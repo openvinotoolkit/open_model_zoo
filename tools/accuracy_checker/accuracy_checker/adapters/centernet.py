@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -115,14 +115,14 @@ class CTDETAdapter(Adapter):
         return target_coords
 
     @staticmethod
-    def _transform(dets, center, scale, heigth, width):
+    def _transform(dets, center, scale, height, width):
         dets[:, :2] = CTDETAdapter._transform_preds(
-            dets[:, 0:2], center, scale, (width, heigth))
+            dets[:, 0:2], center, scale, (width, height))
         dets[:, 2:4] = CTDETAdapter._transform_preds(
-            dets[:, 2:4], center, scale, (width, heigth))
+            dets[:, 2:4], center, scale, (width, height))
         return dets
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         predictions_batch = self._extract_predictions(raw, frame_meta)
         hm_batch = predictions_batch[self.center_heatmap_out]
@@ -153,7 +153,7 @@ class CTDETAdapter(Adapter):
             im_size = meta.get('image_size')
             scale = max(im_size)
             center = np.array(im_size[:2])/2.0
-            dets = self._transform(detections, np.flip(center), scale, height, width)
+            dets = self._transform(detections, np.flip(center, 0), scale, height, width)
             x_min, y_min, x_max, y_max, scores, classes = dets.transpose(1, 0)
             result.append(DetectionPrediction(identifier, classes, scores, x_min, y_min, x_max, y_max))
         return result

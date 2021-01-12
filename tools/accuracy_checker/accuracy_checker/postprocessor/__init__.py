@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,20 +35,30 @@ from .faster_rcnn_postprocessing_resize import FRCNNPostprocessingBboxResize
 from .correct_yolo_v2_boxes import CorrectYoloV2Boxes
 from .resize_segmentation_mask import ResizeSegmentationMask
 from .encode_segmentation_mask import EncodeSegMask
+from .shift import Shift, ShiftLabels
 from .normalize_landmarks_points import NormalizeLandmarksPoints
 from .clip_points import ClipPoints
 from .extend_segmentation_mask import ExtendSegmentationMask
 from .zoom_segmentation_mask import ZoomSegMask
-from .crop_segmentation_mask import CropSegmentationMask
+from .crop_segmentation_mask import CropSegmentationMask, CropOrPadSegmentationMask
 from .clip_segmentation_mask import ClipSegmentationMask
 from .normalize_boxes import NormalizeBoxes
 from .brats_postprocessing import SegmentationPredictionResample, TransformBratsPrediction
-from .extract_answers_tokens import ExtractSQUADPrediction
+from .extract_answers_tokens import ExtractSQUADPrediction, ExtractSQUADPredictionBiDAF
 from .translate_3d_poses import Translate3dPoses
 from .normalize_recomendation import MinMaxNormalizeRecommendation, SigmoidNormalizeRecommendation
 from .align_prediction_depth_map import AlignDepth
 from .resize_prediction_depth_map import ResizeDepthMap
 from .resize_super_resolution import ResizeSuperResolution
+from .resize_style_transfer import ResizeStyleTransfer
+from .crop_ground_truth_image import CropGTImage, CornerCropGTImage
+from .resize import Resize
+from .to_gray_scale_ref_image import RGB2GRAYAnnotation, BGR2GRAYAnnotation
+from .remove_repeats import RemoveRepeatTokens
+from .tokens_to_lower_case import TokensToLowerCase
+from .super_resolution_image_recovery import SRImageRecovery, ColorizationLABRecovery
+from .argmax_segmentation_mask import ArgMaxSegmentationMask
+from .normalize_salient_map import SalientMapNormalizer
 
 
 __all__ = [
@@ -74,17 +84,24 @@ __all__ = [
 
     'ResizeSegmentationMask',
     'EncodeSegMask',
+    'Shift',
+    'ShiftLabels',
     'ExtendSegmentationMask',
     'ZoomSegMask',
     'CropSegmentationMask',
+    'CropOrPadSegmentationMask',
     'ClipSegmentationMask',
+    'ArgMaxSegmentationMask',
 
     'SegmentationPredictionResample',
     'TransformBratsPrediction',
 
     'NormalizeLandmarksPoints',
 
+    'ClipPoints',
+
     'ExtractSQUADPrediction',
+    'ExtractSQUADPredictionBiDAF',
 
     'Translate3dPoses',
 
@@ -96,5 +113,21 @@ __all__ = [
     'AlignDepth',
     'ResizeDepthMap',
 
-    'ResizeSuperResolution'
+    'ResizeSuperResolution',
+    'ResizeStyleTransfer',
+    'RGB2GRAYAnnotation',
+    'BGR2GRAYAnnotation',
+
+    'CropGTImage',
+    'CornerCropGTImage',
+
+    'Resize',
+
+    'RemoveRepeatTokens',
+    'TokensToLowerCase',
+
+    'SRImageRecovery',
+    'ColorizationLABRecovery',
+
+    'SalientMapNormalizer'
 ]

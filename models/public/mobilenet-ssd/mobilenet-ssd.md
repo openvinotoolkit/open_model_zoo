@@ -8,8 +8,6 @@ The model input is a blob that consists of a single image of 1x3x300x300 in BGR 
 
 The model output is a typical vector containing the tracked object data, as previously described.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -21,9 +19,11 @@ The model output is a typical vector containing the tracked object data, as prev
 
 ## Accuracy
 
-See [https://github.com/chuanqi305/MobileNet-SSD](https://github.com/chuanqi305/MobileNet-SSD).
+| Metric | Value |
+| ------ | ----- |
+|  mAP | 79.8377% |
 
-## Performance
+See [the original repository](https://github.com/chuanqi305/MobileNet-SSD).
 
 ## Input
 
@@ -37,7 +37,7 @@ Image, name - `prob`,  shape - `1,3,300,300`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`.
-Mean values - [127.5, 127.5, 127.5], scale value - 127.50223128904757.
+Mean values - [127.5, 127.5, 127.5], scale value - 127.5.
 
 ### Converted model
 
@@ -52,7 +52,7 @@ Channel order is `BGR`
 
 ## Output
 
-### Original model 
+### Original model
 
 The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 7`, where N is the number of detected bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:

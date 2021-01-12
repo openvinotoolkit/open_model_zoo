@@ -1,0 +1,62 @@
+# Copyright (c) 2019-2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "colorization-siggraph" model is one of the colorization <https://arxiv.org/abs/1705.02999>
+  group of models designed to real-time user-guided image colorization. Model was
+  trained on ImageNet dataset with synthetically generated user interaction. For details
+  about this family of models, check out the repository <https://github.com/richzhang/colorization>.
+
+  Model consumes as input L-channel of LAB-image (also user points and binary mask
+  as optional inputs). Model give as output predict A- and B-channels of LAB-image.
+
+task_type: colorization
+files:
+  - name: ckpt/colorization-siggraph.pth
+    size: 136787426
+    sha256: df00044c0a4d7c3edcecf6f75437ce346a66e7a42612d9b968e1a7e17dbc6f66
+    source: https://colorizers.s3.us-east-2.amazonaws.com/siggraph17-df00044c.pth
+  - name: model/__init__.py
+    size: 96
+    sha256: 245a5ac3e1cb1705438355f9d9b05b408d796c559d89c8f6d2741799f1b74000
+    source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/__init__.py
+  - name: model/base_color.py
+    size: 454
+    sha256: 81cea88bb484866478138440f08cc8d6c3e3731652fe57592900e418b278da1d
+    source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/base_color.py
+  - name: model/siggraph17.py
+    size: 7339
+    sha256: c78e3f2af8dd13d5fb7a9c7fc95f580f728f86a183b5ad2e12f6a48b282511bd
+    source: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/colorizers/siggraph17.py
+postprocessing:
+  - $type: regex_replace
+    file: model/__init__.py
+    pattern: 'from .(e|u)(.*) import \*'
+    replacement: ''
+conversion_to_onnx_args:
+  - --model-path=$dl_dir
+  - --model-name=SIGGRAPHGenerator
+  - --weights=$dl_dir/ckpt/colorization-siggraph.pth
+  - --import-module=model
+  - --input-shapes=[1,1,256,256],[1,2,256,256],[1,1,256,256]
+  - --output-file=$conv_dir/colorization-siggraph.onnx
+  - --input-names=data_l,user_ab,user_map
+  - --output-names=color_ab
+model_optimizer_args:
+  - --input_shape=[1,1,256,256],[1,2,256,256],[1,1,256,256]
+  - --input=data_l,user_ab,user_map
+  - --output=color_ab
+  - --input_model=$conv_dir/colorization-siggraph.onnx
+framework: pytorch
+license: https://raw.githubusercontent.com/richzhang/colorization/4f6009ed1495b1300231ebeb41cc4015557ddef7/LICENSE

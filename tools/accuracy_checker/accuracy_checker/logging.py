@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -108,7 +108,7 @@ def exception(exc, *args, **kwargs):
 
 def warning(msg, *args, raise_warning=True, **kwargs):
     if raise_warning:
-        warnings.warn(msg)
+        warnings.warn(msg, stacklevel=2)
     else:
         _default_logger.warning(msg, *args, **kwargs)
 

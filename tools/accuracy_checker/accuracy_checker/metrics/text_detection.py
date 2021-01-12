@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ from collections import namedtuple
 import numpy as np
 from .metric import PerImageEvaluationMetric
 from ..config import BoolField, NumberField
-from ..representation import TextDetectionPrediction, TextDetectionAnnotation
+from ..representation import TextDetectionPrediction, TextDetectionAnnotation, DetectionPrediction
 from ..utils import polygon_from_points
 
 
@@ -97,22 +97,22 @@ def rect_from_points(points):
 
 class FocusedTextLocalizationMetric(PerImageEvaluationMetric):
     annotation_types = (TextDetectionAnnotation, )
-    prediction_types = (TextDetectionPrediction, )
+    prediction_types = (TextDetectionPrediction, DetectionPrediction, )
 
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'area_recall_constrain':  NumberField(
+            'area_recall_constrain': NumberField(
                 min_value=0, max_value=1, optional=True, default=0.5,
                 description="Minimal value for recall that allows to make decision "
                             "that prediction polygon matched with annotation."
             ),
-            'ignore_difficult':  BoolField(
+            'ignore_difficult': BoolField(
                 optional=True, default=True,
                 description="Allows to ignore difficult ground truth text polygons in metric calculation."
             ),
-            'area_precision_constrain':  NumberField(
+            'area_precision_constrain': NumberField(
                 min_value=0, max_value=1, optional=True, default=0.5,
                 description="Minimal value for precision that allows to make decision "
                             "that prediction polygon matched with annotation."
@@ -408,16 +408,16 @@ class IncidentalSceneTextLocalizationMetric(PerImageEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'iou_constrain':  NumberField(
+            'iou_constrain': NumberField(
                 min_value=0, max_value=1, optional=True, default=0.5,
                 description="Minimal value for intersection over union that allows to make decision "
                             "that prediction polygon is true positive."
             ),
-            'ignore_difficult':  BoolField(
+            'ignore_difficult': BoolField(
                 optional=True, default=True,
                 description="Allows to ignore difficult ground truth text polygons in metric calculation."
             ),
-            'area_precision_constrain':  NumberField(
+            'area_precision_constrain': NumberField(
                 min_value=0, max_value=1, optional=True, default=0.5,
                 description="Minimal value for intersection over union that allows to make decision "
                             "that prediction polygon matched with ignored annotation."

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +17,14 @@ limitations under the License.
 from functools import singledispatch
 import numpy as np
 from ..config import StringField
-from ..representation import DetectionAnnotation, DetectionPrediction, TextDetectionPrediction, TextDetectionAnnotation
+from ..representation import (
+    DetectionAnnotation,
+    DetectionPrediction,
+    TextDetectionPrediction,
+    TextDetectionAnnotation,
+    ClassificationAnnotation,
+    ClassificationPrediction
+)
 from .postprocessor import Postprocessor
 
 round_policies_func = {
@@ -27,10 +34,11 @@ round_policies_func = {
     'greater': np.ceil
 }
 
+
 class CastToInt(Postprocessor):
     __provider__ = 'cast_to_int'
-    annotation_types = (DetectionAnnotation, TextDetectionAnnotation)
-    prediction_types = (DetectionPrediction, TextDetectionPrediction)
+    annotation_types = (DetectionAnnotation, TextDetectionAnnotation, ClassificationAnnotation)
+    prediction_types = (DetectionPrediction, TextDetectionPrediction, ClassificationPrediction)
 
     @classmethod
     def parameters(cls):
@@ -65,6 +73,10 @@ class CastToInt(Postprocessor):
         def _(entry):
             entry.points = self.round_func(entry.points)
 
+        @cast_func.register(ClassificationAnnotation)
+        @cast_func.register(ClassificationPrediction)
+        def _(entry):
+            entry.label = self.round_func(entry.label)
 
         for annotation_ in annotation:
             cast_func(annotation_)

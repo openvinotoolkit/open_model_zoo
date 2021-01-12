@@ -12,8 +12,6 @@
 
 #include <algorithm>
 #include <mutex>
-#include <condition_variable>
-#include <thread>
 #include <atomic>
 #include <queue>
 #include <chrono>
@@ -29,7 +27,6 @@
 
 #include <monitors/presenter.h>
 #include <samples/slog.hpp>
-#include <samples/args_helper.hpp>
 
 #include "input.hpp"
 #include "multichannel_params.hpp"
@@ -49,12 +46,14 @@ void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                           " << help_message << std::endl;
+    std::cout << "    -i                           " << input_message << std::endl;
+    std::cout << "    -loop                        " << loop_message << std::endl;
+    std::cout << "    -duplicate_num               " << duplication_channel_number_message << std::endl;
     std::cout << "    -m \"<path>\"                  " << model_path_message<< std::endl;
     std::cout << "      -l \"<absolute_path>\"       " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"       " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
-    std::cout << "    -nc                          " << num_cameras << std::endl;
     std::cout << "    -bs                          " << batch_size << std::endl;
     std::cout << "    -nireq                       " << num_infer_requests << std::endl;
     std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
@@ -64,9 +63,7 @@ void showUsage() {
     std::cout << "    -t                           " << thresh_output_message << std::endl;
     std::cout << "    -no_show                     " << no_show_processed_video << std::endl;
     std::cout << "    -show_stats                  " << show_statistics << std::endl;
-    std::cout << "    -duplicate_num               " << duplication_channel_number << std::endl;
     std::cout << "    -real_input_fps              " << real_input_fps << std::endl;
-    std::cout << "    -i                           " << input_video << std::endl;
     std::cout << "    -u                           " << utilization_monitors_message << std::endl;
 }
 
@@ -83,8 +80,11 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_m.empty()) {
         throw std::logic_error("Parameter -m is not set");
     }
-    if (FLAGS_nc == 0 && FLAGS_i.empty()) {
-        throw std::logic_error("Please specify at least one video source(web cam or video file)");
+    if (FLAGS_i.empty()) {
+        throw std::logic_error("Parameter -i is not set");
+    }
+    if (FLAGS_duplicate_num == 0) {
+        throw std::logic_error("Parameter -duplicate_num must be positive");
     }
     slog::info << "\tDetection model:           " << FLAGS_m << slog::endl;
     slog::info << "\tDetection threshold:       " << FLAGS_t << slog::endl;
@@ -97,7 +97,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     }
     slog::info << "\tBatch size:                " << FLAGS_bs << slog::endl;
     slog::info << "\tNumber of infer requests:  " << FLAGS_nireq << slog::endl;
-    slog::info << "\tNumber of input web cams:  "  << FLAGS_nc << slog::endl;
 
     return true;
 }
@@ -138,6 +137,9 @@ DisplayParams prepareDisplayParams(size_t count) {
     size_t gridCount = static_cast<size_t>(ceil(sqrt(count)));
     size_t gridStepX = static_cast<size_t>(DISP_WIDTH/gridCount);
     size_t gridStepY = static_cast<size_t>(DISP_HEIGHT/gridCount);
+    if (gridStepX == 0 || gridStepY == 0) {
+        throw std::logic_error("Can't display every input: there are too many of them");
+    }
     params.frameSize = cv::Size(gridStepX, gridStepY);
 
     for (size_t i = 0; i < count; i++) {
@@ -210,7 +212,8 @@ int main(int argc, char* argv[]) {
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
-        slog::info << "InferenceEngine: " << InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: "
+            << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -242,24 +245,9 @@ int main(int argc, char* argv[]) {
             throw std::runtime_error("Invalid network input dimensions");
         }
 
-        std::vector<std::string> files;
-        parseInputFilesArguments(files);
-
-        slog::info << "\tNumber of input web cams:    " << FLAGS_nc << slog::endl;
-        slog::info << "\tNumber of input video files: " << files.size() << slog::endl;
-        slog::info << "\tDuplication multiplayer:     " << FLAGS_duplicate_num << slog::endl;
-
-        const auto duplicateFactor = (1 + FLAGS_duplicate_num);
-        size_t numberOfInputs = (FLAGS_nc + files.size()) * duplicateFactor;
-
-        DisplayParams params = prepareDisplayParams(numberOfInputs);
-
-        slog::info << "\tNumber of input channels:    " << numberOfInputs << slog::endl;
-        if (numberOfInputs > MAX_INPUTS) {
-            throw std::logic_error("Number of inputs exceed maximum value [25]");
-        }
-
         VideoSources::InitParams vsParams;
+        vsParams.inputs               = FLAGS_i;
+        vsParams.loop                 = FLAGS_loop;
         vsParams.queueSize            = FLAGS_n_iqs;
         vsParams.collectStats         = FLAGS_show_stats;
         vsParams.realFps              = FLAGS_real_input_fps;
@@ -267,41 +255,22 @@ int main(int argc, char* argv[]) {
         vsParams.expectedWidth  = static_cast<unsigned>(inputDims[3]);
 
         VideoSources sources(vsParams);
-        if (!files.empty()) {
-            slog::info << "Trying to open input video ..." << slog::endl;
-            for (auto& file : files) {
-                try {
-                    sources.openVideo(file, false);
-                } catch (...) {
-                    slog::info << "Cannot open video [" << file << "]" << slog::endl;
-                    throw;
-                }
-            }
-        }
-        if (FLAGS_nc) {
-            slog::info << "Trying to connect " << FLAGS_nc << " web cams ..." << slog::endl;
-            for (size_t i = 0; i < FLAGS_nc; ++i) {
-                try {
-                    sources.openVideo(std::to_string(i), true);
-                } catch (...) {
-                    slog::info << "Cannot open web cam [" << i << "]" << slog::endl;
-                    throw;
-                }
-            }
-        }
+        DisplayParams params = prepareDisplayParams(sources.numberOfInputs() * FLAGS_duplicate_num);
         sources.start();
 
         size_t currentFrame = 0;
 
         network->start([&](VideoFrame& img) {
             img.sourceIdx = currentFrame;
-            auto camIdx = currentFrame / duplicateFactor;
-            currentFrame = (currentFrame + 1) % numberOfInputs;
+            size_t camIdx = currentFrame / FLAGS_duplicate_num;
+            currentFrame = (currentFrame + 1) % (sources.numberOfInputs() * FLAGS_duplicate_num);
             return sources.getFrame(camIdx, img);
         }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize) {
             auto output = req->GetBlob(outputDataBlobNames[0]);
 
-            float* dataPtr = output->buffer();
+            InferenceEngine::LockedMemory<const void> outputMapped = InferenceEngine::as<
+                InferenceEngine::MemoryBlob>(output)->rmap();
+            float* dataPtr = outputMapped.as<float *>();
             InferenceEngine::SizeVector svec = output->getTensorDesc().getDims();
             size_t total = 1;
             for (auto v : svec) {
@@ -309,7 +278,7 @@ int main(int argc, char* argv[]) {
             }
 
 
-            std::vector<Detections> detections(getTensorHeight(output->getTensorDesc()) / 200);
+            std::vector<Detections> detections(FLAGS_bs);
             for (auto& d : detections) {
                 d.set(new std::vector<Face>);
             }

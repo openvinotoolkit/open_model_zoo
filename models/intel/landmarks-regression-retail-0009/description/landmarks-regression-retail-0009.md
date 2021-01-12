@@ -24,24 +24,22 @@ Normed Error (NE) for i<sup>th</sup> sample has the following form:
 
 where N is the number of landmarks, _p_-hat and _p_ are, correspondingly, the prediction and ground truth vectors of k<sup>th</sup> landmark of i<sup>th</sup> sample, and d<sub>i</sub> is the interocular distance for i<sup>th</sup> sample.
 
-## Performance
-
 ## Inputs
 
-1. Name: "data" , shape: [1x3x48x48] - An input image in the format [BxCxHxW],
-   where:
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+Name: "data" , shape: [1x3x48x48] - An input image in the format [BxCxHxW],
+where:
+- B - batch size
+- C - number of channels
+- H - image height
+- W - image width
 
-   The expected color order is BGR.
+The expected color order is BGR.
 
 ## Outputs
 
 
 1.	The net outputs a blob with the shape: [1, 10], containing a row-vector of 10 floating point values
-	for five landmarks coordinates in the form (x0, y0, x1, y1, ..., x5, y5).
+	for five landmarks coordinates in the form (x0, y0, x1, y1, ..., x4, y4).
 	All the coordinates are normalized to be in range [0,1].
 
 ## Legal Information

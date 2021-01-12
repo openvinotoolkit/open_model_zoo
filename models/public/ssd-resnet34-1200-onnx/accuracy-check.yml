@@ -1,0 +1,23 @@
+models:
+  - name:  ssd-resnet34-1200-onnx
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: ssd_onnx
+          scores_out: '.*scores*'
+          labels_out: '.*labels*'
+          bboxes_out: '.*bboxes*'
+
+
+    datasets:
+      - name: ms_coco_detection_80_class_with_background
+        preprocessing:
+          - type: resize
+            size: 1200
+            interpolation: LINEAR
+
+        postprocessing:
+          - type: resize_prediction_boxes
+
+        metrics:
+          - type: coco_precision

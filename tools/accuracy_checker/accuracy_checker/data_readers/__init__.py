@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,18 +18,27 @@ from .data_reader import (
     BaseReader,
     DataReaderField,
     ReaderCombiner,
-    JSONReaderConfig,
     OpenCVFrameReader,
     OpenCVImageReader,
     PillowImageReader,
     ScipyImageReader,
     NiftiImageReader,
+    NumPyReader,
+    NumpyTXTReader,
+    NumpyDictReader,
     TensorflowImageReader,
     AnnotationFeaturesReader,
+    WavReader,
+    DicomReader,
+    PickleReader,
+    SkimageReader,
+    RawpyReader,
 
     DataRepresentation,
     ClipIdentifier,
     MultiFramesInputIdentifier,
+    ImagePairIdentifier,
+
     create_reader,
     REQUIRES_ANNOTATIONS
 )
@@ -39,7 +48,6 @@ __all__ = [
     'DataReaderField',
     'DataRepresentation',
     'ReaderCombiner',
-    'JSONReaderConfig',
     'OpenCVFrameReader',
     'OpenCVImageReader',
     'PillowImageReader',
@@ -47,10 +55,19 @@ __all__ = [
     'NiftiImageReader',
     'TensorflowImageReader',
     'AnnotationFeaturesReader',
+    'WavReader',
+    'DicomReader',
+    'PickleReader',
+    'NumPyReader',
+    'NumpyTXTReader',
+    'NumpyDictReader',
+    'SkimageReader',
+    'RawpyReader',
 
     'DataRepresentation',
     'ClipIdentifier',
     'MultiFramesInputIdentifier',
+    'ImagePairIdentifier',
     'create_reader',
-    'REQUIRES_ANNOTATIONS'
+    'REQUIRES_ANNOTATIONS',
 ]

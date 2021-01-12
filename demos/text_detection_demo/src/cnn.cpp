@@ -16,33 +16,31 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
 
     // --------------------------- 1. Reading network ----------------------------------------------------
     auto network = ie.ReadNetwork(model_path);
-    network.setBatchSize(1);
-
-    model_path_ = model_path;
 
     // --------------------------- Changing input shape if it is needed ----------------------------------
-    if (new_input_resolution != cv::Size()) {
-        InputsDataMap inputInfo(network.getInputsInfo());
-        if (inputInfo.size() != 1) {
-            THROW_IE_EXCEPTION << "The network should have only one input";
-        }
-        InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
+    InputsDataMap inputInfo(network.getInputsInfo());
+    if (inputInfo.size() != 1) {
+        THROW_IE_EXCEPTION << "The network should have only one input";
+    }
+    InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
 
-        SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
+    SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
+    input_dims[0] = 1;
+    if (new_input_resolution != cv::Size()) {
         input_dims[2] = static_cast<size_t>(new_input_resolution.height);
         input_dims[3] = static_cast<size_t>(new_input_resolution.width);
-
-        std::map<std::string, SizeVector> input_shapes;
-        input_shapes[network.getInputsInfo().begin()->first] = input_dims;
-        network.reshape(input_shapes);
     }
+
+    std::map<std::string, SizeVector> input_shapes;
+    input_shapes[network.getInputsInfo().begin()->first] = input_dims;
+    network.reshape(input_shapes);
 
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Configuring input and output ------------------------------------------
     // ---------------------------   Preparing input blobs -----------------------------------------------
     InputInfo::Ptr input_info = network.getInputsInfo().begin()->second;
-    std::string input_name = network.getInputsInfo().begin()->first;
+    input_name_ = network.getInputsInfo().begin()->first;
 
     input_info->setLayout(Layout::NCHW);
     input_info->setPrecision(Precision::FP32);
@@ -67,17 +65,16 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
     infer_request_ = executable_network.CreateInferRequest();
     // ---------------------------------------------------------------------------------------------------
 
-    // --------------------------- Preparing input -------------------------------------------------------
-
-    /* Resize manually and copy data from the image to the input blob */
-    Blob::Ptr input = infer_request_.GetBlob(input_name);
-    input_data_ = input->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-
     is_initialized_ = true;
 }
 
 InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
+    /* Resize manually and copy data from the image to the input blob */
+    InferenceEngine::LockedMemory<void> inputMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_.GetBlob(input_name_))->wmap();
+    float* input_data = inputMapped.as<float *>();
 
     cv::Mat image;
     if (channels_ == 1) {
@@ -94,12 +91,12 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     if (channels_ == 3) {
         for (int pid = 0; pid < image_size; ++pid) {
             for (int ch = 0; ch < channels_; ++ch) {
-                input_data_[ch * image_size + pid] = image.at<cv::Vec3f>(pid)[ch];
+                input_data[ch * image_size + pid] = image.at<cv::Vec3f>(pid)[ch];
             }
         }
     } else if (channels_ == 1) {
         for (int pid = 0; pid < image_size; ++pid) {
-            input_data_[pid] = image.at<float>(pid);
+            input_data[pid] = image.at<float>(pid);
         }
     }
     // ---------------------------------------------------------------------------------------------------

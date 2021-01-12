@@ -2,9 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `inception-resnet-v2` model is one of the Inception family of models designed to perform image classification. For details about this family of models, check out the [paper](https://arxiv.org/pdf/1602.07261.pdf).
-
-## Example
+The `inception-resnet-v2` model is one of the Inception family of models designed to perform image classification. For details about this family of models, check out the [paper](https://arxiv.org/abs/1602.07261).
 
 ## Specification
 
@@ -15,7 +13,12 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 | MParams                         | 30.223                                    |
 | Source framework                | TensorFlow\*                              |
 
-## Performance
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 80.14% |
+| Top 5  | 95.10% |
 
 ## Input
 
@@ -35,14 +38,14 @@ Image, name: `input` , shape: [1x299x299x3], format: [BxHxWxC],
 ### Converted Model
 
 Image, name: `input`, shape: [1x3x299x299], format: [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 
@@ -62,4 +65,4 @@ Probabilities for all dataset classes (0 class is background). Probabilities are
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

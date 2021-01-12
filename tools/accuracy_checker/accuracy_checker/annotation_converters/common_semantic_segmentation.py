@@ -1,4 +1,19 @@
-from pathlib import Path
+"""
+Copyright (c) 2018-2020 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 from ..config import PathField, StringField
 from ..logging import warning
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
@@ -58,7 +73,7 @@ class CommonSegmentationConverter(BaseFormatConverter):
         content_errors = None if not check_content else []
         for idx, image in enumerate(images_list):
             base_name = image.name
-            identifier = Path(self.images_dir.name) / base_name
+            identifier = base_name
             if self.images_prefix:
                 base_name = base_name.split(self.images_prefix)[-1]
             if self.images_postfix:
@@ -68,8 +83,7 @@ class CommonSegmentationConverter(BaseFormatConverter):
             if not mask_file.exists():
                 content_errors.append('{}: does not exist'.format(mask_file))
 
-            mask_id = Path(self.masks_dir.name) / mask_file.name
-            annotations.append(SegmentationAnnotation(str(identifier), str(mask_id), mask_loader=self.mask_loader))
+            annotations.append(SegmentationAnnotation(identifier, mask_file.name, mask_loader=self.mask_loader))
             if progress_callback is not None and idx % progress_interval == 0:
                 progress_callback(idx / num_iterations * 100)
 

@@ -120,7 +120,7 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
                 } else {
                     prob_not_blank = prob[i] * candidate.prob();
                 }
-                
+
                 auto check_res = std::find_if(curr.begin(), curr.end(), [&extend](const BeamElement &n) {
                     return n.sentence == extend;
                 });

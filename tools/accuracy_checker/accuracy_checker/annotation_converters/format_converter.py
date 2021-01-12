@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ limitations under the License.
 from argparse import ArgumentParser
 from collections import namedtuple
 
-from ..topology_types import GenericTopology
 from ..config import ConfigValidator, StringField, PathField, ConfigError
 from ..dependency import ClassProvider
 from ..utils import format_key, get_parameter_value_from_config
@@ -27,7 +26,6 @@ ConverterReturn = namedtuple('ConverterReturn', ['annotations', 'meta', 'content
 
 class BaseFormatConverter(ClassProvider):
     __provider_type__ = 'converter'
-    topology_types = (GenericTopology, )
 
     @classmethod
     def parameters(cls):
@@ -35,17 +33,18 @@ class BaseFormatConverter(ClassProvider):
             'converter': StringField(description="Converter name.")
         }
 
-    @property
-    def config_validator(self):
+    @classmethod
+    def config_validator(cls, uri_prefix=''):
+        converter_uri = '{}.{}'.format(uri_prefix or 'annotation_conversion', cls.get_name())
         return ConfigValidator(
-            '{}_converter_config'.format(self.get_name()), fields=self.parameters(),
+            converter_uri, fields=cls.parameters(),
             on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
         )
 
     def __init__(self, config=None):
         self.config = config
         if config:
-            self.validate_config()
+            self.validate_config(config)
             self.configure()
 
     def get_value_from_config(self, key):
@@ -72,7 +71,7 @@ class BaseFormatConverter(ClassProvider):
 
     def get_argparser(self):
         parser = ArgumentParser(add_help=False)
-        config_validator = self.config_validator
+        config_validator = self.config_validator()
         fields = config_validator.fields
         for field_name, field in fields.items():
             if field_name == 'converter':
@@ -80,15 +79,18 @@ class BaseFormatConverter(ClassProvider):
                 # Converter argparser should contain only converter specific arguments.
                 continue
 
-            required = not field.optional
-            parser.add_argument(
-                format_key(field_name), required=required, type=field.type
-            )
+            kwargs = {'required': not field.optional}
+            data_type = field.type
+            if data_type is not None:
+                kwargs['type'] = data_type
+
+            parser.add_argument(format_key(field_name), **kwargs)
 
         return parser
 
-    def validate_config(self):
-        self.config_validator.validate(self.config)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, uri_prefix=''):
+        return cls.config_validator(uri_prefix=uri_prefix).validate(config, fetch_only=fetch_only)
 
     def configure(self):
         pass

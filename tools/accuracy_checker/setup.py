@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,11 +15,19 @@ limitations under the License.
 """
 
 import importlib
+import os
 import re
 import sys
+import warnings
+import platform
+import subprocess
 from setuptools import find_packages, setup
 from setuptools.command.test import test as test_command
+from setuptools.command.install import install as install_command
+from distutils.version import LooseVersion
 from pathlib import Path
+
+here = Path(__file__).parent
 
 
 class PyTest(test_command):
@@ -39,9 +47,28 @@ class PyTest(test_command):
 
 
 def read(*path):
-    version_file = Path(__file__).parent.joinpath(*path)
-    with version_file.open() as file:
+    input_file = os.path.join(here, *path)
+    with open(str(input_file)) as file:
         return file.read()
+
+
+def check_and_update_numpy(min_acceptable='1.15'):
+    try:
+        import numpy as np
+        update_required = LooseVersion(np.__version__) < LooseVersion(min_acceptable)
+    except ImportError:
+        update_required = True
+    if update_required:
+        subprocess.call(['pip3', 'install', 'numpy>={}'.format(min_acceptable)])
+
+
+def install_dependencies_with_pip(dependencies):
+    for dep in dependencies:
+        subprocess.call(['pip3', 'install', str(dep)])
+
+
+class CoreInstall(install_command):
+    pass
 
 
 def find_version(*path):
@@ -52,16 +79,35 @@ def find_version(*path):
 
     raise RuntimeError("Unable to find version string.")
 
-
+is_arm = platform.processor() == 'aarch64'
 long_description = read("README.md")
 version = find_version("accuracy_checker", "__init__.py")
 
-requirements = [read("requirements.in")]
+
+def prepare_requirements():
+    requirements_core = read('requirements-core.in').split('\n')
+    if 'install_core' in sys.argv:
+        return requirements_core
+    requirements = read("requirements.in").split('\n')
+    return requirements_core + requirements
+
+
+requirements = prepare_requirements()
 
 try:
     importlib.import_module('cv2')
-except ImportError:
-    requirements.append('opencv-python')
+except ImportError as opencv_import_error:
+    if platform.processor() != 'aarch64':
+        warnings.warn(
+            "Problem with cv2 import: \n{}\n opencv-python will be added to requirements".format(opencv_import_error)
+        )
+        requirements.append('opencv-python')
+    else:
+        warnings.warn("Problem with cv2 import: \n{}.\n Probably due to unsuitable numpy version, will be updated".format(opencv_import_error))
+        check_and_update_numpy()
+
+if is_arm:
+    install_dependencies_with_pip(requirements)
 
 setup(
     name="accuracy_checker",
@@ -76,7 +122,7 @@ setup(
     ]},
     zip_safe=False,
     python_requires='>=3.5',
-    install_requires=requirements,
+    install_requires=requirements if not is_arm else '',
     tests_require=[read("requirements-test.in")],
-    cmdclass={'test': PyTest}
+    cmdclass={'test': PyTest, 'install_core': CoreInstall}
 )

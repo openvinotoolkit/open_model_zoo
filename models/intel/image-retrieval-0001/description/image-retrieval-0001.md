@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Image retrieval model based on [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) architecture as a backbone.
+Image retrieval model based on [MobileNetV2](https://arxiv.org/abs/1801.04381) architecture as a backbone.
 
 ## Example
 
@@ -17,19 +17,17 @@ Image retrieval model based on [MobileNetV2](https://arxiv.org/pdf/1801.04381.pd
 | MParams                                                       | 2.535                   |
 | Source framework                                              | TensorFlow\*            |
 
-## Performance
-
 ## Inputs
 
-Name: "input" , shape: [1x3x224x224] — An input image in the format [BxCxHxW],
-   where:
+Name: `input`, shape: [1x3x224x224] — An input image in the format [BxCxHxW],
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order - BGR.
+Expected color order: BGR.
 
 ## Outputs
 

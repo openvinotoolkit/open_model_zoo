@@ -2,9 +2,7 @@
 
 ## Use Case and High-Level Description
 
-[Deep face recognition under open-set protocol](https://arxiv.org/pdf/1704.08063.pdf)
-
-## Example
+[Deep face recognition under open-set protocol](https://arxiv.org/abs/1704.08063)
 
 ## Specification
 
@@ -17,7 +15,9 @@
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| LFW accuracy | 98.8321%|
 
 ## Input
 

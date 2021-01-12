@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <string>
-#include <memory>
-#include <vector>
-#include <utility>
 #include <algorithm>
+#include <chrono>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "graph.hpp"
 #include "threading.hpp"
@@ -143,7 +144,8 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
             }
 
             auto preprocess = [&]() {
-                auto buff = inputBlob->buffer();
+                InferenceEngine::LockedMemory<void> buff = InferenceEngine::as<
+                    InferenceEngine::MemoryBlob>(inputBlob)->wmap();
                 float* inputPtr = static_cast<float*>(buff);
                 auto loopBody = [&](size_t i) {
                     cv::resize(vframes[i]->frame,

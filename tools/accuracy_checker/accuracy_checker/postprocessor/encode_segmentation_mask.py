@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,10 +39,12 @@ class EncodeSegMask(PostprocessorWithSpecificTargets):
                 raise ValueError("No 'segmentation_colors' in dataset metadata.")
 
         if prediction:
-            if not prediction_to_gt_label:
+            if not prediction_to_gt_label and not self._deprocess_predictions:
                 raise ValueError("No 'prediction_to_gt_labels' in dataset metadata")
 
         for annotation_ in annotation:
+            if annotation_ is None:
+                continue
             mask = annotation_.mask.astype(int)
             num_channels = len(mask.shape)
             encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.int16)
@@ -50,20 +52,24 @@ class EncodeSegMask(PostprocessorWithSpecificTargets):
                 encoded_mask[np.where(
                     np.all(mask == color, axis=-1) if num_channels >= 3 else mask == color
                 )[:2]] = label
-            annotation_.mask = encoded_mask
+            annotation_.mask = encoded_mask.astype(np.int8)
 
-        for prediction_ in prediction:
-            mask = prediction_.mask
-            updated_mask = mask
-            saved_mask = mask.copy()
-            if len(mask.shape) == 3 and mask.shape[0] != 1:
-                updated_mask = np.argmax(mask, axis=0)
-                saved_mask = updated_mask.copy()
-            for pred_label, gt_label in prediction_to_gt_label.items():
-                updated_mask[saved_mask == pred_label] = gt_label
+        if not self._deprocess_predictions:
+            for prediction_ in prediction:
+                if prediction_ is None:
+                    continue
+                mask = prediction_.mask
+                updated_mask = mask
+                saved_mask = mask.copy()
+                if len(mask.shape) == 3 and mask.shape[0] != 1:
+                    updated_mask = np.argmax(mask, axis=0)
+                    saved_mask = updated_mask.copy()
+                for pred_label, gt_label in prediction_to_gt_label.items():
+                    updated_mask[saved_mask == pred_label] = gt_label
 
-            updated_mask[saved_mask >= len(prediction_to_gt_label)] = 255
+                updated_mask[saved_mask >= len(prediction_to_gt_label)] = 255
 
-            prediction_.mask = updated_mask
+                prediction_.mask = updated_mask.astype(np.int8)
+        self._deprocess_predictions = False
 
         return annotation, prediction

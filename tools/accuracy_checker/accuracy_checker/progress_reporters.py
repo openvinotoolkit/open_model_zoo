@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -67,9 +67,9 @@ class PrintProgressReporter(ProgressReporter):
         super().__init__(dataset_size)
         self.print_interval = print_interval
 
-    def reset(self, dataset_size):
+    def reset(self, dataset_size, objects='dataset'):
         self.dataset_size = dataset_size
-        print_info('Total dataset size: {}'.format(dataset_size))
+        print_info('Total {objects} size: {size}'.format(objects=objects, size=dataset_size))
         self.start_time = time.time()
         self.prev_time = self.start_time
         self.current = 0
@@ -93,18 +93,20 @@ class TQDMReporter(ProgressReporter):
         super().__init__(dataset_size)
         if tqdm is None:
             warnings.warn('tqdm is not available, progress switched to print')
-        self.tqdm_reporter = tqdm
-        self.progress_printer = PrintProgressReporter(dataset_size, print_interval=1)
+            self.tqdm_reporter = None
+            self.progress_printer = PrintProgressReporter(dataset_size, print_interval=1)
+        else:
+            self.tqdm_reporter = tqdm
 
     def update(self, batch_id, batch_size):
         self.current += batch_size
-        if self.tqdm_reporter:
+        if self.tqdm_reporter is not None:
             self.tqdm_reporter.update(batch_size)
         else:
             self.progress_printer.update(batch_id, batch_size)
 
     def finish(self, objects_processed=True):
-        if self.tqdm_reporter:
+        if self.tqdm_reporter is not None:
             self.tqdm_reporter.close() #pylint: disable=E1120
             super().finish(objects_processed)
         else:
@@ -112,7 +114,7 @@ class TQDMReporter(ProgressReporter):
 
     def reset(self, dataset_size):
         super().reset(dataset_size)
-        if self.tqdm_reporter:
+        if self.tqdm_reporter is not None:
             self.tqdm_reporter = tqdm(
                 total=self.dataset_size, unit='frames', leave=False,
                 bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]'

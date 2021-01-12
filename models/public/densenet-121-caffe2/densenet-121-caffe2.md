@@ -4,11 +4,9 @@
 
 This is a Caffe2\* version of `densenet-121` model, one of the DenseNet
 group of models designed to perform image classification. This model
-was converted from Caffe\* to Caffe2\* format. 
-For details see repository <https://github.com/caffe2/models/tree/master/densenet121>,
-paper <https://arxiv.org/pdf/1608.06993.pdf>.
-
-## Example
+was converted from Caffe\* to Caffe2\* format.
+For details see repository <https://github.com/facebookarchive/models/tree/master/densenet121>,
+paper <https://arxiv.org/abs/1608.06993>.
 
 ## Specification
 
@@ -21,7 +19,10 @@ paper <https://arxiv.org/pdf/1608.06993.pdf>.
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 74.904% |
+| Top 5  | 92.192% |
 
 ## Input
 
@@ -34,7 +35,7 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `BGR`. 
+Channel order is `BGR`.
 Mean values - [103.94,116.78,123.68], scale value - 58.8235294.
 
 ### Converted model
@@ -63,5 +64,5 @@ probability for each class in logits format.
 ## Legal Information
 
 The original model is distributed under the
-[Apache License, Version 2.0](https://raw.githubusercontent.com/caffe2/models/master/LICENSE).
+[Apache License, Version 2.0](https://raw.githubusercontent.com/facebookarchive/models/master/LICENSE).
 A copy of the license is provided in [APACHE-2.0.txt](../licenses/APACHE-2.0.txt).

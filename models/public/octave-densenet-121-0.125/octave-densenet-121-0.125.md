@@ -2,10 +2,8 @@
 
 ## Use Case and High-Level Description
 
-The `octave-densenet-121-0.125` model is a modification of [`densenet-121`](https://arxiv.org/pdf/1608.06993) with Octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.125`. Like the original model, this model is designed for image classification. For details about family of Octave Convolution models, check out the [repository](https://github.com/facebookresearch/OctConv).
+The `octave-densenet-121-0.125` model is a modification of [`densenet-121`](https://arxiv.org/abs/1608.06993) with Octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.125`. Like the original model, this model is designed for image classification. For details about family of Octave Convolution models, check out the [repository](https://github.com/facebookresearch/OctConv).
 
-
-## Example
 
 ## Specification
 
@@ -18,7 +16,10 @@ The `octave-densenet-121-0.125` model is a modification of [`densenet-121`](http
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 76.066%|
+| Top 5  | 93.044%|
 
 ## Input
 
@@ -33,7 +34,7 @@ Image, name: `data`,  shape: `1,3,224,224`, format: `B,C,H,W`, where:
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`. 
+Channel order is `RGB`.
 Mean values: [124,117,104], scale value: 59.880239521.
 
 ### Converted Model

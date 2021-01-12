@@ -11,6 +11,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <inference_engine.hpp>
 
+#include <ngraph/ngraph.hpp>
+
 using namespace InferenceEngine;
 
 #define SSD_EMPTY_DETECTIONS_INDICATOR -1.0
@@ -95,17 +97,6 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
     DataPtr& _output = outputInfo.begin()->second;
     output_name_ = outputInfo.begin()->first;
 
-    const CNNLayerPtr outputLayer = cnnNetwork.getLayerByName(output_name_.c_str());
-    if (outputLayer->type != "DetectionOutput") {
-        THROW_IE_EXCEPTION << "Face Detection network output layer(" + outputLayer->name +
-                              ") should be DetectionOutput, but was " +  outputLayer->type;
-    }
-
-    if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
-        THROW_IE_EXCEPTION << "Face Detection network output layer (" +
-                              output_name_ + ") should have num_classes integer attribute";
-    }
-
     const SizeVector outputDims = _output->getTensorDesc().getDims();
     max_detections_count_ = outputDims[2];
     object_size_ = outputDims[3];
@@ -125,7 +116,8 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
 
 DetectedObjects FaceDetection::fetchResults() {
     DetectedObjects results;
-    const float *data = request->GetBlob(output_name_)->buffer().as<float *>();
+    LockedMemory<const void> outputMapped = as<MemoryBlob>(request->GetBlob(output_name_))->rmap();
+    const float *data = outputMapped.as<float *>();
 
     for (int det_id = 0; det_id < max_detections_count_; ++det_id) {
         const int start_pos = det_id * object_size_;

@@ -1,6 +1,6 @@
 # instance-segmentation-security-0083
 
-## Use case and High-level description
+## Use Case and High-Level Description
 
 This model is an instance segmentation network for 80 classes of objects.
 It is a Mask R-CNN model with ResNeXt152 backbone and
@@ -24,9 +24,7 @@ Feature Pyramid Networks block for feature maps refinement.
 | Source framework                | PyTorch\*                                 |
 
 Average Precision (AP) is defined and measured according to standard
-[MS COCO evaluation procedure](http://cocodataset.org/#detection-eval).
-
-## Performance
+[MS COCO evaluation procedure](https://cocodataset.org/#detection-eval).
 
 ## Inputs
 

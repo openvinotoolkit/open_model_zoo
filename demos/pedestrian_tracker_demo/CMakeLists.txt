@@ -11,3 +11,5 @@ ie_add_sample(NAME pedestrian_tracker_demo
               INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
               DEPENDENCIES monitors
               OPENCV_DEPENDENCIES highgui)
+
+target_link_libraries(pedestrian_tracker_demo PRIVATE ngraph::ngraph)

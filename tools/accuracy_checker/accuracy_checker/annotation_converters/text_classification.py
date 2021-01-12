@@ -1,15 +1,27 @@
+"""
+Copyright (c) 2018-2020 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 from collections import namedtuple
 import csv
 import numpy as np
-try:
-    import tensorflow as tf
-except ImportError:
-    tf = None
 
 
-from ..config import PathField, StringField, NumberField, BoolField, ConfigError
+from ..config import PathField, StringField, NumberField, BoolField
 from ..representation import TextClassificationAnnotation
-from ..utils import string_to_list
+from ..utils import string_to_list, UnsupportedPackage
 from .format_converter import BaseFormatConverter, ConverterReturn
 from ._nlp_common import get_tokenizer, truncate_seq_pair, SEG_ID_A, SEG_ID_B, SEP_ID, CLS_ID, SEG_ID_CLS, SEG_ID_PAD
 
@@ -36,9 +48,12 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             'sentence_piece_model_file': PathField(description='sentence piece model for tokenization', optional=True),
             'max_seq_length': NumberField(
                 description='The maximum total input sequence length after tokenization.',
-                optional=True, default=128
+                optional=True, default=128, value_type=int
             ),
-            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
+            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register'),
+            'class_token_first': BoolField(
+                optional=True, default=True,
+                description='Add [CLS] token to the begin of sequence. If False, will be added as the last token.')
         })
 
         return params
@@ -50,10 +65,11 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
         self.tokenizer = get_tokenizer(self.config, self.lower_case)
         self.reversed_label_map = {value: key for key, value in self.label_map.items()}
         self.support_vocab = 'vocab_file' in self.config
+        self.class_token_first = self.get_value_from_config('class_token_first')
 
     def read_tsv(self):
         lines = []
-        with self.annotation_file.open('r') as ann_file:
+        with open(str(self.annotation_file), 'r', encoding="utf-8-sig") as ann_file:
             reader = csv.reader(ann_file, delimiter="\t", quotechar=None)
             for idx, line in enumerate(reader):
                 if idx == 0:
@@ -81,7 +97,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             # Modifies `tokens_a` and `tokens_b` in place so that the total
             # length is less than the specified length.
             # Account for two [SEP] & one [CLS] with "- 3"
-            truncate_seq_pair(tokens_a, tokens_b, max_seq_length - 3)
+            truncate_seq_pair(tokens_a, tokens_b, self.max_seq_length - 3)
         else:
             # Account for one [SEP] & one [CLS] with "- 2"
             if len(tokens_a) > self.max_seq_length - 2:
@@ -89,6 +105,9 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
 
         tokens = []
         segment_ids = []
+        if self.class_token_first:
+            tokens.append("[CLS]" if self.support_vocab else CLS_ID)
+            segment_ids.append(SEG_ID_CLS)
         for token in tokens_a:
             tokens.append(token)
             segment_ids.append(SEG_ID_A)
@@ -102,21 +121,20 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             tokens.append('[SEP]' if self.support_vocab else SEP_ID)
             segment_ids.append(SEG_ID_B)
 
-        tokens.append("[CLS]" if self.support_vocab else CLS_ID)
-        segment_ids.append(SEG_ID_CLS)
+        if not self.class_token_first:
+            tokens.append("[CLS]" if self.support_vocab else CLS_ID)
+            segment_ids.append(SEG_ID_CLS)
 
         input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab else tokens
+        input_mask = [0 if not self.class_token_first else 1] * len(input_ids)
 
-        # The mask has 0 for real tokens and 1 for padding tokens. Only real
-        # tokens are attended to.
-        input_mask = [0] * len(input_ids)
-
-        # Zero-pad up to the sequence length.
         if len(input_ids) < self.max_seq_length:
             delta_len = self.max_seq_length - len(input_ids)
-            input_ids = [0] * delta_len + input_ids
-            input_mask = [1] * delta_len + input_mask
-            segment_ids = [SEG_ID_PAD] * delta_len + segment_ids
+            input_ids = [0] * delta_len + input_ids if not self.class_token_first else input_ids + [0] * delta_len
+            input_mask = [1] * delta_len + input_mask if not self.class_token_first else input_mask + [0] * delta_len
+            segment_ids = (
+                [SEG_ID_PAD] * delta_len + segment_ids if not self.class_token_first else segment_ids + [0] * delta_len
+            )
 
         return TextClassificationAnnotation(
             identifier, example.label, np.array(input_ids), np.array(input_mask), np.array(segment_ids), tokens
@@ -153,7 +171,7 @@ class XNLIDatasetConverter(BaseGLUETextClassificationConverter):
                 description='comma-separated list of languages for selection only appropriate annotations.'
                 'If not provided full dataset used',
                 optional=True
-                )
+            )
         })
 
         return params
@@ -208,17 +226,18 @@ class BertTextClassificationTFRecordConverter(BaseFormatConverter):
         return params
 
     def configure(self):
-        if tf is None:
-            raise ConfigError(
-                'bert_tf_record converter requires TensorFlow installation. Please install it first.'
-            )
+        try:
+            import tensorflow as tf # pylint: disable=C0415
+            self.tf = tf
+        except ImportError as import_error:
+            UnsupportedPackage("tf", import_error.msg).raise_error(self.__provider__)
         self.annotation_file = self.get_value_from_config('annotation_file')
 
     def read_tf_record(self):
-        record_iterator = tf.python_io.tf_record_iterator(path=str(self.annotation_file))
+        record_iterator = self.tf.python_io.tf_record_iterator(path=str(self.annotation_file))
         record_list = []
         for string_record in record_iterator:
-            example = tf.train.Example()
+            example = self.tf.train.Example()
             example.ParseFromString(string_record)
             input_ids = example.features.feature['input_ids'].int64_list.value
             input_mask = example.features.feature['input_mask'].int64_list.value
@@ -258,7 +277,7 @@ class BertXNLITFRecordConverter(BertTextClassificationTFRecordConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations, _, errors = super().convert(check_content, progress_callback, progress_interval, **kwargs)
 
-        return ConverterReturn(annotations, {'label_map':  dict(enumerate(labels['xnli']))}, errors)
+        return ConverterReturn(annotations, {'label_map': dict(enumerate(labels['xnli']))}, errors)
 
 
 class MRPCConverter(BaseGLUETextClassificationConverter):
@@ -268,7 +287,7 @@ class MRPCConverter(BaseGLUETextClassificationConverter):
         self.label_map = dict(enumerate(labels['mrpc']))
         self.label_ind = 0
         self.text_a_ind = 3
-        self.tex_b_ind = 4
+        self.text_b_ind = 4
         super().__init__(config)
 
 
@@ -297,9 +316,12 @@ class IMDBConverter(BaseGLUETextClassificationConverter):
             'sentence_piece_model_file': PathField(description='sentence piece model for tokenization', optional=True),
             'max_seq_length': NumberField(
                 description='The maximum total input sequence length after tokenization.',
-                optional=True, default=128
+                optional=True, default=128, value_type=int
             ),
-            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
+            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register'),
+            'class_token_first': BoolField(
+                optional=True, default=True,
+                description='Add [CLS] token to the begin of sequence. If False, will be added as the last token.')
         })
 
         return params
@@ -313,6 +335,7 @@ class IMDBConverter(BaseGLUETextClassificationConverter):
         self.label_map = dict(enumerate(imdb_labels))
         self.reversed_label_map = {value: key for key, value in self.label_map.items()}
         self.support_vocab = 'vocab_file' in self.config
+        self.class_token_first = self.get_value_from_config('class_token_first')
 
     def _create_examples(self):
         examples = []

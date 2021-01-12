@@ -10,3 +10,5 @@ ie_add_sample(NAME interactive_face_detection_demo
               HEADERS ${MAIN_HEADERS}
               DEPENDENCIES monitors
               OPENCV_DEPENDENCIES highgui)
+
+target_link_libraries(interactive_face_detection_demo PRIVATE ngraph::ngraph)

@@ -1,9 +1,35 @@
+"""
+Copyright (c) 2018-2020 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 import re
 import numpy as np
+
 from .adapter import Adapter
-from ..representation import MachineTranslationPrediction, QuestionAnsweringPrediction, ClassificationPrediction
-from ..config import PathField, NumberField, StringField
-from ..utils import read_txt
+from ..representation import (MachineTranslationPrediction,
+                              QuestionAnsweringPrediction,
+                              QuestionAnsweringEmbeddingPrediction,
+                              ClassificationPrediction,
+                              LanguageModelingPrediction)
+from ..config import PathField, NumberField, StringField, BoolField
+from ..utils import read_txt, UnsupportedPackage
+
+try:
+    from tokenizers import SentencePieceBPETokenizer
+except ImportError as import_error:
+    SentencePieceBPETokenizer = UnsupportedPackage("tokenizers", import_error.msg)
 
 
 def _clean(sentence, subword_option=None):
@@ -17,6 +43,54 @@ def _clean(sentence, subword_option=None):
         sentence = u"".join(sentence.split()).replace(u"\u2581", u" ").lstrip()
 
     return sentence.split(' ')
+
+
+class NonAutoregressiveMachineTranslationAdapter(Adapter):
+    __provider__ = 'narnmt'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'vocabulary_file': PathField(),
+            'merges_file': PathField(),
+            'output_name': StringField(optional=True, default=None),
+            'sos_symbol': StringField(optional=True, default='<s>'),
+            'eos_symbol': StringField(optional=True, default='</s>'),
+            'pad_symbol': StringField(optional=True, default='<pad>'),
+            'remove_extra_symbols': BoolField(optional=True, default=True)
+        })
+        return parameters
+
+    def configure(self):
+        if isinstance(SentencePieceBPETokenizer, UnsupportedPackage):
+            SentencePieceBPETokenizer.raise_error(self.__provider__)
+        self.tokenizer = SentencePieceBPETokenizer(
+            str(self.get_value_from_config('vocabulary_file')),
+            str(self.get_value_from_config('merges_file'))
+        )
+        self.remove_extra_symbols = self.get_value_from_config('remove_extra_symbols')
+        self.idx = {}
+        for s in ['sos', 'eos', 'pad']:
+            self.idx[s] = str(self.get_value_from_config(s + '_symbol'))
+        self.output_name = self.get_value_from_config('output_name')
+        if self.output_name is None:
+            self.output_name = self.output_blob
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        if self.output_name is None:
+            self.select_output_blob(raw_outputs)
+            self.output_name = self.output_blob
+        translation = raw_outputs[self.output_name]
+        results = []
+        for identifier, tokens in zip(identifiers, translation):
+            sentence = self.tokenizer.decode(tokens)
+            if self.remove_extra_symbols:
+                for s in self.idx.values():
+                    sentence = sentence.replace(s, '')
+            results.append(MachineTranslationPrediction(identifier, sentence.lstrip().split(' ')))
+        return results
 
 
 class MachineTranslationAdapter(Adapter):
@@ -46,8 +120,9 @@ class MachineTranslationAdapter(Adapter):
         self.eos_index = self.get_value_from_config('eos_index')
         self.subword_option = vocab_file.name.split('.')[1] if len(vocab_file.name.split('.')) > 1 else None
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
         translation = raw_outputs[self.output_blob]
         translation = np.transpose(translation, (1, 2, 0))
         results = []
@@ -55,8 +130,9 @@ class MachineTranslationAdapter(Adapter):
             best_sequence = best_beam[0]
             if self.eos_index is not None:
                 if self.eos_index:
-                    end_of_string = np.argwhere(best_sequence == self.eos_index)[0]
-                    best_sequence = best_sequence[:end_of_string[0]]
+                    end_of_string_args = np.argwhere(best_sequence == self.eos_index)
+                    if np.size(end_of_string_args) != 0:
+                        best_sequence = best_sequence[:end_of_string_args[0][0]]
             encoded_words = []
             for seq_id, idx in enumerate(best_sequence):
                 word = self.encoding_vocab.get(int(idx))
@@ -75,19 +151,110 @@ class QuestionAnsweringAdapter(Adapter):
     __provider__ = 'bert_question_answering'
     prediction_types = (QuestionAnsweringPrediction, )
 
-    def process(self, raw, identifiers=None, frame_meta=None):
-        predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'start_token_logits_output': StringField(description="Output layer name for answer start token logits."),
+            'end_token_logits_output': StringField(description="Output layer name for answer end token logits.")
+        })
+        return parameters
+
+    def configure(self):
+        self.start_token_logit_out = self.get_value_from_config('start_token_logits_output')
+        self.end_token_logit_out = self.get_value_from_config('end_token_logits_output')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_output = self._extract_predictions(raw, frame_meta)
         result = []
-        batch_size, seq_length, hidden_size = predictions.shape
-        output_weights = np.random.normal(scale=0.02, size=(2, hidden_size))
-        output_bias = np.zeros(2)
-        prediction_matrix = predictions.reshape((batch_size * seq_length, hidden_size))
-        predictions = np.matmul(prediction_matrix, output_weights.T)
-        predictions = predictions + output_bias
-        predictions = predictions.reshape((batch_size, seq_length, 2))
-        for identifier, prediction in zip(identifiers, predictions):
-            prediction = np.transpose(prediction, (1, 0))
-            result.append(QuestionAnsweringPrediction(identifier, prediction[0], prediction[1]))
+        for identifier, start_token_logits, end_token_logits in zip(
+                identifiers, raw_output[self.start_token_logit_out], raw_output[self.end_token_logit_out]
+        ):
+            result.append(
+                QuestionAnsweringPrediction(identifier, start_token_logits.flatten(), end_token_logits.flatten())
+            )
+
+        return result
+
+
+class QuestionAnsweringEmbeddingAdapter(Adapter):
+    __provider__ = 'bert_question_answering_embedding'
+    prediction_types = (QuestionAnsweringEmbeddingPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'embedding': StringField(description="Output layer name for embedding vector."),
+        })
+        return parameters
+
+    def configure(self):
+        self.embedding = self.get_value_from_config('embedding')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        raw_output = self._extract_predictions(raw, frame_meta)
+        result = []
+        for identifier, embedding in zip(identifiers, raw_output[self.embedding]):
+            result.append(
+                QuestionAnsweringEmbeddingPrediction(identifier, embedding)
+            )
+
+        return result
+
+
+class QuestionAnsweringBiDAFAdapter(Adapter):
+    __provider__ = 'bidaf_question_answering'
+    prediction_types = (QuestionAnsweringPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'start_pos_output': StringField(description="Output layer name for answer start position."),
+            'end_pos_output': StringField(description="Output layer name for answer end position.")
+        })
+        return parameters
+
+    def configure(self):
+        self.start_pos = self.get_value_from_config('start_pos_output')
+        self.end_pos = self.get_value_from_config('end_pos_output')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_output = self._extract_predictions(raw, frame_meta)
+        result = []
+        for identifier, start, end in zip(
+                identifiers, raw_output[self.start_pos], raw_output[self.end_pos]
+        ):
+            result.append(
+                QuestionAnsweringPrediction(identifier=identifier, start_index=start, end_index=end)
+            )
+
+        return result
+
+
+class LanguageModelingAdapter(Adapter):
+    __provider__ = 'common_language_modeling'
+    prediction_types = (LanguageModelingPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'logits_output': StringField(description="Output layer name for language modeling token logits."),
+        })
+        return parameters
+
+    def configure(self):
+        self.logits_out = self.get_value_from_config('logits_output')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        raw_output = self._extract_predictions(raw, frame_meta)
+        result = []
+        for identifier, token_output in zip(identifiers, raw_output[self.logits_out]):
+            if len(token_output.shape) == 3:
+                token_output = np.squeeze(token_output, axis=0)
+            result.append(LanguageModelingPrediction(identifier, token_output))
 
         return result
 
@@ -113,9 +280,11 @@ class BertTextClassification(Adapter):
         self.classification_out = self.get_value_from_config('classification_out')
 
     def process(self, raw, identifiers=None, frame_meta=None):
+        outputs = self._extract_predictions(raw, frame_meta)
         if self.classification_out is None:
+            self.select_output_blob(outputs)
             self.classification_out = self.output_blob
-        outputs = self._extract_predictions(raw, frame_meta)[self.classification_out]
+        outputs = outputs[self.classification_out]
         if outputs.shape[1] != self.num_classes:
             _, hidden_size = outputs.shape
             output_weights = np.random.normal(scale=0.02, size=(self.num_classes, hidden_size))

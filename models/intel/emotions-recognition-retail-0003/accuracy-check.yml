@@ -1,0 +1,12 @@
+models:
+  - name: emotions-recognition-retail-0003
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: emotions_recognition
+
+        metrics:
+          - type: accuracy

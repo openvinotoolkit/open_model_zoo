@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "densenet-121" model is one of the DenseNet* <https://arxiv.org/pdf/1608.06993>
+  The "densenet-121" model is one of the DenseNet* <https://arxiv.org/abs/1608.06993>
   group of models designed to perform image classification. The authors originally
   trained the models  on Torch*, but then converted them into Caffe* format. All DenseNet
   models have been pretrained on the ImageNet image database. For details about this
@@ -39,4 +39,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/densenet-121.caffemodel
   - --input_proto=$dl_dir/densenet-121.prototxt
 framework: caffe
+quantizable: yes
 license: https://raw.githubusercontent.com/liuzhuang13/DenseNet/master/LICENSE

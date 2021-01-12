@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -62,15 +62,18 @@ class HumanPose3dAdapter(Adapter):
 
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         self.features_3d = self.get_value_from_config('features_3d_out')
         self.part_affinity_fields = self.get_value_from_config('part_affinity_fields_out')
         self.keypoints_heatmap = self.get_value_from_config('keypoints_heatmap_out')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         raw_output = zip(
@@ -89,12 +92,21 @@ class HumanPose3dAdapter(Adapter):
             panoptic_poses_3d, translations, panoptic_poses_2d = HumanPose3dAdapter._parse_poses(
                 features, poses_2d, scale_y, scale_x, 1 / scale_x
             )
-            frame_result = PoseEstimation3dPrediction(
-                identifier, panoptic_poses_2d[:, 0:-1:3], panoptic_poses_2d[:, 1:-1:3], panoptic_poses_2d[:, 2:-1:3],
-                panoptic_poses_2d[:, -1], x_3d_values=panoptic_poses_3d[:, 0::4],
-                y_3d_values=panoptic_poses_3d[:, 1::4], z_3d_values=panoptic_poses_3d[:, 2::4],
-                translations=translations
-            )
+            if panoptic_poses_2d.size:
+                frame_result = PoseEstimation3dPrediction(
+                    identifier, panoptic_poses_2d[:, 0:-1:3], panoptic_poses_2d[:, 1:-1:3],
+                    panoptic_poses_2d[:, 2:-1:3], panoptic_poses_2d[:, -1], x_3d_values=panoptic_poses_3d[:, 0::4],
+                    y_3d_values=panoptic_poses_3d[:, 1::4], z_3d_values=panoptic_poses_3d[:, 2::4],
+                    translations=translations
+                )
+            else:
+                frame_result = PoseEstimation3dPrediction(
+                    identifier, panoptic_poses_2d, panoptic_poses_2d,
+                    panoptic_poses_2d,
+                    panoptic_poses_2d, x_3d_values=panoptic_poses_3d,
+                    y_3d_values=panoptic_poses_3d, z_3d_values=panoptic_poses_3d,
+                    translations=translations
+                )
             result.append(frame_result)
 
         return result
@@ -181,11 +193,11 @@ class HumanPose3dAdapter(Adapter):
             poses_2d.append(pose_2d)
         poses_2d = np.array(poses_2d)
 
-        keypoint_treshold = 0.1
+        keypoint_threshold = 0.1
         poses_3d = np.ones((poses_2d.shape[0], num_kpt_panoptic * 4), dtype=np.float32) * -1
         for pose_id in range(poses_3d.shape[0]):
             pose_3d = poses_3d[pose_id]
-            if poses_2d[pose_id, 2] <= keypoint_treshold:
+            if poses_2d[pose_id, 2] <= keypoint_threshold:
                 continue
             neck_2d = poses_2d[pose_id, 0:2].astype(np.int32)
             # read all pose coordinates at neck location
@@ -199,7 +211,7 @@ class HumanPose3dAdapter(Adapter):
             # refine keypoints coordinates at corresponding limbs locations
             for limb in limbs:
                 for kpt_id_from in limb:
-                    if poses_2d[pose_id, kpt_id_from * 3 + 2] <= keypoint_treshold:
+                    if poses_2d[pose_id, kpt_id_from * 3 + 2] <= keypoint_threshold:
                         continue
                     for kpt_id_where in limb:
                         kpt_from_2d = poses_2d[pose_id, kpt_id_from * 3: kpt_id_from * 3 + 2].astype(np.int32)
@@ -254,6 +266,7 @@ class HumanPose3dAdapter(Adapter):
             translations.append(translation)
 
         # map 2d coordinates back to image space
-        poses_2d[:, 0:-1:3] *= scale_x
-        poses_2d[:, 1:-1:3] *= scale_y
+        if poses_2d.size:
+            poses_2d[:, 0:-1:3] *= scale_x
+            poses_2d[:, 1:-1:3] *= scale_y
         return poses_3d, np.array(translations, dtype=np.float32), poses_2d

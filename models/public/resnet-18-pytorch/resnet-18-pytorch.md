@@ -4,7 +4,7 @@
 
 Resnet 18 is image classification model pretrained on ImageNet dataset. This
 is PyTorch implementation based on architecture described in paper ["Deep Residual
-Learning for Image Recognition"](https://arxiv.org/pdf/1512.03385) in TorchVision
+Learning for Image Recognition"](https://arxiv.org/abs/1512.03385) in TorchVision
 package (see [here](https://github.com/pytorch/vision)).
 
 The model input is a blob that consists of a single image of "1x3x224x224"
@@ -12,8 +12,6 @@ in RGB order.
 
 The model output is typical object classifier for the 1000 different classifications
 matching with those in the ImageNet database.
-
-## Example
 
 ## Specification
 
@@ -26,7 +24,10 @@ matching with those in the ImageNet database.
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 69.754%|
+| Top 5  | 89.088%|
 
 ## Input
 
@@ -39,7 +40,7 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`. 
+Channel order is `RGB`.
 Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
 
 ### Converted model

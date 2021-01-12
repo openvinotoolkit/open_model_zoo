@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (c) 2019 Intel Corporation
 
@@ -15,8 +15,6 @@
  limitations under the License.
 """
 
-from __future__ import print_function
-
 import logging as log
 import os
 import sys
@@ -25,10 +23,15 @@ from argparse import ArgumentParser, SUPPRESS
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IENetwork, IECore
+from scipy.special import softmax
+from openvino.inference_engine import IECore
 
 from text_spotting_demo.tracker import StaticIOUTracker
 from text_spotting_demo.visualizer import Visualizer
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
+
 
 SOS_INDEX = 0
 EOS_INDEX = 1
@@ -77,12 +80,13 @@ def build_argparser():
                       required=True, type=str, metavar='"<path>"')
     args.add_argument('-i',
                       dest='input_source',
-                      help='Required. Path to an image, video file or a numeric camera ID.',
+                      help='Required. Input to process.',
                       required=True, type=str, metavar='"<path>"')
     args.add_argument('-d', '--device',
-                      help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
+                      help='Optional. Specify the target device to infer on, i.e : CPU, GPU. '
                            'The demo will look for a suitable plugin for device specified '
-                           '(by default, it is CPU).',
+                           '(by default, it is CPU). Please refer to OpenVINO documentation '
+                           'for the list of devices supported by the model.',
                       default='CPU', type=str, metavar='"<device>"')
     args.add_argument('-l', '--cpu_extension',
                       help='Required for CPU custom layers. '
@@ -96,7 +100,7 @@ def build_argparser():
                       default=0.5, type=float, metavar='"<num>"')
     args.add_argument('-a', '--alphabet',
                       help='Optional. Alphabet that is used for decoding.',
-                      default='  0123456789abcdefghijklmnopqrstuvwxyz')
+                      default='  abcdefghijklmnopqrstuvwxyz0123456789')
     args.add_argument('--trd_input_prev_symbol',
                       help='Optional. Name of previous symbol input node to text recognition head decoder part.',
                       default='prev_symbol')
@@ -112,6 +116,9 @@ def build_argparser():
     args.add_argument('--trd_output_cur_hidden',
                       help='Optional. Name of current hidden output node from text recognition head decoder part.',
                       default='hidden')
+    args.add_argument('-trt', '--tr_threshold',
+                      help='Optional. Text recognition confidence threshold.',
+                      default=0.5, type=float, metavar='"<num>"')
     args.add_argument('--keep_aspect_ratio',
                       help='Optional. Force image resize to keep aspect ratio.',
                       action='store_true')
@@ -133,6 +140,8 @@ def build_argparser():
     args.add_argument("--no_show",
                       help="Optional. Don't show output",
                       action='store_true')
+    args.add_argument('-u', '--utilization_monitors', default='', type=str,
+                      help='Optional. List of monitors to show initially.')
     return parser
 
 
@@ -172,48 +181,41 @@ def main():
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    mask_rcnn_model_xml = args.mask_rcnn_model
-    mask_rcnn_model_bin = os.path.splitext(mask_rcnn_model_xml)[0] + '.bin'
-
-    text_enc_model_xml = args.text_enc_model
-    text_enc_model_bin = os.path.splitext(text_enc_model_xml)[0] + '.bin'
-
-    text_dec_model_xml = args.text_dec_model
-    text_dec_model_bin = os.path.splitext(text_dec_model_xml)[0] + '.bin'
-
     # Plugin initialization for specified device and load extensions library if specified.
     log.info('Creating Inference Engine...')
     ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, 'CPU')
     # Read IR
-    log.info('Loading network files:\n\t{}\n\t{}'.format(mask_rcnn_model_xml, mask_rcnn_model_bin))
-    mask_rcnn_net = IENetwork(model=mask_rcnn_model_xml, weights=mask_rcnn_model_bin)
+    log.info('Loading Mask-RCNN network')
+    mask_rcnn_net = ie.read_network(args.mask_rcnn_model, os.path.splitext(args.mask_rcnn_model)[0] + '.bin')
 
-    log.info('Loading network files:\n\t{}\n\t{}'.format(text_enc_model_xml, text_enc_model_bin))
-    text_enc_net = IENetwork(model=text_enc_model_xml, weights=text_enc_model_bin)
+    log.info('Loading encoder part of text recognition network')
+    text_enc_net = ie.read_network(args.text_enc_model, os.path.splitext(args.text_enc_model)[0] + '.bin')
 
-    log.info('Loading network files:\n\t{}\n\t{}'.format(text_dec_model_xml, text_dec_model_bin))
-    text_dec_net = IENetwork(model=text_dec_model_xml, weights=text_dec_model_bin)
+    log.info('Loading decoder part of text recognition network')
+    text_dec_net = ie.read_network(args.text_dec_model, os.path.splitext(args.text_dec_model)[0] + '.bin')
 
-    if 'CPU' in args.device:
-        supported_layers = ie.query_network(mask_rcnn_net, 'CPU')
-        not_supported_layers = [l for l in mask_rcnn_net.layers.keys() if l not in supported_layers]
-        if len(not_supported_layers) != 0:
-            log.error('Following layers are not supported by the plugin for specified device {}:\n {}'.
-                      format(args.device, ', '.join(not_supported_layers)))
-            log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
-                      "or --cpu_extension command line argument")
-            sys.exit(1)
+    model_required_inputs = {'image'}
+    old_model_required_inputs = {'im_data', 'im_info'}
+    if set(mask_rcnn_net.input_info) == model_required_inputs:
+        old_model = False
+        required_output_keys = {'boxes', 'labels', 'masks', 'text_features.0'}
+        n, c, h, w = mask_rcnn_net.input_info['image'].input_data.shape
+    elif set(mask_rcnn_net.input_info) == old_model_required_inputs:
+        old_model = True
+        required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks', 'text_features'}
+        n, c, h, w = mask_rcnn_net.input_info['im_data'].input_data.shape
+        args.alphabet = '  0123456789abcdefghijklmnopqrstuvwxyz'
+        args.tr_threshold = 0
+    else:
+        raise RuntimeError('Demo supports only topologies with the following input keys: '
+                           f'{model_required_inputs} or {old_model_required_inputs}.')
 
-    required_input_keys = {'im_data', 'im_info'}
-    assert required_input_keys == set(mask_rcnn_net.inputs.keys()), \
-        'Demo supports only topologies with the following input keys: {}'.format(', '.join(required_input_keys))
-    required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks', 'text_features'}
     assert required_output_keys.issubset(mask_rcnn_net.outputs.keys()), \
-        'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
+        f'Demo supports only topologies with the following output keys: {required_output_keys}' \
+        f'Found: {mask_rcnn_net.outputs.keys()}.'
 
-    n, c, h, w = mask_rcnn_net.inputs['im_data'].shape
     assert n == 1, 'Only batch 1 is supported by the demo application'
 
     log.info('Loading IR to the plugin...')
@@ -221,26 +223,29 @@ def main():
     text_enc_exec_net = ie.load_network(network=text_enc_net, device_name=args.device)
     text_dec_exec_net = ie.load_network(network=text_dec_net, device_name=args.device)
 
-    hidden_shape = text_dec_net.inputs[args.trd_input_prev_hidden].shape
+    hidden_shape = text_dec_net.input_info[args.trd_input_prev_hidden].input_data.shape
 
     del mask_rcnn_net
     del text_enc_net
     del text_dec_net
 
-    try:
-        input_source = int(args.input_source)
-    except ValueError:
-        input_source = args.input_source
-
+    input_source = args.input_source
     if os.path.isdir(input_source):
         cap = FolderCapture(input_source)
     else:
-        cap = cv2.VideoCapture(input_source)
+        try:
+            input_source = int(args.input_source)
+            cap = cv2.VideoCapture(input_source)
+            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        except ValueError:
+            cap = cv2.VideoCapture(input_source)
 
     if not cap.isOpened():
-        log.error('Failed to open "{}"'.format(args.input_source))
-    if isinstance(cap, cv2.VideoCapture):
-        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        raise RuntimeError('Failed to open "{}"'.format(input_source))
+
+    ret, frame = cap.read()
+    if not ret:
+        raise RuntimeError("Can't read an image from the input")
 
     if args.no_track:
         tracker = None
@@ -251,13 +256,10 @@ def main():
 
     render_time = 0
 
+    presenter = monitors.Presenter(args.utilization_monitors, 45, (frame.shape[1] // 4, frame.shape[0] // 8))
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-
+    while ret:
         if not args.keep_aspect_ratio:
             # Resize the image to a target size.
             scale_x = w / frame.shape[1]
@@ -280,14 +282,24 @@ def main():
 
         # Run the net.
         inf_start = time.time()
-        outputs = mask_rcnn_exec_net.infer({'im_data': input_image, 'im_info': input_image_info})
+        if old_model:
+            outputs = mask_rcnn_exec_net.infer({'im_data': input_image, 'im_info': input_image_info})
+        else:
+            outputs = mask_rcnn_exec_net.infer({'image': input_image})
 
         # Parse detection results of the current request
-        boxes = outputs['boxes']
-        scores = outputs['scores']
-        classes = outputs['classes'].astype(np.uint32)
-        raw_masks = outputs['raw_masks']
-        text_features = outputs['text_features']
+        if old_model:
+            boxes = outputs['boxes']
+            scores = outputs['scores']
+            classes = outputs['classes'].astype(np.uint32)
+            raw_masks = outputs['raw_masks']
+            text_features = outputs['text_features']
+        else:
+            boxes = outputs['boxes'][:, :4]
+            scores = outputs['boxes'][:, 4]
+            classes = outputs['labels'].astype(np.uint32)
+            raw_masks = outputs['masks']
+            text_features = outputs['text_features.0']
 
         # Filter out detections with low confidence.
         detections_filter = scores > args.prob_threshold
@@ -301,8 +313,9 @@ def main():
         boxes[:, 1::2] /= scale_y
         masks = []
         for box, cls, raw_mask in zip(boxes, classes, raw_masks):
-            raw_cls_mask = raw_mask[cls, ...]
-            mask = segm_postprocess(box, raw_cls_mask, frame.shape[0], frame.shape[1])
+            if old_model:
+                raw_mask = raw_mask[cls, ...]
+            mask = segm_postprocess(box, raw_mask, frame.shape[0], frame.shape[1])
             masks.append(mask)
 
         texts = []
@@ -315,19 +328,22 @@ def main():
             prev_symbol_index = np.ones((1,)) * SOS_INDEX
 
             text = ''
+            text_confidence = 1.0
             for i in range(MAX_SEQ_LEN):
                 decoder_output = text_dec_exec_net.infer({
                     args.trd_input_prev_symbol: prev_symbol_index,
                     args.trd_input_prev_hidden: hidden,
                     args.trd_input_encoder_outputs: feature})
                 symbols_distr = decoder_output[args.trd_output_symbols_distr]
+                symbols_distr_softmaxed = softmax(symbols_distr, axis=1)[0]
                 prev_symbol_index = int(np.argmax(symbols_distr, axis=1))
+                text_confidence *= symbols_distr_softmaxed[prev_symbol_index]
                 if prev_symbol_index == EOS_INDEX:
                     break
                 text += args.alphabet[prev_symbol_index]
                 hidden = decoder_output[args.trd_output_cur_hidden]
 
-            texts.append(text)
+            texts.append(text if text_confidence >= args.tr_threshold else '')
 
         inf_end = time.time()
         inf_time = inf_end - inf_start
@@ -344,6 +360,8 @@ def main():
         masks_tracks_ids = None
         if tracker is not None:
             masks_tracks_ids = tracker(masks, classes)
+
+        presenter.drawGraphs(frame)
 
         # Visualize masks.
         frame = visualizer(frame, boxes, classes, scores, masks, texts, masks_tracks_ids)
@@ -375,7 +393,11 @@ def main():
             esc_code = 27
             if key == esc_code:
                 break
+            presenter.handleKey(key)
 
+        ret, frame = cap.read()
+
+    print(presenter.reportMeans())
     cv2.destroyAllWindows()
     cap.release()
 

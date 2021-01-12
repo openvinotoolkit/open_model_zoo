@@ -1,0 +1,23 @@
+models:
+  - name: person-detection-0106
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: mask_rcnn
+          boxes_out: boxes
+
+    datasets:
+      - name: crossroad_extra_untagged_person_hb
+        preprocessing:
+          - type: resize
+            dst_width: 1344
+            dst_height: 800
+            aspect_ratio_scale: fit_to_window
+          - type: padding
+            dst_width: 1344
+            dst_height: 800
+            pad_type: right_bottom
+            use_numpy: True
+        metrics:
+          - type: coco_orig_precision

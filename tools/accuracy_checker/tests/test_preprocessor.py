@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from enum import Enum
 import cv2
 import numpy as np
 import pytest
@@ -31,6 +32,7 @@ from accuracy_checker.preprocessor import (
     PointAligner,
     GeometricOperationMetadata
 )
+from accuracy_checker.preprocessor.ie_preprocessor import ie_preprocess_available, IEPreprocessor
 from accuracy_checker.preprocessor.preprocessing_executor import PreprocessingExecutor
 from accuracy_checker.preprocessor.resize import _OpenCVResizer
 from accuracy_checker.data_readers import DataRepresentation
@@ -138,9 +140,9 @@ class TestResize:
                             'original_height': 480,
                             'preferable_width': 133,
                             'preferable_height': 150
-                            }
-                        )
-                    ],
+                        }
+                    )
+                ],
                 'image_info': [100, 133, 1],
                 'image_size': (480, 640, 3),
                 'original_height': 480,
@@ -149,7 +151,7 @@ class TestResize:
                 'preferable_width': 133,
                 'scale_x': 0.2078125,
                 'scale_y': 0.20833333333333334
-                }
+        }
 
     def test_resize_to_negative_size_raise_config_error(self):
         with pytest.raises(ConfigError):
@@ -189,22 +191,34 @@ class TestAutoResize:
         resize = Preprocessor.provide('auto_resize', {'type': 'auto_resize'})
         resize.set_input_shape({'data': (1, 3, 200, 200)})
 
-        input_mock = mocker.Mock()
-        resize(DataRepresentation(input_mock))
+        input_data = np.zeros((100, 100, 3))
+        input_rep = DataRepresentation(input_data)
+        expected_meta = {
+                    'preferable_width': 200,
+                    'preferable_height': 200,
+                    'image_info': [200, 200, 1],
+                    'scale_x': 2.0,
+                    'scale_y': 2.0,
+                    'original_width': 100,
+                    'original_height': 100,
+                }
+        resize(input_rep)
 
         assert resize.dst_width == 200
         assert resize.dst_height == 200
-        cv2_resize_mock.assert_called_once_with(input_mock, (200, 200))
+        cv2_resize_mock.assert_called_once_with(input_data, (200, 200))
+        for key, value in expected_meta.items():
+            assert key in input_rep.metadata
+            assert input_rep.metadata[key] == value
 
     def test_auto_resize_input_shape_not_provided_raise_config_error(self, mocker):
         input_mock = mocker.Mock()
         with pytest.raises(ConfigError):
             Preprocessor.provide('auto_resize', {'type': 'auto_resize'})(DataRepresentation(input_mock))
 
-    def test_auto_resize_with_several_input_shapes_raise_config_error(self):
+    def test_auto_resize_with_non_image_input_raise_config_error(self):
         with pytest.raises(ConfigError):
-            Preprocessor.provide('auto_resize', {'type': 'auto_resize'}).set_input_shape({'data': [1, 3, 200, 200], 'data2': [1, 3, 300, 300]})
-
+            Preprocessor.provide('auto_resize', {'type': 'auto_resize'}).set_input_shape({'im_info': [200, 200, 1]})
 
     def test_auto_resize_empty_input_shapes_raise_config_error(self):
         with pytest.raises(ConfigError):
@@ -705,7 +719,7 @@ class TestPreprocessorExtraArgs:
 
     def test_bgr_to_rgb_raise_config_error_on_extra_args(self):
         with pytest.raises(ConfigError):
-            Preprocessor.provide('bgr_to_rgb',  {'type': 'bgr_to_rgb', 'something_extra': 'extra'})
+            Preprocessor.provide('bgr_to_rgb', {'type': 'bgr_to_rgb', 'something_extra': 'extra'})
 
     def test_flip_raise_config_error_on_extra_args(self):
         with pytest.raises(ConfigError):
@@ -722,3 +736,185 @@ class TestPreprocessorExtraArgs:
     def test_point_alignment_raise_config_error_on_extra_args(self):
         with pytest.raises(ConfigError):
             Preprocessor.provide('point_alignment', {'type': 'point_alignment', 'something_extra': 'extra'})
+
+
+@pytest.mark.skipif(not ie_preprocess_available(), reason='IE version does not support preprocessing')
+class TestIEPreprocessor:
+    def test_warn_on_no_supported_ops(self):
+        config = [{'type': 'crop'}]
+        with pytest.warns(UserWarning):
+            preprocessor = IEPreprocessor(config)
+            assert not preprocessor.steps
+
+    def test_aspect_ratio_resize(self):
+        config = [{'type': 'resize', 'aspect_ratio': 'higher'}]
+        with pytest.warns(UserWarning):
+            preprocessor = IEPreprocessor(config)
+            assert not preprocessor.steps
+            assert preprocessor.keep_preprocessing_info == config
+
+    def test_unsupported_interpolation_resize(self):
+        config = [{'type': 'resize', 'interpolation': 'unknown'}]
+        with pytest.warns(UserWarning):
+            preprocessor = IEPreprocessor(config)
+            assert not preprocessor.steps
+            assert preprocessor.keep_preprocessing_info == config
+
+    def test_resize_no_interpolation_specified(self):
+        config = [{'type': 'resize'}]
+        preprocessor = IEPreprocessor(config)
+        assert preprocessor.has_resize()
+        assert len(preprocessor.steps) == 1
+        assert preprocessor.steps[0].name == 'resize_algorithm'
+        assert isinstance(preprocessor.steps[0].value, Enum)
+        resize_interpolation = preprocessor.steps[0].value
+        assert resize_interpolation.name == 'RESIZE_BILINEAR'
+        assert not preprocessor.keep_preprocessing_info
+
+    def test_resize_bilinear_interpolation_specified(self):
+        config = [{'type': 'resize', 'interpolation': 'bilinear'}]
+        preprocessor = IEPreprocessor(config)
+        assert preprocessor.has_resize()
+        assert len(preprocessor.steps) == 1
+        assert preprocessor.steps[0].name == 'resize_algorithm'
+        assert isinstance(preprocessor.steps[0].value, Enum)
+        resize_interpolation = preprocessor.steps[0].value
+        assert resize_interpolation.name == 'RESIZE_BILINEAR'
+        assert not preprocessor.keep_preprocessing_info
+
+    def test_resize_area_interpolation_specified(self):
+        config = [{'type': 'resize', 'interpolation': 'area'}]
+        preprocessor = IEPreprocessor(config)
+        assert preprocessor.has_resize()
+        assert len(preprocessor.steps) == 1
+        assert preprocessor.steps[0].name == 'resize_algorithm'
+        assert isinstance(preprocessor.steps[0].value, Enum)
+        resize_interpolation = preprocessor.steps[0].value
+        assert resize_interpolation.name == 'RESIZE_AREA'
+        assert not preprocessor.keep_preprocessing_info
+
+    def test_particular_preprocessing_transition(self):
+        config = [{'type': 'crop'}, {'type': 'resize'}]
+        preprocessor = IEPreprocessor(config)
+        assert preprocessor.has_resize()
+        assert len(preprocessor.steps) == 1
+        assert preprocessor.steps[0].name == 'resize_algorithm'
+        assert isinstance(preprocessor.steps[0].value, Enum)
+        resize_interpolation = preprocessor.steps[0].value
+        assert resize_interpolation.name == 'RESIZE_BILINEAR'
+        assert len(preprocessor.keep_preprocessing_info) == 1
+        assert preprocessor.keep_preprocessing_info[0] == config[0]
+
+    def test_no_transit_preprocessing_if_last_operation_is_not_supported(self):
+        config = [{'type': 'resize'}, {'type': 'crop'}]
+        with pytest.warns(UserWarning):
+            preprocessor = IEPreprocessor(config)
+            assert not preprocessor.has_resize()
+            assert not preprocessor.steps
+            assert preprocessor.keep_preprocessing_info == config
+
+    def test_unsupported_color_format(self):
+        config = [{'type': 'bgr_to_gray'}]
+        with pytest.warns(UserWarning):
+            preprocessor = IEPreprocessor(config)
+            assert not preprocessor.has_resize()
+            assert not preprocessor.steps
+            assert preprocessor.keep_preprocessing_info == config
+
+    def test_rgb_color_format(self):
+        config = [{'type': 'rgb_to_bgr'}]
+        preprocessor = IEPreprocessor(config)
+        assert not preprocessor.has_resize()
+        assert len(preprocessor.steps) == 1
+        assert not preprocessor.keep_preprocessing_info
+        assert preprocessor.steps[0].name == 'color_format'
+        color_space = preprocessor.steps[0].value
+        assert isinstance(color_space, Enum)
+        assert color_space.name == 'RGB'
+
+    def test_nv12_color_format(self):
+        config = [{'type': 'nv12_to_bgr'}]
+        preprocessor = IEPreprocessor(config)
+        assert not preprocessor.has_resize()
+        assert len(preprocessor.steps) == 1
+        assert not preprocessor.keep_preprocessing_info
+        assert preprocessor.steps[0].name == 'color_format'
+        color_space = preprocessor.steps[0].value
+        assert isinstance(color_space, Enum)
+        assert color_space.name == 'NV12'
+
+    def test_partial_color_format(self):
+        config = [{'type': 'bgr_to_nv12'}, {'type': 'nv12_to_bgr'}]
+        preprocessor = IEPreprocessor(config)
+        assert not preprocessor.has_resize()
+        assert len(preprocessor.steps) == 1
+        assert preprocessor.keep_preprocessing_info == [config[0]]
+        assert preprocessor.steps[0].name == 'color_format'
+        color_space = preprocessor.steps[0].value
+        assert isinstance(color_space, Enum)
+        assert color_space.name == 'NV12'
+
+    def test_several_supported_preprocessing_ops(self):
+        config = [{'type': 'resize'}, {'type': 'bgr_to_rgb'}]
+        preprocessor = IEPreprocessor(config)
+        assert preprocessor.has_resize()
+        assert len(preprocessor.steps) == 2
+        assert not preprocessor.keep_preprocessing_info
+        assert preprocessor.steps[0].name == 'color_format'
+        color_space = preprocessor.steps[0].value
+        assert isinstance(color_space, Enum)
+        assert color_space.name == 'BGR'
+        assert preprocessor.steps[1].name == 'resize_algorithm'
+        resize_interpolation = preprocessor.steps[1].value
+        assert isinstance(resize_interpolation, Enum)
+        assert resize_interpolation.name == 'RESIZE_BILINEAR'
+
+    def test_mean_values_only(self):
+        config = [{'type': 'normalization', 'mean': 255}]
+        preprocessor = IEPreprocessor(config)
+        assert preprocessor.has_normalization()
+        assert len(preprocessor.steps) == 1
+        assert preprocessor.steps[0].name == 'mean_variant'
+        assert preprocessor.steps[0].value.name == 'MEAN_VALUE'
+        assert preprocessor.mean_values == (255, )
+        assert preprocessor.std_values is None
+
+    def test_std_values_only(self):
+        config = [{'type': 'normalization', 'std': 255}]
+        preprocessor = IEPreprocessor(config)
+        assert preprocessor.has_normalization()
+        assert len(preprocessor.steps) == 1
+        assert preprocessor.steps[0].name == 'mean_variant'
+        assert preprocessor.steps[0].value.name == 'MEAN_VALUE'
+        assert preprocessor.std_values == (255, )
+        assert preprocessor.mean_values is None
+
+    def test_mean_and_std_values(self):
+        config = [{'type': 'normalization', 'mean': 255, 'std': 255}]
+        preprocessor = IEPreprocessor(config)
+        assert preprocessor.has_normalization()
+        assert len(preprocessor.steps) == 1
+        assert preprocessor.steps[0].name == 'mean_variant'
+        assert preprocessor.steps[0].value.name == 'MEAN_VALUE'
+        assert preprocessor.std_values == (255, )
+        assert preprocessor.mean_values == (255, )
+
+    def test_mean_values_for_each_channel(self):
+        config = [{'type': 'normalization', 'mean': [255, 255, 255], 'std': [255, 255, 255]}]
+        preprocessor = IEPreprocessor(config)
+        assert preprocessor.has_normalization()
+        assert len(preprocessor.steps) == 1
+        assert preprocessor.steps[0].name == 'mean_variant'
+        assert preprocessor.steps[0].value.name == 'MEAN_VALUE'
+        assert preprocessor.std_values == [255, 255, 255]
+        assert preprocessor.mean_values == [255, 255, 255]
+
+    def test_precomputed_mean_values(self):
+        config = [{'type': 'normalization', 'mean': 'imagenet', 'std': 255}]
+        preprocessor = IEPreprocessor(config)
+        assert preprocessor.has_normalization()
+        assert len(preprocessor.steps) == 1
+        assert preprocessor.steps[0].name == 'mean_variant'
+        assert preprocessor.steps[0].value.name == 'MEAN_VALUE'
+        assert preprocessor.std_values == (255, )
+        assert preprocessor.mean_values == Normalize.PRECOMPUTED_MEANS['imagenet']

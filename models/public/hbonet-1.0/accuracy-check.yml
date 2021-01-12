@@ -1,0 +1,55 @@
+models:
+  - name: hbonet-1.0
+
+    launchers:
+      - framework: onnx_runtime
+        model: hbonet-1.0.onnx
+        adapter: classification
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 1,3,224,224
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: opencv_imread
+
+        preprocessing:
+          - type: bgr_to_rgb
+
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            interpolation: BILINEAR
+            use_pillow: True
+
+          - type: crop
+            size: 224
+
+          - type: normalization
+            std: 255
+
+          - type: normalization
+            mean: (0.485, 0.456, 0.406)
+            std: (0.229, 0.224, 0.225)
+
+  - name: hbonet-1.0
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: opencv_imread
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            interpolation: BILINEAR
+            use_pillow: True
+
+          - type: crop
+            size: 224

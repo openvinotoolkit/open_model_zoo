@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ class Translate3dPoses(Postprocessor):
         for batch_id, prediction in enumerate(predictions):
             for pose_id in range(prediction.size):
                 translation = prediction.translations[pose_id]
-                translation[2] *= annotations[batch_id].fx
+                translation[2] *= annotations[batch_id].fx if annotations[batch_id] is not None else 1
                 prediction.x_3d_values[pose_id] += translation[0]
                 prediction.y_3d_values[pose_id] += translation[1]
                 prediction.z_3d_values[pose_id] += translation[2]

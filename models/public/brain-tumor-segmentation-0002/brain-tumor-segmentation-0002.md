@@ -1,10 +1,8 @@
-# Brain-tumor-segmentation-0002
+# brain-tumor-segmentation-0002
 
 ## Use Case and High-Level Description
 
 This model was created for participation in the [Brain Tumor Segmentation Challenge](https://www.med.upenn.edu/cbica/brats2019/registration.html) (BraTS) 2019. It has the UNet architecture trained with residual blocks.
-
-## Example
 
 ## Specification
 
@@ -17,8 +15,8 @@ This model was created for participation in the [Brain Tumor Segmentation Challe
 
 ## Accuracy
 
-See [BRATS 2019 Leaderboard](https://www.cbica.upenn.edu/BraTS19/lboardValidation.html). The metrics 
-for challenge validation (Dice_WT, Dice_TC, Dice_ET) differ from the metrics reported below (which 
+See [BRATS 2019 Leaderboard](https://www.cbica.upenn.edu/BraTS19/lboardValidation.html). The metrics
+for challenge validation (Dice_WT, Dice_TC, Dice_ET) differ from the metrics reported below (which
 are compartible with input labels):
 
 - WT (whole tumor) class combines all three tumor classes:
@@ -30,24 +28,22 @@ are compartible with input labels):
     - non-enhancing tumor
 - ET (enhancing tumor)
 
-The following accuracy metrics are measured on a `brain tumor` training subset of the [Medical Decathlon](http://medicaldecathlon.com/) dataset. 
+The following accuracy metrics are measured on a `brain tumor` training subset of the [Medical Decathlon](http://medicaldecathlon.com/) dataset.
 
 **Mean**:
-- Dice index for "overall": 0.915
-- Dice index for "necrotic core / non-enhancing tumor": 0.806
-- Dice index for "edema": 0.611
-- Dice index for "enhancing tumor": 0.794
+- Dice index for "overall": 91.5%
+- Dice index for "necrotic core / non-enhancing tumor": 61.1%
+- Dice index for "edema": 80.6%
+- Dice index for "enhancing tumor": 79.4%
 
 **Median**:
-- Dice index for "overall": 0.927
-- Dice index for "necrotic core / non-enhancing tumor": 0.835
-- Dice index for "edema": 0.644
-- Dice index for "enhancing tumor": 0.86
+- Dice index for "overall": 92.7%
+- Dice index for "necrotic core / non-enhancing tumor": 64.5%
+- Dice index for "edema": 83.5%
+- Dice index for "enhancing tumor": 86%
 
-  
+
 > **NOTE**: The accuracy achieved with ONNX\* model adapted for OpenVINO™ can slightly differ from the accuracy achieved with the original PyTorch model since the upsampling operation was changed from the `trilinear` to `nearest` mode.
-
-## Performance
 
 ## Input
 

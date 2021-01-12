@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-A product detector based on the SSD-lite architecture with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for self-checkout points of sale-related scenes.
+A product detector based on the SSD-lite architecture with [MobileNetV2](https://arxiv.org/abs/1801.04381) as a backbone for self-checkout points of sale-related scenes.
 The network can detect 12 classes of objects (`sprite`, `kool-aid`, `extra`, `ocelo`, `finish`, `mtn_dew`, `best_foods`, `gatorade`, `heinz`, `ruffles`, `pringles`, `del_monte`). Labels 0 and 1 are related to `background_label` and `undefined` correspondingly.
 
 ## Example
@@ -18,19 +18,17 @@ The network can detect 12 classes of objects (`sprite`, `kool-aid`, `extra`, `oc
 | MParams                                                           | 3.212    |
 | Source framework                                                  | PyTorch* |
 
-## Performance
-
 ## Inputs
 
-1. Name: `input` , shape: [1x3x512x512]. An input image in the format [BxCxHxW],
-   where:
+Name: `input`, shape: [1x3x512x512]. An input image in the format [BxCxHxW],
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Outputs
 

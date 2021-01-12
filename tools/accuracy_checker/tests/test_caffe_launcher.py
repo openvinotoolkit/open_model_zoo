@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -57,6 +57,18 @@ class TestCaffeLauncher:
         zeros = DataRepresentation(np.zeros((1, 3, 32, 32)))
         launcher.predict([{'data': zeros.data}], [zeros.metadata])
         assert zeros.metadata['input_shape'] == {'data': (1, 3, 32, 32)}
+
+    def test_caffe_launcher_model_search(self, models_dir):
+        config = {
+            "framework": "caffe",
+            "weights": models_dir,
+            "model": models_dir,
+            "adapter": 'classification',
+            "device": "cpu"
+        }
+        caffe_model = create_launcher(config, 'SampleNet')
+        assert caffe_model.model == models_dir / 'SampLeNet.prototxt'
+        assert caffe_model.weights == models_dir / 'SampLeNet.caffemodel'
 
 
 def test_missed_model_in_create_caffe_launcher_raises_config_error_exception():

@@ -1,0 +1,12 @@
+diff --git a/keras_to_tensorflow.py b/keras_to_tensorflow.py
+index c66cbbd..6290ed5 100644
+--- a/keras_to_tensorflow.py
++++ b/keras_to_tensorflow.py
+@@ -16,7 +16,7 @@ from pathlib import Path
+ from absl import app
+ from absl import flags
+ from absl import logging
+-import keras
++from tensorflow import keras
+ from keras import backend as K
+ from keras.models import model_from_json, model_from_yaml

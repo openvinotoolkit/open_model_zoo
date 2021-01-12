@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,12 +17,15 @@ limitations under the License.
 from pathlib import Path
 
 from ..representation import ReIdentificationAnnotation
+from ..utils import OrderedSet
 
 
-def read_directory(directory, query, image_pattern):
-    pids = set()
+def read_directory(directory, query, image_pattern, descent_order=False):
+    pids = OrderedSet()
     images = []
-    for image in directory.glob("*.jpg"):
+    images_list = list(directory.glob("*.jpg"))
+    images_list.sort(reverse=descent_order)
+    for image in images_list:
         pid, camid = map(int, image_pattern.search(image.name).groups())
         if pid == -1:
             continue

@@ -10,11 +10,7 @@
 #include <memory>
 #include <vector>
 
-
-#include <ie_plugin_ptr.hpp>
 #include <inference_engine.hpp>
-
-
 
 ///
 /// \brief The IDescriptorDistance class declares an interface for distance
@@ -123,4 +119,3 @@ private:
     float offset_;  ///< Offset parameter for the distance. Final distance is
                     /// computed as: scale * distance + offset.
 };
-

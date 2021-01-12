@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,6 +26,13 @@ class ReIdentificationAnnotation(ReIdentification):
         super().__init__(identifier)
         self.camera_id = camera_id
         self.person_id = person_id
+        self.query = query
+
+
+class PlaceRecognitionAnnotation(ReIdentification):
+    def __init__(self, identifier, coords, query):
+        super().__init__(identifier)
+        self.coords = coords
         self.query = query
 
 

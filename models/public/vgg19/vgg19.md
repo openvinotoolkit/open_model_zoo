@@ -2,13 +2,11 @@
 
 ## Use Case and High-Level Description
 
-The `vgg19` model is one of the [vgg](https://arxiv.org/pdf/1409.1556.pdf) models designed to perform image classification in Caffe\* format.
+The `vgg19` model is one of the [vgg](https://arxiv.org/abs/1409.1556) models designed to perform image classification in Caffe\* format.
 
 The model input is a blob that consists of a single image of 1x3x224x224 in BGR order. The BGR mean values need to be subtracted as follows: [103.939, 116.779, 123.68] before passing the image blob into the network.
 
 The model output for `vgg19` is the typical object classifier output for the 1000 different classifications matching those in the ImageNet database.
-
-## Example
 
 ## Specification
 
@@ -21,7 +19,10 @@ The model output for `vgg19` is the typical object classifier output for the 100
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 71.062%|
+| Top 5  | 89.832%|
 
 ## Input
 

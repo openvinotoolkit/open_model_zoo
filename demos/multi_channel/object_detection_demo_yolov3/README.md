@@ -3,7 +3,7 @@
 This demo provides an inference pipeline for multi-channel yolo v3. The demo uses Yolo v3 Object Detection network. You can follow [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page convert the YOLO V3 and tiny YOLO V3 into IR model and execute this demo with converted IR model.
 
 > **NOTES**:
-> If you don't use [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page to convert the model, it may not work. 
+> If you don't use [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page to convert the model, it may not work.
 
 Other demo objectives are:
 
@@ -21,36 +21,35 @@ On the start-up, the application reads command line parameters and loads the spe
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
-cd <samples_build_folder>/intel64/Release
+```
 ./multi_channel_object_detection_demo_yolov3 -h
 
 multi_channel_object_detection_demo_yolov3 [OPTION]
 Options:
 
-    -h                           Print a usage message.
-    -m "<path>"                  Required. Path to an .xml file with a trained yolo v3 or tiny yolo v3 model.
-      -l "<absolute_path>"       Required for MKLDNN (CPU)-targeted custom layers. Absolute path to a shared library with the kernels impl.
+    -h                           Print a usage message
+    -i                           Required. A comma separated list of inputs to process. Each input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                        Optional. Enable reading the inputs in a loop.
+    -duplicate_num               Optional. Multiply the inputs by the given factor. For example, if only one input is provided, but -ni is set to 2, the demo uses half of images from the input as it was the first input and another half goes as the second input.
+    -m "<path>"                  Required. Path to an .xml file with a trained model.
+      -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations
           Or
-      -c "<absolute_path>"       Required for clDNN (GPU)-targeted custom kernels. Absolute path to the xml file with the kernels desc.
-    -d "<device>"                Optional. Specify the target device for Face Detection (CPU, GPU, FPGA, HDDL or MYRIAD). The demo will look for a suitable plugin for a specified device.
-    -nc                          Optional. Maximum number of processed camera inputs (web cams)
+      -c "<absolute_path>"       Required for GPU custom kernels. Absolute path to an .xml file with the kernel descriptions
+    -d "<device>"                Optional. Specify the target device for a network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo looks for a suitable plugin for a specified device.
     -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
     -nireq                       Optional. Number of infer requests
     -n_iqs                       Optional. Frame queue size for input channels
-    -fps_sp                      Optional. FPS measurement sampling period. Duration between timepoints, msec
+    -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
     -n_sp                        Optional. Number of sampling periods
-    -pc                          Optional. Enables per-layer performance report.
-    -t                           Optional. Probability threshold for detections.
-    -no_show                     Optional. No show processed video.
+    -pc                          Optional. Enable per-layer performance report
+    -t                           Optional. Probability threshold for detections
+    -no_show                     Optional. Do not show processed video.
     -show_stats                  Optional. Enable statistics report
-    -duplicate_num               Optional. Enable and specify number of channel additionally copied from real sources
     -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline
-    -i                           Optional. Specify full path to input video files
     -u                           Optional. List of monitors to show initially.
 ```
 
-To run the demo, you can use public pre-train model and follow [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page for instruction of how to convert it to IR model. 
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -68,7 +67,7 @@ Video files will be processed repeatedly.
 To achieve 100% utilization of one Myriad X, the thumb rule is to run 4 infer requests on each Myriad X. Option `-nireq 32` can be added to above command to use 100% of HDDL-R card. The 32 here is 8 (Myriad X on HDDL-R card) x 4 (infer requests), such as following command:
 
 ```sh
-./multi_channel_object_detection_demo_yolov3 -m $PATH_OF_YOLO_V3_MODEL -d HDDL 
+./multi_channel_object_detection_demo_yolov3 -m $PATH_OF_YOLO_V3_MODEL -d HDDL
 -i /path/to/file1 /path/to/file2 /path/to/file3 /path/to/file4 -nireq 32
 ```
 
@@ -83,7 +82,7 @@ On the top of the screen, the demo reports throughput in frames per second. You 
 
 ## Input Video Sources
 
-General parameter for input video source is `-i`. Use it to specify video files and web cameras (**USB cameras**) as input video source. You can add the parameter to a sample command line as follows:
+General parameter for input video source is `-i`. Use it to specify video files or web cameras as input video sources. You can add the parameter to a sample command line as follows:
 ```
 -i <file1> <file2>
 ```
@@ -92,7 +91,7 @@ General parameter for input video source is `-i`. Use it to specify video files 
 
 To see all available web cameras, run the `ls /dev/video*` command. You will get output similar to the following:
 
-```sh
+```
 user@user-PC:~ $ ls /dev/video*
 /dev/video0  /dev/video1  /dev/video2
 ```
@@ -107,7 +106,10 @@ Alternatively, you can just set `-nc 3`, which simplifies application usage.
 
 If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use the `-i` parameter.
 
-IP-cameras through RSTP URI interface are not supported.
+To connect to IP cameras, use RTSP URIs:
+```
+-i rtsp://camera_address_1/ rtsp://camera_address_2/
+```
 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)

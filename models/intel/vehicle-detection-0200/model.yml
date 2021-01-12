@@ -1,0 +1,44 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  MobileNetV2-SSD with two heads and clustered priors for 256x256 resolution.
+task_type: detection
+files:
+  - name: FP32/vehicle-detection-0200.xml
+    size: 187876
+    sha256: 3279a6ab14355e71020ec252d63d6ab1ef13831e18cd80ac90f7dfdcc3fc3033
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/vehicle-detection-0200/FP32/vehicle-detection-0200.xml
+  - name: FP32/vehicle-detection-0200.bin
+    size: 7269168
+    sha256: 22968dd07f17738f11e61cd956976e5ae4789c00635e0418155a0da8ba8146fd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/vehicle-detection-0200/FP32/vehicle-detection-0200.bin
+  - name: FP16/vehicle-detection-0200.xml
+    size: 187813
+    sha256: 1b04ba778eb69ef79686c03a0ceccdae5c0e62c0384dc90dd68f19ea71b1cbff
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/vehicle-detection-0200/FP16/vehicle-detection-0200.xml
+  - name: FP16/vehicle-detection-0200.bin
+    size: 3634626
+    sha256: 8e2779dd1bbed6f08a923ed8a2d581ab5bec6de487849726708f9e8b18c3556f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/vehicle-detection-0200/FP16/vehicle-detection-0200.bin
+  - name: FP16-INT8/vehicle-detection-0200.xml
+    size: 494281
+    sha256: 56e70829d6b559460033aa8a40637bbb4ea722704cf6e95ee42f80e8b401dd62
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/vehicle-detection-0200/FP16-INT8/vehicle-detection-0200.xml
+  - name: FP16-INT8/vehicle-detection-0200.bin
+    size: 1921625
+    sha256: b828b71bf3c6dd11a78e54448504bbb0eb6ed61a6f8843870e10d60f1ebff879
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/vehicle-detection-0200/FP16-INT8/vehicle-detection-0200.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
- Copyright (c) 2018 Intel Corporation
+ Copyright (c) 2018-2020 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,13 +15,17 @@
  limitations under the License.
 """
 
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IECore
 import cv2 as cv
 import numpy as np
-import os
-from argparse import ArgumentParser, SUPPRESS
 import logging as log
 import sys
+from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
+import monitors
+from images_capture import open_images_capture
 
 
 def build_arg():
@@ -29,67 +33,58 @@ def build_arg():
     in_args = parser.add_argument_group('Options')
     in_args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Help with the script.')
     in_args.add_argument("-m", "--model", help="Required. Path to .xml file with pre-trained model.",
-                         required=True, type=str)
-    in_args.add_argument("--coeffs", help="Required. Path to .npy file with color coefficients.",
-                         required=True, type=str)
+                         required=True, type=Path)
     in_args.add_argument("-d", "--device",
                          help="Optional. Specify target device for infer: CPU, GPU, FPGA, HDDL or MYRIAD. "
                               "Default: CPU",
                          default="CPU", type=str)
-    in_args.add_argument('-i', "--input",
-                         help='Required. Input to process.',
-                         required=True, type=str, metavar='"<path>"')
+    in_args.add_argument('-i', "--input", required=True,
+                         help='Required. An input to process. The input must be a single image, '
+                              'a folder of images or anything that cv2.VideoCapture can process.')
+    in_args.add_argument('--loop', default=False, action='store_true',
+                         help='Optional. Enable reading the input in a loop.')
     in_args.add_argument("--no_show", help="Optional. Disable display of results on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
                          action='store_true', default=False)
+    in_args.add_argument("-u", "--utilization_monitors", default="", type=str,
+                      help="Optional. List of monitors to show initially.")
     return parser
 
 
 if __name__ == '__main__':
     args = build_arg().parse_args()
-    model_path = os.path.splitext(args.model)[0]
-    weights_bin = model_path + ".bin"
-    coeffs = args.coeffs
 
-    # mean is stored in the source caffe model and passed to IR
     log.basicConfig(format="[ %(levelname)s ] %(message)s",
                     level=log.INFO if not args.verbose else log.DEBUG, stream=sys.stdout)
 
     log.debug("Load network")
-    load_net = IENetwork(model=args.model, weights=weights_bin)
+    ie = IECore()
+    load_net = ie.read_network(args.model, args.model.with_suffix(".bin"))
     load_net.batch_size = 1
-    exec_net = IECore().load_network(network=load_net, device_name=args.device)
+    exec_net = ie.load_network(network=load_net, device_name=args.device)
 
-    assert len(load_net.inputs) == 1, "Expected number of inputs is equal 1"
-    input_blob = next(iter(load_net.inputs))
-    input_shape = load_net.inputs[input_blob].shape
+    input_blob = next(iter(load_net.input_info))
+    input_shape = load_net.input_info[input_blob].input_data.shape
     assert input_shape[1] == 1, "Expected model input shape with 1 channel"
 
     assert len(load_net.outputs) == 1, "Expected number of outputs is equal 1"
     output_blob = next(iter(load_net.outputs))
     output_shape = load_net.outputs[output_blob].shape
-    assert output_shape == [1, 313, 56, 56], "Shape of outputs does not match network shape outputs"
 
     _, _, h_in, w_in = input_shape
 
-    try:
-        input_source = int(args.input)
-    except ValueError:
-        input_source = args.input
+    cap = open_images_capture(args.input, args.loop)
+    original_frame = cap.read()
+    if original_frame is None:
+        raise RuntimeError("Can't read an image from the input")
 
-    cap = cv.VideoCapture(input_source)
-    if not cap.isOpened():
-        assert "{} not exist".format(input_source)
+    imshow_size = (640, 480)
+    graph_size = (imshow_size[0] // 2, imshow_size[1] // 4)
+    presenter = monitors.Presenter(args.utilization_monitors, imshow_size[1] * 2 - graph_size[1], graph_size)
 
-    color_coeff = np.load(coeffs).astype(np.float32)
-    assert color_coeff.shape == (313, 2), "Current shape of color coefficients does not match required shape"
-
-    while True:
+    while original_frame is not None:
         log.debug("#############################")
-        hasFrame, original_frame = cap.read()
-        if not hasFrame:
-            break
         (h_orig, w_orig) = original_frame.shape[:2]
 
         log.debug("Preprocessing frame")
@@ -105,7 +100,7 @@ if __name__ == '__main__':
         log.debug("Network inference")
         res = exec_net.infer(inputs={input_blob: [img_l_rs]})
 
-        update_res = (res[output_blob] * color_coeff.transpose()[:, :, np.newaxis, np.newaxis]).sum(1)
+        update_res = np.squeeze(res[output_blob])
 
         log.debug("Get results")
         out = update_res.transpose((1, 2, 0))
@@ -113,26 +108,30 @@ if __name__ == '__main__':
         img_lab_out = np.concatenate((img_lab[:, :, 0][:, :, np.newaxis], out), axis=2)
         img_bgr_out = np.clip(cv.cvtColor(img_lab_out, cv.COLOR_Lab2BGR), 0, 1)
 
+        original_image = cv.resize(original_frame, imshow_size)
+        grayscale_image = cv.resize(frame, imshow_size)
+        colorize_image = (cv.resize(img_bgr_out, imshow_size) * 255).astype(np.uint8)
+        lab_image = cv.resize(img_lab_out, imshow_size).astype(np.uint8)
+
+        original_image = cv.putText(original_image, 'Original', (25, 50),
+                                    cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        grayscale_image = cv.putText(grayscale_image, 'Grayscale', (25, 50),
+                                     cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        colorize_image = cv.putText(colorize_image, 'Colorize', (25, 50),
+                                    cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        lab_image = cv.putText(lab_image, 'LAB interpretation', (25, 50),
+                               cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+
+        ir_image = [cv.hconcat([original_image, grayscale_image]),
+                    cv.hconcat([lab_image, colorize_image])]
+        final_image = cv.vconcat(ir_image)
+        presenter.drawGraphs(final_image)
         if not args.no_show:
             log.debug("Show results")
-            imshowSize = (640, 480)
-            original_image = cv.resize(original_frame, imshowSize)
-            grayscale_image = cv.resize(frame, imshowSize)
-            colorize_image = (cv.resize(img_bgr_out, imshowSize) * 255).astype(np.uint8)
-            lab_image = (cv.resize(img_lab_out, imshowSize)).astype(np.uint8)
-
-            original_image = cv.putText(original_image, 'Original', (25, 50),
-                                        cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-            grayscale_image = cv.putText(grayscale_image, 'Grayscale', (25, 50),
-                                        cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-            colorize_image = cv.putText(colorize_image, 'Colorize', (25, 50),
-                                        cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-            lab_image = cv.putText(lab_image, 'LAB interpetation', (25, 50),
-                                   cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-
-            ir_image = [cv.hconcat([original_image, grayscale_image]),
-                        cv.hconcat([lab_image, colorize_image])]
-            final_image = cv.vconcat(ir_image)
             cv.imshow('Colorization Demo', final_image)
-            if not cv.waitKey(1) < 0:
+            key = cv.waitKey(1)
+            if key in {ord("q"), ord("Q"), 27}:
                 break
+            presenter.handleKey(key)
+        original_frame = cap.read()
+    print(presenter.reportMeans())

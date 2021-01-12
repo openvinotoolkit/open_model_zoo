@@ -2,44 +2,47 @@
 
 ## Use Case and High-Level Description
 
-The `colorization-v2` model is one of the [colorization](https://arxiv.org/pdf/1603.08511)
-group of models designed to perform image colorization. For details
-about this family of models, check out the [repository](https://github.com/richzhang/colorization).
+The `colorization-v2` model is one of the [colorization](https://arxiv.org/abs/1603.08511)
+group of models designed to perform image colorization. Model was trained on ImageNet dataset.
+For details about this family of models, check out the [repository](https://github.com/richzhang/colorization).
 
 Model consumes as input L-channel of LAB-image.
 Model give as output predict A- and B-channels of LAB-image.
-
-## Example
 
 ## Specification
 
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Colorization  |
-| GFLOPs            | -             |
-| MParams           | -             |
-| Source framework  | Caffe\*       |
+| GFLOPs            | 83.6045       |
+| MParams           | 32.2360       |
+| Source framework  | PyTorch\*     |
 
 ## Accuracy
 
-The accuracy metrics calculated on ImageNet
-validation dataset using [VGG16](https://arxiv.org/pdf/1409.1556.pdf) caffe
-model and colorization as preprocessing.
+The accuracy metrics were calculated between generated images by model and real validation images from ImageNet dataset.
+Results are obtained on subset of 2000 images.
 
-For preprocessing `rgb -> gray -> coloriaztion` recieved values:
+| Metric | Value     |
+| ------ | --------- |
+| PSNR   | 26.99dB   |
+| SSIM   | 0.90      |
+
+Also, metrics can be calculated using [VGG16](https://arxiv.org/abs/1409.1556) caffe model and colorization as preprocessing.
+The results below are obtained on the validation images from ImageNet dataset.
+
+For preprocessing `rgb -> gray -> colorization` recieved values:
 
 | Metric         | Value with preprocessing   | Value without preprocessing |
-|----------------|-----------------------------|-----------------------------|
-| Accuracy top-1 |                      55.39% |                      70.96% |
-| Accuracy top-5 |                      79.21% |                      89.88% |
-
-## Performance
+|----------------|----------------------------|-----------------------------|
+| Accuracy top-1 |                     57.75% |                      70.96% |
+| Accuracy top-5 |                     81.50% |                      89.88% |
 
 ## Input
 
 ### Original model
 
-Image, name - `data_l`,  shape - `1,1,224,224`, format is `B,C,H,W` where:
+Image, name - `data_l`,  shape - `1,1,256,256`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -47,11 +50,10 @@ Image, name - `data_l`,  shape - `1,1,224,224`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is L-channel.
-Mean values - 50.
 
 ### Converted model
 
-Image, name - `data_l`,  shape - `1,1,224,224`, format is `B,C,H,W` where:
+Image, name - `data_l`,  shape - `1,1,256,256`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -64,27 +66,25 @@ Channel order is L-channel.
 
 ### Original model
 
-Image, name - `class8_ab`\*,  shape - `1,2,56,56`, format is `B,C,H,W` where:
+Image, name - `color_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
+
+Channel order is AB channels of LAB-image.
 
 ### Converted model
 
-Image, name - `class8_313_rh`\*,  shape - `1,313,56,56`, format is `B,C,H,W` where:
+Image, name - `color_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
 
-> **NOTE**: `class8_313_rh` layer is in front of `class8_ab` layer,
-in order for network to work,
-you need to reproduce `class8_ab` layer with the coefficients that
-downloaded separately with the model. More detailed information can be found
->[this](https://github.com/richzhang/colorization/blob/master/demo/colorization_demo_v2.ipynb).
+Channel order is AB channels of LAB-image.
 
 ## Legal Information
 The original model is distributed under the following

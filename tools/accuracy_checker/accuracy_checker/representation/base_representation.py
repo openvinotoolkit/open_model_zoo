@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -40,3 +40,12 @@ class BaseRepresentation(abc.ABC):
 
     def set_data_source(self, data_source):
         self.metadata['data_source'] = data_source
+
+    def set_segmentation_mask_source(self, mask_source):
+        self.metadata['segmentation_masks_source'] = mask_source
+
+    def set_additional_data_source(self, source):
+        self.metadata['additional_data_source'] = source
+
+    def set_dataset_metadata(self, source):
+        self.metadata['dataset_meta'] = source

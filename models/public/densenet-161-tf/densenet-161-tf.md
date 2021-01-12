@@ -3,9 +3,7 @@
 ## Use Case and High-Level Description
 
 This is a TensorFlow\* version of `densenet-161` model, one of the DenseNet
-group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details see [repository](https://github.com/pudae/tensorflow-densenet/), [paper](https://arxiv.org/pdf/1608.06993.pdf).
-
-## Example
+group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details see [repository](https://github.com/pudae/tensorflow-densenet/), [paper](https://arxiv.org/abs/1608.06993).
 
 ## Specification
 
@@ -16,7 +14,12 @@ group of models designed to perform image classification. The weights were conve
 | MParams                         | 28.666                                    |
 | Source framework                | TensorFlow\*                              |
 
-## Performance
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 76.446% |
+| Top 5  | 93.228%|
 
 ## Input
 
@@ -36,14 +39,14 @@ Image, name: `Placeholder` , shape: [1x224x224x3], format: [BxHxWxC],
 ### Converted Model
 
 Image, name: `Placeholder`, shape: [1x3x224x224], format: [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -48,5 +48,13 @@ def models_dir():
 def mock_path_exists(mocker):
     mocker.patch('pathlib.Path.exists', return_value=True)
     mocker.patch('pathlib.Path.is_dir', return_value=True)
+    mocker.patch('pathlib.Path.is_file', return_value=True)
+    mocker.patch('os.path.exists', return_value=True)
+
+
+@pytest.fixture
+def mock_file_exists(mocker):
+    mocker.patch('pathlib.Path.exists', return_value=True)
+    mocker.patch('pathlib.Path.is_dir', return_value=False)
     mocker.patch('pathlib.Path.is_file', return_value=True)
     mocker.patch('os.path.exists', return_value=True)

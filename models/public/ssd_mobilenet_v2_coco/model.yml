@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "ssd_mobilenet_v2_coco" model is a Single-Shot multibox Detection <SSD> <https://arxiv.org/pdf/1801.04381.pdf>
+  The "ssd_mobilenet_v2_coco" model is a Single-Shot multibox Detection <SSD> <https://arxiv.org/abs/1801.04381>
   network intended to perform object detection. The model has been trained from the
   Common Objects in Context (COCO) image dataset.
 
@@ -42,4 +42,5 @@ model_optimizer_args:
   - --output=detection_classes,detection_scores,detection_boxes,num_detections
   - --input_model=$dl_dir/ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.pb
 framework: tf
+quantizable: yes
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

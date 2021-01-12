@@ -841,11 +841,14 @@ class RoiDetectorImpl:
 
     def get_res_bbox(self):
         return self.res_bbox
+
     def get_res_bbox_confidence(self):
         """ At the moment it either 0 or 1 """
         return self.res_bbox_confidence
+
     def get_num_summed_masks(self):
         return self.num_summed_masks
+
     def get_result_img_to_show(self):
         return self.result_img_to_show
 
@@ -882,7 +885,7 @@ class RoiDetector:
         """
         Constructor.
         The only parameter of the constructor is frame step that should be used during detection.
-        The value depends on the frome rate of the input video.
+        The value depends on the frame rate of the input video.
         The recommended value for video stream with frame rate 30 frames per second is frame_step=5.
         """
         self.frame_step = frame_step

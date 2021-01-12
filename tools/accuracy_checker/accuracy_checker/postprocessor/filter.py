@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ from ..postprocessor.postprocessor import PostprocessorWithSpecificTargets
 from ..representation import (DetectionAnnotation, DetectionPrediction, TextDetectionAnnotation,
                               TextDetectionPrediction, PoseEstimationPrediction, PoseEstimationAnnotation)
 from ..utils import in_interval, polygon_from_points, convert_to_range
+
 
 class FilterPostprocessor(PostprocessorWithSpecificTargets):
     __provider__ = 'filter'
@@ -127,6 +128,22 @@ class FilterByMinConfidence(BaseFilter):
 
         return filtered
 
+
+class FilterTopK(BaseFilter):
+    __provider__ = 'top_k'
+
+    def apply_filter(self, entry, top_k):
+        filtered = []
+
+        if isinstance(entry, DetectionAnnotation):
+            return filtered
+
+        if len(entry.scores) <= top_k:
+            return filtered
+        scores_inds = np.argsort(entry.scores)[::-1]
+        non_filtered = scores_inds[:int(top_k)]
+
+        return [ind for ind in range(len(entry.scores)) if ind not in non_filtered]
 
 class FilterByHeightRange(BaseFilter):
     __provider__ = 'height_range'

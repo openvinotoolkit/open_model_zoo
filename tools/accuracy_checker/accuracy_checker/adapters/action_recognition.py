@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, NumberField, BoolField, ListField
 from ..representation import DetectionPrediction, ActionDetectionPrediction, ContainerPrediction
+from ..utils import contains_all
 
 
 class ActionDetection(Adapter):
@@ -70,11 +71,11 @@ class ActionDetection(Adapter):
                 description="Variances to decode SSD prediction."
             ),
             'add_conf_out_count': NumberField(
-                optional=True, min_value=1,
+                optional=True, min_value=1, value_type=int,
                 description="Number of layers with action confidences (optional, you can not provide this argument "
                             "if action confidences contained in one layer)."
             ),
-            'num_action_classes': NumberField(description="Number classes for action recognition."),
+            'num_action_classes': NumberField(description="Number classes for action recognition.", value_type=int),
             'detection_threshold': NumberField(
                 optional=True, value_type=float, min_value=0, max_value=1, default=0,
                 description="Minimal detection confidences level for valid detections."),
@@ -89,8 +90,11 @@ class ActionDetection(Adapter):
 
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         self.multihead = self.get_value_from_config('multihead_net')
@@ -136,7 +140,7 @@ class ActionDetection(Adapter):
                 self.head_sizes = [add_conf_out_count]
                 self.glob_layer_id_map = [list(range(add_conf_out_count))]
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.outputs_verified:
@@ -293,5 +297,8 @@ class ActionDetection(Adapter):
 
         self.loc_out = find_layer(loc_out_regex, 'loc', raw_outputs)
         self.main_conf_out = find_layer(main_conf_out_regex, 'main confidence', raw_outputs)
+        add_conf_with_bias = [layer_name + '/add_' for layer_name in self.add_conf_outs]
+        if not contains_all(raw_outputs, self.add_conf_outs) and contains_all(raw_outputs, add_conf_with_bias):
+            self.add_conf_outs = add_conf_with_bias
 
         self.outputs_verified = True

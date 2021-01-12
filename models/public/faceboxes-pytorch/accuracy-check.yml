@@ -1,0 +1,29 @@
+models:
+  - name: faceboxes-pytorch
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: faceboxes
+          boxes_out: "boxes"
+          scores_out: "scores"
+
+    datasets:
+      - name: wider
+
+        preprocessing:
+          - type: resize
+            dst_width: 1024
+            dst_height: 1024
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: annotation
+            height_range: 100
+            is_empty: True
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False

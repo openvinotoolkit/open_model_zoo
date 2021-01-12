@@ -1,0 +1,49 @@
+models:
+  - name: yolact-resnet50-fpn-pytorch onnx
+    launchers:
+      - framework: onnx_runtime
+        model: yolact-resnet50-fpn.onnx
+        adapter:
+          type: yolact
+          boxes_out: "boxes"
+          conf_out: "conf"
+          mask_out: "mask"
+          proto_out: "proto"
+    datasets:
+      - name:  ms_coco_mask_rcnn_short_80_classes_without_background
+        reader: pillow_imread
+        preprocessing:
+          - type: resize
+            size: 550
+            use_pillow: True
+          - type: normalization
+            mean:  123.68, 116.78, 103.94
+            std:  58.40, 57.12, 57.38
+        metrics:
+          - name: AP@masks
+            type: coco_orig_segm_precision
+
+          - name: AP@boxes
+            type: coco_precision
+
+  - name: yolact-resnet50-fpn-pytorch
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: yolact
+          boxes_out: "boxes"
+          conf_out: "conf"
+          mask_out: "mask"
+          proto_out: "proto"
+    datasets:
+      - name:  ms_coco_mask_rcnn_short_80_classes_without_background
+        preprocessing:
+          - type: resize
+            size: 550
+            use_pillow: True
+        metrics:
+          - name: AP@masks
+            type: coco_orig_segm_precision
+
+          - name: AP@boxes
+            type: coco_precision

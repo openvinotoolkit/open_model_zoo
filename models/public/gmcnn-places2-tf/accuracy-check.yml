@@ -1,0 +1,46 @@
+models:
+  - name: gmcnn-places2-tf
+    launchers:
+      - framework: tf
+        model: frozen_model.pb
+        adapter: inpainting
+        inputs:
+          - name: "Placeholder"
+            type: INPUT
+            value: '.*image'
+          - name: "Placeholder_1"
+            type: INPUT
+            value: '.*mask'
+
+    datasets:
+      - name: inpainting_rect_masks
+
+        metrics:
+          - type: psnr
+            scale_border: 0
+            presenter: print_vector
+          - type: ssim
+            presenter: print_vector
+
+  - name: gmcnn-places2-tf
+
+    launchers:
+      - framework: dlsdk
+        adapter: inpainting
+        inputs:
+          - name: "Placeholder"
+            type: INPUT
+            value: '.*image'
+          - name: "Placeholder_1"
+            type: INPUT
+            value: '.*mask'
+
+    datasets:
+      - name: inpainting_rect_masks
+
+        metrics:
+          - type: psnr
+            scale_border: 0
+            presenter: print_vector
+          - type: ssim
+            presenter: print_vector

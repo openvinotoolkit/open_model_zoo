@@ -2,9 +2,7 @@
 
 ## Use Case and High-Level Description
 
-MobileNetV1 FPN is used for object detection. For details, see the [paper](https://arxiv.org/pdf/1807.03284.pdf).
-
-## Example
+MobileNetV1 FPN is used for object detection. For details, see the [paper](https://arxiv.org/abs/1807.03284).
 
 ## Specification
 
@@ -17,7 +15,9 @@ MobileNetV1 FPN is used for object detection. For details, see the [paper](https
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 35.5453%|
 
 ## Input
 
@@ -36,14 +36,14 @@ Image, name: `image_tensor`, shape: [1x640x640x3], format: [BxHxWxC],
 ### Converted Model
 
 Image, name: `image_tensor`, shape: [1x3x640x640], format: [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 
@@ -57,7 +57,7 @@ Image, name: `image_tensor`, shape: [1x3x640x640], format: [BxCxHxW],
 ### Converted Model
 
 The array of summary detection information, name: `DetectionOutput`, shape: [1, 1, N, 7], where N is the number of detected
-bounding boxes.   
+bounding boxes.
 
 For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
@@ -73,4 +73,4 @@ where:
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

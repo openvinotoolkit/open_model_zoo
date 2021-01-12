@@ -2,8 +2,8 @@
 
 ## Use Case and High-Level Description
 
-[An Attention-Based Approach for Single Image Super Resolution](https://arxiv.org/pdf/1807.06779.pdf) but with reduced number of
-channels and changes in network achitecture. It enhances the resolution of the input image by a factor of 4.
+[An Attention-Based Approach for Single Image Super Resolution](https://arxiv.org/abs/1807.06779) but with reduced number of
+channels and changes in network architecture. It enhances the resolution of the input image by a factor of 4.
 
 ## Example
 
@@ -30,8 +30,6 @@ Super resolution:
 
 For reference, PSNR for bicubic upsampling on test dataset is 26.79 dB.
 
-## Performance
-
 ## Inputs
 
 1. name: "0" , shape: [1x3x270x480] - An input image in the format [BxCxHxW],
@@ -39,14 +37,14 @@ For reference, PSNR for bicubic upsampling on test dataset is 26.79 dB.
     - B - batch size
     - C - number of channels
     - H - image height
-    - W - image width.
+    - W - image width
 
 2. name: "1" , shape: [1x3x1080x1920] - Bicubic interpolation of the input image in the format [BxCxHxW],
   where:
     - B - batch size
     - C - number of channels
     - H - image height
-    - W - image width.
+    - W - image width
 
 
   Expected color order is BGR.

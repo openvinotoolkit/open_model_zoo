@@ -2,13 +2,11 @@
 
 ## Use Case and High-Level Description
 
-The `efficientnet-b0` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946) models 
+The `efficientnet-b0` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946) models
 designed to perform image classification.
 This model was pretrained in TensorFlow\*.
 All the EfficientNet models have been pretrained on the ImageNet\* image database.
 For details about this family of models, check out the [TensorFlow Cloud TPU repository](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet).
-
-## Example
 
 ## Specification
 
@@ -23,16 +21,14 @@ For details about this family of models, check out the [TensorFlow Cloud TPU rep
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 75.70          | 75.70           |
-| Top 5  | 92.76          | 92.76           | 
-
-## Performance
+| Top 1  | 75.70%          | 75.70%           |
+| Top 5  | 92.76%          | 92.76%           |
 
 ## Input
 
 ### Original Model
 
-Image, name - `image`,  shape - `[1x224x224x3]`, format is `[BxHxWxC]` where:
+Image, name - `image`,  shape - `[1x224x224x3]`, format is `[BxHxWxC]`, where:
 
 - `B` - batch size
 - `H` - height
@@ -43,12 +39,12 @@ Channel order is `RGB`.
 
 ### Converted Model
 
-Image, name - `sub/placeholder_port_0`,  shape - `[1x224x224x3]`, format is `[BxHxWxC]` where:
+Image, name - `sub/placeholder_port_0`,  shape - `[1x3x224x224]`, format is `[BxCxHxW]`, where:
 
 - `B` - batch size
+- `C` - channel
 - `H` - height
 - `W` - width
-- `C` - channel
 
 Channel order is `BGR`.
 
@@ -59,14 +55,14 @@ Channel order is `BGR`.
 Object classifier according to ImageNet classes, name - `logits`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in logits format
 
 ### Converted Model
 
 Object classifier according to ImageNet classes, name - `efficientnet-b0/model/head/dense/MatMul`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in logits format
 
 ## Legal Information
 

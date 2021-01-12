@@ -2,12 +2,10 @@
 
 ## Use Case and High-Level Description
 
-This is a Caffe2\* version of `resnet-50` model, designed to perform image classification.
-This model was converted from Caffe\* to Caffe2\* format. 
-For details see repository <https://github.com/caffe2/models/tree/master/resnet50>,
-paper <https://arxiv.org/pdf/1512.03385.pdf>.
-
-## Example
+This is a Caffe2\* version of the ResNet-50 model, designed to perform image classification.
+This model was converted from Caffe\* to Caffe2\* format.
+For details see repository <https://github.com/facebookarchive/models/tree/master/resnet50>,
+paper <https://arxiv.org/abs/1512.03385>.
 
 ## Specification
 
@@ -20,7 +18,10 @@ paper <https://arxiv.org/pdf/1512.03385.pdf>.
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 76.38% |
+| Top 5  | 93.188%|
 
 ## Input
 
@@ -33,7 +34,7 @@ Image, name - `gpu_0/data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `BGR`. 
+Channel order is `BGR`.
 Mean values - [103.53,116.28,123.675], scale values - [57.375,57.12,58.395].
 
 ### Converted model
@@ -66,5 +67,5 @@ Object classifier according to ImageNet classes, name - `gpu_0/softmax`,  shape 
 ## Legal Information
 
 The original model is distributed under the
-[Apache License, Version 2.0](https://raw.githubusercontent.com/caffe2/models/master/LICENSE).
+[Apache License, Version 2.0](https://raw.githubusercontent.com/facebookarchive/models/master/LICENSE).
 A copy of the license is provided in [APACHE-2.0.txt](../licenses/APACHE-2.0.txt).

@@ -1,0 +1,16 @@
+models:
+  - name: license-plate-recognition-barrier-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter: lpr
+        inputs:
+          - name: seq_ind
+            type: CONST_INPUT
+            value: [[0], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]
+
+    datasets:
+      - name: synthetic_chinese_license_plates
+
+        metrics:
+          - type: character_recognition_accuracy

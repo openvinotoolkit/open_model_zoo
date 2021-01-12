@@ -1,0 +1,20 @@
+models:
+  - name: deeplabv3
+    launchers:
+      - framework: dlsdk
+        adapter: segmentation
+
+    datasets:
+      - name: VOC2012_Segmentation
+        preprocessing:
+          - type: padding
+            size: 513
+            enable_resize: True
+        postprocessing:
+          - type: encode_segmentation_mask
+            apply_to: annotation
+          - type: extend_segmentation_mask
+        metrics:
+          - type: mean_iou
+            use_argmax: false
+            presenter: print_scalar

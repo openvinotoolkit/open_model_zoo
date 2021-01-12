@@ -2,7 +2,7 @@
 
 We appreciate your intention to contribute model to the OpenVINO&trade; Open Model Zoo (OMZ). OMZ is licensed under the Apache\* License, Version 2.0. By contributing to the project, you agree to the license and copyright terms therein and release your contribution under these terms. Note that we accept models under permissive licenses, such as **MIT**, **Apache 2.0**, and **BSD-3-Clause**. Otherwise, it might take longer time to get your model approved.
 
-Frameworks supported by the Open Model Zoo: 
+Frameworks supported by the Open Model Zoo:
 * Caffe\*
 * Caffe2\* (via conversion to ONNX\*)
 * TensorFlow\*
@@ -45,7 +45,7 @@ File | Destination
 ---|---
 configuration file | `models/public/<model_name>/model.yml`
 documentation file | `models/public/<model_name>/<model_name>.md`
-validation configuration file|`tools/accuracy_checker/configs/<model_name>.yml`
+validation configuration file|`models/public/<model_name>/accuracy-check.yml`
 demo|`demos/<demo_name>`<br>or<br>`demos/python_demos/<demo_name>`
 
 ### Tests
@@ -66,13 +66,13 @@ Your PR may be rejected in some cases, for example:
 
 ## Configuration File
 
-The model configuration file contains information about model: what it is, how to download it, and how to convert it to the IR format. This information must be specified in the `model.yml` file that must be located in the model subfolder. 
+The model configuration file contains information about model: what it is, how to download it, and how to convert it to the IR format. This information must be specified in the `model.yml` file that must be located in the model subfolder.
 
 The detailed descriptions of file entries provided below.
 
 **`description`**
 
-Description of the model. Must match with the description from the model [documentation](#documentation).
+Description of the model. Must match with the description from the model [documentation](#documentation). Use [this](./ci/documentation_updater/documentation_updater.py) script for easy update.
 
 **`task_type`**
 
@@ -90,7 +90,7 @@ Downloadable files. Each file is described by:
 * `source` - sets a direct link to a file *OR* describes a file access parameters
 
 > **TIP**: You can obtain a hash sum using the `sha256sum <file_name>` command on Linux\*.
- 
+
 If file is located on Google Drive\*, the `source` section must contain:
 - `$type: google_drive`
 - `id` file ID on Google Drive\*
@@ -150,7 +150,7 @@ description: >-
   This is a TensorFlow\* version of `densenet-121` model, one of the DenseNet
   group of models designed to perform image classification. The weights were converted
   from DenseNet-Keras Models. For details see repository <https://github.com/pudae/tensorflow-densenet/>,
-  paper <https://arxiv.org/pdf/1608.06993.pdf>
+  paper <https://arxiv.org/abs/1608.06993>
 task_type: classification
 files:
   - name: tf-densenet121.tar.gz
@@ -177,7 +177,7 @@ license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICE
 
 ## Model Conversion
 
-Deep Learning Inference Engine (IE) supports models in the Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using the Model Optimizer tool included in the OpenVINO&trade; toolkit. Find more information about conversion in the [Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After a successful conversion you get a model in the IR format, with the `*.xml` file representing the net graph and the `*.bin` file containing the net parameters. 
+Deep Learning Inference Engine (IE) supports models in the Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using the Model Optimizer tool included in the OpenVINO&trade; toolkit. Find more information about conversion in the [Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After a successful conversion you get a model in the IR format, with the `*.xml` file representing the net graph and the `*.bin` file containing the net parameters.
 
 > **NOTE 1**: Image preprocessing parameters (mean and scale) must be built into a converted model to simplify model usage.
 
@@ -185,13 +185,13 @@ Deep Learning Inference Engine (IE) supports models in the Intermediate Represen
 
 ## Demo
 
-A demo shows the main idea of how to infer a model using IE. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](demos/README.md) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python). 
+A demo shows the main idea of how to infer a model using IE. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](demos/README.md) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python).
 
 The demo's name should end with `_demo` suffix to follow the convention of the project.
 
 Demos are required to support the following keys:
 
- -  `-i "<input>"`: Required. Input to process.
+ -  `-i "<input>"`: Required. An input to process. The input can usually be a single image, a folder of images or anything that OpenCV's `VideoCapture` can process.
  -  `-m "<path>"`: Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m_`.
  -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
  -  `-no_show`: Optional. Do not visualize inference results.
@@ -206,29 +206,18 @@ Add `README.md` file, which describes demo usage. Update [demos' README.md](demo
 
 Accuracy validation can be performed by the [Accuracy Checker](./tools/accuracy_checker) tool. This tool can use either IE to run a converted model, or an original framework to run an original model. Accuracy Checker supports lots of datasets, metrics and preprocessing options, which simplifies validation if a task is supported by the tool. You only need to create a configuration file that contains necessary parameters for accuracy validation (specify a dataset and annotation, pre- and post-processing parameters, accuracy metrics to compute and so on) of converted model. For details, refer to [Testing new models](./tools/accuracy_checker#testing-new-models).
 
-If a model uses a dataset which is not supported by the Accuracy Checker, you also must provide the license and the link to it and mention it in the PR description. 
+If a model uses a dataset which is not supported by the Accuracy Checker, you also must provide the license and the link to it and mention it in the PR description.
 
 When the configuration file is ready, you must run the Accuracy Checker to obtain metric results. If they match your results, that means conversion was successful and the Accuracy Checker fully supports your model, metric and dataset. Otherwise, recheck the [conversion](#model-conversion) parameters or the validation configuration file.
 
 ### Example
 
-This example uses one of the files from `tools/accuracy_checker/configs` — validation configuration file for [DenseNet-121](tools/accuracy_checker/configs/densenet-121-tf.yml)\* from TensorFlow\*:
+This example uses validation configuration file for [DenseNet-121](models/public/densenet-121-tf/accuracy-check.yml)\* from TensorFlow\*:
 ```
 models:
   - name: densenet-121-tf
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/densenet-121-tf/FP32/densenet-121-tf.xml
-        weights: public/densenet-121-tf/FP32/densenet-121-tf.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/densenet-121-tf/FP16/densenet-121-tf.xml
-        weights: public/densenet-121-tf/FP16/densenet-121-tf.bin
         adapter: classification
 
     datasets:

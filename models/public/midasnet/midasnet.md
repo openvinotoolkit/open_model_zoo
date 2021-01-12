@@ -5,11 +5,16 @@
 MidasNet is a model for monocular depth estimation trained by mixing several datasets;
 as described in the following paper:
 "Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-Shot Cross-Dataset Transfer"
-<https://arxiv.org/pdf/1907.01341>
+<https://arxiv.org/abs/1907.01341>
 
 The model input is a blob that consists of a single image of "1x3x384x384" in `RGB` order.
 
 The model output is an inverse depth map that is defined up to an unknown scale factor.
+
+> **NOTE**: Originally the model weights are stored at [Google Drive](https://drive.google.com/file/d/1Jf7qRG9N8IW8CaZ7gPisO5RtlLl63mNA),
+which is unstable to download from due to weights size. Weights were additionally uploaded to
+[https://download.01.org/opencv/public_models](https://download.01.org/opencv/public_models),
+OpenVINO [Model Downloader](../../../tools/downloader/README.md) uses this location for downloading.
 
 ## Example
 
@@ -21,8 +26,14 @@ See [here](https://github.com/intel-isl/MiDaS)
 |-------------------|---------------|
 | Type              | Monodepth     |
 | GFLOPs            | 207.4915      |
-| MParams           |               |
+| MParams           | 104.0814      |
 | Source framework  | PyTorch\*     |
+
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| rmse   | 7.5878|
 
 ## Input
 

@@ -1,5 +1,7 @@
 # Pedestrian Tracker C++ Demo
 
+![](./pedestrian_tracker.gif)
+
 This demo showcases Pedestrian Tracking scenario: it reads frames from an input video sequence, detects pedestrians in the frames, and builds trajectories of movement of the pedestrians in
 a frame-by-frame manner.
 You can use a set of the following pre-trained models with the demo:
@@ -27,7 +29,7 @@ After that, the application displays the tracks and the latest detections on the
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./pedestrian_tracker_demo -h
 InferenceEngine:
     API version ............ <version>
@@ -37,7 +39,10 @@ pedestrian_tracker_demo [OPTION]
 Options:
 
     -h                           Print a usage message.
-    -i "<path>"                  Required. Video sequence to process.
+    -i                           Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                        Optional. Enable reading the input in a loop.
+    -first                       Optional. The index of the first frame of the input to process. The actual first frame captured depends on cv::VideoCapture implementation and may have slightly different number.
+    -limit                       Optional. Read length limit before stopping or restarting reading the input.
     -m_det "<path>"              Required. Path to the Pedestrian Detection Retail model (.xml) file.
     -m_reid "<path>"             Required. Path to the Pedestrian Reidentification Retail model (.xml) file.
     -l "<absolute_path>"         Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels implementation.
@@ -50,12 +55,10 @@ Options:
     -no_show                     Optional. Do not show processed video.
     -delay                       Optional. Delay between frames used for visualization. If negative, the visualization is turned off (like with the option 'no_show'). If zero, the visualization is made frame-by-frame.
     -out "<path>"                Optional. The file name to write output log file with results of pedestrian tracking. The format of the log file is compatible with MOTChallenge format.
-    -first                       Optional. The index of the first frame of video sequence to process. This has effect only if it is positive. The actual first frame captured depends on cv::VideoCapture implementation and may have slightly different number.
-    -last                        Optional. The index of the last frame of video sequence to process. This has effect only if it is positive.
     -u                           Optional. List of monitors to show initially.
 ```
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -72,7 +75,7 @@ For example, to run the application with the OpenVINO&trade; toolkit pre-trained
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes, curves (for trajectories displaying), and text.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
 >* `person-detection-retail-0013`
 >* `person-reidentification-retail-0031`
 > Other models may produce unexpected results on these devices.

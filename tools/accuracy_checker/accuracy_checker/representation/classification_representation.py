@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ limitations under the License.
 import numpy as np
 
 from .base_representation import BaseRepresentation
+from ..utils import softmax
 
 
 class Classification(BaseRepresentation):
@@ -43,6 +44,13 @@ class ClassificationPrediction(Classification):
     def top_k(self, k):
         return np.argpartition(self.scores, -k)[-k:]
 
+    def to_annotation(self, **kwargs):
+        scores = softmax(self.scores) if self.scores.max() > 1.0 or self.scores.min() < 0.0 else self.scores
+        threshold = kwargs.get('threshold', 0.0)
+        if scores.max() > threshold:
+            return ClassificationAnnotation(self.identifier, self.label)
+        return None
+
 
 class ArgMaxClassificationPrediction(ClassificationPrediction):
     def __init__(self, identifier='', label=None):
@@ -52,6 +60,10 @@ class ArgMaxClassificationPrediction(ClassificationPrediction):
     @property
     def label(self):
         return self._label
+
+    @label.setter
+    def label(self, value):
+        self._label = value
 
     def top_k(self, k):
         return np.full(k, self._label)

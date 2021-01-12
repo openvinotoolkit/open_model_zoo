@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,28 +19,28 @@ description: >-
 task_type: semantic_segmentation
 files:
   - name: FP32/semantic-segmentation-adas-0001.xml
-    size: 182087
-    sha256: c3fc63223316e68dc35d147661906a23e83a0655f72a6ca5dabc3251e98d9566
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.xml
+    size: 196345
+    sha256: 6453d8bd27ac7ae7ba523c1ca2ddd11192f052ff25bbfa6bb76779700805e3b2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.xml
   - name: FP32/semantic-segmentation-adas-0001.bin
-    size: 26743564
-    sha256: 6d2592c07c91ed1de76c683a2c5753c89f0a61c215bc553f2a6b30faa05b37ba
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.bin
+    size: 26743532
+    sha256: 62e92c031789e6f24ddcca7a5177635144058ec93c3cd52d09b434ec46377008
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.bin
   - name: FP16/semantic-segmentation-adas-0001.xml
-    size: 182006
-    sha256: b446ba0eb6b0da3888b6052263f1c951abc5737966a8ed067f9cb912bce8d251
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.xml
+    size: 196264
+    sha256: 17aeaee87f8889643225ae6b4544b0ce5aac7e25ff8fe9b1e10cfa76461f7888
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.xml
   - name: FP16/semantic-segmentation-adas-0001.bin
-    size: 13371824
-    sha256: a6366b6cd8e6456bdea4d2709e4d062c434a94cfabb62905dfbb4cd50b3df5d5
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
-  - name: FP32-INT8/semantic-segmentation-adas-0001.xml
-    size: 506262
-    sha256: feba4beb19e206bfa06017c13bc8eac4001a5863043ee2d87316039958323c85
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/semantic-segmentation-adas-0001/FP32-INT8/semantic-segmentation-adas-0001.xml
-  - name: FP32-INT8/semantic-segmentation-adas-0001.bin
-    size: 26858920
-    sha256: 6a2362f6c06fe1d569699d82f461245e7233e4cbc99f729baba3acec3bf5207b
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/semantic-segmentation-adas-0001/FP32-INT8/semantic-segmentation-adas-0001.bin
+    size: 13371792
+    sha256: 3c161dbba54e5636fa995889d051f09cadd54768f1fd3e552d17d07a7625ff17
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
+  - name: FP16-INT8/semantic-segmentation-adas-0001.xml
+    size: 541868
+    sha256: 5ced07e0ac057d48bbef7f92d91612cf9891e3f40b044eb2632838a1e107e9bf
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/semantic-segmentation-adas-0001/FP16-INT8/semantic-segmentation-adas-0001.xml
+  - name: FP16-INT8/semantic-segmentation-adas-0001.bin
+    size: 6757652
+    sha256: 0f542e8c8bbcc5fd7c32bbfab230a54d5a6dc75aefbb381e3835c6e44011dcc3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/semantic-segmentation-adas-0001/FP16-INT8/semantic-segmentation-adas-0001.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

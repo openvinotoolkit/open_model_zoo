@@ -46,4 +46,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/alexnet.caffemodel
   - --input_proto=$dl_dir/alexnet.prototxt
 framework: caffe
+quantizable: yes
 license: https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/readme.md

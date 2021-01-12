@@ -37,16 +37,14 @@ This model presents a person attributes classification algorithm analysis scenar
 | `has_longhair`    | 0.83  |
 | `has_coat_jacket` |  NA   |
 
-## Performance
-
 ## Inputs
 
-1.  name: "input" , shape: [1x3x160x80] - An input image in following format
+1.  name: `input` , shape: [1x3x160x80] - An input image in following format
 [1xCxHxW], where
 
     - C - number of channels
         - H - image height
-        - W - image width.
+        - W - image width
 
     The expected color order is BGR.
 

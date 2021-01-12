@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,18 +22,36 @@ from .classification import (
     ClassificationAccuracyClasses,
     ClipAccuracy,
     ClassificationF1Score,
-    MetthewsCorrelation
+    MetthewsCorrelation,
+    RocAucScore,
+    AcerScore,
 )
-from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric)
-from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets
+from .detection import (
+    DetectionMAP,
+    MissRate,
+    Recall,
+    DetectionAccuracyMetric,
+    YoutubeFacesAccuracy
+)
+from .reid import (
+    CMCScore,
+    ReidMAP,
+    PairwiseAccuracy,
+    PairwiseAccuracySubsets,
+    FaceRecognitionTAFAPairMetric,
+    NormalizedEmbeddingAccuracy,
+    LocalizationRecall
+)
 from .semantic_segmentation import SegmentationAccuracy, SegmentationIOU, SegmentationMeanAccuracy, SegmentationFWAcc
-from .character_recognition import CharacterRecognitionAccuracy
+from .character_recognition import CharacterRecognitionAccuracy, LabelLevelRecognitionAccuracy
 from .regression import (
     MeanAbsoluteErrorOnInterval,
     MeanSquaredErrorOnInterval,
 
     MeanAbsoluteError,
     MeanSquaredError,
+    Log10Error,
+    MeanAbsolutePercentageError,
 
     RootMeanSquaredErrorOnInterval,
     RootMeanSquaredError,
@@ -42,8 +60,11 @@ from .regression import (
     FacialLandmarksNormedError,
 
     PeakSignalToNoiseRatio,
+    StructuralSimilarity,
 
-    AngleError
+    AngleError,
+
+    PercentageCorrectKeypoints
 )
 from .multilabel_recognition import MultiLabelRecall, MultiLabelPrecision, MultiLabelAccuracy, F1Score
 from .text_detection import (
@@ -66,9 +87,24 @@ from .coco_orig_metrics import (
 )
 from .hit_ratio import HitRatioMetric, NDSGMetric
 from .machine_translation import BilingualEvaluationUnderstudy
-from .question_answering import ExactMatchScore, ScoreF1
+from .question_answering import ExactMatchScore, ScoreF1, QuestionAnsweringEmbeddingAccuracy
 from .mpjpe_multiperson import MpjpeMultiperson
+from .language_modeling import ScorePerplexity
 
+from .attribute_classification import (
+    AttributeClassificationRecall,
+    AttributeClassificationPrecision,
+    AttributeClassificationAccuracy
+)
+from .im2latex_images_match import Im2latexRenderBasedMetric
+
+from .speech_recognition import SpeechRecognitionWER, SpeechRecognitionCER
+from .score_class_comparison import ScoreClassComparisonMetric
+from .dna_seq_accuracy import DNASequenceAccuracy
+
+from .gan_metrics import InceptionScore, FrechetInceptionDistance
+
+from .salient_objects_detection import SalienceMapMAE, SalienceEMeasure, SalienceMapFMeasure, SalienceSMeasure
 
 __all__ = [
     'Metric',
@@ -79,16 +115,21 @@ __all__ = [
     'ClassificationAccuracyClasses',
     'ClipAccuracy',
     'ClassificationF1Score',
+    'MetthewsCorrelation',
 
     'DetectionMAP',
     'MissRate',
     'Recall',
     'DetectionAccuracyMetric',
+    'YoutubeFacesAccuracy',
 
     'CMCScore',
     'ReidMAP',
     'PairwiseAccuracy',
     'PairwiseAccuracySubsets',
+    'FaceRecognitionTAFAPairMetric',
+    'NormalizedEmbeddingAccuracy',
+    'LocalizationRecall',
 
     'SegmentationAccuracy',
     'SegmentationIOU',
@@ -96,6 +137,7 @@ __all__ = [
     'SegmentationFWAcc',
 
     'CharacterRecognitionAccuracy',
+    'LabelLevelRecognitionAccuracy',
 
     'MeanAbsoluteError',
     'MeanSquaredError',
@@ -106,7 +148,10 @@ __all__ = [
     'FacialLandmarksPerPointNormedError',
     'FacialLandmarksNormedError',
     'PeakSignalToNoiseRatio',
+    'StructuralSimilarity',
     'AngleError',
+    'MeanAbsolutePercentageError',
+    'Log10Error',
 
     'MultiLabelAccuracy',
     'MultiLabelRecall',
@@ -137,6 +182,36 @@ __all__ = [
 
     'ScoreF1',
     'ExactMatchScore',
+    'QuestionAnsweringEmbeddingAccuracy',
 
-    'MpjpeMultiperson'
+    'MpjpeMultiperson',
+
+    'ScorePerplexity',
+
+    'AttributeClassificationRecall',
+    'AttributeClassificationPrecision',
+    'AttributeClassificationAccuracy',
+
+    'SpeechRecognitionWER',
+    'SpeechRecognitionCER',
+
+    'ScoreClassComparisonMetric',
+
+    'RocAucScore',
+
+    'Im2latexRenderBasedMetric',
+
+    'PercentageCorrectKeypoints',
+
+    'DNASequenceAccuracy',
+
+    'InceptionScore',
+    'FrechetInceptionDistance',
+
+    'AcerScore',
+
+    'SalienceMapMAE',
+    'SalienceMapFMeasure',
+    'SalienceSMeasure',
+    'SalienceEMeasure'
 ]

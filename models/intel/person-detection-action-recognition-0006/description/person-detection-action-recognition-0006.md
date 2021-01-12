@@ -26,11 +26,9 @@ This is an action detector for the Smart Classroom scenario. It is based on the 
 Average Precision (AP) is defined as an area under the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve.
 
-## Performance
-
 ## Inputs
 
-1. name: "input" , shape: [1x400x680x3] - An input image in the format [BxHxWxC],
+Name: `input`, shape: [1x400x680x3] - An input image in the format [BxHxWxC],
    where:
     - B - batch size
     - H - image height

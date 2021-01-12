@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,9 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from pathlib import Path
-
-from ..topology_types import ObjectDetection
 from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
@@ -114,11 +111,7 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
         for image_id, image in enumerate(images_set):
             image_file = '{}.jpg'.format(image)
             mask_file = '{}.png'.format(image)
-            annotation = SegmentationAnnotation(
-                str(Path(self.image_dir.name) / image_file),
-                str(Path(self.mask_dir.name) / mask_file),
-                mask_loader=GTMaskLoader.SCIPY
-            )
+            annotation = SegmentationAnnotation(image_file, mask_file, mask_loader=GTMaskLoader.SCIPY)
             annotations.append(annotation)
             if check_content:
                 if not check_file_existence(self.image_dir / image_file):
@@ -142,7 +135,6 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
 class PascalVOCDetectionConverter(BaseFormatConverter):
     __provider__ = 'voc_detection'
     annotation_types = (DetectionAnnotation, )
-    topology_types = (ObjectDetection, )
 
     @classmethod
     def parameters(cls):

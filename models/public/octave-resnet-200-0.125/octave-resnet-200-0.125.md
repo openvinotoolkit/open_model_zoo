@@ -2,9 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `octave-resnet-200-0.125` model is a modification of [`resnet-200`](https://arxiv.org/pdf/1512.03385.pdf) with Octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.125`. Like the original model, this model is designed for image classification. For details about family of Octave Convolution models, check out the [repository](https://github.com/facebookresearch/OctConv).
-
-## Example
+The `octave-resnet-200-0.125` model is a modification of [`resnet-200`](https://arxiv.org/abs/1512.03385) with Octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.125`. Like the original model, this model is designed for image classification. For details about family of Octave Convolution models, check out the [repository](https://github.com/facebookresearch/OctConv).
 
 ## Specification
 
@@ -17,7 +15,10 @@ The `octave-resnet-200-0.125` model is a modification of [`resnet-200`](https://
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 79.99%|
+| Top 5  | 94.866%|
 
 ## Input
 
@@ -32,7 +33,7 @@ Image, name: `data`,  shape: `1,3,224,224`, format: `B,C,H,W`, where:
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`. 
+Channel order is `RGB`.
 Mean values: [124,117,104], scale value: 59.880239521.
 
 ### Converted Model

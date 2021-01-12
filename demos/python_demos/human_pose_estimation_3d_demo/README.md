@@ -1,4 +1,7 @@
-# 3D Human Pose Estimation Python* Demo
+# 3D Human Pose Estimation Python\* Demo
+
+![](./human_pose_estimation_3d.gif)
+![](./human_pose_estimation_3d_canvas.gif)
 
 This demo demonstrates how to run 3D Human Pose Estimation models using OpenVINO&trade;. The following pre-trained models can be used:
 
@@ -36,6 +39,7 @@ usage: human_pose_estimation_3d_demo.py [-h] -m MODEL [-i INPUT [INPUT ...]]
                                         [--height_size HEIGHT_SIZE]
                                         [--extrinsics_path EXTRINSICS_PATH]
                                         [--fx FX] [--no_show]
+                                        [-u UTILIZATION_MONITORS]
 
 Lightweight 3D human pose estimation demo. Press esc to exit, "p" to (un)pause
 video or process next image.
@@ -45,8 +49,9 @@ Options:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
-                        Required. Path to input image, images, video file or
-                        camera id.
+                        Required. An input to process. The input must be a single image,
+                        a folder of images or anything that cv2.VideoCapture can process.
+   -loop                Optional. Enable reading the input in a loop.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on: CPU,
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a
@@ -58,17 +63,18 @@ Options:
                         Optional. Path to file with camera extrinsics.
   --fx FX               Optional. Camera focal length.
   --no_show             Optional. Do not display output.
-
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 To run the demo, please provide paths to the model in the IR format, and to an input video or image(s):
 ```bash
-python human_pose_estination_3d_demo.py \
+python human_pose_estimation_3d_demo.py \
 -m /home/user/human-pose-estimation-3d-0001.xml \
 -i /home/user/video_name.mp4
 ```
@@ -76,8 +82,6 @@ python human_pose_estination_3d_demo.py \
 ## Demo Output
 
 The application uses OpenCV to display found poses and current inference performance.
-
-![](./data/human_pose_estimation_3d_demo.jpg)
 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)

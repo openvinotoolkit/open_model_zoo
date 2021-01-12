@@ -22,34 +22,36 @@ On the start-up, the application reads command line parameters and loads the spe
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./multi_channel_human_pose_estimation_demo -h
+
 multi_channel_human_pose_estimation_demo [OPTION]
 Options:
+
     -h                           Print a usage message
+    -i                           Required. A comma separated list of inputs to process. Each input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                        Optional. Enable reading the inputs in a loop.
+    -duplicate_num               Optional. Multiply the inputs by the given factor. For example, if only one input is provided, but -ni is set to 2, the demo uses half of images from the input as it was the first input and another half goes as the second input.
     -m "<path>"                  Required. Path to an .xml file with a trained model.
-      -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
+      -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations
           Or
-      -c "<absolute_path>"       Required for GPU custom kernels. Absolute path to an .xml file with the kernel descriptions.
+      -c "<absolute_path>"       Required for GPU custom kernels. Absolute path to an .xml file with the kernel descriptions
     -d "<device>"                Optional. Specify the target device for a network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo looks for a suitable plugin for a specified device.
-    -nc                          Optional. Maximum number of processed camera inputs (web cameras)
     -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
     -nireq                       Optional. Number of infer requests
     -n_iqs                       Optional. Frame queue size for input channels
     -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
     -n_sp                        Optional. Number of sampling periods
     -pc                          Optional. Enable per-layer performance report
-    -no_show                     Optional. Do not show processed video
+    -no_show                     Optional. Do not show processed video.
     -show_stats                  Optional. Enable statistics report
-    -duplicate_num               Optional. Enable and specify the number of channels additionally copied from real sources
-    -real_input_fps              Optional. Disable input frames caching for maximum throughput pipeline
-    -i "<absolute_path>"         Optional. Specify a full path to input video files
+    -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline
     -u                           Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -76,7 +78,7 @@ On the top of the screen, the demo reports throughput in frames per second. You 
 
 ## Input Video Sources
 
-General parameter for input video source is `-i`. Use it to specify video files and web cameras (**USB cameras**) as input video source. You can add the parameter to a sample command line as follows:
+General parameter for input video source is `-i`. Use it to specify video files or web cameras as input video sources. You can add the parameter to a sample command line as follows:
 ```
 -i <file1> <file2>
 ```
@@ -85,7 +87,7 @@ General parameter for input video source is `-i`. Use it to specify video files 
 
 To see all available web cameras, run the `ls /dev/video*` command. You will get output similar to the following:
 
-```sh
+```
 user@user-PC:~ $ ls /dev/video*
 /dev/video0  /dev/video1  /dev/video2
 ```
@@ -100,7 +102,10 @@ Alternatively, you can just set `-nc 3`, which simplifies application usage.
 
 If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use the `-i` parameter.
 
-IP-cameras through RSTP URI interface are not supported.
+To connect to IP cameras, use RTSP URIs:
+```
+-i rtsp://camera_address_1/ rtsp://camera_address_2/
+```
 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)

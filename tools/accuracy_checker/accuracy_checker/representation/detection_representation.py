@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -49,6 +49,14 @@ class Detection(BaseRepresentation):
     def size(self):
         return len(self.x_mins)
 
+    @property
+    def boxes(self):
+        if self.size == 0:
+            return []
+
+        return [[x_min, y_min, x_max, y_max]
+                for x_min, y_min, x_max, y_max in zip(self.x_mins, self.y_mins, self.x_maxs, self.y_maxs)]
+
     def __eq__(self, other):
         if not isinstance(other, type(self)):
             return False
@@ -86,12 +94,17 @@ class DetectionPrediction(Detection):
     def __eq__(self, other):
         return np.array_equal(self.scores, other.scores) if super().__eq__(other) else False
 
+    def to_annotation(self, **kwargs):
+        return DetectionAnnotation(
+            self.identifier, self.labels, self.x_mins, self.y_mins, self.x_maxs, self.y_maxs, self.metadata
+        )
 
-class ActionDetectionAnnotation(DetectionAnnotation):
+
+class AttributeDetectionAnnotation(DetectionAnnotation):
     pass
 
 
-class ActionDetectionPrediction(DetectionPrediction):
+class AttributeDetectionPrediction(DetectionPrediction):
     def __init__(
             self,
             identifier='',
@@ -112,3 +125,15 @@ class ActionDetectionPrediction(DetectionPrediction):
 
     def __eq__(self, other):
         return np.array_equal(self.bbox_scores, other.bbox_scores) if super().__eq__(other) else False
+
+    def to_annotation(self, **kwargs):
+        return AttributeDetectionAnnotation(
+            self.identifier, self.labels, self.x_mins, self.y_mins, self.x_maxs, self.y_maxs, self.metadata
+        )
+
+class ActionDetectionAnnotation(AttributeDetectionAnnotation):
+    pass
+
+
+class ActionDetectionPrediction(AttributeDetectionPrediction):
+    pass

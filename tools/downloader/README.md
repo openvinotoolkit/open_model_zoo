@@ -1,5 +1,4 @@
-Model Downloader and other automation tools
-===========================================
+# Model Downloader and other automation tools
 
 This directory contains scripts that automate certain model-related tasks
 based on configuration files in the models' directories.
@@ -11,6 +10,9 @@ based on configuration files in the models' directories.
 * `converter.py` (model converter) converts the models that are not in the
   Inference Engine IR format into that format using Model Optimizer.
 
+* `quantizer.py` (model quantizer) quantizes full-precision models in the IR
+  format into low-precision versions using Post-Training Optimization Toolkit.
+
 * `info_dumper.py` (model information dumper) prints information about the models
   in a stable machine-readable format.
 
@@ -18,10 +20,9 @@ Please use these tools instead of attempting to parse the configuration files
 directly. Their format is undocumented and may change in incompatible ways in
 future releases.
 
-Prerequisites
--------------
+## Prerequisites
 
-1. Install Python (version 3.5.2 or higher)
+1. Install Python (version 3.6 or higher)
 2. Install the tools' dependencies with the following command:
 
 ```sh
@@ -32,34 +33,28 @@ For the model converter, you will also need to install the OpenVINO&trade;
 toolkit and the prerequisite libraries for Model Optimizer. See the
 [OpenVINO toolkit documentation](https://docs.openvinotoolkit.org/) for details.
 
-If you using models from PyTorch or Caffe2 framework, you will also need to use intermediate
-conversion to ONNX format. To use automatic conversion install additional dependencies.
+To convert models from certain frameworks, you will also need to install
+additional dependencies.
 
-For models from PyTorch:
-```sh
-python3 -mpip install --user -r ./requirements-pytorch.in
-```
 For models from Caffe2:
+
 ```sh
 python3 -mpip install --user -r ./requirements-caffe2.in
 ```
 
-When running the model downloader with Python 3.5.x on macOS, you may encounter
-an error similar to the following:
-
-> requests.exceptions.SSLError: [...] (Caused by SSLError(SSLError(1, '[SSL: TLSV1_ALERT_PROTOCOL_VERSION]
-tlsv1 alert protocol version (\_ssl.c:719)'),))
-
-You can work around this by installing additional packages:
+For models from PyTorch:
 
 ```sh
-python3 -mpip install --user 'requests[security]'
+python3 -mpip install --user -r ./requirements-pytorch.in
 ```
 
-Alternatively, upgrade to Python 3.6 or a later version.
+For models from TensorFlow:
 
-Model downloader usage
-----------------------
+```sh
+python3 -mpip install --user -r ./requirements-tensorflow.in
+```
+
+## Model downloader usage
 
 The basic usage is to run the script like this:
 
@@ -67,22 +62,23 @@ The basic usage is to run the script like this:
 ./downloader.py --all
 ```
 
-This will download all models into a directory tree rooted in the current
-directory. To download into a different directory, use the `-o`/`--output_dir`
-option:
+This will download all models. The `--all` option can be replaced with
+other filter options to download only a subset of models. See the "Shared options"
+section.
+
+By default, the script will download models into a directory tree rooted
+in the current directory. To download into a different directory, use
+the `-o`/`--output_dir` option:
 
 ```sh
 ./downloader.py --all --output_dir my/download/directory
 ```
 
-The `--all` option can be replaced with other filter options to download only
-a subset of models. See the "Shared options" section.
-
 You may use `--precisions` flag to specify comma separated precisions of weights
 to be downloaded.
 
 ```sh
-./downloader.py --name face-detection-retail-0004 --precisions FP16,INT8
+./downloader.py --name face-detection-retail-0004 --precisions FP16,FP16-INT8
 ```
 
 By default, the script will attempt to download each file only once. You can use
@@ -121,6 +117,13 @@ human-readable format.
 
 You can also set this option to `text` to explicitly request the default text
 format.
+
+The script can download files for multiple models concurrently. To enable this,
+use the `-j`/`--jobs` option:
+
+```sh
+./downloader.py --all -j8 # download up to 8 models at a time
+```
 
 See the "Shared options" section for information on other options accepted by
 the script.
@@ -205,11 +208,11 @@ In particular:
   (unless specified otherwise above) or will only occur once.
 
 * Tools should not assume that events will occur in a certain order beyond
-  the ordering constraints specified above. Note that future versions of the script
-  may interleave the downloading of different files or models.
+  the ordering constraints specified above. In particular, when the `--jobs` option
+  is set to a value greater than 1, event sequences for different files or models
+  may get interleaved.
 
-Model converter usage
----------------------
+## Model converter usage
 
 The basic usage is to run the script like this:
 
@@ -220,6 +223,9 @@ The basic usage is to run the script like this:
 This will convert all models into the Inference Engine IR format. Models that
 were originally in that format are ignored. Models in PyTorch and Caffe2 formats will be
 converted in ONNX format first.
+
+The `--all` option can be replaced with other filter options to convert only
+a subset of models. See the "Shared options" section.
 
 The current directory must be the root of a download tree created by the model
 downloader. To specify a different download tree path, use the `-d`/`--download_dir`
@@ -236,9 +242,6 @@ into a different directory tree, use the `-o`/`--output_dir` option:
 ./converter.py --all --output_dir my/output/directory
 ```
 >Note: models in intermediate format are placed to this directory too.
-
-The `--all` option can be replaced with other filter options to convert only
-a subset of models. See the "Shared options" section.
 
 By default, the script will produce models in every precision that is supported
 for conversion. To only produce models in a specific precision, use the `--precisions`
@@ -259,11 +262,11 @@ script. You can override this heuristic with the `--mo` option:
 ```
 
 You can add extra Model Optimizer arguments to the ones specified in the model
-configuration by using the `--add-mo-arg` option. The option can be repeated
+configuration by using the `--add_mo_arg` option. The option can be repeated
 to add multiple arguments:
 
 ```sh
-./converter.py --name=caffenet --add-mo-arg=--reverse_input_channels --add-mo-arg=--silent
+./converter.py --name=caffenet --add_mo_arg=--reverse_input_channels --add_mo_arg=--silent
 ```
 
 By default, the script will run Model Optimizer using the same Python executable
@@ -286,17 +289,97 @@ executed commands, or "auto", in which case the number of CPUs in the system is 
 By default, all commands are run sequentially.
 
 The script can print the conversion commands without actually running them.
-To do this, use the `--dry-run` option:
+To do this, use the `--dry_run` option:
 
 ```sh
-./converter.py --all --dry-run
+./converter.py --all --dry_run
 ```
 
 See the "Shared options" section for information on other options accepted by
 the script.
 
-Model information dumper usage
-------------------------------
+## Model Quantizer Usage
+
+Before you run the model quantizer, you must prepare a directory with
+the datasets required for the quantization process. This directory will be
+referred to as `<DATASET_DIR>` below. You can find more detailed information
+about dataset preparation in the <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.
+
+The basic usage is to run the script like this:
+
+```sh
+./quantizer.py --all --dataset_dir <DATASET_DIR>
+```
+
+This will quantize all models for which quantization is supported. Other models
+are ignored.
+
+The `--all` option can be replaced with other filter options to quantize only
+a subset of models. See the "Shared options" section.
+
+The current directory must be the root of a tree of model files create by the model
+converter. To specify a different model tree path, use the `--model_dir` option:
+
+```sh
+./quantizer.py --all --dataset_dir <DATASET_DIR> --model_dir my/model/directory
+```
+
+By default, the quantized models are placed into the same model tree. To place them
+into a different directory tree, use the `-o`/`--output_dir` option:
+
+```sh
+./quantizer.py --all --dataset_dir <DATASET_DIR> --output_dir my/output/directory
+```
+
+By default, the script will produce models in every precision that is supported
+as a quantization output. To only produce models in a specific precision, use
+the `--precisions` option:
+
+```sh
+./quantizer.py --all --dataset_dir <DATASET_DIR> --precisions=FP16-INT8
+```
+
+The script will attempt to locate Post-Training Optimization Toolkit using
+the environment variables set by the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
+script. You can override this heuristic with the `--pot` option:
+
+```sh
+./quantizer.py --all --dataset_dir <DATASET_DIR> --pot my/openvino/path/post_training_optimization_toolkit/main.py
+```
+
+By default, the script will run Post-Training Optimization Toolkit using the same
+Python executable that was used to run the script itself. To use a different
+Python executable, use the `-p`/`--python` option:
+
+```sh
+./quantizer.py --all --dataset_dir <DATASET_DIR> --python my/python
+```
+
+It's possible to specify a target device for Post-Training Optimization Toolkit
+to optimize for, by using the `--target_device` option:
+
+```sh
+./quantizer.py --all --dataset_dir <DATASET_DIR> --target_device VPU
+```
+
+The supported values are those accepted by the "target_device" option in
+Post-Training Optimization Toolkit's config files. If this option is unspecified,
+Post-Training Optimization Toolkit's default is used.
+
+The script can print the quantization commands without actually running them.
+To do this, use the `--dry_run` option:
+
+```sh
+./quantizer.py --all --dataset_dir <DATASET_DIR> --dry_run
+```
+
+With this option specified, the configuration file for Post-Training Optimization
+Toolkit will still be created, so that you can inspect it.
+
+See the "Shared options" section for information on other options accepted by
+the script.
+
+## Model information dumper usage
 
 The basic usage is to run the script like this:
 
@@ -332,8 +415,6 @@ describing a single model. Each such object has the following keys:
   * `FP32`
   * `FP32-INT1`
   * `FP32-INT8`
-  * `INT1`
-  * `INT8`
 
   Additional possible values might be added in the future.
 
@@ -350,19 +431,27 @@ describing a single model. Each such object has the following keys:
   * `feature_extraction`
   * `head_pose_estimation`
   * `human_pose_estimation`
+  * `image_inpainting`
   * `image_processing`
+  * `image_translation`
   * `instance_segmentation`
+  * `machine_translation`
   * `monocular_depth_estimation`
   * `object_attributes`
   * `optical_character_recognition`
+  * `question_answering`
   * `semantic_segmentation`
+  * `sound_classification`
+  * `speech_recognition`
+  * `style_transfer`
+  * `token_recognition`
+  * `text_to_speech`
 
   Additional possible values might be added in the future.
 
-Shared options
---------------
+## Shared options
 
-The are certain options that both tools accept.
+The are certain options that all tools accept.
 
 `-h`/`--help` can be used to print a help message:
 
@@ -418,7 +507,6 @@ driver-action-recognition-adas-0002-decoder
 driver-action-recognition-adas-0002-encoder
 emotions-recognition-retail-0003
 face-detection-adas-0001
-face-detection-adas-binary-0001
 face-detection-retail-0004
 face-detection-retail-0005
 [...]

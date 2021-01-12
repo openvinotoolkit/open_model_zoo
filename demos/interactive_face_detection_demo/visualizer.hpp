@@ -35,7 +35,6 @@ private:
     double opacity;
     double textScale;
     int textThickness;
-    int internalPadding;
 };
 
 // Drawing a photo frame around detected face
@@ -80,8 +79,6 @@ private:
 // Drawing detected faces on the frame
 class Visualizer {
 public:
-    using Ptr = std::shared_ptr<Visualizer>;
-
     enum AnchorType {
         TL = 0,
         TR,

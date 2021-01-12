@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ class ZoomSegMask(Postprocessor):
 
     def process_image(self, annotation, prediction):
         for annotation_, prediction_ in zip(annotation, prediction):
-            height, width = annotation_.mask.shape[:2]
             prob = prediction_.mask
             if len(prob.shape) == 2:
                 warning(
@@ -54,6 +53,10 @@ class ZoomSegMask(Postprocessor):
                 )
                 prob = prob[np.newaxis, :, :]
             channels, prediction_height, prediction_width = prob.shape
+            if annotation is not None:
+                height, width = annotation_.mask.shape[:2]
+            else:
+                height, width = prediction_height, prediction_width
             zoom_prob = np.zeros((channels, height, width), dtype=np.float32)
             for c in range(channels):
                 for h in range(height):

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
  Copyright (c) 2019 Intel Corporation
 
@@ -16,6 +16,7 @@
 """
 
 import logging as log
+import os
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
@@ -26,6 +27,11 @@ from image_retrieval_demo.image_retrieval import ImageRetrieval
 from image_retrieval_demo.common import central_crop
 from image_retrieval_demo.visualizer import visualize
 from image_retrieval_demo.roi_detector_on_video import RoiDetectorOnVideo
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
+import monitors
+from images_capture import open_images_capture
+
 
 INPUT_SIZE = 224
 
@@ -40,9 +46,10 @@ def build_argparser():
     args.add_argument('-m', '--model',
                       help='Required. Path to an .xml file with a trained model.',
                       required=True, type=str)
-    args.add_argument('-i',
-                      help='Required. Path to a video file or a device node of a web-camera.',
-                      required=True, type=str)
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. Path to a video file or a device node of a web-camera.')
+    args.add_argument('--loop', default=False, action='store_true',
+                      help='Optional. Enable reading the input in a loop.')
     args.add_argument('-g', '--gallery',
                       help='Required. Path to a file listing gallery images.',
                       required=True, type=str)
@@ -60,7 +67,8 @@ def build_argparser():
                       default=None)
     args.add_argument('--no_show', action='store_true',
                       help='Optional. Do not visualize inference results.')
-
+    args.add_argument('-u', '--utilization_monitors', default='', type=str,
+                      help='Optional. List of monitors to show initially.')
     return parser
 
 
@@ -107,12 +115,17 @@ def main():
     img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE,
                                    args.cpu_extension)
 
-    frames = RoiDetectorOnVideo(args.i)
+    cap = open_images_capture(args.input, args.loop)
+    if cap.get_type() not in ('VIDEO', 'CAMERA'):
+        raise RuntimeError("The input should be a video file or a numeric camera ID")
+    frames = RoiDetectorOnVideo(cap)
 
     compute_embeddings_times = []
     search_in_gallery_times = []
 
     positions = []
+
+    presenter = monitors.Presenter(args.utilization_monitors, 0)
 
     for image, view_frame in frames:
         position = None
@@ -134,7 +147,7 @@ def main():
                 position = sorted_classes.index(
                     img_retrieval.text_label_to_class_id[args.ground_truth])
                 positions.append(position)
-                log.info("ROI detected, found: %d, postion of target: %d",
+                log.info("ROI detected, found: %d, position of target: %d",
                          sorted_classes[0], position)
             else:
                 log.info("ROI detected, found: %s", sorted_classes[0])
@@ -143,10 +156,11 @@ def main():
                         [img_retrieval.impaths[i] for i in sorted_indexes],
                         distances[sorted_indexes] if position is not None else None,
                         img_retrieval.input_size, np.mean(compute_embeddings_times),
-                        np.mean(search_in_gallery_times), imshow_delay=3, no_show=args.no_show)
+                        np.mean(search_in_gallery_times), imshow_delay=3, presenter=presenter, no_show=args.no_show)
 
         if key == 27:
             break
+    print(presenter.reportMeans())
 
     if positions:
         compute_metrics(positions)

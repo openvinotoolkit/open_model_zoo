@@ -2,9 +2,7 @@
 
 ## Use Case and High-Level Description
 
-DeepLab is a state-of-art deep learning model for semantic image segmentation. For details see [paper](https://arxiv.org/pdf/1706.05587.pdf).
-
-## Example
+DeepLab is a state-of-art deep learning model for semantic image segmentation. For details see [paper](https://arxiv.org/abs/1706.05587).
 
 ## Specification
 
@@ -17,7 +15,9 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| mean_iou  | 66.85%|
 
 ## Input
 
@@ -43,9 +43,7 @@ Image, name: `mul_1/placeholder_port_1`, shape: [1x3x513x513], format: [BxCxHxW]
     - H - image height
     - W - image width
 
-   Expected color order: RGB.
-
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. Reverse input channels operation via Model Optimizer conversion can not be applied to this model in proper way. For running this model with Open Model Zoo demos, you need to manually rearrange the default channels order in the demo application.
+   Expected color order: BGR.
 
 ## Output
 
@@ -71,4 +69,4 @@ Integer values in a range [0, 20], which represent an index of a predicted class
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

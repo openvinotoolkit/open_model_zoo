@@ -1,0 +1,47 @@
+models:
+  - name: mobilefacedet-v1-mxnet
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: yolo_v3
+          classes: 1
+          num: 9
+          anchors: 10,12,16,20,23,29,43,54,60,75,80,106,118,157,186,248,285,379
+          outputs:
+            - yolov30_yolooutputv32_conv0_fwd/YoloRegion
+            - yolov30_yolooutputv31_conv0_fwd/YoloRegion
+            - yolov30_yolooutputv30_conv0_fwd/YoloRegion
+          anchor_masks: [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+        inputs:
+          - name: data
+            type: INPUT
+            layout: NHWC
+
+    datasets:
+      - name: wider_without_bkgr
+
+        preprocessing:
+          - type: resize
+            size: 256
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.001
+            remove_filtered: true
+          - type: nms
+            overlap: 0.45
+          - type: clip_boxes
+            apply_to: prediction
+          - type: filter
+            apply_to: annotation
+            height_range: 60
+            is_empty: True
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+            allow_multiple_matches_per_ignored: True
+            use_filtered_tp: True

@@ -2,9 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `ssdlite_mobilenet_v2` model is used for object detection. For details, see the [paper](https://arxiv.org/pdf/1801.04381.pdf), MobileNetV2: Inverted Residuals and Linear Bottlenecks.
-
-## Example
+The `ssdlite_mobilenet_v2` model is used for object detection. For details, see the [paper](https://arxiv.org/abs/1801.04381), MobileNetV2: Inverted Residuals and Linear Bottlenecks.
 
 ## Specification
 
@@ -17,7 +15,9 @@ The `ssdlite_mobilenet_v2` model is used for object detection. For details, see 
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 24.2946%|
 
 ## Input
 
@@ -36,14 +36,14 @@ Image, name: `image_tensor`, shape: [1x300x300x3], format: [BxHxWxC],
 ### Converted Model
 
 Image, name: `image_tensor`, shape: [1x3x300x300], format [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 
@@ -71,4 +71,4 @@ bounding boxes. For each detection, the description has the format:
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

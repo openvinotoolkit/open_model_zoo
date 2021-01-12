@@ -1,0 +1,31 @@
+models:
+  - name: vgg16-cf
+    launchers:
+      - framework: caffe
+        model:   vgg16.prototxt
+        weights: vgg16.caffemodel
+        adapter: classification
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 103.939, 116.779, 123.68
+
+  - name: vgg16
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224

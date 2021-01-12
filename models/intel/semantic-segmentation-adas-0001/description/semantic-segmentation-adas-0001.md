@@ -35,7 +35,7 @@ This is a segmentation network to classify each pixel into 20 classes:
 | Image size      | 2048x1024 |
 | GFlops          | 58.572    |
 | MParams         | 6.686     |
-| Source framework| PyTorch*  |
+| Source framework| Caffe*    |
 
 ## Accuracy
 
@@ -70,8 +70,6 @@ The quality metrics calculated on 2000 images:
   - `FN` - number of false negative pixels for given class
   - `FP` - number of false positive pixels for given class
 
-## Performance
-
 ## Inputs
 
 The blob with BGR image in format: [B, C=3, H=1024, W=2048], where:
@@ -83,7 +81,7 @@ The blob with BGR image in format: [B, C=3, H=1024, W=2048], where:
 
 ## Outputs
 
-1. The net outputs a blob with the shape [B, H=1024, W=2048]. It can be treated as a
+1. The net outputs a blob with the shape [B, C=1, H=1024, W=2048]. It can be treated as a
    one-channel feature map, where each pixel is a label of one of the classes.
 
 ## Legal Information

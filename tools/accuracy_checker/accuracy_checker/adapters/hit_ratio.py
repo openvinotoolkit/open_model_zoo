@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ class HitRatioAdapter(Adapter):
     __provider__ = 'hit_ratio_adapter'
     prediction_types = (HitRatioPrediction, )
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         """
         Args:
             raw: output of model.
@@ -38,7 +38,9 @@ class HitRatioAdapter(Adapter):
             list of HitRatioPrediction objects.
         """
 
-        prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        raw_prediction = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_prediction)
+        prediction = raw_prediction[self.output_blob]
         prediction = np.reshape(prediction, -1)
 
         result = []

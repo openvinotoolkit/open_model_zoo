@@ -1,5 +1,7 @@
 # Human Pose Estimation C++ Demo
 
+![](./human_pose_estimation.gif)
+
 This demo showcases the work of multi-person 2D pose estimation algorithm. The task is to predict a pose: body skeleton, which consists of keypoints and connections between them, for every person in an input video. The pose may contain up to 18 keypoints: *ears, eyes, nose, neck, shoulders, elbows, wrists, hips, knees*, and *ankles*. Some of potential use cases of the algorithm are action recognition and behavior understanding. You can use the following pre-trained model with the demo:
 
 * `human-pose-estimation-0001`, which is a human pose estimation network, that produces two feature vectors. The algorithm uses these feature vectors to predict human poses.
@@ -21,8 +23,7 @@ On the start-up, the application reads command line parameters and loads human p
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
-./human_pose_estimation_demo -h
+```
 InferenceEngine:
     API version ............ <version>
     Build .................. <number>
@@ -31,7 +32,8 @@ human_pose_estimation_demo [OPTION]
 Options:
 
     -h                         Print a usage message.
-    -i "<path>"                Required. Path to a video. Default value is "cam" to work with camera.
+    -i                         Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -loop                      Optional. Enable reading the input in a loop.
     -m "<path>"                Required. Path to the Human Pose Estimation model (.xml) file.
     -d "<device>"              Optional. Specify the target device for Human Pose Estimation (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -pc                        Optional. Enable per-layer performance report.
@@ -43,7 +45,7 @@ Options:
 
 Running the application with an empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -56,7 +58,7 @@ For example, to do inference on a CPU, run the following command:
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with estimated poses and text report of **FPS** - frames per second performance for the human pose estimation demo.
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
 >* `human-pose-estimation-0001`
 > Other models may produce unexpected results on these devices.
 

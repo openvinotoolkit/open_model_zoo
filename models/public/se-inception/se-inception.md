@@ -2,9 +2,7 @@
 
 ## Use Case and High-Level Description
 
-[BN-Inception with Squeeze-and-Excitation blocks](https://arxiv.org/pdf/1709.01507.pdf)
-
-## Example
+[BN-Inception with Squeeze-and-Excitation blocks](https://arxiv.org/abs/1709.01507)
 
 ## Specification
 
@@ -17,7 +15,10 @@
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 75.996%|
+| Top 5  | 92.964%|
 
 ## Input
 

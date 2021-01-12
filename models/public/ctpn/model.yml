@@ -14,7 +14,7 @@
 
 description: >-
   Detecting Text in Natural Image with Connectionist Text Proposal Network. For
-  details see paper <https://arxiv.org/pdf/1609.03605.pdf>.
+  details see paper <https://arxiv.org/abs/1609.03605>.
 task_type: detection
 files:
   - name: ctpn.pb

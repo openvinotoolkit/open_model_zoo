@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,24 +16,52 @@ limitations under the License.
 
 from .preprocessing_executor import PreprocessingExecutor
 from .preprocessor import Preprocessor
-from .color_space_conversion import BgrToRgb, RgbToBgr, BgrToGray, RgbToGray, TfConvertImageDType, SelectInputChannel
+from .color_space_conversion import (
+    BgrToRgb, RgbToBgr,
+    BgrToGray, RgbToGray,
+    TfConvertImageDType,
+    SelectInputChannel,
+    BGR2YUVConverter, RGB2YUVConverter,
+    BGRtoNV12Converter, RGBtoNV12Converter,
+    NV12toBGRConverter, NV12toRGBConverter,
+    RGB2YCrCbConverter, BGR2YCrCbConverter,
+    BGRToLAB, RGBToLAB
+)
+from .audio_preprocessing import (
+    ResampleAudio,
+    ClipAudio,
+    NormalizeAudio,
+    HanningWindow,
+    AudioSpectrogram,
+    TriangleFiltering,
+    DCT,
+    ClipCepstrum,
+    TrimmingAudio,
+    SamplesToFloat32,
+    AudioToMelSpectrogram
+)
+
 from .normalization import Normalize, Normalize3d
 from .geometric_transformations import (
     GeometricOperationMetadata,
     Flip,
-    Crop,
-    CropRect,
-    ExtendAroundRect,
     PointAligner,
     Tiling,
-    Crop3D,
-    TransformedCropWithAutoScale,
-    ImagePyramid
+    ImagePyramid,
+    FaceDetectionImagePyramid,
+    WarpAffine
+)
+from .crop import (
+    Crop, CropRect, ExtendAroundRect, Crop3D, TransformedCropWithAutoScale,
+    CandidateCrop, CropOrPad, CropWithPadSize, CornerCrop, ObjectCropWithScale
 )
 from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 from .centernet_preprocessing import CenterNetAffineTransformation
 from .brats_preprocessing import Resize3D, NormalizeBrats, CropBraTS, SwapModalitiesBrats
+from .inpainting_preprocessor import FreeFormMask, RectMask, CustomMask
+from .one_hot_encoding import OneHotEncoding
+from .raw_image_preprocessing import PackBayerImage
 
 __all__ = [
     'PreprocessingExecutor',
@@ -41,26 +69,52 @@ __all__ = [
     'Preprocessor',
     'GeometricOperationMetadata',
 
+    'ResampleAudio',
+    'ClipAudio',
+    'NormalizeAudio',
+    'HanningWindow',
+    'AudioSpectrogram',
+    'TriangleFiltering',
+    'DCT',
+    'ClipCepstrum',
+    'TrimmingAudio',
+    'SamplesToFloat32',
+    'AudioToMelSpectrogram',
+
     'Resize',
     'Resize3D',
     'AutoResize',
     'Flip',
-    'Crop',
-    'CropRect',
-    'ExtendAroundRect',
     'PointAligner',
     'Tiling',
-    'Crop3D',
     'CropBraTS',
-    'TransformedCropWithAutoScale',
     'ImagePyramid',
-
+    'FaceDetectionImagePyramid',
+    'WarpAffine',
     'BgrToGray',
     'BgrToRgb',
     'RgbToGray',
     'RgbToBgr',
+    'BGR2YUVConverter',
+    'RGB2YUVConverter',
+    'BGRtoNV12Converter',
+    'RGBtoNV12Converter',
+    'NV12toBGRConverter',
+    'NV12toRGBConverter',
+    'BGRToLAB',
+    'RGBToLAB',
     'TfConvertImageDType',
     'SelectInputChannel',
+    'CropOrPad',
+    'CropWithPadSize',
+    'Crop',
+    'CornerCrop',
+    'CandidateCrop',
+    'CropRect',
+    'ExtendAroundRect',
+    'Crop3D',
+    'TransformedCropWithAutoScale',
+    'ObjectCropWithScale',
 
     'Normalize3d',
     'Normalize',
@@ -71,5 +125,14 @@ __all__ = [
     'DecodeByVocabulary',
     'PadWithEOS',
 
-    'CenterNetAffineTransformation'
+    'CenterNetAffineTransformation',
+
+    'FreeFormMask',
+    'RectMask',
+    'CustomMask',
+    'RGB2YCrCbConverter',
+    'BGR2YCrCbConverter',
+    'OneHotEncoding',
+
+    'PackBayerImage'
 ]

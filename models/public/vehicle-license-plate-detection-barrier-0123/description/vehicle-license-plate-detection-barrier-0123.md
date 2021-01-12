@@ -18,15 +18,13 @@ the "Barrier" use case.
 | Car pose                        | Front facing cars                          |
 | Min plate width                 | 96 pixels                                  |
 | Max objects to detect           | 200                                        |
-| GFlops                          | 8.666                                      |
+| GFlops                          | 0.271                                      |
 | MParams                         | 0.547                                      |
 | Source framework                | TensorFlow*                                |
 
 Average Precision (AP) is defined as an area under the
 [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve. Validation dataset is BIT-Vehicle.
-
-## Performance
 
 ## Input
 
@@ -81,6 +79,6 @@ The net outputs a blob with the shape: [1, 1, N, 7], where N is the number of de
 ## Legal Information
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../../licenses/APACHE-2.0.txt).
+A copy of the license is provided in [APACHE-2.0.txt](../../licenses/APACHE-2.0.txt).
 
 [*] Other names and brands may be claimed as the property of others.

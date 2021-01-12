@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,8 +15,12 @@ limitations under the License.
 """
 
 from pathlib import Path
+from collections import namedtuple
 
 from ...dependency import ClassProvider
+
+
+StoredPredictionBatch = namedtuple('StoredPredictionBatch', ['raw_predictions', 'identifiers', 'meta'])
 
 
 class Loader(ClassProvider):
@@ -26,7 +30,7 @@ class Loader(ClassProvider):
 
     __provider_type__ = 'loader'
 
-    def __init__(self, data_path: Path):
+    def __init__(self, data_path: Path, *args, **kwarg):
         self._data_path = data_path
 
     def __len__(self):
@@ -39,7 +43,7 @@ class Loader(ClassProvider):
 class DictLoaderMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.data = self.load()
+        self.data = self.load(**kwargs)
 
     def __len__(self):
         return len(self.data)
@@ -50,5 +54,5 @@ class DictLoaderMixin:
 
         return self.data[item]
 
-    def load(self):
+    def load(self, **kwargs):
         raise NotImplementedError

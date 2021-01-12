@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,4 +29,5 @@ class MultiLabelRecognitionAnnotation(MultiLabelRecognitionRepresentation):
 
 
 class MultiLabelRecognitionPrediction(MultiLabelRecognitionRepresentation):
-    pass
+    def to_annotation(self, **kwargs):
+        return MultiLabelRecognitionAnnotation(self.identifier, self.multi_label)

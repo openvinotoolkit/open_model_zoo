@@ -2,9 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Faster R-CNN Resnet-101 model. Used for object detection. For details, see the [paper](https://arxiv.org/pdf/1506.01497v3.pdf).
-
-## Example
+Faster R-CNN Resnet-101 model. Used for object detection. For details, see the [paper](https://arxiv.org/abs/1506.01497).
 
 ## Specification
 
@@ -15,7 +13,12 @@ Faster R-CNN Resnet-101 model. Used for object detection. For details, see the [
 | MParams                         | 48.128                                    |
 | Source framework                | TensorFlow\*                              |
 
-## Performance
+## Accuracy
+
+| Metric | Value |
+| ------ | ----- |
+| coco_precision | 30.95%|
+| mAP| 47.21%|
 
 ## Input
 
@@ -34,14 +37,14 @@ Image, name: `image_tensor`, shape: [1x600x1024x3], format: [BxHxWxC],
 ### Converted Model
 
 1. Image, name: `image_tensor`, shape: [1x3x600x1024], format: [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 2. Information of input image size, name: `image_info`, shape: [1x3], format: [BxC],
    where:
@@ -75,4 +78,4 @@ bounding boxes. For each detection, the description has the format:
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

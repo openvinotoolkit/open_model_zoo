@@ -14,8 +14,6 @@ order. Before passing the image blob to the network, do the following:
 The model output for `efficientnet-b5-pytorch` is the typical object classifier output for
 the 1000 different classifications matching those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -29,10 +27,8 @@ the 1000 different classifications matching those in the ImageNet database.
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 83.69          | 83.69           |
-| Top 5  | 96.71          | 96.71           | 
-
-## Performance
+| Top 1  | 83.69%          | 83.69%           |
+| Top 5  | 96.71%          | 96.71%           |
 
 ## Input
 
@@ -66,14 +62,14 @@ Channel order is `BGR`.
 Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in the [0, 1] range
+- `C` - predicted probabilities for each class in the logits format
 
 ### Converted Model
 
 Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in the [0, 1] range
+- `C` - predicted probabilities for each class in the logits format
 
 ## Legal Information
 

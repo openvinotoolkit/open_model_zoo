@@ -8,8 +8,6 @@ The model input is a blob that consists of a single image of 1x3x227x227 in BGR 
 
 The model output for `alexnet` is the usual object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -21,9 +19,12 @@ The model output for `alexnet` is the usual object classifier output for the 100
 
 ## Accuracy
 
-See [the original model's documentation](https://github.com/BVLC/caffe/tree/master/models/bvlc_alexnet).
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 56.598% |
+| Top 5  | 79.812% |
 
-## Performance
+See [the original model's documentation](https://github.com/BVLC/caffe/tree/master/models/bvlc_alexnet).
 
 ## Input
 

@@ -1,0 +1,59 @@
+models:
+  - name: hrnet-v2-c1-segmentation
+
+    launchers:
+      - framework: onnx_runtime
+        model:   hrnet-v2-c1-segmentation.onnx
+        adapter: segmentation
+
+    datasets:
+      - name: ADEChallengeData2016
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: resize
+            size: 320
+            use_pillow: True
+            interpolation: BILINEAR
+          - type: normalization
+            mean: (123.675,116.28,103.53)
+            std: (58.395,57.12,57.375)
+        postprocessing:
+          - type: resize_segmentation_mask
+            apply_to: prediction
+          - type: shift
+            apply_to: annotation
+            shift_value: -1
+        metrics:
+          - name: pix_accuracy
+            type: segmentation_accuracy
+            use_argmax: True
+          - name: mean_IoU
+            type: mean_iou
+            use_argmax: True
+
+  - name: hrnet-v2-c1-segmentation
+
+    launchers:
+      - framework: dlsdk
+        adapter: segmentation
+
+    datasets:
+      - name: ADEChallengeData2016
+        preprocessing:
+          - type: resize
+            size: 320
+            use_pillow: True
+            interpolation: BILINEAR
+        postprocessing:
+          - type: resize_segmentation_mask
+            apply_to: prediction
+          - type: shift
+            apply_to: annotation
+            shift_value: -1
+        metrics:
+          - name: pix_accuracy
+            type: segmentation_accuracy
+            use_argmax: True
+          - name: mean_IoU
+            type: mean_iou
+            use_argmax: True

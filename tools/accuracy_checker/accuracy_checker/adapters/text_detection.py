@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,20 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from collections import defaultdict
-
 import cv2
 import numpy as np
 
-
 from ..adapters import Adapter
-from ..config import ConfigValidator, StringField, NumberField, BoolField, ConfigError
-from ..representation import TextDetectionPrediction, CharacterRecognitionPrediction
+from ..config import ConfigValidator, StringField, NumberField
+from ..representation import TextDetectionPrediction
 from ..postprocessor import NMS
+from ..utils import UnsupportedPackage
 try:
     from shapely.geometry import Polygon
-except ImportError:
-    Polygon = None
+except ImportError as import_error:
+    Polygon = UnsupportedPackage("shapely", import_error.msg)
 
 
 class TextDetectionAdapter(Adapter):
@@ -66,8 +64,11 @@ class TextDetectionAdapter(Adapter):
 
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         self.pixel_link_out = self.get_value_from_config('pixel_link_out')
@@ -77,7 +78,7 @@ class TextDetectionAdapter(Adapter):
         self.min_area = self.get_value_from_config('min_area')
         self.min_height = self.get_value_from_config('min_height')
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         results = []
         predictions = self._extract_predictions(raw, frame_meta)
 
@@ -308,19 +309,19 @@ class TextProposalsDetectionAdapter(Adapter):
         self.line_min_score = self.get_value_from_config('line_min_score')
         self.text_proposals_width = self.get_value_from_config('text_proposals_width')
         self.min_num_proposals = self.get_value_from_config('min_num_proposals')
-        if Polygon is None:
-            raise ValueError("east_text_detection adapter requires shapely, please install it")
+        if isinstance(Polygon, UnsupportedPackage):
+            Polygon.raise_error(self.__provider__)
         self.text_proposal_connector = TextProposalConnector()
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         result = []
         data = zip(raw_outputs[self.bbox_pred_out], raw_outputs[self.cls_prob_out], frame_meta, identifiers)
         for bbox_pred, cls_prob, meta, identifier in data:
             input_shape = next(iter(meta['input_shape'].values()))
             if input_shape[1] == 3:
-                cls_prob = np.transpose(cls_prob, (2, 1, 0))
-                bbox_pred = np.transpose(bbox_pred, (2, 1, 0))
+                cls_prob = np.transpose(cls_prob, (1, 2, 0))
+                bbox_pred = np.transpose(bbox_pred, (1, 2, 0))
             scale_x, scale_y = meta['scale_x'], meta['scale_y']
             im_info = [meta['original_height'], meta['original_width'], min(scale_x, scale_y)]
             textsegs = self.proposal_layer(cls_prob, bbox_pred, im_info)
@@ -335,7 +336,7 @@ class TextProposalsDetectionAdapter(Adapter):
             if len(resize_op) >= 2:
                 scale_x, scale_y = resize_op[0].parameters['scale_y'], resize_op[0].parameters['scale_x']
                 boxes[:, 0::2] /= scale_x
-                boxes [:, 1::2] /= scale_y
+                boxes[:, 1::2] /= scale_y
             rects = [box.reshape(4, 2) for box in boxes]
             result.append(TextDetectionPrediction(identifier, np.array(rects)))
 
@@ -668,147 +669,6 @@ class TextProposalConnector:
         return text_recs
 
 
-class LPRAdapter(Adapter):
-    __provider__ = 'lpr'
-    prediction_types = (CharacterRecognitionPrediction,)
-
-    def process(self, raw, identifiers=None, frame_meta=None):
-        if not self.label_map:
-            raise ConfigError('LPR adapter requires dataset label map for correct decoding.')
-        raw_output = self._extract_predictions(raw, frame_meta)
-        predictions = raw_output[self.output_blob]
-        result = []
-        for identifier, output in zip(identifiers, predictions):
-            decoded_out = self.decode(output.reshape(-1))
-            result.append(CharacterRecognitionPrediction(identifier, decoded_out))
-
-        return result
-
-    def decode(self, outputs):
-        decode_out = str()
-        for output in outputs:
-            if output == -1:
-                break
-            decode_out += str(self.label_map[int(output)])
-
-        return decode_out
-
-
-class BeamSearchDecoder(Adapter):
-    __provider__ = 'beam_search_decoder'
-    prediction_types = (CharacterRecognitionPrediction, )
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'beam_size': NumberField(
-                optional=True, value_type=int, min_value=1, default=10,
-                description="Size of the beam to use during decoding."
-            ),
-            'blank_label': NumberField(
-                optional=True, value_type=int, min_value=0, description="Index of the CTC blank label."
-            ),
-            'softmaxed_probabilities': BoolField(
-                optional=True, default=False, description="Indicator that model uses softmax for output layer "
-            )
-        })
-        return parameters
-
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
-        self.beam_size = self.get_value_from_config('beam_size')
-        self.blank_label = self.launcher_config.get('blank_label')
-        self.softmaxed_probabilities = self.get_value_from_config('softmaxed_probabilities')
-
-    def process(self, raw, identifiers=None, frame_meta=None):
-        if not self.label_map:
-            raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
-        if self.blank_label is None:
-            self.blank_label = len(self.label_map)
-        raw_output = self._extract_predictions(raw, frame_meta)
-        output = raw_output[self.output_blob]
-        output = np.swapaxes(output, 0, 1)
-
-        result = []
-        for identifier, data in zip(identifiers, output):
-            if self.softmaxed_probabilities:
-                data = np.log(data)
-            seq = self.decode(data, self.beam_size, self.blank_label)
-            decoded = ''.join(str(self.label_map[char]) for char in seq)
-            result.append(CharacterRecognitionPrediction(identifier, decoded))
-        return result
-
-    @staticmethod
-    def decode(probabilities, beam_size=10, blank_id=None):
-        """
-         Decode given output probabilities to sequence of labels.
-        Arguments:
-            probabilities: The output log probabilities for each time step.
-            Should be an array of shape (time x output dim).
-            beam_size (int): Size of the beam to use during decoding.
-            blank_id (int): Index of the CTC blank label.
-        Returns the output label sequence.
-        """
-        def make_new_beam():
-            return defaultdict(lambda: (-np.inf, -np.inf))
-
-        def log_sum_exp(*args):
-            if all(a == -np.inf for a in args):
-                return -np.inf
-            a_max = np.max(args)
-            lsp = np.log(np.sum(np.exp(a - a_max) for a in args))
-
-            return a_max + lsp
-
-        times, symbols = probabilities.shape
-        # Initialize the beam with the empty sequence, a probability of 1 for ending in blank
-        # and zero for ending in non-blank (in log space).
-        beam = [(tuple(), (0.0, -np.inf))]
-
-        for time in range(times):
-            # A default dictionary to store the next step candidates.
-            next_beam = make_new_beam()
-
-            for symbol_id in range(symbols):
-                current_prob = probabilities[time, symbol_id]
-
-                for prefix, (prob_blank, prob_non_blank) in beam:
-                    # If propose a blank the prefix doesn't change.
-                    # Only the probability of ending in blank gets updated.
-                    if symbol_id == blank_id:
-                        next_prob_blank, next_prob_non_blank = next_beam[prefix]
-                        next_prob_blank = log_sum_exp(
-                            next_prob_blank, prob_blank + current_prob, prob_non_blank + current_prob
-                        )
-                        next_beam[prefix] = (next_prob_blank, next_prob_non_blank)
-                        continue
-                    # Extend the prefix by the new character symbol and add it to the beam.
-                    # Only the probability of not ending in blank gets updated.
-                    end_t = prefix[-1] if prefix else None
-                    next_prefix = prefix + (symbol_id,)
-                    next_prob_blank, next_prob_non_blank = next_beam[next_prefix]
-                    if symbol_id != end_t:
-                        next_prob_non_blank = log_sum_exp(
-                            next_prob_non_blank, prob_blank + current_prob, prob_non_blank + current_prob
-                        )
-                    else:
-                        # Don't include the previous probability of not ending in blank (prob_non_blank) if symbol
-                        #  is repeated at the end. The CTC algorithm merges characters not separated by a blank.
-                        next_prob_non_blank = log_sum_exp(next_prob_non_blank, prob_blank + current_prob)
-
-                    next_beam[next_prefix] = (next_prob_blank, next_prob_non_blank)
-                    # If symbol is repeated at the end also update the unchanged prefix. This is the merging case.
-                    if symbol_id == end_t:
-                        next_prob_blank, next_prob_non_blank = next_beam[prefix]
-                        next_prob_non_blank = log_sum_exp(next_prob_non_blank, prob_non_blank + current_prob)
-                        next_beam[prefix] = (next_prob_blank, next_prob_non_blank)
-
-            beam = sorted(next_beam.items(), key=lambda x: log_sum_exp(*x[1]), reverse=True)[:beam_size]
-        best = beam[0]
-        return best[0]
-
-
 class EASTTextDetectionAdapter(Adapter):
     __provider__ = 'east_text_detection'
 
@@ -832,10 +692,10 @@ class EASTTextDetectionAdapter(Adapter):
         self.score_map_thresh = self.get_value_from_config('score_map_threshold')
         self.nms_thresh = self.get_value_from_config('nms_threshold')
         self.box_thresh = self.get_value_from_config('box_threshold')
-        if Polygon is None:
-            raise ValueError("east_text_detection adapter requires shapely, please install it")
+        if isinstance(Polygon, UnsupportedPackage):
+            Polygon.raise_error(self.__provider__)
 
-    def process(self, raw, identifiers=None, frame_meta=None):
+    def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         score_maps = raw_outputs[self.score_map_out]
         geometry_maps = raw_outputs[self.geometry_map_out]
@@ -998,3 +858,116 @@ class EASTTextDetectionAdapter(Adapter):
             new_p_1 = np.zeros((0, 4, 2))
 
         return np.concatenate([new_p_0, new_p_1])
+
+
+class CRAFTTextDetectionAdapter(Adapter):
+    __provider__ = 'craft_text_detection'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'score_out': StringField(description='name of layer with score map', optional=True),
+            'text_threshold': NumberField(
+                value_type=float, optional=True, default=0.7, min_value=0, description='text confidence threshold'
+            ),
+            'link_threshold': NumberField(
+                value_type=float, optional=True, default=0.4, min_value=0, description='link confidence threshold'
+            ),
+            'low_text': NumberField(
+                value_type=float, optional=True, default=0.4, min_value=0, description='text low-bound score'
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.score_out = self.get_value_from_config('score_out')
+        self.text_threshold = self.get_value_from_config('text_threshold')
+        self.link_threshold = self.get_value_from_config('link_threshold')
+        self.low_text = self.get_value_from_config('low_text')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
+        score_out = raw_outputs[self.score_out] if self.score_out else raw_outputs[self.output_blob]
+        results = []
+        for identifier, score, meta in zip(identifiers, score_out, frame_meta):
+            score_text = score[:, :, 0]
+            score_link = score[:, :, 1]
+
+            boxes = self.get_detection_boxes(score_text, score_link,
+                                             self.text_threshold, self.link_threshold, self.low_text)
+            boxes = self.adjust_result_coordinates(boxes, meta.get('scale', 1.0))
+            results.append(TextDetectionPrediction(identifier, boxes))
+
+        return results
+
+    @staticmethod
+    def get_detection_boxes(text, link, text_threshold, link_threshold, low_text):
+        img_h, img_w = text.shape
+
+        _, score_text = cv2.threshold(text.copy(), low_text, 1, 0)
+        _, score_link = cv2.threshold(link.copy(), link_threshold, 1, 0)
+
+        text_score_comb = np.clip(score_text + score_link, 0, 1)
+        count, labels, stats, _ = cv2.connectedComponentsWithStats(text_score_comb.astype(np.uint8), connectivity=4)
+
+        det = []
+        for k in range(1, count):
+            # size filtering
+            size = stats[k, cv2.CC_STAT_AREA]
+            if size < 10:
+                continue
+
+            # thresholding
+            if np.max(text[labels == k]) < text_threshold:
+                continue
+
+            # make segmentation map
+            segmap = np.zeros(text.shape, dtype=np.uint8)
+            segmap[labels == k] = 255
+            segmap[np.logical_and(score_link == 1, score_text == 0)] = 0  # remove link area
+            x, y = stats[k, cv2.CC_STAT_LEFT], stats[k, cv2.CC_STAT_TOP]
+            w, h = stats[k, cv2.CC_STAT_WIDTH], stats[k, cv2.CC_STAT_HEIGHT]
+            niter = int(np.sqrt(size * min(w, h) / (w * h)) * 2)
+            sx, ex, sy, ey = x - niter, x + w + niter + 1, y - niter, y + h + niter + 1
+            # boundary check
+            if sx < 0:
+                sx = 0
+            if sy < 0:
+                sy = 0
+            if ex > img_w:
+                ex = img_w
+            if ey > img_h:
+                ey = img_h
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1 + niter, 1 + niter))
+            segmap[sy:ey, sx:ex] = cv2.dilate(segmap[sy:ey, sx:ex], kernel)
+
+            # make box
+            np_contours = np.roll(np.array(np.where(segmap != 0)), 1, axis=0).transpose().reshape(-1, 2)
+            rectangle = cv2.minAreaRect(np_contours)
+            box = cv2.boxPoints(rectangle)
+
+            # align diamond-shape
+            w, h = np.linalg.norm(box[0] - box[1]), np.linalg.norm(box[1] - box[2])
+            box_ratio = max(w, h) / (min(w, h) + 1e-5)
+            if abs(1 - box_ratio) <= 0.1:
+                l, r = min(np_contours[:, 0]), max(np_contours[:, 0])
+                t, b = min(np_contours[:, 1]), max(np_contours[:, 1])
+                box = np.array([[l, t], [r, t], [r, b], [l, b]], dtype=np.float32)
+
+            # make clock-wise order
+            startidx = box.sum(axis=1).argmin()
+            box = np.roll(box, 4 - startidx, 0)
+            box = np.array(box)
+
+            det.append(box)
+
+        return det
+
+    @staticmethod
+    def adjust_result_coordinates(polys, scale, ratio_net=2):
+        polys = np.array(polys)
+        for k, _ in enumerate(polys):
+            polys[k] *= (scale * ratio_net, scale * ratio_net)
+        return polys

@@ -23,11 +23,6 @@
 #include <samples/common.hpp>
 #include <samples/slog.hpp>
 
-#include <ie_iextension.h>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
-
 #include <opencv2/opencv.hpp>
 
 // -------------------------Generic routines for detection networks-------------------------------------------------
@@ -70,17 +65,19 @@ struct FaceDetection : BaseDetection {
 
     std::string input;
     std::string output;
+    std::string labels_output;
     double detectionThreshold;
     int maxProposalCount;
     int objectSize;
     int enquedFrames;
     float width;
     float height;
+    size_t network_input_width;
+    size_t network_input_height;
     float bb_enlarge_coefficient;
     float bb_dx_coefficient;
     float bb_dy_coefficient;
     bool resultsFetched;
-    std::vector<std::string> labels;
     std::vector<Result> results;
 
     FaceDetection(const std::string &pathToModel,
@@ -182,6 +179,23 @@ struct FacialLandmarksDetection : BaseDetection {
 
     void enqueue(const cv::Mat &face);
     std::vector<float> operator[] (int idx) const;
+};
+
+struct AntispoofingClassifier : BaseDetection {
+    std::string input;
+    std::string prob_output;
+    size_t enquedFaces;
+
+    AntispoofingClassifier(const std::string &pathToModel,
+        const std::string &deviceForInference,
+        int maxBatch, bool isBatchDynamic, bool isAsync,
+        bool doRawOutputMessages);
+
+    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
+    void submitRequest() override;
+
+    void enqueue(const cv::Mat& frame);
+    float operator[] (int idx) const;
 };
 
 struct Load {

@@ -15,7 +15,7 @@
 description: >-
   This is a Caffe2* version of "vgg19" model, designed to perform image classification.
   This model was converted from Caffe* to Caffe2* format.  For details see repository
-  <https://github.com/caffe2/models/tree/master/vgg19>, paper <https://arxiv.org/pdf/1409.1556.pdf>.
+  <https://github.com/facebookarchive/models/tree/master/vgg19>, paper <https://arxiv.org/abs/1409.1556>.
 task_type: classification
 files:
   - name: predict_net.pb
@@ -27,6 +27,7 @@ files:
     sha256: 492dbbbc7dd23cb052c66964714759f88370f3fa8542aa32556e93abc7beb69f
     source: https://s3.amazonaws.com/download.caffe2.ai/models/vgg19/init_net.pb
 framework: caffe2
+quantizable: yes
 conversion_to_onnx_args:
   - --model-path=$dl_dir/predict_net.pb
   - --model-name=vgg19-caffe2
@@ -39,4 +40,4 @@ model_optimizer_args:
   - --input=data
   - --mean_values=data[103.939,116.779,123.68]
   - --input_model=$conv_dir/vgg19-caffe2.onnx
-license: https://raw.githubusercontent.com/caffe2/models/master/LICENSE
+license: https://raw.githubusercontent.com/facebookarchive/models/master/LICENSE

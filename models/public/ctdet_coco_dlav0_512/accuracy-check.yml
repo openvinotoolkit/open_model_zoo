@@ -1,0 +1,28 @@
+models:
+  - name: ctdet_coco_dlav0_512
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: ctdet
+          center_heatmap_out: center_heatmap
+          width_height_out: width_height
+          regression_out: regression
+
+
+    datasets:
+      - name: ms_coco_detection_80_class_without_background
+        preprocessing:
+          - type: centernet_affine_transform
+            dst_width: 512
+            dst_height: 512
+
+        postprocessing:
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.3
+            remove_filtered: True
+
+        metrics:
+          - type: map
+            integral: 11point
+            presenter: print_scalar

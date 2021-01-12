@@ -9,26 +9,30 @@
 #include <vector>
 #include <gflags/gflags.h>
 
+#include <samples/default_flags.hpp>
+
+DEFINE_INPUT_FLAGS
+
 static const char help_message[] = "Print a usage message.";
-static const char video_message[] = "Required. Path to a video or image file. Default value is \"cam\" to work with camera.";
+static const char limit_message[] = "Optional. Read length limit before stopping or restarting reading the input.";
 static const char person_action_detection_model_message[] = "Required. Path to the Person/Action Detection Retail model (.xml) file.";
-static const char face_detection_model_message[] = "Required. Path to the Face Detection Retail model (.xml) file.";
+static const char face_detection_model_message[] = "Required. Path to the Face Detection model (.xml) file.";
 static const char facial_landmarks_model_message[] = "Required. Path to the Facial Landmarks Regression Retail model (.xml) file.";
 static const char face_reid_model_message[] = "Required. Path to the Face Reidentification Retail model (.xml) file.";
 static const char target_device_message_action_detection[] = "Optional. Specify the target device for Person/Action Detection Retail "
-                                                             "(the list of available devices is shown below).Default value is CPU. "
+                                                             "(the list of available devices is shown below). Default value is CPU. "
                                                              "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                              "The application looks for a suitable plugin for the specified device.";
 static const char target_device_message_face_detection[] = "Optional. Specify the target device for Face Detection Retail "
-                                                           "(the list of available devices is shown below).Default value is CPU. "
+                                                           "(the list of available devices is shown below). Default value is CPU. "
                                                            "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                            "The application looks for a suitable plugin for the specified device.";
 static const char target_device_message_landmarks_regression[] = "Optional. Specify the target device for Landmarks Regression Retail "
-                                                                 "(the list of available devices is shown below).Default value is CPU. "
+                                                                 "(the list of available devices is shown below). Default value is CPU. "
                                                                  "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                                  "The application looks for a suitable plugin for the specified device.";
 static const char target_device_message_face_reid[] = "Optional. Specify the target device for Face Reidentification Retail "
-                                                      "(the list of available devices is shown below).Default value is CPU. "
+                                                      "(the list of available devices is shown below). Default value is CPU. "
                                                       "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                       "The application looks for a suitable plugin for the specified device.";
 static const char greedy_reid_matching_message[] = "Optional. Use faster greedy matching algorithm in face reid.";
@@ -49,7 +53,6 @@ static const char no_show_processed_video[] = "Optional. Do not show processed v
 static const char input_image_height_output_message[] = "Optional. Input image height for face detector.";
 static const char input_image_width_output_message[] = "Optional. Input image width for face detector.";
 static const char expand_ratio_output_message[] = "Optional. Expand ratio for bbox before face recognition.";
-static const char last_frame_message[] = "Optional. Last frame number to handle in demo. If negative, handle all input video.";
 static const char teacher_id_message[] = "Optional. ID of a teacher. You must also set a faces gallery parameter (-fg) to use it.";
 static const char min_action_duration_message[] = "Optional. Minimum action duration in seconds.";
 static const char same_action_time_delta_message[] = "Optional. Maximum time difference between actions in seconds.";
@@ -57,7 +60,7 @@ static const char student_actions_message[] = "Optional. List of student actions
 static const char top_actions_message[] = "Optional. List of student actions (for top-k mode) separated by a comma.";
 static const char teacher_actions_message[] = "Optional. List of teacher actions separated by a comma.";
 static const char target_action_name_message[] = "Optional. Target action name.";
-static const char target_actions_num_message[] = "Optional. Number of first K students. If this parameter is positive,"
+static const char target_actions_num_message[] = "Optional. Number of first K students. If this parameter is positive, "
                                                  "the demo detects first K persons with the action, pointed by the parameter 'top_id'";
 static const char crop_gallery_message[] = "Optional. Crop images during faces gallery creation.";
 static const char face_threshold_registration_output_message[] = "Optional. Probability threshold for face detections during database registration.";
@@ -67,7 +70,7 @@ static const char tracker_smooth_size_message[] = "Optional. Number of frames to
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
-DEFINE_string(i, "cam", video_message);
+DEFINE_uint32(limit, gflags::uint32(std::numeric_limits<size_t>::max()), limit_message);
 DEFINE_string(m_act, "", person_action_detection_model_message);
 DEFINE_string(m_fd, "", face_detection_model_message);
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
@@ -92,7 +95,6 @@ DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_int32(inh_fd, 600, input_image_height_output_message);
 DEFINE_int32(inw_fd, 600, input_image_width_output_message);
 DEFINE_double(exp_r_fd, 1.15, face_threshold_output_message);
-DEFINE_int32(last_frame, -1, last_frame_message);
 DEFINE_string(teacher_id, "", teacher_id_message);
 DEFINE_double(min_ad, 1.0, min_action_duration_message);
 DEFINE_double(d_ad, 1.0, same_action_time_delta_message);
@@ -117,7 +119,9 @@ static void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                             " << help_message << std::endl;
-    std::cout << "    -i '<path>'                    " << video_message << std::endl;
+    std::cout << "    -i                             " << input_message << std::endl;
+    std::cout << "    -loop                          " << loop_message << std::endl;
+    std::cout << "    -limit                         " << limit_message << std::endl;
     std::cout << "    -m_act '<path>'                " << person_action_detection_model_message << std::endl;
     std::cout << "    -m_fd '<path>'                 " << face_detection_model_message << std::endl;
     std::cout << "    -m_lm '<path>'                 " << facial_landmarks_model_message << std::endl;
@@ -144,13 +148,12 @@ static void showUsage() {
     std::cout << "    -fg                            " << reid_gallery_path_message << std::endl;
     std::cout << "    -teacher_id                    " << teacher_id_message << std::endl;
     std::cout << "    -no_show                       " << no_show_processed_video << std::endl;
-    std::cout << "    -last_frame                    " << last_frame_message << std::endl;
     std::cout << "    -min_ad                        " << min_action_duration_message << std::endl;
     std::cout << "    -d_ad                          " << same_action_time_delta_message << std::endl;
     std::cout << "    -student_ac                    " << student_actions_message << std::endl;
     std::cout << "    -top_ac                        " << top_actions_message << std::endl;
     std::cout << "    -teacher_ac                    " << teacher_actions_message << std::endl;
-    std::cout << "    -a_id                          " << target_action_name_message << std::endl;
+    std::cout << "    -top_id                        " << target_action_name_message << std::endl;
     std::cout << "    -a_top                         " << target_actions_num_message << std::endl;
     std::cout << "    -crop_gallery                  " << crop_gallery_message << std::endl;
     std::cout << "    -t_reg_fd                      " << face_threshold_registration_output_message << std::endl;

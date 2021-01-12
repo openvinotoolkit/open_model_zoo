@@ -2,9 +2,7 @@
 
 ## Use Case and High-Level Description
 
-[ResNet-101 with Squeeze-and-Excitation blocks](https://arxiv.org/pdf/1709.01507.pdf)
-
-## Example
+[ResNet-101 with Squeeze-and-Excitation blocks](https://arxiv.org/abs/1709.01507)
 
 ## Specification
 
@@ -17,7 +15,10 @@
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 78.252%|
+| Top 5  | 94.206%|
 
 ## Input
 

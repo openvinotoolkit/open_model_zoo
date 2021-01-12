@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ from .postprocessor import Postprocessor
 from ..representation import DetectionPrediction, DetectionAnnotation
 from ..utils import get_size_from_config
 
+
 class CorrectYoloV2Boxes(Postprocessor):
     __provider__ = 'correct_yolo_v2_boxes'
 
@@ -32,7 +33,7 @@ class CorrectYoloV2Boxes(Postprocessor):
             'dst_width': NumberField(value_type=int, optional=True, min_value=1, description="Destination width."),
             'dst_height': NumberField(value_type=int, optional=True, min_value=1, description="Destination height."),
             'size': NumberField(
-                value_type=int, optional=True, min_value=1, description="Destination size for both dimentions."
+                value_type=int, optional=True, min_value=1, description="Destination size for both dimensions."
             )
         })
         return parameters

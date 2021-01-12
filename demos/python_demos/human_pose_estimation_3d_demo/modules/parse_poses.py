@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
  Copyright (c) 2019 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +14,12 @@
 import numpy as np
 
 from modules.pose import Pose, propagate_ids
-from pose_extractor import extract_poses
+try:
+    from pose_extractor import extract_poses
+except ImportError as err:
+    raise ImportError("Module 'pose_extractor' not found. "
+                      "Please build module according to documentation before usage.") from err
+
 
 AVG_PERSON_HEIGHT = 180
 
@@ -56,10 +60,10 @@ def get_root_relative_poses(inference_results):
         poses_2d.append(pose_2d)
     poses_2d = np.array(poses_2d)
 
-    keypoint_treshold = 0.1
+    keypoint_threshold = 0.1
     poses_3d = np.ones((len(poses_2d), num_kpt_panoptic * 4), dtype=np.float32) * -1
     for pose_id in range(poses_3d.shape[0]):
-        if poses_2d[pose_id, 2] <= keypoint_treshold:
+        if poses_2d[pose_id, 2] <= keypoint_threshold:
             continue
         pose_3d = poses_3d[pose_id]
         neck_2d = poses_2d[pose_id, 0:2].astype(np.int32)
@@ -74,7 +78,7 @@ def get_root_relative_poses(inference_results):
         # refine keypoints coordinates at corresponding limbs locations
         for limb in limbs:
             for kpt_id_from in limb:
-                if poses_2d[pose_id, kpt_id_from * 3 + 2] <= keypoint_treshold:
+                if poses_2d[pose_id, kpt_id_from * 3 + 2] <= keypoint_threshold:
                     continue
                 for kpt_id_where in limb:
                     kpt_from_2d = poses_2d[pose_id, kpt_id_from * 3:kpt_id_from * 3 + 2].astype(np.int32)

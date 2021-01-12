@@ -3,11 +3,9 @@
 ## Use Case and High-Level Description
 
 This is a Caffe2\* version of `squeezenet1.1` model, designed to perform image classification.
-This model was converted from Caffe\* to Caffe2\* format. 
-For details see repository <https://github.com/caffe2/models/tree/master/squeezenet>,
-paper <https://arxiv.org/pdf/1602.07360>.
-
-## Example
+This model was converted from Caffe\* to Caffe2\* format.
+For details see repository <https://github.com/facebookarchive/models/tree/master/squeezenet>,
+paper <https://arxiv.org/abs/1602.07360>.
 
 ## Specification
 
@@ -20,7 +18,10 @@ paper <https://arxiv.org/pdf/1602.07360>.
 
 ## Accuracy
 
-## Performance
+| Metric | Value |
+| ------ | ----- |
+| Top 1  | 56.502%|
+| Top 5  | 79.576%|
 
 ## Input
 
@@ -66,5 +67,5 @@ Object classifier according to ImageNet classes, name - `softmaxout`, shape - `1
 ## Legal Information
 
 The original model is distributed under the
-[Apache License, Version 2.0](https://raw.githubusercontent.com/caffe2/models/master/LICENSE).
+[Apache License, Version 2.0](https://raw.githubusercontent.com/facebookarchive/models/master/LICENSE).
 A copy of the license is provided in [APACHE-2.0.txt](../licenses/APACHE-2.0.txt).

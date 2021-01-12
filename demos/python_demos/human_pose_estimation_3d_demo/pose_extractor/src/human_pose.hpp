@@ -17,4 +17,3 @@ struct HumanPose {
     float score;
 };
 } // namespace human_pose_estimation
-

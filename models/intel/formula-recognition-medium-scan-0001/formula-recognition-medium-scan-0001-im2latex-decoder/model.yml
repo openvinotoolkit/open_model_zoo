@@ -1,0 +1,36 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Decoder part of latex formula recognition model.
+task_type: token_recognition
+files:
+  - name: FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
+    size: 48826
+    sha256: 95590206f28dcf740db3696e94c9aaa33f5c3c0a19a1b9fe3e93de3b6bb5ed73
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.xml
+  - name: FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+    size: 10252352
+    sha256: 47313e32aacd678ebddb01fc288e67159bad2996fa92f53fd4711bc6564defcb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP32/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+  - name: FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
+    size: 48818
+    sha256: a6c3507782f58a332eea8cf48631e4efedbda21c4a0c54a0e393434034c6c7a9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.xml
+  - name: FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+    size: 5126230
+    sha256: 85c96b6cf2bbfaa79fc505717070e15236386d3aacc868ce044e3139eb2421ba
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/formula-recognition-medium-scan-0001/formula-recognition-medium-scan-0001-im2latex-decoder/FP16/formula-recognition-medium-scan-0001-im2latex-decoder.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

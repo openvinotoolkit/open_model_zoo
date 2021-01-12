@@ -1,5 +1,5 @@
 """
-Copyright (c) 2019 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ limitations under the License.
 from ..config import BoolField, NumberField
 from ..representation import DetectionPrediction, DetectionAnnotation
 from .postprocessor import PostprocessorWithSpecificTargets
+
 
 class ClipBoxes(PostprocessorWithSpecificTargets):
     __provider__ = 'clip_boxes'
@@ -38,7 +39,7 @@ class ClipBoxes(PostprocessorWithSpecificTargets):
                 value_type=int, optional=True, min_value=1,
                 description="Destination size for box clipping for both dimensions."
             ),
-            'boxes_normalized' : BoolField(
+            'boxes_normalized': BoolField(
                 optional=True, default=False,
                 description="Flag which says that target bounding boxes are in normalized format."
             )

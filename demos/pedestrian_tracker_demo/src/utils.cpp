@@ -6,8 +6,6 @@
 
 #include <opencv2/imgproc.hpp>
 
-#include <ie_plugin_config.hpp>
-
 #include <algorithm>
 #include <vector>
 #include <map>
@@ -78,7 +76,7 @@ LoadInferenceEngine(const std::vector<std::string>& devices,
         }
 
         std::cout << "Loading device " << device << std::endl;
-        std::cout << ie.GetVersions(device) << std::endl;
+        std::cout << printable(ie.GetVersions(device)) << std::endl;
 
         /** Load extensions for the CPU device **/
         if ((device.find("CPU") != std::string::npos)) {
