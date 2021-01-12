@@ -21,7 +21,8 @@ class HPEOpenPose : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    /// Otherwise, image will be preprocessed and resized using OpenCV routines.
+    /// @param confidenceThreshold - threshold to eleminate low-confidence keypoints.
+    /// Any keypoint with confidence lower than this threshold will be ignored.
     HPEOpenPose(const std::string& modelFileName, float confidenceThreshold);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
