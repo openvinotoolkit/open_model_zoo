@@ -27,7 +27,8 @@ import cv2
 import numpy as np
 from openvino.inference_engine import IECore
 
-sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+
 
 import models
 import monitors

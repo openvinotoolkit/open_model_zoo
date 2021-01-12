@@ -33,7 +33,8 @@ from gesture_recognition_demo.tracker import Tracker
 from gesture_recognition_demo.action_recognizer import ActionRecognizer
 from gesture_recognition_demo.visualizer import Visualizer
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common\python'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                             'common/python'))
 import monitors
 
 DETECTOR_OUTPUT_SHAPE = -1, 5

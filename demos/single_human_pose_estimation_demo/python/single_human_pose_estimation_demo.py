@@ -10,7 +10,7 @@ from openvino.inference_engine import IECore
 from detector import Detector
 from estimator import HumanPoseEstimator
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common\python'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'common/python'))
 import monitors
 from images_capture import open_images_capture
 

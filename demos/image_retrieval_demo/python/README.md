@@ -1,6 +1,6 @@
 # Image Retrieval Python\* Demo
 
-![](./image_retrieval.gif)
+![](../image_retrieval.gif)
 
 This demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 

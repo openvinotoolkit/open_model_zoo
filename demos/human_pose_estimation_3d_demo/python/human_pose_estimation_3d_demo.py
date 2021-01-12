@@ -24,7 +24,7 @@ from modules.inference_engine import InferenceEngine
 from modules.draw import Plotter3d, draw_poses
 from modules.parse_poses import parse_poses
 
-sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
 

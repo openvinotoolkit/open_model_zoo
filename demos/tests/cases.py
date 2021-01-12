@@ -72,7 +72,7 @@ class PythonDemo(Demo):
     def fixed_args(self, source_dir, build_dir):
         cpu_extension_path = build_dir / 'lib/libcpu_extension.so'
 
-        return [sys.executable, str(source_dir / 'python_demos' / self._name / (self._name + '.py')),
+        return [sys.executable, str(source_dir / self._name / 'python' / (self._name + '.py')),
             *(['-l', str(cpu_extension_path)] if cpu_extension_path.exists() else [])]
 
 def join_cases(*args):
@@ -197,7 +197,7 @@ NATIVE_DEMOS = [
             ModelArg('mask_rcnn_resnet50_atrous_coco'))
     )),
 
-    NativeDemo(subdirectory='multi_channel/face_detection_demo',
+    NativeDemo(subdirectory='multi_channel_face_detection_demo',
             device_keys=['-d'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -210,7 +210,7 @@ NATIVE_DEMOS = [
             ModelArg('face-detection-retail-0044')),
     )),
 
-    NativeDemo(subdirectory='multi_channel/human_pose_estimation_demo', device_keys=['-d'],
+    NativeDemo(subdirectory='multi_channel_human_pose_estimation_demo', device_keys=['-d'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,

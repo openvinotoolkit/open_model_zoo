@@ -25,7 +25,7 @@ from openvino.inference_engine import IECore  # pylint: disable=import-error,E06
 from utils.network_wrappers import MaskRCNN, SemanticSegmentation
 from utils.misc import MouseClick, set_log_config, check_pressed_keys
 
-sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common\python'))
+sys.path.append(osp.join(osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__)))), 'common/python'))
 import monitors
 from images_capture import open_images_capture
 

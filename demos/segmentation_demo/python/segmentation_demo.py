@@ -25,7 +25,7 @@ import cv2
 import numpy as np
 from openvino.inference_engine import IECore
 
-sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from models import SegmentationModel
 import monitors

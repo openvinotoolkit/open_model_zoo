@@ -1,6 +1,6 @@
 # Whiteboard Inpainting Demo
 
-![](./whiteboard_inpainting.gif)
+![](../whiteboard_inpainting.gif)
 
 This demo focuses on a whiteboard text overlapped by a person. The demo shows
 how to use the OpenVINO<sup>TM</sup> toolkit to detect and hide a person on a

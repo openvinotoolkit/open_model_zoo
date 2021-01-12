@@ -30,7 +30,7 @@
 #include <utils/slog.hpp>
 #include <utils/images_capture.h>
 #include <utils/default_flags.hpp>
-#include <samples/performance_metrics.hpp>
+#include <utils/performance_metrics.hpp>
 #include <unordered_map>
 #include <gflags/gflags.h>
 

@@ -25,7 +25,7 @@ from action_recognition_demo.models import IEModel, DummyDecoder
 from action_recognition_demo.result_renderer import ResultRenderer
 from action_recognition_demo.steps import run_pipeline
 
-sys.path.append(path.join(path.dirname(path.dirname(path.abspath(__file__))), 'common/python'))
+sys.path.append(path.join(path.dirname(path.dirname(path.dirname(path.abspath(__file__)))), 'common/python'))
 import monitors
 from images_capture import open_images_capture
 

@@ -12,10 +12,10 @@
 """
 
 import cv2 as cv
-import os
 import sys
+from pathlib import Path
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[3] / 'common/python'))
 from images_capture import open_images_capture
 
 

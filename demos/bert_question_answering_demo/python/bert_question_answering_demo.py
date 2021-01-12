@@ -24,7 +24,7 @@ from pathlib import Path
 import numpy as np
 from openvino.inference_engine import IECore
 
-sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
 

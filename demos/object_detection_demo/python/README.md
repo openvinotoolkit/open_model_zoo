@@ -1,6 +1,6 @@
 # Object Detection Python\* Demo
 
-![](./object_detection.gif)
+![](../object_detection.gif)
 
 This demo showcases Object Detection with Sync and Async API.
 

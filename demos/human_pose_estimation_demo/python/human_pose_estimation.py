@@ -29,7 +29,7 @@ from openvino.inference_engine import IECore
 from human_pose_estimation_demo.model import HPEAssociativeEmbedding, HPEOpenPose
 from human_pose_estimation_demo.visualization import show_poses
 
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
 from helpers import put_highlighted_text

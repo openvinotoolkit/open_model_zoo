@@ -23,7 +23,7 @@
 #include <utils/slog.hpp>
 #include <utils/args_helper.hpp>
 #include <utils/ocv_common.hpp>
-#include <samples/performance_metrics.hpp>
+#include <utils/performance_metrics.hpp>
 
 #include "grid_mat.hpp"
 

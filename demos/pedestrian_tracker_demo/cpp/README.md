@@ -1,6 +1,6 @@
 # Pedestrian Tracker C++ Demo
 
-![](./pedestrian_tracker.gif)
+![](../pedestrian_tracker.gif)
 
 This demo showcases Pedestrian Tracking scenario: it reads frames from an input video sequence, detects pedestrians in the frames, and builds trajectories of movement of the pedestrians in
 a frame-by-frame manner.
