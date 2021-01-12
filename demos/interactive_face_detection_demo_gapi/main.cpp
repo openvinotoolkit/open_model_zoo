@@ -288,7 +288,7 @@ void setInput(cv::GStreamingCompiled stream, const std::string& input ) {
     try {
         // If stoi() throws exception input should be a path not a camera id
         stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(std::stoi(input)));
-    } catch (std::invalid_argument &err) {
+    } catch (std::invalid_argument&) {
         slog::info << "Input source is treated as a file path" << slog::endl;
         stream.setSource(cv::gapi::wip::make_src<cv::gapi::wip::GCaptureSource>(input));
     }
