@@ -21,9 +21,8 @@ class HPEOpenPose : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
-    HPEOpenPose(const std::string& modelFileName, bool useAutoResize);
+    HPEOpenPose(const std::string& modelFileName);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
@@ -34,8 +33,6 @@ public:
 
 protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
-
-    bool useAutoResize;
 
     const int minJointsNumber = 3;
     const int stride = 8;
@@ -52,5 +49,5 @@ protected:
                                         const std::vector<cv::Mat>& pafs) const;
     void resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const;
 
-    int reshape(InferenceEngine::CNNNetwork & cnnNetwork, const InputData& inputData) override;
+    cv::Size reshape(InferenceEngine::CNNNetwork & cnnNetwork, int targetSize=0) override;
 };

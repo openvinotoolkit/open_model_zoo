@@ -58,7 +58,6 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
 "Absolute path to a shared library with the kernel implementations.";
 static const char thresh_output_message[] = "Optional. Probability threshold for poses filtering.";
-static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
 static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
@@ -77,7 +76,6 @@ DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_double(t, 0.1, thresh_output_message);
-DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
@@ -105,7 +103,6 @@ static void showUsage() {
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
-    std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
@@ -227,7 +224,7 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
-            model.reset(new HPEOpenPose(FLAGS_m, FLAGS_auto_resize));
+            model.reset(new HPEOpenPose(FLAGS_m));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
@@ -236,14 +233,7 @@ int main(int argc, char *argv[]) {
 
         InferenceEngine::Core core;
         InferenceEngine::CNNNetwork cnnNetwork = core.ReadNetwork(model->getModelFileName());
-        /*int reshape;
-        if (FLAGS_tsize) {
-            reshape = FLAGS_tsize;
-        }
-        else {
-            reshape = model->reshape(cnnNetwork, curr_frame.size());
-        }*/
-        int reshape = model->reshape(cnnNetwork, ImageInputData(curr_frame));
+        cv::Size reshape = model->reshape(cnnNetwork, FLAGS_tsize);
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core, reshape);

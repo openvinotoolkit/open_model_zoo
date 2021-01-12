@@ -27,7 +27,7 @@
 
 using namespace InferenceEngine;
 
-AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine, int reshape) :
+AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine, cv::Size reshape) :
     model(std::move(modelInstance)) {
 
     // --------------------------- 1. Load inference engine ------------------------------------------------
@@ -57,8 +57,9 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
     auto shapes = cnnNetwork.getInputShapes();
     for (auto& shape : shapes) {
         shape.second[0] = 1;
-        if (reshape) {
-            shape.second[3] = reshape;
+        if (reshape != cv::Size()) {
+            shape.second[2] = reshape.height;
+            shape.second[3] = reshape.width;
         }
     }
     cnnNetwork.reshape(shapes);

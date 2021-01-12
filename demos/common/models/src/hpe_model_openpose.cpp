@@ -29,9 +29,8 @@
 
 using namespace InferenceEngine;
 
-HPEOpenPose::HPEOpenPose(const std::string& modelFileName, bool useAutoResize) :
-    ModelBase(modelFileName),
-    useAutoResize(useAutoResize) {
+HPEOpenPose::HPEOpenPose(const std::string& modelFileName) :
+    ModelBase(modelFileName) {
 }
 
 void HPEOpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -71,56 +70,28 @@ void HPEOpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) 
         throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
 }
 
-int HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork, const InputData& inputData) {
+cv::Size HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork, int targetSize) {
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     SizeVector& imageInputDims = inputShapes.begin()->second;
-    inputLayerSize = cv::Size(imageInputDims[3], imageInputDims[2]);
-    auto& imageSize = inputData.asRef<ImageInputData>().inputImage.size();
-    double scale = static_cast<double>(inputLayerSize.height) / static_cast<double>(imageSize.height);
-    cv::Size scaledSize(static_cast<int>(cvRound(imageSize.width * scale)),
-                        static_cast<int>(cvRound(imageSize.height * scale)));
-    cv::Size scaledImageSize(std::max(scaledSize.width, inputLayerSize.height),
-                             inputLayerSize.height);
-    int minHeight = std::min(scaledImageSize.height, scaledSize.height);
-    scaledImageSize.width = static_cast<int>(std::ceil(
-                scaledImageSize.width / static_cast<float>(stride))) * stride;
-    pad(0) = static_cast<int>(std::floor((scaledImageSize.height - minHeight) / 2.0));
-    pad(1) = static_cast<int>(std::floor((scaledImageSize.width - scaledSize.width) / 2.0));
-    pad(2) = scaledImageSize.height - minHeight - pad(0);
-    pad(3) = scaledImageSize.width - scaledSize.width - pad(1);
-
-    if (scaledImageSize.width != (inputLayerSize.width - pad(1) - pad(3))) {
-        return scaledImageSize.width;
+    if (!targetSize) {
+        targetSize = imageInputDims[2];
     }
-    else { 
-        return 0;
-    }
+    int height = static_cast<int>(std::floor((imageInputDims[3] + stride - 1) / stride)) * stride;
+    int width = static_cast<int>(std::floor((targetSize + stride - 1) / stride)) * stride;
+    inputLayerSize = cv::Size(height, width);
+    return inputLayerSize;
 }
 
 std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
-
-    if (useAutoResize) {
-        /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
-        request->SetBlob(inputsNames[0], wrapMat2Blob(image));
-    }
-    else {
-        /* Resize and copy data from the image to the input blob */
-        Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-        InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(frameBlob)->wmap();
-        uint8_t* blob_data = blobMapped.as<uint8_t*>();
-        cv::Mat resizedImage;
-        double scale = inputLayerSize.height / static_cast<double>(image.rows);
-        cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
-        cv::Mat paddedImage;
-        cv::copyMakeBorder(resizedImage, paddedImage, pad(0), pad(2), pad(1), pad(3),
+    Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
+    cv::Mat resizedImage;
+    double scale = inputLayerSize.height / static_cast<double>(image.rows);
+    cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
+    cv::Mat paddedImage;
+    cv::copyMakeBorder(resizedImage, paddedImage, pad(0), pad(2), pad(1), pad(3),
                        cv::BORDER_CONSTANT, meanPixel);
-        std::vector<cv::Mat> planes(3);
-        for (size_t pId = 0; pId < planes.size(); pId++) {
-            planes[pId] = cv::Mat(inputLayerSize, CV_8UC1, blob_data + pId * inputLayerSize.area());
-            }
-        cv::split(paddedImage, planes);
-    }
+    matU8ToBlob<uint8_t>(paddedImage, frameBlob);
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(image.cols, image.rows));
 }
 
