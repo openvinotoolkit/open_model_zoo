@@ -138,7 +138,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 }
 
 
-cv::Mat renderHumanPose(const HumanPoseResult& result, float poseScoreThreshold) {
+cv::Mat renderHumanPose(const HumanPoseResult& result) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
         }
@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
-            model.reset(new HPEOpenPose(FLAGS_m, FLAGS_t));
+            model.reset(new HPEOpenPose(FLAGS_m, (float)FLAGS_t));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
@@ -266,7 +266,7 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to HumanPoseResult*
             //    and use your own processing instead of calling renderDetectionData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), (float)FLAGS_t);
+                cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
         while (result = pipeline.getResult()) {
-            cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), (float)FLAGS_t);
+            cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
