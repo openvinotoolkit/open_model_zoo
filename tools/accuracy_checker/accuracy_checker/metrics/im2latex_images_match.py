@@ -155,22 +155,23 @@ def render_routine(line):
         line (tuple): formula idx, formula string, path to store rendered image
     """
     formula, file_idx, folder_path = line
-    output_path = Path(folder_path, file_idx)
+    output_path = folder_path / file_idx
     pre_name = os.path.normcase(output_path).replace('/', '_').replace('.', '_')
     formula = preprocess_formula(formula)
     if not output_path.exists():
-        tex_filename = Path(folder_path, pre_name + '.tex')
-        log_filename = tex_filename.with_name(pre_name + '.log')
-        aux_filename = tex_filename.with_name(pre_name + '.aux')
-        with open(str(tex_filename), "w") as w:
+        tex_filename = folder_path / (pre_name + '.tex')
+        log_filename = tex_filename.with_suffix('.log')
+        aux_filename = tex_filename.with_suffix('.aux')
+        with tex_filename.open(mode="w") as w:
             w.write(template % formula)
-        subprocess.run(['pdflatex', '-interaction=nonstopmode', '-output-directory', folder_path, str(tex_filename)],
+        subprocess.run(['pdflatex', '-interaction=nonstopmode', '-output-directory',
+                        str(folder_path), str(tex_filename)],
                        check=False, stdout=PIPE, stderr=PIPE, shell=os.name == 'nt')
         for filename in (tex_filename, log_filename, aux_filename):
             if filename.exists():
                 filename.unlink()
-        pdf_filename = tex_filename.with_name(pre_name + '.pdf')
-        png_filename = tex_filename.with_name(pre_name + '.png')
+        pdf_filename = tex_filename.with_suffix('.pdf')
+        png_filename = tex_filename.with_suffix('.png')
         if not pdf_filename.exists():
             print_info('ERROR: {} cannot compile\n'.format(file_idx))
         else:
@@ -385,8 +386,8 @@ class Im2latexRenderBasedMetric(FullDatasetEvaluationMetric):
         for dir_ in [out_path_gold, out_path_pred]:
             if not dir_.exists():
                 dir_.mkdir()
-        lines_gold = [(ann.label, ann.identifier, str(out_path_gold)) for ann in annotations]
-        lines_pred = [(pred.label, pred.identifier, str(out_path_pred)) for pred in predictions]
+        lines_gold = [(ann.label, ann.identifier, out_path_gold) for ann in annotations]
+        lines_pred = [(pred.label, pred.identifier, out_path_pred) for pred in predictions]
         lines = lines_gold + lines_pred
         logging.info('Creating render pool with %s threads', self.num_threads)
         pool = ThreadPool(self.num_threads)
