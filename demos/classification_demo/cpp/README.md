@@ -105,6 +105,6 @@ Please note that you should use [imagenet_2015.txt](../../data/dataset_classes/i
 and [imagenet_2012.txt](../../data/dataset_classes/imagenet_2012.txt) labels file with all other models supported by the demo.
 
 ## See Also
-* [Using Open Model Zoo demos](../README.md)
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../tools/downloader/README.md)

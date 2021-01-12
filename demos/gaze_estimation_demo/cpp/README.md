@@ -101,6 +101,6 @@ The following keys are supported:
 > Other models may produce unexpected results on these devices.
 
 ## See Also
-* [Using Open Model Zoo demos](../README.md)
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../tools/downloader/README.md)
