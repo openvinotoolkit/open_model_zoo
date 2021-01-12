@@ -169,9 +169,6 @@ cv::Mat renderHumanPose(const HumanPoseResult& result, float poseScoreThreshold)
     const cv::Point2f absentKeypoint(-1.0f, -1.0f);
     for (auto pose : result.poses) {
         CV_Assert(pose.keypoints.size() == HPEOpenPose::keypointsNumber);
-        /*if (pose.score <= poseScoreThreshold) {
-            continue;
-        }*/
         for (size_t keypointIdx = 0; keypointIdx < pose.keypoints.size(); keypointIdx++) {
             if (pose.keypoints[keypointIdx] != absentKeypoint) {
                 cv::circle(outputImg, pose.keypoints[keypointIdx], 4, colors[keypointIdx], -1);
@@ -224,7 +221,7 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
-            model.reset(new HPEOpenPose(FLAGS_m));
+            model.reset(new HPEOpenPose(FLAGS_m, FLAGS_t));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;

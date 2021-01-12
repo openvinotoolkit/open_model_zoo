@@ -48,7 +48,7 @@ struct TwoJointsConnection {
 void findPeaks(const std::vector<cv::Mat>& heatMaps,
                const float minPeaksDistance,
                std::vector<std::vector<Peak> >& allPeaks,
-               int heatMapId);
+               int heatMapId, float confidenceThreshold);
 
 std::vector<HumanPose> groupPeaksToPoses(
         const std::vector<std::vector<Peak> >& allPeaks,

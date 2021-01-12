@@ -22,7 +22,7 @@ public:
     /// Constructor
     /// @param modelFileName name of model to load
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
-    HPEOpenPose(const std::string& modelFileName);
+    HPEOpenPose(const std::string& modelFileName, float confidenceThreshold);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
@@ -44,6 +44,8 @@ protected:
     const float minSubsetScore = 0.2f;
     const int upsampleRatio = 4;
     cv::Size inputLayerSize;
+
+    float confidenceThreshold;
 
     std::vector<HumanPose> extractPoses(const std::vector<cv::Mat>& heatMaps,
                                         const std::vector<cv::Mat>& pafs) const;

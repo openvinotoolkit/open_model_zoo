@@ -29,8 +29,9 @@
 
 using namespace InferenceEngine;
 
-HPEOpenPose::HPEOpenPose(const std::string& modelFileName) :
-    ModelBase(modelFileName) {
+HPEOpenPose::HPEOpenPose(const std::string& modelFileName, float confidenceThreshold) :
+    ModelBase(modelFileName),
+    confidenceThreshold(confidenceThreshold) {
 }
 
 void HPEOpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -165,20 +166,22 @@ void HPEOpenPose::resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const {
 class FindPeaksBody: public cv::ParallelLoopBody {
 public:
     FindPeaksBody(const std::vector<cv::Mat>& heatMaps, float minPeaksDistance,
-                  std::vector<std::vector<Peak> >& peaksFromHeatMap)
+                  std::vector<std::vector<Peak> >& peaksFromHeatMap, float confidenceThreshold)
         : heatMaps(heatMaps),
           minPeaksDistance(minPeaksDistance),
-          peaksFromHeatMap(peaksFromHeatMap) {}
+          peaksFromHeatMap(peaksFromHeatMap),
+          confidenceThreshold(confidenceThreshold) {}
 
     void operator()(const cv::Range& range) const override {
         for (int i = range.start; i < range.end; i++) {
-            findPeaks(heatMaps, minPeaksDistance, peaksFromHeatMap, i);
+            findPeaks(heatMaps, minPeaksDistance, peaksFromHeatMap, i, confidenceThreshold);
         }
     }
 
 private:
     const std::vector<cv::Mat>& heatMaps;
     float minPeaksDistance;
+    float confidenceThreshold;
     std::vector<std::vector<Peak> >& peaksFromHeatMap;
 };
 
@@ -186,7 +189,7 @@ std::vector<HumanPose> HPEOpenPose::extractPoses(
         const std::vector<cv::Mat>& heatMaps,
         const std::vector<cv::Mat>& pafs) const {
     std::vector<std::vector<Peak>> peaksFromHeatMap(heatMaps.size());
-    FindPeaksBody findPeaksBody(heatMaps, minPeaksDistance, peaksFromHeatMap);
+    FindPeaksBody findPeaksBody(heatMaps, minPeaksDistance, peaksFromHeatMap, confidenceThreshold);
     cv::parallel_for_(cv::Range(0, static_cast<int>(heatMaps.size())),
                       findPeaksBody);
     int peaksBefore = 0;
