@@ -25,15 +25,15 @@ See [here](https://github.com/intel-isl/MiDaS)
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Monodepth     |
-| GFLOPs            | 207.4915      |
-| MParams           | 104.0814      |
+| GFLOPs            | 207.25144     |
+| MParams           | 104.081       |
 | Source framework  | PyTorch\*     |
 
 ## Accuracy
 
 | Metric | Value |
 | ------ | ----- |
-| rmse   | 7.5878|
+| rmse   | 0.07  |
 
 ## Input
 
