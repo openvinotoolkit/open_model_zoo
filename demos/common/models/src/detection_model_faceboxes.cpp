@@ -98,8 +98,8 @@ void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>* anchors, const std::v
 
     for (auto cy : dense_cy) {
         for (auto cx : dense_cx) {
-            anchors->push_back({ static_cast<int>(cx - 0.5f * skx), static_cast<int>(cy - 0.5f * sky),
-                static_cast<int>( cx + 0.5f * skx), static_cast<int>(cy + 0.5f * sky) });  // left top right bottom
+            anchors->push_back({ static_cast<float>(cx - 0.5f * skx), static_cast<float>(cy - 0.5f * sky),
+                static_cast<float>( cx + 0.5f * skx), static_cast<float>(cy + 0.5f * sky) });  // left top right bottom
         }
     }
 
@@ -155,7 +155,7 @@ void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<size_t, size_t>>& fe
 
 std::vector<int> nms(const std::vector<ModelFaceBoxes::Anchor>& boxes, const std::vector<float>& scores, const float thresh) {
 
-    std::vector<int> areas(boxes.size());
+    std::vector<float> areas(boxes.size());
 
     for (int i = 0; i < boxes.size(); ++i) {
         areas[i] = (boxes[i].right - boxes[i].left) * (boxes[i].bottom - boxes[i].top);
@@ -181,7 +181,7 @@ std::vector<int> nms(const std::vector<ModelFaceBoxes::Anchor>& boxes, const std
                     auto overlappingWidth = std::min(boxes[idx1].right, boxes[idx2].right) - std::max(boxes[idx1].left, boxes[idx2].left);
                     auto overlappingHeight = std::min(boxes[idx1].bottom, boxes[idx2].bottom) - std::max(boxes[idx1].top, boxes[idx2].top);
                     auto intersection = overlappingWidth > 0 && overlappingHeight > 0 ? overlappingWidth * overlappingHeight : 0;
-                    auto overlap = static_cast<float>(intersection) / (areas[idx1] + areas[idx2] - intersection);
+                    auto overlap = intersection / (areas[idx1] + areas[idx2] - intersection);
 
                     if (overlap >= thresh) {
                         order[j] = -1;
@@ -236,8 +236,8 @@ std::vector<ModelFaceBoxes::Anchor> filterBBoxes(InferenceEngine::MemoryBlob::Pt
         auto predW = exp(dw * variance[1]) * anchors[i].getWidth();
         auto predH = exp(dh * variance[1]) * anchors[i].getHeight();
 
-        bboxes.push_back({ static_cast<int>(predCtrX - 0.5f * predW), static_cast<int>(predCtrY - 0.5f * predH),
-                                     static_cast<int>(predCtrX + 0.5f * predW), static_cast<int>(predCtrY + 0.5f * predH) });
+        bboxes.push_back({ static_cast<float>(predCtrX - 0.5f * predW), static_cast<float>(predCtrY - 0.5f * predH),
+                                     static_cast<float>(predCtrX + 0.5f * predW), static_cast<float>(predCtrY + 0.5f * predH) });
 
     }
 

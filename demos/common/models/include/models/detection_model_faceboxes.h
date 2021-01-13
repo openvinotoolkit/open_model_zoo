@@ -20,15 +20,15 @@
 class ModelFaceBoxes : public DetectionModel {
 public:
     struct Anchor {
-        int left;
-        int top;
-        int right;
-        int bottom;
+        float left;
+        float top;
+        float right;
+        float bottom;
 
-        int getWidth() const { return (right - left) + 1; }
-        int getHeight() const { return (bottom - top) + 1; }
-        int getXCenter() const { return left + (getWidth() - 1) / 2; }
-        int getYCenter() const { return top + (getHeight() - 1) / 2; }
+        float getWidth() const { return (right - left) + 1; }
+        float getHeight() const { return (bottom - top) + 1; }
+        float getXCenter() const { return left + (getWidth() - 1) / 2.0f; }
+        float getYCenter() const { return top + (getHeight() - 1) / 2.0f; }
     };
     static const int INIT_VECTOR_SIZE = 200;
 
