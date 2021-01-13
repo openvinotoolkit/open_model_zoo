@@ -24,7 +24,8 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: colorization_demo.py [-h] -m MODEL [-d DEVICE] -i INPUT [--loop]
-                            [-o OUTPUT] [--no_show] [-v] [-u UTILIZATION_MONITORS]
+                            [-o OUTPUT] [-limit OUTPUT_LIMIT]
+                            [--no_show] [-v] [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Help with the script.
@@ -39,6 +40,9 @@ Options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If -1 is set, all frames will be stored.
   --no_show             Optional. Disable display of results on screen.
   -v, --verbose         Optional. Enable display of processing logs on screen.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS

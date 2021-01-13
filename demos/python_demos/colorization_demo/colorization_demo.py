@@ -45,6 +45,9 @@ def build_arg():
                          help='Optional. Enable reading the input in a loop.')
     in_args.add_argument('-o', '--output', required=False,
                          help='Optional. Name of output to save.')
+    in_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                         help='Optional. Number of frames to store in output. '
+                              'If -1 is set, all frames will be stored.')
     in_args.add_argument("--no_show", help="Optional. Disable display of results on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
@@ -81,6 +84,7 @@ if __name__ == '__main__':
     if original_frame is None:
         raise RuntimeError("Can't read an image from the input")
 
+    frames_processed = 0
     imshow_size = (640, 480)
     graph_size = (imshow_size[0] // 2, imshow_size[1] // 4)
     presenter = monitors.Presenter(args.utilization_monitors, imshow_size[1] * 2 - graph_size[1], graph_size)
@@ -135,7 +139,8 @@ if __name__ == '__main__':
                     cv.hconcat([lab_image, colorize_image])]
         final_image = cv.vconcat(ir_image)
 
-        if video_writer.isOpened():
+        frames_processed += 1
+        if video_writer.isOpened() and (args.output_limit == -1 or frames_processed <= args.output_limit):
             video_writer.write(final_image)
 
         presenter.drawGraphs(final_image)

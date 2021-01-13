@@ -56,6 +56,9 @@ if __name__ == '__main__':
                       help='Optional. Enable reading the input in a loop.')
     args.add_argument('-o', '--output', required=False,
                       help='Optional. Name of output to save.')
+    args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                      help='Optional. Number of frames to store in output. '
+                           'If -1 is set, all frames will be stored.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
@@ -104,6 +107,7 @@ if __name__ == '__main__':
     base_height = args.height_size
     fx = args.fx
 
+    frames_processed = 0
     delay = 1
     esc_code = 27
     p_code = 112
@@ -143,7 +147,8 @@ if __name__ == '__main__':
         cv2.putText(frame, 'FPS: {}'.format(int(1 / mean_time * 10) / 10),
                     (40, 80), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255))
 
-        if video_writer.isOpened():
+        frames_processed += 1
+        if video_writer.isOpened() and (args.output_limit == -1 or frames_processed <= args.output_limit):
             video_writer.write(frame)
 
         if not args.no_show:

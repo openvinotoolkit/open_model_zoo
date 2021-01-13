@@ -28,6 +28,9 @@ def build_argparser():
                         help="Optional. Enable reading the input in a loop.")
     parser.add_argument("-o", "--output", required=False,
                         help="Optional. Name of output to save.")
+    parser.add_argument("-limit", "--output_limit", required=False, default=1000, type=int,
+                      help="Optional. Number of frames to store in output. "
+                           "If -1 is set, all frames will be stored.")
     parser.add_argument("-d", "--device", type=str, default='CPU', required=False,
                         help="Optional. Specify the target to infer on CPU or GPU.")
     parser.add_argument("--person_label", type=int, required=False, default=15, help="Optional. Label of class person for detector.")
@@ -58,6 +61,7 @@ def run_demo(args):
         if not video_writer.isOpened():
             raise RuntimeError("Can't open video writer")
 
+    frames_processed = 0
     presenter = monitors.Presenter(args.utilization_monitors, 25)
     while frame is not None:
         bboxes = detector_person.detect(frame)
@@ -81,7 +85,8 @@ def run_demo(args):
             float(1 / single_human_pose_estimator.infer_time),
             float(1 / detector_person.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
 
-        if video_writer.isOpened():
+        frames_processed += 1
+        if video_writer.isOpened() and (args.output_limit == -1 or frames_processed <= args.output_limit):
             video_writer.write(frame)
 
         if not args.no_show:

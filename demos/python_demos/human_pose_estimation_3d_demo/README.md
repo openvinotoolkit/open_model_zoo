@@ -35,8 +35,8 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: human_pose_estimation_3d_demo.py [-h] -m MODEL -i INPUT [--loop]
-                                        [-o OUTPUT] [-d DEVICE]
-                                        [--height_size HEIGHT_SIZE]
+                                        [-o OUTPUT] [-limit OUTPUT_LIMIT]
+                                        [-d DEVICE] [--height_size HEIGHT_SIZE]
                                         [--extrinsics_path EXTRINSICS_PATH]
                                         [--fx FX] [--no_show]
                                         [-u UTILIZATION_MONITORS]
@@ -54,6 +54,9 @@ Options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If -1 is set, all frames will be stored.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on: CPU,
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a

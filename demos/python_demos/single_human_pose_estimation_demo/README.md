@@ -14,7 +14,7 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: single_human_pose_estimation_demo.py [-h] -m_od MODEL_OD -m_hpe MODEL_HPE
                                             -i INPUT [--loop] [-o OUTPUT]
-                                            [-d DEVICE]
+                                            [-limit OUTPUT_LIMIT] [-d DEVICE]
                                             [--person_label PERSON_LABEL]
                                             [--no_show]
                                             [-u UTILIZATION_MONITORS]
@@ -31,6 +31,9 @@ optional arguments:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If -1 is set, all frames will be stored.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target to infer on CPU or GPU.
   --person_label PERSON_LABEL

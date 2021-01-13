@@ -41,6 +41,9 @@ def build_argparser():
                       help='Optional. Enable reading the input in a loop.')
     args.add_argument('-o', '--output', required=False,
                       help='Optional. Name of output to save.')
+    args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                      help='Optional. Number of frames to store in output. '
+                           'If -1 is set, all frames will be stored.')
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
     decoder_args = args.add_mutually_exclusive_group()
     decoder_args.add_argument('-m_de', '--m_decoder',
@@ -107,7 +110,7 @@ def main():
         decoder_seq_size = args.decoder_seq_size
 
     presenter = monitors.Presenter(args.utilization_monitors, 70)
-    result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, output=args.output, labels=labels,
+    result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
     cap = open_images_capture(args.input, args.loop)
     run_pipeline(cap, encoder, decoder, result_presenter.render_frame, decoder_seq_size=decoder_seq_size, fps=cap.fps())

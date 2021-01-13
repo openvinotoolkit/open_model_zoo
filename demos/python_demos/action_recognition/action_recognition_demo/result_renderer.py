@@ -31,11 +31,12 @@ TEXT_LEFT_MARGIN = 15
 
 
 class ResultRenderer:
-    def __init__(self, no_show, presenter, output, display_fps=False, display_confidence=True, number_of_predictions=1,
+    def __init__(self, no_show, presenter, output, limit, display_fps=False, display_confidence=True, number_of_predictions=1,
                  label_smoothing_window=30, labels=None, output_height=720):
         self.no_show = no_show
         self.presenter = presenter
         self.output = output
+        self.limit = limit
         self.video_writer = cv2.VideoWriter()
         self.number_of_predictions = number_of_predictions
         self.display_confidence = display_confidence
@@ -97,7 +98,7 @@ class ResultRenderer:
             cv2.putText(frame, "Inference time: {:.2f}ms ({:.2f} FPS)".format(inference_time, fps),
                         text_loc, FONT_STYLE, FONT_SIZE, FONT_COLOR)
 
-        if self.video_writer.isOpened():
+        if self.video_writer.isOpened() and (self.limit == -1 or frame_ind-1 <= self.limit):
             self.video_writer.write(frame)
 
         if not self.no_show:

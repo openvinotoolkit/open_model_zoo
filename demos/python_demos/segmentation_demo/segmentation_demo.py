@@ -124,6 +124,9 @@ def build_argparser():
                          help='Optional. Enable reading the input in a loop.')
     io_args.add_argument('-o', '--output', required=False,
                          help='Optional. Name of output to save.')
+    io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                         help='Optional. Number of frames to store in output. '
+                              'If -1 is set, all frames will be stored.')
     io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
@@ -220,7 +223,7 @@ def main():
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
 
-            if video_writer.isOpened():
+            if video_writer.isOpened() and (args.output_limit == -1 or next_frame_id_to_show-1 <= args.output_limit):
                 video_writer.write(frame)
 
             if not args.no_show:

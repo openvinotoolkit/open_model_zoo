@@ -36,6 +36,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: action_recognition.py [-h] -i INPUT [--loop] [-o OUTPUT]
+                             [-limit OUTPUT_LIMIT]
                              -m_en M_ENCODER [-m_de M_DECODER]
                              [-l CPU_EXTENSION] [-d DEVICE]
                              [-lb LABELS] [--no_show] [-s LABEL_SMOOTHING]
@@ -50,6 +51,9 @@ Options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If -1 is set, all frames will be stored.
   -m_en M_ENCODER, --m_encoder M_ENCODER
                         Required. Path to encoder model.
   -m_de M_DECODER, --m_decoder M_DECODER

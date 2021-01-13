@@ -56,7 +56,7 @@ usage: object_detection_demo.py [-h] -m MODEL -at
                                 [-t PROB_THRESHOLD] [--keep_aspect_ratio]
                                 [-nireq NUM_INFER_REQUESTS]
                                 [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS]
-                                [--loop] [-o OUTPUT] [--no_show]
+                                [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show]
                                 [-u UTILIZATION_MONITORS] [-r]
 
 Options:
@@ -98,6 +98,9 @@ Input/output options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If -1 is set, all frames will be stored.
   --no_show             Optional. Don't show output.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
