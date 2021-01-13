@@ -74,7 +74,7 @@ void HPEOpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) 
 }
 
 bool HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork) {
-    ICNNNetwork::InputShapes& inputShapes = cnnNetwork.getInputShapes();
+    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     SizeVector& InputLayerDims = inputShapes.begin()->second;
     double aspectRatio = inputImageSize.width / static_cast<double>(inputImageSize.height);
     if (!targetSize) {
