@@ -1,24 +1,24 @@
-# instance-segmentation-security-0904
+# instance-segmentation-security-1039
 
 ## Use Case and High-Level Description
 
 This model is an instance segmentation network for 80 classes of objects.
-It is a Mask R-CNN with ResNet50 backbone, light-weight FPN, RPN,
+It is a Mask R-CNN with EfficientNet-B2 backbone, light-weight FPN, RPN,
 detection and segmentation heads.
 
 ## Example
 
-![](./instance-segmentation-security-0904.png)
+![](./instance-segmentation-security-1039.png)
 
 ## Specification
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | MS COCO val2017 box AP          | 32.9%                                     |
-| MS COCO val2017 mask AP         | 29.1%                                     |
+| MS COCO val2017 mask AP         | 28.6%                                     |
 | Max objects to detect           | 100                                       |
-| GFlops                          | 41.3668                                   |
-| MParams                         | 29.9067                                   |
+| GFlops                          | 13.9672                                   |
+| MParams                         | 10.5674                                   |
 | Source framework                | PyTorch\*                                 |
 
 Average Precision (AP) is defined and measured according to standard
@@ -26,7 +26,7 @@ Average Precision (AP) is defined and measured according to standard
 
 ## Inputs
 
-1.	name: `image` , shape: [1x3x384x416] - An input image in the format
+1.	name: `image` , shape: [1x3x480x480] - An input image in the format
     [1xCxHxW]. The expected channel order is BGR.
 
 ## Outputs

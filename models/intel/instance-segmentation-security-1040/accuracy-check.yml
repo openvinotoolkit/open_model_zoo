@@ -1,5 +1,5 @@
 models:
-  - name: instance-segmentation-security-0904
+  - name: instance-segmentation-security-1040
 
     launchers:
       - framework: dlsdk
@@ -14,8 +14,8 @@ models:
 
         preprocessing:
           - type: resize
-            dst_width: 416
-            dst_height: 384
+            dst_width: 608
+            dst_height: 608
 
         metrics:
           - name: AP@masks
