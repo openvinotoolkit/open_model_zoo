@@ -29,8 +29,10 @@
 
 using namespace InferenceEngine;
 
-HPEOpenPose::HPEOpenPose(const std::string& modelFileName, float confidenceThreshold) :
+HPEOpenPose::HPEOpenPose(const std::string& modelFileName, cv::Size inputImageSize, int targetSize, float confidenceThreshold) :
     ModelBase(modelFileName),
+    inputImageSize(inputImageSize),
+    targetSize(targetSize),
     confidenceThreshold(confidenceThreshold) {
 }
 
@@ -71,18 +73,22 @@ void HPEOpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) 
         throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
 }
 
-cv::Size HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork, cv::Size& InputSize, int targetSize) {
-    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+bool HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork) {
+    ICNNNetwork::InputShapes& inputShapes = cnnNetwork.getInputShapes();
     SizeVector& InputLayerDims = inputShapes.begin()->second;
-    double AspectRatio = InputSize.width / static_cast<double>(InputSize.height);
+    double aspectRatio = inputImageSize.width / static_cast<double>(inputImageSize.height);
     if (!targetSize) {
         targetSize = InputLayerDims[2];
     }
-    int inputWidth = static_cast<int>(std::round(targetSize * AspectRatio));
+    int inputWidth = static_cast<int>(std::round(targetSize * aspectRatio));
     int height = static_cast<int>((inputWidth + stride - 1) / stride) * stride;
     int width = static_cast<int>((targetSize + stride - 1) / stride) * stride;
     inputLayerSize = cv::Size(height, width);
-    return inputLayerSize;
+    InputLayerDims[0] = 1;
+    InputLayerDims[3] = height;
+    InputLayerDims[2] = width;
+    cnnNetwork.reshape(inputShapes);
+    return true;
 }
 
 std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {

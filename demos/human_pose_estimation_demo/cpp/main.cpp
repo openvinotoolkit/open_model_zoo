@@ -17,7 +17,7 @@
 /**
 * \brief The entry point for the Inference Engine Human Pose Estimation demo application
 * \file human_pose_estimation_demo/main.cpp
-* \example human_pose_estimation/main.cpp
+* \example human_pose_estimation_demo/main.cpp
 */
 
 #include <iostream>
@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
-            model.reset(new HPEOpenPose(FLAGS_m, (float)FLAGS_t));
+            model.reset(new HPEOpenPose(FLAGS_m, curr_frame.size(), FLAGS_tsize, (float)FLAGS_t));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
@@ -232,11 +232,9 @@ int main(int argc, char *argv[]) {
         }
 
         InferenceEngine::Core core;
-        InferenceEngine::CNNNetwork cnnNetwork = core.ReadNetwork(model->getModelFileName());
-        cv::Size reshape = model->reshape(cnnNetwork, curr_frame.size(), FLAGS_tsize);
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
-            core, reshape);
+            core);
         Presenter presenter(FLAGS_u);
 
         int64_t frameNum = 0;

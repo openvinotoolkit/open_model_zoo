@@ -22,12 +22,15 @@
 =======
 #include <samples/common.hpp>
 #include <samples/slog.hpp>
+<<<<<<< HEAD:demos/common/cpp/pipelines/src/async_pipeline.cpp
 #include "models/hpe_model_openpose.h"
 >>>>>>> 0eaa7e90 (hpe):demos/common/pipelines/src/async_pipeline.cpp
+=======
+>>>>>>> 8b2def53 (Change reshape() interface, add small fixes):demos/common/pipelines/src/async_pipeline.cpp
 
 using namespace InferenceEngine;
 
-AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine, cv::Size reshape) :
+AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine) :
     model(std::move(modelInstance)) {
 
     // --------------------------- 1. Load inference engine ------------------------------------------------
@@ -54,15 +57,13 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
     /** Set batch size to 1 **/
     slog::info << "Batch size is forced to 1." << slog::endl;
 
-    auto shapes = cnnNetwork.getInputShapes();
-    for (auto& shape : shapes) {
-        shape.second[0] = 1;
-        if (reshape != cv::Size()) {
-            shape.second[2] = reshape.height;
-            shape.second[3] = reshape.width;
+    if (!model->reshape(cnnNetwork)) {
+        auto shapes = cnnNetwork.getInputShapes();
+        for (auto& shape : shapes) {
+            shape.second[0] = 1;
         }
+        cnnNetwork.reshape(shapes);
     }
-    cnnNetwork.reshape(shapes);
 
     // -------------------------- Reading all outputs names and customizing I/O blobs (in inherited classes)
     model->prepareInputsOutputs(cnnNetwork);
