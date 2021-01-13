@@ -304,8 +304,8 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
         desc.label = getLabelName(desc.labelID);
         desc.x = bboxes[i].left;
         desc.y = bboxes[i].top;
-        desc.width = bboxes[i].getWidth(); 
-        desc.height = bboxes[i].getHeight(); 
+        desc.width = bboxes[i].getWidth();
+        desc.height = bboxes[i].getHeight();
 
         result->objects.push_back(desc);
     }
