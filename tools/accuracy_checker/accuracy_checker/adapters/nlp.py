@@ -22,6 +22,7 @@ from ..representation import (MachineTranslationPrediction,
                               QuestionAnsweringPrediction,
                               QuestionAnsweringEmbeddingPrediction,
                               ClassificationPrediction,
+                              SequenceClassificationPrediction,
                               LanguageModelingPrediction)
 from ..config import PathField, NumberField, StringField, BoolField
 from ..utils import read_txt, UnsupportedPackage
@@ -298,3 +299,34 @@ class BertTextClassification(Adapter):
             result.append(ClassificationPrediction(identifier, output))
 
         return result
+
+
+class BERTNamedEntityRecognition(Adapter):
+    __provider__ = 'bert_ner'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'classification_out': StringField(
+                optional=True,
+                description='Classification output layer name. If not provided, first output will be used.'
+            )
+        })
+
+        return params
+
+    def configure(self):
+        self.classification_out = self.get_value_from_config('classification_out')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        outputs = self._extract_predictions(raw, frame_meta)
+        if self.classification_out is None:
+            self.select_output_blob(outputs)
+            self.classification_out = self.output_blob
+        outputs = outputs[self.classification_out]
+        results = []
+        for identifier, out in zip(identifiers, outputs):
+            results.append(SequenceClassificationPrediction(identifier, out))
+        return results
+

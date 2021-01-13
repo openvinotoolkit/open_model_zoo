@@ -19,7 +19,9 @@ from .classification_representation import (
     Classification,
     ClassificationAnnotation,
     ClassificationPrediction,
-    ArgMaxClassificationPrediction
+    ArgMaxClassificationPrediction,
+    SequenceClassificationAnnotation,
+    SequenceClassificationPrediction
 )
 from .detection_representation import (
     Detection,
@@ -81,7 +83,8 @@ from .nlp_representation import (
     TextClassificationAnnotation,
     LanguageModelingAnnotation,
     LanguageModelingPrediction,
-    QuestionAnsweringBiDAFAnnotation
+    QuestionAnsweringBiDAFAnnotation,
+    BERTNamedEntityRecognitionAnnotation
 )
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
 from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
@@ -183,6 +186,7 @@ __all__ = [
     'TextClassificationAnnotation',
     'LanguageModelingAnnotation',
     'LanguageModelingPrediction',
+    'BERTNamedEntityRecognitionAnnotation',
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',
