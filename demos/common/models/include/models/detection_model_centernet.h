@@ -20,9 +20,6 @@
 class ModelCenterNet : public DetectionModel {
 public:
     struct BBoxes {
-        float xCenter;
-        float yCenter;
-
         float left;
         float top;
         float right;
@@ -30,12 +27,10 @@ public:
 
         float getWidth() const { return (right - left) + 1; }
         float getHeight() const { return (bottom - top) + 1; }
-        //float getXCenter() const { return left + (getWidth() - 1) / 2.0f; }
-        //float getYCenter() const { return top + (getHeight() - 1) / 2.0f; }
     };
     static const int INIT_VECTOR_SIZE = 200;
 
-    ModelCenterNet(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold,
+    ModelCenterNet(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
         const std::vector<std::string>& labels = std::vector<std::string>());
     std::shared_ptr<InternalModelData> preprocess(
         const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
@@ -43,10 +38,9 @@ public:
 
 protected:
     int maxProposalsCount;
-    const float boxIOUThreshold;
     float imgCX;
     float imgCY;
-//    std::vector<Anchor> anchors;
+
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     std::string getLabelName(int labelID) { return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
 

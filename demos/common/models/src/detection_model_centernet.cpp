@@ -27,9 +27,8 @@
 using namespace InferenceEngine;
 
 ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
-    float confidenceThreshold, bool useAutoResize, float boxIOUThreshold, const std::vector<std::string>& labels)
-    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels),
-    boxIOUThreshold(boxIOUThreshold) {
+    float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels)
+    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
 }
 
 void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -100,9 +99,9 @@ cv::Point2f get3rdPoint(const cv::Point2f& a, const cv::Point2f& b) {
     return b + cv::Point2f({ -direct.y, direct.x });
 }
 
-cv::Mat getAffineTransform(float centerX, float centerY, float scale, float rot, int outputWidth, int outputHeight, bool inv = false) {
-    float srcW = scale;
-    float rotRad =  M_PI * rot / 180.0f;
+cv::Mat getAffineTransform(float centerX, float centerY, int scale, float rot, int outputWidth, int outputHeight, bool inv = false) {
+    int srcW = scale;
+    float rotRad =  static_cast<float>(M_PI) * rot / 180.0f;
     auto srcDir = getDir({ 0, -0.5f * srcW }, rotRad);
     cv::Point2f dstDir({ 0,  -0.5f * outputWidth });
     std::vector<cv::Point2f> src(3, { 0 , 0 });
@@ -127,44 +126,19 @@ cv::Mat getAffineTransform(float centerX, float centerY, float scale, float rot,
     return trans;
 }
 
-
-void hwcTochw(cv::InputArray src, cv::OutputArray dst) {
-    const int srcH = src.rows();
-    const int srcW = src.cols();
-    const int srcC = src.channels();
-
-    cv::Mat hwC = src.getMat().reshape(1, srcH * srcW);
-
-    const std::array<int, 3> dims = { srcC, srcH, srcW };
-    dst.create(3, &dims[0], CV_MAKETYPE(src.depth(), 1));
-    cv::Mat dst1d = dst.getMat().reshape(1, { srcC, srcH, srcW });
-
-    cv::transpose(hwC, dst1d);
-}
-
 std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
-
-    //height, width = image.shape[0:2]
-    //    center = np.array([width / 2., height / 2.], dtype = np.float32)
-    //    scale = max(height, width)
-    //    trans_input = self.get_affine_transform(center, scale, 0, [self.w, self.h])
-    //    resized_image = cv2.warpAffine(image, trans_input, (self.w, self.h), flags = cv2.INTER_LINEAR)
-    //    resized_image = np.transpose(resized_image, (2, 0, 1))
     auto& img = inputData.asRef<ImageInputData>().inputImage;
 
     int imgWidth = img.cols;
     int imgHeight = img.rows;
-
     float centerX = imgWidth / 2.0f;
     float centerY = imgHeight / 2.0f;
-
     int scale = std::max(imgWidth, imgHeight);
+
     auto transInput = getAffineTransform(centerX, centerY, scale, 0, netInputWidth, netInputHeight);
     cv::Mat resizedImg;
     cv::warpAffine(img, resizedImg, transInput, cv::Size(netInputWidth, netInputHeight), cv::INTER_LINEAR);
-    //change order
     cv::Mat chwImg;
-    //hwcTochw(resizedImg, chwImg);
 
     if (useAutoResize) {
         /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
@@ -184,35 +158,15 @@ std::vector<float> maxPool2d(const std::vector<float>& mat, int kernelSize, int 
     return {};
 }
 
-std::vector<std::pair<size_t, float>> nms(const float *scoresPtr, SizeVector sz, float threshold, int kernel = 3) {
-    //def max_pool2d(A, kernel_size, padding = 1, stride = 1) :
-    //    A = np.pad(A, padding, mode = 'constant')
-    //    output_shape = ((A.shape[0] - kernel_size)//stride + 1,
-    //    (A.shape[1] - kernel_size)//stride + 1)
-    //        kernel_size = (kernel_size, kernel_size)
-    //        A_w = as_strided(A, shape = output_shape + kernel_size,
-    //            strides = (stride*A.strides[0],
-    //                stride*A.strides[1]) + A.strides)
-    //        A_w = A_w.reshape(-1, *kernel_size)
-
-    //        return A_w.max(axis = (1, 2)).reshape(output_shape)
-
-//        pad = (kernel - 1) // 2
-
-          
-//        hmax = np.array([max_pool2d(channel, kernel, pad) for channel in heat])
-//        keep = (hmax == heat)
-//        return heat * keep
-
-    int pad = (kernel - 1) / 2;
+std::vector<std::pair<size_t, float>> nms(float *scoresPtr, SizeVector sz, float threshold, int kernel = 3) {
     std::vector<std::pair<size_t, float>> scores;
     scores.reserve(100);
-    //std::vector<float> scores;
-    //std::vector<float> classes;
-    //std::vector<float> x;
-    //std::vector<float> y;
     int chSize = sz[2] * sz[3];
-    int k = 100;
+
+    for (int i = 0; i < sz[1] * sz[2] * sz[3]; ++i) {
+        scoresPtr[i] = expf(scoresPtr[i]) / (1 + expf(scoresPtr[i]));
+    }
+
     for (int ch = 0; ch < sz[1]; ++ch) {
         int count = 0;
         for (int w = 0; w < sz[2]; ++w) {
@@ -244,18 +198,7 @@ std::vector<std::pair<size_t, float>> nms(const float *scoresPtr, SizeVector sz,
             }
         }
     }
-    //for (int i = 0; i < k; ++i) {
-    //    auto ki = q.top();
-    //    newScores[k - i - 1] = ki;
-    //    q.pop();
-    //}
 
-    //for (auto i : indices) {
-    //    scores.push_back(heat[i]);
-    //    classes.push_back(i / chSize);
-    //    x.push_back(i / sz[2]);
-    //    y.push_back(i % sz[2]);
-    //}
     return scores;
 }
 
@@ -264,39 +207,27 @@ std::vector<std::pair<size_t, float>> filterScores(InferenceEngine::MemoryBlob::
     LockedMemory<const void> scoresOutputMapped = scoresInfRes->rmap();
     auto desc = scoresInfRes->getTensorDesc();
     auto sz = desc.getDims();
-    const float *scoresPtr = scoresOutputMapped.as<float*>();
+    float *scoresPtr = scoresOutputMapped.as<float*>();
 
     return nms(scoresPtr, sz, threshold);
 }
 
 std::vector<std::pair<float, float>> filterReg(InferenceEngine::MemoryBlob::Ptr regInfRes, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
     LockedMemory<const void> bboxesOutputMapped = regInfRes->rmap();
-    //auto desc = regInfRes->getTensorDesc();
-    //auto sz = desc.getDims();
-    //auto chSize = sz[1] * sz[2];
     const float *regPtr = bboxesOutputMapped.as<float*>();
     std::vector<std::pair<float, float>> reg;
-
-    //for (int i = 0; i < sz[1] * sz[2] * sz[3]; ++i) {
-    //    reg.push_back({ regPtr[i], regPtr[i] } );
-    //}
 
     for (auto s : scores) {
         reg.push_back({ regPtr[s.first % chSize], regPtr[chSize + s.first % chSize] });
     }
+
     return reg;
 }
 
 std::vector<std::pair<float, float>> filterWH(InferenceEngine::MemoryBlob::Ptr whInfRes, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
     LockedMemory<const void> bboxesOutputMapped = whInfRes->rmap();
-    //auto desc = whInfRes->getTensorDesc();
-    //auto sz = desc.getDims();
     const float *whPtr = bboxesOutputMapped.as<float*>();
     std::vector<std::pair<float, float>> wh;
-
-    //for (int i = 0; i < sz[1] * sz[2] * sz[3]; ++i) {
-    //    wh.push_back({ whPtr[i], whPtr[i] } );
-    //}
 
     for (auto s : scores) {
         wh.push_back({ whPtr[s.first % chSize], whPtr[chSize + s.first % chSize] });
@@ -325,6 +256,7 @@ std::vector<ModelCenterNet::BBoxes> calcBBoxes(const std::vector<std::pair<size_
 
 void transform(std::vector<ModelCenterNet::BBoxes>* bboxes, const SizeVector& sz, int scale, float centerX, float centerY) {
     cv::Mat1f trans = getAffineTransform(centerX, centerY, scale, 0, sz[2], sz[3], true);
+
     for (auto& b : *bboxes) {
         ModelCenterNet::BBoxes newbb;
 
@@ -344,10 +276,6 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
 
     auto scores = filterScores(heatInfRes, confidenceThreshold);
 
-    for (auto& s : scores) {
-        s.second = expf(s.second) / (1 + expf(s.second));
-    }
-
     auto regInfRes = infResult.outputsData[outputsNames[1]];
 
     auto reg = filterReg(regInfRes, scores, chSize);
@@ -366,7 +294,7 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
 
     transform(&bboxes, sz, scale, centerX, centerY);
 
-    // --------------------------- Create detection result objects --------------------------------------------------------
+    // --------------------------- Create detection result objects ----------------------------------------------------
     DetectionResult* result = new DetectionResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
