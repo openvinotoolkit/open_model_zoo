@@ -15,7 +15,6 @@
 */
 #pragma once
 #include "model_base.h"
-#include "human_pose.h"
 
 class HPEOpenPose : public ModelBase {
 public:

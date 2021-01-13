@@ -325,8 +325,8 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
             continue;
         }
         int position = -1;
-        HumanPose pose(std::vector<cv::Point2f>(keypointsNumber, cv::Point2f(-1.0f, -1.0f)),
-                       subsetI.score * std::max(0, subsetI.nJoints - 1));
+        HumanPose pose{std::vector<cv::Point2f>(keypointsNumber, cv::Point2f(-1.0f, -1.0f)),
+                       subsetI.score * std::max(0, subsetI.nJoints - 1)};
         for (const auto& peakIdx : subsetI.peaksIndices) {
             position++;
             if (peakIdx >= 0) {

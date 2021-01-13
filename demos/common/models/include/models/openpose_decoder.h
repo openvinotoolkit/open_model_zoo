@@ -14,8 +14,8 @@
 // limitations under the License.
 */
 #pragma once
-#include "human_pose.h"
-
+#include "opencv2/core.hpp"
+#include "results.h"
 
 struct Peak {
     Peak(const int id = -1,

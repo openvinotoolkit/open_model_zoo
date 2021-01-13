@@ -18,9 +18,7 @@
 #include <opencv2/core.hpp>
 #include <inference_engine.hpp>
 #include <map>
-//#include "metadata.h"
 #include "internal_model_data.h"
-#include "human_pose.h"
 
 struct MetaData;
 struct ResultBase {
@@ -74,6 +72,11 @@ struct DetectionResult : public ResultBase {
 
 struct SegmentationResult : public ResultBase {
     cv::Mat mask;
+};
+
+struct HumanPose {
+    std::vector<cv::Point2f> keypoints;
+    float score;
 };
 
 struct HumanPoseResult : public ResultBase {
