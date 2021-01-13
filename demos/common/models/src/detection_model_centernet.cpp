@@ -73,7 +73,6 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     }
 
     const TensorDesc& outputDesc = outputInfo.begin()->second->getTensorDesc();
-    maxProposalsCount = outputDesc.getDims()[1];
 
     for (auto& output : outputInfo) {
         output.second->setPrecision(InferenceEngine::Precision::FP32);
@@ -153,11 +152,6 @@ std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& i
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
 }
 
-std::vector<float> maxPool2d(const std::vector<float>& mat, int kernelSize, int stride = 1) {
-
-    return {};
-}
-
 std::vector<std::pair<size_t, float>> nms(float *scoresPtr, SizeVector sz, float threshold, int kernel = 3) {
     std::vector<std::pair<size_t, float>> scores;
     scores.reserve(100);
@@ -168,15 +162,20 @@ std::vector<std::pair<size_t, float>> nms(float *scoresPtr, SizeVector sz, float
     }
 
     for (int ch = 0; ch < sz[1]; ++ch) {
-        int count = 0;
         for (int w = 0; w < sz[2]; ++w) {
             for (int h = 0; h < sz[3]; ++h) {
                 float max = scoresPtr[chSize * ch + sz[2] * w + h];
+
+                /*filter on threshold*/
                 if (max < threshold) {
                     continue;
                 }
+
+                /*store index and score*/
                 scores.push_back({ chSize * ch + sz[2] * w + h, max });
+
                 bool next = true;
+                /*maxpool2d*/
                 for (int i = -kernel / 2; i < kernel / 2 + 1 && next; ++i) {
                     for (int j = -kernel / 2; j < kernel / 2 + 1; ++j) {
                         if (w + i >= 0 && w + i < sz[2] && h + j >= 0 && h + j < sz[3]) {
@@ -270,20 +269,18 @@ void transform(std::vector<ModelCenterNet::BBoxes>* bboxes, const SizeVector& sz
 }
 
 std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResult) {
+ // --------------------------- Filter data and get valid indices----------------------------------
     auto heatInfRes = infResult.outputsData[outputsNames[0]];
     auto sz = heatInfRes->getTensorDesc().getDims();;
     auto chSize = sz[2] * sz[3];
-
     auto scores = filterScores(heatInfRes, confidenceThreshold);
 
     auto regInfRes = infResult.outputsData[outputsNames[1]];
-
     auto reg = filterReg(regInfRes, scores, chSize);
 
     auto whInfRes = infResult.outputsData[outputsNames[2]];
-
     auto wh = filterWH(whInfRes, scores, chSize);
-
+// --------------------------- Calculate bounding boxes & apply inverse affine transform-----------
     auto bboxes = calcBBoxes(scores, reg, wh, sz);
 
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
@@ -294,7 +291,7 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
 
     transform(&bboxes, sz, scale, centerX, centerY);
 
-    // --------------------------- Create detection result objects ----------------------------------------------------
+// --------------------------- Create detection result objects ------------------------------------
     DetectionResult* result = new DetectionResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
@@ -302,7 +299,7 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
     for (int i = 0; i < scores.size(); ++i) {
         size_t chIdx = scores[i].first % chSize;
         DetectedObject desc;
-        desc.confidence = static_cast<float>(scores[i].second);
+        desc.confidence = scores[i].second;
         desc.labelID = scores[i].first / chSize;
         desc.label = getLabelName(desc.labelID);
         desc.x = bboxes[i].left;

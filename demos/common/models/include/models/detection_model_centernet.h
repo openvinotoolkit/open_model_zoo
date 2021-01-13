@@ -37,10 +37,6 @@ public:
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    int maxProposalsCount;
-    float imgCX;
-    float imgCY;
-
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     std::string getLabelName(int labelID) { return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
 
