@@ -15,8 +15,8 @@ GFLOPs and MParams are presented for Mobilenet backbone.
 | Metric            | Value           |
 |-------------------|-----------------|
 | Type              | ImageProcessing |
-| GFLOPs            | ???             |
-| MParams           | ???             |
+| GFLOPs            | 80.8919         |
+| MParams           | 2.1083          |
 | Source framework  | PyTorch\*       |
 
 ## Accuracy
@@ -32,7 +32,7 @@ Model was tested on GoPro test dataset. Metrics are presented for Mobilenet back
 
 ### Original Model
 
-Image, name - `blur_image`,  shape - `[1x3x736x1312]`, format is `[BxCxHxW]`, where:
+Image, name - `blur_image`,  shape - `1,3,736,1312`, format is `B,C,H,W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -43,7 +43,7 @@ Channel order is `RGB`. Mean values - [127.5,127.5,127.5], scale values - [127.5
 
 ### Converted Model
 
-Image, name - `blur_image`,  shape - `[1x3x736x1312]`, format is `[BxCxHxW]`, where:
+Image, name - `blur_image`,  shape - `1,3,736,1312`, format is `B,C,H,W`, where:
 
 - `B` - batch size
 - `C` - channel
