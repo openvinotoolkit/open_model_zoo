@@ -118,7 +118,7 @@ cv::Mat getAffineTransform(float centerX, float centerY, float scale, float rot,
 
     cv::Mat trans;
     if (inv) {
-        trans = cv::getAffineTransform(src, dst);
+        trans = cv::getAffineTransform(dst, src);
     }
     else {
         trans = cv::getAffineTransform(src, dst);
@@ -126,6 +126,7 @@ cv::Mat getAffineTransform(float centerX, float centerY, float scale, float rot,
 
     return trans;
 }
+
 
 void hwcTochw(cv::InputArray src, cv::OutputArray dst) {
     const int srcH = src.rows();
@@ -304,43 +305,39 @@ std::vector<std::pair<float, float>> filterWH(InferenceEngine::MemoryBlob::Ptr w
     return wh;
 }
 
-void transform() {
-    //cv::Mat getAffineTransform(float centerX, float centerY, float scale, float rot, int outputWidth, int outputHeight, bool inv = false) {
+std::vector<ModelCenterNet::BBoxes> calcBBoxes(const std::vector<std::pair<size_t, float>>& scores, const std::vector<std::pair<float, float>>& reg,
+    const std::vector<std::pair<float, float>>& wh, const SizeVector& sz) {
+    std::vector<ModelCenterNet::BBoxes> bboxes(scores.size());
+
+    for (int i = 0; i < bboxes.size(); ++i) {
+        size_t chIdx = scores[i].first % (sz[2] * sz[3]);
+        auto xCenter = chIdx % sz[3];
+        auto yCenter = chIdx / sz[3];
+
+        bboxes[i].left = xCenter + reg[i].first - wh[i].first / 2.0f;
+        bboxes[i].top = yCenter + reg[i].second - wh[i].second / 2.0f;
+        bboxes[i].right = xCenter + reg[i].first + wh[i].first / 2.0f;
+        bboxes[i].bottom = yCenter + reg[i].second + wh[i].second / 2.0f;
+    }
+
+    return bboxes;
+}
+
+void transform(std::vector<ModelCenterNet::BBoxes>* bboxes, const SizeVector& sz, int scale, float centerX, float centerY) {
+    cv::Mat1f trans = getAffineTransform(centerX, centerY, scale, 0, sz[2], sz[3], true);
+    for (auto& b : *bboxes) {
+        ModelCenterNet::BBoxes newbb;
+
+        newbb.left = trans.at<float>(0, 0) *  b.left + trans.at<float>(0, 1) *  b.top + trans.at<float>(0, 2);
+        newbb.top = trans.at<float>(1, 0) *  b.left + trans.at<float>(1, 1) *  b.top + trans.at<float>(1, 2);
+        newbb.right = trans.at<float>(0, 0) *  b.right + trans.at<float>(0, 1) *  b.bottom + trans.at<float>(0, 2);
+        newbb.bottom = trans.at<float>(1, 0) *  b.right + trans.at<float>(1, 1) *  b.bottom + trans.at<float>(1, 2);
+
+        b = newbb;
+    }
 }
 
 std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResult) {
-        //heat = outputs[self._output_layer_names[0]][0]
-        //reg = outputs[self._output_layer_names[1]][0]
-        //wh = outputs[self._output_layer_names[2]][0]
-        //heat = np.exp(heat) / (1 + np.exp(heat))
-        //height, width = heat.shape[1:3]
-        //num_predictions = 100
-
-        //heat = self._nms(heat)
-        //scores, inds, clses, ys, xs = self._topk(heat, K = num_predictions)
-        //reg = self._tranpose_and_gather_feat(reg, inds)
-
-        //reg = reg.reshape((num_predictions, 2))
-        //xs = xs.reshape((num_predictions, 1)) + reg[:, 0 : 1]
-        //ys = ys.reshape((num_predictions, 1)) + reg[:, 1 : 2]
-
-        //wh = self._tranpose_and_gather_feat(wh, inds)
-        //wh = wh.reshape((num_predictions, 2))
-        //clses = clses.reshape((num_predictions, 1))
-        //scores = scores.reshape((num_predictions, 1))
-        //bboxes = np.concatenate((xs - wh[..., 0:1] / 2,
-        //    ys - wh[..., 1:2] / 2,
-        //    xs + wh[..., 0:1] / 2,
-        //    ys + wh[..., 1:2] / 2), axis = 1)
-        //detections = np.concatenate((bboxes, scores, clses), axis = 1)
-        //mask = detections[..., 4] >= self._threshold
-        //filtered_detections = detections[mask]
-        //scale = max(meta['original_shape'])
-        //center = np.array(meta['original_shape'][:2]) / 2.0
-        //dets = self._transform(filtered_detections, np.flip(center, 0), scale, height, width)
-        //dets = [Detection(x[0], x[1], x[2], x[3], score = x[4], id = x[5]) for x in dets]
-        //return dets
-
     auto heatInfRes = infResult.outputsData[outputsNames[0]];
     auto sz = heatInfRes->getTensorDesc().getDims();;
     auto chSize = sz[2] * sz[3];
@@ -358,29 +355,20 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
     auto whInfRes = infResult.outputsData[outputsNames[2]];
 
     auto wh = filterWH(whInfRes, scores, chSize);
-    std::vector<BBoxes> bboxes;
-    bboxes.reserve(scores.size());
-    for (int i = 0; i < bboxes.size(); ++i) {
-        size_t chIdx = scores[i].first % chSize;
-        auto xCenter = chIdx % sz[3];
-        auto yCenter = chIdx / sz[3];
-        bboxes[i].left = xCenter + reg[i].first - wh[i].first / 2.0f;
-        bboxes[i].top = xCenter + reg[i].second- wh[i].second / 2.0f;
-        bboxes[i].right = yCenter + reg[i].first + wh[i].first / 2.0f;
-        bboxes[i].bottom = yCenter + reg[i].second + wh[i].second / 2.0f;
-    }
+
+    auto bboxes = calcBBoxes(scores, reg, wh, sz);
+
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
     auto scale = std::max(imgWidth, imgHeight);
     float centerX = imgWidth / 2.0f;
     float centerY = imgHeight / 2.0f;
-    getAffineTransform(centerX, centerY, scale, 0, sz[2], sz[3], true);
+
+    transform(&bboxes, sz, scale, centerX, centerY);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
     DetectionResult* result = new DetectionResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
-    //float scaleX = static_cast<float>(netInputWidth) / imgWidth;
-    //float scaleY = static_cast<float>(netInputHeight) / imgHeight;
 
     result->objects.reserve(scores.size());
     for (int i = 0; i < scores.size(); ++i) {
@@ -389,14 +377,13 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
         desc.confidence = static_cast<float>(scores[i].second);
         desc.labelID = scores[i].first / chSize;
         desc.label = getLabelName(desc.labelID);
-        desc.x = static_cast<float>(chIdx % sz[3] + reg[i].first - wh[i].first / 2.0f);
-        desc.y = static_cast<float>(chIdx / sz[3] + reg[i].second - wh[i].second / 2.0f );
-        desc.width = static_cast<float>(wh[i].first);
-        desc.height = static_cast<float>(wh[i].second);
+        desc.x = bboxes[i].left;
+        desc.y = bboxes[i].top;
+        desc.width = bboxes[i].getWidth(); 
+        desc.height = bboxes[i].getHeight(); 
 
         result->objects.push_back(desc);
     }
 
     return std::unique_ptr<ResultBase>(result);
-   // return {};
 }
