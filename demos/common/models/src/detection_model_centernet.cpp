@@ -297,7 +297,6 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
 
     result->objects.reserve(scores.size());
     for (int i = 0; i < scores.size(); ++i) {
-        size_t chIdx = scores[i].first % chSize;
         DetectedObject desc;
         desc.confidence = scores[i].second;
         desc.labelID = scores[i].first / chSize;
