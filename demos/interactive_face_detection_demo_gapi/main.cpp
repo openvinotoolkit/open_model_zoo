@@ -432,27 +432,24 @@ int main(int argc, char *argv[]) {
         size_t id = 0;
         cv::VideoWriter videoWriter;
 
-        Timer timer;
-
-        slog::info << "Setting media source" << slog::endl;
-        try {
-            setInput(stream, FLAGS_i);
-        } catch (const std::exception&) {
-            std::stringstream msg;
-            msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
-            throw std::invalid_argument(msg.str());
-        }
-
-        slog::info << "Start inference " << slog::endl;
-        stream.start();
-
         const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
         std::unique_ptr<Presenter> presenter;
 
-        while (stream.running()) {
+        Timer timer;
+        do {
+            slog::info << "Setting media source" << slog::endl;
+            try {
+                setInput(stream, FLAGS_i);
+            } catch (const std::exception& error) {
+                std::stringstream msg;
+                msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
+                throw std::invalid_argument(msg.str());
+            }
+            slog::info << "Start inference " << slog::endl;
+            
             timer.start("total");
-
-            if (stream.pull(cv::GRunArgsP(out_vector))) {
+            stream.start();
+            while (stream.pull(cv::GRunArgsP(out_vector))) {
                 if (!FLAGS_no_show && !FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
                     visualizer->enableEmotionBar(frame.size(), EMOTION_VECTOR);
                 }
@@ -474,7 +471,7 @@ int main(int argc, char *argv[]) {
 
                 // Raw output of detected faces
                 if (FLAGS_r)
-                    rawOutputDetections(ssd_res, frame.size(), (float)FLAGS_t);
+                    rawOutputDetections(ssd_res, frame.size(), FLAGS_t);
 
                 // For every detected face
                 for (size_t i = 0; i < face_hub.size(); i++) {
@@ -543,30 +540,18 @@ int main(int argc, char *argv[]) {
                     videoWriter.write(frame);
                 }
 
+                timer["total"].calculateDuration();
                 framesCounter++;
-                timer.finish("total");
-            } else { // End of streaming
-                slog::info << "Number of processed frames: " << framesCounter << slog::endl;
-                slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
-
-                std::cout << presenter->reportMeans() << '\n';
-
-                if(FLAGS_loop) {
-                    slog::info << "Setting media source" << slog::endl;
-                    try {
-                        setInput(stream, FLAGS_i);
-                    } catch (const std::exception&) {
-                        std::stringstream msg;
-                        msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
-                        throw std::invalid_argument(msg.str());
-                    }
-                    slog::info << "Start inference " << slog::endl;
-                    stream.start();
-                } else {
-                    slog::info << "No more frames to process!" << slog::endl;
-                }
             }
-        }
+            timer.finish("total");
+
+            slog::info << "Number of processed frames: " << framesCounter << slog::endl;
+            slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
+
+            std::cout << presenter->reportMeans() << '\n';
+        } while (FLAGS_loop);
+        
+        slog::info << "No more frames to process!" << slog::endl;
 
         if (!FLAGS_o.empty()) {
             videoWriter.release();
