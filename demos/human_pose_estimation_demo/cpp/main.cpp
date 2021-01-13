@@ -213,9 +213,12 @@ int main(int argc, char *argv[]) {
 
         //------------------------------- Preparing Input ------------------------------------------------------
         slog::info << "Reading input" << slog::endl;
+        auto startTime = std::chrono::steady_clock::now();
         auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
-        cv::Mat curr_frame;
-        curr_frame = cap->read();
+        cv::Mat curr_frame = cap->read();
+        if (curr_frame.empty()) {
+            throw std::logic_error("Can't read an image from the input");
+        }
 
         //------------------------------ Running Human Pose Estimation routines ----------------------------------------------
 
@@ -236,28 +239,25 @@ int main(int argc, char *argv[]) {
             core, reshape);
         Presenter presenter(FLAGS_u);
 
+        int64_t frameNum = 0;
+        frameNum = pipeline.submitData(ImageInputData(curr_frame),
+                    std::make_shared<ImageMetaData>(curr_frame, startTime));
+
         bool keepRunning = true;
-        int64_t frameNum = -1;
         std::unique_ptr<ResultBase> result;
 
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
-                auto startTime = std::chrono::steady_clock::now();
-                frameNum = pipeline.submitData(ImageInputData(curr_frame),
-                    std::make_shared<ImageMetaData>(curr_frame, startTime));
-
                 //--- Capturing frame
+                startTime = std::chrono::steady_clock::now();
                 curr_frame = cap->read();
                 if (curr_frame.empty()) {
-                    if (frameNum == -1) {
-                        throw std::logic_error("Can't read an image from the input");
-                    }
-                    else {
-                        // Input stream is over
-                        break;
-                    }
+                    // Input stream is over
+                    break;
                 }
-            }
+                frameNum = pipeline.submitData(ImageInputData(curr_frame),
+                    std::make_shared<ImageMetaData>(curr_frame, startTime));
+                }
 
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
             pipeline.waitForData();

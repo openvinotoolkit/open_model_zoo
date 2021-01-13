@@ -77,8 +77,8 @@ cv::Size HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork, int targe
     if (!targetSize) {
         targetSize = imageInputDims[2];
     }
-    int height = static_cast<int>(std::floor((imageInputDims[3] + stride - 1) / stride)) * stride;
-    int width = static_cast<int>(std::floor((targetSize + stride - 1) / stride)) * stride;
+    int height = static_cast<int>((imageInputDims[3] + stride - 1) / stride) * stride;
+    int width = static_cast<int>((targetSize + stride - 1) / stride) * stride;
     inputLayerSize = cv::Size(height, width);
     return inputLayerSize;
 }
@@ -106,8 +106,8 @@ std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult & infResult
     const SizeVector& outputDims = outputMapped->getTensorDesc().getDims();
     const SizeVector& heatMapDims = heatMapsMapped->getTensorDesc().getDims();
 
-    const float *predictions = outputMapped->rmap().as<float*>();
-    const float *heats = heatMapsMapped->rmap().as<float*>();
+    float* predictions = outputMapped->rmap().as<float*>();
+    float* heats = heatMapsMapped->rmap().as<float*>();
 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
