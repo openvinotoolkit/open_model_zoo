@@ -71,13 +71,15 @@ void HPEOpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) 
         throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
 }
 
-cv::Size HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork, int targetSize) {
+cv::Size HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork, cv::Size& InputSize, int targetSize) {
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    SizeVector& imageInputDims = inputShapes.begin()->second;
+    SizeVector& InputLayerDims = inputShapes.begin()->second;
+    double AspectRatio = InputSize.width / static_cast<double>(InputSize.height);
     if (!targetSize) {
-        targetSize = imageInputDims[2];
+        targetSize = InputLayerDims[2];
     }
-    int height = static_cast<int>((imageInputDims[3] + stride - 1) / stride) * stride;
+    int inputWidth = static_cast<int>(std::round(targetSize * AspectRatio));
+    int height = static_cast<int>((inputWidth + stride - 1) / stride) * stride;
     int width = static_cast<int>((targetSize + stride - 1) / stride) * stride;
     inputLayerSize = cv::Size(height, width);
     return inputLayerSize;
@@ -89,8 +91,14 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
     cv::Mat resizedImage;
     double scale = inputLayerSize.height / static_cast<double>(image.rows);
     cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
+    int h = resizedImage.rows;
+    int w = resizedImage.cols;
+    if (inputLayerSize.width < w)
+        throw std::runtime_error("The image aspect ratio doesn't fit current model shape");
     cv::Mat paddedImage;
-    cv::copyMakeBorder(resizedImage, paddedImage, pad(0), pad(2), pad(1), pad(3),
+    pad(1) = inputLayerSize.height - h;
+    pad(3) = inputLayerSize.width - w;
+    cv::copyMakeBorder(resizedImage, paddedImage, pad(0), pad(1), pad(2), pad(3),
                        cv::BORDER_CONSTANT, meanPixel);
     matU8ToBlob<uint8_t>(paddedImage, frameBlob);
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(image.cols, image.rows));

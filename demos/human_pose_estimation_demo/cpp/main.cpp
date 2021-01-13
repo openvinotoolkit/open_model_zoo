@@ -233,7 +233,7 @@ int main(int argc, char *argv[]) {
 
         InferenceEngine::Core core;
         InferenceEngine::CNNNetwork cnnNetwork = core.ReadNetwork(model->getModelFileName());
-        cv::Size reshape = model->reshape(cnnNetwork, FLAGS_tsize);
+        cv::Size reshape = model->reshape(cnnNetwork, curr_frame.size(), FLAGS_tsize);
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core, reshape);
