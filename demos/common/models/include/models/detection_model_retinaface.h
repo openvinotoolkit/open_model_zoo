@@ -75,4 +75,3 @@ protected:
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
 
 };
-
