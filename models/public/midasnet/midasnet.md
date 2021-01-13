@@ -31,9 +31,9 @@ See [here](https://github.com/intel-isl/MiDaS)
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
-| rmse   | 0.07  |
+| Metric | Value   |
+| ------ | ------- |
+| rmse   | 0.07071 |
 
 ## Input
 
