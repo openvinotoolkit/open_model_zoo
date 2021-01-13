@@ -117,8 +117,8 @@ std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& an
         auto sizeRatio = static_cast<float>(size) / ratio;
         auto ws = sqrt(sizeRatio);
         auto hs = ws * ratio;
-        retVal.push_back({xCtr - 0.5f * (ws - 1.0f), yCtr - 0.5f * (hs - 1.0f),
-            xCtr + 0.5f * (ws - 1.0f), yCtr + 0.5f * (hs - 1.0F) });
+        retVal.push_back({ static_cast<float>(xCtr - 0.5f * (ws - 1.0f)), static_cast<float>(yCtr - 0.5f * (hs - 1.0f)),
+            static_cast<float>(xCtr + 0.5f * (ws - 1.0f)), static_cast<float>(yCtr + 0.5f * (hs - 1.0F)) });
     }
     return retVal;
 }
@@ -129,11 +129,12 @@ std::vector<ModelRetinaFace::Anchor> scaleEnum(const ModelRetinaFace::Anchor& an
     auto h = anchor.getHeight();
     auto xCtr = anchor.getXCenter();
     auto yCtr = anchor.getYCenter();
+
     for (auto scale : scales) {
         auto ws = w * scale;
         auto hs = h * scale;
-        retVal.push_back({xCtr - 0.5f * (ws - 1.0f),  yCtr - 0.5f * (hs - 1.0f),
-            xCtr + 0.5f * (ws - 1.0f),  yCtr + 0.5f * (hs - 1.0f)});
+        retVal.push_back({ static_cast<float>(xCtr - 0.5f * (ws - 1.0f)),  static_cast<float>(yCtr - 0.5f * (hs - 1.0f)),
+            static_cast<float>(xCtr + 0.5f * (ws - 1.0f)),  static_cast<float>(yCtr + 0.5f * (hs - 1.0f)) });
     }
     return retVal;
 }
@@ -221,8 +222,8 @@ void filterBBoxes(std::vector<ModelRetinaFace::Anchor>* bboxes, const std::vecto
         auto predW = exp(dw) * anchors[i].getWidth();
         auto predH = exp(dh) * anchors[i].getHeight();
 
-        bboxes->push_back({ predCtrX - 0.5f * (predW - 1.0f), predCtrY - 0.5f * (predH - 1.0f),
-           predCtrX + 0.5f * (predW - 1.0f), predCtrY + 0.5f * (predH - 1.0f)});
+        bboxes->push_back({ static_cast<float>(predCtrX - 0.5f * (predW - 1.0f)), static_cast<float>(predCtrY - 0.5f * (predH - 1.0f)),
+           static_cast<float>(predCtrX + 0.5f * (predW - 1.0f)), static_cast<float>(predCtrY + 0.5f * (predH - 1.0f)) });
     }
 }
 
