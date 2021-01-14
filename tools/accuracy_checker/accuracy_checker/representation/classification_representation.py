@@ -67,3 +67,16 @@ class ArgMaxClassificationPrediction(ClassificationPrediction):
 
     def top_k(self, k):
         return np.full(k, self._label)
+
+
+class SequenceClassificationAnnotation(ClassificationAnnotation):
+    pass
+
+
+class SequenceClassificationPrediction(ClassificationPrediction):
+    @property
+    def label(self):
+        return np.argmax(self.scores, axis=1)
+
+    def top_k(self, k):
+        return np.argpartition(self.scores, -k, axis=1)[:, -k:]
