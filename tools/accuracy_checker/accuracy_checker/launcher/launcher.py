@@ -156,7 +156,7 @@ class Launcher(ClassProvider):
                     ConfigError("launcher {} is not unregistered".format(framework), config, uri_prefix or 'launcher')
                 )
                 return errors
-        uri = '{}.{}'.format(uri_prefix, cls.__provider__) if uri_prefix else 'launcher.{}'.format(cls.__provider__)
+        uri = uri_prefix or'launcher.{}'.format(cls.__provider__)
         return LauncherConfigValidator(
             uri, fields=cls.parameters(), delayed_model_loading=delayed_model_loading
         ).validate(config, fetch_only=fetch_only)
