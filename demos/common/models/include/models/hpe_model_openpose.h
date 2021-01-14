@@ -36,7 +36,6 @@ protected:
 
     const int minJointsNumber = 3;
     const int stride = 8;
-    cv::Vec4i pad = cv::Vec4i::all(0);
     const cv::Vec3f meanPixel = cv::Vec3f::all(128);
     const float minPeaksDistance = 3.0f;
     const float midPointsScoreThreshold = 0.05f;
