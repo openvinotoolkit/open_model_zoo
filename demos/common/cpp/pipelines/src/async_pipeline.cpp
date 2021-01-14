@@ -56,14 +56,7 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
     InferenceEngine::CNNNetwork cnnNetwork = engine.ReadNetwork(model->getModelFileName());
     /** Set batch size to 1 **/
     slog::info << "Batch size is forced to 1." << slog::endl;
-
-    if (!model->reshape(cnnNetwork)) {
-        auto shapes = cnnNetwork.getInputShapes();
-        for (auto& shape : shapes) {
-            shape.second[0] = 1;
-        }
-        cnnNetwork.reshape(shapes);
-    }
+    model->reshape(cnnNetwork);
 
     // -------------------------- Reading all outputs names and customizing I/O blobs (in inherited classes)
     model->prepareInputsOutputs(cnnNetwork);

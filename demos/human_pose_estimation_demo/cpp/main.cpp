@@ -213,8 +213,8 @@ int main(int argc, char *argv[]) {
 
         //------------------------------- Preparing Input ------------------------------------------------------
         slog::info << "Reading input" << slog::endl;
-        auto startTime = std::chrono::steady_clock::now();
         auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        auto startTime = std::chrono::steady_clock::now();
         cv::Mat curr_frame = cap->read();
         if (curr_frame.empty()) {
             throw std::logic_error("Can't read an image from the input");
@@ -222,9 +222,10 @@ int main(int argc, char *argv[]) {
 
         //------------------------------ Running Human Pose Estimation routines ----------------------------------------------
 
+        double aspectRatio = curr_frame.cols / static_cast<double>(curr_frame.rows);
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
-            model.reset(new HPEOpenPose(FLAGS_m, curr_frame.size(), FLAGS_tsize, (float)FLAGS_t));
+            model.reset(new HPEOpenPose(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;

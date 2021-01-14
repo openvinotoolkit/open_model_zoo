@@ -29,9 +29,9 @@
 
 using namespace InferenceEngine;
 
-HPEOpenPose::HPEOpenPose(const std::string& modelFileName, cv::Size inputImageSize, int targetSize, float confidenceThreshold) :
+HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold) :
     ModelBase(modelFileName),
-    inputImageSize(inputImageSize),
+    aspectRatio(aspectRatio),
     targetSize(targetSize),
     confidenceThreshold(confidenceThreshold) {
 }
@@ -73,22 +73,20 @@ void HPEOpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) 
         throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
 }
 
-bool HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork) {
+void HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork) {
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     SizeVector& InputLayerDims = inputShapes.begin()->second;
-    double aspectRatio = inputImageSize.width / static_cast<double>(inputImageSize.height);
     if (!targetSize) {
         targetSize = InputLayerDims[2];
     }
+    int height = static_cast<int>((targetSize + stride - 1) / stride) * stride;
     int inputWidth = static_cast<int>(std::round(targetSize * aspectRatio));
-    int height = static_cast<int>((inputWidth + stride - 1) / stride) * stride;
-    int width = static_cast<int>((targetSize + stride - 1) / stride) * stride;
-    inputLayerSize = cv::Size(height, width);
+    int width = static_cast<int>((inputWidth + stride - 1) / stride) * stride;
     InputLayerDims[0] = 1;
-    InputLayerDims[3] = height;
-    InputLayerDims[2] = width;
+    InputLayerDims[2] = height;
+    InputLayerDims[3] = width;
+    inputLayerSize = cv::Size(InputLayerDims[3], InputLayerDims[2]);
     cnnNetwork.reshape(inputShapes);
-    return true;
 }
 
 std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
@@ -102,9 +100,9 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
     if (inputLayerSize.width < w)
         throw std::runtime_error("The image aspect ratio doesn't fit current model shape");
     cv::Mat paddedImage;
-    pad(1) = inputLayerSize.height - h;
-    pad(3) = inputLayerSize.width - w;
-    cv::copyMakeBorder(resizedImage, paddedImage, pad(0), pad(1), pad(2), pad(3),
+    int bottom = inputLayerSize.height - h;
+    int right = inputLayerSize.width - w;
+    cv::copyMakeBorder(resizedImage, paddedImage, 0, bottom, 0, right,
                        cv::BORDER_CONSTANT, meanPixel);
     matU8ToBlob<uint8_t>(paddedImage, frameBlob);
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(image.cols, image.rows));
@@ -128,37 +126,29 @@ std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult & infResult
     std::vector<cv::Mat> heatMaps(keypointsNumber);
     for (size_t i = 0; i < heatMaps.size(); i++) {
         heatMaps[i] = cv::Mat(heatMapDims[2], heatMapDims[3], CV_32FC1,
-                              reinterpret_cast<void*>(
-                                  const_cast<float*>(
-                                      heats + i * heatMapDims[2] * heatMapDims[3])));
+                              heats + i * heatMapDims[2] * heatMapDims[3]);
     }
     resizeFeatureMaps(heatMaps);
 
     std::vector<cv::Mat> pafs(outputDims[1]);
     for (size_t i = 0; i < pafs.size(); i++) {
         pafs[i] = cv::Mat(heatMapDims[2], heatMapDims[3], CV_32FC1,
-                          reinterpret_cast<void*>(
-                              const_cast<float*>(
-                                  predictions + i * heatMapDims[2] * heatMapDims[3])));
+                          predictions + i * heatMapDims[2] * heatMapDims[3]);
     }
     resizeFeatureMaps(pafs);
 
     std::vector<HumanPose> poses = extractPoses(heatMaps, pafs);
 
     cv::Size fullFeatureMapSize = heatMaps[0].size() * stride / upsampleRatio;
-    float scaleX = internalData.inputImgWidth /
-            static_cast<float>(fullFeatureMapSize.width - pad(1) - pad(3));
-    float scaleY = internalData.inputImgHeight /
-            static_cast<float>(fullFeatureMapSize.height - pad(0) - pad(2));
+    float scaleX = internalData.inputImgWidth / static_cast<float>(fullFeatureMapSize.width);
+    float scaleY = internalData.inputImgHeight / static_cast<float>(fullFeatureMapSize.height);
     for (auto& pose : poses) {
         for (auto& keypoint : pose.keypoints) {
             if (keypoint != cv::Point2f(-1, -1)) {
                 keypoint.x *= stride / upsampleRatio;
-                keypoint.x -= pad(1);
                 keypoint.x *= scaleX;
 
                 keypoint.y *= stride / upsampleRatio;
-                keypoint.y -= pad(0);
                 keypoint.y *= scaleY;
             }
         }

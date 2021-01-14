@@ -31,11 +31,17 @@ public:
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
         virtual void onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, const std::vector<InferenceEngine::InferRequest::Ptr>& requests) {
         this->execNetwork = execNetwork; }
-    virtual bool reshape(InferenceEngine::CNNNetwork & cnnNetwork) { return false; }
     const std::vector<std::string>& getOutputsNames() const { return outputsNames; }
     const std::vector<std::string>& getInputsNames() const { return inputsNames; }
 
     std::string getModelFileName() { return modelFileName; }
+
+    virtual void reshape(InferenceEngine::CNNNetwork & cnnNetwork) {
+        auto shapes = cnnNetwork.getInputShapes();
+        for (auto& shape : shapes)
+            shape.second[0] = 1;
+        cnnNetwork.reshape(shapes);
+    }
 
 protected:
     std::vector<std::string> inputsNames;

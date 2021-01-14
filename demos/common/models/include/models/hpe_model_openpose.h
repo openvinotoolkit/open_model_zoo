@@ -22,7 +22,7 @@ public:
     /// @param modelFileName name of model to load
     /// @param confidenceThreshold - threshold to eleminate low-confidence keypoints.
     /// Any keypoint with confidence lower than this threshold will be ignored.
-    HPEOpenPose(const std::string& modelFileName, cv::Size inputImageSize, int targetSize, float confidenceThreshold);
+    HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
@@ -44,7 +44,7 @@ protected:
     const float minSubsetScore = 0.2f;
     const int upsampleRatio = 4;
     cv::Size inputLayerSize;
-    cv::Size inputImageSize;
+    double aspectRatio;
     float confidenceThreshold;
     int targetSize;
 
@@ -52,5 +52,5 @@ protected:
                                         const std::vector<cv::Mat>& pafs) const;
     void resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const;
 
-    bool reshape(InferenceEngine::CNNNetwork & cnnNetwork) override;
+    void reshape(InferenceEngine::CNNNetwork & cnnNetwork) override;
 };
