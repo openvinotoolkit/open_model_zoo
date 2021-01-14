@@ -329,4 +329,3 @@ class BERTNamedEntityRecognition(Adapter):
         for identifier, out in zip(identifiers, outputs):
             results.append(SequenceClassificationPrediction(identifier, out))
         return results
-

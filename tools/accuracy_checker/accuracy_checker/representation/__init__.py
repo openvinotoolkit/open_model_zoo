@@ -105,6 +105,8 @@ __all__ = [
     'ClassificationAnnotation',
     'ClassificationPrediction',
     'ArgMaxClassificationPrediction',
+    'SequenceClassificationAnnotation',
+    'SequenceClassificationPrediction',
 
     'Detection',
     'DetectionAnnotation',

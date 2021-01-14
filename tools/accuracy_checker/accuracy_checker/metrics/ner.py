@@ -17,7 +17,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from .metric import PerImageEvaluationMetric, FullDatasetEvaluationMetric
+from .metric import PerImageEvaluationMetric
 from ..config import StringField, ConfigError
 from ..representation import (
     SequenceClassificationAnnotation, BERTNamedEntityRecognitionAnnotation, SequenceClassificationPrediction
@@ -26,10 +26,11 @@ from ..representation import (
 
 def align_sequences(gt_seq, pred_seq, label_map, convert_token_ids=True):
     aligned_gt, aligned_pred = [], []
-    for gt_tok, pred_tok in zip(gt_seq, pred_seq):
+    start_id = 0 if gt_seq[0] in label_map and label_map[gt_seq[0]] != '[CLS]' else 1
+    for gt_tok, pred_tok in zip(gt_seq[start_id:], pred_seq[start_id:]):
         if gt_tok not in label_map:
             continue
-        if gt_tok > len(label_map):
+        if gt_tok == len(label_map):
             break
         aligned_gt.append(gt_tok if not convert_token_ids else label_map[gt_tok])
         aligned_pred.append(pred_tok if not convert_token_ids else label_map.get(pred_tok, '[unk]'))
@@ -327,7 +328,7 @@ class NERRecall(PerImageEvaluationMetric):
         self.true_sum = defaultdict(lambda: 0)
 
 
-class NERFScore(FullDatasetEvaluationMetric):
+class NERFScore(PerImageEvaluationMetric):
     __provider__ = 'ner_f_score'
     annotation_types = (SequenceClassificationAnnotation, BERTNamedEntityRecognitionAnnotation,)
     prediction_types = (SequenceClassificationPrediction, )
