@@ -258,7 +258,7 @@ def main():
             frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
             metrics.update(start_time, frame)
 
-            if video_writer.isOpened() and (args.output_limit == -1 or next_frame_id_to_show-1 <= args.output_limit):
+            if video_writer.isOpened() and (args.output_limit == -1 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
 
             if not args.no_show:

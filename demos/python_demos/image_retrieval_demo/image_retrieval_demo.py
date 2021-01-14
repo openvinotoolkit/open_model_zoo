@@ -53,6 +53,9 @@ def build_argparser():
                       help='Optional. Enable reading the input in a loop.')
     args.add_argument('-o', '--output', required=False,
                       help='Optional. Name of output to save.')
+    args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                      help='Optional. Number of frames to store in output. '
+                           'If -1 is set, all frames will be stored.')
     args.add_argument('-g', '--gallery',
                       help='Required. Path to a file listing gallery images.',
                       required=True, type=str)
@@ -128,6 +131,7 @@ def main():
 
     positions = []
 
+    frames_processed = 0
     presenter = monitors.Presenter(args.utilization_monitors, 0)
     video_writer = cv2.VideoWriter()
 
@@ -167,7 +171,8 @@ def main():
                                            (image.shape[1], image.shape[0]))
             if not video_writer.isOpened():
                 raise RuntimeError("Can't open video writer")
-        if video_writer.isOpened():
+        frames_processed += 1
+        if video_writer.isOpened() and (args.output_limit == -1 or frames_processed <= args.output_limit):
             video_writer.write(image)
 
         if key == 27:

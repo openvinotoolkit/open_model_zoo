@@ -98,7 +98,7 @@ class ResultRenderer:
             cv2.putText(frame, "Inference time: {:.2f}ms ({:.2f} FPS)".format(inference_time, fps),
                         text_loc, FONT_STYLE, FONT_SIZE, FONT_COLOR)
 
-        if self.video_writer.isOpened() and (self.limit == -1 or frame_ind-1 <= self.limit):
+        if self.video_writer.isOpened() and (self.limit == -1 or frame_ind <= self.limit-1):
             self.video_writer.write(frame)
 
         if not self.no_show:

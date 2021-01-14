@@ -38,6 +38,7 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: whiteboard_inpainting_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
+                                     [-limit OUTPUT_LIMIT]
                                      -m_i M_INSTANCE_SEGMENTATION
                                      -m_s M_SEMANTIC_SEGMENTATION
                                      [-t THRESHOLD] [--no_show]
@@ -54,6 +55,9 @@ optional arguments:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If -1 is set, all frames will be stored.
   -m_i M_INSTANCE_SEGMENTATION, --m_instance_segmentation M_INSTANCE_SEGMENTATION
                         Required. Path to the instance segmentation model.
   -m_s M_SEMANTIC_SEGMENTATION, --m_semantic_segmentation M_SEMANTIC_SEGMENTATION

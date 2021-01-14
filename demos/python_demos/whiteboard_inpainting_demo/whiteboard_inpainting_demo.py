@@ -72,6 +72,9 @@ def main():
                         help='Optional. Enable reading the input in a loop.')
     parser.add_argument('-o', '--output', required=False,
                         help='Optional. Name of output to save.')
+    parser.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                        help='Optional. Number of frames to store in output. '
+                             'If -1 is set, all frames will be stored.')
     parser.add_argument('-m_i', '--m_instance_segmentation', type=str, required=False,
                         help='Required. Path to the instance segmentation model.')
     parser.add_argument('-m_s', '--m_semantic_segmentation', type=str, required=False,
@@ -155,7 +158,7 @@ def main():
         merged_frame = np.vstack([frame, output_frame])
         merged_frame = cv2.resize(merged_frame, out_frame_size)
 
-        if video_writer.isOpened():
+        if video_writer.isOpened() and (args.output_limit == -1 or frame_number <= args.output_limit-1):
             video_writer.write(merged_frame)
 
         presenter.drawGraphs(merged_frame)
