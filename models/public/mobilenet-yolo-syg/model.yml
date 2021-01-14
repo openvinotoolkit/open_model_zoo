@@ -1,0 +1,57 @@
+# Copyright © 2018-2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a Keras\* version of `mobilenet-yolov4` model, one of the YOLO group of models
+  designed to perform real-time object detection mainly to vehicles.
+  The weights are pretrained by BDD100k and retrained by our own dataset.
+  For details see repository <https://github.com/ermubuzhiming/omz-test/>,
+  paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
+task_type: detection
+
+files:
+  - name: mobilenet-yolo-syg.pb
+    size: 42133407
+    sha256: 2c8b1b0b7b1fce1efb4e1acef8791103f7e19306936fa15eb96b33fd37b6ba5d
+    source: https://github.com/ermubuzhiming/omz-test/releases/download/v3.0/mobilenet-yolo-syg.pb
+  - name: yolo_pb2ir.json
+    size: 384
+    sha256: e1738caa72b6ad173ea4727a439cfb9bef513d5a010488f6c4c3e86c963d5a61
+    source: https://github.com/ermubuzhiming/omz-test/releases/download/v1.0/yolov4_pb2ir.json
+  - name: VOCdevkit0829.zip
+    size: 1796811321
+    sha256: 070802ef216a2506f2b676e44c8c7bb644c4ed089ff7cd1e0973f918fd05bdf4
+    source: https://github.com/ermubuzhiming/omz-test/releases/download/v3.0/VOCdevkit0829.zip
+  - name: mobilenet-yolo-syg.h5
+    size: 42753056
+    sha256: 763f059f5ece0accec13c104a80020c582ab001157aebf7079baf32bcfdeecc9
+    source: https://github.com/ermubuzhiming/omz-test/releases/download/v1.0/mobilenet-yolo-syg.h5
+
+postprocessing: 
+  - $type: unpack_archive
+    file: VOCdevkit0829.zip
+    format: zip
+
+model_optimizer_args:
+  - --input_model=$dl_dir/mobilenet-yolo-syg.pb
+  - --input_shape=[1,416,416,3]
+  - --input=input_1
+  #- --scale_values=input_1[255]
+  - --transformations_config=$dl_dir/yolo_pb2ir.json
+  - --data_type=FP16
+  - --reverse_input_channels
+
+framework: tf
+license: https://github.com/AlexeyAB/darknet/blob/master/LICENSE
+         https://github.com/tensorflow/models/blob/master/LICENSE
