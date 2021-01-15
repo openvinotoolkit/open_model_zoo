@@ -166,7 +166,7 @@ private:
     }
 
 public:
-    ColorPalette(size_t n = 100) {
+    ColorPalette(size_t n) {
         palette.reserve(n);
         std::vector<cv::Scalar> hsvColors(1, { 1., 1., 1. });
         std::vector<cv::Scalar> colorCandidates;
@@ -280,7 +280,7 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> labels;
         if (!FLAGS_labels.empty())
             labels = DetectionModel::loadLabels(FLAGS_labels);
-        ColorPalette palette(labels.size());
+        ColorPalette palette(labels.size() > 0 ? labels.size() : 100);
 
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "faceboxes") {
