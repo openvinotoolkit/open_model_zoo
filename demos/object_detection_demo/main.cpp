@@ -125,11 +125,11 @@ private:
 
     double getRandom(double a = 0.0, double b = 1.0) {
         static std::default_random_engine e;
-        std::uniform_real_distribution<> dis(a, std::nextafter(b, std::numeric_limits<double>::max())); // range 0 - 1
+        std::uniform_real_distribution<> dis(a, std::nextafter(b, std::numeric_limits<double>::max()));
         return dis(e);
     }
 
-    auto distance(const cv::Scalar& c1, const cv::Scalar& c2) {
+    double distance(const cv::Scalar& c1, const cv::Scalar& c2) {
         auto dh = std::fmin(std::fabs(c1[0] - c2[0]), 1 - fabs(c1[0] - c2[0])) * 2;
         auto ds = std::fabs(c1[1] - c2[1]);
         auto dv = std::fabs(c1[2] - c2[2]);
@@ -161,37 +161,35 @@ private:
 
         cv::Mat rgb;
         cv::Mat hsv(1, 1, CV_8UC3, hsvColor);
-        cvtColor(hsv, rgb, cv::COLOR_HSV2BGR);
+        cvtColor(hsv, rgb, cv::COLOR_HSV2RGB);
         return cv::Scalar(rgb.data[0], rgb.data[1], rgb.data[2]);
     }
 
 public:
     ColorPalette(size_t n = 100) {
         palette.reserve(n);
-        std::vector<cv::Scalar> hsvColors(1, { 1., 1., 1.});
+        std::vector<cv::Scalar> hsvColors(1, { 1., 1., 1. });
         std::vector<cv::Scalar> colorCandidates;
         size_t numCandidates = 100;
+
+        hsvColors.reserve(n);
+        colorCandidates.reserve(numCandidates);
         for (size_t i = 1; i < n; ++i) {
             colorCandidates.clear();
-
             for (size_t j = 1; j < numCandidates; ++j) {
-                colorCandidates.push_back({getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) });
+                colorCandidates.push_back({ getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) });
             }
-
             hsvColors.push_back(maxMinDistance(hsvColors, colorCandidates));
-
         }
 
         for (auto& hsv : hsvColors) {
             palette.push_back(hsv2rgb(hsv));
         }
-
     }
 
     const cv::Scalar& operator[](size_t index) const {
         return palette[index % palette.size()];
     }
-
 };
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -249,8 +247,10 @@ cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& p
         }
 
         std::ostringstream conf;
-        conf << ":" << std::fixed << std::setprecision(3) << obj.confidence;
+        conf << ":" << std::fixed << std::setprecision(1) << obj.confidence * 100 << '%';
         auto color = palette[obj.labelID];
+        cv::putText(outputImg, obj.label + conf.str(),
+            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 230, 230, 230 }, 3);
         cv::putText(outputImg, obj.label + conf.str(),
             cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, color);
         cv::rectangle(outputImg, obj, color, 2);
