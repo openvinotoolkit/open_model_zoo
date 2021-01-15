@@ -161,7 +161,7 @@ private:
 
         cv::Mat rgb;
         cv::Mat hsv(1, 1, CV_8UC3, hsvColor);
-        cvtColor(hsv, rgb, cv::COLOR_HSV2RGB);
+        cv::cvtColor(hsv, rgb, cv::COLOR_HSV2RGB);
         return cv::Scalar(rgb.data[0], rgb.data[1], rgb.data[2]);
     }
 
@@ -187,7 +187,7 @@ public:
         }
     }
 
-    const cv::Scalar& operator[](size_t index) const {
+    const cv::Scalar& operator[] (size_t index) const {
         return palette[index % palette.size()];
     }
 };
