@@ -43,13 +43,13 @@ The demo workflow is the following:
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: instance_segmentation_demo.py [-h] -m "<path>" --labels "<path>" -i
-                                     "<path>" [-d "<device>"]
-                                     [-l "<absolute_path>"] [--delay "<num>"]
-                                     [-pt "<num>"] [--no_keep_aspect_ratio]
-                                     [--no_track] [--show_scores]
-                                     [--show_boxes] [-pc] [-r] [--no_show]
-                                     [-u UTILIZATION_MONITORS]
+usage: instance_segmentation_demo.py [-h] -m "<path>" --labels "<path>" -i INPUT
+                                     [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT]
+                                     [-d "<device>"] [-l "<absolute_path>"]
+                                     [--delay "<num>"] [-pt "<num>"]
+                                     [--no_keep_aspect_ratio] [--no_track]
+                                     [--show_scores] [--show_boxes] [-pc] [-r]
+                                     [--no_show] [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -58,8 +58,13 @@ Options:
   --labels "<path>"     Required. Path to a text file with class labels.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image,
-                        a folder of images or anything that cv2.VideoCapture can process.
+                        a folder of images, video file or camera id.
   --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If -1 is set, all frames are stored.
   -d "<device>", --device "<device>"
                         Optional. Specify the target device to infer on: CPU,
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a

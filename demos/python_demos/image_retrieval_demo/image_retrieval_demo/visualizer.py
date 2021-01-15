@@ -101,6 +101,6 @@ def visualize(image, target_pos, impaths, distances, input_size, compute_embeddi
         cv2.imshow('demo_image', demo_image)
         key_pressed = cv2.waitKey(imshow_delay)
         presenter.handleKey(key_pressed)
-        return key_pressed & 0xff if key_pressed != -1 else -1
+        return (demo_image, key_pressed & 0xff) if key_pressed != -1 else (demo_image, -1)
 
-    return -1
+    return (demo_image, -1)

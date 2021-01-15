@@ -49,12 +49,16 @@ if __name__ == '__main__':
     args.add_argument('-m', '--model',
                       help='Required. Path to an .xml file with a trained model.',
                       type=Path, required=True)
-    args.add_argument('-i', '--input',
+    args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
-                           'a folder of images or anything that cv2.VideoCapture can process.',
-                      required=True)
-    args.add_argument('-loop', '--loop', default=False, action='store_true',
+                           'a folder of images, video file or camera id.')
+    args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
+    args.add_argument('-o', '--output', required=False,
+                      help='Optional. Name of output to save.')
+    args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                      help='Optional. Number of frames to store in output. '
+                           'If -1 is set, all frames are stored.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
@@ -92,9 +96,18 @@ if __name__ == '__main__':
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
+
+    video_writer = cv2.VideoWriter()
+    if args.output:
+        video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                      (frame.shape[1], frame.shape[0]))
+        if not video_writer.isOpened():
+            raise RuntimeError("Can't open video writer")
+
     base_height = args.height_size
     fx = args.fx
 
+    frames_processed = 0
     delay = 1
     esc_code = 27
     p_code = 112
@@ -133,6 +146,11 @@ if __name__ == '__main__':
             mean_time = mean_time * 0.95 + current_time * 0.05
         cv2.putText(frame, 'FPS: {}'.format(int(1 / mean_time * 10) / 10),
                     (40, 80), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255))
+
+        frames_processed += 1
+        if video_writer.isOpened() and (args.output_limit == -1 or frames_processed <= args.output_limit):
+            video_writer.write(frame)
+
         if not args.no_show:
             cv2.imshow(canvas_3d_window_name, canvas_3d)
             cv2.imshow('3D Human Pose Estimation', frame)

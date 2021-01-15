@@ -31,10 +31,11 @@ The demo workflow is the following:
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: image_retrieval_demo.py [-h] -m MODEL -i I -g GALLERY
-                               [-gt GROUND_TRUTH] [-d DEVICE]
-                               [-l CPU_EXTENSION] [--no_show]
-                               [-u UTILIZATION_MONITORS]
+usage: image_retrieval_demo.py [-h] -m MODEL -i INPUT [--loop]
+                               [-o OUTPUT] [-limit OUTPUT_LIMIT]
+                               -g GALLERY [-gt GROUND_TRUTH]
+                               [-d DEVICE] [-l CPU_EXTENSION]
+                               [--no_show] [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -44,6 +45,11 @@ Options:
                         Required. Path to a video file or a device node of a
                         web-camera.
   --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If -1 is set, all frames are stored.
   -g GALLERY, --gallery GALLERY
                         Required. Path to a file listing gallery images.
   -gt GROUND_TRUTH, --ground_truth GROUND_TRUTH

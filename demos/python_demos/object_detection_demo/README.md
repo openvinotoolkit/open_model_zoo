@@ -55,8 +55,8 @@ usage: object_detection_demo.py [-h] -m MODEL -at
                                 [-d DEVICE] [--labels LABELS]
                                 [-t PROB_THRESHOLD] [--keep_aspect_ratio]
                                 [-nireq NUM_INFER_REQUESTS]
-                                [-nstreams NUM_STREAMS]
-                                [-nthreads NUM_THREADS] [-loop] [-no_show]
+                                [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS]
+                                [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show]
                                 [-u UTILIZATION_MONITORS] [-r]
 
 Options:
@@ -66,8 +66,8 @@ Options:
   -at {ssd,yolo,faceboxes,centernet,retina}, --architecture_type {ssd,yolo,faceboxes,centernet,retina}
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
-                        Required. Path to an image, folder with images, video
-                        file or a numeric camera ID.
+                        Required. An input to process. The input must be a
+                        single image, a folder of images, video file or camera id.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The sample
@@ -95,8 +95,13 @@ Inference options:
                         CPU (including HETERO cases).
 
 Input/output options:
-  -loop, --loop         Optional. Loops input data.
-  -no_show, --no_show   Optional. Don't show output.
+  --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If -1 is set, all frames are stored.
+  --no_show             Optional. Don't show output.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 

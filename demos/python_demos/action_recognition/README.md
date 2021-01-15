@@ -35,8 +35,10 @@ You can change the value of `num_requests` in `action_recognition.py` to find an
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: action_recognition.py [-h] -i INPUT -m_en M_ENCODER [-m_de M_DECODER]
-                             [-l CPU_EXTENSION] [-d DEVICE] [--fps FPS]
+usage: action_recognition.py [-h] -i INPUT [--loop] [-o OUTPUT]
+                             [-limit OUTPUT_LIMIT]
+                             -m_en M_ENCODER [-m_de M_DECODER]
+                             [-l CPU_EXTENSION] [-d DEVICE]
                              [-lb LABELS] [--no_show] [-s LABEL_SMOOTHING]
                              [--seq DECODER_SEQ_SIZE]
                              [-u UTILIZATION_MONITORS]
@@ -45,14 +47,19 @@ Options:
   -h, --help            Show this help message and exit.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image,
-                        a folder of images or anything that cv2.VideoCapture can process
-  --loop                Optional. Enable reading the input in a loop
+                        a folder of images, video file or camera id.
+  --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If -1 is set, all frames are stored.
   -m_en M_ENCODER, --m_encoder M_ENCODER
-                        Required. Path to encoder model
+                        Required. Path to encoder model.
   -m_de M_DECODER, --m_decoder M_DECODER
                         Optional. Path to decoder model. If not specified,
                         simple averaging of encoder's outputs over a time
-                        window is applied
+                        window is applied.
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         Optional. For CPU custom layers, if any. Absolute path
                         to a shared library with the kernels implementation.
@@ -60,17 +67,16 @@ Options:
                         Optional. Specify a target device to infer on. CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
                         look for a suitable plugin for the device specified.
-                        Default value is CPU
-  --fps FPS             Optional. FPS for renderer
+                        Default value is CPU.
   -lb LABELS, --labels LABELS
-                        Optional. Path to file with label names
-  --no_show             Optional. Don't show output
+                        Optional. Path to file with label names.
+  --no_show             Optional. Don't show output.
   -s LABEL_SMOOTHING, --smooth LABEL_SMOOTHING
                         Optional. Number of frames used for output label
-                        smoothing
+                        smoothing.
   --seq DECODER_SEQ_SIZE
                         Optional. Length of sequence that decoder takes as
-                        input
+                        input.
   -u UTILIZATION_MONITORS, --utilization-monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```

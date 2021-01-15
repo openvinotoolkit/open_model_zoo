@@ -16,9 +16,9 @@
 """
 
 import logging
-import os.path as osp
 import sys
 from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
 from itertools import cycle
 from enum import Enum
 from time import perf_counter
@@ -29,8 +29,9 @@ from openvino.inference_engine import IECore
 from human_pose_estimation_demo.model import HPEAssociativeEmbedding, HPEOpenPose
 from human_pose_estimation_demo.visualization import show_poses
 
-sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 import monitors
+from images_capture import open_images_capture
 from helpers import put_highlighted_text
 
 
@@ -41,8 +42,13 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument('-i', '--input', help='Required. Path to an image, video file or a numeric camera ID.',
-                      required=True, type=str)
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. An input to process. The input must be a '
+                           'single image, a folder of images, video file or camera id.')
+    args.add_argument('--loop', default=False, action='store_true',
+                      help='Optional. Enable reading the input in a loop.')
+    args.add_argument('-o', '--output', required=False,
+                      help='Optional. Name of output to save.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=str)
     args.add_argument('-at', '--architecture_type', choices=('ae', 'openpose'), required=True, type=str,
@@ -74,7 +80,6 @@ def build_argparser():
     args.add_argument('-nthreads', '--num_threads',
                       help='Optional. Number of threads to use for inference on CPU (including HETERO cases)',
                       default=None, type=int)
-    args.add_argument('-loop', '--loop', help='Optional. Number of times to repeat the input.', type=int, default=0)
     args.add_argument('-no_show', '--no_show', help="Optional. Don't show output", action='store_true')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
@@ -157,28 +162,20 @@ def main():
                 caught_exceptions=exceptions)
     }
 
-    try:
-        input_stream = int(args.input)
-    except ValueError:
-        input_stream = args.input
-    cap = cv2.VideoCapture(input_stream)
+    cap = open_images_capture(args.input, args.loop)
     wait_key_time = 1
 
     next_frame_id = 0
     next_frame_id_to_show = 0
-    input_repeats = 0
 
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between min_latency/user_specified modes, press TAB key in the output window")
 
-    presenter = monitors.Presenter(args.utilization_monitors, 55,
-        (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
+    presenter = None
+    video_writer = cv2.VideoWriter()
 
-    while (cap.isOpened()
-           or completed_request_results
-           or len(hpes[mode].empty_requests) < len(hpes[mode].requests)) \
-          and not exceptions:
+    while True:
         if next_frame_id_to_show in completed_request_results:
             frame_meta, raw_outputs = completed_request_results.pop(next_frame_id_to_show)
             poses, scores = hpes[mode].postprocess(raw_outputs, frame_meta)
@@ -224,6 +221,9 @@ def main():
                 put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
                 put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
 
+            if video_writer.isOpened():
+                video_writer.write(frame)
+
             if not args.no_show:
                 cv2.imshow('Pose estimation results', frame)
                 key = cv2.waitKey(wait_key_time)
@@ -244,17 +244,21 @@ def main():
                 else:
                     presenter.handleKey(key)
 
-        elif hpes[mode].empty_requests and cap.isOpened():
+        elif hpes[mode].empty_requests:
             start_time = perf_counter()
-            ret, frame = cap.read()
-            if not ret:
-                if input_repeats < args.loop or args.loop < 0:
-                    cap.open(input_stream)
-                    input_repeats += 1
-                else:
-                    cap.release()
-                continue
-
+            frame = cap.read()
+            if frame is None:
+                if next_frame_id == 0:
+                    raise ValueError("Can't read an image from the input")
+                break
+            if next_frame_id == 0:
+                presenter = monitors.Presenter(args.utilization_monitors, 55,
+                                               (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
+                if args.output:
+                    video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                                   (frame.shape[1], frame.shape[0]))
+                    if not video_writer.isOpened():
+                        raise RuntimeError("Can't open video writer")
             hpes[mode](frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
 

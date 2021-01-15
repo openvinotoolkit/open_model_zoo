@@ -40,9 +40,14 @@ def build_arg():
                          default="CPU", type=str)
     in_args.add_argument('-i', "--input", required=True,
                          help='Required. An input to process. The input must be a single image, '
-                              'a folder of images or anything that cv2.VideoCapture can process.')
+                              'a folder of images, video file or camera id.')
     in_args.add_argument('--loop', default=False, action='store_true',
                          help='Optional. Enable reading the input in a loop.')
+    in_args.add_argument('-o', '--output', required=False,
+                         help='Optional. Name of output to save.')
+    in_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                         help='Optional. Number of frames to store in output. '
+                              'If -1 is set, all frames are stored.')
     in_args.add_argument("--no_show", help="Optional. Disable display of results on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
@@ -83,9 +88,17 @@ if __name__ == '__main__':
     if original_frame is None:
         raise RuntimeError("Can't read an image from the input")
 
+    frames_processed = 0
     imshow_size = (640, 480)
     graph_size = (imshow_size[0] // 2, imshow_size[1] // 4)
     presenter = monitors.Presenter(args.utilization_monitors, imshow_size[1] * 2 - graph_size[1], graph_size)
+
+    video_writer = cv.VideoWriter()
+    if args.output:
+        video_writer = cv.VideoWriter(args.output, cv.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                      (imshow_size[0] * 2, imshow_size[1] * 2))
+        if not video_writer.isOpened():
+            raise RuntimeError("Can't open video writer")
 
     while original_frame is not None:
         log.debug("#############################")
@@ -131,6 +144,11 @@ if __name__ == '__main__':
         ir_image = [cv.hconcat([original_image, grayscale_image]),
                     cv.hconcat([lab_image, colorize_image])]
         final_image = cv.vconcat(ir_image)
+
+        frames_processed += 1
+        if video_writer.isOpened() and (args.output_limit == -1 or frames_processed <= args.output_limit):
+            video_writer.write(final_image)
+
         presenter.drawGraphs(final_image)
         if not args.no_show:
             log.debug("Show results")
