@@ -16,9 +16,9 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include <opencv2/imgproc.hpp>
 
 #include <ngraph/ngraph.hpp>
+#include <opencv2/imgproc.hpp>
 #include <samples/slog.hpp>
 #include <samples/common.hpp>
 #include <samples/ocv_common.hpp>
@@ -97,7 +97,7 @@ cv::Point2f get3rdPoint(const cv::Point2f& a, const cv::Point2f& b) {
     return b + cv::Point2f(-direct.y, direct.x);
 }
 
-cv::Mat getAffineTransform(float centerX, float centerY, int scale, float rot, int outputWidth, int outputHeight, bool inv = false) {
+cv::Mat getAffineTransform(float centerX, float centerY, int scale, float rot, size_t outputWidth, size_t outputHeight, bool inv = false) {
     int srcW = scale;
     float rotRad =  static_cast<float>(M_PI) * rot / 180.0f;
     auto srcDir = getDir({ 0.0f, -0.5f * srcW }, rotRad);
@@ -154,7 +154,7 @@ std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& i
 std::vector<std::pair<size_t, float>> nms(float* scoresPtr, SizeVector sz, float threshold, int kernel = 3) {
     std::vector<std::pair<size_t, float>> scores;
     scores.reserve(ModelCenterNet::INIT_VECTOR_SIZE);
-    int chSize = sz[2] * sz[3];
+    auto chSize = sz[2] * sz[3];
 
     for (int i = 0; i < sz[1] * sz[2] * sz[3]; ++i) {
         scoresPtr[i] = expf(scoresPtr[i]) / (1 + expf(scoresPtr[i]));
@@ -201,7 +201,7 @@ std::vector<std::pair<size_t, float>> nms(float* scoresPtr, SizeVector sz, float
 }
 
 
-std::vector<std::pair<size_t, float>> filterScores(InferenceEngine::MemoryBlob::Ptr scoresInfRes, float threshold) {
+static std::vector<std::pair<size_t, float>> filterScores(InferenceEngine::MemoryBlob::Ptr scoresInfRes, float threshold) {
     LockedMemory<const void> scoresOutputMapped = scoresInfRes->rmap();
     auto desc = scoresInfRes->getTensorDesc();
     auto sz = desc.getDims();
