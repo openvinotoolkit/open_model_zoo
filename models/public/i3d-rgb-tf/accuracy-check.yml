@@ -1,5 +1,5 @@
 models:
-  - name: i3d-rgb
+  - name: i3d-rgb-tf
     launchers:
       - framework: dlsdk
         adapter: classification
