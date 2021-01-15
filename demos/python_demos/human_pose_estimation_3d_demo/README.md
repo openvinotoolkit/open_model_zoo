@@ -56,7 +56,7 @@ Options:
                         Optional. Name of output to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
-                        If -1 is set, all frames will be stored.
+                        If -1 is set, all frames are stored.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on: CPU,
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a

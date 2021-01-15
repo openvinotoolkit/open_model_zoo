@@ -47,7 +47,7 @@ def build_arg():
                          help='Optional. Name of output to save.')
     in_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                          help='Optional. Number of frames to store in output. '
-                              'If -1 is set, all frames will be stored.')
+                              'If -1 is set, all frames are stored.')
     in_args.add_argument("--no_show", help="Optional. Disable display of results on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",

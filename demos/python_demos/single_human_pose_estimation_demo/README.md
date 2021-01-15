@@ -33,7 +33,7 @@ optional arguments:
                         Optional. Name of output to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
-                        If -1 is set, all frames will be stored.
+                        If -1 is set, all frames are stored.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target to infer on CPU or GPU.
   --person_label PERSON_LABEL

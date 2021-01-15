@@ -58,7 +58,7 @@ if __name__ == '__main__':
                       help='Optional. Name of output to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
-                           'If -1 is set, all frames will be stored.')
+                           'If -1 is set, all frames are stored.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '

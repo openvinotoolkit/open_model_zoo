@@ -74,7 +74,7 @@ def main():
                         help='Optional. Name of output to save.')
     parser.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                         help='Optional. Number of frames to store in output. '
-                             'If -1 is set, all frames will be stored.')
+                             'If -1 is set, all frames are stored.')
     parser.add_argument('-m_i', '--m_instance_segmentation', type=str, required=False,
                         help='Required. Path to the instance segmentation model.')
     parser.add_argument('-m_s', '--m_semantic_segmentation', type=str, required=False,

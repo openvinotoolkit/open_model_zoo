@@ -30,7 +30,7 @@ def build_argparser():
                         help="Optional. Name of output to save.")
     parser.add_argument("-limit", "--output_limit", required=False, default=1000, type=int,
                       help="Optional. Number of frames to store in output. "
-                           "If -1 is set, all frames will be stored.")
+                           "If -1 is set, all frames are stored.")
     parser.add_argument("-d", "--device", type=str, default='CPU', required=False,
                         help="Optional. Specify the target to infer on CPU or GPU.")
     parser.add_argument("--person_label", type=int, required=False, default=15, help="Optional. Label of class person for detector.")
