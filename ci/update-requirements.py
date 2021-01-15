@@ -81,6 +81,5 @@ def main():
         openvino_dir / 'deployment_tools/tools/post_training_optimization_toolkit/setup.py',
         openvino_dir / 'deployment_tools/model_optimizer/requirements.txt')
 
-
 if __name__ == '__main__':
     main()
