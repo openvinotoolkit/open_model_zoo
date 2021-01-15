@@ -560,6 +560,35 @@ class PackCepstrum(Preprocessor):
 
         return image
 
+class AddBatch(Preprocessor):
+    __provider__ = 'add_batch'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            "axis": NumberField(default=0, description='Add batch dimension', value_type=int),
+        })
+        return parameters
+
+    def configure(self):
+        self.axis = self.get_value_from_config('axis')
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+
+        data = np.expand_dims(data, 0)
+        if self.axis != 0:
+            if self.axis > len(data.shape):
+                raise RuntimeError(
+                    'Operation "{}" failed: Invalid axis {} for shape {}.'.format(self.__provider__, self.axis,
+                                                                                  data.shape)
+                )
+            order = list(range(1,self.axis + 1)) + [0] + list(range(self.axis + 1, len(data.shape)))
+            data = np.transpose(data, order)
+        image.data = data
+
+        return image
 
 class TrimmingAudio(Preprocessor):
     __provider__ = 'trim'

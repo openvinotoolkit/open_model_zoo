@@ -83,8 +83,16 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
                 check_progress, self.dataset.size
             )
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
-            batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
-            batch_inputs_extr, _ = extract_image_representations(batch_inputs)
+            rnnt_ref = np.load("./rnnt_ref.npz")
+            wf = rnnt_ref['waveform']
+            feat = rnnt_ref['feature']
+            trasnscript = rnnt_ref['transcript']
+
+            batch_inputs[0].data = wf
+            batch_inputs[0].metadata['image_size'] = wf.shape
+
+            batch_features = self.preprocessor.process(batch_inputs, batch_annotation)
+            batch_inputs_extr, _ = extract_image_representations(batch_features)
             encoder_callback = None
             if output_callback:
                 encoder_callback = partial(output_callback,
@@ -418,7 +426,7 @@ class ASRModel(BaseModel):
                 prediction['model'] = models_args[1 if len(models_args) > 1 else 0]
                 prediction['_model_is_blob'] = is_blob
             if not contains_any(joint, ['model', 'onnx_model']) and models_args:
-                joint['model'] = models_args[1 if len(models_args) > 1 else 0]
+                joint['model'] = models_args[2 if len(models_args) > 2 else 0]
                 joint['_model_is_blob'] = is_blob
             network_info.update({'encoder': encoder, 'prediction': prediction, 'joint': joint})
         if not contains_all(network_info, ['encoder', 'prediction', 'joint']) and not delayed_model_loading:
@@ -434,20 +442,26 @@ class ASRModel(BaseModel):
         self._raw_outs = OrderedDict()
         self.adapter = create_adapter(network_info.get('adapter', 'ctc_greedy_decoder'))
 
-        self._blank_id = 0
+        self._blank_id = 28
         self._SOS = -1
         self._max_symbols_per_step = 30
 
     def predict(self, identifiers, input_data, encoder_callback=None):
         predictions, raw_outputs = [], []
         for data in input_data:
+            rnnt_ref = np.load("./rnnt_ref.npz")
+            wf = rnnt_ref['waveform']
+            feat = rnnt_ref['feature']
+            trasnscript = rnnt_ref['transcript']
+            data = feat
+
             encoder_prediction, decoder_inputs = self.encoder.predict(identifiers, data)
             if encoder_callback:
                 encoder_callback(encoder_prediction)
             if self.store_encoder_predictions:
                 self._encoder_predictions.append(encoder_prediction)
             # raw_output, prediction = self.decoder.predict(identifiers, decoder_inputs)
-            # FIXME: add prediction and joint calls logic
+            raw_output, prediction = self.decoder(identifiers, decoder_inputs)
             raw_outputs.append(raw_output)
             predictions.append(prediction)
         return raw_outputs, predictions
@@ -489,22 +503,28 @@ class ASRModel(BaseModel):
 
         logits, logits_lens = self._model.encoder(x, out_lens)
 
-    def decoder(self, logits, logits_lens):
-        output: List[List[int]] = []
-        for batch_idx in range(logits.size(0)):
-            inseq = logits[batch_idx, :, :].unsqueeze(1)
+    def decoder(self, identifiers, logits):
+        output = []
+        raw_outputs = []
+        batches = logits.shape[0]
+        for batch_idx in range(batches):
+            inseq = np.squeeze(logits[batch_idx, :, :])
             # inseq: TxBxF
-            logitlen = logits_lens[batch_idx]
+            logitlen = inseq.shape[0]
+            # sentence, raw_output = self._greedy_decode(inseq, logitlen)
             sentence = self._greedy_decode(inseq, logitlen)
             output.append(sentence)
+            # raw_outputs.append(raw_output)
 
-        return logits, logits_lens, output
+        return raw_outputs, output
 
     def _greedy_decode(self, x, out_len):
-        hidden = None
+        hidden_size = 320
+        hidden = (np.zeros([2, 1, hidden_size]), np.zeros([2, 1, hidden_size]))
         label = []
-        for time_idx in range(int(out_len.item())):
-            f = x[time_idx, :, :].unsqueeze(0)
+        for time_idx in range(out_len):
+            # f = np.squeeze(x[time_idx, ...])
+            f = np.expand_dims(np.expand_dims(x[time_idx, ...], 0), 0)  # FIXME: one call to expand_dims()
 
             not_blank = True
             symbols_added = 0
@@ -514,11 +534,14 @@ class ASRModel(BaseModel):
                     self._get_last_symb(label),
                     hidden
                 )
+                hidden_prime = (g['151'], g['152'])
+                g = g['153']    # FIXME, move output name to parameters section
                 logp = self._joint_step(f, g, log_normalize=False)[0, :]
 
                 # get index k, of max prob
-                v, k = logp.max(0)
-                k = k.item()
+                # v, k = logp.max(0)
+                # k = k.item()
+                k = np.argmax(logp)
 
                 if k == self._blank_id:
                     not_blank = False
@@ -531,14 +554,18 @@ class ASRModel(BaseModel):
 
     def _pred_step(self, label, hidden):
         if label == self._SOS:
-            return self.prediction.predict(None, hidden)
+            # return self.prediction.predict(None, hidden)
+            label = self._blank_id      # because zeros-initializing branch removed from IR
         if label > self._blank_id:
             label -= 1
         # label = torch.tensor([[label]], dtype=torch.int64)
-        return self.prediction.predict(label, hidden)
+        inputs = {'input.1': [[label,]], '1': hidden[0], '2': hidden[1]} # FIXME: input names to config
+        return self.prediction.predict(None, inputs)
 
     def _joint_step(self, enc, pred, log_normalize: bool=False):
-        logits = self.joint.predict(enc, pred)[:, 0, 0, :]  #FIXME: fit_to_input()
+        inputs = {'0': enc, '1': pred}
+        logits, logits_blob = self.joint.predict(None, inputs)
+        logits = logits_blob[:, 0, 0, :]
         if not log_normalize:
             return logits
 
@@ -570,15 +597,29 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
         del self.launcher
 
     def fit_to_input(self, input_data):
+        if isinstance(input_data, dict):
+            fitted = {}
+            has_info = hasattr(self.exec_network, 'input_info')
+            if has_info:
+                input_info = self.exec_network.input_info
+            else:
+                input_info = self.exec_network.inputs
+            for input_blob in input_info.keys():
+                fitted.update(self.fit_one_input(input_blob, input_data[input_blob]))
+            return fitted
+        else:
+            return self.fit_one_input(self.input_blob, input_data)
+
+    def fit_one_input(self, input_blob, input_data):
         has_info = hasattr(self.exec_network, 'input_info')
         if has_info:
-            input_info = self.exec_network.input_info[self.input_blob].input_data
+            input_info = self.exec_network.input_info[input_blob].input_data
         else:
-            input_info = self.exec_network.inputs[self.input_blob]
+            input_info = self.exec_network.inputs[input_blob]
         if tuple(input_info.shape) != np.shape(input_data):
-            self._reshape_input({self.input_blob: np.shape(input_data)})
+            self._reshape_input({input_blob: np.shape(input_data)})
 
-        return {self.input_blob: np.array(input_data)}
+        return {input_blob: np.array(input_data)}
 
 class EncoderDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'encoder'
