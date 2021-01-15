@@ -38,7 +38,7 @@ files:
   - name: model.pt
     size: 422509849
     sha256: 933c46ec14e4041122852d8d0acf822ff9f4b94fd07f0ff42fa593f135d57cab
-    source: TODO PLEASE UPDATE https://download.01.org/opencv/public_models/032020/midasnet/model-001.pt WITH NEW VERSION OF https://drive.google.com/file/d/1Jf7qRG9N8IW8CaZ7gPisO5RtlLl63mNA
+    source: https://github.com/intel-isl/MiDaS/releases/download/v2_1/model-openvino.pt
 framework: pytorch
 postprocessing:
   - $type: regex_replace
