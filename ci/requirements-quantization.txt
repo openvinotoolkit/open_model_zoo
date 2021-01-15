@@ -62,7 +62,7 @@ shapely==1.7.1                             # via accuracy_checker (tools/accurac
 six==1.15.0                                # via absl-py, chainer, cycler, google-pasta, grpcio, h5py, hyperopt, keras-preprocessing, onnx, protobuf, python-dateutil, tensorboard, tensorflow, test-generator
 tensorboard==1.15.0                        # via tensorflow
 tensorflow-estimator==1.15.1               # via tensorflow
-tensorflow==1.15.5 ; python_version < "3.8"# via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
+tensorflow==1.15.5 ; python_version < "3.8" # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
 termcolor==1.1.0                           # via tensorflow
 test-generator==0.1.1                      # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
 threadpoolctl==2.1.0                       # via scikit-learn
