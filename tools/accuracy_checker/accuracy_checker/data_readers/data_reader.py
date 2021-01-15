@@ -150,7 +150,7 @@ class BaseReader(ClassProvider):
     @classmethod
     def validate_config(cls, config, data_source=None, fetch_only=False, **kwargs):
         uri_prefix = kwargs.pop('uri_prefix', '')
-        reader_uri = '{}'.format(uri_prefix) if uri_prefix else 'reader'
+        reader_uri = uri_prefix or 'reader'
         if cls.__name__ == BaseReader.__name__:
             errors = []
             reader_type = config if isinstance(config, str) else config.get('type')
@@ -178,7 +178,6 @@ class BaseReader(ClassProvider):
                 return errors
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
-        reader_uri = '{}'.format(cls.__provider__)
         return ConfigValidator(reader_uri, fields=cls.parameters(), **kwargs).validate(
             config or {}, fetch_only=fetch_only
         )

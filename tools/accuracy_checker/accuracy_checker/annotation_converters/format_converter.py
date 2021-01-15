@@ -35,7 +35,7 @@ class BaseFormatConverter(ClassProvider):
 
     @classmethod
     def config_validator(cls, uri_prefix=''):
-        converter_uri = '{}.{}'.format(uri_prefix or 'annotation_conversion', cls.get_name())
+        converter_uri = uri_prefix or 'annotation_conversion.{}'.format(cls.get_name())
         return ConfigValidator(
             converter_uri, fields=cls.parameters(),
             on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT

@@ -142,7 +142,7 @@ class Postprocessor(ClassProvider):
             errors.extend(processor_cls.validate_config(config, fetch_only=fetch_only, uri_prefix=uri_prefix))
             return errors
 
-        postprocessing_uri = '{}.{}'.format(uri_prefix or 'postprocessing', cls.__provider__)
+        postprocessing_uri = uri_prefix or 'postprocessing.{}'.format(cls.__provider__)
         return ConfigValidator(
             postprocessing_uri, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
         ).validate(config, fetch_only=fetch_only)
