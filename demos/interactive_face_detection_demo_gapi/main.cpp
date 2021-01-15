@@ -294,7 +294,6 @@ void setInput(cv::GStreamingCompiled stream, const std::string& input ) {
     }
 }
 
-// Copied from demos/common/include/samples/common.hpp
 static std::string fileNameNoExt(const std::string &filepath) {
     auto pos = filepath.rfind('.');
     if (pos == std::string::npos) return filepath;
