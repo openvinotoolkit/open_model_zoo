@@ -19,7 +19,7 @@
 
 class ModelCenterNet : public DetectionModel {
 public:
-    struct BBoxes {
+    struct BBox {
         float left;
         float top;
         float right;
@@ -38,6 +38,4 @@ public:
 
 protected:
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
-    std::string getLabelName(int labelID) { return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
-
 };

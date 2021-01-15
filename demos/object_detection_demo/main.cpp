@@ -39,8 +39,8 @@
 #include <pipelines/metadata.h>
 #include <models/detection_model_centernet.h>
 #include <models/detection_model_faceboxes.h>
-#include <models/detection_model_yolo.h>
 #include <models/detection_model_ssd.h>
+#include <models/detection_model_yolo.h>
 
 static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Architecture type: ssd or yolo";

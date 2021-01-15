@@ -36,7 +36,6 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     // --------------------------- Prepare input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
-
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
     }
@@ -83,10 +82,10 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
 }
 
 cv::Point2f getDir(const cv::Point2f& srcPoint, float rotRadius) {
-    float sn = std::sinf(rotRadius);
-    float cs = std::cosf(rotRadius);
+    float sn = sinf(rotRadius);
+    float cs = cosf(rotRadius);
 
-    cv::Point2f srcResult({ 0, 0 });
+    cv::Point2f srcResult(0.0f, 0.0f);
     srcResult.x = srcPoint.x * cs - srcPoint.y * sn;
     srcResult.y = srcPoint.x * sn + srcPoint.y * cs;
 
@@ -95,16 +94,16 @@ cv::Point2f getDir(const cv::Point2f& srcPoint, float rotRadius) {
 
 cv::Point2f get3rdPoint(const cv::Point2f& a, const cv::Point2f& b) {
     cv::Point2f direct = a - b;
-    return b + cv::Point2f({ -direct.y, direct.x });
+    return b + cv::Point2f(-direct.y, direct.x);
 }
 
 cv::Mat getAffineTransform(float centerX, float centerY, int scale, float rot, int outputWidth, int outputHeight, bool inv = false) {
     int srcW = scale;
     float rotRad =  static_cast<float>(M_PI) * rot / 180.0f;
-    auto srcDir = getDir({ 0, -0.5f * srcW }, rotRad);
-    cv::Point2f dstDir({ 0,  -0.5f * outputWidth });
-    std::vector<cv::Point2f> src(3, { 0 , 0 });
-    std::vector<cv::Point2f> dst(3, { 0 , 0 });
+    auto srcDir = getDir({ 0.0f, -0.5f * srcW }, rotRad);
+    cv::Point2f dstDir(0.0f,  -0.5f * outputWidth);
+    std::vector<cv::Point2f> src(3, { 0.0f, 0.0f });
+    std::vector<cv::Point2f> dst(3, { 0.0f, 0.0f });
 
     src[0] = { centerX, centerY };
     src[1] = srcDir + src[0];
@@ -152,9 +151,9 @@ std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& i
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
 }
 
-std::vector<std::pair<size_t, float>> nms(float *scoresPtr, SizeVector sz, float threshold, int kernel = 3) {
+std::vector<std::pair<size_t, float>> nms(float* scoresPtr, SizeVector sz, float threshold, int kernel = 3) {
     std::vector<std::pair<size_t, float>> scores;
-    scores.reserve(100);
+    scores.reserve(ModelCenterNet::INIT_VECTOR_SIZE);
     int chSize = sz[2] * sz[3];
 
     for (int i = 0; i < sz[1] * sz[2] * sz[3]; ++i) {
@@ -235,9 +234,9 @@ std::vector<std::pair<float, float>> filterWH(InferenceEngine::MemoryBlob::Ptr w
     return wh;
 }
 
-std::vector<ModelCenterNet::BBoxes> calcBBoxes(const std::vector<std::pair<size_t, float>>& scores, const std::vector<std::pair<float, float>>& reg,
+std::vector<ModelCenterNet::BBox> calcBBoxes(const std::vector<std::pair<size_t, float>>& scores, const std::vector<std::pair<float, float>>& reg,
     const std::vector<std::pair<float, float>>& wh, const SizeVector& sz) {
-    std::vector<ModelCenterNet::BBoxes> bboxes(scores.size());
+    std::vector<ModelCenterNet::BBox> bboxes(scores.size());
 
     for (int i = 0; i < bboxes.size(); ++i) {
         size_t chIdx = scores[i].first % (sz[2] * sz[3]);
@@ -253,11 +252,11 @@ std::vector<ModelCenterNet::BBoxes> calcBBoxes(const std::vector<std::pair<size_
     return bboxes;
 }
 
-void transform(std::vector<ModelCenterNet::BBoxes>* bboxes, const SizeVector& sz, int scale, float centerX, float centerY) {
+void transform(std::vector<ModelCenterNet::BBox>* bboxes, const SizeVector& sz, int scale, float centerX, float centerY) {
     cv::Mat1f trans = getAffineTransform(centerX, centerY, scale, 0, sz[2], sz[3], true);
 
     for (auto& b : *bboxes) {
-        ModelCenterNet::BBoxes newbb;
+        ModelCenterNet::BBox newbb;
 
         newbb.left = trans.at<float>(0, 0) *  b.left + trans.at<float>(0, 1) *  b.top + trans.at<float>(0, 2);
         newbb.top = trans.at<float>(1, 0) *  b.left + trans.at<float>(1, 1) *  b.top + trans.at<float>(1, 2);
@@ -269,7 +268,7 @@ void transform(std::vector<ModelCenterNet::BBoxes>* bboxes, const SizeVector& sz
 }
 
 std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResult) {
- // --------------------------- Filter data and get valid indices----------------------------------
+ // --------------------------- Filter data and get valid indices ---------------------------------
     auto heatInfRes = infResult.outputsData[outputsNames[0]];
     auto sz = heatInfRes->getTensorDesc().getDims();;
     auto chSize = sz[2] * sz[3];
@@ -280,7 +279,8 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
 
     auto whInfRes = infResult.outputsData[outputsNames[2]];
     auto wh = filterWH(whInfRes, scores, chSize);
-// --------------------------- Calculate bounding boxes & apply inverse affine transform-----------
+
+// --------------------------- Calculate bounding boxes & apply inverse affine transform ----------
     auto bboxes = calcBBoxes(scores, reg, wh, sz);
 
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
