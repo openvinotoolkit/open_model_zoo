@@ -76,6 +76,11 @@ def main():
         'demos/python_demos/requirements.txt', openvino_dir / 'python/requirements.txt')
     pc('ci/requirements-downloader.txt',
         'tools/downloader/requirements.in')
+    pc('ci/requirements-quantization.txt',
+        'tools/accuracy_checker/setup.py',
+        openvino_dir / 'deployment_tools/tools/post_training_optimization_toolkit/setup.py',
+        openvino_dir / 'deployment_tools/model_optimizer/requirements.txt')
+
 
 if __name__ == '__main__':
     main()
