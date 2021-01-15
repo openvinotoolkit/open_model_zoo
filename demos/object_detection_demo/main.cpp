@@ -23,6 +23,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <numeric>
+#include <random>
 
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
@@ -117,6 +119,80 @@ static void showUsage() {
     std::cout << "    -yolo_af                  " << yolo_af_message << std::endl;
 }
 
+class ColorPalette {
+private:
+    std::vector<cv::Scalar> palette;
+
+    double getRandom(double a = 0.0, double b = 1.0) {
+        static std::default_random_engine e;
+        std::uniform_real_distribution<> dis(a, std::nextafter(b, std::numeric_limits<double>::max())); // range 0 - 1
+        return dis(e);
+    }
+
+    auto distance(const cv::Scalar& c1, const cv::Scalar& c2) {
+        auto dh = std::fmin(std::fabs(c1[0] - c2[0]), 1 - fabs(c1[0] - c2[0])) * 2;
+        auto ds = std::fabs(c1[1] - c2[1]);
+        auto dv = std::fabs(c1[2] - c2[2]);
+
+        return dh * dh + ds * ds + dv * dv;
+    }
+
+    cv::Scalar maxMinDistance(const std::vector<cv::Scalar>& colorSet, const std::vector<cv::Scalar>& colorCandidates) {
+        std::pair<size_t, double> maxDist{ 0, 0 };
+        size_t i = 0;
+        for (auto& c1 : colorCandidates) {
+            double minDist = std::numeric_limits<double>::max();
+            for (auto& c2 : colorSet) {
+                auto dist = distance(c1, c2);
+                minDist = dist < minDist ? dist : minDist;
+            }
+            maxDist = minDist > maxDist.second ? std::pair<size_t, double>{i, minDist} : maxDist;
+            ++i;
+        }
+
+        return colorCandidates[maxDist.first];
+    }
+
+    cv::Scalar hsv2rgb(cv::Scalar& hsvColor) {
+        // Convert to OpenCV HSV format
+        hsvColor[0] *= 179;
+        hsvColor[1] *= 255;
+        hsvColor[2] *= 255;
+
+        cv::Mat rgb;
+        cv::Mat hsv(1, 1, CV_8UC3, hsvColor);
+        cvtColor(hsv, rgb, cv::COLOR_HSV2BGR);
+        return cv::Scalar(rgb.data[0], rgb.data[1], rgb.data[2]);
+    }
+
+public:
+    ColorPalette(size_t n = 100) {
+        palette.reserve(n);
+        std::vector<cv::Scalar> hsvColors(1, { 1., 1., 1.});
+        std::vector<cv::Scalar> colorCandidates;
+        size_t numCandidates = 100;
+        for (size_t i = 1; i < n; ++i) {
+            colorCandidates.clear();
+
+            for (size_t j = 1; j < numCandidates; ++j) {
+                colorCandidates.push_back({getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) });
+            }
+
+            hsvColors.push_back(maxMinDistance(hsvColors, colorCandidates));
+
+        }
+
+        for (auto& hsv : hsvColors) {
+            palette.push_back(hsv2rgb(hsv));
+        }
+
+    }
+
+    const cv::Scalar& operator[](size_t index) const {
+        return palette[index % palette.size()];
+    }
+
+};
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
@@ -144,7 +220,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 }
 
 // Input image is stored inside metadata, as we put it there during submission stage
-cv::Mat renderDetectionData(const DetectionResult& result) {
+cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& palette) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -174,11 +250,10 @@ cv::Mat renderDetectionData(const DetectionResult& result) {
 
         std::ostringstream conf;
         conf << ":" << std::fixed << std::setprecision(3) << obj.confidence;
-
+        auto color = palette[obj.labelID];
         cv::putText(outputImg, obj.label + conf.str(),
-            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
-            cv::Scalar(0, 0, 255));
-        cv::rectangle(outputImg, obj, cv::Scalar(0, 0, 255));
+            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, color);
+        cv::rectangle(outputImg, obj, color, 2);
     }
 
     return outputImg;
@@ -205,6 +280,7 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> labels;
         if (!FLAGS_labels.empty())
             labels = DetectionModel::loadLabels(FLAGS_labels);
+        ColorPalette palette(labels.size());
 
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "faceboxes") {
@@ -257,7 +333,7 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to DetectionResult*
             //    and use your own processing instead of calling renderDetectionData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
+                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -279,7 +355,7 @@ int main(int argc, char *argv[]) {
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
         while (result = pipeline.getResult()) {
-            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
+            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
