@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -96,6 +96,7 @@ from .ade20k_image_translation import ADE20kImageTranslationConverter
 from .salient_object_detection import SalientObjectDetectionConverter
 from .common_object_detection import CommonDetectionConverter
 from .wflw import WFLWConverter
+from .see_in_the_dark import SeeInTheDarkDatasetConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -185,4 +186,5 @@ __all__ = [
     'SalientObjectDetectionConverter',
     'CommonDetectionConverter',
     'WFLWConverter',
+    'SeeInTheDarkDatasetConverter'
 ]

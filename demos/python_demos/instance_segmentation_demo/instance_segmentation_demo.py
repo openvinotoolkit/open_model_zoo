@@ -47,9 +47,14 @@ def build_argparser():
                       required=True, type=str, metavar='"<path>"')
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
-                           'a folder of images or anything that cv2.VideoCapture can process.')
+                           'a folder of images, video file or camera id.')
     args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
+    args.add_argument('-o', '--output', required=False,
+                      help='Optional. Name of output to save.')
+    args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                      help='Optional. Number of frames to store in output. '
+                           'If -1 is set, all frames are stored.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
@@ -121,10 +126,22 @@ def main():
     with open(args.labels, 'rt') as labels_file:
         class_labels = labels_file.read().splitlines()
 
-    frame_size = frame.shape
+    if args.delay:
+        delay = args.delay
+    else:
+        delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
+
+    frames_processed = 0
+    out_frame_size = (frame.shape[1], frame.shape[0])
     presenter = monitors.Presenter(args.utilization_monitors, 45,
-                (round(frame_size[1] / 4), round(frame_size[0] / 8)))
+                (round(out_frame_size[0] / 4), round(out_frame_size[1] / 8)))
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
+    video_writer = cv2.VideoWriter()
+    if args.output:
+        video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                       out_frame_size)
+        if not video_writer.isOpened():
+            raise RuntimeError("Can't open video writer")
 
     render_time = 0
 
@@ -196,6 +213,9 @@ def main():
             for layer, stats in perf_counts.items():
                 print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
                                                                   stats['status'], stats['real_time']))
+        frames_processed += 1
+        if video_writer.isOpened() and (args.output_limit == -1 or frames_processed <= args.output_limit):
+            video_writer.write(frame)
 
         if not args.no_show:
             # Show resulting image.
@@ -204,7 +224,7 @@ def main():
         render_time = render_end - render_start
 
         if not args.no_show:
-            key = cv2.waitKey(args.delay)
+            key = cv2.waitKey(delay)
             esc_code = 27
             if key == esc_code:
                 break

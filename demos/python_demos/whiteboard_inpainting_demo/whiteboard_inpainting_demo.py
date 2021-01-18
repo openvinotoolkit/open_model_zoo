@@ -67,27 +67,29 @@ def remove_background(img, kernel_size=(7, 7), blur_kernel_size=21, invert_color
 def main():
     parser = argparse.ArgumentParser(description='Whiteboard inpainting demo')
     parser.add_argument('-i', '--input', required=True,
-                         help='Required. Path to a video file or a device node of a web-camera')
+                         help='Required. Path to a video file or a device node of a web-camera.')
     parser.add_argument('--loop', default=False, action='store_true',
-                      help='Optional. Enable reading the input in a loop')
+                        help='Optional. Enable reading the input in a loop.')
+    parser.add_argument('-o', '--output', required=False,
+                        help='Optional. Name of output to save.')
+    parser.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                        help='Optional. Number of frames to store in output. '
+                             'If -1 is set, all frames are stored.')
     parser.add_argument('-m_i', '--m_instance_segmentation', type=str, required=False,
-                        help='Path to the instance segmentation model')
+                        help='Required. Path to the instance segmentation model.')
     parser.add_argument('-m_s', '--m_semantic_segmentation', type=str, required=False,
-                        help='Path to the semantic segmentation model')
+                        help='Required. Path to the semantic segmentation model.')
     parser.add_argument('-t', '--threshold', type=float, default=0.6,
-                        help='Threshold for person instance segmentation model')
-    parser.add_argument('--output_video', type=str, default='', required=False,
-                        help='Optional. Path to output video')
-    parser.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
-
+                        help='Optional. Threshold for person instance segmentation model.')
+    parser.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     parser.add_argument('-d', '--device', type=str, default='CPU',
                         help='Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is '
-                             'acceptable. The demo will look for a suitable plugin for the device specified')
+                             'acceptable. The demo will look for a suitable plugin for the device specified.')
     parser.add_argument('-l', '--cpu_extension', type=str, default=None,
-                        help='MKLDNN (CPU)-targeted custom layers.Absolute \
+                        help='MKLDNN (CPU)-targeted custom layers. Absolute \
                               path to a shared library with the kernels impl.')
     parser.add_argument('-u', '--utilization_monitors', default='', type=str,
-                        help='Optional. List of monitors to show initially')
+                        help='Optional. List of monitors to show initially.')
     args = parser.parse_args()
 
     cap = open_images_capture(args.input, args.loop)
@@ -101,7 +103,6 @@ def main():
         raise ValueError('Set up exactly one of segmentation models: '
                          '--m_instance_segmentation or --m_semantic_segmentation')
 
-    fps = cap.fps()
     out_frame_size = (frame.shape[1], frame.shape[0] * 2)
     presenter = monitors.Presenter(args.utilization_monitors, 20,
                                    (out_frame_size[0] // 4, out_frame_size[1] // 16))
@@ -113,11 +114,12 @@ def main():
         cv2.namedWindow(WINNAME)
         cv2.setMouseCallback(WINNAME, mouse.get_points)
 
-    if args.output_video:
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        output_video = cv2.VideoWriter(args.output_video, fourcc, fps, out_frame_size)
-    else:
-        output_video = None
+    video_writer = cv2.VideoWriter()
+    if args.output:
+        video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                       out_frame_size)
+        if not video_writer.isOpened():
+            raise RuntimeError("Can't open video writer")
 
     log.info("Initializing Inference Engine")
     ie = IECore()
@@ -156,8 +158,8 @@ def main():
         merged_frame = np.vstack([frame, output_frame])
         merged_frame = cv2.resize(merged_frame, out_frame_size)
 
-        if output_video is not None:
-            output_video.write(merged_frame)
+        if video_writer.isOpened() and (args.output_limit == -1 or frame_number <= args.output_limit-1):
+            video_writer.write(merged_frame)
 
         presenter.drawGraphs(merged_frame)
         if not args.no_show:
@@ -191,9 +193,6 @@ def main():
     print('')
 
     log.info(presenter.reportMeans())
-
-    if output_video is not None:
-        output_video.release()
 
 
 if __name__ == '__main__':

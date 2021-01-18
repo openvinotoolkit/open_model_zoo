@@ -37,17 +37,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/octave-resnext-50-0.25/FP32/octave-resnext-50-0.25.xml
-        weights: public/octave-resnext-50-0.25/FP32/octave-resnext-50-0.25.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/octave-resnext-50-0.25/FP16/octave-resnext-50-0.25.xml
-        weights: public/octave-resnext-50-0.25/FP16/octave-resnext-50-0.25.bin
         adapter: classification
 
     datasets:

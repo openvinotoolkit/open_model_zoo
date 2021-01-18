@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@ limitations under the License.
 
 import re
 from pathlib import Path
-from .launcher import Launcher, LauncherConfigValidator
+import numpy as np
+
+from .launcher import Launcher
 from ..config import BaseField, ListField, PathField, StringField, ConfigError
 from ..utils import contains_any, contains_all
 
@@ -59,12 +61,7 @@ class TFLauncher(Launcher):
             )
         self.default_layout = 'NHWC'
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
-
-        tf_launcher_config = LauncherConfigValidator(
-            'TF_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
-        )
-        tf_launcher_config.validate(self.config)
-
+        self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
         if not self._delayed_model_loading:
             if not contains_any(self.config, ['model', 'saved_model_dir']):
                 raise ConfigError('model or saved model directory should be provided')
@@ -94,6 +91,108 @@ class TFLauncher(Launcher):
                 self._outputs_tensors.append(tensor)
 
         self.device = '/{}:0'.format(self.get_value_from_config('device').lower())
+        self._output_layouts = dict()
+        self._lstm_inputs = None
+        if '_list_lstm_inputs' in self.config:
+            self._configure_lstm_inputs()
+
+    @staticmethod
+    def _data_to_blob(layer_shape, data, layout): # pylint:disable=R0911
+        data_shape = np.shape(data)
+        if len(layer_shape) == 4:
+            if len(data_shape) == 5:
+                data = data[0]
+            if len(data_shape) < 4:
+                if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
+                    return np.resize(data, layer_shape)
+            return np.transpose(data, layout)
+        if len(layer_shape) == 2:
+            if len(data_shape) == 1:
+                return np.transpose([data])
+            if len(data_shape) > 2:
+                if all([dim == 1 for dim in layer_shape]) and all([dim == 1 for dim in data_shape]):
+                    return np.resize(data, layer_shape)
+                if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
+                    return np.resize(data, layer_shape)
+        if len(layer_shape) == 3 and len(data_shape) == 4:
+            data = np.transpose(data, layout)
+            return data[0]
+        if len(layer_shape) == len(layout):
+            return np.transpose(data, layout)
+        if (
+                len(layer_shape) == 1 and len(data_shape) > 1 and
+                len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape)))
+        ):
+            return np.resize(data, layer_shape)
+        return np.array(data)
+
+    def _set_precision(self):
+        has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
+        config_inputs = self.config.get('inputs', [])
+        for input_config in config_inputs:
+            if 'precision' in input_config:
+                if self.network:
+                    if not has_info:
+                        self.network.inputs[input_config['name']].precision = input_config['precision']
+                    else:
+                        self.network.input_info[input_config['name']].precision = input_config['precision']
+
+    def _set_input_shape(self):
+        if not self.network:
+            return
+        config_inputs = self.config.get('inputs', [])
+        input_shapes = {}
+        for input_config in config_inputs:
+            if 'shape' in input_config:
+                input_shapes[input_config['name']] = input_config['shape']
+        if not input_shapes:
+            return
+        orig_input_shapes = {input_name: input_info.shape for input_name, input_info in self.inputs.items()}
+        orig_input_shapes.update(input_shapes)
+        self._reshape_input(orig_input_shapes)
+
+    def _configure_lstm_inputs(self):
+        lstm_mapping = {}
+        config_inputs = self.config.get('inputs', [])
+        for input_config in config_inputs:
+            if input_config['type'] == 'LSTM_INPUT':
+                lstm_mapping[input_config['name']] = input_config['value']
+        self._lstm_inputs = lstm_mapping
+
+    def _fill_lstm_inputs(self, infer_outputs=None):
+        feed_dict = {}
+        for lstm_var, output_layer in self._lstm_inputs.items():
+            layer_shape = self.inputs[lstm_var]
+            input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(layer_shape)
+            feed_dict[lstm_var] = input_data
+        return feed_dict
+
+    def _predict_sequential(self, inputs, metadata=None, **kwargs):
+        lstm_inputs_feed = self._fill_lstm_inputs()
+        results = []
+        for feed_dict in inputs:
+            feed_dict.update(lstm_inputs_feed)
+
+            with self.tf.device(self.device):
+                with self.tf.Session(graph=self._graph) as session:
+                    feed_dictionary = {
+                        self.node_pattern.format(input_name): input_data
+                        for input_name, input_data in feed_dict.items()
+                    }
+                    result = session.run(self._outputs_tensors, feed_dict=feed_dictionary)
+                    res = dict(zip(self._outputs_names, result))
+                    results.append(res)
+
+
+            lstm_inputs_feed = self._fill_lstm_inputs(res)
+
+        if metadata is not None:
+            for meta_ in metadata:
+                meta_['input_shape'] = self.inputs_info_for_meta()
+                if self._output_layouts:
+                    meta_['output_layout'] = self._output_layouts
+
+        return results
 
     def predict(self, inputs, metadata=None, **kwargs):
         """
@@ -103,6 +202,9 @@ class TFLauncher(Launcher):
         Returns:
             raw data from network.
         """
+        if self._lstm_inputs:
+            return self._predict_sequential(inputs, metadata)
+
         results = []
         for infer_input in inputs:
             with self.tf.device(self.device):

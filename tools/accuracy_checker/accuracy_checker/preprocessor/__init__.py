@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ from .centernet_preprocessing import CenterNetAffineTransformation
 from .brats_preprocessing import Resize3D, NormalizeBrats, CropBraTS, SwapModalitiesBrats
 from .inpainting_preprocessor import FreeFormMask, RectMask, CustomMask
 from .one_hot_encoding import OneHotEncoding
+from .raw_image_preprocessing import PackBayerImage
 
 __all__ = [
     'PreprocessingExecutor',
@@ -131,5 +132,7 @@ __all__ = [
     'CustomMask',
     'RGB2YCrCbConverter',
     'BGR2YCrCbConverter',
-    'OneHotEncoding'
+    'OneHotEncoding',
+
+    'PackBayerImage'
 ]

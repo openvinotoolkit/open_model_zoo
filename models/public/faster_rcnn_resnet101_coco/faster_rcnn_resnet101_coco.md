@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Faster R-CNN Resnet-101 model. Used for object detection. For details, see the [paper](https://arxiv.org/abs/1506.01497v3).
+Faster R-CNN Resnet-101 model. Used for object detection. For details, see the [paper](https://arxiv.org/abs/1506.01497).
 
 ## Specification
 

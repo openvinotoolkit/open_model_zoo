@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -413,7 +413,7 @@ def set_image_metadata(annotation, images):
     if not isinstance(data, list):
         data = [data]
     for image in data:
-        data_shape = image.shape if not np.isscalar(image) else 1
+        data_shape = np.shape(image) if not np.isscalar(image) else 1
         image_sizes.append(data_shape)
     annotation.set_image_size(image_sizes)
 

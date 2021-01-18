@@ -34,9 +34,9 @@ Refer to [Using Open Model Zoo demos](../../README.md), for instructions on how 
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: human_pose_estimation_3d_demo.py [-h] -m MODEL [-i INPUT [INPUT ...]]
-                                        [-d DEVICE]
-                                        [--height_size HEIGHT_SIZE]
+usage: human_pose_estimation_3d_demo.py [-h] -m MODEL -i INPUT [--loop]
+                                        [-o OUTPUT] [-limit OUTPUT_LIMIT]
+                                        [-d DEVICE] [--height_size HEIGHT_SIZE]
                                         [--extrinsics_path EXTRINSICS_PATH]
                                         [--fx FX] [--no_show]
                                         [-u UTILIZATION_MONITORS]
@@ -48,10 +48,15 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -i INPUT [INPUT ...], --input INPUT [INPUT ...]
+  -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image,
-                        a folder of images or anything that cv2.VideoCapture can process.
-   -loop                Optional. Enable reading the input in a loop.
+                        a folder of images, video file or camera id.
+  --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If -1 is set, all frames are stored.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on: CPU,
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a

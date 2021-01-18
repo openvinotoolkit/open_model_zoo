@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -414,7 +414,8 @@ class ColorizationTestModel(BaseModel):
     def predict(self, identifiers, input_data):
         img_l, img_l_rs = self.data_preparation(input_data)
 
-        res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})
+        self.inputs[self.input_blob] = img_l_rs
+        res = self.exec_network.infer(inputs=self.inputs)
 
         new_result = self.postprocessing(res[self.output_blob], img_l)
         return res, np.array(new_result)
@@ -444,6 +445,10 @@ class ColorizationTestModel(BaseModel):
             self.input_blob = input_blob
             self.output_blob = output_blob
             self.with_prefix = with_prefix
+
+        self.inputs = {}
+        for input_name in input_info:
+            self.inputs[input_name] = np.zeros(input_info[input_name].input_data.shape)
 
 
 class ColorizationCheckModel(BaseModel):

@@ -18,6 +18,7 @@ The models can be downloaded via Model Downloader
 | DenseNet 161                | Caffe\*<br>TensorFlow\*            | [densenet-161](./densenet-161/densenet-161.md)<br>[densenet-161-tf](./densenet-161-tf/densenet-161-tf.md) | 77.55%/93.92%<br>76.446%/93.228%| 14.128~15.561  | 28.666 |
 | DenseNet 169                | Caffe\*<br>TensorFlow\*            | [densenet-169](./densenet-169/densenet-169.md)<br>[densenet-169-tf](./densenet-169-tf/densenet-169-tf.md) | 76.106%/93.106%<br>76.14%/93.12%| 6.788~6.7932 | 14.139 |
 | DenseNet 201                | Caffe\*<br>TensorFlow\*            | [densenet-201](./densenet-201/densenet-201.md)<br>[densenet-201-tf](./densenet-201-tf/densenet-201-tf.md)| 76.886%/93.556%<br>76.93%/93.56% | 8.673~8.6786  | 20.001  |
+| DLA 34                      | PyTorch\*                          | [dla-34](./dla-34/dla-34.md) | 74.64%/92.06% | 6.1368 | 15.7344 |
 | EfficientNet B0             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b0](./efficientnet-b0/efficientnet-b0.md)<br>[efficientnet-b0-pytorch](./efficientnet-b0-pytorch/efficientnet-b0-pytorch.md) | 75.70%/92.76%<br>76.91%/93.21% | 0.819 | 5.268 |
 | EfficientNet B0 AutoAugment | TensorFlow\*                       | [efficientnet-b0_auto_aug](./efficientnet-b0_auto_aug/efficientnet-b0_auto_aug.md) | 76.43%/93.04% | 0.819 | 5.268 |
 | EfficientNet B5             | TensorFlow\*<br>PyTorch\*          | [efficientnet-b5](./efficientnet-b5/efficientnet-b5.md)<br>[efficientnet-b5-pytorch](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | 83.33%/96.67%<br>83.69%/96.71% | 21.252 | 30.303 |
@@ -40,6 +41,7 @@ The models can be downloaded via Model Downloader
 | MobileNet V3 Small 1.0      | TensorFlow\*                       | [mobilenet-v3-small-1.0-224-tf](./mobilenet-v3-small-1.0-224-tf/mobilenet-v3-small-1.0-224-tf.md) | 67.36%/87.45% | 0.121 | 2.537 |
 | MobileNet V3 Large 1.0      | TensorFlow\*                       | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/mobilenet-v3-large-1.0-224-tf.md) | 75.70%/92.76% | 0.4536 | 5.4721 |
 | DenseNet 121, alpha=0.125   | MXNet\*                            | [octave-densenet-121-0.125](./octave-densenet-121-0.125/octave-densenet-121-0.125.md) | 76.066%/93.044% | 4.883 | 7.977 |
+| RegNetX-3.2GF               | PyTorch\*                          | [regnetx-3.2gf](./regnetx-3.2gf/regnetx-3.2gf.md) | 78.17%/94.08% | 6.3893 | 15.2653 |
 | ResNet 26, alpha=0.25       | MXNet\*                            | [octave-resnet-26-0.25](./octave-resnet-26-0.25/octave-resnet-26-0.25.md)     | 76.076%/92.584%| 3.768 | 15.99 |
 | ResNet 50, alpha=0.125      | MXNet\*                            | [octave-resnet-50-0.125](./octave-resnet-50-0.125/octave-resnet-50-0.125.md)    | 78.19%/93.862% | 7.221 | 25.551 |
 | ResNet 101, alpha=0.125     | MXNet\*                            | [octave-resnet-101-0.125](./octave-resnet-101-0.125/octave-resnet-101-0.125.md)   | 79.182%/94.42% | 13.387 | 44.543 |
@@ -177,7 +179,7 @@ Since this task contains - in the general setting - some ambiguity, the resultin
 
 | Model Name                  | Implementation | OMZ Model Name                | Accuracy | GFlops    | mParams |
 | --------------------------- | -------------- | ----------------------------- | -------- | --------- | ------- |
-| midasnet                    | PyTorch\*      | [midasnet](./midasnet/midasnet.md)| 7.5878| 207.4915  |    104.0814     |
+| midasnet                    | PyTorch\*      | [midasnet](./midasnet/midasnet.md)| 0.07071 | 207.25144  |    104.081     |
 | FCRN ResNet50-Upproj          | TensorFlow\*   | [fcrn-dp-nyu-depth-v2-tf](./fcrn-dp-nyu-depth-v2-tf/fcrn-dp-nyu-depth-v2-tf.md)| 0.573 | 63.5421 | 34.5255 |
 
 ## Image Inpainting

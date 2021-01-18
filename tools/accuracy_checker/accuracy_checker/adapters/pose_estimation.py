@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -55,8 +55,11 @@ class HumanPoseAdapter(Adapter):
 
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         self.part_affinity_fields = self.get_value_from_config('part_affinity_fields_out')
@@ -375,8 +378,11 @@ class SingleHumanPoseAdapter(Adapter):
     __provider__ = 'single_human_pose_estimation'
     prediction_types = (PoseEstimationPrediction, )
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT
+        )
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []

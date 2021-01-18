@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,7 +34,11 @@ from .config import (
     ConfigError,
     BoolField
 )
-from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
+from .dependency import UnregisteredProviderException
+from .utils import (
+    JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet, contains_any
+)
+
 from .representation import (
     BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
 )
@@ -72,7 +76,7 @@ class Dataset:
         self._config = config_entry
         self.batch = self.config.get('batch')
         self.iteration = 0
-        dataset_config = DatasetConfig('Dataset')
+        dataset_config = DatasetConfig('dataset')
         dataset_config.validate(self._config)
         if not delayed_annotation_loading:
             self._load_annotation()
@@ -325,6 +329,38 @@ class Dataset:
             if progress_reporter:
                 progress_reporter.update(idx, 1)
         return annotations
+
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, uri_prefix=''):
+        dataset_config = DatasetConfig(uri_prefix or 'dataset')
+        errors = dataset_config.validate(config, fetch_only=fetch_only)
+        if 'annotation_conversion' in config:
+            conversion_uri = '{}.annotation_conversion'.format(uri_prefix) if uri_prefix else 'annotation_conversion'
+            conversion_params = config['annotation_conversion']
+            converter = conversion_params.get('converter')
+            if not converter:
+                error = ConfigError('converter is not found', conversion_params, conversion_uri)
+                if not fetch_only:
+                    raise error
+                errors.append(error)
+                return errors
+            try:
+                converter_cls = BaseFormatConverter.resolve(converter)
+            except UnregisteredProviderException as exception:
+                if not fetch_only:
+                    raise exception
+                errors.append(
+                    ConfigError(
+                        'converter {} unregistered'.format(converter), conversion_params, conversion_uri)
+                )
+                return errors
+            errors.extend(converter_cls.validate_config(conversion_params, fetch_only=fetch_only))
+        if not contains_any(config, ['annotation_conversion', 'annotation']):
+            errors.append(
+                ConfigError(
+                    'annotation_conversion or annotation field should be provided', config, uri_prefix or 'dataset')
+            )
+        return errors
 
 
 def read_annotation(annotation_file: Path):

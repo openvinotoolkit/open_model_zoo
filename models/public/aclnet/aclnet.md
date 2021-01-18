@@ -4,7 +4,7 @@
 
 The `AclNet` model is designed to perform sound classification.
 The `AclNet` model is trained on an internal dataset of environmental sounds.
-For details about the model, see this [paper](https://arxiv.org/pdf/1811.06669.pdf).
+For details about the model, see this [paper](https://arxiv.org/abs/1811.06669).
 
 The model input is a segment of PCM audio samples in [N, C, 1, L] format.
 
@@ -21,7 +21,7 @@ The model output for `AclNet` is the sound classifier output for the 53 differen
 
 ## Accuracy
 
-See this [publication](http://dcase.community/documents/workshop2019/proceedings/DCASE2019Workshop_Huang_52.pdf) and this [paper](https://arxiv.org/pdf/1811.06669.pdf).
+See this [publication](http://dcase.community/documents/workshop2019/proceedings/DCASE2019Workshop_Huang_52.pdf) and this [paper](https://arxiv.org/abs/1811.06669).
 
 ## Input
 

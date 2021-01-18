@@ -32,6 +32,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1] / 'common'))
 import models
 import monitors
 from pipelines import AsyncPipeline
+from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
@@ -46,8 +47,9 @@ def build_argparser():
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
                       type=str, required=True, choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
-    args.add_argument('-i', '--input', required=True, type=str,
-                      help='Required. Path to an image, folder with images, video file or a numeric camera ID.')
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. An input to process. The input must be a single image, '
+                           'a folder of images, video file or camera id.')
     args.add_argument('-d', '--device', default='CPU', type=str,
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
@@ -72,8 +74,14 @@ def build_argparser():
                             help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
 
     io_args = parser.add_argument_group('Input/output options')
-    io_args.add_argument('-loop', '--loop', help='Optional. Loops input data.', action='store_true', default=False)
-    io_args.add_argument('-no_show', '--no_show', help="Optional. Don't show output.", action='store_true')
+    io_args.add_argument('--loop', default=False, action='store_true',
+                         help='Optional. Enable reading the input in a loop.')
+    io_args.add_argument('-o', '--output', required=False,
+                         help='Optional. Name of output to save.')
+    io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                         help='Optional. Number of frames to store in output. '
+                              'If -1 is set, all frames are stored.')
+    io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
@@ -220,14 +228,7 @@ def main():
     detector_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
-    try:
-        input_stream = int(args.input)
-    except ValueError:
-        input_stream = args.input
-    cap = cv2.VideoCapture(input_stream)
-    if not cap.isOpened():
-        log.error('OpenCV: Failed to open capture: ' + str(input_stream))
-        sys.exit(1)
+    cap = open_images_capture(args.input, args.loop)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
@@ -236,13 +237,11 @@ def main():
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     palette = ColorPalette(len(model.labels) if model.labels else 100)
-    presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                   (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4),
-                                    round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
-
     metrics = PerformanceMetrics()
+    presenter = None
+    video_writer = cv2.VideoWriter()
 
-    while cap.isOpened():
+    while True:
         if detector_pipeline.callback_exceptions:
             raise detector_pipeline.callback_exceptions[0]
         # Process all completed requests
@@ -258,6 +257,10 @@ def main():
             presenter.drawGraphs(frame)
             frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
             metrics.update(start_time, frame)
+
+            if video_writer.isOpened() and (args.output_limit == -1 or next_frame_id_to_show <= args.output_limit-1):
+                video_writer.write(frame)
+
             if not args.no_show:
                 cv2.imshow('Detection Results', frame)
                 key = cv2.waitKey(1)
@@ -273,14 +276,19 @@ def main():
         if detector_pipeline.is_ready():
             # Get new image/frame
             start_time = perf_counter()
-            ret, frame = cap.read()
-            if not ret:
-                if args.loop:
-                    cap.open(input_stream)
-                else:
-                    cap.release()
-                continue
-
+            frame = cap.read()
+            if frame is None:
+                if next_frame_id == 0:
+                    raise ValueError("Can't read an image from the input")
+                break
+            if next_frame_id == 0:
+                presenter = monitors.Presenter(args.utilization_monitors, 55,
+                                               (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
+                if args.output:
+                    video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                                   (frame.shape[1], frame.shape[0]))
+                    if not video_writer.isOpened():
+                        raise RuntimeError("Can't open video writer")
             # Submit for inference
             detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
@@ -304,6 +312,10 @@ def main():
             presenter.drawGraphs(frame)
             frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
             metrics.update(start_time, frame)
+
+            if video_writer.isOpened():
+                video_writer.write(frame)
+
             if not args.no_show:
                 cv2.imshow('Detection Results', frame)
                 key = cv2.waitKey(1)

@@ -19,7 +19,7 @@ models:
         metrics:
           - type: pairwise_accuracy_subsets
 
-  - name: face-recognition-resnet34-arcface-mx
+  - name: face-recognition-resnet34-arcface
 
     launchers:
       - framework: dlsdk

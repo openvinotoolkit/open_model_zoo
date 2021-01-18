@@ -37,39 +37,43 @@ pip3 install -r requirements.txt
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: whiteboard_inpainting_demo.py [-h] -i I [-m_i M_INSTANCE_SEGMENTATION]
-                                     [-m_s M_SEMANTIC_SEGMENTATION]
-                                     [-t THRESHOLD]
-                                     [--output_video OUTPUT_VIDEO] [--no_show]
+usage: whiteboard_inpainting_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
+                                     [-limit OUTPUT_LIMIT]
+                                     -m_i M_INSTANCE_SEGMENTATION
+                                     -m_s M_SEMANTIC_SEGMENTATION
+                                     [-t THRESHOLD] [--no_show]
                                      [-d DEVICE] [-l CPU_EXTENSION]
                                      [-u UTILIZATION_MONITORS]
 
 Whiteboard inpainting demo
 
 optional arguments:
-  -h, --help            show this help message and exit
+  -h, --help            Show this help message and exit.
   -i INPUT, --input INPUT
                         Required. Path to a video file or a device node of a
-                        web-camera
-  --loop                Optional. Enable reading the input in a loop
+                        web-camera.
+  --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If -1 is set, all frames are stored.
   -m_i M_INSTANCE_SEGMENTATION, --m_instance_segmentation M_INSTANCE_SEGMENTATION
-                        Path to the instance segmentation model
+                        Required. Path to the instance segmentation model.
   -m_s M_SEMANTIC_SEGMENTATION, --m_semantic_segmentation M_SEMANTIC_SEGMENTATION
-                        Path to the semantic segmentation model
+                        Required. Path to the semantic segmentation model.
   -t THRESHOLD, --threshold THRESHOLD
-                        Threshold for person instance segmentation model
-  --output_video OUTPUT_VIDEO
-                        Optional. Path to output video
-  --no_show             Optional. Don't show output
+                        Optional. Threshold for person instance segmentation model.
+  --no_show             Optional. Don't show output.
   -d DEVICE, --device DEVICE
                         Optional. Specify a target device to infer on. CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
-                        look for a suitable plugin for the device specified
+                        look for a suitable plugin for the device specified.
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        MKLDNN (CPU)-targeted custom layers.Absolute path to a
+                        MKLDNN (CPU)-targeted custom layers. Absolute path to a
                         shared library with the kernels impl.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
-                        Optional. List of monitors to show initially
+                        Optional. List of monitors to show initially.
 ```
 
 Example of a command:

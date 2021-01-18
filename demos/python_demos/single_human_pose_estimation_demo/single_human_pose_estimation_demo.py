@@ -18,18 +18,22 @@ from images_capture import open_images_capture
 def build_argparser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-m_od", "--model_od", type=str, required=True,
-                        help="path to model of object detector in xml format")
-
+                        help="Required. Path to model of object detector in .xml format.")
     parser.add_argument("-m_hpe", "--model_hpe", type=str, required=True,
-                        help="path to model of human pose estimator in xml format")
+                        help="Required. Path to model of human pose estimator in .xml format.")
     parser.add_argument("-i", "--input", required=True,
                         help="Required. An input to process. The input must be a single image, "
-                             "a folder of images or anything that cv2.VideoCapture can process.")
+                             "a folder of images, video file or camera id.")
     parser.add_argument("--loop", default=False, action="store_true",
                         help="Optional. Enable reading the input in a loop.")
+    parser.add_argument("-o", "--output", required=False,
+                        help="Optional. Name of output to save.")
+    parser.add_argument("-limit", "--output_limit", required=False, default=1000, type=int,
+                      help="Optional. Number of frames to store in output. "
+                           "If -1 is set, all frames are stored.")
     parser.add_argument("-d", "--device", type=str, default='CPU', required=False,
-                        help="Specify the target to infer on CPU or GPU")
-    parser.add_argument("--person_label", type=int, required=False, default=15, help="Label of class person for detector")
+                        help="Optional. Specify the target to infer on CPU or GPU.")
+    parser.add_argument("--person_label", type=int, required=False, default=15, help="Optional. Label of class person for detector.")
     parser.add_argument("--no_show", help='Optional. Do not display output.', action='store_true')
     parser.add_argument("-u", "--utilization_monitors", default="", type=str,
                         help="Optional. List of monitors to show initially.")
@@ -50,6 +54,14 @@ def run_demo(args):
         raise RuntimeError("Can't read an image from the input")
     delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
 
+    video_writer = cv2.VideoWriter()
+    if args.output:
+        video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                      (frame.shape[1], frame.shape[0]))
+        if not video_writer.isOpened():
+            raise RuntimeError("Can't open video writer")
+
+    frames_processed = 0
     presenter = monitors.Presenter(args.utilization_monitors, 25)
     while frame is not None:
         bboxes = detector_person.detect(frame)
@@ -72,6 +84,11 @@ def run_demo(args):
             float(1 / (detector_person.infer_time + single_human_pose_estimator.infer_time * len(human_poses))),
             float(1 / single_human_pose_estimator.infer_time),
             float(1 / detector_person.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+
+        frames_processed += 1
+        if video_writer.isOpened() and (args.output_limit == -1 or frames_processed <= args.output_limit):
+            video_writer.write(frame)
+
         if not args.no_show:
             cv2.imshow('Human Pose Estimation Demo', frame)
             key = cv2.waitKey(delay)
@@ -80,6 +97,7 @@ def run_demo(args):
             presenter.handleKey(key)
         frame = cap.read()
     print(presenter.reportMeans())
+
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()
