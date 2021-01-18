@@ -79,7 +79,7 @@ def main():
     pc('ci/requirements-quantization.txt',
         'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements.in'
         openvino_dir / 'deployment_tools/tools/post_training_optimization_toolkit/setup.py',
-        openvino_dir / 'deployment_tools/model_optimizer/requirements.txt')
+        openvino_dir / 'deployment_tools/model_optimizer/requirements_kaldi.txt')
 
 if __name__ == '__main__':
     main()
