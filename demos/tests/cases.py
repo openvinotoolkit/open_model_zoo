@@ -200,7 +200,11 @@ NATIVE_DEMOS = [
         TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('object-detection-demo')}),
-        [
+        [   *combine_cases(
+                TestCase(options={'-at': 'centernet'}),
+                single_option_cases('-m',
+                    ModelArg('ctdet_coco_dlav0_384'),
+                    ModelArg('ctdet_coco_dlav0_512'))),
             TestCase(options={'-at': 'faceboxes',
                               '-m': ModelArg('faceboxes-pytorch')}
             ),
