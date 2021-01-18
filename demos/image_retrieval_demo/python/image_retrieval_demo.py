@@ -30,7 +30,7 @@ from image_retrieval_demo.visualizer import visualize
 from image_retrieval_demo.roi_detector_on_video import RoiDetectorOnVideo
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-                             'common/python'))
+
 import monitors
 from images_capture import open_images_capture
 

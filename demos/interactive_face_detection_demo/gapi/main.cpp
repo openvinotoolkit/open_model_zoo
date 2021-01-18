@@ -12,8 +12,8 @@
 #include <list>
 #include <memory>
 
-#include <samples/ocv_common.hpp>
-#include <samples/slog.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 
 #include <opencv2/gapi.hpp>
 #include <opencv2/gapi/core.hpp>
