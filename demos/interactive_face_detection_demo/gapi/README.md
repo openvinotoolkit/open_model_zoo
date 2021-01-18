@@ -9,7 +9,7 @@ This demo executes the Face Detection, Age/Gender Recognition, Head Pose Estimat
 * `emotions-recognition-retail-0003`, which is executed on top of the results of the first model and reports an emotion for each detected face
 * `facial-landmarks-35-adas-0002`, which is executed on top of the results of the first model and reports normed coordinates of estimated facial landmarks
 
-For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 Other demo objectives are:
 
@@ -67,7 +67,7 @@ Options:
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -91,6 +91,6 @@ The demo reports total image throughput which includes frame decoding time, infe
 > Other models may produce unexpected results on these devices.
 
 ## See Also
-* [Using Open Model Zoo demos](../README.md)
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/downloader/README.md)

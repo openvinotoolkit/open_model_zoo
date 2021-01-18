@@ -1,6 +1,6 @@
 # Crossroad Camera C++ Demo
 
-![](./crossroad_camera.gif)
+![](../crossroad_camera.gif)
 
 This demo provides an inference pipeline for persons' detection, recognition and reidentification. The demo uses Person Detection network followed by the Person Attributes Recognition and Person Reidentification Retail networks applied on top of the detection results. You can use a set of the following pre-trained models with the demo:
 
