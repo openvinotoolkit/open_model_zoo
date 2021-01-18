@@ -14,10 +14,10 @@
 // limitations under the License.
 */
 
-#include "models/detection_model_retinaface.h"
 #include <ngraph/ngraph.hpp>
-#include <samples/slog.hpp>
 #include <samples/common.hpp>
+#include <samples/slog.hpp>
+#include "models/detection_model_retinaface.h"
 
 using namespace InferenceEngine;
 

@@ -38,7 +38,7 @@
 #include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 #include <models/detection_model_faceboxes.h>
-#include "models/detection_model_retinaface.h"
+#include <models/detection_model_retinaface.h>
 #include <models/detection_model_ssd.h>
 #include <models/detection_model_yolo.h>
 

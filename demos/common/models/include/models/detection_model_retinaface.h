@@ -15,8 +15,8 @@
 */
 
 #pragma once
-#include "detection_model.h"
 #include <vector>
+#include "detection_model.h"
 
 class ModelRetinaFace
     : public DetectionModel {
