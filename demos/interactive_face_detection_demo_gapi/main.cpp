@@ -115,7 +115,7 @@ GAPI_OCV_KERNEL(OCVPostProc, PostProc) {
 
 void rawOutputDetections(const cv::Mat  &ssd_result,
                          const cv::Size &upscale,
-                         const float detectionThreshold) {
+                         const double detectionThreshold) {
     const auto &in_ssd_dims = ssd_result.size;
     CV_Assert(in_ssd_dims.dims() == 4u);
 
@@ -294,7 +294,6 @@ void setInput(cv::GStreamingCompiled stream, const std::string& input ) {
     }
 }
 
-// Copied from demos/common/include/samples/common.hpp
 static std::string fileNameNoExt(const std::string &filepath) {
     auto pos = filepath.rfind('.');
     if (pos == std::string::npos) return filepath;
@@ -442,7 +441,8 @@ int main(int argc, char *argv[]) {
                 setInput(stream, FLAGS_i);
             } catch (const std::exception& error) {
                 std::stringstream msg;
-                msg << "Can't open source {" << FLAGS_i << "}" << std::endl;
+                msg << "Can't open source {" << FLAGS_i << "}" << std::endl <<
+                    error.what() << std::endl;
                 throw std::invalid_argument(msg.str());
             }
             slog::info << "Start inference " << slog::endl;
