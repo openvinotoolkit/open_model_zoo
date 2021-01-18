@@ -25,49 +25,45 @@ from data_sequences import DATA_SEQUENCES
 MONITORS = {'-u': 'cdm'}
 TestCase = collections.namedtuple('TestCase', ['options'])
 
+
 class Demo:
+    def __init__(self, subdirectory, implementation='', device_keys=None, test_cases=None):
+        self.subdirectory = subdirectory + '/' + implementation if implementation else subdirectory
+
+        self.device_keys = device_keys
+
+        self.test_cases = test_cases
+
+        self._name = subdirectory.replace('/', '_')
+
+    def models_lst_path(self, source_dir):
+        return source_dir / self.subdirectory / 'models.lst'
 
     def device_args(self, device_list):
         if len(self.device_keys) == 0:
             return {'CPU': []}
         return {device: [arg for key in self.device_keys for arg in [key, device]] for device in device_list}
 
-class NativeDemo(Demo):
-    def __init__(self, subdirectory, device_keys, test_cases):
-        self.subdirectory = subdirectory + '/cpp'
 
-        self.device_keys = device_keys
-
-        self.test_cases = test_cases
-
-        self._name = subdirectory.replace('/', '_')
+class CppDemo(Demo):
+    def __init__(self, subdirectory, implementation='cpp', device_keys=None, test_cases=None):
+        super().__init__(subdirectory, implementation, device_keys, test_cases)
 
     @property
     def full_name(self):
         return self._name
 
-    def models_lst_path(self, source_dir):
-        return source_dir / self.subdirectory / 'models.lst'
-
     def fixed_args(self, source_dir, build_dir):
         return [str(build_dir / self._name)]
 
+
 class PythonDemo(Demo):
-    def __init__(self, subdirectory, device_keys, test_cases):
-        self.subdirectory = subdirectory + '/python'
-
-        self.device_keys = device_keys
-
-        self.test_cases = test_cases
-
-        self._name = subdirectory.replace('/', '_')
+    def __init__(self, subdirectory, implementation='python', device_keys={}, test_cases={}):
+        super().__init__(subdirectory, implementation, device_keys, test_cases)
 
     @property
     def full_name(self):
         return 'py/' + self._name
-
-    def models_lst_path(self, source_dir):
-        return source_dir / self.subdirectory / 'models.lst'
 
     def fixed_args(self, source_dir, build_dir):
         cpu_extension_path = build_dir / 'lib/libcpu_extension.so'
@@ -75,21 +71,24 @@ class PythonDemo(Demo):
         return [sys.executable, str(source_dir / self._name / 'python' / (self._name + '.py')),
             *(['-l', str(cpu_extension_path)] if cpu_extension_path.exists() else [])]
 
+
 def join_cases(*args):
     options = {}
     for case in args: options.update(case.options)
     return TestCase(options=options)
 
+
 def combine_cases(*args):
     return [join_cases(*combination)
         for combination in itertools.product(*[[arg] if isinstance(arg, TestCase) else arg for arg in args])]
+
 
 def single_option_cases(key, *args):
     return [TestCase(options={} if arg is None else {key: arg}) for arg in args]
 
 
 NATIVE_DEMOS = [
-    NativeDemo(subdirectory='crossroad_camera_demo',
+    CppDemo(subdirectory='crossroad_camera_demo',
             device_keys=['-d', '-d_pa', '-d_reid'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -105,7 +104,7 @@ NATIVE_DEMOS = [
             ModelArg('person-reidentification-retail-0288')),
     )),
 
-    NativeDemo(subdirectory='gaze_estimation_demo',
+    CppDemo(subdirectory='gaze_estimation_demo',
             device_keys=['-d', '-d_fd', '-d_hp', '-d_lm'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -120,14 +119,14 @@ NATIVE_DEMOS = [
         }),
     )),
 
-    NativeDemo(subdirectory='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
+    CppDemo(subdirectory='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('human-pose-estimation')}),
         TestCase(options={'-m': ModelArg('human-pose-estimation-0001')}),
     )),
 
-    NativeDemo(subdirectory='classification_demo',
+    CppDemo(subdirectory='classification_demo',
             device_keys=['-d'],
             test_cases=combine_cases(
         TestCase(options={
@@ -144,7 +143,7 @@ NATIVE_DEMOS = [
             ModelArg('resnet-50-caffe2')),
     )),
 
-    NativeDemo(subdirectory='interactive_face_detection_demo',
+    CppDemo(subdirectory='interactive_face_detection_demo',
             device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -166,7 +165,7 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    NativeDemo(subdirectory='interactive_face_detection_demo_gapi',
+    CppDemo(subdirectory='interactive_face_detection_demo', implementation='gapi',
             device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -188,7 +187,7 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    NativeDemo(subdirectory='mask_rcnn_demo', device_keys=['-d'], test_cases=combine_cases(
+    CppDemo(subdirectory='mask_rcnn_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': DataDirectoryArg('semantic-segmentation-adas')}),
         single_option_cases('-m',
             ModelArg('mask_rcnn_inception_resnet_v2_atrous_coco'),
@@ -197,7 +196,7 @@ NATIVE_DEMOS = [
             ModelArg('mask_rcnn_resnet50_atrous_coco'))
     )),
 
-    NativeDemo(subdirectory='multi_channel_face_detection_demo',
+    CppDemo(subdirectory='multi_channel_face_detection_demo',
             device_keys=['-d'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -210,7 +209,7 @@ NATIVE_DEMOS = [
             ModelArg('face-detection-retail-0044')),
     )),
 
-    NativeDemo(subdirectory='multi_channel_human_pose_estimation_demo', device_keys=['-d'],
+    CppDemo(subdirectory='multi_channel_human_pose_estimation_demo', device_keys=['-d'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
@@ -218,7 +217,7 @@ NATIVE_DEMOS = [
             '-m': ModelArg('human-pose-estimation-0001')}),
     )),
 
-    NativeDemo(subdirectory='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
+    CppDemo(subdirectory='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('object-detection-demo')}),
@@ -271,7 +270,7 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    NativeDemo('pedestrian_tracker_demo', device_keys=['-d_det', '-d_reid'], test_cases=combine_cases(
+    CppDemo('pedestrian_tracker_demo', device_keys=['-d_det', '-d_reid'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('person-detection-retail')}),
@@ -286,7 +285,7 @@ NATIVE_DEMOS = [
             ModelArg('person-reidentification-retail-0288')),
     )),
 
-    NativeDemo(subdirectory='security_barrier_camera_demo',
+    CppDemo(subdirectory='security_barrier_camera_demo',
             device_keys=['-d', '-d_lpr', '-d_va'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -300,7 +299,7 @@ NATIVE_DEMOS = [
         single_option_cases('-m_va', None, ModelArg('vehicle-attributes-recognition-barrier-0039')),
     )),
 
-    NativeDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
+    CppDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None, **MONITORS}),
         [
             TestCase(options={
@@ -316,7 +315,7 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    NativeDemo(subdirectory='smart_classroom_demo',
+    CppDemo(subdirectory='smart_classroom_demo',
             device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -346,14 +345,14 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    NativeDemo(subdirectory='super_resolution_demo', device_keys=['-d'], test_cases=combine_cases(
+    CppDemo(subdirectory='super_resolution_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': DataDirectoryArg('single-image-super-resolution')}),
         TestCase(options={
             '-m': ModelArg('single-image-super-resolution-1033'),
         }),
     )),
 
-    NativeDemo(subdirectory='text_detection_demo', device_keys=['-d_td', '-d_tr'], test_cases=combine_cases(
+    CppDemo(subdirectory='text_detection_demo', device_keys=['-d_td', '-d_tr'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('text-detection')}),
