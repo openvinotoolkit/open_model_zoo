@@ -446,7 +446,7 @@ int main(int argc, char *argv[]) {
                 throw std::invalid_argument(msg.str());
             }
             slog::info << "Start inference " << slog::endl;
-            
+
             timer.start("total");
             stream.start();
             while (stream.pull(cv::GRunArgsP(out_vector))) {
@@ -550,7 +550,7 @@ int main(int argc, char *argv[]) {
 
             std::cout << presenter->reportMeans() << '\n';
         } while (FLAGS_loop);
-        
+
         slog::info << "No more frames to process!" << slog::endl;
 
         if (!FLAGS_o.empty()) {
