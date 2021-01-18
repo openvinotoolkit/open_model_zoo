@@ -166,6 +166,28 @@ NATIVE_DEMOS = [
         ],
     )),
 
+    NativeDemo(subdirectory='interactive_face_detection_demo_gapi',
+            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
+            test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('375x500')}),
+        TestCase(options={'-m': ModelArg('face-detection-adas-0001')}),
+        [
+            TestCase(options={}),
+            TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
+            TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
+            TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
+            TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
+            TestCase(options={
+                '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
+                '-m_em': ModelArg('emotions-recognition-retail-0003'),
+                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
+                '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+            })
+        ],
+    )),
+
     NativeDemo(subdirectory='mask_rcnn_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': DataDirectoryArg('semantic-segmentation-adas')}),
         single_option_cases('-m',
