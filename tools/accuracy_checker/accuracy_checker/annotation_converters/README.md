@@ -11,8 +11,8 @@ Process of conversion can be implemented in two ways:
 
 ## Describing Annotation Conversion in Configuration File
 
-Annotation conversion can be provided in `dataset` section your configuration file to convert annotation in-place before every evaluation.
-Each conversion configuration should contain `converter` field filled selected converter name and provide converter specific parameters (more details in supported converters section). All paths can be prefixed via command line with `-s, --source` argument.
+Annotation conversion can be provided in `dataset` section of your configuration file to convert annotation in-place before every evaluation.
+Each conversion configuration should contain `converter` field filled with a selected converter name and provide converter specific parameters (more details in supported converters section). All paths can be prefixed via command line with `-s, --source` argument.
 
 You can additionally use optional parameters like:
 * `subsample_size` - Dataset subsample size. You can specify the number of ground truth objects or dataset ratio in percentage. Please, be careful to use this option, some datasets does not support subsampling. You can also specify `subsample_seed` if you want to generate subsample with specific random seed.
@@ -463,9 +463,9 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotation_file` - path to image pairs file in txt format.
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
-There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
+There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `background_label` using `dataset_meta_file` argument.
-dataset meta file is JSON file, which can contains following parameters:
+Dataset meta file is JSON file, which can contain the following parameters:
   * `label_map` is dictionary where `<CLASS_ID>` is key and `<CLASS_NAME>` - value.
   * `labels` is the list of strings, which represent class names (order is matter, the index of class name used as class id). Can be used instead `label_map`.
   * `background_label` - id of background label in the dataset.
