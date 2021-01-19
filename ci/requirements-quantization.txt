@@ -1,80 +1,54 @@
 # use update-requirements.py to update this file
 
-absl-py==0.11.0                            # via tensorboard, tensorflow
 addict==2.2.1                              # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-astor==0.8.1                               # via tensorflow
-certifi==2020.12.5                         # via requests
 chainer==7.7.0                             # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-chardet==4.0.0                             # via requests
 click==7.1.2                               # via nltk
 cycler==0.10.0                             # via matplotlib
 decorator==4.4.2                           # via networkx
-defusedxml==0.6.0                          # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
-editdistance==0.5.3                        # via accuracy_checker (tools/accuracy_checker/setup.py)
-fast-ctc-decode==0.2.5                     # via accuracy_checker (tools/accuracy_checker/setup.py)
+defusedxml==0.6.0                          # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
+editdistance==0.5.3                        # via -r tools/accuracy_checker/requirements.in
+fast-ctc-decode==0.2.5                     # via -r tools/accuracy_checker/requirements.in
 filelock==3.0.12                           # via chainer
 future==0.18.2                             # via hyperopt
-gast==0.2.2                                # via tensorflow
-google-pasta==0.2.0                        # via tensorflow
-graphviz==0.8.4                            # via mxnet
-grpcio==1.32.0                             # via tensorboard, tensorflow
-h5py==2.10.0                               # via keras-applications, tensorflow
 hyperopt==0.1.2                            # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
 ideep4py==2.0.0.post3                      # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-idna==2.10                                 # via requests
 imageio==2.9.0                             # via scikit-image
-importlib-metadata==3.4.0                  # via markdown
 joblib==1.0.0                              # via nltk, scikit-learn
 jstyleson==0.0.2                           # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-keras-applications==1.0.8                  # via tensorflow
-keras-preprocessing==1.1.2                 # via tensorflow
 kiwisolver==1.3.1                          # via matplotlib
-markdown==3.3.3                            # via tensorboard
 matplotlib==3.3.3                          # via scikit-image
-mxnet==1.5.1                               # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
-networkx==2.5                              # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, hyperopt, scikit-image
-nibabel==3.2.1                             # via accuracy_checker (tools/accuracy_checker/setup.py)
-nltk==3.5                                  # via accuracy_checker (tools/accuracy_checker/setup.py)
-numpy==1.16.3                              # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, accuracy_checker (tools/accuracy_checker/setup.py), chainer, h5py, hyperopt, imageio, keras-applications, keras-preprocessing, matplotlib, mxnet, nibabel, onnx, opt-einsum, pandas, parasail, pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py), pywavelets, rawpy, scikit-image, scikit-learn, scipy, tensorboard, tensorflow, tifffile
-onnx==1.8.0                                # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
-opt-einsum==3.3.0                          # via tensorflow
+networkx==2.5                              # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt, hyperopt, scikit-image
+nibabel==3.2.1                             # via -r tools/accuracy_checker/requirements.in
+nltk==3.5                                  # via -r tools/accuracy_checker/requirements.in
+numpy==1.16.3                              # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt, -r tools/accuracy_checker/requirements-core.in, chainer, hyperopt, imageio, matplotlib, nibabel, pandas, parasail, pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py), pywavelets, rawpy, scikit-image, scikit-learn, scipy, tifffile
 packaging==20.8                            # via nibabel
 pandas==0.24.2                             # via pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py)
-parasail==1.2                              # via accuracy_checker (tools/accuracy_checker/setup.py)
-pillow==8.1.0                              # via accuracy_checker (tools/accuracy_checker/setup.py), imageio, matplotlib, scikit-image
-protobuf==3.14.0                           # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt, chainer, onnx, tensorboard, tensorflow
-py-cpuinfo==7.0.0                          # via accuracy_checker (tools/accuracy_checker/setup.py)
-pydicom==2.1.2                             # via accuracy_checker (tools/accuracy_checker/setup.py)
+parasail==1.2                              # via -r tools/accuracy_checker/requirements.in
+pillow==8.1.0                              # via -r tools/accuracy_checker/requirements-core.in, imageio, matplotlib, scikit-image
+protobuf==3.14.0                           # via chainer
+py-cpuinfo==7.0.0                          # via -r tools/accuracy_checker/requirements.in
+pydicom==2.1.2                             # via -r tools/accuracy_checker/requirements.in
 pymongo==3.11.2                            # via hyperopt
 pyparsing==2.4.7                           # via matplotlib, packaging
 python-dateutil==2.8.1                     # via matplotlib, pandas
 pytz==2020.5                               # via pandas
 pywavelets==1.1.1                          # via scikit-image
-pyyaml==5.3.1                              # via accuracy_checker (tools/accuracy_checker/setup.py)
-rawpy==0.16.0                              # via accuracy_checker (tools/accuracy_checker/setup.py)
+pyyaml==5.3.1                              # via -r tools/accuracy_checker/requirements-core.in
+rawpy==0.16.0                              # via -r tools/accuracy_checker/requirements.in
 regex==2020.11.13                          # via nltk
-requests==2.25.1                           # via mxnet
-scikit-image==0.17.2                       # via accuracy_checker (tools/accuracy_checker/setup.py)
-scikit-learn==0.24.0                       # via accuracy_checker (tools/accuracy_checker/setup.py)
-scipy==1.2.1                               # via accuracy_checker (tools/accuracy_checker/setup.py), hyperopt, pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py), scikit-image, scikit-learn
-sentencepiece==0.1.95                      # via accuracy_checker (tools/accuracy_checker/setup.py)
-shapely==1.7.1                             # via accuracy_checker (tools/accuracy_checker/setup.py)
-six==1.15.0                                # via absl-py, chainer, cycler, google-pasta, grpcio, h5py, hyperopt, keras-preprocessing, onnx, protobuf, python-dateutil, tensorboard, tensorflow, test-generator
-tensorboard==1.15.0                        # via tensorflow
-tensorflow-estimator==1.15.1               # via tensorflow
-tensorflow==1.15.5 ; python_version < "3.8" # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
-termcolor==1.1.0                           # via tensorflow
-test-generator==0.1.1                      # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements.txt
+scikit-image==0.17.2                       # via -r tools/accuracy_checker/requirements.in
+scikit-learn==0.24.0                       # via -r tools/accuracy_checker/requirements.in
+scipy==1.2.1                               # via -r tools/accuracy_checker/requirements.in, hyperopt, pot (${INTEL_OPENVINO_DIR}/deployment_tools/tools/post_training_optimization_toolkit/setup.py), scikit-image, scikit-learn
+sentencepiece==0.1.95                      # via -r tools/accuracy_checker/requirements.in
+shapely==1.7.1                             # via -r tools/accuracy_checker/requirements.in
+six==1.15.0                                # via chainer, hyperopt, protobuf, python-dateutil, test-generator
+test-generator==0.1.1                      # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
 threadpoolctl==2.1.0                       # via scikit-learn
 tifffile==2020.9.3                         # via scikit-image
-tokenizers==0.10.0                         # via accuracy_checker (tools/accuracy_checker/setup.py)
-tqdm==4.56.0                               # via accuracy_checker (tools/accuracy_checker/setup.py), hyperopt, nltk
-typing-extensions==3.7.4.3                 # via chainer, importlib-metadata, onnx
-urllib3==1.26.2                            # via requests
-werkzeug==1.0.1                            # via tensorboard
-wheel==0.36.2                              # via parasail, tensorboard, tensorflow
-wrapt==1.12.1                              # via tensorflow
-zipp==3.4.0                                # via importlib-metadata
+tokenizers==0.10.0                         # via -r tools/accuracy_checker/requirements.in
+tqdm==4.56.0                               # via -r tools/accuracy_checker/requirements.in, hyperopt, nltk
+typing-extensions==3.7.4.3                 # via chainer
+wheel==0.36.2                              # via parasail
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
