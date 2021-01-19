@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,16 +22,14 @@ def remove_all_batch_norm(item):
     if isinstance(item, nn.Module):
         for index, child in enumerate(item.children()):
             if isinstance(child, nn.BatchNorm2d):
-                item[index] = batch_noramlization(child.running_mean, child.running_var, child.bias, child.weight, child.eps)
+                item[index] = batch_noramlization(child.bias, child.weight, child.eps)
             else:
                 remove_all_batch_norm(child)
 
 
 class batch_noramlization(nn.Module):
-    def __init__(self, mean, var, bias, weight, eps):
+    def __init__(self, bias, weight, eps):
         super().__init__()
-        self.mean = mean
-        self.var = var
         self.bias = bias
         self.weight = weight
         self.eps = eps
@@ -47,6 +45,7 @@ class batch_noramlization(nn.Module):
 class DeblurV2(nn.Module):
     def __init__(self, weights, model_name):
         super().__init__()
+
         parameters = {'g_name': model_name, 'norm_layer': 'instance'}
         self.impl = get_generator(parameters)
         checkpoint = torch.load(weights, map_location='cpu')['model']

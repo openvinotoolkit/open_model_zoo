@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,19 +24,19 @@ files:
   - name: models/__init__.py
     size: 0
     sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-    source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/master/models/__init__.py
+    source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/a95d6a7e003fc98e786cd26937e1e20814f533b0/models/__init__.py
   - name: models/fpn_mobilenet.py
     size: 5688
     sha256: 1b24574ed94f6bb037b91208c5bcde9da243d2a175493ca942e448176c529efe
-    source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/master/models/fpn_mobilenet.py
+    source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/a95d6a7e003fc98e786cd26937e1e20814f533b0/models/fpn_mobilenet.py
   - name: models/mobilenet_v2.py
     size: 4214
     sha256: 16801e691c8bdaf16d57c00d3511fe1357d0a6fe63cf221f7c48dbc491383bc7
-    source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/master/models/mobilenet_v2.py
+    source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/a95d6a7e003fc98e786cd26937e1e20814f533b0/models/mobilenet_v2.py
   - name: models/networks.py
     size: 12779
     sha256: 3857345de80c42dedc5162d3e82a173160041cf4e0b307fd7e29680a1115d097
-    source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/master/models/networks.py
+    source: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/a95d6a7e003fc98e786cd26937e1e20814f533b0/models/networks.py
   - name: ckpt/fpn_mobilenet.h5
     size: 13505344
     sha256: 6d1b6d9807da3ae8987021c063a5cb6ca0131e76388cdb5164404ee1b1bf522b
@@ -52,6 +52,10 @@ postprocessing:
     file: models/fpn_mobilenet.py
     pattern: 'pretrained=True'
     replacement: 'pretrained=False'
+  - $type: regex_replace
+    file: models/fpn_mobilenet.py
+    pattern: 'upsample'
+    replacement: 'interpolate'
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir
@@ -71,4 +75,4 @@ model_optimizer_args:
   - --output=deblur_image
   - --input_model=$conv_dir/deblurgan-v2.onnx
 framework: pytorch
-license: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/LICENSE
+license: https://raw.githubusercontent.com/VITA-Group/DeblurGANv2/master/LICENSE

@@ -130,6 +130,7 @@ __all__ = [
     'SalientMapNormalizer',
 
     'MinMaxRegressionNormalization',
+
     'CropImage',
-    'CornerCropImage'
+    'CornerCropImage',
 ]

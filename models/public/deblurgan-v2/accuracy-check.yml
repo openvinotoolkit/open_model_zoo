@@ -10,7 +10,7 @@ models:
           std: 127.5
 
     datasets:
-      - name: GoPro
+      - name: GOPRO
         preprocessing:
           - type: bgr_to_rgb
           - type: normalization
@@ -41,7 +41,7 @@ models:
           std: 127.5
 
     datasets:
-      - name: GoPro
+      - name: GOPRO
         preprocessing:
           - type: normalization
             mean: 127.5

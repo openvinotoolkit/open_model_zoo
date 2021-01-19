@@ -50,7 +50,7 @@ Image, name - `blur_image`,  shape - `1,3,736,1312`, format is `B,C,H,W`, where:
 - `H` - height
 - `W` - width
 
-Channel order is `BGR`.
+Channel order is `BGR`. Mean values - [127.5,127.5,127.5], scale values - [127.5,127.5,127.5].
 
 ## Output
 

@@ -17,6 +17,7 @@
 
 from .centernet import CenterNet
 from .faceboxes import FaceBoxes
+from .model import Model
 from .retinaface import RetinaFace
 from .segmentation import SegmentationModel
 from .ssd import SSD
@@ -27,6 +28,7 @@ __all__ = [
     'CenterNet',
     'DetectionWithLandmarks',
     'FaceBoxes',
+    'Model',
     'RetinaFace',
     'SegmentationModel',
     'SSD',

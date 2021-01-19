@@ -1167,3 +1167,12 @@ datasets:
       converter: place_recognition
       split_file: pitts250k/datasets/pitts30k_val.mat
     annotation: pitts30k_val.pickle
+
+  - name: GOPRO
+    data_source: GOPRO/test
+    annotation_conversion:
+      converter: image_processing
+      data_dir: GOPRO/test
+      input_suffix: blur.png
+      target_suffix: sharp.png
+    annotation: GOPRO.pickle
