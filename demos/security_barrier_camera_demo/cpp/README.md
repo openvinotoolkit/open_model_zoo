@@ -1,6 +1,6 @@
 # Security Barrier Camera C++ Demo
 
-![](../security_barrier_camera.gif)
+![](./security_barrier_camera.gif)
 
 This demo showcases Vehicle and License Plate Detection network followed by the Vehicle Attributes Recognition and License Plate Recognition networks applied on top
 of the detection results. You can use a set of the following pre-trained models with the demo:

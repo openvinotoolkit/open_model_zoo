@@ -9,6 +9,7 @@ if(MULTICHANNEL_DEMO_USE_NATIVE_CAM OR MULTICHANNEL_DEMO_USE_TBB)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
+find_package(InferenceEngine 2.0 REQUIRED)
 # Find OpenCV components if exist
 find_package(OpenCV COMPONENTS highgui QUIET)
 if(NOT(OpenCV_FOUND))

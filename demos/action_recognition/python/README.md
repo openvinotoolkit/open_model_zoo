@@ -1,6 +1,6 @@
 # Action Recognition Python\* Demo
 
-![](../action_recognition.gif)
+![](./action_recognition.gif)
 
 This is the demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
 The following pre-trained models are delivered with the product:

@@ -74,7 +74,8 @@ else()
     set(COMPILER_IS_GCC_LIKE FALSE)
 endif()
 
-add_subdirectory(common)
+add_subdirectory(common/cpp)
+add_subdirectory(multi_channel_common/cpp)
 
 function(add_samples_to_build)
     # check each passed sample subdirectory
@@ -184,7 +185,7 @@ find_package(ngraph REQUIRED)
 # collect all samples subdirectories
 file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
 # skip building of unnecessary subdirectories
-list(REMOVE_ITEM samples_dirs common thirdparty)
+list(REMOVE_ITEM samples_dirs common thirdparty multi_channel_common)
 add_samples_to_build(${samples_dirs})
 
 if(ENABLE_PYTHON)

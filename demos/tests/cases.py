@@ -165,7 +165,7 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    CppDemo(subdirectory='interactive_face_detection_demo', implementation='gapi',
+    CppDemo(subdirectory='interactive_face_detection_demo', implementation='cpp_gapi',
             device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
