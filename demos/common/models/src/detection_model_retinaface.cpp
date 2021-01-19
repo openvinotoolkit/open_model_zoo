@@ -67,7 +67,7 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
         output.second->setLayout(InferenceEngine::Layout::NCHW);
         outputsNames.push_back(output.first);
 
-        EOutputType type= OT_MAX;
+        EOutputType type = OT_MAX;
         if (output.first.find("bbox") != -1) {
             type = OT_BBOX;
         }
@@ -153,12 +153,10 @@ std::vector<ModelRetinaFace::Anchor> generateAnchors(const int baseSize, const s
 
 void ModelRetinaFace::generateAnchorsFpn() {
     auto cfg = anchorCfg;
-    std::sort(cfg.begin(), cfg.end(), [](AnchorCfgLine& x, AnchorCfgLine& y) {return x.stride > y.stride; });
+    std::sort(cfg.begin(), cfg.end(), [](const AnchorCfgLine& x, const AnchorCfgLine& y) { return x.stride > y.stride; });
 
-    std::vector<ModelRetinaFace::Anchor> anchors;
     for (auto cfgLine : cfg) {
-        auto anchors = generateAnchors(cfgLine.baseSize, cfgLine.ratios, cfgLine.scales);
-        anchorsFpn.emplace(cfgLine.stride,anchors);
+        anchorsFpn.emplace(cfgLine.stride, generateAnchors(cfgLine.baseSize, cfgLine.ratios, cfgLine.scales));
     }
 }
 
@@ -229,7 +227,7 @@ void filterBBoxes(std::vector<ModelRetinaFace::Anchor>* bboxes, const std::vecto
 
 
 void filterLandmarks(std::vector<cv::Point2f>* landmarks, const std::vector<size_t>& indices, InferenceEngine::MemoryBlob::Ptr rawData,
-    int anchorNum, const std::vector<ModelRetinaFace::Anchor>& anchors, const float landmarkStd) {
+        int anchorNum, const std::vector<ModelRetinaFace::Anchor>& anchors, const float landmarkStd) {
     auto desc = rawData->getTensorDesc();
     auto sz = desc.getDims();
     auto landmarkPredLen = sz[1] / anchorNum;
@@ -356,7 +354,7 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
 // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
     auto keep = nms(bboxes, scores, boxIOUThreshold);
 
-// --------------------------- Create detection result objects --------------------------------------------------------
+    // --------------------------- Create detection result objects --------------------------------------------------------
     RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
