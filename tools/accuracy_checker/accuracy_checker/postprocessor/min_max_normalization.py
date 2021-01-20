@@ -28,7 +28,7 @@ class MinMaxRegressionNormalization(PostprocessorWithSpecificTargets):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'min': NumberField(optional=True, default=0),
+            'min': NumberField(optional=True, default=0, description='minimal value in range'),
             'max': NumberField()
         })
         return params
