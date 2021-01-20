@@ -90,7 +90,7 @@ One specific flavor of that is so called "distilled" model (for that reason it c
 but don't get confused as it is still originated from the BERT Large) that is indeed substantially smaller and faster.
 
 The demo also works fine with [official MLPerf* BERT ONNX models fine-tuned on the Squad dataset](
-https://github.com/mlperf/inference/tree/master/language/bert).
+https://github.com/mlcommons/inference/tree/master/language/bert).
 Unlike [[Open Model Zoo Models](../../../models/intel/index.md) that come directly as the
 Intermediate Representation (IR), the MLPerf models should be explicitly converted with
 [OpenVINO Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).

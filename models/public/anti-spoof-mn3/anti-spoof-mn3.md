@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 The `anti-spoof-mn3` model is an anti-spoofing binary classificator based on the [MobileNetv3](https://arxiv.org/abs/1905.02244), trained on the [CelebA-Spoof dataset](https://arxiv.org/abs/2007.12342). It's a small, light model, trained to predict whether or not a spoof RGB image given to the input. A lot of advanced techniques have been tried and selected the best suit options for the task.
-For details see original [repository](https://github.com/kirillProkofiev/light-weight-face-anti-spoofing).
+For details see original [repository](https://github.com/kprokofi/light-weight-face-anti-spoofing).
 
 ## Specification
 
@@ -80,4 +80,4 @@ python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
 ## Legal Information
 
 The original model is distributed under the
-[MIT License](https://raw.githubusercontent.com/kirillProkofiev/light-weight-face-anti-spoofing/master/LICENSE).
+[MIT License](https://raw.githubusercontent.com/kprokofi/light-weight-face-anti-spoofing/master/LICENSE).

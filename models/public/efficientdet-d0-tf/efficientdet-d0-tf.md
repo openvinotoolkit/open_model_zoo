@@ -21,7 +21,7 @@ For details about this family of models, check out the Google AutoML [repository
 
 | Metric | Converted model |
 | ------ | --------------- |
-| [COCO\* mAP (0.5:0.05:0.95)](http://cocodataset.org/#detection-eval) | 31.95%|
+| [COCO\* mAP (0.5:0.05:0.95)](https://cocodataset.org/#detection-eval) | 31.95%|
 
 ## Input
 
