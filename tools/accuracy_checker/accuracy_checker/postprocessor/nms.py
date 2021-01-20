@@ -248,10 +248,7 @@ class DIOU_NMS(Postprocessor):
             'include_boundaries': BoolField(
                 optional=True, default=True, description="Shows if boundaries are included."
             ),
-            'keep_top_k': NumberField(min_value=0, optional=True, description="Keep top K."),
-            'use_min_area': BoolField(
-                optional=True, default=False,
-                description="Use minimum area of two bounding boxes as base area to calculate overlap"
+            'keep_top_k': NumberField(min_value=0, optional=True, description="Keep top K.")
             )
         })
         return parameters
@@ -260,14 +257,13 @@ class DIOU_NMS(Postprocessor):
         self.overlap = self.get_value_from_config('overlap')
         self.include_boundaries = self.get_value_from_config('include_boundaries')
         self.keep_top_k = self.get_value_from_config('keep_top_k')
-        self.use_min_area = self.get_value_from_config('use_min_area')
 
     def process_image(self, annotations, predictions):
         for prediction in predictions:
             scores = get_scores(prediction)
             keep = self.diou_nms(
                 prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs, scores,
-                self.overlap, self.include_boundaries, self.keep_top_k, self.use_min_area
+                self.overlap, self.include_boundaries, self.keep_top_k
             )
             prediction.remove([box for box in range(len(prediction.x_mins)) if box not in keep])
 
@@ -275,9 +271,7 @@ class DIOU_NMS(Postprocessor):
 
     @staticmethod
     def diou_nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None, use_min_area=False):
-        """
-        Pure Python NMS baseline.
-        """
+
         b = 1 if include_boundaries else 0
 
         areas = (x2 - x1 + b) * (y2 - y1 + b)
@@ -303,20 +297,17 @@ class DIOU_NMS(Postprocessor):
 
             cw = np.maximum(x2[i], x2[order[1:]]) - np.minimum(x1[i], x1[order[1:]])
             ch = np.maximum(y2[i], y2[order[1:]]) - np.minimum(y1[i], y1[order[1:]])
-            c_area = cw**2+ch**2+1e-16
-            rh02 = ((x2[order[1:]]+x1[order[1:]])-(x2[i]+x1[i]))**2/4+((y2[order[1:]]+y1[order[1:]])-(y2[i]+y1[i]))**2/4
+            c_area = cw**2 + ch**2 + 1e-16
+            rh02 = ((x2[order[1:]] + x1[order[1:]]) - (x2[i] + x1[i]))**2 / 4+((y2[order[1:]] + y1[order[1:]]) - (y2[i] + y1[i]))**2 / 4
 
-            if use_min_area:
-                base_area = np.minimum(areas[i], areas[order[1:]])
-            else:
-                base_area = (areas[i] + areas[order[1:]] - intersection)
+            base_area = (areas[i] + areas[order[1:]] - intersection)
 
             overlap = np.divide(
                 intersection,
                 base_area,
                 out=np.zeros_like(intersection, dtype=float),
                 where=base_area != 0
-            ) - pow(rh02/c_area,0.6)
+            ) - pow(rh02 / c_area,0.6)
             order = order[np.where(overlap <= thresh)[0] + 1] # pylint: disable=W0143
 
         return keep
