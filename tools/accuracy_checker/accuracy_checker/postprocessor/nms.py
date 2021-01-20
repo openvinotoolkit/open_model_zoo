@@ -231,7 +231,7 @@ class SoftNMS(Postprocessor):
 
         return np.array(out_ids, dtype=np.int32), np.array(out_scores, dtype=np.float32)
 
-class DIOU_NMS(Postprocessor):
+class DIoUNMS(Postprocessor):
     __provider__ = 'diou_nms'
 
     prediction_types = (DetectionPrediction, ActionDetectionPrediction)
