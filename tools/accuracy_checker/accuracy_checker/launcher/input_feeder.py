@@ -185,7 +185,6 @@ class InputFeeder:
         lstm_inputs = []
         ignore_inputs = []
 
-
         for input_ in inputs_entry:
             name = input_['name']
             if name not in self.network_inputs:
@@ -199,10 +198,11 @@ class InputFeeder:
             value = input_.get('value')
 
             if input_['type'] == 'CONST_INPUT':
+                precision = self.get_layer_precision(input_, name, precision_info, precisions) or np.float32
                 if isinstance(value, list):
-                    value = np.array(value)
-                    precision = self.get_layer_precision(input_, name, precision_info, precisions)
-                    value = value.astype(precision) if precision is not None else value
+                    value = np.array(value, dtype=precision)
+                if isinstance(value, (int, float)) and 'shape' in input_:
+                    value = np.full(input_['shape'], value, dtype=precision)
                 constant_inputs[name] = value
             else:
                 config_non_constant_inputs.append(name)
