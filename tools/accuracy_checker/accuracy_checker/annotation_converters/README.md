@@ -385,6 +385,8 @@ The main difference between this converter and `super_resolution` in data organi
   * `reference_dir` - directory with reference data. **Note: inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.**
   * `input_suffix` - suffix for input files (usually file extension). Optional, default `.txt`.
   * `reference_suffix` - suffix for reference files (usually file extension). Optional, default `.txt`.
+  * `use_bin_data` - this flag specifies that input data in binary format, optional, default `False`
+  * `bin_data_dtype` - data type for reading binary data.
 * `multi_feature_regression` - converts dataset stored in format of directories with preprocessed input numeric data (features) in dictionary format, where keys are layer names and values - features and reference data in the same format to `FeatureRegressionAnnotation`.
  This approach allows comparing output of model from different frameworks (e.g. OpenVINO converted model and source framework realisation). Please note, that input and reference should be stored as dict-like objects in npy files.
   * `data_dir` - directory with input and reference files.

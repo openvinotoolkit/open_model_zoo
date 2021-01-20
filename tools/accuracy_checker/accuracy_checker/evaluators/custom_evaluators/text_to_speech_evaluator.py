@@ -32,7 +32,6 @@ from ...logging import print_info
 class TextToSpeechEvaluator(BaseEvaluator):
     def __init__(self, dataset_config, launcher, model):
         self.dataset_config = dataset_config
-        self.preprocessing_executor = None
         self.preprocessor = None
         self.dataset = None
         self.postprocessor = None
@@ -92,6 +91,7 @@ class TextToSpeechEvaluator(BaseEvaluator):
             batch_raw_prediction, batch_prediction = self.model.predict(
                 batch_identifiers, batch_data, batch_meta, callback=temporal_output_callback
             )
+            batch_annotation, batch_prediction = self.postprocessor.process_batch(batch_annotation, batch_prediction)
             metrics_result = None
             if self.metric_executor and calculate_metrics:
                 metrics_result, _ = self.metric_executor.update_metrics_on_batch(

@@ -109,11 +109,11 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
             if len(prediction.value) != 1:
                 raise ConfigError('annotation for all predictions should be provided')
             diff = self.value_differ(annotation.value, next(iter(prediction.value.values())))
-            if not np.isscalar(diff) and np.ndim(diff) > 1:
+            if not np.isscalar(diff) and np.size(diff) > 1:
                 diff = np.mean(diff)
             return diff
         diff = self.value_differ(annotation.value, prediction.value)
-        if not np.isscalar(diff) and np.ndim(diff) > 1:
+        if not np.isscalar(diff) and np.size(diff) > 1:
             diff = np.mean(diff)
         return diff
 
@@ -332,6 +332,21 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
             self.profiler.finish()
 
         return result
+
+
+def relative_err(target, pred):
+    if len(target.shape) > 2:
+        target = target.flatten()
+    if len(pred.shape) > 2:
+        pred = pred.flatten()
+    return np.linalg.norm(target - pred, 2) / (np.linalg.norm(target, 2) + np.finfo(float).eps)
+
+
+class RelativeL2Error(BaseRegressionMetric):
+    __provider__ = 'relative_l2_error'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(relative_err, *args, **kwargs)
 
 
 class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
