@@ -334,6 +334,21 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
         return result
 
 
+def relative_err(target, pred):
+    if len(target.shape) > 2:
+        target = target.flatten()
+    if len(pred.shape) > 2:
+        pred = pred.flatten()
+    return np.linalg.norm(target - pred, 2) / (np.linalg.norm(target, 2) + np.finfo(float).eps)
+
+
+class RelativeL2Error(BaseRegressionMetric):
+    __provider__ = 'relative_l2_error'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(relative_err, *args, **kwargs)
+
+
 class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
     __provider__ = 'per_point_normed_error'
 
