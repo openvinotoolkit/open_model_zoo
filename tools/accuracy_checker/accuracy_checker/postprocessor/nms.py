@@ -249,7 +249,6 @@ class DIOU_NMS(Postprocessor):
                 optional=True, default=True, description="Shows if boundaries are included."
             ),
             'keep_top_k': NumberField(min_value=0, optional=True, description="Keep top K.")
-            )
         })
         return parameters
 
