@@ -40,7 +40,7 @@ class MinMaxRegressionNormalization(PostprocessorWithSpecificTargets):
 
     def process_image(self, annotation, prediction):
         for ann in annotation:
-            ann.value = (ann.value -self.min) / (self.max - self.min)
+            ann.value = (ann.value - self.min) / (self.max - self.min)
 
         for pred in prediction:
             pred.value = (pred.value -self.min) / (self.max - self.min)
