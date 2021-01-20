@@ -26,6 +26,7 @@ from .data_reader import (
     NumPyReader,
     NumpyTXTReader,
     NumpyDictReader,
+    NumpyBinReader,
     TensorflowImageReader,
     AnnotationFeaturesReader,
     WavReader,
@@ -61,6 +62,7 @@ __all__ = [
     'NumPyReader',
     'NumpyTXTReader',
     'NumpyDictReader',
+    'NumpyBinReader',
     'SkimageReader',
     'RawpyReader',
 

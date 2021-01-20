@@ -20,7 +20,7 @@ import os
 
 import warnings
 
-from ..utils import read_yaml, to_lower_register, contains_any
+from ..utils import read_yaml, to_lower_register, contains_any, is_iterable
 from .config_validator import ConfigError
 
 ENTRIES_PATHS = {
@@ -753,7 +753,7 @@ def process_config(
 
 def merge_entry_paths(keys, value, args, value_id=0):
     for field, argument in keys.items():
-        if field not in value:
+        if not is_iterable(value) or field not in value:
             continue
 
         config_path = Path(value[field])

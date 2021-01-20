@@ -502,6 +502,24 @@ class NumpyDictReader(BaseReader):
         return DataRepresentation(data, identifier=identifier)
 
 
+class NumpyBinReader(BaseReader):
+    __provider__ = 'numpy_bin_reader'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            "dtype": StringField(optional=True, default='float32')
+        })
+        return params
+
+    def configure(self):
+        self.dtype = self.get_value_from_config('dtype')
+
+    def read(self, data_id):
+        return np.fromfile(self.data_source / data_id, dtype=self.dtype)
+
+
 class TensorflowImageReader(BaseReader):
     __provider__ = 'tf_imread'
 
