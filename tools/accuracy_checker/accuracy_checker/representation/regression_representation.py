@@ -120,11 +120,18 @@ class FeaturesRegressionAnnotation(BaseRepresentation):
             }
         else:
             self._reader_config = {'type': 'numpy_dict_reader'}
+        self._value = None
 
     @property
     def value(self):
-        data_source = self.metadata.get('additional_data_source')
-        if data_source is None:
-            data_source = self.metadata['data_source']
-        reader = BaseReader.provide(self._reader_config['type'], data_source, self._reader_config)
-        return reader.read(self.value_file)
+        if self._value is None:
+            data_source = self.metadata.get('additional_data_source')
+            if data_source is None:
+                data_source = self.metadata['data_source']
+            reader = BaseReader.provide(self._reader_config['type'], data_source, self._reader_config)
+            return reader.read(self.value_file)
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
