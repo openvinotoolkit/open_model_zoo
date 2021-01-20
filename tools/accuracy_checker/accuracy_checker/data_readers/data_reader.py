@@ -509,7 +509,7 @@ class NumpyBinReader(BaseReader):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            "dtype": StringField(optional=True, default='float32')
+            "dtype": StringField(optional=True, default='float32', description='data type for reading')
         })
         return params
 
