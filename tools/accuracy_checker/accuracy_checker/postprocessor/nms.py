@@ -297,7 +297,9 @@ class DIoUNMS(Postprocessor):
             cw = np.maximum(x2[i], x2[order[1:]]) - np.minimum(x1[i], x1[order[1:]])
             ch = np.maximum(y2[i], y2[order[1:]]) - np.minimum(y1[i], y1[order[1:]])
             c_area = cw**2 + ch**2 + 1e-16
-            rh02 = ((x2[order[1:]] + x1[order[1:]]) - (x2[i] + x1[i]))**2 / 4+((y2[order[1:]] + y1[order[1:]]) - (y2[i] + y1[i]))**2 / 4
+            d_1 = ((x2[order[1:]] + x1[order[1:]]) - (x2[i] + x1[i]))**2 / 4
+            d_2 = ((y2[order[1:]] + y1[order[1:]]) - (y2[i] + y1[i]))**2 / 4
+            d_area = d_1 + d_2
 
             base_area = (areas[i] + areas[order[1:]] - intersection)
 
@@ -306,7 +308,7 @@ class DIoUNMS(Postprocessor):
                 base_area,
                 out=np.zeros_like(intersection, dtype=float),
                 where=base_area != 0
-            ) - pow(rh02 / c_area,0.6)
+            ) - pow(d_area / c_area, 0.6)
             order = order[np.where(overlap <= thresh)[0] + 1] # pylint: disable=W0143
 
         return keep
