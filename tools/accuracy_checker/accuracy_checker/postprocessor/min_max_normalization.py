@@ -43,6 +43,6 @@ class MinMaxRegressionNormalization(PostprocessorWithSpecificTargets):
             ann.value = (ann.value - self.min) / (self.max - self.min)
 
         for pred in prediction:
-            pred.value = (pred.value -self.min) / (self.max - self.min)
+            pred.value = (pred.value - self.min) / (self.max - self.min)
 
         return annotation, prediction
