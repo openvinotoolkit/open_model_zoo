@@ -4,8 +4,9 @@
 
   This is a Keras\* version of `mobilenet-yolov4` model, one of the YOLO group of models
   designed to perform real-time object detection mainly to vehicles.
-  The weights are pretrained by BDD100k and retrained by our own dataset.
-  For details see repository <https://github.com/ermubuzhiming/omz-test/>,
+  The weights are pretrained by [BDD100k](https://bair.berkeley.edu/blog/2018/05/30/bdd/) 
+  and retrained by our own dataset.
+  For details see repository <https://github.com/ermubuzhiming/OMZ-files-download/>,
   paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
 
 ## Specification
@@ -19,7 +20,8 @@
 
 ## Accuracy
 
-Accuracy metrics obtained on VOCdevkit which is our own made\* validation dataset for converted model.
+Accuracy metrics obtained on [VOCdevkit](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/VOCdevkit0829.zip)
+which is our own made\* validation dataset for converted model.
 
 | Metric | Value |
 | ------ | ------|
@@ -55,11 +57,11 @@ Channel order is `BGR`.
 
 ### Original model
 
-1. The array of detection summary info, name - `separable_conv2d_22`,  shape - `1,13,13,255`. The anchor values are `116,90,  156,198,  373,326`.
+1. The array of detection summary info, name - `separable_conv2d_22`,  shape - `1,52,52,42`. The anchor values are `12,16,  19,36,  40,28`.
 
-2. The array of detection summary info, name - `separable_conv2d_30`,  shape - `1,26,26,255`. The anchor values are `30,61,  62,45,  59,119`.
+2. The array of detection summary info, name - `separable_conv2d_30`,  shape - `1,26,26,42`. The anchor values are `36,75,  76,55,  72,146`.
 
-3. The array of detection summary info, name - `separable_conv2d_38`,  shape - `1,52,52,255`. The anchor values are `10,13,  16,30,  33,23`.
+3. The array of detection summary info, name - `separable_conv2d_38`,  shape - `1,13,13,42`. The anchor values are `142,110,  192,243,  459,401`.
 
 For each case format is `B,Cx,Cy,N*85,`, where
     - `B` - batch size
@@ -74,11 +76,11 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 
 ### Converted model
 
-1. The array of detection summary info, name - `separable_conv2d_22/BiasAdd/YoloRegion`,  shape - `1,255,13,13`. The anchor values are `12,16,  19,36,  40,28`.
+1. The array of detection summary info, name - `separable_conv2d_22/BiasAdd/YoloRegion`,  shape - `1,42,52,52`. The anchor values are `12,16,  19,36,  40,28`.
 
-2. The array of detection summary info, name - `separable_conv2d_30/BiasAdd/YoloRegion`,  shape - `1,255,26,26`. The anchor values are `36,75,  76,55,  72,146`.
+2. The array of detection summary info, name - `separable_conv2d_30/BiasAdd/YoloRegion`,  shape - `1,42,26,26`. The anchor values are `36,75,  76,55,  72,146`.
 
-3. The array of detection summary info, name - `separable_conv2d_38/BiasAdd/YoloRegion`,  shape - `1,255,52,52`. The anchor values are `142,110,  192,243,  459,401`.
+3. The array of detection summary info, name - `separable_conv2d_38/BiasAdd/YoloRegion`,  shape - `1,42,13,13`. The anchor values are `142,110,  192,243,  459,401`.
 
 Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_9`], where:
 - (`x`,`y`) - coordinates of box center relative to the cell
