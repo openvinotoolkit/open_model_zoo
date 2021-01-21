@@ -422,6 +422,17 @@ NATIVE_DEMOS = [
             ModelArg('person-reidentification-retail-0287'),
             ModelArg('person-reidentification-retail-0288')),
     )),
+
+    NativeDemo(subdirectory='social_distance_demo',
+            device_keys=['-d_det', '-d_reid'],
+            test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('person-detection-retail')}),
+        TestCase(options={'-m_det': ModelArg('person-detection-retail-0013')}),
+        single_option_cases('-m_reid',
+            ModelArg('person-reidentification-retail-0300')),
+    )),
 ]
 
 PYTHON_DEMOS = [
