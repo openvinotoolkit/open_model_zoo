@@ -77,14 +77,14 @@ python gesture_recognition_demo.py \
 -m_a /home/user/asl-recognition-0004.xml \
 -m_d /home/user/person-detection-asl-0001.xml \
 -i 0 \
--c ./msasl100-classes.json
+-c <omz_dir>/data/dataset_classes/msasl100.json
 ```
 
 The demo starts in person tracking mode and to switch it in the action recognition mode you should press `0-9` button with appropriate detection ID (the number in top-left of each bounding box). If frame contains only one person, they will be chosen automatically. After that you can switch back to tracking mode by pressing space button.
 
-An example of file with class names can be found [here](./classes.json).
+An example of file with class names can be found [here](../../../data/dataset_classes/msasl100.json).
 
-> **NOTE**: To run the demo application with video examples of gestures specify the `-s` key with valid path to the directory with video samples (you can find some ASL gesture video samples [here](https://github.com/intel-iot-devkit/sample-videos)). The name of each video sample should be the valid name of gesture from the `./classes.json` file. To navigate between samples use 'f' and 'b' keys for iterating next and previous respectively video sample.
+> **NOTE**: To run the demo application with video examples of gestures specify the `-s` key with valid path to the directory with video samples (you can find some ASL gesture video samples [here](https://github.com/intel-iot-devkit/sample-videos)). The name of each video sample should be the valid name of gesture from the [`msasl100.json`](../../../data/dataset_classes/msasl100.json) file. To navigate between samples use 'f' and 'b' keys for iterating next and previous respectively video sample.
 
 ## Demo Output
 
