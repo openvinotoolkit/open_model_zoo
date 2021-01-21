@@ -27,14 +27,14 @@ TestCase = collections.namedtuple('TestCase', ['options'])
 
 
 class Demo:
-    def __init__(self, subdirectory, implementation='', device_keys=None, test_cases=None):
+    def __init__(self, subdirectory, implementation, device_keys=None, test_cases=None):
         self.subdirectory = subdirectory + '/' + implementation if implementation else subdirectory
 
         self.device_keys = device_keys
 
         self.test_cases = test_cases
 
-        self._name = subdirectory.replace('/', '_')
+        self._name = self.subdirectory.replace('/', '_')
 
     def models_lst_path(self, source_dir):
         return source_dir / self.subdirectory / 'models.lst'
@@ -51,7 +51,7 @@ class CppDemo(Demo):
 
     @property
     def full_name(self):
-        return self._name
+        return self._name.replace('_cpp', '')
 
     def fixed_args(self, source_dir, build_dir):
         return [str(build_dir / self._name)]
@@ -63,7 +63,7 @@ class PythonDemo(Demo):
 
     @property
     def full_name(self):
-        return 'py/' + self._name
+        return 'py/' + self._name.replace('_python', '')
 
     def fixed_args(self, source_dir, build_dir):
         cpu_extension_path = build_dir / 'lib/libcpu_extension.so'
