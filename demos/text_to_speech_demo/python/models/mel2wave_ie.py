@@ -181,7 +181,7 @@ class WaveRNNIE:
 
 
 class MelGANIE:
-    def __init__(self, model, ie, device='CPU'):
+    def __init__(self, model, ie, device='CPU', default_width=800):
         """
         return class provided MelGAN inference.
 
@@ -199,6 +199,11 @@ class MelGANIE:
         self.hop_length = 256
 
         self.net = self.load_network(model)
+        if self.net.input_info['mel'].input_data.shape[2] != default_width:
+            orig_shape = self.net.input_info['mel'].input_data.shape
+            new_shape = (orig_shape[0], orig_shape[1], default_width)
+            self.net.reshape({"mel": new_shape})
+
         self.exec_net = self.create_exec_network(self.net, self.scales)
 
         # fixed number of columns in mel-spectrogramm
