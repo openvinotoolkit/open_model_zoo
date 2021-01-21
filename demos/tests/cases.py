@@ -17,7 +17,7 @@ import itertools
 import sys
 
 from args import (
-    DataDirectoryArg, DataDirectoryOrigFileNamesArg, DataPatternArg, DemoFileArg,
+    DataDirectoryArg, DataDirectoryOrigFileNamesArg, DataPatternArg,
     ModelArg, OMZ_DIR, TestDataArg, image_net_arg, image_retrieval_arg,
 )
 from data_sequences import DATA_SEQUENCES
@@ -134,7 +134,7 @@ NATIVE_DEMOS = [
             '-no_show': None,
             '-time': '5',
             '-i': DataDirectoryOrigFileNamesArg('classification'),
-            '-labels': DemoFileArg('imagenet_2012_classes.txt'),
+            '-labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt'),
             '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),
         single_option_cases('-m',
             ModelArg('alexnet'),
@@ -414,9 +414,9 @@ PYTHON_DEMOS = [
                           '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
                           '-m_d': ModelArg('person-detection-asl-0001')}),
         [
-            TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': DemoFileArg('msasl100-classes.json')}),
+            TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
             TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
-                              '-c': DemoFileArg('jester27-classes.json')}),
+                              '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
         ],
     )),
 
@@ -448,7 +448,7 @@ PYTHON_DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
             '--delay': '1',
             '-d': 'CPU',  # GPU is not supported
-            '--labels': DemoFileArg('coco_labels.txt')}),
+            '--labels': str(OMZ_DIR / 'data/dataset_classes/coco.txt')}),
         single_option_cases('-m',
             ModelArg('instance-segmentation-security-0010'),
             ModelArg('instance-segmentation-security-0050'),

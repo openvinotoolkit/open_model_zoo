@@ -96,7 +96,7 @@ To run the demo, please provide paths to the model in the IR format, to a file w
 ```bash
 python3 instance_segmentation_demo/instance_segmentation_demo.py \
     -m <path_to_model>/instance-segmentation-security-0050.xml \
-    --label instance_segmentation_demo/coco_labels.txt \
+    --label <omz_dir>/data/dataset_classes/coco.txt \
     --no_keep_aspect_ratio \
     -i 0 \
     --delay 1
