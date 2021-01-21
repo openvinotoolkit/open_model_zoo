@@ -217,6 +217,18 @@ NATIVE_DEMOS = [
             '-m': ModelArg('human-pose-estimation-0001')}),
     )),
 
+    CppDemo(subdirectory='multi_channel_object_detection_demo_yolov3',
+            device_keys=['-d'],
+            test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            **MONITORS,
+             '-i': DataPatternArg('object-detection-demo')}),
+        single_option_cases('-m',
+            ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
+            ModelArg('yolo-v3-tf'),
+            ModelArg('yolo-v3-tiny-tf'))),
+    )),
+
     CppDemo(subdirectory='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
