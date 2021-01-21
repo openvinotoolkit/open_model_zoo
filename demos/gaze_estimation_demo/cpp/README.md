@@ -11,7 +11,7 @@ The demo also relies on the following auxiliary networks:
 * `facial-landmarks-35-adas-0002`, which estimates coordinates of facial landmarks for detected faces. The keypoints at the corners of eyes are used to locate eyes regions required for the gaze estimation model
 * `open-closed-eye-0001`, which estimates eyes state of detected faces.
 
-For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 Other demo objectives are:
 * Video/Camera as inputs, via OpenCV*
@@ -62,7 +62,7 @@ Options:
 
 Running the application with an empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained and optimized `gaze-estimation-adas-0002` model, and the auxiliary models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained and optimized `gaze-estimation-adas-0002` model, and the auxiliary models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with another trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -103,4 +103,4 @@ The following keys are supported:
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/downloader/README.md)

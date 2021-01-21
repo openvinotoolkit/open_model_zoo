@@ -10,7 +10,7 @@ reports general vehicle attributes, for example, vehicle type (car/van/bus/track
 * `license-plate-recognition-barrier-0001` or `license-plate-recognition-barrier-0007`, which is executed on top of the results from the first network
 and reports a string per recognized license plate
 
-For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 Other demo objectives are:
 * Video/Camera as inputs, via OpenCV\*
@@ -83,7 +83,7 @@ Options:
 
 Running the application with an empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -143,4 +143,4 @@ The demo uses OpenCV to display the resulting frame with detections rendered as 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/downloader/README.md)

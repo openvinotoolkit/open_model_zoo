@@ -6,7 +6,7 @@ This demo showcases the work of multi-person 2D pose estimation algorithm. The t
 
 * `human-pose-estimation-0001`, which is a human pose estimation network, that produces two feature vectors. The algorithm uses these feature vectors to predict human poses.
 
-For more information about the pre-trained model, refer to the [model documentation](../../models/intel/index.md).
+For more information about the pre-trained model, refer to the [model documentation](../../../models/intel/index.md).
 
 The input frame height is scaled to model height, frame width is scaled to preserve initial aspect ratio and padded to multiple of 8.
 
@@ -45,7 +45,7 @@ Options:
 
 Running the application with an empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -65,4 +65,4 @@ The demo uses OpenCV to display the resulting frame with estimated poses and tex
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/downloader/README.md)

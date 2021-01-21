@@ -9,7 +9,7 @@ You can use the following pre-trained models with the demo:
 * `vgg19`
 * all other classification models (please, check [models.lst](./models.lst) file)
 
-For more information about the pre-trained models, refer to the [model documentation](../../models/public/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
 
 ## How It Works
 
@@ -57,7 +57,7 @@ For higher FPS, using `-nireq` which slightly exceeds `-nstreams` value summed o
 
 Running the application with the empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -107,4 +107,4 @@ and [imagenet_2012.txt](../../data/dataset_classes/imagenet_2012.txt) labels fil
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/downloader/README.md)
