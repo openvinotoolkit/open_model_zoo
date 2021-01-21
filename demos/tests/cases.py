@@ -58,7 +58,7 @@ class CppDemo(Demo):
 
 
 class PythonDemo(Demo):
-    def __init__(self, subdirectory, implementation='python', device_keys={}, test_cases={}):
+    def __init__(self, subdirectory, implementation='python', device_keys=None, test_cases=None):
         super().__init__(subdirectory, implementation, device_keys, test_cases)
 
     @property
@@ -226,7 +226,7 @@ NATIVE_DEMOS = [
         single_option_cases('-m',
             ModelArg('person-vehicle-bike-detection-crossroad-yolov3-1020'),
             ModelArg('yolo-v3-tf'),
-            ModelArg('yolo-v3-tiny-tf'))),
+            ModelArg('yolo-v3-tiny-tf')),
     )),
 
     CppDemo(subdirectory='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
