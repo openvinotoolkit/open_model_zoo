@@ -34,7 +34,7 @@ class Demo:
 
         self.test_cases = test_cases
 
-        self._name = self.subdirectory.replace('/', '_')
+        self._exec_name = self.subdirectory.replace('/', '_')
 
     def models_lst_path(self, source_dir):
         return source_dir / self.subdirectory / 'models.lst'
@@ -49,30 +49,22 @@ class CppDemo(Demo):
     def __init__(self, name, implementation='cpp', device_keys=None, test_cases=None):
         super().__init__(name, implementation, device_keys, test_cases)
 
-        self._name = self._name.replace('_cpp', '')
-
-    @property
-    def full_name(self):
-        return self._name
+        self._exec_name = self._exec_name.replace('_cpp', '')
 
     def fixed_args(self, source_dir, build_dir):
-        return [str(build_dir / self.full_name)]
+        return [str(build_dir / self._exec_name)]
 
 
 class PythonDemo(Demo):
     def __init__(self, name, implementation='python', device_keys=None, test_cases=None):
         super().__init__(name, implementation, device_keys, test_cases)
 
-        self._name = self._name.replace('_python', '')
-
-    @property
-    def full_name(self):
-        return 'py/' + self._name
+        self._exec_name = self._exec_name.replace('_python', '')
 
     def fixed_args(self, source_dir, build_dir):
         cpu_extension_path = build_dir / 'lib/libcpu_extension.so'
 
-        return [sys.executable, str(source_dir / self.subdirectory / (self._name + '.py')),
+        return [sys.executable, str(source_dir / self.subdirectory / (self._exec_name + '.py')),
             *(['-l', str(cpu_extension_path)] if cpu_extension_path.exists() else [])]
 
 

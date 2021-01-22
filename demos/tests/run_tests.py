@@ -141,7 +141,7 @@ def main():
 
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
-        demos_to_test = [demo for demo in DEMOS if demo.full_name in names_of_demos_to_test]
+        demos_to_test = [demo for demo in DEMOS if demo.subdirectory in names_of_demos_to_test]
     else:
         demos_to_test = DEMOS
 
@@ -156,7 +156,7 @@ def main():
         }
 
         for demo in demos_to_test:
-            print('Testing {}...'.format(demo.full_name))
+            print('Testing {}...'.format(demo.subdirectory))
             print()
 
             declared_model_names = {model['name']
@@ -222,7 +222,7 @@ def main():
                             execution_time = -1
 
                         if args.report_file:
-                            collect_result(demo.full_name, device, case_model_names, execution_time, args.report_file)
+                            collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
 
             print()
 
