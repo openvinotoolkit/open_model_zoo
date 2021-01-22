@@ -36,3 +36,13 @@ struct InternalImageModelData : public InternalModelData {
     int inputImgWidth;
     int inputImgHeight;
 };
+
+struct InternalScaleData : public InternalModelData {
+    InternalScaleData(float scaleX, float scaleY) {
+        x = scaleX;
+        y = scaleY;
+    }
+
+    float x;
+    float y;
+};

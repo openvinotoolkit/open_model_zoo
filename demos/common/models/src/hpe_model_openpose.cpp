@@ -105,7 +105,8 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
     cv::copyMakeBorder(resizedImage, paddedImage, 0, bottom, 0, right,
                        cv::BORDER_CONSTANT, meanPixel);
     matU8ToBlob<uint8_t>(paddedImage, frameBlob);
-    return std::shared_ptr<InternalModelData>(new InternalImageModelData(image.cols, image.rows));
+    return std::shared_ptr<InternalModelData>(new InternalScaleData(image.cols / static_cast<float>(w),
+                                                                    image.rows / static_cast<float>(h)));
 }
 
 std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult & infResult) {
@@ -120,8 +121,6 @@ std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult & infResult
 
     float* predictions = outputMapped->rmap().as<float*>();
     float* heats = heatMapsMapped->rmap().as<float*>();
-
-    const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
     std::vector<cv::Mat> heatMaps(keypointsNumber);
     for (size_t i = 0; i < heatMaps.size(); i++) {
@@ -139,16 +138,13 @@ std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult & infResult
 
     std::vector<HumanPose> poses = extractPoses(heatMaps, pafs);
 
-    cv::Size fullFeatureMapSize = heatMaps[0].size() * stride / upsampleRatio;
-    float scaleX = internalData.inputImgWidth / static_cast<float>(fullFeatureMapSize.width);
-    float scaleY = internalData.inputImgHeight / static_cast<float>(fullFeatureMapSize.height);
+    const auto& scale = infResult.internalModelData->asRef<InternalScaleData>();
+    float scaleX = stride / upsampleRatio * scale.x;
+    float scaleY = stride / upsampleRatio * scale.y;
     for (auto& pose : poses) {
         for (auto& keypoint : pose.keypoints) {
             if (keypoint != cv::Point2f(-1, -1)) {
-                keypoint.x *= stride / upsampleRatio;
                 keypoint.x *= scaleX;
-
-                keypoint.y *= stride / upsampleRatio;
                 keypoint.y *= scaleY;
             }
         }
