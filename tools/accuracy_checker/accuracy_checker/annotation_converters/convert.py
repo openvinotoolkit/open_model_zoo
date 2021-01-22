@@ -264,6 +264,8 @@ def get_conversion_attributes(config, dataset_size):
     dataset_name = config.get('name', '')
     conversion_parameters = copy.deepcopy(config.get('annotation_conversion', {}))
     for key, value in config.get('annotation_conversion', {}).items():
+        if config.get('command_line_mapping') and key in config['command_line_mapping'].keys():
+            value = value.relative_to(config['command_line_mapping'][key])
         if isinstance(value, Path):
             conversion_parameters[key] = str(value)
     subset_size = config.get('subsample_size')
