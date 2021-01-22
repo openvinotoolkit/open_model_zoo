@@ -4,7 +4,7 @@ The Open Model Zoo demo applications are console applications that demonstrate h
 The Open Model Zoo includes the following demos:
 
 - [3D Human Pose Estimation Python\* Demo](./human_pose_estimation_3d_demo/python/README.md) - 3D human pose estimation demo.
-- [Action Recognition Python\* Demo](./action_recognition/python/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
+- [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
 - [BERT Question Answering Python\* Demo](./bert_question_answering_demo/python/README.md)
 - [BERT Question Answering Embedding Python\* Demo](./bert_question_answering_embedding_demo/python/README.md) - The demo demonstrates how to run BERT based models for question answering task.
 - [Classification C++ Demo](./classification_demo/cpp/README.md) - Shows an example of using neural networks for image classification.
@@ -27,7 +27,7 @@ The Open Model Zoo includes the following demos:
 - [Machine Translation Python\* Demo](./machine_translation_demo/python/README.md) - The demo demonstrates how to run non-autoregressive machine translation models.
 - [Mask R-CNN C++ Demo for TensorFlow\* Object Detection API](./mask_rcnn_demo/cpp/README.md) - Inference of instance segmentation networks created with TensorFlow\* Object Detection API.
 - [Monodepth Python\* Demo](./monodepth_demo/python/README.md) - The demo demonstrates how to run monocular depth estimation models.
-- [Multi-Camera Multi-Target Tracking Python\* Demo](./multi_camera_multi_target_tracking/python/README.md) Demo application for multiple targets (persons or vehicles) tracking on multiple cameras.
+- [Multi-Camera Multi-Target Tracking Python\* Demo](./multi_camera_multi_target_tracking_demo/python/README.md) Demo application for multiple targets (persons or vehicles) tracking on multiple cameras.
 - [Multi-Channel Face Detection C++ Demo](./multi_channel_face_detection_demo/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel face detection scenario.
 - [Multi-Channel Human Pose Estimation C++ Demo](./multi_channel_human_pose_estimation_demo/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel human pose estimation scenario.
 - [Multi-Channel Object Detection Yolov3 C++ Demo](./multi_channel_object_detection_demo_yolov3/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel common object detection scenario.
@@ -59,12 +59,12 @@ The table below shows the correlation between models, demos, and supported plugi
 
 | Model                                            | Demos supported on the model                                                                                 | CPU       | GPU       | MYRIAD/HDDL | HETERO:FPGA,CPU |
 |--------------------------------------------------|--------------------------------------------------------------------------------------------------------------|-----------|-----------|-------------|-----------------|
-| action-recognition-0001-decoder                  | [Action Recognition Python\* Demo](./action_recognition/python/README.md)                              | Supported | Supported | Supported   |                 |
-| action-recognition-0001-encoder                  | [Action Recognition Python\* Demo](./action_recognition/python/README.md)                              | Supported | Supported | Supported   |                 |
+| action-recognition-0001-decoder                  | [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md)                              | Supported | Supported | Supported   |                 |
+| action-recognition-0001-encoder                  | [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md)                              | Supported | Supported | Supported   |                 |
 | age-gender-recognition-retail-0013               | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   | Supported       |
 | asl-recognition-0004                             | [Gesture Recognition Python\* Demo](./gesture_recognition_demo/python/README.md)                       | Supported | Supported |             |                 |
-| driver-action-recognition-adas-0002-decoder      | [Action Recognition Python\* Demo](./action_recognition/python/README.md)                              | Supported | Supported | Supported   |                 |
-| driver-action-recognition-adas-0002-encoder      | [Action Recognition Python\* Demo](./action_recognition/python/README.md)                              | Supported | Supported | Supported   | Supported       |
+| driver-action-recognition-adas-0002-decoder      | [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md)                              | Supported | Supported | Supported   |                 |
+| driver-action-recognition-adas-0002-encoder      | [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md)                              | Supported | Supported | Supported   | Supported       |
 | emotions-recognition-retail-0003                 | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   | Supported       |
 | face-detection-adas-0001                         | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   | Supported       |
 | face-detection-retail-0004                       | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   | Supported       |
@@ -95,9 +95,9 @@ The table below shows the correlation between models, demos, and supported plugi
 | person-detection-retail-0002                     | [Pedestrian Tracker Demo](./pedestrian_tracker_demo/cpp/README.md)                                               | Supported | Supported | Supported   | Supported       |
 | person-detection-retail-0013                     | [Object Detection Demo](./object_detection_demo/cpp/README.md)                                                   | Supported | Supported | Supported   | Supported       |
 | person-reidentification-retail-0277              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported |             |                 |
-| person-reidentification-retail-0286              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./multi_camera_multi_target_tracking/python/README.md)    | Supported | Supported |       |        |
-| person-reidentification-retail-0287              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./multi_camera_multi_target_tracking/python/README.md)    | Supported | Supported |       |        |
-| person-reidentification-retail-0288              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./multi_camera_multi_target_tracking/python/README.md)    | Supported | Supported |       |        |
+| person-reidentification-retail-0286              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./multi_camera_multi_target_tracking_demo/python/README.md)    | Supported | Supported |       |        |
+| person-reidentification-retail-0287              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./multi_camera_multi_target_tracking_demo/python/README.md)    | Supported | Supported |       |        |
+| person-reidentification-retail-0288              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./multi_camera_multi_target_tracking_demo/python/README.md)    | Supported | Supported |       |        |
 | person-vehicle-bike-detection-crossroad-0078     | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported | Supported   | Supported       |
 | person-vehicle-bike-detection-crossroad-1016     | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported | Supported   |                 |
 | person-vehicle-bike-detection-crossroad-yolov3-1020 | [Object Detection Python\* Demo](./object_detection_demo/python/README.md)                          | Supported | Supported | Supported   |                 |

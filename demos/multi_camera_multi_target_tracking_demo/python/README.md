@@ -41,26 +41,26 @@ pip3 install -r requirements.txt
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: multi_camera_multi_target_tracking.py [-h] -i I [I ...]
-                                             [--config CONFIG]
-                                             [--detections DETECTIONS]
-                                             [-m M_DETECTOR]
-                                             [--t_detector T_DETECTOR]
-                                             [--m_segmentation M_SEGMENTATION]
-                                             [--t_segmentation T_SEGMENTATION]
-                                             --m_reid M_REID
-                                             [--output_video OUTPUT_VIDEO]
-                                             [--history_file HISTORY_FILE]
-                                             [--save_detections SAVE_DETECTIONS]
-                                             [--no_show] [-d DEVICE]
-                                             [-l CPU_EXTENSION]
-                                             [-u UTILIZATION_MONITORS]
+usage: multi_camera_multi_target_tracking_demo.py [-h] -i INPUT [INPUT ...]
+                                                  [--loop] [--config CONFIG]
+                                                  [--detections DETECTIONS]
+                                                  [-m M_DETECTOR]
+                                                  [--t_detector T_DETECTOR]
+                                                  [--m_segmentation M_SEGMENTATION]
+                                                  [--t_segmentation T_SEGMENTATION]
+                                                  --m_reid M_REID
+                                                  [--output_video OUTPUT_VIDEO]
+                                                  [--history_file HISTORY_FILE]
+                                                  [--save_detections SAVE_DETECTIONS]
+                                                  [--no_show] [-d DEVICE]
+                                                  [-l CPU_EXTENSION]
+                                                  [-u UTILIZATION_MONITORS]
 
-Multi camera multi target tracking live demo script
+Multi camera multi object tracking live demo script
 
 optional arguments:
   -h, --help            show this help message and exit
-  -i INPUT, --input INPUT
+  -i INPUT [INPUT ...], --input INPUT [INPUT ...]
                         Input sources (indexes of cameras or paths to video
                         files)
   --loop                Optional. Enable reading the input in a loop
@@ -96,7 +96,7 @@ Minimum command examples to run the demo for person tracking (for vehicle tracki
 
 ```
 # videos
-python multi_camera_multi_target_tracking.py \
+python multi_camera_multi_target_tracking_demo.py \
     -i path/to/video_1.avi path/to/video_2.avi \
     --m_detector path/to/person-detection-retail-0013.xml \
     --m_reid path/to/person-reidentification-retail-0103.xml \
