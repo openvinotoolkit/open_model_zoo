@@ -48,3 +48,4 @@ yolo-v2-tiny-tf
 yolo-v2-tiny-vehicle-detection-0001
 yolo-v3-tf
 yolo-v3-tiny-tf
+# For --architecture_type=yolov4

@@ -211,3 +211,76 @@ class YOLO(Model):
             detections = self._resize_detections(detections, meta['original_shape'][1::-1])
 
         return detections
+
+
+class YoloV4(YOLO):
+    class Params:
+        def __init__(self, sides, mask):
+            self.num = 3
+            self.coords = 4
+            self.classes = 80
+            self.sides = sides
+            self.anchors = [12, 16, 19, 36, 40, 28,
+                            36, 75, 76, 55, 72, 146,
+                            142, 110, 192, 243, 459, 401]
+            masked_anchors = []
+            for idx in mask:
+                masked_anchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
+            self.anchors = masked_anchors
+
+    def _get_output_info(self):
+        masks = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+        outputs = sorted(self.net.outputs.items(), key=lambda x: x[1].shape[2], reverse=True)
+
+        output_info = {}
+        for i, (name, layer) in enumerate(outputs):
+            shape = layer.shape
+            yolo_params = self.Params(shape[2:4], mask=masks[i])
+            output_info[name] = (shape, yolo_params)
+        return output_info
+
+    @staticmethod
+    def _parse_yolo_region(predictions, input_size, params, threshold, multiple_labels=True):
+        def sigmoid(x):
+            return 1. / (1. + np.exp(-x))
+        # ------------------------------------------ Extracting layer parameters ---------------------------------------
+        objects = list()
+        bbox_size = params.coords + 1 + params.classes
+        # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
+        for row, col, n in np.ndindex(params.sides[0], params.sides[1], params.num):
+            # Getting raw values for each detection bounding bFox
+            bbox = predictions[0, n * bbox_size:(n + 1) * bbox_size, row, col]
+            x, y = sigmoid(bbox[:2])
+            width, height = bbox[2:4]
+            object_probability = sigmoid(bbox[4])
+
+            class_probabilities = sigmoid(bbox[5:])
+            if object_probability < threshold:
+                continue
+            # Process raw value
+            x = (col + x) / params.sides[1]
+            y = (row + y) / params.sides[0]
+            # Value for exp is very big number in some cases so following construction is using here
+            try:
+                width = np.exp(width)
+                height = np.exp(height)
+            except OverflowError:
+                continue
+            # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
+            width = width * params.anchors[2 * n] / input_size[0]
+            height = height * params.anchors[2 * n + 1] / input_size[1]
+
+            if multiple_labels:
+                for class_id, class_probability in enumerate(class_probabilities):
+                    confidence = object_probability * class_probability
+                    if confidence > threshold:
+                        objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
+                                                 confidence, class_id))
+            else:
+                class_id = np.argmax(class_probabilities)
+                confidence = class_probabilities[class_id] * object_probability
+                if confidence < threshold:
+                    continue
+                objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
+                                         confidence.item(), class_id.item()))
+        return objects

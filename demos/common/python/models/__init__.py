@@ -22,7 +22,7 @@ from .retinaface import RetinaFace
 from .segmentation import SegmentationModel
 from .ssd import SSD
 from .utils import DetectionWithLandmarks
-from .yolo import YOLO
+from .yolo import YOLO, YoloV4
 
 __all__ = [
     'CenterNet',
@@ -33,4 +33,5 @@ __all__ = [
     'SegmentationModel',
     'SSD',
     'YOLO',
+    'YoloV4',
 ]

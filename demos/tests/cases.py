@@ -643,6 +643,7 @@ PYTHON_DEMOS = [
                     ModelArg('yolo-v2-tiny-vehicle-detection-0001'),
                     ModelArg('yolo-v3-tf')),
             ),
+            TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
         ],
     )),
 
