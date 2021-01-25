@@ -19,8 +19,6 @@
 #include <utils/slog.hpp>
 #include "models/detection_model_retinaface.h"
 
-//using namespace InferenceEngine;
-
 ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),  // Default label is "Face"
     boxIOUThreshold(boxIOUThreshold), maskThreshold(0.8f), shouldDetectMasks(false), landmarkStd(1.0f),
