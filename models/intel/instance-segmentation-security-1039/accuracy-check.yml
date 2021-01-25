@@ -10,7 +10,7 @@ models:
           raw_masks_out: masks
 
     datasets:
-      - name: ms_coco_mask_rcnn_short_80_classes
+      - name: ms_coco_mask_rcnn_short_80_classes_without_background
 
         preprocessing:
           - type: resize

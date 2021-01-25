@@ -175,12 +175,8 @@ class MaskRCNNAdapter(Adapter):
         if classes is None:
             classes = np.ones(len(boxes), np.uint32)
 
-        if self.scores_out:
-            valid_detections_mask = classes > 0
-            classes = classes[valid_detections_mask]
-        else:
-            valid_detections_mask = np.sum(boxes, axis=1) > 0
-            classes = classes[valid_detections_mask] + 1
+        valid_detections_mask = classes > 0 if self.scores_out else np.sum(boxes, axis=1) > 0
+        classes = classes[valid_detections_mask]
         boxes = boxes[valid_detections_mask]
         scores = scores[valid_detections_mask]
         if raw_masks is not None:
