@@ -463,6 +463,13 @@ The main difference between this converter and `super_resolution` in data organi
   * `add_background_to_label_id` - flag that label_ids defined in annotation should be shifted if `has_background` enabled.
 * `see_in_the_dark` - converts See-in-the-Dark dataset described in the [paper](https://cchen156.github.io/paper/18CVPR_SID.pdf) to `ImageProcessingAnnotation`.
   * `annotation_file` - path to image pairs file in txt format.
+* `conll_ner` - converts CONLL 2003 dataset for Named Entity Recognition to `BERTNamedEntityRecognitionAnnotation`.
+  * `annotation_file` - annotation file in txt forma
+  * `vocab_file` - vocab file for word piece tokenization.
+  * `lower_case` - converts all tokens to lower case during tokenization (Optional, default `False`).
+  * `max_length` - maximal input sequence length (Optional, default 128).
+  * `pad_input` - allow padding for input sequence if input less that `max_length` (Optional, default `True`).
+  * `include_special_token_lables` - allow extension original dataset labels with special token labels (`[CLS'`, `[SEP]`]) (Optional, default `False`).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
