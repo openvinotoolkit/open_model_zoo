@@ -4,19 +4,19 @@ Demo application for sound classification algorithm.
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network to Inference engine. It uses only audiofiles in `wav` format. Audio should be converted to model's sample rate using `-sr/--samplerate` option, if sample rate of audio differs from sample rate of model (e.g. [AclNet](../../../models/public/aclnet/aclnet.md) expected 16kHz audio). After reading the audio, it is sliced into clips to fit model input (clips are allowed to overlap with `-ol/--overlap` option) and each clip is processed separately with its own prediction.
+Upon the start-up the demo application reads command line parameters and loads a network to Inference engine. It uses only audio files in `wav` format. Audio should be converted to model's sample rate using `-sr/--samplerate` option, if sample rate of audio differs from sample rate of model (e.g. [AclNet](../../../models/public/aclnet/aclnet.md) expected 16kHz audio). After reading the audio, it is sliced into clips to fit model input (clips are allowed to overlap with `-ol/--overlap` option) and each clip is processed separately with its own prediction.
 
 ## Running
 
 Run the application with the `-h` option to see the usage message:
 ```
-python3 audio_classification_demo.py -h
+python3 sound_classification_demo.py -h
 ```
 The command yields the following usage message:
 ```
-usage: audio_classification_demo.py [-h] -i INPUT -m MODEL [-l CPU_EXTENSION]
+usage: sound_classification_demo.py [-h] -i INPUT -m MODEL [-l CPU_EXTENSION]
                                     [-d DEVICE] [--labels LABELS]
-                                    [-sr SAMPLERATE] [-ol OVERLAP]
+                                    [-sr SAMPLE_RATE] [-ol OVERLAP]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -34,7 +34,7 @@ Options:
                         will look for a suitable plugin for device specified.
                         Default value is CPU
   --labels LABELS       Optional. Labels mapping file
-  -sr SAMPLERATE, --sample_rate SAMPLERATE
+  -sr SAMPLE_RATE, --sample_rate SAMPLE_RATE
                         Optional. Set sample rate for audio input
   -ol OVERLAP, --overlap OVERLAP
                         Optional. Set the overlapping between audio clip in
@@ -43,7 +43,7 @@ Options:
 Running the application with the empty list of options yields the usage message given above and an error message.
 You can use the following command to do inference on GPU with a pre-trained sound classification model and conversion of input audio to samplerate of 16000:
 ```
-python3 audio_classification_demo.py -i <path_to_wav>/input_audio.wav -m <path_to_model>/aclnet.xml -d GPU --samplerate 16000
+python3 sound_classification_demo.py -i <path_to_wav>/input_audio.wav -m <path_to_model>/aclnet.xml -d GPU --samplerate 16000
 ```
 
 To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).

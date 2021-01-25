@@ -115,11 +115,7 @@ def read_wav(file, as_float=False):
         2: np.int16,
         4: np.int32
     }
-    sampwidth_max = {
-        1: 255,
-        2: 2**15,
-        4: 2**31
-    }
+
     with wave.open(file, "rb") as wav:
         params = wav.getparams()
         data = wav.readframes(params.nframes)
@@ -130,10 +126,7 @@ def read_wav(file, as_float=False):
                                .format(file, params.sampwidth))
         data = np.reshape(data, (params.nframes, params.nchannels))
         if as_float:
-            data = data / sampwidth_max[params.sampwidth]
-            if params.sampwidth == 1:
-                data -= 0.5
-                data *= 2
+            data = (data - np.mean(data)) / (np.std(data) + 1e-15)
 
     return params.framerate, data
 
