@@ -133,14 +133,20 @@ class MaskRCNN(DetectorInterface):
         self.confidence = conf
         self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
 
-        required_input_keys = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
-        current_input_keys = self.net.input_info.keys()
+        required_input_keys = [{'image'}, {'im_info', 'im_data'}, {'im_data', 'im_info'}]
+        current_input_keys = set(self.net.inputs_info.keys())
         assert current_input_keys in required_input_keys
-        required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks'}
-        assert required_output_keys.issubset(self.net.net.outputs)
+        required_output_keys = {'boxes', 'labels', 'masks'}
+        required_output_keys_segmentoly = {'boxes', 'scores', 'classes', 'raw_masks'}
+        assert required_output_keys.issubset(self.net.net.outputs) or \
+               required_output_keys_segmentoly.issubset(self.net.net.outputs)
 
-        self.n, self.c, self.h, self.w = self.net.input_info['im_data'].input_data.shape
+        input_name = 'im_data' if self.segmentoly_type() else 'image'
+        self.n, self.c, self.h, self.w = self.net.inputs_info[input_name].input_data.shape
         assert self.n == 1, 'Only batch 1 is supported.'
+
+    def segmentoly_type(self):
+        return not 'image' in set(self.net.inputs_info.keys())
 
     def preprocess(self, frame):
         image_height, image_width = frame.shape[:2]
@@ -156,6 +162,7 @@ class MaskRCNN(DetectorInterface):
         return sample
 
     def forward(self, im_data, im_info):
+        input_name = 'im_data' if self.segmentoly_type() else 'image'
         if (self.h - im_data.shape[1] < 0) or (self.w - im_data.shape[2] < 0):
             raise ValueError('Input image should resolution of {}x{} or less, '
                              'got {}x{}.'.format(self.w, self.h, im_data.shape[2], im_data.shape[1]))
@@ -163,15 +170,24 @@ class MaskRCNN(DetectorInterface):
                                    (0, self.h - im_data.shape[1]),
                                    (0, self.w - im_data.shape[2])),
                          mode='constant', constant_values=0).reshape(1, self.c, self.h, self.w)
-        im_info = im_info.reshape(1, *im_info.shape)
-        output = self.net.net.infer(dict(im_data=im_data, im_info=im_info))
+        feed_dict = {input_name: im_data}
+        if im_info is not None:
+            im_info = im_info.reshape(1, *im_info.shape)
+            feed_dict['im_info'] = im_info
+        output = self.net.net.infer(feed_dict)
 
-        classes = output['classes']
-        valid_detections_mask = classes > 0
-        classes = classes[valid_detections_mask]
-        boxes = output['boxes'][valid_detections_mask]
-        scores = output['scores'][valid_detections_mask]
-        masks = output['raw_masks'][valid_detections_mask]
+        if self.segmentoly_type():
+            valid_detections_mask = output['classes'] > 0
+            classes = output['classes'][valid_detections_mask]
+            boxes = output['boxes'][valid_detections_mask]
+            scores = output['scores'][valid_detections_mask]
+            masks = output['raw_masks'][valid_detections_mask]
+        else:
+            valid_detections_mask = np.sum(output['boxes'], axis=1) > 0
+            classes = output['labels'][valid_detections_mask] + 1
+            boxes = output['boxes'][valid_detections_mask][:, :4]
+            scores = output['boxes'][valid_detections_mask][:, 4]
+            masks = output['masks'][valid_detections_mask]
         return boxes, classes, scores, np.full(len(classes), 0, dtype=np.int32), masks
 
     def get_detections(self, frames, return_cropped_masks=True, only_target_class=True):
@@ -179,7 +195,7 @@ class MaskRCNN(DetectorInterface):
         for frame in frames:
             data_batch = self.preprocess(frame)
             im_data = data_batch['im_data']
-            im_info = data_batch['im_info']
+            im_info = data_batch['im_info'] if self.segmentoly_type() else None
             meta = data_batch['meta']
 
             boxes, classes, scores, _, masks = self.forward(im_data, im_info)
@@ -189,7 +205,8 @@ class MaskRCNN(DetectorInterface):
                                                         im_scale_y=meta['processed_size'][0] / meta['original_size'][0],
                                                         im_scale_x=meta['processed_size'][1] / meta['original_size'][1],
                                                         full_image_masks=True, encode_masks=False,
-                                                        confidence_threshold=self.confidence)
+                                                        confidence_threshold=self.confidence,
+                                                        segmentoly_type=self.segmentoly_type())
             frame_output = []
             for i in range(len(scores)):
                 if only_target_class and classes[i] not in self.trg_classes:

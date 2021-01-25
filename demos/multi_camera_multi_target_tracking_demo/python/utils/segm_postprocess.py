@@ -40,7 +40,7 @@ def expand_boxes(boxes, scale):
 def postprocess(scores, classes, boxes, raw_cls_masks,
                 im_h, im_w, im_scale_y=None, im_scale_x=None, im_scale=None,
                 full_image_masks=True, encode_masks=False,
-                confidence_threshold=0.0):
+                confidence_threshold=0.0, segmentoly_type=False):
     no_detections = (np.empty((0, ), dtype=np.float32), np.empty((0, ), dtype=np.float32),
                      np.empty((0, 4), dtype=np.float32), [])
     if scores is None:
@@ -66,7 +66,7 @@ def postprocess(scores, classes, boxes, raw_cls_masks,
     if raw_cls_masks is not None:
         masks = []
         for box, cls, raw_mask in zip(boxes, classes, raw_cls_masks):
-            raw_cls_mask = raw_mask[cls, ...]
+            raw_cls_mask = raw_mask[cls, ...] if segmentoly_type else raw_mask
             mask = segm_postprocess(box, raw_cls_mask, im_h, im_w, full_image_masks, encode_masks)
             masks.append(mask)
     else:

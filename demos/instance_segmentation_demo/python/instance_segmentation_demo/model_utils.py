@@ -56,14 +56,19 @@ def segm_postprocess(box, raw_cls_mask, im_h, im_w):
 def mask_rcnn_postprocess(
         outputs, scale_x, scale_y, frame_height, frame_width, input_height, input_width, conf_threshold
 ):
-    boxes = outputs['boxes']
+    segmentoly_postrpocess = 'raw_masks' in outputs
+    boxes = outputs['boxes'] if segmentoly_postrpocess else outputs['boxes'][:, :4]
+    scores = outputs['scores'] if segmentoly_postrpocess else outputs['boxes'][:, 4]
     boxes[:, 0::2] /= scale_x
     boxes[:, 1::2] /= scale_y
-    scores = outputs['scores']
-    classes = outputs['classes'].astype(np.uint32)
+    if segmentoly_postrpocess:
+        classes = outputs['classes'].astype(np.uint32)
+    else:
+        classes = outputs['labels'].astype(np.uint32) + 1
     masks = []
-    for box, cls, raw_mask in zip(boxes, classes, outputs['raw_masks']):
-        raw_cls_mask = raw_mask[cls, ...]
+    masks_name = 'raw_masks' if segmentoly_postrpocess else 'masks'
+    for box, cls, raw_mask in zip(boxes, classes, outputs[masks_name]):
+        raw_cls_mask = raw_mask[cls, ...] if segmentoly_postrpocess else raw_mask
         mask = segm_postprocess(box, raw_cls_mask, frame_height, frame_width)
         masks.append(mask)
     # Filter out detections with low confidence.
@@ -231,7 +236,9 @@ def yolact_segm_postprocess(
 
 
 MODEL_ATTRIBUTES = {
-    'mask_rcnn': ModelAttributes(('boxes', 'scores', 'classes', 'raw_masks'), mask_rcnn_postprocess),
+    'mask_rcnn_segmentoly': ModelAttributes(('boxes', 'scores', 'classes', 'raw_masks'), 
+                                            mask_rcnn_postprocess),
+    'mask_rcnn': ModelAttributes(('boxes', 'labels', 'masks'), mask_rcnn_postprocess),
     'yolact': ModelAttributes(('boxes', 'conf', 'proto', 'mask'), yolact_postprocess)
 }
 
@@ -250,7 +257,10 @@ def check_model(net):
         ]
         assert len(image_info_input) == 1, 'Demo supports only model with single im_info input'
         image_info_input = image_info_input[0]
-    model_type = 'mask_rcnn' if image_info_input else 'yolact'
+    if image_info_input:
+        model_type = 'mask_rcnn_segmentoly'
+    else:
+        model_type = 'mask_rcnn' if len(net.input_info) == 1 and len(net.outputs) in [3, 5] else 'yolact'
     model_attributes = MODEL_ATTRIBUTES[model_type]
     assert set(model_attributes.required_outputs) <= net.outputs.keys(), \
         'Demo supports only topologies with the following output keys: {}'.format(
