@@ -138,7 +138,7 @@ private:
     }
 
     static cv::Scalar maxMinDistance(const std::vector<cv::Scalar>& colorSet, const std::vector<cv::Scalar>& colorCandidates) {
-        std::vector<float> distances;
+        std::vector<double> distances;
         distances.reserve(colorCandidates.size());
         for (auto& c1 : colorCandidates) {
             auto min = *std::min_element(colorSet.begin(), colorSet.end(),
