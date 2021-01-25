@@ -146,7 +146,7 @@ class MaskRCNN(DetectorInterface):
         assert self.n == 1, 'Only batch 1 is supported.'
 
     def segmentoly_type(self):
-        return not 'image' in set(self.net.inputs_info.keys())
+        return 'image' not in set(self.net.inputs_info.keys())
 
     def preprocess(self, frame):
         image_height, image_width = frame.shape[:2]

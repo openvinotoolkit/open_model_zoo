@@ -34,7 +34,7 @@ class MaskRCNN(IEModel):
         self.n, self.c, self.h, self.w = self.inputs_info[input_name].input_data.shape
 
     def segmentoly_type(self):
-        return not 'image' in set(self.inputs_info.keys())
+        return 'image' not in set(self.inputs_info.keys())
 
     def get_allowed_inputs_len(self):
         return (1, 2)

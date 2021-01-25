@@ -236,7 +236,7 @@ def yolact_segm_postprocess(
 
 
 MODEL_ATTRIBUTES = {
-    'mask_rcnn_segmentoly': ModelAttributes(('boxes', 'scores', 'classes', 'raw_masks'), 
+    'mask_rcnn_segmentoly': ModelAttributes(('boxes', 'scores', 'classes', 'raw_masks'),
                                             mask_rcnn_postprocess),
     'mask_rcnn': ModelAttributes(('boxes', 'labels', 'masks'), mask_rcnn_postprocess),
     'yolact': ModelAttributes(('boxes', 'conf', 'proto', 'mask'), yolact_postprocess)
