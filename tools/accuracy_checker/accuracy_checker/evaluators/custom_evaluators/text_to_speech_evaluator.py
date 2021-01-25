@@ -301,6 +301,7 @@ class SequentialModel:
         self.embeddings_output = 'embeddings'
         self.audio_output = 'audio'
         self.max_mel_len = int(network_info['max_mel_len'])
+        self.max_regression_len = int(network_info['max_regression_len'])
         self.adapter = create_adapter(network_info['adapter'])
         self.adapter.output_blob = self.audio_output
 
