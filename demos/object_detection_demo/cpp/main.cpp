@@ -123,13 +123,13 @@ class ColorPalette {
 private:
     std::vector<cv::Scalar> palette;
 
-    double getRandom(double a = 0.0, double b = 1.0) {
+    static double getRandom(double a = 0.0, double b = 1.0) {
         static std::default_random_engine e;
         std::uniform_real_distribution<> dis(a, std::nextafter(b, std::numeric_limits<double>::max()));
         return dis(e);
     }
 
-    double distance(const cv::Scalar& c1, const cv::Scalar& c2) {
+    static double distance(const cv::Scalar& c1, const cv::Scalar& c2) {
         auto dh = std::fmin(std::fabs(c1[0] - c2[0]), 1 - fabs(c1[0] - c2[0])) * 2;
         auto ds = std::fabs(c1[1] - c2[1]);
         auto dv = std::fabs(c1[2] - c2[2]);
@@ -137,7 +137,7 @@ private:
         return dh * dh + ds * ds + dv * dv;
     }
 
-    cv::Scalar maxMinDistance(const std::vector<cv::Scalar>& colorSet, const std::vector<cv::Scalar>& colorCandidates) {
+    static cv::Scalar maxMinDistance(const std::vector<cv::Scalar>& colorSet, const std::vector<cv::Scalar>& colorCandidates) {
         std::pair<size_t, double> maxDist{ 0, 0 };
         size_t i = 0;
         for (auto& c1 : colorCandidates) {
@@ -166,7 +166,7 @@ private:
     }
 
 public:
-    ColorPalette(size_t n) {
+    explicit ColorPalette(size_t n) {
         palette.reserve(n);
         std::vector<cv::Scalar> hsvColors(1, { 1., 1., 1. });
         std::vector<cv::Scalar> colorCandidates;
