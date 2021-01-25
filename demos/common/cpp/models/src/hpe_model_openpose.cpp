@@ -23,9 +23,9 @@
 #include "models/hpe_model_openpose.h"
 #include "models/openpose_decoder.h"
 
-#include <samples/common.hpp>
+#include <utils/common.hpp>
+#include <utils/ocv_common.hpp>
 #include <ngraph/ngraph.hpp>
-#include <samples/ocv_common.hpp>
 
 using namespace InferenceEngine;
 
@@ -36,7 +36,7 @@ HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, i
     confidenceThreshold(confidenceThreshold) {
 }
 
-void HPEOpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void HPEOpenPose::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
@@ -73,7 +73,7 @@ void HPEOpenPose::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) 
         throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
 }
 
-void HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork) {
+void HPEOpenPose::reshape(CNNNetwork& cnnNetwork) {
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     SizeVector& InputLayerDims = inputShapes.begin()->second;
     if (!targetSize) {
@@ -89,7 +89,7 @@ void HPEOpenPose::reshape(InferenceEngine::CNNNetwork& cnnNetwork) {
     cnnNetwork.reshape(inputShapes);
 }
 
-std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
     cv::Mat resizedImage;
@@ -109,7 +109,7 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
                                                                     image.rows / static_cast<float>(h)));
 }
 
-std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult & infResult) {
+std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult& infResult) {
     HumanPoseResult* result = new HumanPoseResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 

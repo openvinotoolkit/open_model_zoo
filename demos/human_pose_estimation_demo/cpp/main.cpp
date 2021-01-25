@@ -25,22 +25,20 @@
 #include <string>
 
 #include <monitors/presenter.h>
-<<<<<<< HEAD:demos/human_pose_estimation_demo/cpp/main.cpp
+
+#include <utils/args_helper.hpp>
 #include <utils/images_capture.h>
+#include <utils/performance_metrics.hpp>
 #include <utils/ocv_common.hpp>
-=======
-#include <samples/ocv_common.hpp>
-#include <samples/args_helper.hpp>
-#include <samples/slog.hpp>
-#include <samples/images_capture.h>
-#include <samples/default_flags.hpp>
-#include <samples/performance_metrics.hpp>
+#include <utils/slog.hpp>
+#include <utils/default_flags.hpp>
 #include <unordered_map>
 #include <gflags/gflags.h>
 
 #include <pipelines/async_pipeline.h>
 #include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
+
 #include <models/hpe_model_openpose.h>
 
 
@@ -82,7 +80,6 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(loop, false, loop_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
->>>>>>> 0eaa7e90 (hpe):demos/human_pose_estimation_demo/main.cpp
 
 /**
 * \brief This function shows a help message

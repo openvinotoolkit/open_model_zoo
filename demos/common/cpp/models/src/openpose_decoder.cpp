@@ -18,12 +18,8 @@
 #include <utility>
 #include <vector>
 
-<<<<<<< HEAD:demos/human_pose_estimation_demo/cpp/src/peak.cpp
 #include <utils/common.hpp>
-=======
-#include <samples/common.hpp>
 #include "models/openpose_decoder.h"
->>>>>>> 0eaa7e90 (hpe):demos/common/models/src/openpose_decoder.cpp
 
 
 Peak::Peak(const int id, const cv::Point2f& pos, const float score)
