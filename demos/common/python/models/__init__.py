@@ -17,6 +17,8 @@
 
 from .centernet import CenterNet
 from .faceboxes import FaceBoxes
+from .hpe_associative_embedding import HpeAssociativeEmbedding
+from .open_pose import OpenPose
 from .retinaface import RetinaFace
 from .segmentation import SegmentationModel
 from .ssd import SSD
@@ -27,6 +29,8 @@ __all__ = [
     'CenterNet',
     'DetectionWithLandmarks',
     'FaceBoxes',
+    'HpeAssociativeEmbedding',
+    'OpenPose',
     'RetinaFace',
     'SegmentationModel',
     'SSD',

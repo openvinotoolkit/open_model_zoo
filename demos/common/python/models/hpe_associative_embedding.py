@@ -1,5 +1,5 @@
 """
- Copyright (C) 2020 Intel Corporation
+ Copyright (C) 2020-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -17,11 +17,95 @@
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
+from .model import Model
+from .utils import resize_image
+
+
+class HpeAssociativeEmbedding(Model):
+    def __init__(self, ie, model_path, target_size, aspect_ratio, prob_threshold, size_divisor=32):
+        super().__init__(ie, model_path)
+        self.image_blob_name = self._get_inputs(self.net)
+        self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)
+        self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
+        self.embeddings_blob_name = find_layer_by_name('embeddings', self.net.outputs)
+        self.output_scale = self.net.input_info[self.image_blob_name].input_data.shape[-1] / self.net.outputs[self.heatmaps_blob_name].shape[-1]
+
+        if target_size is None:
+            h, w = self.net.input_info[self.image_blob_name].input_data.shape[-2:]
+            target_size = min(h, w)
+        if aspect_ratio >= 1.0:  # img width >= height
+            input_height, input_width = target_size, round(target_size * aspect_ratio)
+        else:
+            input_height, input_width = round(target_size / aspect_ratio), target_size
+        self.h = (input_height + size_divisor - 1) // size_divisor * size_divisor
+        self.w = (input_width + size_divisor - 1) // size_divisor * size_divisor
+        default_input_shape = self.net.input_info[self.image_blob_name].input_data.shape
+        input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h, self.w])}
+        self.logger.info('Reshape net to {}'.format(input_shape))
+        self.net.reshape(input_shape)
+
+        self.decoder = AssociativeEmbeddingDecoder(
+            num_joints=self.net.outputs[self.heatmaps_blob_name].shape[1],
+            adjust=True,
+            refine=True,
+            delta=0.0,
+            max_num_people=30,
+            detection_threshold=0.1,
+            tag_threshold=1,
+            pose_threshold=prob_threshold,
+            use_detection_val=True,
+            ignore_too_much=False)
+
+    @staticmethod
+    def _get_inputs(net):
+        image_blob_name = None
+        for blob_name, blob in net.input_info.items():
+            if len(blob.input_data.shape) == 4:
+                image_blob_name = blob_name
+            else:
+                raise RuntimeError('Unsupported {}D input layer "{}". Only 2D and 4D input layers are supported'
+                                   .format(len(blob.shape), blob_name))
+        if image_blob_name is None:
+            raise RuntimeError('Failed to identify the input for the image.')
+        return image_blob_name
+
+    def preprocess(self, inputs):
+        img = resize_image(inputs, (self.w, self.h), keep_aspect_ratio=True)
+        h, w = img.shape[:2]
+        resize_img_scale = np.array((inputs.shape[1] / w, inputs.shape[0] / h), np.float32)
+
+        img = np.pad(img, ((0, self.h - h), (0, self.w - w), (0, 0)),
+                     mode='constant', constant_values=0)
+        img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+        img = img[None]
+        return {self.image_blob_name: img}, resize_img_scale
+
+    def postprocess(self, outputs, resize_img_scale):
+        heatmaps = outputs[self.heatmaps_blob_name]
+        nms_heatmaps = outputs[self.nms_heatmaps_blob_name]
+        aembds = outputs[self.embeddings_blob_name]
+        poses, scores = self.decoder(heatmaps, aembds, nms_heatmaps=nms_heatmaps)
+        # Rescale poses to the original image.
+        poses[:, :, :2] *= resize_img_scale * self.output_scale
+        return poses, scores
+
+
+def find_layer_by_name(name, layers):
+    suitable_layers = [layer_name for layer_name in layers if layer_name.startswith(name)]
+    if not suitable_layers:
+        raise ValueError('Suitable layer for "{}" output is not found'.format(name))
+
+    if len(suitable_layers) > 1:
+        raise ValueError('More than 1 layer matched to "{}" output'.format(name))
+
+    return suitable_layers[0]
+
 
 class Pose:
     def __init__(self, num_joints, tag_size=1):
         self.num_joints = num_joints
         self.tag_size = tag_size
+        # 2 is for x, y and 1 is for joint confidence
         self.pose = np.zeros((num_joints, 2 + 1 + tag_size), dtype=np.float32)
         self.pose_tag = np.zeros(tag_size, dtype=np.float32)
         self.valid_points_num = 0
@@ -41,12 +125,13 @@ class Pose:
 
 class AssociativeEmbeddingDecoder:
     def __init__(self, num_joints, max_num_people, detection_threshold, use_detection_val,
-                 ignore_too_much, tag_threshold,
+                 ignore_too_much, tag_threshold, pose_threshold,
                  adjust=True, refine=True, delta=0.0, joints_order=None):
         self.num_joints = num_joints
         self.max_num_people = max_num_people
         self.detection_threshold = detection_threshold
         self.tag_threshold = tag_threshold
+        self.pose_threshold = pose_threshold
         self.use_detection_val = use_detection_val
         self.ignore_too_much = ignore_too_much
 
@@ -59,14 +144,10 @@ class AssociativeEmbeddingDecoder:
         self.do_refine = refine
         self.delta = delta
 
-    def match(self, tag_k, loc_k, val_k):
-        return list(map(self._match_by_tag, zip(tag_k, loc_k, val_k)))
-
     @staticmethod
     def _max_match(scores):
         r, c = linear_sum_assignment(scores)
-        tmp = np.stack((r, c), axis=1)
-        return tmp
+        return np.stack((r, c), axis=1)
 
     def _match_by_tag(self, inp):
         tag_k, loc_k, val_k = inp
@@ -131,18 +212,16 @@ class AssociativeEmbeddingDecoder:
 
         x = ind % W
         y = ind // W
-        ind_k = np.stack((x, y), axis=3)
-
-        ans = {'tag_k': tag_k, 'loc_k': ind_k, 'val_k': val_k}
-        return ans
+        loc_k = np.stack((x, y), axis=3)
+        return tag_k, loc_k, val_k
 
     @staticmethod
     def adjust(ans, heatmaps):
         H, W = heatmaps.shape[-2:]
-        for n, people in enumerate(ans):
+        for batch_idx, people in enumerate(ans):
             for person in people:
                 for k, joint in enumerate(person):
-                    heatmap = heatmaps[n, k]
+                    heatmap = heatmaps[batch_idx, k]
                     px = int(joint[0])
                     py = int(joint[1])
                     if 1 < px < W - 1 and 1 < py < H - 1:
@@ -191,8 +270,9 @@ class AssociativeEmbeddingDecoder:
 
         return keypoints
 
-    def __call__(self, heatmaps, tags, nms_heatmaps=None):
-        ans = self.match(**self.top_k(nms_heatmaps, tags))
+    def __call__(self, heatmaps, tags, nms_heatmaps):
+        tag_k, loc_k, val_k = self.top_k(nms_heatmaps, tags)
+        ans = tuple(map(self._match_by_tag, zip(tag_k, loc_k, val_k)))  # Call _match_by_tag() for each element in batch
         ans, ans_tags = map(list, zip(*ans))
 
         if self.do_adjust:
@@ -206,6 +286,9 @@ class AssociativeEmbeddingDecoder:
 
         ans = ans[0]
         scores = np.asarray([i[:, 2].mean() for i in ans])
+        mask = scores > self.pose_threshold
+        ans = ans[mask]
+        scores = scores[mask]
 
         if self.do_refine:
             heatmap_numpy = heatmaps[0]
