@@ -141,7 +141,6 @@ private:
         std::vector<float> distances;
         distances.reserve(colorCandidates.size());
         for (auto& c1 : colorCandidates) {
-
             auto min = *std::min_element(colorSet.begin(), colorSet.end(),
                 [&c1](const cv::Scalar& a, const cv::Scalar& b) { return distance(c1, a) < distance(c1, b); });
             distances.push_back(distance(c1, min));
@@ -167,7 +166,8 @@ public:
         hsvColors.reserve(n);
         colorCandidates.resize(numCandidates);
         for (size_t i = 1; i < n; ++i) {
-            std::generate(colorCandidates.begin(), colorCandidates.end(), [] () { return cv::Scalar{ getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) }; });
+            std::generate(colorCandidates.begin(), colorCandidates.end(),
+                [] () { return cv::Scalar{ getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) }; });
             hsvColors.push_back(maxMinDistance(hsvColors, colorCandidates));
         }
 
