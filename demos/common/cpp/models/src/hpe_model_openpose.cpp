@@ -29,6 +29,12 @@
 
 using namespace InferenceEngine;
 
+const cv::Vec3f HPEOpenPose::meanPixel = cv::Vec3f::all(128);
+const float HPEOpenPose::minPeaksDistance = 3.0f;
+const float HPEOpenPose::midPointsScoreThreshold = 0.05f;
+const float HPEOpenPose::foundMidPointsRatioThreshold = 0.8f;
+const float HPEOpenPose::minSubsetScore = 0.2f;
+
 HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold) :
     ModelBase(modelFileName),
     aspectRatio(aspectRatio),

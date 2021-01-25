@@ -37,11 +37,11 @@ protected:
     static const int minJointsNumber = 3;
     static const int stride = 8;
     static const int upsampleRatio = 4;
-    const cv::Vec3f meanPixel = cv::Vec3f::all(128);
-    const float minPeaksDistance = 3.0f;
-    const float midPointsScoreThreshold = 0.05f;
-    const float foundMidPointsRatioThreshold = 0.8f;
-    const float minSubsetScore = 0.2f;
+    static const cv::Vec3f meanPixel;
+    static const float minPeaksDistance;
+    static const float midPointsScoreThreshold;
+    static const float foundMidPointsRatioThreshold;
+    static const float minSubsetScore;
     cv::Size inputLayerSize;
     double aspectRatio;
     float confidenceThreshold;
