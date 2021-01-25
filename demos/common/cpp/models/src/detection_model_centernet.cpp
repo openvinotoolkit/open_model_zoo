@@ -23,8 +23,8 @@
 
 
 ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
-    float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels)
-    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
+    float confidenceThreshold, const std::vector<std::string>& labels)
+    : DetectionModel(modelFileName, confidenceThreshold, false , labels) {
 }
 
 void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -91,8 +91,7 @@ cv::Point2f get3rdPoint(const cv::Point2f& a, const cv::Point2f& b) {
     return b + cv::Point2f(-direct.y, direct.x);
 }
 
-cv::Mat getAffineTransform(float centerX, float centerY, int scale, float rot, size_t outputWidth, size_t outputHeight, bool inv = false) {
-    int srcW = scale;
+cv::Mat getAffineTransform(float centerX, float centerY, int srcW, float rot, size_t outputWidth, size_t outputHeight, bool inv = false) {
     float rotRad =  static_cast<float>(CV_PI) * rot / 180.0f;
     auto srcDir = getDir({ 0.0f, -0.5f * srcW }, rotRad);
     cv::Point2f dstDir(0.0f,  -0.5f * outputWidth);
@@ -130,17 +129,7 @@ std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& i
     auto transInput = getAffineTransform(centerX, centerY, scale, 0, netInputWidth, netInputHeight);
     cv::Mat resizedImg;
     cv::warpAffine(img, resizedImg, transInput, cv::Size(netInputWidth, netInputHeight), cv::INTER_LINEAR);
-    cv::Mat chwImg;
-
-    if (useAutoResize) {
-        // --- Just set input blob containing read image. Resize and layout conversionx will be done automatically ----
-        request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg));
-    }
-    else {
-        // --- Resize and copy data from the image to the input blob --------------------------------------------------
-        InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-        matU8ToBlob<uint8_t>(resizedImg, frameBlob);
-    }
+    request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg));
 
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
 }

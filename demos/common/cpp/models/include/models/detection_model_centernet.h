@@ -30,7 +30,7 @@ public:
     };
     static const int INIT_VECTOR_SIZE = 200;
 
-    ModelCenterNet(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
+    ModelCenterNet(const std::string& modelFileName, float confidenceThreshold,
         const std::vector<std::string>& labels = std::vector<std::string>());
     std::shared_ptr<InternalModelData> preprocess(
         const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;

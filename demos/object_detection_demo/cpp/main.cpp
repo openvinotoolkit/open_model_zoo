@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "centernet") {
-            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
+            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels));
         }
         else if (FLAGS_at == "faceboxes") {
             model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
