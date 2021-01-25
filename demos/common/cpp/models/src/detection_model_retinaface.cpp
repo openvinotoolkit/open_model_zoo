@@ -138,7 +138,7 @@ std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& an
         auto ws = sqrt(sizeRatio);
         auto hs = ws * ratio;
         retVal.push_back({ static_cast<float>(xCtr - 0.5f * (ws - 1.0f)), static_cast<float>(yCtr - 0.5f * (hs - 1.0f)),
-            static_cast<float>(xCtr + 0.5f * (ws - 1.0f)), static_cast<float>(yCtr + 0.5f * (hs - 1.0F)) });
+            static_cast<float>(xCtr + 0.5f * (ws - 1.0f)), static_cast<float>(yCtr + 0.5f * (hs - 1.0f)) });
     }
     return retVal;
 }
@@ -368,7 +368,7 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         DetectedObject desc;
         desc.confidence = scores[i];
         //--- Scaling coordinates
-        bboxes[i].left /=  scaleX;
+        bboxes[i].left /= scaleX;
         bboxes[i].top /= scaleY;
         bboxes[i].right /= scaleX;
         bboxes[i].bottom /= scaleY;
