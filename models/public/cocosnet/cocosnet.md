@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 Cross-domain correspondence network is a exemplar-based image translation model, consisting of correspondence and translation parts. Model was pre-trained on ADE20k dataset.
-For details see [paper](https://arxiv.org/pdf/2004.05571) and [repository](https://github.com/microsoft/CoCosNet).
+For details see [paper](https://arxiv.org/abs/2004.05571) and [repository](https://github.com/microsoft/CoCosNet).
 
 ## Specification
 

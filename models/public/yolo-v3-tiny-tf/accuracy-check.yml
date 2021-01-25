@@ -1,5 +1,5 @@
 models:
-  - name: yolo_v3_tiny_tf
+  - name: yolo-v3-tiny-tf
     launchers:
       - framework: tf
         model:   yolo-v3-tiny.pb
@@ -54,7 +54,7 @@ models:
             max_detections: 100
             threshold: 0.5
 
-  - name: yolo_v3_tiny
+  - name: yolo-v3-tiny-tf
 
     launchers:
       - framework: dlsdk

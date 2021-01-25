@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@ import re
 from pathlib import Path
 import numpy as np
 
-from .launcher import Launcher, LauncherConfigValidator
+from .launcher import Launcher
 from ..config import BaseField, ListField, PathField, StringField, ConfigError
 from ..utils import contains_any, contains_all
+
 
 class TFLauncher(Launcher):
     __provider__ = 'tf'
@@ -60,12 +61,7 @@ class TFLauncher(Launcher):
             )
         self.default_layout = 'NHWC'
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
-
-        tf_launcher_config = LauncherConfigValidator(
-            'TF_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
-        )
-        tf_launcher_config.validate(self.config)
-
+        self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
         if not self._delayed_model_loading:
             if not contains_any(self.config, ['model', 'saved_model_dir']):
                 raise ConfigError('model or saved model directory should be provided')

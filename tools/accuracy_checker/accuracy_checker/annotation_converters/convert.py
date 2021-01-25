@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -264,8 +264,8 @@ def get_conversion_attributes(config, dataset_size):
     dataset_name = config.get('name', '')
     conversion_parameters = copy.deepcopy(config.get('annotation_conversion', {}))
     for key, value in config.get('annotation_conversion', {}).items():
-        if isinstance(value, Path):
-            conversion_parameters[key] = str(value)
+        if key in config.get('_command_line_mapping', {}):
+            conversion_parameters[key] = str(value.relative_to(config['_command_line_mapping'][key]))
     subset_size = config.get('subsample_size')
     subset_parameters = {}
     if subset_size is not None:

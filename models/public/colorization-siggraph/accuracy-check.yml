@@ -8,9 +8,13 @@ models:
           cast_to_uint8: false
         inputs:
           - name: "user_map"
-            type: IGNORE_INPUT
+            type: CONST_INPUT
+            value: 0
+            shape: [1, 2, 256, 256]
           - name: "user_ab"
-            type: IGNORE_INPUT
+            type: CONST_INPUT
+            value: 0
+            shape: [1, 1, 256, 256]
     datasets:
       - name: imagenet_colorization
         subsample_size: 2000

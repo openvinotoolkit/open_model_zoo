@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -67,3 +67,16 @@ class ArgMaxClassificationPrediction(ClassificationPrediction):
 
     def top_k(self, k):
         return np.full(k, self._label)
+
+
+class SequenceClassificationAnnotation(ClassificationAnnotation):
+    pass
+
+
+class SequenceClassificationPrediction(ClassificationPrediction):
+    @property
+    def label(self):
+        return np.argmax(self.scores, axis=1)
+
+    def top_k(self, k):
+        return np.argpartition(self.scores, -k, axis=1)[:, -k:]

@@ -9,3 +9,4 @@ scipy           # via torchvision
 # For now, just cap the PyTorch version at 1.6.x.
 torch>=1.5,<1.7
 torchvision<0.8
+yacs
