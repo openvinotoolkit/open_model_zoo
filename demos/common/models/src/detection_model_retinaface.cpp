@@ -19,7 +19,7 @@
 #include <samples/slog.hpp>
 #include "models/detection_model_retinaface.h"
 
-using namespace InferenceEngine;
+//using namespace InferenceEngine;
 
 ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),  // Default label is "Face"
@@ -34,25 +34,25 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
     }
-    InputInfo::Ptr& input = inputInfo.begin()->second;
+    InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
     std::string imageInputName = inputInfo.begin()->first;
     inputsNames.push_back(imageInputName);
-    input->setPrecision(Precision::U8);
+    input->setPrecision(InferenceEngine::Precision::U8);
     if (useAutoResize) {
-        input->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-        input->getInputData()->setLayout(Layout::NHWC);
+        input->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+        input->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
     }
     else {
-        input->getInputData()->setLayout(Layout::NCHW);
+        input->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
     }
 
     //--- Reading image input parameters
     imageInputName = inputInfo.begin()->first;
-    const TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
+    const InferenceEngine::TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
 
@@ -74,10 +74,10 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
         else if (output.first.find("cls") != -1) {
             type = OT_SCORES;
         }
-        else if(output.first.find("landmark") != -1) {
+        else if (output.first.find("landmark") != -1) {
             type = OT_LANDMARK;
         }
-        else if(output.first.find("type") != -1) {
+        else if (output.first.find("type") != -1) {
             type = OT_MASKSCORES;
             labels.clear();
             labels.push_back("No Mask");
@@ -102,6 +102,29 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
 
     if (outputsNames.size() != 9 && outputsNames.size() != 12) {
         throw std::logic_error("Expected 12 or 9 output blobs");
+    }
+
+    for (int idx = 0; idx < outputsSizes[OT_BBOX].size(); ++idx) {
+        int width = outputsSizes[OT_BBOX][idx];
+        int height = outputsSizes[OT_BBOX][idx];
+        auto s = anchorCfg[idx].stride;
+        auto anchorNum = anchorsFpn[s].size();
+  
+        anchors.push_back(std::vector<ModelRetinaFace::Anchor>(height * width * anchorNum));
+        for (int iw = 0; iw < width; ++iw) {
+            auto sw = iw * s;
+            for (int ih = 0; ih < height; ++ih) {
+                auto sh = ih * s;
+                for (int k = 0; k < anchorNum; ++k) {
+                    Anchor& anc = anchors[idx][(ih * width + iw) * anchorNum + k];
+                    anc.left = anchorsFpn[s][k].left + sw;
+                    anc.top = anchorsFpn[s][k].top + sh;
+                    anc.right = anchorsFpn[s][k].right + sw;
+                    anc.bottom = anchorsFpn[s][k].bottom + sh;
+                }
+            }
+        }
+
     }
 }
 
@@ -161,13 +184,13 @@ void ModelRetinaFace::generateAnchorsFpn() {
 }
 
 
-std::vector<size_t> thresholding(InferenceEngine::MemoryBlob::Ptr rawData, const int anchorNum, const float confidenceThreshold) {
+std::vector<size_t> thresholding(const InferenceEngine::MemoryBlob::Ptr& rawData, const int anchorNum, const float confidenceThreshold) {
     std::vector<size_t> indices;
     indices.reserve(ModelRetinaFace::INIT_VECTOR_SIZE);
     auto desc = rawData->getTensorDesc();
     auto sz = desc.getDims();
     size_t restAnchors = sz[1] - anchorNum;
-    LockedMemory<const void> outputMapped = rawData->rmap();
+    InferenceEngine::LockedMemory<const void> outputMapped = rawData->rmap();
     const float *memPtr = outputMapped.as<float*>();
 
     for (size_t x = anchorNum; x < sz[1]; ++x) {
@@ -185,8 +208,8 @@ std::vector<size_t> thresholding(InferenceEngine::MemoryBlob::Ptr rawData, const
     return indices;
 }
 
-void filterScores(std::vector<float>* scores, const std::vector<size_t>& indices, InferenceEngine::MemoryBlob::Ptr rawData, const int anchorNum) {
-    LockedMemory<const void> outputMapped = rawData->rmap();
+void filterScores(std::vector<float>& scores, const std::vector<size_t>& indices, const InferenceEngine::MemoryBlob::Ptr& rawData, const int anchorNum) {
+    InferenceEngine::LockedMemory<const void> outputMapped = rawData->rmap();
     const float *memPtr = outputMapped.as<float*>();
     auto desc = rawData->getTensorDesc();
     auto sz = desc.getDims();
@@ -194,17 +217,17 @@ void filterScores(std::vector<float>* scores, const std::vector<size_t>& indices
 
     for (auto i : indices) {
         auto offset = (i % anchorNum) * sz[2] * sz[3] + i / anchorNum;;
-        scores->push_back(memPtr[start + offset]);
+        scores.push_back(memPtr[start + offset]);
     }
 }
 
-void filterBBoxes(std::vector<ModelRetinaFace::Anchor>* bboxes, const std::vector<size_t>& indices, InferenceEngine::MemoryBlob::Ptr rawData,
+void filterBBoxes(std::vector<ModelRetinaFace::Anchor>& bboxes, const std::vector<size_t>& indices, const InferenceEngine::MemoryBlob::Ptr& rawData,
     int anchorNum, const std::vector<ModelRetinaFace::Anchor>& anchors) {
     auto desc = rawData->getTensorDesc();
     auto sz = desc.getDims();
     auto bboxPredLen = sz[1] / anchorNum;
     auto blockWidth = sz[2] * sz[3];
-    LockedMemory<const void> outputMapped = rawData->rmap();
+    InferenceEngine::LockedMemory<const void> outputMapped = rawData->rmap();
     const float *memPtr = outputMapped.as<float*>();
 
     for (auto i : indices) {
@@ -220,19 +243,19 @@ void filterBBoxes(std::vector<ModelRetinaFace::Anchor>* bboxes, const std::vecto
         auto predW = exp(dw) * anchors[i].getWidth();
         auto predH = exp(dh) * anchors[i].getHeight();
 
-        bboxes->push_back({ static_cast<float>(predCtrX - 0.5f * (predW - 1.0f)), static_cast<float>(predCtrY - 0.5f * (predH - 1.0f)),
+        bboxes.push_back({ static_cast<float>(predCtrX - 0.5f * (predW - 1.0f)), static_cast<float>(predCtrY - 0.5f * (predH - 1.0f)),
            static_cast<float>(predCtrX + 0.5f * (predW - 1.0f)), static_cast<float>(predCtrY + 0.5f * (predH - 1.0f)) });
     }
 }
 
 
-void filterLandmarks(std::vector<cv::Point2f>* landmarks, const std::vector<size_t>& indices, InferenceEngine::MemoryBlob::Ptr rawData,
+void filterLandmarks(std::vector<cv::Point2f>& landmarks, const std::vector<size_t>& indices, const InferenceEngine::MemoryBlob::Ptr& rawData,
         int anchorNum, const std::vector<ModelRetinaFace::Anchor>& anchors, const float landmarkStd) {
     auto desc = rawData->getTensorDesc();
     auto sz = desc.getDims();
     auto landmarkPredLen = sz[1] / anchorNum;
     auto blockWidth = sz[2] * sz[3];
-    LockedMemory<const void> outputMapped = rawData->rmap();
+    InferenceEngine::LockedMemory<const void> outputMapped = rawData->rmap();
     const float *memPtr = outputMapped.as<float*>();
 
     for (auto i : indices) {
@@ -242,17 +265,17 @@ void filterLandmarks(std::vector<cv::Point2f>* landmarks, const std::vector<size
             auto offset = (i % anchorNum) * landmarkPredLen * sz[2] * sz[3] + i / anchorNum;
             auto deltaX = memPtr[offset + j * 2 * blockWidth] * landmarkStd;
             auto deltaY = memPtr[offset + (j * 2 + 1) * blockWidth] * landmarkStd;
-            landmarks->push_back({deltaX * anchors[i].getWidth() + anchors[i].getXCenter(),
+            landmarks.push_back({deltaX * anchors[i].getWidth() + anchors[i].getXCenter(),
                deltaY * anchors[i].getHeight() + anchors[i].getYCenter() });
         }
     }
 }
 
-void filterMasksScores(std::vector<float>* masks, const std::vector<size_t>& indices, InferenceEngine::MemoryBlob::Ptr rawData, const int anchorNum) {
+void filterMasksScores(std::vector<float>* masks, const std::vector<size_t>& indices, const InferenceEngine::MemoryBlob::Ptr& rawData, const int anchorNum) {
     auto desc = rawData->getTensorDesc();
     auto sz = desc.getDims();
     auto start = sz[2] * sz[3] * anchorNum * 2;
-    LockedMemory<const void> outputMapped = rawData->rmap();
+    InferenceEngine::LockedMemory<const void> outputMapped = rawData->rmap();
     const float *memPtr = outputMapped.as<float*>();
 
     for (auto i : indices) {
@@ -312,46 +335,25 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         masks.reserve(INIT_VECTOR_SIZE);
     }
 
-// --------------------------- Gather & Filter output from all levels ----------------------------------------------------------
+    // --------------------------- Gather & Filter output from all levels ----------------------------------------------------------
     for (int idx = 0; idx < anchorCfg.size(); ++idx) {
         const auto bboxRaw = infResult.outputsData[separateOutputsNames[OT_BBOX][idx]];
         const auto scoresRaw = infResult.outputsData[separateOutputsNames[OT_SCORES][idx]];
         const auto landmarksRaw = infResult.outputsData[separateOutputsNames[OT_LANDMARK][idx]];
-        auto sz = bboxRaw->getTensorDesc().getDims();
-        auto height = sz[2];
-        auto width = sz[3];
         auto s = anchorCfg[idx].stride;
         auto anchorNum = anchorsFpn[s].size();
 
-        //--- Creating strided anchors plane at first start
-        if (anchors.size() < anchorCfg.size()) {
-            anchors.push_back(std::vector<ModelRetinaFace::Anchor>(height * width * anchorNum));
-            for (int iw = 0; iw < width; ++iw) {
-                auto sw = iw * s;
-                for (int ih = 0; ih < height; ++ih) {
-                    auto sh = ih * s;
-                    for (int k = 0; k < anchorNum; ++k) {
-                        Anchor& anc = anchors[idx][(ih * width + iw) * anchorNum + k];
-                        anc.left = anchorsFpn[s][k].left + sw;
-                        anc.top = anchorsFpn[s][k].top + sh;
-                        anc.right = anchorsFpn[s][k].right + sw;
-                        anc.bottom = anchorsFpn[s][k].bottom + sh;
-                    }
-                }
-            }
-        }
-
         auto validIndices = thresholding(scoresRaw, anchorNum, confidenceThreshold);
-        filterScores(&scores, validIndices, scoresRaw, anchorNum);
-        filterBBoxes(&bboxes, validIndices, bboxRaw, anchorNum, anchors[idx]);
-        filterLandmarks(&landmarks, validIndices, landmarksRaw, anchorNum, anchors[idx], landmarkStd);
+        filterScores(scores, validIndices, scoresRaw, anchorNum);
+        filterBBoxes(bboxes, validIndices, bboxRaw, anchorNum, anchors[idx]);
+        filterLandmarks(landmarks, validIndices, landmarksRaw, anchorNum, anchors[idx], landmarkStd);
 
         if (shouldDetectMasks) {
             const auto masksRaw = infResult.outputsData[separateOutputsNames[OT_MASKSCORES][idx]];
             filterMasksScores(&masks, validIndices, masksRaw, anchorNum);
         }
     }
-// --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
+    // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
     auto keep = nms(bboxes, scores, boxIOUThreshold);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
