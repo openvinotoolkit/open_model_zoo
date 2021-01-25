@@ -52,6 +52,7 @@ from .regression import (
     MeanSquaredError,
     Log10Error,
     MeanAbsolutePercentageError,
+    RelativeL2Error,
 
     RootMeanSquaredErrorOnInterval,
     RootMeanSquaredError,
@@ -153,6 +154,7 @@ __all__ = [
     'AngleError',
     'MeanAbsolutePercentageError',
     'Log10Error',
+    'RelativeL2Error',
 
     'MultiLabelAccuracy',
     'MultiLabelRecall',

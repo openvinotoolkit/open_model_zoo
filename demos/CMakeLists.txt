@@ -7,6 +7,8 @@ cmake_minimum_required (VERSION 3.10)
 project(Demos)
 
 option(ENABLE_PYTHON "Whether to build extension modules for Python demos" OFF)
+option(MULTICHANNEL_DEMO_USE_TBB "Use TBB-based threading in multichannel demos" OFF)
+option(MULTICHANNEL_DEMO_USE_NATIVE_CAM "Use native camera api in multichannel demos" OFF)
 
 if (CMAKE_BUILD_TYPE STREQUAL "")
     message(STATUS "CMAKE_BUILD_TYPE not defined, 'Release' will be used")
@@ -72,26 +74,29 @@ else()
     set(COMPILER_IS_GCC_LIKE FALSE)
 endif()
 
-add_subdirectory(common)
+add_subdirectory(common/cpp)
+add_subdirectory(multi_channel_common/cpp)
 
 function(add_samples_to_build)
     # check each passed sample subdirectory
     foreach (dir ${ARGN})
         if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${dir})
             # check if a subdirectory contains CMakeLists.txt. In this case we can build it.
-            file(GLOB is_sample_dir "${CMAKE_CURRENT_SOURCE_DIR}/${dir}/CMakeLists.txt")
-            if(is_sample_dir)
-                # check if specified sample/demo is found.
-                if (BUILD_SAMPLE_NAME)
-                    list(FIND BUILD_SAMPLE_NAME ${dir} index)
+            file(GLOB sub_dirs ${CMAKE_CURRENT_SOURCE_DIR}/${dir}/*)
+            foreach(sub_dir ${sub_dirs})
+                if(EXISTS "${sub_dir}/CMakeLists.txt")
+                    # check if specified sample/demo is found.
+                    if (BUILD_SAMPLE_NAME)
+                        list(FIND BUILD_SAMPLE_NAME ${dir} index)
+                    endif()
+                    if (index EQUAL -1)
+                        message(STATUS "${dir} SKIPPED")
+                    else()
+                        # Include subdirectory to the project.
+                        add_subdirectory(${sub_dir})
+                    endif()
                 endif()
-                if (index EQUAL -1)
-                    message(STATUS "${dir} SKIPPED")
-                else()
-                    # Include subdirectory to the project.
-                    add_subdirectory(${dir})
-                endif()
-            endif()
+            endforeach()
         endif()
     endforeach()
 endfunction(add_samples_to_build)
@@ -144,7 +149,7 @@ macro(ie_add_sample)
     endif()
 
     target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
-                                                    ${IE_SAMPLE_DEPENDENCIES} common gflags)
+                                                    ${IE_SAMPLE_DEPENDENCIES} utils gflags)
 
     if(UNIX)
         target_link_libraries(${IE_SAMPLE_NAME} PRIVATE pthread)
@@ -177,7 +182,7 @@ find_package(ngraph REQUIRED)
 # collect all samples subdirectories
 file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
 # skip building of unnecessary subdirectories
-list(REMOVE_ITEM samples_dirs common thirdparty)
+list(REMOVE_ITEM samples_dirs common thirdparty multi_channel_common)
 add_samples_to_build(${samples_dirs})
 
 if(ENABLE_PYTHON)
@@ -193,7 +198,7 @@ if(ENABLE_PYTHON)
         message(FATAL_ERROR "NumPy headers not found")
     endif()
 
-    add_subdirectory(python_demos/human_pose_estimation_3d_demo/pose_extractor)
-    add_subdirectory(python_demos/common/monitors_extension)
-    add_subdirectory(python_demos/speech_recognition_demo/ctcdecode-numpy)
+    add_subdirectory(human_pose_estimation_3d_demo/python/pose_extractor)
+    add_subdirectory(common/python/monitors_extension)
+    add_subdirectory(speech_recognition_demo/python/ctcdecode-numpy)
 endif()

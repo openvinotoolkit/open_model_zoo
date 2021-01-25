@@ -426,6 +426,7 @@ describing a single model. Each such object has the following keys:
 
   * `action_recognition`
   * `classification`
+  * `colorization`
   * `detection`
   * `face_recognition`
   * `feature_extraction`

@@ -525,6 +525,14 @@ def softmax(x):
     return np.exp(x) / sum(np.exp(x))
 
 
+def is_iterable(maybe_iterable):
+    try:
+        iter(maybe_iterable)
+        return True
+    except TypeError:
+        return False
+
+
 class ParseError(Exception):
     pass
 

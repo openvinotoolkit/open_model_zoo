@@ -146,4 +146,5 @@ class ONNXLauncher(Launcher):
         raise ValueError('ONNX Runtime Launcher does not support async mode yet')
 
     def release(self):
-        del self._inference_session
+        if hasattr(self, '_inference_session'):
+            del self._inference_session
