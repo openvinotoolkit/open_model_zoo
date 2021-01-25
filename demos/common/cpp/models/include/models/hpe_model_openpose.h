@@ -34,14 +34,14 @@ public:
 protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
 
-    const int minJointsNumber = 3;
-    const int stride = 8;
+    static const int minJointsNumber = 3;
+    static const int stride = 8;
+    static const int upsampleRatio = 4;
     const cv::Vec3f meanPixel = cv::Vec3f::all(128);
     const float minPeaksDistance = 3.0f;
     const float midPointsScoreThreshold = 0.05f;
     const float foundMidPointsRatioThreshold = 0.8f;
     const float minSubsetScore = 0.2f;
-    const int upsampleRatio = 4;
     cv::Size inputLayerSize;
     double aspectRatio;
     float confidenceThreshold;
