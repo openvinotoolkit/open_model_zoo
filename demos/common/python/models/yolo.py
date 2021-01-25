@@ -266,7 +266,6 @@ class YoloV4(YOLO):
                 height = np.exp(height)
             except OverflowError:
                 continue
-            # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
             width = width * params.anchors[2 * n] / input_size[0]
             height = height * params.anchors[2 * n + 1] / input_size[1]
 
