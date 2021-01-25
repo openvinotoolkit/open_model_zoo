@@ -109,7 +109,7 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
         int height = outputsSizes[OT_BBOX][idx];
         auto s = anchorCfg[idx].stride;
         auto anchorNum = anchorsFpn[s].size();
-  
+
         anchors.push_back(std::vector<ModelRetinaFace::Anchor>(height * width * anchorNum));
         for (int iw = 0; iw < width; ++iw) {
             auto sw = iw * s;
