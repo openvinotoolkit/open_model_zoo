@@ -187,7 +187,7 @@ cv::Mat renderDetectionData(const DetectionResult& result) {
             cv::circle(outputImg, lmark, 2, cv::Scalar(0, 255, 255), -1);
         }
     }
-    catch (...) {}
+    catch (const std::bad_cast&) {}
 
     return outputImg;
 }

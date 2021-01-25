@@ -269,7 +269,7 @@ void filterLandmarks(std::vector<cv::Point2f>& landmarks, const std::vector<size
     }
 }
 
-void filterMasksScores(std::vector<float>* masks, const std::vector<size_t>& indices, const InferenceEngine::MemoryBlob::Ptr& rawData, const int anchorNum) {
+void filterMasksScores(std::vector<float>& masks, const std::vector<size_t>& indices, const InferenceEngine::MemoryBlob::Ptr& rawData, const int anchorNum) {
     auto desc = rawData->getTensorDesc();
     auto sz = desc.getDims();
     auto start = sz[2] * sz[3] * anchorNum * 2;
@@ -278,7 +278,7 @@ void filterMasksScores(std::vector<float>* masks, const std::vector<size_t>& ind
 
     for (auto i : indices) {
         auto offset = (i % anchorNum) * sz[2] * sz[3] + i / anchorNum;
-        masks->push_back(memPtr[start + offset]);
+        masks.push_back(memPtr[start + offset]);
     }
 }
 
@@ -348,7 +348,7 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
 
         if (shouldDetectMasks) {
             const auto masksRaw = infResult.outputsData[separateOutputsNames[OT_MASKSCORES][idx]];
-            filterMasksScores(&masks, validIndices, masksRaw, anchorNum);
+            filterMasksScores(masks, validIndices, masksRaw, anchorNum);
         }
     }
     // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
@@ -368,10 +368,16 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
     for (auto i : keep) {
         DetectedObject desc;
         desc.confidence = scores[i];
-        desc.x = bboxes[i].left / scaleX;
-        desc.y = bboxes[i].top / scaleY;
-        desc.width = bboxes[i].getWidth() / scaleX;
-        desc.height = bboxes[i].getHeight() / scaleY;
+        //--- Scaling coordinates
+        bboxes[i].left /=  scaleX;
+        bboxes[i].top /= scaleY;
+        bboxes[i].right /= scaleX;
+        bboxes[i].bottom /= scaleY;
+
+        desc.x = bboxes[i].left;
+        desc.y = bboxes[i].top;
+        desc.width = bboxes[i].getWidth();
+        desc.height = bboxes[i].getHeight();
         //--- Default label 0 - Face. If detecting masks then labels would be 0 - No Mask, 1 - Mask
         desc.labelID = shouldDetectMasks ? (masks[i] > maskThreshold) : 0;
         desc.label = labels[desc.labelID];
