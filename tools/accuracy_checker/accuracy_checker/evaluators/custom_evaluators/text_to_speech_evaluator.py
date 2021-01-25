@@ -249,7 +249,7 @@ class TextToSpeechEvaluator(BaseEvaluator):
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
 
 
-def create_network(model_config, launcher, delayed_model_loading=False):
+def create_network(model_config, launcher, suffix, delayed_model_loading=False):
     launcher_model_mapping = {
         'dlsdk': TTSDLSDKModel
     }
@@ -257,7 +257,7 @@ def create_network(model_config, launcher, delayed_model_loading=False):
     model_class = launcher_model_mapping.get(framework)
     if not model_class:
         raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(model_config, launcher, delayed_model_loading)
+    return model_class(model_config, launcher, suffix, delayed_model_loading)
 
 
 class SequentialModel:
@@ -286,13 +286,15 @@ class SequentialModel:
                     'network_info should contains: {} fields'.format(' ,'.join(required_fields))
                 )
         self.forward_tacotron_duration = create_network(
-            network_info.get('forward_tacotron_duration', {}), launcher, delayed_model_loading
+            network_info.get('forward_tacotron_duration', {}), launcher,
+            'forward_tacotron_duratio', delayed_model_loading
         )
         self.forward_tacotron_regression = create_network(
-            network_info.get('forward_tacotron_regression', {}), launcher, delayed_model_loading
+            network_info.get('forward_tacotron_regression', {}), launcher,
+            'forward_tacotron_regression', delayed_model_loading
         )
         self.melgan = create_network(
-            network_info.get('melgan', {}), launcher, delayed_model_loading
+            network_info.get('melgan', {}), launcher, "melgan", delayed_model_loading
         )
         self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
         self.forward_tacotron_regression_input = next(iter(self.forward_tacotron_regression.inputs))
