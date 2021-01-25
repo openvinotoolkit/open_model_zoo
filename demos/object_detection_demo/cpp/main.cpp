@@ -138,27 +138,19 @@ private:
     }
 
     static cv::Scalar maxMinDistance(const std::vector<cv::Scalar>& colorSet, const std::vector<cv::Scalar>& colorCandidates) {
-        std::pair<size_t, double> maxDist{ 0, 0 };
-        size_t i = 0;
+        std::vector<float> distances;
+        distances.reserve(colorCandidates.size());
         for (auto& c1 : colorCandidates) {
-            double minDist = std::numeric_limits<double>::max();
-            for (auto& c2 : colorSet) {
-                auto dist = distance(c1, c2);
-                minDist = dist < minDist ? dist : minDist;
-            }
-            maxDist = minDist > maxDist.second ? std::pair<size_t, double>{i, minDist} : maxDist;
-            ++i;
-        }
 
-        return colorCandidates[maxDist.first];
+            auto min = *std::min_element(colorSet.begin(), colorSet.end(),
+                [&c1](const cv::Scalar& a, const cv::Scalar& b) { return distance(c1, a) < distance(c1, b); });
+            distances.push_back(distance(c1, min));
+        }
+        auto max = std::max_element(distances.begin(), distances.end());
+        return colorCandidates[std::distance(distances.begin(), max)];
     }
 
-    cv::Scalar hsv2rgb(cv::Scalar& hsvColor) {
-        // Convert to OpenCV HSV format
-        hsvColor[0] *= 179;
-        hsvColor[1] *= 255;
-        hsvColor[2] *= 255;
-
+    static cv::Scalar hsv2rgb(const cv::Scalar& hsvColor) {
         cv::Mat rgb;
         cv::Mat hsv(1, 1, CV_8UC3, hsvColor);
         cv::cvtColor(hsv, rgb, cv::COLOR_HSV2RGB);
@@ -173,16 +165,18 @@ public:
         size_t numCandidates = 100;
 
         hsvColors.reserve(n);
-        colorCandidates.reserve(numCandidates);
+        colorCandidates.resize(numCandidates);
         for (size_t i = 1; i < n; ++i) {
-            colorCandidates.clear();
-            for (size_t j = 1; j < numCandidates; ++j) {
-                colorCandidates.push_back({ getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) });
-            }
+            std::generate(colorCandidates.begin(), colorCandidates.end(), [] () { return cv::Scalar{ getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) }; });
             hsvColors.push_back(maxMinDistance(hsvColors, colorCandidates));
         }
 
         for (auto& hsv : hsvColors) {
+            // Convert to OpenCV HSV format
+            hsv[0] *= 179;
+            hsv[1] *= 255;
+            hsv[2] *= 255;
+
             palette.push_back(hsv2rgb(hsv));
         }
     }
