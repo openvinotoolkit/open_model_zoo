@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,13 @@ public:
     const std::vector<std::string>& getInputsNames() const { return inputsNames; }
 
     std::string getModelFileName() { return modelFileName; }
+
+    virtual void reshape(InferenceEngine::CNNNetwork & cnnNetwork) {
+        auto shapes = cnnNetwork.getInputShapes();
+        for (auto& shape : shapes)
+            shape.second[0] = 1;
+        cnnNetwork.reshape(shapes);
+    }
 
 protected:
     std::vector<std::string> inputsNames;

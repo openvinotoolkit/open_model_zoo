@@ -31,16 +31,24 @@ InferenceEngine:
 human_pose_estimation_demo [OPTION]
 Options:
 
-    -h                         Print a usage message.
-    -i                         Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
-    -loop                      Optional. Enable reading the input in a loop.
-    -m "<path>"                Required. Path to the Human Pose Estimation model (.xml) file.
-    -d "<device>"              Optional. Specify the target device for Human Pose Estimation (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -pc                        Optional. Enable per-layer performance report.
-    -no_show                   Optional. Do not show processed video.
-    -black                     Optional. Show black background.
-    -r                         Optional. Output inference results as raw values.
-    -u                         Optional. List of monitors to show initially.
+    -h                        Print a usage message.
+    -at "<type>"              Required. Type of the network, either "ae" for
+                              Associative Embedding or "openpose" for OpenPose.
+    -i "<path>"               Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -m "<path>"               Required. Path to an .xml file with a trained model.
+    -tsize                    Optional. Target input size.
+    -t                        Optional. Probability threshold for poses filtering.
+      -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
+          Or
+      -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
+    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
+    -pc                       Optional. Enables per-layer performance report.
+    -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
+    -nthreads "<integer>"     Optional. Number of threads.
+    -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
+    -loop                     Optional. Enable reading the input in a loop.
+    -no_show                  Optional. Do not show processed video.
+    -u                        Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields an error message.
@@ -52,7 +60,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 For example, to do inference on a CPU, run the following command:
 
 ```sh
-./human_pose_estimation_demo -i <path_to_video>/input_video.mp4 -m <path_to_model>/human-pose-estimation-0001.xml -d CPU
+./human_pose_estimation_demo -i <path_to_video>/input_video.mp4 -m <path_to_model>/human-pose-estimation-0001.xml -d CPU -at openpose
 ```
 
 ## Demo Output
