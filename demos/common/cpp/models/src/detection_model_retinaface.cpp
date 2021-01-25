@@ -122,7 +122,6 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
                 }
             }
         }
-
     }
 }
 
