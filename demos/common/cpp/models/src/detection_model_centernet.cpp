@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2020-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +14,13 @@
 // limitations under the License.
 */
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include <ngraph/ngraph.hpp>
 #include <opencv2/imgproc.hpp>
-#include <samples/slog.hpp>
-#include <samples/common.hpp>
-#include <samples/ocv_common.hpp>
+#include <utils/common.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 #include "models/detection_model_centernet.h"
 
-using namespace InferenceEngine;
 
 ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels)
@@ -35,25 +31,25 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
     }
 
-    InputInfo::Ptr& input = inputInfo.begin()->second;
-    const TensorDesc& inputDesc = input->getTensorDesc();
-    input->setPrecision(Precision::U8);
+    InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
+    const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
+    input->setPrecision(InferenceEngine::Precision::U8);
 
     if (inputDesc.getDims()[1] != 3) {
         throw std::logic_error("Expected 3-channel input");
     }
 
     if (useAutoResize) {
-        input->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-        input->getInputData()->setLayout(Layout::NHWC);
+        input->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+        input->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
     }
     else {
-        input->getInputData()->setLayout(Layout::NCHW);
+        input->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
     }
 
     // --------------------------- Reading image input parameters -------------------------------------------
@@ -66,13 +62,11 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
 
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
-
     if (outputInfo.size() != 3) {
         throw std::logic_error("This demo expect networks that have 3 outputs blobs");
     }
 
-    const TensorDesc& outputDesc = outputInfo.begin()->second->getTensorDesc();
-
+    const InferenceEngine::TensorDesc& outputDesc = outputInfo.begin()->second->getTensorDesc();
     for (auto& output : outputInfo) {
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(InferenceEngine::Layout::NCHW);
@@ -99,7 +93,7 @@ cv::Point2f get3rdPoint(const cv::Point2f& a, const cv::Point2f& b) {
 
 cv::Mat getAffineTransform(float centerX, float centerY, int scale, float rot, size_t outputWidth, size_t outputHeight, bool inv = false) {
     int srcW = scale;
-    float rotRad =  static_cast<float>(M_PI) * rot / 180.0f;
+    float rotRad =  static_cast<float>(CV_PI) * rot / 180.0f;
     auto srcDir = getDir({ 0.0f, -0.5f * srcW }, rotRad);
     cv::Point2f dstDir(0.0f,  -0.5f * outputWidth);
     std::vector<cv::Point2f> src(3, { 0.0f, 0.0f });
@@ -139,19 +133,19 @@ std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& i
     cv::Mat chwImg;
 
     if (useAutoResize) {
-        /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
+        // --- Just set input blob containing read image. Resize and layout conversionx will be done automatically ----
         request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg));
     }
     else {
-        /* Resize and copy data from the image to the input blob */
-        Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
+        // --- Resize and copy data from the image to the input blob --------------------------------------------------
+        InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
         matU8ToBlob<uint8_t>(resizedImg, frameBlob);
     }
 
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
 }
 
-std::vector<std::pair<size_t, float>> nms(float* scoresPtr, SizeVector sz, float threshold, int kernel = 3) {
+std::vector<std::pair<size_t, float>> nms(float* scoresPtr, InferenceEngine::SizeVector sz, float threshold, int kernel = 3) {
     std::vector<std::pair<size_t, float>> scores;
     scores.reserve(ModelCenterNet::INIT_VECTOR_SIZE);
     auto chSize = sz[2] * sz[3];
@@ -165,16 +159,16 @@ std::vector<std::pair<size_t, float>> nms(float* scoresPtr, SizeVector sz, float
             for (int h = 0; h < sz[3]; ++h) {
                 float max = scoresPtr[chSize * ch + sz[2] * w + h];
 
-                /*filter on threshold*/
+                // ---------------------  filter on threshold--------------------------------------
                 if (max < threshold) {
                     continue;
                 }
 
-                /*store index and score*/
+                // ---------------------  store index and score------------------------------------
                 scores.push_back({ chSize * ch + sz[2] * w + h, max });
 
                 bool next = true;
-                /*maxpool2d*/
+                // ---------------------- maxpool2d -----------------------------------------------
                 for (int i = -kernel / 2; i < kernel / 2 + 1 && next; ++i) {
                     for (int j = -kernel / 2; j < kernel / 2 + 1; ++j) {
                         if (w + i >= 0 && w + i < sz[2] && h + j >= 0 && h + j < sz[3]) {
@@ -201,8 +195,8 @@ std::vector<std::pair<size_t, float>> nms(float* scoresPtr, SizeVector sz, float
 }
 
 
-static std::vector<std::pair<size_t, float>> filterScores(InferenceEngine::MemoryBlob::Ptr scoresInfRes, float threshold) {
-    LockedMemory<const void> scoresOutputMapped = scoresInfRes->rmap();
+static std::vector<std::pair<size_t, float>> filterScores(const InferenceEngine::MemoryBlob::Ptr& scoresInfRes, float threshold) {
+    InferenceEngine::LockedMemory<const void> scoresOutputMapped = scoresInfRes->rmap();
     auto desc = scoresInfRes->getTensorDesc();
     auto sz = desc.getDims();
     float *scoresPtr = scoresOutputMapped.as<float*>();
@@ -210,8 +204,8 @@ static std::vector<std::pair<size_t, float>> filterScores(InferenceEngine::Memor
     return nms(scoresPtr, sz, threshold);
 }
 
-std::vector<std::pair<float, float>> filterReg(InferenceEngine::MemoryBlob::Ptr regInfRes, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
-    LockedMemory<const void> bboxesOutputMapped = regInfRes->rmap();
+std::vector<std::pair<float, float>> filterReg(const InferenceEngine::MemoryBlob::Ptr& regInfRes, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
+    InferenceEngine::LockedMemory<const void> bboxesOutputMapped = regInfRes->rmap();
     const float *regPtr = bboxesOutputMapped.as<float*>();
     std::vector<std::pair<float, float>> reg;
 
@@ -222,8 +216,8 @@ std::vector<std::pair<float, float>> filterReg(InferenceEngine::MemoryBlob::Ptr 
     return reg;
 }
 
-std::vector<std::pair<float, float>> filterWH(InferenceEngine::MemoryBlob::Ptr whInfRes, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
-    LockedMemory<const void> bboxesOutputMapped = whInfRes->rmap();
+std::vector<std::pair<float, float>> filterWH(const InferenceEngine::MemoryBlob::Ptr& whInfRes, const std::vector<std::pair<size_t, float>>& scores, size_t chSize) {
+    InferenceEngine::LockedMemory<const void> bboxesOutputMapped = whInfRes->rmap();
     const float *whPtr = bboxesOutputMapped.as<float*>();
     std::vector<std::pair<float, float>> wh;
 
@@ -235,7 +229,7 @@ std::vector<std::pair<float, float>> filterWH(InferenceEngine::MemoryBlob::Ptr w
 }
 
 std::vector<ModelCenterNet::BBox> calcBBoxes(const std::vector<std::pair<size_t, float>>& scores, const std::vector<std::pair<float, float>>& reg,
-    const std::vector<std::pair<float, float>>& wh, const SizeVector& sz) {
+    const std::vector<std::pair<float, float>>& wh, const InferenceEngine::SizeVector& sz) {
     std::vector<ModelCenterNet::BBox> bboxes(scores.size());
 
     for (int i = 0; i < bboxes.size(); ++i) {
@@ -252,10 +246,10 @@ std::vector<ModelCenterNet::BBox> calcBBoxes(const std::vector<std::pair<size_t,
     return bboxes;
 }
 
-void transform(std::vector<ModelCenterNet::BBox>* bboxes, const SizeVector& sz, int scale, float centerX, float centerY) {
+void transform(std::vector<ModelCenterNet::BBox>& bboxes, const InferenceEngine::SizeVector& sz, int scale, float centerX, float centerY) {
     cv::Mat1f trans = getAffineTransform(centerX, centerY, scale, 0, sz[2], sz[3], true);
 
-    for (auto& b : *bboxes) {
+    for (auto& b : bboxes) {
         ModelCenterNet::BBox newbb;
 
         newbb.left = trans.at<float>(0, 0) *  b.left + trans.at<float>(0, 1) *  b.top + trans.at<float>(0, 2);
@@ -268,7 +262,7 @@ void transform(std::vector<ModelCenterNet::BBox>* bboxes, const SizeVector& sz, 
 }
 
 std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResult) {
- // --------------------------- Filter data and get valid indices ---------------------------------
+    // --------------------------- Filter data and get valid indices ---------------------------------
     auto heatInfRes = infResult.outputsData[outputsNames[0]];
     auto sz = heatInfRes->getTensorDesc().getDims();;
     auto chSize = sz[2] * sz[3];
@@ -280,7 +274,7 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
     auto whInfRes = infResult.outputsData[outputsNames[2]];
     auto wh = filterWH(whInfRes, scores, chSize);
 
-// --------------------------- Calculate bounding boxes & apply inverse affine transform ----------
+    // --------------------------- Calculate bounding boxes & apply inverse affine transform ----------
     auto bboxes = calcBBoxes(scores, reg, wh, sz);
 
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
@@ -289,9 +283,9 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
     float centerX = imgWidth / 2.0f;
     float centerY = imgHeight / 2.0f;
 
-    transform(&bboxes, sz, scale, centerX, centerY);
+    transform(bboxes, sz, scale, centerX, centerY);
 
-// --------------------------- Create detection result objects ------------------------------------
+    // --------------------------- Create detection result objects ------------------------------------
     DetectionResult* result = new DetectionResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 

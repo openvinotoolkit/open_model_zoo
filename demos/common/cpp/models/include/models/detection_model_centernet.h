@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2020-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ public:
         float right;
         float bottom;
 
-        float getWidth() const { return (right - left) + 1; }
-        float getHeight() const { return (bottom - top) + 1; }
+        float getWidth() const { return (right - left) + 1.0f; }
+        float getHeight() const { return (bottom - top) + 1.0f; }
     };
     static const int INIT_VECTOR_SIZE = 200;
 
@@ -37,5 +37,5 @@ public:
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
 };
