@@ -266,6 +266,10 @@ def get_conversion_attributes(config, dataset_size):
     for key, value in config.get('annotation_conversion', {}).items():
         if key in config.get('_command_line_mapping', {}):
             m_path = config['_command_line_mapping'][key]
+            if not m_path:
+                conversion_parameters[key] = str(value)
+                continue
+
             if isinstance(m_path, list):
                 for m_path in config['_command_line_mapping'][key]:
                     if is_relative_to(value, m_path):

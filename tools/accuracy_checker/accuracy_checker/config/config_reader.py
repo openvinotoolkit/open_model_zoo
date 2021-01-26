@@ -683,10 +683,9 @@ def process_config(
             if annotation_conversion_config:
                 command_line_conversion = (create_command_line_mapping(annotation_conversion_config,
                                                                        'source', ANNOTATION_CONVERSION_PATHS))
-                datasets_config['_command_line_mapping'] = {
-                    key: args[value] if not isinstance(value, list) else [args[v] for v in value]
-                    for key, value in command_line_conversion.items()
-                }
+                datasets_config['_command_line_mapping'] = prepare_commandline_conversion_mapping(
+                    command_line_conversion, args
+                )
                 merge_entry_paths(command_line_conversion, annotation_conversion_config, args)
             if 'preprocessing' in datasets_config:
                 for preprocessor in datasets_config['preprocessing']:
@@ -863,3 +862,19 @@ def _add_subset_specific_arg(dataset_entry, arguments):
 
     if 'subsample_size' in arguments and arguments.subsample_size is not None:
         dataset_entry['subsample_size'] = arguments.subsample_size
+
+
+def prepare_commandline_conversion_mapping(commandline_conversion, args):
+    mapping = {}
+    for key, value in commandline_conversion.items():
+        if not isinstance(value, list):
+            mapping[key] = args.get(value)
+        else:
+            possible_paths = []
+            for v in value:
+                if args.get(v) is None:
+                    continue
+                possible_paths.append(args[v])
+            mapping[key] = possible_paths
+
+    return mapping
