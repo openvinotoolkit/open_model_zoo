@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,12 +39,13 @@
 #include <pipelines/async_pipeline.h>
 #include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
+#include <models/detection_model_centernet.h>
 #include <models/detection_model_faceboxes.h>
-#include <models/detection_model_yolo.h>
 #include <models/detection_model_ssd.h>
+#include <models/detection_model_yolo.h>
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Architecture type: ssd or yolo";
+static const char at_message[] = "Required. Architecture type: centernet, faceboxes, ssd or yolo";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
@@ -277,7 +278,10 @@ int main(int argc, char *argv[]) {
         ColorPalette palette(labels.size() > 0 ? labels.size() : 100);
 
         std::unique_ptr<ModelBase> model;
-        if (FLAGS_at == "faceboxes") {
+        if (FLAGS_at == "centernet") {
+            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels));
+        }
+        else if (FLAGS_at == "faceboxes") {
             model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
         }
         else if (FLAGS_at == "ssd") {
