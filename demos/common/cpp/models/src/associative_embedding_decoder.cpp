@@ -93,8 +93,7 @@ std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
         cv::Mat dissimilarityCopy(numAdded, numGrouped, CV_32F);
         for (int i = 0; i < dissimilarity.rows; i++) {
             for (int j = 0; j < dissimilarity.cols; j++) {
-                float diff = tags[i] - posesTags[j];
-                float diffNormed = static_cast<float>(cv::norm(diff));
+                float diffNormed = static_cast<float>(cv::norm(tags[i] - posesTags[j]));
                 dissimilarityCopy.at<float>(i, j) = diffNormed;
                 if (useDetectionVal) {
                     diffNormed = std::round(diffNormed) * 100 - jointPeaks[i].score;
@@ -158,7 +157,7 @@ void adjustAndRefine(std::vector<Pose>& allPoses,
             // Get position with the closest tag value to the pose tag
             for (int i = 0; i < outputSize.height; i++) {
                 for (int j = 0; j < outputSize.width; j++) {
-                    float diff = static_cast<float>(std::abs(aembds.at<float>(i, j) - poseTag) + 0.5);
+                    float diff = std::abs(aembds.at<float>(i, j) - poseTag) + 0.5f;
                     diff -= heatMap.at<float>(i, j);
                     if (diff < minValue) {
                         minValue = diff;
