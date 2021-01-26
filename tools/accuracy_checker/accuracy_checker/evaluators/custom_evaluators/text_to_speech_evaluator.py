@@ -81,6 +81,7 @@ class TextToSpeechEvaluator(BaseEvaluator):
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             batch_data, batch_meta = extract_image_representations(batch_inputs)
+            input_names = [s.split('.')[-1] for s in batch_inputs[0].identifier]
             temporal_output_callback = None
             if output_callback:
                 temporal_output_callback = partial(output_callback,
@@ -89,7 +90,7 @@ class TextToSpeechEvaluator(BaseEvaluator):
                                                    dataset_indices=batch_input_ids)
 
             batch_raw_prediction, batch_prediction = self.model.predict(
-                batch_identifiers, batch_data, batch_meta, callback=temporal_output_callback
+                batch_identifiers, batch_data, batch_meta, input_names, callback=temporal_output_callback
             )
             batch_annotation, batch_prediction = self.postprocessor.process_batch(batch_annotation, batch_prediction)
             metrics_result = None
@@ -287,17 +288,17 @@ class SequentialModel:
                 )
         self.forward_tacotron_duration = create_network(
             network_info.get('forward_tacotron_duration', {}), launcher,
-            'forward_tacotron_duratio', delayed_model_loading
+            'duration_prediction_att', delayed_model_loading
         )
         self.forward_tacotron_regression = create_network(
             network_info.get('forward_tacotron_regression', {}), launcher,
-            'forward_tacotron_regression', delayed_model_loading
+            'regression_att', delayed_model_loading
         )
         self.melgan = create_network(
-            network_info.get('melgan', {}), launcher, "melgan", delayed_model_loading
+            network_info.get('melgan', {}), launcher, "melganupsample", delayed_model_loading
         )
-        self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
-        self.forward_tacotron_regression_input = next(iter(self.forward_tacotron_regression.inputs))
+        self.forward_tacotron_duration_input = [input_name for input_name in self.forward_tacotron_duration.inputs]
+        self.forward_tacotron_regression_input = [input_name for input_name in self.forward_tacotron_regression.inputs]
         self.melgan_input = next(iter(self.melgan.inputs))
         self.duration_output = 'duration'
         self.embeddings_output = 'embeddings'
@@ -314,10 +315,11 @@ class SequentialModel:
             'melgan': self.melgan
         }
 
-    def predict(self, identifiers, input_data, input_meta, callback=None):
+    def predict(self, identifiers, input_data, input_meta, input_names, callback=None):
         assert len(identifiers) == 1
 
-        duration_output = self.forward_tacotron_duration.predict({self.forward_tacotron_duration_input: input_data[0]})
+        duration_output = self.forward_tacotron_duration.predict({
+            key: value for key, value in zip(input_names, input_data[0])})
         if callback:
             callback(duration_output)
 
