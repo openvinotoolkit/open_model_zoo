@@ -261,9 +261,9 @@ AccuracyChecker supports following set of adapters:
   * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.json). Path can be prefixed with `--models` arguments.
   * `merges_file` - file which contains merges for encoding model predicted indexes to words (e. g. merges.txt). Path can be prefixed with `--models` arguments.
   * `output_name` - name of model's output layer if need (optional).
-  * `sos_symbol` - string representation of start_of_sentence symbol (default='<s>').
-  * `eos_symbol` - string representation of end_of_sentence symbol (default='</s>').
-  * `pad_symbol` - string representation of pad symbol (default='<pad>').
+  * `sos_symbol` - string representation of start_of_sentence symbol (default=`<s>`).
+  * `eos_symbol` - string representation of end_of_sentence symbol (default=`</s>`).
+  * `pad_symbol` - string representation of pad symbol (default=`<pad>`).
   * `remove_extra_symbols` - remove sos/eos/pad symbols from predicted string (default=True)
 * `bert_question_answering` - converting output of BERT model trained to solve question answering task to `QuestionAnsweringPrediction`.
 * `bidaf_question_answering` - converting output of BiDAF model trained to solve question answering task to `QuestionAnsweringPrediction`.

@@ -20,7 +20,7 @@ If text recognition model is provided, the demo prints recognized text as well.
 
 ## Running
 
-Running the application with the <code>-h</code> option yields the following usage message:
+Running the application with the `-h` option yields the following usage message:
 ```
 text_detection_demo [OPTION]
 Options:

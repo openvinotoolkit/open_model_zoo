@@ -43,7 +43,7 @@ At the end of the sequence, the `VideoFrame` is destroyed and the sequence start
 
 ## Running
 
-Running the application with the <code>-h</code> option yields the following usage message:
+Running the application with the `-h` option yields the following usage message:
 ```
 [ INFO ] InferenceEngine: <version>
 

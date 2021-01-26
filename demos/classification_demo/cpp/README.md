@@ -25,7 +25,7 @@ You can stop the demo by pressing "Esc" or "Q" button. After that, the average m
 
 ## Running
 
-Running the application with the <code>-h</code> option yields the following usage message:
+Running the application with the `-h` option yields the following usage message:
 ```
 classification_demo [OPTION]
 Options:
