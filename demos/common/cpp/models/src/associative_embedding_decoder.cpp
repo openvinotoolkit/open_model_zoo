@@ -129,11 +129,11 @@ void adjustAndRefine(std::vector<Pose>& allPoses,
                      bool doAdjust, bool doRefine) {
 
     cv::Size outputSize = heatMaps[0].size();
-    Pose pose = allPoses[poseId];
+    Pose& pose = allPoses[poseId];
     float poseTag = pose.getPoseTag();
 
     for (size_t jointId = 0; jointId < pose.size(); jointId++) {
-        Peak peak = pose.getPeak(jointId);
+        Peak& peak = pose.getPeak(jointId);
         const cv::Mat& heatMap = heatMaps[jointId];
         const cv::Mat& aembds = aembdsMaps[jointId];
 

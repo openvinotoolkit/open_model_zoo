@@ -198,7 +198,7 @@ std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(
         }
         std::vector<cv::Point2f> keypoints;
         for (size_t j = 0; j < numJoints; j++) {
-            Peak peak = allPoses[i].getPeak(j);
+            Peak& peak = allPoses[i].getPeak(j);
             keypoints.push_back(peak.keypoint);
         }
         poses.push_back({keypoints, allPoses[i].getMeanScore()});
