@@ -3,7 +3,7 @@
 ![](./whiteboard_inpainting.gif)
 
 This demo focuses on a whiteboard text overlapped by a person. The demo shows
-how to use the OpenVINO<sup>TM</sup> toolkit to detect and hide a person on a
+how to use the OpenVINO™ toolkit to detect and hide a person on a
 video so that all text on a whiteboard is visible.
 
 ## How It Works
@@ -13,7 +13,7 @@ The demo expects one of the following models in the Intermediate Representation 
 * Instance segmentation model
 * Semantic segmentation model
 
-Use your own model or a pretrained model from the OpenVINO<sup>TM</sup> Open Model Zoo.
+Use your own model or a pretrained model from the OpenVINO™ Open Model Zoo.
 Find the list of models suitable for this demo in `models.lst`. Use the
 [Model Downloader](../../../tools/downloader/README.md) to obtain the models.
 
