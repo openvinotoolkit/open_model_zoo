@@ -31,13 +31,8 @@ if(NOT(OpenCV_FOUND))
     return()
 endif()
 
-file (GLOB MAIN_SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
-        )
-
-file (GLOB MAIN_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
-        )
+file(GLOB MAIN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB MAIN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 
 # Create named folders for the sources within the .vcproj
 # Empty name lists them directly under the .vcproj

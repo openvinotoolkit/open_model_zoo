@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required(VERSION 3.10)
 
 project(Demos)
 
@@ -10,12 +10,12 @@ option(ENABLE_PYTHON "Whether to build extension modules for Python demos" OFF)
 option(MULTICHANNEL_DEMO_USE_TBB "Use TBB-based threading in multichannel demos" OFF)
 option(MULTICHANNEL_DEMO_USE_NATIVE_CAM "Use native camera api in multichannel demos" OFF)
 
-if (CMAKE_BUILD_TYPE STREQUAL "")
+if(CMAKE_BUILD_TYPE STREQUAL "")
     message(STATUS "CMAKE_BUILD_TYPE not defined, 'Release' will be used")
     set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-if (NOT(BIN_FOLDER))
+if(NOT BIN_FOLDER)
     string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} ARCH)
     if(ARCH STREQUAL "x86_64" OR ARCH STREQUAL "amd64") # Windows detects Intel's 64-bit CPU as AMD64
         set(ARCH intel64)
@@ -23,10 +23,10 @@ if (NOT(BIN_FOLDER))
         set(ARCH ia32)
     endif()
 
-    set (BIN_FOLDER ${ARCH})
+    set(BIN_FOLDER ${ARCH})
 endif()
 
-set (CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 foreach(artifact IN ITEMS ARCHIVE COMPILE_PDB LIBRARY PDB RUNTIME)
     set("CMAKE_${artifact}_OUTPUT_DIRECTORY" "${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER}/$<CONFIG>")
@@ -37,8 +37,8 @@ if(UNIX)
     string(APPEND CMAKE_ARCHIVE_OUTPUT_DIRECTORY "/lib")
 endif()
 
-if (WIN32)
-    if (NOT "${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
+if(WIN32)
+    if(NOT "${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
         message(FATAL_ERROR "Only 64-bit supported on Windows")
     endif()
 
@@ -58,13 +58,13 @@ endif()
 
 ####################################
 ## to use C++11
-set (CMAKE_CXX_STANDARD 11)
-set (CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ####################################
 
-set (GFLAGS_IS_SUBPROJECT TRUE)
-set (HAVE_SYS_STAT_H 1)
-set (HAVE_INTTYPES_H 1)
+set(GFLAGS_IS_SUBPROJECT TRUE)
+set(HAVE_SYS_STAT_H 1)
+set(HAVE_INTTYPES_H 1)
 
 add_subdirectory(thirdparty/gflags)
 
@@ -79,17 +79,17 @@ add_subdirectory(multi_channel_common/cpp)
 
 function(add_samples_to_build)
     # check each passed sample subdirectory
-    foreach (dir ${ARGN})
-        if (IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${dir})
+    foreach(dir ${ARGN})
+        if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${dir})
             # check if a subdirectory contains CMakeLists.txt. In this case we can build it.
             file(GLOB sub_dirs ${CMAKE_CURRENT_SOURCE_DIR}/${dir}/*)
             foreach(sub_dir ${sub_dirs})
                 if(EXISTS "${sub_dir}/CMakeLists.txt")
                     # check if specified sample/demo is found.
-                    if (BUILD_SAMPLE_NAME)
+                    if(BUILD_SAMPLE_NAME)
                         list(FIND BUILD_SAMPLE_NAME ${dir} index)
                     endif()
-                    if (index EQUAL -1)
+                    if(index EQUAL -1)
                         message(STATUS "${dir} SKIPPED")
                     else()
                         # Include subdirectory to the project.
@@ -99,7 +99,7 @@ function(add_samples_to_build)
             endforeach()
         endif()
     endforeach()
-endfunction(add_samples_to_build)
+endfunction()
 
 include(CMakeParseArguments)
 
@@ -117,7 +117,7 @@ macro(ie_add_sample)
     set(oneValueArgs NAME)
     set(multiValueArgs SOURCES HEADERS DEPENDENCIES OPENCV_DEPENDENCIES INCLUDE_DIRECTORIES)
     cmake_parse_arguments(IE_SAMPLE "${options}" "${oneValueArgs}"
-                          "${multiValueArgs}" ${ARGN} )
+                          "${multiValueArgs}" ${ARGN})
 
     # Find OpenCV components if exist
     if(IE_SAMPLE_OPENCV_DEPENDENCIES)
@@ -168,9 +168,9 @@ endmacro()
 
 
 # use this flag if you need to throw custom message in case if the IE package is not found.
-if (IE_NOT_FOUND_MESSAGE)
+if(IE_NOT_FOUND_MESSAGE)
     find_package(InferenceEngine 2.0 QUIET)
-    if (NOT(InferenceEngine_FOUND))
+    if(NOT InferenceEngine_FOUND)
         message(FATAL_ERROR ${IE_NOT_FOUND_MESSAGE})
     endif()
 else()
