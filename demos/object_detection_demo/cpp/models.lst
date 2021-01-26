@@ -1,4 +1,7 @@
 # This file can be used with the --list option of the model downloader.
+# For -at centernet
+ctdet_coco_dlav0_384
+ctdet_coco_dlav0_512
 # For -at faceboxes
 faceboxes-pytorch
 # For -at retinaface

@@ -5,8 +5,8 @@
 find_package(InferenceEngine 2.0 REQUIRED)
 find_package(OpenCV REQUIRED COMPONENTS core imgproc)
 
-FILE(GLOB SOURCES ./src/*.cpp)
-FILE(GLOB HEADERS ./include/pipelines/*.h)
+file(GLOB SOURCES ./src/*.cpp)
+file(GLOB HEADERS ./include/pipelines/*.h)
 
 # Create named folders for the sources within the .vcproj
 # Empty name lists them directly under the .vcproj

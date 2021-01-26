@@ -119,7 +119,7 @@ NATIVE_DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('human-pose-estimation')}),
-        TestCase(options={'-m': ModelArg('human-pose-estimation-0001')}),
+        TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
     )),
 
     CppDemo(name='classification_demo',
@@ -230,6 +230,11 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('object-detection-demo')}),
         [
+            *combine_cases(
+                TestCase(options={'-at': 'centernet'}),
+                single_option_cases('-m',
+                    ModelArg('ctdet_coco_dlav0_384'),
+                    ModelArg('ctdet_coco_dlav0_512'))),
             TestCase(options={'-at': 'faceboxes',
                               '-m': ModelArg('faceboxes-pytorch')}
             ),

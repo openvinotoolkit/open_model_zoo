@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <numeric>
+#include <random>
 
 #include <monitors/presenter.h>
 #include <utils/ocv_common.hpp>
@@ -37,13 +39,14 @@
 #include <pipelines/async_pipeline.h>
 #include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
+#include <models/detection_model_centernet.h>
 #include <models/detection_model_faceboxes.h>
 #include <models/detection_model_retinaface.h>
 #include <models/detection_model_ssd.h>
 #include <models/detection_model_yolo.h>
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Architecture type: faceboxes, retinaface, ssd, or yolo";
+static const char at_message[] = "Required. Architecture type: centernet, faceboxes, retinaface, ssd or yolo";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
@@ -118,6 +121,72 @@ static void showUsage() {
     std::cout << "    -yolo_af                  " << yolo_af_message << std::endl;
 }
 
+class ColorPalette {
+private:
+    std::vector<cv::Scalar> palette;
+
+    static double getRandom(double a = 0.0, double b = 1.0) {
+        static std::default_random_engine e;
+        std::uniform_real_distribution<> dis(a, std::nextafter(b, std::numeric_limits<double>::max()));
+        return dis(e);
+    }
+
+    static double distance(const cv::Scalar& c1, const cv::Scalar& c2) {
+        auto dh = std::fmin(std::fabs(c1[0] - c2[0]), 1 - fabs(c1[0] - c2[0])) * 2;
+        auto ds = std::fabs(c1[1] - c2[1]);
+        auto dv = std::fabs(c1[2] - c2[2]);
+
+        return dh * dh + ds * ds + dv * dv;
+    }
+
+    static cv::Scalar maxMinDistance(const std::vector<cv::Scalar>& colorSet, const std::vector<cv::Scalar>& colorCandidates) {
+        std::vector<double> distances;
+        distances.reserve(colorCandidates.size());
+        for (auto& c1 : colorCandidates) {
+            auto min = *std::min_element(colorSet.begin(), colorSet.end(),
+                [&c1](const cv::Scalar& a, const cv::Scalar& b) { return distance(c1, a) < distance(c1, b); });
+            distances.push_back(distance(c1, min));
+        }
+        auto max = std::max_element(distances.begin(), distances.end());
+        return colorCandidates[std::distance(distances.begin(), max)];
+    }
+
+    static cv::Scalar hsv2rgb(const cv::Scalar& hsvColor) {
+        cv::Mat rgb;
+        cv::Mat hsv(1, 1, CV_8UC3, hsvColor);
+        cv::cvtColor(hsv, rgb, cv::COLOR_HSV2RGB);
+        return cv::Scalar(rgb.data[0], rgb.data[1], rgb.data[2]);
+    }
+
+public:
+    explicit ColorPalette(size_t n) {
+        palette.reserve(n);
+        std::vector<cv::Scalar> hsvColors(1, { 1., 1., 1. });
+        std::vector<cv::Scalar> colorCandidates;
+        size_t numCandidates = 100;
+
+        hsvColors.reserve(n);
+        colorCandidates.resize(numCandidates);
+        for (size_t i = 1; i < n; ++i) {
+            std::generate(colorCandidates.begin(), colorCandidates.end(),
+                [] () { return cv::Scalar{ getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) }; });
+            hsvColors.push_back(maxMinDistance(hsvColors, colorCandidates));
+        }
+
+        for (auto& hsv : hsvColors) {
+            // Convert to OpenCV HSV format
+            hsv[0] *= 179;
+            hsv[1] *= 255;
+            hsv[2] *= 255;
+
+            palette.push_back(hsv2rgb(hsv));
+        }
+    }
+
+    const cv::Scalar& operator[] (size_t index) const {
+        return palette[index % palette.size()];
+    }
+};
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
@@ -145,7 +214,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 }
 
 // Input image is stored inside metadata, as we put it there during submission stage
-cv::Mat renderDetectionData(const DetectionResult& result) {
+cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& palette) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -174,12 +243,13 @@ cv::Mat renderDetectionData(const DetectionResult& result) {
         }
 
         std::ostringstream conf;
-        conf << ":" << std::fixed << std::setprecision(3) << obj.confidence;
-
+        conf << ":" << std::fixed << std::setprecision(1) << obj.confidence * 100 << '%';
+        auto color = palette[obj.labelID];
         cv::putText(outputImg, obj.label + conf.str(),
-            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
-            cv::Scalar(0, 0, 255));
-        cv::rectangle(outputImg, obj, cv::Scalar(0, 0, 255));
+            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 230, 230, 230 }, 3);
+        cv::putText(outputImg, obj.label + conf.str(),
+            cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, color);
+        cv::rectangle(outputImg, obj, color, 2);
     }
 
     try {
@@ -213,9 +283,13 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> labels;
         if (!FLAGS_labels.empty())
             labels = DetectionModel::loadLabels(FLAGS_labels);
+        ColorPalette palette(labels.size() > 0 ? labels.size() : 100);
 
         std::unique_ptr<ModelBase> model;
-        if (FLAGS_at == "faceboxes") {
+        if (FLAGS_at == "centernet") {
+            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels));
+        }
+        else if (FLAGS_at == "faceboxes") {
             model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
         }
         else if (FLAGS_at == "retinaface") {
@@ -268,7 +342,7 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to DetectionResult*
             //    and use your own processing instead of calling renderDetectionData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
+                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -290,7 +364,7 @@ int main(int argc, char *argv[]) {
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
         while (result = pipeline.getResult()) {
-            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>());
+            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,

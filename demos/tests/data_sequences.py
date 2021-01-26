@@ -88,7 +88,6 @@ DATA_SEQUENCES = {
     ],
 
     'human-pose-estimation': [
-        image_net_arg('00000002'),
         image_net_arg('00000184'),
         image_net_arg('00000442'),
         image_net_arg('00017291'),

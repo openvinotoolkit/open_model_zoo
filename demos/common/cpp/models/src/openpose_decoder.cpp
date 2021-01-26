@@ -1,16 +1,27 @@
-// Copyright (C) 2018-2019 Intel Corporation
-// SPDX-License-Identifier: Apache-2.0
+/*
+// Copyright (C) 2018-2021 Intel Corporation
 //
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+*/
 
 #include <algorithm>
 #include <utility>
 #include <vector>
 
 #include <utils/common.hpp>
+#include "models/openpose_decoder.h"
 
-#include "peak.hpp"
 
-namespace human_pose_estimation {
 Peak::Peak(const int id, const cv::Point2f& pos, const float score)
     : id(id),
       pos(pos),
@@ -31,8 +42,7 @@ TwoJointsConnection::TwoJointsConnection(const int firstJointIdx,
 void findPeaks(const std::vector<cv::Mat>& heatMaps,
                const float minPeaksDistance,
                std::vector<std::vector<Peak> >& allPeaks,
-               int heatMapId) {
-    const float threshold = 0.1f;
+               int heatMapId, float confidenceThreshold) {
     std::vector<cv::Point> peaks;
     const cv::Mat& heatMap = heatMaps[heatMapId];
     const float* heatMapData = heatMap.ptr<float>();
@@ -45,7 +55,7 @@ void findPeaks(const std::vector<cv::Mat>& heatMaps,
                     && x < heatMap.cols
                     && y < heatMap.rows) {
                 val = heatMapData[y * heatMapStep + x];
-                val = val >= threshold ? val : 0;
+                val = val >= confidenceThreshold ? val : 0;
             }
 
             float left_val = 0;
@@ -53,7 +63,7 @@ void findPeaks(const std::vector<cv::Mat>& heatMaps,
                     && x < (heatMap.cols - 1)
                     && y < heatMap.rows) {
                 left_val = heatMapData[y * heatMapStep + x + 1];
-                left_val = left_val >= threshold ? left_val : 0;
+                left_val = left_val >= confidenceThreshold ? left_val : 0;
             }
 
             float right_val = 0;
@@ -61,7 +71,7 @@ void findPeaks(const std::vector<cv::Mat>& heatMaps,
                     && y >= 0
                     && y < heatMap.rows) {
                 right_val = heatMapData[y * heatMapStep + x - 1];
-                right_val = right_val >= threshold ? right_val : 0;
+                right_val = right_val >= confidenceThreshold ? right_val : 0;
             }
 
             float top_val = 0;
@@ -69,7 +79,7 @@ void findPeaks(const std::vector<cv::Mat>& heatMaps,
                     && x < heatMap.cols
                     && y < (heatMap.rows - 1)) {
                 top_val = heatMapData[(y + 1) * heatMapStep + x];
-                top_val = top_val >= threshold ? top_val : 0;
+                top_val = top_val >= confidenceThreshold ? top_val : 0;
             }
 
             float bottom_val = 0;
@@ -77,7 +87,7 @@ void findPeaks(const std::vector<cv::Mat>& heatMaps,
                     && y > 0
                     && x < heatMap.cols) {
                 bottom_val = heatMapData[(y - 1) * heatMapStep + x];
-                bottom_val = bottom_val >= threshold ? bottom_val : 0;
+                bottom_val = bottom_val >= confidenceThreshold ? bottom_val : 0;
             }
 
             if ((val > left_val)
@@ -311,8 +321,8 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
             continue;
         }
         int position = -1;
-        HumanPose pose(std::vector<cv::Point2f>(keypointsNumber, cv::Point2f(-1.0f, -1.0f)),
-                       subsetI.score * std::max(0, subsetI.nJoints - 1));
+        HumanPose pose{std::vector<cv::Point2f>(keypointsNumber, cv::Point2f(-1.0f, -1.0f)),
+                       subsetI.score * std::max(0, subsetI.nJoints - 1)};
         for (const auto& peakIdx : subsetI.peaksIndices) {
             position++;
             if (peakIdx >= 0) {
@@ -325,4 +335,3 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
     }
     return poses;
 }
-}  // namespace human_pose_estimation
