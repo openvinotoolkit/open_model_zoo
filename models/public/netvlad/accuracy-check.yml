@@ -1,0 +1,16 @@
+models:
+  - name: netvlad
+    launchers:
+      - framework: dlsdk
+        adapter: reid
+    datasets:
+      - name: pitts30k_val
+
+        preprocessing:
+          - type: rgb_to_bgr
+          - type: resize
+            dst_height: 200
+            dst_width: 300
+
+        metrics:
+          - type: localization_recall
