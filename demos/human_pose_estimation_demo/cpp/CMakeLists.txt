@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-FILE(GLOB SRC_FILES ./*.cpp)
-FILE(GLOB H_FILES ./*.h)
+file(GLOB SRC_FILES ./*.cpp)
+file(GLOB H_FILES ./*.h)
 
 ie_add_sample(NAME human_pose_estimation_demo
               SOURCES ${SRC_FILES}

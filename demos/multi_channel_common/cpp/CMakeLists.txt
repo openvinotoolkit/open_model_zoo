@@ -17,13 +17,8 @@ if(NOT(OpenCV_FOUND))
     return()
 endif()
 
-file (GLOB MAIN_SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
-        )
-
-file (GLOB MAIN_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
-        )
+file(GLOB MAIN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB MAIN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 
 # Create named folders for the sources within the .vcproj
 # Empty name lists them directly under the .vcproj
@@ -57,7 +52,7 @@ if(MULTICHANNEL_DEMO_USE_NATIVE_CAM)
 
     # LIBVA_INCLUDE_DIR
     # LIBVA_LIB_DIR
-    if ((NOT LIBVA_INCLUDE_DIR) OR (NOT LIBVA_LIB_DIR))
+    if((NOT LIBVA_INCLUDE_DIR) OR (NOT LIBVA_LIB_DIR))
         message(FATAL_ERROR "\"LIBVA_INCLUDE_DIR\" and \"LIBVA_LIB_DIR\" must be set")
     endif()
     unset(_LIBVA_LIB CACHE)
@@ -84,7 +79,7 @@ if(MULTICHANNEL_DEMO_USE_NATIVE_CAM)
       NO_DEFAULT_PATH
       PATHS ${LIBVA_INCLUDE_DIR}
     )
-    if ((NOT _LIBVA_LIB) OR
+    if((NOT _LIBVA_LIB) OR
         (NOT _LIBVA_X11_LIB) OR
         (NOT _LIBVA_DRM_LIB) OR
         (NOT _LIBVA_INCLUDE_DIR))
