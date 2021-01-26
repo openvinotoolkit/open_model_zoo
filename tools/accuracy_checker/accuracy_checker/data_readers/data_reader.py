@@ -612,7 +612,6 @@ class WavReader(BaseReader):
     def read_item(self, data_id):
         return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)
 
-
 class DicomReader(BaseReader):
     __provider__ = 'dicom_reader'
 

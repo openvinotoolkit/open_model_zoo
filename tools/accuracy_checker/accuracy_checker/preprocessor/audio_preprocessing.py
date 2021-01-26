@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import numpy as np
+import scipy.signal as dsp
 
 from ..config import BoolField, BaseField, NumberField, ConfigError, StringField
 from ..preprocessor import Preprocessor
@@ -70,6 +71,7 @@ class ClipAudio(Preprocessor):
                 description="Maximum number of clips per audiofile."
             ),
             'pad_to': NumberField(optional=True, default=0, description="Number of points each clip padded to."),
+            'splice_frames': NumberField(optional=True, default=1, description="Number of frames to splice."),
             'pad_center': BoolField(optional=True, default=False, description="Place clip to center of padded frame"),
             'multi_infer': BoolField(optional=True, default=True, description="Metadata multi infer value"),
             'overlap': BaseField(optional=True, description="Overlapping part for each clip."),
@@ -88,6 +90,7 @@ class ClipAudio(Preprocessor):
         self.pad_to = int(self.get_value_from_config('pad_to'))
         self.pad_center = self.get_value_from_config('pad_center')
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.splice_frames = self.get_value_from_config('splice_frames')
 
     def process(self, image, annotation_meta=None):
         data = image.data
@@ -106,6 +109,14 @@ class ClipAudio(Preprocessor):
 
         if hop > clip_duration:
             raise ConfigError("Preprocessor {}: clip overlapping exceeds clip length.".format(self.__provider__))
+
+        audio_duration = (audio_duration + hop - 1) // hop
+        audio_duration = (audio_duration + self.splice_frames - 1) // self.splice_frames
+        audio_duration *= self.splice_frames * hop
+        audio_duration = int(audio_duration + clip_duration - hop)
+
+        if audio_duration > data.shape[1]:
+            data = np.concatenate((data, np.zeros((data.shape[0], audio_duration - data.shape[1]))), axis=1)
 
         for clip_no, clip_start in enumerate(range(0, audio_duration, hop)):
             if clip_start + clip_duration > audio_duration or clip_no >= self.max_clips:
@@ -232,7 +243,7 @@ class NormalizeAudio(Preprocessor):
     def process(self, image, annotation_meta=None):
         sound = image.data
         if self.int16mode:
-            sound = sound / np.float32(0x7fff)
+            sound = sound / np.float32(0x8000)
         else:
             sound = (sound - np.mean(sound)) / (np.std(sound) + 1e-15)
 
@@ -321,6 +332,7 @@ class TriangleFiltering(Preprocessor):
             ),
             "lower_frequency_limit": NumberField(default=20, description='filter passband lower boundary'),
             "upper_frequency_limit": NumberField(default=4000, description='filter passband upper boundary'),
+            "log_features": BoolField(optional=True, default=False, description='Log feature values'),
         })
         return parameters
 
@@ -330,6 +342,7 @@ class TriangleFiltering(Preprocessor):
         self.filterbank_channel_count = self.get_value_from_config('filterbank_channel_count')
         self.lower_frequency_limit = self.get_value_from_config('lower_frequency_limit')
         self.upper_frequency_limit = self.get_value_from_config('upper_frequency_limit')
+        self.log_features = self.get_value_from_config('log_features')
         self.initialize()
 
     def process(self, image, annotation_meta=None):
@@ -395,7 +408,8 @@ class TriangleFiltering(Preprocessor):
     def compute(self, mfcc_input):
         output_channels = np.zeros(self.filterbank_channel_count)
         for i in range(self.start_index, (self.end_index + 1)):
-            spec_val = np.sqrt(mfcc_input[i])
+            # spec_val = np.sqrt(mfcc_input[i])
+            spec_val = mfcc_input[i]
             weighted = spec_val * self.weights[i]
             channel = self.band_mapper[i]
             if channel >= 0:
@@ -406,34 +420,103 @@ class TriangleFiltering(Preprocessor):
 
         return output_channels
 
-    class SpliceFrame(Preprocessor):
-        __provider__ = 'audio_splice'
+class SpliceFrame(Preprocessor):
+    __provider__ = 'audio_splice'
 
-        @classmethod
-        def parameters(cls):
-            parameters = super().parameters()
-            parameters.update({
-                'frames': NumberField(optional=True, default=1, description="Number of frames to splice", value_type=int),
-                'axis': NumberField(optional=True, default=2, description="Axis to splice frames along", value_type=int),
-            })
-            return parameters
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'frames': NumberField(optional=True, default=1, description="Number of frames to splice", value_type=int),
+            'axis': NumberField(optional=True, default=2, description="Axis to splice frames along", value_type=int),
+        })
+        return parameters
 
-        def configure(self):
+    def configure(self):
 
-            self.frames = self.get_value_from_config('frames')
-            self.axis = self.get_value_from_config('axis')
+        self.frames = self.get_value_from_config('frames')
+        self.axis = self.get_value_from_config('axis')
 
 
-        def process(self, image, annotation_meta=None):
-            if self.frames > 1:
-                seq = [image.data]
-                for n in range(1, self.frames):
-                    tmp = np.zeros_like(image.data)
-                    tmp[:,:-n] = image.data[:,n:]
-                    seq.append(tmp)
-                image.data = np.concatenate(seq, axis=self.axis)
+    def process(self, image, annotation_meta=None):
+        if self.frames > 1:
+            seq = [image.data]
+            for n in range(1, self.frames):
+                tmp = np.zeros_like(image.data)
+                tmp[:,:-n] = image.data[:,n:]
+                seq.append(tmp)
+            image.data = np.concatenate(seq, axis=self.axis)
 
-                return image
+            return image
+
+class DitherFrame(Preprocessor):
+    __provider__ = 'audio_dither'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'use_determenistic_dithering': BoolField(optional=True, default=True,
+                                                     description="Determenistic dithering flag"),
+            'dither': NumberField(optional=True, default=1e-5, description="Dithering factor", value_type=float),
+        })
+        return parameters
+
+    def configure(self):
+
+        self.use_determenistic_dithering = self.get_value_from_config('use_determenistic_dithering')
+        self.dither = self.get_value_from_config('dither')
+
+
+    def process(self, image, annotation_meta=None):
+        if self.dither > 0 and not self.use_determenistic_dithering:
+            image.data += self.dither * np.random.rand(*image.data.shape)
+
+        return image
+
+class PreemphFrame(Preprocessor):
+    __provider__ = 'audio_preemph'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'preemph': NumberField(optional=True, default=0.97, description="Preemph factor", value_type=float),
+        })
+        return parameters
+
+    def configure(self):
+        self.preemph = self.get_value_from_config('preemph')
+
+
+    def process(self, image, annotation_meta=None):
+        if self.preemph != 0:
+            image.data = np.concatenate((np.expand_dims(image.data[:, 0], axis=0), image.data[:, 1:] - self.preemph *  image.data[:, :-1]), axis=1)
+
+        return image
+
+class DitherSpectrum(Preprocessor):
+    __provider__ = 'audio_spec_dither'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'use_determenistic_dithering': BoolField(optional=True, default=True,
+                                                     description="Determenistic dithering flag"),
+            'dither': NumberField(optional=True, default=1e-5, description="Dithering factor", value_type=float),
+        })
+        return parameters
+
+    def configure(self):
+
+        self.use_determenistic_dithering = self.get_value_from_config('use_determenistic_dithering')
+        self.dither = self.get_value_from_config('dither')
+
+    def process(self, image, annotation_meta=None):
+        if self.dither > 0 and not self.use_determenistic_dithering:
+            image.data = image.data + self.dither ** 2
+        return image
 
 class DCT(Preprocessor):
     __provider__ = 'audio_dct'
@@ -693,7 +776,6 @@ windows = {
 class AudioToMelSpectrogram(Preprocessor):
     __provider__ = 'audio_to_mel_spectrogram'
 
-    @classmethod
     def parameters(cls):
         params = super().parameters()
         params.update({
@@ -706,6 +788,7 @@ class AudioToMelSpectrogram(Preprocessor):
             'n_filt': NumberField(optional=True, value_type=int, default=80),
             'splicing': NumberField(optional=True, value_type=int, default=1),
             'sample_rate': NumberField(optional=True, value_type=float),
+            'pad_to': NumberField(optional=True, value_type=int, default=0),
         })
         return params
 
@@ -720,11 +803,12 @@ class AudioToMelSpectrogram(Preprocessor):
         self.sample_rate = self.get_value_from_config('sample_rate')
         self.lowfreq = 0
         self.highfreq = None
-        self.pad_to = 16
+        self.pad_to = self.get_value_from_config('pad_to')
         self.max_duration = 16.7
         self.frame_splicing = self.get_value_from_config('splicing')
         self.pad_value = 0
         self.mag_power = 2.0
+        self.use_determenistic_dithering = True
         self.dither = 1e-05
         self.log = True
         self.log_zero_guard_type = "add"
@@ -758,20 +842,21 @@ class AudioToMelSpectrogram(Preprocessor):
         seq_len = int(np.ceil(seq_len // self.hop_length))
 
         # dither
-        if self.dither > 0:
+        if self.dither > 0 and not self.use_determenistic_dithering:
             x = x + self.dither * np.random.randn(*x.shape)
 
         # do preemphasis
         if self.preemph is not None:
             x = np.concatenate((np.expand_dims(x[:, 0], 1), x[:, 1:] - self.preemph * x[:, :-1]), axis=1, )
-        x = self.stft(
-            x.squeeze(), n_fft=self.n_fft, hop_length=self.hop_length,
-            window=self.window, center=True, dtype=np.float32
-        )
+
+        # do stft with weighting window
+        _, _, x = dsp.stft(x.squeeze(), fs=sample_rate, window=self.window, nperseg=self.window_length,
+                                   noverlap=self.hop_length, nfft=self.n_fft)
+        x *= sum(self.window)
 
         # get power spectrum
         if self.mag_power != 1.0:
-            x = x**self.mag_power
+            x = np.abs(x)**self.mag_power
 
         # dot with filterbank energies
         x = np.matmul(filterbanks, x)
@@ -786,20 +871,25 @@ class AudioToMelSpectrogram(Preprocessor):
 
         # normalize if required
         if self.normalize:
+            seq_len = x.shape[-1]
             x = self.normalize_batch(x, seq_len, normalize_type=self.normalize)
 
         # mask to zero any values beyond seq_len in batch, pad to multiple of
         # `pad_to` (for efficiency)
-        max_len = x.shape[-1]
-        mask = np.arange(max_len)
-        mask = mask >= seq_len
-        x[:, :, mask] = self.pad_value
-        del mask
-        pad_to = self.pad_to
-        if pad_to > 0:
-            pad_amt = x.shape[-1] % pad_to
-            if pad_amt != 0:
-                x = np.pad(x, ((0, 0), (0, 0), (0, pad_to - pad_amt)), constant_values=self.pad_value, mode='constant')
+        if self.pad_to:
+            max_len = x.shape[-1]
+            mask = np.arange(max_len)
+            mask = mask >= seq_len
+            x[:, :, mask] = self.pad_value
+            del mask
+            pad_to = self.pad_to
+            if pad_to > 0:
+                pad_amt = x.shape[-1] % pad_to
+                if pad_amt != 0:
+                    x = np.pad(x, ((0, 0), (0, 0), (0, pad_to - pad_amt)), constant_values=self.pad_value, mode='constant')
+
+        # transpose according to model input layout
+        x = np.transpose(x, [2, 0, 1])
 
         image.data = x
         return image
@@ -928,8 +1018,10 @@ class AudioToMelSpectrogram(Preprocessor):
     def splice_frames(x, frame_splicing):
         seq = [x]
         for n in range(1, frame_splicing):
-            seq.append(np.concatenate([x[:, :, :n], x[:, :, n:]], axis=2))
-        return np.concatenate(seq, axis=1)
+            tmp = np.zeros_like(x)
+            tmp[:, :, :-n] = x[:, :, n:]
+            seq.append(tmp)
+        return np.concatenate(seq, axis=1)[:, :, ::frame_splicing]
 
     @staticmethod
     def normalize_batch(x, seq_len, normalize_type):
@@ -937,8 +1029,8 @@ class AudioToMelSpectrogram(Preprocessor):
             x_mean = np.zeros((x.shape[0], x.shape[1]), dtype=x.dtype)
             x_std = np.zeros((x.shape[0], x.shape[1]), dtype=x.dtype)
             for i in range(x.shape[0]):
-                x_mean[i, :] = x[i, :seq_len].mean(axis=1)
-                x_std[i, :] = x[i, :seq_len].std(axis=1)
+                x_mean[i, :] = x[i, :, :seq_len].mean(axis=1)
+                x_std[i, :] = x[i, :, :seq_len].std(axis=1)
             # make sure x_std is not zero
             x_std += 1e-5
             return (x - np.expand_dims(x_mean, 2)) / np.expand_dims(x_std, 2)

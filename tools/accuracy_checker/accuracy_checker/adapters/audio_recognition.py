@@ -681,6 +681,28 @@ class CtcBeamSearchCandidate:
     def logp_total(self):
         return log_sum_exp(self.logp_blank, self.logp_non_blank)
 
+class DumbDecoder(Adapter):
+    __provider__ = 'dumb_decoder'
+    prediction_types = (CharacterRecognitionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'alphabet': ListField(
+                optional=True, default=None, value_type=str, allow_empty=False, description=
+                "Alphabet as list of strings. Default is space + 26 English letters + apostrophe."
+            ),
+        })
+        return parameters
+
+    def configure(self):
+        self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\''
+        self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        decoded = ''.join(self.alphabet[t] for t in raw[0])
+        return [CharacterRecognitionPrediction(identifiers[0], decoded.upper()),]
 
 class TextState:
     __slots__ = ('text', 'last_word', 'last_char_index')
