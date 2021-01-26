@@ -350,11 +350,10 @@ class SequentialModel:
         preprocessed_embeddings = duration_output[self.embeddings_output]
         indexes = self.build_index(duration, preprocessed_embeddings)
         processed_embeddings = self.gather(preprocessed_embeddings, 1, indexes)
-        processed_embeddings = processed_embeddings[:, self.max_regression_len, :]
+        processed_embeddings = processed_embeddings[:, :self.max_regression_len, :]
         if len(input_names) > 1: # in the case of network with attention
             input_mask = self.sequence_mask(np.array([[processed_embeddings.shape[1]]]), processed_embeddings.shape[1])
             pos_mask = self.pos_mask[:, :, :processed_embeddings.shape[1], :processed_embeddings.shape[1]]
-            mel = self.forward_tacotron_regression.predict({self.forward_tacotron_regression_input: processed_embeddings})
             input_to_regression = {
                 self.forward_tacotron_regression_input['data']: processed_embeddings,
                 self.forward_tacotron_regression_input['data_mask']: input_mask,

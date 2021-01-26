@@ -33,5 +33,5 @@ evaluations:
             input_suffix: duration_prediction_in_
             reference_suffix: melgan_out_
           metrics:
-            - type: mae
+            - type: relative_l2_error
               presenter: print_vector
