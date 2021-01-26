@@ -43,14 +43,7 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     if (inputDesc.getDims()[1] != 3) {
         throw std::logic_error("Expected 3-channel input");
     }
-
-    if (useAutoResize) {
-        input->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
-        input->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
-    }
-    else {
-        input->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
-    }
+    input->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
 
     // --------------------------- Reading image input parameters -------------------------------------------
     std::string imageInputName = inputInfo.begin()->first;
