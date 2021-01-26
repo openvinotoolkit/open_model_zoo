@@ -683,8 +683,10 @@ def process_config(
             if annotation_conversion_config:
                 command_line_conversion = (create_command_line_mapping(annotation_conversion_config,
                                                                        'source', ANNOTATION_CONVERSION_PATHS))
-                datasets_config['_command_line_mapping'] = {key: args[value]
-                                                            for key, value in command_line_conversion.items()}
+                datasets_config['_command_line_mapping'] = {
+                    key: args[value] if not isinstance(value, list) else [args[v] for v in value]
+                    for key, value in command_line_conversion.items()
+                }
                 merge_entry_paths(command_line_conversion, annotation_conversion_config, args)
             if 'preprocessing' in datasets_config:
                 for preprocessor in datasets_config['preprocessing']:
