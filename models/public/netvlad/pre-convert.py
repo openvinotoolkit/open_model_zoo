@@ -30,10 +30,10 @@ def main():
     parser.add_argument('output_dir', type=Path)
     args = parser.parse_args()
 
+    tf.disable_eager_execution()
+
     sys.path.append(str(args.input_dir))
     nets = importlib.import_module('netvlad_tf.nets')
-
-    tf.disable_eager_execution()
 
     tf.reset_default_graph()
     image_batch = tf.placeholder(dtype=tf.float32, shape=[None, None, None, 3])
