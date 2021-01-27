@@ -271,7 +271,6 @@ def main():
         # Change data layout from HWC to CHW.
         input_image = input_image.transpose((2, 0, 1))
         input_image = input_image.reshape((n, c, h, w)).astype(np.float32)
-        input_image_info = np.asarray([[input_image_size[0], input_image_size[1], 1]], dtype=np.float32)
 
         # Run the net.
         inf_start = time.time()
