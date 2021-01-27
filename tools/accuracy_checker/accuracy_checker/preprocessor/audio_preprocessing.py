@@ -443,7 +443,7 @@ class SpliceFrame(Preprocessor):
             seq = [image.data]
             for n in range(1, self.frames):
                 tmp = np.zeros_like(image.data)
-                tmp[:,:-n] = image.data[:,n:]
+                tmp[:, :-n] = image.data[:, n:]
                 seq.append(tmp)
             image.data = np.concatenate(seq, axis=self.axis)
 
@@ -667,7 +667,7 @@ class AddBatch(Preprocessor):
                     'Operation "{}" failed: Invalid axis {} for shape {}.'.format(self.__provider__, self.axis,
                                                                                   data.shape)
                 )
-            order = list(range(1,self.axis + 1)) + [0] + list(range(self.axis + 1, len(data.shape)))
+            order = list(range(1, self.axis + 1)) + [0] + list(range(self.axis + 1, len(data.shape)))
             data = np.transpose(data, order)
         image.data = data
 
@@ -784,7 +784,7 @@ class AudioToMelSpectrogram(Preprocessor):
             'window_stride': NumberField(optional=True, value_type=float, default=0.01,
                                          description='intersection of frames in time-domain, seconds'),
             'window': StringField(
-                choices=windows.keys(), optional=True, default='hann',description='weighting window type'
+                choices=windows.keys(), optional=True, default='hann', description='weighting window type'
             ),
             'n_fft': NumberField(optional=True, value_type=int, description='FFT base'),
             'n_filt': NumberField(optional=True, value_type=int, default=80, description='number of MEL filters'),

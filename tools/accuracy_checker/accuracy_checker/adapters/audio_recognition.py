@@ -702,7 +702,7 @@ class DumbDecoder(Adapter):
 
     def process(self, raw, identifiers=None, frame_meta=None):
         decoded = ''.join(self.alphabet[t] for t in raw[0])
-        return [CharacterRecognitionPrediction(identifiers[0], decoded.upper()),]
+        return [CharacterRecognitionPrediction(identifiers[0], decoded.upper())]
 
 class TextState:
     __slots__ = ('text', 'last_word', 'last_char_index')

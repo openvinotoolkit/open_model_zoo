@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -487,8 +487,6 @@ class ASRModel(BaseModel):
                 {'name': 'prediction', 'model': self.prediction.network},
                 {'name': 'joint', 'model': self.joint.network}]
 
-        logits, logits_lens = self._model.encoder(x, out_lens)
-
     def decoder(self, identifiers, logits):
         output = []
         raw_outputs = []
@@ -542,7 +540,7 @@ class ASRModel(BaseModel):
         inputs = {'input.1': [[label,]], '1': hidden[0], '2': hidden[1]}
         return self.prediction.predict(None, inputs)
 
-    def _joint_step(self, enc, pred, log_normalize: bool=False):
+    def _joint_step(self, enc, pred, log_normalize=False):
         inputs = {'0': enc, '1': pred}
         logits, logits_blob = self.joint.predict(None, inputs)
         logits = logits_blob[:, 0, 0, :]
