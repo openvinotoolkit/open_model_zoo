@@ -54,7 +54,7 @@ def build_argparser():
                       help='Optional. Name of output to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
-                           'If -1 is set, all frames are stored.')
+                           'If 0 is set, all frames are stored.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
@@ -137,11 +137,9 @@ def main():
                 (round(out_frame_size[0] / 4), round(out_frame_size[1] / 8)))
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
     video_writer = cv2.VideoWriter()
-    if args.output:
-        video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
-                                       out_frame_size)
-        if not video_writer.isOpened():
-            raise RuntimeError("Can't open video writer")
+    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                             cap.fps(), out_frame_size):
+        raise RuntimeError("Can't open video writer")
 
     render_time = 0
 
@@ -214,7 +212,7 @@ def main():
                 print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
                                                                   stats['status'], stats['real_time']))
         frames_processed += 1
-        if video_writer.isOpened() and (args.output_limit == -1 or frames_processed <= args.output_limit):
+        if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(frame)
 
         if not args.no_show:

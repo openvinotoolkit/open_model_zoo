@@ -30,7 +30,7 @@ def build_argparser():
                         help="Optional. Name of output to save.")
     parser.add_argument("-limit", "--output_limit", required=False, default=1000, type=int,
                       help="Optional. Number of frames to store in output. "
-                           "If -1 is set, all frames are stored.")
+                           "If 0 is set, all frames are stored.")
     parser.add_argument("-d", "--device", type=str, default='CPU', required=False,
                         help="Optional. Specify the target to infer on CPU or GPU.")
     parser.add_argument("--person_label", type=int, required=False, default=15, help="Optional. Label of class person for detector.")
@@ -55,11 +55,9 @@ def run_demo(args):
     delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
 
     video_writer = cv2.VideoWriter()
-    if args.output:
-        video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
-                                      (frame.shape[1], frame.shape[0]))
-        if not video_writer.isOpened():
-            raise RuntimeError("Can't open video writer")
+    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                             cap.fps(), (frame.shape[1], frame.shape[0])):
+        raise RuntimeError("Can't open video writer")
 
     frames_processed = 0
     presenter = monitors.Presenter(args.utilization_monitors, 25)
@@ -86,7 +84,7 @@ def run_demo(args):
             float(1 / detector_person.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
 
         frames_processed += 1
-        if video_writer.isOpened() and (args.output_limit == -1 or frames_processed <= args.output_limit):
+        if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(frame)
 
         if not args.no_show:

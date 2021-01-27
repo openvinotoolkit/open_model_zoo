@@ -52,8 +52,13 @@ Options:
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+<<<<<<< HEAD:demos/action_recognition_demo/python/README.md
                         Optional. Number of frames to store in output. If -1
                         is set, all frames are stored.
+=======
+                        Optional. Number of frames to store in output.
+                        If 0 is set, all frames are stored.
+>>>>>>> 79f14439 (Modify video_writer opening, change output_limit checking):demos/action_recognition/python/README.md
   -m_en M_ENCODER, --m_encoder M_ENCODER
                         Required. Path to encoder model.
   -m_de M_DECODER, --m_decoder M_DECODER

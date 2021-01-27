@@ -47,7 +47,7 @@ def build_arg():
                          help='Optional. Name of output to save.')
     in_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                          help='Optional. Number of frames to store in output. '
-                              'If -1 is set, all frames are stored.')
+                              'If 0 is set, all frames are stored.')
     in_args.add_argument("--no_show", help="Optional. Disable display of results on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
@@ -94,11 +94,9 @@ if __name__ == '__main__':
     presenter = monitors.Presenter(args.utilization_monitors, imshow_size[1] * 2 - graph_size[1], graph_size)
 
     video_writer = cv.VideoWriter()
-    if args.output:
-        video_writer = cv.VideoWriter(args.output, cv.VideoWriter_fourcc(*'MJPG'), cap.fps(),
-                                      (imshow_size[0] * 2, imshow_size[1] * 2))
-        if not video_writer.isOpened():
-            raise RuntimeError("Can't open video writer")
+    if args.output and not video_writer.open(args.output, cv.VideoWriter_fourcc(*'MJPG'),
+                                             cap.fps(), (imshow_size[0] * 2, imshow_size[1] * 2)):
+        raise RuntimeError("Can't open video writer")
 
     while original_frame is not None:
         log.debug("#############################")
@@ -146,7 +144,7 @@ if __name__ == '__main__':
         final_image = cv.vconcat(ir_image)
 
         frames_processed += 1
-        if video_writer.isOpened() and (args.output_limit == -1 or frames_processed <= args.output_limit):
+        if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(final_image)
 
         presenter.drawGraphs(final_image)
