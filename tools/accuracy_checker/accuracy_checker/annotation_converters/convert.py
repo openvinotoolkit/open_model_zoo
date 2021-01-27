@@ -296,7 +296,7 @@ def configure_converter(converter_options, args, converter):
     }
     converter_config['converter'] = args.converter
     converter.config = converter_config
-    converter.validate_config()
+    converter.validate_config(converter_config)
     converter.configure()
 
     return converter, converter_config
