@@ -216,6 +216,11 @@ def main():
     else:
         tracker = StaticIOUTracker()
 
+    if args.delay:
+        delay = args.delay
+    else:
+        delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
+
     visualizer = Visualizer(['__background__', 'text'], show_boxes=args.show_boxes, show_scores=args.show_scores)
 
     render_time = 0
@@ -349,7 +354,7 @@ def main():
         render_time = render_end - render_start
 
         if not args.no_show:
-            key = cv2.waitKey(args.delay)
+            key = cv2.waitKey(delay)
             esc_code = 27
             if key == esc_code:
                 break
@@ -359,7 +364,6 @@ def main():
 
     print(presenter.reportMeans())
     cv2.destroyAllWindows()
-    cap.release()
 
 
 if __name__ == '__main__':
