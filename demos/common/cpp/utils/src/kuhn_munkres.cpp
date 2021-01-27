@@ -8,7 +8,6 @@
 
 #include "utils/kuhn_munkres.hpp"
 
-
 KuhnMunkres::KuhnMunkres(bool greedy) : n_(), greedy_(greedy) {}
 
 std::vector<size_t> KuhnMunkres::Solve(const cv::Mat& dissimilarity_matrix) {
@@ -111,7 +110,7 @@ int KuhnMunkres::FindInRow(int row, int what) {
     return -1;
 }
 
- int KuhnMunkres::FindInCol(int col, int what) {
+int KuhnMunkres::FindInCol(int col, int what) {
     for (int i = 0; i < n_; i++) {
         if (marked_.at<char>(i, col) == what) {
             return i;
