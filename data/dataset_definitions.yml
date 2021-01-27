@@ -1142,3 +1142,12 @@ datasets:
       prefix: duration_prediction
       input_suffix: in
       reference_suffix: out
+
+  - name: cityscapes
+    annotation_conversion:
+      converter: cityscapes
+      dataset_root_dir: Cityscapes/data
+
+    data_source: Cityscapes/data
+    annotation: cityscapes.pickle
+    dataset_meta: cityscapes.json
