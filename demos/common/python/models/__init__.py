@@ -19,6 +19,7 @@ from .centernet import CenterNet
 from .deblurring import Deblurring
 from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
+from .mtcnn import ProposalModel
 from .open_pose import OpenPose
 from .retinaface import RetinaFace
 from .segmentation import SegmentationModel
@@ -32,6 +33,7 @@ __all__ = [
     'Deblurring',
     'FaceBoxes',
     'HpeAssociativeEmbedding',
+    'ProposalModel',
     'OpenPose',
     'RetinaFace',
     'SegmentationModel',
