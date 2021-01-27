@@ -57,8 +57,8 @@ protected:
 
     void reshape(InferenceEngine::CNNNetwork& cnnNetwork) override;
 
-    std::string HpeAssociativeEmbedding::findLayerByName(const std::string layerName,
-                                                         const std::vector<std::string>& outputsNames);
+    std::string findLayerByName(const std::string layerName,
+                                const std::vector<std::string>& outputsNames);
 
     std::vector<cv::Mat> split(float* data, const InferenceEngine::SizeVector& shape);
 

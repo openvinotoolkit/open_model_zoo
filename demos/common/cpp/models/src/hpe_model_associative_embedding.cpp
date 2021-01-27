@@ -132,9 +132,9 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     float* heatMapsMapped = heats->rmap().as<float*>();
     float* nmsHeatMapsMapped = nmsHeats->rmap().as<float*>();
 
-    std::vector<cv::Mat>& aembdsMaps = split(aembdsMapped, aembdsDims);
-    std::vector<cv::Mat>& heatMaps = split(heatMapsMapped, heatMapsDims);
-    std::vector<cv::Mat>& nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsDims);
+    std::vector<cv::Mat> aembdsMaps = split(aembdsMapped, aembdsDims);
+    std::vector<cv::Mat> heatMaps = split(heatMapsMapped, heatMapsDims);
+    std::vector<cv::Mat> nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsDims);
 
     std::vector<HumanPose> poses = extractPoses(heatMaps, aembdsMaps, nmsHeatMaps);
 
