@@ -31,6 +31,14 @@ class Model:
     def postprocess(self, outputs, meta):
         return outputs
 
+    def reshape(self, shapes):
+        if isinstance(shapes, dict):
+            self.net.reshape(shapes)
+        elif isinstance(shapes, list) and len(self.net.input_info) == 1:
+            self.net.reshape({next(iter(self.net.input_info)): shapes})
+        else:
+            raise NotImplementedError
+
     def set_batch_size(self, batch):
         shapes = {}
         for input_layer in self.net.input_info:
