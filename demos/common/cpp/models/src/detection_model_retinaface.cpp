@@ -164,7 +164,7 @@ std::vector<ModelRetinaFace::Anchor> generateAnchors(const int baseSize, const s
     auto ratioAnchors = ratioEnum(baseAnchor, ratios);
     std::vector<ModelRetinaFace::Anchor> retVal;
 
-    for (auto ra : ratioAnchors) {
+    for (const auto& ra : ratioAnchors) {
         auto addon = scaleEnum(ra, scales);
         retVal.insert(retVal.end(), addon.begin(), addon.end());
     }
@@ -175,7 +175,7 @@ void ModelRetinaFace::generateAnchorsFpn() {
     auto cfg = anchorCfg;
     std::sort(cfg.begin(), cfg.end(), [](const AnchorCfgLine& x, const AnchorCfgLine& y) { return x.stride > y.stride; });
 
-    for (auto cfgLine : cfg) {
+    for (const auto& cfgLine : cfg) {
         anchorsFpn.emplace(cfgLine.stride, generateAnchors(cfgLine.baseSize, cfgLine.ratios, cfgLine.scales));
     }
 }
