@@ -14,8 +14,6 @@ class ProposalModel(Model):
             elif blob.shape[1] == 4:
                 self.bbox_blob_name = name
 
-        # self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
-
     def preprocess(self, inputs):
         # MTCNN input layout is NCWH
         image = inputs
@@ -31,11 +29,8 @@ class ProposalModel(Model):
     def postprocess(self, outputs, meta):
         bboxes = outputs[self.bbox_blob_name]
         scores = outputs[self.prob_blob_name]
-        orginal_image_shape = meta['original_shape']
-        resized_image_shape = meta['resized_shape']
 
         detections = self._generate_detections(bboxes[0], scores[0], 1/self.scale, 0.6)
-        # detections = [Detection(*detection, 1) for detection in detections]
 
         return detections, meta
 
@@ -51,12 +46,11 @@ class ProposalModel(Model):
             w = boxes[:, 2] - boxes[:, 0]
             h = boxes[:, 3] - boxes[:, 1]
             a = np.maximum(w, h)
-            shift = 0.5 * (np.array([w, h]) - np.repeat([a], 2, axis=0))
-            boxes[:, 0] += shift[0]
-            boxes[:, 1] += shift[1]
-            boxes[:, 2] -= shift[0]
-            boxes[:, 3] -= shift[1]
+            shift = 0.5 * (np.array([w, h]) - np.repeat([a], 2, axis=0)).T
+            boxes[:, :2] += shift
+            boxes[:, 2:4] -= shift
             return boxes
+
         out_side = max(bboxes.shape[1:])
         in_side = 2 * out_side + 11
         stride = 2
@@ -65,23 +59,20 @@ class ProposalModel(Model):
         (x, y) = np.where(scores[1] >= score_threshold)
         if x.size == 0:
             return []
-        boundingbox = np.array([x, y]).T
-        bb1 = np.fix((stride * boundingbox) * scale)
-        bb2 = np.fix((stride * boundingbox + 11) * scale)
-        boundingbox = np.concatenate((bb1, bb2), axis=1)
-        dx1 = bboxes[0][x, y]
-        dx2 = bboxes[1][x, y]
-        dx3 = bboxes[2][x, y]
-        dx4 = bboxes[3][x, y]
+
+        kernels = np.array([x, y]).T
+        kernels = np.concatenate((np.fix((stride * kernels) * scale),
+                                  np.fix((stride * kernels + 11) * scale)),
+                                 axis=1)
+        offset = bboxes[:, x, y].T
         score = np.array([scores[1][x, y]]).T
-        offset = np.array([dx1, dx2, dx3, dx4]).T
-        boundingbox = boundingbox + offset * 12.0 * scale
-        rectangles = np.concatenate((boundingbox, score), axis=1)
-        rectangles = square_box(rectangles)
+        boxes = kernels + offset * 12.0 * scale
+        boxes = np.concatenate((boxes, score), axis=1)
+        boxes = square_box(boxes)
         result = []
-        for rectangle in rectangles:
-            if rectangle[2] > rectangle[0] and rectangle[3] > rectangle[1]:
-                result.append(rectangle)
+        for box in boxes:
+            if box[2] > box[0] and box[3] > box[1]:
+                result.append(box)
 
         return ProposalModel.NMS(result, 0.5, 'iou')
 
@@ -94,7 +85,7 @@ class ProposalModel(Model):
             w = int(w * pr_scale)
             h = int(h * pr_scale)
         elif max(w, h) < 1000:
-            scale = 1000.0/max(h, w)
+            pr_scale = 1000.0/max(h, w)
             w = int(w * pr_scale)
             h = int(h * pr_scale)
 
@@ -110,10 +101,10 @@ class ProposalModel(Model):
         return scales
 
     @staticmethod
-    def NMS(rectangles,threshold,type):
-        if len(rectangles)==0:
-            return rectangles
-        boxes = np.array(rectangles)
+    def NMS(bboxes, threshold, type):
+        if len(bboxes)==0:
+            return bboxes
+        boxes = np.array(bboxes)
         x1 = boxes[:, 0]
         y1 = boxes[:, 1]
         x2 = boxes[:, 2]
