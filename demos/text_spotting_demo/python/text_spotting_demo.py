@@ -198,20 +198,12 @@ def main():
     text_dec_net = ie.read_network(args.text_dec_model, os.path.splitext(args.text_dec_model)[0] + '.bin')
 
     model_required_inputs = {'image'}
-    old_model_required_inputs = {'im_data', 'im_info'}
     if set(mask_rcnn_net.input_info) == model_required_inputs:
-        old_model = False
         required_output_keys = {'boxes', 'labels', 'masks', 'text_features.0'}
         n, c, h, w = mask_rcnn_net.input_info['image'].input_data.shape
-    elif set(mask_rcnn_net.input_info) == old_model_required_inputs:
-        old_model = True
-        required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks', 'text_features'}
-        n, c, h, w = mask_rcnn_net.input_info['im_data'].input_data.shape
-        args.alphabet = '  0123456789abcdefghijklmnopqrstuvwxyz'
-        args.tr_threshold = 0
     else:
         raise RuntimeError('Demo supports only topologies with the following input keys: '
-                           f'{model_required_inputs} or {old_model_required_inputs}.')
+                           f'{model_required_inputs}.')
 
     assert required_output_keys.issubset(mask_rcnn_net.outputs.keys()), \
         f'Demo supports only topologies with the following output keys: {required_output_keys}' \
@@ -283,24 +275,14 @@ def main():
 
         # Run the net.
         inf_start = time.time()
-        if old_model:
-            outputs = mask_rcnn_exec_net.infer({'im_data': input_image, 'im_info': input_image_info})
-        else:
-            outputs = mask_rcnn_exec_net.infer({'image': input_image})
+        outputs = mask_rcnn_exec_net.infer({'image': input_image})
 
         # Parse detection results of the current request
-        if old_model:
-            boxes = outputs['boxes']
-            scores = outputs['scores']
-            classes = outputs['classes'].astype(np.uint32)
-            raw_masks = outputs['raw_masks']
-            text_features = outputs['text_features']
-        else:
-            boxes = outputs['boxes'][:, :4]
-            scores = outputs['boxes'][:, 4]
-            classes = outputs['labels'].astype(np.uint32)
-            raw_masks = outputs['masks']
-            text_features = outputs['text_features.0']
+        boxes = outputs['boxes'][:, :4]
+        scores = outputs['boxes'][:, 4]
+        classes = outputs['labels'].astype(np.uint32)
+        raw_masks = outputs['masks']
+        text_features = outputs['text_features.0']
 
         # Filter out detections with low confidence.
         detections_filter = scores > args.prob_threshold
@@ -314,8 +296,6 @@ def main():
         boxes[:, 1::2] /= scale_y
         masks = []
         for box, cls, raw_mask in zip(boxes, classes, raw_masks):
-            if old_model:
-                raw_mask = raw_mask[cls, ...]
             mask = segm_postprocess(box, raw_mask, frame.shape[0], frame.shape[1])
             masks.append(mask)
 
