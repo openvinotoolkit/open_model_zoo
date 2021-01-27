@@ -779,16 +779,24 @@ class AudioToMelSpectrogram(Preprocessor):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'window_size': NumberField(optional=True, value_type=float, default=0.02),
-            'window_stride': NumberField(optional=True, value_type=float, default=0.01),
+            'window_size': NumberField(optional=True, value_type=float, default=0.02,
+                                       description='size of frame in time-domain, seconds'),
+            'window_stride': NumberField(optional=True, value_type=float, default=0.01,
+                                         description='intersection of frames in time-domain, seconds'),
             'window': StringField(
-                choices=windows.keys(), optional=True, default='hann'
+                choices=windows.keys(), optional=True, default='hann',description='weighting window type'
             ),
-            'n_fft': NumberField(optional=True, value_type=int),
-            'n_filt': NumberField(optional=True, value_type=int, default=80),
-            'splicing': NumberField(optional=True, value_type=int, default=1),
-            'sample_rate': NumberField(optional=True, value_type=float),
-            'pad_to': NumberField(optional=True, value_type=int, default=0),
+            'n_fft': NumberField(optional=True, value_type=int, description='FFT base'),
+            'n_filt': NumberField(optional=True, value_type=int, default=80, description='number of MEL filters'),
+            'splicing': NumberField(optional=True, value_type=int, default=1,
+                                    description='number of sequentially concastenated MEL spectrums'),
+            'sample_rate': NumberField(optional=True, value_type=float, description='audio samplimg frequency, Hz'),
+            'pad_to': NumberField(optional=True, value_type=int, default=0, description='Desired length of features'),
+            'preemph': NumberField(optional=True, value_type=float, default=0.97, description='Preemph factor'),
+            'log': BoolField(optional=True, default=True, description='Enables log() of MEL features values'),
+            'use_determenistic_dithering': BoolField(optional=True, default=True,
+                                                     description='Applies determined dithering to signal spectrum'),
+            'dither': NumberField(optional=True, value_type=float, default=0.00001, description='Dithering value'),
         })
         return params
 
@@ -797,20 +805,23 @@ class AudioToMelSpectrogram(Preprocessor):
         self.window_stride = self.get_value_from_config('window_stride')
         self.n_fft = self.get_value_from_config('n_fft')
         self.window_fn = windows.get(self.get_value_from_config('window'))
-        self.normalize = 'per_feature'
-        self.preemph = 0.97
+        self.preemph = self.get_value_from_config('preemph')
         self.nfilt = self.get_value_from_config('n_filt')
         self.sample_rate = self.get_value_from_config('sample_rate')
+        self.log = self.get_value_from_config('log')
+        self.pad_to = self.get_value_from_config('pad_to')
+        self.frame_splicing = self.get_value_from_config('splicing')
+        self.use_determenistic_dithering = self.get_value_from_config('use_determenistic_dithering')
+        self.dither = self.get_value_from_config('dither')
+
+        self.normalize = 'per_feature'
         self.lowfreq = 0
         self.highfreq = None
-        self.pad_to = self.get_value_from_config('pad_to')
         self.max_duration = 16.7
-        self.frame_splicing = self.get_value_from_config('splicing')
         self.pad_value = 0
         self.mag_power = 2.0
         self.use_determenistic_dithering = True
         self.dither = 1e-05
-        self.log = True
         self.log_zero_guard_type = "add"
         self.log_zero_guard_value = 2 ** -24
 

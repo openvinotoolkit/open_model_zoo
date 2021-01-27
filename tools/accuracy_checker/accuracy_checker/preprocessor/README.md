@@ -172,6 +172,27 @@ Accuracy Checker supports following set of preprocessors:
   * `overlap` - sets overlapping for clips in percents or samples (use `%` or `samples` suffixes respectively) (no overlapping by default), e.g. `25%`, `4000samples`
   * `max_clips` - sets the maximum number of clips (clips all record by default)
 * `audio_normalization` - normalize audio record with mean sample subtraction and division on standard deviation of samples.
+* `audio_to_mel_spectrogram` - performs all needed preprocessing to calculate MEL spectrogram from time-domain audio signal
+  * `window_size` - size of time-domain signal frame, seconds
+  * `window_stride` - intersection of frames in time-domain, seconds
+  * `window`- weighting window type, possible choices:
+    * `hann` - applies Hanning window to each signal frame
+    * `hamming` - applies Hamming window to each signal frame
+    * `blackman` - applies Blackman window to each signal frame
+    * `bartlett` - applies Bartlett window to each signal frame
+    * `none` - no window
+  * `n_fft` - STFT base, samples
+  * `n_filt` - number of MEL filters
+  * `splicing` - number of sequentially concastenated MEL spectrums
+  * `sample_rate` - audio sampling frequency, Hz
+  * `pad_to` - desired length of features
+  * `preemph` - preemph factor
+  * `log` - applies log() to MEL features values
+  * `use_determenistic_dithering` - Controls  dithering mode:
+    * `True` - there are no dithering in time-domain, fixed value from `dither` parameter added to signal spectrum
+    * `False` - dithering in time-domain, random values with  `dither` magnitude added to signal spectrum
+  * `dither` - dithering value
+
 * `similarity_transform_box` - apply to image similarity transformation to get rectangle region stored in annotation metadata/
     * `box_scale` - box scale factor (Optional, default 1).
     * `dst_width` and `dst_height` are destination width and height for transformed image respectively.
