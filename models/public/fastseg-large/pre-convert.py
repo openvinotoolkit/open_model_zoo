@@ -31,7 +31,7 @@ def main():
     subprocess.run([sys.executable, '--',
         str(args.input_dir / 'model/onnx_export.py'),
         '{}'.format(args.output_dir / 'fastseg-large.onnx'),
-        '--checkpoint={}'.format(args.output_dir / 'mobilev3large-lraspp-f128-9cbabfde.pt'),
+        '--checkpoint={}'.format(args.input_dir / 'mobilev3large-lraspp-f128-9cbabfde.pt'),
         '--model={}'.format(BACKBONE),
         '--num_filters={}'.format('128')
     ], check=True)
