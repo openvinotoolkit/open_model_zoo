@@ -62,11 +62,12 @@ class Pose {
 void findPeaks(const std::vector<cv::Mat>& nmsHeatMaps,
                const std::vector<cv::Mat>& aembdsMaps,
                std::vector<std::vector<Peak>>& allPeaks,
-               int jointId, int maxNumPeople);
+               int jointId, int maxNumPeople,
+               float detectionThreshold);
 
 std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
                              int maxNumPeople, int numJoints,
-                             float detectionThreshold, float tagThreshold,
+                             float tagThreshold,
                              bool useDetectionVal, bool ignoreTooMuch);
 
 void adjustAndRefine(std::vector<Pose>& allPoses,

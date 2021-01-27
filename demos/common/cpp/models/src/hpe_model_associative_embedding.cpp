@@ -58,7 +58,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
     InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
     inputInfo.setPrecision(Precision::U8);
-    inputInfo.getInputData()->setLayout(Layout::NCHW);
+    inputInfo.getInputData()->setLayout(Layout::NHWC);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
@@ -73,13 +73,16 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
         if (outputLayerDims[0] != 1 || outputLayerDims[1] != 17)
                 throw std::runtime_error("output layers are expected to have 1 batch size and 17 channels");
     }
+    embeddingsBlobName = findLayerByName("embeddings", outputsNames);
+    heatmapsBlobName = findLayerByName("heatmaps", outputsNames);
+    nmsHeatmapsBlobName = findLayerByName("nms_heatmaps", outputsNames);
 }
 
 void HpeAssociativeEmbedding::reshape(CNNNetwork& cnnNetwork) {
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    SizeVector& InputLayerDims = inputShapes.begin()->second;
+    SizeVector& inputDims = inputShapes.begin()->second;
     if (!targetSize) {
-        targetSize =  static_cast<int>(std::min(InputLayerDims[2], InputLayerDims[3]));
+        targetSize =  static_cast<int>(std::min(inputDims[2], inputDims[3]));
     }
     int inputHeight = static_cast<int>(std::round(targetSize * aspectRatio));
     int inputWidth = targetSize;
@@ -88,10 +91,10 @@ void HpeAssociativeEmbedding::reshape(CNNNetwork& cnnNetwork) {
     }
     int height = static_cast<int>((inputHeight + stride - 1) / stride) * stride;
     int width = static_cast<int>((inputWidth + stride - 1) / stride) * stride;
-    InputLayerDims[0] = 1;
-    InputLayerDims[2] = height;
-    InputLayerDims[3] = width;
-    inputLayerSize = cv::Size(InputLayerDims[3], InputLayerDims[2]);
+    inputDims[0] = 1;
+    inputDims[2] = height;
+    inputDims[3] = width;
+    inputLayerSize = cv::Size(inputDims[3], inputDims[2]);
     cnnNetwork.reshape(inputShapes);
 }
 
@@ -104,12 +107,11 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
     int h = resizedImage.rows;
     int w = resizedImage.cols;
     cv::Mat paddedImage;
-    int bottom = inputLayerSize.height - resizedImage.rows;
-    int right = inputLayerSize.width - resizedImage.cols;
+    int bottom = inputLayerSize.height - h;
+    int right = inputLayerSize.width - w;
     cv::copyMakeBorder(resizedImage, paddedImage, 0, bottom, 0, right,
                        cv::BORDER_CONSTANT, meanPixel);
-    Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-    matU8ToBlob<uint8_t>(paddedImage, frameBlob);
+    request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
     return std::shared_ptr<InternalModelData>(new InternalScaleData(image.cols / static_cast<float>(w),
                                                                     image.rows / static_cast<float>(h)));
 }
@@ -118,26 +120,21 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     HumanPoseResult* result = new HumanPoseResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
-    auto aembdsMapped = infResult.outputsData[outputsNames[0]];
-    auto heatMapsMapped = infResult.outputsData[outputsNames[1]];
-    auto nmsHeatMapsMapped = infResult.outputsData[outputsNames[2]];
+    auto aembds = infResult.outputsData[embeddingsBlobName];
+    auto heats = infResult.outputsData[heatmapsBlobName];
+    auto nmsHeats = infResult.outputsData[nmsHeatmapsBlobName];
 
-    const SizeVector& aembdsDims = aembdsMapped->getTensorDesc().getDims();
-    const SizeVector& heatMapsDims = heatMapsMapped->getTensorDesc().getDims();
-    const SizeVector& nmsHeatMapsDims = nmsHeatMapsMapped->getTensorDesc().getDims();
+    const SizeVector& aembdsDims = aembds->getTensorDesc().getDims();
+    const SizeVector& heatMapsDims = heats->getTensorDesc().getDims();
+    const SizeVector& nmsHeatMapsDims = nmsHeats->getTensorDesc().getDims();
 
-    float* aembds = aembdsMapped->rmap().as<float*>();
-    float* heats = heatMapsMapped->rmap().as<float*>();
-    float* nmsHeats = nmsHeatMapsMapped->rmap().as<float*>();
+    float* aembdsMapped = aembds->rmap().as<float*>();
+    float* heatMapsMapped = heats->rmap().as<float*>();
+    float* nmsHeatMapsMapped = nmsHeats->rmap().as<float*>();
 
-    std::vector<cv::Mat> heatMaps(heatMapsDims[1]);
-    convertTo3D(heatMaps, heats, heatMapsDims);
-
-    std::vector<cv::Mat> aembdsMaps(aembdsDims[1]);
-    convertTo3D(aembdsMaps, aembds, aembdsDims);
-
-    std::vector<cv::Mat> nmsHeatMaps(nmsHeatMapsDims[1]);
-    convertTo3D(nmsHeatMaps, nmsHeats, nmsHeatMapsDims);
+    std::vector<cv::Mat>& aembdsMaps = split(aembdsMapped, aembdsDims);
+    std::vector<cv::Mat>& heatMaps = split(heatMapsMapped, heatMapsDims);
+    std::vector<cv::Mat>& nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsDims);
 
     std::vector<HumanPose> poses = extractPoses(heatMaps, aembdsMaps, nmsHeatMaps);
 
@@ -161,11 +158,27 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     return std::unique_ptr<ResultBase>(result);
 }
 
-void HpeAssociativeEmbedding::convertTo3D(std::vector<cv::Mat>& flattenData, float* data,
-                                          const SizeVector& shape) {
+std::string HpeAssociativeEmbedding::findLayerByName(const std::string layerName,
+                                                     const std::vector<std::string>& outputsNames) {
+    std::vector<std::string> suitableLayers;
+    for (auto& outputName: outputsNames) {
+        if (outputName.rfind(layerName, 0) == 0) {
+           suitableLayers.push_back(outputName);
+        }
+    }
+    if (suitableLayers.empty())
+        throw std::runtime_error("Suitable layer for " + layerName + " output is not found");
+    else if (suitableLayers.size() > 1)
+        throw std::runtime_error("More than 1 layer matched to " + layerName + " output");
+    return suitableLayers[0];
+}
+
+std::vector<cv::Mat> HpeAssociativeEmbedding::split(float* data, const SizeVector& shape) {
+    std::vector<cv::Mat> flattenData(shape[1]);
     for (size_t i = 0; i < flattenData.size(); i++) {
         flattenData[i] = cv::Mat(shape[2], shape[3], CV_32FC1, data + i * shape[2] * shape[3]);
     }
+    return flattenData;
 }
 
 std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(
@@ -175,33 +188,26 @@ std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(
 
     std::vector<std::vector<Peak>> allPeaks(numJoints);
     for (int i = 0; i < numJoints; i++) {
-        findPeaks(nmsHeatMaps, aembdsMaps, allPeaks, i, maxNumPeople);
+        findPeaks(nmsHeatMaps, aembdsMaps, allPeaks, i, maxNumPeople, detectionThreshold);
     }
     std::vector<Pose> allPoses = matchByTag(allPeaks, maxNumPeople, numJoints,
-                                            detectionThreshold, tagThreshold,
-                                            useDetectionVal, ignoreTooMuch);
-    // Filtering poses with low mean scores
-    auto it = std::begin(allPoses);
-    while (it != std::end(allPoses)) {
-        Pose pose = *it;
-        if (pose.getMeanScore() <= confidenceThreshold) {
-            it = allPoses.erase(it);
-        }
-        else {
-            ++it;
-        }
-    }
+                                            tagThreshold, useDetectionVal, ignoreTooMuch);
     std::vector<HumanPose> poses;
     for (size_t i = 0; i < allPoses.size(); i++) {
+        Pose pose = allPoses[i];
+        // Filtering poses with low mean scores
+        if (pose.getMeanScore() <= confidenceThreshold) {
+            continue;
+        }
         if (doAdjust || doRefine) {
             adjustAndRefine(allPoses, heatMaps, aembdsMaps, i, delta, doAdjust, doRefine);
         }
         std::vector<cv::Point2f> keypoints;
         for (size_t j = 0; j < numJoints; j++) {
-            Peak& peak = allPoses[i].getPeak(j);
+            Peak& peak = pose.getPeak(j);
             keypoints.push_back(peak.keypoint);
         }
-        poses.push_back({keypoints, allPoses[i].getMeanScore()});
+        poses.push_back({keypoints, pose.getMeanScore()});
     }
     return poses;
 }

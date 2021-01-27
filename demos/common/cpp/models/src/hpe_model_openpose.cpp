@@ -55,7 +55,7 @@ void HPEOpenPose::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
 
     InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
     inputInfo.setPrecision(Precision::U8);
-    inputInfo.getInputData()->setLayout(Layout::NCHW);
+    inputInfo.getInputData()->setLayout(Layout::NHWC);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
@@ -81,23 +81,22 @@ void HPEOpenPose::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
 
 void HPEOpenPose::reshape(CNNNetwork& cnnNetwork) {
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    SizeVector& InputLayerDims = inputShapes.begin()->second;
+    SizeVector& inputDims = inputShapes.begin()->second;
     if (!targetSize) {
-        targetSize = InputLayerDims[2];
+        targetSize = inputDims[2];
     }
     int height = static_cast<int>((targetSize + stride - 1) / stride) * stride;
     int inputWidth = static_cast<int>(std::round(targetSize * aspectRatio));
     int width = static_cast<int>((inputWidth + stride - 1) / stride) * stride;
-    InputLayerDims[0] = 1;
-    InputLayerDims[2] = height;
-    InputLayerDims[3] = width;
-    inputLayerSize = cv::Size(InputLayerDims[3], InputLayerDims[2]);
+    inputDims[0] = 1;
+    inputDims[2] = height;
+    inputDims[3] = width;
+    inputLayerSize = cv::Size(inputDims[3], inputDims[2]);
     cnnNetwork.reshape(inputShapes);
 }
 
 std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
-    Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
     cv::Mat resizedImage;
     double scale = inputLayerSize.height / static_cast<double>(image.rows);
     cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
@@ -110,7 +109,7 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
     int right = inputLayerSize.width - w;
     cv::copyMakeBorder(resizedImage, paddedImage, 0, bottom, 0, right,
                        cv::BORDER_CONSTANT, meanPixel);
-    matU8ToBlob<uint8_t>(paddedImage, frameBlob);
+    request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
     return std::shared_ptr<InternalModelData>(new InternalScaleData(image.cols / static_cast<float>(w),
                                                                     image.rows / static_cast<float>(h)));
 }

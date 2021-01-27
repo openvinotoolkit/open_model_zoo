@@ -41,7 +41,7 @@ TwoJointsConnection::TwoJointsConnection(const int firstJointIdx,
 
 void findPeaks(const std::vector<cv::Mat>& heatMaps,
                const float minPeaksDistance,
-               std::vector<std::vector<Peak> >& allPeaks,
+               std::vector<std::vector<Peak>>& allPeaks,
                int heatMapId, float confidenceThreshold) {
     std::vector<cv::Point> peaks;
     const cv::Mat& heatMap = heatMaps[heatMapId];
@@ -117,7 +117,7 @@ void findPeaks(const std::vector<cv::Mat>& heatMaps,
     }
 }
 
-std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& allPeaks,
+std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak>>& allPeaks,
                                          const std::vector<cv::Mat>& pafs,
                                          const size_t keypointsNumber,
                                          const float midPointsScoreThreshold,

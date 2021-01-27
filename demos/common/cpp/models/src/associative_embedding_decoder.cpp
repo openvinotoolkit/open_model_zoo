@@ -27,7 +27,8 @@
 void findPeaks(const std::vector<cv::Mat>& nmsHeatMaps,
                const std::vector<cv::Mat>& aembdsMaps,
                std::vector<std::vector<Peak>>& allPeaks,
-               int jointId, const int maxNumPeople) {
+               int jointId, const int maxNumPeople,
+               float detectionThreshold) {
 
     const cv::Mat& nmsHeatMap = nmsHeatMaps[jointId];
     const float* heatMapData = nmsHeatMap.ptr<float>();
@@ -36,39 +37,33 @@ void findPeaks(const std::vector<cv::Mat>& nmsHeatMaps,
     std::vector<int> indices(outputSize.area());
     std::iota(std::begin(indices), std::end(indices), 0);
     std::partial_sort(std::begin(indices), std::begin(indices) + maxNumPeople, std::end(indices),
-                      [&heatMapData](int l, int r) { return heatMapData[l] > heatMapData[r]; });
+                      [heatMapData](int l, int r) { return heatMapData[l] > heatMapData[r]; });
 
     for (int personId = 0; personId < maxNumPeople; personId++) {
         int index = indices[personId];
         int x = index / outputSize.width;
         int y = index % outputSize.width;
         float tag = aembdsMaps[jointId].at<float>(x, y);
-        allPeaks[jointId].push_back(Peak{cv::Point2f(static_cast<float>(x), static_cast<float>(y)),
-                                         heatMapData[index], tag});
+        float score = heatMapData[index];
+        allPeaks[jointId].reserve(maxNumPeople);
+        if (score > detectionThreshold) {
+            allPeaks[jointId].emplace_back(Peak{cv::Point2f(static_cast<float>(x), static_cast<float>(y)),
+                                           score, tag});
+        }
     }
 }
 
 std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
                              int maxNumPeople, int numJoints,
-                             float detectionThreshold, float tagThreshold,
+                             float tagThreshold,
                              bool useDetectionVal, bool ignoreTooMuch) {
-    std::vector<size_t> jointOrder { 0, 1, 2, 3, 4, 5, 6, 11, 12, 7, 8, 9, 10, 13, 14, 15, 16 };
+    size_t jointOrder[] { 0, 1, 2, 3, 4, 5, 6, 11, 12, 7, 8, 9, 10, 13, 14, 15, 16 };
     std::vector<Pose> allPoses;
-    for (size_t i = 0; i < numJoints; i++) {
-        size_t jointId = jointOrder[i];
+    for (size_t jointId : jointOrder) {
         std::vector<Peak>& jointPeaks = allPeaks[jointId];
         std::vector<float> tags;
-        auto it = std::begin(jointPeaks);
-        // Filtering peaks with low scores
-        while (it != std::end(jointPeaks)) {
-            Peak peak = *it;
-            if (peak.score <= detectionThreshold) {
-                it = jointPeaks.erase(it);
-            }
-            else {
-                tags.push_back(peak.tag);
-                ++it;
-            }
+        for (auto& peak: jointPeaks) {
+            tags.push_back(peak.tag);
         }
         if (allPoses.empty()) {
             for (size_t personId = 0; personId < jointPeaks.size(); personId++) {

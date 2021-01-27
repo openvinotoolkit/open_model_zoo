@@ -20,6 +20,8 @@ class HpeAssociativeEmbedding : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
+    /// @param aspectRatio - the ratio of input width to its height.
+    /// @param targetSize - the length of a short image side used for network reshaping.
     /// @param confidenceThreshold - threshold to eleminate low-confidence poses.
     /// Any pose with confidence lower than this threshold will be ignored.
     HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold);
@@ -30,12 +32,16 @@ public:
         const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
 
 protected:
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
+    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
 
     cv::Size inputLayerSize;
     double aspectRatio;
     float confidenceThreshold;
     int targetSize;
+
+    std::string embeddingsBlobName;
+    std::string heatmapsBlobName;
+    std::string nmsHeatmapsBlobName;
 
     static const int numJoints = 17;
     static const int stride = 32;
@@ -49,9 +55,12 @@ protected:
     static const bool doRefine;
     static const bool ignoreTooMuch;
 
-    void reshape(InferenceEngine::CNNNetwork & cnnNetwork) override;
+    void reshape(InferenceEngine::CNNNetwork& cnnNetwork) override;
 
-    void convertTo3D(std::vector<cv::Mat>& flattenData, float* data, const InferenceEngine::SizeVector& shape);
+    std::string HpeAssociativeEmbedding::findLayerByName(const std::string layerName,
+                                                         const std::vector<std::string>& outputsNames);
+
+    std::vector<cv::Mat> split(float* data, const InferenceEngine::SizeVector& shape);
 
     std::vector<HumanPose> extractPoses(const std::vector<cv::Mat>& heatMaps,
                                         const std::vector<cv::Mat>& aembdsMaps,

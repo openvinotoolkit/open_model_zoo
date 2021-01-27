@@ -20,6 +20,8 @@ class HPEOpenPose : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
+    /// @param aspectRatio - the ratio of input width to its height.
+    /// @param targetSize - the height used for network reshaping.
     /// @param confidenceThreshold - threshold to eleminate low-confidence keypoints.
     /// Any keypoint with confidence lower than this threshold will be ignored.
     HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold);
@@ -32,7 +34,7 @@ public:
     static const size_t keypointsNumber = 18;
 
 protected:
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
+    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
 
     static const int minJointsNumber = 3;
     static const int stride = 8;
@@ -51,5 +53,5 @@ protected:
                                         const std::vector<cv::Mat>& pafs) const;
     void resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const;
 
-    void reshape(InferenceEngine::CNNNetwork & cnnNetwork) override;
+    void reshape(InferenceEngine::CNNNetwork& cnnNetwork) override;
 };
