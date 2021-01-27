@@ -32,35 +32,13 @@ from text_spotting_demo.visualizer import Visualizer
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                              'common/python'))
 import monitors
+from images_capture import open_images_capture
 
 
 SOS_INDEX = 0
 EOS_INDEX = 1
 MAX_SEQ_LEN = 28
 
-class FolderCapture:
-    def __init__(self, path):
-        self.images_paths = []
-        self.current_index = 0
-        for imname in os.listdir(path):
-            if imname.lower().endswith('.jpg') or imname.lower().endswith('.png'):
-                self.images_paths.append(os.path.join(path, imname))
-
-    def read(self):
-        ret = False
-        image = None
-        if self.current_index < len(self.images_paths):
-            image = cv2.imread(self.images_paths[self.current_index])
-            ret = True
-            self.current_index += 1
-
-        return ret, image
-
-    def isOpened(self):
-        return len(self.images_paths) > 0
-
-    def release(self):
-        self.images_paths = []
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -79,10 +57,16 @@ def build_argparser():
                       help='Required. Path to an .xml file with a trained text recognition model '
                            '(decoder part).',
                       required=True, type=str, metavar='"<path>"')
-    args.add_argument('-i',
-                      dest='input_source',
-                      help='Required. Input to process.',
-                      required=True, type=str, metavar='"<path>"')
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. An input to process. The input must be a single image, '
+                           'a folder of images, video file or camera id.')
+    args.add_argument('--loop', default=False, action='store_true',
+                      help='Optional. Enable reading the input in a loop.')
+    args.add_argument('-o', '--output', required=False,
+                      help='Optional. Name of output to save.')
+    args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                      help='Optional. Number of frames to store in output. '
+                           'If 0 is set, all frames are stored.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on, i.e : CPU, GPU. '
                            'The demo will look for a suitable plugin for device specified '
@@ -222,22 +206,9 @@ def main():
     del text_enc_net
     del text_dec_net
 
-    input_source = args.input_source
-    if os.path.isdir(input_source):
-        cap = FolderCapture(input_source)
-    else:
-        try:
-            input_source = int(args.input_source)
-            cap = cv2.VideoCapture(input_source)
-            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-        except ValueError:
-            cap = cv2.VideoCapture(input_source)
-
-    if not cap.isOpened():
-        raise RuntimeError('Failed to open "{}"'.format(input_source))
-
-    ret, frame = cap.read()
-    if not ret:
+    cap = open_images_capture(args.input, args.loop)
+    frame = cap.read()
+    if frame is None:
         raise RuntimeError("Can't read an image from the input")
 
     if args.no_track:
@@ -248,11 +219,17 @@ def main():
     visualizer = Visualizer(['__background__', 'text'], show_boxes=args.show_boxes, show_scores=args.show_scores)
 
     render_time = 0
+    frames_processed = 0
 
     presenter = monitors.Presenter(args.utilization_monitors, 45, (frame.shape[1] // 4, frame.shape[0] // 8))
+    video_writer = cv2.VideoWriter()
+    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                             cap.fps(), (frame.shape[1], frame.shape[0])):
+        raise RuntimeError("Can't open video writer")
+
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-    while ret:
+    while frame is not None:
         if not args.keep_aspect_ratio:
             # Resize the image to a target size.
             scale_x = w / frame.shape[1]
@@ -361,6 +338,9 @@ def main():
             for layer, stats in perf_counts.items():
                 print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
                                                                   stats['status'], stats['real_time']))
+        frames_processed += 1
+        if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
+            video_writer.write(frame)
 
         if not args.no_show:
             # Show resulting image.
@@ -375,7 +355,7 @@ def main():
                 break
             presenter.handleKey(key)
 
-        ret, frame = cap.read()
+        frame = cap.read()
 
     print(presenter.reportMeans())
     cv2.destroyAllWindows()
