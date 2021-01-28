@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ class Metric(ClassProvider):
                 return errors
             errors.extend(metric_cls.validate_config(config, fetch_only=fetch_only, uri_prefix=uri_prefix))
             return errors
-        metric_uri = '{}.{}'.format(uri_prefix or 'metrics', cls.__provider__)
+        metric_uri = uri_prefix or 'metrics.{}'.format(cls.__provider__)
         return ConfigValidator(
             metric_uri, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
         ).validate(config, fetch_only=fetch_only)

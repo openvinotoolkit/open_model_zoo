@@ -11,8 +11,8 @@ Process of conversion can be implemented in two ways:
 
 ## Describing Annotation Conversion in Configuration File
 
-Annotation conversion can be provided in `dataset` section your configuration file to convert annotation in-place before every evaluation.
-Each conversion configuration should contain `converter` field filled selected converter name and provide converter specific parameters (more details in supported converters section). All paths can be prefixed via command line with `-s, --source` argument.
+Annotation conversion can be provided in `dataset` section of your configuration file to convert annotation in-place before every evaluation.
+Each conversion configuration should contain `converter` field filled with a selected converter name and provide converter specific parameters (more details in supported converters section). All paths can be prefixed via command line with `-s, --source` argument.
 
 You can additionally use optional parameters like:
 * `subsample_size` - Dataset subsample size. You can specify the number of ground truth objects or dataset ratio in percentage. Please, be careful to use this option, some datasets does not support subsampling. You can also specify `subsample_seed` if you want to generate subsample with specific random seed.
@@ -385,6 +385,8 @@ The main difference between this converter and `super_resolution` in data organi
   * `reference_dir` - directory with reference data. **Note: inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.**
   * `input_suffix` - suffix for input files (usually file extension). Optional, default `.txt`.
   * `reference_suffix` - suffix for reference files (usually file extension). Optional, default `.txt`.
+  * `use_bin_data` - this flag specifies that input data in binary format, optional, default `False`
+  * `bin_data_dtype` - data type for reading binary data.
 * `multi_feature_regression` - converts dataset stored in format of directories with preprocessed input numeric data (features) in dictionary format, where keys are layer names and values - features and reference data in the same format to `FeatureRegressionAnnotation`.
  This approach allows comparing output of model from different frameworks (e.g. OpenVINO converted model and source framework realisation). Please note, that input and reference should be stored as dict-like objects in npy files.
   * `data_dir` - directory with input and reference files.
@@ -405,7 +407,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `separator` - Separator between input identifier and file identifier
   * `preprocessed_dir` - Preprocessed dataset location
   * `dense_features` - Name of model dense features input
-  * `sparse_features` - Name of model sparse features input. For multiple inputs use comma-separated list in form <name>:<index>
+  * `sparse_features` - Name of model sparse features input. For multiple inputs use comma-separated list in form `<name>:<index>`
   * `lso_features` - Name of lS_o-like features input
 * `im2latex` - converts im2latex-like datasets to `CharacterRecognitionAnnotation`. [Example of the dataset](http://lstm.seas.harvard.edu/latex/data/)
   * `images_dir` - path to input images (rendered or scanned formulas)
@@ -461,11 +463,18 @@ The main difference between this converter and `super_resolution` in data organi
   * `add_background_to_label_id` - flag that label_ids defined in annotation should be shifted if `has_background` enabled.
 * `see_in_the_dark` - converts See-in-the-Dark dataset described in the [paper](https://cchen156.github.io/paper/18CVPR_SID.pdf) to `ImageProcessingAnnotation`.
   * `annotation_file` - path to image pairs file in txt format.
+* `conll_ner` - converts CONLL 2003 dataset for Named Entity Recognition to `BERTNamedEntityRecognitionAnnotation`.
+  * `annotation_file` - annotation file in txt forma
+  * `vocab_file` - vocab file for word piece tokenization.
+  * `lower_case` - converts all tokens to lower case during tokenization (Optional, default `False`).
+  * `max_length` - maximal input sequence length (Optional, default 128).
+  * `pad_input` - allow padding for input sequence if input less that `max_length` (Optional, default `True`).
+  * `include_special_token_lables` - allow extension original dataset labels with special token labels (`[CLS'`, `[SEP]`]) (Optional, default `False`).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
-There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
+There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
 You are able to overload parameters such as `label_map`, `segmentation_colors`, `background_label` using `dataset_meta_file` argument.
-dataset meta file is JSON file, which can contains following parameters:
+Dataset meta file is JSON file, which can contain the following parameters:
   * `label_map` is dictionary where `<CLASS_ID>` is key and `<CLASS_NAME>` - value.
   * `labels` is the list of strings, which represent class names (order is matter, the index of class name used as class id). Can be used instead `label_map`.
   * `background_label` - id of background label in the dataset.

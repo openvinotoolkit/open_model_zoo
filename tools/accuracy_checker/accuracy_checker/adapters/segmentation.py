@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ class SegmentationAdapter(Adapter):
         for identifier, output, meta in zip(identifiers, raw_outputs[self.output_blob], frame_meta):
             input_shape = next(iter(meta['input_shape'].values()))
             is_chw = input_shape[1] <= 4
-            if len(output.shape) == 2:
+            if len(output.shape) == 2 and len(input_shape) == 4:
                 (in_h, in_w) = input_shape[2:] if is_chw else input_shape[1:3]
                 if output.shape[0] == in_h * in_w:
                     output = np.resize(output, (in_h, in_w, output.shape[-1]))

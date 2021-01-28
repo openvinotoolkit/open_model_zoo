@@ -106,3 +106,7 @@ Accuracy Checker supports following set of postprocessors:
 * `shift_labels` - shifts predicted detection labels. Supported representation: `DetectionPrediction`.
   * `offset` - value for shift.
 * `normalize_salience_map` - converts reference salience map from [0, 255] to [0, 1] range. Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
+* `min_max_normalization` - normalize regression data into [0, 1] with given min and max values. Supported representation: `FeatureRegressionAnnotation`, `RegressionAnnotation`, `RegressionPrediction`
+  * `min` - minimal value in range, optional, default 0.
+  * `max`- maximal value in range.
+  * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).

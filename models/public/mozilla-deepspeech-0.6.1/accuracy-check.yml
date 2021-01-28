@@ -1,5 +1,5 @@
 models:
-  - name: mozilla-deepspeech-0.6.1-with-lm
+  - name: mozilla-deepspeech-0.6.1
     launchers:
       - framework: dlsdk
         adapter:

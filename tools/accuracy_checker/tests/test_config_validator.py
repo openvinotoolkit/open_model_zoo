@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -670,9 +670,9 @@ class TestConfigValidationAPI:
         assert config_errors[0].message == 'launchers section is not provided'
         assert not config_errors[0].entry
         assert config_errors[0].field_uri == 'launchers'
-        assert config_errors[1].message == "datasets.0.preprocessing.1.resize specifies unknown options: ['something_extra']"
+        assert config_errors[1].message == "datasets.0.preprocessing.1 specifies unknown options: ['something_extra']"
         assert config_errors[1].entry == preprocessing_config[1]
-        assert config_errors[1].field_uri == 'datasets.0.preprocessing.1.resize'
+        assert config_errors[1].field_uri == 'datasets.0.preprocessing.1'
 
     @pytest.mark.usefixtures('mock_path_exists')
     def test_preprocessing_config_unknown_parameter(self):
@@ -730,9 +730,9 @@ class TestConfigValidationAPI:
         assert config_errors[0].message == 'launchers section is not provided'
         assert not config_errors[0].entry
         assert config_errors[0].field_uri == 'launchers'
-        assert config_errors[1].message == "datasets.0.postprocessing.0.resize_prediction_boxes specifies unknown options: ['something_extra']"
+        assert config_errors[1].message == "datasets.0.postprocessing.0 specifies unknown options: ['something_extra']"
         assert config_errors[1].entry == postprocessing_config[0]
-        assert config_errors[1].field_uri == 'datasets.0.postprocessing.0.resize_prediction_boxes'
+        assert config_errors[1].field_uri == 'datasets.0.postprocessing.0'
 
     @pytest.mark.usefixtures('mock_path_exists')
     def test_postprocessing_config_unknown_parameter(self):

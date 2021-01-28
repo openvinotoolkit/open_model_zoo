@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ class Preprocessor(ClassProvider):
             errors.extend(preprocessor_cls.validate_config(config, fetch_only=fetch_only, uri_prefix=uri_prefix))
             return errors
 
-        preprocessor_uri = '{}.{}'.format(uri_prefix or 'preprocessing', cls.__provider__)
+        preprocessor_uri = uri_prefix or 'preprocessing.{}'.format(cls.__provider__)
         return ConfigValidator(
             preprocessor_uri, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
         ).validate(config, fetch_only=fetch_only)

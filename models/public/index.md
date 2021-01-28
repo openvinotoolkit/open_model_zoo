@@ -41,6 +41,7 @@ The models can be downloaded via Model Downloader
 | MobileNet V3 Small 1.0      | TensorFlow\*                       | [mobilenet-v3-small-1.0-224-tf](./mobilenet-v3-small-1.0-224-tf/mobilenet-v3-small-1.0-224-tf.md) | 67.36%/87.45% | 0.121 | 2.537 |
 | MobileNet V3 Large 1.0      | TensorFlow\*                       | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/mobilenet-v3-large-1.0-224-tf.md) | 75.70%/92.76% | 0.4536 | 5.4721 |
 | DenseNet 121, alpha=0.125   | MXNet\*                            | [octave-densenet-121-0.125](./octave-densenet-121-0.125/octave-densenet-121-0.125.md) | 76.066%/93.044% | 4.883 | 7.977 |
+| RegNetX-3.2GF               | PyTorch\*                          | [regnetx-3.2gf](./regnetx-3.2gf/regnetx-3.2gf.md) | 78.17%/94.08% | 6.3893 | 15.2653 |
 | ResNet 26, alpha=0.25       | MXNet\*                            | [octave-resnet-26-0.25](./octave-resnet-26-0.25/octave-resnet-26-0.25.md)     | 76.076%/92.584%| 3.768 | 15.99 |
 | ResNet 50, alpha=0.125      | MXNet\*                            | [octave-resnet-50-0.125](./octave-resnet-50-0.125/octave-resnet-50-0.125.md)    | 78.19%/93.862% | 7.221 | 25.551 |
 | ResNet 101, alpha=0.125     | MXNet\*                            | [octave-resnet-101-0.125](./octave-resnet-101-0.125/octave-resnet-101-0.125.md)   | 79.182%/94.42% | 13.387 | 44.543 |
@@ -81,6 +82,8 @@ detect areas with complex shape.
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
 | DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/deeplabv3.md) | 66.85% | 11.469 | 23.819 |
 | HRNet V2 C1 Segmentation  | PyTorch\*      | [hrnet-v2-c1-segmentation](./hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md) | 77.69% | 81.993 | 66.4768 |
+| Fastseg MobileV3Large LR-ASPP, F=128  | PyTorch\*      | [fastseg-large](./fastseg-large/fastseg-large.md) | 72.67% | 140.9611 | 3.2 |
+| Fastseg MobileV3Small LR-ASPP, F=128  | PyTorch\*      | [fastseg-small](./fastseg-small/fastseg-small.md) | 67.15% | 69.2204 | 1.1 |
 
 ### Instance Segmentation
 
@@ -178,7 +181,7 @@ Since this task contains - in the general setting - some ambiguity, the resultin
 
 | Model Name                  | Implementation | OMZ Model Name                | Accuracy | GFlops    | mParams |
 | --------------------------- | -------------- | ----------------------------- | -------- | --------- | ------- |
-| midasnet                    | PyTorch\*      | [midasnet](./midasnet/midasnet.md)| 7.5878| 207.4915  |    104.0814     |
+| midasnet                    | PyTorch\*      | [midasnet](./midasnet/midasnet.md)| 0.07071 | 207.25144  |    104.081     |
 | FCRN ResNet50-Upproj          | TensorFlow\*   | [fcrn-dp-nyu-depth-v2-tf](./fcrn-dp-nyu-depth-v2-tf/fcrn-dp-nyu-depth-v2-tf.md)| 0.573 | 63.5421 | 34.5255 |
 
 ## Image Inpainting

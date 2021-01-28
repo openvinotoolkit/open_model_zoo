@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ class ConfigValidator(BaseValidator):
     WARN_ON_EXTRA_ARGUMENT = _ExtraArgumentBehaviour.WARN
     ERROR_ON_EXTRA_ARGUMENT = _ExtraArgumentBehaviour.ERROR
     IGNORE_ON_EXTRA_ARGUMENT = _ExtraArgumentBehaviour.IGNORE
-    acceptable_unknown_options = ['connector']
+    acceptable_unknown_options = ['connector', '_command_line_mapping']
 
     def __init__(self, config_uri, on_extra_argument=WARN_ON_EXTRA_ARGUMENT, fields=None, **kwargs):
         super().__init__(**kwargs)

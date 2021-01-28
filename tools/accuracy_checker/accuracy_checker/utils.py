@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -413,7 +413,7 @@ def set_image_metadata(annotation, images):
     if not isinstance(data, list):
         data = [data]
     for image in data:
-        data_shape = image.shape if not np.isscalar(image) else 1
+        data_shape = np.shape(image) if not np.isscalar(image) else 1
         image_sizes.append(data_shape)
     annotation.set_image_size(image_sizes)
 
@@ -490,6 +490,14 @@ class OrderedSet(MutableSet):
         return set(self) == set(other)
 
 
+def is_relative_to(path, *other):
+    try:
+        Path(path).relative_to(*other)
+        return True
+    except ValueError:
+        return False
+
+
 def get_parameter_value_from_config(config, parameters, key):
     if key not in parameters.keys():
         return None
@@ -523,6 +531,14 @@ def color_format(s, color=Color.PASSED):
 
 def softmax(x):
     return np.exp(x) / sum(np.exp(x))
+
+
+def is_iterable(maybe_iterable):
+    try:
+        iter(maybe_iterable)
+        return True
+    except TypeError:
+        return False
 
 
 class ParseError(Exception):

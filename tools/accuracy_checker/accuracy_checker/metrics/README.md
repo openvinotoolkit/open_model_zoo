@@ -119,6 +119,8 @@ More detailed information about calculation segmentation metrics you can find [h
   * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
 * `ssim` - [Structural similarity](https://en.wikipedia.org/wiki/Structural_similarity). Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`, `SuperResolutionAnnotation`, `SuperResolutionPrediction`.
 * `angle_error` - Mean angle error and Standard deviation of angle error for gaze estimation. Supported representations: `GazeVectorAnnotation`, `GazeVectorPrediction`.
+* `relative_l2_error` - Mean relative error defined like L2 norm for difference between annotation and prediction normalized by L2 norm for annotation value. Supported representations:
+  `FeatureRegressionAnnotation`, `RegressionPrediction`.
 * `multi_accuracy` - accuracy for multilabel recognition task. Supported representations: `MultiLabelRecognitionAnnotation`, `MultiLabelRecognitionPrediction`.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
   * `calculate_average` - allows calculation of average accuracy (default value: `True`).
@@ -200,6 +202,14 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
 * `f1` - F1-score for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
 * `exact_match` - Exact matching (EM) metric for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
 * `qa_embedding_accuracy` - Right context detection accuracy metric for question answering task solved by question vs context embeddings comparison. Supported representations: `QuestionAnsweringEmbeddingAnnotation`, `QuestionAnsweringEmbeddingPrediction`.
+* `ner_accuracy` - Token-level accuracy used for Named Entity Recognition task. Supported representations: `BERTNamedEntityRecognitionAnnotation`, `SequenceClassificationAnnotation`, `SequenceClassificationPrediction`.
+   * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
+* `ner_recall` - Token-level recall used for Named Entity Recognition task. Supported representations: `BERTNamedEntityRecognitionAnnotation`, `SequenceClassificationAnnotation`, `SequenceClassificationPrediction`.
+   * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
+* `ner_precision` - Token-level precision for Named Entity Recognition task. Supported representations: `BERTNamedEntityRecognitionAnnotation`, `SequenceClassificationAnnotation`, `SequenceClassificationPrediction`.
+   * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
+* `ner_f_score` - Token-level F-score used for Named Entity Recognition task. Supported representations: `BERTNamedEntityRecognitionAnnotation`, `SequenceClassificationAnnotation`, `SequenceClassificationPrediction`.
+   * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
 * `mpjpe_multiperson` - [Mean Per Joint Position Error](http://vision.imar.ro/human3.6m/pami-h36m.pdf) extended for multi-person case. Supported representations: `PoseEstimation3dAnnotation`, `PoseEstimation3dPrediction`. As the first step, correspondence between ground truth and prediction skeletons is established for each image. Then MPJPE is computed for each ground truth and prediction pair. The error is averaged over poses in each frame, then over all frames.
 * `face_recognition_tafa_pair_metric` - accuracy for face recognition models based on dot product of embedding values. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
   * `threshold` - minimal dot product value of embeddings to identify as matched face pair.

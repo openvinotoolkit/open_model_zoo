@@ -1,5 +1,5 @@
 models:
-  - name: resnet-18
+  - name: resnet-18-pytorch
 
     launchers:
       - framework: onnx_runtime
@@ -39,7 +39,7 @@ models:
 
             # Reference metric from PyTorch (pytorch v1.3.1, torchvision v0.4.2) top-1 69.76% top-5 89.08%
 
-  - name: resnet-18
+  - name: resnet-18-pytorch
 
     launchers:
       - framework: dlsdk

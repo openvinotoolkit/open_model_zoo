@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ from ..representation import (
 from ..utils import get_path, OrderedSet
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
-from ..utils import cast_to_bool
+from ..utils import cast_to_bool, is_relative_to
 
 DatasetConversionInfo = namedtuple('DatasetConversionInfo',
                                    [
@@ -264,8 +264,18 @@ def get_conversion_attributes(config, dataset_size):
     dataset_name = config.get('name', '')
     conversion_parameters = copy.deepcopy(config.get('annotation_conversion', {}))
     for key, value in config.get('annotation_conversion', {}).items():
-        if isinstance(value, Path):
-            conversion_parameters[key] = str(value)
+        if key in config.get('_command_line_mapping', {}):
+            m_path = config['_command_line_mapping'][key]
+            if not m_path:
+                conversion_parameters[key] = str(value)
+                continue
+
+            if isinstance(m_path, list):
+                for m_path in config['_command_line_mapping'][key]:
+                    if is_relative_to(value, m_path):
+                        break
+            conversion_parameters[key] = str(value.relative_to(m_path))
+
     subset_size = config.get('subsample_size')
     subset_parameters = {}
     if subset_size is not None:
@@ -286,7 +296,7 @@ def configure_converter(converter_options, args, converter):
     }
     converter_config['converter'] = args.converter
     converter.config = converter_config
-    converter.validate_config()
+    converter.validate_config(converter_config)
     converter.configure()
 
     return converter, converter_config

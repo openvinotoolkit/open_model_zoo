@@ -238,7 +238,7 @@ AccuracyChecker supports following set of adapters:
   * `lm_oov_score` - Replace LM score for out-of-vocabulary words with this value (default -1000, ignored without LM)
   * `lm_vocabulary_offset` - Start of vocabulary strings section in the LM file.  Default is to not filter candidate words using vocabulary (ignored without LM)
   * `lm_vocabulary_length` - Size in bytes of vocabulary strings section in the LM file (ignored without LM)
-* `fast_ctc_beam_search_decoder_with_lm` - CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition, depends on [`ctcdecode_numpy` Python module](../../../../demos/python_demos/speech_recognition_demo/ctcdecode-numpy/README.md).
+* `fast_ctc_beam_search_decoder_with_lm` - CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition, depends on [`ctcdecode_numpy` Python module](../../../../demos/speech_recognition_demo/python/ctcdecode-numpy/README.md).
   * `beam_size` - Size of the beam to use during decoding (default 10).
   * `logarithmic_prob` - Set to "True" to indicate that network gives natural-logarithmic probabilities. Default is False for plain probabilities (after softmax).
   * `probability_out` - Name of the network's output with character probabilities (required)
@@ -261,16 +261,18 @@ AccuracyChecker supports following set of adapters:
   * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.json). Path can be prefixed with `--models` arguments.
   * `merges_file` - file which contains merges for encoding model predicted indexes to words (e. g. merges.txt). Path can be prefixed with `--models` arguments.
   * `output_name` - name of model's output layer if need (optional).
-  * `sos_symbol` - string representation of start_of_sentence symbol (default='<s>').
-  * `eos_symbol` - string representation of end_of_sentence symbol (default='</s>').
-  * `pad_symbol` - string representation of pad symbol (default='<pad>').
+  * `sos_symbol` - string representation of start_of_sentence symbol (default=`<s>`).
+  * `eos_symbol` - string representation of end_of_sentence symbol (default=`</s>`).
+  * `pad_symbol` - string representation of pad symbol (default=`<pad>`).
   * `remove_extra_symbols` - remove sos/eos/pad symbols from predicted string (default=True)
 * `bert_question_answering` - converting output of BERT model trained to solve question answering task to `QuestionAnsweringPrediction`.
 * `bidaf_question_answering` - converting output of BiDAF model trained to solve question answering task to `QuestionAnsweringPrediction`.
   * `start_pos_output` - name of output layer with answer start position.
   * `end_pos_output` - name of output layer with answer end position.
-* `bert_classification` - converting output of BERT model trained for classification task to `ClassificationPrediction`.
+* `bert_classification` - converting output of BERT model trained for text classification task to `ClassificationPrediction`.
   * `num_classes` - number of predicted classes.
+  * `classification_out` - name of output layer with classification probabilities. (Optional, if not provided default first output blob will be used).
+* `bert_ner` - converting output of BERT model trained for named entity recognition task to `SequenceClassificationPrediction`.
   * `classification_out` - name of output layer with classification probabilities. (Optional, if not provided default first output blob will be used).
 * `human_pose_estimation_3d` - converting output of model for 3D human pose estimation to `PoseEstimation3dPrediction`.
   * `features_3d_out` - name of output layer with 3D coordinates maps.

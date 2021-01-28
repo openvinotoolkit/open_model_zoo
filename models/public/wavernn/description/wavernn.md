@@ -1,4 +1,4 @@
-# wavernn
+# wavernn (composite)
 
 ## Use Case and High-Level Description
 

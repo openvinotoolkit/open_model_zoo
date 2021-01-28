@@ -1,5 +1,5 @@
 models:
-  - name: style_transfer
+  - name: fast-neural-style-mosaic-onnx
     launchers:
       - framework: onnx_runtime
         model: fast-neural-style-mosaic-onnx.onnx

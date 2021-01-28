@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ class BaseReader(ClassProvider):
     @classmethod
     def validate_config(cls, config, data_source=None, fetch_only=False, **kwargs):
         uri_prefix = kwargs.pop('uri_prefix', '')
-        reader_uri = '{}'.format(uri_prefix) if uri_prefix else 'reader'
+        reader_uri = uri_prefix or 'reader'
         if cls.__name__ == BaseReader.__name__:
             errors = []
             reader_type = config if isinstance(config, str) else config.get('type')
@@ -178,7 +178,6 @@ class BaseReader(ClassProvider):
                 return errors
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
-        reader_uri = '{}'.format(cls.__provider__)
         return ConfigValidator(reader_uri, fields=cls.parameters(), **kwargs).validate(
             config or {}, fetch_only=fetch_only
         )
@@ -501,6 +500,24 @@ class NumpyDictReader(BaseReader):
         if len(data) == 1:
             return DataRepresentation(data[0], identifier=data_id)
         return DataRepresentation(data, identifier=identifier)
+
+
+class NumpyBinReader(BaseReader):
+    __provider__ = 'numpy_bin_reader'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            "dtype": StringField(optional=True, default='float32', description='data type for reading')
+        })
+        return params
+
+    def configure(self):
+        self.dtype = self.get_value_from_config('dtype')
+
+    def read(self, data_id):
+        return np.fromfile(self.data_source / data_id, dtype=self.dtype)
 
 
 class TensorflowImageReader(BaseReader):

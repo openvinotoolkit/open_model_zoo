@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ from .tokens_to_lower_case import TokensToLowerCase
 from .super_resolution_image_recovery import SRImageRecovery, ColorizationLABRecovery
 from .argmax_segmentation_mask import ArgMaxSegmentationMask
 from .normalize_salient_map import SalientMapNormalizer
+from .min_max_normalization import MinMaxRegressionNormalization
 
 
 __all__ = [
@@ -129,5 +130,7 @@ __all__ = [
     'SRImageRecovery',
     'ColorizationLABRecovery',
 
-    'SalientMapNormalizer'
+    'SalientMapNormalizer',
+
+    'MinMaxRegressionNormalization',
 ]

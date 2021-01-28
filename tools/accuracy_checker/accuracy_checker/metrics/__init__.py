@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ from .regression import (
     MeanSquaredError,
     Log10Error,
     MeanAbsolutePercentageError,
+    RelativeL2Error,
 
     RootMeanSquaredErrorOnInterval,
     RootMeanSquaredError,
@@ -88,6 +89,7 @@ from .coco_orig_metrics import (
 from .hit_ratio import HitRatioMetric, NDSGMetric
 from .machine_translation import BilingualEvaluationUnderstudy
 from .question_answering import ExactMatchScore, ScoreF1, QuestionAnsweringEmbeddingAccuracy
+from .ner import NERAccuracy, NERFScore, NERPrecision, NERRecall
 from .mpjpe_multiperson import MpjpeMultiperson
 from .language_modeling import ScorePerplexity
 
@@ -152,6 +154,7 @@ __all__ = [
     'AngleError',
     'MeanAbsolutePercentageError',
     'Log10Error',
+    'RelativeL2Error',
 
     'MultiLabelAccuracy',
     'MultiLabelRecall',
@@ -183,6 +186,11 @@ __all__ = [
     'ScoreF1',
     'ExactMatchScore',
     'QuestionAnsweringEmbeddingAccuracy',
+
+    'NERAccuracy',
+    'NERPrecision',
+    'NERRecall',
+    'NERFScore',
 
     'MpjpeMultiperson',
 

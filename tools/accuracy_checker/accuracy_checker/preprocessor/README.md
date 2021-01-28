@@ -132,8 +132,8 @@ Accuracy Checker supports following set of preprocessors:
 * `decode_by_sentence_piece_bpe_tokenizer` - Decode words to set of indexes using SentencePieceBPETokenizer.
   * `vocabulary_file` - path to vocabulary file for decoding. Path can be prefixed with `--models` argument.
   * `merges_file` - path to merges file for decoding. Path can be prefixed with `--models` argument.
-  * `sos_symbol` - string representation of start_of_sentence symbol (default='<s>').
-  * `eos_symbol` - string representation of end_of_sentence symbol (default='</s>').
+  * `sos_symbol` - string representation of start_of_sentence symbol (default=`<s>`).
+  * `eos_symbol` - string representation of end_of_sentence symbol (default=`</s>`).
   * `add_symbols` - add sos/eos symbols to sentence (default=True).
 *  `pad_with_eos` - supplement the input sequence to a specific size using a line terminator character or index.
   * `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
@@ -192,6 +192,7 @@ Accuracy Checker supports following set of preprocessors:
 * `pack_raw_image` - pack raw image to [H, W, 4] normalized image format with black level removal.
   * `black_level` - black level on the input image.
   * `ratio` - exposure scale ratio, optional, can be replaced by value from annotation if not provided.
+  * `9-channels` - for packing 9 channels images (Optional, default `False`).
 
 ## Optimized preprocessing via OpenVINO Inference Engine
 OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`.

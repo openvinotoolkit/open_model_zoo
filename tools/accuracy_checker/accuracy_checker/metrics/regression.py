@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -109,11 +109,11 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
             if len(prediction.value) != 1:
                 raise ConfigError('annotation for all predictions should be provided')
             diff = self.value_differ(annotation.value, next(iter(prediction.value.values())))
-            if not np.isscalar(diff) and np.ndim(diff) > 1:
+            if not np.isscalar(diff) and np.size(diff) > 1:
                 diff = np.mean(diff)
             return diff
         diff = self.value_differ(annotation.value, prediction.value)
-        if not np.isscalar(diff) and np.ndim(diff) > 1:
+        if not np.isscalar(diff) and np.size(diff) > 1:
             diff = np.mean(diff)
         return diff
 
@@ -332,6 +332,21 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
             self.profiler.finish()
 
         return result
+
+
+def relative_err(target, pred):
+    if len(target.shape) > 2:
+        target = target.flatten()
+    if len(pred.shape) > 2:
+        pred = pred.flatten()
+    return np.linalg.norm(target - pred, 2) / (np.linalg.norm(target, 2) + np.finfo(float).eps)
+
+
+class RelativeL2Error(BaseRegressionMetric):
+    __provider__ = 'relative_l2_error'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(relative_err, *args, **kwargs)
 
 
 class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
@@ -681,7 +696,7 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
         self.threshold = self.get_value_from_config('threshold')
         self.score_bias = self.get_value_from_config('score_bias')
         self.meta.update({
-            'names': ['head', 'shoulder', 'elbow', 'wrist', 'hip', 'knee', 'ankle', 'mean'],
+            'names': ['mean', 'head', 'shoulder', 'elbow', 'wrist', 'hip', 'knee', 'ankle', 'mean'],
             'calculate_mean': False
         })
         if not contains_all(
@@ -705,18 +720,19 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
         self.jnt_count += jnt_visible
         less_than_threshold = np.multiply((scaled_uv_err < self.threshold), jnt_visible)
         self.pck += less_than_threshold
-        return np.divide(
+        return np.mean(np.divide(
             less_than_threshold.astype(float),
             jnt_visible.astype(float),
             out=np.zeros_like(less_than_threshold, dtype=float),
             where=jnt_visible != 0
-        )
+        ))
 
     def evaluate(self, annotations, predictions):
         full_score = np.divide(self.pck, self.jnt_count, out=np.zeros_like(self.jnt_count), where=self.jnt_count != 0)
         full_score = np.ma.array(full_score, mask=False)
         full_score[6:8].mask = True
         return [
+            np.mean(full_score),
             full_score[self.joints['head']],
             0.5 * (full_score[self.joints['lsho']] + full_score[self.joints['rsho']]),
             0.5 * (full_score[self.joints['lelb']] + full_score[self.joints['relb']]),
@@ -724,7 +740,6 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
             0.5 * (full_score[self.joints['lhip']] + full_score[self.joints['rhip']]),
             0.5 * (full_score[self.joints['lkne']] + full_score[self.joints['rkne']]),
             0.5 * (full_score[self.joints['lank']] + full_score[self.joints['rank']]),
-            np.mean(full_score),
         ]
 
     def reset(self):
