@@ -172,14 +172,14 @@ def add_accuracy_checker_pages(output_root, parent_element):
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
         if md_path_rel.stem == 'README':
-            id_suffix = ''
+            id_suffix = md_path_rel.parent.name
         elif md_path_rel.stem.endswith('_readme'):
-            id_suffix = '_' + md_path_rel.stem[:-7]
+            id_suffix = md_path_rel.stem[:-7]
         else:
             raise RuntimeError('{}: unexpected documentation file name')
 
         add_page(output_root, ac_group_element,
-            id='omz_' + '_'.join(md_path_rel.parent.parts) + id_suffix, path=md_path_rel)
+            id=f'omz_tools_accuracy_checker_{id_suffix}', path=md_path_rel)
 
     sort_titles(ac_group_element)
 
