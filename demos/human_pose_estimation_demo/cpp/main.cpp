@@ -39,6 +39,7 @@
 #include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 
+#include <models/hpe_model_associative_embedding.h>
 #include <models/hpe_model_openpose.h>
 
 
@@ -153,23 +154,32 @@ cv::Mat renderHumanPose(const HumanPoseResult& result) {
         cv::Scalar(0, 0, 255), cv::Scalar(85, 0, 255), cv::Scalar(170, 0, 255),
         cv::Scalar(255, 0, 255), cv::Scalar(255, 0, 170), cv::Scalar(255, 0, 85)
     };
-    static const std::pair<int, int> limbKeypointsIds[] = {
-        {1, 2},  {1, 5},   {2, 3},
-        {3, 4},  {5, 6},   {6, 7},
-        {1, 8},  {8, 9},   {9, 10},
-        {1, 11}, {11, 12}, {12, 13},
-        {1, 0},  {0, 14},  {14, 16},
-        {0, 15}, {15, 17}
+    static const std::pair<int, int> keypointsOP[] = {
+        {1, 2}, {1, 5}, {2, 3}, {3, 4},  {5, 6}, {6, 7},
+        {1, 8}, {8, 9}, {9, 10}, {1, 11}, {11, 12}, {12, 13},
+        {1, 0}, {0, 14},{14, 16}, {0, 15}, {15, 17}
     };
-
+    static const std::pair<int, int> keypointsAE[] = {
+        {15, 13}, {13, 11}, {16, 14}, {14, 12}, {11, 12}, {5, 11},
+        {6, 12}, {5, 6}, {5, 7}, {6, 8}, {7, 9}, {8, 10},
+        {1, 2}, {0, 1}, {0, 2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}
+    };
     const int stickWidth = 4;
     const cv::Point2f absentKeypoint(-1.0f, -1.0f);
     for (auto pose : result.poses) {
-        CV_Assert(pose.keypoints.size() == HPEOpenPose::keypointsNumber);
         for (size_t keypointIdx = 0; keypointIdx < pose.keypoints.size(); keypointIdx++) {
             if (pose.keypoints[keypointIdx] != absentKeypoint) {
                 cv::circle(outputImg, pose.keypoints[keypointIdx], 4, colors[keypointIdx], -1);
             }
+        }
+    }
+    std::vector<std::pair<int, int>> limbKeypointsIds;
+    if (!result.poses.empty()) {
+        if (result.poses[0].keypoints.size() == HPEOpenPose::keypointsNumber) {
+            limbKeypointsIds.insert(limbKeypointsIds.begin(), std::begin(keypointsOP), std::end(keypointsOP));
+        }
+        else {
+            limbKeypointsIds.insert(limbKeypointsIds.begin(), std::begin(keypointsAE), std::end(keypointsAE));
         }
     }
     cv::Mat pane = outputImg.clone();
@@ -223,6 +233,9 @@ int main(int argc, char *argv[]) {
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
             model.reset(new HPEOpenPose(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
+        }
+        else if (FLAGS_at == "ae") {
+            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;

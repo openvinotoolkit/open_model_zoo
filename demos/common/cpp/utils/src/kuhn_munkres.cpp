@@ -2,20 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "kuhn_munkres.hpp"
-#include "logging.hpp"
-
 #include <algorithm>
 #include <limits>
 #include <vector>
 
-KuhnMunkres::KuhnMunkres() : n_() {}
+#include <utils/kuhn_munkres.hpp>
+
+KuhnMunkres::KuhnMunkres(bool greedy) : n_(), greedy_(greedy) {}
 
 std::vector<size_t> KuhnMunkres::Solve(const cv::Mat& dissimilarity_matrix) {
-    PT_CHECK(dissimilarity_matrix.type() == CV_32F);
+    CV_Assert(dissimilarity_matrix.type() == CV_32F);
     double min_val;
     cv::minMaxLoc(dissimilarity_matrix, &min_val);
-    PT_CHECK(min_val >= 0);
 
     n_ = std::max(dissimilarity_matrix.rows, dissimilarity_matrix.cols);
     dm_ = cv::Mat(n_, n_, CV_32F, cv::Scalar(0));
@@ -123,6 +121,8 @@ int KuhnMunkres::FindInCol(int col, int what) {
 
 void KuhnMunkres::Run() {
     TrySimpleCase();
+    if (greedy_)
+        return;
     while (!CheckIfOptimumIsFound()) {
         while (true) {
             auto point = FindUncoveredMinValPos();

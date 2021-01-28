@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "core.hpp"
+#include "opencv2/core.hpp"
 
 #include <memory>
 #include <vector>
@@ -17,7 +17,10 @@
 ///
 class KuhnMunkres {
 public:
-    KuhnMunkres();
+    ///
+    /// \brief Initializes the class for assignment problem solving.
+    /// \param[in] greedy If a faster greedy matching algorithm should be used.
+    explicit KuhnMunkres(bool greedy = false);
 
     ///
     /// \brief Solves the assignment problem for given dissimilarity matrix.
@@ -42,6 +45,7 @@ private:
     std::vector<int> is_col_visited_;
 
     int n_;
+    bool greedy_;
 
     void TrySimpleCase();
     bool CheckIfOptimumIsFound();
