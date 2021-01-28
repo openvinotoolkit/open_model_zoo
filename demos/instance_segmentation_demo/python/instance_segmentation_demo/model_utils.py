@@ -56,19 +56,19 @@ def segm_postprocess(box, raw_cls_mask, im_h, im_w):
 def mask_rcnn_postprocess(
         outputs, scale_x, scale_y, frame_height, frame_width, input_height, input_width, conf_threshold
 ):
-    segmentoly_postrpocess = 'raw_masks' in outputs
-    boxes = outputs['boxes'] if segmentoly_postrpocess else outputs['boxes'][:, :4]
-    scores = outputs['scores'] if segmentoly_postrpocess else outputs['boxes'][:, 4]
+    segmentoly_postprocess = 'raw_masks' in outputs
+    boxes = outputs['boxes'] if segmentoly_postprocess else outputs['boxes'][:, :4]
+    scores = outputs['scores'] if segmentoly_postprocess else outputs['boxes'][:, 4]
     boxes[:, 0::2] /= scale_x
     boxes[:, 1::2] /= scale_y
-    if segmentoly_postrpocess:
+    if segmentoly_postprocess:
         classes = outputs['classes'].astype(np.uint32)
     else:
         classes = outputs['labels'].astype(np.uint32) + 1
     masks = []
-    masks_name = 'raw_masks' if segmentoly_postrpocess else 'masks'
+    masks_name = 'raw_masks' if segmentoly_postprocess else 'masks'
     for box, cls, raw_mask in zip(boxes, classes, outputs[masks_name]):
-        raw_cls_mask = raw_mask[cls, ...] if segmentoly_postrpocess else raw_mask
+        raw_cls_mask = raw_mask[cls, ...] if segmentoly_postprocess else raw_mask
         mask = segm_postprocess(box, raw_cls_mask, frame_height, frame_width)
         masks.append(mask)
     # Filter out detections with low confidence.
