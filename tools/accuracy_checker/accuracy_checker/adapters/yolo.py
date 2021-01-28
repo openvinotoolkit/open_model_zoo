@@ -310,6 +310,7 @@ class YoloV3Adapter(Adapter):
                 description="Reshapes output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on 'output_format'"
                             "value ([B,Cy,Cx] by default). You may need to specify 'cells' value."
             ),
+            'transpose': ListField(optional=True, description="Transpose output tensor to specified format."),
             'cells': ListField(
                 optional=True, default=[13, 26, 52],
                 description="Grid size for each layer, according 'outputs' filed. Works only with 'do_reshape=True' or "
@@ -350,6 +351,7 @@ class YoloV3Adapter(Adapter):
                 per_layer_anchors.append(layer_anchors)
             self.masked_anchors = per_layer_anchors
         self.do_reshape = self.get_value_from_config('do_reshape')
+        self.transpose = self.get_value_from_config('transpose')
         self.cells = self.get_value_from_config('cells')
         if len(self.outputs) != len(self.cells):
             if self.do_reshape:
@@ -400,6 +402,8 @@ class YoloV3Adapter(Adapter):
             for layer_id, p in enumerate(prediction):
                 anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
                 num = len(anchors) // 2 if self.masked_anchors else self.num
+                if self.transpose:
+                    p = np.transpose(p, self.transpose)
                 if self.do_reshape or len(p.shape) != 3:
                     try:
                         cells = self.cells[layer_id]
@@ -563,3 +567,15 @@ class YoloV3TF2(Adapter):
         coors, scores, classes = pred_coor[mask], scores[mask], classes[mask]
 
         return coors, scores, classes
+
+
+class YoloV5Adapter(YoloV3Adapter):
+    __provider__ = 'yolo_v5'
+
+    def configure(self):
+        super().configure()
+        if self.raw_output:
+            self.processor = YoloOutputProcessor(coord_correct=lambda x: 2.0 / (1.0 + np.exp(-x)) - 0.5,
+                                                 size_correct=lambda x: (2.0 / (1.0 + np.exp(-x))) ** 2,
+                                                 conf_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
+                                                 prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
