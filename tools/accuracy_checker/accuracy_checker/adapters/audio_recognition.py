@@ -689,9 +689,8 @@ class DumbDecoder(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'alphabet': ListField(optional=True, default=None, value_type=str, allow_empty=False, description=
-                "Alphabet as list of strings. Default is space + 26 English letters + apostrophe."
-            ),
+            'alphabet': ListField(optional=True, default=None, value_type=str, allow_empty=False,
+                                  description="Alphabet as list of strings."),
             'uppercase': BoolField(optional=True, default=True, description="Transform result to uppercase"),
 
         })
@@ -703,7 +702,7 @@ class DumbDecoder(Adapter):
         self.uppercase = self.get_value_from_config('uppercase')
 
     def process(self, raw, identifiers=None, frame_meta=None):
-        assert (len(identifiers) == 1)
+        assert len(identifiers) == 1
         decoded = ''.join(self.alphabet[t] for t in raw[0])
         if self.uppercase:
             decoded = decoded.upper()

@@ -451,7 +451,7 @@ class SpliceFrame(Preprocessor):
                 seq.append(tmp)
             image.data = np.concatenate(seq, axis=self.axis)
 
-            return image
+        return image
 
 class DitherFrame(Preprocessor):
     __provider__ = 'audio_dither'
@@ -495,7 +495,8 @@ class PreemphFrame(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         if self.preemph != 0:
-            image.data = np.concatenate((np.expand_dims(image.data[:, 0], axis=0), image.data[:, 1:] - self.preemph *  image.data[:, :-1]), axis=1)
+            image.data = np.concatenate((np.expand_dims(image.data[:, 0], axis=0),
+                                         image.data[:, 1:] - self.preemph *  image.data[:, :-1]), axis=1)
 
         return image
 
@@ -867,7 +868,7 @@ class AudioToMelSpectrogram(Preprocessor):
 
         # do stft with weighting window
         _, _, x = dsp.stft(x.squeeze(), fs=sample_rate, window=self.window, nperseg=self.window_length,
-                                   noverlap=self.hop_length, nfft=self.n_fft)
+                           noverlap=self.hop_length, nfft=self.n_fft)
         x *= sum(self.window)
 
         # get power spectrum
@@ -902,7 +903,8 @@ class AudioToMelSpectrogram(Preprocessor):
             if pad_to > 0:
                 pad_amt = x.shape[-1] % pad_to
                 if pad_amt != 0:
-                    x = np.pad(x, ((0, 0), (0, 0), (0, pad_to - pad_amt)), constant_values=self.pad_value, mode='constant')
+                    x = np.pad(x, ((0, 0), (0, 0), (0, pad_to - pad_amt)), constant_values=self.pad_value,
+                               mode='constant')
 
         # transpose according to model input layout
         x = np.transpose(x, [2, 0, 1])
