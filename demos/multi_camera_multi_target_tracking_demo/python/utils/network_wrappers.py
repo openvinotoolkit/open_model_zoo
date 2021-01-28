@@ -148,8 +148,8 @@ class MaskRCNN(DetectorInterface):
 
     def check_segmentoly_type(self):
         required_inputs = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
-        requiredd_outputs = {'boxes', 'scores', 'classes', 'raw_masks'}
-        return self.net.inputs_info.keys() in required_inputs and requiredd_outputs.issubset(self.net.net.outputs)
+        required_outputs = {'boxes', 'scores', 'classes', 'raw_masks'}
+        return self.net.inputs_info.keys() in required_inputs and required_outputs.issubset(self.net.net.outputs)
 
     def preprocess(self, frame):
         image_height, image_width = frame.shape[:2]
