@@ -33,10 +33,6 @@ const cv::Vec3f HpeAssociativeEmbedding::meanPixel = cv::Vec3f::all(128);
 const float HpeAssociativeEmbedding::detectionThreshold = 0.1f;
 const float HpeAssociativeEmbedding::tagThreshold = 1.0f;
 const float HpeAssociativeEmbedding::delta = 0.0f;
-const bool HpeAssociativeEmbedding::useDetectionVal = true;
-const bool HpeAssociativeEmbedding::doAdjust = true;
-const bool HpeAssociativeEmbedding::doRefine = true;
-const bool HpeAssociativeEmbedding::ignoreTooMuch = true;
 
 HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio,
     int targetSize, float confidenceThreshold) :
@@ -190,8 +186,7 @@ std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(
     for (int i = 0; i < numJoints; i++) {
         findPeaks(nmsHeatMaps, aembdsMaps, allPeaks, i, maxNumPeople, detectionThreshold);
     }
-    std::vector<Pose> allPoses = matchByTag(allPeaks, maxNumPeople, numJoints,
-                                            tagThreshold, useDetectionVal, ignoreTooMuch);
+    std::vector<Pose> allPoses = matchByTag(allPeaks, maxNumPeople, numJoints, tagThreshold);
     std::vector<HumanPose> poses;
     for (size_t i = 0; i < allPoses.size(); i++) {
         Pose pose = allPoses[i];
@@ -199,9 +194,7 @@ std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(
         if (pose.getMeanScore() <= confidenceThreshold) {
             continue;
         }
-        if (doAdjust || doRefine) {
-            adjustAndRefine(allPoses, heatMaps, aembdsMaps, i, delta, doAdjust, doRefine);
-        }
+        adjustAndRefine(allPoses, heatMaps, aembdsMaps, i, delta);
         std::vector<cv::Point2f> keypoints;
         for (size_t j = 0; j < numJoints; j++) {
             Peak& peak = pose.getPeak(j);

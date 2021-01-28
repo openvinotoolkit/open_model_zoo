@@ -19,7 +19,7 @@
 
 
 struct Peak {
-    Peak(const cv::Point2f& keypoint = cv::Point2f(-1, -1),
+    explicit Peak(const cv::Point2f& keypoint = cv::Point2f(-1, -1),
          const float score = 0.0f,
          const float tag = 0.0f) :
       keypoint(keypoint),
@@ -34,7 +34,7 @@ struct Peak {
 
 class Pose {
     public:
-        Pose(int numJoints) : peaks(numJoints) {}
+        explicit Pose(int numJoints) : peaks(numJoints) {}
 
         void add(size_t index, Peak peak) {
             peaks[index] = peak;
@@ -67,11 +67,9 @@ void findPeaks(const std::vector<cv::Mat>& nmsHeatMaps,
 
 std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
                              int maxNumPeople, int numJoints,
-                             float tagThreshold,
-                             bool useDetectionVal, bool ignoreTooMuch);
+                             float tagThreshold);
 
 void adjustAndRefine(std::vector<Pose>& allPoses,
                      const std::vector<cv::Mat>& heatMaps,
                      const std::vector<cv::Mat>& aembdsMaps,
-                     int poseId, float delta,
-                     bool doAdjust, bool doRefine);
+                     int poseId, float delta);

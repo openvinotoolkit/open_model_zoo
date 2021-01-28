@@ -50,10 +50,6 @@ protected:
     static const float detectionThreshold;
     static const float tagThreshold;
     static const float delta;
-    static const bool useDetectionVal;
-    static const bool doAdjust;
-    static const bool doRefine;
-    static const bool ignoreTooMuch;
 
     void reshape(InferenceEngine::CNNNetwork& cnnNetwork) override;
 
