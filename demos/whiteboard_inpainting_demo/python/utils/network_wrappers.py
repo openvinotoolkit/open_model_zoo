@@ -23,7 +23,7 @@ class MaskRCNN(IEModel):
         super().__init__(ie, model_path, labels_file, conf, device, ext_path)
 
         required_input_keys = [{'image'}, {'im_info', 'im_data'}, {'im_data', 'im_info'}]
-        current_input_keys = set(self.inputs_info.keys())
+        current_input_keys = self.inputs_info.keys()
         assert current_input_keys in required_input_keys
         required_output_keys = {'boxes', 'labels', 'masks'}
         required_output_keys_segmentoly = {'boxes', 'scores', 'classes', 'raw_masks'}
