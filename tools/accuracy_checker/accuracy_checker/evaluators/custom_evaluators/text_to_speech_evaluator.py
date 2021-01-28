@@ -297,7 +297,7 @@ class SequentialModel:
         self.melgan = create_network(
             network_info.get('melgan', {}), launcher, "melganupsample", delayed_model_loading
         )
-        self.forward_tacotron_duration_input = [input_name for input_name in self.forward_tacotron_duration.inputs]
+        self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
         self.forward_tacotron_regression_input = network_info['forward_tacotron_regression_inputs']
         self.melgan_input = next(iter(self.melgan.inputs))
         self.duration_output = 'duration'
@@ -338,8 +338,7 @@ class SequentialModel:
     def predict(self, identifiers, input_data, input_meta, input_names, callback=None):
         assert len(identifiers) == 1
 
-        duration_output = self.forward_tacotron_duration.predict({
-            key: value for key, value in zip(input_names, input_data[0])})
+        duration_output = self.forward_tacotron_duration.predict(dict(zip(input_names, input_data[0])))
         if callback:
             callback(duration_output)
 
@@ -347,20 +346,20 @@ class SequentialModel:
         duration = (duration + 0.5).astype('int').flatten()
         duration = np.expand_dims(duration, axis=0)
 
-        preprocessed_embeddings = duration_output[self.embeddings_output]
-        indexes = self.build_index(duration, preprocessed_embeddings)
-        processed_embeddings = self.gather(preprocessed_embeddings, 1, indexes)
-        processed_embeddings = processed_embeddings[:, :self.max_regression_len, :]
-        if len(input_names) > 1: # in the case of network with attention
-            input_mask = self.sequence_mask(np.array([[processed_embeddings.shape[1]]]), processed_embeddings.shape[1])
-            pos_mask = self.pos_mask[:, :, :processed_embeddings.shape[1], :processed_embeddings.shape[1]]
+        preprocessed_emb = duration_output[self.embeddings_output]
+        indexes = self.build_index(duration, preprocessed_emb)
+        processed_emb = self.gather(preprocessed_emb, 1, indexes)
+        processed_emb = processed_emb[:, :self.max_regression_len, :]
+        if len(input_names) > 1:  # in the case of network with attention
+            input_mask = self.sequence_mask(np.array([[processed_emb.shape[1]]]), processed_emb.shape[1])
+            pos_mask = self.pos_mask[:, :, :processed_emb.shape[1], :processed_emb.shape[1]]
             input_to_regression = {
-                self.forward_tacotron_regression_input['data']: processed_embeddings,
+                self.forward_tacotron_regression_input['data']: processed_emb,
                 self.forward_tacotron_regression_input['data_mask']: input_mask,
                 self.forward_tacotron_regression_input['pos_mask']: pos_mask}
             mels = self.forward_tacotron_regression.predict(input_to_regression)
         else:
-            mels = self.forward_tacotron_regression.predict({self.forward_tacotron_regression_input: processed_embeddings})
+            mels = self.forward_tacotron_regression.predict({self.forward_tacotron_regression_input: processed_emb})
         if callback:
             callback(mels)
         melgan_input = mels[self.melgan_input]
