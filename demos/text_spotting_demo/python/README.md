@@ -74,6 +74,7 @@ Options:
                         Optional. Name of output to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
+                        If 0 is set, all frames are stored.
   -d "<device>", --device "<device>"
                         Optional. Specify the target device to infer on, i.e. CPU, GPU.
                         The demo will look for a suitable plugin for device specified

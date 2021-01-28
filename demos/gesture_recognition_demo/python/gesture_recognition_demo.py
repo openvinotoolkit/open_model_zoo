@@ -61,9 +61,13 @@ def build_argparser():
     args.add_argument('-m_d', '--detection_model',
                       help='Required. Path to an .xml file with a trained person detector model.',
                       required=True, type=str)
-    args.add_argument('-i', '--input',
-                      help='Required. Path to a video file or a device node of a web-camera.',
-                      required=True, type=str)
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. Path to a video file or a device node of a web-camera.')
+    args.add_argument('-o', '--output', required=False,
+                      help='Optional. Name of output to save.')
+    args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
+                      help='Optional. Number of frames to store in output. '
+                           'If 0 is set, all frames are stored.')
     args.add_argument('-c', '--class_map',
                       help='Required. Path to a file with gesture classes.',
                       required=True, type=str)
@@ -145,12 +149,19 @@ def main():
     tracker_labels_map = dict()
     tracker_labels = set()
 
+    frames_processed = 0
+
     start_time = time.perf_counter()
     while True:
         frame = video_stream.get_live_frame()
         batch = video_stream.get_batch()
         if frame is None or batch is None:
             break
+        if frames_processed == 0:
+            video_writer = cv2.VideoWriter()
+            if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                                     video_stream.fps(), (frame.shape[1], frame.shape[0])):
+                raise RuntimeError("Can't open video writer")
 
         detections, tracker_labels_map = person_tracker.add_frame(
             frame, len(OBJECT_IDS), tracker_labels_map)
@@ -202,6 +213,9 @@ def main():
         if last_caption is not None:
             cv2.putText(frame, last_caption, (10, frame.shape[0] - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        frames_processed += 1
+        if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
+            video_writer.write(frame)
 
         if args.no_show:
             continue
