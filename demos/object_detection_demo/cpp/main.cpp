@@ -41,11 +41,12 @@
 #include <pipelines/metadata.h>
 #include <models/detection_model_centernet.h>
 #include <models/detection_model_faceboxes.h>
+#include <models/detection_model_retinaface.h>
 #include <models/detection_model_ssd.h>
 #include <models/detection_model_yolo.h>
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Architecture type: centernet, faceboxes, ssd or yolo";
+static const char at_message[] = "Required. Architecture type: centernet, faceboxes, retinaface, ssd or yolo";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
@@ -251,6 +252,13 @@ cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& p
         cv::rectangle(outputImg, obj, color, 2);
     }
 
+    try {
+        for (auto lmark : result.asRef<RetinaFaceDetectionResult>().landmarks) {
+            cv::circle(outputImg, lmark, 2, cv::Scalar(0, 255, 255), -1);
+        }
+    }
+    catch (const std::bad_cast&) {}
+
     return outputImg;
 }
 
@@ -283,6 +291,9 @@ int main(int argc, char *argv[]) {
         }
         else if (FLAGS_at == "faceboxes") {
             model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
+        }
+        else if (FLAGS_at == "retinaface") {
+            model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
         }
         else if (FLAGS_at == "ssd") {
             model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));

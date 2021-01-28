@@ -239,6 +239,12 @@ NATIVE_DEMOS = [
                               '-m': ModelArg('faceboxes-pytorch')}
             ),
             *combine_cases(
+                TestCase(options={'-at': 'retinaface'}),
+                single_option_cases('-m',
+                    ModelArg('retinaface-anti-cov'),
+                    ModelArg('retinaface-resnet50'))
+            ),
+            *combine_cases(
                 TestCase(options={'-at': 'ssd'}),
                 single_option_cases('-m',
                     ModelArg('efficientdet-d0-tf'),

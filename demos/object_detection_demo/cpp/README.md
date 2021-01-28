@@ -71,7 +71,7 @@ object_detection_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -at "<type>"              Required. Architecture type: centernet, faceboxes, ssd or yolo
+    -at "<type>"              Required. Architecture type: centernet, faceboxes, retinaface, ssd or yolo
     -i "<path>"               Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
     -m "<path>"               Required. Path to an .xml file with a trained model.
       -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
