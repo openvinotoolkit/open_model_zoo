@@ -689,19 +689,24 @@ class DumbDecoder(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'alphabet': ListField(
-                optional=True, default=None, value_type=str, allow_empty=False, description=
+            'alphabet': ListField(optional=True, default=None, value_type=str, allow_empty=False, description=
                 "Alphabet as list of strings. Default is space + 26 English letters + apostrophe."
             ),
+            'uppercase': BoolField(optional=True, default=True, description="Transform result to uppercase"),
+
         })
         return parameters
 
     def configure(self):
         self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\''
         self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
+        self.uppercase = self.get_value_from_config('uppercase')
 
     def process(self, raw, identifiers=None, frame_meta=None):
+        assert (len(identifiers) == 1)
         decoded = ''.join(self.alphabet[t] for t in raw[0])
+        if self.uppercase:
+            decoded = decoded.upper()
         return [CharacterRecognitionPrediction(identifiers[0], decoded.upper())]
 
 class TextState:

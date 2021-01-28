@@ -398,6 +398,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotation_file` - path to file which describe the data which should be used in evaluation (`audio_filepath`, `text`, `duration`). Optional, used only for data filtering and sorting audio samples by duration.
   * `use_numpy` - allows to use preprocessed data stored in npy-files instead of audio (Optional, default False).
   * `top_n` - numeric value for getting only the n shortest samples **Note:** applicable only with `annotation_file` providing.
+  * `max_duration` - maximum clip duration to include into annotation. Default 0, means no duration checking.
 * `criteo` - converts [Criteo](http://labs.criteo.com/2013/12/download-terabyte-click-logs/) datasets to `ClassificationAnnotation`.
   * `testing_file` - Path to testing file, terabyte_preprocessed.npz (Criteo Terabyte) or day_6_processed.npz (Criteo Kaggle Dac)
   * `batch` - Model batch.

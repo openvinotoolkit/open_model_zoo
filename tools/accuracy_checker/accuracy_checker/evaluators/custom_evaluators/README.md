@@ -37,6 +37,9 @@ Optionally you can provide `module_config` section which contains config for cus
 * **Automatic Speech Recognition Evaluator** shows how to evaluate speech recognition pipeline (encoder + decoder).
   <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/asr_encoder_decoder_evaluator.py">Evaluator code</a>.
 
+* **3-way Automatic Speech Recognition Evaluator** shows how to evaluate speech recognition pipeline (encoder + prediction + joint).
+  <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/asr_encoder_prediction_joint_evaluator.py">Evaluator code</a>.
+
 * **Im2latex formula recognition** demonstrates how to run encoder-decoder model for extractring latex formula from image.
   <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/im2latex_evaluator.py">Evaluator code</a>.
   Configuration file example: <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/configs/im2latex-medium-0002.yml">im2latex-medium-0002</a>.

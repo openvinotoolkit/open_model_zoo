@@ -16,32 +16,17 @@ limitations under the License.
 
 from pathlib import Path
 import pickle
-from functools import partial
 from collections import OrderedDict
 import numpy as np
 
-from ..base_evaluator import BaseEvaluator
-from ..quantization_model_evaluator import create_dataset_attributes
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...launcher import create_launcher
-from ...utils import contains_all, contains_any, extract_image_representations, read_pickle, get_path
-from ...progress_reporters import ProgressReporter
+from ...utils import contains_all, contains_any, read_pickle, get_path
 from ...logging import print_info
+from .asr_encoder_decoder_evaluator import AutomaticSpeechRecognitionEvaluator
 
-
-class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
-    def __init__(self, dataset_config, launcher, model):
-        self.dataset_config = dataset_config
-        self.preprocessing_executor = None
-        self.preprocessor = None
-        self.dataset = None
-        self.postprocessor = None
-        self.metric_executor = None
-        self.launcher = launcher
-        self.model = model
-        self._metrics_results = []
-
+class ASREvaluator(AutomaticSpeechRecognitionEvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False):
         dataset_config = config['datasets']
@@ -55,204 +40,6 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
             delayed_model_loading
         )
         return cls(dataset_config, launcher, model)
-
-    def process_dataset(
-            self, subset=None,
-            num_images=None,
-            check_progress=False,
-            dataset_tag='',
-            output_callback=None,
-            allow_pairwise_subset=False,
-            dump_prediction_to_annotation=False,
-            calculate_metrics=True,
-            **kwargs):
-        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
-            self.select_dataset(dataset_tag)
-
-        self._annotations, self._predictions = [], []
-
-        self._create_subset(subset, num_images, allow_pairwise_subset)
-        metric_config = self.configure_intermediate_metrics_results(kwargs)
-        compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
-
-        if 'progress_reporter' in kwargs:
-            _progress_reporter = kwargs['progress_reporter']
-            _progress_reporter.reset(self.dataset.size)
-        else:
-            _progress_reporter = None if not check_progress else self._create_progress_reporter(
-                check_progress, self.dataset.size
-            )
-        for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
-
-            batch_features = self.preprocessor.process(batch_inputs, batch_annotation)
-            batch_inputs_extr, _ = extract_image_representations(batch_features)
-            encoder_callback = None
-            if output_callback:
-                encoder_callback = partial(output_callback,
-                                           metrics_result=None,
-                                           element_identifiers=batch_identifiers,
-                                           dataset_indices=batch_input_ids)
-
-            batch_raw_prediction, batch_prediction = self.model.predict(
-                batch_identifiers, batch_inputs_extr, encoder_callback=encoder_callback
-            )
-            metrics_result = None
-            if self.metric_executor and calculate_metrics:
-                metrics_result, _ = self.metric_executor.update_metrics_on_batch(
-                    batch_input_ids, batch_annotation, batch_prediction
-                )
-                if self.metric_executor.need_store_predictions:
-                    self._annotations.extend(batch_annotation)
-                    self._predictions.extend(batch_prediction)
-
-            if output_callback:
-                output_callback(
-                    batch_raw_prediction[0],
-                    metrics_result=metrics_result,
-                    element_identifiers=batch_identifiers,
-                    dataset_indices=batch_input_ids
-                )
-            if _progress_reporter:
-                _progress_reporter.update(batch_id, len(batch_prediction))
-                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
-                    self.compute_metrics(
-                        print_results=True, ignore_results_formatting=ignore_results_formatting
-                    )
-
-        if _progress_reporter:
-            _progress_reporter.finish()
-
-        if self.model.store_encoder_predictions:
-            self.model.save_encoder_predictions()
-
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
-        if self._metrics_results:
-            del self._metrics_results
-            self._metrics_results = []
-
-        for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
-                self._annotations, self._predictions):
-            self._metrics_results.append(evaluated_metric)
-            if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
-
-        return self._metrics_results
-
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
-        if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting)
-
-        result_presenters = self.metric_executor.get_metric_presenters()
-        extracted_results, extracted_meta = [], []
-        for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            result, metadata = presenter.extract_result(metric_result)
-            if isinstance(result, list):
-                extracted_results.extend(result)
-                extracted_meta.extend(metadata)
-            else:
-                extracted_results.append(result)
-                extracted_meta.append(metadata)
-            if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting)
-
-        return extracted_results, extracted_meta
-
-    def print_metrics_results(self, ignore_results_formatting=False):
-        if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting)
-            return
-        result_presenters = self.metric_executor.get_metric_presenters()
-        for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting)
-
-    def release(self):
-        self.model.release()
-        self.launcher.release()
-
-    def reset(self):
-        if self.metric_executor:
-            self.metric_executor.reset()
-        if hasattr(self, '_annotations'):
-            del self._annotations
-            del self._predictions
-            del self._input_ids
-        del self._metrics_results
-        self._annotations = []
-        self._predictions = []
-        self._input_ids = []
-        self._metrics_results = []
-        if self.dataset:
-            self.dataset.reset(self.postprocessor.has_processors)
-
-    @staticmethod
-    def get_processing_info(config):
-        module_specific_params = config.get('module_config')
-        model_name = config['name']
-        dataset_config = module_specific_params['datasets'][0]
-        launcher_config = module_specific_params['launchers'][0]
-        return (
-            model_name, launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
-            dataset_config['name']
-        )
-
-    def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
-        if self.dataset.batch is None:
-            self.dataset.batch = 1
-        if subset is not None:
-            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
-        elif num_images is not None:
-            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
-
-    @staticmethod
-    def configure_intermediate_metrics_results(config):
-        compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
-        metric_interval, ignore_results_formatting = None, None
-        if compute_intermediate_metric_res:
-            metric_interval = config.get('metrics_interval', 1000)
-            ignore_results_formatting = config.get('ignore_results_formatting', False)
-        return compute_intermediate_metric_res, metric_interval, ignore_results_formatting
-
-    def load_network(self, network=None):
-        self.model.load_network(network, self.launcher)
-
-    def load_network_from_ir(self, models_list):
-        self.model.load_model(models_list, self.launcher)
-
-    def get_network(self):
-        return self.model.get_network()
-
-    def get_metrics_attributes(self):
-        if not self.metric_executor:
-            return {}
-        return self.metric_executor.get_metrics_attributes()
-
-    def register_metric(self, metric_config):
-        if isinstance(metric_config, str):
-            self.metric_executor.register_metric({'type': metric_config})
-        elif isinstance(metric_config, dict):
-            self.metric_executor.register_metric(metric_config)
-        else:
-            raise ValueError('Unsupported metric configuration type {}'.format(type(metric_config)))
-
-    def register_postprocessor(self, postprocessing_config):
-        pass
-
-    def register_dumped_annotations(self):
-        pass
-
-    def select_dataset(self, dataset_tag):
-        if self.dataset is not None and isinstance(self.dataset_config, list):
-            return
-        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
-        self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
-
-    @staticmethod
-    def _create_progress_reporter(check_progress, dataset_size):
-        pr_kwargs = {}
-        if isinstance(check_progress, int) and not isinstance(check_progress, bool):
-            pr_kwargs = {"print_interval": check_progress}
-
-        return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
 
 
 class BaseModel:

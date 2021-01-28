@@ -15,10 +15,14 @@ limitations under the License.
 """
 
 import numpy as np
-import scipy.signal as dsp
 
 from ..config import BoolField, BaseField, NumberField, ConfigError, StringField
 from ..preprocessor import Preprocessor
+from ..utils import UnsupportedPackage
+try:
+    import scipy.signal as dsp
+except ImportError as import_error:
+    mask_util = UnsupportedPackage("scipy", import_error.msg)
 
 
 class ResampleAudio(Preprocessor):
@@ -776,6 +780,7 @@ windows = {
 class AudioToMelSpectrogram(Preprocessor):
     __provider__ = 'audio_to_mel_spectrogram'
 
+    @classmethod
     def parameters(cls):
         params = super().parameters()
         params.update({
