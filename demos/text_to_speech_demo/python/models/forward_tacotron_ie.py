@@ -44,6 +44,8 @@ class ForwardTacotronIE:
         if self.is_attention:
             self.init_pos_mask()
             print("Load ForwardTacotron with attention")
+        else:
+            self.pos_mask = None
 
     def init_pos_mask(self, mask_sz=6000, window_size=4):
         mask_arr = np.zeros((1, 1, mask_sz, mask_sz), dtype=np.float32)
@@ -86,7 +88,8 @@ class ForwardTacotronIE:
 
     @staticmethod
     def gather(a, dim, index):
-        expanded_index = [index if dim==i else np.arange(a.shape[i]).reshape([-1 if i==j else 1 for j in range(a.ndim)]) for i in range(a.ndim)]
+        expanded_index = [index if dim == i else np.arange(a.shape[i]).reshape(
+                                                  [-1 if i == j else 1 for j in range(a.ndim)]) for i in range(a.ndim)]
         return a[tuple(expanded_index)]
 
     def load_network(self, model_xml):
@@ -137,7 +140,7 @@ class ForwardTacotronIE:
         return out['mel'][:, :non_empty_symbols]
 
     def find_optimal_delimiters_position(self, sequence, delimiters, idx, window=20):
-        res = {d:-1 for d in delimiters}
+        res = {d: -1 for d in delimiters}
         for i in range(max(0, idx - window), idx):
             if sequence[i] in delimiters:
                 res[sequence[i]] = i + 1
