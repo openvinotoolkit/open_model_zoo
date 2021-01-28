@@ -133,13 +133,18 @@ class MaskRCNN(DetectorInterface):
         self.confidence = conf
         self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
 
-        required_input_keys = [{'image'}, {'im_info', 'im_data'}, {'im_data', 'im_info'}]
-        current_input_keys = self.net.inputs_info.keys()
-        assert current_input_keys in required_input_keys
+        required_input_keys = [{'image'}]
         required_output_keys = {'boxes', 'labels', 'masks'}
+
+        required_input_keys_segmentoly = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
         required_output_keys_segmentoly = {'boxes', 'scores', 'classes', 'raw_masks'}
-        assert required_output_keys.issubset(self.net.net.outputs) or \
-               required_output_keys_segmentoly.issubset(self.net.net.outputs)
+
+        current_input_keys = self.net.inputs_info.keys()
+
+        assert (current_input_keys in required_input_keys and \
+                required_output_keys.issubset(self.net.net.outputs)) or \
+               (current_input_keys in required_input_keys_segmentoly and \
+                required_output_keys_segmentoly.issubset(self.net.net.outputs))
 
         self.segmentoly_type = self.check_segmentoly_type()
         input_name = 'im_data' if self.segmentoly_type else 'image'
