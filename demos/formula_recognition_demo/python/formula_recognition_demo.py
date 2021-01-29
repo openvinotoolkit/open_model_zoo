@@ -21,63 +21,168 @@ import sys
 from argparse import SUPPRESS, ArgumentParser
 
 import cv2 as cv
-import numpy as np
 from tqdm import tqdm
-
-from openvino.inference_engine import IECore
-
-from utils import END_TOKEN, START_TOKEN, Vocab
-
-
-def crop(img, target_shape):
-    target_height, target_width = target_shape
-    img_h, img_w = img.shape[0:2]
-    new_w = min(target_width, img_w)
-    new_h = min(target_height, img_h)
-    return img[:new_h, :new_w, :]
+from utils import (COLOR_BLACK, COLOR_RED, COLOR_WHITE, DEFAULT_RESIZE_STEP,
+                   DEFAULT_WIDTH, MAX_HEIGHT, MAX_WIDTH, MIN_HEIGHT, MIN_WIDTH,
+                   PREPROCESSING, Model, calculate_probability, print_stats,
+                   create_renderer, prerocess_crop, strip_internal_spaces)
 
 
-def resize(img, target_shape):
-    target_height, target_width = target_shape
-    img_h, img_w = img.shape[0:2]
-    scale = min(target_height / img_h, target_width / img_w)
-    return cv.resize(img, None, fx=scale, fy=scale)
+class InteractiveDemo:
+    def __init__(self, input_model_shape, resolution):
+        self.resolution = resolution
+        self._tgt_shape = input_model_shape
+        self.start_point, self.end_point = self._create_input_window()
+        self._prev_rendered_formula = None
+        self._prev_formula_img = None
+        self._latex_h = 0
+        self._renderer = create_renderer()
+
+    def _create_input_window(self):
+        aspect_ratio = self._tgt_shape[0] / self._tgt_shape[1]
+        width = min(DEFAULT_WIDTH, self.resolution[0])
+        height = int(width * aspect_ratio)
+        start_point = (int(self.resolution[0] / 2 - width / 2), int(self.resolution[1] / 2 - height / 2))
+        end_point = (int(self.resolution[0] / 2 + width / 2), int(self.resolution[1] / 2 + height / 2))
+        return start_point, end_point
+
+    def get_crop(self, frame):
+        return frame[self.start_point[1]:self.end_point[1], self.start_point[0]:self.end_point[0], :]
+
+    def _draw_rectangle(self, frame):
+        return cv.rectangle(frame, self.start_point, self.end_point, color=COLOR_RED, thickness=2)
+
+    def resize_window(self, action):
+        height = self.end_point[1] - self.start_point[1]
+        width = self.end_point[0] - self.start_point[0]
+        aspect_ratio = height / width
+        step = max(int(DEFAULT_RESIZE_STEP * aspect_ratio), 1)
+        if action == 'increase':
+            max_h, max_w = min(MAX_HEIGHT, self.resolution[1]), min(MAX_WIDTH, self.resolution[0])
+            if height >= max_h or width >= max_w:
+                return
+            self.start_point = (self.start_point[0] - DEFAULT_RESIZE_STEP,
+                                self.start_point[1] - step)
+            self.end_point = (self.end_point[0] + DEFAULT_RESIZE_STEP,
+                              self.end_point[1] + step)
+        elif action == 'decrease':
+            if height <= MIN_HEIGHT or width <= MIN_WIDTH:
+                return
+            self.start_point = (self.start_point[0] + DEFAULT_RESIZE_STEP,
+                                self.start_point[1] + step)
+            self.end_point = (self.end_point[0] - DEFAULT_RESIZE_STEP,
+                              self.end_point[1] - step)
+        else:
+            raise ValueError("wrong action: {}".format(action))
+
+    def _put_text(self, frame, text):
+        if text == '':
+            return frame
+        text = strip_internal_spaces(text)
+        (txt_w, self._latex_h), _ = cv.getTextSize(text, cv.FONT_HERSHEY_SIMPLEX, 1, 3)
+        start_point = (self.start_point[0],
+                       self.end_point[1] - self.start_point[1] + int(self._latex_h * 1.5))
+        frame = cv.putText(frame, text, org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
+                           fontScale=0.7, color=COLOR_BLACK, thickness=3, lineType=cv.LINE_AA)
+        frame = cv.putText(frame, text, org=start_point, fontFace=cv.FONT_HERSHEY_SIMPLEX,
+                           fontScale=0.7, color=COLOR_WHITE, thickness=2, lineType=cv.LINE_AA)
+        comment_coords = (0, self.end_point[1] - self.start_point[1] + int(self._latex_h * 1.5))
+        frame = cv.putText(frame, "Predicted:", comment_coords,
+                           fontFace=cv.FONT_HERSHEY_SIMPLEX, fontScale=0.7, color=COLOR_WHITE, thickness=2, lineType=cv.LINE_AA)
+        return frame
+
+    def put_crop(self, frame, crop):
+        height = self.end_point[1] - self.start_point[1]
+        width = self.end_point[0] - self.start_point[0]
+        crop = cv.resize(crop, (width, height))
+        frame[0:height, self.start_point[0]:self.end_point[0], :] = crop
+        comment_coords = (0, 20)
+        frame = cv.putText(frame, "Model input:", comment_coords, fontFace=cv.FONT_HERSHEY_SIMPLEX,
+                           fontScale=0.7, color=COLOR_WHITE, thickness=2, lineType=cv.LINE_AA)
+        return frame
+
+    def _put_formula_img(self, frame, formula):
+        if self._renderer is None or formula == '':
+            return frame
+        formula_img = self._render_formula_async(formula)
+        if formula_img is None:
+            return frame
+        y_start = self.end_point[1] - self.start_point[1] + self._latex_h * 2
+        formula_img = self._resize_if_need(formula_img)
+        frame[y_start:y_start + formula_img.shape[0],
+              self.start_point[0]:self.start_point[0] + formula_img.shape[1],
+              :] = formula_img
+        comment_coords = (0, y_start + (formula_img.shape[0] + self._latex_h) // 2)
+        frame = cv.putText(frame, "Rendered:", comment_coords,
+                           fontFace=cv.FONT_HERSHEY_SIMPLEX, fontScale=0.7, color=COLOR_WHITE, thickness=2, lineType=cv.LINE_AA)
+        return frame
+
+    def _resize_if_need(self, formula_img):
+        if (self.end_point[0] - self.start_point[0]) < formula_img.shape[1]:
+            scale_factor = (self.end_point[0] - self.start_point[0]) / formula_img.shape[1]
+            formula_img = cv.resize(formula_img, fx=scale_factor, fy=scale_factor, dsize=None)
+        return formula_img
+
+    def _render_formula_async(self, formula):
+        if formula == self._prev_rendered_formula:
+            return self._prev_formula_img
+        result = self._renderer.thread_render(formula)
+        if result is None:
+            return None
+        formula_img, res_formula = result
+        if res_formula != formula:
+            return None
+        self._prev_rendered_formula = formula
+        self._prev_formula_img = formula_img
+        return formula_img
+
+    def draw(self, frame, phrase):
+        frame = self._put_text(frame, phrase)
+        frame = self._put_formula_img(frame, phrase)
+        frame = self._draw_rectangle(frame)
+        return frame
 
 
-PREPROCESSING = {
-    'crop': crop,
-    'resize': resize
-}
-
-COLOR_WHITE = (255, 255, 255)
-
-
-def read_net(model_xml, ie, device):
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
-
-    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
-    model = ie.read_network(model_xml, model_bin)
-    return model
+def create_capture(input_source, demo_resolution):
+    try:
+        input_source = int(input_source)
+    except ValueError:
+        pass
+    capture = cv.VideoCapture(input_source)
+    capture.set(cv.CAP_PROP_BUFFERSIZE, 1)
+    capture.set(cv.CAP_PROP_FRAME_WIDTH, demo_resolution[0])
+    capture.set(cv.CAP_PROP_FRAME_HEIGHT, demo_resolution[1])
+    return capture
 
 
-def print_stats(module):
-    perf_counts = module.requests[0].get_perf_counts()
-    print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format('name', 'layer_type', 'exet_type', 'status',
-                                                      'real_time, us'))
-    for layer, stats in perf_counts.items():
-        print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
-                                                          stats['status'], stats['real_time']))
-
-
-def preprocess_image(preprocess, image_raw, tgt_shape):
-    target_height, target_width = tgt_shape
-    image_raw = preprocess(image_raw, tgt_shape)
-    img_h, img_w = image_raw.shape[0:2]
-    image_raw = cv.copyMakeBorder(image_raw, 0, target_height - img_h,
-                                  0, target_width - img_w, cv.BORDER_CONSTANT,
-                                  None, COLOR_WHITE)
-    image = image_raw.transpose((2, 0, 1))
-    return np.expand_dims(image, axis=0)
+def non_interactive_demo(model, args):
+    renderer = create_renderer()
+    show_window = not args.no_show
+    for rec in tqdm(model.images_list):
+        log.info("Starting inference for %s", rec['img_name'])
+        image = rec['img']
+        distribution, targets = model.infer_sync(image)
+        prob = calculate_probability(distribution)
+        log.info("Confidence score is %s", prob)
+        if prob >= args.conf_thresh ** len(distribution):
+            phrase = model.vocab.construct_phrase(targets)
+            if args.output_file:
+                with open(args.output_file, 'a') as output_file:
+                    output_file.write(rec['img_name'] + '\t' + phrase + '\n')
+            else:
+                print("\n\tImage name: {}\n\tFormula: {}\n".format(rec['img_name'], phrase))
+                if renderer is not None:
+                    rendered_formula, _ = renderer.render(phrase)
+                    if rendered_formula is not None and show_window:
+                        cv.imshow("Predicted formula", rendered_formula)
+                        cv.waitKey(0)
+        else:
+            log.info("Confidence score is low. The formula was not recognized.")
+    if args.perf_counts:
+        log.info("Encoder performance statistics")
+        print_stats(model.exec_net_encoder)
+        log.info("Decoder performance statistics")
+        print_stats(model.exec_net_decoder)
 
 
 def build_argparser():
@@ -89,21 +194,28 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument("-m_decoder", help="Required. Path to an .xml file with a trained decoder part of the model",
                       required=True, type=str)
-    args.add_argument("-i", "--input", help="Required. Path to a folder with images or path to an image files",
+    args.add_argument("-i", "--input", help="Required. Path to a folder with images, path to an image files, integer "
+                      "identifier of the camera or path to the video. See README.md for details.",
                       required=True, type=str)
+    args.add_argument("-no_show", "--no_show", action='store_true',
+                      help='Optional. Suppress pop-up window with rendered formula.')
     args.add_argument("-o", "--output_file",
-                      help="Optional. Path to file where to store output. If not mentioned, result will be stored"
+                      help="Optional. Path to file where to store output. If not mentioned, result will be stored "
                       "in the console.",
                       type=str)
-    args.add_argument("--vocab_path", help="Required. Path to vocab file to construct meaningful phrase",
+    args.add_argument("-v", "--vocab_path", help="Required. Path to vocab file to construct meaningful phrase",
                       type=str, required=True)
     args.add_argument("--max_formula_len",
                       help="Optional. Defines maximum length of the formula (number of tokens to decode)",
                       default="128", type=int)
+    args.add_argument("-t", "--conf_thresh", help="Optional. Probability threshold to treat model prediction as meaningful",
+                      default=0.95, type=float)
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU", type=str)
+    args.add_argument("--resolution", default=(1280, 720), type=int, nargs=2,
+                      help='Optional. Resolution of the demo application window. Default: 1280 720')
     args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
                       help="Optional. Type of the preprocessing", default='crop')
     args.add_argument('-pc', '--perf_counts',
@@ -140,86 +252,54 @@ def build_argparser():
 def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s",
                     level=log.INFO, stream=sys.stdout)
+
     args = build_argparser().parse_args()
-    log.info("Creating Inference Engine")
-    ie = IECore()
-    ie.set_config(
-        {"PERF_COUNT": "YES" if args.perf_counts else "NO"}, args.device)
+    interactive_mode = not (os.path.isdir(args.input) or args.input.endswith('.png') or args.input.endswith('.jpg'))
+    model = Model(args, interactive_mode)
+    if not interactive_mode:
+        non_interactive_demo(model, args)
+        return
 
-    encoder = read_net(args.m_encoder, ie, args.device)
-    dec_step = read_net(args.m_decoder, ie, args.device)
-
-    batch_dim, channels, height, width = encoder.input_info['imgs'].input_data.shape
-    assert batch_dim == 1, "Demo only works with batch size 1."
-    assert channels in (1, 3), "Input image is not 1 or 3 channeled image."
-    target_shape = (height, width)
-    images_list = []
-    if os.path.isdir(args.input):
-        inputs = sorted(os.path.join(args.input, inp)
-                        for inp in os.listdir(args.input))
-    else:
-        inputs = [args.input]
-    log.info("Loading vocab file")
-    vocab = Vocab(args.vocab_path)
-
-    log.info("Loading and preprocessing images")
-    for filenm in tqdm(inputs):
-        image_raw = cv.imread(filenm)
-        assert image_raw is not None, "Error reading image {}".format(filenm)
-        image = preprocess_image(
-            PREPROCESSING[args.preprocessing_type], image_raw, target_shape)
-        record = dict(img_name=filenm, img=image, formula=None)
-        images_list.append(record)
-
-    log.info("Loading networks")
-    exec_net_encoder = ie.load_network(network=encoder, device_name=args.device)
-    exec_net_decoder = ie.load_network(network=dec_step, device_name=args.device)
-
-    log.info("Starting inference")
-    for rec in tqdm(images_list):
-        image = rec['img']
-
-        enc_res = exec_net_encoder.infer(inputs={args.imgs_layer: image})
-        # get results
-        row_enc_out = enc_res[args.row_enc_out_layer]
-        dec_states_h = enc_res[args.hidden_layer]
-        dec_states_c = enc_res[args.context_layer]
-        output = enc_res[args.init_0_layer]
-
-        tgt = np.array([[START_TOKEN]])
-        logits = []
-        for _ in range(args.max_formula_len):
-            dec_res = exec_net_decoder.infer(inputs={args.row_enc_out_layer: row_enc_out,
-                                                     args.dec_st_c_layer: dec_states_c,
-                                                     args.dec_st_h_layer: dec_states_h,
-                                                     args.output_prev_layer: output,
-                                                     args.tgt_layer: tgt
-                                                     }
-                                             )
-
-            dec_states_h = dec_res[args.dec_st_h_t_layer]
-            dec_states_c = dec_res[args.dec_st_c_t_layer]
-            output = dec_res[args.output_layer]
-            logit = dec_res[args.logit_layer]
-            logits.append(logit)
-            tgt = np.array([[np.argmax(logit, axis=1)]])
-
-            if tgt[0][0][0] == END_TOKEN:
-                break
-        if args.perf_counts:
-            log.info("Encoder performance statistics")
-            print_stats(exec_net_encoder)
-            log.info("Decoder performance statistics")
-            print_stats(exec_net_decoder)
-
-        logits = np.array(logits)
-        logits = logits.squeeze(axis=1)
-        targets = np.argmax(logits, axis=1)
-        if args.output_file:
-            with open(args.output_file, 'a') as output_file:
-                output_file.write(rec['img_name'] + '\t' + vocab.construct_phrase(targets) + '\n')
+    height, width = model.encoder.input_info['imgs'].input_data.shape[-2:]
+    prev_text = ''
+    demo = InteractiveDemo((height, width), resolution=args.resolution)
+    show_window = not args.no_show
+    capture = create_capture(args.input, demo.resolution)
+    if not capture.isOpened():
+        log.error("Cannot open camera")
+        return 1
+    while True:
+        ret, frame = capture.read()
+        if not ret:
+            log.info("End of file or error reading from camera")
+            break
+        bin_crop = demo.get_crop(frame)
+        model_input = prerocess_crop(bin_crop, (height, width), preprocess_type=args.preprocessing_type)
+        frame = demo.put_crop(frame, model_input)
+        model_res = model.infer_async(model_input)
+        if not model_res:
+            phrase = prev_text
         else:
-            print("Image name: {}\nFormula: {}\n".format(rec['img_name'], vocab.construct_phrase(targets)))
+            distribution, targets = model_res
+            prob = calculate_probability(distribution)
+            log.info("Confidence score is %s", prob)
+            if prob >= args.conf_thresh ** len(distribution):
+                log.info("Prediction updated")
+                phrase = model.vocab.construct_phrase(targets)
+            else:
+                log.info("Confidence score is low, prediction is not complete")
+                phrase = ''
+        frame = demo.draw(frame, phrase)
+        prev_text = phrase
+        if show_window:
+            cv.imshow('Press q to quit.', frame)
+            key = cv.waitKey(1) & 0xFF
+            if key in (ord('Q'), ord('q'), ord('\x1b')):
+                break
+            elif key in (ord('o'), ord('O')):
+                demo.resize_window("decrease")
+            elif key in (ord('p'), ord('P')):
+                demo.resize_window("increase")
 
     log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
              "from the openVINO toolkit\n")
