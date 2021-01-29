@@ -211,8 +211,6 @@ class ASRModel(BaseModel):
             network_info.update({'encoder': encoder, 'prediction': prediction, 'joint': joint})
         if not contains_all(network_info, ['encoder', 'prediction', 'joint']) and not delayed_model_loading:
             raise ConfigError('network_info should contain encoder, prediction and joint fields')
-        # self.num_processing_frames = network_info['decoder'].get('num_processing_frames', 16)
-        # self.processing_frames_buffer = []
         self.encoder = create_encoder(network_info['encoder'], launcher, delayed_model_loading)
         self.prediction = create_prediction(network_info['prediction'], launcher, delayed_model_loading)
         self.joint = create_joint(network_info['joint'], launcher, delayed_model_loading)
@@ -223,7 +221,7 @@ class ASRModel(BaseModel):
         self.adapter = create_adapter(network_info.get('adapter', 'dumb_decoder'))
 
         self._blank_id = 28
-        self._SOS = -1
+        self._sos = -1
         self._max_symbols_per_step = 30
 
     def predict(self, identifiers, input_data, encoder_callback=None):
@@ -320,11 +318,11 @@ class ASRModel(BaseModel):
         return label
 
     def _pred_step(self, label, hidden):
-        if label == self._SOS:
+        if label == self._sos:
             label = self._blank_id
         if label > self._blank_id:
             label -= 1
-        inputs = {'input.1': [[label,]], '1': hidden[0], '2': hidden[1]}
+        inputs = {'input.1': [[label, ]], '1': hidden[0], '2': hidden[1]}
         return self.prediction.predict(None, inputs)
 
     def _joint_step(self, enc, pred, log_normalize=False):
@@ -334,11 +332,11 @@ class ASRModel(BaseModel):
         if not log_normalize:
             return logits
 
-        # probs = F.log_softmax(logits, dim=len(logits.shape) - 1)
-        # return probs
+        probs = np.argmax(np.log(logits), dim=len(logits.shape) - 1)
+        return probs
 
     def _get_last_symb(self, labels) -> int:
-        return self._SOS if len(labels) == 0 else labels[-1]
+        return self._sos if len(labels) == 0 else labels[-1]
 
 
 class CommonDLSDKModel(BaseModel, BaseDLSDKModel):

@@ -210,6 +210,7 @@ __all__ = [
     'CTCGreedyDecoder',
     'CTCBeamSearchDecoderWithLm',
     'FastCTCBeamSearchDecoderWithLm',
+    'DumbDecoder',
 
     'QualityAssessmentAdapter',
 
