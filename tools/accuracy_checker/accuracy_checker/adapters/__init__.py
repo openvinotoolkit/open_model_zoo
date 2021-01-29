@@ -94,7 +94,8 @@ from .audio_recognition import (
     CTCBeamSearchDecoder,
     CTCGreedyDecoder,
     CTCBeamSearchDecoderWithLm,
-    FastCTCBeamSearchDecoderWithLm
+    FastCTCBeamSearchDecoderWithLm,
+    DumbDecoder
 )
 
 from .regression import RegressionAdapter, MultiOutputRegression
@@ -209,6 +210,7 @@ __all__ = [
     'CTCGreedyDecoder',
     'CTCBeamSearchDecoderWithLm',
     'FastCTCBeamSearchDecoderWithLm',
+    'DumbDecoder',
 
     'QualityAssessmentAdapter',
 

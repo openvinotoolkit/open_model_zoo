@@ -365,3 +365,6 @@ AccuracyChecker supports following set of adapters:
 * `two_stage_detection` - converts output of 2-stage detector to `DetectionPrediction`.
   * `boxes_out` - output with bounding boxes in format BxNx[x_min, y_min, width, height], where B - network batch size, N - number of detected boxes.
   * `cls_out` - output with classification probabilities in format [BxNxC], where B - network batch size, N - number of detected boxes, C - number of classed.
+* `dumb_decoder` - converts  audio recognition model output to  `CharacterRecognitionPrediction`.
+  * `alphabet` - model alphabet.
+  * `uppercase` - produce prediction in uppercase, default is `True`.
