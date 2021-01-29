@@ -57,7 +57,7 @@ optional arguments:
                         Optional. Name of output to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
-                        If -1 is set, all frames are stored.
+                        If 0 is set, all frames are stored.
   -m_i M_INSTANCE_SEGMENTATION, --m_instance_segmentation M_INSTANCE_SEGMENTATION
                         Required. Path to the instance segmentation model.
   -m_s M_SEMANTIC_SEGMENTATION, --m_semantic_segmentation M_SEMANTIC_SEGMENTATION

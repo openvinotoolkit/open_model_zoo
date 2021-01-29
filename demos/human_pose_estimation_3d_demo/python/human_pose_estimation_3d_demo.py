@@ -58,7 +58,7 @@ if __name__ == '__main__':
                       help='Optional. Name of output to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
-                           'If -1 is set, all frames are stored.')
+                           'If 0 is set, all frames are stored.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
@@ -98,11 +98,9 @@ if __name__ == '__main__':
         raise RuntimeError("Can't read an image from the input")
 
     video_writer = cv2.VideoWriter()
-    if args.output:
-        video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
-                                      (frame.shape[1], frame.shape[0]))
-        if not video_writer.isOpened():
-            raise RuntimeError("Can't open video writer")
+    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                             cap.fps(), (frame.shape[1], frame.shape[0])):
+        raise RuntimeError("Can't open video writer")
 
     base_height = args.height_size
     fx = args.fx
@@ -148,7 +146,7 @@ if __name__ == '__main__':
                     (40, 80), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255))
 
         frames_processed += 1
-        if video_writer.isOpened() and (args.output_limit == -1 or frames_processed <= args.output_limit):
+        if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(frame)
 
         if not args.no_show:

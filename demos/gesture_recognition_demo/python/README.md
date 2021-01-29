@@ -1,5 +1,7 @@
 # Gesture Recognition Python\* Demo
 
+![](./gesture_recognition.gif)
+
 This demo demonstrates how to run Gesture (e.g. American Sign Language (ASL) gestures) Recognition models using OpenVINO&trade; toolkit.
 
 ## How It Works
@@ -27,7 +29,8 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: gesture_recognition_demo.py [-h] -m_a ACTION_MODEL -m_d DETECTION_MODEL
-                                   -i INPUT -c CLASS_MAP [-s SAMPLES_DIR]
+                                   -i INPUT [-o OUTPUT] [-limit OUTPUT_LIMIT]
+                                   -c CLASS_MAP [-s SAMPLES_DIR]
                                    [-t ACTION_THRESHOLD] [-d DEVICE]
                                    [-l CPU_EXTENSION] [--no_show]
                                    [-u UTILIZATION_MONITORS]
@@ -43,6 +46,11 @@ Options:
   -i INPUT, --input INPUT
                         Required. Path to a video file or a device node of a
                         web-camera.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If 0 is set, all frames are stored.
   -c CLASS_MAP, --class_map CLASS_MAP
                         Required. Path to a file with gesture classes.
   -s SAMPLES_DIR, --samples_dir SAMPLES_DIR
@@ -89,8 +97,6 @@ An example of file with class names can be found [here](../../../data/dataset_cl
 ## Demo Output
 
 The application uses OpenCV to display gesture recognition result and current inference performance.
-
-![](./gesture_recognition_demo.jpg)
 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)

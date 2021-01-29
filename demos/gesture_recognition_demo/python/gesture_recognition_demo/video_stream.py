@@ -41,6 +41,7 @@ class VideoStream:
         cap = cv2.VideoCapture(self._input_source)
         assert cap.isOpened(), "Can't open " + str(self._input_source)
 
+        self.source_fps = cap.get(cv2.CAP_PROP_FPS)
         source_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         source_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         cap.release()
@@ -58,6 +59,10 @@ class VideoStream:
 
         self._frame_generator_process = None
         self._producer_process = None
+
+    def fps(self):
+        """Returns the input source fps"""
+        return self.source_fps
 
     def get_live_frame(self):
         """Returns last live frame from the input stream"""

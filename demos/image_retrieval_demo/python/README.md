@@ -49,7 +49,7 @@ Options:
                         Optional. Name of output to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
-                        If -1 is set, all frames are stored.
+                        If 0 is set, all frames are stored.
   -g GALLERY, --gallery GALLERY
                         Required. Path to a file listing gallery images.
   -gt GROUND_TRUTH, --ground_truth GROUND_TRUTH
