@@ -136,6 +136,7 @@ class ClipAudio(Preprocessor):
 
         return image
 
+    @staticmethod
     def _pad_center(self, data, size, axis=-1):
         n = data.shape[axis]
         lpad = int((size - n) // 2)

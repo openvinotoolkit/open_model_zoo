@@ -332,7 +332,7 @@ class ASRModel(BaseModel):
         if not log_normalize:
             return logits
 
-        probs = np.argmax(np.log(logits), dim=len(logits.shape) - 1)
+        probs = np.argmax(np.log(logits), axis=len(logits.shape) - 1)
         return probs
 
     def _get_last_symb(self, labels) -> int:
@@ -368,9 +368,9 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
                 input_info = self.exec_network.inputs
             for input_blob in input_info.keys():
                 fitted.update(self.fit_one_input(input_blob, input_data[input_blob]))
-            return fitted
         else:
-            return self.fit_one_input(self.input_blob, input_data)
+            fitted = self.fit_one_input(self.input_blob, input_data)
+        return fitted
 
     def fit_one_input(self, input_blob, input_data):
         has_info = hasattr(self.exec_network, 'input_info')
