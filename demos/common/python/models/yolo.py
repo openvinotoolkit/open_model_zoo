@@ -134,10 +134,9 @@ class YOLO(Model):
         for row, col, n in np.ndindex(params.sides[0], params.sides[1], params.num):
             # Getting raw values for each detection bounding bFox
             bbox = predictions[0, n * bbox_size:(n + 1) * bbox_size, row, col]
-            if params.isYoloV3:
-                x, y, width, height, object_probability = bbox[:5]
-                class_probabilities = bbox[5:]
-            elif params.isYoloV4:
+            x, y, width, height, object_probability = bbox[:5]
+            class_probabilities = bbox[5:]
+            if params.isYoloV4:
                 x, y = sigmoid(bbox[:2])
                 width, height = bbox[2:4]
                 object_probability = sigmoid(bbox[4])
