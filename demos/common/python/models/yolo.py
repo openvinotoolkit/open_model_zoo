@@ -29,13 +29,13 @@ class YOLO(Model):
             self.classes = param.get('classes', 80)
             self.sides = sides
             self.anchors = param.get('anchors',
-                                     [10.0, 13.0, 16.0, 30.0, 33.0, 23.0,
-                                      30.0, 61.0, 62.0, 45.0, 59.0, 119.0,
-                                      116.0, 90.0, 156.0, 198.0, 373.0, 326.0])
-
+                                     [12.0, 16.0, 19.0, 36.0, 40.0, 28.0, 36.0, 75.0, 76.0, 55.0, 72.0, 146.0, 142.0, 110.0, 192.0, 243.0, 459.0, 401.0])
+            
             self.isYoloV3 = False
+            self.isYoloV4 = False
 
             mask = param.get('mask', None)
+
             if mask:
                 self.num = len(mask)
 
@@ -45,6 +45,26 @@ class YOLO(Model):
                 self.anchors = masked_anchors
 
                 self.isYoloV3 = True  # Weak way to determine but the only one.
+            else:
+                if self.num == 3:
+                    # Since 608*608 inputs will match siders as 19*19.
+                    # Assume that the inputs size of yolo we use are all less than 608*608.
+                    # We can distinguish the output layers by the quotient of 19 .
+                    if ((sides[0] / 19) <= 1):
+                        mask = param.get('mask', [6, 7, 8])
+                    elif ((sides[0] / 19) <= 2):
+                        mask = param.get('mask', [3, 4, 5])
+                    else:
+                        mask = param.get('mask', [0, 1, 2])
+
+                    self.num = len(mask)
+
+                    masked_anchors = []
+                    for idx in mask:
+                        masked_anchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
+                    self.anchors = masked_anchors
+                    
+                    self.isYoloV4 = True  # Weak way to determine but the only one.
 
     def __init__(self, ie, model_path, labels=None, keep_aspect_ratio=False, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path)
@@ -104,15 +124,24 @@ class YOLO(Model):
     @staticmethod
     def _parse_yolo_region(predictions, input_size, params, threshold, multiple_labels=True):
         # ------------------------------------------ Extracting layer parameters ---------------------------------------
+        def sigmoid(x):
+            return 1. / (1. + np.exp(-x))
+
         objects = list()
-        size_normalizer = input_size if params.isYoloV3 else params.sides
+        size_normalizer = input_size if (params.isYoloV3 or params.isYoloV4) else params.sides
         bbox_size = params.coords + 1 + params.classes
         # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
         for row, col, n in np.ndindex(params.sides[0], params.sides[1], params.num):
             # Getting raw values for each detection bounding bFox
             bbox = predictions[0, n * bbox_size:(n + 1) * bbox_size, row, col]
-            x, y, width, height, object_probability = bbox[:5]
-            class_probabilities = bbox[5:]
+            if params.isYoloV3:
+                x, y, width, height, object_probability = bbox[:5]
+                class_probabilities = bbox[5:]
+            elif params.isYoloV4:
+                x, y = sigmoid(bbox[:2])
+                width, height = bbox[2:4]
+                object_probability = sigmoid(bbox[4])
+                class_probabilities = sigmoid(bbox[5:])
             if object_probability < threshold:
                 continue
             # Process raw value
