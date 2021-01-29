@@ -141,9 +141,9 @@ class MaskRCNN(DetectorInterface):
 
         current_input_keys = self.net.inputs_info.keys()
 
-        assert (current_input_keys in required_input_keys and \
+        assert (current_input_keys in required_input_keys and
                 required_output_keys.issubset(self.net.net.outputs)) or \
-               (current_input_keys in required_input_keys_segmentoly and \
+               (current_input_keys in required_input_keys_segmentoly and
                 required_output_keys_segmentoly.issubset(self.net.net.outputs))
 
         self.segmentoly_type = self.check_segmentoly_type()
