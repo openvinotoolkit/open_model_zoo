@@ -13,6 +13,7 @@
 #include <utils/default_flags.hpp>
 
 DEFINE_INPUT_FLAGS
+DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
 static const char camera_resolution_message[] = "Optional. Set camera resolution in format WxH.";
@@ -74,6 +75,8 @@ static void showUsage() {
     std::cout << "    -h                       " << help_message << std::endl;
     std::cout << "    -i                       " << input_message << std::endl;
     std::cout << "    -loop                    " << loop_message << std::endl;
+    std::cout << "    -o \"<path>\"              " << output_message << std::endl;
+    std::cout << "    -limit \"<num>\"           " << output_limit_message << std::endl;
     std::cout << "    -res \"<WxH>\"             " << camera_resolution_message << std::endl;
     std::cout << "    -m \"<path>\"              " << gaze_estimation_model_message << std::endl;
     std::cout << "    -m_fd \"<path>\"           " << face_detection_model_message << std::endl;

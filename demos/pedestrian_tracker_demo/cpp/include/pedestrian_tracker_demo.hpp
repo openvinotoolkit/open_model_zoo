@@ -45,6 +45,8 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 DEFINE_bool(h, false, help_message);
 DEFINE_uint32(first, 0, first_frame_message);
 DEFINE_uint32(limit, gflags::uint32(std::numeric_limits<size_t>::max()), limit_message);
+DEFINE_string(o, "", output_message);
+DEFINE_uint32(output_limit, 1000, output_limit_message);
 DEFINE_string(m_det, "", pedestrian_detection_model_message);
 DEFINE_string(m_reid, "", pedestrian_reid_model_message);
 DEFINE_string(d_det, "CPU", target_device_detection_message);
@@ -72,6 +74,8 @@ static void showUsage() {
     std::cout << "    -loop                        " << loop_message << std::endl;
     std::cout << "    -first                       " << first_frame_message << std::endl;
     std::cout << "    -limit                       " << limit_message << std::endl;
+    std::cout << "    -o \"<path>\"                " << output_message << std::endl;
+    std::cout << "    -output_limit \"<num>\"      " << output_limit_message << std::endl;
     std::cout << "    -m_det \"<path>\"              " << pedestrian_detection_model_message << std::endl;
     std::cout << "    -m_reid \"<path>\"             " << pedestrian_reid_model_message << std::endl;
     std::cout << "    -l \"<absolute_path>\"         " << custom_cpu_library_message << std::endl;

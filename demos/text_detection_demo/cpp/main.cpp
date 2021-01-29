@@ -141,6 +141,12 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Can't read an image from the input");
         }
 
+        cv::VideoWriter videoWriter;
+        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'),
+                                                  cap->fps(), image.size())) {
+            throw std::runtime_error("Can't open video writer");
+        }
+        uint32_t framesProcessed = 0;
         cv::Size graphSize{static_cast<int>(image.cols / 4), 60};
         Presenter presenter(FLAGS_u, image.rows - graphSize.height - 10, graphSize);
 
@@ -273,7 +279,10 @@ int main(int argc, char *argv[]) {
                         cv::Point(50, 50), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255), 1);
 
             presenter.drawGraphs(demo_image);
-
+            framesProcessed++;
+            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
+                videoWriter.write(demo_image);
+            }
             if (!FLAGS_no_show) {
                 cv::imshow("Press ESC or Q to exit", demo_image);
                 int key = cv::waitKey(1);

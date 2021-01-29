@@ -46,7 +46,6 @@ static const char person_threshold_output_message[] = "Optional. Probability thr
 static const char action_threshold_output_message[] = "Optional. Probability threshold for action recognition.";
 static const char threshold_output_message_face_reid[] = "Optional. Cosine distance threshold between two vectors for face reidentification.";
 static const char reid_gallery_path_message[] = "Optional. Path to a faces gallery in .json format.";
-static const char output_video_message[] = "Optional. File to write output video with visualization to.";
 static const char act_stat_output_message[] = "Optional. Output file name to save per-person action statistics in.";
 static const char raw_output_message[] = "Optional. Output Inference results as raw values.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
@@ -71,6 +70,8 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 
 DEFINE_bool(h, false, help_message);
 DEFINE_uint32(limit, gflags::uint32(std::numeric_limits<size_t>::max()), limit_message);
+DEFINE_string(o, "", output_message);
+DEFINE_uint32(output_limit, 1000, output_limit_message);
 DEFINE_string(m_act, "", person_action_detection_model_message);
 DEFINE_string(m_fd, "", face_detection_model_message);
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
@@ -90,7 +91,6 @@ DEFINE_double(t_ar, 0.75, action_threshold_output_message);
 DEFINE_double(t_fd, 0.6, face_threshold_output_message);
 DEFINE_double(t_reid, 0.7, threshold_output_message_face_reid);
 DEFINE_string(fg, "", reid_gallery_path_message);
-DEFINE_string(out_v, "", output_video_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_int32(inh_fd, 600, input_image_height_output_message);
 DEFINE_int32(inw_fd, 600, input_image_width_output_message);
@@ -122,6 +122,8 @@ static void showUsage() {
     std::cout << "    -i                             " << input_message << std::endl;
     std::cout << "    -loop                          " << loop_message << std::endl;
     std::cout << "    -limit                         " << limit_message << std::endl;
+    std::cout << "    -o \"<path>\"                  " << output_message << std::endl;
+    std::cout << "    -output_limit \"<num>\"        " << output_limit_message << std::endl;
     std::cout << "    -m_act '<path>'                " << person_action_detection_model_message << std::endl;
     std::cout << "    -m_fd '<path>'                 " << face_detection_model_message << std::endl;
     std::cout << "    -m_lm '<path>'                 " << facial_landmarks_model_message << std::endl;
@@ -133,7 +135,6 @@ static void showUsage() {
     std::cout << "    -d_fd '<device>'               " << target_device_message_face_detection << std::endl;
     std::cout << "    -d_lm '<device>'               " << target_device_message_landmarks_regression << std::endl;
     std::cout << "    -d_reid '<device>'             " << target_device_message_face_reid << std::endl;
-    std::cout << "    -out_v  '<path>'               " << output_video_message << std::endl;
     std::cout << "    -greedy_reid_matching          " << greedy_reid_matching_message << std::endl;
     std::cout << "    -pc                            " << performance_counter_message << std::endl;
     std::cout << "    -r                             " << raw_output_message << std::endl;

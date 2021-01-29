@@ -39,6 +39,9 @@
 #include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 
+DEFINE_INPUT_FLAGS
+DEFINE_OUTPUT_FLAGS
+
 static const char help_message[] = "Print a usage message.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
@@ -59,7 +62,6 @@ static const char no_show_processed_video[] = "Optional. Do not show processed v
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
-DEFINE_string(i, "", input_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_bool(pc, false, performance_counter_message);
@@ -69,7 +71,6 @@ DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
-DEFINE_bool(loop, false, loop_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
 
@@ -82,8 +83,10 @@ static void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
-    std::cout << "    -i \"<path>\"               " << input_message << std::endl;
+    std::cout << "    -i                        " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
+    std::cout << "    -o \"<path>\"               " << output_message << std::endl;
+    std::cout << "    -limit \"<num>\"            " << output_limit_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
@@ -209,12 +212,20 @@ int main(int argc, char *argv[]) {
         bool keepRunning = true;
         int64_t frameNum = -1;
         std::unique_ptr<ResultBase> result;
+        uint32_t framesProcessed = 0;
+        cv::VideoWriter videoWriter;
 
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame
                 auto startTime = std::chrono::steady_clock::now();
                 curr_frame = cap->read();
+                if (frameNum == -1) {
+                    if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'),
+                                                              cap->fps(), curr_frame.size())) {
+                        throw std::runtime_error("Can't open video writer");
+                    }
+                }
                 if (curr_frame.empty()) {
                     if (frameNum == -1) {
                         throw std::logic_error("Can't read an image from the input");
@@ -241,6 +252,9 @@ int main(int argc, char *argv[]) {
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
+                    videoWriter.write(outFrame);
+                }
                 if (!FLAGS_no_show) {
                     cv::imshow("Segmentation Results", outFrame);
 
@@ -252,6 +266,7 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
+                framesProcessed++;
             }
         }
 
@@ -263,11 +278,15 @@ int main(int argc, char *argv[]) {
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                 outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
+                videoWriter.write(outFrame);
+            }
             if (!FLAGS_no_show) {
                 cv::imshow("Segmentation Results", outFrame);
                 //--- Updating output window
                 cv::waitKey(1);
             }
+            framesProcessed++;
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------

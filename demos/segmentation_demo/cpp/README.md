@@ -24,8 +24,10 @@ segmentation_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -i "<path>"               Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -i                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -m "<path>"               Required. Path to an .xml file with a trained model.
+    -o "<path>"               Optional. Name of output to save.
+    -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.
       -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
           Or
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.

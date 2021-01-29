@@ -748,12 +748,13 @@ int main(int argc, char* argv[]) {
         cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
 
-        cv::VideoWriter vid_writer;
-        if (!FLAGS_out_v.empty()) {
-            vid_writer = cv::VideoWriter(FLAGS_out_v, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                         cap->fps(), Visualizer::GetOutputSize(frame.size()));
+        cv::VideoWriter videoWriter;
+        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'),
+                                                  cap->fps(), image.size())) {
+            throw std::runtime_error("Can't open video writer");
         }
-        Visualizer sc_visualizer(!FLAGS_no_show, vid_writer, num_top_persons);
+        uint32_t framesProcessed = 0;
+        Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, num_top_persons);
         DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad, FLAGS_al);
 
         std::cout << "To close the application, press 'CTRL+C' here";

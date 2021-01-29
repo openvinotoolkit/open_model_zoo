@@ -12,6 +12,7 @@
 #include <utils/default_flags.hpp>
 
 DEFINE_INPUT_FLAGS
+DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
 static const char text_detection_model_message[] = "Required. Path to the Text Detection model (.xml) file.";
@@ -78,6 +79,8 @@ static void showUsage() {
     std::cout << "    -h                           " << help_message << std::endl;
     std::cout << "    -i                           " << input_message << std::endl;
     std::cout << "    -loop                        " << loop_message << std::endl;
+    std::cout << "    -o \"<path>\"                " << output_message << std::endl;
+    std::cout << "    -limit \"<num>\"             " << output_limit_message << std::endl;
     std::cout << "    -m_td \"<path>\"               " << text_detection_model_message << std::endl;
     std::cout << "    -m_tr \"<path>\"               " << text_recognition_model_message << std::endl;
     std::cout << "    -m_tr_ss \"<value>\"           " << text_recognition_model_symbols_set_message << std::endl;
