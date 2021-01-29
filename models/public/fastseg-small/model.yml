@@ -49,10 +49,6 @@ files:
     size: 55
     sha256: 160c9a92f85fbdb01bc22c41325b971778190917b4a6fecbffd6c355b862b57c
     source: https://raw.githubusercontent.com/ekzhang/fastseg/91238cdf2251a82f3fe4d35e28873cf84f602c0a/fastseg/__init__.py
-  - name: model/onnx_export.py
-    size: 2015
-    sha256: a96e6706ed75126bdf4c69e4e88b7c8d4c27804ea60b59f2d3ed3471cbec1ce3
-    source: https://raw.githubusercontent.com/ekzhang/fastseg/91238cdf2251a82f3fe4d35e28873cf84f602c0a/onnx_export.py
 postprocessing:
   - $type: unpack_archive
     format: zip
@@ -68,6 +64,16 @@ postprocessing:
     pattern: '\(pretrained=True\)'
     replacement: '(pretrained=False)'
     file: model/fastseg/model/utils.py
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir/model
+  - --model-name=fastseg_small
+  - --import-module=model
+  - --model-param=weights_path=r"$dl_dir/mobilev3small-lraspp-f128-a39a1e4b.pt"
+  - --input-shapes=1,3,1024,2048
+  - --input-names=input0
+  - --output-names=output0
+  - --output-file=$conv_dir/fastseg-small.onnx
 model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,3,1024,2048]
@@ -76,5 +82,5 @@ model_optimizer_args:
   - --mean_values=[123.675,116.28,103.53]
   - --scale_values=[58.395,57.12,57.375]
   - --input_model=$conv_dir/fastseg-small.onnx
-framework: onnx
+framework: pytorch
 license: https://raw.githubusercontent.com/ekzhang/fastseg/master/LICENSE.txt
