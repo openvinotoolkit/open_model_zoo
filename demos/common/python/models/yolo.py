@@ -23,7 +23,7 @@ from .utils import Detection, resize_image, resize_image_letterbox, load_labels
 class YOLO(Model):
     class Params:
         # Magic numbers are copied from yolo samples
-        def __init__(self, param, sides):
+        def __init__(self, param, sides, input_size):
             self.num = param.get('num', 3)
             self.coords = param.get('coord', 4)
             self.classes = param.get('classes', 80)
@@ -47,15 +47,12 @@ class YOLO(Model):
                 self.isYoloV3 = True  # Weak way to determine but the only one.
             else:
                 if self.num == 3:
-                    # Since 608*608 inputs will match siders as 19*19.
-                    # Assume that the inputs size of yolo we use are all less than 608*608.
-                    # We can distinguish the output layers by the quotient of 19 .
-                    if ((sides[0] / 19) <= 1):
-                        mask = param.get('mask', [6, 7, 8])
-                    elif ((sides[0] / 19) <= 2):
-                        mask = param.get('mask', [3, 4, 5])
-                    else:
+                    if int(input_size[0]/sides[0]) == 8 & int(input_size[1]/sides[1]) == 8:
                         mask = param.get('mask', [0, 1, 2])
+                    elif int(input_size[0]/sides[0]) == 16 & int(input_size[1]/sides[1]) == 16:
+                        mask = param.get('mask', [3, 4, 5])
+                    elif int(input_size[0]/sides[0]) == 32 & int(input_size[1]/sides[1]) == 32:
+                        mask = param.get('mask', [6, 7, 8])
 
                     self.num = len(mask)
 
@@ -101,7 +98,7 @@ class YOLO(Model):
             if layer_name not in self.net.outputs:
                 continue
             shape = list(get_parent(node).shape)
-            yolo_params = self.Params(node._get_attributes(), shape[2:4])
+            yolo_params = self.Params(node._get_attributes(), shape[2:4], input_size=[self.h, self.w])
             output_info[layer_name] = (shape, yolo_params)
         return output_info
 
@@ -134,6 +131,8 @@ class YOLO(Model):
         for row, col, n in np.ndindex(params.sides[0], params.sides[1], params.num):
             # Getting raw values for each detection bounding bFox
             bbox = predictions[0, n * bbox_size:(n + 1) * bbox_size, row, col]
+            x, y, width, height, object_probability = bbox[:5]
+            class_probabilities = bbox[5:]
             x, y, width, height, object_probability = bbox[:5]
             class_probabilities = bbox[5:]
             if params.isYoloV4:
