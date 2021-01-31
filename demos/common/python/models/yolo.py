@@ -137,7 +137,7 @@ class YOLO(Model):
             class_probabilities = bbox[5:]
             if params.isYoloV4:
                 x, y = sigmoid(bbox[:2])
-                width, height = bbox[2:4]
+                width, height = sigmoid(bbox[2:4])
                 object_probability = sigmoid(bbox[4])
                 class_probabilities = sigmoid(bbox[5:])
             if object_probability < threshold:
@@ -145,15 +145,20 @@ class YOLO(Model):
             # Process raw value
             x = (col + x) / params.sides[1]
             y = (row + y) / params.sides[0]
-            # Value for exp is very big number in some cases so following construction is using here
-            try:
-                width = np.exp(width)
-                height = np.exp(height)
-            except OverflowError:
-                continue
-            # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
-            width = width * params.anchors[2 * n] / size_normalizer[0]
-            height = height * params.anchors[2 * n + 1] / size_normalizer[1]
+            
+            if params.isYoloV4:
+                width  = (2*width)**2 * params.anchors[2 * n] / size_normalizer[0]
+                height = (2*height)**2 * params.anchors[2 * n + 1] / size_normalizer[1]
+            else:
+                # Value for exp is very big number in some cases so following construction is using here
+                try:
+                    width = np.exp(width)
+                    height = np.exp(height)
+                except OverflowError:
+                    continue
+                # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
+                width = width * params.anchors[2 * n] / size_normalizer[0]
+                height = height * params.anchors[2 * n + 1] / size_normalizer[1]
 
             if multiple_labels:
                 for class_id, class_probability in enumerate(class_probabilities):
