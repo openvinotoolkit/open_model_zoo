@@ -95,6 +95,17 @@ class BaseFormatConverter(ClassProvider):
     def configure(self):
         pass
 
+    @classmethod
+    def validation_scheme(cls, provider=None):
+        if cls.__name__ == BaseFormatConverter.__name__:
+            if provider:
+                return cls.resolve(provider).validation_scheme()
+            full_scheme = {}
+            for provider_ in cls.providers:
+                full_scheme[provider_] = cls.resolve(provider_).validation_scheme()
+            return full_scheme
+        return cls.parameters()
+
 
 class FileBasedAnnotationConverter(BaseFormatConverter):
     @classmethod

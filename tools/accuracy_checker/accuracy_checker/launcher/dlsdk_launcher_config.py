@@ -38,7 +38,7 @@ class CPUExtensionPathField(PathField):
     def __init__(self, **kwargs):
         super().__init__(is_directory=False, **kwargs)
 
-    def validate(self, entry, field_uri=None, fetch_only=False):
+    def validate(self, entry, field_uri=None, fetch_only=False, validation_scheme=None):
         errors = []
         if entry is None:
             return errors
@@ -51,7 +51,7 @@ class CPUExtensionPathField(PathField):
             msg = "values is expected to be path-like"
             if not fetch_only:
                 self.raise_error(entry, field_uri, msg)
-            errors.append(self.build_error(entry, field_uri, msg))
+            errors.append(self.build_error(entry, field_uri, msg, validation_scheme))
         is_directory = False
         if validation_entry.parts[-1] == 'AUTO':
             validation_entry = validation_entry.parent
@@ -62,17 +62,17 @@ class CPUExtensionPathField(PathField):
             msg = "path does not exist"
             if not fetch_only:
                 self.raise_error(validation_entry, field_uri, msg)
-            errors.append(self.build_error(validation_entry, field_uri, msg))
+            errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme))
         except NotADirectoryError:
             msg = "path is not a directory"
             if not fetch_only:
                 self.raise_error(validation_entry, field_uri, msg)
-            errors.append(self.build_error(validation_entry, field_uri, msg))
+            errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme))
         except IsADirectoryError:
             msg = "path is a directory, regular file expected"
             if not fetch_only:
                 self.raise_error(validation_entry, field_uri, msg)
-            errors.append(self.build_error(validation_entry, field_uri, msg))
+            errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme))
         return errors
 
 
@@ -96,7 +96,7 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         )
         self.fields['device'].set_regex(self.supported_device_regex)
 
-    def validate(self, entry, field_uri=None, ie_core=None, fetch_only=False):
+    def validate(self, entry, field_uri=None, ie_core=None, fetch_only=False, validation_scheme=None):
         """
         Validate that launcher entry meets all configuration structure requirements.
         Args:
@@ -104,21 +104,26 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
             field_uri: id of launcher entry.
             ie_core: IECore instance.
             fetch_only: only fetch possible error without raising
+            validation_scheme: scheme for validation
         """
         if not self.delayed_model_loading:
             framework_parameters = self.check_model_source(entry)
             self._set_model_source(framework_parameters)
-        error_stack = super().validate(entry, field_uri, fetch_only)
+        error_stack = super().validate(entry, field_uri, fetch_only, validation_scheme)
         self.create_device_regex(known_plugins)
         if 'device' not in entry:
             return error_stack
         try:
-            self.fields['device'].validate(entry['device'], field_uri)
+            self.fields['device'].validate(
+                entry['device'], field_uri, validation_scheme=(validation_scheme or {}).get('device')
+            )
         except ConfigError as error:
             if ie_core is not None:
                 self.create_device_regex(ie_core.available_devices)
                 try:
-                    self.fields['device'].validate(entry['device'], field_uri)
+                    self.fields['device'].validate(
+                        entry['device'], field_uri, validation_scheme=(validation_scheme or {}).get('device')
+                    )
                 except ConfigError:
                     # workaround for devices where this metric is non implemented
                     warning('unknown device: {}'.format(entry['device']))

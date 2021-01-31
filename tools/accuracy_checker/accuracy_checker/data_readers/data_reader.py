@@ -81,7 +81,7 @@ def create_reader(config):
 
 
 class DataReaderField(BaseField):
-    def validate(self, entry_, field_uri=None, fetch_only=False):
+    def validate(self, entry_, field_uri=None, fetch_only=False, validation_scheme=None):
         errors = super().validate(entry_, field_uri)
 
         if entry_ is None:
@@ -89,7 +89,10 @@ class DataReaderField(BaseField):
 
         field_uri = field_uri or self.field_uri
         if isinstance(entry_, str):
-            errors.extend(StringField(choices=BaseReader.providers).validate(entry_, field_uri, fetch_only=fetch_only))
+            errors.extend(
+                StringField(choices=BaseReader.providers).validate(
+                    entry_, field_uri, fetch_only=fetch_only, validation_scheme=validation_scheme)
+            )
         elif isinstance(entry_, dict):
             class DictReaderValidator(ConfigValidator):
                 type = StringField(choices=BaseReader.providers)
@@ -97,12 +100,15 @@ class DataReaderField(BaseField):
             dict_reader_validator = DictReaderValidator(
                 'reader', on_extra_argument=DictReaderValidator.IGNORE_ON_EXTRA_ARGUMENT
             )
-            errors.extend(dict_reader_validator.validate(entry_, field_uri, fetch_only=fetch_only))
+            errors.extend(
+                dict_reader_validator.validate(
+                    entry_, field_uri, fetch_only=fetch_only, validation_scheme=validation_scheme
+                ))
         else:
             msg = 'reader must be either string or dictionary'
             if not fetch_only:
                 self.raise_error(entry_, field_uri, msg)
-            errors.append(self.build_error(entry_, field_uri, msg))
+            errors.append(self.build_error(entry_, field_uri, msg, validation_scheme))
 
         return errors
 
@@ -167,7 +173,7 @@ class BaseReader(ClassProvider):
                     data_source_field = PathField(is_directory=reader_type not in DATA_SOURCE_IS_FILE)
                     errors.extend(
                         data_source_field.validate(
-                            data_source, '{}.data_source'.format(reader_uri), fetch_only=fetch_only)
+                            data_source, reader_uri.replace('reader', 'data_source'), fetch_only=fetch_only)
                     )
                 errors.extend(
                     reader_cls.validate_config(reader_config, fetch_only=fetch_only, **kwargs, uri_prefix=uri_prefix))
@@ -212,6 +218,17 @@ class BaseReader(ClassProvider):
 
     def reset(self):
         pass
+
+    @classmethod
+    def validation_scheme(cls, provider=None):
+        if cls.__name__ == BaseReader.__name__:
+            if provider:
+                return cls.resolve(provider).validation_scheme()
+            full_scheme = {}
+            for provider_ in cls.providers:
+                full_scheme[provider_] = cls.resolve(provider_).validation_scheme()
+            return full_scheme
+        return cls.parameters()
 
 
 class ReaderCombiner(BaseReader):

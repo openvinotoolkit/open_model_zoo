@@ -479,7 +479,7 @@ class TestConfigValidationAPI:
         assert config_errors[0].field_uri == 'models.launchers'
         assert config_errors[1].message == 'Metrics are not provided'
         assert not config_errors[1].entry
-        assert config_errors[1].field_uri == 'models.datasets.0.metrics'
+        assert config_errors[1].field_uri == 'models.datasets.0'
 
     @pytest.mark.usefixtures('mock_path_exists')
     def test_data_reader_without_data_source(self):
@@ -489,9 +489,9 @@ class TestConfigValidationAPI:
         assert config_errors[0].message == 'launchers section is not provided'
         assert not config_errors[0].entry
         assert config_errors[0].field_uri == 'models.launchers'
-        assert config_errors[1].message == 'Invalid value "None" for models.datasets.0.reader.data_source: models.datasets.0.reader.data_source is not allowed to be None'
+        assert config_errors[1].message == 'Invalid value "None" for models.datasets.0.data_source: models.datasets.0.data_source is not allowed to be None'
         assert not config_errors[1].entry
-        assert config_errors[1].field_uri == 'models.datasets.0.reader.data_source'
+        assert config_errors[1].field_uri == 'models.datasets.0.data_source'
 
     @pytest.mark.usefixtures('mock_path_exists')
     def test_unregistered_data_reader(self):
@@ -538,9 +538,9 @@ class TestConfigValidationAPI:
         assert config_errors[0].message == 'launchers section is not provided'
         assert not config_errors[0].entry
         assert config_errors[0].field_uri == 'launchers'
-        assert config_errors[-1].message == 'Invalid value "data_dir" for datasets.0.reader.data_source: path does not exist'
+        assert config_errors[-1].message == 'Invalid value "data_dir" for datasets.0.data_source: path does not exist'
         assert config_errors[-1].entry == 'data_dir'
-        assert config_errors[-1].field_uri == 'datasets.0.reader.data_source'
+        assert config_errors[-1].field_uri == 'datasets.0.data_source'
 
     @pytest.mark.usefixtures('mock_file_exists')
     def test_data_source_is_file(self):
@@ -552,9 +552,9 @@ class TestConfigValidationAPI:
         assert config_errors[0].message == 'launchers section is not provided'
         assert not config_errors[0].entry
         assert config_errors[0].field_uri == 'launchers'
-        assert config_errors[1].message == 'Invalid value "data" for datasets.0.reader.data_source: path is not a directory'
+        assert config_errors[1].message == 'Invalid value "data" for datasets.0.data_source: path is not a directory'
         assert config_errors[1].entry == 'data'
-        assert config_errors[1].field_uri == 'datasets.0.reader.data_source'
+        assert config_errors[1].field_uri == 'datasets.0.data_source'
 
     @pytest.mark.usefixtures('mock_path_exists')
     def test_annotation_is_not_provided(self):
@@ -597,9 +597,9 @@ class TestConfigValidationAPI:
         assert config_errors[0].message == 'launchers section is not provided'
         assert not config_errors[0].entry
         assert config_errors[0].field_uri == 'launchers'
-        assert config_errors[1].message == 'Invalid config for annotation_conversion.imagenet: missing required fields: annotation_file'
+        assert config_errors[1].message == 'Invalid config for datasets.0.annotation_conversion: missing required fields: annotation_file'
         assert config_errors[1].entry == conversion_parameters
-        assert config_errors[1].field_uri == 'annotation_conversion.imagenet'
+        assert config_errors[1].field_uri == 'datasets.0.annotation_conversion'
 
     @pytest.mark.usefixtures('mock_path_exists')
     def test_annotation_conversion_extra_parameter(self):
@@ -613,9 +613,9 @@ class TestConfigValidationAPI:
         assert config_errors[0].message == 'launchers section is not provided'
         assert not config_errors[0].entry
         assert config_errors[0].field_uri == 'launchers'
-        assert config_errors[1].message == "annotation_conversion.imagenet specifies unknown options: ['something_extra']"
+        assert config_errors[1].message == "datasets.0.annotation_conversion specifies unknown options: ['something_extra']"
         assert config_errors[1].entry == conversion_parameters
-        assert config_errors[1].field_uri == 'annotation_conversion.imagenet'
+        assert config_errors[1].field_uri == 'datasets.0.annotation_conversion'
 
     @pytest.mark.usefixtures('mock_path_exists')
     def test_annotation_conversion_config(self):

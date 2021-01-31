@@ -23,6 +23,9 @@ import numpy as np
 from .annotation_converters import (
     BaseFormatConverter, DatasetConversionInfo, save_annotation, make_subset, analyze_dataset
 )
+from .metrics import  Metric
+from .preprocessor import Preprocessor
+from .postprocessor import Postprocessor
 from .config import (
     ConfigValidator,
     StringField,
@@ -42,33 +45,8 @@ from .utils import (
 from .representation import (
     BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
 )
-from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS
+from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS, BaseReader
 from .logging import print_info
-
-
-class DatasetConfig(ConfigValidator):
-    """
-    Specifies configuration structure for dataset
-    """
-    name = StringField()
-    annotation = PathField(optional=True, check_exists=False)
-    data_source = PathField(optional=True, check_exists=False)
-    dataset_meta = PathField(optional=True, check_exists=False)
-    metrics = ListField(allow_empty=False, optional=True)
-    postprocessing = ListField(allow_empty=False, optional=True)
-    preprocessing = ListField(allow_empty=False, optional=True)
-    reader = DataReaderField(optional=True)
-    annotation_conversion = DictField(optional=True)
-    subsample_size = BaseField(optional=True)
-    shuffle = BoolField(optional=True)
-    subsample_seed = NumberField(value_type=int, min_value=0, optional=True)
-    analyze_dataset = BaseField(optional=True)
-    segmentation_masks_source = PathField(is_directory=True, optional=True)
-    additional_data_source = PathField(is_directory=True, optional=True)
-    batch = NumberField(value_type=int, min_value=1, optional=True)
-    _profile = BoolField(optional=True, default=False)
-    _report_type = StringField(optional=True, choices=['json', 'csv'])
-    _ie_preprocessing = BoolField(optional=True, default=False)
 
 
 class Dataset:
@@ -76,10 +54,39 @@ class Dataset:
         self._config = config_entry
         self.batch = self.config.get('batch')
         self.iteration = 0
-        dataset_config = DatasetConfig('dataset')
-        dataset_config.validate(self._config)
+        ConfigValidator('dataset', fields=self.parameters()).validate(self.config)
         if not delayed_annotation_loading:
             self._load_annotation()
+
+    @classmethod
+    def parameters(cls):
+        return {
+            'name': StringField(description='Dataset name'),
+            'annotation': PathField(
+                optional=True, check_exists=False, description='file for reading/writing Accuracy Checker annotation'
+            ),
+            'data_source': PathField(optional=True, check_exists=False, description='data source'),
+            'dataset_meta': PathField(optional=True, check_exists=False, description='dataset metadata file'),
+            'metrics': ListField(allow_empty=False, optional=True, description='list of metrics for evaluation'),
+            'postprocessing': ListField(allow_empty=False, optional=True, description='list of postprocessings'),
+            'preprocessing': ListField(allow_empty=False, optional=True, description='list of preprocessings'),
+            'reader': DataReaderField(optional=True, description='data reader'),
+            'annotation_conversion': DictField(optional=True, description='annotation conversion parameters'),
+            'subsample_size': BaseField(optional=True, description='subset size for evaluation'),
+            'shuffle': BoolField(optional=True, description='samples shuffling allowed or not'),
+            'subsample_seed': NumberField(value_type=int, min_value=0, optional=True, description=''),
+            'analyze_dataset': BoolField(optional=True, description='provide dataset analysis or not'),
+            'segmentation_masks_source': PathField(
+                is_directory=True, optional=True, description='additional data source for segmentation mask loading'
+            ),
+            'additional_data_source': PathField(
+                is_directory=True, optional=True, description='additional data source for annotation loading'
+            ),
+            'batch': NumberField(value_type=int, min_value=1, optional=True, description='batch size for data read'),
+            '_profile': BoolField(optional=True, default=False, description='allow metric profiling'),
+            '_report_type': StringField(optional=True, choices=['json', 'csv'], description='type profiling report'),
+            '_ie_preprocessing': BoolField(optional=True, default=False)
+        }
 
     def _load_annotation(self):
         annotation, meta = None, None
@@ -332,7 +339,9 @@ class Dataset:
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, uri_prefix=''):
-        dataset_config = DatasetConfig(uri_prefix or 'dataset')
+        dataset_config = ConfigValidator(
+            uri_prefix or 'dataset', fields=cls.parameters(), on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
         errors = dataset_config.validate(config, fetch_only=fetch_only)
         if 'annotation_conversion' in config:
             conversion_uri = '{}.annotation_conversion'.format(uri_prefix) if uri_prefix else 'annotation_conversion'
@@ -354,13 +363,27 @@ class Dataset:
                         'converter {} unregistered'.format(converter), conversion_params, conversion_uri)
                 )
                 return errors
-            errors.extend(converter_cls.validate_config(conversion_params, fetch_only=fetch_only))
+            errors.extend(
+                converter_cls.validate_config(conversion_params, fetch_only=fetch_only, uri_prefix=conversion_uri)
+            )
         if not contains_any(config, ['annotation_conversion', 'annotation']):
             errors.append(
                 ConfigError(
                     'annotation_conversion or annotation field should be provided', config, uri_prefix or 'dataset')
             )
         return errors
+
+    @classmethod
+    def validation_scheme(cls):
+        scheme = {param: field for param, field in cls.parameters().items() if not param.startswith('_')}
+        scheme.update({
+            'preprocessing': Preprocessor,
+            'postprocessing': Postprocessor,
+            'metrics': Metric,
+            'reader': BaseReader,
+            'annotation_conversion': BaseFormatConverter
+        })
+        return [scheme]
 
 
 def read_annotation(annotation_file: Path):

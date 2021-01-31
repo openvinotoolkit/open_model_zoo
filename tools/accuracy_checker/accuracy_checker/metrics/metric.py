@@ -123,7 +123,9 @@ class Metric(ClassProvider):
         if cls.__name__ == Metric.__name__:
             metric_provider = config.get('type')
             if not metric_provider:
-                error = ConfigError('type does not found', config, uri_prefix or 'metric')
+                error = ConfigError(
+                    'type does not found', config, uri_prefix or 'metric', validation_scheme=cls.validation_scheme()
+                )
                 if not fetch_only:
                     raise error
                 errors.append(error)
@@ -134,7 +136,8 @@ class Metric(ClassProvider):
                 if not fetch_only:
                     raise exception
                 errors.append(
-                    ConfigError("metric {} unregistered".format(metric_provider), config, uri_prefix or 'metric')
+                    ConfigError("metric {} unregistered".format(metric_provider),
+                                config, uri_prefix or 'metric', validation_scheme=cls.validation_scheme())
                 )
                 return errors
             errors.extend(metric_cls.validate_config(config, fetch_only=fetch_only, uri_prefix=uri_prefix))
@@ -208,6 +211,17 @@ class Metric(ClassProvider):
             self._update_iter = 0
         if self.profiler:
             self.profiler.reset()
+
+    @classmethod
+    def validation_scheme(cls, provider=None):
+        if cls.__name__ == Metric.__name__:
+            if provider:
+                return cls.resolve(provider).validation_scheme()
+            full_scheme = []
+            for provider_ in cls.providers:
+                full_scheme.append(cls.resolve(provider_).validation_scheme())
+            return full_scheme
+        return cls.parameters()
 
 
 class PerImageEvaluationMetric(Metric):

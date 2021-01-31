@@ -332,7 +332,7 @@ class InputFeeder:
             input_config['precision'] = precision
         if 'precision' not in input_config:
             return None
-        input_precision = PRECISION_TO_DTYPE.get(input_config['precision'])
+        input_precision = PRECISION_TO_DTYPE.get(input_config['precision'].upper())
         if input_precision is None:
             raise ConfigError("unsupported precision {} for layer {}".format(input_config['precision'], input_name))
         precisions[input_name] = input_precision
