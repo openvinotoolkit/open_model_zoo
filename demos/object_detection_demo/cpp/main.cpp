@@ -230,7 +230,7 @@ cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& p
         slog::info << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
     }
 
-    for (auto obj : result.objects) {
+    for (const auto& obj : result.objects) {
         if (FLAGS_r) {
             slog::info << " "
                        << std::left << std::setw(9) << obj.label << " | "
@@ -253,7 +253,7 @@ cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& p
     }
 
     try {
-        for (auto lmark : result.asRef<RetinaFaceDetectionResult>().landmarks) {
+        for (const auto& lmark : result.asRef<RetinaFaceDetectionResult>().landmarks) {
             cv::circle(outputImg, lmark, 2, cv::Scalar(0, 255, 255), -1);
         }
     }

@@ -20,15 +20,15 @@
 class ModelFaceBoxes : public DetectionModel {
 public:
     struct Anchor {
-        int left;
-        int top;
-        int right;
-        int bottom;
+        float left;
+        float top;
+        float right;
+        float bottom;
 
-        int getWidth() const { return (right - left) + 1; }
-        int getHeight() const { return (bottom - top) + 1; }
-        int getXCenter() const { return left + (getWidth() - 1) / 2; }
-        int getYCenter() const { return top + (getHeight() - 1) / 2; }
+        float getWidth() const { return (right - left) + 1.0f; }
+        float getHeight() const { return (bottom - top) + 1.0f; }
+        float getXCenter() const { return left + (getWidth() - 1.0f) / 2.0f; }
+        float getYCenter() const { return top + (getHeight() - 1.0f) / 2.0f; }
     };
     static const int INIT_VECTOR_SIZE = 200;
 
@@ -36,13 +36,13 @@ public:
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
-    int maxProposalsCount;
+    size_t maxProposalsCount;
     const float boxIOUThreshold;
     const std::vector<int> steps;
     const std::vector<float> variance;
     const std::vector<std::vector<int>> minSizes;
     std::vector<Anchor> anchors;
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     void priorBoxes(const std::vector<std::pair<size_t, size_t>>& featureMaps);
 
 };
