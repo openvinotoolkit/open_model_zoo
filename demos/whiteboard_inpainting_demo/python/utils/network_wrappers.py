@@ -22,17 +22,17 @@ class MaskRCNN(IEModel):
     def __init__(self, ie, model_path, labels_file, conf=.6, device='CPU', ext_path=''):
         super().__init__(ie, model_path, labels_file, conf, device, ext_path)
 
-        required_input_keys = [{'image'}]
+        required_input_keys = {'image'}
         required_output_keys = {'boxes', 'labels', 'masks'}
 
-        required_input_keys_segmentoly = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
+        required_input_keys_segmentoly = {'im_info', 'im_data'}
         required_output_keys_segmentoly = {'boxes', 'scores', 'classes', 'raw_masks'}
 
         current_input_keys = self.inputs_info.keys()
 
-        assert (current_input_keys in required_input_keys and
+        assert (current_input_keys == required_input_keys and
                 required_output_keys.issubset(self.net.outputs)) or \
-               (current_input_keys in required_input_keys_segmentoly and
+               (current_input_keys == required_input_keys_segmentoly and
                 required_output_keys_segmentoly.issubset(self.net.outputs))
 
         self.segmentoly_type = self.check_segmentoly_type()
@@ -40,9 +40,9 @@ class MaskRCNN(IEModel):
         self.n, self.c, self.h, self.w = self.inputs_info[input_name].input_data.shape
 
     def check_segmentoly_type(self):
-        required_inputs = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
+        required_inputs = {'im_info', 'im_data'}
         required_outputs = {'boxes', 'scores', 'classes', 'raw_masks'}
-        return self.inputs_info.keys() in required_inputs and required_outputs.issubset(self.net.outputs.keys())
+        return self.inputs_info.keys() == required_inputs and required_outputs.issubset(self.net.outputs.keys())
 
     def get_allowed_inputs_len(self):
         return (1, 2)

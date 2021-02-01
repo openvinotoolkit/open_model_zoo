@@ -133,17 +133,17 @@ class MaskRCNN(DetectorInterface):
         self.confidence = conf
         self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
 
-        required_input_keys = [{'image'}]
+        required_input_keys = {'image'}
         required_output_keys = {'boxes', 'labels', 'masks'}
 
-        required_input_keys_segmentoly = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
+        required_input_keys_segmentoly = {'im_info', 'im_data'}
         required_output_keys_segmentoly = {'boxes', 'scores', 'classes', 'raw_masks'}
 
         current_input_keys = self.net.inputs_info.keys()
 
-        assert (current_input_keys in required_input_keys and
+        assert (current_input_keys == required_input_keys and
                 required_output_keys.issubset(self.net.net.outputs)) or \
-               (current_input_keys in required_input_keys_segmentoly and
+               (current_input_keys == required_input_keys_segmentoly and
                 required_output_keys_segmentoly.issubset(self.net.net.outputs))
 
         self.segmentoly_type = self.check_segmentoly_type()
@@ -152,9 +152,9 @@ class MaskRCNN(DetectorInterface):
         assert self.n == 1, 'Only batch 1 is supported.'
 
     def check_segmentoly_type(self):
-        required_inputs = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
+        required_inputs = {'im_info', 'im_data'}
         required_outputs = {'boxes', 'scores', 'classes', 'raw_masks'}
-        return self.net.inputs_info.keys() in required_inputs and required_outputs.issubset(self.net.net.outputs)
+        return self.net.inputs_info.keys() == required_inputs and required_outputs.issubset(self.net.net.outputs)
 
     def preprocess(self, frame):
         image_height, image_width = frame.shape[:2]
