@@ -18,13 +18,10 @@ import_array();
 %}
 
 %{
-#include "scorer_base.h"
-#include "scorer_yoklm.h"
 #include "binding.h"
 %}
 
 %include "std_vector.i"
-%include "std_pair.i"
 %include "std_string.i"
 
 // Add support for size_t to numpy.i
@@ -32,7 +29,6 @@ import_array();
 %numpy_typemaps(float , NPY_FLOAT , size_t)
 
 namespace std {
-    %template(IntVector) std::vector<int>;
     %template(StringVector) std::vector<std::string>;
 }
 
@@ -43,9 +39,4 @@ namespace std {
 %apply (float ** ARGOUTVIEWM_ARRAY1, size_t * DIM1) {(float ** scores, size_t * scores_dim)}
 %apply (int ** ARGOUTVIEWM_ARRAY1, size_t * DIM1) {(int ** tokens_lengths, size_t * tokens_lengths_dim)}
 
-// Workaround for the absent support of std::unique_ptr<...>.
-%ignore ScorerBase::dictionary;
-
-%include "scorer_base.h"
-%include "scorer_yoklm.h"
 %include "binding.h"

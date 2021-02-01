@@ -36,33 +36,21 @@ class CTCBeamDecoder(object):
         max_candidates_per_batch = self._max_candidates_per_batch
         if max_candidates_per_batch is None or max_candidates_per_batch > self._beam_width:
             max_candidates_per_batch = self._beam_width
-        if self._scorer is not None:
-            output, timesteps, scores, out_seq_len = ctc_decode.numpy_beam_decode(
-                probs,  # batch_size x max_seq_lens x vocab_size
-                seq_lens,  # batch_size
-                self._labels,  # list(str)
-                self._beam_width,
-                max_candidates_per_batch,
-                self._num_processes,
-                self._cutoff_prob,
-                self.cutoff_top_n,
-                self._blank_id,
-                self._log_probs,  # log_input, bool
-                self._scorer,
-            )
-        else:
-            output, timesteps, scores, out_seq_len = ctc_decode.numpy_beam_decode_no_lm(
-                probs,  # batch_size x max_seq_lens x vocab_size
-                seq_lens,  # batch_size
-                self._labels,  # list(str)
-                self._beam_width,
-                max_candidates_per_batch,
-                self._num_processes,
-                self._cutoff_prob,
-                self.cutoff_top_n,
-                self._blank_id,
-                self._log_probs,  # log_input, bool
-            )
+
+        output, timesteps, scores, out_seq_len = ctc_decode.numpy_beam_decode(
+            probs,  # batch_size x max_seq_lens x vocab_size
+            seq_lens,  # batch_size
+            self._labels,  # list(str)
+            self._beam_width,
+            max_candidates_per_batch,
+            self._num_processes,
+            self._cutoff_prob,
+            self.cutoff_top_n,
+            self._blank_id,
+            self._log_probs,  # log_input, bool
+            self._scorer,
+        )
+
         output.shape =      (batch_size, max_candidates_per_batch, -1)
         timesteps.shape =   (batch_size, max_candidates_per_batch, -1)
         scores.shape =      (batch_size, max_candidates_per_batch)
