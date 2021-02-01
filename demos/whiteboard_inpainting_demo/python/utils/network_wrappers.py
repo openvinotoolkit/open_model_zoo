@@ -22,30 +22,47 @@ class MaskRCNN(IEModel):
     def __init__(self, ie, model_path, labels_file, conf=.6, device='CPU', ext_path=''):
         super().__init__(ie, model_path, labels_file, conf, device, ext_path)
 
-        required_input_keys = {'im_info', 'im_data'}
-        assert self.inputs_info.keys() == required_input_keys
-        required_output_keys = {'boxes', 'scores', 'classes', 'raw_masks'}
-        assert required_output_keys.issubset(self.net.outputs)
+        required_input_keys = {'image'}
+        required_output_keys = {'boxes', 'labels', 'masks'}
 
-        self.n, self.c, self.h, self.w = self.inputs_info['im_data'].input_data.shape
+        required_input_keys_segmentoly = {'im_info', 'im_data'}
+        required_output_keys_segmentoly = {'boxes', 'scores', 'classes', 'raw_masks'}
+
+        current_input_keys = self.inputs_info.keys()
+
+        assert (current_input_keys == required_input_keys and
+                required_output_keys.issubset(self.net.outputs)) or \
+               (current_input_keys == required_input_keys_segmentoly and
+                required_output_keys_segmentoly.issubset(self.net.outputs))
+
+        self.segmentoly_type = self.check_segmentoly_type()
+        input_name = 'im_data' if self.segmentoly_type else 'image'
+        self.n, self.c, self.h, self.w = self.inputs_info[input_name].input_data.shape
+
+    def check_segmentoly_type(self):
+        required_inputs = {'im_info', 'im_data'}
+        required_outputs = {'boxes', 'scores', 'classes', 'raw_masks'}
+        return self.inputs_info.keys() == required_inputs and required_outputs.issubset(self.net.outputs.keys())
 
     def get_allowed_inputs_len(self):
-        return (2, )
+        return (1, 2)
 
     def get_allowed_outputs_len(self):
-        return (4, 5)
+        return (3, 4, 5)
 
     def _preprocess(self, frame):
         image_height, image_width = frame.shape[:2]
         scale = min(self.h / image_height, self.w / image_width)
         processed_image = cv2.resize(frame, None, fx=scale, fy=scale)
         processed_image = processed_image.astype('float32').transpose(2, 0, 1)
-        im_info=np.array([processed_image.shape[1], processed_image.shape[2], 1.0], dtype='float32')
+        height, width = processed_image.shape[1], processed_image.shape[2]
+        im_info = np.array([height, width, 1.0], dtype='float32') if self.segmentoly_type else None
         meta=dict(original_size=frame.shape[:2],
                   processed_size=processed_image.shape[1:3])
         return processed_image, im_info, meta
 
     def forward(self, im_data, im_info):
+        input_name = 'im_data' if self.segmentoly_type else 'image'
         if (self.h - im_data.shape[1] < 0) or (self.w - im_data.shape[2] < 0):
             raise ValueError('Input image should have the resolution of {}x{} or less, '
                              'got {}x{}.'.format(self.w, self.h, im_data.shape[2], im_data.shape[1]))
@@ -53,15 +70,24 @@ class MaskRCNN(IEModel):
                                    (0, self.h - im_data.shape[1]),
                                    (0, self.w - im_data.shape[2])),
                          mode='constant', constant_values=0).reshape(1, self.c, self.h, self.w)
-        im_info = im_info[None, ]
-        output = self.net.infer(dict(im_data=im_data, im_info=im_info))
+        feed_dict = {input_name: im_data}
+        if im_info is not None:
+            im_info = im_info.reshape(1, *im_info.shape)
+            feed_dict['im_info'] = im_info
+        output = self.net.infer(feed_dict)
 
-        classes = output['classes']
-        valid_detections_mask = classes > 0
-        classes = classes[valid_detections_mask]
-        boxes = output['boxes'][valid_detections_mask]
-        scores = output['scores'][valid_detections_mask]
-        masks = output['raw_masks'][valid_detections_mask]
+        if self.segmentoly_type:
+            valid_detections_mask = output['classes'] > 0
+            classes = output['classes'][valid_detections_mask]
+            boxes = output['boxes'][valid_detections_mask]
+            scores = output['scores'][valid_detections_mask]
+            masks = output['raw_masks'][valid_detections_mask]
+        else:
+            valid_detections_mask = np.sum(output['boxes'], axis=1) > 0
+            classes = output['labels'][valid_detections_mask] + 1
+            boxes = output['boxes'][valid_detections_mask][:, :4]
+            scores = output['boxes'][valid_detections_mask][:, 4]
+            masks = output['masks'][valid_detections_mask]
         return boxes, classes, scores, np.full(len(classes), 0, dtype=np.int32), masks
 
     def get_detections(self, frames, return_cropped_masks=False):
@@ -76,7 +102,8 @@ class MaskRCNN(IEModel):
                                                         im_scale_y=meta['processed_size'][0] / meta['original_size'][0],
                                                         im_scale_x=meta['processed_size'][1] / meta['original_size'][1],
                                                         full_image_masks=True, encode_masks=False,
-                                                        confidence_threshold=self.confidence)
+                                                        confidence_threshold=self.confidence,
+                                                        segmentoly_postprocess=self.segmentoly_type)
             frame_output = []
             for i in range(len(scores)):
                 if classes[i] in self.labels_to_hide:

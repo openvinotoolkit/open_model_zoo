@@ -70,8 +70,8 @@ def load_ie_model(ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=
 
     assert len(net.input_info) == 1 or len(net.input_info) == 2, \
         "Supports topologies with only 1 or 2 inputs"
-    assert len(net.outputs) == 1 or len(net.outputs) == 4 or len(net.outputs) == 5, \
-        "Supports topologies with only 1, 4 or 5 outputs"
+    assert len(net.outputs) in [1, 3, 4, 5], \
+        "Supports topologies with only 1, 3, 4 or 5 outputs"
 
     log.info("Preparing input blobs")
     input_blob = next(iter(net.input_info))

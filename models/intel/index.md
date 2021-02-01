@@ -136,10 +136,15 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [instance-segmentation-security-1025](./instance-segmentation-security-1025/description/instance-segmentation-security-1025.md)                | 30.146               | 26.69      |
+| [instance-segmentation-security-0002](./instance-segmentation-security-0002/description/instance-segmentation-security-0002.md)                | 423.0842             | 48.3732    |
+| [instance-segmentation-security-0010](./instance-segmentation-security-0010/description/instance-segmentation-security-0010.md)                | 899.568              | 174.568    |
 | [instance-segmentation-security-0050](./instance-segmentation-security-0050/description/instance-segmentation-security-0050.md)                | 46.602               | 30.448     |
 | [instance-segmentation-security-0083](./instance-segmentation-security-0083/description/instance-segmentation-security-0083.md)                | 365.626              | 143.444    |
-| [instance-segmentation-security-0010](./instance-segmentation-security-0010/description/instance-segmentation-security-0010.md)                | 899.568              | 174.568    |
+| [instance-segmentation-security-0091](./instance-segmentation-security-0091/description/instance-segmentation-security-0091.md)                | 828.6324             | 101.236    |
+| [instance-segmentation-security-0228](./instance-segmentation-security-0228/description/instance-segmentation-security-0228.md)                | 147.2352             | 49.8328    |
+| [instance-segmentation-security-1025](./instance-segmentation-security-1025/description/instance-segmentation-security-1025.md)                | 30.146               | 26.69      |
+| [instance-segmentation-security-1039](./instance-segmentation-security-1039/description/instance-segmentation-security-1039.md)                | 13.9672              | 10.5674    |
+| [instance-segmentation-security-1040](./instance-segmentation-security-1040/description/instance-segmentation-security-1040.md)                | 29.334               | 13.5673    |
 
 
 ## Human Pose Estimation Models
