@@ -40,4 +40,22 @@ class MtcnnPipeline:
             results = pipeline.get_result(id)
             if results:
                 proposal_results += results[0][0]
-        return self.proposal_model.postprocess_all(proposal_results)
+        refine_pipeline = AsyncPipeline(self.ie, self.refine_model, self.plugin_config, self.device, self.max_requests)
+        refine_results = []
+        for detection in proposal_results:
+            refine_pipeline.submit_data({'image': frame, 'crop': detection[:4]}, 1, {})
+            refine_pipeline.await_any()
+            results = refine_pipeline.get_result(1)
+            if results:
+                refine_results += results[0][0]
+        output_pipeline = AsyncPipeline(self.ie, self.output_model, self.plugin_config, self.device, self.max_requests)
+        output_results = []
+        for detection in refine_results:
+            output_pipeline.submit_data({'image': frame, 'crop': detection[:4]}, 1, {})
+            output_pipeline.await_any()
+            results = output_pipeline.get_result(1)
+            if results:
+                output_results += results[0][0]
+
+        results = self.output_model.postprocess_all(output_results)
+        return results

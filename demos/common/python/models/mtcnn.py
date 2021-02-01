@@ -1,7 +1,7 @@
 import numpy as np
 
 from .model import Model
-from .utils import resize_image, Detection
+from .utils import resize_image, DetectionWithLandmarks
 
 
 class ProposalModel(Model):
@@ -19,12 +19,10 @@ class ProposalModel(Model):
         image = inputs
         n, c, w, h = self.net.input_info[self.image_blob_name].input_data.shape
         resized_image = resize_image(image, (w, h))
-        meta = {'original_shape': image.shape,
-                'resized_shape': resized_image.shape}
         resized_image = resized_image.transpose((2, 1, 0))
         resized_image = resized_image.reshape((n, c, w, h))
         dict_inputs = {self.image_blob_name: resized_image}
-        return dict_inputs, meta
+        return dict_inputs, {}
 
     def postprocess(self, outputs, meta):
         bboxes = outputs[self.bbox_blob_name]
@@ -129,3 +127,141 @@ class ProposalModel(Model):
             I = I[np.where(o<=threshold)[0]]
         result_rectangle = boxes[pick].tolist()
         return result_rectangle
+
+
+class RefineModel(Model):
+    def __init__(self, ie, model_path):
+        super().__init__(ie, model_path)
+        self.image_blob_name = next(iter(self.net.input_info))
+        for name, blob in self.net.outputs.items():
+            if blob.shape[1] == 2:
+                self.prob_blob_name = name
+            elif blob.shape[1] == 4:
+                self.bbox_blob_name = name
+        self.n, self.c, self.w, self.h = self.net.input_info[self.image_blob_name].input_data.shape
+
+    def preprocess(self, inputs):
+        image = inputs['image']
+        x1, y1, x2, y2 = [int(x) for x in inputs['crop']]
+        image = image[y1:y2, x1:x2]
+        resized_image = resize_image(image, (self.w, self.h))
+        meta = {'crop': inputs['crop']}
+        resized_image = resized_image.transpose((2, 1, 0))
+        resized_image = resized_image.reshape((self.n, self.c, self.w, self.h))
+        dict_inputs = {self.image_blob_name: resized_image}
+        return dict_inputs, meta
+
+    def postprocess(self, outputs, meta):
+        bboxes = outputs[self.bbox_blob_name]
+        scores = outputs[self.prob_blob_name]
+
+        detections = self._generate_detections(bboxes[0], scores[0], meta['crop'], 0.7)
+
+        return detections, meta
+
+    def _generate_detections(self, bboxes, scores, crop, score_threshold):
+        def square_box(boxes):
+            w = boxes[:, 2] - boxes[:, 0]
+            h = boxes[:, 3] - boxes[:, 1]
+            a = np.maximum(w, h)
+            shift = 0.5 * (np.array([w, h]) - np.repeat([a], 2, axis=0)).T
+            boxes[:, :2] += shift
+            boxes[:, 2:4] -= shift
+            return boxes
+        if len(scores.shape) == 1:
+            bboxes = np.expand_dims(bboxes, axis=1)
+            scores = np.expand_dims(scores, axis=1)
+        (keep,) = np.where(scores[1] >= score_threshold)
+        if keep.size == 0:
+            return []
+        w = crop[2] - crop[0]
+        h = crop[3] - crop[1]
+        # bboxes = bboxes[:, keep]
+        bboxes[0] = bboxes[0] * w + crop[0]
+        bboxes[1] = bboxes[1] * w + crop[1]
+        bboxes[2] = bboxes[2] * h + crop[2]
+        bboxes[3] = bboxes[3] * h + crop[3]
+        score = np.array([scores[1]]).T
+        boxes = np.concatenate((bboxes.T, score), axis=1)
+        boxes = square_box(boxes)
+        result = []
+        for box in boxes:
+            if box[2] > box[0] and box[3] > box[1]:
+                result.append(box)
+
+        return ProposalModel.NMS(result, 0.5, 'iou')
+
+    @staticmethod
+    def postprocess_all(detections):
+        detections = ProposalModel.NMS(detections, 0.7, 'iou')
+        detections = [Detection(*detection, 1) for detection in detections]
+        return detections
+
+
+class OutputModel(Model):
+    def __init__(self, ie, model_path):
+        super().__init__(ie, model_path)
+        self.image_blob_name = next(iter(self.net.input_info))
+        for name, blob in self.net.outputs.items():
+            if blob.shape[1] == 2:
+                self.prob_blob_name = name
+            elif blob.shape[1] == 4:
+                self.bbox_blob_name = name
+            elif blob.shape[1] == 10:
+                self.landmarks_blob_name = name
+        self.n, self.c, self.w, self.h = self.net.input_info[self.image_blob_name].input_data.shape
+
+    def preprocess(self, inputs):
+        image = inputs['image']
+        x1, y1, x2, y2 = [int(x) for x in inputs['crop']]
+        image = image[y1:y2, x1:x2]
+        resized_image = resize_image(image, (self.w, self.h))
+        meta = {'crop': inputs['crop']}
+        resized_image = resized_image.transpose((2, 1, 0))
+        resized_image = resized_image.reshape((self.n, self.c, self.w, self.h))
+        dict_inputs = {self.image_blob_name: resized_image}
+        return dict_inputs, meta
+
+    def postprocess(self, outputs, meta):
+        bboxes = outputs[self.bbox_blob_name]
+        scores = outputs[self.prob_blob_name]
+        landmarks = outputs[self.landmarks_blob_name]
+
+        detections = self._generate_detections(bboxes[0], scores[0], landmarks[0], meta['crop'], 0.7)
+
+        return detections, meta
+
+    def _generate_detections(self, bboxes, scores, landmarks, crop, score_threshold):
+        if len(scores.shape) == 1:
+            bboxes = np.expand_dims(bboxes, axis=1)
+            scores = np.expand_dims(scores, axis=1)
+            landmarks = np.expand_dims(landmarks, axis=1)
+        (keep,) = np.where(scores[1] >= score_threshold)
+        if keep.size == 0:
+            return []
+        w = crop[2] - crop[0]
+        h = crop[3] - crop[1]
+        bboxes = bboxes[:, keep]
+        bboxes[0] = bboxes[0] * w + crop[0]
+        bboxes[1] = bboxes[1] * w + crop[1]
+        bboxes[2] = bboxes[2] * h + crop[2]
+        bboxes[3] = bboxes[3] * h + crop[3]
+        landmarks[:5] = landmarks[:5] * w + crop[0]
+        landmarks[5:] = landmarks[5:] * h + crop[1]
+        # landmarks = np.concatenate((landmarks[0::2], landmarks[1::2]), axis=0)
+        score = np.array([scores[1]]).T
+        classes = np.ones(shape=(score.shape[0], 1))
+        boxes = np.concatenate((bboxes.T, score, classes, landmarks.T), axis=1)
+        result = []
+        for box in boxes:
+            if box[2] > box[0] and box[3] > box[1]:
+                result.append(box)
+
+        return ProposalModel.NMS(result, 0.5, 'iou')
+
+    @staticmethod
+    def postprocess_all(detections):
+        detections = ProposalModel.NMS(detections, 0.7, 'iou')
+        detections = [DetectionWithLandmarks(*detection[:6], detection[6:11], detection[11:])
+                      for detection in detections]
+        return detections

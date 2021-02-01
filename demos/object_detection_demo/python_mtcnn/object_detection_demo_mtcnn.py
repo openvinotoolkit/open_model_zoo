@@ -46,10 +46,10 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m_p', '--model_proposal', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
-    # args.add_argument('-m_r', '--model_refine', help='Required. Path to an .xml file with a trained model.',
-    #                   required=True, type=Path)
-    # args.add_argument('-m_o', '--model_output', help='Required. Path to an .xml file with a trained model.',
-    #                   required=True, type=Path)
+    args.add_argument('-m_r', '--model_refine', help='Required. Path to an .xml file with a trained model.',
+                      required=True, type=Path)
+    args.add_argument('-m_o', '--model_output', help='Required. Path to an .xml file with a trained model.',
+                      required=True, type=Path)
     # args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
     #                   type=str, required=True, choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
     args.add_argument('-i', '--input', required=True,
@@ -184,6 +184,7 @@ def draw_detections(frame, detections, palette, labels, threshold):
                         (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
             if isinstance(detection, models.DetectionWithLandmarks):
                 for landmark in detection.landmarks:
+                    landmark = (int(landmark[0]), int(landmark[1]))
                     cv2.circle(frame, landmark, 2, (0, 255, 255), 2)
     return frame
 
@@ -213,10 +214,8 @@ def main():
     log.info('Loading network...')
 
     model_proposal = models.ProposalModel(ie, args.model_proposal)
-    model_refine = None
-    model_output = None
-    # model_refine = models.RefineModel(ie, args.model_refine)
-    # model_output = models.OutputModel(ie, args.model_output)
+    model_refine = models.RefineModel(ie, args.model_refine)
+    model_output = models.OutputModel(ie, args.model_output)
 
     detector_pipeline = MtcnnPipeline(ie, model_proposal, model_refine, model_output, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
