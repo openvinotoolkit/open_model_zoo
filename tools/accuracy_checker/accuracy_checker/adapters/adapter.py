@@ -107,10 +107,10 @@ class AdapterField(BaseField):
         field_uri_ = field_uri_ or self.field_uri
         if isinstance(entry, str):
             errors_stack.extend(
-                StringField(
-                    choices=Adapter.providers).validate(
-                        entry, field_uri_ or 'adapter', fetch_only=fetch_only, validation_scheme=validation_scheme
-                ))
+                StringField(choices=Adapter.providers).validate(
+                    entry, field_uri_ or 'adapter', fetch_only=fetch_only, validation_scheme=validation_scheme
+                )
+            )
         elif isinstance(entry, dict):
             class DictAdapterValidator(ConfigValidator):
                 type = StringField(choices=Adapter.providers)
