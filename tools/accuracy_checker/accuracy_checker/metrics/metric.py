@@ -145,7 +145,7 @@ class Metric(ClassProvider):
         metric_uri = uri_prefix or 'metrics.{}'.format(cls.__provider__)
         return ConfigValidator(
             metric_uri, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
-        ).validate(config, fetch_only=fetch_only)
+        ).validate(config, fetch_only=fetch_only, validation_scheme=cls.validation_scheme())
 
     def _update_state(self, fn, state_key, default_factory=None):
         iter_key = "{}_global_it".format(state_key)

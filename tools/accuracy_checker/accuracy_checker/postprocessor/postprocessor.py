@@ -136,7 +136,8 @@ class Postprocessor(ClassProvider):
                 errors.append(
                     ConfigError(
                         "postprocessor {} unregistered".format(processing_provider), config,
-                        uri_prefix or 'postprocessing')
+                        uri_prefix or 'postprocessing', validation_scheme=cls.validation_scheme()
+                    )
                 )
                 return errors
             errors.extend(processor_cls.validate_config(config, fetch_only=fetch_only, uri_prefix=uri_prefix))
@@ -145,7 +146,7 @@ class Postprocessor(ClassProvider):
         postprocessing_uri = uri_prefix or 'postprocessing.{}'.format(cls.__provider__)
         return ConfigValidator(
             postprocessing_uri, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
-        ).validate(config, fetch_only=fetch_only)
+        ).validate(config, fetch_only=fetch_only, validation_scheme=cls.validation_scheme())
 
     def get_entries(self, annotation, prediction):
         message_not_found = '{}: {} is not found in container'

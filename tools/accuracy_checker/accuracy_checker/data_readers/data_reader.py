@@ -161,7 +161,9 @@ class BaseReader(ClassProvider):
             errors = []
             reader_type = config if isinstance(config, str) else config.get('type')
             if not reader_type:
-                error = ConfigError('type is not provided', config, reader_uri)
+                error = ConfigError(
+                    'type is not provided', config, reader_uri, validation_scheme=cls.validation_scheme()
+                )
                 if not fetch_only:
                     raise error
                 errors.append(error)
@@ -170,10 +172,14 @@ class BaseReader(ClassProvider):
                 reader_cls = cls.resolve(reader_type)
                 reader_config = config if isinstance(config, dict) else {'type': reader_type}
                 if reader_type not in DOES_NOT_REQUIRED_DATA_SOURCE:
-                    data_source_field = PathField(is_directory=reader_type not in DATA_SOURCE_IS_FILE)
+                    data_source_field = PathField(
+                        is_directory=reader_type not in DATA_SOURCE_IS_FILE, description='data source'
+                    )
                     errors.extend(
                         data_source_field.validate(
-                            data_source, reader_uri.replace('reader', 'data_source'), fetch_only=fetch_only)
+                            data_source, reader_uri.replace('reader', 'data_source'), fetch_only=fetch_only,
+                            validation_scheme=data_source_field
+                        )
                     )
                 errors.extend(
                     reader_cls.validate_config(reader_config, fetch_only=fetch_only, **kwargs, uri_prefix=uri_prefix))
@@ -185,7 +191,7 @@ class BaseReader(ClassProvider):
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
         return ConfigValidator(reader_uri, fields=cls.parameters(), **kwargs).validate(
-            config or {}, fetch_only=fetch_only
+            config or {}, fetch_only=fetch_only, validation_scheme=cls.validation_scheme()
         )
 
     def read(self, data_id):

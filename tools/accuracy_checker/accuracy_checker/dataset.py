@@ -348,7 +348,9 @@ class Dataset:
             conversion_params = config['annotation_conversion']
             converter = conversion_params.get('converter')
             if not converter:
-                error = ConfigError('converter is not found', conversion_params, conversion_uri)
+                error = ConfigError(
+                    'converter is not found', conversion_params, conversion_uri, validation_scheme=BaseFormatConverter
+                )
                 if not fetch_only:
                     raise error
                 errors.append(error)
@@ -360,7 +362,8 @@ class Dataset:
                     raise exception
                 errors.append(
                     ConfigError(
-                        'converter {} unregistered'.format(converter), conversion_params, conversion_uri)
+                        'converter {} unregistered'.format(converter),
+                        conversion_params, conversion_uri, validation_scheme=BaseFormatConverter)
                 )
                 return errors
             errors.extend(
@@ -369,7 +372,9 @@ class Dataset:
         if not contains_any(config, ['annotation_conversion', 'annotation']):
             errors.append(
                 ConfigError(
-                    'annotation_conversion or annotation field should be provided', config, uri_prefix or 'dataset')
+                    'annotation_conversion or annotation field should be provided', config, uri_prefix or 'dataset',
+                    validation_scheme=cls.validation_scheme()
+                )
             )
         return errors
 

@@ -123,7 +123,7 @@ class ModelEvaluator(BaseEvaluator):
             config_errors.append(
                 ConfigError(
                     'launchers section is not provided', model_config.get('launchers', []),
-                    '{}.launchers'.format(uri_prefix) if uri_prefix else 'launchers'
+                    '{}.launchers'.format(uri_prefix) if uri_prefix else 'launchers', validation_scheme=Launcher
                 )
             )
         else:
@@ -141,7 +141,11 @@ class ModelEvaluator(BaseEvaluator):
         datasets_uri = '{}.datasets'.format(uri_prefix) if uri_prefix else 'datasets'
         if 'datasets' not in model_config or not model_config['datasets']:
             config_errors.append(
-                ConfigError('datasets section is not provided', model_config.get('datasets', []), datasets_uri))
+                ConfigError(
+                    'datasets section is not provided', model_config.get('datasets', []),
+                    datasets_uri, validation_scheme=Dataset
+                )
+            )
         else:
             for dataset_id, dataset_config in enumerate(model_config['datasets']):
                 data_reader_config = dataset_config.get('reader', 'opencv_imread')

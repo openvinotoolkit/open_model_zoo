@@ -90,7 +90,9 @@ class BaseFormatConverter(ClassProvider):
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, uri_prefix=''):
-        return cls.config_validator(uri_prefix=uri_prefix).validate(config, fetch_only=fetch_only)
+        return cls.config_validator(uri_prefix=uri_prefix).validate(
+            config, fetch_only=fetch_only, validation_scheme=cls.validation_scheme()
+        )
 
     def configure(self):
         pass

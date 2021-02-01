@@ -51,7 +51,7 @@ class CPUExtensionPathField(PathField):
             msg = "values is expected to be path-like"
             if not fetch_only:
                 self.raise_error(entry, field_uri, msg)
-            errors.append(self.build_error(entry, field_uri, msg, validation_scheme))
+            errors.append(self.build_error(entry, field_uri, msg, validation_scheme=validation_scheme))
         is_directory = False
         if validation_entry.parts[-1] == 'AUTO':
             validation_entry = validation_entry.parent
@@ -62,17 +62,17 @@ class CPUExtensionPathField(PathField):
             msg = "path does not exist"
             if not fetch_only:
                 self.raise_error(validation_entry, field_uri, msg)
-            errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme))
+            errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme=validation_scheme))
         except NotADirectoryError:
             msg = "path is not a directory"
             if not fetch_only:
                 self.raise_error(validation_entry, field_uri, msg)
-            errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme))
+            errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme=validation_scheme))
         except IsADirectoryError:
             msg = "path is a directory, regular file expected"
             if not fetch_only:
                 self.raise_error(validation_entry, field_uri, msg)
-            errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme))
+            errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme=validation_scheme))
         return errors
 
 

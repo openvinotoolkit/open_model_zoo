@@ -127,7 +127,13 @@ class ConfigValidator(BaseValidator):
             if key not in self.fields:
                 extra_arguments.append(key)
                 continue
-            field_valid_scheme = validation_scheme.get(key) if validation_scheme else None
+            if validation_scheme is None:
+                field_valid_scheme = None
+            else:
+                field_valid_scheme = (
+                    validation_scheme.get(key) if isinstance(validation_scheme, dict)
+                    else validation_scheme.validation_scheme()
+                )
             error_stack.extend(
                 self.fields[key].validate(entry[key], fetch_only=fetch_only, validation_scheme=field_valid_scheme)
             )
@@ -250,14 +256,18 @@ class StringField(BaseField):
             if not fetch_only:
                 self.raise_error(source_entry, field_uri, reason)
             else:
-                error_stack.append(self.build_error(source_entry, field_uri, reason, validation_scheme))
+                error_stack.append(
+                    self.build_error(source_entry, field_uri, reason, validation_scheme=validation_scheme)
+                )
 
         if self._regex and not self._regex.match(entry):
             regex_reason = 'value does not matched by regex'
             if not fetch_only:
                 self.raise_error(source_entry, field_uri, reason=regex_reason)
             else:
-                error_stack.append(self.build_error(source_entry, field_uri, regex_reason))
+                error_stack.append(
+                    self.build_error(source_entry, field_uri, regex_reason, validation_scheme=validation_scheme)
+                )
 
         return error_stack
 
@@ -288,26 +298,26 @@ class DictField(BaseField):
             if not fetch_only:
                 self.raise_error(entry, field_uri, msg)
             else:
-                error_stack.append(self.build_error(entry, field_uri, msg, validation_scheme))
+                error_stack.append(self.build_error(entry, field_uri, msg, validation_scheme=validation_scheme))
                 return error_stack
 
         if not entry and not self.allow_empty:
             empty_msg = "value is empty"
             if not fetch_only:
-                self.raise_error(entry, field_uri, empty_msg, validation_scheme)
+                self.raise_error(entry, field_uri, empty_msg)
             else:
-                error_stack.append(self.build_error(entry, field_uri, empty_msg, validation_scheme))
+                error_stack.append(self.build_error(entry, field_uri, empty_msg, validation_scheme=validation_scheme))
                 return error_stack
 
         for k, v in entry.items():
             if self.validate_keys:
                 uri = "{}.keys.{}".format(field_uri, k)
-                error_stack.extend(self.key_type.validate(k, uri, fetch_only, validation_scheme))
+                error_stack.extend(self.key_type.validate(k, uri, fetch_only, validation_scheme=validation_scheme))
 
             if self.validate_values:
                 uri = "{}.{}".format(field_uri, k)
 
-                error_stack.extend(self.value_type.validate(v, uri, fetch_only, validation_scheme))
+                error_stack.extend(self.value_type.validate(v, uri, fetch_only, validation_scheme=validation_scheme))
         return error_stack
 
     @property
@@ -332,14 +342,16 @@ class ListField(BaseField):
             if not fetch_only:
                 self.raise_error(entry, field_uri, msg)
             else:
-                error_stack.append(self.build_error(entry, field_uri, msg, validation_scheme))
+                error_stack.append(self.build_error(entry, field_uri, msg, validation_scheme=validation_scheme))
                 return error_stack
 
         if not entry and not self.allow_empty:
             if not fetch_only:
                 self.raise_error(entry, field_uri, "value is empty")
             else:
-                error_stack.append(self.build_error(entry, field_uri, "value is empty", validation_scheme))
+                error_stack.append(
+                    self.build_error(entry, field_uri, "value is empty", validation_scheme=validation_scheme)
+                )
                 return error_stack
 
         if self.validate_values:
@@ -391,7 +403,7 @@ class ListInputsField(ListField):
                 else:
                     error_stack.append(
                         self.build_error(
-                            entry, field_uri, '{} repeated name'.format(input_name), validation_scheme
+                            entry, field_uri, '{} repeated name'.format(input_name), validation_scheme=validation_scheme
                         ))
         return error_stack
 
@@ -415,7 +427,8 @@ class NumberField(BaseField):
             if fetch_only:
                 error_stack.append(
                     self.build_error(
-                        entry, field_uri, "{} is expected to be int".format(field_uri), validation_scheme
+                        entry, field_uri, "{} is expected to be int".format(field_uri),
+                        validation_scheme=validation_scheme
                     ))
                 return error_stack
             self.raise_error(entry, field_uri, "{} is expected to be int".format(field_uri))
@@ -424,7 +437,8 @@ class NumberField(BaseField):
             if fetch_only:
                 error_stack.append(
                     self.build_error(
-                        entry, field_uri, "{} is expected to be number".format(field_uri), validation_scheme
+                        entry, field_uri, "{} is expected to be number".format(field_uri),
+                        validation_scheme=validation_scheme
                     ))
                 return error_stack
             self.raise_error(entry, field_uri, "{} is expected to be number".format(field_uri))
@@ -441,13 +455,15 @@ class NumberField(BaseField):
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
             else:
-                error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme))
+                error_stack.append(
+                    self.build_error(entry, field_uri, reason, validation_scheme=validation_scheme)
+                )
         if self.max is not None and entry > self.max:
             reason = "value is greater than maximal allowed - {}".format(self.max)
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
             else:
-                error_stack.append(self.build_error(entry, fetch_only, reason, validation_scheme))
+                error_stack.append(self.build_error(entry, fetch_only, reason, validation_scheme=validation_scheme))
         return error_stack
 
     def finite_check(self, entry, field_uri, fetch_only, validation_scheme=None):
@@ -457,13 +473,13 @@ class NumberField(BaseField):
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
             else:
-                error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme))
+                error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme=validation_scheme))
         if math.isnan(entry) and not self._allow_nan:
             reason = "value is NaN"
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
             else:
-                error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme))
+                error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme=validation_scheme))
         return error_stack
 
     @property
@@ -490,22 +506,22 @@ class PathField(BaseField):
             reason = "values is expected to be path-like"
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
-            error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme))
+            error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme=validation_scheme))
         except FileNotFoundError:
             reason = "path does not exist"
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
-            error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme))
+            error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme=validation_scheme))
         except NotADirectoryError:
             reason = "path is not a directory"
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
-            error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme))
+            error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme=validation_scheme))
         except IsADirectoryError:
             reason = "path is a directory, regular file expected"
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
-            error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme))
+            error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme=validation_scheme))
 
         return error_stack
 
@@ -529,7 +545,7 @@ class BoolField(BaseField):
             if not fetch_only:
                 self.raise_error(entry, field_uri, reason)
             else:
-                error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme))
+                error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme=validation_scheme))
         return error_stack
 
     @property

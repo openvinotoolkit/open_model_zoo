@@ -57,7 +57,9 @@ class Adapter(ClassProvider):
             errors = []
             adapter_type = config if isinstance(config, str) else config.get('type')
             if not adapter_type:
-                error = ConfigError('type is not provided', config, uri_prefix or 'adapter')
+                error = ConfigError(
+                    'type is not provided', config, uri_prefix or 'adapter', validation_scheme=cls.validation_scheme()
+                )
                 if not fetch_only:
                     raise error
                 errors.append(error)
@@ -73,7 +75,9 @@ class Adapter(ClassProvider):
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
         uri = '{}.{}'.format(uri_prefix, cls.__provider__) if uri_prefix else 'adapter.{}'.format(cls.__provider__)
-        return ConfigValidator(uri, fields=cls.parameters(), **kwargs).validate(config, fetch_only=fetch_only)
+        return ConfigValidator(uri, fields=cls.parameters(), **kwargs).validate(
+            config, fetch_only=fetch_only, validation_scheme=cls.validation_scheme()
+        )
 
     @staticmethod
     def _extract_predictions(outputs_list, meta):
