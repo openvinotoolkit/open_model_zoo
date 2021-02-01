@@ -243,8 +243,8 @@ std::vector<ModelFaceBoxes::Anchor> filterBBoxes(const InferenceEngine::MemoryBl
         auto predW = exp(dw * variance[1]) * anchors[i].getWidth();
         auto predH = exp(dh * variance[1]) * anchors[i].getHeight();
 
-        bboxes.push_back({ predCtrX - 0.5f * predW, predCtrY - 0.5f * predH,
-                                     predCtrX + 0.5f * predW, predCtrY + 0.5f * predH });
+        bboxes.push_back({ static_cast<float>(predCtrX - 0.5f * predW), static_cast<float>(predCtrY - 0.5f * predH),
+                                     static_cast<float>(predCtrX + 0.5f * predW), static_cast<float>(predCtrY + 0.5f * predH) });
 
     }
 
