@@ -259,16 +259,14 @@ class CTCGreedyDecoder(Adapter):
         blank_id = len(labels)
         hypotheses = []
         # CTC decoding procedure
-        for ind in range(prediction.shape[0]):
+        for batch_elem in prediction:
             decoded_prediction = []
             previous = blank_id
-            pr = prediction[ind]
-            for p in pr:
-                if (p != previous or previous == blank_id) and p != blank_id:
-                    decoded_prediction.append(p)
+            for p in batch_elem:
+                if previous != p != blank_id:
+                    decoded_prediction.append(labels[p])
                 previous = p
-            hypothesis = ''.join([labels[c] for c in decoded_prediction])
-            hypotheses.append(hypothesis)
+            hypotheses.append(''.join(decoded_prediction))
         return hypotheses
 
 
