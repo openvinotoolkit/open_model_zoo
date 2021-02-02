@@ -75,6 +75,7 @@ def main():
             for suffix in ['caffe', 'mxnet', 'onnx', 'tf2']))
     pc('ci/requirements-demos.txt',
         'demos/requirements.txt', openvino_dir / 'python/requirements.txt')
+    pc('ci/requirements-documentation.txt', 'ci/requirements-documentation.in')
     pc('ci/requirements-downloader.txt',
         'tools/downloader/requirements.in')
     pc('ci/requirements-quantization.txt',
