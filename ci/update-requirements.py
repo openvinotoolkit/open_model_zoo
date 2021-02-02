@@ -27,7 +27,8 @@ def fixup_req_file(req_path, path_placeholders):
     contents = req_path.read_text()
 
     for path, placeholder in path_placeholders:
-        contents = contents.replace('-r {}/'.format(path), '-r ${{{}}}/'.format(placeholder))
+        contents = contents.replace(f'-r {path}/', f'-r ${{{placeholder}}}/')
+        contents = contents.replace(f'({path}/', f'(${{{placeholder}}}/')
 
     contents = "# use {} to update this file\n\n".format(script_name) + contents
     req_path.write_text(contents)
@@ -73,7 +74,7 @@ def main():
         *(openvino_dir / f'deployment_tools/model_optimizer/requirements_{suffix}.txt'
             for suffix in ['caffe', 'mxnet', 'onnx', 'tf2']))
     pc('ci/requirements-demos.txt',
-        'demos/python_demos/requirements.txt', openvino_dir / 'python/requirements.txt')
+        'demos/requirements.txt', openvino_dir / 'python/requirements.txt')
     pc('ci/requirements-downloader.txt',
         'tools/downloader/requirements.in')
     pc('ci/requirements-quantization.txt',
