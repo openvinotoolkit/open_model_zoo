@@ -21,7 +21,7 @@
 
 ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),  // Default label is "Face"
-    boxIOUThreshold(boxIOUThreshold), maskThreshold(0.8f), shouldDetectMasks(false), landmarkStd(1.0f),
+    boxIOUThreshold(boxIOUThreshold), maskThreshold(0.8f), shouldDetectMasks(false), shouldDetectLandmarks(false), landmarkStd(1.0f),
     anchorCfg({ {32, { 32, 16 }, 16, { 1 }},
               { 16, { 8, 4 }, 16, { 1 }},
               { 8, { 2, 1 }, 16, { 1 }} }) {
@@ -74,6 +74,7 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
         }
         else if (output.first.find("landmark") != -1) {
             type = OT_LANDMARK;
+            shouldDetectLandmarks = true;
         }
         else if (output.first.find("type") != -1) {
             type = OT_MASKSCORES;
@@ -98,8 +99,8 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
         outputsSizes[type].insert(outputsSizes[type].begin() + i, num);
     }
 
-    if (outputsNames.size() != 9 && outputsNames.size() != 12) {
-        throw std::logic_error("Expected 12 or 9 output blobs");
+    if (outputsNames.size() != 6 && outputsNames.size() != 9 && outputsNames.size() != 12) {
+        throw std::logic_error("Expected 6, 9 or 12 output blobs");
     }
 
     for (int idx = 0; idx < outputsSizes[OT_BBOX].size(); ++idx) {
@@ -325,9 +326,11 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
     std::vector<Anchor> bboxes;
     bboxes.reserve(INIT_VECTOR_SIZE);
     std::vector<cv::Point2f> landmarks;
-    landmarks.reserve(INIT_VECTOR_SIZE);
     std::vector<float> masks;
 
+    if (shouldDetectLandmarks) {
+        landmarks.reserve(INIT_VECTOR_SIZE);
+    }
     if (shouldDetectMasks) {
         masks.reserve(INIT_VECTOR_SIZE);
     }
@@ -336,15 +339,16 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
     for (int idx = 0; idx < anchorCfg.size(); ++idx) {
         const auto bboxRaw = infResult.outputsData[separateOutputsNames[OT_BBOX][idx]];
         const auto scoresRaw = infResult.outputsData[separateOutputsNames[OT_SCORES][idx]];
-        const auto landmarksRaw = infResult.outputsData[separateOutputsNames[OT_LANDMARK][idx]];
         auto s = anchorCfg[idx].stride;
         auto anchorNum = anchorsFpn[s].size();
 
         auto validIndices = thresholding(scoresRaw, anchorNum, confidenceThreshold);
         filterScores(scores, validIndices, scoresRaw, anchorNum);
         filterBBoxes(bboxes, validIndices, bboxRaw, anchorNum, anchors[idx]);
-        filterLandmarks(landmarks, validIndices, landmarksRaw, anchorNum, anchors[idx], landmarkStd);
-
+        if (shouldDetectLandmarks) {
+            const auto landmarksRaw = infResult.outputsData[separateOutputsNames[OT_LANDMARK][idx]];
+            filterLandmarks(landmarks, validIndices, landmarksRaw, anchorNum, anchors[idx], landmarkStd);
+        }
         if (shouldDetectMasks) {
             const auto masksRaw = infResult.outputsData[separateOutputsNames[OT_MASKSCORES][idx]];
             filterMasksScores(masks, validIndices, masksRaw, anchorNum);
@@ -383,7 +387,7 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         result->objects.push_back(desc);
 
         //--- Scaling landmarks coordinates
-        for (size_t l = 0; l < ModelRetinaFace::LANDMARKS_NUM; ++l) {
+        for (size_t l = 0; l < ModelRetinaFace::LANDMARKS_NUM && shouldDetectLandmarks; ++l) {
             landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].x /= scaleX;
             landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].y /= scaleY;
             result->landmarks.push_back(landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l]);
