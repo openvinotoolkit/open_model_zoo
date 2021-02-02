@@ -61,6 +61,9 @@ AccuracyChecker supports following set of adapters:
   * `boxes_out` - the name of layer with bounding boxes
   * `scores_out` - the name of output layer with detection scores for each class and box pair.
   * `indices_out` - the name of output layer with indices triplets (class_id, score_id, bbox_id).
+* `yolo_v3_tf2` - converting output of TensorFlow 2 Yolo V3 with embedded box decoding to `DetectionPrediction`.
+  * `outputs` - the list of output layers names.
+  * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0).
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
 * `ssd_mxnet` - converting output of SSD-based models from MXNet framework to `DetectionPrediction` representation.
