@@ -67,7 +67,7 @@ static const char num_streams_message[] = "Optional. Number of streams to use fo
 "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes (YOLOv3 only).";
+static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes.";
 static const char yolo_af_message[] = "Optional. Use advanced postprocessing/filtering algorithm for YOLO.";
 
 DEFINE_bool(h, false, help_message);

@@ -282,10 +282,10 @@ void filterMasksScores(std::vector<float>& masks, const std::vector<size_t>& ind
     }
 }
 
-std::vector<int> nms(const std::vector<ModelRetinaFace::Anchor>& boxes, const std::vector<float>& scores, const float thresh) {
+std::vector<int> nms(const std::vector<ModelRetinaFace::Anchor>& boxes, const std::vector<float>& scores, const float thresh, bool includeBoundaries) {
     std::vector<float> areas(boxes.size());
     for (int i = 0; i < boxes.size(); ++i) {
-        areas[i] = (boxes[i].right - boxes[i].left) * (boxes[i].bottom - boxes[i].top);
+        areas[i] = (boxes[i].right - boxes[i].left + includeBoundaries) * (boxes[i].bottom - boxes[i].top + includeBoundaries);
     }
     std::vector<int> order(scores.size());
     std::iota(order.begin(), order.end(), 0);
@@ -355,7 +355,7 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         }
     }
     // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
-    auto keep = nms(bboxes, scores, boxIOUThreshold);
+    auto keep = nms(bboxes, scores, boxIOUThreshold, shouldDetectLandmarks);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
     RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult;
