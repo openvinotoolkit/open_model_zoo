@@ -868,3 +868,43 @@ class TwoStageDetector(Adapter):
             scores = np.max(conf, axis=1)
             result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_mins + w, y_mins + h))
         return result
+
+
+class DETRAdapter(Adapter):
+    __provider__ = 'detr'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'scores_out': StringField(description='scores output'),
+            'boxes_out': StringField(description='boxes output')
+        })
+        return params
+
+    def configure(self):
+        self.scores_out = self.get_value_from_config('scores_out')
+        self.boxes_out = self.get_value_from_config('boxes_out')
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_output = self._extract_predictions(raw, frame_meta)
+
+        def box_cxcywh_to_xyxy(x):
+            x_c, y_c, w, h = x.T
+            b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
+                 (x_c + 0.5 * w), (y_c + 0.5 * h)]
+            return b
+
+        def softmax(x):
+            exp_x = np.exp(x)
+            return exp_x / np.sum(exp_x)
+
+        for identifier, logits, boxes in zip(identifiers, raw_output[self.scores_out], raw_output[self.boxes_out]):
+            x_mins, y_mins, x_maxs, y_maxs = box_cxcywh_to_xyxy(boxes)
+            scores = softmax(logits)
+            labels = np.argmax(scores[:, :-1], axis=-1)
+            det_scores = np.max(scores[:, :-1], axis=-1)
+            result.append(DetectionPrediction(identifier, labels, det_scores, x_mins, y_mins, x_maxs, y_maxs))
+
+        return result

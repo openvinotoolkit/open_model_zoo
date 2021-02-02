@@ -52,7 +52,8 @@ from .detection import (
     FaceDetectionAdapter,
     FaceDetectionRefinementAdapter,
     FasterRCNNONNX,
-    TwoStageDetector
+    TwoStageDetector,
+    DETRAdapter
 )
 from .detection_person_vehicle import (
     PersonVehicleDetectionAdapter,
@@ -94,8 +95,7 @@ from .audio_recognition import (
     CTCBeamSearchDecoder,
     CTCGreedyDecoder,
     CTCBeamSearchDecoderWithLm,
-    FastCTCBeamSearchDecoderWithLm,
-    DumbDecoder
+    FastCTCBeamSearchDecoderWithLm
 )
 
 from .regression import RegressionAdapter, MultiOutputRegression
@@ -130,6 +130,7 @@ __all__ = [
     'HeadDetectionAdapter',
     'FasterRCNNONNX',
     'TwoStageDetector',
+    'DETRAdapter',
 
     'TinyYOLOv1Adapter',
     'YoloV2Adapter',
@@ -211,7 +212,6 @@ __all__ = [
     'CTCGreedyDecoder',
     'CTCBeamSearchDecoderWithLm',
     'FastCTCBeamSearchDecoderWithLm',
-    'DumbDecoder',
 
     'QualityAssessmentAdapter',
 
