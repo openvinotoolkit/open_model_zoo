@@ -3,7 +3,6 @@
 //
 
 #include <utils/images_capture.h>
-#include <utils/slog.hpp>
 
 #ifdef _WIN32
 #include "w_dirent.hpp"
@@ -232,8 +231,9 @@ std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input, bool 
     catch (const OpenError& e) { openErrors.push_back(e.what()); }
 
     std::vector<std::string> errorMessages = openErrors.empty() ? invalidInputs : openErrors;
+    std::string errorsInfo;
     for (const auto& message: errorMessages) {
-        slog::err << message << slog::endl;
+        errorsInfo.append(message + "\n");
     }
-    throw std::runtime_error{"Can't read " + input};
+    throw std::runtime_error(errorsInfo);
 }
