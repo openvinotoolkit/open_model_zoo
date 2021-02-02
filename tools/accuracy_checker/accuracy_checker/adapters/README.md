@@ -371,3 +371,6 @@ AccuracyChecker supports following set of adapters:
 * `dumb_decoder` - converts  audio recognition model output to  `CharacterRecognitionPrediction`.
   * `alphabet` - model alphabet.
   * `uppercase` - produce prediction in uppercase, default is `True`.
+* `detr` - converts output of DETR models family to `DetectionPrediction`.
+    * `scores_out` - output layer name with detection scores logits.
+    * `boxes_out` - output layer name with detection boxes coordinates in [Cx,Cy,W, H] format, where Cx - x coordinate of box center, Cy - y coordinate of box center, W, H - width and height respectively.
