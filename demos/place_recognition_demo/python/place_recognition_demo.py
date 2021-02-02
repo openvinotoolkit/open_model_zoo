@@ -33,9 +33,6 @@ import monitors
 from images_capture import open_images_capture
 
 
-INPUT_SIZE = [200, 300]
-
-
 def build_argparser():
     """ Returns argument parser. """
 
@@ -45,13 +42,13 @@ def build_argparser():
                       help='Show this help message and exit.')
     args.add_argument('-m', '--model',
                       help='Required. Path to an .xml file with a trained model.',
-                      required=True, type=str)
+                      required=True, type=Path)
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
     args.add_argument('-gf', '--gallery_folder',
                       help='Required. Path to a folder with images in the gallery.',
-                      required=True, type=str)
+                      required=True, type=Path)
     args.add_argument('--gallery_size', required=False, type=int,
                       help='Optional. Number of images from the gallery used for processing')
     args.add_argument('--loop', default=False, action='store_true',
@@ -92,7 +89,7 @@ def main():
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    place_recognition = PlaceRecognition(args.model, args.device, args.gallery_folder, INPUT_SIZE, args.cpu_extension,
+    place_recognition = PlaceRecognition(args.model, args.device, args.gallery_folder, args.cpu_extension,
                                          args.gallery_size)
 
     cap = open_images_capture(args.input, args.loop)

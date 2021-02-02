@@ -247,9 +247,9 @@ The task of image translation is to generate the output based on exemplar.
 
 The task of place recognition is to quickly and accurately recognize the location of a given query photograph.
 
-| Model Name | Implementation | OMZ Model Name                  | Accuracy | GFlops | mParams |
-| ---------- | ---------------| --------------------------------| -------- | ------ | ------- |
-| NetVLAD    | TensorFlow\*   | [netvlad](./netvlad/netvlad.md) | 82.0321% | 36.6374| 149.0021|
+| Model Name | Implementation | OMZ Model Name                           | Accuracy | GFlops | mParams |
+| ---------- | ---------------| -----------------------------------------| -------- | ------ | ------- |
+| NetVLAD    | TensorFlow\*   | [netvlad-tf](./netvlad-tf/netvlad-tf.md) | 82.0321% | 36.6374| 149.0021|
 
 ## Legal Information
 

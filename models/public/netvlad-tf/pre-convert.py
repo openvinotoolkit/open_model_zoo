@@ -35,18 +35,16 @@ def main():
     sys.path.append(str(args.input_dir))
     nets = importlib.import_module('netvlad_tf.nets')
 
-    tf.reset_default_graph()
     image_batch = tf.placeholder(dtype=tf.float32, shape=[None, None, None, 3])
-    nets.vgg16NetvladPca(image_batch)
+    net_out = nets.vgg16NetvladPca(image_batch)
     saver = tf.train.Saver()
 
-    sess = tf.Session()
-    saver.restore(sess, str(args.input_dir / NETWORK_NAME / NETWORK_NAME))
-    outputs = ['vgg16_netvlad_pca/l2_normalize_1']
-    graph_def_freezed = tf.graph_util.convert_variables_to_constants(sess, sess.graph.as_graph_def(), outputs)
+    with tf.Session() as sess:
+        saver.restore(sess, str(args.input_dir / NETWORK_NAME / NETWORK_NAME))
+        graph_def_frozen = tf.graph_util.convert_variables_to_constants(sess, sess.graph.as_graph_def(),
+                                                                        [net_out.op.name])
 
-    tf.io.write_graph(graph_def_freezed, str(args.output_dir), str(args.output_dir / 'model_frozen.pb'),
-                         as_text=False)
+    tf.io.write_graph(graph_def_frozen, str(args.output_dir), 'model_frozen.pb', as_text=False)
 
 
 if __name__ == '__main__':

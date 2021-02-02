@@ -1154,7 +1154,6 @@ datasets:
 
   - name: pitts30k_val
     data_source: pitts250k
-    reader: pillow_imread
     annotation_conversion:
       converter: place_recognition
       split_file: pitts250k/datasets/pitts30k_val.mat

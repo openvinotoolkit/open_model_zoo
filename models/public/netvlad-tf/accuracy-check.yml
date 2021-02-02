@@ -1,10 +1,11 @@
 models:
-  - name: netvlad
+  - name: netvlad-tf
     launchers:
       - framework: dlsdk
         adapter: reid
     datasets:
       - name: pitts30k_val
+        reader: pillow_imread
 
         preprocessing:
           - type: rgb_to_bgr

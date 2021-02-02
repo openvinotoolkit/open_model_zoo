@@ -18,14 +18,13 @@ import numpy as np
 
 import cv2
 from tqdm import tqdm
-from pathlib import Path
 
 from place_recognition_demo.common import crop_resize, l2_distance
 
 from openvino.inference_engine import IECore # pylint: disable=no-name-in-module
 
 
-class IEModel(): # pylint: disable=too-few-public-methods
+class IEModel: # pylint: disable=too-few-public-methods
     """ Class that allows working with Inference Engine model. """
 
     def __init__(self, model_path, device, cpu_extension):
@@ -33,9 +32,10 @@ class IEModel(): # pylint: disable=too-few-public-methods
         if cpu_extension and device == 'CPU':
             ie.add_extension(cpu_extension, 'CPU')
 
-        path = '.'.join(model_path.split('.')[:-1])
-        self.net = ie.read_network(path + '.xml', path + '.bin')
-        self.output_name = list(self.net.outputs.keys())[0]
+        self.net = ie.read_network(model_path, model_path.with_suffix('.bin'))
+        self.input_name = next(iter(self.net.input_info))
+        self.output_name = next(iter(self.net.outputs))
+        self.input_size = self.net.input_info[self.input_name].input_data.shape
         self.exec_net = ie.load_network(network=self.net, device_name=device)
 
     def predict(self, image):
@@ -43,20 +43,17 @@ class IEModel(): # pylint: disable=too-few-public-methods
 
         assert len(image.shape) == 4
         image = np.transpose(image, (0, 3, 1, 2))
-        out = self.exec_net.infer(inputs={'Placeholder': image})[self.output_name]
+        out = self.exec_net.infer(inputs={self.input_name: image})[self.output_name]
         return out
 
 
 class PlaceRecognition:
     """ Class representing Place Recognition algorithm. """
 
-    def __init__(self, model_path, device, gallery_path, input_size, cpu_extension, gallery_size):
-        if gallery_size:
-            self.impaths = (list(Path(gallery_path).rglob("*.jpg")))[:gallery_size]
-        else:
-            self.impaths = (list(Path(gallery_path).rglob("*.jpg")))
-        self.input_size = input_size
+    def __init__(self, model_path, device, gallery_path, cpu_extension, gallery_size):
+        self.impaths = (list(gallery_path.rglob("*.jpg")))[:gallery_size or None]
         self.model = IEModel(model_path, device, cpu_extension)
+        self.input_size = self.model.input_size[2:]
         self.embeddings = self.compute_gallery_embeddings()
 
     def compute_embedding(self, image):
@@ -82,15 +79,12 @@ class PlaceRecognition:
         for full_path in tqdm(self.impaths, desc='Reading gallery images.'):
             image = cv2.imread(str(full_path))
             if image is None:
-                print("ERROR: cannot find image, full_path =", str(full_path))
+                print("ERROR: cannot process image, full_path =", str(full_path))
+                continue
             image = crop_resize(image, self.input_size)
             images.append(image)
 
-        embeddings = [None for _ in self.impaths]
-
-        index = 0
-        for image in tqdm(images, desc='Computing embeddings of gallery images.'):
-            embeddings[index] = self.model.predict(image).reshape([-1])
-            index += 1
+        embeddings = [self.model.predict(image).reshape([-1]) for image in tqdm(
+            images, desc='Computing embeddings of gallery images.')]
 
         return embeddings

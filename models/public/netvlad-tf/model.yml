@@ -20,7 +20,7 @@ description: >-
   dataset.
 
   For details see repository <https://github.com/uzh-rpg/netvlad_tf_open> and paper
-  <https://arxiv.org/pdf/1511.07247.pdf>.
+  <https://arxiv.org/abs/1511.07247>.
 task_type: place_recognition
 files:
   - name: netvlad.zip
