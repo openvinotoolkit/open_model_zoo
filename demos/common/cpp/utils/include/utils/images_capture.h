@@ -8,19 +8,6 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/videoio.hpp>
 
-
-class InvalidInput : public std::runtime_error {
-public:
-    explicit InvalidInput(const std::string& message) noexcept
-        : std::runtime_error(message) {}
-};
-
-class OpenError : public std::runtime_error {
-public:
-    explicit OpenError(const std::string& message) noexcept
-        : std::runtime_error(message) {}
-};
-
 class ImagesCapture {
 public:
     const bool loop;

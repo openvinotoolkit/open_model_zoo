@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
                 auto startTime = std::chrono::steady_clock::now();
                 curr_frame = cap->read();
                 if (frameNum == -1) {
-                    if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'),
+                    if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
                                                               cap->fps(), curr_frame.size())) {
                         throw std::runtime_error("Can't open video writer");
                     }

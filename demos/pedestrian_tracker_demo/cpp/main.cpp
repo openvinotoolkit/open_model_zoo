@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
         cv::Size firstFrameSize = frame.size();
 
         cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'),
+        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
                                                   cap->fps(), firstFrameSize)) {
             throw std::runtime_error("Can't open video writer");
         }
@@ -204,7 +204,6 @@ int main(int argc, char **argv) {
                 videoWriter.write(frame);
             }
             if (should_show) {
-                cv::resize(frame, frame, cv::Size(), 0.5, 0.5);
                 cv::imshow("dbg", frame);
                 char k = cv::waitKey(delay);
                 if (k == 27)

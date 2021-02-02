@@ -18,6 +18,17 @@
 #include <memory>
 #include <fstream>
 
+class InvalidInput : public std::runtime_error {
+public:
+    explicit InvalidInput(const std::string& message) noexcept
+        : std::runtime_error(message) {}
+};
+
+class OpenError : public std::runtime_error {
+public:
+    explicit OpenError(const std::string& message) noexcept
+        : std::runtime_error(message) {}
+};
 
 class ImreadWrapper : public ImagesCapture {
     cv::Mat img;
@@ -179,9 +190,8 @@ public:
             }
             throw OpenError("Can't open the camera from " + input);
         }
-        catch (const std::invalid_argument&) {
-            throw InvalidInput("Can't find the camera " + input);
-        }
+        catch (const std::invalid_argument&) { throw InvalidInput("Can't find the camera " + input); }
+        catch (const std::out_of_range&) { throw InvalidInput("Can't find the camera " + input); }
     }
 
     double fps() const override {return cap.get(cv::CAP_PROP_FPS) > 0 ? cap.get(cv::CAP_PROP_FPS) : 30;}
@@ -225,5 +235,5 @@ std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input, bool 
     for (const auto& message: errorMessages) {
         slog::err << message << slog::endl;
     }
-    std::exit(1);
+    throw std::runtime_error{"Can't read " + input};
 }

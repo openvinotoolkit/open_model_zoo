@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
         }
 
         cv::VideoWriter videoWriter;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'),
+        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
                                                   cap->fps(), frame.size())) {
             throw std::runtime_error("Can't open video writer");
         }
