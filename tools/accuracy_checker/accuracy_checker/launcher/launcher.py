@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 import numpy as np
-from ..adapters import AdapterField
+from ..adapters import AdapterField, Adapter
 from ..config import ConfigValidator, StringField, ListField, ConfigError, InputField, ListInputsField
 from ..dependency import ClassProvider, UnregisteredProviderException
 from ..utils import get_parameter_value_from_config, contains_all
@@ -26,7 +26,7 @@ class LauncherConfigValidator(ConfigValidator):
         super().__init__(config_uri, fields=fields, **kwarg)
         self.delayed_model_loading = delayed_model_loading
 
-    def validate(self, entry, field_uri=None, fetch_only=False):
+    def validate(self, entry, field_uri=None, fetch_only=False, validation_scheme=None):
         if self.delayed_model_loading:
             if 'model' in self.fields:
                 self.fields['model'].optional = True
@@ -34,32 +34,42 @@ class LauncherConfigValidator(ConfigValidator):
             if 'weights' in self.fields:
                 self.fields['weights'].optional = True
                 self.fields['weights'].check_exists = False
-        error_stack = super().validate(entry, field_uri, fetch_only=fetch_only)
+        error_stack = super().validate(
+            entry, field_uri or 'launcher', fetch_only=fetch_only, validation_scheme=validation_scheme
+        )
         if 'inputs' in entry:
-            error_stack.extend(self._validate_inputs(entry, fetch_only=fetch_only))
+            error_stack.extend(
+                self._validate_inputs(
+                    entry, fetch_only=fetch_only, field_uri=field_uri or 'launcher',
+                    validation_scheme=validation_scheme
+                ))
 
         return error_stack
 
-    def _validate_inputs(self, entry, fetch_only):
+    def _validate_inputs(self, entry, fetch_only, field_uri='', validation_scheme=None):
+        inputs_uri = field_uri + '.inputs' if field_uri else 'inputs'
         inputs = entry.get('inputs')
         error_stack = []
         count_non_const_inputs = 0
         required_input_params = ['type', 'name']
         inputs_by_type = {input_type: [] for input_type in InputField.INPUTS_TYPES}
-        for input_layer in inputs:
+        for input_id, input_layer in enumerate(inputs):
+            input_uri = '{}.{}'.format(inputs_uri, input_id)
             if not contains_all(input_layer, required_input_params):
                 req = ', '.join(required_input_params)
                 reason = 'fields: {} are required for all input configurations'.format(req)
                 if not fetch_only:
-                    raise ConfigError(reason)
-                error_stack.append(self.build_error(input_layer, '{}.inputs'.format(self.field_uri), reason))
+                    raise ConfigError(reason, input_layer, input_uri)
+                error_stack.append(
+                    self.build_error(input_layer, '{}.inputs'.format(self.field_uri), reason,
+                                     validation_scheme=validation_scheme['inputs']))
             input_type = input_layer['type']
             if input_type not in InputField.INPUTS_TYPES:
                 reason = 'undefined input type {}'.format(input_type)
                 if not fetch_only:
-                    raise ConfigError(reason)
+                    raise ConfigError(reason, input_layer, input_uri)
                 error_stack.append(
-                    self.build_error(input_type, '{}.inputs.{}'.format(self.field_uri, input_layer['name']), reason)
+                    self.build_error(input_layer, inputs_uri, reason, validation_scheme=validation_scheme['inputs'])
                 )
             inputs_by_type[input_type].append(input_layer['name'])
             if input_type == 'INPUT':
@@ -71,7 +81,10 @@ class LauncherConfigValidator(ConfigValidator):
                     error_stack.append(
                         self.build_error(
                             input_layer,
-                            '{}.inputs.{}'.format(self.field_uri, input_layer['name']), reason)
+                            input_uri,
+                            reason,
+                            validation_scheme=validation_scheme['inputs']
+                        )
                     )
                 count_non_const_inputs += 1
 
@@ -136,12 +149,34 @@ class Launcher(ClassProvider):
         }
 
     @classmethod
+    def validation_scheme(cls, provider=None):
+        if cls.__name__ == Launcher.__name__:
+            if provider:
+                return cls.resolve(provider).validation_scheme()
+            full_scheme = []
+            for provider_ in cls.providers:
+                full_scheme.append(cls.resolve(provider_).validation_scheme())
+            return full_scheme
+        scheme = {}
+        for key, value in cls.parameters().items():
+            if key.startswith('_'):
+                continue
+            if key == 'adapter':
+                scheme[key] = Adapter
+                continue
+            scheme[key] = value
+        return scheme
+
+    @classmethod
     def validate_config(cls, config, delayed_model_loading=False, fetch_only=False, uri_prefix=''):
         if cls.__name__ == Launcher.__name__:
             errors = []
             framework = config.get('framework')
             if not framework:
-                error = ConfigError('framework is not provided', config, uri_prefix or 'launcher')
+                error = ConfigError(
+                    'framework is not provided', config, uri_prefix or 'launcher',
+                    validation_scheme=cls.validation_scheme()
+                )
                 if not fetch_only:
                     raise error
                 errors.append(error)
@@ -153,13 +188,15 @@ class Launcher(ClassProvider):
                 if not fetch_only:
                     raise exception
                 errors.append(
-                    ConfigError("launcher {} is not unregistered".format(framework), config, uri_prefix or 'launcher')
+                    ConfigError(
+                        "launcher {} is not unregistered".format(framework), config, uri_prefix or 'launcher',
+                        validation_scheme=cls.validation_scheme())
                 )
                 return errors
         uri = uri_prefix or'launcher.{}'.format(cls.__provider__)
         return LauncherConfigValidator(
             uri, fields=cls.parameters(), delayed_model_loading=delayed_model_loading
-        ).validate(config, fetch_only=fetch_only)
+        ).validate(config, fetch_only=fetch_only, validation_scheme=cls.validation_scheme())
 
     def get_value_from_config(self, key):
         return get_parameter_value_from_config(self.config, self.parameters(), key)

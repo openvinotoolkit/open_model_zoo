@@ -882,9 +882,9 @@ class DLSDKLauncher(Launcher):
             if 'precision' in input_config:
                 if self.network:
                     if not has_info:
-                        self.network.inputs[input_config['name']].precision = input_config['precision']
+                        self.network.inputs[input_config['name']].precision = input_config['precision'].upper()
                     else:
-                        self.network.input_info[input_config['name']].precision = input_config['precision']
+                        self.network.input_info[input_config['name']].precision = input_config['precision'].upper()
 
     def _set_input_shape(self):
         if not self.network:

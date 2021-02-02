@@ -90,10 +90,23 @@ class BaseFormatConverter(ClassProvider):
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, uri_prefix=''):
-        return cls.config_validator(uri_prefix=uri_prefix).validate(config, fetch_only=fetch_only)
+        return cls.config_validator(uri_prefix=uri_prefix).validate(
+            config, fetch_only=fetch_only, validation_scheme=cls.validation_scheme()
+        )
 
     def configure(self):
         pass
+
+    @classmethod
+    def validation_scheme(cls, provider=None):
+        if cls.__name__ == BaseFormatConverter.__name__:
+            if provider:
+                return cls.resolve(provider).validation_scheme()
+            full_scheme = {}
+            for provider_ in cls.providers:
+                full_scheme[provider_] = cls.resolve(provider_).validation_scheme()
+            return full_scheme
+        return cls.parameters()
 
 
 class FileBasedAnnotationConverter(BaseFormatConverter):

@@ -26,7 +26,7 @@ from ..metrics import MetricsExecutor
 from ..postprocessor import PostprocessingExecutor
 from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter, Adapter
-from ..config import ConfigError
+from ..config import ConfigError, StringField
 from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS, DataRepresentation
 from .base_evaluator import BaseEvaluator
 
@@ -123,7 +123,7 @@ class ModelEvaluator(BaseEvaluator):
             config_errors.append(
                 ConfigError(
                     'launchers section is not provided', model_config.get('launchers', []),
-                    '{}.launchers'.format(uri_prefix) if uri_prefix else 'launchers'
+                    '{}.launchers'.format(uri_prefix) if uri_prefix else 'launchers', validation_scheme=Launcher
                 )
             )
         else:
@@ -141,7 +141,11 @@ class ModelEvaluator(BaseEvaluator):
         datasets_uri = '{}.datasets'.format(uri_prefix) if uri_prefix else 'datasets'
         if 'datasets' not in model_config or not model_config['datasets']:
             config_errors.append(
-                ConfigError('datasets section is not provided', model_config.get('datasets', []), datasets_uri))
+                ConfigError(
+                    'datasets section is not provided', model_config.get('datasets', []),
+                    datasets_uri, validation_scheme=Dataset
+                )
+            )
         else:
             for dataset_id, dataset_config in enumerate(model_config['datasets']):
                 data_reader_config = dataset_config.get('reader', 'opencv_imread')
@@ -174,6 +178,14 @@ class ModelEvaluator(BaseEvaluator):
                 )
 
         return config_errors
+
+    @classmethod
+    def validation_scheme(cls):
+        return {'models': [
+            {'name': StringField(description='model name'),
+             'launchers': Launcher,
+             'datasets': Dataset
+             }]}
 
     @staticmethod
     def get_processing_info(config):
@@ -287,6 +299,7 @@ class ModelEvaluator(BaseEvaluator):
         enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
         for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
+            # self.process_single_image(batch_identifiers[0])
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
             if stored_predictions:
                 self.prepare_prediction_to_store(batch_predictions, batch_identifiers, batch_meta, stored_predictions)

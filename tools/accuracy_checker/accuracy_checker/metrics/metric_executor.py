@@ -184,12 +184,16 @@ class MetricsExecutor:
 
     @classmethod
     def validate_config(cls, metrics, fetch_only=False, uri_prefix=''):
+        metrics_uri = uri_prefix or 'metrics'
         if not metrics:
             if fetch_only:
-                return [ConfigError("Metrics are not provided", metrics, uri_prefix or 'metrics')]
+                upper_level_uri = (
+                    metrics_uri.replace('.metrics', '') if metrics_uri.endswith('.metrics') else metrics_uri
+                )
+                return [ConfigError("Metrics are not provided", metrics, upper_level_uri)]
         errors = []
         for metric_id, metric in enumerate(metrics):
-            metric_uri = '{}.{}'.format(uri_prefix or 'metrics', metric_id)
+            metric_uri = '{}.{}'.format(metrics_uri, metric_id)
             errors.extend(Metric.validate_config(metric, fetch_only=fetch_only, uri_prefix=metric_uri))
 
         return errors
