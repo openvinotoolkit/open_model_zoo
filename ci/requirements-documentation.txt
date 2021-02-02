@@ -1,0 +1,6 @@
+# use update-requirements.py to update this file
+
+mistune==2.0.0a6
+    # via -r ci/requirements-documentation.in
+pyyaml==5.4.1
+    # via -r ci/requirements-documentation.in
