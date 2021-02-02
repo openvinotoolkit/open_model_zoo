@@ -525,7 +525,7 @@ class YoloV3TF2(Adapter):
         return result
 
     def postprocess_boxes(self, pred_bbox, org_img_shape, input_size):
-        valid_scale=[0, np.inf]
+        valid_scale = [0, np.inf]
         pred_bbox = np.array(pred_bbox)
 
         pred_xywh = pred_bbox[:, 0:4]
