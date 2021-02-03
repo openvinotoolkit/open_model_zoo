@@ -19,7 +19,7 @@ import numpy as np
 import cv2
 from tqdm import tqdm
 
-from place_recognition_demo.common import crop_resize, l2_distance
+from place_recognition_demo.common import crop_resize
 
 from openvino.inference_engine import IECore # pylint: disable=no-name-in-module
 
@@ -66,8 +66,7 @@ class PlaceRecognition:
     def search_in_gallery(self, embedding):
         ''' Takes input embedding vector and searches it in the gallery. '''
 
-        distances = l2_distance(embedding, self.embeddings)
-        distances = distances.reshape([-1])
+        distances = np.linalg.norm(embedding - self.embeddings, axis=1, ord=2)
         sorted_indexes = np.argsort(distances)
         return sorted_indexes, distances
 
@@ -84,7 +83,7 @@ class PlaceRecognition:
             image = crop_resize(image, self.input_size)
             images.append(image)
 
-        embeddings = [self.model.predict(image).reshape([-1]) for image in tqdm(
-            images, desc='Computing embeddings of gallery images.')]
+        embeddings = np.vstack([self.model.predict(image) for image in tqdm(
+            images, desc='Computing embeddings of gallery images.')])
 
         return embeddings

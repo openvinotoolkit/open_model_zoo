@@ -38,14 +38,3 @@ def crop_resize(image, input_size):
     image = cv2.resize(image, (input_size[1], input_size[0]))
     image = np.expand_dims(image, axis=0)
     return image
-
-
-def l2_distance(query_embedding, gallery_embedding):
-    query_embedding = np.array(query_embedding)
-    gallery_embedding = np.array(gallery_embedding)
-    distance = (
-        np.sum(query_embedding ** 2, axis=1, keepdims=True)
-        + np.sum(gallery_embedding ** 2, axis=1)
-        - 2 * np.dot(query_embedding, gallery_embedding.transpose())
-    )
-    return distance
