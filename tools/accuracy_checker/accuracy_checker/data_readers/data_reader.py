@@ -74,6 +74,7 @@ class DataRepresentation:
 ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
 MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id', 'frames'])
 ImagePairIdentifier = namedtuple('ImagePairIdentifier', ['first', 'second'])
+ListIdentifier = namedtuple('ListIdentifier', ['values'])
 
 
 def create_reader(config):
@@ -124,6 +125,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(ClipIdentifier, self._read_clip)
         self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
         self.read_dispatcher.register(ImagePairIdentifier, self._read_pair)
+        self.read_dispatcher.register(ListIdentifier, self._read_list_ids)
         self.multi_infer = False
 
         self.validate_config(config, data_source)
@@ -200,6 +202,9 @@ class BaseReader(ClassProvider):
     def _read_list(self, data_id):
         return [self.read(identifier) for identifier in data_id]
 
+    def _read_list_ids(self, data_id):
+        return self.read_dispatcher(data_id.values)
+
     def _read_clip(self, data_id):
         video = Path(data_id.video)
         frames_identifiers = [video / frame for frame in data_id.frames]
@@ -209,7 +214,10 @@ class BaseReader(ClassProvider):
         return self.read_dispatcher(data_id.frames)
 
     def read_item(self, data_id):
-        data_rep = DataRepresentation(self.read_dispatcher(data_id), identifier=data_id)
+        data_rep = DataRepresentation(
+            self.read_dispatcher(data_id),
+            identifier=data_id if not isinstance(data_id, ListIdentifier) else data_id.values
+        )
         if self.multi_infer:
             data_rep.metadata['multi_infer'] = True
         return data_rep

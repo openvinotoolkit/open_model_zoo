@@ -27,19 +27,18 @@ from ..postprocessor import PostprocessingExecutor
 from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter, Adapter
 from ..config import ConfigError, StringField
-from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS, DataRepresentation
+from ..data_readers import BaseReader, DataRepresentation
 from .base_evaluator import BaseEvaluator
 
 
 # pylint: disable=W0223
 class ModelEvaluator(BaseEvaluator):
     def __init__(
-            self, launcher, input_feeder, adapter, reader, preprocessor, postprocessor, dataset, metric, async_mode
+            self, launcher, input_feeder, adapter, preprocessor, postprocessor, dataset, metric, async_mode
     ):
         self.launcher = launcher
         self.input_feeder = input_feeder
         self.adapter = adapter
-        self.reader = reader
         self.preprocessor = preprocessor
         self.postprocessor = postprocessor
         self.dataset = dataset
@@ -56,23 +55,13 @@ class ModelEvaluator(BaseEvaluator):
         launcher_config = model_config['launchers'][0]
         dataset_config = model_config['datasets'][0]
         dataset_name = dataset_config['name']
-        data_reader_config = dataset_config.get('reader', 'opencv_imread')
-        data_source = dataset_config.get('data_source')
+
         postpone_model_loading = (
             not model_config.get('_store_only', False) and cls._is_stored(model_config.get('_stored_data'))
         )
 
         dataset = Dataset(dataset_config)
-        if isinstance(data_reader_config, str):
-            data_reader_type = data_reader_config
-            data_reader_config = None
-        elif isinstance(data_reader_config, dict):
-            data_reader_type = data_reader_config['type']
-        else:
-            raise ConfigError('reader should be dict or string')
-        if data_reader_type in REQUIRES_ANNOTATIONS:
-            data_source = dataset.annotation
-        data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
+
         launcher_kwargs = {'delayed_model_loading': postpone_model_loading}
         enable_ie_preprocessing = (
             dataset_config.get('_ie_preprocessing', False)
@@ -108,7 +97,7 @@ class ModelEvaluator(BaseEvaluator):
             metric_dispatcher.set_processing_info(ModelEvaluator.get_processing_info(model_config))
 
         return cls(
-            launcher, input_feeder, adapter, data_reader,
+            launcher, input_feeder, adapter,
             preprocessor, postprocessor, dataset, metric_dispatcher, async_mode
         )
 
@@ -198,16 +187,12 @@ class ModelEvaluator(BaseEvaluator):
             dataset_config['name']
         )
 
-    def _get_batch_input(self, batch_annotation):
-        batch_identifiers = [annotation.identifier for annotation in batch_annotation]
-        batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
-        for annotation, input_data in zip(batch_annotation, batch_input):
-            self.dataset.set_annotation_metadata(annotation, input_data, self.reader.data_source)
+    def _get_batch_input(self, batch_annotation, batch_input):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
         _, batch_meta = extract_image_representations(batch_input)
         filled_inputs = self.input_feeder.fill_inputs(batch_input)
 
-        return filled_inputs, batch_meta, batch_identifiers
+        return filled_inputs, batch_meta
 
     def process_dataset_async(self, stored_predictions, progress_reporter, *args, **kwargs):
         def completion_callback(status_code, request_id):
@@ -230,7 +215,7 @@ class ModelEvaluator(BaseEvaluator):
         if (
                 self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
                 self.preprocessor.has_multi_infer_transformations or
-                getattr(self.reader, 'multi_infer', False)
+                self.dataset.multi_infer
         ):
             warning('Model can not to be processed in async mode. Switched to sync.')
             return self.process_dataset_sync(stored_predictions, progress_reporter, *args, **kwargs)
@@ -297,9 +282,8 @@ class ModelEvaluator(BaseEvaluator):
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
         enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
-        for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
-            filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
-            # self.process_single_image(batch_identifiers[0])
+        for batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) in enumerate(self.dataset):
+            filled_inputs, batch_meta = self._get_batch_input(batch_annotation, batch_input)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
             if stored_predictions:
                 self.prepare_prediction_to_store(batch_predictions, batch_identifiers, batch_meta, stored_predictions)
@@ -357,7 +341,7 @@ class ModelEvaluator(BaseEvaluator):
         annotations = self.dataset.annotation
         if self.postprocessor.has_processors:
             print_info("Postprocess results:")
-            self.dataset.provide_data_info(self.reader, annotations, progress_reporter)
+            self.dataset.provide_data_info(annotations, progress_reporter)
             annotations, predictions = self.postprocessor.full_process(annotations, predictions)
         self.metric_executor.update_metrics_on_batch(
             range(len(annotations)), annotations, predictions
@@ -371,11 +355,11 @@ class ModelEvaluator(BaseEvaluator):
     def _fill_free_irs(self, free_irs, queued_irs, infer_requests_pool, dataset_iterator):
         for ir_id in free_irs:
             try:
-                batch_id, (batch_input_ids, batch_annotation) = next(dataset_iterator)
+                batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) = next(dataset_iterator)
             except StopIteration:
                 break
 
-            batch_input, batch_meta, _ = self._get_batch_input(batch_annotation)
+            batch_input, batch_meta = self._get_batch_input(batch_annotation, batch_input)
             self.launcher.predict_async(infer_requests_pool[ir_id], batch_input, batch_meta,
                                         context=tuple([batch_id, batch_input_ids, batch_annotation]))
             queued_irs.append(ir_id)
@@ -402,7 +386,9 @@ class ModelEvaluator(BaseEvaluator):
     def _prepare_data_for_single_inference(self, data):
         def get_data(image, create_representation=True):
             if is_path(image):
-                return [self.reader(identifier=image) if create_representation else self.reader.read_dispatcher(image)]
+                return [
+                    self.dataset.data_provider.data_reader.read_dispatcher(identifier=image) if create_representation
+                    else self.dataset.data_provider.data_reader.read_dispatcher(image)]
             return [DataRepresentation(image, identifier='image') if create_representation else image]
 
         if not isinstance(data, list):
@@ -529,7 +515,6 @@ class ModelEvaluator(BaseEvaluator):
         self._predictions = []
         self._metrics_results = []
         self.dataset.reset(self.postprocessor.has_processors)
-        self.reader.reset()
 
     def release(self):
         self.input_feeder.release()

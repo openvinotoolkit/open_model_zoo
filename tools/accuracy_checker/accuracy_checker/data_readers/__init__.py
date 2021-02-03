@@ -39,6 +39,7 @@ from .data_reader import (
     ClipIdentifier,
     MultiFramesInputIdentifier,
     ImagePairIdentifier,
+    ListIdentifier,
 
     create_reader,
     REQUIRES_ANNOTATIONS
@@ -70,6 +71,7 @@ __all__ = [
     'ClipIdentifier',
     'MultiFramesInputIdentifier',
     'ImagePairIdentifier',
+    'ListIdentifier',
     'create_reader',
     'REQUIRES_ANNOTATIONS',
 ]
