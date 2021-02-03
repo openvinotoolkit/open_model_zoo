@@ -52,36 +52,15 @@ OMZ_ROOT = Path(__file__).resolve().parents[1]
 
 XML_ID_ATTRIBUTE = '{http://www.w3.org/XML/1998/namespace}id'
 
-# For most task types, a simple transformation yields a human-readable
-# English description, but for a few types it's useful to override it
-# to improve consistency and grammar.
+# For most task types, taking the machine-readable form and replacing
+# underscores with spaces yields a human-readable English description,
+# but for a few types it's useful to override it to improve consistency
+# and grammar.
+# TODO: consider providing these descriptions through the info dumper.
 HUMAN_READABLE_TASK_TYPES = {
     'detection': 'Object Detection',
     'object_attributes': 'Object Attribute Estimation',
     'text_to_speech': 'Text-to-speech',
-    **{id: id.replace('_', ' ').title() for id in [
-        'action_recognition',
-        'classification',
-        'colorization',
-        'face_recognition',
-        'feature_extraction',
-        'head_pose_estimation',
-        'human_pose_estimation',
-        'image_inpainting',
-        'image_processing',
-        'image_translation',
-        'instance_segmentation',
-        'machine_translation',
-        'monocular_depth_estimation',
-        'optical_character_recognition',
-        'place_recognition',
-        'question_answering',
-        'semantic_segmentation',
-        'sound_classification',
-        'speech_recognition',
-        'style_transfer',
-        'token_recognition',
-    ]},
 }
 
 parse_markdown = mistune.create_markdown(renderer=mistune.AstRenderer())
@@ -236,8 +215,11 @@ def add_model_pages(output_root, parent_element, group, group_title):
             continue
 
         if task_type not in task_type_elements:
+            human_readable_task_type = HUMAN_READABLE_TASK_TYPES.get(task_type,
+                task_type.replace('_', ' ').title())
+
             task_type_elements[task_type] = add_page(output_root, group_element,
-                title=HUMAN_READABLE_TASK_TYPES[task_type] + ' Models')
+                title=f'{human_readable_task_type} Models')
 
         # All model names are unique, so we don't need to include the group
         # in the page ID. However, we do prefix "model_", so that model pages
