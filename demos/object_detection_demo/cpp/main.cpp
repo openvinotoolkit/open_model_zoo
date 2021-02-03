@@ -16,8 +16,8 @@
 
 /**
 * \brief The entry point for the Inference Engine object_detection_demo_ssd_async demo application
-* \file object_detection_demo_ssd_async/main.cpp
-* \example object_detection_demo_ssd_async/main.cpp
+* \file object_detection_demo/main.cpp
+* \example object_detection_demo/main.cpp
 */
 
 #include <iostream>
