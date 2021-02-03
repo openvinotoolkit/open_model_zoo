@@ -132,7 +132,7 @@ class ConfigValidator(BaseValidator):
             else:
                 field_valid_scheme = (
                     validation_scheme.get(key) if isinstance(validation_scheme, dict)
-                    else validation_scheme.validation_scheme()
+                    else validation_scheme
                 )
             error_stack.extend(
                 self.fields[key].validate(entry[key], fetch_only=fetch_only, validation_scheme=field_valid_scheme)
