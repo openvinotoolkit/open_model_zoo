@@ -6,6 +6,8 @@ importlib-metadata==3.4.0
     # via flake8
 mccabe==0.6.1
     # via flake8
+mistune==2.0.0a6
+    # via -r ci/requirements-documentation.in
 pathspec==0.8.1
     # via yamllint
 pycodestyle==2.6.0
@@ -13,7 +15,9 @@ pycodestyle==2.6.0
 pyflakes==2.2.0
     # via flake8
 pyyaml==5.4.1
-    # via yamllint
+    # via
+    #   -r ci/requirements-documentation.in
+    #   yamllint
 typing-extensions==3.7.4.3
     # via importlib-metadata
 yamllint==1.26.0
