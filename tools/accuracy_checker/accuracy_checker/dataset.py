@@ -216,7 +216,7 @@ class Dataset:
     def reset(self, reload_annotation=False):
         self.subset = None
         if reload_annotation:
-            self.data_provider.annotation_provider = AnnotationProvider(*self.load_annotation())
+            self.data_provider.annotation_provider = AnnotationProvider(*self.load_annotation(self.config))
 
     def set_annotation(self, annotation):
         subsample_size = self._config.get('subsample_size')

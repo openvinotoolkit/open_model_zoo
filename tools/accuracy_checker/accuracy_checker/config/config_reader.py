@@ -36,7 +36,8 @@ ENTRIES_PATHS = {
         'annotation': 'annotations',
         'dataset_meta': 'annotations',
         'data_source': 'source',
-        'additional_data_source': 'source'
+        'additional_data_source': 'source',
+        "subset_file": "annotations"
     },
 }
 
@@ -862,6 +863,10 @@ def _add_subset_specific_arg(dataset_entry, arguments):
 
     if 'subsample_size' in arguments and arguments.subsample_size is not None:
         dataset_entry['subsample_size'] = arguments.subsample_size
+    if 'subset_file' in arguments and arguments.subset_file is not None:
+        dataset_entry['subset_file'] = arguments.subset_file
+    if 'store_subset' in arguments and arguments.store_subset:
+        dataset_entry['store_subset'] = arguments.store_subset
 
 
 def prepare_commandline_conversion_mapping(commandline_conversion, args):

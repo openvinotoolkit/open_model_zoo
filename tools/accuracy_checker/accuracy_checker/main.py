@@ -278,6 +278,13 @@ def build_arguments_parser():
              'If single value without layer_name provided, then it will be applayed to all input layers.'
     )
     parser.add_argument('--store_only', required=False, default=False, type=cast_to_bool)
+    parser.add_argument(
+        '--store_subset', required=False, default=False, type=cast_to_bool,
+        help='allow to save evaluation data ids'
+    )
+    parser.add_argument(
+        '--subset_file', required=False, help='file name for saving or reading identifiers subset'
+    )
 
     return parser
 

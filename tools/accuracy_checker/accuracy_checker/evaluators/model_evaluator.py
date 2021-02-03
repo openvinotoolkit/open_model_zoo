@@ -355,7 +355,7 @@ class ModelEvaluator(BaseEvaluator):
     def _fill_free_irs(self, free_irs, queued_irs, infer_requests_pool, dataset_iterator):
         for ir_id in free_irs:
             try:
-                batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) = next(dataset_iterator)
+                batch_id, (batch_input_ids, batch_annotation, batch_input, _) = next(dataset_iterator)
             except StopIteration:
                 break
 
