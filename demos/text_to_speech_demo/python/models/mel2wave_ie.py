@@ -190,8 +190,6 @@ class MelGANIE:
         :param device: target device
         :return:
         """
-        super().__init__()
-
         self.device = device
         self.ie = ie
 
