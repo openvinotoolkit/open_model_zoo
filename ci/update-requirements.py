@@ -68,14 +68,14 @@ def main():
     pc('ci/requirements-ac-test.txt',
         'tools/accuracy_checker/requirements.in', 'tools/accuracy_checker/requirements-test.in',
         'tools/accuracy_checker/requirements-core.in')
-    pc('ci/requirements-check-basics.txt', 'ci/requirements-check-basics.in')
+    pc('ci/requirements-check-basics.txt', 
+       'ci/requirements-check-basics.in', 'ci/requirements-documentation.in')
     pc('ci/requirements-conversion.txt',
         *(f'tools/downloader/requirements-{suffix}.in' for suffix in ['caffe2', 'pytorch', 'tensorflow']),
         *(openvino_dir / f'deployment_tools/model_optimizer/requirements_{suffix}.txt'
             for suffix in ['caffe', 'mxnet', 'onnx', 'tf2']))
     pc('ci/requirements-demos.txt',
         'demos/requirements.txt', openvino_dir / 'python/requirements.txt')
-    pc('ci/requirements-documentation.txt', 'ci/requirements-documentation.in')
     pc('ci/requirements-downloader.txt',
         'tools/downloader/requirements.in')
     pc('ci/requirements-quantization.txt',
