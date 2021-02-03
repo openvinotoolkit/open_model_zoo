@@ -41,6 +41,9 @@ from .data_reader import (
     ImagePairIdentifier,
     ListIdentifier,
 
+    serializer_identifier,
+    deserialize_identifier,
+
     create_reader,
     REQUIRES_ANNOTATIONS
 )
@@ -74,4 +77,7 @@ __all__ = [
     'ListIdentifier',
     'create_reader',
     'REQUIRES_ANNOTATIONS',
+
+    'serializer_identifier',
+    'deserialize_identifier'
 ]

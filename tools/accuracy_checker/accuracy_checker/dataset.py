@@ -20,6 +20,7 @@ from collections import OrderedDict
 import warnings
 import pickle
 import numpy as np
+import yaml
 
 from .annotation_converters import (
     BaseFormatConverter, DatasetConversionInfo, save_annotation, make_subset, analyze_dataset
@@ -40,13 +41,18 @@ from .config import (
 )
 from .dependency import UnregisteredProviderException
 from .utils import (
-    JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet, contains_any
+    JSONDecoderWithAutoConversion,
+    read_json, read_yaml,
+    get_path, contains_all, set_image_metadata, OrderedSet, contains_any
 )
 
 from .representation import (
     BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
 )
-from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS, BaseReader, ListIdentifier
+from .data_readers import (
+    DataReaderField, REQUIRES_ANNOTATIONS, BaseReader, ListIdentifier,
+    serializer_identifier, deserialize_identifier
+)
 from .logging import print_info
 
 
@@ -84,6 +90,11 @@ class Dataset:
             ),
             'additional_data_source': PathField(
                 is_directory=True, optional=True, description='additional data source for annotation loading'
+            ),
+            'subset_file': PathField(optional=True, description='file with identifiers for subset', check_exists=False),
+            'store_subset': BoolField(
+                optional=True, default=False,
+                description='save subset ids to file specified in subset_file parameter'
             ),
             'batch': NumberField(value_type=int, min_value=1, optional=True, description='batch size for data read'),
             '_profile': BoolField(optional=True, default=False, description='allow metric profiling'),
@@ -476,15 +487,39 @@ class DataProvider:
         self.batch = None
         self.subset = subset
         self.create_data_list(data_list)
+        if self.store_subset:
+            self.sava_subset()
 
     def create_data_list(self, data_list=None):
         if data_list is not None:
             self._data_list = data_list
             return
+        self.store_subset = self.dataset_config.get('store_subset', False)
+
+        if self.dataset_config.get('subset_file'):
+            subset_file = Path(self.dataset_config)
+            if subset_file.exists() and not self.store_subset:
+                self.read_subset(subset_file)
+            else:
+                self.store_subset = True
+            return
+
         if self.annotation_provider:
             self._data_list = self.annotation_provider.identifiers
             return
         self._data_list = [file.name for file in self.data_reader.data_source.glob('*')]
+
+    def read_subset(self, subset_file):
+        identifiers = [deserialize_identifier(idx) for idx in read_yaml(subset_file)]
+        self._data_list = identifiers
+
+    def sava_subset(self):
+        identifiers = [serializer_identifier(idx) for idx in self._data_list]
+        subset_file = Path(self.dataset_config.get(
+            'subset_file', '{}_subset_{}.yml'.format(self.dataset_config['name'], len(identifiers))))
+        print_info("Data subset will be saved to {} file".format(subset_file))
+        with subset_file.open(mode="w") as sf:
+            yaml.safe_dump(identifiers, sf)
 
     def __getitem__(self, item):
         if self.batch is None:

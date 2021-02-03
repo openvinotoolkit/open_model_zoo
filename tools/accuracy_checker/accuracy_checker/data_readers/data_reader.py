@@ -77,6 +77,49 @@ ImagePairIdentifier = namedtuple('ImagePairIdentifier', ['first', 'second'])
 ListIdentifier = namedtuple('ListIdentifier', ['values'])
 
 
+def serializer_identifier(identifier):
+    if isinstance(identifier, ClipIdentifier):
+        return {
+            "type": "clip_identifier",
+            "video": identifier.video,
+            "clip_id": identifier.clip_id,
+            "frames": identifier.frames
+        }
+    if isinstance(identifier, MultiFramesInputIdentifier):
+        return {
+            "type": "multi_frame_identifier",
+            "input_id": identifier.input_id,
+            "frames": identifier.frames
+        }
+    if isinstance(identifier, ImagePairIdentifier):
+        return {
+            "type": "image_pair_identifier",
+            "first": identifier.first,
+            "second": identifier.second
+        }
+    if isinstance(identifier, ListIdentifier):
+        return {
+            "type": "list_identifier",
+            "values": identifier.values
+        }
+    return identifier
+
+
+def deserialize_identifier(identifier):
+    if isinstance(identifier, dict):
+        type_id = identifier.get('type')
+        if type_id == 'image_pair_identifier':
+            return ImagePairIdentifier(identifier['first'], identifier['second'])
+        if type_id == 'list_identifier':
+            return ListIdentifier(identifier['values'])
+        if type_id == 'multi_frame_identifier':
+            return MultiFramesInputIdentifier(identifier['input_id'], identifier['frames'])
+        if type_id == 'clip_identifier':
+            return ClipIdentifier(identifier['video'], identifier['clip_id'], identifier['frames'])
+        raise ValueError('Unsupported identifier type: {}'.format(type_id))
+    return identifier
+
+
 def create_reader(config):
     return BaseReader.provide(config.get('type', 'opencv_imread'), config.get('data_source'), config=config)
 

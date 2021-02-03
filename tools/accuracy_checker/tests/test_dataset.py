@@ -106,7 +106,7 @@ class TestAnnotationConversion:
         converted_annotation = make_representation('0 0 0 5 5', True)
         annotation_reader_mock = mocker.patch(
             'accuracy_checker.dataset.read_annotation',
-            return_value=(converted_annotation, None)
+            return_value=converted_annotation
         )
         Dataset(config)
 
@@ -145,7 +145,7 @@ class TestAnnotationConversion:
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         dataset = Dataset(config)
-        assert dataset.annotation == [converted_annotation[1]]
+        assert dataset.data_provider.annotation_provider.data_buffer == {converted_annotation[1].identifier: converted_annotation[1]}
 
     def test_annotation_conversion_subset_ratio(self, mocker):
         addition_options = {
@@ -162,7 +162,7 @@ class TestAnnotationConversion:
         subset_maker_mock = mocker.patch(
             'accuracy_checker.dataset.make_subset'
         )
-        Dataset(config)
+        Dataset.load_annotation(config)
         subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666, True)
 
     def test_annotation_conversion_subset_more_than_dataset_size(self, mocker):
@@ -179,8 +179,7 @@ class TestAnnotationConversion:
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         with pytest.warns(UserWarning):
-            dataset = Dataset(config)
-            annotation = dataset.annotation
+            annotation, _ = Dataset.load_annotation(config)
             assert annotation == converted_annotation
 
     def test_annotation_conversion_with_zero_subset_size(self, mocker):
@@ -288,7 +287,7 @@ class TestAnnotationConversion:
         subset_maker_mock = mocker.patch(
             'accuracy_checker.dataset.make_subset'
         )
-        Dataset(config)
+        Dataset.load_annotation(config)
         subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666, True)
 
     def test_annotation_conversion_subset_with_seed(self, mocker):
@@ -304,8 +303,7 @@ class TestAnnotationConversion:
             'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
-        dataset = Dataset(config)
-        annotation = dataset.annotation
+        annotation, _ = Dataset.load_annotation(config)
         assert annotation == [converted_annotation[0]]
 
     def test_annotation_conversion_save_subset(self, mocker):
@@ -341,6 +339,5 @@ class TestAnnotationConversion:
             'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
             return_value=ConverterReturn(converted_annotation, None, None)
         )
-        dataset = Dataset(config)
-        annotation = dataset.annotation
+        annotation, _ = Dataset.load_annotation(config)
         assert annotation == [converted_annotation[0]]
