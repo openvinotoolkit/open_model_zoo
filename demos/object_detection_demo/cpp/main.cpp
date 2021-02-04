@@ -15,9 +15,9 @@
 */
 
 /**
-* \brief The entry point for the Inference Engine object_detection_demo_ssd_async demo application
-* \file object_detection_demo/main.cpp
-* \example object_detection_demo/main.cpp
+* \brief The entry point for the Inference Engine object_detection_demo demo application
+* \file object_detection_demo/cpp/main.cpp
+* \example object_detection_demo/cpp/main.cpp
 */
 
 #include <iostream>
@@ -111,6 +111,7 @@ static void showUsage() {
     std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
+    std::cout << "    -iou_t                    " << iou_thresh_output_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
