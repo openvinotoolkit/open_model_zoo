@@ -193,7 +193,7 @@ class ModelEvaluator:
     def register_dumped_annotations(self):
         if not self._dumped_annotations:
             return
-        meta = Dataset.load_meta(self.dataset.dataset_config)   
+        meta = Dataset.load_meta(self.dataset.dataset_config)
         self.dataset.annotation_provider = AnnotationProvider(self._dumped_annotations, meta)
 
     def select_dataset(self, dataset_tag):
