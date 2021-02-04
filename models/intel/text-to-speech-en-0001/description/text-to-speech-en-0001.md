@@ -15,7 +15,7 @@ The model is built on top of the modified ForwardTacotron and modified MelGAN fr
 
 ## Duration prediction model specification
 
-The forward-tacotron-duration-att-0001 model is a ForwardTacotron-based duration predictor for symbols.
+The text-to-speech-en-0001-duration-prediction model is a ForwardTacotron-based duration predictor for symbols.
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
@@ -60,7 +60,7 @@ where:
 
 ## Mel-spectrogram regression model specification
 
-The forward-tacotron-regression-att-0001 model accepts aligned by duration processed embeddings (for example: if duration is [2, 3] and processed embeddings is [[1, 2], [3, 4]], aligned embeddings is [[1, 2], [1, 2], [1,2], [3, 4], [3, 4]]) and produces mel-spectrogram.
+The text-to-speech-en-0001-regression model accepts aligned by duration processed embeddings (for example: if duration is [2, 3] and processed embeddings is [[1, 2], [3, 4]], aligned embeddings is [[1, 2], [1, 2], [1,2], [3, 4], [3, 4]]) and produces mel-spectrogram.
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
@@ -96,9 +96,9 @@ where:
    - C - number of rows in mel-spectrogram
 
 
-## MelGAN model specification
+## Audio generation model specification
 
-The melgan-upsample-0001 model is a MelGAN based audio generator.
+The text-to-speech-en-0001-generation model is a MelGAN based audio generator.
 
 | Metric                                        | Value |
 |-----------------------------------------------|-------|

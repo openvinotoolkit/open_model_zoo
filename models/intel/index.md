@@ -272,9 +272,9 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 | Model Name                                                                                | Complexity (GFLOPs)  | Size (Mp)  |
 |-------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [text-to-speech-en-0001](./text-to-speech-en-0001/description/text-to-speech-en-0001.md)  |                      |            |
-| forward-tacotron-duration-att-0001                                                        | 15.84                | 13.569     |
-| forward-tacotron-regression-att-0001                                                      | 7.65                 | 4.96       |
-| melgan-upsample-0001                                                                      | 48.38                | 12.77      |
+| text-to-speech-en-0001-duration-prediction                                                | 15.84                | 13.569     |
+| text-to-speech-en-0001-regression                                                         | 7.65                 | 4.96       |
+| text-to-speech-en-0001-generation                                                         | 48.38                | 12.77      |
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
