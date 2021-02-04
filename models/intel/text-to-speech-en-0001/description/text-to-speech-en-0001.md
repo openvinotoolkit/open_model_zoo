@@ -2,8 +2,8 @@
 
 ## Use Case and High-Level Description
 
-This is a speech synthesis composite model that simultaneously reconstruct
-mel-spectrogram and wave form from text. The model generate wave form from symbol sequences separated by space.
+This is a speech synthesis composite model that simultaneously reconstructs
+mel-spectrogram and wave form from text. The model generates wave form from symbol sequences separated by space.
 The model is built on top of the modified ForwardTacotron and modified MelGAN frameworks.
 
 ## Composite model specification
