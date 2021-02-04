@@ -19,12 +19,16 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, ConfigError
 from ..representation import PoseEstimationPrediction
-from ..utils import contains_all, UnsupportedPackage
+from ..utils import UnsupportedPackage
 
 try:
     from scipy.optimize import linear_sum_assignment
 except ImportError as error:
     linear_sum_assignment = UnsupportedPackage('scipy.optimize', error.msg)
+
+
+def contains_all(container, args):
+    return set(container).intersection(args) == set(args)
 
 
 class AssociativeEmbeddingAdapter(Adapter):
@@ -66,6 +70,7 @@ class AssociativeEmbeddingAdapter(Adapter):
             num_joints=17,
             adjust=True,
             refine=True,
+            dist_reweight=True,
             delta=0.0,
             max_num_people=30,
             detection_threshold=0.1,
@@ -116,11 +121,14 @@ class Pose:
         self.pose = np.zeros((num_joints, 2 + 1 + tag_size), dtype=np.float32)
         self.pose_tag = np.zeros(tag_size, dtype=np.float32)
         self.valid_points_num = 0
+        self.c = np.zeros(2, dtype=np.float32)
 
     def add(self, idx, joint, tag):
         self.pose[idx] = joint
+        self.c = self.c * self.valid_points_num + joint[:2]
         self.pose_tag = (self.pose_tag * self.valid_points_num) + tag
         self.valid_points_num += 1
+        self.c /= self.valid_points_num
         self.pose_tag /= self.valid_points_num
 
     @property
@@ -129,11 +137,18 @@ class Pose:
             return self.pose_tag
         return None
 
+    @property
+    def center(self):
+        if self.valid_points_num > 0:
+            return self.c
+        return None
+
 
 class AssociativeEmbeddingDecoder:
     def __init__(self, num_joints, max_num_people, detection_threshold, use_detection_val,
                  ignore_too_much, tag_threshold,
-                 adjust=True, refine=True, delta=0.0, joints_order=None):
+                 adjust=True, refine=True, delta=0.0, joints_order=None,
+                 dist_reweight=True):
         self.num_joints = num_joints
         self.max_num_people = max_num_people
         self.detection_threshold = detection_threshold
@@ -148,6 +163,7 @@ class AssociativeEmbeddingDecoder:
 
         self.do_adjust = adjust
         self.do_refine = refine
+        self.dist_reweight = dist_reweight
         self.delta = delta
 
     def match(self, tag_k, loc_k, val_k):
@@ -185,6 +201,15 @@ class AssociativeEmbeddingDecoder:
             poses_tags = np.stack([p.tag for p in poses], axis=0)
             diff = tags[:, None] - poses_tags[None, :]
             diff_normed = np.linalg.norm(diff, ord=2, axis=2)
+
+            if self.dist_reweight:
+                # Reweight cost matrix to prefer nearby points among all that are close enough in a tag space.
+                dists = np.linalg.norm(joints[:, :2][:, None, :] - np.stack([p.center for p in poses], axis=0)[None], ord=2, axis=2)
+                close_tags_masks = diff_normed < self.tag_threshold
+                min_dists = np.min(dists, axis=0, keepdims=True)
+                dists /= min_dists + 1e-10
+                diff_normed[close_tags_masks] *= dists[close_tags_masks]
+
             diff_saved = np.copy(diff_normed)
             if self.use_detection_val:
                 diff_normed = np.round(diff_normed) * 100 - joints[:, 2:3]
@@ -285,6 +310,8 @@ class AssociativeEmbeddingDecoder:
     def __call__(self, heatmaps, tags, nms_heatmaps=None):
         ans = self.match(**self.top_k(nms_heatmaps, tags))
         ans, ans_tags = map(list, zip(*ans))
+
+        np.abs(heatmaps, out=heatmaps)
 
         if self.do_adjust:
             ans = self.adjust(ans, heatmaps)

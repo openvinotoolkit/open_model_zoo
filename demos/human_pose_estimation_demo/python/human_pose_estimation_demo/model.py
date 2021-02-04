@@ -225,7 +225,10 @@ class HPEAssociativeEmbedding(Model):
 
         self.image_blob_name = self._get_inputs(self.net)
         self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)
-        self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
+        try:
+            self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
+        except ValueError:
+            self.nms_heatmaps_blob_name = self.heatmaps_blob_name
         self.embeddings_blob_name = find_layer_by_name('embeddings', self.net.outputs)
 
         self.num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1]
@@ -239,6 +242,7 @@ class HPEAssociativeEmbedding(Model):
             num_joints=self.num_joints,
             adjust=True,
             refine=True,
+            dist_reweight=True,
             delta=0.0,
             max_num_people=30,
             detection_threshold=0.1,
