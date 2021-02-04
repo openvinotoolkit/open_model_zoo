@@ -134,7 +134,6 @@ def main():
 
     frames_processed = 0
     presenter = monitors.Presenter(args.utilization_monitors, 0)
-    video_writer = cv2.VideoWriter()
 
     for image, view_frame in frames:
         position = None
@@ -167,9 +166,11 @@ def main():
                         img_retrieval.input_size, np.mean(compute_embeddings_times),
                         np.mean(search_in_gallery_times), imshow_delay=3, presenter=presenter, no_show=args.no_show)
 
-        if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                                 cap.fps(), (image.shape[1], image.shape[0])):
-            raise RuntimeError("Can't open video writer")
+        if frames_processed == 0:
+            video_writer = cv2.VideoWriter()
+            if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                                     cap.fps(), (image.shape[1], image.shape[0])):
+                raise RuntimeError("Can't open video writer")
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(image)
