@@ -97,11 +97,11 @@ postprocessing:
     file: model_files/models/networks/correspondence.py
     pattern: '/ self.opt.down\)'
     replacement: '// self.opt.down)'
-  # MO can only convert Squeeze with fixed dimensions
+  # Replace Squeeze with Gather operation for support PyTorch >= 1.7
   - $type: regex_replace
     file: model_files/models/networks/correspondence.py
     pattern: '\.squeeze\(\)'
-    replacement: '.squeeze(dim=0)'
+    replacement: '[0]'
   # fix deprecated function usage
   - $type: regex_replace
     file: model_files/models/networks/generator.py

@@ -95,7 +95,7 @@ SOFTWARE
 The Synchronized-BatchNorm-PyTorch (dependency for model) is distributed under the following
 [license](https://github.com/vacancy/Synchronized-BatchNorm-PyTorch/blob/master/LICENSE):
 
-'''
+```
 MIT License
 
 Copyright (c) 2018 Jiayuan MAO
@@ -117,4 +117,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+```

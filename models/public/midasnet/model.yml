@@ -49,6 +49,11 @@ postprocessing:
     file: models/blocks.py
     pattern: 'torch.hub.load\("facebookresearch/WSL-Images", "resnext101_32x8d_wsl"\)'
     replacement: 'models.resnext101_32x8d()'
+  # Replace Squeeze with Gather operation for support PyTorch >= 1.7
+  - $type: regex_replace
+    file: models/midas_net.py
+    pattern: 'torch\.squeeze\((.*),(.*)\)'
+    replacement: '\g<1>[0]'
 conversion_to_onnx_args:
   - --model-name=MidasNet
   - --model-path=$dl_dir
