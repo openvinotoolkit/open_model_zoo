@@ -24,24 +24,24 @@ The forward-tacotron-duration-att-0001 model is a ForwardTacotron-based duration
 
 ### Inputs
 
-Sequence, name: `input_seq`, shape: [1x512], format: [BxC]
+Sequence, name: `input_seq`, shape: `1, 512`, format: `B,C`
 where:
    - B - batch size
    - C - number of symbols in sequence
 
-Sequence, name: `input_mask`, shape: [1x1x512], format: [BxDxC]
-where:
-   - B - batch size
-   - D - extra dimension for multiplication
-   - C - number of symbols in sequence
-
-Mask for input sequence, name: `input_mask`, shape: [1x1x512], format: [BxDxC]
+Sequence, name: `input_mask`, shape: `1, 1, 512`, format: `B, D, C`
 where:
    - B - batch size
    - D - extra dimension for multiplication
    - C - number of symbols in sequence
 
-Mask for relative position representation in attention, name: `pos_mask`, shape: [1x1x512x512], format: [BxDxCxC]
+Mask for input sequence, name: `input_mask`, shape: `1, 1, 512`, format: `B, D, C`
+where:
+   - B - batch size
+   - D - extra dimension for multiplication
+   - C - number of symbols in sequence
+
+Mask for relative position representation in attention, name: `pos_mask`, shape: `1, 1, 512, 512`, format: `B, D, C, C`
 where:
    - B - batch size
    - D - extra dimension for multiplication
@@ -49,7 +49,7 @@ where:
 
 ### Outputs
 
-1. Duration for input symbols, name: `duration`, shape: [1, 512, 1], format [BxCxH]. Contains predicted duration for each of the symbol in sequence.
+1. Duration for input symbols, name: `duration`, shape: `1, 512, 1`, format `B, C, H`. Contains predicted duration for each of the symbol in sequence.
    - B - batch size
    - C - number of symbols in sequence
    - H - empty dimension
