@@ -558,7 +558,9 @@ class DataProvider:
         return batch_input_ids, batch_annotation, batch_input, batch_identifiers
 
     def __len__(self):
-        return len(self._data_list)
+        if self.subset is None:
+            return len(self._data_list)
+        return len(self.subset)
 
     @property
     def identifiers(self):
@@ -628,3 +630,7 @@ class DataProvider:
             if progress_reporter:
                 progress_reporter.update(idx, 1)
         return annotations
+
+
+class DatasetWrapper(DataProvider):
+    pass
