@@ -341,3 +341,46 @@ class TestAnnotationConversion:
         )
         annotation, _ = Dataset.load_annotation(config)
         assert annotation == [converted_annotation[0]]
+
+    def test_ignore_subset_parameters_if_file_provided(self, mocker):
+        mocker.patch('pathlib.Path.exists', return_value=True)
+        mocker.patch('accuracy_checker.utils.read_yaml', return_value=['1'])
+
+        subset_maker_mock = mocker.patch(
+            'accuracy_checker.dataset.make_subset'
+        )
+        addition_options = {
+            'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
+            'subsample_size': 1,
+            'shuffle': False,
+            "subset_file": "subset.yml"
+        }
+        config = copy_dataset_config(self.dataset_config)
+        config.update(addition_options)
+        converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
+        mocker.patch(
+            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            return_value=ConverterReturn(converted_annotation, None, None)
+        )
+        Dataset.load_annotation(config)
+        assert not subset_maker_mock.called
+
+    def test_create_data_provider_with_subset_file(self, mocker):
+        mocker.patch('pathlib.Path.exists', return_value=True)
+        mocker.patch('accuracy_checker.dataset.read_yaml', return_value=['1'])
+
+        addition_options = {
+            'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
+            "subset_file": "subset.yml"
+        }
+        config = copy_dataset_config(self.dataset_config)
+        config.update(addition_options)
+        converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
+        mocker.patch(
+            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            return_value=ConverterReturn(converted_annotation, None, None)
+        )
+        dataset = Dataset(config)
+        assert len(dataset.data_provider) == 1
+        assert dataset.identifiers() == ['1']
+        assert dataset.data_provider.full_size == 2

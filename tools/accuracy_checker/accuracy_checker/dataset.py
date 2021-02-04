@@ -50,7 +50,7 @@ from .representation import (
     BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
 )
 from .data_readers import (
-    DataReaderField, REQUIRES_ANNOTATIONS, BaseReader, ListIdentifier,
+    DataReaderField, REQUIRES_ANNOTATIONS, BaseReader,
     serializer_identifier, deserialize_identifier, create_identifier_key
 )
 from .logging import print_info
@@ -113,6 +113,21 @@ class Dataset:
                 return True
             return False
 
+        def _create_subset(annotation, config):
+            subsample_size = config.get('subsample_size')
+            if not ignore_subset_settings(config):
+
+                if subsample_size is not None:
+                    subsample_seed = config.get('subsample_seed', 666)
+                    shuffle = config.get('shuffle', True)
+                    annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
+            elif subsample_size is not None:
+                warnings.warn("Subset selection parameters will be ignored")
+                config.pop('subsample_size', None)
+                config.pop('subsample_seed', None)
+                config.pop('shuffle', None)
+            return annotation
+
         annotation, meta = None, None
         use_converted_annotation = True
         if 'annotation' in config:
@@ -136,20 +151,7 @@ class Dataset:
 
         if not annotation:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
-        subsample_size = config.get('subsample_size')
-        if not ignore_subset_settings(config):
-
-            if subsample_size is not None:
-                subsample_seed = config.get('subsample_seed', 666)
-                shuffle = config.get('shuffle', True)
-
-                annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
-        elif subsample_size is not None:
-            warnings.warn("Subset selection parameters will be ignored")
-            config.pop('subsample_size', None)
-            config.pop('subsample_seed', None)
-            config.pop('shuffle', None)
-
+        annotation = _create_subset(annotation, config)
 
         if config.get('analyze_dataset', False):
             if config.get('segmentation_masks_source'):
@@ -381,7 +383,7 @@ class AnnotationProvider:
         self.config = config
         self._data_buffer = OrderedDict()
         self._meta = meta
-        for i, ann in enumerate(annotations):
+        for ann in annotations:
             idx = create_identifier_key(ann.identifier)
             self._data_buffer[idx] = ann
 
@@ -514,8 +516,9 @@ class DataProvider:
             subset_file = Path(self.dataset_config['subset_file'])
             if subset_file.exists() and not self.store_subset:
                 self.read_subset(subset_file)
-            else:
-                self.store_subset = True
+                return
+
+            self.store_subset = True
 
         if self.annotation_provider:
             self._data_list = self.annotation_provider.identifiers
