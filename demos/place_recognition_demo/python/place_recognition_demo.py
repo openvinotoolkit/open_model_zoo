@@ -75,7 +75,7 @@ def build_argparser():
 
 
 def time_elapsed(func, *args):
-    """ Auxiliary function that helps measure elapsed time. """
+    """ Auxiliary function that helps to measure elapsed time. """
 
     start_time = time.perf_counter()
     res = func(*args)
@@ -102,8 +102,6 @@ def main():
     video_writer = cv2.VideoWriter()
 
     while True:
-        sorted_indexes = []
-
         frame = cap.read()
 
         if frame is None:
@@ -111,12 +109,11 @@ def main():
                 raise ValueError("Can't read an image from the input")
             break
 
-        if frame is not None:
-            elapsed, probe_embedding = time_elapsed(place_recognition.compute_embedding, frame)
-            compute_embeddings_times.append(elapsed)
+        elapsed, probe_embedding = time_elapsed(place_recognition.compute_embedding, frame)
+        compute_embeddings_times.append(elapsed)
 
-            elapsed, (sorted_indexes, distances) = time_elapsed(place_recognition.search_in_gallery, probe_embedding)
-            search_in_gallery_times.append(elapsed)
+        elapsed, (sorted_indexes, distances) = time_elapsed(place_recognition.search_in_gallery, probe_embedding)
+        search_in_gallery_times.append(elapsed)
 
         image, key = visualize(frame, [str(place_recognition.impaths[i]) for i in sorted_indexes],
                                distances[sorted_indexes], place_recognition.input_size,

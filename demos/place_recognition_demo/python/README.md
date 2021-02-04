@@ -6,7 +6,7 @@ This demo demonstrates how to run Place Recognition models using OpenVINO&trade;
 
 ## How It Works
 
-The demo application expects an place recognition model in the Intermediate Representation (IR) format.
+The demo application expects a place recognition model in the Intermediate Representation (IR) format.
 
 As input, the demo application takes:
 * a path to an image
