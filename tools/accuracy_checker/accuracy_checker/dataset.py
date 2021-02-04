@@ -104,6 +104,15 @@ class Dataset:
 
     @staticmethod
     def load_annotation(config):
+        def ignore_subset_settings(config):
+            subset_file = config.get('subset_file')
+            store_subset = config.get('store_subset')
+            if subset_file is None:
+                return False
+            if Path(subset_file).exists() and not store_subset:
+                return True
+            return False
+
         annotation, meta = None, None
         use_converted_annotation = True
         if 'annotation' in config:
@@ -127,13 +136,20 @@ class Dataset:
 
         if not annotation:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
-
         subsample_size = config.get('subsample_size')
-        if subsample_size is not None:
-            subsample_seed = config.get('subsample_seed', 666)
-            shuffle = config.get('shuffle', True)
+        if not ignore_subset_settings(config):
 
-            annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
+            if subsample_size is not None:
+                subsample_seed = config.get('subsample_seed', 666)
+                shuffle = config.get('shuffle', True)
+
+                annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
+        elif subsample_size is not None:
+            warnings.warn("Subset selection parameters will be ignored")
+            config.pop('subsample_size', None)
+            config.pop('subsample_seed', None)
+            config.pop('shuffle', None)
+
 
         if config.get('analyze_dataset', False):
             if config.get('segmentation_masks_source'):
@@ -169,7 +185,7 @@ class Dataset:
         if data_reader_type in REQUIRES_ANNOTATIONS:
             data_source = annotation
         data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
-        self.data_provider = DataProvider(data_reader, AnnotationProvider(annotation, meta))
+        self.data_provider = DataProvider(data_reader, AnnotationProvider(annotation, meta), dataset_config=self.config)
 
     @property
     def config(self):
@@ -214,7 +230,7 @@ class Dataset:
         return annotation, meta
 
     def reset(self, reload_annotation=False):
-        self.subset = None
+        self.data_provider.reset()
         if reload_annotation:
             self.data_provider.annotation_provider = AnnotationProvider(*self.load_annotation(self.config))
 
@@ -363,27 +379,27 @@ class AnnotationProvider:
     def __init__(self, annotations, meta, name='', config=None):
         self.name = name
         self.config = config
-        self.data_buffer = OrderedDict()
+        self._data_buffer = OrderedDict()
         self._meta = meta
         for ann in annotations:
             identifier = ann.identifier
             if isinstance(ann.identifier, list):
                 identifier = ListIdentifier(ann.identifier)
-            self.data_buffer[identifier] = ann
+            self._data_buffer[identifier] = ann
 
     def __getitem__(self, item):
-        return self.data_buffer[item]
+        return self._data_buffer[item]
 
     @property
     def identifiers(self):
-        return list(self.data_buffer)
+        return list(self._data_buffer)
 
     def __len__(self):
-        return len(self.data_buffer)
+        return len(self._data_buffer)
 
     def make_subset(self, ids=None, start=0, step=1, end=None, accept_pairs=False):
         pairwise_subset = isinstance(
-            next(iter(self.data_buffer.values())), (
+            next(iter(self._data_buffer.values())), (
                 ReIdentificationAnnotation,
                 ReIdentificationClassificationAnnotation,
                 PlaceRecognitionAnnotation
@@ -399,12 +415,12 @@ class AnnotationProvider:
     def _make_subset_pairwise(self, ids, add_pairs=False):
         def reid_pairwise_subset(pairs_set, subsample_set, ids):
             identifier_to_index = {
-                idx: index for index, idx in enumerate(self.data_buffer)
+                idx: index for index, idx in enumerate(self._data_buffer)
             }
-            index_to_identifier = dict(enumerate(self.data_buffer))
+            index_to_identifier = dict(enumerate(self._data_buffer))
             for idx in ids:
                 subsample_set.add(idx)
-                current_annotation = self.data_buffer[index_to_identifier[idx]]
+                current_annotation = self._data_buffer[index_to_identifier[idx]]
                 positive_pairs = [
                     identifier_to_index[pair_identifier] for pair_identifier in current_annotation.positive_pairs
                 ]
@@ -416,31 +432,31 @@ class AnnotationProvider:
             return pairs_set, subsample_set
 
         def reid_subset(pairs_set, subsample_set, ids):
-            index_to_identifier = dict(enumerate(self.data_buffer))
+            index_to_identifier = dict(enumerate(self._data_buffer))
             for idx in ids:
                 subsample_set.add(idx)
-                selected_annotation = self.data_buffer[index_to_identifier[idx]]
+                selected_annotation = self._data_buffer[index_to_identifier[idx]]
                 if not selected_annotation.query:
                     query_for_person = [
-                        idx for idx, (_, annotation) in enumerate(self.data_buffer.items())
+                        idx for idx, (_, annotation) in enumerate(self._data_buffer.items())
                         if annotation.person_id == selected_annotation.person_id and annotation.query
                     ]
                     pairs_set |= OrderedSet(query_for_person)
                 else:
                     gallery_for_person = [
-                        idx for idx, (_, annotation) in enumerate(self.data_buffer.items())
+                        idx for idx, (_, annotation) in enumerate(self._data_buffer.items())
                         if annotation.person_id == selected_annotation.person_id and not annotation.query
                     ]
                     pairs_set |= OrderedSet(gallery_for_person)
             return pairs_set, subsample_set
 
         def ibl_subset(pairs_set, subsample_set, ids):
-            queries_ids = [idx for idx, (_, ann) in enumerate(self.data_buffer.items()) if ann.query]
-            gallery_ids = [idx for idx, (_, ann) in enumerate(self.data_buffer.items()) if not ann.query]
+            queries_ids = [idx for idx, (_, ann) in enumerate(self._data_buffer.items()) if ann.query]
+            gallery_ids = [idx for idx, (_, ann) in enumerate(self._data_buffer.items()) if not ann.query]
             subset_id_to_q_id = {s_id: idx for idx, s_id in enumerate(queries_ids)}
             subset_id_to_g_id = {s_id: idx for idx, s_id in enumerate(gallery_ids)}
-            queries_loc = [ann.coords for ann in self.data_buffer.values() if ann.query]
-            gallery_loc = [ann.coords for ann in self.data_buffer.values() if not ann.query]
+            queries_loc = [ann.coords for ann in self._data_buffer.values() if ann.query]
+            gallery_loc = [ann.coords for ann in self._data_buffer.values() if not ann.query]
             dist_mat = np.zeros((len(queries_ids), len(gallery_ids)))
             for idx, query_loc in enumerate(queries_loc):
                 dist_mat[idx] = np.linalg.norm(np.array(query_loc) - np.array(gallery_loc), axis=1)
@@ -461,7 +477,7 @@ class AnnotationProvider:
         subsample_set = OrderedSet()
         pairs_set = OrderedSet()
         for (dtype, func) in realisation:
-            if isinstance(next(iter(self.data_buffer.values())), dtype):
+            if isinstance(next(iter(self._data_buffer.values())), dtype):
                 pairs_set, subsample_set = func(pairs_set, subsample_set, ids)
                 break
         if add_pairs:
@@ -497,7 +513,7 @@ class DataProvider:
         self.store_subset = self.dataset_config.get('store_subset', False)
 
         if self.dataset_config.get('subset_file'):
-            subset_file = Path(self.dataset_config)
+            subset_file = Path(self.dataset_config['subset_file'])
             if subset_file.exists() and not self.store_subset:
                 self.read_subset(subset_file)
             else:
@@ -512,6 +528,7 @@ class DataProvider:
     def read_subset(self, subset_file):
         identifiers = [deserialize_identifier(idx) for idx in read_yaml(subset_file)]
         self._data_list = identifiers
+        print_info("loaded {} data items from {}".format(len(self._data_list), subset_file))
 
     def sava_subset(self):
         identifiers = [serializer_identifier(idx) for idx in self._data_list]
