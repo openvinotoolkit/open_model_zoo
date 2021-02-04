@@ -51,7 +51,7 @@ from .representation import (
 )
 from .data_readers import (
     DataReaderField, REQUIRES_ANNOTATIONS, BaseReader, ListIdentifier,
-    serializer_identifier, deserialize_identifier
+    serializer_identifier, deserialize_identifier, create_identifier_key
 )
 from .logging import print_info
 
@@ -381,11 +381,9 @@ class AnnotationProvider:
         self.config = config
         self._data_buffer = OrderedDict()
         self._meta = meta
-        for ann in annotations:
-            identifier = ann.identifier
-            if isinstance(ann.identifier, list):
-                identifier = ListIdentifier(ann.identifier)
-            self._data_buffer[identifier] = ann
+        for i, ann in enumerate(annotations):
+            idx = create_identifier_key(ann.identifier)
+            self._data_buffer[idx] = ann
 
     def __getitem__(self, item):
         return self._data_buffer[item]
@@ -518,7 +516,6 @@ class DataProvider:
                 self.read_subset(subset_file)
             else:
                 self.store_subset = True
-            return
 
         if self.annotation_provider:
             self._data_list = self.annotation_provider.identifiers

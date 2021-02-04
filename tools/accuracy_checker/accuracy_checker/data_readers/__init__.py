@@ -43,6 +43,7 @@ from .data_reader import (
 
     serializer_identifier,
     deserialize_identifier,
+    create_identifier_key,
 
     create_reader,
     REQUIRES_ANNOTATIONS
@@ -79,5 +80,6 @@ __all__ = [
     'REQUIRES_ANNOTATIONS',
 
     'serializer_identifier',
-    'deserialize_identifier'
+    'deserialize_identifier',
+    'create_identifier_key'
 ]

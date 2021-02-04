@@ -111,12 +111,22 @@ def deserialize_identifier(identifier):
         if type_id == 'image_pair_identifier':
             return ImagePairIdentifier(identifier['first'], identifier['second'])
         if type_id == 'list_identifier':
-            return ListIdentifier(identifier['values'])
+            return ListIdentifier(tuple(identifier['values']))
         if type_id == 'multi_frame_identifier':
-            return MultiFramesInputIdentifier(identifier['input_id'], identifier['frames'])
+            return MultiFramesInputIdentifier(identifier['input_id'], tuple(identifier['frames']))
         if type_id == 'clip_identifier':
-            return ClipIdentifier(identifier['video'], identifier['clip_id'], identifier['frames'])
+            return ClipIdentifier(identifier['video'], identifier['clip_id'], tuple(identifier['frames']))
         raise ValueError('Unsupported identifier type: {}'.format(type_id))
+    return identifier
+
+
+def create_identifier_key(identifier):
+    if isinstance(identifier, list):
+        return ListIdentifier(tuple(identifier))
+    if isinstance(identifier, ClipIdentifier):
+        return ClipIdentifier(identifier.video, identifier.clip_id, tuple(identifier.frames))
+    if isinstance(identifier, MultiFramesInputIdentifier):
+        return MultiFramesInputIdentifier(identifier.input_id, tuple(identifier.frames))
     return identifier
 
 
@@ -246,7 +256,7 @@ class BaseReader(ClassProvider):
         return [self.read(identifier) for identifier in data_id]
 
     def _read_list_ids(self, data_id):
-        return self.read_dispatcher(data_id.values)
+        return self.read_dispatcher(list(data_id.values))
 
     def _read_clip(self, data_id):
         video = Path(data_id.video)
@@ -254,12 +264,12 @@ class BaseReader(ClassProvider):
         return self.read_dispatcher(frames_identifiers)
 
     def _read_frames_multi_input(self, data_id):
-        return self.read_dispatcher(data_id.frames)
+        return self.read_dispatcher(list(data_id.frames))
 
     def read_item(self, data_id):
         data_rep = DataRepresentation(
             self.read_dispatcher(data_id),
-            identifier=data_id if not isinstance(data_id, ListIdentifier) else data_id.values
+            identifier=data_id if not isinstance(data_id, ListIdentifier) else list(data_id.values)
         )
         if self.multi_infer:
             data_rep.metadata['multi_infer'] = True

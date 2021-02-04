@@ -145,7 +145,7 @@ class TestAnnotationConversion:
             return_value=ConverterReturn(converted_annotation, None, None)
         )
         dataset = Dataset(config)
-        assert dataset.data_provider.annotation_provider.data_buffer == {converted_annotation[1].identifier: converted_annotation[1]}
+        assert dataset.data_provider.annotation_provider._data_buffer == {converted_annotation[1].identifier: converted_annotation[1]}
 
     def test_annotation_conversion_subset_ratio(self, mocker):
         addition_options = {
