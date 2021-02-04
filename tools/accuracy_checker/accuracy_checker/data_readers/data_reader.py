@@ -77,7 +77,7 @@ ImagePairIdentifier = namedtuple('ImagePairIdentifier', ['first', 'second'])
 ListIdentifier = namedtuple('ListIdentifier', ['values'])
 
 
-def serializer_identifier(identifier):
+def serialize_identifier(identifier):
     if isinstance(identifier, ClipIdentifier):
         return {
             "type": "clip_identifier",

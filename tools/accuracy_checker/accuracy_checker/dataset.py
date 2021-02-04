@@ -51,7 +51,7 @@ from .representation import (
 )
 from .data_readers import (
     DataReaderField, REQUIRES_ANNOTATIONS, BaseReader,
-    serializer_identifier, deserialize_identifier, create_identifier_key
+    serialize_identifier, deserialize_identifier, create_identifier_key
 )
 from .logging import print_info
 
@@ -531,7 +531,7 @@ class DataProvider:
         print_info("loaded {} data items from {}".format(len(self._data_list), subset_file))
 
     def sava_subset(self):
-        identifiers = [serializer_identifier(idx) for idx in self._data_list]
+        identifiers = [serialize_identifier(idx) for idx in self._data_list]
         subset_file = Path(self.dataset_config.get(
             'subset_file', '{}_subset_{}.yml'.format(self.dataset_config['name'], len(identifiers))))
         print_info("Data subset will be saved to {} file".format(subset_file))
