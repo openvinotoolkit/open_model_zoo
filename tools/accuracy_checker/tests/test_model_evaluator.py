@@ -29,8 +29,6 @@ class TestModelEvaluator:
         self.postprocessor = Mock()
         self.adapter = MagicMock(return_value=[])
         self.input_feeder = Mock()
-        self.data_reader = Mock(return_value=data)
-        self.data_reader.data_source = 'source'
 
         annotation_0 = MagicMock()
         annotation_0.identifier = 0
@@ -45,7 +43,9 @@ class TestModelEvaluator:
         self.annotations = [[annotation_container_0], [annotation_container_1]]
 
         self.dataset = MagicMock()
-        self.dataset.__iter__.return_value = [(range(1), self.annotations[0]), (range(1), self.annotations[1])]
+        self.dataset.__iter__.return_value = [
+            (range(1), self.annotations[0], data, [0]),
+            (range(1), self.annotations[1], data, [1])]
 
         self.postprocessor.process_batch = Mock(side_effect=[
             ([annotation_container_0], [annotation_container_0]), ([annotation_container_1], [annotation_container_1])
@@ -64,7 +64,6 @@ class TestModelEvaluator:
             self.launcher,
             self.input_feeder,
             self.adapter,
-            self.data_reader,
             self.preprocessor,
             self.postprocessor,
             self.dataset,
@@ -154,8 +153,6 @@ class TestModelEvaluatorAsync:
         self.adapter = MagicMock(return_value=[])
         self.input_feeder = MagicMock()
         self.input_feeder.lstm_inputs = []
-        self.data_reader = Mock(return_value=data)
-        self.data_reader.data_source = 'source'
 
         annotation_0 = MagicMock()
         annotation_0.identifier = 0
@@ -170,8 +167,10 @@ class TestModelEvaluatorAsync:
         self.annotations = [[annotation_container_0], [annotation_container_1]]
 
         self.dataset = MagicMock()
-        self.dataset.__iter__.return_value = [(range(1), self.annotations[0]), (range(1), self.annotations[1])]
-        self.data_reader.multi_infer = False
+        self.dataset.__iter__.return_value = [
+            (range(1), self.annotations[0], data, [0]),
+            (range(1), self.annotations[1], data, [1])]
+        self.dataset.multi_infer = False
 
         self.postprocessor.process_batch = Mock(side_effect=[
             ([annotation_container_0], [annotation_container_0]), ([annotation_container_1], [annotation_container_1])
@@ -190,7 +189,6 @@ class TestModelEvaluatorAsync:
             self.launcher,
             self.input_feeder,
             self.adapter,
-            self.data_reader,
             self.preprocessor,
             self.postprocessor,
             self.dataset,
@@ -218,6 +216,7 @@ class TestModelEvaluatorAsync:
         self.postprocessor.has_dataset_processors = False
         self.launcher.allow_reshape_input = False
         self.preprocessor.has_multi_infer_transformations = False
+        self.dataset.multi_infer = False
 
         self.evaluator.process_dataset('path', None)
 
@@ -269,7 +268,7 @@ class TestModelEvaluatorAsync:
         self.postprocessor.has_dataset_processors = False
         self.launcher.allow_reshape_input = False
         self.preprocessor.has_multi_infer_transformations = False
-        self.data_reader.multi_infer = True
+        self.dataset.multi_infer = True
 
         self.evaluator.process_dataset(None, None)
 

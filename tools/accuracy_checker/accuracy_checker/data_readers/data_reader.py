@@ -74,6 +74,60 @@ class DataRepresentation:
 ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
 MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id', 'frames'])
 ImagePairIdentifier = namedtuple('ImagePairIdentifier', ['first', 'second'])
+ListIdentifier = namedtuple('ListIdentifier', ['values'])
+
+
+def serialize_identifier(identifier):
+    if isinstance(identifier, ClipIdentifier):
+        return {
+            "type": "clip_identifier",
+            "video": identifier.video,
+            "clip_id": identifier.clip_id,
+            "frames": identifier.frames
+        }
+    if isinstance(identifier, MultiFramesInputIdentifier):
+        return {
+            "type": "multi_frame_identifier",
+            "input_id": identifier.input_id,
+            "frames": identifier.frames
+        }
+    if isinstance(identifier, ImagePairIdentifier):
+        return {
+            "type": "image_pair_identifier",
+            "first": identifier.first,
+            "second": identifier.second
+        }
+    if isinstance(identifier, ListIdentifier):
+        return {
+            "type": "list_identifier",
+            "values": identifier.values
+        }
+    return identifier
+
+
+def deserialize_identifier(identifier):
+    if isinstance(identifier, dict):
+        type_id = identifier.get('type')
+        if type_id == 'image_pair_identifier':
+            return ImagePairIdentifier(identifier['first'], identifier['second'])
+        if type_id == 'list_identifier':
+            return ListIdentifier(tuple(identifier['values']))
+        if type_id == 'multi_frame_identifier':
+            return MultiFramesInputIdentifier(identifier['input_id'], tuple(identifier['frames']))
+        if type_id == 'clip_identifier':
+            return ClipIdentifier(identifier['video'], identifier['clip_id'], tuple(identifier['frames']))
+        raise ValueError('Unsupported identifier type: {}'.format(type_id))
+    return identifier
+
+
+def create_identifier_key(identifier):
+    if isinstance(identifier, list):
+        return ListIdentifier(tuple(identifier))
+    if isinstance(identifier, ClipIdentifier):
+        return ClipIdentifier(identifier.video, identifier.clip_id, tuple(identifier.frames))
+    if isinstance(identifier, MultiFramesInputIdentifier):
+        return MultiFramesInputIdentifier(identifier.input_id, tuple(identifier.frames))
+    return identifier
 
 
 def create_reader(config):
@@ -124,6 +178,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(ClipIdentifier, self._read_clip)
         self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
         self.read_dispatcher.register(ImagePairIdentifier, self._read_pair)
+        self.read_dispatcher.register(ListIdentifier, self._read_list_ids)
         self.multi_infer = False
 
         self.validate_config(config, data_source)
@@ -200,16 +255,22 @@ class BaseReader(ClassProvider):
     def _read_list(self, data_id):
         return [self.read(identifier) for identifier in data_id]
 
+    def _read_list_ids(self, data_id):
+        return self.read_dispatcher(list(data_id.values))
+
     def _read_clip(self, data_id):
         video = Path(data_id.video)
         frames_identifiers = [video / frame for frame in data_id.frames]
         return self.read_dispatcher(frames_identifiers)
 
     def _read_frames_multi_input(self, data_id):
-        return self.read_dispatcher(data_id.frames)
+        return self.read_dispatcher(list(data_id.frames))
 
     def read_item(self, data_id):
-        data_rep = DataRepresentation(self.read_dispatcher(data_id), identifier=data_id)
+        data_rep = DataRepresentation(
+            self.read_dispatcher(data_id),
+            identifier=data_id if not isinstance(data_id, ListIdentifier) else list(data_id.values)
+        )
         if self.multi_infer:
             data_rep.metadata['multi_infer'] = True
         return data_rep

@@ -39,6 +39,11 @@ from .data_reader import (
     ClipIdentifier,
     MultiFramesInputIdentifier,
     ImagePairIdentifier,
+    ListIdentifier,
+
+    serialize_identifier,
+    deserialize_identifier,
+    create_identifier_key,
 
     create_reader,
     REQUIRES_ANNOTATIONS
@@ -70,6 +75,11 @@ __all__ = [
     'ClipIdentifier',
     'MultiFramesInputIdentifier',
     'ImagePairIdentifier',
+    'ListIdentifier',
     'create_reader',
     'REQUIRES_ANNOTATIONS',
+
+    'serialize_identifier',
+    'deserialize_identifier',
+    'create_identifier_key'
 ]

@@ -140,7 +140,7 @@ def create_adapter(adapter_config, launcher=None, dataset=None):
     if dataset:
         metadata = dataset.metadata
         if metadata:
-            label_map = dataset.metadata.get('label_map')
+            label_map = metadata.get('label_map')
     if isinstance(adapter_config, str):
         adapter = Adapter.provide(adapter_config, {'type': adapter_config}, label_map=label_map)
     elif isinstance(adapter_config, dict):
