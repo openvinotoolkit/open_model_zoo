@@ -234,24 +234,13 @@ class Dataset:
     def reset(self, reload_annotation=False):
         self.data_provider.reset()
         if reload_annotation:
-            self.data_provider.annotation_provider = AnnotationProvider(*self.load_annotation(self.config))
+            self.data_provider.set_annotation(*self.load_annotation(self.config))
 
-    def set_annotation(self, annotation):
-        subsample_size = self._config.get('subsample_size')
-        meta = self.metadata
-        if subsample_size is not None:
-            subsample_seed = self._config.get('subsample_seed', 666)
+    def set_annotation(self, annotation, meta=None):
+        if meta is None:
+            meta = self.load_meta(self._config)
+        self.data_provider.set_annotation(annotation, meta)
 
-            annotation = create_subset(annotation, subsample_size, subsample_seed)
-
-        if self._config.get('analyze_dataset', False):
-            if self._config.get('segmentation_masks_source'):
-                meta['segmentation_masks_source'] = self._config.get('segmentation_masks_source')
-            meta = analyze_dataset(annotation, meta)
-            if meta.get('segmentation_masks_source'):
-                del meta['segmentation_masks_source']
-
-        self.data_provider.annotation_provider = AnnotationProvider(annotation, meta)
 
     def provide_data_info(self, annotations, progress_reporter=None):
         return self.data_provider.provide_data_info(annotations, progress_reporter)
@@ -596,7 +585,7 @@ class DataProvider:
         if self.subset:
             self.subset = None
         if self.annotation_provider and reload_annotation:
-            self.annotation_provider = AnnotationProvider(*Dataset.load_annotation(self.dataset_config))
+            self.set_annotation(*Dataset.load_annotation(self.dataset_config))
         self.data_reader.reset()
 
     @property
@@ -630,6 +619,23 @@ class DataProvider:
             if progress_reporter:
                 progress_reporter.update(idx, 1)
         return annotations
+
+    def set_annotation(self, annotation, meta):
+        subsample_size = self.dataset_config.get('subsample_size')
+        if subsample_size is not None:
+            subsample_seed = self.dataset_config.get('subsample_seed', 666)
+
+            annotation = create_subset(annotation, subsample_size, subsample_seed)
+
+        if self.dataset_config.get('analyze_dataset', False):
+            if self.dataset_config.get('segmentation_masks_source'):
+                meta['segmentation_masks_source'] = self.dataset_config.get('segmentation_masks_source')
+            meta = analyze_dataset(annotation, meta)
+            if meta.get('segmentation_masks_source'):
+                del meta['segmentation_masks_source']
+        self.annotation_provider = AnnotationProvider(annotation, meta)
+        if len(self._data_list) < len(annotation):
+            self._data_list = self.annotation_provider.identifiers
 
 
 class DatasetWrapper(DataProvider):
