@@ -308,6 +308,10 @@ class Dataset:
     def multi_infer(self):
         return self.data_provider.multi_infer
 
+    @property
+    def labels(self):
+        return self.data_provider.labels
+
 
 def read_annotation(annotation_file: Path):
     annotation_file = get_path(annotation_file)
@@ -576,6 +580,10 @@ class DataProvider:
         self._batch = batch
 
     @property
+    def labels(self):
+        return self.annotation_provider.metadata.get('label_map', {})
+
+    @property
     def metadata(self):
         if self.annotation_provider:
             return self.annotation_provider.metadata
@@ -634,8 +642,7 @@ class DataProvider:
             if meta.get('segmentation_masks_source'):
                 del meta['segmentation_masks_source']
         self.annotation_provider = AnnotationProvider(annotation, meta)
-        if len(self._data_list) < len(annotation):
-            self._data_list = self.annotation_provider.identifiers
+        self.create_data_list()
 
 
 class DatasetWrapper(DataProvider):
