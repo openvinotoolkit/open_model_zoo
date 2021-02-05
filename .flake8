@@ -7,6 +7,8 @@ exclude=
     models/public/mozilla-deepspeech-0.8.2/mds_convert_utils/memmapped_file_system_pb2.py,
 
 select=
+    # flake8-comprehensions issues
+    C4,
     # indentation problems
     E10,E11,
     # closing bracket does not match indentation of opening brackets line
@@ -37,3 +39,6 @@ ignore=
     # ignored because putting a statement after a colon is harmless and
     # sometimes results in more compact code
     E701,E704,
+    # unnecessary <dict/list/tuple> call
+    # TODO: consider enabling this later
+    C408,
