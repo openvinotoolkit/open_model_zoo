@@ -108,7 +108,8 @@ class AssociativeEmbeddingDecoder:
 
             if self.dist_reweight:
                 # Reweight cost matrix to prefer nearby points among all that are close enough in a tag space.
-                dists = np.linalg.norm(joints[:, :2][:, None, :] - np.stack([p.center for p in poses], axis=0)[None], ord=2, axis=2)
+                centers = np.stack([p.center for p in poses], axis=0)[None]
+                dists = np.linalg.norm(joints[:, :2][:, None, :] - centers, ord=2, axis=2)
                 close_tags_masks = diff_normed < self.tag_threshold
                 min_dists = np.min(dists, axis=0, keepdims=True)
                 dists /= min_dists + 1e-10
