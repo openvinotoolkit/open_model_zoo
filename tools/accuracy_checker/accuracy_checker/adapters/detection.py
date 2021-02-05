@@ -710,6 +710,7 @@ class FaceDetectionAdapter(Adapter):
             result.append(
                 DetectionPrediction(
                     identifier=identifier,
+                    labels=np.zeros_like(detections['scores']),
                     x_mins=detections['x_mins'],
                     y_mins=detections['y_mins'],
                     x_maxs=detections['x_maxs'],
