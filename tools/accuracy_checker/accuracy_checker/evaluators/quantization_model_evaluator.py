@@ -194,7 +194,7 @@ class ModelEvaluator:
         if not self._dumped_annotations:
             return
         meta = Dataset.load_meta(self.dataset.dataset_config)
-        self.dataset.set_annotation(annotation, meta)
+        self.dataset.set_annotation(self._dumped_annotations, meta)
 
     def select_dataset(self, dataset_tag):
         if self.dataset is not None and isinstance(self.dataset_config, list):
