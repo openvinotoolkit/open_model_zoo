@@ -723,11 +723,9 @@ class DLSDKLauncher(Launcher):
         else:
             for key, value in device_configuration.items():
                 if isinstance(value, dict):
-                    if key in ie.known_plugins:
-                        self.ie_core.set_config(value, key)
-                    else:
-                        warnings.warn('Option {key}: {value} will be skipped because device is '
-                                      'unknown'.format(key=key, value=value))
+                    if key not in ie.known_plugins:
+                        warnings.warn('{} device is unknown'.format(key))
+                    self.ie_core.set_config(value, key)
                 else:
                     warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
                                   'applied is not specified or option is not a dict-like'.format(key=key, value=value))
