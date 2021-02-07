@@ -27,7 +27,7 @@ See this [publication](http://dcase.community/documents/workshop2019/proceedings
 
 ### Original Model
 
-Audio, name - `0`, shape - `1,1,1,L`, format is `N,C,1,L` where:
+Audio, name - `input`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 - `N` - batch size
 - `C` - channel
@@ -35,7 +35,7 @@ Audio, name - `0`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 ### Converted Model
 
-Audio, name - `0`, shape - `1,1,1,L`, format is `N,C,1,L` where:
+Audio, name - `input`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 - `N` - batch size
 - `C` - channel
