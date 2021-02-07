@@ -1,0 +1,37 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "aclnet-int8" model is designed to perform sound classification. The "aclnet-int8" model
+  is trained and fine-tuned for INT8 layers on an internal dataset of environmental sounds. For details about the
+  model, see this paper <https://arxiv.org/abs/1811.06669>.
+
+  The model input is a segment of PCM audio samples in [N, C, H, W] format with the
+  shape [1, 1, 1, 16000].
+
+  The model output for "aclnet-int8" is the sound classifier output for the 53 different
+  environmental sound classes from the internal sound database.
+task_type: sound_classification
+files:
+  - name: aclnet_des_53_int8.onnx
+    size: 10988855
+    sha256: 3a4b57b62616a1b3cb2a220b21e1a3c520371d84d3f884df721677dcaefbd1c5
+    source: ?
+model_optimizer_args:
+  - --input_shape=[1,1,1,16000]
+  - --input=result.1
+  - --output=486
+  - --input_model=$dl_dir/aclnet_des_53_int8.onnx
+framework: onnx
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
