@@ -30,7 +30,7 @@ files:
     source: https://storage.openvinotoolkit.org/models_contrib/sound_classification/aclnet/2021-02-04/aclnet_des_53_fp32.onnx
 model_optimizer_args:
   - --input_shape=[1,1,1,16000]
-  - --input=0
+  - --input=input
   - --output=203
   - --input_model=$dl_dir/aclnet_des_53.onnx
 framework: onnx
