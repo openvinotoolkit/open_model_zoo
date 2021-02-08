@@ -306,7 +306,7 @@ class ASRModel(BaseModel):
             while not_blank and symbols_added < self._max_symbols_per_step:
                 g, hidden_prime = self._pred_step(
                     self._get_last_symb(label),
-                    hidden,
+                    hidden
                 )
                 if callback:
                     callback(g)
