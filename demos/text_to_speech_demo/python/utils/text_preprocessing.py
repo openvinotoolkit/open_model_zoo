@@ -17,7 +17,6 @@ This file is based in cleaners.py from https://github.com/keithito/tacotron,
 commit d26c763342518d4e432e9c4036a1aff3b4fdaa1e on Feb 3, 2020
 """
 
-from unidecode import unidecode
 import re
 from utils.numbers import normalize_numbers
 
@@ -82,7 +81,7 @@ def text_to_sequence(text):
     Returns:
       List of integers corresponding to the symbols in the text
   '''
-    text = unidecode(text)
+    text = text
     text = text.lower()
     text = normalize_numbers(text)
     text = expand_abbreviations(text)
