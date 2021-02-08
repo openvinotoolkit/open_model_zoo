@@ -401,7 +401,6 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
 
 class EncoderDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'encoder'
-    input_layers = []
 
 
 class PredictionDLSDKModel(CommonDLSDKModel):
