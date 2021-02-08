@@ -1,0 +1,16 @@
+numpy==1.19.4
+matplotlib==3.3.3
+ipywidgets==7.5.1
+tqdm==4.39.0
+itk==5.1.2
+itk-core==5.1.2
+itk-filtering==5.1.2
+itk-io==5.1.2
+itk-meshtopolydata==0.6.2
+itk-numerics==5.1.2
+itk-registration==5.1.2
+itk-segmentation==5.1.2
+itkwidgets==0.23.1
+segyio==1.9.1
+imageio==2.9.0
+ipympl==0.5.1

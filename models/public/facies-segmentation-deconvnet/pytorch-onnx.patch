@@ -1,0 +1,145 @@
+
+---
+diff --git a/core/models/section_deconvnet.py b/core/models/section_deconvnet.py
+index d95df34..7a0f818 100644
+--- a/core/models/section_deconvnet.py
++++ b/core/models/section_deconvnet.py
+@@ -1,4 +1,22 @@
++import torch
+ import torch.nn as nn
++import torch.nn.functional as F
++
++
++class Unpool2d(torch.autograd.Function):
++    @staticmethod
++    def symbolic(g, x, indices, output_size=None):
++        if output_size:
++            return g.op('Unpooling', x, indices, output_size)
++        else:
++            return g.op('Unpooling', x, indices)
++
++    @staticmethod
++    def forward(self, x, indices, output_size=None):
++        if not output_size is None:
++            return nn.MaxUnpool2d(2, stride=2)(x, indices, output_size=output_size.size())
++        else:
++            return nn.MaxUnpool2d(2, stride=2)(x, indices)
+ 
+ class section_deconvnet(nn.Module):
+ 
+@@ -6,7 +24,7 @@ class section_deconvnet(nn.Module):
+         super(section_deconvnet, self).__init__()
+         self.learned_billinear = learned_billinear
+         self.n_classes = n_classes
+-        self.unpool = nn.MaxUnpool2d(2, stride=2)
++        self.unpool = Unpool2d()
+         self.conv_block1 = nn.Sequential(
+ 
+             # conv1_1
+@@ -259,29 +277,24 @@ class section_deconvnet(nn.Module):
+             raise NotImplementedError
+ 
+     def forward(self, x):
+-        size0 = x.size()
+         conv1, indices1 = self.conv_block1(x)
+-        size1 = conv1.size()
+         conv2, indices2 = self.conv_block2(conv1)
+-        size2 = conv2.size()
+         conv3, indices3 = self.conv_block3(conv2)
+-        size3 = conv3.size()
+         conv4, indices4 = self.conv_block4(conv3)
+-        size4 = conv4.size()
+         conv5, indices5 = self.conv_block5(conv4)
+ 
+         conv6 = self.conv_block6(conv5)
+         conv7 = self.conv_block7(conv6)
+-        conv8 = self.deconv_block8(conv7) 
+-        conv9 = self.unpool(conv8,indices5, output_size=size4)
+-        conv10 = self.deconv_block10(conv9) 
+-        conv11 = self.unpool(conv10,indices4, output_size=size3)
+-        conv12 = self.deconv_block12(conv11) 
+-        conv13 = self.unpool(conv12,indices3, output_size=size2)
+-        conv14 = self.deconv_block14(conv13) 
+-        conv15 = self.unpool(conv14,indices2, output_size=size1)
+-        conv16 = self.deconv_block16(conv15) 
+-        conv17 = self.unpool(conv16,indices1, output_size=size0)
++        conv8 = self.deconv_block8(conv7)
++        conv9 = self.unpool.apply(conv8, indices5, conv4)
++        conv10 = self.deconv_block10(conv9)
++        conv11 = self.unpool.apply(conv10, indices4, conv3)
++        conv12 = self.deconv_block12(conv11)
++        conv13 = self.unpool.apply(conv12, indices3, conv2)
++        conv14 = self.deconv_block14(conv13)
++        conv15 = self.unpool.apply(conv14, indices2, conv1)
++        conv16 = self.deconv_block16(conv15)
++        conv17 = self.unpool.apply(conv16, indices1, x)
+         conv18 = self.deconv_block18(conv17)
+         out = self.seg_score19(conv18)
+ 
+diff --git a/requirements.txt b/requirements.txt
+new file mode 100644
+index 0000000..e03d22e
+--- /dev/null
++++ b/requirements.txt
+@@ -0,0 +1,2 @@
++torch==1.5.0
++torchvision==0.6.0
+diff --git a/torch2onnx.py b/torch2onnx.py
+new file mode 100644
+index 0000000..a061750
+--- /dev/null
++++ b/torch2onnx.py
+@@ -0,0 +1,51 @@
++import sys
++import torch
++import logging
++import argparse
++from core.models.section_deconvnet import section_deconvnet as DeconvNet
++
++
++def get_logger():
++    ''' Setting up Logging and return logger.'''
++    INFO = 5
++    logging.addLevelName(INFO, 'INFO')
++
++    def info(self, message, *args, **kws):
++        self.log(INFO, message, *args, **kws)
++    logging.Logger.info = info
++
++    logging.basicConfig(format='[%(levelname)s] %(message)s',
++                        stream=sys.stdout)
++    logger = logging.getLogger('torch2onnx')
++    logger.setLevel(INFO)
++    return logger
++
++
++def main(args, logger):
++    network = DeconvNet(n_classes=6)
++    logger.info('Loading the model')
++    checkpoint = torch.load(args.snapshot_path)
++    network.load_state_dict(checkpoint)
++    logger.info('Model has loaded')
++    network.eval()
++
++    logger.info(f'Converting to ONNX, input shape: {(1, 1, 255, 401)}')
++    inp = torch.randn(1, 1, 255, 401)
++    with torch.no_grad():
++        torch.onnx.export(network, inp,
++                          args.snapshot_path.split('.')[0] + '.onnx',
++                          input_names=['input'],
++                          output_names=['output'],
++                          operator_export_type=torch.onnx.OperatorExportTypes.ONNX_ATEN_FALLBACK)
++
++    logger.info(
++        f"Model has converted, output path: {args.snapshot_path.split('.')[0] + '.onnx'}")
++
++
++if __name__ == '__main__':
++    parser = argparse.ArgumentParser(description='Args for converting to onnx')
++    parser.add_argument('-i', '--snapshot_path', type=str, required=True,
++                        help='Path to snapshot (.pth file)')
++    args = parser.parse_args()
++    logger = get_logger()
++    main(args, logger)
+-- 
+2.17.1
