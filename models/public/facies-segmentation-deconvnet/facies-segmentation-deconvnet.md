@@ -1,4 +1,4 @@
-# facies-segmentation
+# facies-segmentation-deconvnet
 
 ## Use Case and High-Level Description
 
