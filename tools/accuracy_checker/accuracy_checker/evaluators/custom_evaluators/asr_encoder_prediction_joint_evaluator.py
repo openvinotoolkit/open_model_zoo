@@ -464,7 +464,7 @@ class EncoderONNXModel(CommonONNXModel):
 
 class PredictionONNXModel(CommonONNXModel):
     default_model_suffix = 'prediction'
-    input_layers = ['input_1', '1', '2']
+    input_layers = ['input.1', '1', '2']
     output_layers = ['151', '152', '153']
 
 
