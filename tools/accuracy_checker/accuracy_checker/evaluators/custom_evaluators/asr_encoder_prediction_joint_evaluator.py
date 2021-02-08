@@ -361,6 +361,8 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         self.with_prefix = None
+        self.output_blob = None
+        self.input_blob = None
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
 
@@ -405,14 +407,13 @@ class EncoderDLSDKModel(CommonDLSDKModel):
 
 class PredictionDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'prediction'
-    input_layers = ['input_1', '1', '2']
+    input_layers = ['input.1', '1', '2']
     output_layers = ['151', '152', '153']
 
 
 class JointDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'joint'
     input_layers = ['0', '1']
-    output_layers = []
 
 
 class CommonONNXModel(BaseModel):
