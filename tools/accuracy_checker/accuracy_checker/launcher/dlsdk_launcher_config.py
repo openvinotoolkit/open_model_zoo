@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from pathlib import Path
-from ..config import PathField, ConfigError
+from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField, BaseField
 from .launcher import LauncherConfigValidator
 from .model_conversion import FrameworkParameters
 from ..logging import warning
@@ -74,6 +74,57 @@ class CPUExtensionPathField(PathField):
                 self.raise_error(validation_entry, field_uri, msg)
             errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme=validation_scheme))
         return errors
+
+
+DLSDK_LAUNCHER_PARAMETERS = {
+    'model': PathField(description="Path to model.", file_or_directory=True),
+    'weights': PathField(description="Path to weights.", optional=True, file_or_directory=True),
+    'device': StringField(description="Device name."),
+    'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
+    'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
+    'mxnet_weights': PathField(optional=True, description="Path to MXNet weights file."),
+    'tf_model': PathField(optional=True, description="Path to TF model file."),
+    'tf_meta': PathField(optional=True, description="Path to TF meta file."),
+    'onnx_model': PathField(optional=True, description="Path to ONNX model file."),
+    'kaldi_model': PathField(optional=True, description="Path to Kaldi model file."),
+    'cpu_extensions': CPUExtensionPathField(optional=True, description="Path to CPU extensions."),
+    'gpu_extensions': PathField(optional=True, description="Path to GPU extensions."),
+    'bitstream': PathField(optional=True, description="Bitream (FPGA only)."),
+    'mo_params': DictField(optional=True, description="Model Optimizer parameters."),
+    'mo_flags': ListField(optional=True, description="Model Optimizer flags."),
+    'outputs': ListField(optional=True, description="Outputs."),
+    'allow_reshape_input': BoolField(optional=True, default=False, description="Allows reshape input."),
+    'affinity_map': PathField(optional=True, description="Affinity map."),
+    'batch': NumberField(value_type=int, min_value=1, optional=True, default=1, description="Batch size."),
+    'should_log_cmd': BoolField(optional=True, description="Log Model Optimizer command."),
+    'async_mode': BoolField(optional=True, description="Allows asynchronous mode.", default=False),
+    'num_requests': BaseField(
+        optional=True,
+        description="Number of requests (for async mode only). "
+                    "In multi device mode allows setting comma-separated list for numbers "
+                    "or one value which will be used for all devices"
+    ),
+    '_model_optimizer': PathField(optional=True, is_directory=True, description="Model optimizer."),
+    '_tf_obj_detection_api_config_dir': PathField(
+        optional=True, is_directory=True, description="TF Object Detection API Config."
+    ),
+    '_tf_custom_op_config_dir': PathField(
+        optional=True, is_directory=True, description="TF Custom Operation Config prefix."
+    ),
+    '_transformations_config_dir': PathField(
+        optional=True, is_directory=True, description="Transformation config prefix for Model Optimizer"),
+    '_tf_obj_detection_api_pipeline_config_path': PathField(
+        optional=True, is_directory=False, description="TF Custom Operation Pipeline Config."),
+    '_cpu_extensions_mode': StringField(optional=True, description="CPU extensions mode."),
+    '_aocl': PathField(optional=True, description="path to aocl (FPGA only)"),
+    '_vpu_log_level': StringField(
+        optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
+    ),
+    '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)"),
+    '_device_config': PathField(optional=True, description='path to file with device configuration'),
+    '_model_is_blob': BoolField(optional=True, description='hint for auto model search'),
+    '_use_set_partial_shape': BoolField(optional=True, default=False)
+}
 
 
 class DLSDKLauncherConfigValidator(LauncherConfigValidator):

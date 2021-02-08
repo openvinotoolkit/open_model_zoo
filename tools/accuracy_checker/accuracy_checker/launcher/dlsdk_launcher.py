@@ -26,12 +26,11 @@ import numpy as np
 import openvino.inference_engine as ie
 
 from .dlsdk_launcher_config import (
-    HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, FPGA_COMPILER_MODE_VAR, NIREQ_REGEX, VPU_PLUGINS, VPU_LOG_LEVELS,
-    CPUExtensionPathField,
+    HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, FPGA_COMPILER_MODE_VAR, NIREQ_REGEX, VPU_PLUGINS, DLSDK_LAUNCHER_PARAMETERS,
     DLSDKLauncherConfigValidator
 )
 from .dlsdk_async_request import AsyncInferRequestWrapper
-from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField, BaseField
+from ..config import ConfigError
 from ..logging import warning
 from ..utils import (
     read_yaml,
@@ -79,54 +78,7 @@ class DLSDKLauncher(Launcher):
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
-        parameters.update({
-            'model': PathField(description="Path to model.", file_or_directory=True),
-            'weights': PathField(description="Path to weights.", optional=True, file_or_directory=True),
-            'device': StringField(description="Device name."),
-            'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
-            'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
-            'mxnet_weights': PathField(optional=True, description="Path to MXNet weights file."),
-            'tf_model': PathField(optional=True, description="Path to TF model file."),
-            'tf_meta': PathField(optional=True, description="Path to TF meta file."),
-            'onnx_model': PathField(optional=True, description="Path to ONNX model file."),
-            'kaldi_model': PathField(optional=True, description="Path to Kaldi model file."),
-            'cpu_extensions': CPUExtensionPathField(optional=True, description="Path to CPU extensions."),
-            'gpu_extensions': PathField(optional=True, description="Path to GPU extensions."),
-            'bitstream': PathField(optional=True, description="Bitream (FPGA only)."),
-            'mo_params': DictField(optional=True, description="Model Optimizer parameters."),
-            'mo_flags': ListField(optional=True, description="Model Optimizer flags."),
-            'outputs': ListField(optional=True, description="Outputs."),
-            'allow_reshape_input': BoolField(optional=True, default=False, description="Allows reshape input."),
-            'affinity_map': PathField(optional=True, description="Affinity map."),
-            'batch': NumberField(value_type=int, min_value=1, optional=True, default=1, description="Batch size."),
-            'should_log_cmd': BoolField(optional=True, description="Log Model Optimizer command."),
-            'async_mode': BoolField(optional=True, description="Allows asynchronous mode.", default=False),
-            'num_requests': BaseField(
-                optional=True,
-                description="Number of requests (for async mode only). "
-                            "In multi device mode allows setting comma-separated list for numbers "
-                            "or one value which will be used for all devices"
-            ),
-            '_model_optimizer': PathField(optional=True, is_directory=True, description="Model optimizer."),
-            '_tf_obj_detection_api_config_dir': PathField(
-                optional=True, is_directory=True, description="TF Object Detection API Config."
-            ),
-            '_tf_custom_op_config_dir': PathField(
-                optional=True, is_directory=True, description="TF Custom Operation Config prefix."
-            ),
-            '_transformations_config_dir': PathField(
-                optional=True, is_directory=True, description="Transformation config prefix for Model Optimizer"),
-            '_tf_obj_detection_api_pipeline_config_path': PathField(
-                optional=True, is_directory=False, description="TF Custom Operation Pipeline Config."),
-            '_cpu_extensions_mode': StringField(optional=True, description="CPU extensions mode."),
-            '_aocl': PathField(optional=True, description="path to aocl (FPGA only)"),
-            '_vpu_log_level': StringField(
-                optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
-            ),
-            '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)"),
-            '_device_config': PathField(optional=True, description='path to file with device configuration'),
-            '_model_is_blob': BoolField(optional=True, description='hint for auto model search')
-        })
+        parameters.update(DLSDK_LAUNCHER_PARAMETERS)
 
         return parameters
 
@@ -143,6 +95,7 @@ class DLSDKLauncher(Launcher):
             'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading,
         )
         dlsdk_launcher_config.validate(self.config, ie_core=self.ie_core)
+        self._use_set_partial_shape = self.config.get('_use_set_partial_shape', False)
         device = self.config['device'].split('.')
         self._device = '.'.join((device[0].upper(), device[1])) if len(device) > 1 else device[0].upper()
         self._set_variable = False
@@ -890,15 +843,37 @@ class DLSDKLauncher(Launcher):
         if not self.network:
             return
         config_inputs = self.config.get('inputs', [])
-        input_shapes = {}
-        for input_config in config_inputs:
-            if 'shape' in input_config:
-                input_shapes[input_config['name']] = input_config['shape']
-        if not input_shapes:
-            return
-        orig_input_shapes = {input_name: input_info.shape for input_name, input_info in self.inputs.items()}
-        orig_input_shapes.update(input_shapes)
-        self._reshape_input(orig_input_shapes)
+
+        def set_input_shape_via_reshape():
+            input_shapes = {}
+            for input_config in config_inputs:
+                if 'shape' in input_config:
+                    input_shapes[input_config['name']] = input_config['shape']
+            if not input_shapes:
+                return
+            orig_input_shapes = {input_name: input_info.shape for input_name, input_info in self.inputs.items()}
+            orig_input_shapes.update(input_shapes)
+            self._reshape_input(orig_input_shapes)
+
+        def set_input_shape_via_ngraph():
+            cfg_input_shapes = {}
+            for input_ in config_inputs:
+                if 'shape' not in input_:
+                    continue
+                cfg_input_shapes[input_['name']] = input_['shape']
+            if isinstance(ng, UnsupportedPackage):
+                ng.raise_error('dlsdk launcher')
+            ng_function = ng.function_from_cnn(self.network)
+            for node in ng_function.get_ordered_ops():
+                layer_name = node.get_friendly_name()
+                if layer_name not in cfg_input_shapes:
+                    continue
+                node.set_partial_shape(ng.impl.PartialShape(cfg_input_shapes[layer_name]))
+            self.network = ng.function_to_cnn(ng_function)
+        if self._use_set_partial_shape:
+            set_input_shape_via_ngraph()
+        else:
+            set_input_shape_via_reshape()
 
     def _configure_lstm_inputs(self):
         lstm_mapping = {}
