@@ -81,7 +81,6 @@ def text_to_sequence(text):
     Returns:
       List of integers corresponding to the symbols in the text
   '''
-    text = text
     text = text.lower()
     text = normalize_numbers(text)
     text = expand_abbreviations(text)
