@@ -154,7 +154,11 @@ class QuestionAnsweringEmbeddingAccuracy(FullDatasetEvaluationMetric):
         ap_pairs = list(zip(annotations, predictions))
 
         #check data alignment
-        assert all(a.identifier is p.identifier for a, p in ap_pairs), "annotations and predictions are not aligned"
+        assert all(
+            a.identifier is p.identifier
+            if not isinstance(p.identifier, tuple)
+            else p.identifier.values
+            for a, p in ap_pairs), "annotations and predictions are not aligned"
 
         q_pairs = [(a, p) for a, p in ap_pairs if a.context_pos_indetifier is not None]
         c_pairs = [(a, p) for a, p in ap_pairs if a.context_pos_indetifier is None]
