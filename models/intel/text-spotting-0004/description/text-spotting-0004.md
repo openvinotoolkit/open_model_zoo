@@ -80,7 +80,7 @@ Name: `output`, shape: `1, 256, 28, 28`. Encoded text recognition features.
 
 ### Outputs
 
-1.	Name: `output`, shape: [1x38]. Encoded text recognition features. Indices starting from 2 correspond to symbols from the
+1.	Name: `output`, shape: `1, 38`. Encoded text recognition features. Indices starting from 2 correspond to symbols from the
 alphabet. The 0 and 1 are special Start of Sequence and End of Sequence symbols correspondingly.
 1.	Name: `hidden`, shape: [1x1x256]. Current hidden state of GRU.
 
