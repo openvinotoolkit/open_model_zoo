@@ -30,27 +30,18 @@ from ...representation import CharacterRecognitionPrediction
 
 
 class Im2latexEvaluator(BaseEvaluator):
-    def __init__(self, dataset, reader, preprocessing, metric_executor, launcher, model):
+    def __init__(self, dataset, preprocessing, metric_executor, launcher, model):
         self.dataset = dataset
         self.preprocessing_executor = preprocessing
         self.metric_executor = metric_executor
         self.launcher = launcher
         self.model = model
-        self.reader = reader
         self._metrics_results = []
 
     @classmethod
     def from_configs(cls, config):
         dataset_config = config['datasets'][0]
         dataset = Dataset(dataset_config)
-        data_reader_config = dataset_config.get('reader', 'opencv_imread')
-        data_source = dataset_config['data_source']
-        if isinstance(data_reader_config, str):
-            reader = BaseReader.provide(data_reader_config, data_source)
-        elif isinstance(data_reader_config, dict):
-            reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config)
-        else:
-            raise ConfigError('reader should be dict or string')
         preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
@@ -62,7 +53,7 @@ class Im2latexEvaluator(BaseEvaluator):
             meta,
             config.get('_model_is_blob'),
         )
-        return cls(dataset, reader, preprocessing, metrics_executor, launcher, model)
+        return cls(dataset, preprocessing, metrics_executor, launcher, model)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         self._annotations, self._predictions = [], []
@@ -74,20 +65,18 @@ class Im2latexEvaluator(BaseEvaluator):
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
         self.dataset_meta = self.dataset.metadata
-        for batch_id, (_, batch_annotation) in enumerate(self.dataset):
+        for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
 
-            batch_identifiers = [annotation.identifier for annotation in batch_annotation]
-            batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
-            batch_input = self.preprocessing_executor.process(batch_input, batch_annotation)
-            batch_input, _ = extract_image_representations(batch_input)
-            batch_prediction = self.model.predict(batch_identifiers, batch_input)
+            batch_inputs = self.preprocessing_executor.process(batch_inputs, batch_annotation)
+            batch_inputs, _ = extract_image_representations(batch_inputs)
+            batch_prediction = self.model.predict(batch_identifiers, batch_inputs)
             batch_prediction = [CharacterRecognitionPrediction(
                 label=batch_prediction, identifier=batch_annotation[0].identifier)]
             self._annotations.extend(batch_annotation)
             self._predictions.extend(batch_prediction)
 
             if progress_reporter:
-                progress_reporter.update(batch_id, len(batch_input))
+                progress_reporter.update(batch_id, len(batch_inputs))
                 if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
                     self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting)
 
