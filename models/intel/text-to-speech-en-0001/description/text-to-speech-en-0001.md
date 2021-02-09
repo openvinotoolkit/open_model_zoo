@@ -53,7 +53,7 @@ where:
    - B - batch size
    - C - number of symbols in sequence
    - H - empty dimension
-2. Processed embeddings, name: `embeddings`, shape: [1, 512, 256], format [BxCxH]. Contains processed embeddings for each symbol in sequence.
+2. Processed embeddings, name: `embeddings`, shape: `1, 512, 256`, format `BxCxH`. Contains processed embeddings for each symbol in sequence.
    - B - batch size
    - C - number of symbols in sequence
    - H - height of the intermediate feature map
@@ -70,19 +70,19 @@ The text-to-speech-en-0001-regression model accepts aligned by duration processe
 
 ### Inputs
 
-Processed embeddigs aligned by durations, name: `data`, shape: [1x512x256], format: [BxTxC]
+Processed embeddigs aligned by durations, name: `data`, shape: `1x512x256`, format: `BxTxC`
 where:
    - B - batch size
    - T - time in mel-spectrogram
    - C - processed embedding dimension
 
-Mask for 'data' by time dimension, name: `data_mask`, shape: [1x1x512], format: [BxDxT]
+Mask for 'data' by time dimension, name: `data_mask`, shape: `1x1x512`, format: `BxDxT`
 where:
    - B - batch size
    - D - extra dimension for multiplication
    - T - time in mel-spectrogram
 
-Mask for relative position representation in attention, name: `pos_mask`, shape: [1x1x512x512], format: [BxDxCxC]
+Mask for relative position representation in attention, name: `pos_mask`, shape: `1x1x512x512`, format: `BxDxCxC`
 where:
    - B - batch size
    - D - extra dimension for multiplication
@@ -90,7 +90,7 @@ where:
 
 ### Output
 
-Mel-spectrogram, name: `mel`, shape: [80x512], format: [CxT]
+Mel-spectrogram, name: `mel`, shape: `80x512`, format: `CxT`
 where:
    - T - time in mel-spectrogram
    - C - number of rows in mel-spectrogram
@@ -108,7 +108,7 @@ The text-to-speech-en-0001-generation model is a MelGAN based audio generator.
 
 ### Inputs
 
-Mel-spectrogram, name: `mel`, shape: [1x80x128], format: [BxCxT]
+Mel-spectrogram, name: `mel`, shape: `1x80x128`, format: `BxCxT`
 where:
    - B - batch size
    - C - number of rows in mel-spectrogram
@@ -116,7 +116,7 @@ where:
 
 ### Outputs
 
-Audio, name: `audio`, shape: [32768], format: [T]
+Audio, name: `audio`, shape: `32768`, format: `T`
 where:
    - T - time in audio with sampling rate 22050 (~1.5 sec).
 
