@@ -41,7 +41,7 @@ The text-spotting-0004-detector model is a Mask-RCNN-based text detector with Re
 
 ### Outputs
 
-1.	Name: `labels`, shape: [100]. Contiguous integer class ID for every
+1.	Name: `labels`, shape: `100`. Contiguous integer class ID for every
     detected object, `0` is for text class.
 2.	Name: `boxes`, shape: [100x5]. Bounding boxes around every detected object
     in the (top_left_x, top_left_y, bottom_right_x, bottom_right_y, confidence) format.
