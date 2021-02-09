@@ -45,7 +45,7 @@ The text-spotting-0004-detector model is a Mask-RCNN-based text detector with Re
     detected object, `0` is for text class.
 2.	Name: `boxes`, shape: `100, 5`. Bounding boxes around every detected object
     in the (top_left_x, top_left_y, bottom_right_x, bottom_right_y, confidence) format.
-3.	Name: `masks`, shape: [100x28x28]. Text segmentation masks for every output bounding box.
+3.	Name: `masks`, shape: `100, 28, 28`. Text segmentation masks for every output bounding box.
 4.  Name: `text_features.0`, shape [100x64x28x28]. Text features that are fed to a text recognition head.
 
 ## Encoder model specification
