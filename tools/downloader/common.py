@@ -454,13 +454,14 @@ class PostprocUnpackArchive(Postproc):
 Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Model:
-    def __init__(self, name, subdirectory, files, postprocessing, mo_args, quantizable, framework,
+    def __init__(self, name, subdirectory, files, postprocessing, mo_args, quantized, quantizable, framework,
                  description, license_url, precisions, task_type, conversion_to_onnx_args):
         self.name = name
         self.subdirectory = subdirectory
         self.files = files
         self.postprocessing = postprocessing
         self.mo_args = mo_args
+        self.quantized = quantized
         self.quantizable = quantizable
         self.framework = framework
         self.description = description
@@ -537,6 +538,8 @@ class Model:
 
                 precisions = set(files_per_precision.keys())
 
+            quantized = model.get('quantized', None)
+
             quantizable = model.get('quantizable', False)
             if not isinstance(quantizable, bool):
                 raise DeserializationError('"quantizable": expected a boolean, got {!r}'.format(quantizable))
@@ -547,7 +550,7 @@ class Model:
 
             task_type = validate_string_enum('"task_type"', model['task_type'], KNOWN_TASK_TYPES)
 
-            return cls(name, subdirectory, files, postprocessing, mo_args, quantizable, framework,
+            return cls(name, subdirectory, files, postprocessing, mo_args, quantized, quantizable, framework,
                 description, license_url, precisions, task_type, conversion_to_onnx_args)
 
 def load_models(args):

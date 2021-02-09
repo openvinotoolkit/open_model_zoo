@@ -34,4 +34,5 @@ model_optimizer_args:
   - --output=486
   - --input_model=$dl_dir/aclnet_des_53_int8.onnx
 framework: onnx
+quantized: INT8
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
