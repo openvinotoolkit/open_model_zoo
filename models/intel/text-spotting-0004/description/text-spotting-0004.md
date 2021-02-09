@@ -59,7 +59,7 @@ The text-spotting-0004-recognizer-encoder model is a fully-convolutional encoder
 
 ### Inputs
 
-Name: `input` , shape: [1x64x28x28]. Text recognition features obtained from detection part.
+Name: `input` , shape: `1, 64, 28, 28`. Text recognition features obtained from detection part.
 
 ### Outputs
 
