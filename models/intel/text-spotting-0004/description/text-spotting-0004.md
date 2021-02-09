@@ -63,7 +63,7 @@ Name: `input` , shape: `1, 64, 28, 28`. Text recognition features obtained from 
 
 ### Outputs
 
-Name: `output`, shape: [1x256x28x28]. Encoded text recognition features.
+Name: `output`, shape: `1, 256, 28, 28`. Encoded text recognition features.
 
 ## Decoder model specification
 
