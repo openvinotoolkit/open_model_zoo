@@ -30,9 +30,9 @@ Optionally you can provide `module_config` section which contains config for cus
   [Evaluator code](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/mtcnn_evaluator.py).
   Configuration file example: [mtcnn](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/configs/mtcnn.yml).
 
-* **Text Spotting Evaluator** demonstrates how to evaluate the `text-spotting-0003` model via Accuracy Checker.
+* **Text Spotting Evaluator** demonstrates how to evaluate the `text-spotting-0004` model via Accuracy Checker.
   [Evaluator code](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/text_spotting_evaluator.py).
-  Configuration file example: [text-spotting-0003](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/configs/text-spotting-0003.yml).
+  Configuration file example: [text-spotting-0004](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/configs/text-spotting-0004.yml).
 
 * **Automatic Speech Recognition Evaluator** shows how to evaluate speech recognition pipeline (encoder + decoder).
   [Evaluator code](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/asr_encoder_decoder_evaluator.py).
