@@ -193,9 +193,8 @@ class ModelEvaluator:
     def register_dumped_annotations(self):
         if not self._dumped_annotations:
             return
-        if self.dataset.annotation_reader is None:
-            self.dataset.annotation_reader = Dataset(self.dataset.dataset_config, True)
-        self.dataset.annotation_reader.set_annotation(self._dumped_annotations)
+        meta = Dataset.load_meta(self.dataset.dataset_config)
+        self.dataset.set_annotation(self._dumped_annotations, meta)
 
     def select_dataset(self, dataset_tag):
         if self.dataset is not None and isinstance(self.dataset_config, list):

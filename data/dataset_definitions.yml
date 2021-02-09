@@ -1160,3 +1160,10 @@ datasets:
       data_dir: forward_tacotron_melgan_io
       input_suffix: duration_prediction_in_
       reference_suffix: melgan_out_
+
+  - name: pitts30k_val
+    data_source: pitts250k
+    annotation_conversion:
+      converter: place_recognition
+      split_file: pitts250k/datasets/pitts30k_val.mat
+    annotation: pitts30k_val.pickle

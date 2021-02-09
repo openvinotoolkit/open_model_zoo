@@ -243,6 +243,14 @@ The task of image translation is to generate the output based on exemplar.
 | -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
 | CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/cocosnet.md) | 12.93dB  | 1080.7032 | 167.9141 |
 
+## Place Recognition
+
+The task of place recognition is to quickly and accurately recognize the location of a given query photograph.
+
+| Model Name | Implementation | OMZ Model Name                           | Accuracy | GFlops | mParams |
+| ---------- | ---------------| -----------------------------------------| -------- | ------ | ------- |
+| NetVLAD    | TensorFlow\*   | [netvlad-tf](./netvlad-tf/netvlad-tf.md) | 82.0321% | 36.6374| 149.0021|
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.
