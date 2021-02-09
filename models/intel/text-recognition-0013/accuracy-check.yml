@@ -1,0 +1,23 @@
+models:
+  - name: text-recognition-0013
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: beam_search_decoder
+          beam_size: 10
+          logits_output: logits
+          blank_label: 0
+          custom_label_map: "?1234567890abcdefghijklmnopqrstuvwxyz"
+
+    datasets:
+      - name: ICDAR2013
+
+        preprocessing:
+          - type: bgr_to_gray
+          - type: resize
+            dst_width: 120
+            dst_height: 32
+
+        metrics:
+          - type: character_recognition_accuracy
