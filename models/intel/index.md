@@ -265,6 +265,16 @@ Deep Learning compressed models
 | [machine-translation-nar-en-ru-0001](./machine-translation-nar-en-ru-0001/description/machine-translation-nar-en-ru-0001.md) | 23.17 | 69.29 |
 | [machine-translation-nar-ru-en-0001](./machine-translation-nar-ru-en-0001/description/machine-translation-nar-ru-en-0001.md) | 23.17 | 69.29 |
 
+## Text To Speech
+
+Deep Learning models for speech synthesis (mel spectrogram generation and wave form generation).
+
+| Model Name                                                                                | Complexity (GFLOPs)  | Size (Mp)  |
+|-------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [text-to-speech-en-0001](./text-to-speech-en-0001/description/text-to-speech-en-0001.md)  |                      |            |
+| text-to-speech-en-0001-duration-prediction                                                | 15.84                | 13.569     |
+| text-to-speech-en-0001-regression                                                         | 7.65                 | 4.96       |
+| text-to-speech-en-0001-generation                                                         | 48.38                | 12.77      |
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
