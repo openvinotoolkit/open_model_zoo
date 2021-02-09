@@ -64,7 +64,7 @@ class Im2latexEvaluator(BaseEvaluator):
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
         self.dataset_meta = self.dataset.metadata
-        for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
+        for batch_id, (_, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
 
             batch_inputs = self.preprocessing_executor.process(batch_inputs, batch_annotation)
             batch_inputs, _ = extract_image_representations(batch_inputs)
