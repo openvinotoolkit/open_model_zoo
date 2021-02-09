@@ -224,8 +224,8 @@ The task of sound classification is to predict what sounds are in an audio fragm
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | ------ | ------- | ------- |
-| ACLNet                    | PyTorch\* | [aclnet](./aclnet/aclnet.md) |      | 1.4     | 2.7     |
-| ACLNet-int8               | PyTorch\* | [aclnet-int8](./aclnet-int8/aclnet-int8.md) |      | ?     | ?     |
+| ACLNet                    | PyTorch\* | [aclnet](./aclnet/aclnet.md) | 86%/92%    | 1.4     | 2.7     |
+| ACLNet-int8               | PyTorch\* | [aclnet-int8](./aclnet-int8/aclnet-int8.md) | 87%/93%   | 1.41     | 2.71     |
 
 ## Speech Recognition
 

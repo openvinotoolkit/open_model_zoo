@@ -15,8 +15,8 @@ The model output for `AclNet-int8` is the sound classifier output for the 53 dif
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Classification|
-| GFLOPs            | ?           |
-| MParams           | ?           |
+| GFLOPs            | 2.71          |
+| MParams           | 1.41          |
 | Source framework  | PyTorch\*     |
 
 ## Accuracy
