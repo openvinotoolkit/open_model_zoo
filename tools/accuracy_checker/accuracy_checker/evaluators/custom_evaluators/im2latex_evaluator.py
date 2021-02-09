@@ -21,7 +21,6 @@ from ..base_evaluator import BaseEvaluator
 from ...config import ConfigError
 from ...utils import contains_all, extract_image_representations
 from ...launcher import create_launcher
-from ...data_readers import BaseReader
 from ...dataset import Dataset
 from ...logging import print_info
 from ...metrics import MetricsExecutor
