@@ -70,6 +70,7 @@ HUMAN_READABLE_TASK_TYPES = {
         'machine_translation',
         'monocular_depth_estimation',
         'optical_character_recognition',
+        'place_recognition',
         'question_answering',
         'semantic_segmentation',
         'sound_classification',
