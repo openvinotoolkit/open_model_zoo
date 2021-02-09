@@ -76,7 +76,7 @@ Name: `output`, shape: `1, 256, 28, 28`. Encoded text recognition features.
 
 1.	Name: `encoder_outputs` , shape: `1, (28*28), 256`. Encoded text recognition features.
 1.	Name: `prev_symbol` , shape: `1, 1`. Index in alphabet of previously generated symbol.
-1.	Name: `prev_hidden`, shape: [1x1x256]. Previous hidden state of GRU.
+1.	Name: `prev_hidden`, shape: `1, 1, 256`. Previous hidden state of GRU.
 
 ### Outputs
 
