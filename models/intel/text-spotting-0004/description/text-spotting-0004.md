@@ -36,7 +36,7 @@ The text-spotting-0004-detector model is a Mask-RCNN-based text detector with Re
 
 1.	Name: `im_data` , shape: `1, 3, 768, 1280`. An input image in the `1, C, H, W` format.
     The expected channel order is BGR.
-2.	Name: `im_info`, shape: [1x3]. Image information: processed image height,
+2.	Name: `im_info`, shape: `1, 3`. Image information: processed image height,
     processed image width, and processed image scale with respect to the original image resolution.
 
 ### Outputs
