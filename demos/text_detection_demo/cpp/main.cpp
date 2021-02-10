@@ -314,11 +314,10 @@ int main(int argc, char *argv[]) {
           std::cout << "text recognition postprocessing (ms) (fps): "
                     << text_recognition_postproc_time / text_recognition.ncalls() / 1000 << " "
                     << text_recognition.ncalls() * 1000000 / text_recognition_postproc_time << std::endl << std::endl;
-          if (std::fabs(text_crop_time) < std::numeric_limits<double>::epsilon()) {
-              throw std::logic_error("text_crop_time can't be equal to zero");
-          }
-          std::cout << "text crop (ms) (fps): " << text_crop_time / text_recognition.ncalls() / 1000 << " "
+          if (std::fabs(text_crop_time) > std::numeric_limits<double>::epsilon()) {
+              std::cout << "text crop (ms) (fps): " << text_crop_time / text_recognition.ncalls() / 1000 << " "
                     << text_recognition.ncalls() * 1000000 / text_crop_time << std::endl << std::endl;
+          }
         }
 
         // ---------------------------------------------------------------------------------------------------
