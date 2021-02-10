@@ -451,6 +451,39 @@ class TestConfigValidationAPI:
         assert config_errors[0].field_uri == 'models.datasets'
 
     @pytest.mark.usefixtures('mock_file_exists')
+    def test_input_without_type(self):
+        launcher_config = {'model': 'foo', 'framework': 'dlsdk', 'device': 'cpu', 'inputs': [{"name": 'input'}]}
+        config_errors = ModelEvaluator.validate_config({'models': [{'launchers': [launcher_config], 'datasets': []}]})
+        assert len(config_errors) == 2
+        assert config_errors[0].message.endswith('input type is not provided')
+        assert config_errors[0].field_uri == 'models.launchers.0.inputs.0'
+        assert config_errors[1].message == 'datasets section is not provided'
+        assert not config_errors[1].entry
+        assert config_errors[1].field_uri == 'models.datasets'
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_input_with_invalid_type(self):
+        launcher_config = {'model': 'foo', 'framework': 'dlsdk', 'device': 'cpu', 'inputs': [{"name": 'input', 'type': 'FOO'}]}
+        config_errors = ModelEvaluator.validate_config({'models': [{'launchers': [launcher_config], 'datasets': []}]})
+        assert len(config_errors) == 2
+        assert config_errors[0].message.endswith('undefined input type FOO')
+        assert config_errors[0].field_uri == 'models.launchers.0.inputs.0'
+        assert config_errors[1].message == 'datasets section is not provided'
+        assert not config_errors[1].entry
+        assert config_errors[1].field_uri == 'models.datasets'
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_input_without_name(self):
+        launcher_config = {'model': 'foo', 'framework': 'dlsdk', 'device': 'cpu', 'inputs': [{"type": 'INPUT'}]}
+        config_errors = ModelEvaluator.validate_config({'models': [{'launchers': [launcher_config], 'datasets': []}]})
+        assert len(config_errors) == 2
+        assert config_errors[0].message.endswith('input name is not provided')
+        assert config_errors[0].field_uri == 'models.launchers.0.inputs.0'
+        assert config_errors[1].message == 'datasets section is not provided'
+        assert not config_errors[1].entry
+        assert config_errors[1].field_uri == 'models.datasets'
+
+    @pytest.mark.usefixtures('mock_file_exists')
     def test_adapter_str_config(self):
         launcher_config = {'model': 'foo', 'framework': 'dlsdk', 'device': 'cpu', 'adapter': 'classification'}
         config_errors = ModelEvaluator.validate_config({'models': [{'launchers': [launcher_config], 'datasets': []}]})

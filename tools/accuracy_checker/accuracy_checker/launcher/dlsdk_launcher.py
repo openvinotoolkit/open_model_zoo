@@ -176,10 +176,14 @@ class DLSDKLauncher(Launcher):
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
+        field_uri = uri_prefix or 'launcher.{}'.format(cls.__provider__)
         return DLSDKLauncherConfigValidator(
-            uri_prefix or 'launcher.{}'.format(cls.__provider__), fields=cls.parameters(),
+            field_uri, fields=cls.parameters(),
             delayed_model_loading=delayed_model_loading
-        ).validate(config, fetch_only=fetch_only)
+        ).validate(
+            config, field_uri=field_uri,
+            validation_scheme=cls.validation_scheme(), fetch_only=fetch_only
+        )
 
     @property
     def device(self):
