@@ -35,6 +35,7 @@ except ImportError as import_error:
     confusion_matrix = UnsupportedPackage("sklearn.metric.confusion_matrix", import_error.msg)
     roc_auc_score = UnsupportedPackage("sklearn.metric.roc_auc_score", import_error.msg)
 
+
 class ClassificationAccuracy(PerImageEvaluationMetric):
     """
     Class for evaluating accuracy metric of classification models.
@@ -327,6 +328,7 @@ class MetthewsCorrelation(PerImageEvaluationMetric):
         self.fp = 0
         self.fn = 0
 
+
 class RocAucScore(PerImageEvaluationMetric):
     __provider__ = 'roc_auc_score'
     annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
@@ -352,6 +354,7 @@ class RocAucScore(PerImageEvaluationMetric):
         self.targets = []
         self.results = []
 
+
 class AcerScore(PerImageEvaluationMetric):
     __provider__ = 'acer_score'
     annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
@@ -360,6 +363,9 @@ class AcerScore(PerImageEvaluationMetric):
     def configure(self):
         if isinstance(confusion_matrix, UnsupportedPackage):
             confusion_matrix.raise_error(self.__provider__)
+        self.meta.update({
+            'target': 'higher-worse'
+        })
         self.reset()
 
     def update(self, annotation, prediction):

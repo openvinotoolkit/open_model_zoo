@@ -11,6 +11,7 @@ models:
       - name: lfw_mtcnn_align
 
         preprocessing:
+          - type: auto_resize
           - type: flip
             mode: vertical
             merge_with_original: True
