@@ -12,9 +12,10 @@
 #include <utils/default_flags.hpp>
 
 DEFINE_INPUT_FLAGS
+DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char limit_message[] = "Optional. Read length limit before stopping or restarting reading the input.";
+static const char read_limit_message[] = "Optional. Read length limit before stopping or restarting reading the input.";
 static const char person_action_detection_model_message[] = "Required. Path to the Person/Action Detection Retail model (.xml) file.";
 static const char face_detection_model_message[] = "Required. Path to the Face Detection model (.xml) file.";
 static const char facial_landmarks_model_message[] = "Required. Path to the Facial Landmarks Regression Retail model (.xml) file.";
@@ -69,9 +70,7 @@ static const char tracker_smooth_size_message[] = "Optional. Number of frames to
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
-DEFINE_uint32(limit, gflags::uint32(std::numeric_limits<size_t>::max()), limit_message);
-DEFINE_string(o, "", output_message);
-DEFINE_uint32(output_limit, 1000, output_limit_message);
+DEFINE_uint32(read_limit, gflags::uint32(std::numeric_limits<size_t>::max()), read_limit_message);
 DEFINE_string(m_act, "", person_action_detection_model_message);
 DEFINE_string(m_fd, "", face_detection_model_message);
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
@@ -121,9 +120,9 @@ static void showUsage() {
     std::cout << "    -h                             " << help_message << std::endl;
     std::cout << "    -i                             " << input_message << std::endl;
     std::cout << "    -loop                          " << loop_message << std::endl;
-    std::cout << "    -limit                         " << limit_message << std::endl;
+    std::cout << "    -read_limit                    " << read_limit_message << std::endl;
     std::cout << "    -o \"<path>\"                  " << output_message << std::endl;
-    std::cout << "    -output_limit \"<num>\"        " << output_limit_message << std::endl;
+    std::cout << "    -limit \"<num>\"               " << limit_message << std::endl;
     std::cout << "    -m_act '<path>'                " << person_action_detection_model_message << std::endl;
     std::cout << "    -m_fd '<path>'                 " << face_detection_model_message << std::endl;
     std::cout << "    -m_lm '<path>'                 " << facial_landmarks_model_message << std::endl;

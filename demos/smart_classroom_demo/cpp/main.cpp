@@ -740,7 +740,7 @@ int main(int argc, char* argv[]) {
 
         int teacher_track_id = -1;
 
-        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_limit);
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_read_limit);
         cv::Mat frame = cap->read();
         if (!frame.data) {
             throw std::runtime_error("Can't read an image from the input");
@@ -754,7 +754,7 @@ int main(int argc, char* argv[]) {
                                                   cap->fps(), frame.size())) {
             throw std::runtime_error("Can't open video writer");
         }
-        Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, FLAGS_output_limit, num_top_persons);
+        Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, FLAGS_limit, num_top_persons);
         DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad, FLAGS_al);
 
         std::cout << "To close the application, press 'CTRL+C' here";

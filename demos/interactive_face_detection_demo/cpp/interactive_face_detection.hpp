@@ -124,7 +124,7 @@ static void showUsage() {
     std::cout << "    -i                         " << input_message << std::endl;
     std::cout << "    -loop                      " << loop_message << std::endl;
     std::cout << "    -o \"<path>\"                " << output_message << std::endl;
-    std::cout << "    -limit \"<num>\"             " << output_limit_message << std::endl;
+    std::cout << "    -limit \"<num>\"             " << limit_message << std::endl;
     std::cout << "    -m \"<path>\"                " << face_detection_model_message << std::endl;
     std::cout << "    -m_ag \"<path>\"             " << age_gender_model_message << std::endl;
     std::cout << "    -m_hp \"<path>\"             " << head_pose_model_message << std::endl;

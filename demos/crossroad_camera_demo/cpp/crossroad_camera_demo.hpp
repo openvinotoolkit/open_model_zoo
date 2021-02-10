@@ -77,7 +77,7 @@ static void showUsage() {
     std::cout << "    -i                           " << input_message << std::endl;
     std::cout << "    -loop                        " << loop_message << std::endl;
     std::cout << "    -o \"<path>\"                " << output_message << std::endl;
-    std::cout << "    -limit \"<num>\"             " << output_limit_message << std::endl;
+    std::cout << "    -limit \"<num>\"             " << limit_message << std::endl;
     std::cout << "    -m \"<path>\"                  " << person_vehicle_bike_detection_model_message<< std::endl;
     std::cout << "    -m_pa \"<path>\"               " << person_attribs_model_message << std::endl;
     std::cout << "    -m_reid \"<path>\"             " << person_reid_model_message << std::endl;

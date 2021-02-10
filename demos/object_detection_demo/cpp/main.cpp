@@ -105,7 +105,7 @@ static void showUsage() {
     std::cout << "    -i                          " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
-    std::cout << "    -limit \"<num>\"            " << output_limit_message << std::endl;
+    std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;

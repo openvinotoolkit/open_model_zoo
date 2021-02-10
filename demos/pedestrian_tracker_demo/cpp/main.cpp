@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
             CreatePedestrianTracker(reid_model, ie, reid_mode,
                                     should_keep_tracking_info);
 
-        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_first, FLAGS_limit);
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, FLAGS_first, FLAGS_read_limit);
         double video_fps = cap->fps();
         if (0.0 == video_fps) {
             // the default frame rate for DukeMTMC dataset
@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
             }
 
             framesProcessed++;
-            if (videoWriter.isOpened() && (FLAGS_output_limit == 0 || framesProcessed <= FLAGS_output_limit)) {
+            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
                 videoWriter.write(frame);
             }
             if (should_show) {
