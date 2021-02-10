@@ -83,8 +83,11 @@ int main(int argc, char *argv[]) {
         const char kPadSymbol = '#';
         if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
             throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
-
-        std::string kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
+        std::string kAlphabet;
+        if (FLAGS_tr_pt_first)
+            kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
+        else
+            kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
 
         const double min_text_recognition_confidence = FLAGS_thr;
 
@@ -210,12 +213,16 @@ int main(int argc, char *argv[]) {
                 double conf = 1.0;
                 if (text_recognition.is_initialized()) {
                     auto blobs = text_recognition.Infer(cropped_text);
-                    auto output_shape = blobs.begin()->second->getTensorDesc().getDims();
+                    auto out_blob = blobs.begin()->second;
+                    if (FLAGS_tr_o_blb_nm != "")
+                        out_blob = blobs[FLAGS_tr_o_blb_nm];
+                    auto output_shape = out_blob->getTensorDesc().getDims();
+
                     if (output_shape[2] != kAlphabet.length()) {
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
                     }
 
-                    LockedMemory<const void> blobMapped = as<MemoryBlob>(blobs.begin()->second)->rmap();
+                    LockedMemory<const void> blobMapped = as<MemoryBlob>(out_blob)->rmap();
                     float *output_data_pointer = blobMapped.as<float *>();
                     std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
 
@@ -276,7 +283,7 @@ int main(int argc, char *argv[]) {
 
             if (!FLAGS_no_show) {
                 cv::imshow("Press ESC or Q to exit", demo_image);
-                int key = cv::waitKey(1);
+                int key = cv::waitKey(0);
                 if ('q' == key || 'Q' == key || key == 27) break;
                 presenter.handleKey(key);
             }
