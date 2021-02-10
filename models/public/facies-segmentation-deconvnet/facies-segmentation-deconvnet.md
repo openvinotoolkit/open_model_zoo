@@ -28,10 +28,13 @@ git apply ../pytorch-onnx.patch
 ```sh
 pip install -r requirements.txt
 ```
-5. Download the [pretrained weights] <-(link)
+5. Download the pretrained weights:
+```sh
+wget -O facies-segmentation-deconvnet.pth https://www.dropbox.com/s/35srlutnxerujfn/facies-segmentation-deconvnet.pth?dl=1
+```
 6. Run
 ```sh
-python torch2onnx.py -i /path/to/downloaded/weights.pth
+python torch2onnx.py -i facies-segmentation-deconvnet.pth
 ```
 
 ## Specification
