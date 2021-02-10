@@ -14,7 +14,7 @@ backbone with ATSS head for 864x480 resolution.
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | AP @ [ IoU=0.50:0.95 ]          | TBD                                       |
-| GFlops                          | 6.78                                      |
+| GFlops                          | TBD                                       |
 | MParams                         | 1.95                                      |
 | Source framework                | PyTorch\*                                 |
 
