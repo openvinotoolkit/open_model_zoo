@@ -70,11 +70,6 @@ def add_common_args(parser):
         required=False
     )
     common_args.add_argument(
-        '-l', '--log_file',
-        help='file for additional logging results',
-        required=False
-    )
-    common_args.add_argument(
         '--model_attributes',
         help="path's prefix for additional models attributes",
         type=partial(get_path, is_directory=True),
@@ -112,7 +107,7 @@ def add_config_filtration_args(parser):
 
 
 def add_dataset_related_args(parser):
-    dataset_related_args = parser.add_argument_group('Datasets-related arguments')
+    dataset_related_args = parser.add_argument_group('Dataset related arguments')
     dataset_related_args.add_argument(
         '-ss', '--subsample_size',
         help="dataset subsample size",
@@ -214,6 +209,11 @@ def add_tool_settings_args(parser):
         '--store_only',
         type=cast_to_bool,
         default=False,
+        required=False
+    )
+    tool_settings_args.add_argument(
+        '-l', '--log_file',
+        help='file for additional logging results',
         required=False
     )
 
