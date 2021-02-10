@@ -21,7 +21,7 @@ The network is able to recognize case-insensitive alphanumeric text (36 unique s
 
 ## Inputs
 
-Shape: [1x1x32x120] - An input image in the format [BxCxHxW],
+Shape: `1, 1, 32, 120` - An input image in the format `B, C, H, W`,
 where:
   - B - batch size
   - C - number of channels
@@ -31,7 +31,7 @@ where:
 Note that the source image should be tight aligned crop with detected text converted to grayscale.
 
 ## Outputs
-The net outputs a blob with the shape [30, 1, 37] in the format [WxBxL],
+The net outputs a blob with the shape `30, 1, 37` in the format `W, B, L`,
 where:
   - W - output sequence length
   - B - batch size
