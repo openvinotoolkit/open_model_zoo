@@ -57,7 +57,7 @@ PRECISION_TO_DTYPE = {
     'I16': np.int16,  # signed short
     'I32': np.int32,  # signed int
     'I64': np.int64,  # signed long int
-    'STR': np.str,  # string
+    'STR': str,  # string
 }
 
 INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'IGNORE_INPUT', 'LSTM_INPUT']
