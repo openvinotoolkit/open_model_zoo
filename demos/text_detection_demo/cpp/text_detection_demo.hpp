@@ -17,6 +17,10 @@ static const char help_message[] = "Print a usage message.";
 static const char text_detection_model_message[] = "Required. Path to the Text Detection model (.xml) file.";
 static const char text_recognition_model_message[] = "Required. Path to the Text Recognition model (.xml) file.";
 static const char text_recognition_model_symbols_set_message[] = "Optional. Symbol set for the Text Recognition model.";
+static const char text_recognition_pad_token_is_first_message[] = "Optional. Specifies if pad token is the first symbol in the alphabet. "
+                                                                    "Default is false";
+static const char text_recognition_output_blob_name[] = "Optional. Name of the output blob of the model which would be used as model output. "
+                                                        "If not stated, first blob of the model would be used.";
 static const char text_central_image_crop_message[] = "Optional. If it is set, then in case of absence of the Text Detector, "
                                                       "the Text Recognition model takes a central image crop as an input, but not full frame.";
 static const char image_width_for_text_detection_model_message[] = "Optional. Input image width for Text Detection model.";
@@ -51,6 +55,8 @@ DEFINE_bool(h, false, help_message);
 DEFINE_string(m_td, "", text_detection_model_message);
 DEFINE_string(m_tr, "", text_recognition_model_message);
 DEFINE_string(m_tr_ss, "0123456789abcdefghijklmnopqrstuvwxyz", text_recognition_model_symbols_set_message);
+DEFINE_bool(tr_pt_first, false, text_recognition_pad_token_is_first_message);
+DEFINE_string(tr_o_blb_nm, "", text_recognition_output_blob_name);
 DEFINE_bool(cc, false, text_central_image_crop_message);
 DEFINE_int32(w_td, 0, image_width_for_text_detection_model_message);
 DEFINE_int32(h_td, 0, image_height_for_text_detection_model_message);
@@ -81,6 +87,8 @@ static void showUsage() {
     std::cout << "    -m_td \"<path>\"               " << text_detection_model_message << std::endl;
     std::cout << "    -m_tr \"<path>\"               " << text_recognition_model_message << std::endl;
     std::cout << "    -m_tr_ss \"<value>\"           " << text_recognition_model_symbols_set_message << std::endl;
+    std::cout << "    -tr_pt_first                   " << text_recognition_pad_token_is_first_message << std::endl;
+    std::cout << "    -tr_o_blb_nm                   " << text_recognition_output_blob_name << std::endl;
     std::cout << "    -cc                          " << text_central_image_crop_message << std::endl;
     std::cout << "    -w_td \"<value>\"              " << image_width_for_text_detection_model_message << std::endl;
     std::cout << "    -h_td \"<value>\"              " << image_height_for_text_detection_model_message << std::endl;
