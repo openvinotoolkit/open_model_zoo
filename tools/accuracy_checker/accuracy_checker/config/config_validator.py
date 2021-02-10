@@ -356,8 +356,9 @@ class ListField(BaseField):
 
         if self.validate_values:
             for i, val in enumerate(entry):
+                value_uri = "{}[{}]".format(val, i) if field_uri is None else field_uri + '.{}'.format(i)
                 error_stack.extend(
-                    self.value_type.validate(val, "{}[{}]".format(val, i), fetch_only, validation_scheme)
+                    self.value_type.validate(val, value_uri, fetch_only, validation_scheme)
                 )
         return error_stack
 
@@ -382,7 +383,7 @@ class InputField(BaseField):
         self.precision = StringField(optional=True, description='Input precision', choices=InputField.PRECISIONS)
 
     def validate(self, entry, field_uri=None, fetch_only=False, validation_scheme=None):
-        entry['optional'] = entry['type'] not in ['CONST_INPUT', 'LSTM_INPUT']
+        self.value.optional = entry.get('type') not in ['CONST_INPUT', 'LSTM_INPUT']
         return super().validate(entry, field_uri, fetch_only, validation_scheme)
 
 
@@ -393,17 +394,20 @@ class ListInputsField(ListField):
     def validate(self, entry, field_uri=None, fetch_only=False, validation_scheme=None):
         error_stack = super().validate(entry, field_uri, fetch_only, validation_scheme)
         names_set = set()
-        for input_layer in entry:
-            input_name = input_layer['name']
+        for input_idx, input_layer in enumerate(entry):
+            input_uri = '{}.{}'.format(field_uri or 'inputs', input_idx)
+            input_name = input_layer.get('name')
+            if input_name is None:
+                continue
             if input_name not in names_set:
                 names_set.add(input_name)
             else:
                 if not fetch_only:
-                    self.raise_error(entry, field_uri, '{} repeated name'.format(input_name))
+                    self.raise_error(entry, input_uri, '{} repeated name'.format(input_name))
                 else:
                     error_stack.append(
                         self.build_error(
-                            entry, field_uri, '{} repeated name'.format(input_name), validation_scheme=validation_scheme
+                            entry, input_uri, '{} repeated name'.format(input_name), validation_scheme=validation_scheme
                         ))
         return error_stack
 
