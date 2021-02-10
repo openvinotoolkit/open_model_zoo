@@ -61,7 +61,7 @@ class CropImage(PostprocessorWithSpecificTargets):
                 target.value, target_height, target_width, None, False, False, True, {}
             )
 
-        for target in annotation:
+        for target in prediction:
             target.value = Crop.process_data(
                 target.value, target_height, target_width, None, False, False, True, {}
             )

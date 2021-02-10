@@ -10,22 +10,20 @@ check out the [DeblurGAN-v2: Deblurring (Orders-of-Magnitude) Faster and Better]
 
 ## Specification
 
-GFLOPs and MParams are presented for Mobilenet backbone.
-
 | Metric            | Value           |
 |-------------------|-----------------|
-| Type              | ImageProcessing |
+| Type              | Image Processing |
 | GFLOPs            | 80.8919         |
 | MParams           | 2.1083          |
 | Source framework  | PyTorch\*       |
 
 ## Accuracy
 
-Model was tested on GoPro test dataset. Metrics are presented for Mobilenet backbone.
+Model was tested on GoPro test dataset.
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| PSNR   | 28.25Db        | 28.25Db         |
+| PSNR   | 28.25Db        | 28.24Db         |
 | SSIM   | 0.97           | 0.97            |
 
 ## Input
@@ -50,7 +48,7 @@ Image, name - `blur_image`,  shape - `1,3,736,1312`, format is `B,C,H,W`, where:
 - `H` - height
 - `W` - width
 
-Channel order is `BGR`. Mean values - [127.5,127.5,127.5], scale values - [127.5,127.5,127.5].
+Channel order is `BGR`.
 
 ## Output
 
@@ -74,7 +72,7 @@ Deblurred image, name - `deblur_image`,  shape - `1,3,736,1312`, output data for
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`.
+Channel order is `BGR`.
 
 ## Legal Information
 

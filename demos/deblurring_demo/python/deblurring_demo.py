@@ -149,7 +149,6 @@ def main():
             input_frame = frame_meta['frame']
             start_time = frame_meta['start_time']
 
-            result_frame = cv2.cvtColor(result_frame, cv2.COLOR_RGB2BGR)
             final_image = cv2.hconcat([input_frame, result_frame])
 
             presenter.drawGraphs(final_image)
@@ -171,7 +170,6 @@ def main():
             input_frame = frame_meta['frame']
             start_time = frame_meta['start_time']
 
-            result_frame = cv2.cvtColor(result_frame, cv2.COLOR_RGB2BGR)
             final_image = cv2.hconcat([input_frame, result_frame])
 
             presenter.drawGraphs(final_image)

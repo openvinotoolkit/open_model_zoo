@@ -54,4 +54,8 @@ class DeblurV2(nn.Module):
         remove_all_batch_norm(self.impl)
 
     def forward(self, image):
-        return self.impl(image)
+        out = self.impl(image)
+        # convert out to [0, 1] range and change channel order RGB->BGR
+        out = (out + 1) / 2
+        permute = [2, 1, 0]
+        return out[:, permute, :, :]

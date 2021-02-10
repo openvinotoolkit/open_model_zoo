@@ -6,11 +6,10 @@ models:
         model: deblurgan-v2.onnx
         adapter:
           type: image_processing
-          mean: 127.5
-          std: 127.5
+          reverse_channels: True
 
     datasets:
-      - name: GOPRO
+      - name: GoPro
         preprocessing:
           - type: bgr_to_rgb
           - type: normalization
@@ -37,15 +36,11 @@ models:
       - framework: dlsdk
         adapter:
           type: image_processing
-          mean: 127.5
-          std: 127.5
+          reverse_channels: True
 
     datasets:
-      - name: GOPRO
+      - name: GoPro
         preprocessing:
-          - type: normalization
-            mean: 127.5
-            std: 127.5
           - type: padding
             dst_height: 736
             dst_width: 1312

@@ -75,21 +75,8 @@ class DeblurringModel(Model):
 
         return output_blob_name
 
-    @staticmethod
-    def _normalize(image, mean=127.5, std=127.5):
-        image = image - mean
-        image = image / std
-        return image
-
-    @staticmethod
-    def _padding(image, pad_params):
-        return np.pad(image, **pad_params)
-
     def preprocess(self, inputs):
         image = inputs
-        self.mean = 127.5
-        self.std = 127.5
-        normalized_image = self._normalize(image, self.mean, self.std)
         # right bottom padding to resize input image to input_layer shape
         pad_params = {'mode': 'constant',
                       'constant_values': 0,
@@ -97,9 +84,9 @@ class DeblurringModel(Model):
                       }
 
         if image.shape[0] != self.h or image.shape[1] != self.w:
-            resized_image = self._padding(normalized_image, pad_params)
+            resized_image = np.pad(image, **pad_params)
         else:
-            resized_image = normalized_image
+            resized_image = image
         resized_image = resized_image.transpose((2, 0, 1))
         resized_image = np.expand_dims(resized_image, 0)
 
@@ -114,8 +101,7 @@ class DeblurringModel(Model):
         input_image_width = meta['original_shape'][1]
 
         prediction = prediction.transpose((1, 2, 0))
-        prediction *= self.std
-        prediction += self.mean
+        prediction *= 255
         prediction = prediction.astype(np.uint8)
 
-        return prediction[:min(input_image_height, self.h), :min(input_image_width, self.w), :]
+        return prediction[:input_image_height, :input_image_width, :]
