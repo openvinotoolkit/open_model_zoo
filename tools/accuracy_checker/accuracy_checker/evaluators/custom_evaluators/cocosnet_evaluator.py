@@ -25,6 +25,7 @@ from ...adapters import create_adapter
 from ...config import ConfigError
 from ...data_readers import DataRepresentation
 from ...launcher import create_launcher
+from ...launcher.input_feeder import PRECISION_TO_DTYPE
 from ...logging import print_info
 from ...preprocessor import PreprocessingExecutor
 from ...progress_reporters import ProgressReporter
@@ -150,7 +151,7 @@ class CocosnetEvaluator(BaseEvaluator):
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self._preprocessing_for_batch_input(batch_annotation, batch_inputs)
             extr_batch_inputs, _ = extract_image_representations(batch_inputs)
-            batch_predictions = self.test_model.predict(batch_identifiers, extr_batch_inputs)
+            batch_predictions, raw_predictions = self.test_model.predict(batch_identifiers, extr_batch_inputs)
             annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
 
             if self.metric_executor:
@@ -181,7 +182,7 @@ class CocosnetEvaluator(BaseEvaluator):
 
             if output_callback:
                 output_callback(
-                    predictions,
+                    raw_predictions,
                     metrics_result=metrics_result,
                     element_identifiers=batch_identifiers,
                     dataset_indices=batch_input_ids
@@ -262,16 +263,20 @@ class CocosnetEvaluator(BaseEvaluator):
         if self.dataset:
             self.dataset.reset(self.postprocessor.has_processors)
 
-    def load_model(self, network_list, launcher):
+    def load_model(self, network_list):
         for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_network(network_dict, launcher)
+            self._part_by_name[network_dict['name']].load_model(network_dict, self.launcher)
 
-    def load_network(self, network_list, launcher):
+    def load_network(self, network_list):
         for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_network(network_dict['model'], launcher)
+            self._part_by_name[network_dict['name']].load_network(network_dict['model'], self.launcher)
 
     def get_network(self):
         return [{'name': key, 'model': model.network} for key, model in self._part_by_name.items()]
+
+    def load_network_from_ir(self, models_list):
+        model_paths = next(iter(models_list))
+        next(iter(self._part_by_name.values())).load_model(model_paths, self.launcher)
 
     def get_metrics_attributes(self):
         if not self.metric_executor:
@@ -359,6 +364,12 @@ class BaseModel:
 
         return model, weights
 
+    @property
+    def inputs(self):
+        if self.network:
+            return self.network.input_info if hasattr(self.network, 'input_info') else self.network.inputs
+        return self.exec_network.input_info if hasattr(self.exec_network, 'input_info') else self.exec_network.inputs
+
     def predict(self, idenitifiers, input_data):
         raise NotImplementedError
 
@@ -430,15 +441,18 @@ class CocosnetModel(BaseModel):
         else:
             inputs_data = self.exec_network.inputs
         self.inputs_names = list(inputs_data.keys())
-        self.output_blob = next(iter(self.exec_network.outputs))
-        self.adapter.output_blob = self.output_blob
+        if self.output_blob is None:
+            self.output_blob = next(iter(self.exec_network.outputs))
+
+        if self.adapter.output_blob is None:
+            self.adapter.output_blob = self.output_blob
 
     def fit_to_input(self, input_data):
         inputs = {}
         for value, key in zip(input_data, self.inputs_names):
             value = np.expand_dims(value, 0)
             value = np.transpose(value, (0, 3, 1, 2))
-            inputs.update({key: value})
+            inputs[key] = value.astype(PRECISION_TO_DTYPE[self.inputs[key].precision])
         return inputs
 
     def predict(self, identifiers, inputs):
@@ -446,14 +460,14 @@ class CocosnetModel(BaseModel):
         for current_input in inputs:
             prediction = self.exec_network.infer(self.fit_to_input(current_input))
             results.append(*self.adapter.process(prediction, identifiers, [{}]))
-        return results
+        return results, prediction
 
 
 class GanCheckModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.net_type = "verification_network"
         self.additional_layers = network_info.get('additional_layers')
-        super().__init__(network_info, launcher)
+        super().__init__(network_info, launcher, delayed_model_loading)
 
     def load_model(self, network_info, launcher, log=False):
         model, weights = self.auto_model_search(network_info, self.net_type)
