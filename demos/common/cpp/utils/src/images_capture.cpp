@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "utils/images_capture.h"
+#include <utils/images_capture.h>
 
 #ifdef _WIN32
 #include "w_dirent.hpp"
@@ -15,8 +15,19 @@
 #include <stdexcept>
 #include <string>
 #include <memory>
+#include <fstream>
 
-class InvalidInput {};
+class InvalidInput : public std::runtime_error {
+public:
+    explicit InvalidInput(const std::string& message) noexcept
+        : std::runtime_error(message) {}
+};
+
+class OpenError : public std::runtime_error {
+public:
+    explicit OpenError(const std::string& message) noexcept
+        : std::runtime_error(message) {}
+};
 
 class ImreadWrapper : public ImagesCapture {
     cv::Mat img;
@@ -24,8 +35,12 @@ class ImreadWrapper : public ImagesCapture {
 
 public:
     ImreadWrapper(const std::string &input, bool loop) : ImagesCapture{loop}, canRead{true} {
+        std::ifstream file(input.c_str());
+        if (!file.good())
+            throw InvalidInput("Can't find the image by " + input);
         img = cv::imread(input);
-        if(!img.data) throw InvalidInput{};
+        if(!img.data)
+            throw OpenError("Can't open the image from " + input);
     }
 
     double fps() const override {return 1.0;}
@@ -52,12 +67,14 @@ public:
     DirReader(const std::string &input, bool loop, size_t initialImageId, size_t readLengthLimit) : ImagesCapture{loop},
             fileId{0}, nextImgId{0}, initialImageId{initialImageId}, readLengthLimit{readLengthLimit}, input{input} {
         DIR *dir = opendir(input.c_str());
-        if (!dir) throw InvalidInput{};
+        if (!dir)
+            throw InvalidInput("Can't find the dir by " + input);
         while (struct dirent *ent = readdir(dir))
             if (strcmp(ent->d_name, ".") && strcmp(ent->d_name, ".."))
                 names.emplace_back(ent->d_name);
         closedir(dir);
-        if (names.empty()) throw InvalidInput{};
+        if (names.empty())
+            throw OpenError("The dir " + input + " is empty");
         sort(names.begin(), names.end());
         size_t readImgs = 0;
         while (fileId < names.size()) {
@@ -68,7 +85,7 @@ public:
             }
             ++fileId;
         }
-        throw std::runtime_error{"Can't read the first image from " + input + " dir"};
+        throw OpenError("Can't read the first image from " + input);
     }
 
     double fps() const override {return 1.0;}
@@ -108,32 +125,16 @@ class VideoCapWrapper : public ImagesCapture {
     size_t readLengthLimit;
 
 public:
-    VideoCapWrapper(const std::string &input, bool loop, size_t initialImageId, size_t readLengthLimit,
-                cv::Size cameraResolution)
+    VideoCapWrapper(const std::string &input, bool loop, size_t initialImageId, size_t readLengthLimit)
             : ImagesCapture{loop}, nextImgId{0}, initialImageId{static_cast<double>(initialImageId)} {
-
-        try {
-            if (cap.open(std::stoi(input))) {
-                this->readLengthLimit = loop ? std::numeric_limits<size_t>::max() : readLengthLimit;
-                cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
-                cap.set(cv::CAP_PROP_FRAME_WIDTH, cameraResolution.width);
-                cap.set(cv::CAP_PROP_FRAME_HEIGHT, cameraResolution.height);
-                cap.set(cv::CAP_PROP_AUTOFOCUS, true);
-                cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
-                return;
-            }
-        }
-        catch (const std::invalid_argument&) {} // If stoi conversion failed, let's try another way to open capture device
-        catch (const std::out_of_range&) {}
 
         if (cap.open(input)) {
             this->readLengthLimit = readLengthLimit;
             if (!cap.set(cv::CAP_PROP_POS_FRAMES, this->initialImageId))
-                throw std::runtime_error{"Can't set the frame to begin with"};
+                throw OpenError("Can't set the frame to begin with");
             return;
         }
-
-        throw InvalidInput{};
+        throw InvalidInput("Can't open the video from " + input);
     }
 
     double fps() const override {return cap.get(cv::CAP_PROP_FPS);}
@@ -159,18 +160,72 @@ public:
     }
 };
 
+class CameraCapWrapper : public ImagesCapture {
+    cv::VideoCapture cap;
+    size_t nextImgId;
+    const double initialImageId;
+    size_t readLengthLimit;
+
+public:
+    CameraCapWrapper(const std::string &input, bool loop, size_t initialImageId, size_t readLengthLimit,
+                cv::Size cameraResolution)
+            : ImagesCapture{loop}, nextImgId{0}, initialImageId{static_cast<double>(initialImageId)} {
+
+        try {
+            if (cap.open(std::stoi(input))) {
+                this->readLengthLimit = loop ? std::numeric_limits<size_t>::max() : readLengthLimit;
+                cap.set(cv::CAP_PROP_BUFFERSIZE, 1);
+                cap.set(cv::CAP_PROP_FRAME_WIDTH, cameraResolution.width);
+                cap.set(cv::CAP_PROP_FRAME_HEIGHT, cameraResolution.height);
+                cap.set(cv::CAP_PROP_AUTOFOCUS, true);
+                cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+                return;
+            }
+            throw OpenError("Can't open the camera from " + input);
+        }
+        catch (const std::invalid_argument&) { throw InvalidInput("Can't find the camera " + input); }
+        catch (const std::out_of_range&) { throw InvalidInput("Can't find the camera " + input); }
+    }
+
+    double fps() const override {return cap.get(cv::CAP_PROP_FPS) > 0 ? cap.get(cv::CAP_PROP_FPS) : 30;}
+
+    cv::Mat read() override {
+        if (nextImgId >= readLengthLimit) {
+            return cv::Mat{};
+        }
+        cv::Mat img;
+        if (!cap.read(img)) {
+            throw std::runtime_error("The image can't be captured from the camera");
+        }
+        ++nextImgId;
+        return img;
+    }
+};
+
 std::unique_ptr<ImagesCapture> openImagesCapture(const std::string &input, bool loop, size_t initialImageId,
         size_t readLengthLimit, cv::Size cameraResolution) {
     if (readLengthLimit == 0) throw std::runtime_error{"Read length limit must be positive"};
-    try {
-        return std::unique_ptr<ImagesCapture>(new ImreadWrapper{input, loop});
-    } catch (const InvalidInput &) {}
-    try {
-        return std::unique_ptr<ImagesCapture>(new DirReader{input, loop, initialImageId, readLengthLimit});
-    } catch (const InvalidInput &) {}
-    try {
-        return std::unique_ptr<ImagesCapture>(new VideoCapWrapper{input, loop, initialImageId, readLengthLimit,
-            cameraResolution});
-    } catch (const InvalidInput &) {}
-    throw std::runtime_error{"Can't read " + input};
+    std::vector<std::string> invalidInputs, openErrors;
+    try { return std::unique_ptr<ImagesCapture>(new ImreadWrapper{input, loop}); }
+    catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
+    catch (const OpenError& e) { openErrors.push_back(e.what()); }
+
+    try { return std::unique_ptr<ImagesCapture>(new DirReader{input, loop, initialImageId, readLengthLimit}); }
+    catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
+    catch (const OpenError& e) { openErrors.push_back(e.what()); }
+
+    try { return std::unique_ptr<ImagesCapture>(new VideoCapWrapper{input, loop, initialImageId, readLengthLimit}); }
+    catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
+    catch (const OpenError& e) { openErrors.push_back(e.what()); }
+
+    try { return std::unique_ptr<ImagesCapture>(new CameraCapWrapper{input, loop, initialImageId, readLengthLimit, cameraResolution}); }
+    catch (const InvalidInput& e) { invalidInputs.push_back(e.what()); }
+    catch (const OpenError& e) { openErrors.push_back(e.what()); }
+
+    std::vector<std::string> errorMessages = openErrors.empty() ? invalidInputs : openErrors;
+    std::string errorsInfo;
+    for (const auto& message: errorMessages) {
+        errorsInfo.append(message + "\n");
+    }
+    throw std::runtime_error(errorsInfo);
 }

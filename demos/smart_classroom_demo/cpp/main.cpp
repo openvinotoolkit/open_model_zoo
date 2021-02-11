@@ -40,6 +40,7 @@ private:
     const bool enabled_;
     const int num_top_persons_;
     cv::VideoWriter& writer_;
+    uint32_t limit_;
     float rect_scale_x_;
     float rect_scale_y_;
     static int const max_input_width_ = 1920;
@@ -51,8 +52,8 @@ private:
     static int const margin_size_ = 5;
 
 public:
-    Visualizer(bool enabled, cv::VideoWriter& writer, int num_top_persons) : enabled_(enabled), num_top_persons_(num_top_persons), writer_(writer),
-                                                        rect_scale_x_(0), rect_scale_y_(0) {
+    Visualizer(bool enabled, cv::VideoWriter& writer, uint32_t limit, int num_top_persons) :
+        enabled_(enabled), num_top_persons_(num_top_persons), writer_(writer), limit_(limit), rect_scale_x_(0), rect_scale_y_(0) {
         if (!enabled_) {
             return;
         }
@@ -91,12 +92,12 @@ public:
         }
     }
 
-    void Show() const {
+    void Show(size_t framesProcessed) const {
         if (enabled_) {
             cv::imshow(main_window_name_, frame_);
         }
 
-        if (writer_.isOpened()) {
+        if (writer_.isOpened() && (limit_ == 0 || framesProcessed <= limit_)) {
             writer_ << frame_;
         }
     }
@@ -739,7 +740,7 @@ int main(int argc, char* argv[]) {
 
         int teacher_track_id = -1;
 
-        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_limit);
+        std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_read_limit);
         cv::Mat frame = cap->read();
         if (!frame.data) {
             throw std::runtime_error("Can't read an image from the input");
@@ -748,12 +749,12 @@ int main(int argc, char* argv[]) {
         cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
 
-        cv::VideoWriter vid_writer;
-        if (!FLAGS_out_v.empty()) {
-            vid_writer = cv::VideoWriter(FLAGS_out_v, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                         cap->fps(), Visualizer::GetOutputSize(frame.size()));
+        cv::VideoWriter videoWriter;
+        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                                                  cap->fps(), frame.size())) {
+            throw std::runtime_error("Can't open video writer");
         }
-        Visualizer sc_visualizer(!FLAGS_no_show, vid_writer, num_top_persons);
+        Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, FLAGS_limit, num_top_persons);
         DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad, FLAGS_al);
 
         std::cout << "To close the application, press 'CTRL+C' here";
@@ -977,7 +978,7 @@ int main(int argc, char* argv[]) {
 
             ++total_num_frames;
 
-            sc_visualizer.Show();
+            sc_visualizer.Show(total_num_frames);
 
             logger.FinalizeFrameRecord();
         }
