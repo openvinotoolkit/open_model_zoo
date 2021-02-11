@@ -29,18 +29,14 @@ from models.forward_tacotron_ie import ForwardTacotronIE
 from models.mel2wave_ie import WaveRNNIE, MelGANIE
 
 
-def save_wav(x, path, is_wavernn):
+def save_wav(x, path):
     sr = 22050
-    if is_wavernn:
-        audio = (x * (2 ** 15 - 1)).astype("<h")
-    else:
-        audio = x.astype(dtype=np.int16)
 
     with wave.open(path, "w") as f:
         f.setnchannels(1)
         f.setsampwidth(2)
         f.setframerate(sr)
-        f.writeframes(audio.tobytes())
+        f.writeframes(x.tobytes())
 
 
 def build_argparser():
@@ -104,8 +100,7 @@ def main():
 
     forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, ie, args.device, verbose=False)
 
-    audio_res = []
-    silent = np.array([1.0])
+    audio_res = np.array([], dtype=np.int16)
 
     len_th = 512
 
@@ -137,19 +132,12 @@ def main():
                 time_e = time.perf_counter()
                 time_forward += (time_e - time_s) * 1000
 
-                if is_wavernn:
-                    mel = (mel + 4) / 8
-                    np.clip(mel, 0, 1, out=mel)
-                    mel = np.transpose(mel)
-                mel = np.expand_dims(mel, axis=0)
-
                 time_s = time.perf_counter()
                 audio = vocoder.forward(mel)
                 time_e = time.perf_counter()
                 time_wavernn += (time_e - time_s) * 1000
 
-                audio_res.extend(audio)
-                audio_res.extend(silent * np.mean(audio))
+                audio_res = np.append(audio_res, audio)
 
             if count % 5 == 0:
                 print('WaveRNN time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'.format(time_wavernn, time_forward))
@@ -158,7 +146,7 @@ def main():
     print('All time {:.3f}ms. WaveRNN time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'
           .format((time_e_all - time_s_all) * 1000, time_wavernn, time_forward))
 
-    save_wav(np.array(audio_res), args.out, is_wavernn)
+    save_wav(audio_res, args.out)
 
 
 if __name__ == '__main__':

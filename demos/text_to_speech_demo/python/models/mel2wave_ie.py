@@ -87,6 +87,11 @@ class WaveRNNIE:
         return h1, h2, x
 
     def forward(self, mels):
+        mels = (mels + 4) / 8
+        np.clip(mels, 0, 1, out=mels)
+        mels = np.transpose(mels)
+        mels = np.expand_dims(mels, axis=0)
+
         n_parts = mels.shape[1] // self.mel_len + 1 if mels.shape[1] % self.mel_len > 0 else mels.shape[
                                                                                                  1] // self.mel_len
         upsampled_mels = []
@@ -119,6 +124,7 @@ class WaveRNNIE:
         aux, _ = fold_with_overlap(aux, self.target, self.overlap)
 
         audio = self.forward_rnn(mels, upsampled_mels, aux)
+        audio = (audio * (2 ** 15 - 1)).astype("<h")
 
         return audio
 
@@ -229,6 +235,7 @@ class MelGANIE:
         return exec_net
 
     def forward(self, mel):
+        mel = np.expand_dims(mel, axis=0)
         res_audio = []
         last_padding = 0
         if mel.shape[2] % self.mel_len:
@@ -265,6 +272,10 @@ class MelGANIE:
 
             c_end += cur_w
         if last_padding:
-            return res_audio[:-self.hop_length * last_padding]
+            audio = res_audio[:-self.hop_length * last_padding]
         else:
-            return res_audio
+            audio = res_audio
+
+        audio = np.array(audio).astype(dtype=np.int16)
+
+        return audio
