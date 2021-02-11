@@ -23,7 +23,7 @@ from copy import copy
 from functools import partial
 from pathlib import Path
 
-from ..utils import get_path, cast_to_bool
+from ..utils import get_path, cast_to_bool, get_or_parse_value
 
 
 class ConfigError(ValueError):
@@ -566,6 +566,41 @@ class BoolField(BaseField):
                     parameters_dict[key] = self.__dict__[key]
             parameters_dict['type'] = type(bool()).__name__
         return parameters_dict
+
+
+class NormalizationArgsField(BaseField):
+    def __init__(self, precomputed_args, allow_zeros=True, num_channels=(1, 3), **kwargs):
+        super().__init__(**kwargs)
+        self.precomputed_args = precomputed_args
+        self.allow_zeros = allow_zeros
+        self.num_channels = (num_channels,) if isinstance(num_channels, int) else num_channels
+
+    def validate(self, entry, field_uri=None, fetch_only=False, validation_scheme=None):
+        error_stack = super().validate(entry, field_uri, fetch_only, validation_scheme)
+        if entry is None:
+            return error_stack
+
+        field_uri = field_uri or self.field_uri
+
+        entry = self.type(entry)
+
+        if not self.allow_zeros and 0 in entry:
+            reason = "{} should not contain 0".format(field_uri)
+            if not fetch_only:
+                self.raise_error(entry, field_uri, reason)
+            error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme=validation_scheme))
+
+        if not len(entry) in self.num_channels:
+            reason = "{} should be one value or comma-separated list channel-wise values".format(field_uri)
+            if not fetch_only:
+                self.raise_error(entry, field_uri, reason)
+            error_stack.append(self.build_error(entry, field_uri, reason, validation_scheme=validation_scheme))
+
+        return error_stack
+
+    @property
+    def type(self):
+        return partial(get_or_parse_value, supported_values=self.precomputed_args)
 
 
 def _get_field_type(key_type):

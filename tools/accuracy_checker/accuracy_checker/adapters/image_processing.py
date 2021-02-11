@@ -21,8 +21,7 @@ import numpy as np
 
 from ..adapters import Adapter
 from ..representation import ImageProcessingPrediction, SuperResolutionPrediction, ContainerPrediction
-from ..config import ConfigValidator, BoolField, BaseField, StringField, DictField, ConfigError
-from ..utils import get_or_parse_value
+from ..config import ConfigValidator, BoolField, StringField, DictField, NormalizationArgsField
 from ..preprocessor import Normalize
 
 
@@ -38,15 +37,18 @@ class ImageProcessingAdapter(Adapter):
             'reverse_channels': BoolField(
                 optional=True, default=False, description="Allow switching output image channels e.g. RGB to BGR"
             ),
-            'mean': BaseField(
+            'mean': NormalizationArgsField(
                 optional=True, default=0,
                 description='The value which should be added to prediction pixels for scaling to range [0, 255]'
-                            '(usually it is the same mean value which subtracted in preprocessing step))'
+                            '(usually it is the same mean value which subtracted in preprocessing step))',
+                precomputed_args=Normalize.PRECOMPUTED_MEANS
             ),
-            'std': BaseField(
+            'std': NormalizationArgsField(
                 optional=True, default=255,
                 description='The value on which prediction pixels should be multiplied for scaling to range '
-                            '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
+                            '[0, 255] (usually it is the same scale (std) used in preprocessing step))',
+                precomputed_args=Normalize.PRECOMPUTED_STDS,
+                allow_zeros=False
             ),
             'target_out': StringField(optional=True, description='Target super resolution model output'),
             "cast_to_uint8": BoolField(
@@ -63,15 +65,8 @@ class ImageProcessingAdapter(Adapter):
 
     def configure(self):
         self.reverse_channels = self.get_value_from_config('reverse_channels')
-        self.mean = get_or_parse_value(self.launcher_config.get('mean', 0), Normalize.PRECOMPUTED_MEANS)
-        self.std = get_or_parse_value(self.launcher_config.get('std', 255), Normalize.PRECOMPUTED_STDS)
-
-        if not (len(self.mean) == 3 or len(self.mean) == 1):
-            raise ConfigError('mean should be one value or comma-separated list channel-wise values')
-
-        if not (len(self.std) == 3 or len(self.std) == 1):
-            raise ConfigError('std should be one value or comma-separated list channel-wise values')
-
+        self.mean = self.get_value_from_config('mean')
+        self.std = self.get_value_from_config('std')
         self.target_out = self.get_value_from_config('target_out')
         self.cast_to_uint8 = self.get_value_from_config('cast_to_uint8')
 
@@ -132,15 +127,18 @@ class MultiSuperResolutionAdapter(Adapter):
             'reverse_channels': BoolField(
                 optional=True, default=False, description="Allow switching output image channels e.g. RGB to BGR"
             ),
-            'mean': BaseField(
+            'mean': NormalizationArgsField(
                 optional=True, default=0,
                 description='The value which should be added to prediction pixels for scaling to range [0, 255]'
-                            '(usually it is the same mean value which subtracted in preprocessing step))'
+                            '(usually it is the same mean value which subtracted in preprocessing step))',
+                precomputed_args=Normalize.PRECOMPUTED_MEANS
             ),
-            'std': BaseField(
+            'std': NormalizationArgsField(
                 optional=True, default=255,
                 description='The value on which prediction pixels should be multiplied for scaling to range '
-                            '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
+                            '[0, 255] (usually it is the same scale (std) used in preprocessing step))',
+                precomputed_args=Normalize.PRECOMPUTED_STDS,
+                allow_zeros=False
             ),
             "cast_to_uint8": BoolField(
                 optional=True, default=True, description="Cast prediction values to integer within [0, 255] range"
