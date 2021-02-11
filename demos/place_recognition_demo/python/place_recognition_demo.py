@@ -57,7 +57,7 @@ def build_argparser():
                       help='Optional. Name of output to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
-                           'If -1 is set, all frames are stored.')
+                           'If 0 is set, all frames are stored.')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL '
                            'or MYRIAD. The demo will look for a suitable plugin for device '
@@ -120,9 +120,10 @@ def main():
                                np.mean(compute_embeddings_times), np.mean(search_in_gallery_times),
                                imshow_delay=3, presenter=presenter, no_show=args.no_show)
 
-        if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
-                                                 (image.shape[1], image.shape[0])):
-            raise RuntimeError("Can't open video writer")
+        if frames_processed == 0:
+            if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                                     (image.shape[1], image.shape[0])):
+                raise RuntimeError("Can't open video writer")
 
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):

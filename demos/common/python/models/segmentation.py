@@ -28,8 +28,7 @@ class SegmentationModel(Model):
         self.out_blob_name = self.prepare_outputs()
 
     def prepare_inputs(self):
-        input_num = len(self.net.input_info)
-        if input_num != 1:
+        if len(self.net.input_info) != 1:
             raise RuntimeError("Demo supports topologies only with 1 input")
 
         blob_name = next(iter(self.net.input_info))
@@ -46,8 +45,7 @@ class SegmentationModel(Model):
         return blob_name
 
     def prepare_outputs(self):
-        output_num = len(self.net.outputs)
-        if output_num != 1:
+        if len(self.net.outputs) != 1:
             raise RuntimeError("Demo supports topologies only with 1 output")
 
         blob_name = next(iter(self.net.outputs))
@@ -57,12 +55,8 @@ class SegmentationModel(Model):
         out_size = blob.shape
         if len(out_size) == 3:
             self.out_channels = 0
-            self.out_height = out_size[1]
-            self.out_width = out_size[2]
         elif len(out_size) == 4:
             self.out_channels = out_size[1]
-            self.out_height = out_size[2]
-            self.out_width = out_size[3]
         else:
             raise Exception("Unexpected output blob shape {}. Only 4D and 3D output blobs are supported".format(out_size))
 
