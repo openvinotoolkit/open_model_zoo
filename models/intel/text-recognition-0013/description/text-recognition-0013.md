@@ -20,7 +20,7 @@ The network is able to recognize case-insensitive alphanumeric text (36 unique s
 | Source framework                               | PyTorch            |
 
 ## Inputs
-
+Input tensor is `imgs`.
 Shape: `1, 1, 32, 120` - An input image in the format `B, C, H, W`,
 where:
   - B - batch size
@@ -31,7 +31,7 @@ where:
 Note that the source image should be tight aligned crop with detected text converted to grayscale.
 
 ## Outputs
-The net outputs a blob with the shape `30, 1, 37` in the format `W, B, L`,
+The net outputs a blob `logits` with the shape `30, 1, 37` in the format `W, B, L`,
 where:
   - W - output sequence length
   - B - batch size
