@@ -283,7 +283,7 @@ int main(int argc, char *argv[]) {
 
             if (!FLAGS_no_show) {
                 cv::imshow("Press ESC or Q to exit", demo_image);
-                int key = cv::waitKey(0);
+                int key = cv::waitKey(1);
                 if ('q' == key || 'Q' == key || key == 27) break;
                 presenter.handleKey(key);
             }
