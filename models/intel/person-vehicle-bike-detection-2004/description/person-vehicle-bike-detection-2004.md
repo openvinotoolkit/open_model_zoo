@@ -13,9 +13,9 @@ backbone with ATSS head for 448x256 resolution.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP @ [ IoU=0.50:0.95 ]          | TBD                                       |
-| GFlops                          | TBD                                       |
-| MParams                         | 1.95                                      |
+| AP @ [ IoU=0.50:0.95 ]          | 0.274 (internal test set)                 |
+| GFlops                          | 1.811                                     |
+| MParams                         | 2.327                                     |
 | Source framework                | PyTorch\*                                 |
 
 Average Precision (AP) is defined as an area under
@@ -45,7 +45,7 @@ Expected color order is BGR.
     - `conf` - confidence for the predicted class
 2. The `labels` is a blob with shape: `N`, where N is the number of detected
    bounding boxes. The value of each label is equal to predicted class ID
-   (0 - vehicle, 1 - person, 2 - bike).
+   (0 - vehicle, 1 - person, 2 - non-vehicle).
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -4,12 +4,11 @@ models:
     launchers:
       - framework: dlsdk
         adapter:
-
           type: class_agnostic_detection
           scale: [0.0022321, 0.0039063]
 
     datasets:
-      - name: crossroad_extra_untagged_person_hb
+      - name: crossroad_extra_untagged
         preprocessing:
           - type: resize
             dst_width: 448
