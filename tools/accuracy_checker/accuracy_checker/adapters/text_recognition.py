@@ -19,7 +19,7 @@ from collections import defaultdict
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, BoolField, ConfigError, StringField
+from ..config import ConfigValidator, NumberField, BoolField, ConfigError, DictField, StringField
 from ..representation import CharacterRecognitionPrediction
 
 
@@ -42,7 +42,7 @@ class BeamSearchDecoder(Adapter):
                 optional=True, default=False, description="Indicator that model uses softmax for output layer "
             ),
             'logits_output': StringField(optional=True, description='Logits output layer name'),
-            'custom_label_map': StringField(optional=True, description='Label map')
+            'custom_label_map': DictField(optional=True, description='Label map')
         })
         return parameters
 

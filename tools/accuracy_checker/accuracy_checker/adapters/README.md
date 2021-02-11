@@ -228,7 +228,7 @@ AccuracyChecker supports following set of adapters:
   * `blank_label` - index of the CTC blank label.
   * `softmaxed_probabilities` - indicator that model uses softmax for output layer (default False).
   * `logits_output` - Name of the output layer of the network to use in decoder
-  * `custom_label_map` - Alphabet as string or as a list of strings. Must include blank symbol for CTC algorithm.
+  * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm.
 * `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
   * `blank_label` - index of the CTC blank label (default 0).
 * `ctc_beam_search_decoder` - Python implementation of CTC beam search decoder without LM for speech recognition.
