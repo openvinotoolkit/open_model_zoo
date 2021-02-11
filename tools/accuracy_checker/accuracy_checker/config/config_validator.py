@@ -582,7 +582,7 @@ class NormalizationArgsField(BaseField):
 
         field_uri = field_uri or self.field_uri
 
-        entry = self.type(entry)
+        entry = self.type(entry) # pylint: disable=E1102
 
         if not self.allow_zeros and 0 in entry:
             reason = "{} should not contain 0".format(field_uri)
