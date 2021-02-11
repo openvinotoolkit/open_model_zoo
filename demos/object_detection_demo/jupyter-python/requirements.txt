@@ -1,0 +1,10 @@
+requests
+jupyterlab==2
+ipywidgets
+voila
+matplotlib
+openvino
+opencv-python-headless
+pyyaml
+#ipython==7.10
+numpy==1.19
