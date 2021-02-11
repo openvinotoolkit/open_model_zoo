@@ -25,6 +25,7 @@ from ...adapters import create_adapter
 from ...config import ConfigError
 from ...data_readers import DataRepresentation
 from ...launcher import create_launcher
+from ...launcher.input_feeder import PRECISION_TO_DTYPE
 from ...logging import print_info
 from ...preprocessor import PreprocessingExecutor
 from ...progress_reporters import ProgressReporter
@@ -363,6 +364,12 @@ class BaseModel:
 
         return model, weights
 
+    @property
+    def inputs(self):
+        if self.network:
+            return self.network.input_info if hasattr(self.network, 'input_info') else self.network.inputs
+        return self.exec_network.input_info if hasattr(self.exec_network, 'input_info') else self.exec_network.inputs
+
     def predict(self, idenitifiers, input_data):
         raise NotImplementedError
 
@@ -445,7 +452,7 @@ class CocosnetModel(BaseModel):
         for value, key in zip(input_data, self.inputs_names):
             value = np.expand_dims(value, 0)
             value = np.transpose(value, (0, 3, 1, 2))
-            inputs.update({key: value})
+            inputs[key] = value.astype(PRECISION_TO_DTYPE[self.inputs[key].precision])
         return inputs
 
     def predict(self, identifiers, inputs):
