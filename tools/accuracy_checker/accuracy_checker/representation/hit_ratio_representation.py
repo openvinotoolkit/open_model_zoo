@@ -15,12 +15,14 @@ limitations under the License.
 """
 
 import numpy as np
-
+from  ..data_readers import ListIdentifier
 from .base_representation import BaseRepresentation
 
 
 class HitRatio(BaseRepresentation):
     def __init__(self, identifier=''):
+        if isinstance(identifier, ListIdentifier):
+            identifier = identifier.values
         super().__init__(identifier)
         self.user = int(identifier[0].split('u:')[-1])
         self.item = int(identifier[1].split('i:')[-1])
