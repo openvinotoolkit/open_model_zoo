@@ -15,9 +15,9 @@
 */
 
 /**
-* \brief The entry point for the Inference Engine object_detection_demo_ssd_async demo application
-* \file object_detection_demo_ssd_async/main.cpp
-* \example object_detection_demo_ssd_async/main.cpp
+* \brief The entry point for the Inference Engine object_detection_demo demo application
+* \file object_detection_demo/cpp/main.cpp
+* \example object_detection_demo/cpp/main.cpp
 */
 
 #include <iostream>
@@ -70,7 +70,7 @@ static const char num_streams_message[] = "Optional. Number of streams to use fo
 "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes (YOLOv3 only).";
+static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes.";
 static const char yolo_af_message[] = "Optional. Use advanced postprocessing/filtering algorithm for YOLO.";
 
 DEFINE_bool(h, false, help_message);
@@ -114,6 +114,7 @@ static void showUsage() {
     std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
+    std::cout << "    -iou_t                    " << iou_thresh_output_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;

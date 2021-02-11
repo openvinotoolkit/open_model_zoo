@@ -84,6 +84,7 @@ Options:
     -pc                       Optional. Enables per-layer performance report.
     -r                        Optional. Inference results as raw values.
     -t                        Optional. Probability threshold for detections.
+    -iou_t                    Optional. Filtering intersection over union threshold for overlapping boxes.
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
     -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
     -nthreads "<integer>"     Optional. Number of threads.

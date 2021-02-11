@@ -252,7 +252,8 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'retinaface'}),
                 single_option_cases('-m',
                     ModelArg('retinaface-anti-cov'),
-                    ModelArg('retinaface-resnet50'))
+                    ModelArg('retinaface-resnet50'),
+                    ModelArg('ssh-mxnet'))
             ),
             *combine_cases(
                 TestCase(options={'-at': 'ssd'}),
