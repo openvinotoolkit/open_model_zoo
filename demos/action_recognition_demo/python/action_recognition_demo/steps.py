@@ -46,7 +46,7 @@ class SingleModelStep(PipelineStep):
         super().__init__()
         self.model = model
         assert sequence_size > 0
-        self.sequence_size = sequence_size 
+        self.sequence_size = sequence_size
         self.size = frame_size
         self.crop_size = crop_size
         self.input_seq = deque(maxlen = self.sequence_size)

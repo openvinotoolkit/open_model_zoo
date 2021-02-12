@@ -103,7 +103,7 @@ def main():
         model = IEModel(model_xml, model_bin, ie, encoder_target_device,
                         num_requests=(3 if args.device == 'MYRIAD' else 1))
         seq_size = model.input_size[2]
-    elif args.model_type == 'composite': 
+    elif args.model_type == 'composite':
         encoder_xml = args.m_encoder
         encoder_bin = args.m_encoder.replace('.xml', '.bin')
         model = []
