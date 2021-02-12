@@ -16,8 +16,8 @@
 
 
 from .centernet import CenterNet
+from .deblurring import Deblurring
 from .faceboxes import FaceBoxes
-from .model import Model
 from .retinaface import RetinaFace
 from .segmentation import SegmentationModel
 from .ssd import SSD
@@ -27,8 +27,8 @@ from .yolo import YOLO
 __all__ = [
     'CenterNet',
     'DetectionWithLandmarks',
+    'Deblurring',
     'FaceBoxes',
-    'Model',
     'RetinaFace',
     'SegmentationModel',
     'SSD',

@@ -11,17 +11,13 @@
  limitations under the License.
 """
 
-from pathlib import Path
-import sys
-
+import cv2
 import math
 import numpy as np
 
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+from .model import Model
 
-from models import Model
-
-class DeblurringModel(Model):
+class Deblurring(Model):
     def __init__(self, ie, model_path, input_image_shape):
         super().__init__(ie, model_path)
         self.calculate_new_shape(input_image_shape)
@@ -77,16 +73,16 @@ class DeblurringModel(Model):
 
     def preprocess(self, inputs):
         image = inputs
-        # right bottom padding to resize input image to input_layer shape
-        pad_params = {'mode': 'constant',
-                      'constant_values': 0,
-                      'pad_width': ((0, self.h - image.shape[0]), (0, self.w - image.shape[1]), (0, 0))
-                      }
 
-        if image.shape[0] != self.h or image.shape[1] != self.w:
+        if image.shape[0] < self.h and image.shape[1] < self.w:
+            # right bottom padding to resize input image to input_layer shape
+            pad_params = {'mode': 'constant',
+                          'constant_values': 0,
+                          'pad_width': ((0, self.h - image.shape[0]), (0, self.w - image.shape[1]), (0, 0))
+                          }
             resized_image = np.pad(image, **pad_params)
         else:
-            resized_image = image
+            resized_image = cv2.resize(image, (self.w, self.h))
         resized_image = resized_image.transpose((2, 0, 1))
         resized_image = np.expand_dims(resized_image, 0)
 
@@ -101,7 +97,6 @@ class DeblurringModel(Model):
         input_image_width = meta['original_shape'][1]
 
         prediction = prediction.transpose((1, 2, 0))
+        prediction = prediction[:min(self.h, input_image_height), :min(self.w, input_image_width), :]
         prediction *= 255
-        prediction = prediction.astype(np.uint8)
-
-        return prediction[:input_image_height, :input_image_width, :]
+        return prediction.astype(np.uint8)

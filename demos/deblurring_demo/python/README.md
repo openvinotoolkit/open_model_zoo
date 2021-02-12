@@ -13,7 +13,7 @@ For each image demo performs the following steps:
 1. Do preprocessing consisting of normalization and padding to input shape of model.
 2. Inference of model (user is able to set the inference options to influence the execution process).
 3. Do postprocessing for output of model.
-4. To display the resulting image together with source image.
+4. Display the resulting image together with source image.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
@@ -30,7 +30,8 @@ The command yields the following usage message:
 ```
 usage: deblurring_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
                           [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
-                          [-nthreads NUM_THREADS] [--loop] [--no_show]
+                          [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
+                          [-limit OUTPUT_LIMIT] [--no_show]
                           [-u UTILIZATION_MONITORS]
 
 Options:
@@ -62,9 +63,15 @@ Inference options:
 
 Input/output options:
   --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output. If 0 is
+                        set, all frames are stored.
   --no_show             Optional. Don't show output.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
