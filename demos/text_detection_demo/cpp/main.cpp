@@ -214,16 +214,16 @@ int main(int argc, char *argv[]) {
                 if (text_recognition.is_initialized()) {
                     auto blobs = text_recognition.Infer(cropped_text);
                     auto out_blob = blobs.begin()->second;
-                    if (FLAGS_tr_o_blb_nm != ""){
-                        if (blobs.find(FLAGS_tr_o_blb_nm) == blobs.end()){
-                            std::string exception_msg = "The text recognition model does not have output " + std::string(FLAGS_tr_o_blb_nm);
-                            throw std::runtime_error(exception_msg);
+                    if (FLAGS_tr_o_blb_nm != "") {
+                        const auto& iter = blobs.find(FLAGS_tr_o_blb_nm);
+                        if (iter == blobs.end()) {
+                            throw std::runtime_error("The text recognition model does not have output " + FLAGS_tr_o_blb_nm);
                         }
-                        out_blob = blobs[FLAGS_tr_o_blb_nm];
+                        out_blob = iter->second;
                     }
                     auto output_shape = out_blob->getTensorDesc().getDims();
 
-                    if (output_shape.size() >=3 && output_shape[2] != kAlphabet.length()) {
+                    if (output_shape.size() < 3 || output_shape[2] != kAlphabet.length()) {
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
                     }
 
