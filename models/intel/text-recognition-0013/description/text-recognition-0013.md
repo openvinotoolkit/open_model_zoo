@@ -31,11 +31,18 @@ where:
 Note that the source image should be tight aligned crop with detected text converted to grayscale.
 
 ## Outputs
-The net outputs a blob `logits` with the shape `30, 1, 37` in the format `W, B, L`,
-where:
-  - W - output sequence length
-  - B - batch size
-  - L - confidence distribution across alphanumeric symbols: "#0123456789abcdefghijklmnopqrstuvwxyz", where # - special blank character for CTC decoding algorithm.
+The net outputs 2 blobs
+*  `logits` with the shape `30, 1, 37` in the format `W, B, L`,
+    where:
+      - W - output sequence length
+      - B - batch size
+      - L - confidence distribution across alphanumeric symbols: "#0123456789abcdefghijklmnopqrstuvwxyz", where # - special blank character for CTC decoding algorithm.
+* `targets` with the shape `30, 1, 1` in the format `W, B, L`,
+    where:
+      - W - output sequence length
+      - B - batch size
+      - L - index of the most probable class along the alphanumeric alphabet
+  This is just np.argmax of the `logits` on the `L` dimension.
 
 The network output can be decoded by CTC Greedy Decoder or CTC Beam Search decoder.
 
