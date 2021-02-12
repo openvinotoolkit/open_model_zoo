@@ -221,3 +221,29 @@ class TFLauncher(Launcher):
             raise ConfigError('output blobs in the graph cannot be found')
 
         return names
+
+    def create_inference_session(self, model, saved_model_dir = False):
+        # self._config_outputs = self.get_value_from_config('output_names')
+        if saved_model_dir:
+            _graph = self._load_graph(str(model), True)
+        else:
+            _graph = self._load_graph(str(model))
+
+        # self._outputs_names = self._get_outputs_names(self._graph, self._config_outputs)
+        #
+        # self._outputs_tensors = []
+        # self.node_pattern = 'import/{}:0'
+        # for output in self._outputs_names:
+        #     try:
+        #         tensor = self._graph.get_tensor_by_name('import/{}:0'.format(output))
+        #     except KeyError:
+        #         try:
+        #             tensor = self._graph.get_tensor_by_name('{}:0'.format(output))
+        #             self.node_pattern = '{}:0'
+        #         except KeyError:
+        #             raise ConfigError('model graph does not contains output {}'.format(output))
+        #     self._outputs_tensors.append(tensor)
+        with self.tf.device(self.device):
+            session = self.tf.Session(graph=_graph)
+
+        return session
