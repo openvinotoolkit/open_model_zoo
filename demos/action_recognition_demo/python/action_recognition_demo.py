@@ -44,11 +44,13 @@ def build_argparser():
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
+    args.add_argument('-mt','--model_type', help='Required. Specify model type.',
+                      type=str, required=True, choices=('single', 'composite'))
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
     decoder_args = args.add_mutually_exclusive_group()
     decoder_args.add_argument('-m_de', '--m_decoder',
                               help="Optional. Path to decoder model. If not specified, "
-                                   "simple averaging of encoder's outputs over a time window is applied.",
+                                   "for composite models simple averaging of encoder's outputs over a time window is applied.",
                               default=None, type=str)
     decoder_args.add_argument('--seq', dest='decoder_seq_size',
                               help='Optional. Length of sequence that decoder takes as input.',
@@ -95,25 +97,35 @@ def main():
     else:
         encoder_target_device = decoder_target_device
 
-    encoder_xml = args.m_encoder
-    encoder_bin = args.m_encoder.replace('.xml', '.bin')
-    encoder = IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
-                      num_requests=(3 if args.device == 'MYRIAD' else 1))
+    if args.model_type == 'single':
+        model_xml = args.m_encoder
+        model_bin = args.m_encoder.replace('.xml', '.bin')
+        model = IEModel(model_xml, model_bin, ie, encoder_target_device,
+                        num_requests=(3 if args.device == 'MYRIAD' else 1))
+        seq_size = model.input_size[2]
+    elif args.model_type == 'composite': 
+        encoder_xml = args.m_encoder
+        encoder_bin = args.m_encoder.replace('.xml', '.bin')
+        model = []
+        model.append(IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
+                        num_requests=(3 if args.device == 'MYRIAD' else 1)))
 
-    if args.m_decoder is not None:
-        decoder_xml = args.m_decoder
-        decoder_bin = args.m_decoder.replace('.xml', '.bin')
-        decoder = IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2)
-        decoder_seq_size = decoder.input_size[1]
+        if args.m_decoder is not None:
+            decoder_xml = args.m_decoder
+            decoder_bin = args.m_decoder.replace('.xml', '.bin')
+            model.append(IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2))
+            seq_size = model[1].input_size[1]
+        else:
+            model.append(DummyDecoder(num_requests=2))
+            seq_size = args.decoder_seq_size
     else:
-        decoder = DummyDecoder(num_requests=2)
-        decoder_seq_size = args.decoder_seq_size
+        raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
     presenter = monitors.Presenter(args.utilization_monitors, 70)
-    result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,
+    result_presenter = ResultRenderer(no_show=args.no_show, model_type = args.model_type, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
     cap = open_images_capture(args.input, args.loop)
-    run_pipeline(cap, encoder, decoder, result_presenter.render_frame, decoder_seq_size=decoder_seq_size, fps=cap.fps())
+    run_pipeline(cap, args.model_type, model, result_presenter.render_frame, seq_size=seq_size, fps=cap.fps())
     print(presenter.reportMeans())
 
 

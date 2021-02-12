@@ -5,18 +5,21 @@
 This is the demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
 The following pre-trained models are delivered with the product:
 * `driver-action-recognition-adas-0002-encoder` + `driver-action-recognition-adas-0002-decoder`, which are models for driver monitoring scenario. They recognize actions like safe driving, talking to the phone and others
-* `action-recognition-0001-encoder` + `action-recognition-0001-decoder`, which are general-purpose action recognition (400 actions) models for Kinetics-400 dataset.
+* `action-recognition-0001-encoder` + `action-recognition-0001-decoder` and `i3d-rgb-tf`, which are general-purpose action recognition (400 actions) models for Kinetics-400 dataset.
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
+For more information about the pre-trained models, refer to the [intel models documentation](../../../models/intel/index.md) and [public models documentation](../../../models/public/index.md).
 
 ## How It Works
 
-The demo pipeline consists of several frames, namely `Data`, `Encoder`, `Decoder` and `Render`.
+The demo pipeline consists of several frames, namely `Data`, `Model` and `Render`.
 Every step implements `PipelineStep` interface by creating a class derived from `PipelineStep` base class. See `steps.py` for implementation details.
 
 - `DataStep` reads frames from the input video.
-- `EncoderStep` preprocesses a frame and feeds it to the encoder model to produce a frame embedding.
-- `DecoderStep` feeds embeddings produced by the `EncoderStep` to the decoder model and produces predictions.
+-  Model step depends on model type:
+    - For composite models there are two steps:
+      -  `EncoderStep` preprocesses a frame and feeds it to the encoder model to produce a frame embedding.
+      -  `DecoderStep` feeds embeddings produced by the `EncoderStep` to the decoder model and produces predictions.
+    - For single model `SingleModelStep` does both preprocess and produce predictions.
 - `RenderStep` renders prediction results.
 
 Pipeline steps are composed in `AsyncPipeline`. Every step can be run in separate thread by adding it to the pipeline with `parallel=True` option.
@@ -36,7 +39,8 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: action_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
-                                  [-limit OUTPUT_LIMIT] -m_en M_ENCODER
+                                  [-limit OUTPUT_LIMIT] -mt {single,composite}
+                                  -m_en M_ENCODER
                                   [-m_de M_DECODER | --seq DECODER_SEQ_SIZE]
                                   [-l CPU_EXTENSION] [-d DEVICE] [-lb LABELS]
                                   [--no_show] [-s LABEL_SMOOTHING]
@@ -52,14 +56,16 @@ Options:
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
-                        Optional. Number of frames to store in output. If 0
-                        is set, all frames are stored.
+                        Optional. Number of frames to store in output. If 0 is
+                        set, all frames are stored.
+  -mt {single,composite}, --model_type {single,composite}
+                        Required. Specify model type.
   -m_en M_ENCODER, --m_encoder M_ENCODER
                         Required. Path to encoder model.
   -m_de M_DECODER, --m_decoder M_DECODER
-                        Optional. Path to decoder model. If not specified,
-                        simple averaging of encoder's outputs over a time
-                        window is applied.
+                        Optional. Path to decoder model. If not specified, for
+                        composite models simple averaging of encoder's outputs
+                        over a time window is applied.
   --seq DECODER_SEQ_SIZE
                         Optional. Length of sequence that decoder takes as
                         input.
@@ -89,7 +95,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 **For example**, to run the demo for in-cabin driver monitoring scenario, please provide a path to the encoder and decoder models, an input video and a file with label names:
 ```bash
-python3 action_recognition_demo.py -m_en models/driver_action_recognition_tsd_0002_encoder.xml \
+python3 action_recognition_demo.py -mt composite -m_en models/driver_action_recognition_tsd_0002_encoder.xml \
     -m_de models/driver_action_recognition_tsd_0002_decoder.xml \
     -i <path_to_video>/inputVideo.mp4 \
     -lb driver_actions.txt
