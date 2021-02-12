@@ -41,7 +41,7 @@ def adaptive_resize(frame, dst_size):
         return frame
     return cv2.resize(frame, (ow, oh))
 
-def preprocess_frame(frame, size=224, crop_size=224, add_dimension = True):
+def preprocess_frame(frame, size=224, crop_size=224, add_dimension=True):
     frame = adaptive_resize(frame, size)
     frame = center_crop(frame, (crop_size, crop_size))
 

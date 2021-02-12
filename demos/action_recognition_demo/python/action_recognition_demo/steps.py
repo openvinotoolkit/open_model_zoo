@@ -28,13 +28,13 @@ from .queue import Signal
 
 def run_pipeline(capture, model_type, model, render_fn, seq_size=16, fps=30):
     pipeline = AsyncPipeline()
-    pipeline.add_step("Data", DataStep(capture), parallel = False)
+    pipeline.add_step("Data", DataStep(capture), parallel=False)
     if model_type == 'single':
         pipeline.add_step("SingleModelStep", SingleModelStep(model, seq_size, 256, 224), parallel = False)
     elif model_type == 'composite':
         pipeline.add_step("Encoder", EncoderStep(model[0]), parallel=False)
         pipeline.add_step("Decoder", DecoderStep(model[1], sequence_size=seq_size), parallel=False)
-    pipeline.add_step("Render", RenderStep(render_fn, fps=fps), parallel = True)
+    pipeline.add_step("Render", RenderStep(render_fn, fps=fps), parallel=True)
 
     pipeline.run()
     pipeline.close()
@@ -105,7 +105,7 @@ class EncoderStep(PipelineStep):
 
 class DecoderStep(PipelineStep):
 
-    def __init__(self, decoder, sequence_size = 16):
+    def __init__(self, decoder, sequence_size=16):
         super().__init__()
         assert sequence_size > 0
         self.sequence_size = sequence_size

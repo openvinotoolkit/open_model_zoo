@@ -122,7 +122,7 @@ def main():
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
     presenter = monitors.Presenter(args.utilization_monitors, 70)
-    result_presenter = ResultRenderer(no_show=args.no_show, model_type = args.model_type, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,
+    result_presenter = ResultRenderer(no_show=args.no_show, model_type=args.model_type, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
     cap = open_images_capture(args.input, args.loop)
     run_pipeline(cap, args.model_type, model, result_presenter.render_frame, seq_size=seq_size, fps=cap.fps())
