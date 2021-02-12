@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
                     }
                     auto output_shape = out_blob->getTensorDesc().getDims();
 
-                    if (output_shape[2] != kAlphabet.length()) {
+                    if (output_shape.size() >=3 && output_shape[2] != kAlphabet.length()) {
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
                     }
 
