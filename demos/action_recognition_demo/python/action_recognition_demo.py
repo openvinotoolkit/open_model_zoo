@@ -44,7 +44,7 @@ def build_argparser():
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
-    args.add_argument('-mt','--model_type', help='Required. Specify model type.',
+    args.add_argument('-mt', '--model_type', help='Required. Specify model type.',
                       type=str, required=True, choices=('single', 'composite'))
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
     decoder_args = args.add_mutually_exclusive_group()
