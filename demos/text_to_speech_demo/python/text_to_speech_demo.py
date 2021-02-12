@@ -82,7 +82,7 @@ def build_argparser():
 
 
 def is_correct_args(args):
-    if not ((args.model_melgan is None and args.model_rnn is not None and args.model_upsample is not None) or \
+    if not ((args.model_melgan is None and args.model_rnn is not None and args.model_upsample is not None) or
             (args.model_melgan is not None and args.model_rnn is None and args.model_upsample is None)):
         print('Can not use m_rnn and m_upsample with m_melgan. Define m_melgan or [m_rnn, m_upsample]')
         return False
