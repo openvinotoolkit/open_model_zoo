@@ -60,43 +60,49 @@ def build_argparser():
                            "Default value is CPU",
                       default="CPU", type=str)
 
-    vocoder_parsers = parser.add_subparsers(dest='vocoder')
-
-    wavernn_parser = vocoder_parsers.add_parser('wavernn', aliases=['wr'])
-    wavernn_parser.add_argument("-m_upsample", "--model_upsample",
-                      help="Required. Path to WaveRNN`s part for mel-spectrogram upsampling "
+    args.add_argument("-m_upsample", "--model_upsample",
+                      help="Path to WaveRNN`s part for mel-spectrogram upsampling "
                            "by time axis (*.xml format).",
-                      required=True, type=str)
-    wavernn_parser.add_argument("-m_rnn", "--model_rnn",
-                      help="Required. Path to WaveRNN`s part for waveform autoregression (*.xml format).",
-                      required=True, type=str)
-    wavernn_parser.add_argument("--upsampler_width", default=-1,
-                                help="Width for reshaping of the model_upsample. "
-                                     "If -1 then no reshape. Do not use with FP16 model.",
-                                required=False,
-                                type=int)
+                      default=None, required=False, type=str)
+    args.add_argument("-m_rnn", "--model_rnn",
+                      help="Path to WaveRNN`s part for waveform autoregression (*.xml format).",
+                      default=None, required=False, type=str)
+    args.add_argument("--upsampler_width", default=-1,
+                        help="Width for reshaping of the model_upsample in WaveRNN vocoder. "
+                             "If -1 then no reshape. Do not use with FP16 model.",
+                        required=False,
+                        type=int)
 
-    melgan_parser = vocoder_parsers.add_parser('melgan', aliases=['mg'])
-    melgan_parser.add_argument("-m_melgan", "--model_melgan",
-                               help="Required. Path to model of the MelGAN (*.xml format).",
-                               required=True,
-                               type=str)
-
+    args.add_argument("-m_melgan", "--model_melgan",
+                       help="Path to model of the MelGAN (*.xml format).",
+                       default=None, required=False,
+                       type=str)
 
     return parser
+
+
+def is_correct_args(args):
+    if not ((args.model_melgan is None and args.model_rnn is not None and args.model_upsample is not None) or \
+            (args.model_melgan is not None and args.model_rnn is None and args.model_upsample is None)):
+        print('Can not use m_rnn and m_upsample with m_melgan. Define m_melgan or [m_rnn, m_upsample]')
+        return False
+    return True
 
 
 def main():
     args = build_argparser().parse_args()
 
+    if not is_correct_args(args):
+        return 0
+
     ie = IECore()
 
-    is_wavernn = args.vocoder in ['wavernn', 'wr']
-    if is_wavernn:
+    if args.model_melgan is not None:
+        vocoder = MelGANIE(args.model_melgan, ie, device=args.device)
+    else:
+
         vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, ie, device=args.device,
                             upsampler_width=args.upsampler_width)
-    else:
-        vocoder = MelGANIE(args.model_melgan, ie, device=args.device)
 
     forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, ie, args.device, verbose=False)
 
