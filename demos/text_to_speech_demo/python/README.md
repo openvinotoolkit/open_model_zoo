@@ -18,10 +18,9 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: text_to_speech_demo.py [-h] -m_duration MODEL_DURATION -m_forward
                               MODEL_FORWARD -i INPUT [-o OUT] [-d DEVICE]
-                              {wavernn,wr,melgan,mg} ...
-
-positional arguments:
-  {wavernn,wr,melgan,mg}
+                              [-m_upsample MODEL_UPSAMPLE] [-m_rnn MODEL_RNN]
+                              [--upsampler_width UPSAMPLER_WIDTH]
+                              [-m_melgan MODEL_MELGAN]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -39,6 +38,18 @@ Options:
                         GPU, FPGA, HDDL, MYRIAD or HETERO is acceptable. The
                         sample will look for a suitable plugin for device
                         specified. Default value is CPU
+  -m_upsample MODEL_UPSAMPLE, --model_upsample MODEL_UPSAMPLE
+                        Path to WaveRNN`s part for mel-spectrogram upsampling
+                        by time axis (*.xml format).
+  -m_rnn MODEL_RNN, --model_rnn MODEL_RNN
+                        Path to WaveRNN`s part for waveform autoregression
+                        (*.xml format).
+  --upsampler_width UPSAMPLER_WIDTH
+                        Width for reshaping of the model_upsample in WaveRNN
+                        vocoder. If -1 then no reshape. Do not use with FP16
+                        model.
+  -m_melgan MODEL_MELGAN, --model_melgan MODEL_MELGAN
+                        Path to model of the MelGAN (*.xml format).
 ```
 
 Running the application with the empty list of options yields the usage message and an error message.

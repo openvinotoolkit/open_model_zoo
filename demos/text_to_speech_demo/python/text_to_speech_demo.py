@@ -93,7 +93,7 @@ def main():
     args = build_argparser().parse_args()
 
     if not is_correct_args(args):
-        return 0
+        return 1
 
     ie = IECore()
 
