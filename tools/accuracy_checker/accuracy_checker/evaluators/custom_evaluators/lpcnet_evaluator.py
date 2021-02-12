@@ -77,7 +77,7 @@ class SequentialModel:
             'decoder': self.decoder,
         }
 
-    def predict(self, identifiers, input_data, input_meta, callback=None):
+    def predict(self, identifiers, input_data, input_meta, input_names=None, callback=None):
         assert len(identifiers) == 1
         encoder_output, feats, chunk_size = self.encoder.predict(input_data[0])
         if callback:
