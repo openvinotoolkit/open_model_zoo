@@ -466,7 +466,7 @@ class Model:
         self.framework = framework
         self.description = description
         self.license_url = license_url
-        self.precisions = precisions
+        self.precisions = {'FP32-INT8','FP16-INT8'} if self.quantized else precisions
         self.task_type = task_type
         self.conversion_to_onnx_args = conversion_to_onnx_args
         self.converter_to_onnx = KNOWN_FRAMEWORKS[framework]

@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import argparse
+import functools
 import os
 import string
 import sys
@@ -160,11 +161,11 @@ def main():
             for arg in model.mo_args]
 
         for model_precision in sorted(model_precisions):
-            dir_precision = model_precision + '-INT8' if model.quantized else model_precision
+            data_type = functools.reduce(lambda a,b: a.replace(b,''),'-INT8',model_precision)
             mo_cmd = [str(args.python), '--', str(mo_path),
                 '--framework={}'.format(model_format),
-                '--data_type={}'.format(model_precision),
-                '--output_dir={}'.format(output_dir / model.subdirectory / dir_precision),
+                '--data_type={}'.format(data_type),
+                '--output_dir={}'.format(output_dir / model.subdirectory / model_precision),
                 '--model_name={}'.format(model.name),
                 *expanded_mo_args, *extra_mo_args]
 
