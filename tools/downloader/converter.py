@@ -161,7 +161,7 @@ def main():
             for arg in model.mo_args]
 
         for model_precision in sorted(model_precisions):
-            data_type = functools.reduce(lambda a,b: a.replace(b,''),'-INT8',model_precision)
+            data_type = functools.reduce(lambda a, b: a.replace(b, ''), '-INT8', model_precision)
             mo_cmd = [str(args.python), '--', str(mo_path),
                 '--framework={}'.format(model_format),
                 '--data_type={}'.format(data_type),
