@@ -29,18 +29,20 @@ from .queue import Signal
 def run_pipeline(capture, model_type, model, render_fn, seq_size=16, fps=30):
     pipeline = AsyncPipeline()
     pipeline.add_step("Data", DataStep(capture), parallel=False)
-    if model_type == 'single':
-        pipeline.add_step("SingleModelStep", SingleModelStep(model, seq_size, 256, 224), parallel = False)
-    elif model_type == 'composite':
+    
+    if model_type in ('en-de', 'dummy-de'):
         pipeline.add_step("Encoder", EncoderStep(model[0]), parallel=False)
         pipeline.add_step("Decoder", DecoderStep(model[1], sequence_size=seq_size), parallel=False)
+    elif model_type == 'i3d-rgb':
+        pipeline.add_step("I3DRGBModelStep", I3DRGBModelStep(model[0], seq_size, 256, 224), parallel = False)
+
     pipeline.add_step("Render", RenderStep(render_fn, fps=fps), parallel=True)
 
     pipeline.run()
     pipeline.close()
     pipeline.print_statistics()
 
-class SingleModelStep(PipelineStep):
+class I3DRGBModelStep(PipelineStep):
 
     def __init__(self, model, sequence_size, frame_size, crop_size):
         super().__init__()
@@ -63,10 +65,10 @@ class SingleModelStep(PipelineStep):
 
             if output is None:
                 return None
+                
+            return next_frame, output[0], {'i3d-rgb-model': self.own_time.last}
 
-            return next_frame, output[0], {'single_model': self.own_time.last}
-
-        return frame, None, {'single_model': self.own_time.last}
+        return frame, None, {'i3d-rgb-model': self.own_time.last}
 
 class DataStep(PipelineStep):
 

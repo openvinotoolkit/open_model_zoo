@@ -15,11 +15,11 @@ The demo pipeline consists of several frames, namely `Data`, `Model` and `Render
 Every step implements `PipelineStep` interface by creating a class derived from `PipelineStep` base class. See `steps.py` for implementation details.
 
 - `DataStep` reads frames from the input video.
--  Model step depends on model type:
+-  Model step depends on architecture type:
     - For composite models there are two steps:
-      -  `EncoderStep` preprocesses a frame and feeds it to the encoder model to produce a frame embedding.
-      -  `DecoderStep` feeds embeddings produced by the `EncoderStep` to the decoder model and produces predictions.
-    - For single model `SingleModelStep` does both preprocess and produce predictions.
+      -  `EncoderStep` preprocesses a frame and feeds it to the encoder model to produce a frame embedding. simple averaging of encoder's outputs over a time window is applied.
+      -  `DecoderStep` feeds embeddings produced by the `EncoderStep` to the decoder model and produces predictions. For models that use `DummyDecoder` simple averaging of encoder's outputs over a time window is applied.
+    - For single models implemented corresponding `<ModelNameStep>` which does preprocess and produce predictions.
 - `RenderStep` renders prediction results.
 
 Pipeline steps are composed in `AsyncPipeline`. Every step can be run in separate thread by adding it to the pipeline with `parallel=True` option.
@@ -39,8 +39,8 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: action_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
-                                  [-limit OUTPUT_LIMIT] -mt {single,composite}
-                                  -m_en M_ENCODER
+                                  [-limit OUTPUT_LIMIT] -at
+                                  {dummy-de,en-de,i3d-rgb} -m_en M_ENCODER
                                   [-m_de M_DECODER | --seq DECODER_SEQ_SIZE]
                                   [-l CPU_EXTENSION] [-d DEVICE] [-lb LABELS]
                                   [--no_show] [-s LABEL_SMOOTHING]
@@ -58,14 +58,12 @@ Options:
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output. If 0 is
                         set, all frames are stored.
-  -mt {single,composite}, --model_type {single,composite}
-                        Required. Specify model type.
+  -at {dummy-de,en-de,i3d-rgb}, --architecture_type {dummy-de,en-de,i3d-rgb}
+                        Required. Specify architecture type.
   -m_en M_ENCODER, --m_encoder M_ENCODER
                         Required. Path to encoder model.
   -m_de M_DECODER, --m_decoder M_DECODER
-                        Optional. Path to decoder model. If not specified, for
-                        composite models simple averaging of encoder's outputs
-                        over a time window is applied.
+                        Optional. Path to decoder model. Only for -at en-de.
   --seq DECODER_SEQ_SIZE
                         Optional. Length of sequence that decoder takes as
                         input.
@@ -84,7 +82,6 @@ Options:
                         Optional. Number of frames used for output label
                         smoothing.
   -u UTILIZATION_MONITORS, --utilization-monitors UTILIZATION_MONITORS
-                        Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.

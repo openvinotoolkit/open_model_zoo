@@ -31,10 +31,10 @@ TEXT_LEFT_MARGIN = 15
 
 
 class ResultRenderer:
-    def __init__(self, no_show, model_type, presenter, output, limit, display_fps=False, display_confidence=True, number_of_predictions=1,
+    def __init__(self, no_show, architecture_type, presenter, output, limit, display_fps=False, display_confidence=True, number_of_predictions=1,
                  label_smoothing_window=30, labels=None, output_height=720):
         self.no_show = no_show
-        self.model_type = model_type
+        self.architecture_type = architecture_type
         self.presenter = presenter
         self.output = output
         self.limit = limit
@@ -50,13 +50,13 @@ class ResultRenderer:
         print("To close the application, press 'CTRL+C' here or switch to the output window and press Esc or Q")
 
     def update_timers(self, timers):
-        if self.model_type == 'single':
-            self.meters['single_model'].update(timers['single_model'])
-            return  self.meters['single_model'].avg
-        elif self.model_type == 'composite':
+        if self.architecture_type in ('en-de', 'dummy-de'):
             self.meters['encoder'].update(timers['encoder'])
             self.meters['decoder'].update(timers['decoder'])
             return self.meters['encoder'].avg + self.meters['decoder'].avg
+        elif self.architecture_type == 'i3d-rgb':
+            self.meters['i3d-rgb-model'].update(timers['i3d-rgb-model'])
+            return  self.meters['i3d-rgb-model'].avg
 
     def render_frame(self, frame, logits, timers, frame_ind, fps):
         inference_time = self.update_timers(timers)
@@ -106,7 +106,7 @@ class ResultRenderer:
 
         if not self.no_show:
             cv2.imshow("Action Recognition", frame)
-            key = cv2.waitKey(1) & 0xFF
+            key = cv2.waitKey(0) & 0xFF
             if key in {ord('q'), ord('Q'), 27}:
                 return -1
             self.presenter.handleKey(key)

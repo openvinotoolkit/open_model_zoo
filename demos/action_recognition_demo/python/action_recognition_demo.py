@@ -44,13 +44,12 @@ def build_argparser():
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
-    args.add_argument('-mt', '--model_type', help='Required. Specify model type.',
-                      type=str, required=True, choices=('single', 'composite'))
+    args.add_argument('-at', '--architecture_type', help='Required. Specify architecture type.',
+                      type=str, required=True, choices=('dummy-de','en-de', 'i3d-rgb'))
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
     decoder_args = args.add_mutually_exclusive_group()
     decoder_args.add_argument('-m_de', '--m_decoder',
-                              help="Optional. Path to decoder model. If not specified, "
-                                   "for composite models simple averaging of encoder's outputs over a time window is applied.",
+                              help="Optional. Path to decoder model. Only for -at en-de.",
                               default=None, type=str)
     decoder_args.add_argument('--seq', dest='decoder_seq_size',
                               help='Optional. Length of sequence that decoder takes as input.',
@@ -97,35 +96,33 @@ def main():
     else:
         encoder_target_device = decoder_target_device
 
-    if args.model_type == 'single':
-        model_xml = args.m_encoder
-        model_bin = args.m_encoder.replace('.xml', '.bin')
-        model = IEModel(model_xml, model_bin, ie, encoder_target_device,
-                        num_requests=(3 if args.device == 'MYRIAD' else 1))
-        seq_size = model.input_size[2]
-    elif args.model_type == 'composite':
-        encoder_xml = args.m_encoder
-        encoder_bin = args.m_encoder.replace('.xml', '.bin')
-        model = []
-        model.append(IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
-                        num_requests=(3 if args.device == 'MYRIAD' else 1)))
+    encoder_xml = args.m_encoder
+    encoder_bin = args.m_encoder.replace('.xml', '.bin')
+    model = []
+    model.append(IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
+                num_requests=(3 if args.device == 'MYRIAD' else 1)))
 
-        if args.m_decoder is not None:
-            decoder_xml = args.m_decoder
-            decoder_bin = args.m_decoder.replace('.xml', '.bin')
-            model.append(IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2))
-            seq_size = model[1].input_size[1]
-        else:
-            model.append(DummyDecoder(num_requests=2))
-            seq_size = args.decoder_seq_size
+    if args.architecture_type == 'dummy-de':
+        model.append(DummyDecoder(num_requests=2))
+        seq_size = args.decoder_seq_size
+    elif args.architecture_type == 'en-de':
+        if args.m_decoder is None:
+            raise RuntimeError('No decoder for encoder-decoder model type\
+                 (-m_de) provided: {}'.format(args.architecture_type))
+        decoder_xml = args.m_decoder
+        decoder_bin = args.m_decoder.replace('.xml', '.bin')
+        model.append(IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2))
+        seq_size = model[1].input_size[1]
+    elif args.architecture_type == 'i3d-rgb':
+        seq_size = model[0].input_size[2]
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
     presenter = monitors.Presenter(args.utilization_monitors, 70)
-    result_presenter = ResultRenderer(no_show=args.no_show, model_type=args.model_type, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,
+    result_presenter = ResultRenderer(no_show=args.no_show, architecture_type=args.architecture_type, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
     cap = open_images_capture(args.input, args.loop)
-    run_pipeline(cap, args.model_type, model, result_presenter.render_frame, seq_size=seq_size, fps=cap.fps())
+    run_pipeline(cap, args.architecture_type, model, result_presenter.render_frame, seq_size=seq_size, fps=cap.fps())
     print(presenter.reportMeans())
 
 
