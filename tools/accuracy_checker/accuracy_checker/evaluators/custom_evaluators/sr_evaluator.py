@@ -475,7 +475,7 @@ class FeedbackMixin:
 
     def feedback(self, data):
         data = data[0]
-        info = self._feedback_inputs[self._feedback_name]
+        # info = self._feedback_inputs[self._feedback_name]
         self._feedback_data[self._feedback_name] = data[0].value
 
     def fill_feedback(self, data):
@@ -531,33 +531,30 @@ class ModelTFModel(BaseModel, FeedbackMixin):
         super().__init__(network_info, launcher)
         model = self.automatic_model_search(network_info)
         self.inference_session = launcher.create_inference_session(str(model))
-        # self.input_blob = next(iter(self.inference_session.get_inputs()))
-        # self.output_blob = next(iter(self.inference_session.get_outputs()))
 
+        self.adapter = create_adapter(network_info.get('adapter', 'super_resolution'))
         self.configure_feedback()
 
     def predict(self, identifiers, input_data):
-        results = self.inference_session.run((self.output_blob.name, ), self.fit_to_input(input_data))
-        return results, results[0]
+        input_data = self.fit_to_input(input_data)
+        raw_result = self.inference_session.predict([input_data,])
+        result = self.adapter.process(raw_result, identifiers, [{}])
+        return raw_result, result
 
     def fit_to_input(self, input_data):
-        return {self.input_blob.name: input_data[0]}
+        fitted = {}
+        for idx, data in enumerate(input_data):
+            name = self._idx_to_name[idx]
+            data = np.expand_dims(data, axis=0)
+            fitted[name] = data
+
+        return fitted
 
     def release(self):
         del self.inference_session
 
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
-        # if model.is_dir():
-        #     model_list = list(model.glob('*{}.onnx'.format(self.default_model_suffix)))
-        #     if not model_list:
-        #         model_list = list(model.glob('*.onnx'))
-        #     if not model_list:
-        #         raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
-        #     if len(model_list) > 1:
-        #         raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
-        #     model = model_list[0]
-
         return model
 
 
