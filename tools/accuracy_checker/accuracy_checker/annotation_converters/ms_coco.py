@@ -213,7 +213,7 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
                     optional=True, default='image_id', choices=['image_id', 'image_size'],
                     description='Key by which annotations will be sorted.'
                 ),
-                'has_background_images': BoolField(
+                'remove_empty_images': BoolField(
                     optional=True, default=False,
                     description='Allows including/exclusing images without objects to/from the dataset.'
                 )

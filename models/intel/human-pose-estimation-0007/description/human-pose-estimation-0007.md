@@ -23,7 +23,7 @@ Average Precision metric described in [COCO Keypoint Evaluation site](https://co
 
 ## Inputs
 
-Name: `input`, shape: [1x3x448x448]. An input image in the [BxCxHxW] format ,
+Name: `input`, shape: `1, 3, 448, 448`. An input image in the `B, C, H, W` format ,
 where:
   - B - batch size
   - C - number of channels
@@ -35,7 +35,7 @@ Expected color order is BGR.
 
 The net outputs three blobs:
   * "heatmaps" of shape [N, 17, 224, 224] containing location heatmaps for keypoints of all types. Locations that are filtered out by non-maximum suppression algorithm have negated values assigned to them.
-  * "embeddings" of shape [N, 17, 224, 224, 1] containing associative embedding values, which are used for grouping individual keypoints into poses.
+  * `embeddings` of shape `N, 17, 224, 224, 1` containing associative embedding values, which are used for grouping individual keypoints into poses.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
