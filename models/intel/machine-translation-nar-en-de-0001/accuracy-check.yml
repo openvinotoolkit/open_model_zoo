@@ -4,8 +4,8 @@ models:
       - framework: dlsdk
         adapter:
           type: narnmt
-          vocabulary_file: tokenizer_tgt/vocab.json
-          merges_file: tokenizer_tgt/merges.txt
+          vocabulary_file: machine-translation-nar-en-de-0001/tokenizer_tgt/vocab.json
+          merges_file: machine-translation-nar-en-de-0001/tokenizer_tgt/merges.txt
           output_name: preds
         inputs:
           - name: "tokens"
@@ -21,8 +21,8 @@ models:
 
         preprocessing:
           - type: decode_by_sentence_piece_bpe_tokenizer
-            vocabulary_file: tokenizer_src/vocab.json
-            merges_file: tokenizer_src/merges.txt
+            vocabulary_file: machine-translation-nar-en-de-0001/tokenizer_src/vocab.json
+            merges_file: machine-translation-nar-en-de-0001/tokenizer_src/merges.txt
 
           - type: pad_with_eos
             eos_index: 1
