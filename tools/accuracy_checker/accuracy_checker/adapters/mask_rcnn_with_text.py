@@ -145,10 +145,10 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
 
         for bbox, label, mask in zip(bboxes, labels, masks):
             x0, y0, x1, y1 = bbox
-            src_points = np.float32([[0, 0], [0, mask.shape[0]], [mask.shape[1],  mask.shape[0]]]) - 0.5
+            src_points = np.float32([[0, 0], [0, mask.shape[0]], [mask.shape[1], mask.shape[0]]]) - 0.5
             dst_points = np.float32([[x0, y0], [x0, y1], [x1, y1]]) - 0.5
             transform_matrix = cv2.getAffineTransform(src_points, dst_points)
-            mask = cv2.warpAffine(mask, transform_matrix, img_size[::-1]) 
+            mask = cv2.warpAffine(mask, transform_matrix, img_size[::-1])
             mask = (mask >= mask_thr_binary).astype(np.uint8)
             cls_masks[label].append(mask)
 
