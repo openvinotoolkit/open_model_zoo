@@ -514,7 +514,6 @@ class Model:
             if 'model_optimizer_args' in model:
                 mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)
                     for i, arg in enumerate(model['model_optimizer_args'])]
-
                 precisions = {'FP16-INT8', 'FP32-INT8'} if quantized is not None else {'FP16', 'FP32'}
             else:
                 if framework != 'dldt':

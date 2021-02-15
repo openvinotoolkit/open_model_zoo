@@ -15,7 +15,6 @@
 # limitations under the License.
 
 import argparse
-import functools
 import os
 import string
 import sys
