@@ -29,7 +29,7 @@ for more information on optimizing models.
 
 1. Clone the Open Model Zoo repository to your computer with `git`, or download the repository by clicking on this link[this link](https://github.com/openvinotoolkit/open_model_zoo/archive/master.zip) and unzip it.
 
-2. Install Python 
+2. Install Python
 
     This notebook has been tested on Linux (Ubuntu 18.04) and Windows, with Python 3.7.9. If you have not installed Python yet, download and install it from https://www.python.org/downloads/release/python-379/. Choose a 64-bit version (not embedded). If you are on Windows, it is recommended to select the `Add Python to your PATH` option during installation.
 
@@ -40,12 +40,12 @@ for more information on optimizing models.
    - In the demo directory, type the following command: `pip install -r requirements.txt`
 
 4. Add the OpenVINO directory to the PATH (Windows) or LD_LIBRARY_PATH (Linux/MacOS) variable.
-    - NOTE: the PATH is remembered as long as you do not close the terminal application. If you open a new terminal and want to run the notebooks again, you have to set the PATH again. 
+    - NOTE: the PATH is remembered as long as you do not close the terminal application. If you open a new terminal and want to run the notebooks again, you have to set the PATH again.
     - On Windows, on a fresh install:
       - Find the library path by copy/pasting: `python -c "import os, sys; print((os.path.dirname(sys.executable))+'\Library\\bin')"`. If you followed the default installation, the path will be `C:\Users\USERNAME\AppData\Local\Programs\Python\Python37\Library\bin`
       - Copy the library path (with CTRL-C) and type `set PATH=` followed by CTRL-V to paste the path you just copied, followed by `;%PATH%;`
     - For other situations, follow the instructions on https://pypi.org/project/openvino-python/
- 
+
 5. Run Jupyter Lab with `jupyter lab`. Click on the notebook at the left.
 
 ## Optional
@@ -67,6 +67,4 @@ This is supported in the notebook by setting `CONVERT_MODELS` to `True`. The
 model optimizer needs to be installed and configured separately. Follow the
 installation instructions at
 https://docs.openvinotoolkit.org/2021.2/installation_guides.html, including the
-steps under *Configure the Model Optimizer*. 
-
-
+steps under *Configure the Model Optimizer*.

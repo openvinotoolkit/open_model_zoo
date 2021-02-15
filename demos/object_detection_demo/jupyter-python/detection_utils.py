@@ -10,7 +10,6 @@ open_model_zoo_path =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.a
 
 sys.path.append(os.path.join(open_model_zoo_path, "demos", "common", "python"))
 
-import monitors
 from models import SSD, YOLO, FaceBoxes, CenterNet, RetinaFace
 
 class ColorPalette:
@@ -52,8 +51,8 @@ class ColorPalette:
 
     def __len__(self):
         return len(self.palette)
-    
-    
+
+
 def get_model(ie, model, architecture_type, labels, keep_aspect_ratio=False, prob_threshold=0.5):
     if architecture_type == "ssd":
         return SSD(ie, model, labels=labels, keep_aspect_ratio_resize=keep_aspect_ratio)
