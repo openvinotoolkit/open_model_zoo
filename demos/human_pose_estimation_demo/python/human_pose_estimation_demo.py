@@ -53,7 +53,7 @@ def build_argparser():
                       help='Optional. Name of output to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                        help='Optional. Number of frames to store in output. '
-                            'If -1 is set, all frames are stored.')
+                            'If 0 is set, all frames are stored.')
     args.add_argument('-d', '--device', default='CPU', type=str,
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
@@ -206,9 +206,8 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors, 55,
                                    (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
     video_writer = cv2.VideoWriter()
-    if (args.output
-            and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
-                (frame.shape[1], frame.shape[0]))):
+    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+            (frame.shape[1], frame.shape[0])):
         raise RuntimeError("Can't open video writer")
 
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
@@ -228,7 +227,7 @@ def main():
             presenter.drawGraphs(frame)
             frame = draw_poses(frame, poses, args.prob_threshold)
             metrics.update(start_time, frame)
-            if video_writer.isOpened() and (args.output_limit == -1 or next_frame_id_to_show <= args.output_limit-1):
+            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
             if not args.no_show:
                 cv2.imshow('Pose estimation results', frame)
@@ -272,7 +271,7 @@ def main():
             presenter.drawGraphs(frame)
             frame = draw_poses(frame, poses, args.prob_threshold)
             metrics.update(start_time, frame)
-            if video_writer.isOpened() and (args.output_limit == -1 or next_frame_id_to_show <= args.output_limit-1):
+            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
             if not args.no_show:
                 cv2.imshow('Pose estimation results', frame)
