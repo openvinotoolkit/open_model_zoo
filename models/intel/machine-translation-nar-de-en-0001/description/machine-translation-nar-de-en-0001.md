@@ -27,7 +27,7 @@ The quality metrics were calculated on the wmt19-en-de dataset ("test" split in 
 ## Input
 
 name: tokens
-shape: [1, 150]
+shape: `1, 150`
 description: sequence of tokens (integer values) representing the tokenized sentence.
 The sequence structure is as follows (`<s>`, `</s>` and `<pad>` should be replaced by corresponding token IDs as specified by the dictionary):
 `<s>` + *tokenized sentence* + `</s>` + (`<pad>` tokens to pad to the maximum sequence length of 150)
@@ -35,7 +35,7 @@ The sequence structure is as follows (`<s>`, `</s>` and `<pad>` should be replac
 ## Output
 
 name: preds
-shape: [1, 200]
+shape: `1, 200`
 description: sequence of tokens (integer values) representing the tokenized translation.
 The sequence structure is as follows (`<s>`, `</s>` and `<pad>` should be replaced by corresponding token IDs as specified by the dictionary):
 `<s>` + *tokenized sentence* + `</s>` + (`<pad>` tokens to pad to the maximum sequence length of 150)
