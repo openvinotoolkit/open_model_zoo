@@ -11,7 +11,7 @@ models:
           embeddings_out: embeddings
 
     datasets:
-      - name: ms_coco_val2017_keypoints_with_background
+      - name: ms_coco_val2017_keypoints_5k_images
 
         preprocessing:
           - type: resize

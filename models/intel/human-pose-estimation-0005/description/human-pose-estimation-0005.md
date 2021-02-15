@@ -17,7 +17,7 @@ The pose may contain up to 17 keypoints: ears, eyes, nose, shoulders, elbows, wr
 | Average Precision (AP)          | 45.7%                                     |
 | GFlops                          | 5.9393                                    |
 | MParams                         | 8.1504                                    |
-| Source framework                | PyTorch\*                                  |
+| Source framework                | PyTorch\*                                 |
 
 Average Precision metric described in [COCO Keypoint Evaluation site](https://cocodataset.org/#keypoints-eval).
 
@@ -34,8 +34,8 @@ Expected color order is BGR.
 ## Outputs
 
 The net outputs three blobs:
-  * "heatmaps" of shape [N, 17, 144, 144] containing location heatmaps for keypoints of all types. Locations that are filtered out by non-maximum suppression algorithm have negated values assigned to them.
-  * `embeddings` of shape `N, 17, 144, 144, 1` containing associative embedding values, which are used for grouping individual keypoints into poses.
+  * `heatmaps` of shape `B, 17, 144, 144` containing location heatmaps for keypoints of all types. Locations that are filtered out by non-maximum suppression algorithm have negated values assigned to them.
+  * `embeddings` of shape `B, 17, 144, 144, 1` containing associative embedding values, which are used for grouping individual keypoints into poses.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

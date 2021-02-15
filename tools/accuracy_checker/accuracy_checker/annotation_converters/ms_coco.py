@@ -215,7 +215,7 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
                 ),
                 'remove_empty_images': BoolField(
                     optional=True, default=False,
-                    description='Allows including/exclusing images without objects to/from the dataset.'
+                    description='Allows excluding/inclusing images without objects from/to the dataset.'
                 )
             }
         )
@@ -227,7 +227,7 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
         self.sort_annotations = self.get_value_from_config('sort_annotations')
         self.sort_key = self.get_value_from_config('sort_key')
-        self.has_background_images = self.get_value_from_config('has_background_images')
+        self.remove_empty_images = self.get_value_from_config('remove_empty_images')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         keypoints_annotations = []
@@ -251,7 +251,7 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
                 if not check_file_existence(full_image_path):
                     content_errors.append('{}: does not exist'.format(full_image_path))
             image_annotation = get_image_annotation(image[0], annotations)
-            if not image_annotation and not self.has_background_images:
+            if not image_annotation and self.remove_empty_images:
                 continue
             x_vals, y_vals, visibility, labels, areas, is_crowd, bboxes, difficult = [], [], [], [], [], [], [], []
             for target in image_annotation:
