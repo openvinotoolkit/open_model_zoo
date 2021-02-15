@@ -13,7 +13,7 @@ models:
             type: INPUT
 
     datasets:
-      - name: WMT_de_en
+      - name: WMT2019_de_en
         postprocessing:
           - type: to_lower_case
           - type: remove_repeats
