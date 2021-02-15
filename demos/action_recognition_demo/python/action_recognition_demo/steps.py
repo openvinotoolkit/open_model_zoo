@@ -29,7 +29,7 @@ from .queue import Signal
 def run_pipeline(capture, model_type, model, render_fn, seq_size=16, fps=30):
     pipeline = AsyncPipeline()
     pipeline.add_step("Data", DataStep(capture), parallel=False)
-    
+
     if model_type in ('en-de', 'dummy-de'):
         pipeline.add_step("Encoder", EncoderStep(model[0]), parallel=False)
         pipeline.add_step("Decoder", DecoderStep(model[1], sequence_size=seq_size), parallel=False)
@@ -65,7 +65,7 @@ class I3DRGBModelStep(PipelineStep):
 
             if output is None:
                 return None
-                
+
             return next_frame, output[0], {'i3d-rgb-model': self.own_time.last}
 
         return frame, None, {'i3d-rgb-model': self.own_time.last}

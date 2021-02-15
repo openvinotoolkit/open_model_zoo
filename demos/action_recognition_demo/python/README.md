@@ -16,10 +16,10 @@ Every step implements `PipelineStep` interface by creating a class derived from 
 
 - `DataStep` reads frames from the input video.
 -  Model step depends on architecture type:
-    - For composite models there are two steps:
+    - For encder-decoder models there are two steps:
       -  `EncoderStep` preprocesses a frame and feeds it to the encoder model to produce a frame embedding. simple averaging of encoder's outputs over a time window is applied.
       -  `DecoderStep` feeds embeddings produced by the `EncoderStep` to the decoder model and produces predictions. For models that use `DummyDecoder` simple averaging of encoder's outputs over a time window is applied.
-    - For single models implemented corresponding `<ModelNameStep>` which does preprocess and produce predictions.
+    - For specific single models implemented corresponding `<ModelNameStep>` which does preprocess and produce predictions.
 - `RenderStep` renders prediction results.
 
 Pipeline steps are composed in `AsyncPipeline`. Every step can be run in separate thread by adding it to the pipeline with `parallel=True` option.
@@ -92,7 +92,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 **For example**, to run the demo for in-cabin driver monitoring scenario, please provide a path to the encoder and decoder models, an input video and a file with label names:
 ```bash
-python3 action_recognition_demo.py -mt composite -m_en models/driver_action_recognition_tsd_0002_encoder.xml \
+python3 action_recognition_demo.py -at en-de -m_en models/driver_action_recognition_tsd_0002_encoder.xml \
     -m_de models/driver_action_recognition_tsd_0002_decoder.xml \
     -i <path_to_video>/inputVideo.mp4 \
     -lb driver_actions.txt

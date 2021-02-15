@@ -45,7 +45,7 @@ def build_argparser():
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
     args.add_argument('-at', '--architecture_type', help='Required. Specify architecture type.',
-                      type=str, required=True, choices=('dummy-de','en-de', 'i3d-rgb'))
+                      type=str, required=True, choices=('dummy-de', 'en-de', 'i3d-rgb'))
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
     decoder_args = args.add_mutually_exclusive_group()
     decoder_args.add_argument('-m_de', '--m_decoder',
