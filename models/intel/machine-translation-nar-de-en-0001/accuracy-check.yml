@@ -14,6 +14,20 @@ models:
 
     datasets:
       - name: WMT2019_de_en
+        reader:
+          type: annotation_features_extractor
+          features:
+            - source
+
+        preprocessing:
+          - type: decode_by_sentence_piece_bpe_tokenizer
+            vocabulary_file: tokenizer_src/vocab.json
+            merges_file: tokenizer_src/merges.txt
+
+          - type: pad_with_eos
+            eos_index: 1
+            sequence_len: 150
+
         postprocessing:
           - type: to_lower_case
           - type: remove_repeats

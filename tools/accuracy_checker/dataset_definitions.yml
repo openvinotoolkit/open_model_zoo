@@ -1055,8 +1055,8 @@ datasets:
   - name: WMT2019_en_de
     annotation_conversion:
       converter: wmt
-      input_file: wmt19-en-de.src
-      reference_file: wmt19-en-de.ref
+      input_file: WMT_en_de/wmt-en-de.src
+      reference_file: WMT_en_de/wmt-en-de.ref
 
       reader:
         type: annotation_features_extractor
@@ -1075,8 +1075,8 @@ datasets:
   - name: WMT2019_de_en
     annotation_conversion:
       converter: wmt
-      input_file: wmt19-en-de.ref
-      reference_file: wmt19-en-de.src
+      input_file: WMT_de_en/wmt-de-en.src
+      reference_file: WMT_de_en/wmt-de-en.ref
 
       reader:
         type: annotation_features_extractor
