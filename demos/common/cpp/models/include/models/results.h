@@ -99,3 +99,7 @@ struct HumanPoseResult : public ResultBase {
     }
     std::vector<HumanPose> poses;
 };
+
+struct ImageProcessingResult: public ResultBase {
+    cv::Mat resultImage;
+};
