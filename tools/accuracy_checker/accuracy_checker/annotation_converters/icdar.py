@@ -119,6 +119,8 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
                 text_annotation = text_area.split(',')
                 transcription = text_annotation[-1]
                 num_coords = 8 if len(text_annotation) >= 8 else 4
+                if len(text_annotation) > 9:
+                    transcription = ','.join(text_annotation[8:] + [transcription])
                 coords = text_annotation[:num_coords]
                 points = np.reshape(list(map(float, coords)), (-1, 2))
                 if num_coords == 4:
