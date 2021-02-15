@@ -34,8 +34,7 @@ Expected color order is BGR.
 ## Outputs
 
 The net outputs three blobs:
-  * "heatmaps" of shape [N, 17, 144, 144] containing location heatmaps for keypoints of all types.
-  * "nms_heatmaps" of shape [N, 17, 144, 144] containing heatmaps after non-maximum suppression.
+  * "heatmaps" of shape [N, 17, 144, 144] containing location heatmaps for keypoints of all types. Locations that are filtered out by non-maximum suppression algorithm have negated values assigned to them.
   * "embeddings" of shape [N, 17, 144, 144, 1] containing associative embedding values, which are used for grouping individual keypoints into poses.
 
 ## Legal Information
