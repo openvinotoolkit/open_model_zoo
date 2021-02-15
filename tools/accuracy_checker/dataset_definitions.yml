@@ -1052,6 +1052,46 @@ datasets:
         eos_index: 1
         sequence_len: 192
 
+  - name: WMT2019_en_de
+    annotation_conversion:
+      converter: wmt
+      input_file: wmt19-en-de.src
+      reference_file: wmt19-en-de.ref
+
+      reader:
+        type: annotation_features_extractor
+        features:
+          - source
+
+      preprocessing:
+        - type: decode_by_sentence_piece_bpe_tokenizer
+          vocabulary_file: tokenizer_src/vocab.json
+          merges_file: tokenizer_src/merges.txt
+
+        - type: pad_with_eos
+          eos_index: 1
+          sequence_len: 150
+
+  - name: WMT2019_de_en
+    annotation_conversion:
+      converter: wmt
+      input_file: wmt19-en-de.ref
+      reference_file: wmt19-en-de.src
+
+      reader:
+        type: annotation_features_extractor
+        features:
+          - source
+
+      preprocessing:
+        - type: decode_by_sentence_piece_bpe_tokenizer
+          vocabulary_file: tokenizer_src/vocab.json
+          merges_file: tokenizer_src/merges.txt
+
+        - type: pad_with_eos
+          eos_index: 1
+          sequence_len: 150
+
   - name: NYU_Depth_V2
     data_source: nyudepthv2/val/converted/images
     additional_data_source: nyudepthv2/val/converted/depth
