@@ -461,12 +461,11 @@ class Model:
         self.files = files
         self.postprocessing = postprocessing
         self.mo_args = mo_args
-        self.quantized = quantized
         self.quantizable = quantizable
         self.framework = framework
         self.description = description
         self.license_url = license_url
-        self.precisions = {'FP32-INT8', 'FP16-INT8'} if self.quantized else precisions
+        self.precisions = precisions
         self.task_type = task_type
         self.conversion_to_onnx_args = conversion_to_onnx_args
         self.converter_to_onnx = KNOWN_FRAMEWORKS[framework]
@@ -508,11 +507,15 @@ class Model:
                 if conversion_to_onnx_args:
                     raise DeserializationError('Conversion to ONNX not supported for "{}" framework'.format(framework))
 
+            quantized = model.get('quantized', None)
+            if quantized is not None and quantized != 'INT8':
+                raise DeserializationError('"quantized": expected a INT8, got {!r}'.format(quantized))
+
             if 'model_optimizer_args' in model:
                 mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)
                     for i, arg in enumerate(model['model_optimizer_args'])]
 
-                precisions = {'FP16', 'FP32'}
+                precisions = {'FP16-INT8', 'FP32-INT8'} if quantized is not None else {'FP16', 'FP32'}
             else:
                 if framework != 'dldt':
                     raise DeserializationError('Model not in IR format, but no conversions defined')
@@ -537,8 +540,6 @@ class Model:
                             raise DeserializationError('No {} file for precision "{}"'.format(ext.upper(), precision))
 
                 precisions = set(files_per_precision.keys())
-
-            quantized = model.get('quantized', None)
 
             quantizable = model.get('quantizable', False)
             if not isinstance(quantizable, bool):
