@@ -572,7 +572,7 @@ PYTHON_DEMOS = [
                               '-m': ModelArg('faceboxes-pytorch')}
             ),
             *combine_cases(
-                TestCase(options={'--architecture_type': 'retina'}),
+                TestCase(options={'--architecture_type': 'retinaface'}),
                 single_option_cases('-m',
                     ModelArg('retinaface-anti-cov'),
                     ModelArg('retinaface-resnet50'))
