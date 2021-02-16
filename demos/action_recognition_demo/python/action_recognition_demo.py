@@ -107,16 +107,13 @@ def main():
         seq_size = args.decoder_seq_size
     elif args.architecture_type == 'en-de':
         if args.m_decoder is None:
-            raise RuntimeError('No decoder for encoder-decoder model type\
-                 (-m_de) provided: {}'.format(args.architecture_type))
+            raise RuntimeError('No decoder for encoder-decoder model type (-m_de) provided: {}'.format(args.m_decoder))
         decoder_xml = args.m_decoder
         decoder_bin = args.m_decoder.replace('.xml', '.bin')
         model.append(IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2))
         seq_size = model[1].input_size[1]
     elif args.architecture_type == 'i3d-rgb':
         seq_size = model[0].input_size[2]
-    else:
-        raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
     presenter = monitors.Presenter(args.utilization_monitors, 70)
     result_presenter = ResultRenderer(no_show=args.no_show, architecture_type=args.architecture_type, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,

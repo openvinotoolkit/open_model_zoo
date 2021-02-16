@@ -106,7 +106,7 @@ class ResultRenderer:
 
         if not self.no_show:
             cv2.imshow("Action Recognition", frame)
-            key = cv2.waitKey(0) & 0xFF
+            key = cv2.waitKey(1) & 0xFF
             if key in {ord('q'), ord('Q'), 27}:
                 return -1
             self.presenter.handleKey(key)
