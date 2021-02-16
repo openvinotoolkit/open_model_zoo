@@ -286,7 +286,7 @@ public:
             InferenceEngine::LockedMemory<void> seqBlobMapped =
                 InferenceEngine::as<InferenceEngine::MemoryBlob>(seqBlob)->wmap();
             float* blob_data = seqBlobMapped.as<float*>();
-            std::fill(blob_dat, blob_data + seqBlob->getTensorDesc().getDims()[0], 1.0f);
+            std::fill(blob_data, blob_data + seqBlob->getTensorDesc().getDims()[0], 1.0f);
         }
     }
 
