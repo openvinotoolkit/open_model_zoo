@@ -23,8 +23,8 @@
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),
-    boxIOUThreshold(boxIOUThreshold), variance({0.1f, 0.2f}), steps({32, 64, 128}),
-    minSizes({ {32, 64, 128}, {256}, {512} }) {
+      maxProposalsCount(0), boxIOUThreshold(boxIOUThreshold), variance({0.1f, 0.2f}),
+      steps({32, 64, 128}), minSizes({ {32, 64, 128}, {256}, {512} }) {
 }
 
 void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
