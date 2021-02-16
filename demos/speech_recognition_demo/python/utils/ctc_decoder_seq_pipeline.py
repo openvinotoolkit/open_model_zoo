@@ -7,7 +7,7 @@ from copy import deepcopy
 from ctcdecode_numpy import SeqCtcLmDecoder
 
 from utils.alphabet import get_default_alphabet, load_alphabet, CtcdecoderAlphabet
-from utils.pipelines import BlockedSeqPipelineStage, SeqPipeline
+from utils.pipelines import BlockedSeqPipelineStage
 
 
 class CtcDecoderSeqPipelineStage(BlockedSeqPipelineStage):
@@ -30,7 +30,7 @@ class CtcDecoderSeqPipelineStage(BlockedSeqPipelineStage):
         alphabet_decoder = CtcdecoderAlphabet(self.alphabet)
         self._decoder = SeqCtcLmDecoder(self.alphabet, self.beam_width, max_candidates=max_candidates,
             scorer_lm_fname=lm, alpha=self.p['alpha'], beta=self.p['beta'],
-            text_decoder=lambda symbols:alphabet_decoder.decode(symbols))
+            text_decoder=lambda symbols: alphabet_decoder.decode(symbols))
 
         super().__init__(
             block_len=1, context_len=0,

@@ -91,6 +91,7 @@ def main():
         assert compression_type == 'NONE', "Only linear PCM WAV files supported"
         assert channel_num == 1, "Only mono WAV PCM supported"
         print("Audio file length: {} s".format(pcm_length / sampling_rate))
+        print("")
 
         audio_pos = 0
         play_start_time = timeit.default_timer()
