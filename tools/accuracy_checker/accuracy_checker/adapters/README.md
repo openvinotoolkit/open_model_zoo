@@ -67,6 +67,11 @@ AccuracyChecker supports following set of adapters:
   * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0).
 * `yolo_v5` - converting output of YOLO v5 family models to `DetectionPrediction` representation. The parameters are the same as for the `yolo_v3` models.
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
+* `aocr` - converting output of attention-ocr model to `CharacterRecognitionPrediction`.
+  * `output_blob` - name of output layer with predicted labels or string.
+  * `labels` - optional, list of supported tokens for decoding raw labels (Optional, default configuration is ascii charmap, this parameter ignored if you have decoding part in the model).
+  * `eos_index` - index of end of string token in labels. (Optional, default 2, ignored if you have decoding part in the model).
+  * `to_lower_case` - allow converting decoded characters to lower case (Optional, default is `True`).
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
 * `ssd_mxnet` - converting output of SSD-based models from MXNet framework to `DetectionPrediction` representation.
 * `pytorch_ssd_decoder` - converts output of SSD model from PyTorch without embedded decoder.

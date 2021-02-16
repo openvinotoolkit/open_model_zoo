@@ -19,7 +19,7 @@ from collections import defaultdict
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, BoolField, ConfigError
+from ..config import ConfigValidator, NumberField, BoolField, StringField, ListField, ConfigError
 from ..representation import CharacterRecognitionPrediction
 
 
@@ -229,3 +229,42 @@ class LPRAdapter(Adapter):
             decode_out += str(self.label_map[int(output)])
 
         return decode_out
+
+
+class AttentionOCRAdapter(Adapter):
+    __provider__ = 'aocr'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'output_blob': StringField(description='network output with predicted labels name'),
+            'labels': ListField(description='label list for decoding', optional=True, default=['', '', ''] + [chr(i) for i in range(32, 127)]),
+            'eos_index': NumberField(default=2, optional=True, description='end of string symbol index', value_type=int),
+            'to_lower_case': BoolField(optional=True, default=True,
+                                       description='should be output string converted to lower case or not')
+        })
+        return params
+
+    def configure(self):
+        self.output_blob = self.get_value_from_config('output_blob')
+        self.labels = self.get_value_from_config('labels')
+        self.eos_index = self.get_value_from_config('eos_index')
+        self.lower_case = self.get_value_from_config('to_lower_case')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_out = self._extract_predictions(raw, frame_meta)
+        result = []
+        if isinstance(raw_out[self.output_blob], bytes):
+            out_str = raw_out[self.output_blob].decode('iso-8859-1')
+            if self.lower_case:
+                out_str = out_str.lower()
+            return [CharacterRecognitionPrediction(identifiers[0], out_str)]
+
+        for identifier, out in zip(identifiers, raw_out[self.output_blob]):
+            valid_out = out[out != self.eos_index]
+            decoded_out = ''.join([self.labels[l] for l in valid_out])
+            if self.lower_case:
+                decoded_out = decoded_out.lower()
+            result.append(CharacterRecognitionPrediction(identifier, decoded_out))
+        return result

@@ -758,3 +758,11 @@ class RawpyReader(BaseReader):
             return raw.raw_image_visible.astype(np.float32)
         postprocessed = raw.postprocess(use_camera_wb=True, half_size=False, no_auto_bright=True, output_bps=16)
         return np.float32(postprocessed / 65535.0)
+
+
+class ByteFileReader(BaseReader):
+    __provider__ = 'byte_reader'
+
+    def read(self, data_id):
+        with open(self.data_source / data_id, 'rb') as f:
+            return np.array(f.read())

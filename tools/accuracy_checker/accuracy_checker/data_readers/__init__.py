@@ -34,6 +34,7 @@ from .data_reader import (
     PickleReader,
     SkimageReader,
     RawpyReader,
+    ByteFileReader,
 
     DataRepresentation,
     ClipIdentifier,
