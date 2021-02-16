@@ -272,11 +272,6 @@ class BaseModel:
 
 # pylint: disable=E0203
 class BaseDLSDKModel:
-    def _reshape_input(self, input_shapes):
-        del self.exec_network
-        self.network.reshape(input_shapes)
-        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
-
     def print_input_output_info(self):
         print_info('{} - Input info:'.format(self.default_model_suffix))
         has_info = hasattr(self.network if self.network is not None else self.exec_network, 'input_info')
@@ -356,11 +351,7 @@ class BaseDLSDKModel:
             self.with_prefix = with_prefix
 
     def load_model(self, network_info, launcher, log=False):
-        if 'onnx_model' in network_info:
-            network_info.update(launcher.config)
-            model, weights = launcher.convert_model(network_info)
-        else:
-            model, weights = self.automatic_model_search(network_info)
+        model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.read_network(str(model), str(weights))
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
@@ -375,7 +366,6 @@ def create_model(model_config, launcher, delayed_model_loading=False):
     launcher_model_mapping = {
         'dlsdk': ModelDLSDKModel,
         'tf': ModelTFModel,
-        'dummy': DummyModel
     }
     framework = launcher.config['framework']
     if 'predictions' in model_config and not model_config.get('store_predictions', False):
@@ -412,8 +402,6 @@ class SRFModel(BaseModel):
         predictions, raw_outputs = [], []
         for data in input_data:
             output, prediction = self.model.predict(identifiers, data)
-            if callback:
-                callback(prediction)
             if self.store_predictions:
                 self._predictions.append(prediction)
             raw_outputs.append(output)
@@ -556,17 +544,3 @@ class ModelTFModel(BaseModel, FeedbackMixin):
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
         return model
-
-
-class DummyModel(BaseModel):
-    def __init__(self, network_info, launcher):
-        super().__init__(network_info, launcher)
-        if 'predictions' not in network_info:
-            raise ConfigError('predictions_file is not found')
-        self._predictions = read_pickle(network_info['predictions'])
-        self.iterator = 0
-
-    def predict(self, identifiers, input_data):
-        result = self._predictions[self.iterator]
-        self.iterator += 1
-        return None, result
