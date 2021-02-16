@@ -47,7 +47,7 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
+                      type=str, required=True, choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retinaface'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -143,7 +143,7 @@ def get_model(ie, args):
         return models.FaceBoxes(ie, args.model, threshold=args.prob_threshold)
     elif args.architecture_type == 'centernet':
         return models.CenterNet(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
-    elif args.architecture_type == 'retina':
+    elif args.architecture_type == 'retinaface':
         return models.RetinaFace(ie, args.model, threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))

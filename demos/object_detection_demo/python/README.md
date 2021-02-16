@@ -51,7 +51,7 @@ python3 object_detection_demo.py -h
 The command yields the following usage message:
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
-                                {ssd,yolo,faceboxes,centernet,retina} -i INPUT
+                                {ssd,yolo,faceboxes,centernet,retinaface} -i INPUT
                                 [-d DEVICE] [--labels LABELS]
                                 [-t PROB_THRESHOLD] [--keep_aspect_ratio]
                                 [-nireq NUM_INFER_REQUESTS]
@@ -63,7 +63,7 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -at {ssd,yolo,faceboxes,centernet,retina}, --architecture_type {ssd,yolo,faceboxes,centernet,retina}
+  -at {ssd,yolo,faceboxes,centernet,retinaface}, --architecture_type {ssd,yolo,faceboxes,centernet,retinaface}
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
