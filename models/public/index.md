@@ -252,6 +252,14 @@ The task of place recognition is to quickly and accurately recognize the locatio
 | ---------- | ---------------| -----------------------------------------| -------- | ------ | ------- |
 | NetVLAD    | TensorFlow\*   | [netvlad-tf](./netvlad-tf/netvlad-tf.md) | 82.0321% | 36.6374| 149.0021|
 
+## Deblurring
+
+The task of image deblurring.
+
+| Model Name     | Implementation | OMZ Model Name                                 | Accuracy | GFlops  | mParams  |
+| -------------- | -------------- | ---------------------------------------------- | -------- | ------- | -------- |
+| DeblurGAN-v2   | PyTorch\*      | [deblurgan-v2](./deblurgan-v2/deblurgan-v2.md) | 28.25Db  | 80.8919 | 2.1083   |
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.

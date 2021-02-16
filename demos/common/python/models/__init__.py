@@ -16,6 +16,7 @@
 
 
 from .centernet import CenterNet
+from .deblurring import Deblurring
 from .faceboxes import FaceBoxes
 from .retinaface import RetinaFace
 from .segmentation import SegmentationModel
@@ -26,6 +27,7 @@ from .yolo import YOLO
 __all__ = [
     'CenterNet',
     'DetectionWithLandmarks',
+    'Deblurring',
     'FaceBoxes',
     'RetinaFace',
     'SegmentationModel',

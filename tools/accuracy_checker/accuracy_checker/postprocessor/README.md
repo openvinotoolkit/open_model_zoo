@@ -80,8 +80,8 @@ Accuracy Checker supports following set of postprocessors:
     `target` - select target image for resize (`prediction` or `annotation`)
 * `resize_style_transfer` - resizing style transfer predicted image. Supported representations: `StyleTransferAnotation`, `StyleTransferPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resizing respectively.
-* `crop_ground_truth_image` - cropping ground truth image. Supported representations: `ImageInpaintingAnnotation`.
-* `corner_crop_ground_truth_image` - Corner crop of the ground truth image. Supported representations: `ImageInpaintingAnnotation`.
+* `crop_image` - cropping image. Supported representations: `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+* `corner_crop_image` - corner crop of the image. Supported representations: `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
   * `dst_width` and `dst_height` are destination width and height
   * `corner_type` is type of the corner crop. Options are:
     * `top-left`
