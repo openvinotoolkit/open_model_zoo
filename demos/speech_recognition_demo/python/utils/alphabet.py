@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020 Intel Corporation
+# Copyright (C) 2020-2021 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 """
@@ -47,6 +47,9 @@ class CtcdecoderAlphabet:
             is 0-based index into this list.
         """
         self.characters = characters
+
+    def __len__(self):
+        return len(self.characters)
 
     def decode(self, keys):
         return ''.join(self.characters[key] for key in keys)
