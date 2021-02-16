@@ -509,7 +509,7 @@ class Model:
 
             quantized = model.get('quantized', None)
             if quantized is not None and quantized != 'INT8':
-                raise DeserializationError('"quantized": expected a INT8, got {!r}'.format(quantized))
+                raise DeserializationError('"quantized": expected "INT8", got {!r}'.format(quantized))
 
             if 'model_optimizer_args' in model:
                 mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)
