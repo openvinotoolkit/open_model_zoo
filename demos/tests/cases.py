@@ -128,7 +128,11 @@ NATIVE_DEMOS = [
                 single_option_cases('-m',
                     ModelArg('human-pose-estimation-0002'),
                     ModelArg('human-pose-estimation-0003'),
-                    ModelArg('human-pose-estimation-0004'))),
+                    ModelArg('human-pose-estimation-0004'),
+                    # ModelArg('human-pose-estimation-0005'),
+                    # ModelArg('human-pose-estimation-0006'),
+                    # ModelArg('human-pose-estimation-0007')
+                )),
         ],
     )),
 
