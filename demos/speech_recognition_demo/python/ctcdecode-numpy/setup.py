@@ -30,7 +30,7 @@ extension = setuptools.Extension(
 
 setuptools.setup(
     name='ctcdecode-numpy',
-    version='0.2',
+    version='0.2.1',
     description="CTC Decoder for NumPy based on implementation from PaddlePaddle-Deepspeech and Parlance ctcdecode",
     packages=['ctcdecode_numpy'],
     ext_modules=[extension],

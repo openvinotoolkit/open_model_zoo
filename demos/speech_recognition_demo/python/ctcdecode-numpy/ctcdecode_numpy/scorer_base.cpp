@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 Intel Corporation
+* Copyright (c) 2020-2021 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * This file is based in part on scorer.cpp from https://github.com/parlance/ctcdecode,
@@ -17,8 +17,8 @@ ScorerBase::ScorerBase(double alpha,
       : alpha(alpha), beta(beta), dictionary(nullptr),
         is_character_based_(true), max_order_(0),
         dict_size_(0), space_id_(-1) {
-  // Call setup() from derived class constructor since it
-  // calls virtual method load_lm():
+  // Derived classes must call setup() from derived class constructor
+  // since setup() calls virtual method load_lm():
   //   setup(lm_path, vocab_list);
 }
 

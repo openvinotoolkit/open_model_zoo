@@ -272,33 +272,190 @@ class StringVector(_object):
 StringVector_swigregister = _impl.StringVector_swigregister
 StringVector_swigregister(StringVector)
 
+class ScorerBase(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, ScorerBase, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, ScorerBase, name)
 
-def numpy_beam_decode(probs, seq_lens, labels, beam_size, max_candidates_per_batch, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_input, scorer):
-    return _impl.numpy_beam_decode(probs, seq_lens, labels, beam_size, max_candidates_per_batch, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_input, scorer)
-numpy_beam_decode = _impl.numpy_beam_decode
+    def __init__(self, *args, **kwargs):
+        raise AttributeError("No constructor defined - class is abstract")
+    __repr__ = _swig_repr
+    __swig_destroy__ = _impl.delete_ScorerBase
+    __del__ = lambda self: None
+
+    def get_log_cond_prob(self, words):
+        return _impl.ScorerBase_get_log_cond_prob(self, words)
+
+    def get_sent_log_prob(self, words):
+        return _impl.ScorerBase_get_sent_log_prob(self, words)
+
+    def get_max_order(self):
+        return _impl.ScorerBase_get_max_order(self)
+
+    def get_dict_size(self):
+        return _impl.ScorerBase_get_dict_size(self)
+
+    def is_character_based(self):
+        return _impl.ScorerBase_is_character_based(self)
+
+    def reset_params(self, alpha, beta):
+        return _impl.ScorerBase_reset_params(self, alpha, beta)
+
+    def make_ngram(self, prefix):
+        return _impl.ScorerBase_make_ngram(self, prefix)
+
+    def split_labels(self, labels):
+        return _impl.ScorerBase_split_labels(self, labels)
+    __swig_setmethods__["alpha"] = _impl.ScorerBase_alpha_set
+    __swig_getmethods__["alpha"] = _impl.ScorerBase_alpha_get
+    if _newclass:
+        alpha = _swig_property(_impl.ScorerBase_alpha_get, _impl.ScorerBase_alpha_set)
+    __swig_setmethods__["beta"] = _impl.ScorerBase_beta_set
+    __swig_getmethods__["beta"] = _impl.ScorerBase_beta_get
+    if _newclass:
+        beta = _swig_property(_impl.ScorerBase_beta_get, _impl.ScorerBase_beta_set)
+ScorerBase_swigregister = _impl.ScorerBase_swigregister
+ScorerBase_swigregister(ScorerBase)
+cvar = _impl.cvar
+OOV_SCORE = cvar.OOV_SCORE
+START_TOKEN = cvar.START_TOKEN
+UNK_TOKEN = cvar.UNK_TOKEN
+END_TOKEN = cvar.END_TOKEN
+
+class ScorerYoklm(ScorerBase):
+    __swig_setmethods__ = {}
+    for _s in [ScorerBase]:
+        __swig_setmethods__.update(getattr(_s, '__swig_setmethods__', {}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, ScorerYoklm, name, value)
+    __swig_getmethods__ = {}
+    for _s in [ScorerBase]:
+        __swig_getmethods__.update(getattr(_s, '__swig_getmethods__', {}))
+    __getattr__ = lambda self, name: _swig_getattr(self, ScorerYoklm, name)
+    __repr__ = _swig_repr
+
+    def __init__(self, alpha, beta, lm_path, vocabulary):
+        this = _impl.new_ScorerYoklm(alpha, beta, lm_path, vocabulary)
+        try:
+            self.this.append(this)
+        except __builtin__.Exception:
+            self.this = this
+    __swig_destroy__ = _impl.delete_ScorerYoklm
+    __del__ = lambda self: None
+
+    def get_log_cond_prob(self, words):
+        return _impl.ScorerYoklm_get_log_cond_prob(self, words)
+ScorerYoklm_swigregister = _impl.ScorerYoklm_swigregister
+ScorerYoklm_swigregister(ScorerYoklm)
+
+class CtcDecoderState(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, CtcDecoderState, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, CtcDecoderState, name)
+    __repr__ = _swig_repr
+
+    def __init__(self, *args):
+        this = _impl.new_CtcDecoderState(*args)
+        try:
+            self.this.append(this)
+        except __builtin__.Exception:
+            self.this = this
+
+    def init(self, alphabet, blank_idx, beam_size, lm_scorer=None):
+        return _impl.CtcDecoderState_init(self, alphabet, blank_idx, beam_size, lm_scorer)
+
+    def deinit(self):
+        return _impl.CtcDecoderState_deinit(self)
+
+    def set_config(self, name, value, required=False):
+        return _impl.CtcDecoderState_set_config(self, name, value, required)
+
+    def get_config(self, name, required=False, not_found=-1.):
+        return _impl.CtcDecoderState_get_config(self, name, required, not_found)
+
+    def new_sequence(self):
+        return _impl.CtcDecoderState_new_sequence(self)
+
+    def append(self, probs, probs_frame_num, probs_frame_stride, probs_alph_stride, log_probs=False):
+        return _impl.CtcDecoderState_append(self, probs, probs_frame_num, probs_frame_stride, probs_alph_stride, log_probs)
+
+    def finalize(self):
+        return _impl.CtcDecoderState_finalize(self)
+
+    def is_finalized(self):
+        return _impl.CtcDecoderState_is_finalized(self)
+
+    def decode(self, limit_candidates=0, finalize=True):
+        return _impl.CtcDecoderState_decode(self, limit_candidates, finalize)
+    __swig_destroy__ = _impl.delete_CtcDecoderState
+    __del__ = lambda self: None
+CtcDecoderState_swigregister = _impl.CtcDecoderState_swigregister
+CtcDecoderState_swigregister(CtcDecoderState)
+
+
+def ctc_beam_search_decoder(probs, probs_frame_num, probs_frame_stride, probs_alph_stride, alphabet, beam_size, cutoff_prob=1.0, cutoff_top_n=40, blank_idx=0, log_probs=False, lm_scorer=None):
+    return _impl.ctc_beam_search_decoder(probs, probs_frame_num, probs_frame_stride, probs_alph_stride, alphabet, beam_size, cutoff_prob, cutoff_top_n, blank_idx, log_probs, lm_scorer)
+ctc_beam_search_decoder = _impl.ctc_beam_search_decoder
+
+def ctc_beam_search_decoder_batch(probs, probs_batch_num, probs_frame_nums, probs_batch_stride, probs_frame_stride, probs_alph_stride, alphabet, beam_size, num_processes, cutoff_prob=1.0, cutoff_top_n=40, blank_idx=0, log_probs=False, lm_scorer=None):
+    return _impl.ctc_beam_search_decoder_batch(probs, probs_batch_num, probs_frame_nums, probs_batch_stride, probs_frame_stride, probs_alph_stride, alphabet, beam_size, num_processes, cutoff_prob, cutoff_top_n, blank_idx, log_probs, lm_scorer)
+ctc_beam_search_decoder_batch = _impl.ctc_beam_search_decoder_batch
+class CtcDecoderStateNumpy(CtcDecoderState):
+    __swig_setmethods__ = {}
+    for _s in [CtcDecoderState]:
+        __swig_setmethods__.update(getattr(_s, '__swig_setmethods__', {}))
+    __setattr__ = lambda self, name, value: _swig_setattr(self, CtcDecoderStateNumpy, name, value)
+    __swig_getmethods__ = {}
+    for _s in [CtcDecoderState]:
+        __swig_getmethods__.update(getattr(_s, '__swig_getmethods__', {}))
+    __getattr__ = lambda self, name: _swig_getattr(self, CtcDecoderStateNumpy, name)
+    __repr__ = _swig_repr
+
+    def __init__(self, *args):
+        this = _impl.new_CtcDecoderStateNumpy(*args)
+        try:
+            self.this.append(this)
+        except __builtin__.Exception:
+            self.this = this
+
+    def append_numpy(self, probs, log_probs=False):
+        return _impl.CtcDecoderStateNumpy_append_numpy(self, probs, log_probs)
+
+    def decode_numpy(self, limit_candidates, finalize):
+        return _impl.CtcDecoderStateNumpy_decode_numpy(self, limit_candidates, finalize)
+    __swig_destroy__ = _impl.delete_CtcDecoderStateNumpy
+    __del__ = lambda self: None
+CtcDecoderStateNumpy_swigregister = _impl.CtcDecoderStateNumpy_swigregister
+CtcDecoderStateNumpy_swigregister(CtcDecoderStateNumpy)
+
+
+def batched_ctc_lm_decoder(probs, seq_lens, labels, beam_size, max_candidates_per_batch, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_probs, lm_scorer):
+    return _impl.batched_ctc_lm_decoder(probs, seq_lens, labels, beam_size, max_candidates_per_batch, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_probs, lm_scorer)
+batched_ctc_lm_decoder = _impl.batched_ctc_lm_decoder
 
 def create_scorer_yoklm(alpha, beta, lm_path, labels):
     return _impl.create_scorer_yoklm(alpha, beta, lm_path, labels)
 create_scorer_yoklm = _impl.create_scorer_yoklm
 
-def delete_scorer(scorer):
-    return _impl.delete_scorer(scorer)
+def delete_scorer(lm_scorer):
+    return _impl.delete_scorer(lm_scorer)
 delete_scorer = _impl.delete_scorer
 
-def is_character_based(scorer):
-    return _impl.is_character_based(scorer)
+def is_character_based(lm_scorer):
+    return _impl.is_character_based(lm_scorer)
 is_character_based = _impl.is_character_based
 
-def get_max_order(scorer):
-    return _impl.get_max_order(scorer)
+def get_max_order(lm_scorer):
+    return _impl.get_max_order(lm_scorer)
 get_max_order = _impl.get_max_order
 
-def get_dict_size(scorer):
-    return _impl.get_dict_size(scorer)
+def get_dict_size(lm_scorer):
+    return _impl.get_dict_size(lm_scorer)
 get_dict_size = _impl.get_dict_size
 
-def reset_params(scorer, alpha, beta):
-    return _impl.reset_params(scorer, alpha, beta)
+def reset_params(lm_scorer, alpha, beta):
+    return _impl.reset_params(lm_scorer, alpha, beta)
 reset_params = _impl.reset_params
 # This file is compatible with both classic and new-style classes.
 

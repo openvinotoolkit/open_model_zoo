@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 Intel Corporation
+* Copyright (c) 2020-2021 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * This file is based in part on decoder_utils.h from https://github.com/parlance/ctcdecode,
@@ -68,10 +68,12 @@ T log_sum_exp(const T &x, const T &y) {
 
 // Get pruned probability vector for each time step's beam search
 std::vector<std::pair<size_t, float>> get_pruned_log_probs(
-    const std::vector<float> &prob_step,
+    const float * prob_step,
+    size_t alphabet_len,
+    size_t prob_stride,
     float cutoff_prob,
     size_t cutoff_top_n,
-    int log_input);
+    bool log_probs);
 
 // Get beam search result from prefixes in trie tree
 std::vector<std::pair<float, Output>> get_beam_search_result(

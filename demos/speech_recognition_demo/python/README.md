@@ -12,12 +12,17 @@ The application accepts
 * n-gram language model file in kenlm quantized binary format, and
 * an audio file in PCM WAV 16 kHz mono format.
 
-After computing audio features, running a neural network to get per-frame character probabilities, and CTC decoding, the demo prints the decoded text together with the timings of the processing stages.
+The application has two modes:
+
+ * *Offline mode* (default). Audio data is fed in 10 second chunks into a pipeline of: computing audio features, running a neural network to get per-frame character probabilities, and CTC decoding. After processing the whole file, the demo prints the decoded text and the time spent.
+
+ * In *online mode* the app simulates speech recognition of live recording by feeding audio data from input file and displaying the current partial result in a creeping line in console output. Data is fed at real-time speed by introducing the necessary delays. Audio data is fed in 0.32 sec chunks (size is controlled by `--block-size` option) into the same pipeline. In this mode the pipeline provides updated recognition result after each data chunk.
 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/speech_recognition_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+Don't forget to configure Model Optimizer, which is a requirement for Model Downloader, as described in its documentation.
 
 An example of using the Model Downloader:
 
@@ -30,6 +35,8 @@ An example of using the Model Converter:
 ```sh
 python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 ```
+
+Please pay attention to the model license, **Mozilla Public License 2.0**.
 
 ## Prerequisites
 
@@ -55,6 +62,8 @@ Here are the available command line options:
 ```
 usage: speech_recognition_demo.py [-h] -i FILENAME [-d DEVICE] -m FILENAME
                                   [-L FILENAME] -p NAME [-b N] [-c N]
+                                  [--online] [--block-size BLOCK_SIZE]
+                                  [--online-window ONLINE_WINDOW]
                                   [-l FILENAME]
 
 Speech recognition demo
@@ -81,13 +90,21 @@ optional arguments:
                         500)
   -c N, --max-candidates N
                         Show top N (or less) candidates (default 1)
+  --online              Switch to realtime online ASR mode
+  --block-size BLOCK_SIZE
+                        Block size in audio samples for streaming into ASR
+                        pipeline (defaults to samples in 10 sec for offline;
+                        samples in 16 frame strides for online)
+  --online-window ONLINE_WINDOW
+                        In online mode, show this many characters on screen
+                        (default 79)
   -l FILENAME, --cpu_extension FILENAME
                         Optional. Required for CPU custom layers. MKLDNN
                         (CPU)-targeted custom layers. Absolute path to a
                         shared library with the kernels implementations.
 ```
 
-The typical command line is:
+The typical command line for offline mode is:
 
 ```shell
 pip install -r requirements.txt
@@ -110,13 +127,15 @@ python3 speech_recognition_demo.py \
     -i <path_to_audio>/audio.wav
 ```
 
+To run in *online mode* add command-line option `--online`.
+
 > **NOTE**: Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.
 
-Optional language model files, `deepspeech-0.8.2-models.kenlm` or `lm.binary` are part of corresponding model downloaded content and will be located at Model Downloader output folder after model downloading. An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/how_are_you_doing.wav`.
+Optional (but highly recommended) language model files, `deepspeech-0.8.2-models.kenlm` or `lm.binary` are part of corresponding model downloaded content and will be located at Model Downloader output folder after model downloading and conversion. An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/how_are_you_doing.wav`.
 
 ## Demo Output
 
-The application shows time taken by the initialization and processing stages, and the decoded text for the audio file.
+The application shows time taken by the initialization and processing stages, and the decoded text for the audio file. In online mode the current recognition result is shown while the app is running as well.
 
 ## See Also
 

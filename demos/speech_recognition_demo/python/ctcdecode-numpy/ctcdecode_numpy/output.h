@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 Intel Corporation
+* Copyright (c) 2020-2021 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * This file is based in part on output.h from https://github.com/parlance/ctcdecode,
@@ -11,11 +11,12 @@
 
 #include <vector>
 
-/* Struct for the beam search output, containing the tokens based on the vocabulary indices, and the timesteps
- * for each token in the beam search output
- */
+// Struct for a single candidate text in beam search output, containing
+// the symbols ("tokens") based on the alphabet indices, and the timesteps
+// for each symbol in the beam search output.
 struct Output {
     std::vector<int> tokens, timesteps;
+    float audio_score;
 };
 
 #endif  // OUTPUT_H_

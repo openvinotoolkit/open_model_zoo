@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 #
-# Copyright (C) 2019-2020 Intel Corporation
+# Copyright (C) 2019-2021 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 # This file is based in part on deepspeech_openvino_0.5.py by Feng Yen-Chang at
 # https://github.com/openvinotoolkit/open_model_zoo/pull/419, commit 529805d011d9b405f142b2b40f4d202bd403a4f1 on Sep 19, 2019.
 #
+import time
 import wave
 import timeit
 import argparse
@@ -14,8 +15,9 @@ import yaml
 import numpy as np
 from tqdm import tqdm
 
+from utils.profiles import PROFILES
 from utils.context_timer import Timer
-from utils.deep_speech_pipeline import DeepSpeechPipeline, PROFILES
+from utils.deep_speech_seq_pipeline import DeepSpeechSeqPipeline
 
 
 def build_argparser():
@@ -39,6 +41,14 @@ def build_argparser():
     parser.add_argument('-c', '--max-candidates', type=int, default=1, metavar="N",
                         help="Show top N (or less) candidates (default 1)")
 
+    parser.add_argument('--online', action='store_true',
+                        help="Switch to realtime online ASR mode")
+    parser.add_argument('--block-size', type=int, default=None,
+                        help="Block size in audio samples for streaming into ASR pipeline "
+                        "(defaults to samples in 10 sec for offline; samples in 16 frame strides for online)")
+    parser.add_argument('--online-window', type=int, default=79,
+                        help="In online mode, show this many characters on screen (default 79)")
+
     parser.add_argument('-l', '--cpu_extension', type=str, metavar="FILENAME",
                         help="Optional. Required for CPU custom layers. "
                              "MKLDNN (CPU)-targeted custom layers. Absolute path to a shared library with the"
@@ -55,12 +65,15 @@ def get_profile(profile_name):
 
 
 def main():
+    args = build_argparser().parse_args()
+    profile = get_profile(args.profile)
+    if args.block_size is None:
+        sr = profile['model_sampling_rate']
+        args.block_size = round(sr*10) if not args.online else round(sr*profile['frame_stride_seconds']*16)
+
     start_time = timeit.default_timer()
     with Timer() as timer:
-        args = build_argparser().parse_args()
-        profile = get_profile(args.profile)
-
-        stt = DeepSpeechPipeline(
+        stt = DeepSpeechSeqPipeline(
             model = args.model,
             lm = args.lm,
             beam_width = args.beam_width,
@@ -68,43 +81,52 @@ def main():
             profile = profile,
             device = args.device,
             ie_extensions = [(args.device, args.cpu_extension)] if args.device == 'CPU' else [],
+            online_decoding = args.online,
         )
+    print("Loading, including network weights, IE initialization, LM, building LM vocabulary trie: {} s".format(timer.elapsed))
 
-        wave_read = wave.open(args.input, 'rb')
+    with wave.open(args.input, 'rb') as wave_read:
         channel_num, sample_width, sampling_rate, pcm_length, compression_type, _ = wave_read.getparams()
         assert sample_width == 2, "Only 16-bit WAV PCM supported"
         assert compression_type == 'NONE', "Only linear PCM WAV files supported"
         assert channel_num == 1, "Only mono WAV PCM supported"
-        audio = np.frombuffer(wave_read.readframes(pcm_length * channel_num), dtype=np.int16).reshape((pcm_length, channel_num))
-        wave_read.close()
-    print("Loading, including network weights, IE initialization, LM, building LM vocabulary trie, loading audio: {} s".format(timer.elapsed))
-    print("Audio file length: {} s".format(audio.shape[0] / sampling_rate))
+        print("Audio file length: {} s".format(pcm_length / sampling_rate))
 
-    # Now it is enough to call:
-    #   transcription = stt.recognize_audio(audio, sampling_rate)
-    # if you don't need to access intermediate features like character probabilities or audio features.
+        audio_pos = 0
+        play_start_time = timeit.default_timer()
+        iter_wrapper = tqdm if not args.online else (lambda x: x)
+        for audio_iter in iter_wrapper(range(0, pcm_length, args.block_size)):
+            audio_block = np.frombuffer(wave_read.readframes(args.block_size * channel_num), dtype=np.int16).reshape((-1, channel_num))
+            if audio_block.shape[0] == 0:
+                break
+            audio_pos += audio_block.shape[0]
+            #
+            # It is possible to call stt.recognize_audio() for the whole audio files instead like this:
+            #   transcription1 = stt.recognize_audio(whole_audio1, sampling_rate)
+            #   transcription2 = stt.recognize_audio(whole_audio2, sampling_rate)
+            # If you need intermediate features, you can call pipeline stage by stage like this:
+            #    audio_features = stt.extract_mfcc(whole_audio, sampling_rate)
+            #    character_probs = stt.extract_per_frame_probs(audio_features)
+            #    transcription = stt.decode_probs(character_probs)
+            #
+            partial_transcr = stt.recognize_audio(audio_block, sampling_rate, finish=False)
+            if args.online:
+                if partial_transcr is not None and len(partial_transcr) > 0:
+                    print('\r' + partial_transcr[0].text[-args.online_window:], end='')
+                to_wait = play_start_time + audio_pos/sampling_rate - timeit.default_timer()
+                if to_wait > 0:
+                    time.sleep(to_wait)
 
-    with Timer() as timer:
-        audio_features = stt.extract_mfcc(audio, sampling_rate=sampling_rate)
-    print("MFCC time: {} s".format(timer.elapsed))
+    transcription = stt.recognize_audio(None, sampling_rate, finish=True)
+    if args.online:
+        if transcription is not None and len(transcription) > 0:
+            print('\r' + transcription[0].text[-args.online_window:])
 
-    with Timer() as timer:
-        character_probs = stt.extract_per_frame_probs(audio_features, wrap_iterator=tqdm)
-    print("RNN time: {} s".format(timer.elapsed))
-
-    with Timer() as timer:
-        transcription = stt.decode_probs(character_probs)
-    print("Beam search time: {} s".format(timer.elapsed))
     print("Overall time: {} s".format(timeit.default_timer() - start_time))
 
-    print("\nTranscription and confidence score:")
+    print("\nTranscription(s) and confidence score(s):")
     for candidate in transcription:
-        print(
-            "{}\t{}".format(
-                candidate.conf,
-                candidate.text,
-            )
-        )
+        print("{}\t{}".format(candidate.conf, candidate.text))
 
 
 if __name__ == '__main__':
