@@ -25,7 +25,7 @@ from ..quantization_model_evaluator import create_dataset_attributes
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...launcher import create_launcher
-from ...utils import contains_all, contains_any, extract_image_representations, read_pickle, get_path
+from ...utils import contains_all, contains_any, extract_image_representations, get_path
 from ...progress_reporters import ProgressReporter
 from ...logging import print_info
 
@@ -92,9 +92,9 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
             callback = None
             if callback:
                 callback = partial(output_callback,
-                                           metrics_result=None,
-                                           element_identifiers=batch_identifiers,
-                                           dataset_indices=batch_input_ids)
+                                   metrics_result=None,
+                                   element_identifiers=batch_identifiers,
+                                   dataset_indices=batch_input_ids)
 
             batch_raw_prediction, batch_prediction = self.srmodel.predict(
                 batch_identifiers, batch_inputs_extr, callback=callback
@@ -437,7 +437,7 @@ class FeedbackMixin:
         self._feedback_data = {self._feedback_name: None}
         self._first_step = True
         self._inputs = self.network_info['inputs']
-        self._feedback_inputs = {self._feedback_name: [t for t in self._inputs if t['name']==self._feedback_name][0]}
+        self._feedback_inputs = {self._feedback_name: [t for t in self._inputs if t['name'] == self._feedback_name][0]}
 
         for input_info in self._inputs:
             idx = int(input_info['value'])
@@ -507,13 +507,13 @@ class ModelDLSDKModel(BaseModel, BaseDLSDKModel, FeedbackMixin):
         with_prefix = input_blob.startswith(self.default_model_suffix + '_')
         if (with_prefix != self.with_prefix) and with_prefix:
             self.network_info['feedback_input'] = '_'.join([self.default_model_suffix,
-                                                           self.network_info['feedback_input']])
-            for input in self.network_info['inputs']:
-                input['name'] = '_'.join([self.default_model_suffix, input['name']])
-                if 'blob' in input.keys():
-                    input['blob'] = '_'.join([self.default_model_suffix, input['blob']])
+                                                            self.network_info['feedback_input']])
+            for inp in self.network_info['inputs']:
+                inp['name'] = '_'.join([self.default_model_suffix, inp['name']])
+                if 'blob' in inp.keys():
+                    inp['blob'] = '_'.join([self.default_model_suffix, inp['blob']])
             self.network_info['adapter']['target_out'] = '_'.join([self.default_model_suffix,
-                                                                  self.network_info['adapter']['target_out']])
+                                                                   self.network_info['adapter']['target_out']])
 
         self.with_prefix = with_prefix
 
@@ -546,6 +546,7 @@ class ModelTFModel(BaseModel, FeedbackMixin):
     def release(self):
         del self.inference_session
 
-    def automatic_model_search(self, network_info):
+    @staticmethod
+    def automatic_model_search(network_info):
         model = Path(network_info['model'])
         return model

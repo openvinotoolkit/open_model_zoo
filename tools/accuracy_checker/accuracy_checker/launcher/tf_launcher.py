@@ -336,7 +336,7 @@ class TFLauncher(Launcher):
 
         return names
 
-    def create_inference_session(self, model, saved_model_dir = False, inputs=[], outputs=[]):
+    def create_inference_session(self, model, saved_model_dir=False, inputs=None, outputs=None):
         if saved_model_dir:
             _graph = self._load_graph(str(model), True)
         else:
