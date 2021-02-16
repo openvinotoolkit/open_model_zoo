@@ -27,7 +27,8 @@ from .text_detection import (
 from .text_recognition import (
     BeamSearchDecoder,
     CTCGreedySearchDecoder,
-    LPRAdapter
+    LPRAdapter,
+    AttentionOCRAdapter
 )
 
 from .image_processing import (
@@ -176,6 +177,7 @@ __all__ = [
     'BeamSearchDecoder',
     'LPRAdapter',
     'CTCGreedySearchDecoder',
+    'AttentionOCRAdapter',
 
     'AssociativeEmbeddingAdapter',
     'HumanPoseAdapter',

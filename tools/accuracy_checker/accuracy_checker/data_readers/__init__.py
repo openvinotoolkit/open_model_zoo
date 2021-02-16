@@ -34,6 +34,7 @@ from .data_reader import (
     PickleReader,
     SkimageReader,
     RawpyReader,
+    ByteFileReader,
 
     DataRepresentation,
     ClipIdentifier,
@@ -70,6 +71,7 @@ __all__ = [
     'NumpyBinReader',
     'SkimageReader',
     'RawpyReader',
+    'ByteFileReader',
 
     'DataRepresentation',
     'ClipIdentifier',

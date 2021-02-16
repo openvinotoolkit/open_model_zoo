@@ -58,3 +58,4 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
   2. numeric data array + metadata stored in dictionary
 * `rawpy` - read raw image formats using rawpy library.
   * `postprocess` - allow image postprocessing and normalization (Optional, default `True`).
+* `byte_reader` - read raw binary data and wrap them to numpy-array.
