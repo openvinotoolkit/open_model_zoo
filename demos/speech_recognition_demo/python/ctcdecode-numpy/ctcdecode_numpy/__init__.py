@@ -22,7 +22,7 @@ class SeqCtcLmDecoder:
             text_decoder=None):
         self.alphabet = alphabet
         if text_decoder is None:
-            text_decoder = lambda x: x
+            text_decoder = lambda x: x  # noqa: E731
         self.text_decoder = text_decoder
 
         self.beam_size = beam_size

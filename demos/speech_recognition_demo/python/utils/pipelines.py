@@ -121,7 +121,7 @@ class BlockedSeqPipelineStage(SeqPipelineStage):
         # variables accepted from prev.stage: buffer, finalize
         processed, buffer_skip_len = self._process_blocks(buffer, finish=finish)
         if finish:
-           self._reset_state()
+            self._reset_state()
         else:
             # start_pos contains its value for the last iteration of the loop
             buffer = buffer[buffer_skip_len:].copy()

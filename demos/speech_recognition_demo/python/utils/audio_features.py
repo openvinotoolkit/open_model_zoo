@@ -30,7 +30,7 @@ class AudioFeaturesSeqPipelineStage(BlockedSeqPipelineStage):
         #if abs(sampling_rate - self.p['model_sampling_rate']) > self.p['model_sampling_rate'] * 0.1:
         #    raise ValueError("Input audio file should be {} kHz mono".format(self.p['model_sampling_rate']/1e3))
         if data is not None:
-            if len(data.shape) == 2 and data.shape[1] != 1 or len(data.shape) not in [1,2]:
+            if len(data.shape) == 2 and data.shape[1] != 1 or len(data.shape) not in [1, 2]:
                 raise ValueError("Input audio file should be {} kHz mono".format(self.p['model_sampling_rate']/1e3))
             if len(data.shape) == 2:
                 data = data.squeeze(axis=1)
