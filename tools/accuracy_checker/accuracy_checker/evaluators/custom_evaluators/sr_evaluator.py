@@ -372,8 +372,8 @@ class SRFModel(BaseModel):
             if not contains_any(model, ['model', 'onnx_model']) and models_args:
                 model['srmodel'] = models_args[0]
                 model['_model_is_blob'] = is_blob
-            network_info.update({'sr_model': model,})
-        if not contains_all(network_info, ['srmodel',]) and not delayed_model_loading:
+            network_info.update({'sr_model': model})
+        if not contains_all(network_info, ['srmodel']) and not delayed_model_loading:
             raise ConfigError('network_info should contain srmodel field')
         self.srmodel = create_model(network_info['srmodel'], launcher, delayed_model_loading)
         self.feedback = self.srmodel.feedback
@@ -425,7 +425,7 @@ class SRFModel(BaseModel):
             self._raw_outs[key].append(output)
 
     def get_network(self):
-        return [{'name': 'srmodel', 'model': self.srmodel.network},]
+        return [{'name': 'srmodel', 'model': self.srmodel.network}]
 
 
 class FeedbackMixin:
@@ -530,7 +530,7 @@ class ModelTFModel(BaseModel, FeedbackMixin):
 
     def predict(self, identifiers, input_data):
         input_data = self.fit_to_input(input_data)
-        raw_result = self.inference_session.predict([input_data,])
+        raw_result = self.inference_session.predict([input_data])
         result = self.adapter.process(raw_result, identifiers, [{}])
         return raw_result, result
 
