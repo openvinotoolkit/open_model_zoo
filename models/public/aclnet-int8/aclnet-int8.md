@@ -50,7 +50,7 @@ Audio, name - `result.1`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 ### Original Model
 
-Sound classifier (see [labels](./labels.txt)), name - `486`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see [labels](../../../data/dataset_classes/aclnet_classes.txt)), name - `486`, shape - `1,53`, output data format is `N,C` where:
 
 - `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range
