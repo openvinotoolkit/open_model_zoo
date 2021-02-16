@@ -19,7 +19,7 @@ evaluations:
           cur_hidden: hidden
 
         max_seq_len: '28'
-        recognizer_confidence_threshold: '0.45'
+        recognizer_confidence_threshold: '0.3'
 
         alphabet: __abcdefghijklmnopqrstuvwxyz0123456789
         sos_index: '0'
