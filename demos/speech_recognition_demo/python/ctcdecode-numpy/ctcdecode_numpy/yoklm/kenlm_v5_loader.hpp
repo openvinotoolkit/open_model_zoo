@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 Intel Corporation
+* Copyright (c) 2020-2021 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 **********************************************************************/
 
@@ -42,8 +42,6 @@ class KenlmV5Loader {
     LmConfig lm_config_;
     VocabularyConfig vocabulary_config_;
 
-    // Only valid during parsing, reset() after parsing done
-    MemorySection whole_file_;
     // This flag is set by _parse_header(), and is used in _parse_vocabulary_strings()
     bool with_vocabulary_strings_;
 

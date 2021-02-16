@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 Intel Corporation
+* Copyright (c) 2020-2021 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 **********************************************************************/
 
@@ -17,15 +17,15 @@
 namespace yoklm {
 
 struct UnigramNodeFormat {
-  float prob;  // log10-prob for this node
-  float backoff;  // log10-backoff for this node
+  float log10_prob;  // log10-prob for this node
+  float log10_backoff;  // log10-backoff for this node
   uint64_t start_index;  // starting index of the subtrie in the next trie layer
 };
 
 struct MediumLayer {
   int bhiksha_total_bits;
-  int bhiksha_low_bits;  // TODO: get rid of data duplication here
-  int backoff_bits;  // TODO: get rid of data duplication here
+  int bhiksha_low_bits;
+  int backoff_bits;
 
   size_t bhiksha_highs_count;  // number of elements in bhiksha_highs
   MemorySectionArray<uint64_t> bhiksha_highs;
@@ -45,8 +45,7 @@ struct LmConfig {
   std::vector<MemorySectionArray<float> > prob_quant_tables;  // [k-2] for k-grams, k=2...n
   std::vector<MemorySectionArray<float> > backoff_quant_tables;  // [k-2] for k-grams, k=2...(n-1)
   MemorySectionArray<UnigramNodeFormat> unigram_layer;
-  std::vector<MediumLayer> medium_layers;
-  //MediumLayer leaves_layer;
+  std::vector<MediumLayer> medium_layers;  // all non-unigram layers, including tree leaves
 };
 
 struct LmState {
@@ -67,11 +66,10 @@ class LanguageModel {
     LanguageModel() : config_() {}
     void load(LmConfig config) { config_ = config; }
 
-    //float log10_p_cond(const std::vector<WordIndex>& words) const;
     float log10_p_cond(WordIndex new_word, LmState& state) const;
 
-    size_t order() const { return config_.order; };
-    uint64_t num_words() const { return config_.ngram_counts[0]; };
+    size_t order() const { return config_.order; }
+    uint64_t num_words() const { return config_.ngram_counts[0]; }
 
   private:
     LmConfig config_;
@@ -82,7 +80,6 @@ class LanguageModel {
     //   * state.backoff.size(): the length of the longest n-gram present in the LM
     //   * state.backoff[]: state.backoff[k] if backoff for (k+1)-gram postfix
     float find_ngram(LmState& state) const;
-    //std::pair<uint64_t, uint64_t> bhiksha_lookup(const MemorySectionArray<uint64_t>& bhiksha_highs, uint64_t index) const;
 };
 
 } // namespace yoklm

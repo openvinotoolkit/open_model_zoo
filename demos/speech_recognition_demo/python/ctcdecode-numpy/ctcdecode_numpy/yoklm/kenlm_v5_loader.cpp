@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 Intel Corporation
+* Copyright (c) 2020-2021 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 **********************************************************************/
 
@@ -54,16 +54,22 @@ struct KenlmV5BhikshaArrayHeaderFormat {
 
 
 KenlmV5Loader::KenlmV5Loader() : lm_config_(), vocabulary_config_(),
-    whole_file_(), with_vocabulary_strings_(false),
-    debug_print_sections_(false) {}
+    with_vocabulary_strings_(false), debug_print_sections_(false) {
+  const uint64_t endianness = 0x0102030405060708ULL;
+  if (((const uint8_t *)&endianness)[0] != 8)
+    throw std::logic_error("yoklm requires little-endian byte order.");
+}
 
 void KenlmV5Loader::parse(const std::string& filename) {
   parse(load_file(filename));
 }
 
 void KenlmV5Loader::parse(MemorySection mem) {
-  // Parsing requires offset alignment in some sections, so will need base address for the whole file
-  whole_file_ = mem;
+  const size_t file_size = mem.size();
+
+  // Parsing requires offset alignment in _parse_bhiksha_highs(), so we need
+  // base offset relative to start of the file (memory section).
+  mem.set_base_offset(0);
 
   mem = _parse_header(mem);
   mem = _parse_lm_config(mem);
@@ -72,11 +78,9 @@ void KenlmV5Loader::parse(MemorySection mem) {
   mem = _parse_vocabulary_strings(mem);
 
   if (debug_print_sections_) {
-    std::cout << "parse() end offset= " << mem.offset(whole_file_) << std::endl;
-    std::cout << "parse() whole_file_ size= " << whole_file_.size() << std::endl;
+    std::cout << "parse() end offset= " << mem.base_offset() << std::endl;
+    std::cout << "parse() file size= " << file_size << std::endl;
   }
-
-  whole_file_.reset();
 }
 
 bool KenlmV5Loader::is_our_format(const MemorySection& mem) {
@@ -91,7 +95,7 @@ static void fail_sanity() {
 
 MemorySection KenlmV5Loader::_parse_header(MemorySection mem) {
   if (debug_print_sections_)
-    std::cout << "_parse_header offset= " << mem.offset(whole_file_) << std::endl;
+    std::cout << "_parse_header offset= " << mem.base_offset() << std::endl;
 
   if (!is_our_format(mem))
     throw std::runtime_error("Unexpected file format. Expected kenlm v5 binary format.");
@@ -111,7 +115,7 @@ MemorySection KenlmV5Loader::_parse_header(MemorySection mem) {
 
 MemorySection KenlmV5Loader::_parse_lm_config(MemorySection mem) {
   if (debug_print_sections_)
-    std::cout << "_parse_lm_config offset= " << mem.offset(whole_file_) << std::endl;
+    std::cout << "_parse_lm_config offset= " << mem.base_offset() << std::endl;
 
   if (sizeof(KenlmV5LmFixedParametersFormat) != SIZE_KenlmV5LmFixedParametersFormat)
     throw std::logic_error("Wrong size of KenlmV5LmFixedParametersFormat in the code.");
@@ -145,7 +149,7 @@ MemorySection KenlmV5Loader::_parse_lm_config(MemorySection mem) {
 
 MemorySection KenlmV5Loader::_parse_vocabulary(MemorySection mem) {
   if (debug_print_sections_)
-    std::cout << "_parse_vocabulary offset= " << mem.offset(whole_file_) << std::endl;
+    std::cout << "_parse_vocabulary offset= " << mem.base_offset() << std::endl;
 
   const size_t num_words_to_skip = lm_config_.ngram_counts[0];  // only used in section size calculation
   // Number of words in the table of word hashes (word_hashes) + <unk>
@@ -167,7 +171,7 @@ MemorySection KenlmV5Loader::_parse_vocabulary(MemorySection mem) {
 
 MemorySection KenlmV5Loader::_parse_lm(MemorySection mem) {
   if (debug_print_sections_)
-    std::cout << "_parse_lm offset= " << mem.offset(whole_file_) << std::endl;
+    std::cout << "_parse_lm offset= " << mem.base_offset() << std::endl;
 
   if (sizeof(KenlmV5QuantizationHeaderFormat) != SIZE_KenlmV5QuantizationHeaderFormat)
     throw std::logic_error("Wrong size of KenlmV5QuantizationHeaderFormat in the code.");
@@ -192,7 +196,7 @@ MemorySection KenlmV5Loader::_parse_lm(MemorySection mem) {
 
 MemorySection KenlmV5Loader::_parse_lm_quant(MemorySection mem) {
   if (debug_print_sections_)
-    std::cout << "_parse_lm_quant offset= " << mem.offset(whole_file_) << std::endl;
+    std::cout << "_parse_lm_quant offset= " << mem.base_offset() << std::endl;
   if (sizeof(float) != 4)
     throw std::logic_error("KenlmV5 format: cannot work on targets with non-32-bit float type");
 
@@ -209,7 +213,7 @@ MemorySection KenlmV5Loader::_parse_lm_quant(MemorySection mem) {
 
 MemorySection KenlmV5Loader::_parse_trie_unigram(MemorySection mem) {
   if (debug_print_sections_)
-    std::cout << "_parse_trie_unigram offset= " << mem.offset(whole_file_) << std::endl;
+    std::cout << "_parse_trie_unigram offset= " << mem.base_offset() << std::endl;
 
   lm_config_.unigram_layer = mem.get_and_drop_prefix(sizeof(UnigramNodeFormat) * (lm_config_.ngram_counts[0] + 2));
 
@@ -218,7 +222,7 @@ MemorySection KenlmV5Loader::_parse_trie_unigram(MemorySection mem) {
 
 MemorySection KenlmV5Loader::_parse_trie_medium(MemorySection mem) {
   if (debug_print_sections_)
-    std::cout << "_parse_trie_medium offset= " << mem.offset(whole_file_) << std::endl;
+    std::cout << "_parse_trie_medium offset= " << mem.base_offset() << std::endl;
 
   lm_config_.medium_layers.reserve(lm_config_.order - 1);
   lm_config_.medium_layers.resize(lm_config_.order - 2);
@@ -232,7 +236,7 @@ MemorySection KenlmV5Loader::_parse_trie_medium(MemorySection mem) {
 
 MemorySection KenlmV5Loader::_parse_trie_long(MemorySection mem) {
   if (debug_print_sections_)
-    std::cout << "_parse_trie_long offset= " << mem.offset(whole_file_) << std::endl;
+    std::cout << "_parse_trie_long offset= " << mem.base_offset() << std::endl;
 
   lm_config_.medium_layers.resize(lm_config_.order - 1);
   MediumLayer& leaves_layer = lm_config_.medium_layers[lm_config_.order - 2];
@@ -259,7 +263,7 @@ int required_bits(uint64_t value) {
 // stored in Bhiksha representation ("Bhiksha array").
 // Expects: max_high_bits >= 0  and  value_total_bits == required_bits(max_value)
 int find_bhiksha_low_bits(size_t max_index, size_t max_value, int value_total_bits, int max_high_bits) {
-  // WHY ON THE EARTH it's not just stored in the file?
+  // Format authors should have just stored the value of bhiksha_low_bits in the file.
 
   if (max_high_bits < 0)
     throw std::logic_error("Internal error: max_high_bits < 0");
@@ -280,7 +284,7 @@ int find_bhiksha_low_bits(size_t max_index, size_t max_value, int value_total_bi
 
 MemorySection KenlmV5Loader::_parse_bhiksha_highs(MemorySection mem, MediumLayer& layer_config, size_t num_entries, size_t max_value) {
   if (debug_print_sections_)
-    std::cout << "_parse_bhiksha_highs offset= " << mem.offset(whole_file_) << std::endl;
+    std::cout << "_parse_bhiksha_highs offset= " << mem.base_offset() << std::endl;
 
   if (sizeof(KenlmV5BhikshaArrayHeaderFormat) != SIZE_KenlmV5BhikshaArrayHeaderFormat)
     throw std::logic_error("Wrong size of KenlmV5BhikshaArrayHeaderFormat in the code.");
@@ -298,10 +302,10 @@ MemorySection KenlmV5Loader::_parse_bhiksha_highs(MemorySection mem, MediumLayer
   MemorySection unaligned_bhiksha_highs = mem.get_and_drop_prefix(bhiksha_highs_size + 7);  // Add 7 bytes for alignment
 
   // Align offset to a multiple of 8
-  size_t alignment = (-unaligned_bhiksha_highs.offset(whole_file_)) & 7;
+  size_t alignment = (-unaligned_bhiksha_highs.base_offset()) & 7;
   layer_config.bhiksha_highs = unaligned_bhiksha_highs.subsection(alignment, bhiksha_highs_size);
   if (debug_print_sections_)
-    std::cout << "_parse_bhiksha_highs aligned offset= " << layer_config.bhiksha_highs.offset(whole_file_) << std::endl;
+    std::cout << "_parse_bhiksha_highs aligned offset= " << layer_config.bhiksha_highs.base_offset() << std::endl;
 
   if (layer_config.bhiksha_highs_count == 0 || layer_config.bhiksha_highs[0] != 0)
     std::runtime_error("Broken LM file: bhisha_highs[0] != 0");
@@ -313,7 +317,7 @@ uint64_t make_bitmask(int bits) { return ((uint64_t)1 << bits) - 1; }
 
 MemorySection KenlmV5Loader::_parse_bitarray(MemorySection mem, MediumLayer& layer_config, size_t num_entries, int backoff_bits) {
   if (debug_print_sections_)
-    std::cout << "_parse_bitarray offset= " << mem.offset(whole_file_) << std::endl;
+    std::cout << "_parse_bitarray offset= " << mem.base_offset() << std::endl;
 
   const int word_index_bits = required_bits(lm_config_.ngram_counts[0]);
   const int bits_per_record = word_index_bits + lm_config_.prob_bits + backoff_bits + layer_config.bhiksha_low_bits;
@@ -350,7 +354,7 @@ MemorySection KenlmV5Loader::_parse_bitarray(MemorySection mem, MediumLayer& lay
 
 MemorySection KenlmV5Loader::_parse_vocabulary_strings(MemorySection mem) {
   if (debug_print_sections_)
-    std::cout << "_parse_vocabulary_strings offset= " << mem.offset(whole_file_) << std::endl;
+    std::cout << "_parse_vocabulary_strings offset= " << mem.base_offset() << std::endl;
 
   if (!with_vocabulary_strings_) {
     vocabulary_config_.num_word_strings = 0;
