@@ -68,7 +68,7 @@ AccuracyChecker supports following set of adapters:
 * `yolo_v5` - converting output of YOLO v5 family models to `DetectionPrediction` representation. The parameters are the same as for the `yolo_v3` models.
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `aocr` - converting output of attention-ocr model to `CharacterRecognitionPrediction`.
-  * `output_blob` - name of output layer with predicted labels or string.
+  * `output_blob` - name of output layer with predicted labels or string (Optional, if not provided, first founded output will be used).
   * `labels` - optional, list of supported tokens for decoding raw labels (Optional, default configuration is ascii charmap, this parameter ignored if you have decoding part in the model).
   * `eos_index` - index of end of string token in labels. (Optional, default 2, ignored if you have decoding part in the model).
   * `to_lower_case` - allow converting decoded characters to lower case (Optional, default is `True`).

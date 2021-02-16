@@ -177,6 +177,7 @@ __all__ = [
     'BeamSearchDecoder',
     'LPRAdapter',
     'CTCGreedySearchDecoder',
+    'AttentionOCRAdapter',
 
     'AssociativeEmbeddingAdapter',
     'HumanPoseAdapter',

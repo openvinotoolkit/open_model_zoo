@@ -71,6 +71,7 @@ __all__ = [
     'NumpyBinReader',
     'SkimageReader',
     'RawpyReader',
+    'ByteFileReader',
 
     'DataRepresentation',
     'ClipIdentifier',
