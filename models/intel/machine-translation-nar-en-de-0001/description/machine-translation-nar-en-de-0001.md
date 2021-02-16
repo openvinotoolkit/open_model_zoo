@@ -26,7 +26,7 @@ The quality metrics were calculated on the wmt19-en-de dataset ("test" split in 
 
 ## Input
 
-name: tokens
+name: `tokens`
 shape: `1, 150`
 description: sequence of tokens (integer values) representing the tokenized sentence.
 The sequence structure is as follows (`<s>`, `</s>` and `<pad>` should be replaced by corresponding token IDs as specified by the dictionary):
