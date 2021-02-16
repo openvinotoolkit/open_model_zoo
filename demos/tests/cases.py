@@ -402,7 +402,7 @@ PYTHON_DEMOS = [
     PythonDemo(name='action_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('action-recognition')}),
         [
-            TestCase(options={'--architecture_type': ' i3d-rgb',
+            TestCase(options={'--architecture_type': 'i3d-rgb',
                               '-m_en': ModelArg('i3d-rgb-tf')}
             ),
             *combine_cases(
