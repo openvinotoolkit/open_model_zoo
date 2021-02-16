@@ -26,7 +26,9 @@ documentation. This currently involves two things:
      do so without affecting the page IDs (by updating this script so that it
      assigns the same IDs as before), thus not breaking any documentation links.
 
-* Generating a Doxygen layout file.
+* Generating a Doxygen layout file. Various sections of the layout are assigned
+  xml:id attributes so that they can be inserted into the appropriate parent
+  sections when the overall OpenVINO toolkit layout file is generated.
 
 The script also runs some basic checks on the documentation contents.
 
@@ -47,6 +49,8 @@ import mistune
 import yaml
 
 OMZ_ROOT = Path(__file__).resolve().parents[1]
+
+XML_ID_ATTRIBUTE = '{http://www.w3.org/XML/1998/namespace}id'
 
 # For most task types, a simple transformation yields a human-readable
 # English description, but for a few types it's useful to override it
@@ -70,6 +74,7 @@ HUMAN_READABLE_TASK_TYPES = {
         'machine_translation',
         'monocular_depth_estimation',
         'optical_character_recognition',
+        'place_recognition',
         'question_answering',
         'semantic_segmentation',
         'sound_classification',
@@ -167,6 +172,7 @@ def add_accuracy_checker_pages(output_root, parent_element):
     ac_group_element = add_page(output_root, parent_element,
         id='omz_tools_accuracy_checker', path='tools/accuracy_checker/README.md',
         title='Accuracy Checker Tool')
+    ac_group_element.attrib[XML_ID_ATTRIBUTE] = 'omz_tools_accuracy_checker'
 
     for md_path in OMZ_ROOT.glob('tools/accuracy_checker/*/**/*.md'):
         md_path_rel = md_path.relative_to(OMZ_ROOT)
@@ -266,11 +272,13 @@ def main():
 
     add_accuracy_checker_pages(output_root, navindex_element)
 
-    add_page(output_root, navindex_element,
+    downloader_element = add_page(output_root, navindex_element,
         id='omz_tools_downloader', path='tools/downloader/README.md', title='Model Downloader')
+    downloader_element.attrib[XML_ID_ATTRIBUTE] = 'omz_tools_downloader'
 
     trained_models_group_element = add_page(output_root, navindex_element,
         title="Trained Models")
+    trained_models_group_element.attrib[XML_ID_ATTRIBUTE] = 'omz_models'
 
     add_model_pages(output_root, trained_models_group_element,
         'intel', "Intel's Pre-trained Models")
@@ -279,6 +287,7 @@ def main():
 
     demos_group_element = add_page(output_root, navindex_element,
         title="Demos", id='omz_demos', path='demos/README.md')
+    demos_group_element.attrib[XML_ID_ATTRIBUTE] = 'omz_demos'
 
     for md_path in [
         *OMZ_ROOT.glob('demos/*_demo/*/README.md'),

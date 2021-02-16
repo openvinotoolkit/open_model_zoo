@@ -126,9 +126,9 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 To run the demo, please provide paths to the model in the IR format and to an input with images:
 ```bash
 python3 text_spotting_demo.py \
--m_m <path_to_models>/text-spotting-0003-detector.xml \
--m_te <path_to_models>/text-spotting-0003-recognizer-encoder.xml \
--m_td <path_to_models>/text-spotting-0003-recognizer-decoder.xml \
+-m_m <path_to_models>/text-spotting-0004-detector.xml \
+-m_te <path_to_models>/text-spotting-0004-recognizer-encoder.xml \
+-m_td <path_to_models>/text-spotting-0004-recognizer-decoder.xml \
 -i 0
 ```
 

@@ -40,6 +40,29 @@ class ForwardTacotronIE:
         self.forward_len = self.forward_net.input_info['data'].input_data.shape[1]
         if self.verbose:
             print('Forward limitations : {0} symbols and {1} embeddings'.format(self.duration_len, self.forward_len))
+        self.is_attention = 'pos_mask' in self.forward_net.input_info
+        if self.is_attention:
+            self.init_pos_mask()
+            print("Load ForwardTacotron with attention")
+        else:
+            self.pos_mask = None
+
+    def init_pos_mask(self, mask_sz=6000, window_size=4):
+        mask_arr = np.zeros((1, 1, mask_sz, mask_sz), dtype=np.float32)
+        width = 2 * window_size + 1
+        for i in range(mask_sz - width):
+            mask_arr[0][0][i][i:i + width] = 1.0
+
+        self.pos_mask = mask_arr
+
+    @staticmethod
+    def sequence_mask(length, max_length=None):
+        if max_length is None:
+            max_length = np.max(length)
+        x = np.arange(max_length, dtype=length.dtype)
+        x = np.expand_dims(x, axis=(0))
+        length = np.expand_dims(length, axis=(1))
+        return x < length
 
     def seq_to_indexes(self, text):
         res = text_to_sequence(text)
@@ -65,7 +88,8 @@ class ForwardTacotronIE:
 
     @staticmethod
     def gather(a, dim, index):
-        expanded_index = [index if dim==i else np.arange(a.shape[i]).reshape([-1 if i==j else 1 for j in range(a.ndim)]) for i in range(a.ndim)]
+        expanded_index = [index if dim == i else np.arange(a.shape[i]).reshape(
+                                                  [-1 if i == j else 1 for j in range(a.ndim)]) for i in range(a.ndim)]
         return a[tuple(expanded_index)]
 
     def load_network(self, model_xml):
@@ -80,7 +104,14 @@ class ForwardTacotronIE:
         return exec_net
 
     def infer_duration(self, sequence, alpha=1.0, non_empty_symbols=None):
-        out = self.duration_predictor_exec.infer(inputs={"input_seq": sequence})
+        if self.is_attention:
+            input_mask = self.sequence_mask(np.array([[non_empty_symbols]]), sequence.shape[1])
+            pos_mask = self.pos_mask[:, :, :sequence.shape[1], :sequence.shape[1]]
+            out = self.duration_predictor_exec.infer(inputs={"input_seq": sequence,
+                                                             "input_mask": input_mask,
+                                                             "pos_mask": pos_mask})
+        else:
+            out = self.duration_predictor_exec.infer(inputs={"input_seq": sequence})
         duration = out["duration"] * alpha
 
         duration = (duration + 0.5).astype('int').flatten()
@@ -97,76 +128,74 @@ class ForwardTacotronIE:
 
         return self.gather(preprocessed_embeddings, 1, indexes)
 
-    def infer_mel(self, aligned_emb):
-        out = self.forward_exec.infer(inputs={"data": aligned_emb})
-        return out['mel']
+    def infer_mel(self, aligned_emb, non_empty_symbols):
+        if self.is_attention:
+            data_mask = self.sequence_mask(np.array([[non_empty_symbols]]), aligned_emb.shape[1])
+            pos_mask = self.pos_mask[:, :, :aligned_emb.shape[1], :aligned_emb.shape[1]]
+            out = self.forward_exec.infer(inputs={"data": aligned_emb,
+                                                  "data_mask": data_mask,
+                                                  "pos_mask": pos_mask})
+        else:
+            out = self.forward_exec.infer(inputs={"data": aligned_emb})
+        return out['mel'][:, :non_empty_symbols]
 
-    def forward(self, text, alpha=1.0):
+    def find_optimal_delimiters_position(self, sequence, delimiters, idx, window=20):
+        res = {d: -1 for d in delimiters}
+        for i in range(max(0, idx - window), idx):
+            if sequence[i] in delimiters:
+                res[sequence[i]] = i + 1
+        return res
+
+    def forward_duration_prediction_by_delimiters(self, text, alpha):
         sequence = self.seq_to_indexes(text)
-        if len(sequence) <= self.duration_len:
-            non_empty_symbols = None
-            if len(sequence) < self.duration_len:
-                non_empty_symbols = len(sequence)
-                sequence += [_symbol_to_id[' ']] * (self.duration_len - len(sequence))
+        seq_len = len(sequence)
+        outputs = []
+
+        if seq_len <= self.duration_len:
+            non_empty_symbols = len(sequence) + min(1, self.duration_len - seq_len)
+            sequence = sequence + [_symbol_to_id[' ']] * (self.duration_len - seq_len)
             sequence = np.array(sequence)
             sequence = np.expand_dims(sequence, axis=0)
-            if self.verbose:
-                print("Seq shape: {0}".format(sequence.shape))
-            aligned_emb = self.infer_duration(sequence, alpha, non_empty_symbols=non_empty_symbols)
-            if self.verbose:
-                print("AEmb shape: {0}".format(aligned_emb.shape))
+            outputs.append(self.infer_duration(sequence, alpha, non_empty_symbols=non_empty_symbols))
         else:
-            punctuation = '!\'(),.:;? '
+            punctuation = '.!?,;: '
             delimiters = [_symbol_to_id[p] for p in punctuation]
-            # try to find optimal fragmentation for inference
-            ranges = [i+1 for i, val in enumerate(sequence) if val in delimiters]
-            if len(sequence) not in ranges:
-                ranges.append(len(sequence))
-            optimal_ranges = []
-            prev_begin = 0
-            for i in range(len(ranges)-1):
-                if ranges[i] < 0:
-                    continue
-                res1 = (ranges[i] - prev_begin) % self.duration_len
-                res2 = (ranges[i + 1] - prev_begin) % self.duration_len
-                if res1 > res2 or res1 == 0:
-                    if res2 == 0:
-                        optimal_ranges.append(ranges[i+1])
-                        ranges[i+1] = -1
-                    else:
-                        optimal_ranges.append(ranges[i])
-                    prev_begin = optimal_ranges[-1]
-            if self.verbose:
-                print(optimal_ranges)
-            if len(sequence) not in optimal_ranges:
-                optimal_ranges.append(len(sequence))
 
-            outputs = []
             start_idx = 0
-            for edge in optimal_ranges:
+            while start_idx < seq_len:
+                if start_idx + self.duration_len < seq_len:
+                    positions = self.find_optimal_delimiters_position(sequence, delimiters,
+                                                                      start_idx + self.duration_len,
+                                                                      window=self.duration_len//10)
+                else:
+                    positions = {delimiters[0]: seq_len}
+                edge = -1
+                for d in delimiters:
+                    if positions[d] > 0:
+                        edge = positions[d]
+                        break
+                if edge < 0:
+                    raise Exception("Bad delimiter position {0} for sequence with length {1}".format(edge, seq_len))
+
                 sub_sequence = sequence[start_idx:edge]
-                start_idx = edge
-                non_empty_symbols = None
-                if len(sub_sequence) < self.duration_len:
-                    non_empty_symbols = len(sub_sequence)
-                    sub_sequence += [_symbol_to_id[' ']] * (self.duration_len - len(sub_sequence))
+                non_empty_symbols = len(sub_sequence) + min(1, self.duration_len - len(sub_sequence))
+                sub_sequence += [_symbol_to_id[' ']] * (self.duration_len - len(sub_sequence))
                 sub_sequence = np.array(sub_sequence)
                 sub_sequence = np.expand_dims(sub_sequence, axis=0)
-                if self.verbose:
-                    print("Sub seq shape: {0}".format(sub_sequence.shape))
                 outputs.append(self.infer_duration(sub_sequence, alpha, non_empty_symbols=non_empty_symbols))
+                start_idx = edge
 
-                if self.verbose:
-                    print("Sub AEmb: {0}".format(outputs[-1].shape))
+        aligned_emb = np.concatenate(outputs, axis=1)
+        return aligned_emb
 
-            aligned_emb = np.concatenate(outputs, axis=1)
+    def forward(self, text, alpha=1.0):
+        aligned_emb = self.forward_duration_prediction_by_delimiters(text, alpha)
+
         mels = []
-        n_iters = aligned_emb.shape[1] // self.forward_len + 1
-        for i in range(n_iters):
-            start_idx = i * self.forward_len
-            end_idx = min((i+1) * self.forward_len, aligned_emb.shape[1])
-            if start_idx >= aligned_emb.shape[1]:
-                break
+        start_idx = 0
+        end_idx = 0
+        while start_idx < aligned_emb.shape[1] and end_idx < aligned_emb.shape[1]:
+            end_idx = min(start_idx + self.forward_len, aligned_emb.shape[1])
             sub_aligned_emb = aligned_emb[:, start_idx:end_idx, :]
             if sub_aligned_emb.shape[1] < self.forward_len:
                 sub_aligned_emb = np.pad(sub_aligned_emb,
@@ -174,8 +203,9 @@ class ForwardTacotronIE:
                                          'constant', constant_values=0)
             if self.verbose:
                 print("SAEmb shape: {0}".format(sub_aligned_emb.shape))
-            mel = self.infer_mel(sub_aligned_emb)[:, :end_idx - start_idx]
+            mel = self.infer_mel(sub_aligned_emb, end_idx - start_idx)
             mels.append(mel)
+            start_idx += self.forward_len
 
         res = np.concatenate(mels, axis=1)
         if self.verbose:

@@ -387,8 +387,8 @@ class ModelEvaluator(BaseEvaluator):
         def get_data(image, create_representation=True):
             if is_path(image):
                 return [
-                    self.dataset.data_provider.data_reader.read_dispatcher(identifier=image) if create_representation
-                    else self.dataset.data_provider.data_reader.read_dispatcher(image)]
+                    DataRepresentation(self.dataset.data_provider.data_reader.read_dispatcher(image), identifier=image)
+                    if create_representation else self.dataset.data_provider.data_reader.read_dispatcher(image)]
             return [DataRepresentation(image, identifier='image') if create_representation else image]
 
         if not isinstance(data, list):

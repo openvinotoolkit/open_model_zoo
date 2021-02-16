@@ -6,6 +6,7 @@ The demo shows an example of using neural networks to detect and recognize print
 * `text-detection-0004`, which is a lightweight detection network for finding text.
 * `horizontal-text-detection-0001`, which is a detection network that works much faster than models above, but it is applicable to finding more or less horizontal text only.
 * `text-recognition-0012`, which is a recognition network for recognizing text.
+* `text-recognition-0013`, which is a recognition network for recognizing text.
 * `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
 
 For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
@@ -26,11 +27,15 @@ text_detection_demo [OPTION]
 Options:
 
     -h                           Print a usage message.
-    -i                           Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -i                           Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -loop                        Optional. Enable reading the input in a loop.
+    -o "<path>"                  Optional. Name of output to save.
+    -limit "<num>"               Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m_td "<path>"               Required. Path to the Text Detection model (.xml) file.
     -m_tr "<path>"               Required. Path to the Text Recognition model (.xml) file.
     -m_tr_ss "<value>"           Optional. Symbol set for the Text Recognition model.
+    -tr_pt_first                   Optional. Specifies if pad token is the first symbol in the alphabet. Default is false
+    -tr_o_blb_nm                   Optional. Name of the output blob of the model which would be used as model output. If not stated, first blob of the model would be used.
     -cc                          Optional. If it is set, then in case of absence of the Text Detector, the Text Recognition model takes a central image crop as an input, but not full frame.
     -w_td "<value>"              Optional. Input image width for Text Detection model.
     -h_td "<value>"              Optional. Input image height for Text Detection model.

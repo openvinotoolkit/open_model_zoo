@@ -81,6 +81,7 @@ class TextToSpeechEvaluator(BaseEvaluator):
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             batch_data, batch_meta = extract_image_representations(batch_inputs)
+            input_names = [s.split('.')[-1] for s in batch_inputs[0].identifier]
             temporal_output_callback = None
             if output_callback:
                 temporal_output_callback = partial(output_callback,
@@ -89,7 +90,7 @@ class TextToSpeechEvaluator(BaseEvaluator):
                                                    dataset_indices=batch_input_ids)
 
             batch_raw_prediction, batch_prediction = self.model.predict(
-                batch_identifiers, batch_data, batch_meta, callback=temporal_output_callback
+                batch_identifiers, batch_data, batch_meta, input_names, callback=temporal_output_callback
             )
             batch_annotation, batch_prediction = self.postprocessor.process_batch(batch_annotation, batch_prediction)
             metrics_result = None
@@ -249,7 +250,7 @@ class TextToSpeechEvaluator(BaseEvaluator):
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
 
 
-def create_network(model_config, launcher, delayed_model_loading=False):
+def create_network(model_config, launcher, suffix, delayed_model_loading=False):
     launcher_model_mapping = {
         'dlsdk': TTSDLSDKModel
     }
@@ -257,7 +258,7 @@ def create_network(model_config, launcher, delayed_model_loading=False):
     model_class = launcher_model_mapping.get(framework)
     if not model_class:
         raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(model_config, launcher, delayed_model_loading)
+    return model_class(model_config, launcher, suffix, delayed_model_loading)
 
 
 class SequentialModel:
@@ -286,23 +287,29 @@ class SequentialModel:
                     'network_info should contains: {} fields'.format(' ,'.join(required_fields))
                 )
         self.forward_tacotron_duration = create_network(
-            network_info.get('forward_tacotron_duration', {}), launcher, delayed_model_loading
+            network_info.get('forward_tacotron_duration', {}), launcher,
+            'duration_prediction_att', delayed_model_loading
         )
         self.forward_tacotron_regression = create_network(
-            network_info.get('forward_tacotron_regression', {}), launcher, delayed_model_loading
+            network_info.get('forward_tacotron_regression', {}), launcher,
+            'regression_att', delayed_model_loading
         )
         self.melgan = create_network(
-            network_info.get('melgan', {}), launcher, delayed_model_loading
+            network_info.get('melgan', {}), launcher, "melganupsample", delayed_model_loading
         )
         self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
-        self.forward_tacotron_regression_input = next(iter(self.forward_tacotron_regression.inputs))
+        self.forward_tacotron_regression_input = network_info['forward_tacotron_regression_inputs']
         self.melgan_input = next(iter(self.melgan.inputs))
         self.duration_output = 'duration'
         self.embeddings_output = 'embeddings'
         self.audio_output = 'audio'
         self.max_mel_len = int(network_info['max_mel_len'])
+        self.max_regression_len = int(network_info['max_regression_len'])
+        self.pos_mask_window = int(network_info['pos_mask_window'])
         self.adapter = create_adapter(network_info['adapter'])
         self.adapter.output_blob = self.audio_output
+
+        self.init_pos_mask(window_size=self.pos_mask_window)
 
         self.with_prefix = False
         self._part_by_name = {
@@ -311,10 +318,27 @@ class SequentialModel:
             'melgan': self.melgan
         }
 
-    def predict(self, identifiers, input_data, input_meta, callback=None):
+    def init_pos_mask(self, mask_sz=6000, window_size=4):
+        mask_arr = np.zeros((1, 1, mask_sz, mask_sz), dtype=np.float32)
+        width = 2 * window_size + 1
+        for i in range(mask_sz - width):
+            mask_arr[0][0][i][i:i + width] = 1.0
+
+        self.pos_mask = mask_arr
+
+    @staticmethod
+    def sequence_mask(length, max_length=None):
+        if max_length is None:
+            max_length = np.max(length)
+        x = np.arange(max_length, dtype=length.dtype)
+        x = np.expand_dims(x, axis=(0))
+        length = np.expand_dims(length, axis=(1))
+        return x < length
+
+    def predict(self, identifiers, input_data, input_meta, input_names, callback=None):
         assert len(identifiers) == 1
 
-        duration_output = self.forward_tacotron_duration.predict({self.forward_tacotron_duration_input: input_data[0]})
+        duration_output = self.forward_tacotron_duration.predict(dict(zip(input_names, input_data[0])))
         if callback:
             callback(duration_output)
 
@@ -322,12 +346,20 @@ class SequentialModel:
         duration = (duration + 0.5).astype('int').flatten()
         duration = np.expand_dims(duration, axis=0)
 
-        preprocessed_embeddings = duration_output[self.embeddings_output]
-        indexes = self.build_index(duration, preprocessed_embeddings)
-        processed_embeddings = self.gather(preprocessed_embeddings, 1, indexes)
-        processed_embeddings = processed_embeddings[:, self.max_mel_len, :]
-
-        mels = self.forward_tacotron_regression.predict({self.forward_tacotron_regression_input: processed_embeddings})
+        preprocessed_emb = duration_output[self.embeddings_output]
+        indexes = self.build_index(duration, preprocessed_emb)
+        processed_emb = self.gather(preprocessed_emb, 1, indexes)
+        processed_emb = processed_emb[:, :self.max_regression_len, :]
+        if len(input_names) > 1:  # in the case of network with attention
+            input_mask = self.sequence_mask(np.array([[processed_emb.shape[1]]]), processed_emb.shape[1])
+            pos_mask = self.pos_mask[:, :, :processed_emb.shape[1], :processed_emb.shape[1]]
+            input_to_regression = {
+                self.forward_tacotron_regression_input['data']: processed_emb,
+                self.forward_tacotron_regression_input['data_mask']: input_mask,
+                self.forward_tacotron_regression_input['pos_mask']: pos_mask}
+            mels = self.forward_tacotron_regression.predict(input_to_regression)
+        else:
+            mels = self.forward_tacotron_regression.predict({self.forward_tacotron_regression_input: processed_emb})
         if callback:
             callback(mels)
         melgan_input = mels[self.melgan_input]

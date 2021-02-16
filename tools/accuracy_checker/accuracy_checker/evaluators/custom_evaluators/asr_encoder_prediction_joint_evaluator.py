@@ -26,6 +26,7 @@ from ...utils import contains_all, contains_any, read_pickle, get_path
 from ...logging import print_info
 from .asr_encoder_decoder_evaluator import AutomaticSpeechRecognitionEvaluator
 
+
 class ASREvaluator(AutomaticSpeechRecognitionEvaluator):
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False):
@@ -138,6 +139,16 @@ class BaseDLSDKModel:
             self.input_blob = input_blob
             self.output_blob = output_blob
             self.with_prefix = with_prefix
+            for idx, inp in enumerate(self.input_layers):
+                self.input_layers[idx] = (
+                    '_'.join([self.default_model_suffix, inp])
+                    if with_prefix else inp.split(self.default_model_suffix)[-1]
+                )
+            for idx, out in enumerate(self.output_layers):
+                self.output_layers[idx] = (
+                    '_'.join([self.default_model_suffix, out])
+                    if with_prefix else out.split(self.default_model_suffix)[-1]
+                )
 
     def load_model(self, network_info, launcher, log=False):
         if 'onnx_model' in network_info:
@@ -181,6 +192,7 @@ def create_prediction(model_config, launcher, delayed_model_loading):
         raise ValueError('model for framework {} is not supported'.format(framework))
     return model_class(model_config, launcher, delayed_model_loading)
 
+
 def create_joint(model_config, launcher, delayed_model_loading):
     launcher_model_mapping = {
         'dlsdk': JointDLSDKModel,
@@ -191,6 +203,7 @@ def create_joint(model_config, launcher, delayed_model_loading):
     if not model_class:
         raise ValueError('model for framework {} is not supported'.format(framework))
     return model_class(model_config, launcher, delayed_model_loading)
+
 
 class ASRModel(BaseModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
@@ -216,7 +229,7 @@ class ASRModel(BaseModel):
         self.joint = create_joint(network_info['joint'], launcher, delayed_model_loading)
         self.store_encoder_predictions = network_info['encoder'].get('store_predictions', False)
         self._encoder_predictions = [] if self.store_encoder_predictions else None
-        self._part_by_name = {'encoder': self.encoder, 'prediction': self.decoder, 'joint': self.joint}
+        self._part_by_name = {'encoder': self.encoder, 'prediction': self.prediction, 'joint': self.joint}
         self._raw_outs = OrderedDict()
         self.adapter = create_adapter(network_info.get('adapter', 'dumb_decoder'))
 
@@ -232,7 +245,7 @@ class ASRModel(BaseModel):
                 encoder_callback(encoder_prediction)
             if self.store_encoder_predictions:
                 self._encoder_predictions.append(encoder_prediction)
-            raw_output, prediction = self.decoder(identifiers, decoder_inputs)
+            raw_output, prediction = self.decoder(identifiers, decoder_inputs, callback=encoder_callback)
             raw_outputs.append(raw_output)
             predictions.append(prediction)
         return raw_outputs, predictions
@@ -261,18 +274,12 @@ class ASRModel(BaseModel):
         for network_dict in network_list:
             self._part_by_name[network_dict['name']].load_model(network_dict, launcher)
 
-    def _add_raw_encoder_predictions(self, encoder_prediction):
-        for key, output in encoder_prediction.items():
-            if key not in self._raw_outs:
-                self._raw_outs[key] = []
-            self._raw_outs[key].append(output)
-
     def get_network(self):
         return [{'name': 'encoder', 'model': self.encoder.network},
                 {'name': 'prediction', 'model': self.prediction.network},
                 {'name': 'joint', 'model': self.joint.network}]
 
-    def decoder(self, identifiers, logits):
+    def decoder(self, identifiers, logits, callback=None):
         output = []
         raw_outputs = []
         batches = logits.shape[0]
@@ -280,14 +287,13 @@ class ASRModel(BaseModel):
             inseq = np.squeeze(logits[batch_idx, :, :])
             # inseq: TxBxF
             logitlen = inseq.shape[0]
-            sentence = self._greedy_decode(inseq, logitlen)
+            sentence = self._greedy_decode(inseq, logitlen, callback)
             output.append(sentence)
-            # raw_outputs.append(raw_output)
         result = self.adapter.process(output, identifiers, [{}])
 
         return raw_outputs, result
 
-    def _greedy_decode(self, x, out_len):
+    def _greedy_decode(self, x, out_len, callback=None):
         hidden_size = 320
         hidden = (np.zeros([2, 1, hidden_size]), np.zeros([2, 1, hidden_size]))
         label = []
@@ -302,9 +308,11 @@ class ASRModel(BaseModel):
                     self._get_last_symb(label),
                     hidden
                 )
-                hidden_prime = (g['151'], g['152'])
-                g = g['153']
-                logp = self._joint_step(f, g, log_normalize=False)[0, :]
+                if callback:
+                    callback(g)
+                hidden_prime = (g[self.prediction.output_layers[0]], g[self.prediction.output_layers[1]])
+                g = g[self.prediction.output_layers[2]]
+                logp = self._joint_step(f, g, log_normalize=False, callback=callback)[0, :]
 
                 k = np.argmax(logp)
 
@@ -322,12 +330,18 @@ class ASRModel(BaseModel):
             label = self._blank_id
         if label > self._blank_id:
             label -= 1
-        inputs = {'input.1': [[label, ]], '1': hidden[0], '2': hidden[1]}
+        inputs = {
+            self.prediction.input_layers[0]: [[label, ]],
+            self.prediction.input_layers[1]: hidden[0],
+            self.prediction.input_layers[2]: hidden[1]
+        }
         return self.prediction.predict(None, inputs)
 
-    def _joint_step(self, enc, pred, log_normalize=False):
-        inputs = {'0': enc, '1': pred}
+    def _joint_step(self, enc, pred, log_normalize=False, callback=None):
+        inputs = {self.joint.input_layers[0]: enc, self.joint.input_layers[1]: pred}
         logits, logits_blob = self.joint.predict(None, inputs)
+        if callback:
+            callback(logits)
         logits = logits_blob[:, 0, 0, :]
         if not log_normalize:
             return logits
@@ -341,15 +355,18 @@ class ASRModel(BaseModel):
 
 class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
     default_model_suffix = 'encoder'
+    input_layers = []
+    output_layers = []
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        self.input_blob, self.output_blob = None, None
         self.with_prefix = None
+        self.output_blob = None
+        self.input_blob = None
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
 
-    def predict(self, identifiers, input_data):
+    def predict(self, identifiers, input_data, callback=None):
         input_data = self.fit_to_input(input_data)
         results = self.exec_network.infer(input_data)
         return results, results[self.output_blob]
@@ -383,14 +400,21 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
 
         return {input_blob: np.array(input_data)}
 
+
 class EncoderDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'encoder'
 
+
 class PredictionDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'prediction'
+    input_layers = ['input.1', '1', '2']
+    output_layers = ['151', '152', '153']
+
 
 class JointDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'joint'
+    input_layers = ['0', '1']
+
 
 class CommonONNXModel(BaseModel):
     default_model_suffix = 'encoder'
@@ -402,7 +426,7 @@ class CommonONNXModel(BaseModel):
         self.input_blob = next(iter(self.inference_session.get_inputs()))
         self.output_blob = next(iter(self.inference_session.get_outputs()))
 
-    def predict(self, identifiers, input_data):
+    def predict(self, identifiers, input_data, callback=None):
         fitted = self.fit_to_input(input_data)
         results = self.inference_session.run((self.output_blob.name, ), fitted)
         return results, results[0]
@@ -427,18 +451,28 @@ class CommonONNXModel(BaseModel):
 
         return model
 
+
 class EncoderONNXModel(CommonONNXModel):
     default_model_suffix = 'encoder'
+    input_layers = []
+    output_layer = []
 
     def fit_to_input(self, input_data):
         frames, _, _ = input_data.shape
         return {self.input_blob.name: input_data, '1': np.array([frames], dtype=np.int64)}
 
+
 class PredictionONNXModel(CommonONNXModel):
     default_model_suffix = 'prediction'
+    input_layers = ['input.1', '1', '2']
+    output_layers = ['151', '152', '153']
+
 
 class JointONNXModel(CommonONNXModel):
     default_model_suffix = 'joint'
+    input_layers = ['0', '1']
+    output_layer = []
+
 
 class DummyEncoder(BaseModel):
     def __init__(self, network_info, launcher):

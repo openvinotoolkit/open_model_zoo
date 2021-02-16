@@ -193,6 +193,7 @@ Deep Learning models for text recognition in various applications.
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [text-recognition-0012](./text-recognition-0012/description/text-recognition-0012.md)                                                          | 1.485                | 5.568      |
+| [text-recognition-0013](./text-recognition-0013/description/text-recognition-0013.md)                                                          | 1.488                | 5.567      |
 | [handwritten-score-recognition-0003](./handwritten-score-recognition-0003/description/handwritten-score-recognition-0003.md)                   | 0.792                | 5.555      |
 | [handwritten-japanese-recognition-0001](./handwritten-japanese-recognition-0001/description/handwritten-japanese-recognition-0001.md)          | 117.136              | 15.31      |
 | [handwritten-simplified-chinese-recognition-0001](./handwritten-simplified-chinese-recognition-0001/description/handwritten-simplified-chinese-recognition-0001.md)          |       134.513        |    17.270   |
@@ -209,6 +210,10 @@ Deep Learning models for text spotting (simultaneous detection and recognition).
 | text-spotting-0003-detector                                                                                                                    | 184.495              | 27.010     |
 | text-spotting-0003-recognizer-encoder                                                                                                          | 2.082                | 1.328      |
 | text-spotting-0003-recognizer-decoder                                                                                                          | 0.002                | 0.273      |
+| [text-spotting-0004](./text-spotting-0004/description/text-spotting-0004.md)                                                                   |                      |            |
+| text-spotting-0004-detector                                                                                                                    | 184.495              | 27.010     |
+| text-spotting-0004-recognizer-encoder                                                                                                          | 2.082                | 1.328      |
+| text-spotting-0004-recognizer-decoder                                                                                                          | 0.002                | 0.273      |
 
 ## Action Recognition Models
 
@@ -265,6 +270,16 @@ Deep Learning compressed models
 | [machine-translation-nar-en-ru-0001](./machine-translation-nar-en-ru-0001/description/machine-translation-nar-en-ru-0001.md) | 23.17 | 69.29 |
 | [machine-translation-nar-ru-en-0001](./machine-translation-nar-ru-en-0001/description/machine-translation-nar-ru-en-0001.md) | 23.17 | 69.29 |
 
+## Text To Speech
+
+Deep Learning models for speech synthesis (mel spectrogram generation and wave form generation).
+
+| Model Name                                                                                | Complexity (GFLOPs)  | Size (Mp)  |
+|-------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [text-to-speech-en-0001](./text-to-speech-en-0001/description/text-to-speech-en-0001.md)  |                      |            |
+| text-to-speech-en-0001-duration-prediction                                                | 15.84                | 13.569     |
+| text-to-speech-en-0001-regression                                                         | 7.65                 | 4.96       |
+| text-to-speech-en-0001-generation                                                         | 48.38                | 12.77      |
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

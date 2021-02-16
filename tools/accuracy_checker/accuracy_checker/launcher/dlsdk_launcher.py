@@ -176,10 +176,14 @@ class DLSDKLauncher(Launcher):
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
+        field_uri = uri_prefix or 'launcher.{}'.format(cls.__provider__)
         return DLSDKLauncherConfigValidator(
-            uri_prefix or 'launcher.{}'.format(cls.__provider__), fields=cls.parameters(),
+            field_uri, fields=cls.parameters(),
             delayed_model_loading=delayed_model_loading
-        ).validate(config, fetch_only=fetch_only)
+        ).validate(
+            config, field_uri=field_uri,
+            validation_scheme=cls.validation_scheme(), fetch_only=fetch_only
+        )
 
     @property
     def device(self):
@@ -723,11 +727,9 @@ class DLSDKLauncher(Launcher):
         else:
             for key, value in device_configuration.items():
                 if isinstance(value, dict):
-                    if key in ie.known_plugins:
-                        self.ie_core.set_config(value, key)
-                    else:
-                        warnings.warn('Option {key}: {value} will be skipped because device is '
-                                      'unknown'.format(key=key, value=value))
+                    if key not in ie.known_plugins:
+                        warnings.warn('{} device is unknown. Config loading may lead to error.'.format(key))
+                    self.ie_core.set_config(value, key)
                 else:
                     warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
                                   'applied is not specified or option is not a dict-like'.format(key=key, value=value))

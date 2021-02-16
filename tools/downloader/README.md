@@ -440,6 +440,7 @@ describing a single model. Each such object has the following keys:
   * `monocular_depth_estimation`
   * `object_attributes`
   * `optical_character_recognition`
+  * `place_recognition`
   * `question_answering`
   * `semantic_segmentation`
   * `sound_classification`

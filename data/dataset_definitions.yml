@@ -1151,3 +1151,19 @@ datasets:
     data_source: Cityscapes/data
     annotation: cityscapes.pickle
     dataset_meta: cityscapes.json
+
+  - name: forward_tacotron_melgan_io
+    data_source: forward_tacotron_melgan_io
+    reader: numpy_dict_reader
+    annotation_conversion:
+      converter: multi_feature_regression
+      data_dir: forward_tacotron_melgan_io
+      input_suffix: duration_prediction_in_
+      reference_suffix: melgan_out_
+
+  - name: pitts30k_val
+    data_source: pitts250k
+    annotation_conversion:
+      converter: place_recognition
+      split_file: pitts250k/datasets/pitts30k_val.mat
+    annotation: pitts30k_val.pickle

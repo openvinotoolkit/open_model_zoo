@@ -19,7 +19,7 @@ from collections import defaultdict
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, BoolField, StringField, ListField, ConfigError
+from ..config import ConfigValidator, ConfigError, NumberField, BoolField, DictField, ListField, StringField
 from ..representation import CharacterRecognitionPrediction
 
 
@@ -40,7 +40,9 @@ class BeamSearchDecoder(Adapter):
             ),
             'softmaxed_probabilities': BoolField(
                 optional=True, default=False, description="Indicator that model uses softmax for output layer "
-            )
+            ),
+            'logits_output': StringField(optional=True, description='Logits output layer name'),
+            'custom_label_map': DictField(optional=True, description='Label map')
         })
         return parameters
 
@@ -54,12 +56,18 @@ class BeamSearchDecoder(Adapter):
         self.beam_size = self.get_value_from_config('beam_size')
         self.blank_label = self.launcher_config.get('blank_label')
         self.softmaxed_probabilities = self.get_value_from_config('softmaxed_probabilities')
+        self.logits_output = self.get_value_from_config("logits_output")
+        self.custom_label_map = self.get_value_from_config("custom_label_map")
 
     def process(self, raw, identifiers, frame_meta):
         if not self.label_map:
             raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
         if self.blank_label is None:
             self.blank_label = len(self.label_map)
+        if self.logits_output:
+            self.output_blob = self.logits_output
+        if self.custom_label_map:
+            self.label_map = self.custom_label_map
         raw_output = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
