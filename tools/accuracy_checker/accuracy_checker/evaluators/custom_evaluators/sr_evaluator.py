@@ -29,6 +29,8 @@ from ...utils import contains_all, contains_any, extract_image_representations, 
 from ...progress_reporters import ProgressReporter
 from ...logging import print_info
 
+def generate_name(prefix, with_prefix, layer_name):
+    return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
 
 class SuperResolutionFeedbackEvaluator(BaseEvaluator):
     def __init__(self, dataset_config, launcher, model):
@@ -39,7 +41,7 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
         self.postprocessor = None
         self.metric_executor = None
         self.launcher = launcher
-        self.model = model
+        self.srmodel = model
         self._metrics_results = []
 
     @classmethod
@@ -82,9 +84,9 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
             _progress_reporter = None if not check_progress else self._create_progress_reporter(
                 check_progress, self.dataset.size
             )
-        self.model.init_feedback(self.dataset.data_reader)
+        self.srmodel.init_feedback(self.dataset.data_reader)
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
-            self.model.fill_feedback(batch_inputs)
+            self.srmodel.fill_feedback(batch_inputs)
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             batch_inputs_extr, _ = extract_image_representations(batch_inputs)
             callback = None
@@ -94,11 +96,11 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
                                            element_identifiers=batch_identifiers,
                                            dataset_indices=batch_input_ids)
 
-            batch_raw_prediction, batch_prediction = self.model.predict(
+            batch_raw_prediction, batch_prediction = self.srmodel.predict(
                 batch_identifiers, batch_inputs_extr, callback=callback
             )
             annotation, prediction = self.postprocessor.process_batch(batch_annotation, batch_prediction)
-            self.model.feedback(prediction)
+            self.srmodel.feedback(prediction)
 
             metrics_result = None
             if self.metric_executor and calculate_metrics:
@@ -126,8 +128,8 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
         if _progress_reporter:
             _progress_reporter.finish()
 
-        if self.model.store_predictions:
-            self.model.save_predictions()
+        if self.srmodel.store_predictions:
+            self.srmodel.save_predictions()
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
@@ -170,7 +172,7 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
             presenter.write_result(metric_result, ignore_results_formatting)
 
     def release(self):
-        self.model.release()
+        self.srmodel.release()
         self.launcher.release()
 
     def reset(self):
@@ -217,13 +219,13 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
         return compute_intermediate_metric_res, metric_interval, ignore_results_formatting
 
     def load_network(self, network=None):
-        self.model.load_network(network, self.launcher)
+        self.srmodel.load_network(network, self.launcher)
 
     def load_network_from_ir(self, models_list):
-        self.model.load_model(models_list, self.launcher)
+        self.srmodel.load_model(models_list, self.launcher)
 
     def get_network(self):
-        return self.model.get_network()
+        return self.srmodel.get_network()
 
     def get_metrics_attributes(self):
         if not self.metric_executor:
@@ -302,7 +304,7 @@ class BaseDLSDKModel:
             print_info('\tshape: {}\n'.format(output_info.shape))
 
     def automatic_model_search(self, network_info):
-        model = Path(network_info['model'])
+        model = Path(network_info['srmodel'])
         if model.is_dir():
             is_blob = network_info.get('_model_is_blob')
             if is_blob:
@@ -333,22 +335,8 @@ class BaseDLSDKModel:
         self.network = network
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
 
-    def set_input_and_output(self):
-        has_info = hasattr(self.exec_network, 'input_info')
-        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
-        input_blob = next(iter(input_info))
-        with_prefix = input_blob.startswith(self.default_model_suffix)
-        if self.input_blob is None or with_prefix != self.with_prefix:
-            if self.input_blob is None:
-                output_blob = next(iter(self.exec_network.outputs))
-            else:
-                output_blob = (
-                    '_'.join([self.default_model_suffix, self.output_blob])
-                    if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
-                )
-            self.input_blob = input_blob
-            self.output_blob = output_blob
-            self.with_prefix = with_prefix
+    def update_inputs_outputs_info(self):
+        raise NotImplementedError
 
     def load_model(self, network_info, launcher, log=False):
         model, weights = self.automatic_model_search(network_info)
@@ -357,7 +345,7 @@ class BaseDLSDKModel:
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
-        self.set_input_and_output()
+        self.update_inputs_outputs_info()
         if log:
             self.print_input_output_info()
 
@@ -380,28 +368,26 @@ class SRFModel(BaseModel):
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         if models_args and not delayed_model_loading:
-            model = network_info.get('model', {})
+            model = network_info.get('srmodel', {})
             if not contains_any(model, ['model', 'onnx_model']) and models_args:
-                model['model'] = models_args[0]
+                model['srmodel'] = models_args[0]
                 model['_model_is_blob'] = is_blob
-            network_info.update({'model': model,})
-        if not contains_all(network_info, ['model',]) and not delayed_model_loading:
-            raise ConfigError('network_info should contain encoder and decoder fields')
-        # self.num_processing_frames = network_info['decoder'].get('num_processing_frames', 16)
-        # self.processing_frames_buffer = []
-        self.model = create_model(network_info['model'], launcher, delayed_model_loading)
-        self.feedback = self.model.feedback
-        self.init_feedback = self.model.init_feedback
-        self.fill_feedback = self.model.fill_feedback
-        self.store_predictions = network_info['model'].get('store_predictions', False)
+            network_info.update({'sr_model': model,})
+        if not contains_all(network_info, ['srmodel',]) and not delayed_model_loading:
+            raise ConfigError('network_info should contain srmodel field')
+        self.srmodel = create_model(network_info['srmodel'], launcher, delayed_model_loading)
+        self.feedback = self.srmodel.feedback
+        self.init_feedback = self.srmodel.init_feedback
+        self.fill_feedback = self.srmodel.fill_feedback
+        self.store_predictions = network_info['srmodel'].get('store_predictions', False)
         self._predictions = [] if self.store_predictions else None
-        self._part_by_name = {'model': self.model}
+        self._part_by_name = {'srmodel': self.srmodel}
         self._raw_outs = OrderedDict()
 
     def predict(self, identifiers, input_data, callback=None):
         predictions, raw_outputs = [], []
         for data in input_data:
-            output, prediction = self.model.predict(identifiers, data)
+            output, prediction = self.srmodel.predict(identifiers, data)
             if self.store_predictions:
                 self._predictions.append(prediction)
             raw_outputs.append(output)
@@ -414,21 +400,23 @@ class SRFModel(BaseModel):
             self._predictions = []
 
     def release(self):
-        self.model.release()
+        self.srmodel.release()
 
     def save_predictions(self):
         if self._predictions is not None:
-            prediction_file = Path(self.network_info['model'].get('predictions', 'model_predictions.pickle'))
+            prediction_file = Path(self.network_info['srmodel'].get('predictions', 'model_predictions.pickle'))
             with prediction_file.open('wb') as file:
                 pickle.dump(self._predictions, file)
 
     def load_network(self, network_list, launcher):
         for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_network(network_dict['model'], launcher)
+            self._part_by_name[network_dict['name']].load_network(network_dict['srmodel'], launcher)
+        self.update_inputs_outputs_info()
 
     def load_model(self, network_list, launcher):
         for network_dict in network_list:
             self._part_by_name[network_dict['name']].load_model(network_dict, launcher)
+        self.update_inputs_outputs_info()
 
     def _add_raw_predictions(self, prediction):
         for key, output in prediction.items():
@@ -437,7 +425,8 @@ class SRFModel(BaseModel):
             self._raw_outs[key].append(output)
 
     def get_network(self):
-        return [{'name': 'model', 'model': self.model.network},]
+        return [{'name': 'srmodel', 'model': self.srmodel.network},]
+
 
 class FeedbackMixin:
     def configure_feedback(self):
@@ -463,7 +452,6 @@ class FeedbackMixin:
 
     def feedback(self, data):
         data = data[0]
-        # info = self._feedback_inputs[self._feedback_name]
         self._feedback_data[self._feedback_name] = data[0].value
 
     def fill_feedback(self, data):
@@ -472,12 +460,13 @@ class FeedbackMixin:
 
 
 class ModelDLSDKModel(BaseModel, BaseDLSDKModel, FeedbackMixin):
-    default_model_suffix = 'model'
+    default_model_suffix = 'srmodel'
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         self.input_blob, self.output_blob = None, None
         self.with_prefix = None
+
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
 
@@ -511,9 +500,25 @@ class ModelDLSDKModel(BaseModel, BaseDLSDKModel, FeedbackMixin):
 
         return fitted
 
+    def update_inputs_outputs_info(self):
+        has_info = hasattr(self.exec_network, 'input_info')
+        input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
+        input_blob = next(iter(input_info))
+        with_prefix = input_blob.startswith(self.default_model_suffix + '_')
+        if (with_prefix != self.with_prefix) and with_prefix:
+            self.network_info['feedback_input'] = '_'.join([self.default_model_suffix,
+                                                           self.network_info['feedback_input']])
+            for input in self.network_info['inputs']:
+                input['name'] = '_'.join([self.default_model_suffix, input['name']])
+                if 'blob' in input.keys():
+                    input['blob'] = '_'.join([self.default_model_suffix, input['blob']])
+            self.network_info['adapter']['target_out'] = '_'.join([self.default_model_suffix,
+                                                                  self.network_info['adapter']['target_out']])
+
+        self.with_prefix = with_prefix
 
 class ModelTFModel(BaseModel, FeedbackMixin):
-    default_model_suffix = 'model'
+    default_model_suffix = 'srmodel'
 
     def __init__(self, network_info, launcher, *args, **kwargs):
         super().__init__(network_info, launcher)
