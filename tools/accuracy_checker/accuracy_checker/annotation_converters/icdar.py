@@ -35,7 +35,6 @@ def strip(text):
     return text
 
 def is_word(text):
-
     text = strip(text)
 
     if ' ' in text:
@@ -115,7 +114,7 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
 
             all_points, transcriptions, difficult = [], [], []
 
-            for text_area in read_txt(gt_file):
+            for text_area in read_txt(gt_file, encoding='utf-8'):
                 text_annotation = text_area.split(',')
                 transcription = text_annotation[-1]
                 num_coords = 8 if len(text_annotation) >= 8 else 4
