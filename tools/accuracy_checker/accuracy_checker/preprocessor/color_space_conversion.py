@@ -38,7 +38,7 @@ class BgrToGray(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         def process_data(data):
-            return np.expand_dims(cv2.cvtColor(data, cv2.COLOR_BGR2GRAY).astype(np.float32), -1)
+            return np.expand_dims(cv2.cvtColor(data, cv2.COLOR_BGR2GRAY), -1)
 
         image.data = process_data(image.data) if not isinstance(image.data, list) else [
             process_data(fragment) for fragment in image.data
@@ -63,7 +63,7 @@ class RgbToGray(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         def process_data(data):
-            return np.expand_dims(cv2.cvtColor(data, cv2.COLOR_RGB2GRAY).astype(np.float32), -1)
+            return np.expand_dims(cv2.cvtColor(data, cv2.COLOR_RGB2GRAY), -1)
 
         image.data = process_data(image.data) if not isinstance(image.data, list) else [
             process_data(fragment) for fragment in image.data
