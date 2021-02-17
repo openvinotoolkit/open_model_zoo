@@ -52,3 +52,6 @@ Optionally you can provide `module_config` section which contains config for cus
 
 * **LPCNet Evaluator** demonstrates how to evaluate LPCNet vocoder pipeline.
   [Evaluator code](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/lpcnet_evaluator.py).
+
+* **Video SR Evaluator** demonstrates how to evaluate super resolution model with feedback data from model output to next step model input.
+  <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/sr_evaluator.py">Evaluator code</a>.

@@ -126,7 +126,7 @@ def create_identifier_key(identifier):
     if isinstance(identifier, ClipIdentifier):
         return ClipIdentifier(identifier.video, identifier.clip_id, tuple(identifier.frames))
     if isinstance(identifier, MultiFramesInputIdentifier):
-        return MultiFramesInputIdentifier(identifier.input_id, tuple(identifier.frames))
+        return MultiFramesInputIdentifier(tuple(identifier.input_id), tuple(identifier.frames))
     return identifier
 
 
