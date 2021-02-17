@@ -134,7 +134,7 @@ AccuracyChecker supports following set of adapters:
 * `age_gender` - converting age gender recognition model output to `ContainerPrediction` with `ClassificationPrediction` named `gender` for gender recognition, `ClassificationPrediction` named `age_classification` and `RegressionPrediction` named `age_error` for age recognition.
   * `age_out` - output layer name for age recognition.
   * `gender_out` - output layer name for gender recognition.
-* `action_detection` - converting output of model for person detection and action recognition tasks to `ContainerPrediction` with `DetectionPrdiction` for class agnostic metric calculation and `ActionDetectionPrediction` for action recognition. The representations in container have names `class_agnostic_prediction` and `action_prediction` respectively.
+* `action_detection` - converting output of model for person detection and action recognition tasks to `ContainerPrediction` with `DetectionPrediction` for class agnostic metric calculation and `ActionDetectionPrediction` for action recognition. The representations in container have names `class_agnostic_prediction` and `action_prediction` respectively.
   * `priorbox_out` - name of layer containing prior boxes in SSD format.
   * `loc_out` - name of layer containing box coordinates in SSD format.
   * `main_conf_out` - name of layer containing detection confidences.

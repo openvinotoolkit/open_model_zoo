@@ -4,8 +4,9 @@ models:
     launchers:
       - framework: dlsdk
         adapter:
-          type: class_agnostic_detection
-          scale: [0.0011574, 0.0020833]
+          type: faster_rcnn_onnx
+          labels_out: 'labels'
+          boxes_out: 'boxes'
 
     datasets:
       - name: crossroad_extra_untagged
@@ -15,12 +16,10 @@ models:
             dst_height: 480
 
         postprocessing:
-          - type: resize_prediction_boxes
-          - type: cast_to_int
-          - type: nms
-            overlap: 0.6
-          - type: clip_boxes
-            apply_to: prediction
+          -   type: filter
+              apply_to: prediction
+              min_confidence: 0.05
 
         metrics:
           - type: coco_orig_precision
+            include_boundaries: false
