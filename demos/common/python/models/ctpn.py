@@ -1,0 +1,429 @@
+"""
+ Copyright (c) 2021 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
+import cv2
+import numpy as np
+
+from .model import Model
+from .utils import Detection
+
+
+class CTPN(Model):
+    def __init__(self, ie, model_path, frame_size, threshold=0.9):
+        super().__init__(ie, model_path)
+
+        self.image_blob_name = self.prepare_inputs()
+        self.bboxes_blob_name, self.scores_blob_name = self.prepare_outputs()
+
+        self.labels = ['Text']
+
+        self.boxes_threshold = threshold
+        self.nms_threshold = 0.5
+        self.min_size = 8
+        self.min_ratio = 0.5
+        self.text_proposals_width = 16
+        self.min_num_proposals = 2
+        self.pre_nms_top_n = 1000
+        self.post_nms_top_n = 500
+        self.text_proposal_connector = TextProposalConnector()
+
+        self.h, self.w = self.ctpn_keep_aspect_ratio(600, 600, frame_size[1], frame_size[0])
+        input_shape = {self.image_blob_name: ([1, 3] + [self.h, self.w])}
+        self.logger.info('Reshape net to {}'.format(input_shape))
+        self.net.reshape(input_shape)
+
+    def prepare_inputs(self):
+        if len(self.net.input_info) != 1:
+            raise RuntimeError("The CTPN topology supposes only 1 input layer")
+
+        image_blob_name = next(iter(self.net.input_info))
+        input_size = self.net.input_info[image_blob_name].input_data.shape
+
+        if len(input_size) != 4 or input_size[1] != 3:
+            raise RuntimeError("3-channel 4-dimensional model's input is expected")
+
+        return image_blob_name
+
+    def prepare_outputs(self):
+        output_names = [name for name in self.net.outputs]
+        if len(output_names) != 2:
+            raise RuntimeError("The CTPN topology supposes exactly 2 output layers")
+
+        boxes_blob = self.net.outputs[output_names[0]]
+        scores_blob = self.net.outputs[output_names[1]]
+
+        if len(boxes_blob.shape) != 4 or len(scores_blob.shape) != 4:
+            raise Exception("Unexpected output blob shape. Only 4D output blobs are supported")
+
+        if scores_blob.shape[1] == boxes_blob.shape[1] * 2:
+            return output_names[::-1]
+        return output_names
+
+    def preprocess(self, inputs):
+        resized_image = cv2.resize(inputs, (self.w, self.h))
+        meta = {'original_shape': inputs.shape,
+                'resized_shape': resized_image.shape}
+        resized_image = resized_image.transpose((2, 0, 1)) # Change data layout from HWC to CHW
+        dict_inputs = {self.image_blob_name: resized_image}
+        return dict_inputs, meta
+
+    def postprocess(self, outputs, meta):
+        scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
+        scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
+        boxes = outputs[self.bboxes_blob_name][0].transpose((1, 2, 0))
+        scores = outputs[self.scores_blob_name][0].transpose((1, 2, 0))
+
+        textsegs = self.proposal_layer(scores, boxes, meta['original_shape'])
+        scores = textsegs[:, 0]
+        textsegs = textsegs[:, 1:5]
+        textsegs[:, 0::2] /= scale_x
+        textsegs[:, 1::2] /= scale_y
+        boxes = self.detect(textsegs, scores[:, np.newaxis], meta['original_shape'])
+        return [Detection(box[0], box[1], box[2], box[5], box[8], 0) for box in boxes]
+
+    @staticmethod
+    def ctpn_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
+        scale = min(dst_height, dst_width)
+        max_scale = max(dst_height, dst_width)
+        im_min_size = min(image_width, image_height)
+        im_max_size = max(image_width, image_height)
+        im_scale = float(scale) / float(im_min_size)
+        if np.round(im_scale * im_max_size) > max_scale:
+            im_scale = float(max_scale) / float(im_max_size)
+        new_h = np.round(image_height * im_scale)
+        new_w = np.round(image_width * im_scale)
+
+        return int(new_h), int(new_w)
+
+    def proposal_layer(self, rpn_cls_prob_reshape, rpn_bbox_pred, image_size, _feat_stride=(16, )):
+        """
+        Parameters
+        rpn_cls_prob_reshape: (H , W , Ax2) outputs of RPN, prob of bg or fg
+        rpn_bbox_pred: (H , W , Ax4), rgs boxes output of RPN
+        image_size: a list of [image_height, image_width]
+        _feat_stride: the downsampling ratio of feature map to the original input image
+        Algorithm:
+        for each (H, W) location i
+        generate A anchor boxes centered on cell i
+        apply predicted bbox deltas at cell i to each of the A anchors
+        clip predicted boxes to image
+        remove predicted boxes with either height or width < threshold
+        sort all (proposal, score) pairs by score from highest to lowest
+        take top pre_nms_topN proposals before NMS
+        apply NMS with threshold to remaining proposals
+        take after_nms_top_n proposals after NMS
+        return the top proposals (-> RoIs top, scores top)
+        """
+
+        _anchors = self.generate_anchors()
+        _num_anchors = _anchors.shape[0]
+        height, width = rpn_cls_prob_reshape.shape[:2]
+        scores = np.reshape(
+            np.reshape(rpn_cls_prob_reshape, [height, width, _num_anchors, 2])[:, :, :, 1],
+            [height, width, _num_anchors]
+        )
+        bbox_deltas = rpn_bbox_pred
+        shift_x = np.arange(0, width) * _feat_stride
+        shift_y = np.arange(0, height) * _feat_stride
+        shift_x, shift_y = np.meshgrid(shift_x, shift_y)
+        shifts = np.vstack((shift_x.ravel(), shift_y.ravel(), shift_x.ravel(), shift_y.ravel())).transpose()
+        _num_shifts = shifts.shape[0]
+        anchors = _anchors.reshape((1, _num_anchors, 4)) + shifts.reshape((1, _num_shifts, 4)).transpose((1, 0, 2))
+        anchors = anchors.reshape((_num_shifts * _num_anchors, 4))
+        # Transpose and reshape predicted bbox transformations to get them
+        # into the same order as the anchors:
+        # bbox deltas will be (4 * A, H, W) format
+        # transpose to (H, W, 4 * A)
+        # reshape to (H * W * A, 4) where rows are ordered by (h, w, a)
+        # in slowest to fastest order
+        bbox_deltas = bbox_deltas.reshape((-1, 4))  # (HxWxA, 4)
+
+        # Same story for the scores:
+        scores = scores.reshape((-1, 1))
+
+        # Convert anchors into proposals via bbox transformations
+        proposals = self.bbox_transform_inv(anchors, bbox_deltas)
+
+        # clip predicted boxes to image
+        proposals = clip_boxes(proposals, image_size)
+
+        # sort all (proposal, score) pairs by score from highest to lowest
+        order = scores.ravel().argsort()[::-1]
+        if self.pre_nms_top_n > 0:
+            order = order[:self.pre_nms_top_n]
+        proposals, scores = proposals[order, :], scores[order]
+
+        # apply nms
+        keep = self.nms(proposals[:, 0], proposals[:, 1], proposals[:, 2], proposals[:, 3], scores.reshape(-1), self.nms_threshold)
+        if self.post_nms_top_n > 0:
+            keep = keep[:self.post_nms_top_n]
+        proposals, scores = proposals[keep, :], scores[keep]
+        blob = np.hstack((scores.astype(np.float32, copy=False), proposals.astype(np.float32, copy=False)))
+
+        return blob
+
+    @staticmethod
+    def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None):
+        b = 1 if include_boundaries else 0
+
+        areas = (x2 - x1 + b) * (y2 - y1 + b)
+        order = scores.argsort()[::-1]
+
+        if keep_top_k:
+            order = order[:keep_top_k]
+
+        keep = []
+        while order.size > 0:
+            i = order[0]
+            keep.append(i)
+
+            xx1 = np.maximum(x1[i], x1[order[1:]])
+            yy1 = np.maximum(y1[i], y1[order[1:]])
+            xx2 = np.minimum(x2[i], x2[order[1:]])
+            yy2 = np.minimum(y2[i], y2[order[1:]])
+
+            w = np.maximum(0.0, xx2 - xx1 + b)
+            h = np.maximum(0.0, yy2 - yy1 + b)
+            intersection = w * h
+
+            union = (areas[i] + areas[order[1:]] - intersection)
+            overlap = np.divide(intersection, union, out=np.zeros_like(intersection, dtype=float), where=union != 0)
+
+            order = order[np.where(overlap <= thresh)[0] + 1]  # pylint: disable=W0143
+
+        return keep
+
+    @staticmethod
+    def generate_anchors():
+        def generate_basic_anchors(sizes, base_size=16):
+            base_anchor = np.array([0, 0, base_size - 1, base_size - 1], np.int32)
+            anchors = np.zeros((len(sizes), 4), np.int32)
+            for index, (h, w) in enumerate(sizes):
+                anchors[index] = scale_anchor(base_anchor, h, w)
+            return anchors
+
+        def scale_anchor(anchor, h, w):
+            x_ctr = (anchor[0] + anchor[2]) * 0.5
+            y_ctr = (anchor[1] + anchor[3]) * 0.5
+            scaled_anchor = anchor.copy()
+            scaled_anchor[0] = x_ctr - w / 2  # xmin
+            scaled_anchor[2] = x_ctr + w / 2  # xmax
+            scaled_anchor[1] = y_ctr - h / 2  # ymin
+            scaled_anchor[3] = y_ctr + h / 2  # ymax
+            return scaled_anchor
+
+        heights = [11, 16, 23, 33, 48, 68, 97, 139, 198, 283]
+        widths = [16]
+        sizes = [(h, w) for h in heights for w in widths]
+        return generate_basic_anchors(sizes)
+
+    @staticmethod
+    def bbox_transform_inv(boxes, deltas):
+
+        boxes = boxes.astype(deltas.dtype, copy=False)
+
+        widths = boxes[:, 2] - boxes[:, 0] + 1.0
+        heights = boxes[:, 3] - boxes[:, 1] + 1.0
+        ctr_x = boxes[:, 0] + 0.5 * widths
+        ctr_y = boxes[:, 1] + 0.5 * heights
+
+        dy = deltas[:, 1::4]
+        dh = deltas[:, 3::4]
+
+        pred_ctr_x = ctr_x[:, np.newaxis]
+        pred_ctr_y = dy * heights[:, np.newaxis] + ctr_y[:, np.newaxis]
+        pred_w = widths[:, np.newaxis]
+        pred_h = np.exp(dh) * heights[:, np.newaxis]
+
+        pred_boxes = np.zeros(deltas.shape, dtype=deltas.dtype)
+        pred_boxes[:, 0::4] = pred_ctr_x - 0.5 * pred_w
+        pred_boxes[:, 1::4] = pred_ctr_y - 0.5 * pred_h
+        pred_boxes[:, 2::4] = pred_ctr_x + 0.5 * pred_w
+        pred_boxes[:, 3::4] = pred_ctr_y + 0.5 * pred_h
+
+        return pred_boxes
+
+    def detect(self, text_proposals, scores, size):
+        keep_inds = np.where(scores > 0.7)[0]
+        text_proposals, scores = text_proposals[keep_inds], scores[keep_inds]
+
+        sorted_indices = np.argsort(scores.ravel())[::-1]
+        text_proposals, scores = text_proposals[sorted_indices], scores[sorted_indices]
+
+        text_recs = self.text_proposal_connector.get_text_lines(text_proposals, scores, size)
+
+        heights = np.zeros((len(text_recs), 1), np.float)
+        widths = np.zeros((len(text_recs), 1), np.float)
+        scores = np.zeros((len(text_recs), 1), np.float)
+        for index, box in enumerate(text_recs):
+            heights[index] = (abs(box[5] - box[1]) + abs(box[7] - box[3])) / 2.0 + 1
+            widths[index] = (abs(box[2] - box[0]) + abs(box[6] - box[4])) / 2.0 + 1
+            scores[index] = box[8]
+        keep_inds = np.where((widths / heights > self.min_ratio) & (scores > self.boxes_threshold) &
+                             (widths > (self.min_num_proposals * self.text_proposals_width)))[0]
+
+        return text_recs[keep_inds]
+
+def clip_boxes(boxes, image_size):
+    """
+    Clip boxes to image boundaries.
+    """
+    boxes[:, 0::4] = np.maximum(np.minimum(boxes[:, 0::4], image_size[1] - 1), 0)
+    boxes[:, 1::4] = np.maximum(np.minimum(boxes[:, 1::4], image_size[0] - 1), 0)
+    boxes[:, 2::4] = np.maximum(np.minimum(boxes[:, 2::4], image_size[1] - 1), 0)
+    boxes[:, 3::4] = np.maximum(np.minimum(boxes[:, 3::4], image_size[0] - 1), 0)
+
+    return boxes
+
+
+class Graph:
+    def __init__(self, graph):
+        self.graph = graph
+
+    def sub_graphs_connected(self):
+        sub_graphs = []
+        for index in range(self.graph.shape[0]):
+            if not self.graph[:, index].any() and self.graph[index, :].any():
+                v = index
+                sub_graphs.append([v])
+                while self.graph[v, :].any():
+                    v = np.where(self.graph[v, :])[0][0]
+                    sub_graphs[-1].append(v)
+
+        return sub_graphs
+
+
+class TextProposalGraphBuilder:
+    """
+        Build Text proposals into a graph.
+    """
+    def get_successions(self, index):
+        box = self.text_proposals[index]
+        results = []
+        for left in range(int(box[0]) + 1, min(int(box[0]) + 50 + 1, self.im_size[1])):
+            adj_box_indices = self.boxes_table[left]
+            for adj_box_index in adj_box_indices:
+                if self.meet_v_iou(adj_box_index, index):
+                    results.append(adj_box_index)
+            if results:
+                return results
+        return results
+
+    def get_precursors(self, index):
+        box = self.text_proposals[index]
+        results = []
+        for left in range(int(box[0]) - 1, max(int(box[0] - 50), 0) - 1, -1):
+            adj_box_indices = self.boxes_table[left]
+            for adj_box_index in adj_box_indices:
+                if self.meet_v_iou(adj_box_index, index):
+                    results.append(adj_box_index)
+            if results:
+                return results
+        return results
+
+    def is_succession_node(self, index, succession_index):
+        precursors = self.get_precursors(succession_index)
+        return self.scores[index] >= np.max(self.scores[precursors])
+
+    def meet_v_iou(self, index1, index2):
+        def overlaps_v(h1, h2, text_proposal1, text_proposal2):
+            y0 = max(text_proposal2[1], text_proposal1[1])
+            y1 = min(text_proposal2[3], text_proposal1[3])
+            return max(0, y1 - y0 + 1) / min(h1, h2)
+
+        def size_similarity(h1, h2):
+            return min(h1, h2) / max(h1, h2)
+
+        height_1 = self.heights[index1]
+        height_2 = self.heights[index2]
+        proposal_1 = self.text_proposals[index1]
+        proposal_2 = self.text_proposals[index2]
+        size_similarity_estimation = size_similarity(height_1, height_2)
+        vertical_overlap = overlaps_v(height_1, height_2, proposal_1, proposal_2)
+
+        return vertical_overlap >= 0.7 and size_similarity_estimation >= 0.7
+
+    def build_graph(self, text_proposals, scores, im_size):
+        self.text_proposals = text_proposals
+        self.scores = scores
+        self.im_size = im_size
+        self.heights = text_proposals[:, 3] - text_proposals[:, 1] + 1
+
+        boxes_table = [[] for _ in range(self.im_size[1])]
+        for index, box in enumerate(text_proposals):
+            boxes_table[int(box[0])].append(index)
+        self.boxes_table = boxes_table
+
+        graph = np.zeros((text_proposals.shape[0], text_proposals.shape[0]), np.bool)
+
+        for index, box in enumerate(text_proposals):
+            successions = self.get_successions(index)
+            if not successions:
+                continue
+            succession_index = successions[np.argmax(scores[successions])]
+            if self.is_succession_node(index, succession_index):
+                graph[index, succession_index] = True
+
+        return Graph(graph)
+
+
+class TextProposalConnector:
+    def __init__(self):
+        self.graph_builder = TextProposalGraphBuilder()
+
+    def group_text_proposals(self, text_proposals, scores, image_size):
+        graph = self.graph_builder.build_graph(text_proposals, scores, image_size)
+        return graph.sub_graphs_connected()
+
+    def get_text_lines(self, text_proposals, scores, image_size):
+        def fit_y(x, y, x1, x2):
+            if np.sum(x == x[0]) == np.size(x):
+                return y[0], y[0]
+            p = np.poly1d(np.polyfit(x, y, 1))
+            return p(x1), p(x2)
+
+        tp_groups = self.group_text_proposals(text_proposals, scores, image_size)
+
+        text_lines = np.zeros((len(tp_groups), 5), np.float32)
+
+        for index, tp_indices in enumerate(tp_groups):
+            text_line_boxes = text_proposals[list(tp_indices)]
+
+            x0 = np.min(text_line_boxes[:, 0])
+            x1 = np.max(text_line_boxes[:, 2])
+
+            offset = (text_line_boxes[0, 2] - text_line_boxes[0, 0]) * 0.5
+
+            lt_y, rt_y = fit_y(text_line_boxes[:, 0], text_line_boxes[:, 1], x0 + offset, x1 - offset)
+            lb_y, rb_y = fit_y(text_line_boxes[:, 0], text_line_boxes[:, 3], x0 + offset, x1 - offset)
+            score = scores[list(tp_indices)].sum() / float(len(tp_indices))
+
+            text_lines[index, 0] = x0
+            text_lines[index, 1] = min(lt_y, rt_y)
+            text_lines[index, 2] = x1
+            text_lines[index, 3] = max(lb_y, rb_y)
+            text_lines[index, 4] = score
+
+        text_lines = clip_boxes(text_lines, image_size)
+
+        text_recs = np.zeros((len(text_lines), 9), np.float)
+        for index, line in enumerate(text_lines):
+            xmin, ymin, xmax, ymax = line[0], line[1], line[2], line[3]
+            text_recs[index, 0], text_recs[index, 1], text_recs[index, 2], text_recs[index, 3] = xmin, ymin, xmax, ymin
+            text_recs[index, 4], text_recs[index, 5], text_recs[index, 6], text_recs[index, 7] = xmax, ymax, xmin, ymax
+            text_recs[index, 8] = line[4]
+
+        return text_recs

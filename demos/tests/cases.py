@@ -600,6 +600,9 @@ PYTHON_DEMOS = [
             TestCase(options={'--architecture_type': 'faceboxes',
                               '-m': ModelArg('faceboxes-pytorch')}
             ),
+            TestCase(options={'--architecture_type': 'ctpn',
+                              '-m': ModelArg('ctpn')}
+            ),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'retinaface'}),
                 single_option_cases('-m',

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2018-2020 Intel Corporation
+ Copyright (C) 2018-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -47,7 +47,11 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
+<<<<<<< HEAD
                       type=str, required=True, choices=('ssd', 'yolo', 'yolov4', 'faceboxes', 'centernet', 'retinaface'))
+=======
+                      type=str, required=True, choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'ctpn', 'retinaface'))
+>>>>>>> 1a78617d (Add ctpn wrapper)
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -133,9 +137,11 @@ class ColorPalette:
         return len(self.palette)
 
 
-def get_model(ie, args):
+def get_model(ie, args, frame_size):
     if args.architecture_type == 'ssd':
         return models.SSD(ie, args.model, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
+    elif args.architecture_type == 'ctpn':
+        return models.CTPN(ie, args.model, frame_size=frame_size, threshold=args.prob_threshold)
     elif args.architecture_type == 'yolo':
         return models.YOLO(ie, args.model, labels=args.labels,
                            threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
@@ -225,25 +231,35 @@ def main():
 
     plugin_config = get_plugin_configs(args.device, args.num_streams, args.num_threads)
 
+    cap = open_images_capture(args.input, args.loop)
+
+    start_time = perf_counter()
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
+
     log.info('Loading network...')
 
-    model = get_model(ie, args)
+    model = get_model(ie, args, frame.shape[:2])
 
     detector_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
-    cap = open_images_capture(args.input, args.loop)
-
-    next_frame_id = 0
-    next_frame_id_to_show = 0
-
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
+    detector_pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
+    next_frame_id = 1
+    next_frame_id_to_show = 0
+
     palette = ColorPalette(len(model.labels) if model.labels else 100)
     metrics = PerformanceMetrics()
-    presenter = None
     video_writer = cv2.VideoWriter()
+    presenter = monitors.Presenter(args.utilization_monitors, 55,
+                                   (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
+    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                             cap.fps(), (frame.shape[1], frame.shape[0])):
+        raise RuntimeError("Can't open video writer")
 
     while True:
         if detector_pipeline.callback_exceptions:
@@ -282,15 +298,7 @@ def main():
             start_time = perf_counter()
             frame = cap.read()
             if frame is None:
-                if next_frame_id == 0:
-                    raise ValueError("Can't read an image from the input")
                 break
-            if next_frame_id == 0:
-                presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                               (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
-                if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                                         cap.fps(), (frame.shape[1], frame.shape[0])):
-                    raise RuntimeError("Can't open video writer")
             # Submit for inference
             detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
