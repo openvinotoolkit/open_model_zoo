@@ -65,6 +65,7 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
         self.raw_masks_out = self.get_value_from_config('raw_masks_out')
         self.texts_out = self.get_value_from_config('texts_out')
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
+        self.mask_processor = self.mask_to_result if not self.scores_out else self.mask_to_result_old
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
@@ -103,7 +104,7 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
             boxes[:, 0:4:2] = np.clip(boxes[:, 0:4:2], 0, img_w - 1)
             boxes[:, 1:4:2] = np.clip(boxes[:, 1:4:2], 0, img_h - 1)
 
-            segms = self.mask_to_result(
+            segms = self.mask_processor(
                 boxes,
                 classes,
                 raw_masks,
@@ -153,3 +154,70 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
             cls_masks[label].append(mask)
 
         return cls_masks
+
+    @staticmethod
+    def mask_to_result_old(det_bboxes,
+                           det_labels,
+                           det_masks,
+                           num_classes,
+                           mask_thr_binary=0.5,
+                           img_size=None):
+
+        def expand_boxes(boxes, scale):
+            """Expand an array of boxes by a given scale."""
+            w_half = (boxes[:, 2] - boxes[:, 0]) * .5
+            h_half = (boxes[:, 3] - boxes[:, 1]) * .5
+            x_c = (boxes[:, 2] + boxes[:, 0]) * .5
+            y_c = (boxes[:, 3] + boxes[:, 1]) * .5
+
+            w_half *= scale
+            h_half *= scale
+
+            boxes_exp = np.zeros(boxes.shape)
+            boxes_exp[:, 0] = x_c - w_half
+            boxes_exp[:, 2] = x_c + w_half
+            boxes_exp[:, 1] = y_c - h_half
+            boxes_exp[:, 3] = y_c + h_half
+
+            return boxes_exp
+
+        def segm_postprocess(box, raw_cls_mask, im_h, im_w, full_image_mask=False, encode=False):
+            # Add zero border to prevent upsampling artifacts on segment borders.
+            raw_cls_mask = np.pad(raw_cls_mask, ((1, 1), (1, 1)), 'constant', constant_values=0)
+            extended_box = expand_boxes(box[np.newaxis, :], raw_cls_mask.shape[0] / (raw_cls_mask.shape[0] - 2.0))[
+                0]
+            extended_box = extended_box.astype(int)
+            w, h = np.maximum(extended_box[2:] - extended_box[:2] + 1, 1)  # pylint: disable=E0633
+            x0, y0 = np.clip(extended_box[:2], a_min=0, a_max=[im_w, im_h])
+            x1, y1 = np.clip(extended_box[2:] + 1, a_min=0, a_max=[im_w, im_h])
+
+            raw_cls_mask = cv2.resize(raw_cls_mask, (w, h)) > 0.5
+            mask = raw_cls_mask.astype(np.uint8)
+
+            if full_image_mask:
+                # Put an object mask in an image mask.
+                im_mask = np.zeros((im_h, im_w), dtype=np.uint8)
+                mask_start_y = y0 - extended_box[1]
+                mask_end_y = y1 - extended_box[1]
+                mask_start_x = x0 - extended_box[0]
+                mask_end_x = x1 - extended_box[0]
+                im_mask[y0:y1, x0:x1] = mask[mask_start_y:mask_end_y, mask_start_x:mask_end_x]
+            else:
+                original_box = box.astype(int)
+                x0, y0 = np.clip(original_box[:2], a_min=0, a_max=[im_w, im_h])
+                x1, y1 = np.clip(original_box[2:] + 1, a_min=0, a_max=[im_w, im_h])
+                im_mask = np.ascontiguousarray(
+                    mask[(y0 - original_box[1]):(y1 - original_box[1]), (x0 - original_box[0]):(x1 - original_box[0])]
+                )
+
+            return im_mask
+
+        masks = []
+        per_obj_raw_masks = []
+        for cls, raw_mask in zip(det_labels, det_masks):
+            per_obj_raw_masks.append(raw_mask[cls, ...])
+
+        for box, raw_cls_mask in zip(det_bboxes, per_obj_raw_masks):
+            masks.append(segm_postprocess(box, raw_cls_mask, *img_size, True, False))
+
+        return [masks]
