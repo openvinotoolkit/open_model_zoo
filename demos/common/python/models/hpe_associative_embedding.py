@@ -25,7 +25,7 @@ class HpeAssociativeEmbedding(Model):
     def __init__(self, ie, model_path, target_size, aspect_ratio, prob_threshold, size_divisor=32):
         super().__init__(ie, model_path)
         self.image_blob_name = self._get_inputs(self.net)
-        self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)  
+        self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)
         try:
             self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
         except ValueError:
@@ -59,6 +59,7 @@ class HpeAssociativeEmbedding(Model):
             use_detection_val=True,
             ignore_too_much=False,
             dist_reweight=True)
+        self.size_divisor = size_divisor
 
     @staticmethod
     def _get_inputs(net):
@@ -76,6 +77,8 @@ class HpeAssociativeEmbedding(Model):
     def preprocess(self, inputs):
         img = resize_image(inputs, (self.w, self.h), keep_aspect_ratio=True)
         h, w = img.shape[:2]
+        if not (self.h - self.size_divisor < h <= self.h and self.w - self.size_divisor < w <= self.w):
+            self.logger.warn("Chosen model aspect ratio doesn't match image aspect ratio")
         resize_img_scale = np.array((inputs.shape[1] / w, inputs.shape[0] / h), np.float32)
 
         img = np.pad(img, ((0, self.h - h), (0, self.w - w), (0, 0)),

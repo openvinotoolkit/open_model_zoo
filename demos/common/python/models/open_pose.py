@@ -69,6 +69,7 @@ class OpenPose(Model):
 
         num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1] - 1  # The last channel is for background
         self.decoder = OpenPoseDecoder(num_joints, score_threshold=prob_threshold)
+        self.size_divisor = size_divisor
 
     @staticmethod
     def _get_inputs(net):
@@ -98,6 +99,8 @@ class OpenPose(Model):
         h, w = img.shape[:2]
         if self.w < w:
             raise RuntimeError("The image aspect ratio doesn't fit current model shape")
+        if not (self.w - self.size_divisor < w <= self.w):
+            self.logger.warn("Chosen model aspect ratio doesn't match image aspect ratio")
         resize_img_scale = np.array((inputs.shape[1] / w, inputs.shape[0] / h), np.float32)
 
         img = np.pad(img, ((0, 0), (0, self.w - w), (0, 0)),

@@ -25,6 +25,7 @@
 
 #include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 #include <ngraph/ngraph.hpp>
 
 using namespace InferenceEngine;
@@ -102,6 +103,10 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
     cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
     int h = resizedImage.rows;
     int w = resizedImage.cols;
+    if (!(inputLayerSize.height - stride < h && h <= inputLayerSize.height
+        && inputLayerSize.width - stride < w && w <= inputLayerSize.width)) {
+        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
+    }
     cv::Mat paddedImage;
     int bottom = inputLayerSize.height - h;
     int right = inputLayerSize.width - w;
