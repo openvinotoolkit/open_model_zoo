@@ -50,7 +50,6 @@ protected:
     static const float detectionThreshold;
     static const float tagThreshold;
     static const float delta;
-    static const bool reweightDiff;
 
     void reshape(InferenceEngine::CNNNetwork& cnnNetwork) override;
 

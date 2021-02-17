@@ -72,7 +72,7 @@ void findPeaks(const std::vector<cv::Mat>& nmsHeatMaps,
 
 std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
                              int maxNumPeople, int numJoints,
-                             float tagThreshold, bool reweightDiff);
+                             float tagThreshold);
 
 void adjustAndRefine(std::vector<Pose>& allPoses,
                      const std::vector<cv::Mat>& heatMaps,

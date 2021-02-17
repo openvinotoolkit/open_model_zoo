@@ -33,7 +33,6 @@ const cv::Vec3f HpeAssociativeEmbedding::meanPixel = cv::Vec3f::all(128);
 const float HpeAssociativeEmbedding::detectionThreshold = 0.1f;
 const float HpeAssociativeEmbedding::tagThreshold = 1.0f;
 const float HpeAssociativeEmbedding::delta = 0.0f;
-const bool HpeAssociativeEmbedding::reweightDiff = true;
 
 HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio,
     int targetSize, float confidenceThreshold) :
@@ -194,7 +193,7 @@ std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(
     for (int i = 0; i < numJoints; i++) {
         findPeaks(nmsHeatMaps, aembdsMaps, allPeaks, i, maxNumPeople, detectionThreshold);
     }
-    std::vector<Pose> allPoses = matchByTag(allPeaks, maxNumPeople, numJoints, tagThreshold, reweightDiff);
+    std::vector<Pose> allPoses = matchByTag(allPeaks, maxNumPeople, numJoints, tagThreshold);
     std::vector<HumanPose> poses;
     for (size_t i = 0; i < allPoses.size(); i++) {
         Pose pose = allPoses[i];
