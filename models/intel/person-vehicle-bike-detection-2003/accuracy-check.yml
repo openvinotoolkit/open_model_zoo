@@ -3,7 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        device: CPU
         adapter:
           type: faster_rcnn_onnx
           labels_out: 'labels'
