@@ -157,11 +157,11 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
 
     @staticmethod
     def mask_to_result_old(det_bboxes,
-                       det_labels,
-                       det_masks,
-                       num_classes,
-                       mask_thr_binary=0.5,
-                       img_size=None):
+                           det_labels,
+                           det_masks,
+                           num_classes,
+                           mask_thr_binary=0.5,
+                           img_size=None):
 
         def expand_boxes(boxes, scale):
             """Expand an array of boxes by a given scale."""
