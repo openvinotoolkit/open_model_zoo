@@ -39,9 +39,11 @@ class Pose {
         void add(size_t index, Peak peak) {
             peaks[index] = peak;
             sum += peak.score;
-            poseTag = (poseTag * static_cast<float>(validPointsNum)) + peak.tag;
+            poseTag = poseTag * static_cast<float>(validPointsNum) + peak.tag;
+            poseCenter = poseCenter * static_cast<float>(validPointsNum) + peak.keypoint;
             validPointsNum += 1;
             poseTag = poseTag / static_cast<float>(validPointsNum);
+            poseCenter = poseCenter / static_cast<float>(validPointsNum);
         }
 
         float getPoseTag() const { return poseTag; }
@@ -50,10 +52,13 @@ class Pose {
 
         Peak& getPeak(size_t index) { return peaks[index]; }
 
+        cv::Point2f& getPoseCenter() { return poseCenter; }
+
         size_t size() const { return peaks.size(); }
 
     private:
         std::vector<Peak> peaks;
+        cv::Point2f poseCenter = cv::Point2f(0.f, 0.f);
         int validPointsNum = 0;
         float poseTag = 0;
         float sum = 0;
@@ -67,7 +72,7 @@ void findPeaks(const std::vector<cv::Mat>& nmsHeatMaps,
 
 std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
                              int maxNumPeople, int numJoints,
-                             float tagThreshold);
+                             float tagThreshold, bool reweightDiff);
 
 void adjustAndRefine(std::vector<Pose>& allPoses,
                      const std::vector<cv::Mat>& heatMaps,

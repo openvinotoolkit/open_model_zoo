@@ -50,6 +50,7 @@ protected:
     static const float detectionThreshold;
     static const float tagThreshold;
     static const float delta;
+    static const bool reweightDiff;
 
     void reshape(InferenceEngine::CNNNetwork& cnnNetwork) override;
 
@@ -58,7 +59,7 @@ protected:
 
     std::vector<cv::Mat> split(float* data, const InferenceEngine::SizeVector& shape);
 
-    std::vector<HumanPose> extractPoses(const std::vector<cv::Mat>& heatMaps,
+    std::vector<HumanPose> extractPoses(std::vector<cv::Mat>& heatMaps,
                                         const std::vector<cv::Mat>& aembdsMaps,
                                         const std::vector<cv::Mat>& nmsHeatMaps) const;
 };

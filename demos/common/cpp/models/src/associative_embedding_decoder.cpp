@@ -55,7 +55,7 @@ void findPeaks(const std::vector<cv::Mat>& nmsHeatMaps,
 
 std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
                              int maxNumPeople, int numJoints,
-                             float tagThreshold) {
+                             float tagThreshold, bool reweightDiff) {
     size_t jointOrder[] { 0, 1, 2, 3, 4, 5, 6, 11, 12, 7, 8, 9, 10, 13, 14, 15, 16 };
     std::vector<Pose> allPoses;
     for (size_t jointId : jointOrder) {
@@ -77,31 +77,49 @@ std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
             continue;
         }
         std::vector<float> posesTags;
+        std::vector<cv::Point2f> posesCenters;
         for (auto& pose : allPoses) {
             posesTags.push_back(pose.getPoseTag());
+            posesCenters.push_back(pose.getPoseCenter());
         }
-        // Compute dissimilarity matrix
+        // Compute cost matrix.
         int numAdded = tags.size();
         int numGrouped = posesTags.size();
-        cv::Mat dissimilarity(numAdded, numGrouped, CV_32F);
-        cv::Mat dissimilarityCopy(numAdded, numGrouped, CV_32F);
-        for (int i = 0; i < dissimilarity.rows; i++) {
-            for (int j = 0; j < dissimilarity.cols; j++) {
-                float diffNormed = static_cast<float>(cv::norm(tags[i] - posesTags[j]));
-                dissimilarityCopy.at<float>(i, j) = diffNormed;
-                diffNormed = std::round(diffNormed) * 100 - jointPeaks[i].score;
-                dissimilarity.at<float>(i, j) = diffNormed;
+        cv::Mat tagsDiff(numAdded, numGrouped, CV_32F);
+        cv::Mat matchingCost(numAdded, numGrouped, CV_32F);
+        std::vector<float> dists(numAdded);
+        for (int j = 0; j < numGrouped; j++) {
+            float minDist = std::numeric_limits<float>::max();
+            for (int i = 0; i < numAdded; i++) {
+                float diff = static_cast<float>(cv::norm(tags[i] - posesTags[j]));
+                tagsDiff.at<float>(i, j) = diff;
+                if (reweightDiff) {
+                    const cv::Point2f center = posesCenters.at(j);
+                    cv::Point2f v = jointPeaks.at(i).keypoint - center;
+                    float dist = std::sqrt(v.x * v.x + v.y * v.y);
+                    dists[i] = dist;
+                    minDist = std::min(dist, minDist);
+                }
+            }
+
+            for (int i = 0; i < numAdded; i++) {
+                float diff = tagsDiff.at<float>(i, j);
+                if (reweightDiff && diff < tagThreshold) {
+                    diff *= dists[i] / (minDist + 1e-10f);
+                }
+                matchingCost.at<float>(i, j) = std::round(diff) * 100 - jointPeaks[i].score;
             }
         }
+
         if (numAdded > numGrouped) {
-            cv::copyMakeBorder(dissimilarity, dissimilarity, 0, 0, 0, numAdded - numGrouped,
+            cv::copyMakeBorder(matchingCost, matchingCost, 0, 0, 0, numAdded - numGrouped,
                                cv::BORDER_CONSTANT, 10000000000);
         }
         // Get pairs
-        auto res = KuhnMunkres().Solve(dissimilarity);
+        auto res = KuhnMunkres().Solve(matchingCost);
         for (int row = 0; row < res.size(); row++) {
             int col = res[row];
-            if (row < numAdded && col < numGrouped && dissimilarityCopy.at<float>(row, col) < tagThreshold) {
+            if (row < numAdded && col < numGrouped && tagsDiff.at<float>(row, col) < tagThreshold) {
                 allPoses[col].add(jointId, jointPeaks[row]);
             }
             else {
@@ -112,6 +130,20 @@ std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
         }
     }
     return allPoses;
+}
+
+namespace {
+    cv::Point2f adjust(const int x, const int y, const cv::Mat& heatMap) {
+        cv::Point2f delta(0.f, 0.f);
+        cv::Size outputSize = heatMap.size();
+        if ((1 < x) && (x < outputSize.width - 1) && (1 < y) && (y < outputSize.height - 1)) {
+            auto diffX = heatMap.at<float>(y, x + 1) - heatMap.at<float>(y, x - 1);
+            auto diffY = heatMap.at<float>(y + 1, x) - heatMap.at<float>(y - 1, x);
+            delta.x = diffX > 0 ? 0.25f : -0.25f;
+            delta.y = diffY > 0 ? 0.25f : -0.25f;
+        }
+        return delta;
+    }
 }
 
 void adjustAndRefine(std::vector<Pose>& allPoses,
@@ -128,47 +160,37 @@ void adjustAndRefine(std::vector<Pose>& allPoses,
         const cv::Mat& heatMap = heatMaps[jointId];
         const cv::Mat& aembds = aembdsMaps[jointId];
 
-        // Adjust
-        int px = static_cast<int>(peak.keypoint.x);
-        int py = static_cast<int>(peak.keypoint.y);
-        if ((1 < px) && (px < outputSize.width - 1) && (1 < py) && (py < outputSize.height - 1)) {
-            auto diffX = heatMap.at<float>(py, px + 1) - heatMap.at<float>(py, px - 1);
-            auto diffY = heatMap.at<float>(py + 1, px) - heatMap.at<float>(py - 1, px);
-            peak.keypoint.x += diffX > 0 ? 0.25f : -0.25f;
-            peak.keypoint.y += diffY > 0 ? 0.25f : -0.25f;
-        }
-        if (delta) {
-            peak.keypoint.x += delta;
-            peak.keypoint.y += delta;
-        }
-        // Refine
-        if (peak.score <= 0) {
-            continue;
-        }
-        float minValue = std::numeric_limits<float>::max();
-        int x, y;
-        // Get position with the closest tag value to the pose tag
-        for (int i = 0; i < outputSize.height; i++) {
-            for (int j = 0; j < outputSize.width; j++) {
-                float diff = std::abs(aembds.at<float>(i, j) - poseTag) + 0.5f;
-                diff -= heatMap.at<float>(i, j);
-                if (diff < minValue) {
-                    minValue = diff;
-                    x = i;
-                    y = j;
-                }
+        if (peak.score > 0) {
+            // Adjust
+            peak.keypoint += adjust(static_cast<int>(peak.keypoint.x), static_cast<int>(peak.keypoint.y), heatMap);
+            if (delta) {
+                peak.keypoint.x += delta;
+                peak.keypoint.y += delta;
             }
         }
-        float val = heatMap.at<float>(x, y);
-        if (val > 0) {
-            peak.keypoint.x = static_cast<float>(x);
-            peak.keypoint.y = static_cast<float>(y);
-            peak.score = val;
-            if ((1 < x) && (x < outputSize.width - 1) && (1 < y) && (y < outputSize.height - 1)) {
-                auto diffX = heatMap.at<float>(y, x + 1) - heatMap.at<float>(y, x - 1);
-                auto diffY = heatMap.at<float>(y + 1, x) - heatMap.at<float>(y - 1, x);
-                peak.keypoint.x += diffX > 0 ? 0.25f : -0.25f;
-                peak.keypoint.y += diffY > 0 ? 0.25f : -0.25f;
+        else {
+            // Refine
+            float minValue = std::numeric_limits<float>::max();
+            int x, y;
+            // Get position with the closest tag value to the pose tag
+            for (int i = 0; i < outputSize.height; i++) {
+                for (int j = 0; j < outputSize.width; j++) {
+                    float diff = std::round(std::abs(aembds.at<float>(i, j) - poseTag));
+                    diff -= heatMap.at<float>(i, j);
+                    if (diff < minValue) {
+                        minValue = diff;
+                        y = i;
+                        x = j;
+                    }
+                }
+            }
+            float val = heatMap.at<float>(y, x);
+            if (val > 0) {
+                peak.keypoint.x = static_cast<float>(x);
+                peak.keypoint.y = static_cast<float>(y);
+                peak.keypoint += adjust(x, y, heatMap);
+                // Peak score is assigned directly, so it does not affect the pose score.
+                peak.score = val;
             }
         }
     }
