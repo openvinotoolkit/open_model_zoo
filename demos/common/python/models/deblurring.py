@@ -20,15 +20,16 @@ from .model import Model
 class Deblurring(Model):
     def __init__(self, ie, model_path, input_image_shape):
         super().__init__(ie, model_path)
-        self.calculate_new_shape(input_image_shape)
+        self.block_size = 32
+        self.input_shape = input_image_shape
+        self.calculate_new_shape()
         self.input_blob_name = self.prepare_inputs()
         self.output_blob_name = self.prepare_outputs()
 
-    def calculate_new_shape(self, shape):
-        h, w, _ = shape
-        block_size = 32
-        new_height = math.ceil(h / block_size) * block_size
-        new_width = math.ceil(w / block_size) * block_size
+    def calculate_new_shape(self):
+        h, w, _ = self.input_shape
+        new_height = math.ceil(h / self.block_size) * self.block_size
+        new_width = math.ceil(w / self.block_size) * self.block_size
 
         input_layer = next(iter(self.net.input_info))
         input_shape = self.net.input_info[input_layer].input_data.shape
@@ -49,6 +50,11 @@ class Deblurring(Model):
             self.n, self.c, self.h, self.w = input_size
         else:
             raise RuntimeError("3-channel 4-dimensional model's input is expected")
+
+        self.pad_params = {'mode': 'constant',
+                           'constant_values': 0,
+                           'pad_width': ((0, self.h - self.input_shape[0]), (0, self.w - self.input_shape[1]), (0, 0))
+                           }
 
         return input_blob_name
 
@@ -74,15 +80,11 @@ class Deblurring(Model):
     def preprocess(self, inputs):
         image = inputs
 
-        if image.shape[0] < self.h and image.shape[1] < self.w:
-            # right bottom padding to resize input image to input_layer shape
-            pad_params = {'mode': 'constant',
-                          'constant_values': 0,
-                          'pad_width': ((0, self.h - image.shape[0]), (0, self.w - image.shape[1]), (0, 0))
-                          }
-            resized_image = np.pad(image, **pad_params)
-        else:
-            resized_image = cv2.resize(image, (self.w, self.h))
+        if image.shape != self.input_shape:
+            self.logger.warn("Chosen model size doesn't match image size. The image is resized")
+            image = cv2.resize(image, (self.input_shape[1], self.input_shape[0]))
+
+        resized_image = np.pad(image, **self.pad_params)
         resized_image = resized_image.transpose((2, 0, 1))
         resized_image = np.expand_dims(resized_image, 0)
 
@@ -93,10 +95,8 @@ class Deblurring(Model):
 
     def postprocess(self, outputs, meta):
         prediction = outputs[self.output_blob_name].squeeze()
-        input_image_height = meta['original_shape'][0]
-        input_image_width = meta['original_shape'][1]
 
         prediction = prediction.transpose((1, 2, 0))
-        prediction = prediction[:min(self.h, input_image_height), :min(self.w, input_image_width), :]
+        prediction = prediction[:self.input_shape[0], :self.input_shape[1], :]
         prediction *= 255
         return prediction.astype(np.uint8)
