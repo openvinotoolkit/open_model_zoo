@@ -39,10 +39,12 @@ pedestrian_tracker_demo [OPTION]
 Options:
 
     -h                           Print a usage message.
-    -i                           Required. An input to process. The input must be a single image, a folder of images or anything that cv::VideoCapture can process.
+    -i                           Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -loop                        Optional. Enable reading the input in a loop.
     -first                       Optional. The index of the first frame of the input to process. The actual first frame captured depends on cv::VideoCapture implementation and may have slightly different number.
-    -limit                       Optional. Read length limit before stopping or restarting reading the input.
+    -read_limit                  Optional. Read length limit before stopping or restarting reading the input.
+    -o "<path>"                  Optional. Name of output to save.
+    -limit "<num>"               Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m_det "<path>"              Required. Path to the Pedestrian Detection Retail model (.xml) file.
     -m_reid "<path>"             Required. Path to the Pedestrian Reidentification Retail model (.xml) file.
     -l "<absolute_path>"         Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels implementation.

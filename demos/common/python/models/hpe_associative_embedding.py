@@ -25,8 +25,11 @@ class HpeAssociativeEmbedding(Model):
     def __init__(self, ie, model_path, target_size, aspect_ratio, prob_threshold, size_divisor=32):
         super().__init__(ie, model_path)
         self.image_blob_name = self._get_inputs(self.net)
-        self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)
-        self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
+        self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)  
+        try:
+            self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
+        except ValueError:
+            self.nms_heatmaps_blob_name = self.heatmaps_blob_name
         self.embeddings_blob_name = find_layer_by_name('embeddings', self.net.outputs)
         self.output_scale = self.net.input_info[self.image_blob_name].input_data.shape[-1] / self.net.outputs[self.heatmaps_blob_name].shape[-1]
 
@@ -54,7 +57,8 @@ class HpeAssociativeEmbedding(Model):
             tag_threshold=1,
             pose_threshold=prob_threshold,
             use_detection_val=True,
-            ignore_too_much=False)
+            ignore_too_much=False,
+            dist_reweight=True)
 
     @staticmethod
     def _get_inputs(net):
@@ -109,11 +113,14 @@ class Pose:
         self.pose = np.zeros((num_joints, 2 + 1 + tag_size), dtype=np.float32)
         self.pose_tag = np.zeros(tag_size, dtype=np.float32)
         self.valid_points_num = 0
+        self.c = np.zeros(2, dtype=np.float32)
 
     def add(self, idx, joint, tag):
         self.pose[idx] = joint
+        self.c = self.c * self.valid_points_num + joint[:2]
         self.pose_tag = (self.pose_tag * self.valid_points_num) + tag
         self.valid_points_num += 1
+        self.c /= self.valid_points_num
         self.pose_tag /= self.valid_points_num
 
     @property
@@ -122,11 +129,18 @@ class Pose:
             return self.pose_tag
         return None
 
+    @property
+    def center(self):
+        if self.valid_points_num > 0:
+            return self.c
+        return None
+
 
 class AssociativeEmbeddingDecoder:
     def __init__(self, num_joints, max_num_people, detection_threshold, use_detection_val,
                  ignore_too_much, tag_threshold, pose_threshold,
-                 adjust=True, refine=True, delta=0.0, joints_order=None):
+                 adjust=True, refine=True, delta=0.0, joints_order=None,
+                 dist_reweight=True):
         self.num_joints = num_joints
         self.max_num_people = max_num_people
         self.detection_threshold = detection_threshold
@@ -142,6 +156,7 @@ class AssociativeEmbeddingDecoder:
 
         self.do_adjust = adjust
         self.do_refine = refine
+        self.dist_reweight = dist_reweight
         self.delta = delta
 
     @staticmethod
@@ -175,6 +190,16 @@ class AssociativeEmbeddingDecoder:
             poses_tags = np.stack([p.tag for p in poses], axis=0)
             diff = tags[:, None] - poses_tags[None, :]
             diff_normed = np.linalg.norm(diff, ord=2, axis=2)
+
+            if self.dist_reweight:
+                # Reweight cost matrix to prefer nearby points among all that are close enough in a tag space.
+                centers = np.stack([p.center for p in poses], axis=0)[None]
+                dists = np.linalg.norm(joints[:, :2][:, None, :] - centers, ord=2, axis=2)
+                close_tags_masks = diff_normed < self.tag_threshold
+                min_dists = np.min(dists, axis=0, keepdims=True)
+                dists /= min_dists + 1e-10
+                diff_normed[close_tags_masks] *= dists[close_tags_masks]
+
             diff_saved = np.copy(diff_normed)
             if self.use_detection_val:
                 diff_normed = np.round(diff_normed) * 100 - joints[:, 2:3]
@@ -274,6 +299,8 @@ class AssociativeEmbeddingDecoder:
         tag_k, loc_k, val_k = self.top_k(nms_heatmaps, tags)
         ans = tuple(map(self._match_by_tag, zip(tag_k, loc_k, val_k)))  # Call _match_by_tag() for each element in batch
         ans, ans_tags = map(list, zip(*ans))
+
+        np.abs(heatmaps, out=heatmaps)
 
         if self.do_adjust:
             ans = self.adjust(ans, heatmaps)

@@ -24,6 +24,7 @@ from .config_validator import (
     DictField,
     InputField,
     ListInputsField,
+    NormalizationArgsField,
 
     BaseValidator,
     ConfigError,
@@ -43,6 +44,7 @@ __all__ = [
     'DictField',
     'InputField',
     'ListInputsField',
+    'NormalizationArgsField',
 
     'BaseValidator',
     'ConfigError',

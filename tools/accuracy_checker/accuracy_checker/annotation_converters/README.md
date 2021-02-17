@@ -99,7 +99,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is False).
   * `use_full_label_map` - allows to use original label map (with 91 object categories) from paper instead public available(80 categories).
   * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
-  * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
+  * `sort_key` - key by which annotations will be sorted (supported keys are `image_id` and `image_size`, default is `image_id`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
   * `semantic_only` - converts MS COCO dataset annotation to `SegmentationAnnotation`. (Optional, default value is False)
   * `masks_dir` - path to store segmentation masks in `semantic_only` mode
@@ -108,12 +108,14 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is False).
   * `use_full_label_map` - allows to use original label map (with 91 object categories) from paper instead public available(80 categories).
   * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
-  * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
+  * `sort_key` - key by which annotations will be sorted (supported keys are `image_id` and `image_size`, default is `image_id`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `mscoco_keypoints` - converts MS COCO dataset for keypoints localization task to `PoseEstimationAnnotation`.
   * `annotation_file` - path to annotation file in json format.
   * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
-  * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
+  * `sort_key` - key by which annotations will be sorted (supported keys are `image_id` and `image_size`, default is `image_id`).
+  * `remove_empty_images` - allows excluding/inclusing images without objects from/to the dataset..
+  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `wider` - converts from Wider Face dataset to `DetectionAnnotation`.
   * `annotation_file` - path to txt file, which contains ground truth data in WiderFace dataset format.
   * `label_start` - specifies face label index in label map. Default value is 1. You can provide another value, if you want to use this dataset for separate label validation,
@@ -398,6 +400,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotation_file` - path to file which describe the data which should be used in evaluation (`audio_filepath`, `text`, `duration`). Optional, used only for data filtering and sorting audio samples by duration.
   * `use_numpy` - allows to use preprocessed data stored in npy-files instead of audio (Optional, default False).
   * `top_n` - numeric value for getting only the n shortest samples **Note:** applicable only with `annotation_file` providing.
+  * `max_duration` - maximum clip duration to include into annotation. Default 0, means no duration checking.
 * `criteo` - converts [Criteo](http://labs.criteo.com/2013/12/download-terabyte-click-logs/) datasets to `ClassificationAnnotation`.
   * `testing_file` - Path to testing file, terabyte_preprocessed.npz (Criteo Terabyte) or day_6_processed.npz (Criteo Kaggle Dac)
   * `batch` - Model batch.
@@ -407,7 +410,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `separator` - Separator between input identifier and file identifier
   * `preprocessed_dir` - Preprocessed dataset location
   * `dense_features` - Name of model dense features input
-  * `sparse_features` - Name of model sparse features input. For multiple inputs use comma-separated list in form <name>:<index>
+  * `sparse_features` - Name of model sparse features input. For multiple inputs use comma-separated list in form `<name>:<index>`
   * `lso_features` - Name of lS_o-like features input
 * `im2latex` - converts im2latex-like datasets to `CharacterRecognitionAnnotation`. [Example of the dataset](http://lstm.seas.harvard.edu/latex/data/)
   * `images_dir` - path to input images (rendered or scanned formulas)
@@ -463,6 +466,13 @@ The main difference between this converter and `super_resolution` in data organi
   * `add_background_to_label_id` - flag that label_ids defined in annotation should be shifted if `has_background` enabled.
 * `see_in_the_dark` - converts See-in-the-Dark dataset described in the [paper](https://cchen156.github.io/paper/18CVPR_SID.pdf) to `ImageProcessingAnnotation`.
   * `annotation_file` - path to image pairs file in txt format.
+* `conll_ner` - converts CONLL 2003 dataset for Named Entity Recognition to `BERTNamedEntityRecognitionAnnotation`.
+  * `annotation_file` - annotation file in txt forma
+  * `vocab_file` - vocab file for word piece tokenization.
+  * `lower_case` - converts all tokens to lower case during tokenization (Optional, default `False`).
+  * `max_length` - maximal input sequence length (Optional, default 128).
+  * `pad_input` - allow padding for input sequence if input less that `max_length` (Optional, default `True`).
+  * `include_special_token_lables` - allow extension original dataset labels with special token labels (`[CLS'`, `[SEP]`]) (Optional, default `False`).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

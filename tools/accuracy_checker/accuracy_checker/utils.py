@@ -490,6 +490,14 @@ class OrderedSet(MutableSet):
         return set(self) == set(other)
 
 
+def is_relative_to(path, *other):
+    try:
+        Path(path).relative_to(*other)
+        return True
+    except ValueError:
+        return False
+
+
 def get_parameter_value_from_config(config, parameters, key):
     if key not in parameters.keys():
         return None

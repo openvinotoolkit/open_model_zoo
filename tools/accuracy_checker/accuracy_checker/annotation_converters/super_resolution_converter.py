@@ -479,7 +479,9 @@ class SRDirectoryBased(BaseFormatConverter):
             return numbers
 
         idx = get_index(file_name)
-        found_files = list(search_dir.glob('*{}*'.format(idx)))
+        found_files = []
+        for i in idx:
+            found_files.extend(search_dir.glob('*{}*'.format(i)))
         if not found_files:
             return None
         return found_files[0]

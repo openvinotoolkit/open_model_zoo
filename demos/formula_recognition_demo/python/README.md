@@ -1,6 +1,7 @@
 # Formula Recognition Python\* Demo
+![](./demo_intro.gif)
 
-This demo shows how to run im2latex models. Im2latex models allow to get a latex formula markup from the image.
+This demo shows how to run Im2LaTeX models. Im2LaTeX models allow to get a LaTeX formula markup from the image.
 
 > **NOTE**: Only batch size of 1 is supported.
 
@@ -25,14 +26,68 @@ Second model is Decoder that takes as input:
 * Target (`tgt`) - previous token (for the first time it is `START_TOKEN` )
 Second model is being executed until current decoded token is `END_TOKEN` or length of the formula is less then `--max_formula_len` producing one token per each decode step.
 
-As input, the demo application takes a path to a folder with images or a path to a single image file with a command-line argument `-i`.
+The demo application takes an input with the help of the `-i` argument. This could be:
 
-The demo workflow is the following:
+* Path to a single image
+* Path to a folder with images
+> In this Case non-interactive mode would be triggered. This means that demo will run the model over the input image(s) and will try to predict the formula. The output would be stored in the console or in the output file (if specified)
+* Integer identifier of the device (e.g. web-camera), typically 0.
+* Path to a video (.avi, .mp4, etc)
+> This will trigger interactive mode, which would be explained in detail later.
+
+### Non-interactive mode
+Non-interactive mode assumes that demo processes inputs sequentially.
+The demo workflow in non-interactive mode is the following:
 
 1. The demo application reads a single image or iterates over all images in the given folder, then crops or resizes and inputs to fit into the input image blob of the network (`imgs`). Crop and pad is used to keep size of the font.
 2. For each image, encoder extracts features from the image
 3. While length of the current formula is less then `--max_formula_len` or current token is not `END_TOKEN` Decode Step produces new tokens.
-5. The demo prints the decoded text into the console or in a file if `-o` parameter specified.
+4. The demo prints the decoded text to a file if `-o` parameter specified or into the console and (optionally) renders predicted formula into image.
+
+#### Rendering of the LaTeX formula into image
+User has an option to render the LaTeX formula predicted by the demo application into an image.
+Regardless of what mode is selected (interactive or non-interactive) the process of the rendering of the formula is the same.
+##### Requirements for rendering
+Sympy python package is used for rendering. To install it, please, run:
+`pip install -r requirements.txt`
+Sympy package needs LaTeX system installed in the operating system.
+For Windows you can use MiKTeX (just download and install it), for Ubuntu/MacOS you can use TeX Live:
+Ubuntu:
+`apt-get update && apt-get install texlive`
+MacOS:
+`brew install texlive`
+> Note: Other LaTeX systems should also work.
+
+
+
+### Interactive mode
+The example of the interface:
+![](./interactive_interface.png)
+When User runs demo application with the `-i` option and passes video or number of the web-camera device as an argument (typically 0), window with the image simillar to above should pop up.
+
+Example of usage of the interactive mode:
+```
+python formula_recognition_demo.py <required args> -i 0
+```
+or
+```
+python formula_recognition_demo.py <required args> -i input_video.mp4
+```
+
+
+The window has four main sections:
+1. A red rectangle is placed on the center of this window. This is input "target", with the help of which User, moving the camera, can capture formula.
+2. Image from the input target will be binarized, preprocessed and fed to the network. Preprocessed and binarized image is placed on the top of the window (near `Model input` label)
+3. If the formula will be predicted with sufficient confidence score, it will be placed right under preprocessed image (near `Predicted` label)
+4. If rendering is available (see the previous Paragraph for details) and predicted formula does not contain LaTeX grammar errors, it will be rendered and placed near `Rendered` label.
+
+Navigation keys:
+  * Use `q` button to quit from program
+  * Use `o` to decrease the size of the input (red) window
+  * Use `p` to increase the size of the input window
+
+The overall process is simillar to the Non-interactive mode with the exception that it runs asynchronously.
+This means model inference and rendering of the formula do not block main thread, so the image from the web camera can move smoothly.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
@@ -44,22 +99,26 @@ The demo has two preprocessing types: Crop and Pad to target shape and Resize an
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder M_DECODER -i
-                        INPUT [-o OUTPUT_FILE] --vocab_path VOCAB_PATH
-                        [--max_formula_len MAX_FORMULA_LEN] [-d DEVICE]
-                        [--preprocessing_type {crop,resize}] [-pc]
-                        [--imgs_layer IMGS_LAYER]
-                        [--row_enc_out_layer ROW_ENC_OUT_LAYER]
-                        [--hidden_layer HIDDEN_LAYER]
-                        [--context_layer CONTEXT_LAYER]
-                        [--init_0_layer INIT_0_LAYER]
-                        [--dec_st_c_layer DEC_ST_C_LAYER]
-                        [--dec_st_h_layer DEC_ST_H_LAYER]
-                        [--dec_st_c_t_layer DEC_ST_C_T_LAYER]
-                        [--dec_st_h_t_layer DEC_ST_H_T_LAYER]
-                        [--output_layer OUTPUT_LAYER]
-                        [--output_prev_layer OUTPUT_PREV_LAYER]
-                        [--logit_layer LOGIT_LAYER] [--tgt_layer TGT_LAYER]
+usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder
+                                   M_DECODER -i INPUT [-no_show]
+                                   [-o OUTPUT_FILE] -v VOCAB_PATH
+                                   [--max_formula_len MAX_FORMULA_LEN]
+                                   [-t CONF_THRESH] [-d DEVICE]
+                                   [--resolution RESOLUTION RESOLUTION]
+                                   [--preprocessing_type {crop,resize}] [-pc]
+                                   [--imgs_layer IMGS_LAYER]
+                                   [--row_enc_out_layer ROW_ENC_OUT_LAYER]
+                                   [--hidden_layer HIDDEN_LAYER]
+                                   [--context_layer CONTEXT_LAYER]
+                                   [--init_0_layer INIT_0_LAYER]
+                                   [--dec_st_c_layer DEC_ST_C_LAYER]
+                                   [--dec_st_h_layer DEC_ST_H_LAYER]
+                                   [--dec_st_c_t_layer DEC_ST_C_T_LAYER]
+                                   [--dec_st_h_t_layer DEC_ST_H_T_LAYER]
+                                   [--output_layer OUTPUT_LAYER]
+                                   [--output_prev_layer OUTPUT_PREV_LAYER]
+                                   [--logit_layer LOGIT_LAYER]
+                                   [--tgt_layer TGT_LAYER]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -68,28 +127,37 @@ Options:
   -m_decoder M_DECODER  Required. Path to an .xml file with a trained decoder
                         part of the model
   -i INPUT, --input INPUT
-                        Required. Path to a folder with images or path to an
-                        image files
+                        Required. Path to a folder with images, path to an
+                        image files, integer identificator of the camera or
+                        path to the video. See README.md for details.
+  -no_show, --no_show   Optional. Suppress pop-up window with rendered
+                        formula.
   -o OUTPUT_FILE, --output_file OUTPUT_FILE
                         Optional. Path to file where to store output. If not
-                        mentioned, result will be storedin the console.
-  --vocab_path VOCAB_PATH
+                        mentioned, result will be stored in the console.
+  -v VOCAB_PATH, --vocab_path VOCAB_PATH
                         Required. Path to vocab file to construct meaningful
                         phrase
   --max_formula_len MAX_FORMULA_LEN
                         Optional. Defines maximum length of the formula
                         (number of tokens to decode)
+  -t CONF_THRESH, --conf_thresh CONF_THRESH
+                        Optional. Probability threshold to treat model
+                        prediction as meaningful
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. Sample will
                         look for a suitable plugin for device specified.
                         Default value is CPU
+  --resolution RESOLUTION RESOLUTION
+                        Optional. Resolution of the demo application window.
+                        Default: 1280 720
   --preprocessing_type {crop,resize}
                         Optional. Type of the preprocessing
   -pc, --perf_counts
   --imgs_layer IMGS_LAYER
-                        Optional. Encoder input key for images. See README for
-                        details.
+                        Optional. Encoder input name for images. See README
+                        for details.
   --row_enc_out_layer ROW_ENC_OUT_LAYER
                         Optional. Encoder output key for row_enc_out. See
                         README for details.

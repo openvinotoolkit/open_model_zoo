@@ -83,8 +83,11 @@ int main(int argc, char *argv[]) {
         const char kPadSymbol = '#';
         if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
             throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
-
-        std::string kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
+        std::string kAlphabet;
+        if (FLAGS_tr_pt_first)
+            kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
+        else
+            kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
 
         const double min_text_recognition_confidence = FLAGS_thr;
 
@@ -141,6 +144,12 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Can't read an image from the input");
         }
 
+        cv::VideoWriter videoWriter;
+        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                                                  cap->fps(), image.size())) {
+            throw std::runtime_error("Can't open video writer");
+        }
+        uint32_t framesProcessed = 0;
         cv::Size graphSize{static_cast<int>(image.cols / 4), 60};
         Presenter presenter(FLAGS_u, image.rows - graphSize.height - 10, graphSize);
 
@@ -210,12 +219,21 @@ int main(int argc, char *argv[]) {
                 double conf = 1.0;
                 if (text_recognition.is_initialized()) {
                     auto blobs = text_recognition.Infer(cropped_text);
-                    auto output_shape = blobs.begin()->second->getTensorDesc().getDims();
-                    if (output_shape[2] != kAlphabet.length()) {
+                    auto out_blob = blobs.begin()->second;
+                    if (FLAGS_tr_o_blb_nm != "") {
+                        const auto& iter = blobs.find(FLAGS_tr_o_blb_nm);
+                        if (iter == blobs.end()) {
+                            throw std::runtime_error("The text recognition model does not have output " + FLAGS_tr_o_blb_nm);
+                        }
+                        out_blob = iter->second;
+                    }
+                    auto output_shape = out_blob->getTensorDesc().getDims();
+
+                    if (output_shape.size() < 3 || output_shape[2] != kAlphabet.length()) {
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
                     }
 
-                    LockedMemory<const void> blobMapped = as<MemoryBlob>(blobs.begin()->second)->rmap();
+                    LockedMemory<const void> blobMapped = as<MemoryBlob>(out_blob)->rmap();
                     float *output_data_pointer = blobMapped.as<float *>();
                     std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
 
@@ -273,7 +291,10 @@ int main(int argc, char *argv[]) {
                         cv::Point(50, 50), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255), 1);
 
             presenter.drawGraphs(demo_image);
-
+            framesProcessed++;
+            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
+                videoWriter.write(demo_image);
+            }
             if (!FLAGS_no_show) {
                 cv::imshow("Press ESC or Q to exit", demo_image);
                 int key = cv::waitKey(1);
@@ -307,11 +328,10 @@ int main(int argc, char *argv[]) {
           std::cout << "text recognition postprocessing (ms) (fps): "
                     << text_recognition_postproc_time / text_recognition.ncalls() / 1000 << " "
                     << text_recognition.ncalls() * 1000000 / text_recognition_postproc_time << std::endl << std::endl;
-          if (std::fabs(text_crop_time) < std::numeric_limits<double>::epsilon()) {
-              throw std::logic_error("text_crop_time can't be equal to zero");
-          }
-          std::cout << "text crop (ms) (fps): " << text_crop_time / text_recognition.ncalls() / 1000 << " "
+          if (std::fabs(text_crop_time) > std::numeric_limits<double>::epsilon()) {
+              std::cout << "text crop (ms) (fps): " << text_crop_time / text_recognition.ncalls() / 1000 << " "
                     << text_recognition.ncalls() * 1000000 / text_crop_time << std::endl << std::endl;
+          }
         }
 
         // ---------------------------------------------------------------------------------------------------

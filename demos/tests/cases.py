@@ -119,7 +119,21 @@ NATIVE_DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('human-pose-estimation')}),
-        TestCase(options={'-m': ModelArg('human-pose-estimation-0001')}),
+        [
+            TestCase(options={'-at': 'openpose',
+                              '-m': ModelArg('human-pose-estimation-0001')}
+            ),
+            *combine_cases(
+                TestCase(options={'-at': 'ae'}),
+                single_option_cases('-m',
+                    ModelArg('human-pose-estimation-0002'),
+                    ModelArg('human-pose-estimation-0003'),
+                    ModelArg('human-pose-estimation-0004'),
+                    # ModelArg('human-pose-estimation-0005'),
+                    # ModelArg('human-pose-estimation-0006'),
+                    # ModelArg('human-pose-estimation-0007')
+                )),
+        ],
     )),
 
     CppDemo(name='classification_demo',
@@ -230,8 +244,20 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('object-detection-demo')}),
         [
+            *combine_cases(
+                TestCase(options={'-at': 'centernet'}),
+                single_option_cases('-m',
+                    ModelArg('ctdet_coco_dlav0_384'),
+                    ModelArg('ctdet_coco_dlav0_512'))),
             TestCase(options={'-at': 'faceboxes',
                               '-m': ModelArg('faceboxes-pytorch')}
+            ),
+            *combine_cases(
+                TestCase(options={'-at': 'retinaface'}),
+                single_option_cases('-m',
+                    ModelArg('retinaface-anti-cov'),
+                    ModelArg('retinaface-resnet50'),
+                    ModelArg('ssh-mxnet'))
             ),
             *combine_cases(
                 TestCase(options={'-at': 'ssd'}),
@@ -318,6 +344,8 @@ NATIVE_DEMOS = [
                 TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
                 single_option_cases('-m',
                     ModelArg('semantic-segmentation-adas-0001'),
+                    ModelArg('fastseg-large'),
+                    ModelArg('fastseg-small'),
                     ModelArg('hrnet-v2-c1-segmentation'),
                     ModelArg('deeplabv3'))),
         ],
@@ -376,7 +404,7 @@ PYTHON_DEMOS = [
         single_option_cases('-i', *DATA_SEQUENCES['brain-tumor-nifti']),
     )),
 
-    PythonDemo(name='action_recognition', device_keys=['-d'], test_cases=combine_cases(
+    PythonDemo(name='action_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('action-recognition')}),
         [
             TestCase(options={
@@ -498,6 +526,11 @@ PYTHON_DEMOS = [
             ModelArg('instance-segmentation-security-0050'),
             ModelArg('instance-segmentation-security-0083'),
             ModelArg('instance-segmentation-security-1025')),
+            #ModelArg('instance-segmentation-security-0002'),
+            #ModelArg('instance-segmentation-security-0091'),
+            #ModelArg('instance-segmentation-security-0228'),
+            #ModelArg('instance-segmentation-security-1039'),
+            #ModelArg('instance-segmentation-security-1040')),
     )),
 
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
@@ -532,7 +565,7 @@ PYTHON_DEMOS = [
                           '-m': ModelArg('midasnet')})
     )),
 
-    PythonDemo(name='multi_camera_multi_target_tracking', device_keys=['-d'], test_cases=combine_cases(
+    PythonDemo(name='multi_camera_multi_target_tracking_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': [DataPatternArg('multi-camera-multi-target-tracking'),
@@ -558,7 +591,7 @@ PYTHON_DEMOS = [
                               '-m': ModelArg('faceboxes-pytorch')}
             ),
             *combine_cases(
-                TestCase(options={'--architecture_type': 'retina'}),
+                TestCase(options={'--architecture_type': 'retinaface'}),
                 single_option_cases('-m',
                     ModelArg('retinaface-anti-cov'),
                     ModelArg('retinaface-resnet50'))
@@ -639,6 +672,8 @@ PYTHON_DEMOS = [
                 TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
                 single_option_cases('-m',
                     ModelArg('semantic-segmentation-adas-0001'),
+                    ModelArg('fastseg-large'),
+                    ModelArg('fastseg-small'),
                     ModelArg('hrnet-v2-c1-segmentation'),
                     ModelArg('icnet-camvid-ava-0001'),
                     ModelArg('icnet-camvid-ava-sparse-30-0001'),

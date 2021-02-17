@@ -57,11 +57,21 @@ AccuracyChecker supports following set of adapters:
   * `output_format` - setting output layer format - boxes first (`BHW`)(default, also default for generated IRs), boxes last (`HWB`). Applicable only if network output not 3D (4D with batch) tensor.
   * `cells` - sets grid size for each layer, according `outputs` filed. Works only with `do_reshape=True` or when output tensor dimensions not equal 3.
   * `do_reshape` - forces reshape output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on `output_format` value ([B,Cy,Cx] by default). You may need to specify `cells` value.
+  * `transpose` - transpose output tensor to specified format (optional).
 * `yolo_v3_onnx` - converting output of ONNX Yolo V3 model to `DetectionPrediction`.
   * `boxes_out` - the name of layer with bounding boxes
   * `scores_out` - the name of output layer with detection scores for each class and box pair.
   * `indices_out` - the name of output layer with indices triplets (class_id, score_id, bbox_id).
+* `yolo_v3_tf2` - converting output of TensorFlow 2 Yolo V3 with embedded box decoding to `DetectionPrediction`.
+  * `outputs` - the list of output layers names.
+  * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0).
+* `yolo_v5` - converting output of YOLO v5 family models to `DetectionPrediction` representation. The parameters are the same as for the `yolo_v3` models.
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
+* `aocr` - converting output of attention-ocr model to `CharacterRecognitionPrediction`.
+  * `output_blob` - name of output layer with predicted labels or string (Optional, if not provided, first founded output will be used).
+  * `labels` - optional, list of supported tokens for decoding raw labels (Optional, default configuration is ascii charmap, this parameter ignored if you have decoding part in the model).
+  * `eos_index` - index of end of string token in labels. (Optional, default 2, ignored if you have decoding part in the model).
+  * `to_lower_case` - allow converting decoded characters to lower case (Optional, default is `True`).
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
 * `ssd_mxnet` - converting output of SSD-based models from MXNet framework to `DetectionPrediction` representation.
 * `pytorch_ssd_decoder` - converts output of SSD model from PyTorch without embedded decoder.
@@ -222,6 +232,8 @@ AccuracyChecker supports following set of adapters:
   * `beam_size` -  size of the beam to use during decoding (default 10).
   * `blank_label` - index of the CTC blank label.
   * `softmaxed_probabilities` - indicator that model uses softmax for output layer (default False).
+  * `logits_output` - Name of the output layer of the network to use in decoder
+  * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm.
 * `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
   * `blank_label` - index of the CTC blank label (default 0).
 * `ctc_beam_search_decoder` - Python implementation of CTC beam search decoder without LM for speech recognition.
@@ -261,9 +273,9 @@ AccuracyChecker supports following set of adapters:
   * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.json). Path can be prefixed with `--models` arguments.
   * `merges_file` - file which contains merges for encoding model predicted indexes to words (e. g. merges.txt). Path can be prefixed with `--models` arguments.
   * `output_name` - name of model's output layer if need (optional).
-  * `sos_symbol` - string representation of start_of_sentence symbol (default='<s>').
-  * `eos_symbol` - string representation of end_of_sentence symbol (default='</s>').
-  * `pad_symbol` - string representation of pad symbol (default='<pad>').
+  * `sos_symbol` - string representation of start_of_sentence symbol (default=`<s>`).
+  * `eos_symbol` - string representation of end_of_sentence symbol (default=`</s>`).
+  * `pad_symbol` - string representation of pad symbol (default=`<pad>`).
   * `remove_extra_symbols` - remove sos/eos/pad symbols from predicted string (default=True)
 * `bert_question_answering` - converting output of BERT model trained to solve question answering task to `QuestionAnsweringPrediction`.
 * `bidaf_question_answering` - converting output of BiDAF model trained to solve question answering task to `QuestionAnsweringPrediction`.
@@ -358,6 +370,7 @@ AccuracyChecker supports following set of adapters:
 * `dna_seq_beam_search` - converts output of DNA sequencing model to `DNASequencePrediction` using beam search decoding.
   * `beam_size` - beam size for CTC Beam Search (Optional, default 5).
   * `threshold` - beam cut threshold (Optional, default 1e-3).
+  * `output_blob` - name of output layer with sequence prediction.
 * `pwcnet` - converts output of PWCNet network to `OpticalFlowPrediction`.
   * `flow_out` - target output layer name.
 * `salient_object_detection` - converts output of salient object detection model to `SalientRegionPrediction`
@@ -365,3 +378,9 @@ AccuracyChecker supports following set of adapters:
 * `two_stage_detection` - converts output of 2-stage detector to `DetectionPrediction`.
   * `boxes_out` - output with bounding boxes in format BxNx[x_min, y_min, width, height], where B - network batch size, N - number of detected boxes.
   * `cls_out` - output with classification probabilities in format [BxNxC], where B - network batch size, N - number of detected boxes, C - number of classed.
+* `dumb_decoder` - converts  audio recognition model output to  `CharacterRecognitionPrediction`.
+  * `alphabet` - model alphabet.
+  * `uppercase` - produce prediction in uppercase, default is `True`.
+* `detr` - converts output of DETR models family to `DetectionPrediction`.
+    * `scores_out` - output layer name with detection scores logits.
+    * `boxes_out` - output layer name with detection boxes coordinates in [Cx,Cy,W, H] format, where Cx - x coordinate of box center, Cy - y coordinate of box center, W, H - width and height respectively.

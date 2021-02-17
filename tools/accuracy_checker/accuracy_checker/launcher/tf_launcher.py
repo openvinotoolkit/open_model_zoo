@@ -62,6 +62,7 @@ class TFLauncher(Launcher):
         self.default_layout = 'NHWC'
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
         self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
+        self._graph = None
         if not self._delayed_model_loading:
             if not contains_any(self.config, ['model', 'saved_model_dir']):
                 raise ConfigError('model or saved model directory should be provided')
@@ -242,7 +243,8 @@ class TFLauncher(Launcher):
         }
 
     def release(self):
-        del self._graph
+        if self._graph is not None:
+            del self._graph
 
     @property
     def output_blob(self):
@@ -333,3 +335,65 @@ class TFLauncher(Launcher):
             raise ConfigError('output blobs in the graph cannot be found')
 
         return names
+
+    def create_inference_session(self, model, saved_model_dir=False, inputs=None, outputs=None):
+        if saved_model_dir:
+            _graph = self._load_graph(str(model), True)
+        else:
+            _graph = self._load_graph(str(model))
+
+        _outputs_names = self._get_outputs_names(_graph, outputs)
+        _outputs_tensors = []
+        _node_pattern = 'import/{}:0'
+        for output in _outputs_names:
+            try:
+                tensor = _graph.get_tensor_by_name('import/{}:0'.format(output))
+            except KeyError:
+                try:
+                    tensor = _graph.get_tensor_by_name('{}:0'.format(output))
+                    _node_pattern = '{}:0'
+                except KeyError:
+                    raise ConfigError('model graph does not contains output {}'.format(output))
+            _outputs_tensors.append(tensor)
+
+        graph_inputs = self._get_graph_inputs(_graph, inputs)
+        _inputs = {
+            node_name.split('import/')[-1]:
+                tuple(int(a.size) for a in node.attr['shape'].shape.dim) for node_name, node in graph_inputs.items()
+        }
+
+        return TFSessionWrapper(self.tf, self.device, _graph, _outputs_names, _outputs_tensors, _inputs, _node_pattern)
+
+class TFSessionWrapper:
+    def __init__(self, tf, device, graph, outputs_names, outputs_tensors, inputs, node_pattern):
+        self._tf = tf
+        self._device = device
+        self._graph = graph
+        self._outputs_names = outputs_names
+        self._outputs_tensors = outputs_tensors
+        self._inputs = inputs
+        self._node_pattern = node_pattern
+
+        self.default_layout = 'NHWC'
+
+        with self._tf.device(self._device):
+            self._session = self._tf.Session(graph=self._graph)
+
+    def predict(self, inputs, metadata=None, **kwargs):
+        results = []
+        for infer_input in inputs:
+            feed_dictionary = {
+                self._node_pattern.format(input_name): input_data
+                for input_name, input_data in infer_input.items()
+            }
+            result = self._session.run(self._outputs_tensors, feed_dict=feed_dictionary)
+            res = dict(zip(self._outputs_names, result))
+            results.append(res)
+
+            if metadata is not None:
+                for meta_ in metadata:
+                    meta_['input_shape'] = meta_.get('input_shape', {}).update(
+                        {name: data.shape for name, data in infer_input.items()}
+                    )
+
+        return results

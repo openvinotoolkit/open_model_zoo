@@ -82,6 +82,8 @@ detect areas with complex shape.
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
 | DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/deeplabv3.md) | 66.85% | 11.469 | 23.819 |
 | HRNet V2 C1 Segmentation  | PyTorch\*      | [hrnet-v2-c1-segmentation](./hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md) | 77.69% | 81.993 | 66.4768 |
+| Fastseg MobileV3Large LR-ASPP, F=128  | PyTorch\*      | [fastseg-large](./fastseg-large/fastseg-large.md) | 72.67% | 140.9611 | 3.2 |
+| Fastseg MobileV3Small LR-ASPP, F=128  | PyTorch\*      | [fastseg-small](./fastseg-small/fastseg-small.md) | 67.15% | 69.2204 | 1.1 |
 
 ### Instance Segmentation
 
@@ -222,7 +224,8 @@ The task of sound classification is to predict what sounds are in an audio fragm
 
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | ------ | ------- | ------- |
-| ACLNet                    | PyTorch\* | [aclnet](./aclnet/aclnet.md) |      | 1.4     | 2.7     |
+| ACLNet                    | PyTorch\* | [aclnet](./aclnet/aclnet.md) | 86%/92% | 1.4     | 2.7     |
+| ACLNet-int8               | PyTorch\* | [aclnet-int8](./aclnet-int8/aclnet-int8.md) | 87%/93%   | 1.41     | 2.71     |
 
 ## Speech Recognition
 
@@ -240,6 +243,22 @@ The task of image translation is to generate the output based on exemplar.
 | Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops    | mParams  |
 | -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
 | CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/cocosnet.md) | 12.93dB  | 1080.7032 | 167.9141 |
+
+## Place Recognition
+
+The task of place recognition is to quickly and accurately recognize the location of a given query photograph.
+
+| Model Name | Implementation | OMZ Model Name                           | Accuracy | GFlops | mParams |
+| ---------- | ---------------| -----------------------------------------| -------- | ------ | ------- |
+| NetVLAD    | TensorFlow\*   | [netvlad-tf](./netvlad-tf/netvlad-tf.md) | 82.0321% | 36.6374| 149.0021|
+
+## Deblurring
+
+The task of image deblurring.
+
+| Model Name     | Implementation | OMZ Model Name                                 | Accuracy | GFlops  | mParams  |
+| -------------- | -------------- | ---------------------------------------------- | -------- | ------- | -------- |
+| DeblurGAN-v2   | PyTorch\*      | [deblurgan-v2](./deblurgan-v2/deblurgan-v2.md) | 28.25Db  | 80.8919 | 2.1083   |
 
 ## Legal Information
 

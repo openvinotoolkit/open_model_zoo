@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 #include <opencv2/core.hpp>
 #include <inference_engine.hpp>
 #include <map>
-//#include "metadata.h"
 #include "internal_model_data.h"
 
 struct MetaData;
@@ -71,6 +70,19 @@ struct DetectionResult : public ResultBase {
     std::vector<DetectedObject> objects;
 };
 
+struct RetinaFaceDetectionResult : public DetectionResult {
+    std::vector<cv::Point2f> landmarks;
+};
+
 struct SegmentationResult : public ResultBase {
     cv::Mat mask;
+};
+
+struct HumanPose {
+    std::vector<cv::Point2f> keypoints;
+    float score;
+};
+
+struct HumanPoseResult : public ResultBase {
+    std::vector<HumanPose> poses;
 };

@@ -40,6 +40,12 @@ from .audio_preprocessing import (
     SamplesToFloat32,
     AudioToMelSpectrogram
 )
+from .audio_preprocessing_ext import (
+    SpliceFrame,
+    DitherFrame,
+    DitherSpectrum,
+    PreemphFrame
+)
 
 from .normalization import Normalize, Normalize3d
 from .geometric_transformations import (
@@ -80,6 +86,10 @@ __all__ = [
     'TrimmingAudio',
     'SamplesToFloat32',
     'AudioToMelSpectrogram',
+    'SpliceFrame',
+    'DitherFrame',
+    'DitherSpectrum',
+    'PreemphFrame',
 
     'Resize',
     'Resize3D',

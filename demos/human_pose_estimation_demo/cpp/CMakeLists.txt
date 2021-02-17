@@ -1,13 +1,12 @@
-# Copyright (C) 2018-2019 Intel Corporation
+# Copyright (C) 2018-2021 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 
-file (GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-file (GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
+file(GLOB SRC_FILES ./*.cpp)
+file(GLOB H_FILES ./*.h)
 
 ie_add_sample(NAME human_pose_estimation_demo
-              SOURCES ${SOURCES}
-              HEADERS ${HEADERS}
-              INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
-              DEPENDENCIES monitors
-              OPENCV_DEPENDENCIES highgui)
+              SOURCES ${SRC_FILES}
+              HEADERS ${H_FILES}
+              DEPENDENCIES monitors models pipelines
+              OPENCV_DEPENDENCIES highgui videoio imgproc)

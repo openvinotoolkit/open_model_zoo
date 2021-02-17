@@ -72,7 +72,7 @@ class Preprocessor(ClassProvider):
                 errors.append(
                     ConfigError(
                         "preprocessor {} unregistered".format(processing_provider), config,
-                        uri_prefix or 'preprocessing')
+                        uri_prefix or 'preprocessing', validation_scheme=cls.validation_scheme())
                 )
                 return errors
             errors.extend(preprocessor_cls.validate_config(config, fetch_only=fetch_only, uri_prefix=uri_prefix))
@@ -81,7 +81,18 @@ class Preprocessor(ClassProvider):
         preprocessor_uri = uri_prefix or 'preprocessing.{}'.format(cls.__provider__)
         return ConfigValidator(
             preprocessor_uri, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
-        ).validate(config, fetch_only=fetch_only)
+        ).validate(config, fetch_only=fetch_only, validation_scheme=cls.validation_scheme())
 
     def set_input_shape(self, input_shape):
         pass
+
+    @classmethod
+    def validation_scheme(cls, provider=None):
+        if cls.__name__ == Preprocessor.__name__:
+            if provider:
+                return cls.resolve(provider).validation_scheme()
+            full_scheme = []
+            for provider_ in cls.providers:
+                full_scheme.append(cls.resolve(provider_).validation_scheme())
+            return full_scheme
+        return cls.parameters()

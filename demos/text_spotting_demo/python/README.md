@@ -43,8 +43,8 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>"
-                             -i "<path>" [-d "<device>"]
-                             [-l "<absolute_path>"] [--delay "<num>"]
+                             -i INPUT [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT]
+                             [-d "<device>"] [-l "<absolute_path>"] [--delay "<num>"]
                              [-pt "<num>"] [-a ALPHABET]
                              [--trd_input_prev_symbol TRD_INPUT_PREV_SYMBOL]
                              [--trd_input_prev_hidden TRD_INPUT_PREV_HIDDEN]
@@ -66,7 +66,15 @@ Options:
   -m_td "<path>", --text_dec_model "<path>"
                         Required. Path to an .xml file with a trained text
                         recognition model (decoder part).
-  -i "<path>"           Required. Input to process.
+  -i INPUT, --input INPUT
+                        Required. An input to process. The input must be a single image,
+                        a folder of images, video file or camera id.
+  --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If 0 is set, all frames are stored.
   -d "<device>", --device "<device>"
                         Optional. Specify the target device to infer on, i.e. CPU, GPU.
                         The demo will look for a suitable plugin for device specified
@@ -118,9 +126,9 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 To run the demo, please provide paths to the model in the IR format and to an input with images:
 ```bash
 python3 text_spotting_demo.py \
--m_m <path_to_models>/text-spotting-0003-detector.xml \
--m_te <path_to_models>/text-spotting-0003-recognizer-encoder.xml \
--m_td <path_to_models>/text-spotting-0003-recognizer-decoder.xml \
+-m_m <path_to_models>/text-spotting-0004-detector.xml \
+-m_te <path_to_models>/text-spotting-0004-recognizer-encoder.xml \
+-m_td <path_to_models>/text-spotting-0004-recognizer-decoder.xml \
 -i 0
 ```
 

@@ -16,6 +16,7 @@
 
 
 from .centernet import CenterNet
+from .deblurring import Deblurring
 from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
 from .open_pose import OpenPose
@@ -28,6 +29,7 @@ from .yolo import YOLO
 __all__ = [
     'CenterNet',
     'DetectionWithLandmarks',
+    'Deblurring',
     'FaceBoxes',
     'HpeAssociativeEmbedding',
     'OpenPose',

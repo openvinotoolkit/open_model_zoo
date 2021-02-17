@@ -97,35 +97,21 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
         results = []
 
         for identifier, image_meta in zip(identifiers, frame_meta):
-            original_image_size = image_meta['image_size'][:2]
-            if 'scale_x' in image_meta and 'scale_y' in image_meta:
-                im_scale_x, im_scale_y = image_meta['scale_x'], image_meta['scale_y']
-            else:
-                image_input = [shape for shape in image_meta['input_shape'].values() if len(shape) == 4]
-                assert image_input, "image input not found"
-                assert len(image_input) == 1, 'several input images detected'
-                processed_image_size = image_input[0][2:]
-                im_scale_y = processed_image_size[0] / original_image_size[0]
-                im_scale_x = processed_image_size[1] / original_image_size[1]
-            boxes[:, 0::2] /= im_scale_x
-            boxes[:, 1::2] /= im_scale_y
-            masks = []
+            im_scale_x, im_scale_y = image_meta['scale_x'], image_meta['scale_y']
+            img_h, img_w = image_meta['image_size'][:2]
+            boxes[:, :4] /= np.array([im_scale_x, im_scale_y, im_scale_x, im_scale_y])
+            boxes[:, 0:4:2] = np.clip(boxes[:, 0:4:2], 0, img_w - 1)
+            boxes[:, 1:4:2] = np.clip(boxes[:, 1:4:2], 0, img_h - 1)
 
-            if self.scores_out:
-                raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
-                if raw_mask_for_all_classes:
-                    per_obj_raw_masks = []
-                    for cls, raw_mask in zip(classes, raw_masks):
-                        per_obj_raw_masks.append(raw_mask[cls, ...])
-                else:
-                    per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
-            else:
-                per_obj_raw_masks = raw_masks
-
-            for box, raw_cls_mask in zip(boxes, per_obj_raw_masks):
-                masks.append(self.segm_postprocess(box, raw_cls_mask, *original_image_size, True, False))
-
-            rectangles = self.masks_to_rects(masks)
+            segms = self.mask_to_result(
+                boxes,
+                classes,
+                raw_masks,
+                num_classes=1,
+                mask_thr_binary=0.5,
+                img_size=(img_h, img_w)
+            )
+            rectangles = self.masks_to_rects(segms[0])
 
             results.append(
                 TextDetectionPrediction(identifier, points=rectangles, description=texts))
@@ -136,22 +122,34 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
     def masks_to_rects(masks):
         rects = []
         for mask in masks:
-            decoded_mask = mask
+            decoded_mask = mask.astype(np.uint8)
             contours = cv2.findContours(decoded_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2]
-
-            areas = []
-            boxes = []
-            for contour in contours:
-                area = cv2.contourArea(contour)
-                areas.append(area)
-
-                rect = cv2.minAreaRect(contour)
-                box = cv2.boxPoints(rect)
-                box = np.int0(box)
-                boxes.append(box)
-
-            if areas:
-                i = np.argmax(areas)
-                rects.append(boxes[i])
+            contour = sorted(contours, key=lambda x: -cv2.contourArea(x))[0]
+            xys = cv2.boxPoints(cv2.minAreaRect(contour))
+            rects.append(xys)
 
         return rects
+
+    @staticmethod
+    def mask_to_result(det_bboxes,
+                       det_labels,
+                       det_masks,
+                       num_classes,
+                       mask_thr_binary=0.5,
+                       img_size=None):
+        masks = det_masks
+        bboxes = det_bboxes[:, :4]
+        labels = det_labels
+
+        cls_masks = [[] for _ in range(num_classes)]
+
+        for bbox, label, mask in zip(bboxes, labels, masks):
+            x0, y0, x1, y1 = bbox
+            src_points = np.float32([[0, 0], [0, mask.shape[0]], [mask.shape[1], mask.shape[0]]]) - 0.5
+            dst_points = np.float32([[x0, y0], [x0, y1], [x1, y1]]) - 0.5
+            transform_matrix = cv2.getAffineTransform(src_points, dst_points)
+            mask = cv2.warpAffine(mask, transform_matrix, img_size[::-1])
+            mask = (mask >= mask_thr_binary).astype(np.uint8)
+            cls_masks[label].append(mask)
+
+        return cls_masks

@@ -19,7 +19,7 @@ from collections import defaultdict
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, BoolField, ConfigError
+from ..config import ConfigValidator, ConfigError, NumberField, BoolField, DictField, ListField, StringField
 from ..representation import CharacterRecognitionPrediction
 
 
@@ -40,7 +40,9 @@ class BeamSearchDecoder(Adapter):
             ),
             'softmaxed_probabilities': BoolField(
                 optional=True, default=False, description="Indicator that model uses softmax for output layer "
-            )
+            ),
+            'logits_output': StringField(optional=True, description='Logits output layer name'),
+            'custom_label_map': DictField(optional=True, description='Label map')
         })
         return parameters
 
@@ -54,12 +56,18 @@ class BeamSearchDecoder(Adapter):
         self.beam_size = self.get_value_from_config('beam_size')
         self.blank_label = self.launcher_config.get('blank_label')
         self.softmaxed_probabilities = self.get_value_from_config('softmaxed_probabilities')
+        self.logits_output = self.get_value_from_config("logits_output")
+        self.custom_label_map = self.get_value_from_config("custom_label_map")
 
     def process(self, raw, identifiers, frame_meta):
         if not self.label_map:
             raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
         if self.blank_label is None:
             self.blank_label = len(self.label_map)
+        if self.logits_output:
+            self.output_blob = self.logits_output
+        if self.custom_label_map:
+            self.label_map = self.custom_label_map
         raw_output = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
@@ -229,3 +237,46 @@ class LPRAdapter(Adapter):
             decode_out += str(self.label_map[int(output)])
 
         return decode_out
+
+
+class AttentionOCRAdapter(Adapter):
+    __provider__ = 'aocr'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'output_blob': StringField(description='network output with predicted labels name', optional=True),
+            'labels': ListField(
+                description='label list for decoding', optional=True,
+                default=['', '', ''] + [chr(i) for i in range(32, 127)]),
+            'eos_index': NumberField(
+                default=2, optional=True, description='end of string symbol index', value_type=int),
+            'to_lower_case': BoolField(optional=True, default=True,
+                                       description='should be output string converted to lower case or not')
+        })
+        return params
+
+    def configure(self):
+        self._output_blob = self.get_value_from_config('output_blob')
+        self.labels = self.get_value_from_config('labels')
+        self.eos_index = self.get_value_from_config('eos_index')
+        self.lower_case = self.get_value_from_config('to_lower_case')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_out = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_out)
+        result = []
+        if isinstance(raw_out[self.output_blob], bytes):
+            out_str = raw_out[self.output_blob].decode('iso-8859-1')
+            if self.lower_case:
+                out_str = out_str.lower()
+            return [CharacterRecognitionPrediction(identifiers[0], out_str)]
+
+        for identifier, out in zip(identifiers, raw_out[self.output_blob]):
+            valid_out = out[out != self.eos_index]
+            decoded_out = ''.join([self.labels[idx] for idx in valid_out])
+            if self.lower_case:
+                decoded_out = decoded_out.lower()
+            result.append(CharacterRecognitionPrediction(identifier, decoded_out))
+        return result

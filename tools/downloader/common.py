@@ -67,6 +67,7 @@ KNOWN_TASK_TYPES = {
     'monocular_depth_estimation',
     'object_attributes',
     'optical_character_recognition',
+    'place_recognition',
     'question_answering',
     'semantic_segmentation',
     'sound_classification',
@@ -507,11 +508,14 @@ class Model:
                 if conversion_to_onnx_args:
                     raise DeserializationError('Conversion to ONNX not supported for "{}" framework'.format(framework))
 
+            quantized = model.get('quantized', None)
+            if quantized is not None and quantized != 'INT8':
+                raise DeserializationError('"quantized": expected "INT8", got {!r}'.format(quantized))
+
             if 'model_optimizer_args' in model:
                 mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)
                     for i, arg in enumerate(model['model_optimizer_args'])]
-
-                precisions = {'FP16', 'FP32'}
+                precisions = {f'FP16-{quantized}', f'FP32-{quantized}'} if quantized is not None else {'FP16', 'FP32'}
             else:
                 if framework != 'dldt':
                     raise DeserializationError('Model not in IR format, but no conversions defined')

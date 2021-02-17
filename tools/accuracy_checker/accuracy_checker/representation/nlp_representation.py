@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import numpy as np
 from .base_representation import BaseRepresentation
 from .classification_representation import ClassificationAnnotation, SequenceClassificationAnnotation
 
@@ -143,5 +144,5 @@ class BERTNamedEntityRecognitionAnnotation(SequenceClassificationAnnotation):
         self.input_ids = input_ids
         self.input_mask = input_mask if input_mask is not None else []
         self.segment_ids = segment_ids if segment_ids is not None else []
-        self.valid_ids = valid_ids
-        self.label_mask = label_mask
+        self.valid_ids = np.array(valid_ids, dtype=bool) if valid_ids is not None else valid_ids
+        self.label_mask = np.array(label_mask, dtype=bool) if label_mask is not None else label_mask

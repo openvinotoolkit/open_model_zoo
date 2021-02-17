@@ -130,10 +130,27 @@ datasets:
     annotation_conversion:
       converter: mscoco_keypoints
       annotation_file: person_keypoints_val2017.json
+      remove_empty_images: True
+      sort_annotations: True
       sort_key: image_size
       images_dir: val2017
     annotation: mscoco_val2017_keypoints.pickle
     dataset_meta: mscoco_val2017_keypoints.json
+    metrics:
+      - name: AP
+        type: coco_orig_keypoints_precision
+
+  - name: ms_coco_val2017_keypoints_5k_images
+    data_source: val2017
+    annotation_conversion:
+      converter: mscoco_keypoints
+      annotation_file: person_keypoints_val2017.json
+      remove_empty_images: False
+      sort_annotations: True
+      sort_key: image_size
+      images_dir: val2017
+    annotation: mscoco_val2017_keypoints_5k_images.pickle
+    dataset_meta: mscoco_val2017_keypoints_5k_images.json
     metrics:
       - name: AP
         type: coco_orig_keypoints_precision
@@ -563,7 +580,7 @@ datasets:
     annotation_conversion:
       converter: icdar_detection
       word_spotting: True
-      data_dir: ICDAR15_DET/gt
+      data_dir: ICDAR15_DET/gt_proper
     annotation: icdar15_detection.pickle
 
   - name: ICDAR2013_detection
@@ -1062,6 +1079,46 @@ datasets:
         eos_index: 1
         sequence_len: 192
 
+  - name: WMT2019_en_de
+    annotation_conversion:
+      converter: wmt
+      input_file: WMT_en_de/wmt-en-de.src
+      reference_file: WMT_en_de/wmt-en-de.ref
+
+      reader:
+        type: annotation_features_extractor
+        features:
+          - source
+
+      preprocessing:
+        - type: decode_by_sentence_piece_bpe_tokenizer
+          vocabulary_file: tokenizer_src/vocab.json
+          merges_file: tokenizer_src/merges.txt
+
+        - type: pad_with_eos
+          eos_index: 1
+          sequence_len: 150
+
+  - name: WMT2019_de_en
+    annotation_conversion:
+      converter: wmt
+      input_file: WMT_de_en/wmt-de-en.src
+      reference_file: WMT_de_en/wmt-de-en.ref
+
+      reader:
+        type: annotation_features_extractor
+        features:
+          - source
+
+      preprocessing:
+        - type: decode_by_sentence_piece_bpe_tokenizer
+          vocabulary_file: tokenizer_src/vocab.json
+          merges_file: tokenizer_src/merges.txt
+
+        - type: pad_with_eos
+          eos_index: 1
+          sequence_len: 150
+
   - name: NYU_Depth_V2
     data_source: nyudepthv2/val/converted/images
     additional_data_source: nyudepthv2/val/converted/depth
@@ -1142,3 +1199,37 @@ datasets:
       prefix: duration_prediction
       input_suffix: in
       reference_suffix: out
+
+  - name: cityscapes
+    annotation_conversion:
+      converter: cityscapes
+      dataset_root_dir: Cityscapes/data
+
+    data_source: Cityscapes/data
+    annotation: cityscapes.pickle
+    dataset_meta: cityscapes.json
+
+  - name: forward_tacotron_melgan_io
+    data_source: forward_tacotron_melgan_io
+    reader: numpy_dict_reader
+    annotation_conversion:
+      converter: multi_feature_regression
+      data_dir: forward_tacotron_melgan_io
+      input_suffix: duration_prediction_in_
+      reference_suffix: melgan_out_
+
+  - name: pitts30k_val
+    data_source: pitts250k
+    annotation_conversion:
+      converter: place_recognition
+      split_file: pitts250k/datasets/pitts30k_val.mat
+    annotation: pitts30k_val.pickle
+
+  - name: GoPro
+    data_source: GOPRO/test
+    annotation_conversion:
+      converter: image_processing
+      data_dir: GOPRO/test
+      input_suffix: blur.png
+      target_suffix: sharp.png
+    annotation: GOPRO.pickle

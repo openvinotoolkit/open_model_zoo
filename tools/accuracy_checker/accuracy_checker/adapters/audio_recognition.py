@@ -259,16 +259,14 @@ class CTCGreedyDecoder(Adapter):
         blank_id = len(labels)
         hypotheses = []
         # CTC decoding procedure
-        for ind in range(prediction.shape[0]):
+        for batch_elem in prediction:
             decoded_prediction = []
             previous = blank_id
-            pr = prediction[ind]
-            for p in pr:
-                if (p != previous or previous == blank_id) and p != blank_id:
-                    decoded_prediction.append(p)
+            for p in batch_elem:
+                if previous != p != blank_id:
+                    decoded_prediction.append(labels[p])
                 previous = p
-            hypothesis = ''.join([labels[c] for c in decoded_prediction])
-            hypotheses.append(hypothesis)
+            hypotheses.append(''.join(decoded_prediction))
         return hypotheses
 
 
@@ -681,6 +679,32 @@ class CtcBeamSearchCandidate:
     def logp_total(self):
         return log_sum_exp(self.logp_blank, self.logp_non_blank)
 
+class DumbDecoder(Adapter):
+    __provider__ = 'dumb_decoder'
+    prediction_types = (CharacterRecognitionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'alphabet': ListField(optional=True, default=None, value_type=str, allow_empty=False,
+                                  description="Alphabet as list of strings."),
+            'uppercase': BoolField(optional=True, default=True, description="Transform result to uppercase"),
+
+        })
+        return parameters
+
+    def configure(self):
+        self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\''
+        self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
+        self.uppercase = self.get_value_from_config('uppercase')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        assert len(identifiers) == 1
+        decoded = ''.join(self.alphabet[t] for t in raw[0])
+        if self.uppercase:
+            decoded = decoded.upper()
+        return [CharacterRecognitionPrediction(identifiers[0], decoded.upper())]
 
 class TextState:
     __slots__ = ('text', 'last_word', 'last_char_index')

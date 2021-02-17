@@ -136,10 +136,15 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [instance-segmentation-security-1025](./instance-segmentation-security-1025/description/instance-segmentation-security-1025.md)                | 30.146               | 26.69      |
+| [instance-segmentation-security-0002](./instance-segmentation-security-0002/description/instance-segmentation-security-0002.md)                | 423.0842             | 48.3732    |
+| [instance-segmentation-security-0010](./instance-segmentation-security-0010/description/instance-segmentation-security-0010.md)                | 899.568              | 174.568    |
 | [instance-segmentation-security-0050](./instance-segmentation-security-0050/description/instance-segmentation-security-0050.md)                | 46.602               | 30.448     |
 | [instance-segmentation-security-0083](./instance-segmentation-security-0083/description/instance-segmentation-security-0083.md)                | 365.626              | 143.444    |
-| [instance-segmentation-security-0010](./instance-segmentation-security-0010/description/instance-segmentation-security-0010.md)                | 899.568              | 174.568    |
+| [instance-segmentation-security-0091](./instance-segmentation-security-0091/description/instance-segmentation-security-0091.md)                | 828.6324             | 101.236    |
+| [instance-segmentation-security-0228](./instance-segmentation-security-0228/description/instance-segmentation-security-0228.md)                | 147.2352             | 49.8328    |
+| [instance-segmentation-security-1025](./instance-segmentation-security-1025/description/instance-segmentation-security-1025.md)                | 30.146               | 26.69      |
+| [instance-segmentation-security-1039](./instance-segmentation-security-1039/description/instance-segmentation-security-1039.md)                | 13.9672              | 10.5674    |
+| [instance-segmentation-security-1040](./instance-segmentation-security-1040/description/instance-segmentation-security-1040.md)                | 29.334               | 13.5673    |
 
 
 ## Human Pose Estimation Models
@@ -159,6 +164,9 @@ instances, thus faster than previous, because network runs once.
 | [human-pose-estimation-0002](./human-pose-estimation-0002/description/human-pose-estimation-0002.md)                       | 5.9393               | 8.1504          |
 | [human-pose-estimation-0003](./human-pose-estimation-0003/description/human-pose-estimation-0003.md)                       | 8.8720               | 8.1504          |
 | [human-pose-estimation-0004](./human-pose-estimation-0004/description/human-pose-estimation-0004.md)                       | 14.3707              | 8.1504          |
+| [human-pose-estimation-0005](./human-pose-estimation-0005/description/human-pose-estimation-0005.md)                       | 5.9393               | 8.1504          |
+| [human-pose-estimation-0006](./human-pose-estimation-0006/description/human-pose-estimation-0006.md)                       | 8.8720               | 8.1504          |
+| [human-pose-estimation-0007](./human-pose-estimation-0007/description/human-pose-estimation-0007.md)                       | 14.3707              | 8.1504          |
 
 ## Image Processing
 
@@ -188,6 +196,7 @@ Deep Learning models for text recognition in various applications.
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [text-recognition-0012](./text-recognition-0012/description/text-recognition-0012.md)                                                          | 1.485                | 5.568      |
+| [text-recognition-0013](./text-recognition-0013/description/text-recognition-0013.md)                                                          | 1.488                | 5.567      |
 | [handwritten-score-recognition-0003](./handwritten-score-recognition-0003/description/handwritten-score-recognition-0003.md)                   | 0.792                | 5.555      |
 | [handwritten-japanese-recognition-0001](./handwritten-japanese-recognition-0001/description/handwritten-japanese-recognition-0001.md)          | 117.136              | 15.31      |
 | [handwritten-simplified-chinese-recognition-0001](./handwritten-simplified-chinese-recognition-0001/description/handwritten-simplified-chinese-recognition-0001.md)          |       134.513        |    17.270   |
@@ -204,6 +213,10 @@ Deep Learning models for text spotting (simultaneous detection and recognition).
 | text-spotting-0003-detector                                                                                                                    | 184.495              | 27.010     |
 | text-spotting-0003-recognizer-encoder                                                                                                          | 2.082                | 1.328      |
 | text-spotting-0003-recognizer-decoder                                                                                                          | 0.002                | 0.273      |
+| [text-spotting-0004](./text-spotting-0004/description/text-spotting-0004.md)                                                                   |                      |            |
+| text-spotting-0004-detector                                                                                                                    | 184.495              | 27.010     |
+| text-spotting-0004-recognizer-encoder                                                                                                          | 2.082                | 1.328      |
+| text-spotting-0004-recognizer-decoder                                                                                                          | 0.002                | 0.273      |
 
 ## Action Recognition Models
 
@@ -259,7 +272,19 @@ Deep Learning compressed models
 |-----------|--------------------|---------|
 | [machine-translation-nar-en-ru-0001](./machine-translation-nar-en-ru-0001/description/machine-translation-nar-en-ru-0001.md) | 23.17 | 69.29 |
 | [machine-translation-nar-ru-en-0001](./machine-translation-nar-ru-en-0001/description/machine-translation-nar-ru-en-0001.md) | 23.17 | 69.29 |
+| [machine-translation-nar-en-de-0001](./machine-translation-nar-en-de-0001/description/machine-translation-nar-en-de-0001.md) | 23.19 | 77.47 |
+| [machine-translation-nar-de-en-0001](./machine-translation-nar-de-en-0001/description/machine-translation-nar-de-en-0001.md) | 23.19 | 77.47 |
 
+## Text To Speech
+
+Deep Learning models for speech synthesis (mel spectrogram generation and wave form generation).
+
+| Model Name                                                                                | Complexity (GFLOPs)  | Size (Mp)  |
+|-------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [text-to-speech-en-0001](./text-to-speech-en-0001/description/text-to-speech-en-0001.md)  |                      |            |
+| text-to-speech-en-0001-duration-prediction                                                | 15.84                | 13.569     |
+| text-to-speech-en-0001-regression                                                         | 7.65                 | 4.96       |
+| text-to-speech-en-0001-generation                                                         | 48.38                | 12.77      |
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

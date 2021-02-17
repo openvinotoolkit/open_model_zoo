@@ -27,7 +27,8 @@ from .text_detection import (
 from .text_recognition import (
     BeamSearchDecoder,
     CTCGreedySearchDecoder,
-    LPRAdapter
+    LPRAdapter,
+    AttentionOCRAdapter
 )
 
 from .image_processing import (
@@ -52,7 +53,8 @@ from .detection import (
     FaceDetectionAdapter,
     FaceDetectionRefinementAdapter,
     FasterRCNNONNX,
-    TwoStageDetector
+    TwoStageDetector,
+    DETRAdapter
 )
 from .detection_person_vehicle import (
     PersonVehicleDetectionAdapter,
@@ -62,7 +64,7 @@ from .detection_head import HeadDetectionAdapter
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
 from .retinanet import RetinaNetAdapter, MultiOutRetinaNet, RetinaNetTF2
-from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX
+from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX, YoloV3TF2, YoloV5Adapter
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter
 from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
@@ -129,11 +131,14 @@ __all__ = [
     'HeadDetectionAdapter',
     'FasterRCNNONNX',
     'TwoStageDetector',
+    'DETRAdapter',
 
     'TinyYOLOv1Adapter',
     'YoloV2Adapter',
     'YoloV3Adapter',
     'YoloV3ONNX',
+    'YoloV3TF2',
+    'YoloV5Adapter',
 
     'SSDAdapter',
     'SSDAdapterMxNet',
@@ -172,6 +177,7 @@ __all__ = [
     'BeamSearchDecoder',
     'LPRAdapter',
     'CTCGreedySearchDecoder',
+    'AttentionOCRAdapter',
 
     'AssociativeEmbeddingAdapter',
     'HumanPoseAdapter',

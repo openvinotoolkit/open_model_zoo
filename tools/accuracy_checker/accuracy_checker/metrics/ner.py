@@ -18,14 +18,17 @@ from collections import defaultdict
 import numpy as np
 
 from .metric import PerImageEvaluationMetric
-from ..config import StringField, ConfigError
+from ..config import StringField, BoolField, ConfigError
 from ..representation import (
     SequenceClassificationAnnotation, BERTNamedEntityRecognitionAnnotation, SequenceClassificationPrediction
 )
 
 
-def align_sequences(gt_seq, pred_seq, label_map, convert_token_ids=True):
+def align_sequences(gt_seq, pred_seq, label_map, convert_token_ids=True, label_mask=None, valid_ids=None):
     aligned_gt, aligned_pred = [], []
+    if label_mask is not None and valid_ids is not None:
+        gt_seq = np.array(gt_seq)[label_mask]
+        pred_seq = np.array(pred_seq[valid_ids])
     start_id = 0 if gt_seq[0] in label_map and label_map[gt_seq[0]] != '[CLS]' else 1
     for gt_tok, pred_tok in zip(gt_seq[start_id:], pred_seq[start_id:]):
         if gt_tok not in label_map:
@@ -183,6 +186,10 @@ class NERAccuracy(PerImageEvaluationMetric):
         parameters = super().parameters()
         parameters.update({
             'label_map': StringField(optional=True, default='label_map', description="Label map."),
+            'include_all_tokens': BoolField(
+                optional=True, default=False,
+                description='should all tokens will be considered during metirc calculation or not'
+            )
         })
         return parameters
 
@@ -196,13 +203,18 @@ class NERAccuracy(PerImageEvaluationMetric):
         else:
             raise ConfigError('ner_accuracy metric requires dataset metadata'
                               'Please provide dataset meta file or regenerate annotation')
+        self.include_all_tokens = self.get_value_from_config('include_all_tokens')
         self.correct = 0
         self.total = 0
 
     def update(self, annotation, prediction):
         gt_seq = annotation.label
         pred_seq = prediction.label
-        y_true, y_pred = align_sequences(gt_seq, pred_seq, self.labels, False)
+        label_mask = annotation.label_mask if not self.include_all_tokens else None
+        valid_ids = annotation.valid_ids if not self.include_all_tokens else None
+        y_true, y_pred = align_sequences(
+            gt_seq, pred_seq, self.labels, False, label_mask, valid_ids
+        )
         nb_correct = sum(y_t == y_p for y_t, y_p in zip(y_true, y_pred))
         nb_true = len(y_true)
         self.correct += nb_correct
@@ -228,7 +240,10 @@ class NERPrecision(PerImageEvaluationMetric):
         parameters = super().parameters()
         parameters.update({
             'label_map': StringField(optional=True, default='label_map', description="Label map."),
-        })
+            'include_all_tokens': BoolField(
+                optional=True, default=False,
+                description='should all tokens will be considered during metirc calculation or not'
+            )})
         return parameters
 
     def configure(self):
@@ -242,13 +257,17 @@ class NERPrecision(PerImageEvaluationMetric):
             raise ConfigError('ner_recall metric requires dataset metadata'
                               'Please provide dataset meta file or regenerate annotation')
         self.reset()
+        self.imclude_all_tokens = self.get_value_from_config('include_all_tokens')
 
     def update(self, annotation, prediction):
         gt_seq = annotation.label
         pred_seq = prediction.label
-        y_true, y_pred = align_sequences(gt_seq, pred_seq, self.labels)
+        label_mask = annotation.label_mask if not self.include_all_tokens else None
+        valid_ids = annotation.valid_ids if not self.include_all_tokens else None
+        y_true, y_pred = align_sequences(gt_seq, pred_seq, self.labels, False, label_mask, valid_ids)
         pred_sum, tp_sum, true_sum, target_names = extract_tp_actual_correct(y_true, y_pred)
         for type_name in target_names:
+
             self.tp_sum[type_name] += tp_sum[type_name]
             self.pred_sum[type_name] += pred_sum[type_name]
             self.true_sum[type_name] += true_sum[type_name]
@@ -283,6 +302,10 @@ class NERRecall(PerImageEvaluationMetric):
         parameters = super().parameters()
         parameters.update({
             'label_map': StringField(optional=True, default='label_map', description="Label map."),
+            'include_all_tokens': BoolField(
+                optional=True, default=False,
+                description='should all tokens will be considered during metric calculation or not'
+            )
         })
         return parameters
 
@@ -297,11 +320,14 @@ class NERRecall(PerImageEvaluationMetric):
             raise ConfigError('ner_precision metric requires dataset metadata'
                               'Please provide dataset meta file or regenerate annotation')
         self.reset()
+        self.include_all_tokens = self.get_value_from_config('include_all_tokens')
 
     def update(self, annotation, prediction):
         gt_seq = annotation.label
         pred_seq = prediction.label
-        y_true, y_pred = align_sequences(gt_seq, pred_seq, self.labels)
+        label_mask = annotation.label_mask if not self.include_all_tokens else None
+        valid_ids = annotation.valid_ids if not self.include_all_tokens else None
+        y_true, y_pred = align_sequences(gt_seq, pred_seq, self.labels, False, label_mask, valid_ids)
         pred_sum, tp_sum, true_sum, target_names = extract_tp_actual_correct(y_true, y_pred)
         for type_name in target_names:
             self.tp_sum[type_name] += tp_sum[type_name]
@@ -338,6 +364,10 @@ class NERFScore(PerImageEvaluationMetric):
         parameters = super().parameters()
         parameters.update({
             'label_map': StringField(optional=True, default='label_map', description="Label map."),
+            'include_all_tokens': BoolField(
+                optional=True, default=False,
+                description='should all tokens will be considered during metirc calculation or not'
+            )
         })
         return parameters
 
@@ -352,11 +382,14 @@ class NERFScore(PerImageEvaluationMetric):
             raise ConfigError('ner_f_score metric requires dataset metadata'
                               'Please provide dataset meta file or regenerate annotation')
         self.reset()
+        self.include_all_tokens = self.get_value_from_config('include_all_tokens')
 
     def update(self, annotation, prediction):
         gt_seq = annotation.label
         pred_seq = prediction.label
-        y_true, y_pred = align_sequences(gt_seq, pred_seq, self.labels)
+        label_mask = annotation.label_mask if not self.include_all_tokens else None
+        valid_ids = annotation.valid_ids if not self.include_all_tokens else None
+        y_true, y_pred = align_sequences(gt_seq, pred_seq, self.labels, True, label_mask, valid_ids)
         pred_sum, tp_sum, true_sum, target_names = extract_tp_actual_correct(y_true, y_pred)
         for type_name in target_names:
             self.tp_sum[type_name] += tp_sum[type_name]

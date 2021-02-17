@@ -57,7 +57,9 @@ class Adapter(ClassProvider):
             errors = []
             adapter_type = config if isinstance(config, str) else config.get('type')
             if not adapter_type:
-                error = ConfigError('type is not provided', config, uri_prefix or 'adapter')
+                error = ConfigError(
+                    'type is not provided', config, uri_prefix or 'adapter', validation_scheme=cls.validation_scheme()
+                )
                 if not fetch_only:
                     raise error
                 errors.append(error)
@@ -73,7 +75,9 @@ class Adapter(ClassProvider):
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
         uri = '{}.{}'.format(uri_prefix, cls.__provider__) if uri_prefix else 'adapter.{}'.format(cls.__provider__)
-        return ConfigValidator(uri, fields=cls.parameters(), **kwargs).validate(config, fetch_only=fetch_only)
+        return ConfigValidator(uri, fields=cls.parameters(), **kwargs).validate(
+            config, fetch_only=fetch_only, validation_scheme=cls.validation_scheme()
+        )
 
     @staticmethod
     def _extract_predictions(outputs_list, meta):
@@ -85,29 +89,47 @@ class Adapter(ClassProvider):
         if self.output_blob is None:
             self.output_blob = next(iter(outputs))
 
+    @classmethod
+    def validation_scheme(cls, provider=None):
+        if cls.__name__ == Adapter.__name__:
+            if provider:
+                return cls.resolve(provider).validation_scheme()
+            full_scheme = {}
+            for provider_ in cls.providers:
+                full_scheme[provider_] = cls.resolve(provider_).validation_scheme()
+            return full_scheme
+        return cls.parameters()
+
 
 class AdapterField(BaseField):
-    def validate(self, entry, field_uri_=None, fetch_only=False):
-        errors_stack = super().validate(entry, field_uri_, fetch_only)
+    def validate(self, entry, field_uri_=None, fetch_only=False, validation_scheme=None):
+        errors_stack = super().validate(entry, field_uri_, fetch_only, validation_scheme)
 
         if entry is None:
             return errors_stack
 
         field_uri_ = field_uri_ or self.field_uri
         if isinstance(entry, str):
-            errors_stack.extend(StringField(
-                choices=Adapter.providers).validate(entry, field_uri_ or 'adapter', fetch_only=fetch_only))
+            errors_stack.extend(
+                StringField(choices=Adapter.providers).validate(
+                    entry, field_uri_ or 'adapter', fetch_only=fetch_only, validation_scheme=validation_scheme
+                )
+            )
         elif isinstance(entry, dict):
             class DictAdapterValidator(ConfigValidator):
                 type = StringField(choices=Adapter.providers)
             dict_adapter_validator = DictAdapterValidator(
                 field_uri_ or 'adapter', on_extra_argument=DictAdapterValidator.IGNORE_ON_EXTRA_ARGUMENT
             )
-            errors_stack.extend(dict_adapter_validator.validate(entry, field_uri_ or 'adapter', fetch_only=fetch_only))
+            errors_stack.extend(dict_adapter_validator.validate(
+                entry, field_uri_ or 'adapter', fetch_only=fetch_only, validation_scheme=validation_scheme
+            ))
         else:
             if not fetch_only:
                 errors_stack.append(
-                    self.build_error(entry, field_uri_ or 'adapter', 'adapter must be either string or dictionary'))
+                    self.build_error(
+                        entry, field_uri_ or 'adapter', 'adapter must be either string or dictionary', validation_scheme
+                    ))
             else:
                 self.raise_error(entry, field_uri_ or 'adapter', 'adapter must be either string or dictionary')
         return errors_stack
@@ -118,7 +140,7 @@ def create_adapter(adapter_config, launcher=None, dataset=None):
     if dataset:
         metadata = dataset.metadata
         if metadata:
-            label_map = dataset.metadata.get('label_map')
+            label_map = metadata.get('label_map')
     if isinstance(adapter_config, str):
         adapter = Adapter.provide(adapter_config, {'type': adapter_config}, label_map=label_map)
     elif isinstance(adapter_config, dict):

@@ -13,9 +13,9 @@
 #include <utils/default_flags.hpp>
 
 DEFINE_INPUT_FLAGS
+DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message";
-static const char output_video_message[] = "Optional. Path to an output video file.";
 static const char face_detection_model_message[] = "Required. Path to an .xml file with a trained Face Detection model.";
 static const char age_gender_model_message[] = "Optional. Path to an .xml file with a trained Age/Gender Recognition model.";
 static const char head_pose_model_message[] = "Optional. Path to an .xml file with a trained Head Pose Estimation model.";
@@ -73,7 +73,6 @@ static const char no_show_emotion_bar_message[] = "Optional. Do not show emotion
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
-DEFINE_string(o, "", output_video_message);
 DEFINE_string(m, "", face_detection_model_message);
 DEFINE_string(m_ag, "", age_gender_model_message);
 DEFINE_string(m_hp, "", head_pose_model_message);
@@ -124,7 +123,8 @@ static void showUsage() {
     std::cout << "    -h                         " << help_message << std::endl;
     std::cout << "    -i                         " << input_message << std::endl;
     std::cout << "    -loop                      " << loop_message << std::endl;
-    std::cout << "    -o \"<path>\"                " << output_video_message << std::endl;
+    std::cout << "    -o \"<path>\"                " << output_message << std::endl;
+    std::cout << "    -limit \"<num>\"             " << limit_message << std::endl;
     std::cout << "    -m \"<path>\"                " << face_detection_model_message << std::endl;
     std::cout << "    -m_ag \"<path>\"             " << age_gender_model_message << std::endl;
     std::cout << "    -m_hp \"<path>\"             " << head_pose_model_message << std::endl;

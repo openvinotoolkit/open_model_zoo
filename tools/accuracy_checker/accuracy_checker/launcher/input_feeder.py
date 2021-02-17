@@ -33,7 +33,8 @@ LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
     'NDCWH': [0, 1, 4, 3, 2],
     'NCHWD': [0, 2, 3, 4, 1],
     'NC': [0, 1],
-    'CN': [1, 0]
+    'CN': [1, 0],
+    'CNH': [1, 0, 2]
 }
 
 DIM_IDS_TO_LAYOUT = {
@@ -43,7 +44,8 @@ DIM_IDS_TO_LAYOUT = {
     (0, 1, 4, 2, 3): 'NDHWC',
     (0, 1, 4, 3, 2): 'NDCWH',
     (0, 1): 'NC',
-    (1, 0): 'CN'
+    (1, 0): 'CN',
+    (1, 0, 2): 'CNH'
 }
 
 PRECISION_TO_DTYPE = {
@@ -55,7 +57,7 @@ PRECISION_TO_DTYPE = {
     'I16': np.int16,  # signed short
     'I32': np.int32,  # signed int
     'I64': np.int64,  # signed long int
-    'STR': np.str,  # string
+    'STR': str,  # string
 }
 
 INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'IGNORE_INPUT', 'LSTM_INPUT']
@@ -332,7 +334,7 @@ class InputFeeder:
             input_config['precision'] = precision
         if 'precision' not in input_config:
             return None
-        input_precision = PRECISION_TO_DTYPE.get(input_config['precision'])
+        input_precision = PRECISION_TO_DTYPE.get(input_config['precision'].upper())
         if input_precision is None:
             raise ConfigError("unsupported precision {} for layer {}".format(input_config['precision'], input_name))
         precisions[input_name] = input_precision

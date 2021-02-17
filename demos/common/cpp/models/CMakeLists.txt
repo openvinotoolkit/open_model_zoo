@@ -6,8 +6,8 @@ find_package(InferenceEngine 2.0 REQUIRED)
 find_package(OpenCV REQUIRED COMPONENTS core imgproc)
 find_package(ngraph REQUIRED)
 
-FILE(GLOB SOURCES ./src/*.cpp)
-FILE(GLOB HEADERS ./include/models/*.h)
+file(GLOB SOURCES ./src/*.cpp)
+file(GLOB HEADERS ./include/models/*.h)
 
 # Create named folders for the sources within the .vcproj
 # Empty name lists them directly under the .vcproj
