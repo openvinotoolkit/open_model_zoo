@@ -98,28 +98,27 @@ def main():
 
     encoder_xml = args.m_encoder
     encoder_bin = args.m_encoder.replace('.xml', '.bin')
-    model = []
-    model.append(IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
-                num_requests=(3 if args.device == 'MYRIAD' else 1)))
+    models = [IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
+                num_requests=(3 if args.device == 'MYRIAD' else 1))]
 
     if args.architecture_type == 'dummy-de':
-        model.append(DummyDecoder(num_requests=2))
+        models.append(DummyDecoder(num_requests=2))
         seq_size = args.decoder_seq_size
     elif args.architecture_type == 'en-de':
         if args.m_decoder is None:
-            raise RuntimeError('No decoder for encoder-decoder model type (-m_de) provided: {}'.format(args.m_decoder))
+            raise RuntimeError('No decoder for encoder-decoder model type (-m_de) provided')
         decoder_xml = args.m_decoder
         decoder_bin = args.m_decoder.replace('.xml', '.bin')
-        model.append(IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2))
-        seq_size = model[1].input_size[1]
+        models.append(IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2))
+        seq_size = models[1].input_size[1]
     elif args.architecture_type == 'i3d-rgb':
-        seq_size = model[0].input_size[2]
+        seq_size = models[0].input_size[2]
 
     presenter = monitors.Presenter(args.utilization_monitors, 70)
-    result_presenter = ResultRenderer(no_show=args.no_show, architecture_type=args.architecture_type, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,
+    result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
     cap = open_images_capture(args.input, args.loop)
-    run_pipeline(cap, args.architecture_type, model, result_presenter.render_frame, seq_size=seq_size, fps=cap.fps())
+    run_pipeline(cap, args.architecture_type, models, result_presenter.render_frame, seq_size=seq_size, fps=cap.fps())
     print(presenter.reportMeans())
 
 

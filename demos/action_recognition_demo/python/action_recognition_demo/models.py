@@ -41,13 +41,11 @@ def adaptive_resize(frame, dst_size):
         return frame
     return cv2.resize(frame, (ow, oh))
 
-def preprocess_frame(frame, size=224, crop_size=224, add_dimension=True):
+def preprocess_frame(frame, size=224, crop_size=224):
     frame = adaptive_resize(frame, size)
     frame = center_crop(frame, (crop_size, crop_size))
-
     frame = frame.transpose((2, 0, 1))  # HWC -> CHW
-    if add_dimension:
-        frame = frame[np.newaxis, ...]  # add batch dimension
+
     return frame
 
 

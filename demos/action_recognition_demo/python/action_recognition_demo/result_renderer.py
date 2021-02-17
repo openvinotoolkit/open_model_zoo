@@ -31,10 +31,9 @@ TEXT_LEFT_MARGIN = 15
 
 
 class ResultRenderer:
-    def __init__(self, no_show, architecture_type, presenter, output, limit, display_fps=False, display_confidence=True, number_of_predictions=1,
+    def __init__(self, no_show, presenter, output, limit, display_fps=False, display_confidence=True, number_of_predictions=1,
                  label_smoothing_window=30, labels=None, output_height=720):
         self.no_show = no_show
-        self.architecture_type = architecture_type
         self.presenter = presenter
         self.output = output
         self.limit = limit
@@ -50,13 +49,11 @@ class ResultRenderer:
         print("To close the application, press 'CTRL+C' here or switch to the output window and press Esc or Q")
 
     def update_timers(self, timers):
-        if self.architecture_type in ('en-de', 'dummy-de'):
-            self.meters['encoder'].update(timers['encoder'])
-            self.meters['decoder'].update(timers['decoder'])
-            return self.meters['encoder'].avg + self.meters['decoder'].avg
-        elif self.architecture_type == 'i3d-rgb':
-            self.meters['i3d-rgb-model'].update(timers['i3d-rgb-model'])
-            return  self.meters['i3d-rgb-model'].avg
+        inference_time = 0.0
+        for key, val in timers.items():
+            self.meters[key].update(val)
+            inference_time += self.meters[key].avg
+        return inference_time
 
     def render_frame(self, frame, logits, timers, frame_ind, fps):
         inference_time = self.update_timers(timers)
