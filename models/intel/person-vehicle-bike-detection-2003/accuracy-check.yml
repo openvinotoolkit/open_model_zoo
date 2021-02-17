@@ -3,6 +3,7 @@ models:
 
     launchers:
       - framework: dlsdk
+        device: CPU
         adapter:
           type: faster_rcnn_onnx
           labels_out: 'labels'
@@ -16,9 +17,9 @@ models:
             dst_height: 480
 
         postprocessing:
-          -   type: filter
-              apply_to: prediction
-              min_confidence: 0.05
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.05
 
         metrics:
           - type: coco_orig_precision

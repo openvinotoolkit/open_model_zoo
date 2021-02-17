@@ -16,9 +16,9 @@ models:
             dst_height: 256
 
         postprocessing:
-          -   type: filter
-              apply_to: prediction
-              min_confidence: 0.05
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.05
 
         metrics:
           - type: coco_orig_precision
