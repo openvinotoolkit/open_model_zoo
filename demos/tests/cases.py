@@ -279,6 +279,8 @@ NATIVE_DEMOS = [
                     ModelArg('person-vehicle-bike-detection-2000'),
                     ModelArg('person-vehicle-bike-detection-2001'),
                     ModelArg('person-vehicle-bike-detection-2002'),
+                    #ModelArg('person-vehicle-bike-detection-2003'),
+                    #ModelArg('person-vehicle-bike-detection-2004'),
                     ModelArg('product-detection-0001'),
                     ModelArg('rfcn-resnet101-coco-tf'),
                     ModelArg('retinanet-tf'),
