@@ -22,7 +22,7 @@ public:
     /// @param modelFileName name of model to load
     /// @param aspectRatio - the ratio of input width to its height.
     /// @param targetSize - the height used for network reshaping.
-    /// @param confidenceThreshold - threshold to eleminate low-confidence keypoints.
+    /// @param confidenceThreshold - threshold to eliminate low-confidence keypoints.
     /// Any keypoint with confidence lower than this threshold will be ignored.
     HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold);
 

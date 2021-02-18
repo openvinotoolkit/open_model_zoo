@@ -7,7 +7,7 @@ Chinese license plates in traffic.
 
 ## Validation Dataset - Internal
 
-300320 Sythetic Chinese plates i.e. the plate text on them consists of symbols generated randomly (but to conform to the plate requirements in terms of the number of characters, sequence, shape, placement, etc.). The “real-looking” appearance of the plates (rotation, dirt, color, lightening, etc.) is achieved by a style transfer procedure.
+300320 Sythetic Chinese plates i.e. the plate text on them consists of symbols generated randomly (but to conform to the plate requirements in terms of the number of characters, sequence, shape, placement, etc.). The “real-looking” appearance of the plates (rotation, dirt, color, lighting, etc.) is achieved by a style transfer procedure.
 
 ## Example
 

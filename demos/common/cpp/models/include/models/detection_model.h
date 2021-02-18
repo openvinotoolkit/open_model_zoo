@@ -21,7 +21,7 @@ class DetectionModel : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    /// @param confidenceThreshold - threshold to eleminate low-confidence detections.
+    /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.

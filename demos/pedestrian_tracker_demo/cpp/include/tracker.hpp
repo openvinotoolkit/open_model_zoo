@@ -419,10 +419,10 @@ private:
     // Indexes of active tracks.
     std::set<size_t> active_track_ids_;
 
-    // Descriptor fast (base classifer).
+    // Descriptor fast (base classifier).
     Descriptor descriptor_fast_;
 
-    // Distance fast (base classifer).
+    // Distance fast (base classifier).
     Distance distance_fast_;
 
     // Descriptor strong (reid classifier).

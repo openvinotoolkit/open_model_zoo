@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-fastseg-small is an accurate real-time semantic segmentation model, pretrained on [Cityscapes](https://www.cityscapes-dataset.com) dataset for 19 object classes, see Cityscapes classes [defintion](https://www.cityscapes-dataset.com/dataset-overview). The model was built on MobileNetV3 small backbone and modified segmentation head based on LR-ASPP. This model can be used for efficient segmentation on a variety of real-world street images. For details see [repository](https://github.com/ekzhang/fastseg).
+fastseg-small is an accurate real-time semantic segmentation model, pretrained on [Cityscapes](https://www.cityscapes-dataset.com) dataset for 19 object classes, see Cityscapes classes [definition](https://www.cityscapes-dataset.com/dataset-overview). The model was built on MobileNetV3 small backbone and modified segmentation head based on LR-ASPP. This model can be used for efficient segmentation on a variety of real-world street images. For details see [repository](https://github.com/ekzhang/fastseg).
 
 ## Specification
 
