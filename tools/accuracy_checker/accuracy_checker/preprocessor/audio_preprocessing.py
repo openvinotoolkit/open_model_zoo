@@ -22,7 +22,7 @@ from ..utils import UnsupportedPackage
 try:
     import scipy.signal as dsp
 except ImportError as import_error:
-    mask_util = UnsupportedPackage("scipy", import_error.msg)
+    mask_util = UnsupportedPackage('scipy', import_error.msg)
 
 
 class ResampleAudio(Preprocessor):
@@ -33,7 +33,7 @@ class ResampleAudio(Preprocessor):
         parameters = super().parameters()
         parameters.update({
             'sample_rate': NumberField(value_type=int, min_value=1,
-                                       description='Set new audio sample rate.'),
+                                       description="Set new audio sample rate."),
         })
         return parameters
 
@@ -326,20 +326,20 @@ class TriangleFiltering(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "base": NumberField(
-                default=16000, description='Spectrogram length expected by filter bank', value_type=int
+            'base': NumberField(
+                default=16000, description="Spectrogram length expected by filter bank", value_type=int
             ),
-            "sample_rate": NumberField(
-                default=16000, description='sample rate value expected by model', value_type=int
+            'sample_rate': NumberField(
+                default=16000, description="Sample rate value expected by model", value_type=int
             ),
-            "filterbank_channel_count": NumberField(
-                default=40, description='number of channels in filter bank', value_type=int
+            'filterbank_channel_count': NumberField(
+                default=40, description="Number of channels in filter bank", value_type=int
             ),
-            "lower_frequency_limit": NumberField(default=20, description='filter passband lower boundary'),
-            "upper_frequency_limit": NumberField(default=4000, description='filter passband upper boundary'),
-            "filter_amplitudes": BoolField(
+            'lower_frequency_limit': NumberField(default=20, description="Filter passband lower boundary"),
+            'upper_frequency_limit': NumberField(default=4000, description="Filter passband upper boundary"),
+            'filter_amplitudes': BoolField(
                 optional=True, default=False,
-                description='Filter amplitude values (sqrt(power)) instead of power (Re^2+Im^2)'
+                description="Filter amplitude values (sqrt(power)) instead of power (Re^2+Im^2)"
             ),
         })
         return parameters
@@ -438,10 +438,10 @@ class DCT(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "filterbank_channel_count": NumberField(
-                default=40, description='number of channels in filter bank', value_type=int
+            'filterbank_channel_count': NumberField(
+                default=40, description="Number of channels in filter bank", value_type=int
             ),
-            "numceps": NumberField(default=26, description='Number of cepstral coefficients', value_type=int),
+            'numceps': NumberField(default=26, description="Number of cepstral coefficients", value_type=int),
         })
         return parameters
 
@@ -496,8 +496,8 @@ class ClipCepstrum(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "context": NumberField(default=9, description='number of samples in context window', value_type=int),
-            "numceps": NumberField(default=26, description='Number of input coefficients', value_type=int),
+            'context': NumberField(default=9, description="Number of samples in context window", value_type=int),
+            'numceps': NumberField(default=26, description="Number of input coefficients", value_type=int),
         })
         return parameters
 
@@ -531,7 +531,7 @@ class PackCepstrum(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "step": NumberField(default=16, description='number of simultaneously processed contexts', value_type=int),
+            'step': NumberField(default=16, description="Number of simultaneously processed contexts", value_type=int),
         })
         return parameters
 
@@ -563,7 +563,7 @@ class AddBatch(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "axis": NumberField(default=0, description='Add batch dimension', value_type=int),
+            'axis': NumberField(default=0, description="Add batch dimension", value_type=int),
         })
         return parameters
 
@@ -694,23 +694,23 @@ class AudioToMelSpectrogram(Preprocessor):
         params = super().parameters()
         params.update({
             'window_size': NumberField(optional=True, value_type=float, default=0.02,
-                                       description='size of frame in time-domain, seconds'),
+                                       description="Size of frame in time-domain, seconds"),
             'window_stride': NumberField(optional=True, value_type=float, default=0.01,
-                                         description='intersection of frames in time-domain, seconds'),
+                                         description="Intersection of frames in time-domain, seconds"),
             'window': StringField(
-                choices=windows.keys(), optional=True, default='hann', description='weighting window type'
+                choices=windows.keys(), optional=True, default='hann', description="Weighting window type"
             ),
-            'n_fft': NumberField(optional=True, value_type=int, description='FFT base'),
-            'n_filt': NumberField(optional=True, value_type=int, default=80, description='number of MEL filters'),
+            'n_fft': NumberField(optional=True, value_type=int, description="FFT base"),
+            'n_filt': NumberField(optional=True, value_type=int, default=80, description="Number of MEL filters"),
             'splicing': NumberField(optional=True, value_type=int, default=1,
-                                    description='number of sequentially concastenated MEL spectrums'),
-            'sample_rate': NumberField(optional=True, value_type=float, description='audio samplimg frequency, Hz'),
-            'pad_to': NumberField(optional=True, value_type=int, default=0, description='Desired length of features'),
-            'preemph': NumberField(optional=True, value_type=float, default=0.97, description='Preemph factor'),
-            'log': BoolField(optional=True, default=True, description='Enables log() of MEL features values'),
+                                    description="Number of sequentially concastenated MEL spectrums"),
+            'sample_rate': NumberField(optional=True, value_type=float, description="Audio samplimg frequency, Hz"),
+            'pad_to': NumberField(optional=True, value_type=int, default=0, description="Desired length of features"),
+            'preemph': NumberField(optional=True, value_type=float, default=0.97, description="Preemph factor"),
+            'log': BoolField(optional=True, default=True, description="Enables log() of MEL features values"),
             'use_determenistic_dithering': BoolField(optional=True, default=True,
-                                                     description='Applies determined dithering to signal spectrum'),
-            'dither': NumberField(optional=True, value_type=float, default=0.00001, description='Dithering value'),
+                                                     description="Applies determined dithering to signal spectrum"),
+            'dither': NumberField(optional=True, value_type=float, default=0.00001, description="Dithering value"),
         })
         return params
 
@@ -736,7 +736,7 @@ class AudioToMelSpectrogram(Preprocessor):
         self.mag_power = 2.0
         self.use_determenistic_dithering = True
         self.dither = 1e-05
-        self.log_zero_guard_type = "add"
+        self.log_zero_guard_type = 'add'
         self.log_zero_guard_value = 2 ** -24
 
     def process(self, image, annotation_meta=None):
@@ -897,7 +897,7 @@ class AudioToMelSpectrogram(Preprocessor):
             return np.pad(data, lengths, **kwargs)
 
         def frame(x, frame_length=2048, hop_length=512):
-            '''Slice a data array into (overlapping) frames.'''
+            """Slice a data array into (overlapping) frames."""
 
             n_frames = (x.shape[-1] - frame_length) // hop_length
             strides = np.asarray(x.strides)
@@ -951,7 +951,7 @@ class AudioToMelSpectrogram(Preprocessor):
 
     @staticmethod
     def normalize_batch(x, seq_len, normalize_type):
-        if normalize_type == "per_feature":
+        if normalize_type == 'per_feature':
             x_mean = np.zeros((x.shape[0], x.shape[1]), dtype=x.dtype)
             x_std = np.zeros((x.shape[0], x.shape[1]), dtype=x.dtype)
             for i in range(x.shape[0]):
@@ -961,7 +961,7 @@ class AudioToMelSpectrogram(Preprocessor):
             x_std += 1e-5
             return (x - np.expand_dims(x_mean, 2)) / np.expand_dims(x_std, 2)
 
-        if normalize_type == "all_features":
+        if normalize_type == 'all_features':
             x_mean = np.zeros(seq_len, dtype=x.dtype)
             x_std = np.zeros(seq_len, dtype=x.dtype)
             for i in range(x.shape[0]):
