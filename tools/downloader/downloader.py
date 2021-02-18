@@ -326,7 +326,8 @@ def main():
     parser.add_argument('--all', action='store_true', help='download all available models')
     parser.add_argument('--print_all', action='store_true', help='print all available models')
     parser.add_argument('--precisions', metavar='PREC[,PREC...]',
-                        help='download only models with the specified precisions (actual for DLDT networks)')
+                        help='download only models with the specified precisions (actual for DLDT networks); specify one or more of: '
+                             + ','.join(common.KNOWN_PRECISIONS))
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
         default=Path.cwd(), help='path where to save models')
     parser.add_argument('--cache_dir', type=Path, metavar='DIR',
