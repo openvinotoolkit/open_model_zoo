@@ -338,6 +338,10 @@ class TriangleFiltering(Preprocessor):
             "lower_frequency_limit": NumberField(default=20, description='filter passband lower boundary'),
             "upper_frequency_limit": NumberField(default=4000, description='filter passband upper boundary'),
             "log_features": BoolField(optional=True, default=False, description='Log feature values'),
+            "filter_amplitudes": BoolField(
+                optional=True, default=False,
+                description='Filter amplitude values (sqrt(power)) instead of power (Re^2+Im^2)'
+            ),
         })
         return parameters
 
@@ -348,6 +352,7 @@ class TriangleFiltering(Preprocessor):
         self.lower_frequency_limit = self.get_value_from_config('lower_frequency_limit')
         self.upper_frequency_limit = self.get_value_from_config('upper_frequency_limit')
         self.log_features = self.get_value_from_config('log_features')
+        self.filter_amplitudes = self.get_value_from_config('filter_amplitudes')
         self.initialize()
 
     def process(self, image, annotation_meta=None):
@@ -413,8 +418,10 @@ class TriangleFiltering(Preprocessor):
     def compute(self, mfcc_input):
         output_channels = np.zeros(self.filterbank_channel_count)
         for i in range(self.start_index, (self.end_index + 1)):
-            # spec_val = np.sqrt(mfcc_input[i])
-            spec_val = mfcc_input[i]
+            if not self.filter_amplitudes:
+                spec_val = mfcc_input[i]
+            else:
+                spec_val = np.sqrt(mfcc_input[i])
             weighted = spec_val * self.weights[i]
             channel = self.band_mapper[i]
             if channel >= 0:
