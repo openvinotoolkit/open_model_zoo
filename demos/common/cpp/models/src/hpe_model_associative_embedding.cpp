@@ -201,8 +201,8 @@ std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(
         if (pose.getMeanScore() <= confidenceThreshold) {
             continue;
         }
-        for (size_t i = 0; i < heatMaps.size(); i++) {
-            heatMaps[i] = cv::abs(heatMaps[i]);
+        for (size_t j = 0; j < heatMaps.size(); j++) {
+            heatMaps[j] = cv::abs(heatMaps[j]);
         }
         adjustAndRefine(allPoses, heatMaps, aembdsMaps, i, delta);
         std::vector<cv::Point2f> keypoints;
