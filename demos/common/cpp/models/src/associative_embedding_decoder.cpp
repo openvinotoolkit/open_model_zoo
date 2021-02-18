@@ -172,20 +172,16 @@ void adjustAndRefine(std::vector<Pose>& allPoses,
         }
         else {
             // Refine
-            float minValue = std::numeric_limits<float>::max();
-            int x, y;
             // Get position with the closest tag value to the pose tag
-            for (int i = 0; i < outputSize.height; i++) {
-                for (int j = 0; j < outputSize.width; j++) {
-                    float diff = std::round(std::abs(aembds.at<float>(i, j) - poseTag));
-                    diff -= heatMap.at<float>(i, j);
-                    if (diff < minValue) {
-                        minValue = diff;
-                        y = i;
-                        x = j;
-                    }
-                }
-            }
+            cv::Mat diff = cv::abs(aembds - poseTag);
+            diff.convertTo(diff, CV_32S, 1.0, 0.5);
+            diff.convertTo(diff, CV_32F);
+            diff -= heatMap;
+            double min;
+            cv::Point2i minLoc;
+            cv::minMaxLoc(diff, &min, 0, &minLoc);
+            int x = minLoc.x;
+            int y = minLoc.y;
             float val = heatMap.at<float>(y, x);
             if (val > 0) {
                 peak.keypoint.x = static_cast<float>(x);
