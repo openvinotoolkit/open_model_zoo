@@ -35,6 +35,8 @@ The demo application takes an input with the help of the `-i` argument. This cou
 * Path to a video (.avi, .mp4, etc)
 > This will trigger interactive mode, which would be explained in detail later.
 
+Vocabulary files are provided under corresponding model description folder.
+
 ### Non-interactive mode
 Non-interactive mode assumes that demo processes inputs sequentially.
 The demo workflow in non-interactive mode is the following:
