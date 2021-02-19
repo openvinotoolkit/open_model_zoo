@@ -215,6 +215,7 @@ int main(int argc, char* argv[])
         int64_t frameNum = -1;
         std::unique_ptr<ResultBase> result;
         uint32_t framesProcessed = 0;
+
         cv::VideoWriter videoWriter;
 
         cv::Size outputResolution;
