@@ -162,7 +162,10 @@ class CTCGreedySearchDecoder(Adapter):
         parameters.update({
             'blank_label': NumberField(
                 optional=True, value_type=int, min_value=0, default=0, description="Index of the CTC blank label."
-            )
+            ),
+            'logits_output': StringField(optional=True, description='Logits output layer name'),
+            'custom_label_map': DictField(optional=True, description='Label map')
+
         })
         return parameters
 
@@ -174,12 +177,18 @@ class CTCGreedySearchDecoder(Adapter):
 
     def configure(self):
         self.blank_label = self.get_value_from_config('blank_label')
+        self.logits_output = self.get_value_from_config("logits_output")
+        self.custom_label_map = self.get_value_from_config("custom_label_map")
 
     def process(self, raw, identifiers=None, frame_meta=None):
         if not self.label_map:
             raise ConfigError('CTCGreedy Search Decoder requires dataset label map for correct decoding.')
         if self.blank_label is None:
             self.blank_label = 0
+        if self.logits_output:
+            self.output_blob = self.logits_output
+        if self.custom_label_map:
+            self.label_map = self.custom_label_map
         raw_output = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
