@@ -34,9 +34,7 @@
 #include <gflags/gflags.h>
 
 #include <pipelines/async_pipeline.h>
-#include <models/super_resolution_model.h>
-#include <models/deblurring_model.h>
-#include <models/colorization_model.h>
+#include <models/image_processing_model.h>
 #include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 
@@ -131,29 +129,15 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 std::unique_ptr<ImageProcessingModel> getModel(const cv::Size& frameSize) {
     std::unique_ptr<ImageProcessingModel> model;
     if (FLAGS_at == "super_resolution") {
-        model.reset(new SuperResolutionModel(FLAGS_m));
-    }
-    else if (FLAGS_at == "colorization") {
-        model.reset(new ColorizationModel(FLAGS_m));
+        model.reset(new ImageProcessingModel(FLAGS_m));
     }
     else if (FLAGS_at == "deblurring") {
-        model.reset(new DeblurringModel(FLAGS_m, frameSize));
+        model.reset(new ImageProcessingModel(FLAGS_m, frameSize));
     }
     else {
         throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
     }
     return model;
-}
-
-std::pair<int, int> getScale() {
-    std::pair<int, int> scale(1, 1);
-    if (FLAGS_at == "super_resolution" || FLAGS_at == "deblurring") {
-        scale = {1, 2};
-    }
-    else if (FLAGS_at == "colorization") {
-        scale = {2, 2};
-    }
-    return scale;
 }
 
 cv::Mat renderResultData(const ImageProcessingResult& result) {
@@ -225,11 +209,9 @@ int main(int argc, char *argv[]) {
         uint32_t framesProcessed = 0;
 
         cv::VideoWriter videoWriter;
-        auto scale = getScale();
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
                                                   cap->fps(),
-                                                  cv::Size(scale.second * viewResult.width,
-                                                           scale.first * viewResult.height))) {
+                                                  cv::Size(2 * viewResult.width, viewResult.height))) {
             throw std::runtime_error("Can't open video writer");
         }
 

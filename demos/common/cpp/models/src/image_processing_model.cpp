@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2021 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,9 +19,16 @@
 
 using namespace InferenceEngine;
 
-SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, bool useAutoResize) :
-    ImageProcessingModel(modelFileName, useAutoResize) {
-        viewSize = cv::Size(1920, 1080);
+ImageProcessingModel::ImageProcessingModel(const std::string& modelFileName, const cv::Size inputImageShape) :
+    ModelBase(modelFileName) {
+        if (inputImageShape == cv::Size(0, 0)) {
+            type = "super_resolution";
+            viewInfo = cv::Size(1920, 1080);
+        } else {
+            type = "deblurring";
+            inputSize = inputImageShape;
+            viewInfo = inputSize;
+        }
 }
 
 void ImageProcessingModel::reshape(InferenceEngine::CNNNetwork & cnnNetwork) {
@@ -45,29 +52,28 @@ void ImageProcessingModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
     // --------------------------- Prepare input blobs --------------------------------------------------
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     if (inputShapes.size() != 1 && inputShapes.size() != 2)
-        throw std::runtime_error("The demo supports topologies with 1 or 2 inputs only");
-    std::string lrInputBlobName = inputShapes.begin()->first;
-    inputsNames.push_back(lrInputBlobName);
-    SizeVector& lrShape = inputShapes[lrInputBlobName];
-    if (lrShape.size() != 4)
-        throw std::runtime_error("Number of dimensions for an input must be 4");
-    if (lrShape[1] != 1 && lrShape[1] != 3)
-        throw std::runtime_error("Input layer is expected to have 1 or 3 channels");
+        throw std::logic_error("The demo supports topologies with 1 or 2 inputs only");
+    std::string firstInputBlobName = inputShapes.begin()->first;
+    inputsNames.push_back(firstInputBlobName);
+    SizeVector& firstInputSizeVector = inputShapes[firstInputBlobName];
+    if (firstInputSizeVector.size() != 4)
+        throw std::logic_error("Number of dimensions for an input must be 4");
 
     // A model like single-image-super-resolution-???? may take bicubic interpolation of the input image as the
     // second input
-    std::string bicInputBlobName;
+    std::string secondInputBlobName;
     if (inputShapes.size() == 2) {
-        bicInputBlobName = (++inputShapes.begin())->first;
-        inputsNames.push_back(bicInputBlobName);
-        SizeVector& bicShape = inputShapes[bicInputBlobName];
-        if (bicShape.size() != 4) {
-            throw std::runtime_error("Number of dimensions for both inputs must be 4");
+        secondInputBlobName = (++inputShapes.begin())->first;
+        inputsNames.push_back(secondInputBlobName);
+        SizeVector& secondInputSizeVector = inputShapes[secondInputBlobName];
+        if (secondInputSizeVector.size() != 4) {
+            throw std::logic_error("Number of dimensions for both inputs must be 4");
         }
-        if (lrShape[2] >= bicShape[2] && lrShape[3] >= bicShape[3]) {
-            inputsNames[0].swap(inputsNames[1]);
-        } else if (!(lrShape[2] <= bicShape[2] && lrShape[3] <= bicShape[3])) {
-            throw std::runtime_error("Each spatial dimension of one input must surpass or be equal to a spatial"
+        if (firstInputSizeVector[2] >= secondInputSizeVector[2] && firstInputSizeVector[3] >= secondInputSizeVector[3]) {
+            firstInputBlobName.swap(secondInputBlobName);
+            firstInputSizeVector.swap(secondInputSizeVector);
+        } else if (!(firstInputSizeVector[2] <= secondInputSizeVector[2] && firstInputSizeVector[3] <= secondInputSizeVector[3])) {
+            throw std::logic_error("Each spatial dimension of one input must surpass or be equal to a spatial"
                 "dimension of another input");
         }
     }
@@ -94,7 +100,7 @@ std::shared_ptr<InternalModelData> ImageProcessingModel::preprocess(const InputD
 
     /* Resize and copy data from the image to the input blob */
     Blob::Ptr lrInputBlob = request->GetBlob(inputsNames[0]);
-    if (img.channels() != (int)lrInputBlob->getTensorDesc().getDims()[1])
+    if (img.channels() != lrInputBlob->getTensorDesc().getDims()[1])
         cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
 
     matU8ToBlob<float_t>(img, lrInputBlob);
@@ -112,8 +118,8 @@ std::shared_ptr<InternalModelData> ImageProcessingModel::preprocess(const InputD
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
 }
 
-std::unique_ptr<ResultBase> SuperResolutionModel::postprocess(InferenceResult& infResult) {
-    ImageResult* result = new ImageResult;
+std::unique_ptr<ResultBase> ImageProcessingModel::postprocess(InferenceResult& infResult) {
+    ImageProcessingResult* result = new ImageProcessingResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
 
@@ -137,7 +143,10 @@ std::unique_ptr<ResultBase> SuperResolutionModel::postprocess(InferenceResult& i
 
     cv::Mat resultImg;
     cv::merge(imgPlanes, resultImg);
-    result->resultImage = resultImg;
+    if (type == "deblurring")
+        cv::resize(resultImg, result->resultImage, inputSize);
+    else
+        result->resultImage = resultImg;
 
     return std::unique_ptr<ResultBase>(result);
 }

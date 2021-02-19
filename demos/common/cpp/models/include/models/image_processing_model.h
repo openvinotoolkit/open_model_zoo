@@ -14,7 +14,7 @@
 // limitations under the License.
 */
 
-#include "model_base.h"
+#include "image_processing_model.h"
 
 #pragma once
 
@@ -22,6 +22,8 @@ class ImageProcessingModel : public ModelBase{
 public:
     /// Constructor
     /// @param modelFileName name of model to load
+    /// @param useAutoResize - if true, image will be resized by IE.
+    /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     ImageProcessingModel(const std::string& modelFileName, const cv::Size inputImageShape=cv::Size(0, 0));
 
     std::shared_ptr<InternalModelData> preprocess(

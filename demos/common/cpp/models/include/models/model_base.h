@@ -16,7 +16,6 @@
 
 #pragma once
 #include "input_data.h"
-#include <opencv2/core.hpp>
 #include "results.h"
 #include "utils/config_factory.h"
 
@@ -54,15 +53,4 @@ protected:
     InferenceEngine::ExecutableNetwork execNetwork;
     std::string modelFileName;
     CnnConfig cnnConfig = {};
-};
-
-class ImageProcessingModel: public ModelBase {
-public:
-    ImageProcessingModel(const std::string& modelFileName)
-        : ModelBase(modelFileName)
-    {}
-
-    const cv::Size& getViewInfo() const { return viewInfo; }
-protected:
-    cv::Size viewInfo;
 };
