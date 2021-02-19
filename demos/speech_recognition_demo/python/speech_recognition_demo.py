@@ -50,7 +50,7 @@ def get_profile(profile_name):
     if profile_name in PROFILES:
         return PROFILES[profile_name]
     with open(profile_name, 'rt') as f:
-        profile = yaml.load(f)
+        profile = yaml.safe_load(f)
     return profile
 
 
