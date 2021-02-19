@@ -26,7 +26,7 @@ future releases.
 2. Install the tools' dependencies with the following command:
 
 ```sh
-python3 -mpip install --user -r ./requirements.in
+python3 -m pip install --user -r ./requirements.in
 ```
 
 For the model converter, you will also need to install the OpenVINO&trade;
@@ -39,19 +39,19 @@ additional dependencies.
 For models from Caffe2:
 
 ```sh
-python3 -mpip install --user -r ./requirements-caffe2.in
+python3 -m pip install --user -r ./requirements-caffe2.in
 ```
 
 For models from PyTorch:
 
 ```sh
-python3 -mpip install --user -r ./requirements-pytorch.in
+python3 -m pip install --user -r ./requirements-pytorch.in
 ```
 
 For models from TensorFlow:
 
 ```sh
-python3 -mpip install --user -r ./requirements-tensorflow.in
+python3 -m pip install --user -r ./requirements-tensorflow.in
 ```
 
 ## Model downloader usage
