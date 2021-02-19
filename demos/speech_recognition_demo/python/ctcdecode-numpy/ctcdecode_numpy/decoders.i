@@ -9,6 +9,16 @@
 
 %module impl
 
+// Catch C++ exceptions to ensure they're reported by Python
+%include "exception.i"
+%exception {
+  try {
+    $action
+  } catch (const std::exception& e) {
+    SWIG_exception(SWIG_RuntimeError, e.what());
+  }
+}
+
 %{
 #define SWIG_FILE_WITH_INIT
 %}
