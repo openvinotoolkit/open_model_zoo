@@ -139,6 +139,8 @@ MemorySection KenlmV5Loader::_parse_lm_config(MemorySection mem) {
     if (debug_print_sections_)
       std::cout << "count[" << k+1 << "]= " << lm_config_.ngram_counts[k] << std::endl;
   }
+  if (lm_config_.ngram_counts[0] == 0)
+    throw std::runtime_error("Invalid KenlmV5 format: LMs with zero words (1-grams) are not supported");
 
   // Padding to a multiple of 8, it's always 4 bytes here
   offset += 4;
@@ -179,8 +181,8 @@ MemorySection KenlmV5Loader::_parse_lm(MemorySection mem) {
   if (quant_header.quantization_type != 2)
     throw std::runtime_error("KenlmV5 format: unsupported quantization_type. Only quantized models are supported.");
 
-  lm_config_.prob_bits = quant_header.prob_bits;
-  lm_config_.backoff_bits = quant_header.backoff_bits;
+  lm_config_.prob_bits = quant_header.prob_bits;  // always in range [0, 24] (after the check below)
+  lm_config_.backoff_bits = quant_header.backoff_bits;  // always in range [0, 24] (after the check below)
   if (lm_config_.prob_bits < 0 || lm_config_.prob_bits > 24)
     throw std::runtime_error("KenlmV5 format: prob_bits must be from 0 to 24");
   if (lm_config_.backoff_bits < 0 || lm_config_.backoff_bits > 24)
@@ -248,7 +250,7 @@ MemorySection KenlmV5Loader::_parse_trie_long(MemorySection mem) {
   return mem;
 }
 
-// Return bit length of a value. For value=0 return 0.
+// Return bit length of a value. For value=0 return 0. Result is always from 0 to 64.
 int required_bits(uint64_t value) {
   int bits = 0;
   while (value != 0) {
@@ -262,6 +264,7 @@ int required_bits(uint64_t value) {
 // of values to be stored in a plain array, while the high bits are to be
 // stored in Bhiksha representation ("Bhiksha array").
 // Expects: max_high_bits >= 0  and  value_total_bits == required_bits(max_value)
+// Result is always from 0 to value_total_bits
 int find_bhiksha_low_bits(size_t max_index, size_t max_value, int value_total_bits, int max_high_bits) {
   // Format authors should have just stored the value of bhiksha_low_bits in the file.
 
@@ -293,8 +296,8 @@ MemorySection KenlmV5Loader::_parse_bhiksha_highs(MemorySection mem, MediumLayer
     throw std::runtime_error("KenlmV5 format: unsupported bhiksha_type.  Probably, it was created by a too new version of kenlm.");
   // No need to check bhiksha_header.max_bhiksha_high_bits>=0, as it's uint8_t
 
-  const int total_bits = layer_config.bhiksha_total_bits = required_bits(max_value);
-  const int low_bits = layer_config.bhiksha_low_bits =
+  const int total_bits = layer_config.bhiksha_total_bits = required_bits(max_value);  // always in the range [0, 64]
+  const int low_bits = layer_config.bhiksha_low_bits =   // always in the range [0, 64]
     find_bhiksha_low_bits(num_entries, max_value, total_bits, bhiksha_header.max_bhiksha_high_bits);
   layer_config.bhiksha_highs_count = (max_value >> low_bits) + 1;
   const size_t bhiksha_highs_size = sizeof(uint64_t) * layer_config.bhiksha_highs_count;
@@ -319,8 +322,9 @@ MemorySection KenlmV5Loader::_parse_bitarray(MemorySection mem, MediumLayer& lay
   if (debug_print_sections_)
     std::cout << "_parse_bitarray offset= " << mem.base_offset() << std::endl;
 
-  const int word_index_bits = required_bits(lm_config_.ngram_counts[0]);
-  const int bits_per_record = word_index_bits + lm_config_.prob_bits + backoff_bits + layer_config.bhiksha_low_bits;
+  const int word_index_bits = required_bits(lm_config_.ngram_counts[0]);  // always in range [1, 64] because ngram_counts[0]>0
+  // bits_per_record is always in range [1, 176]
+  const int bits_per_record = word_index_bits + backoff_bits + lm_config_.prob_bits + layer_config.bhiksha_low_bits;
   const size_t bitarray_size = (num_entries * bits_per_record + 7) / 8 + 8;
   layer_config.backoff_bits = backoff_bits;
 
@@ -328,19 +332,19 @@ MemorySection KenlmV5Loader::_parse_bitarray(MemorySection mem, MediumLayer& lay
   int offset = 0;
   layer_config.word_field.offset = offset;
   layer_config.word_field.mask = make_bitmask(word_index_bits);
-  offset += word_index_bits;
+  offset += word_index_bits;  // offset here is always in the range [1, 64]
 
   layer_config.backoff_field.offset = offset;
   layer_config.backoff_field.mask = make_bitmask(backoff_bits);
-  offset += backoff_bits;
+  offset += backoff_bits;    // offset now in [1, 64+24]
 
   layer_config.prob_field.offset = offset;
   layer_config.prob_field.mask = make_bitmask(lm_config_.prob_bits);
-  offset += lm_config_.prob_bits;
+  offset += lm_config_.prob_bits;    // offset now in  [1, 64+24+24]
 
   layer_config.bhiksha_low_field.offset = offset;
   layer_config.bhiksha_low_field.mask = make_bitmask(layer_config.bhiksha_low_bits);
-  offset += layer_config.bhiksha_low_bits;
+  offset += layer_config.bhiksha_low_bits;    // offset now in [1, 64+24+24+64] = [1, 176]
 
   // Parse bitarray
   layer_config.bit_array = mem.get_and_drop_prefix(bitarray_size);

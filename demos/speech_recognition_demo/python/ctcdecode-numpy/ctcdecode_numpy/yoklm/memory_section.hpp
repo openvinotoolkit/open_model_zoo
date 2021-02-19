@@ -121,17 +121,17 @@ class MemorySectionArray : public MemorySection {
 struct BitField {
   int offset;  // in bits
   uint64_t mask;
-};
+}; // struct BitField
 
 // Essentially this class template only overloads operator[] in MemorySection.
 class MemorySectionBitArray : public MemorySection {
   public:
     MemorySectionBitArray() : stride_(0), bit_field_{}, index_limit_(0) {}
-    MemorySectionBitArray(const MemorySection& ms)
+    MemorySectionBitArray(const MemorySection& ms)  // ms must contain 8-byte padding after the actual bit array
         : MemorySection(ms), stride_(0), bit_field_{}, index_limit_(0) {}
 
     // Defined in header file for efficiency.
-    // Expects index to be inside bound, and not cause segfault on the last element.
+    // Expects (0 <= bf.offset) and (bf.offset + bits(bf.mask) <= stride).
     uint64_t operator()(size_t index, const BitField& bf) const {
       size_t bit_index = index * stride_ + bf.offset;
       if (index >= index_limit_)
@@ -148,7 +148,7 @@ class MemorySectionBitArray : public MemorySection {
   private:
     int stride_;  // for operator[] and operator()
     BitField bit_field_;  // for operator[]
-    uint32_t index_limit_;
+    size_t index_limit_;
 }; // class MemorySectionBitArray
 
 // Throws an exception if cannot.

@@ -105,10 +105,17 @@ void MemorySection::reset() {
 
 void MemorySectionBitArray::set_stride(int stride) {
   stride_ = stride;
-  // Dividing max(size_t) by 2 to be sure there's no overflows.
-  if (stride != 0 && (stride <= 0 || size() / size_t(stride) >= std::numeric_limits<size_t>::max() / 8 / 2))
+  // Dividing max(size_t) by 2 to be sure there're no overflow in operator(),
+  // because BitField::offset being an int cannot exceed max(size_t)/2 (when it's non-negative).
+  // Plus in all actual cases in yoklm library, BitField::offset is not more than ~200.
+  if (stride <= 0 || size() / size_t(stride) >= std::numeric_limits<size_t>::max() / 8 / 2)
     throw std::range_error("Array size exceeds size_t in MemorySectionBitArray. Broken LM file?");
-  index_limit_ = size() * 8 / stride;
+  if (size() >= 8)
+    // Subtracting 8 to ensure no access beyond our memory section to exclude SIGSEGV on read.
+    // Kenlm binary format has an 8-byte padding after each bit array for this.
+    index_limit_ = (size() - 8) * 8 / stride;
+  else
+    index_limit_ = 0;
 }
 
 MemorySection load_file(const std::string& filename) {
