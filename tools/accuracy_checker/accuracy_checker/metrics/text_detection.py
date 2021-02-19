@@ -443,7 +443,8 @@ class IncidentalSceneTextLocalizationMetric(PerImageEvaluationMetric):
         gt_polygons = list(map(polygon_from_points, annotation.points))
         gt_texts = list(annotation.description)
 
-        prediction_polygons = list(map(polygon_from_points, prediction.points))
+        prediction_points_int = np.array(prediction.points, dtype=np.int32)
+        prediction_polygons = list(map(polygon_from_points, prediction_points_int))
         prediction_texts = list(prediction.description)
 
         num_gt = len(gt_polygons)
