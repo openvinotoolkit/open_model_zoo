@@ -17,7 +17,6 @@
 #include "image_processing_model.h"
 
 #pragma once
-
 class DeblurringModel : public ImageProcessingModel {
 public:
     /// Constructor

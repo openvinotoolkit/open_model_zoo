@@ -36,6 +36,7 @@
 #include <pipelines/async_pipeline.h>
 #include <models/super_resolution_model.h>
 #include <models/deblurring_model.h>
+#include <models/colorization_model.h>
 #include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 
@@ -71,7 +72,6 @@ DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
-DEFINE_bool(loop, false, loop_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
 
@@ -97,7 +97,6 @@ static void showUsage() {
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
-    std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
@@ -129,10 +128,13 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-std::unique_ptr<ModelBase> getModel(const cv::Size& frameSize) {
-    std::unique_ptr<ModelBase> model;
+std::unique_ptr<ImageProcessingModel> getModel(const cv::Size& frameSize) {
+    std::unique_ptr<ImageProcessingModel> model;
     if (FLAGS_at == "super_resolution") {
         model.reset(new SuperResolutionModel(FLAGS_m));
+    }
+    else if (FLAGS_at == "colorization") {
+        model.reset(new ColorizationModel(FLAGS_m));
     }
     else if (FLAGS_at == "deblurring") {
         model.reset(new DeblurringModel(FLAGS_m, frameSize));
@@ -141,6 +143,17 @@ std::unique_ptr<ModelBase> getModel(const cv::Size& frameSize) {
         throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
     }
     return model;
+}
+
+std::pair<int, int> getScale() {
+    std::pair<int, int> scale(1, 1);
+    if (FLAGS_at == "super_resolution" || FLAGS_at == "deblurring") {
+        scale = {1, 2};
+    }
+    else if (FLAGS_at == "colorization") {
+        scale = {2, 2};
+    }
+    return scale;
 }
 
 cv::Mat renderResultData(const ImageProcessingResult& result) {
@@ -156,14 +169,21 @@ cv::Mat renderResultData(const ImageProcessingResult& result) {
     }
     size_t h = result.resultImage.rows;
     size_t w = result.resultImage.cols;
+    size_t c = result.resultImage.channels();
 
     if (inputImg.rows != h || inputImg.cols != w) {
         cv::resize(inputImg, inputImg, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
     }
 
-    // inputImg(cv::Rect(0, 0, w/2, h)).copyTo(result.resultImage(cv::Rect(0, 0, w/2, h)));
     cv::Mat out;
-    cv::hconcat(inputImg, result.resultImage, out);
+    if (inputImg.channels() != c) {
+        cv::Mat bgrResult;
+        cv::cvtColor(result.resultImage, bgrResult, cv::COLOR_GRAY2BGR);
+        cv::hconcat(inputImg, bgrResult, out);
+    }
+    else
+        cv::hconcat(inputImg, result.resultImage, out);
+
     return out;
 }
 
@@ -191,10 +211,11 @@ int main(int argc, char *argv[]) {
 
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
         InferenceEngine::Core core;
-        AsyncPipeline pipeline(std::move(getModel(cv::Size(curr_frame.cols, curr_frame.rows))),
+        std::unique_ptr<ImageProcessingModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows));
+        auto viewResult = model->getViewInfo();
+        AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
             core);
-
         Presenter presenter(FLAGS_u);
 
         bool keepRunning = true;
@@ -202,9 +223,13 @@ int main(int argc, char *argv[]) {
                     std::make_shared<ImageMetaData>(curr_frame, startTime));;
         std::unique_ptr<ResultBase> result;
         uint32_t framesProcessed = 0;
+
         cv::VideoWriter videoWriter;
+        auto scale = getScale();
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), curr_frame.size())) {
+                                                  cap->fps(),
+                                                  cv::Size(scale.second * viewResult.width,
+                                                           scale.first * viewResult.height))) {
             throw std::runtime_error("Can't open video writer");
         }
 

@@ -1,6 +1,7 @@
 # Image Segmentation C++ Demo
 
-![](../segmentation.gif)
+![](output.jpg)
+![](sr_1.png)
 
 This topic demonstrates how to run the Image Segmentation demo application, which does inference using semantic segmentation networks.
 

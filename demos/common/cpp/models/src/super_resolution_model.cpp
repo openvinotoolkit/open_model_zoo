@@ -20,7 +20,8 @@
 using namespace InferenceEngine;
 
 SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName) :
-    ModelBase(modelFileName) {
+    ImageProcessingModel(modelFileName) {
+        viewInfo = cv::Size(1920, 1080);
 }
 
 void SuperResolutionModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -34,7 +35,7 @@ void SuperResolutionModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
     SizeVector& firstInputSizeVector = inputShapes[firstInputBlobName];
     if (firstInputSizeVector.size() != 4)
         throw std::logic_error("Number of dimensions for an input must be 4");
-    
+
     // A model like single-image-super-resolution-???? may take bicubic interpolation of the input image as the
     // second input
     std::string secondInputBlobName;
@@ -58,7 +59,8 @@ void SuperResolutionModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
     inputInfo.setPrecision(Precision::FP32);
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
-    if (outputInfo.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
+    if (outputInfo.size() != 1)
+        throw std::runtime_error("Demo supports topologies only with 1 output");
 
     outputsNames.push_back(outputInfo.begin()->first);
     Data& data = *outputInfo.begin()->second;
@@ -75,6 +77,9 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
 
     /* Resize and copy data from the image to the input blob */
     Blob::Ptr lrInputBlob = request->GetBlob(inputsNames[0]);
+    if (img.channels() != lrInputBlob->getTensorDesc().getDims()[1])
+        cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
+
     matU8ToBlob<float_t>(img, lrInputBlob);
 
     if (inputsNames.size() == 2) {
@@ -94,6 +99,7 @@ std::unique_ptr<ResultBase> SuperResolutionModel::postprocess(InferenceResult& i
     ImageProcessingResult* result = new ImageProcessingResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
+
     LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
     const auto outputData = outMapped.as<float*>();
 
@@ -105,7 +111,7 @@ std::unique_ptr<ResultBase> SuperResolutionModel::postprocess(InferenceResult& i
               cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels])),
               cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels * 2]))};
     } else {
-        imgPlanes = std::vector<cv::Mat>{cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[numOfPixels * outChannels]))};
+        imgPlanes = std::vector<cv::Mat>{cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0]))};
         // Post-processing for text-image-super-resolution models
         cv::threshold(imgPlanes[0], imgPlanes[0], 0.5f, 1.0f, cv::THRESH_BINARY);
     }
