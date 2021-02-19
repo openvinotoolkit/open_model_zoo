@@ -52,6 +52,7 @@ models:
 
         preprocessing:
           - type: bgr_to_gray
+            cast_to_float: false
           - type: resize
             dst_width: 120
             dst_height: 32
