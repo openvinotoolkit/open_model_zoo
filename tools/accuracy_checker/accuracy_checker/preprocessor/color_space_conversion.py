@@ -44,8 +44,7 @@ class BgrToGray(Preprocessor):
                 default=True,
                 description="Parameter specifies if the result image should be casted to np.float32"
             )
-        }
-        )
+        })
         return parameters
 
     def configure(self):
@@ -87,8 +86,7 @@ class RgbToGray(Preprocessor):
                 default=True,
                 description="Parameter specifies if the result image should be casted to np.float32"
             )
-        }
-        )
+        })
         return parameters
 
     def configure(self):
