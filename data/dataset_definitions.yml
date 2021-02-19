@@ -1051,13 +1051,13 @@ datasets:
         - source
 
     preprocessing:
-    - type: decode_by_sentence_piece_bpe_tokenizer
-      vocabulary_file: tokenizer_src/vocab.json
-      merges_file: tokenizer_src/merges.txt
+      - type: decode_by_sentence_piece_bpe_tokenizer
+        vocabulary_file: tokenizer_src/vocab.json
+        merges_file: tokenizer_src/merges.txt
 
-    - type: pad_with_eos
-      eos_index: 1
-      sequence_len: 192
+      - type: pad_with_eos
+        eos_index: 1
+        sequence_len: 192
 
   - name: WMT_ru_en
     annotation_conversion:
@@ -1091,13 +1091,13 @@ datasets:
         - source
 
     preprocessing:
-    - type: decode_by_sentence_piece_bpe_tokenizer
-      vocabulary_file: tokenizer_src/vocab.json
-      merges_file: tokenizer_src/merges.txt
+      - type: decode_by_sentence_piece_bpe_tokenizer
+        vocabulary_file: tokenizer_src/vocab.json
+        merges_file: tokenizer_src/merges.txt
 
-    - type: pad_with_eos
-      eos_index: 1
-      sequence_len: 150
+      - type: pad_with_eos
+        eos_index: 1
+        sequence_len: 150
 
   - name: WMT2019_de_en
     annotation_conversion:
@@ -1111,13 +1111,13 @@ datasets:
         - source
 
     preprocessing:
-    - type: decode_by_sentence_piece_bpe_tokenizer
-      vocabulary_file: tokenizer_src/vocab.json
-      merges_file: tokenizer_src/merges.txt
+      - type: decode_by_sentence_piece_bpe_tokenizer
+        vocabulary_file: tokenizer_src/vocab.json
+        merges_file: tokenizer_src/merges.txt
 
-    - type: pad_with_eos
-      eos_index: 1
-      sequence_len: 150
+      - type: pad_with_eos
+        eos_index: 1
+        sequence_len: 150
 
   - name: NYU_Depth_V2
     data_source: nyudepthv2/val/converted/images
