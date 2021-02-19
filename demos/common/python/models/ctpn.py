@@ -40,8 +40,9 @@ class CTPN(Model):
         self.post_nms_top_n = 500
         self.text_proposal_connector = TextProposalConnector()
 
-        self.h, self.w = self.ctpn_keep_aspect_ratio(600, 600, frame_size[1], frame_size[0])
-        input_shape = {self.image_blob_name: ([1, 3] + [self.h, self.w])}
+        self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, frame_size[1], frame_size[0])
+        self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
+        input_shape = {self.image_blob_name: ([1, 3] + [self.h2, self.w2])}
         self.logger.info('Reshape net to {}'.format(input_shape))
         self.net.reshape(input_shape)
 
@@ -73,25 +74,36 @@ class CTPN(Model):
         return output_names
 
     def preprocess(self, inputs):
-        resized_image = cv2.resize(inputs, (self.w, self.h))
-        meta = {'original_shape': inputs.shape,
-                'resized_shape': resized_image.shape}
-        resized_image = resized_image.transpose((2, 0, 1)) # Change data layout from HWC to CHW
-        dict_inputs = {self.image_blob_name: resized_image}
+        meta = {'original_shape': inputs.shape}
+        scales = (self.w1 / inputs.shape[1], self.h1 / inputs.shape[0])
+
+        if scales[0] < 1 and scales[1] < 1:
+            meta['scales'] = [scales]
+            inputs = cv2.resize(inputs, (self.w1, self.h1))
+        if self.h1 != self.h2 or self.w1 != self.w2:
+            meta.setdefault('scales', []).append((self.w2 / inputs.shape[1],
+                                                  self.h2 / inputs.shape[0]))
+            inputs = cv2.resize(inputs, (self.w2, self.h2))
+
+        inputs = inputs.transpose((2, 0, 1)) # Change data layout from HWC to CHW
+        dict_inputs = {self.image_blob_name: inputs}
         return dict_inputs, meta
 
     def postprocess(self, outputs, meta):
-        scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
-        scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
+        first_scales = meta['scales'].pop()
         boxes = outputs[self.bboxes_blob_name][0].transpose((1, 2, 0))
         scores = outputs[self.scores_blob_name][0].transpose((1, 2, 0))
 
         textsegs = self.proposal_layer(scores, boxes, meta['original_shape'])
         scores = textsegs[:, 0]
         textsegs = textsegs[:, 1:5]
-        textsegs[:, 0::2] /= scale_x
-        textsegs[:, 1::2] /= scale_y
+        textsegs[:, 0::2] /= first_scales[0]
+        textsegs[:, 1::2] /= first_scales[1]
         boxes = self.detect(textsegs, scores[:, np.newaxis], meta['original_shape'])
+        if meta['scales']:
+            second_scales = meta['scales'].pop()
+            boxes[:, 0:8:2] /= second_scales[0]
+            boxes[:, 1:8:2] /= second_scales[1]
         return [Detection(box[0], box[1], box[2], box[5], box[8], 0) for box in boxes]
 
     @staticmethod
