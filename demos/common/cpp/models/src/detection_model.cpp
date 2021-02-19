@@ -33,14 +33,13 @@ std::shared_ptr<InternalModelData> DetectionModel::preprocess(const InputData& i
     if (useAutoResize) {
         /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
         request->SetBlob(inputsNames[0], wrapMat2Blob(img));
+        /* IE::Blob::Ptr from wrapMat2Blob() doesn't onwn data. Save the image to avoid deallocation before inference */
+        return std::make_shared<InternalImageMatModelData>(img);
     }
-    else {
-        /* Resize and copy data from the image to the input blob */
-        Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-        matU8ToBlob<uint8_t>(img, frameBlob);
-    }
-
-    return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
+    /* Resize and copy data from the image to the input blob */
+    Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
+    matU8ToBlob<uint8_t>(img, frameBlob);
+    return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
 
 std::vector<std::string> DetectionModel::loadLabels(const std::string& labelFilename) {

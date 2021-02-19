@@ -37,12 +37,16 @@ struct InternalImageModelData : public InternalModelData {
     int inputImgHeight;
 };
 
-struct InternalScaleData : public InternalModelData {
-    InternalScaleData(float scaleX, float scaleY) {
-        x = scaleX;
-        y = scaleY;
-    }
+struct InternalImageMatModelData : public InternalImageModelData {
+    InternalImageMatModelData(const cv::Mat& mat) : InternalImageModelData(mat.cols, mat.rows), mat(mat) {}
+
+    cv::Mat mat;
+};
+
+struct InternalScaleMatData : public InternalModelData {
+    InternalScaleMatData(float scaleX, float scaleY, cv::Mat&& mat) : x(scaleX), y(scaleY), mat(std::move(mat)) {}
 
     float x;
     float y;
+    cv::Mat mat;
 };

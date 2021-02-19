@@ -113,8 +113,8 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
     cv::copyMakeBorder(resizedImage, paddedImage, 0, bottom, 0, right,
                        cv::BORDER_CONSTANT, meanPixel);
     request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
-    return std::shared_ptr<InternalModelData>(new InternalScaleData(image.cols / static_cast<float>(w),
-                                                                    image.rows / static_cast<float>(h)));
+    /* IE::Blob::Ptr from wrapMat2Blob() doesn't onwn data. Save the image to avoid deallocation before inference */
+    return std::make_shared<InternalScaleMatData>(image.cols / static_cast<float>(w), image.rows / static_cast<float>(h), std::move(paddedImage));
 }
 
 std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult& infResult) {
@@ -142,7 +142,7 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     std::vector<HumanPose> poses = extractPoses(heatMaps, aembdsMaps, nmsHeatMaps);
 
     // Rescale poses to the original image
-    const auto& scale = infResult.internalModelData->asRef<InternalScaleData>();
+    const auto& scale = infResult.internalModelData->asRef<InternalScaleMatData>();
     float outputScale = inputLayerSize.width / static_cast<float>(heatMapsDims[3]);
     float scaleX = scale.x * outputScale;
     float scaleY = scale.y * outputScale;
