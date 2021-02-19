@@ -2,7 +2,7 @@
 
 The Open Model Zoo demo applications are console applications that demonstrate how you can use the Inference Engine in your applications to solve specific use-cases.
 
-For the Intel® Distribution of OpenVINO™ toolkit, the demos are available after installation in the folder: `<INSTALL_DIR>\deployment_tools\open_model_zoo\demos`.
+For the Intel® Distribution of OpenVINO™ toolkit, the demos are available after installation in the following directory: `<INSTALL_DIR>/deployment_tools/open_model_zoo/demos`.
 For the open source version of OpenVINO™ toolkit, the demos are available in the Open Model Zoo repository in the `demos` directory.
 C++, C++ GAPI and Python versions are located in the `cpp`, `cpp_gapi` and `python` subfolders respectively.
 
