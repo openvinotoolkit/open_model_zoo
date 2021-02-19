@@ -10,6 +10,7 @@ The Open Model Zoo includes the following demos:
 - [Classification C++ Demo](./classification_demo/cpp/README.md) - Shows an example of using neural networks for image classification.
 - [Colorization Python\* Demo](./colorization_demo/python/README.md) - Colorization demo colorizes input frames.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/cpp/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
+- [Deblurring Python\* Demo](./deblurring_demo/python/README.md) - Demo for deblurring the input images.
 - [Formula Recognition Python\* Demo](./formula_recognition_demo/python/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/cpp/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
 - [Gesture Recognition Python\* Demo](./gesture_recognition_demo/python/README.md) - Demo application for Gesture Recognition algorithm (e.g. American Sign Language gestures), which classifies gesture actions that are being performed on input video.

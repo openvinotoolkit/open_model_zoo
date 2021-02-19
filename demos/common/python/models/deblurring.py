@@ -21,13 +21,12 @@ class Deblurring(Model):
     def __init__(self, ie, model_path, input_image_shape):
         super().__init__(ie, model_path)
         self.block_size = 32
-        self.input_shape = input_image_shape
-        self.calculate_new_shape()
+        self.reshape(input_image_shape)
         self.input_blob_name = self.prepare_inputs()
         self.output_blob_name = self.prepare_outputs()
 
-    def calculate_new_shape(self):
-        h, w, _ = self.input_shape
+    def reshape(self, base_shape):
+        h, w, _ = base_shape
         new_height = math.ceil(h / self.block_size) * self.block_size
         new_width = math.ceil(w / self.block_size) * self.block_size
 
@@ -50,11 +49,6 @@ class Deblurring(Model):
             self.n, self.c, self.h, self.w = input_size
         else:
             raise RuntimeError("3-channel 4-dimensional model's input is expected")
-
-        self.pad_params = {'mode': 'constant',
-                           'constant_values': 0,
-                           'pad_width': ((0, self.h - self.input_shape[0]), (0, self.w - self.input_shape[1]), (0, 0))
-                           }
 
         return input_blob_name
 
@@ -80,23 +74,23 @@ class Deblurring(Model):
     def preprocess(self, inputs):
         image = inputs
 
-        if image.shape != self.input_shape:
+        if not (self.h - self.block_size < image.shape[0] <= self.h and self.w - self.block_size < image.shape[1] <= self.w):
             self.logger.warn("Chosen model size doesn't match image size. The image is resized")
-            image = cv2.resize(image, (self.input_shape[1], self.input_shape[0]))
 
-        resized_image = np.pad(image, **self.pad_params)
+        resized_image = cv2.resize(image, (self.w, self.h))
         resized_image = resized_image.transpose((2, 0, 1))
         resized_image = np.expand_dims(resized_image, 0)
 
-        meta = {'original_shape': image.shape,
-                'resized_shape': resized_image.shape}
+        meta = {'original_shape': image.shape}
         dict_inputs = {self.input_blob_name: resized_image}
         return dict_inputs, meta
 
     def postprocess(self, outputs, meta):
         prediction = outputs[self.output_blob_name].squeeze()
+        input_image_height = meta['original_shape'][0]
+        input_image_width = meta['original_shape'][1]
 
         prediction = prediction.transpose((1, 2, 0))
-        prediction = prediction[:self.input_shape[0], :self.input_shape[1], :]
+        prediction = cv2.resize(prediction, (input_image_width, input_image_height))
         prediction *= 255
         return prediction.astype(np.uint8)
