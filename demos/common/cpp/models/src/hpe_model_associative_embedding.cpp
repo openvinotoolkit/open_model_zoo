@@ -58,8 +58,8 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
-    if (outputInfo.size() != 3)
-        throw std::runtime_error("Demo supports topologies only with 3 outputs");
+    if (outputInfo.size() != 2 && outputInfo.size() != 3)
+        throw std::runtime_error("Demo supports topologies only with 2 or 3 outputs");
     for (const auto& outputLayer: outputInfo) {
         outputLayer.second->setPrecision(Precision::FP32);
         outputsNames.push_back(outputLayer.first);
@@ -71,7 +71,12 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
     }
     embeddingsBlobName = findLayerByName("embeddings", outputsNames);
     heatmapsBlobName = findLayerByName("heatmaps", outputsNames);
-    nmsHeatmapsBlobName = findLayerByName("nms_heatmaps", outputsNames);
+    try {
+        nmsHeatmapsBlobName = findLayerByName("nms_heatmaps", outputsNames);
+    }
+    catch (const std::runtime_error&) {
+        nmsHeatmapsBlobName = heatmapsBlobName;
+    }
 }
 
 void HpeAssociativeEmbedding::reshape(CNNNetwork& cnnNetwork) {
@@ -117,20 +122,22 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     auto aembds = infResult.outputsData[embeddingsBlobName];
-    auto heats = infResult.outputsData[heatmapsBlobName];
-    auto nmsHeats = infResult.outputsData[nmsHeatmapsBlobName];
-
     const SizeVector& aembdsDims = aembds->getTensorDesc().getDims();
-    const SizeVector& heatMapsDims = heats->getTensorDesc().getDims();
-    const SizeVector& nmsHeatMapsDims = nmsHeats->getTensorDesc().getDims();
-
     float* aembdsMapped = aembds->rmap().as<float*>();
-    float* heatMapsMapped = heats->rmap().as<float*>();
-    float* nmsHeatMapsMapped = nmsHeats->rmap().as<float*>();
-
     std::vector<cv::Mat> aembdsMaps = split(aembdsMapped, aembdsDims);
+
+    auto heats = infResult.outputsData[heatmapsBlobName];
+    const SizeVector& heatMapsDims = heats->getTensorDesc().getDims();
+    float* heatMapsMapped = heats->rmap().as<float*>();
     std::vector<cv::Mat> heatMaps = split(heatMapsMapped, heatMapsDims);
-    std::vector<cv::Mat> nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsDims);
+
+    std::vector<cv::Mat> nmsHeatMaps = heatMaps;
+    if (nmsHeatmapsBlobName != heatmapsBlobName) {
+        auto nmsHeats = infResult.outputsData[nmsHeatmapsBlobName];
+        const SizeVector& nmsHeatMapsDims = nmsHeats->getTensorDesc().getDims();
+        float* nmsHeatMapsMapped = nmsHeats->rmap().as<float*>();
+        nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsDims);
+    }
 
     std::vector<HumanPose> poses = extractPoses(heatMaps, aembdsMaps, nmsHeatMaps);
 
@@ -178,7 +185,7 @@ std::vector<cv::Mat> HpeAssociativeEmbedding::split(float* data, const SizeVecto
 }
 
 std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(
-    const std::vector<cv::Mat>& heatMaps,
+    std::vector<cv::Mat>& heatMaps,
     const std::vector<cv::Mat>& aembdsMaps,
     const std::vector<cv::Mat>& nmsHeatMaps) const {
 
@@ -193,6 +200,9 @@ std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(
         // Filtering poses with low mean scores
         if (pose.getMeanScore() <= confidenceThreshold) {
             continue;
+        }
+        for (size_t j = 0; j < heatMaps.size(); j++) {
+            heatMaps[j] = cv::abs(heatMaps[j]);
         }
         adjustAndRefine(allPoses, heatMaps, aembdsMaps, i, delta);
         std::vector<cv::Point2f> keypoints;
