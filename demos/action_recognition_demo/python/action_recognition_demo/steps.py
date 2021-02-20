@@ -34,7 +34,7 @@ def run_pipeline(capture, model_type, model, render_fn, seq_size=16, fps=30):
         pipeline.add_step("Encoder", EncoderStep(model[0]), parallel=False)
         pipeline.add_step("Decoder", DecoderStep(model[1], sequence_size=seq_size), parallel=False)
     elif model_type == 'i3d-rgb':
-        pipeline.add_step("I3DRGB", I3DRGBModelStep(model[0], seq_size, 256, 224), parallel = False)
+        pipeline.add_step("I3DRGB", I3DRGBModelStep(model[0], seq_size, 256, 224), parallel=False)
 
     pipeline.add_step("Render", RenderStep(render_fn, fps=fps), parallel=True)
 
