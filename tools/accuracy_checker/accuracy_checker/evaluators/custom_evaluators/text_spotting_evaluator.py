@@ -36,12 +36,12 @@ def softmax(x):
 
 
 class TextSpottingEvaluator(BaseEvaluator):
-    def __init__(self, dataset_config, launcher, model, postprocessor):
+    def __init__(self, dataset_config, launcher, model):
         self.dataset_config = dataset_config
         self.preprocessing_executor = None
         self.preprocessor = None
         self.dataset = None
-        self.postprocessor = postprocessor
+        self.postprocessor = None
         self.metric_executor = None
         self.launcher = launcher
         self.model = model
@@ -59,8 +59,7 @@ class TextSpottingEvaluator(BaseEvaluator):
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
-        postprocessor = PostprocessingExecutor(dataset_config[0].get('postprocessing'))
-        return cls(dataset_config, launcher, model, postprocessor)
+        return cls(dataset_config, launcher, model)
 
     def process_dataset(
             self, subset=None,
