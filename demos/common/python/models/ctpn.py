@@ -22,7 +22,7 @@ from .utils import Detection
 
 
 class CTPN(Model):
-    def __init__(self, ie, model_path, frame_size, threshold=0.9):
+    def __init__(self, ie, model_path, input_size, threshold=0.9):
         super().__init__(ie, model_path)
 
         self.image_blob_name = self.prepare_inputs()
@@ -40,7 +40,8 @@ class CTPN(Model):
         self.post_nms_top_n = 500
         self.text_proposal_connector = TextProposalConnector()
 
-        self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, frame_size[1], frame_size[0])
+        print('input size', input_size)
+        self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, input_size[1], input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
         input_shape = {self.image_blob_name: ([1, 3] + [self.h2, self.w2])}
         self.logger.info('Reshape net to {}'.format(input_shape))

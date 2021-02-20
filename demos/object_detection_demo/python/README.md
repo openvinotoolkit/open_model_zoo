@@ -84,6 +84,9 @@ Common model options:
                         Optional. Probability threshold for detections
                         filtering.
   --keep_aspect_ratio   Optional. Keeps aspect ratio on resize.
+  --input_size          Optional. The first image size used for CTPN model reshaping.
+                        Default: 600 600. Note that submitted images should have the same resolution,
+                        otherwise predictions might be incorrect.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS

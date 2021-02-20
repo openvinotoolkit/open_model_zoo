@@ -66,6 +66,10 @@ def build_argparser():
                                    help='Optional. Probability threshold for detections filtering.')
     common_model_args.add_argument('--keep_aspect_ratio', action='store_true', default=False,
                                    help='Optional. Keeps aspect ratio on resize.')
+    common_model_args.add_argument('--input_size', default=(600, 600), type=int, nargs=2,
+                                   help='Optional. The first image size used for CTPN model reshaping. '
+                                        'Default: 600 600. Note that submitted images should have the same resolution, '
+                                        'otherwise predictions might be incorrect.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -137,11 +141,11 @@ class ColorPalette:
         return len(self.palette)
 
 
-def get_model(ie, args, frame_size):
+def get_model(ie, args):
     if args.architecture_type == 'ssd':
         return models.SSD(ie, args.model, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
     elif args.architecture_type == 'ctpn':
-        return models.CTPN(ie, args.model, frame_size=frame_size, threshold=args.prob_threshold)
+        return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
     elif args.architecture_type == 'yolo':
         return models.YOLO(ie, args.model, labels=args.labels,
                            threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
@@ -231,35 +235,24 @@ def main():
 
     plugin_config = get_plugin_configs(args.device, args.num_streams, args.num_threads)
 
-    cap = open_images_capture(args.input, args.loop)
-
-    start_time = perf_counter()
-    frame = cap.read()
-    if frame is None:
-        raise RuntimeError("Can't read an image from the input")
-
     log.info('Loading network...')
 
-    model = get_model(ie, args, frame.shape[:2])
+    model = get_model(ie, args)
 
     detector_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
+    cap = open_images_capture(args.input, args.loop)
+    next_frame_id = 0
+    next_frame_id_to_show = 0
+
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
-    detector_pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
-    next_frame_id = 1
-    next_frame_id_to_show = 0
-
     palette = ColorPalette(len(model.labels) if model.labels else 100)
     metrics = PerformanceMetrics()
+    presenter = None
     video_writer = cv2.VideoWriter()
-    presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                   (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
-    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                             cap.fps(), (frame.shape[1], frame.shape[0])):
-        raise RuntimeError("Can't open video writer")
 
     while True:
         if detector_pipeline.callback_exceptions:
@@ -297,8 +290,17 @@ def main():
             # Get new image/frame
             start_time = perf_counter()
             frame = cap.read()
+            print(frame.shape)
             if frame is None:
+                if next_frame_id == 0:
+                    raise ValueError("Can't read an image from the input")
                 break
+            if next_frame_id == 0:
+                presenter = monitors.Presenter(args.utilization_monitors, 55,
+                                               (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
+                if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                                         cap.fps(), (frame.shape[1], frame.shape[0])):
+                    raise RuntimeError("Can't open video writer")
             # Submit for inference
             detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
             next_frame_id += 1
