@@ -94,12 +94,12 @@ class CTPN(Model):
         boxes = outputs[self.bboxes_blob_name][0].transpose((1, 2, 0))
         scores = outputs[self.scores_blob_name][0].transpose((1, 2, 0))
 
-        textsegs = self.proposal_layer(scores, boxes, meta['original_shape'])
+        textsegs = self.get_proposals(scores, boxes, meta['original_shape'])
         scores = textsegs[:, 0]
         textsegs = textsegs[:, 1:5]
         textsegs[:, 0::2] /= first_scales[0]
         textsegs[:, 1::2] /= first_scales[1]
-        boxes = self.detect(textsegs, scores[:, np.newaxis], meta['original_shape'])
+        boxes = self.get_detections(textsegs, scores[:, np.newaxis], meta['original_shape'])
         if meta['scales']:
             second_scales = meta['scales'].pop()
             boxes[:, 0:8:2] /= second_scales[0]
@@ -120,7 +120,7 @@ class CTPN(Model):
 
         return int(new_h), int(new_w)
 
-    def proposal_layer(self, rpn_cls_prob_reshape, rpn_bbox_pred, image_size, _feat_stride=(16, )):
+    def get_proposals(self, rpn_cls_prob_reshape, rpn_bbox_pred, image_size, _feat_stride=(16, )):
         """
         Parameters
         rpn_cls_prob_reshape: (H , W , Ax2) outputs of RPN, prob of bg or fg
@@ -186,6 +186,27 @@ class CTPN(Model):
         blob = np.hstack((scores.astype(np.float32, copy=False), proposals.astype(np.float32, copy=False)))
 
         return blob
+
+    def get_detections(self, text_proposals, scores, size):
+        keep_inds = np.where(scores > 0.7)[0]
+        text_proposals, scores = text_proposals[keep_inds], scores[keep_inds]
+
+        sorted_indices = np.argsort(scores.ravel())[::-1]
+        text_proposals, scores = text_proposals[sorted_indices], scores[sorted_indices]
+
+        text_recs = self.text_proposal_connector.get_text_lines(text_proposals, scores, size)
+
+        heights = np.zeros((len(text_recs), 1), np.float)
+        widths = np.zeros((len(text_recs), 1), np.float)
+        scores = np.zeros((len(text_recs), 1), np.float)
+        for index, box in enumerate(text_recs):
+            heights[index] = (abs(box[5] - box[1]) + abs(box[7] - box[3])) / 2.0 + 1
+            widths[index] = (abs(box[2] - box[0]) + abs(box[6] - box[4])) / 2.0 + 1
+            scores[index] = box[8]
+        keep_inds = np.where((widths / heights > self.min_ratio) & (scores > self.boxes_threshold) &
+                             (widths > (self.min_num_proposals * self.text_proposals_width)))[0]
+
+        return text_recs[keep_inds]
 
     @staticmethod
     def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None):
@@ -267,27 +288,6 @@ class CTPN(Model):
         pred_boxes[:, 3::4] = pred_ctr_y + 0.5 * pred_h
 
         return pred_boxes
-
-    def detect(self, text_proposals, scores, size):
-        keep_inds = np.where(scores > 0.7)[0]
-        text_proposals, scores = text_proposals[keep_inds], scores[keep_inds]
-
-        sorted_indices = np.argsort(scores.ravel())[::-1]
-        text_proposals, scores = text_proposals[sorted_indices], scores[sorted_indices]
-
-        text_recs = self.text_proposal_connector.get_text_lines(text_proposals, scores, size)
-
-        heights = np.zeros((len(text_recs), 1), np.float)
-        widths = np.zeros((len(text_recs), 1), np.float)
-        scores = np.zeros((len(text_recs), 1), np.float)
-        for index, box in enumerate(text_recs):
-            heights[index] = (abs(box[5] - box[1]) + abs(box[7] - box[3])) / 2.0 + 1
-            widths[index] = (abs(box[2] - box[0]) + abs(box[6] - box[4])) / 2.0 + 1
-            scores[index] = box[8]
-        keep_inds = np.where((widths / heights > self.min_ratio) & (scores > self.boxes_threshold) &
-                             (widths > (self.min_num_proposals * self.text_proposals_width)))[0]
-
-        return text_recs[keep_inds]
 
 def clip_boxes(boxes, image_size):
     """
