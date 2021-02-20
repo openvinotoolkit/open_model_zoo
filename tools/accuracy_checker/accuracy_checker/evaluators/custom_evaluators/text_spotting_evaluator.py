@@ -25,6 +25,7 @@ from ...adapters import create_adapter
 from ...config import ConfigError
 from ...launcher import create_launcher
 from ...utils import contains_all, extract_image_representations, get_path
+from ...postprocessor import PostprocessingExecutor
 from ...progress_reporters import ProgressReporter
 from ...logging import print_info
 
@@ -35,12 +36,12 @@ def softmax(x):
 
 
 class TextSpottingEvaluator(BaseEvaluator):
-    def __init__(self, dataset_config, launcher, model):
+    def __init__(self, dataset_config, launcher, model, postprocessor):
         self.dataset_config = dataset_config
         self.preprocessing_executor = None
         self.preprocessor = None
         self.dataset = None
-        self.postprocessor = None
+        self.postprocessor = postprocessor
         self.metric_executor = None
         self.launcher = launcher
         self.model = model
@@ -58,7 +59,8 @@ class TextSpottingEvaluator(BaseEvaluator):
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
-        return cls(dataset_config, launcher, model)
+        postprocessor = PostprocessingExecutor(dataset_config[0].get('postprocessing'))
+        return cls(dataset_config, launcher, model, postprocessor)
 
     def process_dataset(
             self, subset=None,
@@ -96,6 +98,9 @@ class TextSpottingEvaluator(BaseEvaluator):
 
             batch_raw_prediction, batch_prediction = self.model.predict(
                 batch_identifiers, batch_data, batch_meta, callback=temporal_output_callback
+            )
+            batch_annotation, batch_prediction = self.postprocessor.process_batch(
+                batch_annotation, batch_prediction, batch_meta
             )
             metrics_result = None
             if self.metric_executor and calculate_metrics:

@@ -43,7 +43,9 @@ evaluations:
             - type: resize
               dst_width: 1280
               dst_height: 768
-
+          postprocessing:
+            - type: cast_to_int
+              round_policy: nearest_to_zero
           metrics:
             - type: incidental_text_hmean
               name: f-measure
