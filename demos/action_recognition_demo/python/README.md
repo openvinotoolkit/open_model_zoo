@@ -7,7 +7,7 @@ The following pre-trained models are delivered with the product:
 * `driver-action-recognition-adas-0002-encoder` + `driver-action-recognition-adas-0002-decoder`, which are models for driver monitoring scenario. They recognize actions like safe driving, talking to the phone and others
 * `action-recognition-0001-encoder` + `action-recognition-0001-decoder` and `i3d-rgb-tf`, which are general-purpose action recognition (400 actions) models for Kinetics-400 dataset.
 
-For more information about the pre-trained models, refer to the [intel models documentation](../../../models/intel/index.md) and [public models documentation](../../../models/public/index.md).
+For more information about the pre-trained models, refer to the [Intel model documentation](../../../models/intel/index.md) and [public model documentation](../../../models/public/index.md).
 
 ## How It Works
 
