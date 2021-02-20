@@ -40,7 +40,6 @@ class CTPN(Model):
         self.post_nms_top_n = 500
         self.text_proposal_connector = TextProposalConnector()
 
-        print('input size', input_size)
         self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, input_size[1], input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
         input_shape = {self.image_blob_name: ([1, 3] + [self.h2, self.w2])}

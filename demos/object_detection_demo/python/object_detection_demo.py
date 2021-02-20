@@ -243,6 +243,7 @@ def main():
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
     cap = open_images_capture(args.input, args.loop)
+
     next_frame_id = 0
     next_frame_id_to_show = 0
 
@@ -290,7 +291,6 @@ def main():
             # Get new image/frame
             start_time = perf_counter()
             frame = cap.read()
-            print(frame.shape)
             if frame is None:
                 if next_frame_id == 0:
                     raise ValueError("Can't read an image from the input")
