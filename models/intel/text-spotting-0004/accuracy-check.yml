@@ -19,7 +19,7 @@ evaluations:
           cur_hidden: hidden
 
         max_seq_len: '28'
-        recognizer_confidence_threshold: '0.45'
+        recognizer_confidence_threshold: '0.3'
 
         alphabet: __abcdefghijklmnopqrstuvwxyz0123456789
         sos_index: '0'
@@ -43,7 +43,9 @@ evaluations:
             - type: resize
               dst_width: 1280
               dst_height: 768
-
+          postprocessing:
+            - type: cast_to_int
+              round_policy: nearest_to_zero
           metrics:
             - type: incidental_text_hmean
               name: f-measure

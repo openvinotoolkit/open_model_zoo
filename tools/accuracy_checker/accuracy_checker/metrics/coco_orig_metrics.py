@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import contextlib
 import os
 import tempfile
 import json
@@ -123,10 +124,8 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         coco_data_to_store = self._prepare_data_for_annotation_file(
             annotations, label_map)
 
-        coco_annotation = self._create_json(coco_data_to_store)
-        coco = COCO(str(coco_annotation))
-
-        return coco
+        with self._create_temp_json(coco_data_to_store) as coco_annotation:
+            return COCO(coco_annotation)
 
     @staticmethod
     def generate_map_pred_label_id_to_coco_cat_id(has_background, use_full_label_map):
@@ -290,19 +289,23 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         return coco_data_to_store
 
     @staticmethod
-    def _create_json(coco_data_to_store):
-        with tempfile.NamedTemporaryFile() as ftmp:
-            json_file_to_store = ftmp.name + ".json"
-        with open(json_file_to_store, 'w') as f:
-            json.dump(coco_data_to_store, f, indent=4)
+    @contextlib.contextmanager
+    def _create_temp_json(coco_data_to_store):
+        temp_name = None
 
-        return json_file_to_store
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as ftmp:
+                temp_name = ftmp.name
+                json.dump(coco_data_to_store, ftmp, indent=4)
+
+            yield temp_name
+        finally:
+            if temp_name:
+                os.unlink(temp_name)
 
     def _reload_results_to_coco_class(self, coco, coco_data_to_store):
-        json_file_to_load = self._create_json(coco_data_to_store)
-        coco_res = coco.loadRes(json_file_to_load)
-
-        return coco_res
+        with self._create_temp_json(coco_data_to_store) as json_file_to_load:
+            return coco.loadRes(json_file_to_load)
 
     @staticmethod
     def _debug_printing_and_displaying_predictions(coco, coco_res, data_source, should_display_debug_images):

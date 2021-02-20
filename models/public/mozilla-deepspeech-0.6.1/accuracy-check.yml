@@ -41,6 +41,7 @@ models:
             magnitude_squared: True
             skip_channels: True
           - type: audio_triangle_filtering
+            filter_amplitudes: True
             base: 257
             filterbank_channel_count: 40
             lower_frequency_limit: 20

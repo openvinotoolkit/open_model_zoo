@@ -14,9 +14,9 @@ The pose may contain up to 17 keypoints: ears, eyes, nose, shoulders, elbows, wr
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Average Precision (AP)          | 45.7%                                     |
-| GFlops                          | 5.9393                                    |
-| MParams                         | 8.1504                                    |
+| Average Precision (AP)          | 45.6%                                     |
+| GFlops                          | 5.9206                                    |
+| MParams                         | 8.1506                                    |
 | Source framework                | PyTorch\*                                 |
 
 Average Precision metric described in [COCO Keypoint Evaluation site](https://cocodataset.org/#keypoints-eval).

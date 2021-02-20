@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a network for text recognition scenario. It consists of VGG16-like backbone and bidirectional LSTM encoder-decoder.
+This is a network for text recognition scenario. It consists of ResNext50-like backbone (stage-1-2) and bidirectional LSTM encoder-decoder.
 The network is able to recognize case-insensitive alphanumeric text (36 unique symbols).
 
 ## Example
@@ -13,10 +13,10 @@ The network is able to recognize case-insensitive alphanumeric text (36 unique s
 
 | Metric                                         | Value              |
 | ---------------------------------------------- | ------------------ |
-| Accuracy on the alphanumeric subset of ICDAR13 | 0.8739             |
+| Accuracy on the alphanumeric subset of ICDAR13 | 0.8828             |
 | Text location requirements                     | Tight aligned crop |
-| GFlops                                         | 1.488              |
-| MParams                                        | 5.567              |
+| GFlops                                         | 0.2726             |
+| MParams                                        | 1.4187             |
 | Source framework                               | PyTorch            |
 
 ## Inputs

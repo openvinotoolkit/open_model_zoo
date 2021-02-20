@@ -40,11 +40,37 @@ from ..representation.segmentation_representation import GTMaskLoader
 
 from ..logging import warning
 
+
+COCO_TO_VOC = {
+    1: 15,  # person
+    2: 2,  # bicycle
+    3: 7,  # car
+    4: 14,  # motorbike
+    5: 1,  # airplane
+    6: 6,  # bus
+    7: 19,  # train
+    9: 4,  # boat
+    16: 3,  # bird
+    17: 8,  # cat
+    18: 12,  # dog
+    19: 13,  # horse
+    20: 17,  # sheep
+    21: 10,  # cow
+    44: 5,  # bottle
+    62: 9,  # chair
+    63: 18,  # couch/sofa
+    64: 16,  # potted plant
+    67: 11,  # dining table
+    72: 20,  # tv
+}
+
+
 def get_image_annotation(image_id, annotations_):
     return list(filter(lambda x: x['image_id'] == image_id, annotations_))
 
 
-def get_label_map(dataset_meta, full_annotation, use_full_label_map=False, has_background=False):
+def get_label_map(dataset_meta, full_annotation, use_full_label_map=False, has_background=False,
+                  convert_COCO_to_VOC_labels=False):
     if dataset_meta:
         meta = read_json(dataset_meta)
         label_map = meta.get('label_map')
@@ -55,7 +81,8 @@ def get_label_map(dataset_meta, full_annotation, use_full_label_map=False, has_b
                 label_map = {i + label_offset: label for i, label in enumerate(labels)}
         if label_map:
             label_map = verify_label_map(label_map)
-            label_id_to_label = {i: i for i in label_map}
+            label_id_to_label = {i: i for i in label_map} if not convert_COCO_to_VOC_labels else {
+                i: COCO_TO_VOC[i] for i in label_map}
             return label_map, label_id_to_label
 
     labels = full_annotation['categories']
@@ -107,7 +134,11 @@ class MSCocoDetectionConverter(BaseFormatConverter):
             ),
             'dataset_meta_file': PathField(
                 description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
-            )
+            ),
+            'convert_COCO_to_VOC_labels': BoolField(
+                optional=True, default=False,
+                description="Allows to convert COCO labels to Pacsal VOC labels."
+            ),
         })
         return configuration_parameters
 
@@ -119,6 +150,7 @@ class MSCocoDetectionConverter(BaseFormatConverter):
         self.sort_key = self.get_value_from_config('sort_key')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
+        self.convert_COCO_to_VOC_labels = self.get_value_from_config('convert_COCO_to_VOC_labels')
         self.meta = {}
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
@@ -132,7 +164,8 @@ class MSCocoDetectionConverter(BaseFormatConverter):
         annotations = full_annotation['annotations']
 
         label_map, label_id_to_label = get_label_map(
-            self.dataset_meta, full_annotation, self.use_full_label_map, self.has_background
+            self.dataset_meta, full_annotation, self.use_full_label_map, self.has_background,
+            self.convert_COCO_to_VOC_labels
         )
 
         meta = {}
@@ -282,8 +315,13 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
 def make_segmentation_mask(height, width, path_to_mask, labels, segmentations):
     polygons = []
     for mask in segmentations:
-        rles = maskUtils.frPyObjects(mask, height, width)
-        rle = maskUtils.merge(rles)
+        if isinstance(mask, list):
+            rles = maskUtils.frPyObjects(mask, height, width)
+            rle = maskUtils.merge(rles)
+        elif isinstance(mask['counts'], list):
+            rle = maskUtils.frPyObjects(mask, height, width)
+        else:
+            rle = mask
         polygons.append(rle)
 
     masks = []
@@ -322,6 +360,11 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
                 default='./segmentation_masks',
                 description='path to segmentation masks, used if semantic_only is True'
             ),
+            'convert_mask': BoolField(
+                optional=True,
+                default=True,
+                description="Allows to convert segmentation mask."
+            ),
         })
         return configuration_parameters
 
@@ -329,6 +372,7 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
         super().configure()
         self.semantic_only = self.get_value_from_config('semantic_only')
         self.masks_dir = self.get_value_from_config('masks_dir')
+        self.convert_mask = self.get_value_from_config('convert_mask')
 
     def _create_representations(
             self, image_info, annotations, label_id_to_label, check_content, progress_callback, progress_interval
@@ -338,23 +382,27 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
         num_iterations = len(image_info)
         progress_reporter = PrintProgressReporter(print_interval=progress_interval)
         progress_reporter.reset(num_iterations, 'annotations')
-        if self.semantic_only:
+        if self.semantic_only and self.convert_mask:
             if not self.masks_dir.exists():
                 self.masks_dir.mkdir()
                 warning('Segmentation masks will be located in {} folder'.format(str(self.masks_dir.resolve())))
 
         for (image_id, image) in enumerate(image_info):
-            image_labels, _, _, _, _, is_crowd, segmentations = self._read_image_annotation(
+            image_labels, is_crowd, segmentations = self._read_image_annotation(
                 image, annotations,
                 label_id_to_label
             )
+
+            if not image_labels:
+                continue
 
             if not self.semantic_only:
                 annotation = CoCoInstanceSegmentationAnnotation(image[1], segmentations, image_labels)
             else:
                 h, w, _ = image[2]
                 mask_file = self.masks_dir / "{:012}.png".format(image[0])
-                make_segmentation_mask(h, w, mask_file, image_labels, segmentations)
+                if self.convert_mask:
+                    make_segmentation_mask(h, w, mask_file, image_labels, segmentations)
                 annotation = SegmentationAnnotation(image[1],
                                                     str(mask_file.relative_to(self.masks_dir.parent)),
                                                     mask_loader=GTMaskLoader.PILLOW)
@@ -371,6 +419,18 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
         progress_reporter.finish()
 
         return segmentation_annotations, content_errors
+
+    @staticmethod
+    def _read_image_annotation(image, annotations, label_id_to_label):
+        image_annotation = get_image_annotation(image[0], annotations)
+        mask = [label_id_to_label.get(annotation['category_id']) is not None for annotation in image_annotation]
+        image_labels = [label_id_to_label[annotation['category_id']]
+                        for index, annotation in enumerate(image_annotation) if mask[index]]
+        is_crowd = [annotation['iscrowd'] for index, annotation in enumerate(image_annotation) if mask[index]]
+        segmentation_polygons = [annotation['segmentation']
+                                 for index, annotation in enumerate(image_annotation) if mask[index]]
+
+        return image_labels, is_crowd, segmentation_polygons
 
 
 class MSCocoMaskRCNNConverter(MSCocoDetectionConverter):

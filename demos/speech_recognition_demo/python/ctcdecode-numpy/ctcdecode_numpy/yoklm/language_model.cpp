@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 Intel Corporation
+* Copyright (c) 2020-2021 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 **********************************************************************/
 
@@ -21,17 +21,17 @@ float LanguageModel::log10_p_cond(WordIndex new_word, LmState& state) const {
     words.resize(config_.order - 1);
   words.insert(words.begin(), new_word);
 
-  // First fetch log10-p without backoff, then add backoff
-  float p = find_ngram(new_state);
+  // First fetch log10_p without backoff, then add backoff
+  float log10_p = find_ngram(new_state);
   // The length of the longest sententce postfix present in the LM
   size_t ngram_length = new_state.backoffs.size();
   for (size_t k = ngram_length; k <= state.backoffs.size(); k++)
-    p += state.backoffs[k-1];
+    log10_p += state.backoffs[k-1];
 
   if (words.size() > config_.order - 1)
     words.resize(config_.order - 1);
   state = std::move(new_state);
-  return p;
+  return log10_p;
 }
 
 //   Preconditions:
@@ -74,12 +74,12 @@ float LanguageModel::find_ngram(LmState& words_backoffs) const {
   uint64_t l, r;
 
   // 1-gram
-  p = config_.unigram_layer[words[0]].prob;
-  backoffs.push_back(config_.unigram_layer[words[0]].backoff);
+  p = config_.unigram_layer[words[0]].log10_prob;
+  backoffs.push_back(config_.unigram_layer[words[0]].log10_backoff);
   l = config_.unigram_layer[words[0]].start_index;
   r = config_.unigram_layer[words[0] + 1].start_index;
 
-  // Medium trie layers: 2-gram .. (n-1)-gram, and including n-gram.
+  // Medium and leaves trie layers: 2-gram .. (n-1)-gram, and including n-gram.
   const WordIndex not_found = (WordIndex)(-1);
   for (size_t k = 2; k <= config_.order && k < words.size() + 1 && l < r; k++) {
     const WordIndex word = words[k-1];

@@ -41,7 +41,7 @@ models:
             apply_to: prediction
             min_confidence: 0.001
             remove_filtered: true
-          - type: nms
+          - type: diou_nms
             overlap: 0.5
           - type: clip_boxes
             apply_to: prediction
@@ -86,7 +86,7 @@ models:
             apply_to: prediction
             min_confidence: 0.001
             remove_filtered: true
-          - type: nms
+          - type: diou_nms
             overlap: 0.5
           - type: clip_boxes
             apply_to: prediction

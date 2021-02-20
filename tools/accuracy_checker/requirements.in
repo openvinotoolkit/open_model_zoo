@@ -29,7 +29,7 @@ nltk
 editdistance
 
 # DNA sequence matching
-parasail<=1.2
+parasail
 fast-ctc-decode
 
 # raw image formats processing

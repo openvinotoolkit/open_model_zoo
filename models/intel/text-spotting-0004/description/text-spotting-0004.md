@@ -17,7 +17,7 @@ Alphabet is alphanumeric: `abcdefghijklmnopqrstuvwxyz0123456789`.
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| Word spotting hmean ICDAR2015, without a dictionary | 68.40% |
+| Word spotting hmean ICDAR2015, without a dictionary | 70.34% |
 | Source framework                              | PyTorch\* |
 
 *Hmean Word spotting* is defined and measured according to the

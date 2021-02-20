@@ -193,6 +193,7 @@ class AssociativeEmbeddingDecoder:
             poses_tags = np.stack([p.tag for p in poses], axis=0)
             diff = tags[:, None] - poses_tags[None, :]
             diff_normed = np.linalg.norm(diff, ord=2, axis=2)
+            diff_saved = np.copy(diff_normed)
 
             if self.dist_reweight:
                 # Reweight cost matrix to prefer nearby points among all that are close enough in a tag space.
@@ -203,7 +204,6 @@ class AssociativeEmbeddingDecoder:
                 dists /= min_dists + 1e-10
                 diff_normed[close_tags_masks] *= dists[close_tags_masks]
 
-            diff_saved = np.copy(diff_normed)
             if self.use_detection_val:
                 diff_normed = np.round(diff_normed) * 100 - joints[:, 2:3]
             num_added = diff.shape[0]

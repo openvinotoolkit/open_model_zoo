@@ -58,7 +58,7 @@ protected:
 
     std::vector<cv::Mat> split(float* data, const InferenceEngine::SizeVector& shape);
 
-    std::vector<HumanPose> extractPoses(const std::vector<cv::Mat>& heatMaps,
+    std::vector<HumanPose> extractPoses(std::vector<cv::Mat>& heatMaps,
                                         const std::vector<cv::Mat>& aembdsMaps,
                                         const std::vector<cv::Mat>& nmsHeatMaps) const;
 };
