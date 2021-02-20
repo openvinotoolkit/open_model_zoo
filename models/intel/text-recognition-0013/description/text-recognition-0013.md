@@ -37,11 +37,6 @@ The net outputs 2 blobs
       - W - output sequence length
       - B - batch size
       - L - confidence distribution across alphanumeric symbols: "#0123456789abcdefghijklmnopqrstuvwxyz", where # - special blank character for CTC decoding algorithm.
-* `targets` with the shape `30, 1` in the format `W, B`,
-    where:
-      - W - output sequence length
-      - B - batch size
-  This is just np.argmax of the `logits` on the `L` dimension.
 
 The network output can be decoded by CTC Greedy Decoder or CTC Beam Search decoder.
 
