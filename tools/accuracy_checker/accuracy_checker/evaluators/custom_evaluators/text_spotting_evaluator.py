@@ -25,7 +25,6 @@ from ...adapters import create_adapter
 from ...config import ConfigError
 from ...launcher import create_launcher
 from ...utils import contains_all, extract_image_representations, get_path
-from ...postprocessor import PostprocessingExecutor
 from ...progress_reporters import ProgressReporter
 from ...logging import print_info
 
