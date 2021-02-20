@@ -1,5 +1,5 @@
 """
- Copyright (C) 2020 Intel Corporation
+ Copyright (C) 2020-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,18 +20,35 @@ from collections import deque
 
 
 class AsyncPipeline:
-    def __init__(self, ie, model, plugin_config, device='CPU', max_num_requests=1):
+    def __init__(self, ie, model=None, plugin_config={'CPU': 1}, device='CPU', max_num_requests=1, silent=False):
         self.model = model
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger() if not silent else lambda *x: None
 
-        self.logger.info('Loading network to {} plugin...'.format(device))
-        self.exec_net = ie.load_network(network=self.model.net, device_name=device,
-                                        config=plugin_config, num_requests=max_num_requests)
+        self.plugin_config = plugin_config
+        self.device = device
+        self.max_num_requests = max_num_requests
+        self.ie = ie
 
-        self.empty_requests = deque(self.exec_net.requests)
+        self.async_postprocessing = False
+
+        if self.model:
+            self.logger.info('Loading network to {} plugin...'.format(device))
+            self.exec_net = ie.load_network(network=self.model.net, device_name=device,
+                                            config=plugin_config, num_requests=max_num_requests)
+
+            self.empty_requests = deque(self.exec_net.requests)
         self.completed_request_results = {}
         self.callback_exceptions = {}
         self.event = threading.Event()
+
+    def reload_model(self, model, plugin_config=None, device=None, max_num_requests=None):
+        self.model = model
+        self.logger.info('Loading network to {} plugin...'.format(device))
+        self.exec_net = self.ie.load_network(network=self.model.net,
+                                             device_name=device if device else self.device,
+                                             config=plugin_config if plugin_config else self.plugin_config,
+                                             num_requests=max_num_requests if max_num_requests else self.max_num_requests)
+        self.empty_requests = deque(self.exec_net.requests)
 
     def inference_completion_callback(self, status, callback_args):
         request, id, meta, preprocessing_meta = callback_args
@@ -54,12 +71,14 @@ class AsyncPipeline:
                                         py_data=(request, id, meta, preprocessing_meta))
         request.async_infer(inputs=inputs)
 
-    def get_raw_result(self, id):
+    def get_raw_result(self, id=None):
+        if not id and self.completed_request_results:
+            return self.completed_request_results.popitem()[1]
         if id in self.completed_request_results:
             return self.completed_request_results.pop(id)
         return None
 
-    def get_result(self, id):
+    def get_result(self, id=None):
         result = self.get_raw_result(id)
         if result:
             raw_result, meta, preprocess_meta = result
