@@ -199,32 +199,3 @@ void batched_ctc_lm_decoder(
         }
     }
 }
-
-ScorerBase * create_scorer_yoklm(
-        double alpha,
-        double beta,
-        const std::string& lm_path,
-        const std::vector<std::string>& labels)
-{
-    return new ScorerYoklm(alpha, beta, lm_path, labels);
-}
-
-void delete_scorer(ScorerBase * lm_scorer) {
-    delete lm_scorer;
-}
-
-int is_character_based(ScorerBase * lm_scorer){
-    return lm_scorer->is_character_based();
-}
-
-size_t get_max_order(ScorerBase * lm_scorer){
-    return lm_scorer->get_max_order();
-}
-
-size_t get_dict_size(ScorerBase * lm_scorer){
-    return lm_scorer->get_dict_size();
-}
-
-void reset_params(ScorerBase * lm_scorer, double alpha, double beta){
-    lm_scorer->reset_params(alpha, beta);
-}

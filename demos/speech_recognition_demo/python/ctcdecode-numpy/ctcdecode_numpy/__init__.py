@@ -18,7 +18,7 @@ class SeqCtcLmDecoder:
     """
     def __init__(self, alphabet, beam_size, max_candidates=None,
             cutoff_prob=1.0, cutoff_top_n=40,
-            scorer_lm_fname=None, alpha=0.75, beta=1.85,
+            scorer_lm_fname=None, alpha=None, beta=None,
             text_decoder=None):
         self.alphabet = alphabet
         if text_decoder is None:
@@ -32,11 +32,12 @@ class SeqCtcLmDecoder:
 
         self.decoder_state = impl.CtcDecoderStateNumpy()
         if scorer_lm_fname is not None:
-            self.lm_scorer = impl.create_scorer_yoklm(alpha, beta, scorer_lm_fname, alphabet)
+            assert alpha is not None and beta is not None, "alpha and beta arguments must be provided to use LM"
+            self.lm_scorer = impl.ScorerYoklm(alpha, beta, scorer_lm_fname, alphabet)
         else:
             self.lm_scorer = None
         self.decoder_state.init(
-            alphabet + [''],  # labels
+            alphabet + [''],
             blank_idx = len(alphabet),
             beam_size = beam_size,
             lm_scorer = self.lm_scorer,
@@ -53,7 +54,7 @@ class SeqCtcLmDecoder:
         assert len(probs.shape) == 2
         if self.decoder_state.is_finalized():
             self.decoder_state.new_sequence()
-        self.decoder_state.append_numpy(probs, log_probs=log_probs)
+        self.decoder_state.append_numpy(probs, log_probs)
 
     def decode(self, probs=None, log_probs=None, finalize=True):
         if probs is not None:
@@ -74,11 +75,6 @@ class SeqCtcLmDecoder:
         ]
         return candidates
 
-    def __del__(self):
-        if self.lm_scorer is not None:
-            impl.delete_scorer(self.lm_scorer)
-            self.lm_scorer = None
-
 
 class BatchedCtcLmDecoder:
     """
@@ -96,7 +92,7 @@ class BatchedCtcLmDecoder:
         self._log_probs = bool(log_probs_input)
         if model_path is not None:
             if loader == 'yoklm':
-                self._scorer = impl.create_scorer_yoklm(alpha, beta, model_path, self._alphabet)
+                self._scorer = impl.ScorerYoklm(alpha, beta, model_path, self._alphabet)
             else:
                 raise ValueError("Unknown loader type: \"%s\"" % loader)
         self._cutoff_prob = cutoff_prob
@@ -132,22 +128,17 @@ class BatchedCtcLmDecoder:
         return output, scores, timesteps, out_seq_len
 
     def character_based(self):
-        return impl.is_character_based(self._scorer) if self._scorer else None
+        return self._scorer.is_character_based() if self._scorer else None
 
     def max_order(self):
-        return impl.get_max_order(self._scorer) if self._scorer else None
+        return self._scorer.get_max_order() if self._scorer else None
 
     def dict_size(self):
-        return impl.get_dict_size(self._scorer) if self._scorer else None
+        return self._scorer.get_dict_size() if self._scorer else None
 
     def reset_params(self, alpha, beta):
         if self._scorer is not None:
-            impl.reset_params(self._scorer, alpha, beta)
-
-    def __del__(self):
-        if self._scorer is not None:
-            impl.delete_scorer(self._scorer)
-            self._scorer = None
+            self._scorer.reset_params(alpha, beta)
 
 
 # For compatibility with ctcdecode_numpy version 0.2.0

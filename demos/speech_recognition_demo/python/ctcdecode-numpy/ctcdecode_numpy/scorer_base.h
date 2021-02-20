@@ -23,7 +23,7 @@ const std::string UNK_TOKEN = "<unk>";
 const std::string END_TOKEN = "</s>";
 
 /* External scorer to query score for n-gram or sentence, including language
- * model scoring and word insertion.
+ * model scoring and word insertion score.
  *
  * Example:
  *     Scorer scorer(alpha, beta, "path_of_language_model");

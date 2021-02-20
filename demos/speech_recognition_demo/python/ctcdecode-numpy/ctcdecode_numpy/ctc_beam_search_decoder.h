@@ -46,7 +46,7 @@ public:
     size_t probs_frame_num,
     size_t probs_frame_stride,
     size_t probs_alph_stride,
-    bool log_probs = false
+    bool log_probs
   );
   void finalize();
   bool is_finalized() { return is_finalized_; }
@@ -91,7 +91,6 @@ private:
 */
 
 std::vector<std::pair<float, Output>> ctc_beam_search_decoder(
-    //const std::vector<std::vector<float>>& probs_seq,
     const float * probs,
     size_t probs_frame_num,
     size_t probs_frame_stride,

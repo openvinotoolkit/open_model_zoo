@@ -21,7 +21,7 @@ namespace yoklm {
 }
 
 /* External scorer to query score for n-gram or sentence, including language
- * model scoring and word insertion.
+ * model scoring and word insertion score.
  *
  * Example:
  *     Scorer scorer(alpha, beta, "path_of_language_model");

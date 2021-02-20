@@ -377,7 +377,7 @@ class CtcDecoderState(_object):
     def new_sequence(self):
         return _impl.CtcDecoderState_new_sequence(self)
 
-    def append(self, probs, probs_frame_num, probs_frame_stride, probs_alph_stride, log_probs=False):
+    def append(self, probs, probs_frame_num, probs_frame_stride, probs_alph_stride, log_probs):
         return _impl.CtcDecoderState_append(self, probs, probs_frame_num, probs_frame_stride, probs_alph_stride, log_probs)
 
     def finalize(self):
@@ -419,7 +419,7 @@ class CtcDecoderStateNumpy(CtcDecoderState):
         except __builtin__.Exception:
             self.this = this
 
-    def append_numpy(self, probs, log_probs=False):
+    def append_numpy(self, probs, log_probs):
         return _impl.CtcDecoderStateNumpy_append_numpy(self, probs, log_probs)
 
     def decode_numpy(self, limit_candidates, finalize):
@@ -433,30 +433,6 @@ CtcDecoderStateNumpy_swigregister(CtcDecoderStateNumpy)
 def batched_ctc_lm_decoder(probs, seq_lens, labels, beam_size, max_candidates_per_batch, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_probs, lm_scorer):
     return _impl.batched_ctc_lm_decoder(probs, seq_lens, labels, beam_size, max_candidates_per_batch, num_processes, cutoff_prob, cutoff_top_n, blank_id, log_probs, lm_scorer)
 batched_ctc_lm_decoder = _impl.batched_ctc_lm_decoder
-
-def create_scorer_yoklm(alpha, beta, lm_path, labels):
-    return _impl.create_scorer_yoklm(alpha, beta, lm_path, labels)
-create_scorer_yoklm = _impl.create_scorer_yoklm
-
-def delete_scorer(lm_scorer):
-    return _impl.delete_scorer(lm_scorer)
-delete_scorer = _impl.delete_scorer
-
-def is_character_based(lm_scorer):
-    return _impl.is_character_based(lm_scorer)
-is_character_based = _impl.is_character_based
-
-def get_max_order(lm_scorer):
-    return _impl.get_max_order(lm_scorer)
-get_max_order = _impl.get_max_order
-
-def get_dict_size(lm_scorer):
-    return _impl.get_dict_size(lm_scorer)
-get_dict_size = _impl.get_dict_size
-
-def reset_params(lm_scorer, alpha, beta):
-    return _impl.reset_params(lm_scorer, alpha, beta)
-reset_params = _impl.reset_params
 # This file is compatible with both classic and new-style classes.
 
 
