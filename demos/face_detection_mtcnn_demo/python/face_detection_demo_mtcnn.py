@@ -29,7 +29,6 @@ from openvino.inference_engine import IECore
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
-
 import models
 import monitors
 from pipelines import MtcnnPipeline
@@ -44,39 +43,62 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
+    args.add_argument('-i', '--input', required=True,
+                      help='Required. An input to process. The input must be a single image, '
+                           'a folder of images, video file or camera id.')
     args.add_argument('-m_p', '--model_proposal', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-m_r', '--model_refine', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-m_o', '--model_output', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
-    # args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-    #                   type=str, required=True, choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retina'))
-    args.add_argument('-i', '--input', required=True,
-                      help='Required. An input to process. The input must be a single image, '
-                           'a folder of images, video file or camera id.')
-    args.add_argument('-d', '--device', default='CPU', type=str,
-                      help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
-                           'acceptable. The sample will look for a suitable plugin for device specified. '
+    args.add_argument('-d_p', '--device_proposal', type=str, default='CPU',
+                      help='Optional. Specify the target device to infer on MTCNN Proposal stage;'
+                           ' CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. '
+                           'The sample will look for a suitable plugin for device specified. '
+                           'Default value is CPU.')
+    args.add_argument('-d_r', '--device_refine', type=str, default='CPU',
+                      help='Optional. Specify the target device to infer on MTCNN Refine stage;'
+                           ' CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. '
+                           'The sample will look for a suitable plugin for device specified. '
+                           'Default value is CPU.')
+    args.add_argument('-d_o', '--device_output', type=str, default='CPU',
+                      help='Optional. Specify the target device to infer on MTCNN Output stage;'
+                           ' CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. '
+                           'The sample will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
 
-    common_model_args = parser.add_argument_group('Common model options')
-    common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
-    common_model_args.add_argument('-t', '--prob_threshold', default=0.5, type=float,
-                                   help='Optional. Probability threshold for detections filtering.')
-    common_model_args.add_argument('--keep_aspect_ratio', action='store_true', default=False,
-                                   help='Optional. Keeps aspect ratio on resize.')
-
     infer_args = parser.add_argument_group('Inference options')
-    infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
-                            default=1, type=int)
-    infer_args.add_argument('-nstreams', '--num_streams',
+    infer_args.add_argument('--proposal_async', default=False, action='store_true')
+    infer_args.add_argument('--refine_batch_size', type=int, default=0,
+                            help='Optional. Sets fixed batch size for MTCNN Refine stage, disallowing dynamic reshape.'
+                                 'Forces asynchronous mode for MTCNN Refine stage. Dynamic reshape is set by default.')
+    infer_args.add_argument('--refine_requests', type=int, default=1,
+                            help='Optional. Number of infer requests for MTCNN Refine stage. '
+                                 'Works only with --refine_batch_size > 0.')
+    infer_args.add_argument('--refine_nstreams', type=str, default='',
                             help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
-                                 'mode (for HETERO and MULTI device cases use format '
-                                 '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).',
-                            default='', type=str)
-    infer_args.add_argument('-nthreads', '--num_threads', default=None, type=int,
-                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
+                                 'mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>, '
+                                 '<device2>:<nstreams2> or just <nstreams>) for MTCNN Refine stage.'
+                                 'Works only with --refine_batch_size > 0.')
+    infer_args.add_argument('--refine_nthreads', type=int, default=1,
+                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases) for'
+                                 'MTCNN Refine stage. Works only with --refine_batch_size > 0.')
+
+    infer_args.add_argument('--output_batch_size', type=int, default=0,
+                            help='Optional. Sets fixed batch size for MTCNN Output stage, disallowing dynamic reshape.'
+                                 'Forces asynchronous mode for MTCNN Output stage. Dynamic reshape is set by default.')
+    infer_args.add_argument('--output_requests', type=int, default=1,
+                            help='Optional. Number of infer requests for MTCNN Output stage. '
+                                 'Works only with --output_batch_size > 0.')
+    infer_args.add_argument('--output_nstreams', type=str, default='',
+                            help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
+                                 'mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>, '
+                                 '<device2>:<nstreams2> or just <nstreams>) for MTCNN Output stage.'
+                                 'Works only with --output_batch_size > 0.')
+    infer_args.add_argument('--output_nthreads', type=int, default=1,
+                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases) for'
+                                 'MTCNN Output stage. Works only with --output_batch_size > 0.')
 
     io_args = parser.add_argument_group('Input/output options')
     io_args.add_argument('--loop', default=False, action='store_true',
@@ -168,7 +190,7 @@ def get_plugin_configs(device, num_streams, num_threads):
     return config_user_specified
 
 
-def draw_detections(frame, detections, palette, labels, threshold):
+def draw_detections(frame, detections, palette, labels, threshold, draw_landmark=True, draw_confidence=True):
     size = frame.shape[:2]
     for detection in detections:
         if detection.score > threshold:
@@ -178,11 +200,12 @@ def draw_detections(frame, detections, palette, labels, threshold):
             ymax = min(int(detection.ymax), size[0])
             class_id = int(detection.id)
             color = palette[class_id]
-            det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
-            cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
-                        (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
-            if isinstance(detection, models.DetectionWithLandmarks):
+            if draw_confidence:
+                det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
+                cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
+                            (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
+            if isinstance(detection, models.DetectionWithLandmarks) and draw_landmark:
                 for landmark in detection.landmarks:
                     landmark = (int(landmark[0]), int(landmark[1]))
                     cv2.circle(frame, landmark, 2, (0, 255, 255), 2)
@@ -209,7 +232,8 @@ def main():
     log.info('Initializing Inference Engine...')
     ie = IECore()
 
-    plugin_config = get_plugin_configs(args.device, args.num_streams, args.num_threads)
+    refine_config_plugin = get_plugin_configs(args.device_refine, args.refine_nstreams, args.refine_nthreads)
+    output_config_plugin = get_plugin_configs(args.device_output, args.output_nstreams, args.output_nthreads)
 
     log.info('Loading network...')
 
@@ -217,125 +241,67 @@ def main():
     model_refine = models.RefineModel(ie, args.model_refine)
     model_output = models.OutputModel(ie, args.model_output)
 
-    detector_pipeline = MtcnnPipeline(ie, model_proposal, model_refine, model_output, plugin_config,
-                                      device=args.device, max_num_requests=args.num_infer_requests)
+    detector_pipeline = MtcnnPipeline(ie, model_proposal, model_refine, model_output,
+                                      pm_sync=not args.proposal_async,
+                                      pm_device=args.device_proposal,
+                                      rm_batch_size=args.refine_batch_size,
+                                      rm_config=refine_config_plugin,
+                                      rm_num_requests=args.refine_requests,
+                                      rm_device=args.device_refine,
+                                      om_batch_size=args.output_batch_size,
+                                      om_config=output_config_plugin,
+                                      om_num_requests=args.output_requests,
+                                      om_device=args.device_output)
 
     cap = open_images_capture(args.input, args.loop)
 
-    next_frame_id = 0
-    next_frame_id_to_show = 0
-
     log.info('Starting inference...')
+    print("Use 'c' key to disable/enable confidence drawing, 'l' to disable/enable landmarks drawing")
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     palette = ColorPalette(1)
     metrics = PerformanceMetrics()
-    presenter = None
     video_writer = cv2.VideoWriter()
 
+    draw_lanmdmark = True
+    draw_confidence = True
+    total_frames = 0
     while True:
+        start_time = perf_counter()
         frame = cap.read()
+        if not frame:
+            break
+        total_frames += 1
+        if total_frames == 1 :
+            presenter = monitors.Presenter(args.utilization_monitors, 55,
+                                           (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
+            if args.output:
+                video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                               (frame.shape[1], frame.shape[0]))
+                if not video_writer.isOpened():
+                    raise RuntimeError("Can't open video writer")
         detections = detector_pipeline.infer(frame)
 
-        if detections:
-            draw_detections(frame, detections, palette, None, 0.5)
+        presenter.drawGraphs(frame)
+        draw_detections(frame, detections, palette, None, 0.5, draw_lanmdmark, draw_confidence)
+        metrics.update(start_time, frame)
+
+        if video_writer.isOpened() and (args.output_limit == -1 or total_frames <= args.output_limit - 1):
+            video_writer.write(frame)
 
         if not args.no_show:
             cv2.imshow('Detection Results', frame)
-            key = cv2.waitKey()
+            key = cv2.waitKey(1)
             ESC_KEY = 27
             # Quit.
             if key in {ord('q'), ord('Q'), ESC_KEY}:
                 break
-        # if detector_pipeline.callback_exceptions:
-        #     raise detector_pipeline.callback_exceptions[0]
-        # # Process all completed requests
-        # results = detector_pipeline.get_result(next_frame_id_to_show)
-        # if results:
-        #     objects, frame_meta = results
-        #     frame = frame_meta['frame']
-        #     start_time = frame_meta['start_time']
-        #
-        #     if len(objects) and args.raw_output_message:
-        #         print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
-        #
-        #     presenter.drawGraphs(frame)
-        #     frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
-        #     metrics.update(start_time, frame)
-        #
-        #     if video_writer.isOpened() and (args.output_limit == -1 or next_frame_id_to_show <= args.output_limit-1):
-        #         video_writer.write(frame)
-        #
-        #     if not args.no_show:
-        #         cv2.imshow('Detection Results', frame)
-        #         key = cv2.waitKey(1)
-        #
-        #         ESC_KEY = 27
-        #         # Quit.
-        #         if key in {ord('q'), ord('Q'), ESC_KEY}:
-        #             break
-        #         presenter.handleKey(key)
-        #     next_frame_id_to_show += 1
-        #     continue
-        #
-        # if detector_pipeline.is_ready():
-        #     # Get new image/frame
-        #     start_time = perf_counter()
-        #     frame = cap.read()
-        #     if frame is None:
-        #         if next_frame_id == 0:
-        #             raise ValueError("Can't read an image from the input")
-        #         break
-        #     if next_frame_id == 0:
-        #         presenter = monitors.Presenter(args.utilization_monitors, 55,
-        #                                        (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
-        #         if args.output:
-        #             video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
-        #                                            (frame.shape[1], frame.shape[0]))
-        #             if not video_writer.isOpened():
-        #                 raise RuntimeError("Can't open video writer")
-        #     # Submit for inference
-        #     detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
-        #     next_frame_id += 1
-        #
-        # else:
-        #     # Wait for empty request
-        #     detector_pipeline.await_any()
-
-    detector_pipeline.await_all()
-    # Process completed requests
-    while detector_pipeline.has_completed_request():
-        results = detector_pipeline.get_result(next_frame_id_to_show)
-        if results:
-            objects, frame_meta = results
-            frame = frame_meta['frame']
-            start_time = frame_meta['start_time']
-
-            if len(objects) and args.raw_output_message:
-                print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
-
-            presenter.drawGraphs(frame)
-            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
-            metrics.update(start_time, frame)
-
-            if video_writer.isOpened():
-                video_writer.write(frame)
-
-            if not args.no_show:
-                cv2.imshow('Detection Results', frame)
-                key = cv2.waitKey(1)
-
-                ESC_KEY = 27
-                # Quit.
-                if key in {ord('q'), ord('Q'), ESC_KEY}:
-                    break
-                presenter.handleKey(key)
-            next_frame_id_to_show += 1
-        else:
-            break
+            if key in {ord('l'), ord('L')}:
+                draw_lanmdmark = not draw_lanmdmark
+            if key in {ord('c'), ord('C')}:
+                draw_confidence = not draw_confidence
 
     metrics.print_total()
-    print(presenter.reportMeans())
 
 
 if __name__ == '__main__':
