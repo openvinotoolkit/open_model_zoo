@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 Intel Corporation
+* Copyright (c) 2020-2021 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 **********************************************************************/
 
@@ -27,7 +27,6 @@ class ManagedMemory {
     ManagedMemory& operator=(const ManagedMemory& mm) = delete;
     virtual ~ManagedMemory() { delete[] ptr_; }
 
-    // TODO: add alignment
     ManagedMemory(size_t size) : ptr_(new uint8_t[size]), size_(size) {}
   private:
     // The caller transfers ownership of *ptr.
@@ -35,8 +34,8 @@ class ManagedMemory {
     ManagedMemory(uint8_t * ptr, size_t size) : ptr_(ptr), size_(size) {}
   public:
 
-    virtual uint8_t * ptr() const { return ptr_; };
-    virtual size_t size() const { return size_; };
+    virtual uint8_t * ptr() const { return ptr_; }
+    virtual size_t size() const { return size_; }
 
   private:
     uint8_t * ptr_;
@@ -53,21 +52,20 @@ class MemorySection {
     MemorySection& operator=(const MemorySection& ms);
 
     MemorySection(std::shared_ptr<ManagedMemory> mm);
-    // TODO: add alignment
-    MemorySection(size_t size);
   private:
     // Initialize with unmanaged memory. The caller is responsible for proper *ptr lifetime.
-    MemorySection(const uint8_t * ptr, size_t size, std::shared_ptr<ManagedMemory>& owner);
+    // base_ptr can point anywhere and is never dereferenced, used only in base_offset() method.
+    MemorySection(const uint8_t * ptr, const uint8_t * base_ptr, size_t size, std::shared_ptr<ManagedMemory>& owner);
 
   public:
     const uint8_t& operator[](size_t index) const {
       if (index >= size_)
-        throw std::out_of_range("Internal error in yoklm: access outside MemorySection");
+        throw std::out_of_range("Out of bounds access in MemorySection. Broken LM file?");
       return ptr_[index];
     }
     template <typename T> const T& at(size_t index) const {
       if (size_ < sizeof(T) || index > size_ - sizeof(T))
-        throw std::out_of_range("Access outside MemorySection.  This can be caused by a broken LM file.");
+        throw std::out_of_range("Out of bounds access in MemorySection::at<T>(). Broken LM file?");
       return *reinterpret_cast<const T *>(&ptr_[index]);
     }
     // Return subsection
@@ -87,12 +85,15 @@ class MemorySection {
     }
 
     void reset();
-    const uint8_t * ptr() const { return ptr_; };
-    size_t size() const { return size_; };
-    std::ptrdiff_t offset(const MemorySection& base) { return ptr_ - base.ptr_; }
+    const uint8_t * ptr() const { return ptr_; }
+    size_t size() const { return size_; }
+
+    void set_base_offset(std::ptrdiff_t base_offset) { base_ptr_ = ptr_ - base_offset; }
+    std::ptrdiff_t base_offset() const { return ptr_ - base_ptr_; }
 
   private:
     const uint8_t * ptr_;
+    const uint8_t * base_ptr_;  // this pointer is never dereferenced, only for expressions like (ptr - base_ptr_)
     size_t size_;
     mutable std::shared_ptr<ManagedMemory> owner_;
 }; // class MemorySection
@@ -104,13 +105,14 @@ class MemorySectionArray : public MemorySection {
     MemorySectionArray() {}
     MemorySectionArray(const MemorySection& ms) : MemorySection(ms) {}
 
-    // Now :index: is not offset, but index into T[] array instead. That is, the second element's index is 1.
+    // Here :index: is not offset, but index into T[] array instead. That is, the second element's index is 1.
     const T& operator[](size_t index) const {
       if (index >= size() / sizeof(T))
         throw std::out_of_range(
-          "Internal error in yoklm: access outside MemorySection: index="
+          "Out of bounds access in MemorySectionArray: index="
             + std::to_string((unsigned long)index)
             + " size=" + std::to_string((unsigned long)(size() / sizeof(T)))
+            + ". Broken LM file?"
         );
       return reinterpret_cast<const T *>(ptr())[index];
     }
@@ -119,35 +121,34 @@ class MemorySectionArray : public MemorySection {
 struct BitField {
   int offset;  // in bits
   uint64_t mask;
-};
+}; // struct BitField
 
 // Essentially this class template only overloads operator[] in MemorySection.
 class MemorySectionBitArray : public MemorySection {
   public:
     MemorySectionBitArray() : stride_(0), bit_field_{}, index_limit_(0) {}
-    MemorySectionBitArray(const MemorySection& ms)
+    MemorySectionBitArray(const MemorySection& ms)  // ms must contain 8-byte padding after the actual bit array
         : MemorySection(ms), stride_(0), bit_field_{}, index_limit_(0) {}
 
-    // Inline for efficiency.
-    // Expects index to be inside bound, and not cause segfault on the last element.
+    // Defined in header file for efficiency.
+    // Expects (0 <= bf.offset) and (bf.offset + bits(bf.mask) <= stride).
     uint64_t operator()(size_t index, const BitField& bf) const {
       size_t bit_index = index * stride_ + bf.offset;
-      // We don't check for the end of uint64_t stick outside the array.  It's mainly for testing anyway.
       if (index >= index_limit_)
-        throw std::logic_error("Out of bounds access in MemorySectionBitArray");
+        throw std::logic_error("Out of bounds access in MemorySectionBitArray. Broken LM file?");
       uint64_t data = *reinterpret_cast<const uint64_t *>(&ptr()[bit_index / 8]) >> (bit_index & 7);  // unaligned read
       return data & bf.mask;
     }
     uint64_t operator[](size_t index) const { return operator()(index, bit_field_); }
 
-    void set_stride(int stride) { stride_ = stride; index_limit_ = size() * 8 / stride; }
+    void set_stride(int stride);
     void set_bit_field(const BitField& bf) { bit_field_ = bf; }
     int stride() const { return stride_; }
 
   private:
     int stride_;  // for operator[] and operator()
     BitField bit_field_;  // for operator[]
-    uint32_t index_limit_;
+    size_t index_limit_;
 }; // class MemorySectionBitArray
 
 // Throws an exception if cannot.
