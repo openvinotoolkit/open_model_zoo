@@ -40,7 +40,7 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: action_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
                                   [-limit OUTPUT_LIMIT] -at
-                                  {dummy-de,en-de,i3d-rgb} -m_en M_ENCODER
+                                  {en-de,en-mean,i3d-rgb} -m_en M_ENCODER
                                   [-m_de M_DECODER | --seq DECODER_SEQ_SIZE]
                                   [-l CPU_EXTENSION] [-d DEVICE] [-lb LABELS]
                                   [--no_show] [-s LABEL_SMOOTHING]
@@ -58,7 +58,7 @@ Options:
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output. If 0 is
                         set, all frames are stored.
-  -at {dummy-de,en-de,i3d-rgb}, --architecture_type {dummy-de,en-de,i3d-rgb}
+  -at {en-de,en-mean,i3d-rgb}, --architecture_type {en-de,en-mean,i3d-rgb}
                         Required. Specify architecture type.
   -m_en M_ENCODER, --m_encoder M_ENCODER
                         Required. Path to encoder model.

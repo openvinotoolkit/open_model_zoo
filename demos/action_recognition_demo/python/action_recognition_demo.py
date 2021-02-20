@@ -45,7 +45,7 @@ def build_argparser():
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
     args.add_argument('-at', '--architecture_type', help='Required. Specify architecture type.',
-                      type=str, required=True, choices=('dummy-de', 'en-de', 'i3d-rgb'))
+                      type=str, required=True, choices=('en-de', 'en-mean', 'i3d-rgb'))
     args.add_argument('-m_en', '--m_encoder', help='Required. Path to encoder model.', required=True, type=str)
     decoder_args = args.add_mutually_exclusive_group()
     decoder_args.add_argument('-m_de', '--m_decoder',
@@ -101,16 +101,16 @@ def main():
     models = [IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
                 num_requests=(3 if args.device == 'MYRIAD' else 1))]
 
-    if args.architecture_type == 'dummy-de':
-        models.append(DummyDecoder(num_requests=2))
-        seq_size = args.decoder_seq_size
-    elif args.architecture_type == 'en-de':
+    if args.architecture_type == 'en-de':
         if args.m_decoder is None:
             raise RuntimeError('No decoder for encoder-decoder model type (-m_de) provided')
         decoder_xml = args.m_decoder
         decoder_bin = args.m_decoder.replace('.xml', '.bin')
         models.append(IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2))
         seq_size = models[1].input_size[1]
+    elif args.architecture_type == 'en-mean':
+        models.append(DummyDecoder(num_requests=2))
+        seq_size = args.decoder_seq_size
     elif args.architecture_type == 'i3d-rgb':
         seq_size = models[0].input_size[2]
 

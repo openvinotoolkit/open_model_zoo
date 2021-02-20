@@ -30,7 +30,7 @@ def run_pipeline(capture, model_type, model, render_fn, seq_size=16, fps=30):
     pipeline = AsyncPipeline()
     pipeline.add_step("Data", DataStep(capture), parallel=False)
 
-    if model_type in ('en-de', 'dummy-de'):
+    if model_type in ('en-de', 'en-mean'):
         pipeline.add_step("Encoder", EncoderStep(model[0]), parallel=False)
         pipeline.add_step("Decoder", DecoderStep(model[1], sequence_size=seq_size), parallel=False)
     elif model_type == 'i3d-rgb':
@@ -56,7 +56,8 @@ class I3DRGBModelStep(PipelineStep):
         self.async_model = AsyncWrapper(self.model, self.model.num_requests)
 
     def process(self, frame):
-        preprocessed = preprocess_frame(frame, self.size, self.crop_size)
+        preprocessed = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        preprocessed = preprocess_frame(preprocessed, self.size, self.crop_size)
         self.input_seq.append(preprocessed)
         if len(self.input_seq) == self.sequence_size:
             input_blob = np.array(self.input_seq)
