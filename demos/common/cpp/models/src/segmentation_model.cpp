@@ -79,7 +79,7 @@ std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData
     if (useAutoResize) {
         /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
         request->SetBlob(inputsNames[0], wrapMat2Blob(img));
-        /* IE::Blob::Ptr from wrapMat2Blob() doesn't onwn data. Save the image to avoid deallocation before inference */
+        /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
         return std::make_shared<InternalImageMatModelData>(img);
     }
     /* Resize and copy data from the image to the input blob */
