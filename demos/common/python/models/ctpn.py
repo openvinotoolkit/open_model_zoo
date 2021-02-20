@@ -80,7 +80,8 @@ class CTPN(Model):
         if scales[0] < 1 and scales[1] < 1:
             meta['scales'] = [scales]
             inputs = cv2.resize(inputs, (self.w1, self.h1))
-        if self.h1 != self.h2 or self.w1 != self.w2:
+        if (self.h2 == 600 and self.w2 == 600 or
+           (self.h1 != self.h2 or self.w1 != self.w2)):
             meta.setdefault('scales', []).append((self.w2 / inputs.shape[1],
                                                   self.h2 / inputs.shape[0]))
             inputs = cv2.resize(inputs, (self.w2, self.h2))
