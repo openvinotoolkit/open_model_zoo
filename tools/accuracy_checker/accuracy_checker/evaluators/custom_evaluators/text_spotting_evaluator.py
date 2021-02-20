@@ -97,6 +97,9 @@ class TextSpottingEvaluator(BaseEvaluator):
             batch_raw_prediction, batch_prediction = self.model.predict(
                 batch_identifiers, batch_data, batch_meta, callback=temporal_output_callback
             )
+            batch_annotation, batch_prediction = self.postprocessor.process_batch(
+                batch_annotation, batch_prediction, batch_meta
+            )
             metrics_result = None
             if self.metric_executor and calculate_metrics:
                 metrics_result, _ = self.metric_executor.update_metrics_on_batch(
