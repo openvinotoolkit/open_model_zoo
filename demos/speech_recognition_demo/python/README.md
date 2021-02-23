@@ -88,8 +88,8 @@ source <openvino_dir>/bin/setupvars.sh
 
 python speech_recognition_demo.py \
     -p mds08x_en \
-    -m <ir_dir>/FP32/mozilla_deepspeech_0.8.2.xml \
-    -L <path_to_tf_model>/deepspeech-0.8.2-models.kenlm \
+    -m <path_to_model>/mozilla_deepspeech_0.8.2.xml \
+    -L <path_to_file>/deepspeech-0.8.2-models.kenlm \
     -i <path_to_audio>/audio.wav
 ```
 
@@ -98,8 +98,8 @@ For version 0.6.1 it is:
 ```shell
 python speech_recognition_demo.py \
     -p mds06x_en \
-    -m <ir_dir>/FP32/mozilla_deepspeech_0.6.1.xml \
-    -L <path_to_tf_model>/lm.binary \
+    -m <path_to_model>/mozilla_deepspeech_0.6.1.xml \
+    -L <path_to_file>/lm.binary \
     -i <path_to_audio>/audio.wav
 ```
 

@@ -55,20 +55,20 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 For example, to run the demo on FPGA with fallback on CPU, with one single camera, use the following command:
 ```sh
-./multi_channel_object_detection_demo_yolov3 -m $PATH_OF_YOLO_V3_MODEL -d HETERO:FPGA,CPU -nc 1
+./multi_channel_object_detection_demo_yolov3 -m <path_to_model>/model.xml -d HETERO:FPGA,CPU -nc 1
 ```
 
 To run the demo using two recorded video files, use the following command:
 ```sh
-./multi_channel_object_detection_demo_yolov3 -m $PATH_OF_YOLO_V3_MODEL -d HDDL -i /path/to/file1 /path/to/file2
+./multi_channel_object_detection_demo_yolov3 -m <path_to_mdel>/model.xml -d HDDL -i <path_to_file>/file1 <path_to_file>/file2
 ```
 Video files will be processed repeatedly.
 
 To achieve 100% utilization of one Myriad X, the thumb rule is to run 4 infer requests on each Myriad X. Option `-nireq 32` can be added to above command to use 100% of HDDL-R card. The 32 here is 8 (Myriad X on HDDL-R card) x 4 (infer requests), such as following command:
 
 ```sh
-./multi_channel_object_detection_demo_yolov3 -m $PATH_OF_YOLO_V3_MODEL -d HDDL
--i /path/to/file1 /path/to/file2 /path/to/file3 /path/to/file4 -nireq 32
+./multi_channel_object_detection_demo_yolov3 -m <path_to_model>/model.xml -d HDDL
+-i <path_to_file>/file1 <path_to_file>/file2 <path_to_file>/file3 <path_to_file>/file4 -nireq 32
 ```
 
 You can also run the demo on web cameras and video files simultaneously by specifying both parameters: `-nc <number of cams> -i <video files sequentially, separated by space>`.

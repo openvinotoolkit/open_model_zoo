@@ -77,9 +77,9 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 To run the demo, please provide paths to the model in the IR format, to a file with class labels, and to an input video, image, or folder with images:
 ```bash
 python image_retrieval_demo.py \
--m /home/user/image-retrieval-0001.xml \
--i /home/user/video.dav.mp4 \
--g /home/user/list.txt \
+-m <path_to_model>/image-retrieval-0001.xml \
+-i <path_to_video>/video.dav.mp4 \
+-g <path_to_file>/list.txt \
 --ground_truth text_label
 ```
 

@@ -64,7 +64,7 @@ Options:
 
 For example:
 ```
-python handwritten_text_recognition_demo.py -i data/handwritten_japanese_test.png -m path/to/ir_xml/model.xml
+python handwritten_text_recognition_demo.py -i data/handwritten_japanese_test.png -m <path_to_model>/model.xml
 
 ```
 When the `designated_characters` argument is provided, if the output character is not included in the designated characters, the script will check Top k steps in looking up the decoded character, until a designated one is found. By doing so, the output character will be restricted to a designated region. K is set to 20 by default.
@@ -74,7 +74,7 @@ For example, if we want to restrict the output characters to only digits and hyp
 The command line:
 
 ```
-python handwritten_text_recognition_demo.py -i data/handwritten_japanese_test.png -m path/to/ir_xml/model.xml -dc data/digit_hyphen.txt
+python handwritten_text_recognition_demo.py -i data/handwritten_japanese_test.png -m <path_to_model>/model.xml -dc data/digit_hyphen.txt
 
 ```
 ## Demo Output

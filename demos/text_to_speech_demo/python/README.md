@@ -55,11 +55,25 @@ Options:
 Running the application with the empty list of options yields the usage message and an error message.
 
 ## Example for running with arguments
+
+# WaveRNN upsample
 ```
-python3 text_to_speech_demo.py --model_duration forward_tacotron_duration_prediction.xml --model_forward forward_tacotron_regression.xml --input <path_to_file_with_text.txt> wavernn --model_upsample wavernn_upsampler.xml --model_rnn wavernn_rnn.xml
+python3 text_to_speech_demo.py \
+--input <path_to_file>/text.txt \
+-o <path_to_audio>/audio.wav \
+--model_duration <path_to_model>/forward_tacotron_duration_prediction.xml \
+--model_forward <path_to_model>/forward_tacotron_regression.xml \
+--model_upsample <path_to_model>/wavernn_upsampler.xml \
+--model_rnn <path_to_model>/wavernn_rnn.xml
 ```
+# MELGAN upsample
 ```
-python3 text_to_speech_demo.py -m_duration forward_tacotron_duration_prediction_att.xml -m_forward forward_tacotron_regression_att.xml -i <path_to_file_with_text.txt> -o <path_to_audio.wav> melgan -m_melgan melganupsample.xml
+python3 text_to_speech_demo.py \
+-i <path_to_file>/text.txt \
+-o <path_to_audio>/audio.wav \
+-m_duration <path_to_model>/forward_tacotron_duration_prediction_att.xml \
+-m_forward <path_to_model>/forward_tacotron_regression_att.xml \
+-m_melgan <path_to_model>/melganupsample.xml
 ```
 To run the demo, you can use public pre-trained models. You can download the pre-trained models with the OpenVINO
 [Model Downloader](../../../tools/downloader/README.md).

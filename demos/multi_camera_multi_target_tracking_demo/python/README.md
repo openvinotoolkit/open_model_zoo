@@ -97,23 +97,23 @@ Minimum command examples to run the demo for person tracking (for vehicle tracki
 ```
 # videos
 python multi_camera_multi_target_tracking_demo.py \
-    -i path/to/video_1.avi path/to/video_2.avi \
-    --m_detector path/to/person-detection-retail-0013.xml \
-    --m_reid path/to/person-reidentification-retail-0103.xml \
+    -i <path_to_video>/video_1.avi <path_to_video>/video_2.avi \
+    --m <path_to_model>/person-detection-retail-0013.xml \
+    --m_reid <path_to_model>/person-reidentification-retail-0103.xml \
     --config configs/person.py
 
 # videos with instance segmentation model
 python multi_camera_multi_person_tracking.py \
-    -i path/to/video_1.avi path/to/video_2.avi \
-    --m_segmentation path/to/instance-segmentation-security-0050.xml \
-    --m_reid path/to/person-reidentification-retail-0107.xml \
+    -i <path_to_video>/video_1.avi <path_to_video>/video_2.avi \
+    --m_segmentation <path_to_model>/instance-segmentation-security-0050.xml \
+    --m_reid <path_to_model>/person-reidentification-retail-0107.xml \
     --config configs/person.py
 
 # web-cameras
 python multi_camera_multi_person_tracking.py \
     -i 0 1 \
-    --m_detector path/to/person-detection-retail-0013.xml \
-    --m_reid path/to/person-reidentification-retail-0103.xml \
+    --m_detector <path_to_model>/person-detection-retail-0013.xml \
+    --m_reid <path_to_model>/person-reidentification-retail-0103.xml \
     --config configs/person.py
 ```
 
@@ -200,18 +200,18 @@ The annotation must includes the following labels and attributes:
 To run evaluation MOT metrics use the following command:
 ```bash
 python run_evaluate.py \
-    --history_file path/to/history/file.json \
+    --history_file <path_to_file>/file.json \
     --gt_files \
-      path/to/ground/truth/annotation/for/source_0.xml \
-      path/to/ground/truth/annotation/for/source_1.xml \
+      <path_to_file>/source_0.xml \
+      <path_to_file>/source_1.xml \
 ```
 Number of ground truth files depends on the number of used video sources.
 
 For the visualization of the demo results please use the next command:
 ```
 python run_history_visualize.py \
-    -i path/to/video_1.avi path/to/video_2.avi \
-    --history_file path/to/history/file.json \
+    -i <path_to_video>/video_1.avi <path_to_video>/video_2.avi \
+    --history_file <path_to_file>/file.json \
 ```
 This a minimum arguments set for the script. To show all available arguments
 run the command:

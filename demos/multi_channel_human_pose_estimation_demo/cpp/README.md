@@ -62,7 +62,7 @@ For example, to run the demo with the pre-trained Human Pose Estimation model on
 
 To run the demo using two recorded video files, use the following command:
 ```sh
-./multi_channel_human_pose_estimation_demo -m <path_to_model>/human-pose-estimation-0001.xml -d HETERO:FPGA,CPU -i /path/to/file1 /path/to/file2
+./multi_channel_human_pose_estimation_demo -m <path_to_model>/human-pose-estimation-0001.xml -d HETERO:FPGA,CPU -i <path_to_file>/file1 <path_to_file>/file2
 ```
 
 Video files will be processed repeatedly.

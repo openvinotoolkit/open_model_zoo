@@ -47,7 +47,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 For example, to do inference on a CPU, run the following command:
 
 ```sh
-python single_human_pose_estimation_demo.py --model_od <path_to_dir__with_models>/mobilenet-ssd.xml --model_hpe <path_to_dir__with_models>/single-human-pose-estimation-0001.xml --input <path_to_video>/back-passengers.avi
+python single_human_pose_estimation_demo.py --model_od <path_to_model>/mobilenet-ssd.xml --model_hpe <path_to_model>/single-human-pose-estimation-0001.xml --input <path_to_video>/back-passengers.avi
 ```
 
 The demo uses OpenCV to display the resulting frame with estimated poses and reports performance in the following format: summary inference FPS (single human pose inference FPS / detector inference FPS).

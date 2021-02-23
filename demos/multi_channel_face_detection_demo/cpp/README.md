@@ -56,12 +56,12 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 For example, to run the demo with the pre-trained face detection model on FPGA with fallback on CPU, with one single camera, use the following command:
 ```sh
-./multi_channel_face_detection_demo -m face-detection-retail-0004.xml -d HETERO:FPGA,CPU -nc 1
+./multi_channel_face_detection_demo -m <path_to_model>/face-detection-retail-0004.xml -d HETERO:FPGA,CPU -nc 1
 ```
 
 To run the demo using two recorded video files, use the following command:
 ```sh
-./multi_channel_face_detection_demo -m face-detection-retail-0004.xml -d HETERO:FPGA,CPU -i /path/to/file1 /path/to/file2
+./multi_channel_face_detection_demo -m <path_to_model>/face-detection-retail-0004.xml -d HETERO:FPGA,CPU -i <path_to_file>/file1 <path_to_file>/file2
 ```
 Video files will be processed repeatedly.
 
