@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 The `AclNet-int8` model is quantized and fine-tuned with NNCF variant of [AclNet](https://github.com/openvinotoolkit/open_model_zoo/blob/master/models/public/aclnet/aclnet.md) model, which is designed to perform sound classification.
-The `AclNet-int8` model is trained on an internal dataset of environmental sounds for 53 different [classes](../../../data/dataset_classes/aclnet.txt).
+The `AclNet-int8` model is trained on an internal dataset of environmental sounds for 53 different classes, listed in file `<omz_dir>/data/dataset_classes/aclnet.txt`.
 For details about the model, see this [paper](https://arxiv.org/abs/1811.06669).
 
 The model input is a segment of PCM audio samples in [N, C, 1, L] format.
@@ -50,14 +50,14 @@ Audio, name - `result.1`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 ### Original Model
 
-Sound classifier (see [labels](../../../data/dataset_classes/aclnet.txt)), name - `486`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet.txt`), name - `486`, shape - `1,53`, output data format is `N,C` where:
 
 - `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range
 
 ### Converted Model
 
-Sound classifier (see [labels](../../../data/dataset_classes/aclnet.txt)), name - `486`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet.txt`), name - `486`, shape - `1,53`, output data format is `N,C` where:
 
 - `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range

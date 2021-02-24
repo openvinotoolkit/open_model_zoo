@@ -206,7 +206,7 @@ To run the demo, please provide paths to the model in the IR format and to an in
 ```bash
 python formula_recognition_demo.py \
         -m_encoder <path_to_models>/encoder.xml \
-        -m_decoder <path_to_models>/decode_step.xml \
+        -m_decoder <path_to_models>/decoder.xml \
         --vocab_path <path_to_vocab> \
         --preprocessing <preproc type> \
         -i input_image.png

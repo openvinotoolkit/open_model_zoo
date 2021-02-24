@@ -80,8 +80,8 @@ Example of a command:
 
 ```
 python whiteboard_inpainting_demo.py \
-    -i path/to/video.avi \
-    -m_i path/to/instance-segmentation-security-0050.xml
+    -i <path_to_video>/video.avi \
+    -m_i <path_to_model>/instance-segmentation-security-0050.xml
 ```
 
 ## Demo output

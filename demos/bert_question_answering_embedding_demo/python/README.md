@@ -98,7 +98,7 @@ You can use the following command to try the demo (assuming the model from the O
 [Model Downloader](../../../tools/downloader/README.md) executed with "--name bert*"):
 ```
     python3 bert_question_answering_embedding_demo.py
-            --vocab=<path_to_model>/vocab.txt
+            --vocab=<omz_dir>/models/intel/<model_name>/vocab.txt
             --model_emb=<path_to_model>/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
             --input_names_emb="input_ids,attention_mask,token_type_ids,position_ids"
             --model_qa=<path_to_model>/bert-small-uncased-whole-word-masking-squad-0002.xml

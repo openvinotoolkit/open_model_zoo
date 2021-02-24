@@ -50,7 +50,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 You can use the following command to do inference on CPU on images captured by a camera using a pre-trained semantic-segmentation-adas-0001 network:
 ```sh
-./segmentation_demo -i 0 -m semantic-segmentation-adas-0001.xml
+./segmentation_demo -i 0 -m <path_to_model>/semantic-segmentation-adas-0001.xml
 ```
 
 ## Demo Output

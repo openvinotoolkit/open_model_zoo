@@ -80,8 +80,8 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 To run the demo, please provide paths to the model in the IR format, and to an input video or image(s):
 ```bash
 python human_pose_estimation_3d_demo.py \
--m /home/user/human-pose-estimation-3d-0001.xml \
--i /home/user/video_name.mp4
+-m <path_to_model>/human-pose-estimation-3d-0001.xml \
+-i <path_to_video>/video_name.mp4
 ```
 
 ## Demo Output

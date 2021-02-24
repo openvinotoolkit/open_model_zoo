@@ -90,10 +90,11 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
-**For example**, to run the demo for in-cabin driver monitoring scenario, please provide a path to the encoder and decoder models, an input video and a file with label names:
+**For example**, to run the demo for in-cabin driver monitoring scenario, please provide a path to the encoder and decoder models, an input video and a file with [label names](./driver_actions.txt):
 ```bash
-python3 action_recognition_demo.py -at en-de -m_en models/driver_action_recognition_tsd_0002_encoder.xml \
-    -m_de models/driver_action_recognition_tsd_0002_decoder.xml \
+python3 action_recognition_demo.py \
+    -m_en <path_to_model>/driver-action-recognition-adas-0002_encoder.xml \
+    -m_de <path_to_model>/driver-action-recognition-adas-0002_decoder.xml \
     -i <path_to_video>/inputVideo.mp4 \
     -lb driver_actions.txt
 ```

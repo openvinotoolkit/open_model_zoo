@@ -61,9 +61,9 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 For example, use the following command line command to run the application:
 ```sh
-./text_detection_demo -m_td <path_to_text_detection_model> \
-                      -m_tr <path_to_text_recognition_model> \
-                      -i <path_to_image>
+./text_detection_demo -m_td <path_to_model>/text-detection-0004.xml \
+                      -m_tr <path_to_model>/text-recognition-0013.xml \
+                      -i <path_to_image>/sample.jpg
 ```
 
 ## Demo Output

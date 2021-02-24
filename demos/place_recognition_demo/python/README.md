@@ -78,9 +78,9 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 To run the demo, please provide paths to the model in the IR format, to directory with gallery images, and to an input video, image, or folder with images:
 ```bash
 python place_recognition_demo.py \
--m /home/user/netvlad-tf.xml \
--i /home/user/image.jpg \
--gf /home/user/gallery_folder
+-m <path_to_model>/netvlad-tf.xml \
+-i <path_to_file>/image.jpg \
+-gf <path>/gallery_folder
 ```
 
 ## Demo Output
