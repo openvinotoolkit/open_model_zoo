@@ -126,12 +126,9 @@ NATIVE_DEMOS = [
             *combine_cases(
                 TestCase(options={'-at': 'ae'}),
                 single_option_cases('-m',
-                    ModelArg('human-pose-estimation-0002'),
-                    ModelArg('human-pose-estimation-0003'),
-                    ModelArg('human-pose-estimation-0004'),
-                    # ModelArg('human-pose-estimation-0005'),
-                    # ModelArg('human-pose-estimation-0006'),
-                    # ModelArg('human-pose-estimation-0007')
+                    ModelArg('human-pose-estimation-0005'),
+                    ModelArg('human-pose-estimation-0006'),
+                    ModelArg('human-pose-estimation-0007'),
                 )),
         ],
     )),
@@ -517,15 +514,12 @@ PYTHON_DEMOS = [
             '-d': 'CPU',  # GPU is not supported
             '--labels': str(OMZ_DIR / 'data/dataset_classes/coco.txt')}),
         single_option_cases('-m',
-            ModelArg('instance-segmentation-security-0010'),
-            ModelArg('instance-segmentation-security-0050'),
-            ModelArg('instance-segmentation-security-0083'),
-            ModelArg('instance-segmentation-security-1025')),
-            #ModelArg('instance-segmentation-security-0002'),
-            #ModelArg('instance-segmentation-security-0091'),
-            #ModelArg('instance-segmentation-security-0228'),
-            #ModelArg('instance-segmentation-security-1039'),
-            #ModelArg('instance-segmentation-security-1040')),
+            ModelArg('instance-segmentation-security-0002'),
+            ModelArg('instance-segmentation-security-0091'),
+            ModelArg('instance-segmentation-security-0228'),
+            ModelArg('instance-segmentation-security-1039'),
+            ModelArg('instance-segmentation-security-1040'),
+        ),
     )),
 
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
@@ -698,9 +692,9 @@ PYTHON_DEMOS = [
                           '-i': DataPatternArg('text-detection')}),
         [
             TestCase(options={
-                '-m_m': ModelArg('text-spotting-0003-detector'),
-                '-m_te': ModelArg('text-spotting-0003-recognizer-encoder'),
-                '-m_td': ModelArg('text-spotting-0003-recognizer-decoder'),
+                '-m_m': ModelArg('text-spotting-0004-detector'),
+                '-m_te': ModelArg('text-spotting-0004-recognizer-encoder'),
+                '-m_td': ModelArg('text-spotting-0004-recognizer-decoder'),
                 '--no_track': None
             }),
         ]
