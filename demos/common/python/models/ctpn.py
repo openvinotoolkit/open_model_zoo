@@ -42,7 +42,7 @@ class CTPN(Model):
 
         self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, input_size[1], input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
-        input_shape = {self.image_blob_name: ([1, 3] + [self.h2, self.w2])}
+        input_shape = {self.image_blob_name: ([1, 3, self.h2, self.w2])}
         self.logger.info('Reshape net to {}'.format(input_shape))
         self.net.reshape(input_shape)
 
@@ -59,19 +59,19 @@ class CTPN(Model):
         return image_blob_name
 
     def prepare_outputs(self):
-        output_names = [name for name in self.net.outputs]
-        if len(output_names) != 2:
+        if len(self.net.outputs) != 2:
             raise RuntimeError("The CTPN topology supposes exactly 2 output layers")
 
-        boxes_blob = self.net.outputs[output_names[0]]
-        scores_blob = self.net.outputs[output_names[1]]
+        (boxes_name, boxes_data_repr), (scores_name, scores_data_repr) = self.net.outputs.items()
 
-        if len(boxes_blob.shape) != 4 or len(scores_blob.shape) != 4:
-            raise Exception("Unexpected output blob shape. Only 4D output blobs are supported")
+        if len(boxes_data_repr.shape) != 4 or len(scores_data_repr.shape) != 4:
+            raise RuntimeError("Unexpected output blob shape. Only 4D output blobs are supported")
 
-        if scores_blob.shape[1] == boxes_blob.shape[1] * 2:
-            return output_names[::-1]
-        return output_names
+        if scores_data_repr.shape[1] == boxes_data_repr.shape[1] * 2:
+            return scores_name, boxes_name
+        if boxes_data_repr.shape[1] == scores_data_repr.shape[1] * 2:
+            return boxes_name, scores_name
+        raise RuntimeError("One of outputs must be two times larger than another for the CTPN topology")
 
     def preprocess(self, inputs):
         meta = {'original_shape': inputs.shape}
@@ -124,14 +124,14 @@ class CTPN(Model):
     def get_proposals(self, rpn_cls_prob_reshape, rpn_bbox_pred, image_size, _feat_stride=(16, )):
         """
         Parameters
-        rpn_cls_prob_reshape: (H , W , Ax2) outputs of RPN, prob of bg or fg
-        rpn_bbox_pred: (H , W , Ax4), rgs boxes output of RPN
+        rpn_cls_prob_reshape: (H , W , Ax2), probabilities for predicted regions
+        rpn_bbox_pred: (H , W , Ax4), predicted regions
         image_size: a list of [image_height, image_width]
         _feat_stride: the downsampling ratio of feature map to the original input image
         Algorithm:
         for each (H, W) location i
-        generate A anchor boxes centered on cell i
-        apply predicted bbox deltas at cell i to each of the A anchors
+        generate A anchor boxes centered on location i
+        apply predicted bbox deltas at location i to each of the A anchors
         clip predicted boxes to image
         remove predicted boxes with either height or width < threshold
         sort all (proposal, score) pairs by score from highest to lowest
@@ -242,27 +242,18 @@ class CTPN(Model):
 
     @staticmethod
     def generate_anchors():
-        def generate_basic_anchors(sizes, base_size=16):
-            base_anchor = np.array([0, 0, base_size - 1, base_size - 1], np.int32)
-            anchors = np.zeros((len(sizes), 4), np.int32)
-            for index, (h, w) in enumerate(sizes):
-                anchors[index] = scale_anchor(base_anchor, h, w)
-            return anchors
+        def scale_anchor(h, w, base_size=16):
+            ctr = (base_size - 1) * 0.5
+            xmin = ctr - w / 2
+            ymin = ctr - h / 2
+            xmax = ctr + w / 2
+            ymax = ctr + h / 2
+            return np.array([xmin, ymin, xmax, ymax], np.int32)
 
-        def scale_anchor(anchor, h, w):
-            x_ctr = (anchor[0] + anchor[2]) * 0.5
-            y_ctr = (anchor[1] + anchor[3]) * 0.5
-            scaled_anchor = anchor.copy()
-            scaled_anchor[0] = x_ctr - w / 2  # xmin
-            scaled_anchor[2] = x_ctr + w / 2  # xmax
-            scaled_anchor[1] = y_ctr - h / 2  # ymin
-            scaled_anchor[3] = y_ctr + h / 2  # ymax
-            return scaled_anchor
-
-        heights = [11, 16, 23, 33, 48, 68, 97, 139, 198, 283]
-        widths = [16]
-        sizes = [(h, w) for h in heights for w in widths]
-        return generate_basic_anchors(sizes)
+        # the even values of heights are converted to odd, so that
+        # anchors coordinates are calculated as integers
+        heights = [11, 15, 23, 33, 47, 67, 97, 139, 197, 283]
+        return np.stack([scale_anchor(h, 16) for h in heights])
 
     @staticmethod
     def bbox_transform_inv(boxes, deltas):
