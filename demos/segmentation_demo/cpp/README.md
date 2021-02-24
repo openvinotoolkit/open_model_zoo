@@ -45,12 +45,7 @@ segmentation_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
-<<<<<<< HEAD:demos/segmentation_demo/cpp/README.md
     -i                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
-=======
-    -at "<type>"              Required. Type of architecture: super_resolution, deblurring
-    -i "<path>"               Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
->>>>>>> add tests:demos/image_processing_demo/cpp/description/README.md
     -m "<path>"               Required. Path to an .xml file with a trained model.
     -o "<path>"               Optional. Name of output to save.
     -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.

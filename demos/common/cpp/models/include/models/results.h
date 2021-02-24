@@ -84,10 +84,8 @@ struct RetinaFaceDetectionResult : public DetectionResult {
     std::vector<cv::Point2f> landmarks;
 };
 
-struct SegmentationResult : public ResultBase {
-    SegmentationResult(int64_t frameId = -1, const std::shared_ptr<MetaData>& metaData = nullptr) :
-        ResultBase(frameId, metaData) {}
-    cv::Mat mask;
+struct ImageProcessingResult: public ResultBase {
+    cv::Mat resultImage;
 };
 
 struct HumanPose {

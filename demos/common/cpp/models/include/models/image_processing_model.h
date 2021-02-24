@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ class ImageProcessingModel : public ModelBase{
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     ImageProcessingModel(const std::string& modelFileName, const cv::Size inputImageShape=cv::Size(0, 0));
 
     std::shared_ptr<InternalModelData> preprocess(

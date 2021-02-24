@@ -169,7 +169,7 @@ NATIVE_DEMOS = [
                     ModelArg('text-image-super-resolution-0001'))
             ),
             TestCase(options={'-at': 'deblurring',
-                              '-m': ModelArg('deblurgan-v2')}
+                '-m': ModelArg('deblurgan-v2')}
             ),
         ]
     )),
