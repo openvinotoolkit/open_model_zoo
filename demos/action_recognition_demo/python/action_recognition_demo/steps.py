@@ -26,16 +26,51 @@ from .pipeline import AsyncPipeline, PipelineStep
 from .queue import Signal
 
 
-def run_pipeline(capture, encoder, decoder, render_fn, decoder_seq_size=16, fps=30):
+def run_pipeline(capture, model_type, model, render_fn, seq_size=16, fps=30):
     pipeline = AsyncPipeline()
     pipeline.add_step("Data", DataStep(capture), parallel=False)
-    pipeline.add_step("Encoder", EncoderStep(encoder), parallel=False)
-    pipeline.add_step("Decoder", DecoderStep(decoder, sequence_size=decoder_seq_size), parallel=False)
+
+    if model_type in ('en-de', 'en-mean'):
+        pipeline.add_step("Encoder", EncoderStep(model[0]), parallel=False)
+        pipeline.add_step("Decoder", DecoderStep(model[1], sequence_size=seq_size), parallel=False)
+    elif model_type == 'i3d-rgb':
+        pipeline.add_step("I3DRGB", I3DRGBModelStep(model[0], seq_size, 256, 224), parallel=False)
+
     pipeline.add_step("Render", RenderStep(render_fn, fps=fps), parallel=True)
 
     pipeline.run()
     pipeline.close()
     pipeline.print_statistics()
+
+
+class I3DRGBModelStep(PipelineStep):
+
+    def __init__(self, model, sequence_size, frame_size, crop_size):
+        super().__init__()
+        self.model = model
+        assert sequence_size > 0
+        self.sequence_size = sequence_size
+        self.size = frame_size
+        self.crop_size = crop_size
+        self.input_seq = deque(maxlen = self.sequence_size)
+        self.async_model = AsyncWrapper(self.model, self.model.num_requests)
+
+    def process(self, frame):
+        preprocessed = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        preprocessed = preprocess_frame(preprocessed, self.size, self.crop_size)
+        self.input_seq.append(preprocessed)
+        if len(self.input_seq) == self.sequence_size:
+            input_blob = np.array(self.input_seq)
+            input_blob = np.transpose(input_blob, (1, 0, 2, 3))
+            input_blob = np.expand_dims(input_blob, axis=0)
+            output, next_frame = self.async_model.infer(input_blob, frame)
+
+            if output is None:
+                return None
+
+            return next_frame, output[0], {'i3d-rgb-model': self.own_time.last}
+
+        return frame, None, {'i3d-rgb-model': self.own_time.last}
 
 
 class DataStep(PipelineStep):
@@ -66,6 +101,7 @@ class EncoderStep(PipelineStep):
 
     def process(self, frame):
         preprocessed = preprocess_frame(frame)
+        preprocessed = preprocessed[np.newaxis, ...]  # add batch dimension
         embedding, frame = self.async_model.infer(preprocessed, frame)
 
         if embedding is None:

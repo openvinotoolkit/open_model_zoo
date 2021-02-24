@@ -49,9 +49,11 @@ class ResultRenderer:
         print("To close the application, press 'CTRL+C' here or switch to the output window and press Esc or Q")
 
     def update_timers(self, timers):
-        self.meters['encoder'].update(timers['encoder'])
-        self.meters['decoder'].update(timers['decoder'])
-        return self.meters['encoder'].avg + self.meters['decoder'].avg
+        inference_time = 0.0
+        for key, val in timers.items():
+            self.meters[key].update(val)
+            inference_time += self.meters[key].avg
+        return inference_time
 
     def render_frame(self, frame, logits, timers, frame_ind, fps):
         inference_time = self.update_timers(timers)
@@ -101,7 +103,6 @@ class ResultRenderer:
 
         if not self.no_show:
             cv2.imshow("Action Recognition", frame)
-
             key = cv2.waitKey(1) & 0xFF
             if key in {ord('q'), ord('Q'), 27}:
                 return -1

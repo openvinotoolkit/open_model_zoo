@@ -409,14 +409,22 @@ PYTHON_DEMOS = [
     PythonDemo(name='action_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('action-recognition')}),
         [
-            TestCase(options={
-                '-m_en': ModelArg('action-recognition-0001-encoder'),
-                '-m_de': ModelArg('action-recognition-0001-decoder'),
-            }),
-            TestCase(options={
-                '-m_en': ModelArg('driver-action-recognition-adas-0002-encoder'),
-                '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
-            }),
+            TestCase(options={'--architecture_type': 'i3d-rgb',
+                              '-m_en': ModelArg('i3d-rgb-tf')}
+            ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'en-de'}),
+                [
+                    TestCase(options={
+                        '-m_en': ModelArg('action-recognition-0001-encoder'),
+                        '-m_de': ModelArg('action-recognition-0001-decoder'),
+                    }),
+                    TestCase(options={
+                        '-m_en': ModelArg('driver-action-recognition-adas-0002-encoder'),
+                        '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
+                    }),
+                ]
+            ),
         ],
     )),
 
