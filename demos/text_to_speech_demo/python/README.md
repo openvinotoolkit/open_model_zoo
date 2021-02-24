@@ -56,7 +56,7 @@ Running the application with the empty list of options yields the usage message 
 
 ## Example for running with arguments
 
-# WaveRNN upsample
+### ForwardTacotron with WaveRNN
 ```
 python3 text_to_speech_demo.py \
 --input <path_to_file>/text.txt \
