@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `AclNet` model is designed to perform sound classification and is trained on internal dataset of environmental sounds for 53 different classes, listed in file <omz_dir>/data/dataset_classes/aclnet.txt.
+The `AclNet` model is designed to perform sound classification and is trained on internal dataset of environmental sounds for 53 different classes, listed in file `<omz_dir>/data/dataset_classes/aclnet.txt`.
 For details about the model, see this [paper](https://arxiv.org/abs/1811.06669).
 
 The model input is a segment of PCM audio samples in [N, C, 1, L] format.
@@ -49,14 +49,14 @@ Audio, name - `input`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 ### Original Model
 
-Sound classifier (see labels file, <omz_dir>/data/dataset_classes/aclnet.txt), name - `203`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet.txt`), name - `203`, shape - `1,53`, output data format is `N,C` where:
 
 - `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range
 
 ### Converted Model
 
-Sound classifier (see labels file, <omz_dir>/data/dataset_classes/aclnet.txt), name - `203`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet.txt`), name - `203`, shape - `1,53`, output data format is `N,C` where:
 
 - `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range

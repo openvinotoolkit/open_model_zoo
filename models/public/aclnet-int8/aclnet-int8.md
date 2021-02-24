@@ -50,14 +50,14 @@ Audio, name - `result.1`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 ### Original Model
 
-Sound classifier (see labels file, <omz_dir>/data/dataset_classes/aclnet.txt), name - `486`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet.txt`), name - `486`, shape - `1,53`, output data format is `N,C` where:
 
 - `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range
 
 ### Converted Model
 
-Sound classifier (see labels file, <omz_dir>/data/dataset_classes/aclnet.txt), name - `486`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet.txt`), name - `486`, shape - `1,53`, output data format is `N,C` where:
 
 - `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range
