@@ -156,6 +156,24 @@ NATIVE_DEMOS = [
             ModelArg('resnet-50-caffe2')),
     )),
 
+    CppDemo(name='image_processing_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            **MONITORS,
+            '-i': DataDirectoryArg('single-image-super-resolution')}),
+        [
+            *combine_cases(
+                TestCase(options={'-at': 'super_resolution'}),
+                single_option_cases('-m',
+                    ModelArg('single-image-super-resolution-1032'),
+                    ModelArg('single-image-super-resolution-1033'),
+                    ModelArg('text-image-super-resolution-0001'))
+            ),
+            TestCase(options={'-at': 'deblurring',
+                              '-m': ModelArg('deblurgan-v2')}
+            ),
+        ]
+    )),
+
     CppDemo(name='interactive_face_detection_demo',
             device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
             test_cases=combine_cases(
@@ -378,13 +396,6 @@ NATIVE_DEMOS = [
             ),
             TestCase(options={'-m_act': ModelArg('person-detection-raisinghand-recognition-0001'), '-a_top': '5'}),
         ],
-    )),
-
-    CppDemo(name='super_resolution_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': DataDirectoryArg('single-image-super-resolution')}),
-        TestCase(options={
-            '-m': ModelArg('single-image-super-resolution-1033'),
-        }),
     )),
 
     CppDemo(name='text_detection_demo', device_keys=['-d_td', '-d_tr'], test_cases=combine_cases(
