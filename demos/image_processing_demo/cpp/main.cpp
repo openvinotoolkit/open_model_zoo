@@ -42,7 +42,7 @@ DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char pt_message[] = "Required. Type of processing: super_resolution, deblurring";
+static const char at_message[] = "Required. Type of architecture: super_resolution, deblurring";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
@@ -61,7 +61,7 @@ static const char no_show_processed_video[] = "Optional. Do not show processed v
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
-DEFINE_string(pt, "", pt_message);
+DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_bool(pc, false, performance_counter_message);
@@ -82,7 +82,7 @@ static void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
-    std::cout << "    -pt \"<type>\"              " << pt_message << std::endl;
+    std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -i \"<path>\"               " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
@@ -120,8 +120,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -m is not set");
     }
 
-    if (FLAGS_pt.empty()) {
-        throw std::logic_error("Parameter -pt is not set");
+    if (FLAGS_at.empty()) {
+        throw std::logic_error("Parameter -at is not set");
     }
 
     return true;
@@ -129,14 +129,14 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 std::unique_ptr<ImageProcessingModel> getModel(const cv::Size& frameSize) {
     std::unique_ptr<ImageProcessingModel> model;
-    if (FLAGS_pt == "super_resolution") {
+    if (FLAGS_at == "super_resolution") {
         model.reset(new ImageProcessingModel(FLAGS_m));
     }
-    else if (FLAGS_pt == "deblurring") {
+    else if (FLAGS_at == "deblurring") {
         model.reset(new ImageProcessingModel(FLAGS_m, frameSize));
     }
     else {
-        throw std::invalid_argument("No model type or invalid model type (-pt) provided: " + FLAGS_pt);
+        throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
     }
     return model;
 }
