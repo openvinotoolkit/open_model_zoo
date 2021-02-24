@@ -244,7 +244,7 @@ class YoloV4(YOLO):
         def sigmoid(x):
             return 1. / (1. + np.exp(-x))
         # ------------------------------------------ Extracting layer parameters ---------------------------------------
-        objects = list()
+        objects = []
         bbox_size = params.coords + 1 + params.classes
         # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
         for row, col, n in np.ndindex(params.sides[0], params.sides[1], params.num):
