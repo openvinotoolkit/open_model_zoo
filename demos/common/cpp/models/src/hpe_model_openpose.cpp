@@ -110,8 +110,8 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
     cv::copyMakeBorder(resizedImage, paddedImage, 0, bottom, 0, right,
                        cv::BORDER_CONSTANT, meanPixel);
     request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
-    return std::shared_ptr<InternalModelData>(new InternalScaleData(image.cols / static_cast<float>(w),
-                                                                    image.rows / static_cast<float>(h)));
+    /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
+    return std::make_shared<InternalScaleMatData>(image.cols / static_cast<float>(w), image.rows / static_cast<float>(h), std::move(paddedImage));
 }
 
 std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult& infResult) {
@@ -143,7 +143,7 @@ std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult& infResult)
 
     std::vector<HumanPose> poses = extractPoses(heatMaps, pafs);
 
-    const auto& scale = infResult.internalModelData->asRef<InternalScaleData>();
+    const auto& scale = infResult.internalModelData->asRef<InternalScaleMatData>();
     float scaleX = stride / upsampleRatio * scale.x;
     float scaleY = stride / upsampleRatio * scale.y;
     for (auto& pose : poses) {
