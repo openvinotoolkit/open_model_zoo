@@ -62,11 +62,7 @@ class Deblurring(Model):
         output_blob.precision = "FP32"
 
         output_size = output_blob.shape
-        if len(output_size) == 4:
-            self.out_channels = output_size[1]
-            self.out_height = output_size[2]
-            self.out_width = output_size[3]
-        else:
+        if len(output_size) != 4:
             raise Exception("Unexpected output blob shape {}. Only 4D output blob is supported".format(output_size))
 
         return output_blob_name
@@ -74,23 +70,28 @@ class Deblurring(Model):
     def preprocess(self, inputs):
         image = inputs
 
-        if not (self.h - self.block_size < image.shape[0] <= self.h and self.w - self.block_size < image.shape[1] <= self.w):
+        if self.h - self.block_size < image.shape[0] <= self.h and self.w - self.block_size < image.shape[1] <= self.w:
+            pad_params = {'mode': 'constant',
+                          'constant_values': 0,
+                          'pad_width': ((0, self.h - image.shape[0]), (0, self.w - image.shape[1]), (0, 0))
+                          }
+            resized_image = np.pad(image, **pad_params)
+        else:
             self.logger.warn("Chosen model size doesn't match image size. The image is resized")
+            resized_image = cv2.resize(image, (self.w, self.h))
 
-        resized_image = cv2.resize(image, (self.w, self.h))
         resized_image = resized_image.transpose((2, 0, 1))
         resized_image = np.expand_dims(resized_image, 0)
 
-        meta = {'original_shape': image.shape}
         dict_inputs = {self.input_blob_name: resized_image}
-        return dict_inputs, meta
+        return dict_inputs, image.shape[1::-1]
 
-    def postprocess(self, outputs, meta):
+    def postprocess(self, outputs, dsize):
         prediction = outputs[self.output_blob_name].squeeze()
-        input_image_height = meta['original_shape'][0]
-        input_image_width = meta['original_shape'][1]
-
         prediction = prediction.transpose((1, 2, 0))
-        prediction = cv2.resize(prediction, (input_image_width, input_image_height))
+        if self.h - self.block_size < dsize[1] <= self.h and self.w - self.block_size < dsize[0] <= self.w:
+            prediction = prediction[:dsize[1], :dsize[0], :]
+        else:
+            prediction = cv2.resize(prediction, dsize)
         prediction *= 255
         return prediction.astype(np.uint8)
