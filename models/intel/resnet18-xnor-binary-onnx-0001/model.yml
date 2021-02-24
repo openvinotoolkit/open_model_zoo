@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@ description: >-
 task_type: classification
 files:
   - name: FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
-    size: 98334
-    sha256: f5d07c037c5ca2335baca26819849da4ccbbd0407e8233ba3645b8c901fc4fdd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
+    size: 101171
+    sha256: 96e8819455dc447a4808b46d50ea513bf81c6f55d645587f8bf9e715fbcbdbc0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.xml
   - name: FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
     size: 4190948
     sha256: e7f808e2cf493194eece7792bf362a9623ba8f8e66f44c8bd3c460826de03d83
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/resnet18-xnor-binary-onnx-0001/FP32-INT1/resnet18-xnor-binary-onnx-0001.bin
   - name: FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
-    size: 98308
-    sha256: 105e0691c4f3b1c98462ea8b540f50d1cf9582065207ec78d55572fa9aaef846
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
+    size: 101145
+    sha256: 465258cc0e90fc46d54b13d202c209df01fe141db7246ee67e227b8bfa88a9fe
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.xml
   - name: FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
     size: 2782084
     sha256: 031e74abeddc9330a052d7b6719bec8d620263c5dd37f15f51fc9883726874ef
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/resnet18-xnor-binary-onnx-0001/FP16-INT1/resnet18-xnor-binary-onnx-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
