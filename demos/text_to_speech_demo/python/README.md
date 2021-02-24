@@ -66,7 +66,7 @@ python3 text_to_speech_demo.py \
 --model_upsample <path_to_model>/wavernn_upsampler.xml \
 --model_rnn <path_to_model>/wavernn_rnn.xml
 ```
-# MELGAN upsample
+### Modified ForwardTacotron with MelGAN
 ```
 python3 text_to_speech_demo.py \
 -i <path_to_file>/text.txt \
