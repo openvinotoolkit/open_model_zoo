@@ -220,7 +220,7 @@ class YoloV4(YOLO):
             self.coords = 4
             self.classes = 80
             self.sides = sides
-            self.anchors = [12.0, 16.0, 19.0, 36.0, 40.0, 28.0,
+            anchors = [12.0, 16.0, 19.0, 36.0, 40.0, 28.0,
                             36.0, 75.0, 76.0, 55.0, 72.0, 146.0,
                             142.0, 110.0, 192.0, 243.0, 459.0, 401.0]
             masked_anchors = []
