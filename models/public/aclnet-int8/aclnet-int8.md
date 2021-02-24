@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 The `AclNet-int8` model is quantized and fine-tuned with NNCF variant of [AclNet](https://github.com/openvinotoolkit/open_model_zoo/blob/master/models/public/aclnet/aclnet.md) model, which is designed to perform sound classification.
-The `AclNet-int8` model is trained on an internal dataset of environmental sounds for 53 different classes, listed in file <omz_dir>/data/dataset_classes/aclnet.txt.
+The `AclNet-int8` model is trained on an internal dataset of environmental sounds for 53 different classes, listed in file `<omz_dir>/data/dataset_classes/aclnet.txt`.
 For details about the model, see this [paper](https://arxiv.org/abs/1811.06669).
 
 The model input is a segment of PCM audio samples in [N, C, 1, L] format.
