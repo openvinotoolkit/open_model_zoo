@@ -59,21 +59,21 @@ Running the application with the empty list of options yields the usage message 
 ### ForwardTacotron with WaveRNN
 ```
 python3 text_to_speech_demo.py \
---input <path_to_file>/text.txt \
--o <path_to_audio>/audio.wav \
---model_duration <path_to_model>/forward_tacotron_duration_prediction.xml \
---model_forward <path_to_model>/forward_tacotron_regression.xml \
---model_upsample <path_to_model>/wavernn_upsampler.xml \
---model_rnn <path_to_model>/wavernn_rnn.xml
+    --input <path_to_file>/text.txt \
+    -o <path_to_audio>/audio.wav \
+    --model_duration <path_to_model>/forward_tacotron_duration_prediction.xml \
+    --model_forward <path_to_model>/forward_tacotron_regression.xml \
+    --model_upsample <path_to_model>/wavernn_upsampler.xml \
+    --model_rnn <path_to_model>/wavernn_rnn.xml
 ```
 ### Modified ForwardTacotron with MelGAN
 ```
 python3 text_to_speech_demo.py \
--i <path_to_file>/text.txt \
--o <path_to_audio>/audio.wav \
--m_duration <path_to_model>/forward_tacotron_duration_prediction_att.xml \
--m_forward <path_to_model>/forward_tacotron_regression_att.xml \
--m_melgan <path_to_model>/melganupsample.xml
+    -i <path_to_file>/text.txt \
+    -o <path_to_audio>/audio.wav \
+    -m_duration <path_to_model>/forward_tacotron_duration_prediction_att.xml \
+    -m_forward <path_to_model>/forward_tacotron_regression_att.xml \
+    -m_melgan <path_to_model>/melganupsample.xml
 ```
 To run the demo, you can use public pre-trained models. You can download the pre-trained models with the OpenVINO
 [Model Downloader](../../../tools/downloader/README.md).

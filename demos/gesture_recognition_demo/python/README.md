@@ -82,10 +82,10 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 To run the demo, please provide paths to the gesture recognition and person detection models in the IR format, to a file with class names, and to an input video:
 ```bash
 python gesture_recognition_demo.py \
--m_a <path_to_model>/asl-recognition-0004.xml \
--m_d <path_to_model>/person-detection-asl-0001.xml \
--i 0 \
--c <omz_dir>/data/dataset_classes/msasl100.json
+    -m_a <path_to_model>/asl-recognition-0004.xml \
+    -m_d <path_to_model>/person-detection-asl-0001.xml \
+    -i 0 \
+    -c <omz_dir>/data/dataset_classes/msasl100.json
 ```
 
 The demo starts in person tracking mode and to switch it in the action recognition mode you should press `0-9` button with appropriate detection ID (the number in top-left of each bounding box). If frame contains only one person, they will be chosen automatically. After that you can switch back to tracking mode by pressing space button.
