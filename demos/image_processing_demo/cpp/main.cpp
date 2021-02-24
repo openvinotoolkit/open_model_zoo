@@ -128,17 +128,13 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 }
 
 std::unique_ptr<ImageProcessingModel> getModel(const cv::Size& frameSize) {
-    std::unique_ptr<ImageProcessingModel> model;
     if (FLAGS_at == "super_resolution") {
-        model.reset(new ImageProcessingModel(FLAGS_m));
+        return std::unique_ptr<ImageProcessingModel>(new ImageProcessingModel(FLAGS_m));
     }
-    else if (FLAGS_at == "deblurring") {
-        model.reset(new ImageProcessingModel(FLAGS_m, frameSize));
+    if (FLAGS_at == "deblurring") {
+        return std::unique_ptr<ImageProcessingModel>(new ImageProcessingModel(FLAGS_m, frameSize));
     }
-    else {
-        throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
-    }
-    return model;
+    throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
 
 cv::Mat renderResultData(const ImageProcessingResult& result) {
