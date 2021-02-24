@@ -3,12 +3,12 @@
 ## Use Case and High-Level Description
 
 This is an im2latex composite model that recognizes latex formulas.
-The model uses [vocabulary file](../vocab.json) to predict sequence of latex tokens.
+The model uses vocabulary file `vocab.json` to predict sequence of latex tokens.
 The model is built on the resnext50 backbone with additional attention-based text recognition head.
 The model was trained on internal Intel's dataset containing images of handwritten polynomial equations.
 The equations consist of tokens from the corresponding to this model vocabulary file.
 
-Vocabulary file is located under the model description folder with name [vocab.json](../vocab.json). Model can predict letters, numbers and upperscript.
+Vocabulary file is located under the model description folder, <omz_dir>/models/intel/formula-recognition-polynomials-handwritten-0001/vocab.json. Model can predict letters, numbers and upperscript.
 
 ## Example of the input data
 
