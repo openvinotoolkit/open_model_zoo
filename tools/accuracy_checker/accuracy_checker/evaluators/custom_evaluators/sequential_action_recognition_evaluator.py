@@ -261,7 +261,7 @@ class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.network_info = network_info
 
-    def predict(self, idenitifiers, input_data):
+    def predict(self, identifiers, input_data):
         raise NotImplementedError
 
     def release(self):

@@ -128,7 +128,7 @@ class CocosnetEvaluator(BaseEvaluator):
             dataset_tag='',
             output_callback=None,
             allow_pairwise_subset=False,
-            dump_prediction_to_annotgiation=False,
+            dump_prediction_to_annotation=False,
             **kwargs):
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
@@ -370,7 +370,7 @@ class BaseModel:
             return self.network.input_info if hasattr(self.network, 'input_info') else self.network.inputs
         return self.exec_network.input_info if hasattr(self.exec_network, 'input_info') else self.exec_network.inputs
 
-    def predict(self, idenitifiers, input_data):
+    def predict(self, identifiers, input_data):
         raise NotImplementedError
 
     def release(self):
