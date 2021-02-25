@@ -14,22 +14,31 @@ iou_threshold = [0.5, 0.7, 0.7, 0.7]
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
-    args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("-i", "--input", help="Required. Path to a test image file.",
-                      type=str)
-    args.add_argument("-mp", "--model_pnet", help="Required. Path to an .xml file with a pnet model.",
-                      type=str)
-    args.add_argument("-mr", "--model_rnet", help="Required. Path to an .xml file with a rnet model.",
-                      type=str)
-    args.add_argument("-mo", "--model_onet", help="Required. Path to an .xml file with a onet model.",
-                      type=str)
-    args.add_argument("-th", "--threshold", help="Optional. The threshold to define the face is recognized or not.",
-                      type=float, default=0.6)
+    args.add_argument('-h', '--help', action='help', default=SUPPRESS,
+                      help='Show this help message and exit.')
+    args.add_argument("-i", "--input",
+                      help="Required. Path to a test image file.",
+                      required=True, type=str)
+    args.add_argument("-m_p", "--model_pnet",
+                      help="Required. Path to an .xml file with a pnet model.",
+                      required=True, type=str, metavar='"<path>"')
+    args.add_argument("-m_r", "--model_rnet",
+                      help="Required. Path to an .xml file with a rnet model.",
+                      required=True, type=str, metavar='"<path>"')
+    args.add_argument("-m_o", "--model_onet",
+                      help="Required. Path to an .xml file with a onet model.",
+                      required=True, type=str, metavar='"<path>"')
+    args.add_argument("-th", "--threshold",
+                      help="Optional. The threshold to define the face is recognized or not.",
+                      type=float, default=0.6, metavar='"<num>"')
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL, MYRIAD or HETERO: is "
                            "acceptable. The sample will look for a suitable plugin for device specified. Default "
                            "value is CPU",
-                      default="CPU", type=str)
+                      default="CPU", type=str, metavar='"<device>"')
+    args.add_argument("--no_show",
+                      help="Optional. Don't show output",
+                      action='store_true')
 
     return parser
 
@@ -58,7 +67,6 @@ def main():
     ie_p = IECore()
     ie_r = IECore()
     ie_o = IECore()
-    ie_f = IECore()
 
     # Read IR
     log.info("Loading network files:\n\t{}\n\t{}".format(PNET_model_xml, PNET_model_bin))
@@ -173,8 +181,11 @@ def main():
     infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()  # Recorde infer time
     cv2.putText(origin_image, 'summary: {:.1f} FPS'.format(
         1.0 / infer_time), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
-    cv2.imshow('test', origin_image)
-    cv2.waitKey()
+
+    if not args.no_show:
+        # Show resulting image.
+        cv2.imshow('test', origin_image)
+        cv2.waitKey()
 
 
 if __name__ == '__main__':
