@@ -483,7 +483,7 @@ PYTHON_DEMOS = [
             TestCase(options={
                 '-m_p': ModelArg('mtcnn-p'),
                 '-m_r': ModelArg('mtcnn-r'),
-                '-m_0': ModelArg('mtcnn-o')
+                '-m_o': ModelArg('mtcnn-o')
             }),
         ]
     )),
