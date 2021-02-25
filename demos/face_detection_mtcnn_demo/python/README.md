@@ -67,6 +67,8 @@ python face_detection_mtcnn_demo.py \
 
 The application uses OpenCV to display found faces' boundary, feature points and current inference performance.
 
+![](./test.jpg)
+
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
