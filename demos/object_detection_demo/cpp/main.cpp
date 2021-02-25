@@ -83,14 +83,14 @@ DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
-DEFINE_double(iou_t, 0.4, iou_thresh_output_message);
+DEFINE_double(iou_t, 0.5, iou_thresh_output_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
-DEFINE_bool(yolo_af, false, yolo_af_message);
+DEFINE_bool(yolo_af, true, yolo_af_message);
 
 /**
 * \brief This function shows a help message
