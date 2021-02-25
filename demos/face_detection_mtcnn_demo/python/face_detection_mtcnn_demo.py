@@ -125,28 +125,24 @@ def main():
         rectangles.extend(rectangle)
     rectangles = tools.NMS(rectangles, iou_threshold[1], 'iou')
 
-    if len(rectangles) == 0:
-        return rectangles
-
-    # *************************************
     # Start Rnet
-    # *************************************
-    # Loading Rnet model to the plugin
-    log.info("Loading Rnet model to the plugin")
+    if len(rectangles) > 0:
+        # Loading Rnet model to the plugin
+        log.info("Loading Rnet model to the plugin")
 
-    r_net.reshape({rnet_input_blob : [len(rectangles), 3, 24, 24]})  # Change batch size of input blob
-    exec_rnet = ie_r.load_network(network = r_net, device_name = args.device)
+        r_net.reshape({rnet_input_blob : [len(rectangles), 3, 24, 24]})  # Change batch size of input blob
+        exec_rnet = ie_r.load_network(network = r_net, device_name = args.device)
 
-    rnet_input = []
-    for rectangle in rectangles:
-        crop_img = origin_image[int(rectangle[1]):int(rectangle[3]), int(rectangle[0]):int(rectangle[2])]
-        crop_img = image_reader(crop_img, 24, 24)
-        rnet_input.extend(crop_img)
+        rnet_input = []
+        for rectangle in rectangles:
+            crop_img = origin_image[int(rectangle[1]):int(rectangle[3]), int(rectangle[0]):int(rectangle[2])]
+            crop_img = image_reader(crop_img, 24, 24)
+            rnet_input.extend(crop_img)
 
-    rnet_res = exec_rnet.infer(inputs={rnet_input_blob: rnet_input})
+        rnet_res = exec_rnet.infer(inputs={rnet_input_blob: rnet_input})
 
-    (layer_name_roi, roi_prob), (layer_name_cls, cls_prob)  = rnet_res.items()
-    rectangles = tools.filter_face_24net(cls_prob, roi_prob, rectangles, ow, oh, score_threshold[1], iou_threshold[2])
+        (layer_name_roi, roi_prob), (layer_name_cls, cls_prob)  = rnet_res.items()
+        rectangles = tools.filter_face_24net(cls_prob, roi_prob, rectangles, ow, oh, score_threshold[1], iou_threshold[2])
 
     if len(rectangles) == 0:
         return rectangles
