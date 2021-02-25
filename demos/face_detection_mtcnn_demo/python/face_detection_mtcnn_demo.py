@@ -144,28 +144,23 @@ def main():
         (layer_name_roi, roi_prob), (layer_name_cls, cls_prob)  = rnet_res.items()
         rectangles = tools.filter_face_24net(cls_prob, roi_prob, rectangles, ow, oh, score_threshold[1], iou_threshold[2])
 
-    if len(rectangles) == 0:
-        return rectangles
-
-    # *************************************
     # Start Onet
-    # *************************************
-    # Loading Rnet model to the plugin
-    log.info("Loading Onet model to the plugin")
+    if len(rectangles) > 0:
+        log.info("Loading Onet model to the plugin")
 
-    o_net.reshape({onet_input_blob : [len(rectangles), 3, 48, 48]})  # Change batch size of input blob
-    exec_onet = ie_o.load_network(network = o_net, device_name = args.device)
+        o_net.reshape({onet_input_blob : [len(rectangles), 3, 48, 48]})  # Change batch size of input blob
+        exec_onet = ie_o.load_network(network = o_net, device_name = args.device)
 
-    onet_input = []
-    for rectangle in rectangles:
-        crop_img = origin_image[int(rectangle[1]):int(rectangle[3]), int(rectangle[0]):int(rectangle[2])]
-        crop_img = image_reader(crop_img, 48, 48)
-        onet_input.extend(crop_img)
+        onet_input = []
+        for rectangle in rectangles:
+            crop_img = origin_image[int(rectangle[1]):int(rectangle[3]), int(rectangle[0]):int(rectangle[2])]
+            crop_img = image_reader(crop_img, 48, 48)
+            onet_input.extend(crop_img)
 
-    onet_res = exec_onet.infer(inputs={onet_input_blob: onet_input})
+        onet_res = exec_onet.infer(inputs={onet_input_blob: onet_input})
 
-    (layer_name_roi, roi_prob), (layer_name_landmark, pts_prob), (layer_name_cls, cls_prob)  = onet_res.items()
-    rectangles = tools.filter_face_48net(cls_prob, roi_prob, pts_prob, rectangles, ow, oh, score_threshold[2], iou_threshold[3])
+        (layer_name_roi, roi_prob), (layer_name_landmark, pts_prob), (layer_name_cls, cls_prob)  = onet_res.items()
+        rectangles = tools.filter_face_48net(cls_prob, roi_prob, pts_prob, rectangles, ow, oh, score_threshold[2], iou_threshold[3])
 
     for rectangle in rectangles:
         # Draw detected boxes
