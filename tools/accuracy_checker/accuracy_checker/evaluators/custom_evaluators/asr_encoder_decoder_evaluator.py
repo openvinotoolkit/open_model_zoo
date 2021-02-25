@@ -259,7 +259,7 @@ class BaseModel:
         self.network_info = network_info
         self.launcher = launcher
 
-    def predict(self, idenitifiers, input_data):
+    def predict(self, identifiers, input_data):
         raise NotImplementedError
 
     def release(self):

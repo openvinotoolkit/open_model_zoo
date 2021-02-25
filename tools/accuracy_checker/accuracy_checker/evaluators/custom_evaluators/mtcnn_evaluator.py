@@ -171,7 +171,7 @@ class RefineBaseStage(BaseStage):
     include_boundaries = True
     default_model_name = 'mtcnn-r'
 
-    def preprocess_data(self, batch_input, batch_annotation, previous_stage_prediction, *lrgs, **kwargs):
+    def preprocess_data(self, batch_input, batch_annotation, previous_stage_prediction, *args, **kwargs):
         batch_input = self.model_specific_preprocessor.process(batch_input, batch_annotation)
         batch_input = self.common_preprocessor.process(batch_input, batch_annotation)
         _, batch_meta = extract_image_representations(batch_input)

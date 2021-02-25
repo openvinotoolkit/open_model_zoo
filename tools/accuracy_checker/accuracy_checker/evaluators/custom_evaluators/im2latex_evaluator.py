@@ -148,7 +148,7 @@ class BaseModel:
         self.default_model_suffix = default_model_suffix
         self.network_info = network_info
 
-    def predict(self, idenitifers, input_data):
+    def predict(self, identifiers, input_data):
         raise NotImplementedError
 
     def release(self):
@@ -271,8 +271,8 @@ class SequentialModel:
                 return res.strip()
         return res.strip()
 
-    def predict(self, idenitifiers, input_data):
-        assert len(idenitifiers) == 1
+    def predict(self, identifiers, input_data):
+        assert len(identifiers) == 1
         input_data = np.array(input_data)
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         enc_res = self.recognizer_encoder.predict(

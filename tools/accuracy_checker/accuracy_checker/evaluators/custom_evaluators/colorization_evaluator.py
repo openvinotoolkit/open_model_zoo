@@ -324,7 +324,7 @@ class BaseModel:
 
         return model, weights
 
-    def predict(self, idenitifers, input_data):
+    def predict(self, identifiers, input_data):
         raise NotImplementedError
 
     def release(self):
