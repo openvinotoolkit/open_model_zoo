@@ -11,10 +11,10 @@ Output:
 def rect2square(rectangles):
     w = rectangles[:, 2] - rectangles[:, 0]
     h = rectangles[:, 3] - rectangles[:, 1]
-    l = np.maximum(w, h).T
-    rectangles[:, 0] = rectangles[:, 0] + w*0.5 - l*0.5
-    rectangles[:, 1] = rectangles[:, 1] + h*0.5 - l*0.5
-    rectangles[:, 2:4] = rectangles[:, 0:2] + np.repeat([l], 2, axis = 0).T
+    L = np.maximum(w, h).T
+    rectangles[:, 0] = rectangles[:, 0] + w*0.5 - L*0.5
+    rectangles[:, 1] = rectangles[:, 1] + h*0.5 - L*0.5
+    rectangles[:, 2:4] = rectangles[:, 0:2] + np.repeat([L], 2, axis = 0).T
     return rectangles
 '''
 Function:
@@ -69,19 +69,19 @@ def detect_face_12net(cls_prob, roi, out_side, scale, width, height, score_thres
     stride = 0
     if out_side != 1:
         stride = float(in_side-12)/(out_side-1)
-    (x,y) = np.where(cls_prob>=score_threshold)
-    boundingbox = np.array([x,y]).T
+    (x, y) = np.where(cls_prob>=score_threshold)
+    boundingbox = np.array([x, y]).T
     bb1 = np.fix((stride * (boundingbox) + 0 ) * scale)
     bb2 = np.fix((stride * (boundingbox) + 11) * scale)
-    boundingbox = np.concatenate((bb1,bb2),axis = 1)
-    dx1 = roi[0][x,y]
-    dx2 = roi[1][x,y]
-    dx3 = roi[2][x,y]
-    dx4 = roi[3][x,y]
-    score = np.array([cls_prob[x,y]]).T
-    offset = np.array([dx1,dx2,dx3,dx4]).T
+    boundingbox = np.concatenate((bb1, bb2), axis = 1)
+    dx1 = roi[0][x, y]
+    dx2 = roi[1][x, y]
+    dx3 = roi[2][x, y]
+    dx4 = roi[3][x, y]
+    score = np.array([cls_prob[x, y]]).T
+    offset = np.array([dx1, dx2, dx3, dx4]).T
     boundingbox = boundingbox + offset*12.0*scale
-    rectangles = np.concatenate((boundingbox,score), axis=1)
+    rectangles = np.concatenate((boundingbox, score), axis=1)
     rectangles = rect2square(rectangles)
     pick = []
     for i in range(len(rectangles)):
@@ -92,7 +92,7 @@ def detect_face_12net(cls_prob, roi, out_side, scale, width, height, score_thres
         sc = rectangles[i][4]
         if x2>x1 and y2>y1:
             pick.append([x1, y1, x2, y2, sc])
-    return NMS(pick,iou_threshold,'iou')
+    return NMS(pick, iou_threshold, 'iou')
 '''
 Function:
     Filter face position and calibrate bounding box on 12net's output
@@ -125,7 +125,7 @@ def filter_face_24net(cls_prob, roi, rectangles, width, height, score_threshold,
     y1  = np.array([(y1+dx2*h)[0]]).T
     x2  = np.array([(x2+dx3*w)[0]]).T
     y2  = np.array([(y2+dx4*h)[0]]).T
-    rectangles = np.concatenate((x1, y1, x2, y2, sc),axis=1)
+    rectangles = np.concatenate((x1, y1, x2, y2, sc), axis=1)
     rectangles = rect2square(rectangles)
     pick = []
     for i in range(len(rectangles)):
@@ -136,7 +136,7 @@ def filter_face_24net(cls_prob, roi, rectangles, width, height, score_threshold,
         sc = rectangles[i][4]
         if x2>x1 and y2>y1:
             pick.append([x1, y1, x2, y2, sc])
-    return NMS(pick,iou_threshold,'iou')
+    return NMS(pick, iou_threshold, 'iou')
 '''
 Function:
     Filter face position and calibrate bounding box on 12net's output
@@ -188,8 +188,8 @@ def filter_face_48net(cls_prob, roi, pts, rectangles, width, height, score_thres
         x2 = int(min(width , rectangles[i][2]))
         y2 = int(min(height, rectangles[i][3]))
         if x2>x1 and y2>y1:
-            pick.append([x1, y1, x2, y2,rectangles[i][4],
-        		 rectangles[i][5], rectangles[i][6], rectangles[i][7], rectangles[i][8], rectangles[i][9], rectangles[i][10], rectangles[i][11], rectangles[i][12], rectangles[i][13], rectangles[i][14]])
+            pick.append([x1, y1, x2, y2, rectangles[i][4],
+                rectangles[i][5], rectangles[i][6], rectangles[i][7], rectangles[i][8], rectangles[i][9], rectangles[i][10], rectangles[i][11], rectangles[i][12], rectangles[i][13], rectangles[i][14]])
     return NMS(pick, iou_threshold, 'iom')
 '''
 Function:
@@ -209,7 +209,6 @@ def calculateScales(img):
         w = int(w*pr_scale)
         h = int(h*pr_scale)
     elif max(w, h) < 1000:
-        scale = 1000.0 / max(h, w)
         w = int(w*pr_scale)
         h = int(h*pr_scale)
 
