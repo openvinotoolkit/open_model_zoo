@@ -478,7 +478,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='face_detection_mtcnn_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
-                          '-i': DataPatternArg('375x500')}),
+                          '-i': image_net_arg('00000002')}),
         [
             TestCase(options={
                 '-m_p': ModelArg('mtcnn-p'),
