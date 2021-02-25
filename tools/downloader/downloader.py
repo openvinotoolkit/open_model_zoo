@@ -168,17 +168,26 @@ class DirCache:
         return verify_hash(reporter, cache_sha256.digest(), model_file.sha256, path)
 
     def put(self, hash, path):
-        # A file in the cache must have the hash implied by its name. So when we upload a file,
-        # we first copy it to a temporary file and then atomically move it to the desired name.
-        # This prevents interrupted runs from corrupting the cache.
-        with path.open('rb') as src_file:
-            with tempfile.NamedTemporaryFile(dir=str(self._staging_dir), delete=False) as staging_file:
-                staging_path = Path(staging_file.name)
-                shutil.copyfileobj(src_file, staging_file)
+        staging_path = None
 
-        hash_path = self._hash_path(hash)
-        hash_path.parent.mkdir(parents=True, exist_ok=True)
-        staging_path.replace(self._hash_path(hash))
+        try:
+            # A file in the cache must have the hash implied by its name. So when we upload a file,
+            # we first copy it to a temporary file and then atomically move it to the desired name.
+            # This prevents interrupted runs from corrupting the cache.
+            with path.open('rb') as src_file:
+                with tempfile.NamedTemporaryFile(dir=str(self._staging_dir), delete=False) as staging_file:
+                    staging_path = Path(staging_file.name)
+                    shutil.copyfileobj(src_file, staging_file)
+
+            hash_path = self._hash_path(hash)
+            hash_path.parent.mkdir(parents=True, exist_ok=True)
+            staging_path.replace(self._hash_path(hash))
+            staging_path = None
+        finally:
+            # If we failed to complete our temporary file or to move it into place,
+            # get rid of it.
+            if staging_path:
+                staging_path.unlink()
 
 def try_retrieve_from_cache(reporter, cache, model_file, destination):
     try:
