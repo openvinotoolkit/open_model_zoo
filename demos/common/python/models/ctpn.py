@@ -34,15 +34,27 @@ class CTPN(Model):
         self.nms_threshold = 0.5
         self.min_size = 8
         self.min_ratio = 0.5
-        self.text_proposals_width = 16
-        self.min_num_proposals = 2
+        self.min_width = 32
         self.pre_nms_top_n = 1000
         self.post_nms_top_n = 500
         self.text_proposal_connector = TextProposalConnector()
 
+        self.anchors = np.array([
+            [0,   2,  15,  13],
+            [0,   0,  15,  15],
+            [0,  -4,  15,  19],
+            [0,  -9,  15,  24],
+            [0,  -16, 15,  31],
+            [0,  -26, 15,  41],
+            [0,  -41, 15,  56],
+            [0,  -62, 15,  77],
+            [0,  -91, 15, 106],
+            [0, -134, 15, 149]
+        ])
+
         self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, input_size[1], input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
-        input_shape = {self.image_blob_name: ([1, 3, self.h2, self.w2])}
+        input_shape = {self.image_blob_name: (1, 3, self.h2, self.w2)}
         self.logger.info('Reshape net to {}'.format(input_shape))
         self.net.reshape(input_shape)
 
@@ -95,9 +107,7 @@ class CTPN(Model):
         boxes = outputs[self.bboxes_blob_name][0].transpose((1, 2, 0))
         scores = outputs[self.scores_blob_name][0].transpose((1, 2, 0))
 
-        textsegs = self.get_proposals(scores, boxes, meta['original_shape'])
-        scores = textsegs[:, 0]
-        textsegs = textsegs[:, 1:5]
+        textsegs, scores = self.get_proposals(scores, boxes, meta['original_shape'])
         textsegs[:, 0::2] /= first_scales[0]
         textsegs[:, 1::2] /= first_scales[1]
         boxes = self.get_detections(textsegs, scores[:, np.newaxis], meta['original_shape'])
@@ -121,11 +131,11 @@ class CTPN(Model):
 
         return int(new_h), int(new_w)
 
-    def get_proposals(self, rpn_cls_prob_reshape, rpn_bbox_pred, image_size, _feat_stride=(16, )):
+    def get_proposals(self, rpn_cls_prob_reshape, bbox_deltas, image_size, _feat_stride=16):
         """
         Parameters
         rpn_cls_prob_reshape: (H , W , Ax2), probabilities for predicted regions
-        rpn_bbox_pred: (H , W , Ax4), predicted regions
+        bbox_deltas: (H , W , Ax4), predicted regions
         image_size: a list of [image_height, image_width]
         _feat_stride: the downsampling ratio of feature map to the original input image
         Algorithm:
@@ -141,14 +151,13 @@ class CTPN(Model):
         return the top proposals (-> RoIs top, scores top)
         """
 
-        _anchors = self.generate_anchors()
+        _anchors = self.anchors.copy()
         _num_anchors = _anchors.shape[0]
         height, width = rpn_cls_prob_reshape.shape[:2]
         scores = np.reshape(
             np.reshape(rpn_cls_prob_reshape, [height, width, _num_anchors, 2])[:, :, :, 1],
             [height, width, _num_anchors]
         )
-        bbox_deltas = rpn_bbox_pred
         shift_x = np.arange(0, width) * _feat_stride
         shift_y = np.arange(0, height) * _feat_stride
         shift_x, shift_y = np.meshgrid(shift_x, shift_y)
@@ -171,8 +180,8 @@ class CTPN(Model):
         proposals = self.bbox_transform_inv(anchors, bbox_deltas)
 
         # clip predicted boxes to image
-        proposals = clip_boxes(proposals, image_size)
-
+        proposals[:, :4].clip(min=0, max=(image_size[1] - 1, image_size[0] - 1, image_size[1] - 1, image_size[0] - 1),
+                              out=proposals[:, :4])
         # sort all (proposal, score) pairs by score from highest to lowest
         order = scores.ravel().argsort()[::-1]
         if self.pre_nms_top_n > 0:
@@ -184,9 +193,7 @@ class CTPN(Model):
         if self.post_nms_top_n > 0:
             keep = keep[:self.post_nms_top_n]
         proposals, scores = proposals[keep, :], scores[keep]
-        blob = np.hstack((scores.astype(np.float32, copy=False), proposals.astype(np.float32, copy=False)))
-
-        return blob
+        return proposals, scores
 
     def get_detections(self, text_proposals, scores, size):
         keep_inds = np.where(scores > 0.7)[0]
@@ -197,15 +204,11 @@ class CTPN(Model):
 
         text_recs = self.text_proposal_connector.get_text_lines(text_proposals, scores, size)
 
-        heights = np.zeros((len(text_recs), 1), np.float)
-        widths = np.zeros((len(text_recs), 1), np.float)
-        scores = np.zeros((len(text_recs), 1), np.float)
-        for index, box in enumerate(text_recs):
-            heights[index] = (abs(box[5] - box[1]) + abs(box[7] - box[3])) / 2.0 + 1
-            widths[index] = (abs(box[2] - box[0]) + abs(box[6] - box[4])) / 2.0 + 1
-            scores[index] = box[8]
+        heights = (abs(text_recs[:, 5] - text_recs[:, 1]) + abs(text_recs[:, 7] - text_recs[:, 3])) / 2.0 + 1
+        widths = (abs(text_recs[:, 2] - text_recs[:, 0]) + abs(text_recs[:, 6] - text_recs[:, 4])) / 2.0 + 1
+        scores = text_recs[:, 8]
         keep_inds = np.where((widths / heights > self.min_ratio) & (scores > self.boxes_threshold) &
-                             (widths > (self.min_num_proposals * self.text_proposals_width)))[0]
+                             (widths > self.min_width))[0]
 
         return text_recs[keep_inds]
 
@@ -241,21 +244,6 @@ class CTPN(Model):
         return keep
 
     @staticmethod
-    def generate_anchors():
-        def scale_anchor(h, w, base_size=16):
-            ctr = (base_size - 1) * 0.5
-            xmin = ctr - w / 2
-            ymin = ctr - h / 2
-            xmax = ctr + w / 2
-            ymax = ctr + h / 2
-            return np.array([xmin, ymin, xmax, ymax], np.int32)
-
-        # the even values of heights are converted to odd, so that
-        # anchors coordinates are calculated as integers
-        heights = [11, 15, 23, 33, 47, 67, 97, 139, 197, 283]
-        return np.stack([scale_anchor(h, 16) for h in heights])
-
-    @staticmethod
     def bbox_transform_inv(boxes, deltas):
 
         boxes = boxes.astype(deltas.dtype, copy=False)
@@ -280,17 +268,6 @@ class CTPN(Model):
         pred_boxes[:, 3::4] = pred_ctr_y + 0.5 * pred_h
 
         return pred_boxes
-
-def clip_boxes(boxes, image_size):
-    """
-    Clip boxes to image boundaries.
-    """
-    boxes[:, 0::4] = np.maximum(np.minimum(boxes[:, 0::4], image_size[1] - 1), 0)
-    boxes[:, 1::4] = np.maximum(np.minimum(boxes[:, 1::4], image_size[0] - 1), 0)
-    boxes[:, 2::4] = np.maximum(np.minimum(boxes[:, 2::4], image_size[1] - 1), 0)
-    boxes[:, 3::4] = np.maximum(np.minimum(boxes[:, 3::4], image_size[0] - 1), 0)
-
-    return boxes
 
 
 class Graph:
@@ -421,7 +398,8 @@ class TextProposalConnector:
             text_lines[index, 3] = max(lb_y, rb_y)
             text_lines[index, 4] = score
 
-        text_lines = clip_boxes(text_lines, image_size)
+        text_lines[:, :4].clip(min=0, max=(image_size[1] - 1, image_size[0] - 1, image_size[1] - 1, image_size[0] - 1),
+                               out=text_lines[:, :4])
 
         text_recs = np.zeros((len(text_lines), 9), np.float)
         for index, line in enumerate(text_lines):
