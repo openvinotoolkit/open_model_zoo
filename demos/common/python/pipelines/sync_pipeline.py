@@ -14,10 +14,16 @@
  limitations under the License.
 """
 
+import logging
+
 
 class SyncPipeline:
     def __init__(self, ie, model=None, device='CPU', silent=False):
-        self.logger = logging.getLogger() if not silent else lambda *x: None
+        if silent:
+            self.logger = logging.getLogger('dummy')
+            self.logger.setLevel(logging.CRITICAL)
+        else:
+            self.logger = logging.getLogger()
 
         self.ie = ie
         self.device = device
@@ -27,11 +33,9 @@ class SyncPipeline:
             self.exec_net = ie.load_network(network=self.model.net, device_name=device)
 
     def reload_model(self, model, device=None):
-        if device:
-            self.device = device
         self.model = model
-        self.logger.info('Loading network to {} plugin...'.format(device))
-        self.exec_net = self.ie.load_network(network=self.model.net, device_name=self.device)
+        self.logger.info('Loading network to {} plugin...'.format(device if device else self.device))
+        self.exec_net = self.ie.load_network(network=self.model.net, device_name=device if device else self.device)
 
     def infer(self, inputs):
         inputs, preprocessing_meta = self.model.preprocess(inputs)

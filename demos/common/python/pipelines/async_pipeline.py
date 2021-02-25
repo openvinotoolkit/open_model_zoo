@@ -22,7 +22,11 @@ from collections import deque
 class AsyncPipeline:
     def __init__(self, ie, model=None, plugin_config={'CPU': 1}, device='CPU', max_num_requests=1, silent=False):
         self.model = model
-        self.logger = logging.getLogger() if not silent else lambda *x: None
+        if silent:
+            self.logger = logging.getLogger('dummy')
+            self.logger.setLevel(logging.CRITICAL)
+        else:
+            self.logger = logging.getLogger()
 
         self.plugin_config = plugin_config
         self.device = device
@@ -43,7 +47,7 @@ class AsyncPipeline:
 
     def reload_model(self, model, plugin_config=None, device=None, max_num_requests=None):
         self.model = model
-        self.logger.info('Loading network to {} plugin...'.format(device))
+        self.logger.info('Loading network to {} plugin...'.format(device if device else self.device))
         self.exec_net = self.ie.load_network(network=self.model.net,
                                              device_name=device if device else self.device,
                                              config=plugin_config if plugin_config else self.plugin_config,

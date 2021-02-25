@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2018-2020 Intel Corporation
+ Copyright (C) 2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -256,7 +256,7 @@ def main():
     cap = open_images_capture(args.input, args.loop)
 
     log.info('Starting inference...')
-    print("Use 'c' key to disable/enable confidence drawing, 'l' to disable/enable landmarks drawing")
+    print("Use 's' key to disable/enable scores drawing, 'l' to disable/enable landmarks drawing")
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     palette = ColorPalette(1)
@@ -269,15 +269,15 @@ def main():
     while True:
         start_time = perf_counter()
         frame = cap.read()
-        if not frame:
+        if frame is None:
             break
         total_frames += 1
-        if total_frames == 1 :
+        if total_frames == 1:
             presenter = monitors.Presenter(args.utilization_monitors, 55,
                                            (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
             if args.output:
-                video_writer = cv2.VideoWriter(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
-                                               (frame.shape[1], frame.shape[0]))
+                video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
+                                  (frame.shape[1], frame.shape[0]))
                 if not video_writer.isOpened():
                     raise RuntimeError("Can't open video writer")
         detections = detector_pipeline.infer(frame)
@@ -286,7 +286,7 @@ def main():
         draw_detections(frame, detections, palette, None, 0.5, draw_lanmdmark, draw_confidence)
         metrics.update(start_time, frame)
 
-        if video_writer.isOpened() and (args.output_limit == -1 or total_frames <= args.output_limit - 1):
+        if video_writer.isOpened() and (args.output_limit <= 0 or total_frames <= args.output_limit - 1):
             video_writer.write(frame)
 
         if not args.no_show:
@@ -296,10 +296,11 @@ def main():
             # Quit.
             if key in {ord('q'), ord('Q'), ESC_KEY}:
                 break
-            if key in {ord('l'), ord('L')}:
+            elif key in {ord('l'), ord('L')}:
                 draw_lanmdmark = not draw_lanmdmark
-            if key in {ord('c'), ord('C')}:
+            elif  key in {ord('s'), ord('S')}:
                 draw_confidence = not draw_confidence
+            presenter.handleKey(key)
 
     metrics.print_total()
 
