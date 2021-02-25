@@ -18,6 +18,8 @@
 from .centernet import CenterNet
 from .deblurring import Deblurring
 from .faceboxes import FaceBoxes
+from .hpe_associative_embedding import HpeAssociativeEmbedding
+from .open_pose import OpenPose
 from .retinaface import RetinaFace
 from .segmentation import SegmentationModel
 from .ssd import SSD
@@ -29,6 +31,8 @@ __all__ = [
     'DetectionWithLandmarks',
     'Deblurring',
     'FaceBoxes',
+    'HpeAssociativeEmbedding',
+    'OpenPose',
     'RetinaFace',
     'SegmentationModel',
     'SSD',

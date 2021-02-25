@@ -25,6 +25,7 @@
 
 #include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 #include <ngraph/ngraph.hpp>
 
 using namespace InferenceEngine;
@@ -104,10 +105,12 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
     int w = resizedImage.cols;
     if (inputLayerSize.width < w)
         throw std::runtime_error("The image aspect ratio doesn't fit current model shape");
+    if (!(inputLayerSize.width - stride < w && w <= inputLayerSize.width)) {
+        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
+    }
     cv::Mat paddedImage;
-    int bottom = inputLayerSize.height - h;
     int right = inputLayerSize.width - w;
-    cv::copyMakeBorder(resizedImage, paddedImage, 0, bottom, 0, right,
+    cv::copyMakeBorder(resizedImage, paddedImage, 0, 0, 0, right,
                        cv::BORDER_CONSTANT, meanPixel);
     request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */

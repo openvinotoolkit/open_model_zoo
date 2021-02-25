@@ -494,6 +494,21 @@ PYTHON_DEMOS = [
         TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
     )),
 
+    PythonDemo(name='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('human-pose-estimation')}),
+        [
+            TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
+            *combine_cases(
+                TestCase(options={'-at': 'ae'}),
+                single_option_cases('-m',
+                    ModelArg('human-pose-estimation-0002'),
+                    ModelArg('human-pose-estimation-0003'),
+                    ModelArg('human-pose-estimation-0004'))),
+        ],
+    )),
+
     PythonDemo(name='image_inpainting_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
                           '-i': image_net_arg('00048311'),
