@@ -119,9 +119,9 @@ def main():
     rectangles = []
     for i in range(image_num):
         (layer_name_roi, roi), (layer_name_cls, cls_prob) = pnet_res[i].items()
-        _, _, out_h,out_w = cls_prob.shape
-        out_side = max(out_h,out_w)
-        rectangle = tools.detect_face_12net(cls_prob[0][1],roi[0],out_side,1/scales[i],ow,oh,score_threshold[0], iou_threshold[0])
+        _, _, out_h, out_w = cls_prob.shape
+        out_side = max(out_h, out_w)
+        rectangle = tools.detect_face_12net(cls_prob[0][1], roi[0], out_side,1/scales[i], ow, oh, score_threshold[0], iou_threshold[0])
         rectangles.extend(rectangle)
     rectangles = tools.NMS(rectangles, iou_threshold[1], 'iou')
 
@@ -146,7 +146,7 @@ def main():
     rnet_res = exec_rnet.infer(inputs={rnet_input_blob: rnet_input})
 
     (layer_name_roi, roi_prob), (layer_name_cls, cls_prob)  = rnet_res.items()
-    rectangles = tools.filter_face_24net(cls_prob,roi_prob,rectangles,ow,oh,score_threshold[1], iou_threshold[2])
+    rectangles = tools.filter_face_24net(cls_prob, roi_prob, rectangles, ow, oh, score_threshold[1], iou_threshold[2])
 
     if len(rectangles) == 0:
         return rectangles
@@ -169,14 +169,14 @@ def main():
     onet_res = exec_onet.infer(inputs={onet_input_blob: onet_input})
 
     (layer_name_roi, roi_prob), (layer_name_landmark, pts_prob), (layer_name_cls, cls_prob)  = onet_res.items()
-    rectangles = tools.filter_face_48net(cls_prob,roi_prob,pts_prob,rectangles,ow,oh,score_threshold[2], iou_threshold[3])
+    rectangles = tools.filter_face_48net(cls_prob, roi_prob, pts_prob, rectangles, ow, oh, score_threshold[2], iou_threshold[3])
 
     for rectangle in rectangles:
         # Draw detected boxes
-        cv2.putText(origin_image, 'confidence: {:.2f}'.format(rectangle[4]),(int(rectangle[0]),int(rectangle[1])),cv2.FONT_HERSHEY_SIMPLEX,0.6,(0,255,0))
-        cv2.rectangle(origin_image,(int(rectangle[0]),int(rectangle[1])),(int(rectangle[2]),int(rectangle[3])),(255,0,0),1)
-        for i in range(5,15,2):
-            cv2.circle(origin_image,(int(rectangle[i+0]),int(rectangle[i+1])),2,(0,255,0))
+        cv2.putText(origin_image, 'confidence: {:.2f}'.format(rectangle[4]), (int(rectangle[0]), int(rectangle[1])), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0))
+        cv2.rectangle(origin_image, (int(rectangle[0]), int(rectangle[1])), (int(rectangle[2]), int(rectangle[3])), (255, 0, 0), 1)
+        for i in range(5, 15, 2):
+            cv2.circle(origin_image, (int(rectangle[i+0]), int(rectangle[i+1])), 2, (0, 255 ,0))
 
     infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()  # Recorde infer time
     cv2.putText(origin_image, 'summary: {:.1f} FPS'.format(
