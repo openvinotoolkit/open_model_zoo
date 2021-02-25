@@ -47,7 +47,7 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=('ssd', 'yolo', 'faceboxes', 'centernet', 'retinaface'))
+                      type=str, required=True, choices=('ssd', 'yolo', 'yolov4', 'faceboxes', 'centernet', 'retinaface'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -139,6 +139,9 @@ def get_model(ie, args):
     elif args.architecture_type == 'yolo':
         return models.YOLO(ie, args.model, labels=args.labels,
                            threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
+    elif args.architecture_type == 'yolov4':
+        return models.YoloV4(ie, args.model, labels=args.labels,
+                             threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
     elif args.architecture_type == 'faceboxes':
         return models.FaceBoxes(ie, args.model, threshold=args.prob_threshold)
     elif args.architecture_type == 'centernet':
