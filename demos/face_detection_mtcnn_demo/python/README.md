@@ -2,8 +2,7 @@
 
 This demo showcases Face Detection using MTCNN architecture.
 
-The MTCNN architecture consists of three different models, which perform face detection in three serial stages - 
-Proposal, Refine and Output.
+The MTCNN architecture consists of three different models, which perform face detection in three serial stages - Proposal, Refine and Output.
 
 This and other performance implications and tips for the Async API are covered in the
 [Optimization Guide](https://docs.openvinotoolkit.org/latest/_docs_optimization_guide_dldt_optimization_guide.html).
@@ -19,7 +18,7 @@ Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference
 
 The MTCNN model is perfomed in three serial stages:
 - Proposal stage - the MTCNN-P model reshapes into several separate models depending on image size. Each model performes inference and gives a pack of "proposal" boxes
-- Refine stage - each "proposal" box refines by MTCNN-R model execution. The model could be executed once for all "proposal" boxes (*by default*) which involve its reshaping by setting new batch size and reloading to device, or several times in asynchronous mode with fixed batch size (see `--refine_batch_size` option) 
+- Refine stage - each "proposal" box refines by MTCNN-R model execution. The model could be executed once for all "proposal" boxes (*by default*) which involve its reshaping by setting new batch size and reloading to device, or several times in asynchronous mode with fixed batch size (see `--refine_batch_size` option)
 - Output stage - each "refined" box corrects by MTCNN-O model execution. The model could be executed once for all "refined" boxes (*by default*) which involve its reshaping by setting new batch size and reloading to device, or several times in asynchronous mode with fixed batch size (see `--output_batch_size` option)
 
 ## Running

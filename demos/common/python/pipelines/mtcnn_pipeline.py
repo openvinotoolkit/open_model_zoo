@@ -40,7 +40,7 @@ class MtcnnPipeline:
         self.refine_resize = rm_batch_size == 0
         self.refine_fixed_batch_size = rm_batch_size
         if self.refine_resize:
-            self.refine_pipeline = SyncPipeline(ie, device=rm_device)
+            self.refine_pipeline = SyncPipeline(ie, device=rm_device, silent=True)
         else:
             self.refine_model.set_batch_size(self.refine_fixed_batch_size)
             self.refine_pipeline = AsyncPipeline(ie, self.refine_model, rm_config, rm_device, rm_num_requests,
@@ -49,7 +49,7 @@ class MtcnnPipeline:
         self.output_resize = om_batch_size == 0
         self.output_fixed_batch_size = om_batch_size
         if self.output_resize:
-            self.output_pipeline = SyncPipeline(ie, device=om_device)
+            self.output_pipeline = SyncPipeline(ie, device=om_device, silent=True)
         else:
             self.output_model.set_batch_size(self.output_fixed_batch_size)
             self.output_pipeline = AsyncPipeline(ie, self.output_model, om_config, om_device, om_num_requests,
@@ -90,6 +90,9 @@ class MtcnnPipeline:
                     proposal_pipelines.append(proposal_pipeline)
         proposal_results = self.proposal_model.postprocess_all(proposal_results)
 
+        if len(proposal_results) == 0:
+            return []
+
         if self.refine_resize:
             self.refine_model.set_batch_size(len(proposal_results))
             self.refine_pipeline.reload_model(self.refine_model)
@@ -113,6 +116,9 @@ class MtcnnPipeline:
                 if results:
                     refine_results += results[0][0]
         refine_results = self.refine_model.postprocess_all(refine_results)
+
+        if len(refine_results) == 0:
+            return []
 
         if self.output_resize:
             self.output_model.set_batch_size(len(refine_results))
