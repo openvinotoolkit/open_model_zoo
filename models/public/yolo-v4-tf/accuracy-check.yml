@@ -80,8 +80,12 @@ models:
         preprocessing:
           - type: resize
             size: 608
+            aspect_ratio_scale: fit_to_window
+            use_pillow: True
+          - type: padding
+            pad_type: center
         postprocessing:
-          - type: resize_prediction_boxes
+          - type: letterbox_postprocessing_resize
           - type: filter
             apply_to: prediction
             min_confidence: 0.001

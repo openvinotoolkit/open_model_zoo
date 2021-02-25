@@ -60,6 +60,7 @@ from .argmax_segmentation_mask import ArgMaxSegmentationMask
 from .normalize_salient_map import SalientMapNormalizer
 from .min_max_normalization import MinMaxRegressionNormalization
 from .crop_image import CropImage, CornerCropImage
+from .letterbox_postrocessing_resize import LetterboxPostprocessingResize
 
 
 __all__ = [
@@ -81,6 +82,7 @@ __all__ = [
     'DIoUNMS',
     'ResizePredictionBoxes',
     'FRCNNPostprocessingBboxResize',
+    'LetterboxPostprocessingResize',
     'CorrectYoloV2Boxes',
     'NormalizeBoxes',
 
