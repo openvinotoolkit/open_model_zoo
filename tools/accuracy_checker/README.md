@@ -50,6 +50,7 @@ In order to evaluate some models required frameworks have to be installed. Accur
 - [TensorFlow](https://www.tensorflow.org/).
 - [ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/master/README.md).
 - [PyTorch](https://pytorch.org/)
+- [PaddlePaddle](https://www.paddlepaddle.org.cn/documentation/docs/en/guides/index_en.html)
 
 You can use any of them or several at a time. For correct work, Accuracy Checker requires at least one. You are able postpone installation of other frameworks and install them when they will be necessary.
 
@@ -163,7 +164,9 @@ You can use field `global_definitions` for specifying path to global definitions
 ### Launchers
 
 Launcher is a description of how your model should be executed.
-Each launcher configuration starts with setting `framework` name. Currently *caffe*, *dlsdk*, *mxnet*, *tf*, *tf_lite*, *opencv*, *onnx_runtime* supported. Launcher description can have differences.
+Each launcher configuration starts with setting `framework` name.
+Currently *caffe*, *dlsdk*, *mxnet*, *tf*, *tf2*, *tf_lite*, *opencv*, *onnx_runtime*, *pytorch*, *paddlepaddle* supported.
+Launcher description can have differences.
 Please view:
 
 - [How to configure Caffe launcher](accuracy_checker/launcher/caffe_launcher_readme.md)
@@ -175,6 +178,7 @@ Please view:
 - [How to configure TensorFlow 2.0 Launcher](accuracy_checker/launcher/tf2_launcher_readme.md)
 - [How to configure ONNX Runtime Launcher](accuracy_checker/launcher/onnx_runtime_launcher_readme.md)
 - [How to configure PyTorch Launcher](accuracy_checker/launcher/pytorch_launcher_readme.md)
+- [How to configure PaddlePaddle Launcher](accuracy_checker/launcher/pdpd_launcher_readme.md)
 
 ### Datasets
 

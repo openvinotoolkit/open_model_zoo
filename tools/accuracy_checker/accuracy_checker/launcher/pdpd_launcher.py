@@ -103,7 +103,7 @@ class PaddlePaddleLauncher(Launcher):
         return PaddleTensor(np.array(data).astype(input_precision))
 
     def predict_async(self, *args, **kwargs):
-        raise ValueError('ONNX Runtime Launcher does not support async mode yet')
+        raise ValueError('PaddlePaddle Launcher does not support async mode yet')
 
     def release(self):
         if hasattr(self, '_predictor'):
