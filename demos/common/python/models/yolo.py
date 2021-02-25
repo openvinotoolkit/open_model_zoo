@@ -225,7 +225,7 @@ class YoloV4(YOLO):
                             142.0, 110.0, 192.0, 243.0, 459.0, 401.0]
             masked_anchors = []
             for idx in mask:
-                masked_anchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
+                masked_anchors += [anchors[idx * 2], anchors[idx * 2 + 1]]
             self.anchors = masked_anchors
 
     def _get_output_info(self):
