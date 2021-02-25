@@ -39,6 +39,7 @@ from .attributes_recognition import (
     VehicleAttributesRecognitionAdapter,
     PersonAttributesAdapter,
     AgeGenderAdapter,
+    AgeRecognitionAdapter,
     LandmarksRegressionAdapter,
     GazeEstimationAdapter,
     PRNetAdapter
@@ -165,6 +166,7 @@ __all__ = [
     'VehicleAttributesRecognitionAdapter',
     'PersonAttributesAdapter',
     'AgeGenderAdapter',
+    'AgeRecognitionAdapter',
     'LandmarksRegressionAdapter',
     'GazeEstimationAdapter',
     'PRNetAdapter',

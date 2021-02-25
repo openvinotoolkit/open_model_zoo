@@ -179,6 +179,59 @@ class AgeGenderAdapter(Adapter):
         return result
 
 
+class AgeRecognitionAdapter(Adapter):
+    __provider__ = 'age_recognition'
+    prediction_types = (ClassificationPrediction, RegressionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'age_out': StringField(description="Output layer name for age recognition.", optional=True),
+        })
+        return parameters
+
+    def configure(self):
+        self.age_out = self.get_value_from_config('age_out')
+
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
+
+    @staticmethod
+    def get_age_scores(age):
+        age_scores = np.zeros(4)
+        if age < 19:
+            age_scores[0] = 1
+            return age_scores
+        if age < 36:
+            age_scores[1] = 1
+            return age_scores
+        if age < 66:
+            age_scores[2] = 1
+            return age_scores
+        age_scores[3] = 1
+        return age_scores
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        result = []
+        raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
+        self.age_out = self.age_out or self.output_blob
+        prediction = raw_output[self.age_out]
+        for identifier, output in zip(identifiers, prediction):
+            age = np.argmax(output)
+            age_class_rep = ClassificationPrediction(identifier, self.get_age_scores(age))
+            age_error_rep = RegressionPrediction(identifier, age)
+            result.append(ContainerPrediction({
+                'age_classification': age_class_rep, 'age_error': age_error_rep
+            }))
+
+        return result
+
+
 class LandmarksRegressionAdapter(Adapter):
     __provider__ = 'landmarks_regression'
     prediction_types = (FacialLandmarksPrediction, )

@@ -757,7 +757,7 @@ class MatlabDataReader():
         return array
 
     def _read_char_array(self, fd, endian, header):
-        array = self._read_numeric_array(fd, endian, header, ['miUTF8'])
+        array = self._read_numeric_array(fd, endian, header, ['miUTF8', 'miUTF16'])
         if header['dims'][0] > 1:
             array = [self.asstr(bytearray(i)) for i in array]
         else:
