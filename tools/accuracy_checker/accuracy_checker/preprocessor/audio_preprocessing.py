@@ -708,7 +708,7 @@ class AudioToMelSpectrogram(Preprocessor):
             'pad_to': NumberField(optional=True, value_type=int, default=0, description="Desired length of features"),
             'preemph': NumberField(optional=True, value_type=float, default=0.97, description="Preemph factor"),
             'log': BoolField(optional=True, default=True, description="Enables log() of MEL features values"),
-            'use_determenistic_dithering': BoolField(optional=True, default=True,
+            'use_deterministic_dithering': BoolField(optional=True, default=True,
                                                      description="Applies determined dithering to signal spectrum"),
             'dither': NumberField(optional=True, value_type=float, default=0.00001, description="Dithering value"),
         })
@@ -725,7 +725,7 @@ class AudioToMelSpectrogram(Preprocessor):
         self.log = self.get_value_from_config('log')
         self.pad_to = self.get_value_from_config('pad_to')
         self.frame_splicing = self.get_value_from_config('splicing')
-        self.use_determenistic_dithering = self.get_value_from_config('use_determenistic_dithering')
+        self.use_deterministic_dithering = self.get_value_from_config('use_deterministic_dithering')
         self.dither = self.get_value_from_config('dither')
 
         self.normalize = 'per_feature'
@@ -734,7 +734,7 @@ class AudioToMelSpectrogram(Preprocessor):
         self.max_duration = 16.7
         self.pad_value = 0
         self.mag_power = 2.0
-        self.use_determenistic_dithering = True
+        self.use_deterministic_dithering = True
         self.dither = 1e-05
         self.log_zero_guard_type = 'add'
         self.log_zero_guard_value = 2 ** -24
@@ -767,7 +767,7 @@ class AudioToMelSpectrogram(Preprocessor):
         seq_len = int(np.ceil(seq_len // self.hop_length))
 
         # dither
-        if self.dither > 0 and not self.use_determenistic_dithering:
+        if self.dither > 0 and not self.use_deterministic_dithering:
             x = x + self.dither * np.random.randn(*x.shape)
 
         # do preemphasis
