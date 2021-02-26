@@ -57,8 +57,8 @@ class TextRecognition(Model):
         else:
             output_blob_name = [name for name in self.net.outputs if name.startswith('logits')][0]
 
-        for _, blob in self.net.input_info.items():
-            if len(blob.input_data.shape) != 3:
+        for _, blob in self.net.outputs.items():
+            if len(blob.shape) != 3:
                 raise RuntimeError("Unexpected output blob shape. Only 3D output blobs are supported")
 
         return output_blob_name

@@ -169,7 +169,7 @@ def main():
         raise RuntimeError("Can't read an image from the input")
 
     frame_size = frame.shape[:2]
-    text_detection = models.CTPN(ie, args.m_td, frame_size=frame_size, threshold=args.prob_threshold)
+    text_detection = models.CTPN(ie, args.m_td, input_size=frame_size, threshold=args.prob_threshold)
     if args.tr_pt_first:
         alphabet = '#' + args.alphabet
     else:
