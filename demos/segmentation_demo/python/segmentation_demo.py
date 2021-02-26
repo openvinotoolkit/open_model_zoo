@@ -63,18 +63,10 @@ class Visualizer(object):
     ]
 
     def __init__(self, colors_path=None):
-        if colors_path:
-            self.color_palette = self.get_palette_from_file(colors_path)
-        else:
-            self.color_palette = self.pascal_voc_palette
         self.color_map = self.create_color_map()
 
-    def get_palette_from_file(self, colors_path):
-        with open(colors_path, 'r') as file:
-            return [eval(line.strip()) for line in file.readlines()]
-
     def create_color_map(self):
-        classes = np.array(self.color_palette, dtype=np.uint8)[:, ::-1] # BGR to RGB
+        classes = np.array(self.pascal_voc_palette, dtype=np.uint8)[:, ::-1] # BGR to RGB
         color_map = np.zeros((256, 1, 3), dtype=np.uint8)
         classes_num = len(classes)
         color_map[:classes_num, 0, :] = classes
@@ -103,10 +95,6 @@ def build_argparser():
                       help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
-
-    common_model_args = parser.add_argument_group('Common model options')
-    common_model_args.add_argument('-c', '--colors', type=Path,
-                                   help='Optional. Path to a text file containing colors for classes.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
@@ -182,7 +170,7 @@ def main():
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
-    visualizer = Visualizer(args.colors)
+    visualizer = Visualizer()
     presenter = None
     video_writer = cv2.VideoWriter()
 

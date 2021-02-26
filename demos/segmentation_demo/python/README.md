@@ -23,8 +23,7 @@ python3 segmentation_demo.py -h
 The command yields the following usage message:
 
 ```
-usage: segmentation_demo.py [-h] -m MODEL -i INPUT
-                            [-d DEVICE] [-c COLORS]
+usage: segmentation_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
                             [-nireq NUM_INFER_REQUESTS]
                             [-nstreams NUM_STREAMS]
                             [-nthreads NUM_THREADS]
@@ -43,11 +42,6 @@ Options:
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The demo
                         will look for a suitable plugin for device specified.
                         Default value is CPU.
-
-Common model options:
-  -c COLORS, --colors COLORS
-                        Optional. Path to a text file containing colors for
-                        classes.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
