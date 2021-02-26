@@ -8,3 +8,6 @@ tokenizers
 tensorboard
 tensorboardX
 tqdm
+jupyterlab
+ipywidgets
+opencv-python-headless

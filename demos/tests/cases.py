@@ -14,6 +14,8 @@
 
 import collections
 import itertools
+import os
+import subprocess
 import sys
 
 from args import (
@@ -66,6 +68,33 @@ class PythonDemo(Demo):
 
         return [sys.executable, str(source_dir / self.subdirectory / (self._exec_name + '.py')),
             *(['-l', str(cpu_extension_path)] if cpu_extension_path.exists() else [])]
+
+
+class NotebookDemo(Demo):
+    """
+    Convert notebook to Python script and runs it
+    """
+    def __init__(self, name, implementation='jupyter-python', device_keys=None, test_cases=None):
+        super().__init__(name, implementation, device_keys, test_cases)
+        self._exec_name = self._exec_name.replace('_jupyter-python', '')
+
+    def fixed_args(self, source_dir, build_dir):
+        sys.path.append(os.path.join(os.path.dirname(os.path.abspath(os.curdir)), "common", "python"))
+
+        notebook_file = str(source_dir / self.subdirectory / (self._exec_name + '.ipynb'))
+        python_file = notebook_file.replace('ipynb', 'py')
+        python_test_file = python_file.replace('.py', '_test.py')
+        subprocess.run([sys.executable.replace('python', 'jupyter'), 'nbconvert', '--to', 'python', notebook_file])
+
+        # Change the working directory to the directory that contains the notebook
+        with open(python_file, 'r') as python_script:
+            changedir = f"import os\nos.chdir(r'{os.path.dirname(python_file)}')\n"
+            content = changedir + python_script.read()
+
+            with open(python_test_file, 'w') as python_test_script:
+                python_test_script.write(content)
+
+        return [sys.executable, python_test_file]
 
 
 def join_cases(*args):
@@ -726,4 +755,10 @@ PYTHON_DEMOS = [
     )),
 ]
 
-DEMOS = NATIVE_DEMOS + PYTHON_DEMOS
+
+NOTEBOOK_DEMOS = [
+   NotebookDemo(name='object_detection_demo', device_keys=[], test_cases=[TestCase(options=
+       {'-m': ModelArg('face-detection-0200')}),
+])]
+
+DEMOS = NATIVE_DEMOS + PYTHON_DEMOS + NOTEBOOK_DEMOS
