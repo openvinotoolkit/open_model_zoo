@@ -340,7 +340,8 @@ class TextProposalsDetectionAdapter(Adapter):
             textsegs, scores = self.get_proposals(cls_prob, bbox_pred, im_info)
             textsegs[:, 0::2] /= scale_x
             textsegs[:, 1::2] /= scale_y
-            boxes = self.get_detections(textsegs, scores[:, np.newaxis], [meta['original_height'], meta['original_width']])
+            boxes = self.get_detections(textsegs, scores[:, np.newaxis],
+                                        [meta['original_height'], meta['original_width']])
             boxes = boxes[:, :8]
             geom_operations = meta['geometric_operations']
             resize_op = [geom_operation for geom_operation in geom_operations if geom_operation.type == 'resize']
