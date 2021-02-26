@@ -55,7 +55,7 @@ Channel order is `BGR`.
 
 ### Original model
 
-1. Classifier, name - `detection_classes`, contains predicted bounding boxes classes in range [1, 91]. The model was trained on Microsoft\* COCO dataset version with [90 categories](../../../data/dataset_classes/coco_91cl_bkgr.txt) of object,  0 class is for background.
+1. Classifier, name - `detection_classes`, contains predicted bounding boxes classes in range [1, 91]. The model was trained on Microsoft\* COCO dataset version with [91 categories](../../../data/dataset_classes/coco_91cl_bkgr.txt) of object,  0 class is for background.
 2. Probability, name - `detection_scores`, contains probability of detected bounding boxes.
 3. Detection box, name - `detection_boxes`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are rescaled to input image size.
 4. Detections number, name - `num_detections`, contains the number of predicted detection boxes.

@@ -56,7 +56,7 @@ Expected color order: BGR.
 
 ### Original Model
 
-1. Classifier, name: `detection_classes`. Contains predicted bounding boxes classes in a range [1, 91]. The model was trained on Microsoft\* COCO dataset version with [90 categories](../../../data/dataset_classes/coco_91cl_bkgr.txt) of objects.
+1. Classifier, name: `detection_classes`. Contains predicted bounding boxes classes in a range [1, 91]. The model was trained on Microsoft\* COCO dataset version with [91 categories](../../../data/dataset_classes/coco_91cl_bkgr.txt) of objects, 0 class is for background.
 2. Probability, name: `detection_scores`. Contains probability of detected bounding boxes.
 3. Detection box, name: `detection_boxes`. Contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates of the top left corner, (`x_max`, `y_max`) are coordinates of the right bottom corner. Coordinates are rescaled to input image size.
 4. Detections number, name: `num_detections`. Contains the number of predicted detection boxes.
