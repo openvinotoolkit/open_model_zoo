@@ -152,11 +152,6 @@ def get_model(ie, args):
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
 
-def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
-    cv2.putText(frame, message, position, font_face, font_scale, (255, 255, 255), thickness + 1)  # white border
-    cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
-
-
 def get_plugin_configs(device, num_streams, num_threads):
     config_user_specified = {}
 
