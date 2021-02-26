@@ -56,18 +56,18 @@ class DitherFrame(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'use_determenistic_dithering': BoolField(optional=True, default=True,
-                                                     description="Determenistic dithering flag"),
+            'use_deterministic_dithering': BoolField(optional=True, default=True,
+                                                     description="Deterministic dithering flag"),
             'dither': NumberField(optional=True, default=1e-5, description="Dithering factor", value_type=float),
         })
         return parameters
 
     def configure(self):
-        self.use_determenistic_dithering = self.get_value_from_config('use_determenistic_dithering')
+        self.use_deterministic_dithering = self.get_value_from_config('use_deterministic_dithering')
         self.dither = self.get_value_from_config('dither')
 
     def process(self, image, annotation_meta=None):
-        if self.dither > 0 and not self.use_determenistic_dithering:
+        if self.dither > 0 and not self.use_deterministic_dithering:
             image.data += self.dither * np.random.rand(*image.data.shape)
         return image
 
@@ -100,17 +100,17 @@ class DitherSpectrum(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'use_determenistic_dithering': BoolField(optional=True, default=True,
-                                                     description="Determenistic dithering flag"),
+            'use_deterministic_dithering': BoolField(optional=True, default=True,
+                                                     description="Deterministic dithering flag"),
             'dither': NumberField(optional=True, default=1e-5, description="Dithering factor", value_type=float),
         })
         return parameters
 
     def configure(self):
-        self.use_determenistic_dithering = self.get_value_from_config('use_determenistic_dithering')
+        self.use_deterministic_dithering = self.get_value_from_config('use_deterministic_dithering')
         self.dither = self.get_value_from_config('dither')
 
     def process(self, image, annotation_meta=None):
-        if self.dither > 0 and not self.use_determenistic_dithering:
+        if self.dither > 0 and not self.use_deterministic_dithering:
             image.data = image.data + self.dither ** 2
         return image

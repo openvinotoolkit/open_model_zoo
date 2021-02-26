@@ -188,7 +188,7 @@ Accuracy Checker supports following set of preprocessors:
   * `pad_to` - desired length of features
   * `preemph` - preemph factor
   * `log` - applies log() to MEL features values
-  * `use_determenistic_dithering` - Controls  dithering mode:
+  * `use_deterministic_dithering` - Controls  dithering mode:
     * `True` - there are no dithering in time-domain, fixed value from `dither` parameter added to signal spectrum
     * `False` - dithering in time-domain, random values with  `dither` magnitude added to signal spectrum
   * `dither` - dithering value
