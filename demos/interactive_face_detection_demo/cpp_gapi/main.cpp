@@ -505,7 +505,7 @@ int main(int argc, char *argv[]) {
                         if (FLAGS_r)
                             rawOutputLandmarks(i, out_landmarks[i]);
                     }
-                    // End of face postprocesing
+                    // End of face postprocessing
 
                     faces.push_back(face);
                 }

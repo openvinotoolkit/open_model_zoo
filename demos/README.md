@@ -33,7 +33,7 @@ The Open Model Zoo includes the following demos:
 - [Multi-Channel Human Pose Estimation C++ Demo](./multi_channel_human_pose_estimation_demo/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel human pose estimation scenario.
 - [Multi-Channel Object Detection Yolov3 C++ Demo](./multi_channel_object_detection_demo_yolov3/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel common object detection scenario.
 - [Object Detection Python\* Demo](./object_detection_demo/python/README.md) - Demo application for several object detection model types (like SSD, Yolo, etc).
-- [Object Detection C++ Demo](./object_detection_demo/cpp/README.md) - Demo application for Object Detection networks (different models architectures are supproted), async API showcase, simple OpenCV interoperability (supports video and camera inputs).
+- [Object Detection C++ Demo](./object_detection_demo/cpp/README.md) - Demo application for Object Detection networks (different models architectures are supported), async API showcase, simple OpenCV interoperability (supports video and camera inputs).
 - [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/cpp/README.md) - Demo application for pedestrian tracking scenario.
 - [Security Barrier Camera C++ Demo](./security_barrier_camera_demo/cpp/README.md) - Vehicle Detection followed by the Vehicle Attributes and License-Plate Recognition, supports images/video and camera inputs.
 - [Speech Recognition Python\* Demo](./speech_recognition_demo/python/README.md) - Speech recognition demo: takes audio file with an English phrase on input, and converts it into text.

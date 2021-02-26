@@ -22,7 +22,7 @@ public:
     /// @param modelFileName name of model to load
     /// @param aspectRatio - the ratio of input width to its height.
     /// @param targetSize - the length of a short image side used for network reshaping.
-    /// @param confidenceThreshold - threshold to eleminate low-confidence poses.
+    /// @param confidenceThreshold - threshold to eliminate low-confidence poses.
     /// Any pose with confidence lower than this threshold will be ignored.
     HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold);
 

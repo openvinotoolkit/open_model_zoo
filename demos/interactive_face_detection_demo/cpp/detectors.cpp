@@ -171,7 +171,7 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
             }
         }
         if (output.empty() || labels_output.empty()) {
-            throw std::logic_error("Face Detection network must contain ether single DetectionOutput or "
+            throw std::logic_error("Face Detection network must contain either single DetectionOutput or "
                                    "'boxes' [nx5] and 'labels' [n] at least, where 'n' is a number of detected objects.");
         }
     }

@@ -119,9 +119,9 @@ void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnN
     Data& data = *outputsDataMap.begin()->second;
     const SizeVector& outSizeVector = data.getTensorDesc().getDims();
     if (outSizeVector.size() != 2 && outSizeVector.size() != 4)
-        throw std::runtime_error("Demo supports topologies only with 2-dimensional or 4-dimensional ouput");
+        throw std::runtime_error("Demo supports topologies only with 2-dimensional or 4-dimensional output");
     if (outSizeVector.size() == 4 && outSizeVector[2] != 1 && outSizeVector[3] != 1)
-        throw std::runtime_error("Demo supports topologies only with 4-dimensional ouput which has last two dimensions of size 1");
+        throw std::runtime_error("Demo supports topologies only with 4-dimensional output which has last two dimensions of size 1");
     if (nTop > outSizeVector[1])
         throw std::runtime_error("The model provides " + std::to_string(outSizeVector[1]) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
     if (outSizeVector[1] == labels.size() + 1) {

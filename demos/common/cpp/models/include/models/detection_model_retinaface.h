@@ -37,7 +37,7 @@ public:
     static const int INIT_VECTOR_SIZE = 200;
     /// Loads model and performs required initialization
     /// @param model_name name of model to load
-    /// @param confidenceThreshold - threshold to eleminate low-confidence detections.
+    /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param useAutoResize - if true, image will be resized by IE.
     /// @param labels - array of labels for every class. If this array is empty or contains less elements

@@ -31,7 +31,7 @@ Results are obtained on subset of 2000 images.
 Also, metrics can be calculated using [VGG16](https://arxiv.org/abs/1409.1556) caffe model and colorization as preprocessing.
 The results below are obtained on the validation images from ImageNet dataset.
 
-For preprocessing `rgb -> gray -> colorization` recieved values:
+For preprocessing `rgb -> gray -> colorization` received values:
 
 | Metric         | Value with preprocessing   | Value without preprocessing |
 |----------------|----------------------------|-----------------------------|
