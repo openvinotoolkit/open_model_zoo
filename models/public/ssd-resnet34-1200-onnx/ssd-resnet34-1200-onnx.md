@@ -52,13 +52,13 @@ Channel order is `BGR`.
 
 ### Original model
 
-1. Classifier, name - `labels`, shape - `1,N`, contains predicted classes for each detected bounding box in [1, 81] range. The model was trained on Microsoft\* COCO dataset version with [80 categories](../../../data/dataset_classes/coco_80cl_bkgr.txt) of object,  0 class is for background.
+1. Classifier, name - `labels`, shape - `1,N`, contains predicted classes for each detected bounding box in [1, 81] range. The model was trained on Microsoft\* COCO dataset version with 80 categories of object,  0 class is for background. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl_bkgr.txt` file
 2. Probability, name - `scores`, shape - `1,N`, contains confidence of each detected bounding boxes.
 3. Detection boxes, name - `bboxes`, shape - `1,N,4`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are rescaled to input image size.
 
 ### Converted model
 
-1. Classifier, shape - `1,200`, contains predicted class ID for each detected bounding box in [1, 81] range. The model was trained on Microsoft\* COCO dataset version with [80 categories](../../../data/dataset_classes/coco_80cl_bkgr.txt) of object.
+1. Classifier, shape - `1,200`, contains predicted class ID for each detected bounding box in [1, 81] range. The model was trained on Microsoft\* COCO dataset version with 80 categories of object, 0 class is for background. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl_bkgr.txt` file
 2. Probability, shape - `1,200`, contains confidence of each detected bounding boxes.
 3. Detection boxes, shape - `1,200,4`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are in normalized format, in range [0, 1].
 

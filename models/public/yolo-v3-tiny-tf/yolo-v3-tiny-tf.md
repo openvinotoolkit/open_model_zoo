@@ -87,7 +87,7 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `class_no_1`,...,`class_no_80` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) and multiply by obtained confidence value to get confidence of each class
 
 
-The model was trained on Microsoft\* COCO dataset version with [80 categories](../../../data/dataset_classes/coco_80cl.txt) of object.
+The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 
 ### Converted model
 
@@ -107,7 +107,7 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `class_no_1`,...,`class_no_80` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
 
 
-The model was trained on Microsoft\* COCO dataset version with [80 categories](../../../data/dataset_classes/coco_80cl.txt) of object.
+The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 
 ## Legal Information
 
