@@ -159,8 +159,7 @@ def main():
 
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            **PYTHONPATH),
-        }
+            **PYTHONPATH}
 
         for demo in demos_to_test:
             print('Testing {}...'.format(demo.subdirectory))
