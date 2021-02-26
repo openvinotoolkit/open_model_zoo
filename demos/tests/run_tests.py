@@ -149,10 +149,17 @@ def main():
         dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test)
 
         num_failures = 0
+        
+        pythonpath_args = (os.environ['PYTHONPATH'], args.demo_build_dir)
+        
+        if os.name == "nt":
+            PYTHONPATH = {'PYTHONPATH': "{};{};".format(*pythonpath_args)}
+        else:
+            PYTHONPATH = {'PYTHONPATH': "{}:{}/lib".format(*pythonpath_args)}
 
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir),
+            **PYTHONPATH),
         }
 
         for demo in demos_to_test:
