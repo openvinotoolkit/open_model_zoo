@@ -110,7 +110,7 @@ def main():
         image = image_reader(origin_image, ws, hs)
 
         p_net.reshape({pnet_input_blob : [1, 3, ws, hs]})  # Change weidth and height of input blob
-        exec_pnet = ie_p.load_network(network = p_net, device_name = args.device)
+        exec_pnet = ie_p.load_network(network=p_net, device_name=args.device)
 
         p_res = exec_pnet.infer(inputs={pnet_input_blob: image})
         pnet_res.append(p_res)
