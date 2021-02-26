@@ -307,11 +307,24 @@ class TextProposalsDetectionAdapter(Adapter):
         self.nms_threshold = self.get_value_from_config('nms_threshold')
         self.min_ratio = self.get_value_from_config('min_ratio')
         self.line_min_score = self.get_value_from_config('line_min_score')
-        self.text_proposals_width = self.get_value_from_config('text_proposals_width')
-        self.min_num_proposals = self.get_value_from_config('min_num_proposals')
+        text_proposals_width = self.get_value_from_config('text_proposals_width')
+        min_num_proposals = self.get_value_from_config('min_num_proposals')
+        self.min_width = min_num_proposals * text_proposals_width
         if isinstance(Polygon, UnsupportedPackage):
             Polygon.raise_error(self.__provider__)
         self.text_proposal_connector = TextProposalConnector()
+        self.anchors = np.array([
+            [0,   2,  15,  13],
+            [0,   0,  15,  15],
+            [0,  -4,  15,  19],
+            [0,  -9,  15,  24],
+            [0,  -16, 15,  31],
+            [0,  -26, 15,  41],
+            [0,  -41, 15,  56],
+            [0,  -62, 15,  77],
+            [0,  -91, 15, 106],
+            [0, -134, 15, 149]
+        ])
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
@@ -324,12 +337,10 @@ class TextProposalsDetectionAdapter(Adapter):
                 bbox_pred = np.transpose(bbox_pred, (1, 2, 0))
             scale_x, scale_y = meta['scale_x'], meta['scale_y']
             im_info = [meta['original_height'], meta['original_width'], min(scale_x, scale_y)]
-            textsegs = self.proposal_layer(cls_prob, bbox_pred, im_info)
-            scores = textsegs[:, 0]
-            textsegs = textsegs[:, 1:5]
+            textsegs, scores = self.get_proposals(cls_prob, bbox_pred, im_info)
             textsegs[:, 0::2] /= scale_x
             textsegs[:, 1::2] /= scale_y
-            boxes = self.detect(textsegs, scores[:, np.newaxis], [meta['original_height'], meta['original_width']])
+            boxes = self.get_detections(textsegs, scores[:, np.newaxis], [meta['original_height'], meta['original_width']])
             boxes = boxes[:, :8]
             geom_operations = meta['geometric_operations']
             resize_op = [geom_operation for geom_operation in geom_operations if geom_operation.type == 'resize']
@@ -342,17 +353,17 @@ class TextProposalsDetectionAdapter(Adapter):
 
         return result
 
-    def proposal_layer(self, rpn_cls_prob_reshape, rpn_bbox_pred, im_info, _feat_stride=(16, )):
+    def get_proposals(self, rpn_cls_prob_reshape, bbox_deltas, im_info, _feat_stride=16):
         """
         Parameters
-        rpn_cls_prob_reshape: (H , W , Ax2) outputs of RPN, prob of bg or fg
-        rpn_bbox_pred: (H , W , Ax4), rgs boxes output of RPN
+        rpn_cls_prob_reshape: (H , W , Ax2) probabilities for predicted regions
+        bbox_deltas: (H , W , Ax4), predicted regions
         im_info: a list of [image_height, image_width, scale_ratios]
         _feat_stride: the downsampling ratio of feature map to the original input image
         Algorithm:
         for each (H, W) location i
-        generate A anchor boxes centered on cell i
-        apply predicted bbox deltas at cell i to each of the A anchors
+        generate A anchor boxes centered on location i
+        apply predicted bbox deltas at location i to each of the A anchors
         clip predicted boxes to image
         remove predicted boxes with either height or width < threshold
         sort all (proposal, score) pairs by score from highest to lowest
@@ -370,7 +381,7 @@ class TextProposalsDetectionAdapter(Adapter):
 
             return keep
 
-        _anchors = self.generate_anchors()
+        _anchors = self.anchors.copy()
         _num_anchors = _anchors.shape[0]
         height, width = rpn_cls_prob_reshape.shape[:2]
         scores = np.reshape(
@@ -378,7 +389,6 @@ class TextProposalsDetectionAdapter(Adapter):
             [height, width, _num_anchors]
         )
 
-        bbox_deltas = rpn_bbox_pred
         shift_x = np.arange(0, width) * _feat_stride
         shift_y = np.arange(0, height) * _feat_stride
         shift_x, shift_y = np.meshgrid(shift_x, shift_y)
@@ -401,20 +411,19 @@ class TextProposalsDetectionAdapter(Adapter):
         proposals = self.bbox_transform_inv(anchors, bbox_deltas)
 
         # 2. clip predicted boxes to image
-        proposals = clip_boxes(proposals, im_info[:2])
+        proposals[:, :4].clip(min=0, max=(im_info[1] - 1, im_info[0] - 1, im_info[1] - 1, im_info[0] - 1),
+                              out=proposals[:, :4])
 
         # 3. remove predicted boxes with either height or width < threshold
         # (NOTE: convert min_size to input image scale stored in im_info[2])
         keep = _filter_boxes(proposals, self.min_size * im_info[2])
-        proposals = proposals[keep, :]
-        scores = scores[keep]
+        proposals, scores = proposals[keep, :], scores[keep]
         # 4. sort all (proposal, score) pairs by score from highest to lowest
         # 5. take top pre_nms_topN (e.g. 6000)
         order = scores.ravel().argsort()[::-1]
         if self.pre_nms_top_n > 0:
             order = order[:self.pre_nms_top_n]
-        proposals = proposals[order, :]
-        scores = scores[order]
+        proposals, scores = proposals[order, :], scores[order]
         # 6. apply nms (e.g. threshold = 0.7)
         # 7. take after_nms_topN (e.g. 300)
         # 8. return the top proposals (-> RoIs top)
@@ -423,40 +432,32 @@ class TextProposalsDetectionAdapter(Adapter):
         )
         if self.post_nms_top_n > 0:
             keep = keep[:self.post_nms_top_n]
-        proposals = proposals[keep, :]
-        scores = scores[keep]
-        blob = np.hstack((scores.astype(np.float32, copy=False), proposals.astype(np.float32, copy=False)))
+        proposals, scores = proposals[keep, :], scores[keep]
+        return proposals, scores
 
-        return blob
+    def get_detections(self, text_proposals, scores, size):
+        keep_inds = np.where(scores > 0.7)[0]
+        text_proposals, scores = text_proposals[keep_inds], scores[keep_inds]
 
-    @staticmethod
-    def generate_anchors():
-        def generate_basic_anchors(sizes, base_size=16):
-            base_anchor = np.array([0, 0, base_size - 1, base_size - 1], np.int32)
-            anchors = np.zeros((len(sizes), 4), np.int32)
-            index = 0
-            for h, w in sizes:
-                anchors[index] = scale_anchor(base_anchor, h, w)
-                index += 1
-            return anchors
+        sorted_indices = np.argsort(scores.ravel())[::-1]
+        text_proposals, scores = text_proposals[sorted_indices], scores[sorted_indices]
+        x_mins, y_mins = text_proposals[:, 0], text_proposals[:, 1]
+        x_maxs, y_maxs = text_proposals[:, 2], text_proposals[:, 3]
 
-        def scale_anchor(anchor, h, w):
-            x_ctr = (anchor[0] + anchor[2]) * 0.5
-            y_ctr = (anchor[1] + anchor[3]) * 0.5
-            scaled_anchor = anchor.copy()
-            scaled_anchor[0] = x_ctr - w / 2  # xmin
-            scaled_anchor[2] = x_ctr + w / 2  # xmax
-            scaled_anchor[1] = y_ctr - h / 2  # ymin
-            scaled_anchor[3] = y_ctr + h / 2  # ymax
-            return scaled_anchor
+        keep_inds = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, scores.reshape(-1), 0.2)
+        text_proposals, scores = text_proposals[keep_inds], scores[keep_inds]
 
-        heights = [11, 16, 23, 33, 48, 68, 97, 139, 198, 283]
-        widths = [16]
-        sizes = []
-        for h in heights:
-            for w in widths:
-                sizes.append((h, w))
-        return generate_basic_anchors(sizes)
+        text_recs = self.text_proposal_connector.get_text_lines(text_proposals, scores, size)
+
+        heights = (abs(text_recs[:, 5] - text_recs[:, 1]) + abs(text_recs[:, 7] - text_recs[:, 3])) / 2.0 + 1
+        widths = (abs(text_recs[:, 2] - text_recs[:, 0]) + abs(text_recs[:, 6] - text_recs[:, 4])) / 2.0 + 1
+        scores = text_recs[:, 8]
+        keep_inds = np.where(
+            (widths / heights > self.min_ratio) & (scores > self.line_min_score) &
+            (widths > self.min_width)
+        )[0]
+
+        return text_recs[keep_inds]
 
     @staticmethod
     def bbox_transform_inv(boxes, deltas):
@@ -483,47 +484,6 @@ class TextProposalsDetectionAdapter(Adapter):
         pred_boxes[:, 3::4] = pred_ctr_y + 0.5 * pred_h
 
         return pred_boxes
-
-    def detect(self, text_proposals, scores, size):
-        keep_inds = np.where(scores > 0.7)[0]
-        text_proposals, scores = text_proposals[keep_inds], scores[keep_inds]
-
-        sorted_indices = np.argsort(scores.ravel())[::-1]
-        text_proposals, scores = text_proposals[sorted_indices], scores[sorted_indices]
-        x_mins, y_mins = text_proposals[:, 0], text_proposals[:, 1]
-        x_maxs, y_maxs = text_proposals[:, 2], text_proposals[:, 3]
-
-        keep_inds = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, scores.reshape(-1), 0.2)
-        text_proposals, scores = text_proposals[keep_inds], scores[keep_inds]
-
-        text_recs = self.text_proposal_connector.get_text_lines(text_proposals, scores, size)
-        heights = np.zeros((len(text_recs), 1), np.float)
-        widths = np.zeros((len(text_recs), 1), np.float)
-        scores = np.zeros((len(text_recs), 1), np.float)
-        index = 0
-        for box in text_recs:
-            heights[index] = (abs(box[5] - box[1]) + abs(box[7] - box[3])) / 2.0 + 1
-            widths[index] = (abs(box[2] - box[0]) + abs(box[6] - box[4])) / 2.0 + 1
-            scores[index] = box[8]
-            index += 1
-        keep_inds = np.where(
-            (widths / heights > self.min_ratio) & (scores > self.line_min_score) &
-            (widths > (self.min_num_proposals * self.text_proposals_width))
-        )[0]
-
-        return text_recs[keep_inds]
-
-
-def clip_boxes(boxes, im_shape):
-    """
-    Clip boxes to image boundaries.
-    """
-    boxes[:, 0::4] = np.maximum(np.minimum(boxes[:, 0::4], im_shape[1] - 1), 0)
-    boxes[:, 1::4] = np.maximum(np.minimum(boxes[:, 1::4], im_shape[0] - 1), 0)
-    boxes[:, 2::4] = np.maximum(np.minimum(boxes[:, 2::4], im_shape[1] - 1), 0)
-    boxes[:, 3::4] = np.maximum(np.minimum(boxes[:, 3::4], im_shape[0] - 1), 0)
-
-    return boxes
 
 
 class Graph:
@@ -573,9 +533,7 @@ class TextProposalGraphBuilder:
 
     def is_succession_node(self, index, succession_index):
         precursors = self.get_precursors(succession_index)
-        if self.scores[index] >= np.max(self.scores[precursors]):
-            return True
-        return False
+        return self.scores[index] >= np.max(self.scores[precursors])
 
     def meet_v_iou(self, index1, index2):
         def overlaps_v(h1, h2, text_proposal1, text_proposal2):
@@ -655,16 +613,15 @@ class TextProposalConnector:
             text_lines[index, 3] = max(lb_y, rb_y)
             text_lines[index, 4] = score
 
-        text_lines = clip_boxes(text_lines, im_size)
+        text_lines[:, :4].clip(min=0, max=(im_size[1] - 1, im_size[0] - 1, im_size[1] - 1, im_size[0] - 1),
+                               out=text_lines[:, :4])
 
         text_recs = np.zeros((len(text_lines), 9), np.float)
-        index = 0
-        for line in text_lines:
+        for index, line in enumerate(text_lines):
             xmin, ymin, xmax, ymax = line[0], line[1], line[2], line[3]
             text_recs[index, 0], text_recs[index, 1], text_recs[index, 2], text_recs[index, 3] = xmin, ymin, xmax, ymin
             text_recs[index, 4], text_recs[index, 5], text_recs[index, 6], text_recs[index, 7] = xmax, ymax, xmin, ymax
             text_recs[index, 8] = line[4]
-            index = index + 1
 
         return text_recs
 
