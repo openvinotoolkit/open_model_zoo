@@ -24,6 +24,7 @@ from .open_pose import OpenPose
 from .retinaface import RetinaFace
 from .segmentation import SegmentationModel
 from .ssd import SSD
+from .text_recognition import TextRecognition
 from .utils import DetectionWithLandmarks
 from .yolo import YOLO, YoloV4
 
@@ -38,6 +39,7 @@ __all__ = [
     'RetinaFace',
     'SegmentationModel',
     'SSD',
+    'TextRecognition',
     'YOLO',
     'YoloV4',
 ]

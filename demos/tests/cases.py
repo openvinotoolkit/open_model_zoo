@@ -724,6 +724,15 @@ PYTHON_DEMOS = [
             }),
         ]
     )),
+
+    PythonDemo(name='text_detection_demo', device_keys=['-d_td', '-d_tr'], test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('text-detection')}),
+        single_option_cases('-m_td', ModelArg('ctpn')),
+        single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+    )),
+
 ]
 
 DEMOS = NATIVE_DEMOS + PYTHON_DEMOS
