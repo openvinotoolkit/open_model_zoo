@@ -169,7 +169,7 @@ def main():
         for i in range(5, 15, 2):
             cv2.circle(origin_image, (int(rectangle[i+0]), int(rectangle[i+1])), 2, (0, 255 , 0))
 
-    infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()  # Recorde infer time
+    infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()  # Record infer time
     cv2.putText(origin_image, 'summary: {:.1f} FPS'.format(
         1.0 / infer_time), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
 
