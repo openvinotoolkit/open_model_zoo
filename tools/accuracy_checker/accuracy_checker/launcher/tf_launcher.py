@@ -219,9 +219,8 @@ class TFLauncher(Launcher):
                     results.append(res)
             if metadata is not None:
                 for meta_ in metadata:
-                    meta_['input_shape'] = meta_.get('input_shape', {}).update(
-                        {name: data.shape for name, data in infer_input.items()}
-                    )
+                    meta_['input_shape'] = meta_.get('input_shape', {})
+                    meta_['input_shape'].update({name: data.shape for name, data in infer_input.items()})
 
         return results
 
@@ -392,8 +391,7 @@ class TFSessionWrapper:
 
             if metadata is not None:
                 for meta_ in metadata:
-                    meta_['input_shape'] = meta_.get('input_shape', {}).update(
-                        {name: data.shape for name, data in infer_input.items()}
-                    )
+                    meta_['input_shape'] = meta_.get('input_shape', {})
+                    meta_['input_shape'].update({name: data.shape for name, data in infer_input.items()})
 
         return results
