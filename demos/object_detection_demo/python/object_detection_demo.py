@@ -194,7 +194,7 @@ def draw_detections(frame, detections, palette, labels, threshold):
                         (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
             if isinstance(detection, models.DetectionWithLandmarks):
                 for landmark in detection.landmarks:
-                    cv2.circle(frame, landmark, 2, (0, 255, 255), 2)
+                    cv2.circle(frame, (int(landmark[0]), int(landmark[1])), 2, (0, 255, 255), 2)
     return frame
 
 
