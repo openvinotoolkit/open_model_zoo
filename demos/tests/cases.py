@@ -530,7 +530,7 @@ PYTHON_DEMOS = [
             '-i': DataPatternArg('instance-segmentation'),
             '--delay': '1',
             '-d': 'CPU',  # GPU is not supported
-            '--labels': str(OMZ_DIR / 'data/dataset_classes/coco.txt')}),
+            '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
         single_option_cases('-m',
             ModelArg('instance-segmentation-security-0010'),
             ModelArg('instance-segmentation-security-0050'),
