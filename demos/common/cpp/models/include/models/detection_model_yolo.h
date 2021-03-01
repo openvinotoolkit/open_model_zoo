@@ -48,11 +48,11 @@ public:
     /// @param useAdvancedPostprocessing - if true, an advanced algorithm for filtering/postprocessing will be used
     /// (with better processing of multiple crossing objects). Otherwise, classic algorithm will be used.
     /// @param boxIOUThreshold - threshold to treat separate output regions as one object for filtering
-    /// during postprocessing (only one of them should stay). The default value is 0.4
+    /// during postprocessing (only one of them should stay). The default value is 0.5
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
     ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-        bool useAdvancedPostprocessing = false, float boxIOUThreshold = 0.4, const std::vector<std::string>& labels = std::vector<std::string>());
+        bool useAdvancedPostprocessing = true, float boxIOUThreshold = 0.5, const std::vector<std::string>& labels = std::vector<std::string>());
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
