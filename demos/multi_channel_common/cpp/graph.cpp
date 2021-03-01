@@ -43,6 +43,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
 
     if (deviceName.find("CPU") != std::string::npos) {
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CPU_BIND_THREAD, "NO"}}, "CPU");
+        ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CPU_THROUGHPUT_STREAMS,InferenceEngine::PluginConfigParams::CPU_THROUGHPUT_AUTO}},"CPU");
     }
     if (!cpuExtensionPath.empty()) {
         auto extension_ptr = InferenceEngine::make_so_pointer<InferenceEngine::IExtension>(cpuExtensionPath);
