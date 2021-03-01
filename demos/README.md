@@ -214,6 +214,26 @@ For example:
 cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON=ON <open_model_zoo>/demos
 ```
 
+### <a name="build_specific_demos"></a>Build Specific Demos
+
+To build specific demos, follow the instructions for building the demo applications above,
+but add `--target <list of demos>` to the `cmake` or `--target="<list of demos>"` to the `build_demos*` command.
+Note,  CMake `--build` tool supports multiple targets starting with version 3.15. With lower versions you can specify only one target.
+For example:
+
+```sh
+cmake -DCMAKE_BUILD_TYPE=Release <open_model_zoo>/demos
+cmake --build . --config Release --target  <Demo_1> <Demo_2>
+```
+
+```sh
+build_demos.sh --target="classification_demo segmentation_demo"
+```
+
+```bat
+build_demos_msvc.bat --target="classification_demo segmentation_demo"
+```
+
 ## Get Ready for Running the Demo Applications
 
 ### Get Ready for Running the Demo Applications on Linux*
