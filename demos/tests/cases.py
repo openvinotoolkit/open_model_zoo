@@ -84,7 +84,7 @@ class NotebookDemo(Demo):
         notebook_file = str(source_dir / self.subdirectory / (self._exec_name + '.ipynb'))
         python_file = notebook_file.replace('ipynb', 'py')
         python_test_file = python_file.replace('.py', '_test.py')
-        subprocess.run([sys.executable.replace('python', 'jupyter'), 'nbconvert', '--to', 'python', notebook_file])
+        subprocess.run(['jupyter', 'nbconvert', '--to', 'python', notebook_file])
 
         # Change the working directory to the directory that contains the notebook
         with open(python_file, 'r') as python_script:
