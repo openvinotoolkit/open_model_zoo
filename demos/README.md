@@ -1,6 +1,11 @@
 # Open Model Zoo Demos
 
-The Open Model Zoo demo applications are console applications that demonstrate how you can use the Inference Engine in your applications to solve specific use-cases
+The Open Model Zoo demo applications are console applications that provide robust application templates to help you implement specific deep learning scenarios. These applications involve increasingly complex processing pipelines that gather analysis data from several models that run inference simultaneously, such as detecting a person in a video stream along with detecting the person's physical attributes, such as age, gender, and emotional state
+
+For the Intel® Distribution of OpenVINO™ toolkit, the demos are available after installation in the following directory: `<INSTALL_DIR>/deployment_tools/open_model_zoo/demos`.
+The demos can also be obtained from the Open Model Zoo [GitHub repository](https://github.com/openvinotoolkit/open_model_zoo/).
+C++, C++ G-API and Python versions are located in the `cpp`, `cpp_gapi` and `python` subdirectories respectively.
+
 The Open Model Zoo includes the following demos:
 
 - [3D Human Pose Estimation Python\* Demo](./human_pose_estimation_3d_demo/python/README.md) - 3D human pose estimation demo.
