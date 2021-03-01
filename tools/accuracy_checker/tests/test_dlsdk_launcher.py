@@ -183,6 +183,7 @@ class TestDLSDKLauncherInfer:
 
 @pytest.mark.skipif(ng is None and not has_layers(), reason='no functionality to set affinity')
 class TestDLSDKLauncherAffinity:
+    @pytest.mark.skip(reason='runtime issue with affinity setting')
     @pytest.mark.usefixtures('mock_affinity_map_exists')
     def test_dlsdk_launcher_valid_affinity_map(self, mocker, models_dir):
         affinity_map = {'conv1': 'GPU'}
