@@ -1,5 +1,4 @@
 import sys
-import os
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 from time import perf_counter
