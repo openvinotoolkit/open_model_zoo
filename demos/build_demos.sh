@@ -33,7 +33,6 @@ for opt in "$@"; do
     -DENABLE_PYTHON=*)
         extra_cmake_opts+=("$opt")
         ;;
-    *)
     --target=*)
         tmp="${opt%\"}"
         tmp="${tmp#\"}"
