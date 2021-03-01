@@ -55,7 +55,8 @@ from .detection import (
     FaceDetectionRefinementAdapter,
     FasterRCNNONNX,
     TwoStageDetector,
-    DETRAdapter
+    DETRAdapter,
+    UltraLightweightFaceDetectionAdapter
 )
 from .detection_person_vehicle import (
     PersonVehicleDetectionAdapter,
@@ -133,6 +134,7 @@ __all__ = [
     'FasterRCNNONNX',
     'TwoStageDetector',
     'DETRAdapter',
+    'UltraLightweightFaceDetectionAdapter',
 
     'TinyYOLOv1Adapter',
     'YoloV2Adapter',
