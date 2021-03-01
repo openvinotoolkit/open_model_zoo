@@ -43,7 +43,6 @@ class TwoStagePipeline:
         self.decoder = AsyncPipeline(ie, decoder_model, de_plugin_config, de_device, de_max_num_requests)
 
         self.submitted_frames = deque([])
-        self.submitted_enc_results = deque([])
 
     def is_ready(self):
         return self.encoder.is_ready()
@@ -73,38 +72,25 @@ class TwoStagePipeline:
         self.submitted_frames.popleft()
         data = get_boxes(encoder_result)
         self.decoder_result = [None for _ in data]
-        self.start_decoder_inference(data)
+        self.submit_to_decoder(data)
+        self.postprocess_all()
         return encoder_result, self.decoder_result
-
-    def start_decoder_inference(self, data):
-        submission = threading.Thread(target=self.submit_to_decoder, args=(data,))
-        postprocess = threading.Thread(target=self.postprocess_all, args=())
-
-        submission.start()
-        postprocess.start()
-
-        submission.join()
-        postprocess.join()
 
     def submit_to_decoder(self, data):
         indices = [i for i, _ in enumerate(data)]
         while indices:
             if self.decoder.is_ready():
                 id = indices.pop()
-                self.submitted_enc_results.append(id)
                 self.decoder.submit_data(data[id], id, None)
             else:
                 self.decoder.await_any()
 
     def postprocess_all(self):
         while not self.result_is_ready():
-            if self.submitted_enc_results:
-                id = self.submitted_enc_results.pop()
-                while True:
-                    results = self.decoder.get_result(id)
-                    if results is not None:
-                        self.decoder_result[id] = results[0]
-                        break
+            if self.decoder.has_completed_request():
+                id = list(self.decoder.completed_request_results.keys())[0]
+                results = self.decoder.get_result(id)
+                self.decoder_result[id] = results[0]
 
     def result_is_ready(self):
         return len(self.decoder_result) \
