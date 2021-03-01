@@ -89,14 +89,14 @@ fi
 mkdir -p "$build_dir"
 
 (cd "$build_dir" && cmake -DCMAKE_BUILD_TYPE=Release "${extra_cmake_opts[@]}" "$DEMOS_PATH")
-printf &build_targets
+
 if ["&build_targets" == ""]; then
     cmake --build "$build_dir" -- "$NUM_THREADS"
 else
     targets=($build_targets)
-    for t in "${targets[@]:1}
+    for t in "${targets[@]:1}"
     do
-        echo $t
+        cmake --build "$build_dir" --target t -- "$NUM_THREADS"
     done
 fi
 
