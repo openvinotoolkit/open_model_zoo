@@ -219,3 +219,26 @@ class SuperResolutionYUV(Adapter):
             results.append(SuperResolutionPrediction(identifier, sr_img))
 
         return results
+
+class TrimapAdapter(ImageProcessingAdapter):
+    __provider__ = 'trimap'
+    prediction_types = (ImageProcessingPrediction, )
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.target_out:
+            self.select_output_blob(raw_outputs)
+            self.target_out = self.output_blob
+
+        for identifier, out_img, out_meta in zip(identifiers, raw_outputs[self.target_out], frame_meta):
+            tmap = np.expand_dims(out_meta['tmap'], axis=0)
+            C,N,W = out_img.shape
+            if C>1 and W == 1:
+                out_img = np.transpose(out_img, [2,0,1])
+            out_img[tmap == 2] = 1
+            out_img[tmap == 0] = 0
+            out_img = self._basic_postprocess(out_img)
+            result.append(ImageProcessingPrediction(identifier, out_img))
+
+        return result

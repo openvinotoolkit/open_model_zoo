@@ -338,6 +338,7 @@ class Resize(Preprocessor):
                 optional=True,
                 description="Specifies usage of TensorFlow Image for resizing. Requires TensorFlow installation."
             ),
+
             'resize_realization': StringField(
                 optional=True, choices=_Resizer.providers,
                 description="Parameter specifies functionality of which library will be used for resize: "

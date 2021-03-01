@@ -17,6 +17,7 @@ limitations under the License.
 from functools import singledispatch
 from PIL import Image
 import numpy as np
+import cv2
 from ..representation import (
     SegmentationPrediction, SegmentationAnnotation,
     StyleTransferAnnotation, StyleTransferPrediction,
@@ -27,7 +28,7 @@ from ..representation import (
 )
 from ..postprocessor.postprocessor import PostprocessorWithSpecificTargets, ApplyToOption
 from ..postprocessor import ResizeSegmentationMask
-from ..config import NumberField
+from ..config import NumberField, StringField
 from ..utils import get_size_from_config
 
 
@@ -55,13 +56,20 @@ class Resize(PostprocessorWithSpecificTargets):
             'size': NumberField(
                 value_type=int, optional=True, min_value=1,
                 description="Destination size for resize for both dimensions (height and width)."
-            )
+            ),
+            'resize_realization': StringField(
+                optional=True, choices={"pillow": "pillow", "opencv": "opencv"}, default="pillow",
+                description="Parameter specifies functionality of which library will be used for resize: "
+                            "{}".format(', '.join(["pillow","opencv"]))
+            ),
+
         })
         return parameters
 
     def configure(self):
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self._required_both = True
+        self.realization = self.get_value_from_config('resize_realization')
 
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         if self._deprocess_predictions:
@@ -92,11 +100,16 @@ class Resize(PostprocessorWithSpecificTargets):
         @resize.register(ImageInpaintingAnnotation)
         @resize.register(ImageInpaintingPrediction)
         def _(entry, height, width):
-            entry.value = entry.value.astype(np.uint8)
-            data = Image.fromarray(entry.value)
-            data = data.resize((width, height), Image.BICUBIC)
-            entry.value = np.array(data)
+            data = entry.value if entry.value.shape[-1] > 1 else entry.value[:,:,0]
+            assert self.realization in ['pillow', 'opencv']
+            if self.realization == 'pillow':
+                data = data.astype(np.uint8)
+                data = Image.fromarray(data)
+                data = data.resize((width, height), Image.BICUBIC)
+            else:
+                data = cv2.resize(data, (width, height)).astype(np.uint8)
 
+            entry.value = np.array(data)
             return entry
 
         @resize.register(SegmentationPrediction)
