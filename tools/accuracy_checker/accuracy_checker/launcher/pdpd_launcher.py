@@ -1,3 +1,18 @@
+"""
+Copyright (c) 2018-2021 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
 from pathlib import Path
 import numpy as np
 from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
@@ -54,17 +69,21 @@ class PaddlePaddleLauncher(Launcher):
     def automatic_model_search(self):
         model = Path(self.get_value_from_config('model'))
         if model.is_dir():
-            model_list = list(model.glob('model'))
+            model_list = list(model.glob('{}.pdmodel'.format(self._model_name)))
             if not model_list:
-                raise ConfigError('Model not found')
+                model_list = list(model.glob('*.pdmodel'))
+                if not model_list:
+                    raise ConfigError('Model not found')
             model = model_list[0]
             print_info('Found model: {}'.format(model))
         params = self.get_value_from_config('params')
         if params is None or Path(params).is_dir():
             params_dir = model.parent if params is None else Path(params)
-            params_list = list(params_dir.glob('params'))
+            params_list = list(params_dir.glob('{}.pdiparams'.format(self._model_name)))
             if not params_list:
-                raise ConfigError('Params not found')
+                params_list = list(params_dir.glob('*.pdiparams'))
+                if not params_list:
+                    raise ConfigError('Params not found')
             params = params_list[0]
             print_info('Found params: {}'.format(params))
         params = Path(params)
