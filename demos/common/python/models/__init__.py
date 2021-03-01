@@ -1,5 +1,5 @@
 """
- Copyright (C) 2020 Intel Corporation
+ Copyright (C) 2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 from .centernet import CenterNet
 from .deblurring import Deblurring
+from .ctpn import CTPN
 from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
 from .open_pose import OpenPose
@@ -28,6 +29,7 @@ from .yolo import YOLO, YoloV4
 
 __all__ = [
     'CenterNet',
+    'CTPN',
     'DetectionWithLandmarks',
     'Deblurring',
     'FaceBoxes',

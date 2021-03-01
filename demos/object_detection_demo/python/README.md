@@ -63,7 +63,7 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -at {ssd,yolo,yolov4,faceboxes,centernet,retinaface}, --architecture_type {ssd,yolo,yolov4,faceboxes,centernet,retinaface}
+  -at {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface}, --architecture_type {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface}
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
@@ -80,6 +80,9 @@ Common model options:
                         Optional. Probability threshold for detections
                         filtering.
   --keep_aspect_ratio   Optional. Keeps aspect ratio on resize.
+  --input_size          Optional. The first image size used for CTPN model reshaping.
+                        Default: 600 600. Note that submitted images should have the same resolution,
+                        otherwise predictions might be incorrect.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS

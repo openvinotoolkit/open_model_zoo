@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (C) 2018-2020 Intel Corporation
+ Copyright (C) 2018-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=('ssd', 'yolo', 'yolov4', 'faceboxes', 'centernet', 'retinaface'))
+                      type=str, required=True, choices=('ssd', 'yolo', 'yolov4', 'faceboxes', 'centernet', 'ctpn', 'retinaface'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -62,6 +62,10 @@ def build_argparser():
                                    help='Optional. Probability threshold for detections filtering.')
     common_model_args.add_argument('--keep_aspect_ratio', action='store_true', default=False,
                                    help='Optional. Keeps aspect ratio on resize.')
+    common_model_args.add_argument('--input_size', default=(600, 600), type=int, nargs=2,
+                                   help='Optional. The first image size used for CTPN model reshaping. '
+                                        'Default: 600 600. Note that submitted images should have the same resolution, '
+                                        'otherwise predictions might be incorrect.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -136,6 +140,8 @@ class ColorPalette:
 def get_model(ie, args):
     if args.architecture_type == 'ssd':
         return models.SSD(ie, args.model, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
+    elif args.architecture_type == 'ctpn':
+        return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
     elif args.architecture_type == 'yolo':
         return models.YOLO(ie, args.model, labels=args.labels,
                            threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
