@@ -39,7 +39,12 @@ void CnnDLSDKBase::Load() {
         output_blobs_names_.push_back(item.first);
     }
 
-    executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
+    try {
+        executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
+    } catch (const details::InferenceEngineException&) {  // face-recognition-mobilefacenet-arcface may not work with dynamic batch
+        cnnNetwork.setBatchSize(1);
+        executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName, {{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::NO}});
+    }
     infer_request_ = executable_network_.CreateInferRequest();
 }
 
