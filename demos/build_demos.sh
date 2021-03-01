@@ -95,7 +95,7 @@ else
     targets=($build_targets)
     for t in "${targets[@]:1}"
     do
-        cmake --build "$build_dir" --target t -- "$NUM_THREADS"
+        cmake --build "$build_dir" --target "$t" -- "$NUM_THREADS"
     done
 fi
 
