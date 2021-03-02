@@ -19,7 +19,7 @@ def rect2square(rectangles):
     return rectangles
 
 
-def NMS(rectangles, threshold, type):
+def NMS(rectangles, threshold, use_iom=False):
     """
     Function:
         apply NMS(non-maximum suppression) on ROIs in same scale(matrix version)
@@ -47,7 +47,7 @@ def NMS(rectangles, threshold, type):
         w = np.maximum(0.0, xx2 - xx1 + 1)
         h = np.maximum(0.0, yy2 - yy1 + 1)
         inter = w * h
-        if type == 'iom':
+        if use_iom:
             o = inter / np.minimum(area[i[-1]], area[i[0:-1]])
         else:
             o = inter / (area[i[-1]] + area[i[0:-1]] - inter)
@@ -90,14 +90,14 @@ def detect_face_12net(cls_prob, roi, out_side, scale, width, height, score_thres
     rectangles = rect2square(rectangles)
     pick = []
     for i in range(len(rectangles)):
-        x1 = int(max(0     , rectangles[i][0]))
-        y1 = int(max(0     , rectangles[i][1]))
-        x2 = int(min(width , rectangles[i][2]))
+        x1 = int(max(0,      rectangles[i][0]))
+        y1 = int(max(0,      rectangles[i][1]))
+        x2 = int(min(width,  rectangles[i][2]))
         y2 = int(min(height, rectangles[i][3]))
         sc = rectangles[i][4]
         if x2 > x1 and y2 > y1:
             pick.append([x1, y1, x2, y2, sc])
-    return NMS(pick, iou_threshold, 'iou')
+    return NMS(pick, iou_threshold)
 
 
 def filter_face_24net(cls_prob, roi, rectangles, width, height, score_threshold, iou_threshold):
@@ -117,33 +117,37 @@ def filter_face_24net(cls_prob, roi, rectangles, width, height, score_threshold,
     prob = cls_prob[:, 1]
     pick = np.where(prob >= score_threshold)
     rectangles = np.array(rectangles)
-    x1  = rectangles[pick, 0]
-    y1  = rectangles[pick, 1]
-    x2  = rectangles[pick, 2]
-    y2  = rectangles[pick, 3]
-    sc  = np.array([prob[pick]]).T
+    x1 = rectangles[pick, 0]
+    y1 = rectangles[pick, 1]
+    x2 = rectangles[pick, 2]
+    y2 = rectangles[pick, 3]
+    sc = np.array([prob[pick]]).T
+
     dx1 = roi[pick, 0]
     dx2 = roi[pick, 1]
     dx3 = roi[pick, 2]
     dx4 = roi[pick, 3]
-    w   = x2 - x1
-    h   = y2 - y1
-    x1  = np.array([(x1+dx1*w)[0]]).T
-    y1  = np.array([(y1+dx2*h)[0]]).T
-    x2  = np.array([(x2+dx3*w)[0]]).T
-    y2  = np.array([(y2+dx4*h)[0]]).T
+
+    w = x2 - x1
+    h = y2 - y1
+
+    x1 = np.array([(x1+dx1*w)[0]]).T
+    y1 = np.array([(y1+dx2*h)[0]]).T
+    x2 = np.array([(x2+dx3*w)[0]]).T
+    y2 = np.array([(y2+dx4*h)[0]]).T
+
     rectangles = np.concatenate((x1, y1, x2, y2, sc), axis=1)
     rectangles = rect2square(rectangles)
     pick = []
     for i in range(len(rectangles)):
-        x1 = int(max(0     , rectangles[i][0]))
-        y1 = int(max(0     , rectangles[i][1]))
-        x2 = int(min(width , rectangles[i][2]))
+        x1 = int(max(0,      rectangles[i][0]))
+        y1 = int(max(0,      rectangles[i][1]))
+        x2 = int(min(width,  rectangles[i][2]))
         y2 = int(min(height, rectangles[i][3]))
         sc = rectangles[i][4]
         if x2 > x1 and y2 > y1:
             pick.append([x1, y1, x2, y2, sc])
-    return NMS(pick, iou_threshold, 'iou')
+    return NMS(pick, iou_threshold)
 
 
 def filter_face_48net(cls_prob, roi, pts, rectangles, width, height, score_threshold, iou_threshold):
@@ -164,44 +168,48 @@ def filter_face_48net(cls_prob, roi, pts, rectangles, width, height, score_thres
     prob = cls_prob[:, 1]
     pick = np.where(prob >= score_threshold)
     rectangles = np.array(rectangles)
-    x1  = rectangles[pick, 0]
-    y1  = rectangles[pick, 1]
-    x2  = rectangles[pick, 2]
-    y2  = rectangles[pick, 3]
-    sc  = np.array([prob[pick]]).T
+    x1 = rectangles[pick, 0]
+    y1 = rectangles[pick, 1]
+    x2 = rectangles[pick, 2]
+    y2 = rectangles[pick, 3]
+    sc = np.array([prob[pick]]).T
+
     dx1 = roi[pick, 0]
     dx2 = roi[pick, 1]
     dx3 = roi[pick, 2]
     dx4 = roi[pick, 3]
-    w   = x2-x1
-    h   = y2-y1
-    pts0= np.array([(w*pts[pick, 0]+x1)[0]]).T
-    pts1= np.array([(h*pts[pick, 5]+y1)[0]]).T
-    pts2= np.array([(w*pts[pick, 1]+x1)[0]]).T
-    pts3= np.array([(h*pts[pick, 6]+y1)[0]]).T
-    pts4= np.array([(w*pts[pick, 2]+x1)[0]]).T
-    pts5= np.array([(h*pts[pick, 7]+y1)[0]]).T
-    pts6= np.array([(w*pts[pick, 3]+x1)[0]]).T
-    pts7= np.array([(h*pts[pick, 8]+y1)[0]]).T
-    pts8= np.array([(w*pts[pick, 4]+x1)[0]]).T
-    pts9= np.array([(h*pts[pick, 9]+y1)[0]]).T
-    x1  = np.array([(x1+dx1*w)[0]]).T
-    y1  = np.array([(y1+dx2*h)[0]]).T
+
+    w = x2-x1
+    h = y2-y1
+
+    pts0 = np.array([(w*pts[pick, 0]+x1)[0]]).T
+    pts1 = np.array([(h*pts[pick, 5]+y1)[0]]).T
+    pts2 = np.array([(w*pts[pick, 1]+x1)[0]]).T
+    pts3 = np.array([(h*pts[pick, 6]+y1)[0]]).T
+    pts4 = np.array([(w*pts[pick, 2]+x1)[0]]).T
+    pts5 = np.array([(h*pts[pick, 7]+y1)[0]]).T
+    pts6 = np.array([(w*pts[pick, 3]+x1)[0]]).T
+    pts7 = np.array([(h*pts[pick, 8]+y1)[0]]).T
+    pts8 = np.array([(w*pts[pick, 4]+x1)[0]]).T
+    pts9 = np.array([(h*pts[pick, 9]+y1)[0]]).T
+    x1 = np.array([(x1+dx1*w)[0]]).T
+    y1 = np.array([(y1+dx2*h)[0]]).T
     x2  = np.array([(x2+dx3*w)[0]]).T
-    y2  = np.array([(y2+dx4*h)[0]]).T
-    rectangles=np.concatenate((x1, y1, x2, y2, sc, pts0, pts1, pts2, pts3, pts4, pts5, pts6, pts7, pts8, pts9), axis=1)
+    y2 = np.array([(y2+dx4*h)[0]]).T
+    rectangles = np.concatenate((x1, y1, x2, y2, sc, pts0, pts1, pts2, pts3, pts4, pts5, pts6, pts7, pts8, pts9),
+                                axis=1)
     pick = []
     for i in range(len(rectangles)):
-        x1 = int(max(0     , rectangles[i][0]))
-        y1 = int(max(0     , rectangles[i][1]))
-        x2 = int(min(width , rectangles[i][2]))
+        x1 = int(max(0,      rectangles[i][0]))
+        y1 = int(max(0,      rectangles[i][1]))
+        x2 = int(min(width,  rectangles[i][2]))
         y2 = int(min(height, rectangles[i][3]))
-        if x2>x1 and y2>y1:
+        if x2 > x1 and y2 > y1:
             pick.append([x1, y1, x2, y2, *rectangles[i][4:]])
-    return NMS(pick, iou_threshold, 'iom')
+    return NMS(pick, iou_threshold, use_iom=True)
 
 
-def calculateScales(img):
+def calculate_scales(img):
     """
     Function:
         calculate multi-scale and limit the maxinum side to 1000
@@ -211,9 +219,8 @@ def calculateScales(img):
         pr_scale: limit the maxinum side to 1000, < 1.0
         scales  : Multi-scale
     """
-    caffe_img = img.copy()
     pr_scale = 1.0
-    h, w, _ = caffe_img.shape
+    h, w, _ = img.shape
     if min(w, h) > 1000:
         pr_scale = 1000.0 / min(h, w)
         w = int(w*pr_scale)
