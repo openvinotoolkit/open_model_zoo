@@ -726,7 +726,7 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(name='text_detection_demo', device_keys=['-d_td', '-d_tr'], test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
+        TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('text-detection')}),
         single_option_cases('-m_td', ModelArg('ctpn')),
