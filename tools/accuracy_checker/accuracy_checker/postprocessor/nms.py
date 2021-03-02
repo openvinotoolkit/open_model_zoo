@@ -67,6 +67,10 @@ class NMS(Postprocessor):
             'use_min_area': BoolField(
                 optional=True, default=False,
                 description="Use minimum area of two bounding boxes as base area to calculate overlap"
+            ),
+            'nms_per_class': BoolField(
+                optional=True, default=False,
+                description="Use nms for each class separately"
             )
         })
         return parameters
@@ -76,14 +80,31 @@ class NMS(Postprocessor):
         self.include_boundaries = self.get_value_from_config('include_boundaries')
         self.keep_top_k = self.get_value_from_config('keep_top_k')
         self.use_min_area = self.get_value_from_config('use_min_area')
+        self.nms_per_class = True
 
     def process_image(self, annotations, predictions):
         for prediction in predictions:
             scores = get_scores(prediction)
-            keep = self.nms(
-                prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs, scores,
-                self.overlap, self.include_boundaries, self.keep_top_k, self.use_min_area
-            )
+
+            if self.nms_per_class:
+                labels = prediction.labels
+                unique_labels = np.unique(labels)
+                keep = []
+                for label in unique_labels:
+                    indexes = np.where(labels == label)[0]
+                    keep_per_class = self.nms(
+                        prediction.x_mins[indexes], prediction.y_mins[indexes],
+                        prediction.x_maxs[indexes], prediction.y_maxs[indexes],
+                        scores[indexes],
+                        self.overlap, self.include_boundaries, self.keep_top_k, self.use_min_area
+                    )
+                    keep.extend(indexes[keep_per_class])
+            else:
+                keep = self.nms(
+                    prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs, scores,
+                    self.overlap, self.include_boundaries, self.keep_top_k, self.use_min_area
+                )
+
             prediction.remove([box for box in range(len(prediction.x_mins)) if box not in keep])
 
         return annotations, predictions
