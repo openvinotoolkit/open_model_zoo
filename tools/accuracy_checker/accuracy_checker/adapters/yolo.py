@@ -121,7 +121,7 @@ def entry_index(w, h, n_coords, n_classes, pos, entry):
     return row * w * h * (n_classes + n_coords + 1) + entry * w * h + col
 
 
-def parse_output(predictions, cells, num, box_size, anchors, processor, threshold=0.001):
+def parse_output(predictions, cells, num, box_size, anchors, processor, threshold=0.001, multi_label=False):
     cells_x, cells_y = cells, cells
 
     labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
@@ -138,15 +138,24 @@ def parse_output(predictions, cells, num, box_size, anchors, processor, threshol
         if processed_box.confidence < threshold:
             continue
 
-        classes_prob = processed_box.probabilities
-        label = np.argmax(classes_prob)
+        if multi_label:
+            for class_id, probability in enumerate(processed_box.probabilities):
+                labels.append(class_id)
+                scores.append(probability * processed_box.confidence)
+                x_mins.append(processed_box.x - processed_box.w / 2.0)
+                y_mins.append(processed_box.y - processed_box.h / 2.0)
+                x_maxs.append(processed_box.x + processed_box.w / 2.0)
+                y_maxs.append(processed_box.y + processed_box.h / 2.0)
+        else:
+            classes_prob = processed_box.probabilities
+            label = np.argmax(classes_prob)
 
-        labels.append(label)
-        scores.append(processed_box.probabilities[label] * processed_box.confidence)
-        x_mins.append(processed_box.x - processed_box.w / 2.0)
-        y_mins.append(processed_box.y - processed_box.h / 2.0)
-        x_maxs.append(processed_box.x + processed_box.w / 2.0)
-        y_maxs.append(processed_box.y + processed_box.h / 2.0)
+            labels.append(label)
+            scores.append(processed_box.probabilities[label] * processed_box.confidence)
+            x_mins.append(processed_box.x - processed_box.w / 2.0)
+            y_mins.append(processed_box.y - processed_box.h / 2.0)
+            x_maxs.append(processed_box.x + processed_box.w / 2.0)
+            y_maxs.append(processed_box.y + processed_box.h / 2.0)
 
     return labels, scores, x_mins, y_mins, x_maxs, y_maxs
 
@@ -244,9 +253,8 @@ class YoloV2Adapter(Adapter):
                 else:
                     new_shape = (self.cells, self.cells, self.num * box_size)
                 prediction = np.reshape(prediction, new_shape)
-            labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(prediction, self.cells, self.num,
-                                                                          box_size, self.anchors,
-                                                                          self.processor)
+            labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(prediction, self.cells, self.num, box_size,
+                                                                          self.anchors, self.processor)
 
             result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
 
@@ -322,6 +330,10 @@ class YoloV3Adapter(Adapter):
             'output_format': StringField(
                 choices=['BHW', 'HWB'], optional=True, default='BHW',
                 description="Set output layer format"
+            ),
+            'multi_label': BoolField(
+                optional=True, default=False,
+                description='Allows multiple labels for single box'
             )
         })
 
@@ -340,6 +352,7 @@ class YoloV3Adapter(Adapter):
         self.anchors = get_or_parse_value(self.get_value_from_config('anchors'), YoloV3Adapter.PRECOMPUTED_ANCHORS)
         self.threshold = self.get_value_from_config('threshold')
         self.outputs = self.get_value_from_config('outputs')
+        self.multi_label = self.get_value_from_config('multi_label')
         anchor_masks = self.get_value_from_config('anchor_masks')
         self.masked_anchors = None
         if anchor_masks is not None:
@@ -425,9 +438,9 @@ class YoloV3Adapter(Adapter):
                 self.processor.x_normalizer = cells
                 self.processor.y_normalizer = cells
 
-                labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num,
-                                                                              box_size, anchors,
-                                                                              self.processor, self.threshold)
+                labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num, box_size, anchors,
+                                                                              self.processor, self.threshold,
+                                                                              self.multi_label)
                 detections['labels'].extend(labels)
                 detections['scores'].extend(scores)
                 detections['x_mins'].extend(x_mins)
