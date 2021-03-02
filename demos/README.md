@@ -47,6 +47,7 @@ The Open Model Zoo includes the following demos:
 - [Sound Classification Python\* Demo](./sound_classification_demo/python/README.md) - Demo application for sound classification algorithm.
 - [Super Resolution C++ Demo](./super_resolution_demo/cpp/README.md) - Super Resolution demo (the demo supports only images as inputs). It enhances the resolution of the input image.
 - [Text Detection C++ Demo](./text_detection_demo/cpp/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
+- [Text Detection Python\* Demo](./text_detection_demo/python/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
 - [Text Spotting Python\* Demo](./text_spotting_demo/python/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Text-to-speech Python\* Demo](./text_to_speech_demo/python/README.md) - Shows an example of using Forward Tacotron and WaveRNN neural networks for text to speech task.
 

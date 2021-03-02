@@ -49,11 +49,11 @@ def build_argparser():
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
     args.add_argument('-d_td', '--device_td', default='CPU', type=str,
-                      help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
+                      help='Optional. Specify the target device to infer on Detection stage; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
     args.add_argument('-d_tr', '--device_tr', default='CPU', type=str,
-                      help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
+                      help='Optional. Specify the target device to infer on Recognition stage; CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The sample will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
 
@@ -61,7 +61,7 @@ def build_argparser():
     common_model_args.add_argument('-t', '--prob_threshold', default=0.9, type=float,
                                    help='Optional. Probability threshold for text detections filtering.')
     common_model_args.add_argument('-a', '--alphabet',
-                                   help='Optional. Alphabet used for decoding.',
+                                   help='Optional. Alphabet used for text decoding.',
                                    default='0123456789abcdefghijklmnopqrstuvwxyz')
     common_model_args.add_argument('--tr_pt_first', default=False, action='store_true',
                                    help='Optional. Specifies if pad token is the first symbol in the alphabet.')
@@ -70,25 +70,26 @@ def build_argparser():
                                         'in this case CTC greedy decoder will be used.')
 
     infer_args = parser.add_argument_group('Inference options')
-    infer_args.add_argument('-nireq_td', '--num_infer_requests_td', help='Optional. Number of infer requests',
-                            default=1, type=int)
+    infer_args.add_argument('-nireq_td', '--num_requests_td', default=1, type=int,
+                            help='Optional. Number of infer requests for Detection stage.')
     infer_args.add_argument('-nstreams_td', '--num_streams_td',
                             help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
                                  'mode (for HETERO and MULTI device cases use format '
-                                 '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).',
+                                 '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>) for Detection stage.',
                             default='', type=str)
     infer_args.add_argument('-nthreads_td', '--num_threads_td', default=None, type=int,
-                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
-
-    infer_args.add_argument('-nireq_tr', '--num_infer_requests_tr', help='Optional. Number of infer requests',
-                            default=1, type=int)
+                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases) '
+                                 'for Detection stage.')
+    infer_args.add_argument('-nireq_tr', '--num_requests_tr', default=1, type=int,
+                            help='Optional. Number of infer requests for Recognition stage.')
     infer_args.add_argument('-nstreams_tr', '--num_streams_tr',
                             help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
                                  'mode (for HETERO and MULTI device cases use format '
-                                 '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).',
+                                 '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>) for Recognition stage.',
                             default='', type=str)
     infer_args.add_argument('-nthreads_tr', '--num_threads_tr', default=None, type=int,
-                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
+                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases) '
+                                 'for Recognition stage.')
 
     io_args = parser.add_argument_group('Input/output options')
     io_args.add_argument('--loop', default=False, action='store_true',
@@ -178,7 +179,7 @@ def main():
     pipeline = TwoStagePipeline(ie, text_detection, text_recognition,
                                 plugin_config_td, plugin_config_tr,
                                 args.device_td, args.device_tr,
-                                args.num_infer_requests_td, args.num_infer_requests_tr)
+                                args.num_requests_td, args.num_requests_tr)
 
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")

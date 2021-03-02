@@ -23,11 +23,11 @@ class TwoStagePipeline:
     def __init__(self, ie, encoder_model, decoder_model,
                  en_plugin_config, de_plugin_config,
                  en_device, de_device,
-                 en_max_num_requests, de_max_num_requests):
+                 en_num_requests, de_num_requests):
 
         self.encoder_model = encoder_model
-        self.encoder = AsyncPipeline(ie, encoder_model, en_plugin_config, en_device, en_max_num_requests)
-        self.decoder = AsyncPipeline(ie, decoder_model, de_plugin_config, de_device, de_max_num_requests)
+        self.encoder = AsyncPipeline(ie, encoder_model, en_plugin_config, en_device, en_num_requests)
+        self.decoder = AsyncPipeline(ie, decoder_model, de_plugin_config, de_device, de_num_requests)
 
         self.submitted_frames = deque([])
 
