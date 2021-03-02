@@ -66,7 +66,7 @@ class TrimapPreprocessor(Preprocessor):
         trimap = np.stack([cut, cal, keep], 2)
         image.data = np.concatenate([image.data, trimap], 2)
 
-        trimap = np.argmax(trimap,2)
+        trimap = np.argmax(trimap, 2)
         image.metadata.update({'tmap': trimap})
 
         return image

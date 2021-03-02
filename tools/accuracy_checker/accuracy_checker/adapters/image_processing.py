@@ -233,9 +233,9 @@ class TrimapAdapter(ImageProcessingAdapter):
 
         for identifier, out_img, out_meta in zip(identifiers, raw_outputs[self.target_out], frame_meta):
             tmap = np.expand_dims(out_meta['tmap'], axis=0)
-            C,N,W = out_img.shape
-            if C>1 and W == 1:
-                out_img = np.transpose(out_img, [2,0,1])
+            C, _, W = out_img.shape
+            if C > 1 and W == 1:
+                out_img = np.transpose(out_img, [2, 0, 1])
             out_img[tmap == 2] = 1
             out_img[tmap == 0] = 0
             out_img = self._basic_postprocess(out_img)

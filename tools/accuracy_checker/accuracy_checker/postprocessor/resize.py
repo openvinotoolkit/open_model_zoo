@@ -60,7 +60,7 @@ class Resize(PostprocessorWithSpecificTargets):
             'resize_realization': StringField(
                 optional=True, choices=["pillow", "opencv"], default="pillow",
                 description="Parameter specifies functionality of which library will be used for resize: "
-                            "{}".format(', '.join(["pillow","opencv"]))
+                            "{}".format(', '.join(["pillow", "opencv"]))
             ),
 
         })
@@ -100,7 +100,7 @@ class Resize(PostprocessorWithSpecificTargets):
         @resize.register(ImageInpaintingAnnotation)
         @resize.register(ImageInpaintingPrediction)
         def _(entry, height, width):
-            data = entry.value if entry.value.shape[-1] > 1 else entry.value[:,:,0]
+            data = entry.value if entry.value.shape[-1] > 1 else entry.value[:, :, 0]
             assert self.realization in ['pillow', 'opencv']
             if self.realization == 'pillow':
                 data = data.astype(np.uint8)
