@@ -929,6 +929,9 @@ class UltraLightweightFaceDetectionAdapter(Adapter):
         parameters.update({
             'scores_out': StringField(description="Scores output layer name."),
             'boxes_out': StringField(description="Boxes output layer name."),
+            'score_threshold': NumberField(
+                value_type=float, min_value=0, max_value=1, default=0.7, optional=True,
+                description='Minimal accepted score for valid boxes'),
         })
 
         return parameters
@@ -936,10 +939,7 @@ class UltraLightweightFaceDetectionAdapter(Adapter):
     def configure(self):
         self.scores_out = self.get_value_from_config('scores_out')
         self.boxes_out = self.get_value_from_config('boxes_out')
-
-        # Set default values
-        self.prob_threshold = 0.7
-        self.iou_threshold = 0.5
+        self.score_threshold = self.get_value_from_config('score_threshold')
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
@@ -949,44 +949,12 @@ class UltraLightweightFaceDetectionAdapter(Adapter):
 
         result = []
         for identifier, scores, boxes in zip(identifiers, batch_scores, batch_boxes):
-            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+            score = np.transpose(scores)[1]
+            mask = score > self.score_threshold
+            filtered_boxes, filtered_score = boxes[mask, :], score[mask]
+            x_mins, y_mins, x_maxs, y_maxs = filtered_boxes.T
+            labels = np.full_like(filtered_score, 1, dtype=int)
 
-            for label, score in enumerate(np.transpose(scores)):
-                if label == 0:
-                    continue
-
-                mask = score > self.prob_threshold
-                filtered_boxes, filtered_score = boxes[mask, :], score[mask]
-                if filtered_score.size == 0:
-                    continue
-
-                x_mins = (filtered_boxes[:, 0])
-                y_mins = (filtered_boxes[:, 1])
-                x_maxs = (filtered_boxes[:, 2])
-                y_maxs = (filtered_boxes[:, 3])
-
-                keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.iou_threshold,
-                               include_boundaries=False)
-
-                filtered_score = filtered_score[keep]
-                x_mins = x_mins[keep]
-                y_mins = y_mins[keep]
-                x_maxs = x_maxs[keep]
-                y_maxs = y_maxs[keep]
-
-                labels = np.full_like(filtered_score, label, dtype=int)
-                detections['labels'].extend(labels)
-                detections['scores'].extend(filtered_score)
-                detections['x_mins'].extend(x_mins)
-                detections['y_mins'].extend(y_mins)
-                detections['x_maxs'].extend(x_maxs)
-                detections['y_maxs'].extend(y_maxs)
-
-            result.append(
-                DetectionPrediction(
-                    identifier, detections['labels'], detections['scores'], detections['x_mins'],
-                    detections['y_mins'], detections['x_maxs'], detections['y_maxs']
-                )
-            )
+            result.append(DetectionPrediction(identifier, labels, filtered_score, x_mins, y_mins, x_maxs, y_maxs))
 
         return result
