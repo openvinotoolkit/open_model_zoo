@@ -1,12 +1,32 @@
+#!/usr/bin/env python3
+"""
+ Copyright (C) 2021 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
+import logging
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 from time import perf_counter
+
+
 import cv2
 import numpy as np
-import logging
-import mtcnn_utils as utils
 from openvino.inference_engine import IECore
+
+import mtcnn_utils as utils
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
@@ -21,6 +41,7 @@ log = logging.getLogger()
 score_threshold = [0.6, 0.7, 0.7]
 iou_threshold = [0.5, 0.7, 0.7, 0.7]
 
+
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
@@ -31,13 +52,13 @@ def build_argparser():
                       required=True, type=str)
     args.add_argument("-m_p", "--model_pnet",
                       help="Required. Path to an .xml file with a pnet model.",
-                      required=True, type=str, metavar='"<path>"')
+                      required=True, type=Path, metavar='"<path>"')
     args.add_argument("-m_r", "--model_rnet",
                       help="Required. Path to an .xml file with a rnet model.",
-                      required=True, type=str, metavar='"<path>"')
+                      required=True, type=Path, metavar='"<path>"')
     args.add_argument("-m_o", "--model_onet",
                       help="Required. Path to an .xml file with a onet model.",
-                      required=True, type=str, metavar='"<path>"')
+                      required=True, type=Path, metavar='"<path>"')
     args.add_argument("-th", "--threshold",
                       help="Optional. The threshold to define the face is recognized or not.",
                       type=float, default=0.6, metavar='"<num>"')
@@ -69,6 +90,7 @@ def preprocess_image(image, w, h):
     image = np.expand_dims(image, axis=0)
     return image
 
+
 def main():
     metrics = PerformanceMetrics()
 
@@ -81,17 +103,17 @@ def main():
 
     # Read IR
     log.info("Loading network files:\n\t{}".format(args.model_pnet))
-    p_net = ie.read_network(args.model_pnet)
+    p_net = ie.read_network(args.model_pnet, args.model_pnet.with_suffix('.bin'))
     assert len(p_net.input_info.keys()) == 1, "Pnet supports only single input topologies"
     assert len(p_net.outputs) == 2, "Pnet supports two output topologies"
 
     log.info("Loading network files:\n\t{}".format(args.model_rnet))
-    r_net = ie.read_network(args.model_rnet)
+    r_net = ie.read_network(args.model_rnet, args.model_rnet.with_suffix('.bin'))
     assert len(r_net.input_info.keys()) == 1, "Rnet supports only single input topologies"
     assert len(r_net.outputs) == 2, "Rnet supports two output topologies"
 
     log.info("Loading network files:\n\t{}".format(args.model_onet))
-    o_net = ie.read_network(args.model_onet)
+    o_net = ie.read_network(args.model_onet, args.model_onet.with_suffix('.bin'))
     assert len(o_net.input_info.keys()) == 1, "Onet supports only single input topologies"
     assert len(o_net.outputs) == 3, "Onet supports three output topologies"
 
@@ -100,6 +122,32 @@ def main():
     pnet_input_blob = next(iter(p_net.input_info))
     rnet_input_blob = next(iter(r_net.input_info))
     onet_input_blob = next(iter(o_net.input_info))
+
+    for name, blob in p_net.outputs.items():
+        if blob.shape[1] == 2:
+            pnet_cls_name = name
+        elif blob.shape[1] == 4:
+            pnet_roi_name = name
+        else:
+            raise RuntimeError("Unsupported output layer for Pnet")
+
+    for name, blob in r_net.outputs.items():
+        if blob.shape[1] == 2:
+            rnet_cls_name = name
+        elif blob.shape[1] == 4:
+            rnet_roi_name = name
+        else:
+            raise RuntimeError("Unsupported output layer for Rnet")
+
+    for name, blob in o_net.outputs.items():
+        if blob.shape[1] == 2:
+            onet_cls_name = name
+        elif blob.shape[1] == 4:
+            onet_roi_name = name
+        elif blob.shape[1] == 10:
+            onet_pts_name = name
+        else:
+            raise RuntimeError("Unsupported output layer for Onet")
 
     cap = open_images_capture(args.input, args.loop)
 
@@ -144,7 +192,7 @@ def main():
             ws = int(ow*scale)
             image = preprocess_image(rgb_image, ws, hs)
 
-            p_net.reshape({pnet_input_blob : [1, 3, ws, hs]})  # Change weidth and height of input blob
+            p_net.reshape({pnet_input_blob: [1, 3, ws, hs]})  # Change weidth and height of input blob
             exec_pnet = ie.load_network(network=p_net, device_name=args.device)
 
             p_res = exec_pnet.infer(inputs={pnet_input_blob: image})
@@ -153,10 +201,11 @@ def main():
         image_num = len(scales)
         rectangles = []
         for i in range(image_num):
-            (layer_name_roi, roi), (layer_name_cls, cls_prob) = pnet_res[i].items()
-            _, _, out_h, out_w = cls_prob.shape
+            roi = pnet_res[i][pnet_roi_name]
+            cls = pnet_res[i][pnet_cls_name]
+            _, _, out_h, out_w = cls.shape
             out_side = max(out_h, out_w)
-            rectangle = utils.detect_face_12net(cls_prob[0][1], roi[0], out_side, 1/scales[i], ow, oh, score_threshold[0], iou_threshold[0])
+            rectangle = utils.detect_face_12net(cls[0][1], roi[0], out_side, 1/scales[i], ow, oh, score_threshold[0], iou_threshold[0])
             rectangles.extend(rectangle)
         rectangles = utils.NMS(rectangles, iou_threshold[1], 'iou')
 
@@ -164,8 +213,8 @@ def main():
         if len(rectangles) > 0:
             log.info("Loading Rnet model to the plugin")
 
-            r_net.reshape({rnet_input_blob : [len(rectangles), 3, 24, 24]})  # Change batch size of input blob
-            exec_rnet = ie.load_network(network = r_net, device_name = args.device)
+            r_net.reshape({rnet_input_blob: [len(rectangles), 3, 24, 24]})  # Change batch size of input blob
+            exec_rnet = ie.load_network(network=r_net, device_name = args.device)
 
             rnet_input = []
             for rectangle in rectangles:
@@ -175,8 +224,9 @@ def main():
 
             rnet_res = exec_rnet.infer(inputs={rnet_input_blob: rnet_input})
 
-            (layer_name_roi, roi_prob), (layer_name_cls, cls_prob)  = rnet_res.items()
-            rectangles = utils.filter_face_24net(cls_prob, roi_prob, rectangles, ow, oh, score_threshold[1], iou_threshold[2])
+            roi = rnet_res[rnet_roi_name]
+            cls = rnet_res[rnet_cls_name]
+            rectangles = utils.filter_face_24net(cls, roi, rectangles, ow, oh, score_threshold[1], iou_threshold[2])
 
         # Onet stage
         if len(rectangles) > 0:
@@ -193,20 +243,24 @@ def main():
 
             onet_res = exec_onet.infer(inputs={onet_input_blob: onet_input})
 
-            (layer_name_roi, roi_prob), (layer_name_landmark, pts_prob), (layer_name_cls, cls_prob)  = onet_res.items()
-            rectangles = utils.filter_face_48net(cls_prob, roi_prob, pts_prob, rectangles, ow, oh, score_threshold[2], iou_threshold[3])
+            roi = onet_res[onet_roi_name]
+            cls = onet_res[onet_cls_name]
+            pts = onet_res[onet_pts_name]
+            rectangles = utils.filter_face_48net(cls, roi, pts, rectangles, ow, oh, score_threshold[2], iou_threshold[3])
 
         # display results
         for rectangle in rectangles:
             # Draw detected boxes
-            cv2.putText(origin_image, 'confidence: {:.2f}'.format(rectangle[4]), (int(rectangle[0]), int(rectangle[1])), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0))
-            cv2.rectangle(origin_image, (int(rectangle[0]), int(rectangle[1])), (int(rectangle[2]), int(rectangle[3])), (255, 0, 0), 1)
+            cv2.putText(origin_image, 'confidence: {:.2f}'.format(rectangle[4]),
+                        (int(rectangle[0]), int(rectangle[1])), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0))
+            cv2.rectangle(origin_image, (int(rectangle[0]), int(rectangle[1])), (int(rectangle[2]), int(rectangle[3])),
+                          (255, 0, 0), 1)
             for i in range(5, 15, 2):
-                cv2.circle(origin_image, (int(rectangle[i+0]), int(rectangle[i+1])), 2, (0, 255 , 0))
+                cv2.circle(origin_image, (int(rectangle[i+0]), int(rectangle[i+1])), 2, (0, 255, 0))
 
         infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()  # Record infer time
-        cv2.putText(origin_image, 'summary: {:.1f} FPS'.format(
-            1.0 / infer_time), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+        cv2.putText(origin_image, 'summary: {:.1f} FPS'.format(1.0 / infer_time),
+                    (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
 
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id <= args.output_limit - 1):
             video_writer.write(origin_image)
@@ -221,6 +275,7 @@ def main():
         metrics.update(start_time, origin_image)
 
     metrics.print_total()
+
 
 if __name__ == '__main__':
     sys.exit(main() or 0)
