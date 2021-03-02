@@ -21,7 +21,6 @@ from pathlib import Path
 from time import perf_counter
 
 import cv2
-import numpy as np
 from openvino.inference_engine import IECore
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))

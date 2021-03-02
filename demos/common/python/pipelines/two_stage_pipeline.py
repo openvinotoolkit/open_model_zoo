@@ -14,7 +14,6 @@
  limitations under the License.
 """
 
-import threading
 from collections import deque
 
 from pipelines import AsyncPipeline
