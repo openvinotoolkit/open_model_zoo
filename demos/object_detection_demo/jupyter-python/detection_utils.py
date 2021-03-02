@@ -73,36 +73,6 @@ def put_highlighted_text(frame, message, position, font_face, font_scale, color,
     cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
 
 
-def draw_detections(frame, detections, palette, labels, threshold, draw_landmarks=False):
-    """
-    Draw detection boxes on `frame`.
-    """
-    size = frame.shape[:2]
-    for detection in detections:
-        if detection.score > threshold:
-            xmin = max(int(detection.xmin), 0)
-            ymin = max(int(detection.ymin), 0)
-            xmax = min(int(detection.xmax), size[1])
-            ymax = min(int(detection.ymax), size[0])
-            class_id = int(detection.id)
-            color = palette[class_id]
-            det_label = labels[class_id] if labels and len(labels) >= class_id else "#{}".format(class_id)
-            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
-            cv2.putText(
-                frame,
-                "{} {:.1%}".format(det_label, detection.score),
-                (xmin, ymin - 7),
-                cv2.FONT_HERSHEY_COMPLEX,
-                0.6,
-                color,
-                1,
-            )
-            if draw_landmarks:
-                for landmark in detection.landmarks:
-                    cv2.circle(frame, landmark, 2, (0, 255, 255), 2)
-    return frame
-
-
 def download_video(path: str) -> np.ndarray:
     """
     Download a video from `path` and save it to the current folder.
