@@ -108,7 +108,8 @@ def main():
     # Read IR
     log.info('Loading network')
     net = ie.read_network(args.model, args.model.with_suffix('.bin'))
-    image_input, image_info_input, (n, c, h, w), postprocessor = check_model(net)
+    image_input, image_info_input, (n, c, h, w), model_type, postprocessor = check_model(net)
+    args.no_keep_aspect_ratio = model_type == 'yolact' or args.no_keep_aspect_ratio
 
     log.info('Loading IR to the plugin...')
     exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)

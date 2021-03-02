@@ -109,7 +109,9 @@ def yolact_postprocess(
         idx_lst.append(idx[keep])
         cls_lst.append(np.full(len(keep), cls))
         scr_lst.append(cls_scores[keep])
-
+    
+    if not idx_lst:
+        return np.array([]), np.array([]), np.array([]), np.array([])
     idx = np.concatenate(idx_lst, axis=0)
     classes = np.concatenate(cls_lst, axis=0)
     scores = np.concatenate(scr_lst, axis=0)
@@ -220,17 +222,10 @@ def yolact_segm_postprocess(
     boxes[:, 1], boxes[:, 3] = sanitize_coordinates(boxes[:, 1], boxes[:, 3], h, shift_y)
     ready_masks = []
 
-    for mask_id, mask in enumerate(masks):
+    for mask in masks:
         mask = cv2.resize(mask, (w, h), cv2.INTER_LINEAR)
         mask = mask > 0.5
-        b_x1, b_y1, b_x2, b_y2 = np.ceil(boxes[mask_id]).astype(int)
-        im_mask = np.zeros((h, w), dtype=np.uint8)
-        height = max(b_y2 - b_y1, y2[mask_id] - y1[mask_id])
-        width = max(b_x2 - b_x1, x2[mask_id] - x1[mask_id])
-        im_mask[b_y1:b_y1 + height, b_x1:b_x1+width] = mask[
-                                                       y1[mask_id]:y1[mask_id] + height,
-                                                       x1[mask_id]:x1[mask_id] + width]
-        ready_masks.append(im_mask.astype(np.uint8))
+        ready_masks.append(mask.astype(np.uint8))
 
     return boxes, score, classes, ready_masks
 
@@ -269,4 +264,4 @@ def check_model(net):
     input_shape = net.input_info[image_input].input_data.shape
     assert input_shape[0] == 1, 'Only batch 1 is supported by the demo application'
 
-    return image_input, image_info_input, input_shape, model_attributes.postprocessor
+    return image_input, image_info_input, input_shape, model_type, model_attributes.postprocessor
