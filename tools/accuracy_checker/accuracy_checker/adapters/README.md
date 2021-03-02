@@ -386,3 +386,7 @@ AccuracyChecker supports following set of adapters:
 * `detr` - converts output of DETR models family to `DetectionPrediction`.
     * `scores_out` - output layer name with detection scores logits.
     * `boxes_out` - output layer name with detection boxes coordinates in [Cx,Cy,W, H] format, where Cx - x coordinate of box center, Cy - y coordinate of box center, W, H - width and height respectively.
+* `ultra_lightweight_face_detection` - converts output of Ultra-Lightweight Face Detection models to `DetectionPrediction` representation.
+  * `scores_out` - name of output layer with bounding boxes scores.
+  * `boxes_out` - name of output layer with bounding boxes coordinates.
+  * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0.7).
