@@ -20,25 +20,13 @@ from collections import deque
 from pipelines import AsyncPipeline
 
 
-def get_boxes(result):
-    detections, frame_meta = result
-    frame = frame_meta['frame']
-    boxes = []
-    for detection in detections:
-        xmin = max(int(detection.xmin), 0)
-        ymin = max(int(detection.ymin), 0)
-        xmax = min(int(detection.xmax), frame.shape[1])
-        ymax = min(int(detection.ymax), frame.shape[0])
-        boxes.append(frame[ymin:ymax, xmin:xmax])
-    return boxes
-
-
 class TwoStagePipeline:
     def __init__(self, ie, encoder_model, decoder_model,
                  en_plugin_config, de_plugin_config,
                  en_device, de_device,
                  en_max_num_requests, de_max_num_requests):
 
+        self.encoder_model = encoder_model
         self.encoder = AsyncPipeline(ie, encoder_model, en_plugin_config, en_device, en_max_num_requests)
         self.decoder = AsyncPipeline(ie, decoder_model, de_plugin_config, de_device, de_max_num_requests)
 
@@ -70,7 +58,7 @@ class TwoStagePipeline:
             return None
 
         self.submitted_frames.popleft()
-        data = get_boxes(encoder_result)
+        data = self.encoder_model.prepare(encoder_result)
         self.decoder_result = [None for _ in data]
         self.submit_to_decoder(data)
         self.postprocess_all()
