@@ -109,7 +109,7 @@ def yolact_postprocess(
         idx_lst.append(idx[keep])
         cls_lst.append(np.full(len(keep), cls))
         scr_lst.append(cls_scores[keep])
-    
+
     if not idx_lst:
         return np.array([]), np.array([]), np.array([]), np.array([])
     idx = np.concatenate(idx_lst, axis=0)
