@@ -949,10 +949,12 @@ class UltraLightweightFaceDetectionAdapter(Adapter):
 
         result = []
         for identifier, scores, boxes in zip(identifiers, batch_scores, batch_boxes):
+            x_mins, y_mins, x_maxs, y_maxs = [], [], [], []
             score = np.transpose(scores)[1]
             mask = score > self.score_threshold
             filtered_boxes, filtered_score = boxes[mask, :], score[mask]
-            x_mins, y_mins, x_maxs, y_maxs = filtered_boxes.T
+            if filtered_score.size != 0:
+                x_mins, y_mins, x_maxs, y_maxs = filtered_boxes.T
             labels = np.full_like(filtered_score, 1, dtype=int)
 
             result.append(DetectionPrediction(identifier, labels, filtered_score, x_mins, y_mins, x_maxs, y_maxs))
