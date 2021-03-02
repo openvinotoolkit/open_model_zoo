@@ -214,6 +214,11 @@ Accuracy Checker supports following set of preprocessors:
   * `black_level` - black level on the input image.
   * `ratio` - exposure scale ratio, optional, can be replaced by value from annotation if not provided.
   * `9-channels` - for packing 9 channels images (Optional, default `False`).
+* `alpha` - extracts alpha-channel data from the image.
+  * `channel` - number of channel to extract (Optional, default 3).
+* `trimap` - concatenates image data with alpha-channel based information for cut, keep and calculation zones in image.
+  * `cut_treshold` - maximum level of alpha values in cut zone. Optional, default is 0.1.
+  * `keep_treshold` - minimum level of alpha values in keep zone. Optional, default is 0.9. Pixels with alpha-channel values between `cut_threshold` and `keep_treshold` are in calculation zone.
 
 ## Optimized preprocessing via OpenVINO Inference Engine
 OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`.

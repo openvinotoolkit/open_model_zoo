@@ -58,7 +58,7 @@ class Resize(PostprocessorWithSpecificTargets):
                 description="Destination size for resize for both dimensions (height and width)."
             ),
             'resize_realization': StringField(
-                optional=True, choices={"pillow": "pillow", "opencv": "opencv"}, default="pillow",
+                optional=True, choices=["pillow", "opencv"], default="pillow",
                 description="Parameter specifies functionality of which library will be used for resize: "
                             "{}".format(', '.join(["pillow","opencv"]))
             ),

@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-# import cv2
 import numpy as np
 from .preprocessor import Preprocessor
 from ..config import NumberField
@@ -58,16 +57,6 @@ class TrimapPreprocessor(Preprocessor):
         self.keep_treshold = self.get_value_from_config('keep_treshold')
 
     def process(self, image, annotation_meta=None):
-        # in4chanel = image.data
-
-        # in4chanel = cv2.imread(filename, cv2.IMREAD_UNCHANGED)
-        # in4chanel = np.array(Image.open(filename))
-        # original_shape = in4chanel.shape[0:2]
-        # in4chanel = cv2.resize(in4chanel, (inputSize, inputSize), interpolation=cv2.INTER_NEAREST)
-
-        # image = in4chanel[:, :, 0:3]
-        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        # alpha = in4chanel[:, :, 3]
         alpha = image.metadata['alpha']
 
         cut = alpha < self.cut_treshold * 255
@@ -75,12 +64,6 @@ class TrimapPreprocessor(Preprocessor):
         cal = (alpha >= self.cut_treshold * 255) * (alpha <= self.keep_treshold * 255)
 
         trimap = np.stack([cut, cal, keep], 2)
-
-        # image = image / 255
-        # image[:, :, 0] = (image[:, :, 0] - 0.485) / 0.229
-        # image[:, :, 1] = (image[:, :, 1] - 0.456) / 0.224
-        # image[:, :, 2] = (image[:, :, 2] - 0.406) / 0.225
-
         image.data = np.concatenate([image.data, trimap], 2)
 
         trimap = np.argmax(trimap,2)
