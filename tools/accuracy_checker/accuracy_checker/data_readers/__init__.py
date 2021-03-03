@@ -41,6 +41,7 @@ from .data_reader import (
     MultiFramesInputIdentifier,
     ImagePairIdentifier,
     ListIdentifier,
+    MultiInstanceIdentifier,
 
     serialize_identifier,
     deserialize_identifier,

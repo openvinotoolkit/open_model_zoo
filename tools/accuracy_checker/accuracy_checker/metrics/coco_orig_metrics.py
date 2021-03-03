@@ -178,7 +178,10 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         coco_data_to_store = []
         for pred in predictions:
             prediction_data_to_store = []
-            cur_name = Path(pred.identifier).name
+            pred_id = pred.identifier
+            if isinstance(pred_id, tuple):
+                pred_id = pred_id.identifier
+            cur_name = Path(pred_id).name
             cur_img_id = (cur_name.split(".jpg")[0]).split("_")[-1]
 
             labels = pred.labels.tolist()
@@ -204,7 +207,10 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         coco_data_to_store = []
         for pred in predictions:
             prediction_data_to_store = []
-            cur_name = Path(pred.identifier).name
+            pred_id = pred.identifier
+            if isinstance(pred_id, tuple):
+                pred_id = pred_id.identifier
+            cur_name = Path(pred_id).name
             assert cur_name in map_coco_img_file_name_to_img_id
             cur_img_id = map_coco_img_file_name_to_img_id[cur_name]
             if pred.size == 0:
@@ -245,7 +251,10 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         count = 1
         for annotation in annotations:
             annotation_data_to_store = []
-            cur_name = Path(annotation.identifier).name
+            ann_id = annotation.identifier
+            if isinstance(ann_id, tuple):
+                ann_id = ann_id.identifier
+            cur_name = Path(ann_id).name
             cur_img_id = (cur_name.split(".jpg")[0]).split("_")[-1]
 
             labels = annotation.labels
