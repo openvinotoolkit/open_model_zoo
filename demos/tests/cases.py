@@ -79,12 +79,16 @@ class NotebookDemo(Demo):
         self._exec_name = self._exec_name.replace('_jupyter-python', '')
 
     def fixed_args(self, source_dir, build_dir):
-        sys.path.append(os.path.join(os.path.dirname(os.path.abspath(os.curdir)), "common", "python"))
+        demo_env = {**os.environ,
+                   'PATH': f"{os.environ['PATH']}{os.pathsep}"
+                           f"{os.path.dirname(sys.executable)}",
+                   'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}"
+                                 f"{os.path.join(os.path.dirname(os.path.abspath(os.curdir)), 'common', 'python')}"}
 
         notebook_file = str(source_dir / self.subdirectory / (self._exec_name + '.ipynb'))
         python_file = notebook_file.replace('ipynb', 'py')
         python_test_file = python_file.replace('.py', '_test.py')
-        subprocess.run(['jupyter', 'nbconvert', '--to', 'python', notebook_file])
+        subprocess.run(['jupyter', 'nbconvert', '--to', 'python', notebook_file], env=demo_env)
 
         # Change the working directory to the directory that contains the notebook
         with open(python_file, 'r') as python_script:
