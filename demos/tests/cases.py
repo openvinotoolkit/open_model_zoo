@@ -276,8 +276,8 @@ NATIVE_DEMOS = [
                     ModelArg('person-vehicle-bike-detection-2000'),
                     ModelArg('person-vehicle-bike-detection-2001'),
                     ModelArg('person-vehicle-bike-detection-2002'),
-                    ModelArg('person-vehicle-bike-detection-2003'),
-                    ModelArg('person-vehicle-bike-detection-2004'),
+                    #ModelArg('person-vehicle-bike-detection-2003'),
+                    #ModelArg('person-vehicle-bike-detection-2004'),
                     ModelArg('product-detection-0001'),
                     ModelArg('rfcn-resnet101-coco-tf'),
                     ModelArg('retinanet-tf'),
@@ -392,7 +392,9 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('text-detection')}),
         single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
-        single_option_cases('-m_tr', None, ModelArg('text-recognition-0012'), ModelArg('text-recognition-0013')),
+        single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+        TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
+                          '-tr_pt_first': 'tr_o_blb_nm "logits"'}),
     )),
 ]
 
