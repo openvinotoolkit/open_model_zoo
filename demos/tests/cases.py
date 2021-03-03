@@ -392,9 +392,11 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('text-detection')}),
         single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
-        single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
-        TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
-                          '-tr_pt_first': 'tr_o_blb_nm "logits"'}),
+        [
+            *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+            TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
+                              '-tr_pt_first': None}),
+        ]
     )),
 ]
 
