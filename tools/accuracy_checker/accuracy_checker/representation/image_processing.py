@@ -26,6 +26,7 @@ class GTLoader(Enum):
     OPENCV = 1
     DICOM = 2
     RAWPY = 3
+    SKIMAGE = 4
 
 
 class ImageProcessingRepresentation(BaseRepresentation):
@@ -37,7 +38,8 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
         GTLoader.PILLOW: 'pillow_imread',
         GTLoader.OPENCV: 'opencv_imread',
         GTLoader.DICOM: 'dicom_reader',
-        GTLoader.RAWPY: 'rawpy'
+        GTLoader.RAWPY: 'rawpy',
+        GTLoader.SKIMAGE: 'skimage_imread'
     }
 
     def __init__(self, identifier, path_to_gt, gt_loader=GTLoader.PILLOW):

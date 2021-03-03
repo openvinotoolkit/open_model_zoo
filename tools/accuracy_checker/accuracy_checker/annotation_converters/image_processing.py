@@ -23,7 +23,8 @@ from .format_converter import BaseFormatConverter, ConverterReturn
 LOADERS_MAPPING = {
     'opencv': GTLoader.OPENCV,
     'pillow': GTLoader.PILLOW,
-    'dicom': GTLoader.DICOM
+    'dicom': GTLoader.DICOM,
+    'skimage': GTLoader.SKIMAGE
 }
 
 

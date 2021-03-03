@@ -68,6 +68,7 @@ from .brats_preprocessing import Resize3D, NormalizeBrats, CropBraTS, SwapModali
 from .inpainting_preprocessor import FreeFormMask, RectMask, CustomMask
 from .one_hot_encoding import OneHotEncoding
 from .raw_image_preprocessing import PackBayerImage
+from .trimap import TrimapPreprocessor, AlphaChannel
 
 __all__ = [
     'PreprocessingExecutor',
@@ -144,5 +145,8 @@ __all__ = [
     'BGR2YCrCbConverter',
     'OneHotEncoding',
 
-    'PackBayerImage'
+    'PackBayerImage',
+
+    'TrimapPreprocessor',
+    'AlphaChannel'
 ]

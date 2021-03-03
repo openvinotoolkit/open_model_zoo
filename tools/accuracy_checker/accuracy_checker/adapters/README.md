@@ -390,3 +390,4 @@ AccuracyChecker supports following set of adapters:
   * `scores_out` - name of output layer with bounding boxes scores.
   * `boxes_out` - name of output layer with bounding boxes coordinates.
   * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0.7).
+* `trimap` - converts greyscale model output to `ImageProcessingPrediction`. Replaces pixel values in cut and keep zones with 0 and 1 respectively. All other postprocessing inherited from `image_processing` adapter.

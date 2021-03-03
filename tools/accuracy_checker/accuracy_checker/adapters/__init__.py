@@ -32,7 +32,7 @@ from .text_recognition import (
 )
 
 from .image_processing import (
-    ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter, SuperResolutionYUV
+    ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter, SuperResolutionYUV, TrimapAdapter
 )
 from .attributes_recognition import (
     HeadPoseEstimatorAdapter,
@@ -163,6 +163,7 @@ __all__ = [
     'SuperResolutionAdapter',
     'MultiSuperResolutionAdapter',
     'SuperResolutionYUV',
+    'TrimapAdapter',
 
     'HeadPoseEstimatorAdapter',
     'VehicleAttributesRecognitionAdapter',
