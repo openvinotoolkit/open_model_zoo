@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import collections
+import inspect
 import itertools
 import os
 import subprocess
@@ -72,11 +73,16 @@ class PythonDemo(Demo):
 
 class NotebookDemo(Demo):
     """
-    Convert notebook to Python script and runs it
+    Converts notebook to a Python script with nbconvert. Adds code to make the
+    script work with command line parameters. The `test_code` parameter is
+    added at the end of the script. This should contain the line of code to
+    execute to test the notebook.
     """
-    def __init__(self, name, implementation='jupyter-python', device_keys=None, test_cases=None):
+
+    def __init__(self, name, implementation='jupyter-python', device_keys=None, test_cases=None, test_code=None):
         super().__init__(name, implementation, device_keys, test_cases)
         self._exec_name = self._exec_name.replace('_jupyter-python', '')
+        self.test_code = test_code
 
     def fixed_args(self, source_dir, build_dir):
         demo_env = {**os.environ,
@@ -90,11 +96,28 @@ class NotebookDemo(Demo):
         python_test_file = python_file.replace('.py', '_test.py')
         subprocess.run(['jupyter', 'nbconvert', '--to', 'python', notebook_file], env=demo_env)
 
-        # Change the working directory to the directory that contains the notebook
         with open(python_file, 'r') as python_script:
+            # Change the working directory to the directory that contains the notebook
             changedir = f"import os\nos.chdir(r'{os.path.dirname(python_file)}')\n"
+            # Add some lines to the test script to make it accept command line arguments
             content = changedir + python_script.read()
+            content += inspect.cleandoc("""
+            from os.path import dirname
+            import argparse
 
+            def parse_args():
+                parser = argparse.ArgumentParser()
+                parser.add_argument('-m')
+                parser.add_argument('-i')
+                return parser.parse_args()
+
+            args = parse_args()
+            """)
+            # Change settings for test script
+            content += '\nbase_model_dir=dirname(dirname(dirname(dirname(args.m))))'
+            # Add a line that executes the function that is tested
+            content += f'\n{self.test_code}'
+            # Write test script to file
             with open(python_test_file, 'w') as python_test_script:
                 python_test_script.write(content)
 
@@ -761,8 +784,16 @@ PYTHON_DEMOS = [
 
 
 NOTEBOOK_DEMOS = [
-   NotebookDemo(name='object_detection_demo', device_keys=[], test_cases=[TestCase(options=
-       {'-m': ModelArg('face-detection-0200')}),
-])]
+   NotebookDemo(name='object_detection_demo', device_keys=[],
+   test_code = 'JUMP_FRAMES=200\nresult=get_results_for_model(os.path.basename(args.m)[:-4], args.i, 4, 4, 4)\nassert len(result[0]) > 2',
+   test_cases=[
+       TestCase(options={'-m': ModelArg('yolo-v3-tiny-tf', precision='FP16'),
+                         '-i': TestDataArg('Image_Retrieval/d0c460d0-4d75-4315-98a8-a0116d3dfb81.dav'),
+       }),
+       TestCase(options= {'-m': ModelArg('face-detection-0200', precision='FP16'),
+                          '-i': TestDataArg('Image_Retrieval/636e91cc-4829-40bd-a8bc-18505b943a9b.dav'),
+       }),
+  ]),
+]
 
 DEMOS = NATIVE_DEMOS + PYTHON_DEMOS + NOTEBOOK_DEMOS
