@@ -29,7 +29,7 @@ class TwoStagePipeline:
         self.encoder = AsyncPipeline(ie, encoder_model, en_plugin_config, en_device, en_num_requests)
         self.decoder = AsyncPipeline(ie, decoder_model, de_plugin_config, de_device, de_num_requests)
 
-        self.submitted_frames = deque([])
+        self.submitted_data = deque([])
 
     def is_ready(self):
         return self.encoder.is_ready()
@@ -44,19 +44,19 @@ class TwoStagePipeline:
         return self.encoder.has_completed_request()
 
     def submit_data(self, inputs, id, meta):
-        self.submitted_frames.append(id)
+        self.submitted_data.append(id)
         self.encoder.submit_data(inputs, id, meta)
 
     def get_result(self):
-        if not self.submitted_frames:
+        if not self.submitted_data:
             return None
 
-        frame_id = self.submitted_frames[0]
+        frame_id = self.submitted_data[0]
         encoder_result = self.encoder.get_result(frame_id)
         if not encoder_result:
             return None
 
-        self.submitted_frames.popleft()
+        self.submitted_data.popleft()
         data = self.encoder_model.prepare(encoder_result)
         self.decoder_result = [None for _ in data]
         self.submit_to_decoder(data)

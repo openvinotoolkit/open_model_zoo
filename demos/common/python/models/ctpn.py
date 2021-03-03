@@ -115,7 +115,8 @@ class CTPN(Model):
             second_scales = meta['scales'].pop()
             boxes[:, 0:8:2] /= second_scales[0]
             boxes[:, 1:8:2] /= second_scales[1]
-        return [Detection(box[0], box[1], box[2], box[5], box[8], 0) for box in boxes]
+        return [Detection(box[0], box[1], box[2], box[5], box[8], 0)
+                for box in boxes if box[0] != box[2] and box[1] != box[5]]
 
     def prepare(self, result):
         detections, frame_meta = result
