@@ -395,7 +395,8 @@ NATIVE_DEMOS = [
         [
             *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
             TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
-                              '-tr_pt_first': None}),
+                              '-tr_pt_first': None,
+                              '-tr_o_blb_nm': 'logit'}),
         ]
     )),
 ]
