@@ -11,8 +11,8 @@ For details see [repository](https://github.com/Linzaer/Ultra-Light-Fast-Generic
 | Metric                          | Value             |
 |---------------------------------|-------------------|
 | Type                            | Object detection  |
-| GFLOPs                          | TBD               |
-| MParams                         | TBD               |
+| GFLOPs                          | 0.1724            |
+| MParams                         | 0.2844            |
 | Source framework                | PyTorch\*         |
 
 ## Accuracy
