@@ -126,12 +126,9 @@ NATIVE_DEMOS = [
             *combine_cases(
                 TestCase(options={'-at': 'ae'}),
                 single_option_cases('-m',
-                    ModelArg('human-pose-estimation-0002'),
-                    ModelArg('human-pose-estimation-0003'),
-                    ModelArg('human-pose-estimation-0004'),
-                    # ModelArg('human-pose-estimation-0005'),
-                    # ModelArg('human-pose-estimation-0006'),
-                    # ModelArg('human-pose-estimation-0007')
+                    ModelArg('human-pose-estimation-0005'),
+                    ModelArg('human-pose-estimation-0006'),
+                    ModelArg('human-pose-estimation-0007')
                 )),
         ],
     )),
@@ -395,7 +392,12 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('text-detection')}),
         single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
-        single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+        [
+            *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+            TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
+                              '-tr_pt_first': None,
+                              '-tr_o_blb_nm': 'logits'}),
+        ]
     )),
 ]
 
@@ -511,9 +513,9 @@ PYTHON_DEMOS = [
             *combine_cases(
                 TestCase(options={'-at': 'ae'}),
                 single_option_cases('-m',
-                    ModelArg('human-pose-estimation-0002'),
-                    ModelArg('human-pose-estimation-0003'),
-                    ModelArg('human-pose-estimation-0004'))),
+                    ModelArg('human-pose-estimation-0005'),
+                    ModelArg('human-pose-estimation-0006'),
+                    ModelArg('human-pose-estimation-0007'))),
         ],
     )),
 
@@ -540,15 +542,11 @@ PYTHON_DEMOS = [
             '-d': 'CPU',  # GPU is not supported
             '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
         single_option_cases('-m',
-            ModelArg('instance-segmentation-security-0010'),
-            ModelArg('instance-segmentation-security-0050'),
-            ModelArg('instance-segmentation-security-0083'),
-            ModelArg('instance-segmentation-security-1025')),
-            #ModelArg('instance-segmentation-security-0002'),
-            #ModelArg('instance-segmentation-security-0091'),
-            #ModelArg('instance-segmentation-security-0228'),
-            #ModelArg('instance-segmentation-security-1039'),
-            #ModelArg('instance-segmentation-security-1040')),
+            ModelArg('instance-segmentation-security-0002'),
+            ModelArg('instance-segmentation-security-0091'),
+            ModelArg('instance-segmentation-security-0228'),
+            ModelArg('instance-segmentation-security-1039'),
+            ModelArg('instance-segmentation-security-1040')),
     )),
 
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
@@ -642,6 +640,8 @@ PYTHON_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2000'),
                         ModelArg('person-vehicle-bike-detection-2001'),
                         ModelArg('person-vehicle-bike-detection-2002'),
+                        ModelArg('person-vehicle-bike-detection-2003'),
+                        ModelArg('person-vehicle-bike-detection-2004'),
                         ModelArg('pelee-coco'),
                         ModelArg('product-detection-0001'),
                         ModelArg('rfcn-resnet101-coco-tf'),
@@ -725,9 +725,9 @@ PYTHON_DEMOS = [
                           '-i': DataPatternArg('text-detection')}),
         [
             TestCase(options={
-                '-m_m': ModelArg('text-spotting-0003-detector'),
-                '-m_te': ModelArg('text-spotting-0003-recognizer-encoder'),
-                '-m_td': ModelArg('text-spotting-0003-recognizer-decoder'),
+                '-m_m': ModelArg('text-spotting-0004-detector'),
+                '-m_te': ModelArg('text-spotting-0004-recognizer-encoder'),
+                '-m_td': ModelArg('text-spotting-0004-recognizer-decoder'),
                 '--no_track': None
             }),
         ]
