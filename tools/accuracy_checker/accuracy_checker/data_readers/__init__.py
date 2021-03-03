@@ -79,7 +79,7 @@ __all__ = [
     'MultiFramesInputIdentifier',
     'ImagePairIdentifier',
     'ListIdentifier',
-    'MultiInstanceIdentifier'
+    'MultiInstanceIdentifier',
     'create_reader',
     'REQUIRES_ANNOTATIONS',
 
