@@ -94,6 +94,8 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
 - `class_no_1`,...,`class_no_20` - probability distribution over the classes in logits format, apply [softmax function](https://en.wikipedia.org/wiki/Softmax_function) and multiply by obtained confidence value to get confidence of each class
 
+Mapping to class names provided by `<omz_dir>/data/dataset_classes/voc_20cl.txt` file.
+
 The anchor values are `1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52`.
 
 ### Converted model
@@ -108,6 +110,8 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply with corresponding anchors to get height and width values relative to the cell
 - `box_score` - confidence of detection box in [0,1] range
 - `class_no_1`,...,`class_no_20` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
+
+Mapping to class names provided by `<omz_dir>/data/dataset_classes/voc_20cl.txt` file.
 
 The anchor values are `1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52`.
 
