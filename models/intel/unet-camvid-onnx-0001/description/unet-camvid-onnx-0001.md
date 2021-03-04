@@ -7,18 +7,18 @@ This is a U-Net model that is designed to perform semantic segmentation. The mod
 The model input is a blob that consists of a single image of `1x3x368x480` in the BGR order. The pixel values are integers in the [0, 255] range.
 
 The model output for `unet-camvid-onnx-0001` is the per-pixel probabilities of each input pixel belonging to one of the 12 classes of the CamVid dataset:
--Sky
--Building
--Pole
--Road
--Pavement
--Tree
--SignSymbol
--Fence
--Vehicle
--Pedestrian
--Bike
--Unlabeled
+- Sky
+- Building
+- Pole
+- Road
+- Pavement
+- Tree
+- SignSymbol
+- Fence
+- Vehicle
+- Pedestrian
+- Bike
+- Unlabeled
 
 ## Specification
 
