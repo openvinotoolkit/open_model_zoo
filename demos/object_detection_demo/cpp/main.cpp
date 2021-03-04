@@ -12,6 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 */
 
 /**
@@ -37,7 +38,6 @@
 #include <gflags/gflags.h>
 
 #include <pipelines/async_pipeline.h>
-#include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 #include <models/detection_model_centernet.h>
 #include <models/detection_model_faceboxes.h>
@@ -223,7 +223,10 @@ cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& p
         throw std::invalid_argument("Renderer: metadata is null");
     }
 
-    auto outputImg = result.metaData->asRef<ImageMetaData>().img;
+    auto& imgMetaData = result.metaData->asRef<ImageMetaData>();
+
+    cv::Mat outputImg;
+    outputImg = result.metaData->asRef<ImageMetaData>().img;
 
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
@@ -311,28 +314,34 @@ int main(int argc, char *argv[]) {
         }
 
         InferenceEngine::Core core;
+
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
-            core);
+            core
+            );
         Presenter presenter(FLAGS_u);
 
         bool keepRunning = true;
         int64_t frameNum = -1;
         std::unique_ptr<ResultBase> result;
         uint32_t framesProcessed = 0;
-        cv::VideoWriter videoWriter;
 
+        cv::VideoWriter videoWriter;
+        cv::Size frameSize;
+        double fps = 30;
+
+
+        int skip=0;
+
+        PerformanceMetrics readerMetrics;
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame
                 auto startTime = std::chrono::steady_clock::now();
+
                 curr_frame = cap->read();
-                if (frameNum == -1) {
-                    if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                              cap->fps(), curr_frame.size())) {
-                        throw std::runtime_error("Can't open video writer");
-                    }
-                }
+                readerMetrics.update(startTime);
+
                 if (curr_frame.empty()) {
                     if (frameNum == -1) {
                         throw std::logic_error("Can't read an image from the input");
@@ -343,8 +352,19 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
+                frameSize = curr_frame.size();
+                fps = cap->fps();
+
                 frameNum = pipeline.submitData(ImageInputData(curr_frame),
-                    std::make_shared<ImageMetaData>(curr_frame, startTime));
+                                               std::make_shared<ImageMetaData>(curr_frame, startTime));
+            }
+
+            // Preparing video writer if needed
+            if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
+                if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                                                          fps, frameSize)) {
+                    throw std::runtime_error("Can't open video writer");
+                }
             }
 
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
@@ -399,6 +419,13 @@ int main(int argc, char *argv[]) {
         //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << slog::endl << "Metric reports:" << slog::endl;
         metrics.printTotal();
+        slog::info << slog::endl << "Latencies:\n";
+        slog::info << "  * Decoding only: \t" << std::fixed << std::setprecision(2) <<
+            readerMetrics.getTotal().latency << " ms\n";
+        slog::info << "  * Preprocessing only:\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Inference only: \t" << std::fixed << std::setprecision(2) <<
+            pipeline.getInferenceMetircs().getTotal().latency << " ms" << slog::endl;
 
         slog::info << presenter.reportMeans() << slog::endl;
     }
