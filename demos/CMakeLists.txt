@@ -64,10 +64,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_subdirectory(thirdparty/gflags)
-add_subdirectory(common/cpp)
-add_subdirectory(multi_channel_common/cpp)
-
 function(add_samples_to_build)
     # check each passed sample subdirectory
     foreach(dir ${ARGN})
@@ -94,32 +90,16 @@ endfunction()
 
 include(CMakeParseArguments)
 
-#
-# ie_add_sample(NAME <target name>
-#               SOURCES <source files>
-#               [HEADERS <header files>]
-#               [INCLUDE_DIRECTORIES <include dir>]
-#               [DEPENDENCIES <dependencies>]
-#               [OPENCV_DENENDENCIES <opencv modules>]
-#               [EXCLUDE_CPPLINT]
-#
-macro(ie_add_sample)
-    set(options EXCLUDE_CPPLINT)
+# add_demo(NAME <target name>
+#     SOURCES <source files>
+#     [HEADERS <header files>]
+#     [INCLUDE_DIRECTORIES <include dir>]
+#     [DEPENDENCIES <dependencies>])
+macro(add_demo)
     set(oneValueArgs NAME)
     set(multiValueArgs SOURCES HEADERS DEPENDENCIES OPENCV_DEPENDENCIES INCLUDE_DIRECTORIES)
     cmake_parse_arguments(IE_SAMPLE "${options}" "${oneValueArgs}"
                           "${multiValueArgs}" ${ARGN})
-
-    # Find OpenCV components if exist
-    if(IE_SAMPLE_OPENCV_DEPENDENCIES)
-        find_package(OpenCV COMPONENTS ${IE_SAMPLE_OPENCV_DEPENDENCIES} QUIET)
-        if(NOT OpenCV_FOUND)
-            message(WARNING "OPENCV is disabled or not found, " ${IE_SAMPLE_NAME} " skipped")
-            return()
-        else()
-            add_definitions(-DUSE_OPENCV)
-        endif()
-    endif()
 
     # Create named folders for the sources within the .vcproj
     # Empty name lists them directly under the .vcproj
@@ -140,15 +120,20 @@ macro(ie_add_sample)
     endif()
 
     target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
-                                                    ${IE_SAMPLE_DEPENDENCIES} utils gflags)
+                                                    ${IE_SAMPLE_DEPENDENCIES} ngraph::ngraph utils gflags)
 
     if(UNIX)
         target_link_libraries(${IE_SAMPLE_NAME} PRIVATE pthread)
     endif()
 endmacro()
 
+find_package(OpenCV REQUIRED COMPONENTS core highgui videoio imgproc imgcodecs gapi)
 find_package(InferenceEngine 2.0 REQUIRED)
 find_package(ngraph REQUIRED)
+
+add_subdirectory(thirdparty/gflags)
+add_subdirectory(common/cpp)
+add_subdirectory(multi_channel_common/cpp)
 
 # collect all samples subdirectories
 file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
