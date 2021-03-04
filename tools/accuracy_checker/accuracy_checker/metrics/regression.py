@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,8 +52,10 @@ from ..utils import string_to_tuple, finalize_metric_result, contains_all
 
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
-    annotation_types = (RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation)
-    prediction_types = (RegressionPrediction, DepthEstimationPrediction)
+    annotation_types = (
+        RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation, ImageProcessingAnnotation
+    )
+    prediction_types = (RegressionPrediction, DepthEstimationPrediction, ImageProcessingPrediction)
 
     def __init__(self, value_differ, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -106,8 +108,14 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         if isinstance(prediction.value, dict):
             if len(prediction.value) != 1:
                 raise ConfigError('annotation for all predictions should be provided')
-            return self.value_differ(annotation.value, next(iter(prediction.value.values())))
-        return self.value_differ(annotation.value, prediction.value)
+            diff = self.value_differ(annotation.value, next(iter(prediction.value.values())))
+            if not np.isscalar(diff) and np.size(diff) > 1:
+                diff = np.mean(diff)
+            return diff
+        diff = self.value_differ(annotation.value, prediction.value)
+        if not np.isscalar(diff) and np.size(diff) > 1:
+            diff = np.mean(diff)
+        return diff
 
     def _calculate_diff_depth_estimation_rep(self, annotation, prediction):
         diff = annotation.mask * self.value_differ(annotation.depth_map, prediction.depth_map)
@@ -326,6 +334,21 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
         return result
 
 
+def relative_err(target, pred):
+    if len(target.shape) > 2:
+        target = target.flatten()
+    if len(pred.shape) > 2:
+        pred = pred.flatten()
+    return np.linalg.norm(target - pred, 2) / (np.linalg.norm(target, 2) + np.finfo(float).eps)
+
+
+class RelativeL2Error(BaseRegressionMetric):
+    __provider__ = 'relative_l2_error'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(relative_err, *args, **kwargs)
+
+
 class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
     __provider__ = 'per_point_normed_error'
 
@@ -541,7 +564,8 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             'color_order': StringField(
                 optional=True, choices=['BGR', 'RGB'], default='RGB',
                 description="The field specified which color order BGR or RGB will be used during metric calculation."
-            )
+            ),
+            'normalized_images': BoolField(optional=True, default=False, description='images in [0, 1] range or not')
         })
 
         return parameters
@@ -560,6 +584,8 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
         }
         self.meta['postfix'] = 'Db'
         self.channel_order = channel_order[color_order]
+        self.normalized_images = self.get_value_from_config('normalized_images')
+        self.color_scale = 255 if not self.normalized_images else 1
 
     def _psnr_differ(self, annotation_image, prediction_image):
         prediction = np.asarray(prediction_image).astype(np.float)
@@ -574,7 +600,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             self.scale_border:height - self.scale_border,
             self.scale_border:width - self.scale_border
         ]
-        image_difference = (prediction - ground_truth) / 255
+        image_difference = (prediction - ground_truth) / self.color_scale
         if len(ground_truth.shape) == 3 and ground_truth.shape[2] == 3:
             r_channel_diff = image_difference[:, :, self.channel_order[0]]
             g_channel_diff = image_difference[:, :, self.channel_order[1]]
@@ -601,8 +627,10 @@ def angle_differ(gt_gaze_vector, predicted_gaze_vector):
 def log10_differ(annotation_val, prediction_val):
     return np.abs(np.log10(annotation_val) - np.log10(prediction_val))
 
+
 def mape_differ(annotation_val, prediction_val):
     return np.abs(annotation_val - prediction_val) / annotation_val
+
 
 class AngleError(BaseRegressionMetric):
     __provider__ = 'angle_error'
@@ -668,7 +696,7 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
         self.threshold = self.get_value_from_config('threshold')
         self.score_bias = self.get_value_from_config('score_bias')
         self.meta.update({
-            'names': ['head', 'shoulder', 'elbow', 'wrist', 'hip', 'knee', 'ankle', 'mean'],
+            'names': ['mean', 'head', 'shoulder', 'elbow', 'wrist', 'hip', 'knee', 'ankle', 'mean'],
             'calculate_mean': False
         })
         if not contains_all(
@@ -684,7 +712,7 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
         uv_err = np.linalg.norm(uv_error, axis=1)
         headbox = np.array(annotation.metadata['headbox'])
         headsizes = headbox[1] - headbox[0]
-        headsizes = np.linalg.norm(headsizes)
+        headsizes = np.linalg.norm(headsizes, axis=0)
         headsizes *= self.score_bias
         scale = headsizes
         scaled_uv_err = np.divide(uv_err, scale)
@@ -692,13 +720,19 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
         self.jnt_count += jnt_visible
         less_than_threshold = np.multiply((scaled_uv_err < self.threshold), jnt_visible)
         self.pck += less_than_threshold
-        return np.divide(
-            less_than_threshold, jnt_visible, out=np.zeros_like(less_than_threshold), where=jnt_visible != 0
-        )
+        return np.mean(np.divide(
+            less_than_threshold.astype(float),
+            jnt_visible.astype(float),
+            out=np.zeros_like(less_than_threshold, dtype=float),
+            where=jnt_visible != 0
+        ))
 
     def evaluate(self, annotations, predictions):
         full_score = np.divide(self.pck, self.jnt_count, out=np.zeros_like(self.jnt_count), where=self.jnt_count != 0)
+        full_score = np.ma.array(full_score, mask=False)
+        full_score[6:8].mask = True
         return [
+            np.mean(full_score),
             full_score[self.joints['head']],
             0.5 * (full_score[self.joints['lsho']] + full_score[self.joints['rsho']]),
             0.5 * (full_score[self.joints['lelb']] + full_score[self.joints['relb']]),
@@ -706,8 +740,7 @@ class PercentageCorrectKeypoints(PerImageEvaluationMetric):
             0.5 * (full_score[self.joints['lhip']] + full_score[self.joints['rhip']]),
             0.5 * (full_score[self.joints['lkne']] + full_score[self.joints['rkne']]),
             0.5 * (full_score[self.joints['lank']] + full_score[self.joints['rank']]),
-            np.mean(full_score),
-            ]
+        ]
 
     def reset(self):
         self.jnt_count = np.zeros(self.num_joints)

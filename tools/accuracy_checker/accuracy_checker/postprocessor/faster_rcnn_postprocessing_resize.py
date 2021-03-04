@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -85,7 +85,7 @@ class FRCNNPostprocessingBboxResize(Postprocessor):
         return coeff_x, coeff_y
 
     def process_image(self, annotations, predictions):
-        raise RuntimeError("Since `process_image_with_metadata` is overriden, this method MUST NOT be called")
+        raise RuntimeError("Since `process_image_with_metadata` is overridden, this method MUST NOT be called")
 
     def process_image_with_metadata(self, annotations, predictions, image_metadata=None):
         assert image_metadata and 'geometric_operations' in image_metadata, (

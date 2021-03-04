@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Shufflenet V2 x1.0 is image classification model pretrained on ImageNet dataset. This is PyTorch implementation based on architecture described in paper ["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"](https://arxiv.org/pdf/1807.11164.pdf) in TorchVision package (see [here](https://github.com/pytorch/vision)).
+Shufflenet V2 x1.0 is image classification model pretrained on ImageNet dataset. This is PyTorch implementation based on architecture described in paper ["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"](https://arxiv.org/abs/1807.11164) in TorchVision package (see [here](https://github.com/pytorch/vision)).
 
 The model input is a blob that consists of a single image of "1x3x224x224" in RGB order.
 

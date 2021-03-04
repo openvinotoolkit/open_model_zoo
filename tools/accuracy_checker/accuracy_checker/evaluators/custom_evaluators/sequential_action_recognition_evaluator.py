@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -261,7 +261,7 @@ class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.network_info = network_info
 
-    def predict(self, idenitifiers, input_data):
+    def predict(self, identifiers, input_data):
         raise NotImplementedError
 
     def release(self):

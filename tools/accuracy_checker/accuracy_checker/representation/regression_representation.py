@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -111,15 +111,27 @@ class FacialLandmarks3DPrediction(FacialLandmarks3DRepresentation):
 
 
 class FeaturesRegressionAnnotation(BaseRepresentation):
-    def __init__(self, identifier, value_file, dict_features=False):
+    def __init__(self, identifier, value_file, dict_features=False, is_bin=False, bin_dtype='float32'):
         super().__init__(identifier)
         self.value_file = value_file
-        self._reader_config = 'numpy_txt_reader' if not dict_features else 'numpy_dict_reader'
+        if not dict_features:
+            self._reader_config = {'type': 'numpy_txt_reader'} if not is_bin else {
+                "type": 'numpy_bin_reader', "dtype": bin_dtype
+            }
+        else:
+            self._reader_config = {'type': 'numpy_dict_reader'}
+        self._value = None
 
     @property
     def value(self):
-        data_source = self.metadata.get('additional_data_source')
-        if data_source is None:
-            data_source = self.metadata['data_source']
-        reader = BaseReader.provide(self._reader_config, data_source)
-        return reader.read(self.value_file)
+        if self._value is None:
+            data_source = self.metadata.get('additional_data_source')
+            if data_source is None:
+                data_source = self.metadata['data_source']
+            reader = BaseReader.provide(self._reader_config['type'], data_source, self._reader_config)
+            return reader.read(self.value_file)
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value

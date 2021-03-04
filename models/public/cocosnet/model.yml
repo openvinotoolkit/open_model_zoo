@@ -15,7 +15,7 @@
 description: >-
   Cross-domain correspondence network is a exemplar-based image translation model,
   consisting of correspondence and translation parts. Model was pre-trained on ADE20k
-  dataset. For details see paper <https://arxiv.org/pdf/2004.05571> and repository
+  dataset. For details see paper <https://arxiv.org/abs/2004.05571> and repository
   <https://github.com/microsoft/CoCosNet>.
 task_type: image_translation
 files:
@@ -97,6 +97,16 @@ postprocessing:
     file: model_files/models/networks/correspondence.py
     pattern: '/ self.opt.down\)'
     replacement: '// self.opt.down)'
+  # MO can only convert Squeeze with fixed dimensions
+  - $type: regex_replace
+    file: model_files/models/networks/correspondence.py
+    pattern: '\.squeeze\(\)'
+    replacement: '.squeeze(dim=0)'
+  # fix deprecated function usage
+  - $type: regex_replace
+    file: model_files/models/networks/generator.py
+    pattern: '\bF\.tanh\b'
+    replacement: 'torch.tanh'
   - $type: regex_replace
     file: model_files/util/util.py
     pattern: 'colormap = scio.loadmat\(.\./util/color150.mat.\)\[.colors.\]'
@@ -113,7 +123,7 @@ conversion_to_onnx_args:
   - --input-names=input_seg_map,ref_image,ref_seg_map
   - --output-names=exemplar_based_output
 model_optimizer_args:
-  - --input_model=$dl_dir/cocosnet.onnx
+  - --input_model=$conv_dir/cocosnet.onnx
   - --input=input_seg_map,ref_image,ref_seg_map
   - --output=exemplar_based_output
   - --mean_values=ref_image[127.5,127.5,127.5]

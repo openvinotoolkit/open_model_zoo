@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,14 +43,15 @@ def no_available_myriad():
     try:
         from openvino.inference_engine import IECore
         return 'MYRIAD' not in IECore().available_devices
-    except:
+    except Exception:
         return True
+
 
 def has_layers():
     try:
         from openvino.inference_engine import IENetwork
         return hasattr(IENetwork, 'layers')
-    except:
+    except Exception:
         return False
 
 
@@ -182,6 +183,7 @@ class TestDLSDKLauncherInfer:
 
 @pytest.mark.skipif(ng is None and not has_layers(), reason='no functionality to set affinity')
 class TestDLSDKLauncherAffinity:
+    @pytest.mark.skip(reason='runtime issue with affinity setting')
     @pytest.mark.usefixtures('mock_affinity_map_exists')
     def test_dlsdk_launcher_valid_affinity_map(self, mocker, models_dir):
         affinity_map = {'conv1': 'GPU'}
@@ -218,18 +220,18 @@ class TestDLSDKLauncherAffinity:
         )
 
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,CPU', 'affinity_map' : './affinity_map.yml'})
+            get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,CPU', 'affinity_map': './affinity_map.yml'})
 
     @pytest.mark.usefixtures('mock_file_exists')
     def test_dlsdk_launcher_affinity_map_invalid_layer(self, mocker, models_dir):
-        affinity_map = {'none-existing-layer' : 'CPU'}
+        affinity_map = {'none-existing-layer': 'CPU'}
 
         mocker.patch(
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,CPU', 'affinity_map' : './affinity_map.yml'})
+            get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,CPU', 'affinity_map': './affinity_map.yml'})
 
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inference_engine', 'mock_inputs')

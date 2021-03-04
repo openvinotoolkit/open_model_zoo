@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,9 +36,26 @@ class BgrToRgb(Preprocessor):
 class BgrToGray(Preprocessor):
     __provider__ = 'bgr_to_gray'
 
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            "cast_to_float": BoolField(
+                default=True,
+                description="Parameter specifies if the result image should be casted to np.float32"
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.cast_to_float = self.get_value_from_config('cast_to_float')
+
     def process(self, image, annotation_meta=None):
         def process_data(data):
-            return np.expand_dims(cv2.cvtColor(data, cv2.COLOR_BGR2GRAY).astype(np.float32), -1)
+            gray_image = np.expand_dims(cv2.cvtColor(data, cv2.COLOR_BGR2GRAY), -1)
+            if self.cast_to_float:
+                gray_image = gray_image.astype(np.float32)
+            return gray_image
 
         image.data = process_data(image.data) if not isinstance(image.data, list) else [
             process_data(fragment) for fragment in image.data
@@ -61,9 +78,26 @@ class RgbToBgr(Preprocessor):
 class RgbToGray(Preprocessor):
     __provider__ = 'rgb_to_gray'
 
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            "cast_to_float": BoolField(
+                default=True,
+                description="Parameter specifies if the result image should be casted to np.float32"
+            )
+        })
+        return parameters
+
+    def configure(self):
+        self.cast_to_float = self.get_value_from_config('cast_to_float')
+
     def process(self, image, annotation_meta=None):
         def process_data(data):
-            return np.expand_dims(cv2.cvtColor(data, cv2.COLOR_RGB2GRAY).astype(np.float32), -1)
+            gray_image = np.expand_dims(cv2.cvtColor(data, cv2.COLOR_RGB2GRAY), -1)
+            if self.cast_to_float:
+                gray_image = gray_image.astype(np.float32)
+            return gray_image
 
         image.data = process_data(image.data) if not isinstance(image.data, list) else [
             process_data(fragment) for fragment in image.data
@@ -108,7 +142,8 @@ class TfConvertImageDType(Preprocessor):
                 '*tf_convert_image_dtype* operation requires TensorFlow. '
                 'Please install it before usage. {}'.format(import_error.msg)
             )
-        tf.enable_eager_execution()
+        if tf.__version__ < '2.0.0':
+            tf.enable_eager_execution()
         self.converter = tf.image.convert_image_dtype
         self.dtype = tf.float32
 

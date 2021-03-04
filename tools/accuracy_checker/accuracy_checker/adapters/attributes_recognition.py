@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -46,8 +46,11 @@ class HeadPoseEstimatorAdapter(Adapter):
         })
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         """
@@ -97,8 +100,11 @@ class VehicleAttributesRecognitionAdapter(Adapter):
         })
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         """
@@ -136,8 +142,11 @@ class AgeGenderAdapter(Adapter):
         self.age_out = self.get_value_from_config('age_out')
         self.gender_out = self.get_value_from_config('gender_out')
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
 
     @staticmethod
     def get_age_scores(age):
@@ -170,6 +179,59 @@ class AgeGenderAdapter(Adapter):
         return result
 
 
+class AgeRecognitionAdapter(Adapter):
+    __provider__ = 'age_recognition'
+    prediction_types = (ClassificationPrediction, RegressionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'age_out': StringField(description="Output layer name for age recognition.", optional=True),
+        })
+        return parameters
+
+    def configure(self):
+        self.age_out = self.get_value_from_config('age_out')
+
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
+
+    @staticmethod
+    def get_age_scores(age):
+        age_scores = np.zeros(4)
+        if age < 19:
+            age_scores[0] = 1
+            return age_scores
+        if age < 36:
+            age_scores[1] = 1
+            return age_scores
+        if age < 66:
+            age_scores[2] = 1
+            return age_scores
+        age_scores[3] = 1
+        return age_scores
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        result = []
+        raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
+        self.age_out = self.age_out or self.output_blob
+        prediction = raw_output[self.age_out]
+        for identifier, output in zip(identifiers, prediction):
+            age = np.argmax(output)
+            age_class_rep = ClassificationPrediction(identifier, self.get_age_scores(age))
+            age_error_rep = RegressionPrediction(identifier, age)
+            result.append(ContainerPrediction({
+                'age_classification': age_class_rep, 'age_error': age_error_rep
+            }))
+
+        return result
+
+
 class LandmarksRegressionAdapter(Adapter):
     __provider__ = 'landmarks_regression'
     prediction_types = (FacialLandmarksPrediction, )
@@ -177,6 +239,7 @@ class LandmarksRegressionAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         res = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         for identifier, values in zip(identifiers, raw_output[self.output_blob]):
             x_values, y_values = values[::2], values[1::2]
             res.append(FacialLandmarksPrediction(identifier, x_values.reshape(-1), y_values.reshape(-1)))
@@ -198,8 +261,11 @@ class PersonAttributesAdapter(Adapter):
         })
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         self.attributes_recognition_out = self.launcher_config.get('attributes_recognition_out', self.output_blob)
@@ -207,6 +273,7 @@ class PersonAttributesAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         self.attributes_recognition_out = self.attributes_recognition_out or self.output_blob
         for identifier, multi_label in zip(identifiers, raw_output[self.attributes_recognition_out]):
             multi_label[multi_label > 0.5] = 1.
@@ -224,6 +291,7 @@ class GazeEstimationAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         for identifier, output in zip(identifiers, raw_output[self.output_blob]):
             result.append(GazeVectorPrediction(identifier, output))
 
@@ -259,6 +327,7 @@ class PRNetAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         for identifier, pos, meta in zip(identifiers, raw_output[self.output_blob], frame_meta):
             input_shape = next(iter(meta['input_shape'].values()))
             if input_shape[1] == 3:

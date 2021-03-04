@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,6 +18,11 @@ import numpy as np
 
 from ..config import BoolField, BaseField, NumberField, ConfigError, StringField
 from ..preprocessor import Preprocessor
+from ..utils import UnsupportedPackage
+try:
+    import scipy.signal as dsp
+except ImportError as import_error:
+    mask_util = UnsupportedPackage('scipy', import_error.msg)
 
 
 class ResampleAudio(Preprocessor):
@@ -28,7 +33,7 @@ class ResampleAudio(Preprocessor):
         parameters = super().parameters()
         parameters.update({
             'sample_rate': NumberField(value_type=int, min_value=1,
-                                       description='Set new audio sample rate.'),
+                                       description="Set new audio sample rate."),
         })
         return parameters
 
@@ -64,17 +69,16 @@ class ClipAudio(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'duration': BaseField(
-                description="Length of audio clip in seconds or samples (with 'samples' suffix)."
-            ),
+            'duration': BaseField(description="Length of audio clip in seconds or samples (with 'samples' suffix)."),
             'max_clips': NumberField(
                 value_type=int, min_value=1, optional=True,
                 description="Maximum number of clips per audiofile."
             ),
-            'overlap': BaseField(
-                optional=True,
-                description="Overlapping part for each clip."
-            ),
+            'pad_to': NumberField(optional=True, default=0, description="Number of points each clip padded to."),
+            'splice_frames': NumberField(optional=True, default=1, description="Number of frames to splice."),
+            'pad_center': BoolField(optional=True, default=False, description="Place clip to center of padded frame"),
+            'multi_infer': BoolField(optional=True, default=True, description="Metadata multi infer value"),
+            'overlap': BaseField(optional=True, description="Overlapping part for each clip."),
         })
         return parameters
 
@@ -86,6 +90,11 @@ class ClipAudio(Preprocessor):
 
         overlap = self.get_value_from_config('overlap')
         self._parse_overlap(overlap)
+
+        self.pad_to = int(self.get_value_from_config('pad_to'))
+        self.pad_center = self.get_value_from_config('pad_center')
+        self.multi_infer = self.get_value_from_config('multi_infer')
+        self.splice_frames = self.get_value_from_config('splice_frames')
 
     def process(self, image, annotation_meta=None):
         data = image.data
@@ -105,16 +114,35 @@ class ClipAudio(Preprocessor):
         if hop > clip_duration:
             raise ConfigError("Preprocessor {}: clip overlapping exceeds clip length.".format(self.__provider__))
 
+        audio_duration = (audio_duration + hop - 1) // hop
+        audio_duration = (audio_duration + self.splice_frames - 1) // self.splice_frames
+        audio_duration *= self.splice_frames * hop
+        audio_duration = int(audio_duration + clip_duration - hop)
+
+        if audio_duration > data.shape[1]:
+            data = np.concatenate((data, np.zeros((data.shape[0], audio_duration - data.shape[1]))), axis=1)
+
         for clip_no, clip_start in enumerate(range(0, audio_duration, hop)):
             if clip_start + clip_duration > audio_duration or clip_no >= self.max_clips:
                 break
             clip = data[:, clip_start: clip_start + clip_duration]
             clipped_data.append(clip)
 
+        if self.pad_to is not None:
+            if self.pad_center:
+                clipped_data = self._pad_center(np.asarray(clipped_data), self.pad_to)
         image.data = clipped_data
-        image.metadata['multi_infer'] = True
+        image.metadata['multi_infer'] = self.multi_infer
 
         return image
+
+    @staticmethod
+    def _pad_center(data, size, axis=-1):
+        n = data.shape[axis]
+        lpad = int((size - n) // 2)
+        lengths = [(0, 0)] * data.ndim
+        lengths[axis] = (lpad, int(size - n - lpad))
+        return np.pad(data, lengths)
 
     def _parse_overlap(self, overlap):
         self.is_overlap_in_samples = False
@@ -220,7 +248,7 @@ class NormalizeAudio(Preprocessor):
     def process(self, image, annotation_meta=None):
         sound = image.data
         if self.int16mode:
-            sound = sound / np.float32(0x7fff)
+            sound = sound / np.float32(0x8000)
         else:
             sound = (sound - np.mean(sound)) / (np.std(sound) + 1e-15)
 
@@ -298,17 +326,21 @@ class TriangleFiltering(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "base": NumberField(
-                default=16000, description='Spectrogram length expected by filter bank', value_type=int
+            'base': NumberField(
+                default=16000, description="Spectrogram length expected by filter bank", value_type=int
             ),
-            "sample_rate": NumberField(
-                default=16000, description='sample rate value expected by model', value_type=int
+            'sample_rate': NumberField(
+                default=16000, description="Sample rate value expected by model", value_type=int
             ),
-            "filterbank_channel_count": NumberField(
-                default=40, description='number of channels in filter bank', value_type=int
+            'filterbank_channel_count': NumberField(
+                default=40, description="Number of channels in filter bank", value_type=int
             ),
-            "lower_frequency_limit": NumberField(default=20, description='filter passband lower boundary'),
-            "upper_frequency_limit": NumberField(default=4000, description='filter passband upper boundary'),
+            'lower_frequency_limit': NumberField(default=20, description="Filter passband lower boundary"),
+            'upper_frequency_limit': NumberField(default=4000, description="Filter passband upper boundary"),
+            'filter_amplitudes': BoolField(
+                optional=True, default=False,
+                description="Filter amplitude values (sqrt(power)) instead of power (Re^2+Im^2)"
+            ),
         })
         return parameters
 
@@ -318,6 +350,7 @@ class TriangleFiltering(Preprocessor):
         self.filterbank_channel_count = self.get_value_from_config('filterbank_channel_count')
         self.lower_frequency_limit = self.get_value_from_config('lower_frequency_limit')
         self.upper_frequency_limit = self.get_value_from_config('upper_frequency_limit')
+        self.filter_amplitudes = self.get_value_from_config('filter_amplitudes')
         self.initialize()
 
     def process(self, image, annotation_meta=None):
@@ -383,7 +416,10 @@ class TriangleFiltering(Preprocessor):
     def compute(self, mfcc_input):
         output_channels = np.zeros(self.filterbank_channel_count)
         for i in range(self.start_index, (self.end_index + 1)):
-            spec_val = np.sqrt(mfcc_input[i])
+            if not self.filter_amplitudes:
+                spec_val = mfcc_input[i]
+            else:
+                spec_val = np.sqrt(mfcc_input[i])
             weighted = spec_val * self.weights[i]
             channel = self.band_mapper[i]
             if channel >= 0:
@@ -394,6 +430,7 @@ class TriangleFiltering(Preprocessor):
 
         return output_channels
 
+
 class DCT(Preprocessor):
     __provider__ = 'audio_dct'
 
@@ -401,10 +438,10 @@ class DCT(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "filterbank_channel_count": NumberField(
-                default=40, description='number of channels in filter bank', value_type=int
+            'filterbank_channel_count': NumberField(
+                default=40, description="Number of channels in filter bank", value_type=int
             ),
-            "numceps": NumberField(default=26, description='Number of cepstral coefficients', value_type=int),
+            'numceps': NumberField(default=26, description="Number of cepstral coefficients", value_type=int),
         })
         return parameters
 
@@ -459,8 +496,8 @@ class ClipCepstrum(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "context": NumberField(default=9, description='number of samples in context window', value_type=int),
-            "numceps": NumberField(default=26, description='Number of input coefficients', value_type=int),
+            'context': NumberField(default=9, description="Number of samples in context window", value_type=int),
+            'numceps': NumberField(default=26, description="Number of input coefficients", value_type=int),
         })
         return parameters
 
@@ -494,7 +531,7 @@ class PackCepstrum(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            "step": NumberField(default=16, description='number of simultaneously processed contexts', value_type=int),
+            'step': NumberField(default=16, description="Number of simultaneously processed contexts", value_type=int),
         })
         return parameters
 
@@ -510,17 +547,44 @@ class PackCepstrum(Preprocessor):
             features = np.concatenate((features, empty_context))
             steps, context, numceps = features.shape # pylint:disable=E0633
 
-        features = np.expand_dims(features, 0)
-
         packed = []
         for i in range(0, steps, self.step):
-            packed.append(features[:, i:i+self.step, ...])
+            packed.append(features[i:i+self.step, ...])
 
         image.data = packed
         image.metadata['multi_infer'] = True
 
         return image
 
+class AddBatch(Preprocessor):
+    __provider__ = 'add_batch'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'axis': NumberField(default=0, description="Add batch dimension", value_type=int),
+        })
+        return parameters
+
+    def configure(self):
+        self.axis = self.get_value_from_config('axis')
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+
+        data = np.expand_dims(data, 0)
+        if self.axis != 0:
+            if self.axis > len(data.shape):
+                raise RuntimeError(
+                    'Operation "{}" failed: Invalid axis {} for shape {}.'.format(self.__provider__, self.axis,
+                                                                                  data.shape)
+                )
+            order = list(range(1, self.axis + 1)) + [0] + list(range(self.axis + 1, len(data.shape)))
+            data = np.transpose(data, order)
+        image.data = data
+
+        return image
 
 class TrimmingAudio(Preprocessor):
     __provider__ = 'trim'
@@ -629,13 +693,24 @@ class AudioToMelSpectrogram(Preprocessor):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'window_size': NumberField(optional=True, value_type=float, default=0.02),
-            'window_stride': NumberField(optional=True, value_type=float, default=0.01),
+            'window_size': NumberField(optional=True, value_type=float, default=0.02,
+                                       description="Size of frame in time-domain, seconds"),
+            'window_stride': NumberField(optional=True, value_type=float, default=0.01,
+                                         description="Intersection of frames in time-domain, seconds"),
             'window': StringField(
-                choices=windows.keys(), optional=True, default='hann'
+                choices=windows.keys(), optional=True, default='hann', description="Weighting window type"
             ),
-            'n_fft': NumberField(optional=True, value_type=int)
-
+            'n_fft': NumberField(optional=True, value_type=int, description="FFT base"),
+            'n_filt': NumberField(optional=True, value_type=int, default=80, description="Number of MEL filters"),
+            'splicing': NumberField(optional=True, value_type=int, default=1,
+                                    description="Number of sequentially concastenated MEL spectrums"),
+            'sample_rate': NumberField(optional=True, value_type=float, description="Audio samplimg frequency, Hz"),
+            'pad_to': NumberField(optional=True, value_type=int, default=0, description="Desired length of features"),
+            'preemph': NumberField(optional=True, value_type=float, default=0.97, description="Preemph factor"),
+            'log': BoolField(optional=True, default=True, description="Enables log() of MEL features values"),
+            'use_deterministic_dithering': BoolField(optional=True, default=True,
+                                                     description="Applies determined dithering to signal spectrum"),
+            'dither': NumberField(optional=True, value_type=float, default=0.00001, description="Dithering value"),
         })
         return params
 
@@ -644,30 +719,38 @@ class AudioToMelSpectrogram(Preprocessor):
         self.window_stride = self.get_value_from_config('window_stride')
         self.n_fft = self.get_value_from_config('n_fft')
         self.window_fn = windows.get(self.get_value_from_config('window'))
+        self.preemph = self.get_value_from_config('preemph')
+        self.nfilt = self.get_value_from_config('n_filt')
+        self.sample_rate = self.get_value_from_config('sample_rate')
+        self.log = self.get_value_from_config('log')
+        self.pad_to = self.get_value_from_config('pad_to')
+        self.frame_splicing = self.get_value_from_config('splicing')
+        self.use_deterministic_dithering = self.get_value_from_config('use_deterministic_dithering')
+        self.dither = self.get_value_from_config('dither')
+
         self.normalize = 'per_feature'
-        self.preemph = 0.97
-        self.nfilt = 64
         self.lowfreq = 0
         self.highfreq = None
-        self.pad_to = 16
         self.max_duration = 16.7
-        self.frame_splicing = 1
         self.pad_value = 0
         self.mag_power = 2.0
+        self.use_deterministic_dithering = True
         self.dither = 1e-05
-        self.log = True
-        self.log_zero_guard_type = "add"
+        self.log_zero_guard_type = 'add'
         self.log_zero_guard_value = 2 ** -24
 
     def process(self, image, annotation_meta=None):
-        sample_rate = image.metadata.get('sample_rate')
-        if sample_rate is None:
-            raise RuntimeError(
-                'Operation "{}" failed: required "sample rate" in metadata.'.format(self.__provider__)
-            )
+        if self.sample_rate is None:
+            sample_rate = image.metadata.get('sample_rate')
+            if sample_rate is None:
+                raise RuntimeError(
+                    'Operation "{}" failed: required "sample rate" in metadata.'.format(self.__provider__)
+                )
+        else:
+            sample_rate = self.sample_rate
         self.window_length = int(self.window_size * sample_rate)
         self.hop_length = int(self.window_stride * sample_rate)
-        self.n_fft = self.n_fft or 2 ** np.ceil(np.log2(self.window_length))
+        self.n_fft = int(self.n_fft or 2 ** np.ceil(np.log2(self.window_length)))
         self.window = self.window_fn(self.window_length) if self.window_fn is not None else None
         highfreq = self.highfreq or (sample_rate / 2)
         filterbanks = np.expand_dims(self.mel(
@@ -684,20 +767,21 @@ class AudioToMelSpectrogram(Preprocessor):
         seq_len = int(np.ceil(seq_len // self.hop_length))
 
         # dither
-        if self.dither > 0:
+        if self.dither > 0 and not self.use_deterministic_dithering:
             x = x + self.dither * np.random.randn(*x.shape)
 
         # do preemphasis
         if self.preemph is not None:
             x = np.concatenate((np.expand_dims(x[:, 0], 1), x[:, 1:] - self.preemph * x[:, :-1]), axis=1, )
-        x = self.stft(
-            x.squeeze(), n_fft=self.n_fft, hop_length=self.hop_length,
-            window=self.window, center=True, dtype=np.float32
-        )
+
+        # do stft with weighting window
+        _, _, x = dsp.stft(x.squeeze(), fs=sample_rate, window=self.window, nperseg=self.window_length,
+                           noverlap=self.hop_length, nfft=self.n_fft)
+        x *= sum(self.window)
 
         # get power spectrum
         if self.mag_power != 1.0:
-            x = x**self.mag_power
+            x = np.abs(x)**self.mag_power
 
         # dot with filterbank energies
         x = np.matmul(filterbanks, x)
@@ -712,20 +796,26 @@ class AudioToMelSpectrogram(Preprocessor):
 
         # normalize if required
         if self.normalize:
+            seq_len = x.shape[-1]
             x = self.normalize_batch(x, seq_len, normalize_type=self.normalize)
 
         # mask to zero any values beyond seq_len in batch, pad to multiple of
         # `pad_to` (for efficiency)
-        max_len = x.shape[-1]
-        mask = np.arange(max_len)
-        mask = mask >= seq_len
-        x[:, :, mask] = self.pad_value
-        del mask
-        pad_to = self.pad_to
-        if pad_to > 0:
-            pad_amt = x.shape[-1] % pad_to
-            if pad_amt != 0:
-                x = np.pad(x, ((0, 0), (0, 0), (0, pad_to - pad_amt)), constant_values=self.pad_value, mode='constant')
+        if self.pad_to:
+            max_len = x.shape[-1]
+            mask = np.arange(max_len)
+            mask = mask >= seq_len
+            x[:, :, mask] = self.pad_value
+            del mask
+            pad_to = self.pad_to
+            if pad_to > 0:
+                pad_amt = x.shape[-1] % pad_to
+                if pad_amt != 0:
+                    x = np.pad(x, ((0, 0), (0, 0), (0, pad_to - pad_amt)), constant_values=self.pad_value,
+                               mode='constant')
+
+        # transpose according to model input layout
+        x = np.transpose(x, [2, 0, 1])
 
         image.data = x
         return image
@@ -807,7 +897,7 @@ class AudioToMelSpectrogram(Preprocessor):
             return np.pad(data, lengths, **kwargs)
 
         def frame(x, frame_length=2048, hop_length=512):
-            '''Slice a data array into (overlapping) frames.'''
+            """Slice a data array into (overlapping) frames."""
 
             n_frames = (x.shape[-1] - frame_length) // hop_length
             strides = np.asarray(x.strides)
@@ -854,22 +944,24 @@ class AudioToMelSpectrogram(Preprocessor):
     def splice_frames(x, frame_splicing):
         seq = [x]
         for n in range(1, frame_splicing):
-            seq.append(np.concatenate([x[:, :, :n], x[:, :, n:]], axis=2))
-        return np.concatenate(seq, axis=1)
+            tmp = np.zeros_like(x)
+            tmp[:, :, :-n] = x[:, :, n:]
+            seq.append(tmp)
+        return np.concatenate(seq, axis=1)[:, :, ::frame_splicing]
 
     @staticmethod
     def normalize_batch(x, seq_len, normalize_type):
-        if normalize_type == "per_feature":
+        if normalize_type == 'per_feature':
             x_mean = np.zeros((x.shape[0], x.shape[1]), dtype=x.dtype)
             x_std = np.zeros((x.shape[0], x.shape[1]), dtype=x.dtype)
             for i in range(x.shape[0]):
-                x_mean[i, :] = x[i, :seq_len].mean(axis=1)
-                x_std[i, :] = x[i, :seq_len].std(axis=1)
+                x_mean[i, :] = x[i, :, :seq_len].mean(axis=1)
+                x_std[i, :] = x[i, :, :seq_len].std(axis=1)
             # make sure x_std is not zero
             x_std += 1e-5
             return (x - np.expand_dims(x_mean, 2)) / np.expand_dims(x_std, 2)
 
-        if normalize_type == "all_features":
+        if normalize_type == 'all_features':
             x_mean = np.zeros(seq_len, dtype=x.dtype)
             x_std = np.zeros(seq_len, dtype=x.dtype)
             for i in range(x.shape[0]):

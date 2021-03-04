@@ -100,6 +100,7 @@ def load_model(model_name, weights, model_paths, module_name, model_params):
     return model
 
 
+@torch.no_grad()
 def convert_to_onnx(model, input_shapes, output_file, input_names, output_names):
     """Convert PyTorch model to ONNX and check the resulting onnx model"""
 

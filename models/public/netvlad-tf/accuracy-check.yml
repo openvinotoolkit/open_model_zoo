@@ -1,0 +1,17 @@
+models:
+  - name: netvlad-tf
+    launchers:
+      - framework: dlsdk
+        adapter: reid
+    datasets:
+      - name: pitts30k_val
+        reader: pillow_imread
+
+        preprocessing:
+          - type: rgb_to_bgr
+          - type: resize
+            dst_height: 200
+            dst_width: 300
+
+        metrics:
+          - type: localization_recall

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -53,14 +53,15 @@ class CornerCrop(Preprocessor):
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
 
     def process(self, image, annotation_meta=None):
-        data = image.data
-        image.data = self.process_data(
-            data, self.dst_height, self.dst_width, self.corner_type
-            ) if not isinstance(data, list) else [
+        if isinstance(image.data, list):
+            image.data = [
                 self.process_data(
-                    fragment, self.dst_height, self.dst_width, self.corner_type
-                    ) for fragment in image.data
+                    fragment, self.dst_height, self.dst_width, self.corner_type)
+                for fragment in image.data
             ]
+        else:
+            image.data = self.process_data(
+                image.data, self.dst_height, self.dst_width, self.corner_type)
 
         return image
 
@@ -640,7 +641,7 @@ class ObjectCropWithScale(Preprocessor):
         # Preprocessing for efficient cropping
         height, width = img.shape[:2]
         sf = scale * 200.0 / self.dst_width
-        if sf <= 2:
+        if sf >= 2:
             new_size = int(np.math.floor(max(height, width) / sf))
             new_height = int(np.math.floor(height / sf))
             new_width = int(np.math.floor(width / sf))

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
                 description="Max number of predicted results per image. If you have more predictions, "
                             "the results with minimal confidence will be ignored."
             ),
-            'threshold' : BaseField(
+            'threshold': BaseField(
                 optional=True, default='.50:.05:.95',
                 description="Intersection over union threshold. "
                             "You can specify one value or comma separated range of values. "

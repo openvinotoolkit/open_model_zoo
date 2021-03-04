@@ -1,0 +1,27 @@
+models:
+  - name: human-pose-estimation-0005
+
+    launchers:
+      - framework: dlsdk
+        allow_reshape_input: True
+        adapter:
+          type: human_pose_estimation_ae
+          heatmaps_out: heatmaps
+          nms_heatmaps_out: heatmaps
+          embeddings_out: embeddings
+
+    datasets:
+      - name: ms_coco_val2017_keypoints_5k_images
+
+        preprocessing:
+          - type: resize
+            size: 288
+            interpolation: LINEAR
+            aspect_ratio_scale: greater
+          - type: padding
+            stride: 32
+            pad_type: right_bottom
+
+        metrics:
+          - name: AP
+            type: coco_orig_keypoints_precision

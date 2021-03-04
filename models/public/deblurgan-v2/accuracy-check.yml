@@ -1,0 +1,57 @@
+models:
+  - name: deblurgan-v2
+
+    launchers:
+      - framework: onnx_runtime
+        model: deblurgan-v2.onnx
+        adapter:
+          type: image_processing
+          reverse_channels: True
+
+    datasets:
+      - name: GoPro
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: normalization
+            mean: 127.5
+            std: 127.5
+          - type: padding
+            dst_height: 736
+            dst_width: 1312
+            use_numpy: True
+            pad_type: right_bottom
+        postprocessing:
+          - type: corner_crop_image
+            apply_to: prediction
+        metrics:
+          - type: psnr
+            scale_border: 0
+            presenter: print_vector
+          - type: ssim
+            presenter: print_vector
+
+  - name: deblurgan-v2
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: image_processing
+          reverse_channels: True
+
+    datasets:
+      - name: GoPro
+        preprocessing:
+          - type: padding
+            dst_height: 736
+            dst_width: 1312
+            use_numpy: True
+            pad_type: right_bottom
+        postprocessing:
+          - type: corner_crop_image
+            apply_to: prediction
+        metrics:
+          - type: psnr
+            scale_border: 0
+            presenter: print_vector
+          - type: ssim
+            presenter: print_vector

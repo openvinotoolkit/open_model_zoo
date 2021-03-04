@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ except ImportError as import_error:
     accuracy_score = UnsupportedPackage("sklearn.metric.accuracy_score", import_error.msg)
     confusion_matrix = UnsupportedPackage("sklearn.metric.confusion_matrix", import_error.msg)
     roc_auc_score = UnsupportedPackage("sklearn.metric.roc_auc_score", import_error.msg)
+
 
 class ClassificationAccuracy(PerImageEvaluationMetric):
     """
@@ -238,6 +239,7 @@ class ClassificationF1Score(PerImageEvaluationMetric):
 
     annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
     prediction_types = (ClassificationPrediction, )
+
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
@@ -326,6 +328,7 @@ class MetthewsCorrelation(PerImageEvaluationMetric):
         self.fp = 0
         self.fn = 0
 
+
 class RocAucScore(PerImageEvaluationMetric):
     __provider__ = 'roc_auc_score'
     annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
@@ -351,6 +354,7 @@ class RocAucScore(PerImageEvaluationMetric):
         self.targets = []
         self.results = []
 
+
 class AcerScore(PerImageEvaluationMetric):
     __provider__ = 'acer_score'
     annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
@@ -359,6 +363,9 @@ class AcerScore(PerImageEvaluationMetric):
     def configure(self):
         if isinstance(confusion_matrix, UnsupportedPackage):
             confusion_matrix.raise_error(self.__provider__)
+        self.meta.update({
+            'target': 'higher-worse'
+        })
         self.reset()
 
     def update(self, annotation, prediction):

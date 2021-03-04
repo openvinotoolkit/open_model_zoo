@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -96,6 +96,7 @@ class CTCBeamSearchDecoder(Adapter):
         multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
 
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
         if multi_infer:
             steps, _, _, _ = output.shape
@@ -234,6 +235,7 @@ class CTCGreedyDecoder(Adapter):
         multi_infer = frame_meta[-1].get('multi_infer', False) if frame_meta else False
 
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
         if multi_infer:
             steps, _, _, _ = output.shape
@@ -257,16 +259,14 @@ class CTCGreedyDecoder(Adapter):
         blank_id = len(labels)
         hypotheses = []
         # CTC decoding procedure
-        for ind in range(prediction.shape[0]):
+        for batch_elem in prediction:
             decoded_prediction = []
             previous = blank_id
-            pr = prediction[ind]
-            for p in pr:
-                if (p != previous or previous == blank_id) and p != blank_id:
-                    decoded_prediction.append(p)
+            for p in batch_elem:
+                if previous != p != blank_id:
+                    decoded_prediction.append(labels[p])
                 previous = p
-            hypothesis = ''.join([labels[c] for c in decoded_prediction])
-            hypotheses.append(hypothesis)
+            hypotheses.append(''.join(decoded_prediction))
         return hypotheses
 
 
@@ -375,7 +375,7 @@ class CTCBeamSearchDecoderWithLm(Adapter):
                 raise ValueError("Need lm_alpha and lm_beta to use lm_file")
 
     def process(self, raw, identifiers=None, frame_meta=None):
-        log_prob = self._extract_predictions(raw, frame_meta, self.probability_out)
+        log_prob = self._extract_predictions(raw, frame_meta)
         log_prob = np.concatenate(list(log_prob))
         if not self.logarithmic_prob:
             log_prob = np.log(log_prob.clip(min=np.finfo(log_prob.dtype).tiny))
@@ -391,8 +391,7 @@ class CTCBeamSearchDecoderWithLm(Adapter):
         decoded = decoded.upper()  # this should be responsibility of metric
         return [CharacterRecognitionPrediction(identifiers[0], decoded)]
 
-    @staticmethod
-    def _extract_predictions(outputs_list, meta, layer_out_name):
+    def _extract_predictions(self, outputs_list, meta):
         """
         Extract the value of network's output identified by the provided name.
         The result is returned as list(numpy.ndarray), arrays are to be
@@ -402,8 +401,8 @@ class CTCBeamSearchDecoderWithLm(Adapter):
         if isinstance(outputs_list, dict):
             outputs_list = [outputs_list]
         if not is_multi_infer:
-            return [outputs_list[0][layer_out_name]]
-        return [output[layer_out_name] for output in outputs_list]
+            return [outputs_list[0][self.probability_out]]
+        return [output[self.probability_out] for output in outputs_list]
 
     def decode(self, logp_audio):
         cand_set = CtcBeamSearchWithLmCandidateSet(
@@ -680,6 +679,32 @@ class CtcBeamSearchCandidate:
     def logp_total(self):
         return log_sum_exp(self.logp_blank, self.logp_non_blank)
 
+class DumbDecoder(Adapter):
+    __provider__ = 'dumb_decoder'
+    prediction_types = (CharacterRecognitionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'alphabet': ListField(optional=True, default=None, value_type=str, allow_empty=False,
+                                  description="Alphabet as list of strings."),
+            'uppercase': BoolField(optional=True, default=True, description="Transform result to uppercase"),
+
+        })
+        return parameters
+
+    def configure(self):
+        self.alphabet = self.get_value_from_config('alphabet') or ' ' + string.ascii_lowercase + '\''
+        self.alphabet = self.alphabet.encode('ascii').decode('utf-8')
+        self.uppercase = self.get_value_from_config('uppercase')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        assert len(identifiers) == 1
+        decoded = ''.join(self.alphabet[t] for t in raw[0])
+        if self.uppercase:
+            decoded = decoded.upper()
+        return [CharacterRecognitionPrediction(identifiers[0], decoded.upper())]
 
 class TextState:
     __slots__ = ('text', 'last_word', 'last_char_index')
