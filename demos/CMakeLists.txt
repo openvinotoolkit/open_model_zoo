@@ -145,29 +145,9 @@ macro(ie_add_sample)
     if(UNIX)
         target_link_libraries(${IE_SAMPLE_NAME} PRIVATE pthread)
     endif()
-
-    # create global target with all samples / demo apps
-    if(NOT TARGET ie_samples)
-        add_custom_target(ie_samples ALL)
-    endif()
-    add_dependencies(ie_samples ${IE_SAMPLE_NAME})
-
-    if(COMMAND add_cpplint_target AND NOT IE_SAMPLE_EXCLUDE_CPPLINT)
-        add_cpplint_target(${IE_SAMPLE_NAME}_cpplint FOR_TARGETS ${IE_SAMPLE_NAME})
-    endif()
 endmacro()
 
-
-# use this flag if you need to throw custom message in case if the IE package is not found.
-if(IE_NOT_FOUND_MESSAGE)
-    find_package(InferenceEngine 2.0 QUIET)
-    if(NOT InferenceEngine_FOUND)
-        message(FATAL_ERROR ${IE_NOT_FOUND_MESSAGE})
-    endif()
-else()
-    find_package(InferenceEngine 2.0 REQUIRED)
-endif()
-
+find_package(InferenceEngine 2.0 REQUIRED)
 find_package(ngraph REQUIRED)
 
 # collect all samples subdirectories

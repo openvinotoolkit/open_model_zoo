@@ -46,13 +46,3 @@ set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_PDB_NAME ${TARGET_NAME})
 
 target_link_libraries(${TARGET_NAME} PRIVATE
     ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} ngraph::ngraph monitors multi_channel_common)
-
-if(COMMAND add_cpplint_target)
-    add_cpplint_target(${TARGET_NAME}_cpplint FOR_TARGETS ${TARGET_NAME})
-endif()
-
-if(NOT TARGET ie_samples)
-    add_custom_target(ie_samples ALL)
-endif()
-
-add_dependencies(ie_samples ${TARGET_NAME})
