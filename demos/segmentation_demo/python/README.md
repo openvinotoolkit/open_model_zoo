@@ -86,6 +86,13 @@ You can use the following command to do inference on CPU on images captured by a
     python3 segmentation_demo.py -i 0 -m <path_to_model>/semantic-segmentation-adas-0001.xml
 ```
 
+## Color palettes
+
+The color palette is used to visualize predicted classes. By default, the colors from PASCAL VOC dataset are applied.
+Also, one can use predefined colors from other datasets, like CAMVID. The folder with available colors files is in [palettes](../../../data/palettes).
+If you want to assign custom colors for classes, you should create a `.txt` file, where the each line contains colors in `(R, G, B)` format.
+The path to the `.txt` file with palette is passed by `--colors` option.
+
 ## Demo Output
 
 The demo uses OpenCV to display the resulting images with blended segmentation mask.
