@@ -29,8 +29,6 @@ if(NOT BIN_FOLDER)
     set(BIN_FOLDER ${ARCH})
 endif()
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 foreach(artifact IN ITEMS ARCHIVE COMPILE_PDB LIBRARY PDB RUNTIME)
     set("CMAKE_${artifact}_OUTPUT_DIRECTORY" "${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER}/$<CONFIG>")
 endforeach()
@@ -55,28 +53,18 @@ if(MSVC)
                         /EHsc)  # Enable standard C++ stack unwinding, assume functions with extern "C" never throw
 endif()
 
-if(COMPILER_IS_GCC_LIKE)
-    add_compile_options(-Wall)
-endif()
-
-####################################
-## to use C++11
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-####################################
-
-set(GFLAGS_IS_SUBPROJECT TRUE)
-set(HAVE_SYS_STAT_H 1)
-set(HAVE_INTTYPES_H 1)
-
-add_subdirectory(thirdparty/gflags)
-
 if(CMAKE_CXX_COMPILER_ID MATCHES "^GNU|(Apple)?Clang$")
     set(COMPILER_IS_GCC_LIKE TRUE)
+    add_compile_options(-Wall)
 else()
     set(COMPILER_IS_GCC_LIKE FALSE)
 endif()
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+add_subdirectory(thirdparty/gflags)
 add_subdirectory(common/cpp)
 add_subdirectory(multi_channel_common/cpp)
 
