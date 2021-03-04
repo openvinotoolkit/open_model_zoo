@@ -28,7 +28,7 @@ Accuracy Checker supports following set of postprocessors:
    - the preprocessing steps contains only one operation changing input image size, and the operation is `resize`
    - the preprocessing steps contains only two operations changing input image size, and the operations are `resize` and then `padding`.
    * `rescale` if this option enabled, rescaling boxes on input size will be performed before applying postprocessing (Optional, default `False`).
-* `resize_prediction_boxes` - resizing normalized detection prediction boxes according to image with the letterbox resizing. Supported representations: `DetectionAnotation`, `DetectionPrediction`. Works only when the preprocessing steps contains only two operations changing - `resize` and then `padding` with `center` padding type.
+* `letterbox_postprocessing_resize` - resizing normalized detection prediction boxes according to image with the letterbox resizing. Supported representations: `DetectionAnotation`, `DetectionPrediction`. Works only when the preprocessing steps contains only two operations changing - `resize` and then `padding` with `center` padding type.
 * `nms` - non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
   * `overlap` - overlap threshold for merging detections.
   * `use_min_area` - boolean value to determine whether to use minimum area of two bounding boxes as base area to calculate overlap.

@@ -42,7 +42,6 @@ class LetterboxPostprocessingResize(Postprocessor):
             assert op_name2 == "padding", (
                 "Unknown case: two geometric operations, the second with name '{}'".format(op_name2))
             pad = op_props2['pad']
-            assert (pad[0] == 0 and pad[2] == 0) or (pad[1] == 0 and pad[3] == 0), "Unknown case: padding is not center"
 
             offset_x = pad[1] / op_props2['pref_width']
             offset_y = pad[2] / op_props2['pref_height']
