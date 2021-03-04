@@ -31,6 +31,7 @@ import contextlib
 import csv
 import json
 import os
+import platform
 import shlex
 import subprocess
 import sys
@@ -150,13 +151,10 @@ def main():
 
         num_failures = 0
         
-        demo_build_subdir = "/lib" if os.pathsep == ":" else ""
-        pythonpath_args = (os.environ['PYTHONPATH'], os.pathsep, args.demo_build_dir, demo_build_subdir)
-        PYTHONPATH = {'PYTHONPATH': "{}{}{}{}".format(*pythonpath_args)}
-
+        demo_build_subdir = "" if platform.system() == "Windows" else "/lib"
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            **PYTHONPATH}
+            'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{demo_build_subdir}"}
 
         for demo in demos_to_test:
             print('Testing {}...'.format(demo.subdirectory))
