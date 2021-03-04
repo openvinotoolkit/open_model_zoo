@@ -16,12 +16,25 @@
 #pragma once
 #include "models/model_base.h"
 
+#ifdef USE_VA
+#include "vaapi_converter.h"
+#endif
+
+#ifdef USE_VA
+#include <gpu/gpu_context_api_va.hpp>
+using VAContextPtr = InferenceEngine::gpu::VAContext::Ptr;
+#else
+using VAContextPtr = void*;
+#endif
+
 class ImageModel : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
     /// @param useAutoResize - if true, image is resized by IE.
     ImageModel(const std::string& modelFileName, bool useAutoResize);
+
+    virtual InferenceEngine::ExecutableNetwork loadExecutableNetwork(const CnnConfig& cnnConfig, InferenceEngine::Core& core) override;
 
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
 
@@ -30,4 +43,13 @@ protected:
 
     size_t netInputHeight = 0;
     size_t netInputWidth = 0;
+
+    VAContextPtr sharedVAContext;
+
+#ifdef USE_VA
+    std::unique_ptr<InferenceBackend::VaApiContext> va_context;
+    std::unique_ptr<InferenceBackend::VaApiConverter> va_converter;
+
+    std::unique_ptr<InferenceBackend::VaApiImagePool> resizedSurfacesPool;
+    #endif
 };

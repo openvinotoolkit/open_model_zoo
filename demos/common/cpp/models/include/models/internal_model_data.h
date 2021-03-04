@@ -14,6 +14,11 @@
 // limitations under the License.
 */
 
+#ifdef USE_VA
+#include "vaapi_images.h"
+#endif
+
+
 #pragma once
 struct InternalModelData
 {
@@ -30,9 +35,20 @@ struct InternalModelData
 
 struct InternalImageModelData : public InternalModelData
 {
+#ifdef USE_VA
+    InternalImageModelData(int width, int height, InferenceBackend::VaPooledImage::Ptr vaImage=nullptr) :
+        vaImage(vaImage),
+        inputImgWidth(width),
+        inputImgHeight(height)
+    {
+    }
+
+    InferenceBackend::VaPooledImage::Ptr vaImage;
+#else
     InternalImageModelData(int width, int height) :
         inputImgWidth(width),
         inputImgHeight(height) {}
+#endif
 
     int inputImgWidth;
     int inputImgHeight;

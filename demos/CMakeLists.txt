@@ -19,6 +19,17 @@ option(ENABLE_PYTHON "Whether to build extension modules for Python demos" OFF)
 option(MULTICHANNEL_DEMO_USE_TBB "Use TBB-based threading in multichannel demos" OFF)
 option(MULTICHANNEL_DEMO_USE_NATIVE_CAM "Use native camera api in multichannel demos" OFF)
 
+if(WIN32)
+    set(ENABLE_VA OFF)
+else()
+    option(ENABLE_VA "Enables VA DMA support in demos (Linux Only)" ON)
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "")
+    message(STATUS "CMAKE_BUILD_TYPE not defined, 'Release' will be used")
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 if(NOT BIN_FOLDER)
     string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} ARCH)
     if(ARCH STREQUAL "x86_64" OR ARCH STREQUAL "amd64") # Windows detects Intel's 64-bit CPU as AMD64
@@ -100,6 +111,10 @@ macro(add_demo)
     set(multiValueArgs SOURCES HEADERS DEPENDENCIES INCLUDE_DIRECTORIES)
     cmake_parse_arguments(IE_SAMPLE "${options}" "${oneValueArgs}"
                           "${multiValueArgs}" ${ARGN})
+
+    if(ENABLE_VA)
+        add_definitions(-DUSE_VA)
+    endif()
 
     # Create named folders for the sources within the .vcproj
     # Empty name lists them directly under the .vcproj

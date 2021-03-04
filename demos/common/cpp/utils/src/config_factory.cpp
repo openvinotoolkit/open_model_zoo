@@ -26,9 +26,10 @@ using namespace InferenceEngine;
 
 CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::string& flags_l,
     const std::string& flags_c, bool flags_pc,
-    uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads)
+    uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads,
+    bool flags_varc)
 {
-    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_pc, flags_nireq);
+    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_pc, flags_nireq, flags_varc);
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(flags_d)) {
         devices.insert(device);
@@ -64,9 +65,9 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::st
 }
 
 CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, const std::string& flags_l,
-    const std::string& flags_c, bool flags_pc, uint32_t flags_nireq)
+    const std::string& flags_c, bool flags_pc, uint32_t flags_nireq, bool flags_varc)
 {
-    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_pc, flags_nireq);
+    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_pc, flags_nireq,flags_varc);
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(flags_d)) {
         devices.insert(device);
@@ -83,7 +84,7 @@ CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, const s
 }
 
 CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, const std::string& flags_l,
-    const std::string& flags_c, bool flags_pc, uint32_t flags_nireq)
+    const std::string& flags_c, bool flags_pc, uint32_t flags_nireq, bool flags_varc)
 {
     CnnConfig config;
 
@@ -100,6 +101,7 @@ CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, const std::
     }
 
     config.maxAsyncRequests = flags_nireq;
+    config.useGPURemoteContext = flags_varc;
 
     /** Per layer metrics **/
     if (flags_pc) {

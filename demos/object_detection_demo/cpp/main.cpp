@@ -38,6 +38,12 @@
 #include <models/detection_model_ssd.h>
 #include <models/detection_model_yolo.h>
 
+#ifdef USE_VA
+#include <gpu/gpu_context_api_va.hpp>
+#include <ie_compound_blob.h>
+#include "gst_vaapi_decoder.h"
+#endif
+
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
@@ -84,6 +90,14 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_bool(yolo_af, true, yolo_af_message);
+
+#ifdef USE_VA
+    static const char varc_message[] = "Optional. Use gstreamer and remote VA context for video decoding.";
+    DEFINE_bool(varc, false, varc_message);
+#else
+    #define FLAGS_varc false
+#endif
+
 
 /**
 * \brief This function shows a help message
@@ -220,7 +234,22 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
         throw std::invalid_argument("Renderer: metadata is null");
     }
 
-    auto outputImg = result.metaData->asRef<ImageMetaData>().img;
+    auto& imgMetaData = result.metaData->asRef<ImageMetaData>();
+    cv::Mat outputImg;
+
+#ifdef USE_VA
+    static std::unique_ptr<ImageMap> mapper = std::unique_ptr<ImageMap>(ImageMap::Create(MemoryType::SYSTEM));
+    if(imgMetaData.isVA()) {
+        auto sysImg = mapper->Map(*imgMetaData.vaImage);
+        cv::Mat nv12(sysImg.height*3/2,sysImg.width,CV_8UC1,sysImg.planes[0],{sysImg.stride[0]});
+        cv::cvtColor(nv12,outputImg,cv::COLOR_YUV2BGR_NV12);
+        mapper->Unmap();
+    }
+    else
+#endif
+    {
+        outputImg = result.metaData->asRef<ImageMetaData>().img;
+    }
 
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
@@ -310,8 +339,15 @@ int main(int argc, char *argv[]) {
 
         InferenceEngine::Core core;
 
+#ifdef USE_VA
+        pz::GstVaApiDecoder decoder;
+        std::shared_ptr<Image> srcImage;
+        decoder.open(FLAGS_i);
+        decoder.play();
+#endif
+
         AsyncPipeline pipeline(std::move(model),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads, FLAGS_varc),
             core);
         Presenter presenter(FLAGS_u);
 
@@ -321,6 +357,8 @@ int main(int argc, char *argv[]) {
         uint32_t framesProcessed = 0;
 
         cv::VideoWriter videoWriter;
+        cv::Size videoFrameSize;
+        double videoFps = 30;
 
         cv::Size outputResolution;
         OutputTransform outputTransform = OutputTransform();
@@ -329,22 +367,42 @@ int main(int argc, char *argv[]) {
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
                 auto startTime = std::chrono::steady_clock::now();
-
-                //--- Capturing frame
                 curr_frame = cap->read();
-
-                if (curr_frame.empty()) {
-                    if (frameNum == -1) {
-                        throw std::logic_error("Can't read an image from the input");
+ #ifdef USE_VA
+                if (FLAGS_varc) {
+                    if (decoder.read(srcImage)) {
+                        frameNum = pipeline.submitData(ImageInputData(srcImage),
+                                                       std::make_shared<ImageMetaData>(srcImage, startTime));
                     }
                     else {
                         // Input stream is over
                         break;
                     }
+                    videoFrameSize.width = srcImage->width;
+                    videoFrameSize.height = srcImage->height;
+                    videoFps = decoder.getFPS();
                 }
+                else
+#endif
+                {
+                    curr_frame = cap->read();
 
-                frameNum = pipeline.submitData(ImageInputData(curr_frame),
-                    std::make_shared<ImageMetaData>(curr_frame, startTime));
+                    if (curr_frame.empty()) {
+                        if (frameNum == -1) {
+                            throw std::logic_error("Can't read an image from the input");
+                        }
+                        else {
+                            // Input stream is over
+                            break;
+                        }
+                    }
+
+                    videoFrameSize = curr_frame.size();
+                    videoFps = cap->fps();
+
+                    frameNum = pipeline.submitData(ImageInputData(curr_frame),
+                                                   std::make_shared<ImageMetaData>(curr_frame, startTime));
+                }
             }
 
             if (frameNum == 0) {

@@ -31,6 +31,21 @@ struct MetaData {
 
 struct ImageMetaData : public MetaData {
     cv::Mat img;
+
+#ifdef USE_VA
+    std::shared_ptr<InferenceBackend::Image> vaImage;
+
+    ImageMetaData(const std::shared_ptr<InferenceBackend::Image>& vaImage, std::chrono::steady_clock::time_point timeStamp) :
+        vaImage(vaImage),
+        timeStamp(timeStamp)
+    {
+    }
+
+    bool isVA() const {return !!vaImage;}
+#else
+    bool isVA() const {return false;}
+#endif
+
     std::chrono::steady_clock::time_point timeStamp;
 
     ImageMetaData() {

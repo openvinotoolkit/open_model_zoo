@@ -17,6 +17,11 @@
 #pragma once
 #include <opencv2/core.hpp>
 
+#ifdef USE_VA
+#include <gpu/gpu_context_api_va.hpp>
+#include "vaapi_images.h"
+#endif
+
 struct InputData {
     virtual ~InputData() {}
 
@@ -31,6 +36,19 @@ struct InputData {
 
 struct ImageInputData : public InputData {
     cv::Mat inputImage;
+
+#ifdef USE_VA
+    std::shared_ptr<InferenceBackend::Image> vaImage;
+
+    ImageInputData(const std::shared_ptr<InferenceBackend::Image>& vaImage) :
+        vaImage(vaImage)
+    {
+    }
+
+    bool isVA() const {return !!vaImage;}
+#else
+    bool isVA() const {return false;}
+#endif
 
     ImageInputData() {}
     ImageInputData(const cv::Mat& img) {
