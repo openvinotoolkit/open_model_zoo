@@ -72,7 +72,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     auto internalModelData = model->preprocess(inputData, request);
     preprocessMetrics.update(startTime);
 
-    auto cb = [this,
+    request->SetCompletionCallback([this,
         frameID,
         request,
         internalModelData,
@@ -87,6 +87,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                     result.frameId = frameID;
                     result.metaData = std::move(metaData);
                     result.internalModelData = std::move(internalModelData);
+
                     for (const auto& outName : model->getOutputsNames())
                         result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outName))));
 
@@ -100,8 +101,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                 }
             }
             condVar.notify_one();
-    };
-    request->SetCompletionCallback(cb);
+    });
 
     inputFrameId++;
     if (inputFrameId < 0)
