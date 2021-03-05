@@ -224,7 +224,7 @@ For example:
 
 ```sh
 cmake -DCMAKE_BUILD_TYPE=Release <open_model_zoo>/demos
-cmake --build . --config Release --target <Demo_1> <Demo_2>
+cmake --build . --config Release --target classification_demo segmentation_demo
 ```
 
 ```sh

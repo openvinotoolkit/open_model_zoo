@@ -89,7 +89,7 @@ mkdir -p "$build_dir"
 
 (cd "$build_dir" && cmake -DCMAKE_BUILD_TYPE=Release "${extra_cmake_opts[@]}" "$DEMOS_PATH")
 
-if ["&build_targets" == ""]; then
+if [ -z "$build_targets" ]; then
     cmake --build "$build_dir" -- "$NUM_THREADS"
 else
     targets=($build_targets)
