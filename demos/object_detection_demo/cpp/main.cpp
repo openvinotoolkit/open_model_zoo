@@ -333,14 +333,12 @@ int main(int argc, char *argv[]) {
 
         int skip=0;
 
-        PerformanceMetrics readerMetrics;
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
-                //--- Capturing frame
                 auto startTime = std::chrono::steady_clock::now();
 
+                //--- Capturing frame
                 curr_frame = cap->read();
-                readerMetrics.update(startTime);
 
                 if (curr_frame.empty()) {
                     if (frameNum == -1) {
@@ -421,7 +419,7 @@ int main(int argc, char *argv[]) {
         metrics.printTotal();
         slog::info << slog::endl << "Latencies:\n";
         slog::info << "  * Decoding only: \t" << std::fixed << std::setprecision(2) <<
-            readerMetrics.getTotal().latency << " ms\n";
+            cap->getMetrics().getTotal().latency << " ms\n";
         slog::info << "  * Preprocessing only:\t" << std::fixed << std::setprecision(2) <<
             pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
         slog::info << "  * Inference only: \t" << std::fixed << std::setprecision(2) <<
