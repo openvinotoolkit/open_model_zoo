@@ -61,6 +61,19 @@ Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet_53cl.t
 - `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range
 
+## Model downloading and conversion to OpenVINO Inference Engine format
+Model can be downloaded and if necessary converted to Inference Engine format using the OpenVINO [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in examples below:
+
+An example of using Model Downloader
+```
+python3 downloader.py --name <model_name>
+```
+
+An example of using Model Conevrter
+```
+python3 converter.py --name <model_name>
+```
+
 ## Legal Information
 
 The original model is distributed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.html).
