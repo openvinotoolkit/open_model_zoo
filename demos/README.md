@@ -171,7 +171,7 @@ make
 ```
 Or you can use `cmake --build` tool:
 ```sh
-cmake --build . 
+cmake --build .
 ```
 
 For the release configuration, the demo application binaries are in `<path_to_build_directory>/intel64/Release/`;
