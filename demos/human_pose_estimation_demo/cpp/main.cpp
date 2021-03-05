@@ -255,8 +255,7 @@ int main(int argc, char *argv[]) {
             core);
         Presenter presenter(FLAGS_u);
 
-        int64_t frameNum = 0;
-        frameNum = pipeline.submitData(ImageInputData(curr_frame),
+        pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
 
         uint32_t framesProcessed = 0;
@@ -272,7 +271,7 @@ int main(int argc, char *argv[]) {
                     // Input stream is over
                     break;
                 }
-                frameNum = pipeline.submitData(ImageInputData(curr_frame),
+                pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
                 }
 

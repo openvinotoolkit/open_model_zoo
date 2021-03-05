@@ -146,8 +146,8 @@ void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<size_t, size_t>>& fe
 
     for (size_t k = 0; k < featureMaps.size(); ++k) {
         std::vector<float> a;
-        for (int i = 0; i < featureMaps[k].first; ++i) {
-            for (int j = 0; j < featureMaps[k].second; ++j) {
+        for (size_t i = 0; i < featureMaps[k].first; ++i) {
+            for (size_t j = 0; j < featureMaps[k].second; ++j) {
                 if (k == 0) {
                     calculateAnchorsZeroLevel(anchors, j, i,  minSizes[k], steps[k]);;
                 }
@@ -163,7 +163,7 @@ std::vector<int> nms(const std::vector<ModelFaceBoxes::Anchor>& boxes, const std
 
     std::vector<float> areas(boxes.size());
 
-    for (int i = 0; i < boxes.size(); ++i) {
+    for (size_t i = 0; i < boxes.size(); ++i) {
         areas[i] = (boxes[i].right - boxes[i].left) * (boxes[i].bottom - boxes[i].top);
     }
 
@@ -171,17 +171,17 @@ std::vector<int> nms(const std::vector<ModelFaceBoxes::Anchor>& boxes, const std
     std::iota(order.begin(), order.end(), 0);
     std::sort(order.begin(), order.end(), [&scores](int o1, int o2) { return scores[o1] > scores[o2]; });
 
-    int ordersNum = 0;
+    size_t ordersNum = 0;
     for (; ordersNum < order.size() && scores[order[ordersNum]] >= 0; ordersNum++);
 
     std::vector<int> keep;
     bool shouldContinue = true;
-    for (int i = 0; shouldContinue && i < ordersNum; ++i) {
+    for (size_t i = 0; shouldContinue && i < ordersNum; ++i) {
         auto idx1 = order[i];
         if (idx1 >= 0) {
             keep.push_back(idx1);
             shouldContinue = false;
-            for (int j = i + 1; j < ordersNum; ++j) {
+            for (size_t j = i + 1; j < ordersNum; ++j) {
                 auto idx2 = order[j];
                 if (idx2 >= 0) {
                     shouldContinue = true;

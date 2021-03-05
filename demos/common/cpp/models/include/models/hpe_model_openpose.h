@@ -46,8 +46,8 @@ protected:
     static const float minSubsetScore;
     cv::Size inputLayerSize;
     double aspectRatio;
-    float confidenceThreshold;
     int targetSize;
+    float confidenceThreshold;
 
     std::vector<HumanPose> extractPoses(const std::vector<cv::Mat>& heatMaps,
                                         const std::vector<cv::Mat>& pafs) const;
