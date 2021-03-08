@@ -25,20 +25,34 @@ for more information on optimizing models.
 
 ## Run this demo on your computer
 
-To run this notebook on your computer, you need to install Python (3.6, 3.7 or 3.8). If you do not have Python yet,
+To run this notebook on your computer, you need to install Python (3.6, 3.7 or 3.8) and Git. If you do not have Python yet,
 install it from https://www.python.org/downloads/release/python-379/. For Windows, choose the [executable installer
 for x86-64](https://www.python.org/ftp/python/3.7.9/python-3.7.9-amd64.exe) and select the *Add Python to your PATH*
-option during installation.
+option during installation, as well as the option to disable the PATH length limit. Git can be downloaded from [git-scm.com](https://git-scm.com/).
 
-1. Clone the Open Model Zoo repository to your computer with `git clone https://github.com/openvinotoolkit/open_model_zoo.git`
 
-2. Install the required Python packages
-   - Open a terminal and go to the demo directory (the directory that contains this README.).
-     - On Linux or MacOS, open Terminal. On Windows, open a Command Prompt (type `cmd` in the search Window in the task bar)
-     - Use the `cd` command to go to the correct directory. Starting from the main `open_model_zoo` directory, you can type `cd demos/object_detection_demo/jupyter-python`
+1. Open a terminal
+   - On Linux or MacOS, open Terminal. On Windows, open a Command Prompt (type `cmd` in the search Window in the task bar)
+
+2. Clone the Open Model Zoo repository to your computer with `git clone https://github.com/openvinotoolkit/open_model_zoo.git`
+
+3. Use the `cd` command to go to the correct directory: `cd open_model_zoo/demos/object_detection_demo/jupyter-python`
+
+3. Create a virtual environment with `python -m venv openvino_env` and activate it by typing:
+   - Linux: `source openvino_env/bin/activate`
+   - Windows: `openvino_env\Scripts\activate`
+
+   Note: on Linux, depending on the distribution, it may be necessary to type `python3` instead of `python`. On Windows, if yo
+   followed the default installation for Python, you can choose a specific version of Python by typing for example `py -3.7` instead of `python` to select version 3.7.
+
+4. Install the required Python packages
    - In the demo directory, type the following command: `pip install -r requirements.txt`
 
-3. Run Jupyter Lab with `jupyter lab`. Click on the notebook at the left.
+5. Create a Jupyter kernel for the virtual environment with `python -m ipykernel install --user --name openvino_env`
+
+6. Run Jupyter Lab with `jupyter lab` and select the *object_detection_demo.ipynb* file in the file browser, or run Jupyter Notebook with `jupyter notebook object_detection_demo.ipynb`. If you made the virtual environment named *openvino_env*, the notebook should start with the virtual environment kernel. If it does not, you can select the kernel for your virtual environment with the Kernel->*Change Kernel* menu item.
+
+7. To quit Jupyter Lab or Jupyter Notebook, press `Ctrl-C` in the terminal. To deactivate the virtual environment type `deactivate`.
 
 ## Optional
 
