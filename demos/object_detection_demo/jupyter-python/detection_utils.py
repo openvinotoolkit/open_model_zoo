@@ -73,14 +73,16 @@ def put_highlighted_text(frame, message, position, font_face, font_scale, color,
     cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
 
 
-def download_video(path: str) -> np.ndarray:
+def download_video(path: str, video_directory: str) -> np.ndarray:
     """
-    Download a video from `path` and save it to the current folder.
+    Download a video from `path` and save it to `video_directory`. `video_directory` will be created if it does not exist
+    yet.
     """
 
     # Set User-Agent to Mozilla because some websites block requests with User-Agent Python
     request = urllib.request.Request(path, headers={"User-Agent": "Mozilla/5.0"})
     response = urllib.request.urlopen(request)
     data = response.read()
-    with open(os.path.basename(path), "wb") as f:
+    os.makedirs(video_directory, exist_ok=True)
+    with open(os.path.join(video_directory, os.path.basename(path)), "wb") as f:
         f.write(data)
