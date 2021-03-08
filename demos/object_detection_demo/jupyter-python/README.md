@@ -42,12 +42,13 @@ option during installation.
 
 ## Optional
 
-### Use Voila to run the notebook in `dashboard mode`
+### Use Voila to run the notebook in *dashboard mode*
 
 If you want to run the notebook in dashboard mode, without showing all the
 code, you can use Voila. Instead of typing `jupyter lab` type `voila
---TagRemovePreprocessor.remove_cell_tags=hide
---TagRemovePreprocessor.remove_cell_tags=hide_temp object_detection_demo.ipynb`
+--TagRemovePreprocessor.remove_cell_tags=hide` and click on the `object_detection_demo` notebook.
+In *dashboard mode* you cannot upload your own video, but video's that you already uploaded in Jupyter Lab
+can be used in *dashboard mode.
 
 ### Use Public models from Open Model Zoo by installing and configuring the Model Optimizer
 
