@@ -2,8 +2,7 @@
 
 This demo showcases Object Detection on Open Model Zoo models with Async API.
 Async API usage can improve the overall frame-rate of the application, because
-rather than wait for inference to complete, the app can continue doing things
-on the host, while accelerator is busy.
+inference and image preprocessing can occur at the same time.
 
 This notebook allows you to select a model and an input video, as well as vary
 the number of streams, threads and requests for the inference.
@@ -15,38 +14,31 @@ speed. With the default setting every tenth frame is analyzed.
 
 Other demo objectives are:
 
-* Video as input support via OpenCV\*
-* Visualization of the resulting bounding boxes
-* Comparison of different Open Model Zoo models
+* Using video as input with OpenCV\*
+* Visualizing the resulting bounding boxes
+* Comparing results and speed of different Open Model Zoo models
 
 See the [Python Object Detection Async Demo](../python/) for more details about
 the Async API, and the [Optimization
 Guide](https://docs.openvinotoolkit.org/latest/_docs_optimization_guide_dldt_optimization_guide.html)
 for more information on optimizing models.
 
-
 ## Run this demo on your computer
 
-1. Clone the Open Model Zoo repository to your computer with `git`, or download the repository by clicking on this link[this link](https://github.com/openvinotoolkit/open_model_zoo/archive/master.zip) and unzip it.
+To run this notebook on your computer, you need to install Python (3.6, 3.7 or 3.8). If you do not have Python yet,
+install it from https://www.python.org/downloads/release/python-379/. For Windows, choose the [executable installer
+for x86-64](https://www.python.org/ftp/python/3.7.9/python-3.7.9-amd64.exe) and select the *Add Python to your PATH*
+option during installation.
 
-2. Install Python
+1. Clone the Open Model Zoo repository to your computer with `git clone https://github.com/openvinotoolkit/open_model_zoo.git`
 
-    This notebook has been tested on Linux (Ubuntu 18.04) and Windows, with Python 3.7.9. If you have not installed Python yet, download and install it from https://www.python.org/downloads/release/python-379/. Choose a 64-bit version (not embedded). If you are on Windows, it is recommended to select the `Add Python to your PATH` option during installation.
-
-3. Install the required Python packages
-   - Open a terminal and go to the demo directory (the directory that contains this README.)
+2. Install the required Python packages
+   - Open a terminal and go to the demo directory (the directory that contains this README.).
      - On Linux or MacOS, open Terminal. On Windows, open a Command Prompt (type `cmd` in the search Window in the task bar)
-     - Use the `cd` command to go to the correct directory (tip: pressing the Tab key auto-expands the filenames, so you can type `cd Dow<tab>`)
+     - Use the `cd` command to go to the correct directory. Starting from the main `open_model_zoo` directory, you can type `cd demos/object_detection_demo/jupyter-python`
    - In the demo directory, type the following command: `pip install -r requirements.txt`
 
-4. Add the OpenVINO directory to the PATH (Windows) or LD_LIBRARY_PATH (Linux/MacOS) variable.
-    - NOTE: the PATH is remembered as long as you do not close the terminal application. If you open a new terminal and want to run the notebooks again, you have to set the PATH again.
-    - On Windows, on a fresh install:
-      - Find the library path by copy/pasting: `python -c "import os, sys; print((os.path.dirname(sys.executable))+'\Library\\bin')"`. If you followed the default installation, the path will be `C:\Users\USERNAME\AppData\Local\Programs\Python\Python37\Library\bin`
-      - Copy the library path (with CTRL-C) and type `set PATH=` followed by CTRL-V to paste the path you just copied, followed by `;%PATH%;`
-    - For other situations, follow the instructions on https://pypi.org/project/openvino-python/
-
-5. Run Jupyter Lab with `jupyter lab`. Click on the notebook at the left.
+3. Run Jupyter Lab with `jupyter lab`. Click on the notebook at the left.
 
 ## Optional
 
