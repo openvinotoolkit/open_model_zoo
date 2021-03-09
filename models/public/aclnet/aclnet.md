@@ -63,7 +63,7 @@ Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet_53cl.t
 
 ## Download a Model and Convert it into OpenVINO™ Inference Engine Format
 
-Model can be downloaded and if necessary converted to Inference Engine format using the OpenVINO [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in examples below:
+You can download models and if necessary convert them into Inference Engine format using the OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
 
 An example of using Model Downloader
 ```
