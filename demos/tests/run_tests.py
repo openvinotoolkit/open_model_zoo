@@ -151,10 +151,11 @@ def main():
 
         num_failures = 0
         
-        demo_build_subdir = "" if platform.system() == "Windows" else "/lib"
+        python_module_subdir = "" if platform.system() == "Windows" else "/lib"
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{demo_build_subdir}"}
+            'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{demo_build_subdir}",
+        }
 
         for demo in demos_to_test:
             print('Testing {}...'.format(demo.subdirectory))
