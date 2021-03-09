@@ -17,6 +17,8 @@ limitations under the License.
 import copy
 import pickle
 
+import numpy as np
+
 from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
 from ..launcher import create_launcher, DummyLauncher, InputFeeder, Launcher
@@ -310,6 +312,8 @@ class ModelEvaluator(BaseEvaluator):
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
             batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
+            for pred in batch_predictions:
+                np.save(pred.value, self.dataset.data_provider.data_reader.data_source / (pred.identifier.replace('.JPEG', '.npy')))
 
         annotations, predictions = self.postprocessor.process_batch(
             batch_annotations, batch_predictions, batch_meta
