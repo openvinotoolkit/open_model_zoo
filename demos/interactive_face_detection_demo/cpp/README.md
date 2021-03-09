@@ -106,7 +106,7 @@ An example of using the Model Converter:
 python3 converter.py --list models.lst
 ```
 
-> **NOTE**: Before running the demo with a trained model, make sure the model is downloaded and converted to the Inference Engine format (\*.xml + \*.bin) using OpenVINO [Model Downloader and other automation tools](../../../tools/downloader/README.md).
+> **NOTE**: Before running the demo with a trained model, make sure the model is downloaded and converted to the Inference Engine format (\*.xml + \*.bin) using OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md).
 
 For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
