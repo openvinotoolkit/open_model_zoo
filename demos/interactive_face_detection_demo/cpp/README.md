@@ -96,7 +96,7 @@ Running the application with an empty list of options yields the usage message g
 
 To run the demo, you can use public or Intel pre-trained models. You can download models and if necessary convert them into Inference Engine format using the OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below. The models which are supported by the demo are listed in the [models.lst](./models.lst) file.
 
-An example of using Model Downloader
+An example of using the Model Downloader:
 ```
 python3 downloader.py --list models.lst
 ```
