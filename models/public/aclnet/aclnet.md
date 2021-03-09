@@ -70,7 +70,7 @@ An example of using the Model Downloader:
 python3 downloader.py --name <model_name>
 ```
 
-An example of using Model Conevrter
+An example of using the Model Converter:
 ```
 python3 converter.py --name <model_name>
 ```
