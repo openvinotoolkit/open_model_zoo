@@ -101,7 +101,7 @@ An example of using the Model Downloader:
 python3 downloader.py --list models.lst
 ```
 
-An example of using Model Conevrter
+An example of using the Model Converter:
 ```
 python3 converter.py --list models.lst
 ```
