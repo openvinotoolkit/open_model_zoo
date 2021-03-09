@@ -68,6 +68,20 @@ Semantic-segmentation mask according to ADE20k classes, name - `softmax`,  shape
 - `H` - height
 - `W` - width
 
+## Download a Model and Convert it into OpenVINO™ Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 converter.py --name <model_name>
+```
+
 ## Legal Information
 
 The original model is distributed under the following

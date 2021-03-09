@@ -101,6 +101,20 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
 
+## Download a Model and Convert it into OpenVINO™ Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 converter.py --name <model_name>
+```
+
 ## Legal Information
 
 The original model is distributed under the following

@@ -20,7 +20,7 @@ For details see [paper](https://arxiv.org/abs/1904.07850), [repository](https://
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| mAP    | 41.81%          | 41.61%            |
+| mAP    | 41.81%          | 41.61%         |
 
 ## Input
 
@@ -54,6 +54,20 @@ Expected color order: BGR.
 1. Object center points heatmap, name: `center_heatmap`. Contains predicted objects center point, for each of the 80 categories, according to MSCOCO\* dataset version with 80 categories of objects, without background label, mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_00cl.txt` file.
 2. Object size output, name: `width_height`. Contains predicted width and height for each object.
 3. Regression output, name: `regression`. Contains offsets for each prediction.
+
+## Download a Model and Convert it into OpenVINO™ Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 converter.py --name <model_name>
+```
 
 ## Legal Information
 

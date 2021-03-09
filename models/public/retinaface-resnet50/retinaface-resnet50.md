@@ -84,6 +84,20 @@ Facial landmarks have format `[x1, y1, x2, y2, x3, y3, x4, y4, x5, y5]`, where:
 ### Converted model
 The converted model has the same parameters as the original model.
 
+## Download a Model and Convert it into OpenVINO™ Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 converter.py --name <model_name>
+```
+
 ## Legal Information
 
 The original model is distributed under the following

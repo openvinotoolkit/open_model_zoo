@@ -76,6 +76,20 @@ bounding boxes. For each detection, the description has the format:
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates stored in normalized format, in range [0, 1])
 2. Segmentation heatmaps for all classes for every output bounding box, name: `masks`, shape: [N, 90, 33, 33], where N is the number of detected masks, 90 is the number of classes (the background class excluded).
 
+## Download a Model and Convert it into OpenVINO™ Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 converter.py --name <model_name>
+```
+
 ## Legal Information
 
 The original model is distributed under the

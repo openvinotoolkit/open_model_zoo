@@ -27,8 +27,8 @@ the 1000 different classifications matching those in the ImageNet database.
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 83.69%          | 83.69%           |
-| Top 5  | 96.71%          | 96.71%           |
+| Top 1  | 83.69%         | 83.69%          |
+| Top 5  | 96.71%         | 96.71%          |
 
 ## Input
 
@@ -70,6 +70,20 @@ Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000
 
 - `B` - batch size
 - `C` - predicted probabilities for each class in the logits format
+
+## Download a Model and Convert it into OpenVINO™ Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 converter.py --name <model_name>
+```
 
 ## Legal Information
 

@@ -62,6 +62,20 @@ Channel order is `BGR`.
 2. Probability, shape - `1,200`, contains confidence of each detected bounding boxes.
 3. Detection boxes, shape - `1,200,4`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are in normalized format, in range [0, 1].
 
+## Download a Model and Convert it into OpenVINO™ Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 converter.py --name <model_name>
+```
+
 ## Legal Information
 
 The original model is distributed under the
