@@ -154,7 +154,7 @@ def main():
         python_module_subdir = "" if platform.system() == "Windows" else "/lib"
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{demo_build_subdir}",
+            'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{python_module_subdir}",
         }
 
         for demo in demos_to_test:
