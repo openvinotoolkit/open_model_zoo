@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,11 +26,7 @@ except ImportError as import_error:
     maskUtils = UnsupportedPackage("pycocotools", import_error.msg)
 
 def no_available_pycocotools():
-    try:
-        import pycocotools.mask as maskUtils
-        return False
-    except:
-        return True
+    return isinstance(maskUtils, UnsupportedPackage)
 
 def encode_mask(mask):
     raw_mask = []

@@ -73,7 +73,7 @@ Expected color order: BGR.
 
 ### Original Model
 
-1. Classifier, name: `filtered_detections/map/TensorArrayStack_2/TensorArrayGatherV3`. Contains predicted bounding boxes classes in a range [1, 80]. The model was trained on the Microsoft\* COCO dataset version with 80 categories of objects.
+1. Classifier, name: `filtered_detections/map/TensorArrayStack_2/TensorArrayGatherV3`. Contains predicted bounding boxes classes in a range [1, 80]. The model was trained on the Microsoft\* COCO dataset version with 80 categories of objects, 0 class is for background. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl_bkgr.txt` file
 2. Probability, name: `filtered_detections/map/TensorArrayStack_1/TensorArrayGatherV3`. Contains probability of detected bounding boxes.
 3. Detection box, name: `filtered_detections/map/TensorArrayStack/TensorArrayGatherV3`. Contains detection boxes coordinates in a format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates of the top left corner, (`x_max`, `y_max`) are coordinates of the right bottom corner. Coordinates are rescaled to input image size.
 
@@ -83,9 +83,8 @@ The array of summary detection information, name - `DetectionOutput`, shape - [1
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
     where:
-
     - `image_id` - ID of the image in the batch
-    - `label` - predicted class ID
+    - `label` - predicted class ID in range [1, 80], mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl_bkgr.txt` file
     - `conf` - confidence for the predicted class
     - (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates stored in normalized format, in range [0, 1])
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates stored in normalized format, in range [0, 1])

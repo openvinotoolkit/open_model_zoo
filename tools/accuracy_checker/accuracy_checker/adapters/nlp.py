@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ from ..representation import (MachineTranslationPrediction,
                               QuestionAnsweringPrediction,
                               QuestionAnsweringEmbeddingPrediction,
                               ClassificationPrediction,
+                              SequenceClassificationPrediction,
                               LanguageModelingPrediction)
 from ..config import PathField, NumberField, StringField, BoolField
 from ..utils import read_txt, UnsupportedPackage
@@ -79,6 +80,9 @@ class NonAutoregressiveMachineTranslationAdapter(Adapter):
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if self.output_name is None:
+            self.select_output_blob(raw_outputs)
+            self.output_name = self.output_blob
         translation = raw_outputs[self.output_name]
         results = []
         for identifier, tokens in zip(identifiers, translation):
@@ -119,6 +123,7 @@ class MachineTranslationAdapter(Adapter):
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
         translation = raw_outputs[self.output_blob]
         translation = np.transpose(translation, (1, 2, 0))
         results = []
@@ -172,6 +177,7 @@ class QuestionAnsweringAdapter(Adapter):
 
         return result
 
+
 class QuestionAnsweringEmbeddingAdapter(Adapter):
     __provider__ = 'bert_question_answering_embedding'
     prediction_types = (QuestionAnsweringEmbeddingPrediction, )
@@ -196,6 +202,7 @@ class QuestionAnsweringEmbeddingAdapter(Adapter):
             )
 
         return result
+
 
 class QuestionAnsweringBiDAFAdapter(Adapter):
     __provider__ = 'bidaf_question_answering'
@@ -225,6 +232,7 @@ class QuestionAnsweringBiDAFAdapter(Adapter):
             )
 
         return result
+
 
 class LanguageModelingAdapter(Adapter):
     __provider__ = 'common_language_modeling'
@@ -273,9 +281,11 @@ class BertTextClassification(Adapter):
         self.classification_out = self.get_value_from_config('classification_out')
 
     def process(self, raw, identifiers=None, frame_meta=None):
+        outputs = self._extract_predictions(raw, frame_meta)
         if self.classification_out is None:
+            self.select_output_blob(outputs)
             self.classification_out = self.output_blob
-        outputs = self._extract_predictions(raw, frame_meta)[self.classification_out]
+        outputs = outputs[self.classification_out]
         if outputs.shape[1] != self.num_classes:
             _, hidden_size = outputs.shape
             output_weights = np.random.normal(scale=0.02, size=(self.num_classes, hidden_size))
@@ -289,3 +299,33 @@ class BertTextClassification(Adapter):
             result.append(ClassificationPrediction(identifier, output))
 
         return result
+
+
+class BERTNamedEntityRecognition(Adapter):
+    __provider__ = 'bert_ner'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'classification_out': StringField(
+                optional=True,
+                description='Classification output layer name. If not provided, first output will be used.'
+            )
+        })
+
+        return params
+
+    def configure(self):
+        self.classification_out = self.get_value_from_config('classification_out')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        outputs = self._extract_predictions(raw, frame_meta)
+        if self.classification_out is None:
+            self.select_output_blob(outputs)
+            self.classification_out = self.output_blob
+        outputs = outputs[self.classification_out]
+        results = []
+        for identifier, out in zip(identifiers, outputs):
+            results.append(SequenceClassificationPrediction(identifier, out))
+        return results

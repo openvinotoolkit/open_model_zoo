@@ -4,9 +4,8 @@ models:
       - framework: dlsdk
         adapter:
           type: multi_output_regression
-        outputs:
-          - mel
-        allow_reshape_input: False
+          outputs:
+            - mel
         inputs:
           - name: 'data'
             type: INPUT

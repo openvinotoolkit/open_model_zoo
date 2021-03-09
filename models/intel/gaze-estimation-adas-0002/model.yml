@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/gaze-estimation-adas-0002.xml
-    size: 71796
-    sha256: aee115a62c7bf1e8ad0c43d9dd7cc305222212eb44aa472be323b0e4eb9c1a83
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
+    size: 73963
+    sha256: 5452a765e3e2d6e1500d45c52ab18a4ff1a36566f8e6cd9e5989739490bdfe5b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
   - name: FP32/gaze-estimation-adas-0002.bin
     size: 7529480
     sha256: f9811838cc264443a845b8d5089d3cfeb2d354b832f52a96aa0ccfa5be8e8401
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
   - name: FP16/gaze-estimation-adas-0002.xml
-    size: 71755
-    sha256: 3307033ae20b649c0b5e56c5737abd7ed4164d090df5cb44df160f8f173dd9f4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
+    size: 73922
+    sha256: 9845ef5b316b54b3c88417dc5e0aa937e1e92b2b1f41ee0078d0c10cb5952043
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
   - name: FP16/gaze-estimation-adas-0002.bin
     size: 3764842
     sha256: 4aea144ee55e1c26ff81ffd006be71e581d869e76e38364fdc10c3e0d3848154
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
   - name: FP16-INT8/gaze-estimation-adas-0002.xml
-    size: 151286
-    sha256: b545b4f3fea28e57d595eb1ba01481905c27c8f205ba871ef09bd07354e126f3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.xml
+    size: 148595
+    sha256: 9f760a6b0fdb42018095b0a2355860f02ed23132bd34e4415533c2b39b41f527
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.xml
   - name: FP16-INT8/gaze-estimation-adas-0002.bin
-    size: 1893396
-    sha256: b877b890ab18e14cbddde64aafe49c13cfccfc92a043b77f33b62e54d1af855c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.bin
+    size: 1893394
+    sha256: 27c81f3d0d9c460acd5d36d253b7b10c4fb6ebc073b38a8c0b971aeaa5df2967
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

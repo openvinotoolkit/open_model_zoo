@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,8 +37,11 @@ class SegmentationAdapter(Adapter):
         })
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         self.make_argmax = self.launcher_config.get('make_argmax', False)
@@ -47,17 +50,29 @@ class SegmentationAdapter(Adapter):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
+        self.select_output_blob(raw_outputs)
+        for identifier, output, meta in zip(identifiers, raw_outputs[self.output_blob], frame_meta):
+            input_shape = next(iter(meta['input_shape'].values()))
+            is_chw = input_shape[1] <= 4
+            if len(output.shape) == 2 and len(input_shape) == 4:
+                (in_h, in_w) = input_shape[2:] if is_chw else input_shape[1:3]
+                if output.shape[0] == in_h * in_w:
+                    output = np.resize(output, (in_h, in_w, output.shape[-1]))
+                    is_chw = False
             if self.make_argmax:
-                output = np.argmax(output, axis=0)
+                argmax_axis = 0 if is_chw else -1
+                output = np.argmax(output, axis=argmax_axis)
+            if not is_chw and not self.make_argmax and len(output.shape) == 3:
+                output = np.transpose(output, (2, 0, 1))
             result.append(SegmentationPrediction(identifier, output))
 
         return result
 
     def _extract_predictions(self, outputs_list, meta):
-        if not 'tiles_shape' in (meta[-1] or {}):
+        if 'tiles_shape' not in (meta[-1] or {}):
             return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
 
+        self.select_output_blob(outputs_list[0])
         tiles_shapes = [meta['tiles_shape'] for meta in meta]
         restore_output = []
         offset = 0
@@ -96,6 +111,7 @@ class SegmentationOneClassAdapter(Adapter):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
         for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
             output = output > self.threshold
             result.append(SegmentationPrediction(identifier, output.astype(np.uint8)))
@@ -142,6 +158,7 @@ class BrainTumorSegmentationAdapter(Adapter):
                 raise ConfigError('segmentation output not found')
             segm_out = self.segmentation_out if self.segmentation_out in raw_outputs else self.segmentation_out_bias
         else:
+            self.select_output_blob(raw_outputs)
             segm_out = self.output_blob
         for identifier, output in zip(identifiers, raw_outputs[segm_out]):
             if self.argmax:
@@ -193,6 +210,7 @@ class DUCSegmentationAdapter(Adapter):
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
         for identifier, output, meta in zip(identifiers, raw_outputs[self.output_blob], frame_meta):
             _, _, h, w = next(iter(meta.get('input_shape', {'data': (1, 3, 800, 800)}).values()))
             feat_height = math.floor(h / self.ds_rate)

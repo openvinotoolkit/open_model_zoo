@@ -36,11 +36,11 @@ only the images containing five aforementioned emotions is chosen. The total amo
 
 ## Inputs
 
-Name: `input`, shape: [1x3x64x64] - An input image in [1xCxHxW] format. Expected color order is BGR.
+Name: `data`, shape: [1x3x64x64] - An input image in [1xCxHxW] format. Expected color order is BGR.
 
 ## Outputs
 
-1. name: "prob", shape: [1, 5, 1, 1] - Softmax output across five emotions
+1. name: "prob_emotion", shape: [1, 5, 1, 1] - Softmax output across five emotions
    ('neutral', 'happy', 'sad', 'surprise', 'anger').
 
 ## Legal Information

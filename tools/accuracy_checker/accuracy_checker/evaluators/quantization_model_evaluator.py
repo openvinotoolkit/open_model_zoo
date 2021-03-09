@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import copy
 import numpy as np
 
 from ..utils import extract_image_representations, contains_any
-from ..dataset import Dataset, DatasetWrapper
+from ..dataset import Dataset, DataProvider, AnnotationProvider
 from ..launcher import create_launcher, InputFeeder
 from ..logging import warning
 from ..metrics import MetricsExecutor
@@ -193,17 +193,16 @@ class ModelEvaluator:
     def register_dumped_annotations(self):
         if not self._dumped_annotations:
             return
-        if self.dataset.annotation_reader is None:
-            self.dataset.annotation_reader = Dataset(self.dataset.dataset_config, True)
-        self.dataset.annotation_reader.set_annotation(self._dumped_annotations)
+        meta = Dataset.load_meta(self.dataset.dataset_config)
+        self.dataset.set_annotation(self._dumped_annotations, meta)
 
     def select_dataset(self, dataset_tag):
         if self.dataset is not None and isinstance(self.dataset_config, list):
             return
         dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag, self._dumped_annotations)
         self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
-        if self.dataset.annotation_reader and self.dataset.annotation_reader.metadata:
-            self.adapter.label_map = self.dataset.annotation_reader.metadata.get('label_map')
+        if self.dataset.annotation_provider and self.dataset.annotation_provider.metadata:
+            self.adapter.label_map = self.dataset.annotation_provider.metadata.get('label_map')
 
     def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
         if subset is not None:
@@ -474,10 +473,12 @@ def create_dataset_attributes(config, tag, dumped_annotations=None):
     data_source = dataset_config.get('data_source')
     annotation_reader = None
     dataset_meta = {}
+    annotation = None
     if contains_any(dataset_config, ['annotation', 'annotation_conversion']) or dumped_annotations:
-        annotation_reader = Dataset(dataset_config, bool(dumped_annotations))
-        if dumped_annotations:
-            annotation_reader.set_annotation(dumped_annotations)
+        annotation, meta = Dataset.load_annotation(dataset_config)
+        annotation_reader = AnnotationProvider(
+            annotation if not dumped_annotations else dumped_annotations, meta, dataset_name, dataset_config
+        )
         dataset_meta = annotation_reader.metadata
     if isinstance(data_reader_config, str):
         data_reader_type = data_reader_config
@@ -489,11 +490,11 @@ def create_dataset_attributes(config, tag, dumped_annotations=None):
     if data_reader_type in REQUIRES_ANNOTATIONS:
         if annotation_reader is None:
             raise ConfigError('data reader *{}* requires annotation'.format(data_reader_type))
-        data_source = annotation_reader.annotation
+        data_source = annotation if not dumped_annotations else dumped_annotations
     data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
 
     metric_dispatcher = None
-    dataset = DatasetWrapper(data_reader, annotation_reader, tag, dataset_config)
+    dataset = DataProvider(data_reader, annotation_reader, tag=tag, dataset_config=dataset_config)
     preprocessor = PreprocessingExecutor(
         dataset_config.get('preprocessing'), dataset_name, dataset_meta
     )

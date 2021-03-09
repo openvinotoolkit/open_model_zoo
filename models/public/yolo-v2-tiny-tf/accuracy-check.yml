@@ -3,8 +3,6 @@ models:
 
     launchers:
       - framework: tf
-        tags:
-          - FP32
         model:   yolo-v2-tiny.pb
         adapter:
           type: yolo_v2

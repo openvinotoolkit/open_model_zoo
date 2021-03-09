@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ import numpy as np
 
 from ..adapters import Adapter
 from ..representation import ImageProcessingPrediction, SuperResolutionPrediction, ContainerPrediction
-from ..config import ConfigValidator, BoolField, BaseField, StringField, DictField, ConfigError
-from ..utils import get_or_parse_value
+from ..config import ConfigValidator, BoolField, StringField, DictField, NormalizationArgsField
 from ..preprocessor import Normalize
 
 
@@ -38,15 +37,18 @@ class ImageProcessingAdapter(Adapter):
             'reverse_channels': BoolField(
                 optional=True, default=False, description="Allow switching output image channels e.g. RGB to BGR"
             ),
-            'mean': BaseField(
+            'mean': NormalizationArgsField(
                 optional=True, default=0,
                 description='The value which should be added to prediction pixels for scaling to range [0, 255]'
-                            '(usually it is the same mean value which subtracted in preprocessing step))'
+                            '(usually it is the same mean value which subtracted in preprocessing step))',
+                precomputed_args=Normalize.PRECOMPUTED_MEANS
             ),
-            'std':  BaseField(
+            'std': NormalizationArgsField(
                 optional=True, default=255,
                 description='The value on which prediction pixels should be multiplied for scaling to range '
-                            '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
+                            '[0, 255] (usually it is the same scale (std) used in preprocessing step))',
+                precomputed_args=Normalize.PRECOMPUTED_STDS,
+                allow_zeros=False
             ),
             'target_out': StringField(optional=True, description='Target super resolution model output'),
             "cast_to_uint8": BoolField(
@@ -55,20 +57,16 @@ class ImageProcessingAdapter(Adapter):
         })
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         self.reverse_channels = self.get_value_from_config('reverse_channels')
-        self.mean = get_or_parse_value(self.launcher_config.get('mean', 0), Normalize.PRECOMPUTED_MEANS)
-        self.std = get_or_parse_value(self.launcher_config.get('std', 255), Normalize.PRECOMPUTED_STDS)
-
-        if not (len(self.mean) == 3 or len(self.mean) == 1):
-            raise ConfigError('mean should be one value or comma-separated list channel-wise values')
-
-        if not (len(self.std) == 3 or len(self.std) == 1):
-            raise ConfigError('std should be one value or comma-separated list channel-wise values')
-
+        self.mean = self.get_value_from_config('mean')
+        self.std = self.get_value_from_config('std')
         self.target_out = self.get_value_from_config('target_out')
         self.cast_to_uint8 = self.get_value_from_config('cast_to_uint8')
 
@@ -76,6 +74,7 @@ class ImageProcessingAdapter(Adapter):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.target_out:
+            self.select_output_blob(raw_outputs)
             self.target_out = self.output_blob
 
         for identifier, out_img in zip(identifiers, raw_outputs[self.target_out]):
@@ -107,6 +106,7 @@ class SuperResolutionAdapter(ImageProcessingAdapter):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.target_out:
+            self.select_output_blob(raw_outputs)
             self.target_out = self.output_blob
 
         for identifier, img_sr in zip(identifiers, raw_outputs[self.target_out]):
@@ -127,15 +127,18 @@ class MultiSuperResolutionAdapter(Adapter):
             'reverse_channels': BoolField(
                 optional=True, default=False, description="Allow switching output image channels e.g. RGB to BGR"
             ),
-            'mean': BaseField(
+            'mean': NormalizationArgsField(
                 optional=True, default=0,
                 description='The value which should be added to prediction pixels for scaling to range [0, 255]'
-                            '(usually it is the same mean value which subtracted in preprocessing step))'
+                            '(usually it is the same mean value which subtracted in preprocessing step))',
+                precomputed_args=Normalize.PRECOMPUTED_MEANS
             ),
-            'std':  BaseField(
+            'std': NormalizationArgsField(
                 optional=True, default=255,
                 description='The value on which prediction pixels should be multiplied for scaling to range '
-                            '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
+                            '[0, 255] (usually it is the same scale (std) used in preprocessing step))',
+                precomputed_args=Normalize.PRECOMPUTED_STDS,
+                allow_zeros=False
             ),
             "cast_to_uint8": BoolField(
                 optional=True, default=True, description="Cast prediction values to integer within [0, 255] range"
@@ -144,8 +147,11 @@ class MultiSuperResolutionAdapter(Adapter):
         })
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         self.target_mapping = self.get_value_from_config('target_mapping')
@@ -213,3 +219,26 @@ class SuperResolutionYUV(Adapter):
             results.append(SuperResolutionPrediction(identifier, sr_img))
 
         return results
+
+class TrimapAdapter(ImageProcessingAdapter):
+    __provider__ = 'trimap'
+    prediction_types = (ImageProcessingPrediction, )
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.target_out:
+            self.select_output_blob(raw_outputs)
+            self.target_out = self.output_blob
+
+        for identifier, out_img, out_meta in zip(identifiers, raw_outputs[self.target_out], frame_meta):
+            tmap = np.expand_dims(out_meta['tmap'], axis=0)
+            C, _, W = out_img.shape
+            if C > 1 and W == 1:
+                out_img = np.transpose(out_img, [2, 0, 1])
+            out_img[tmap == 2] = 1
+            out_img[tmap == 0] = 0
+            out_img = self._basic_postprocess(out_img)
+            result.append(ImageProcessingPrediction(identifier, out_img))
+
+        return result

@@ -4,9 +4,9 @@ models:
       - framework: dlsdk
         adapter:
           type: multi_output_regression
-        outputs:
-          - aux
-          - upsample_mels
+          outputs:
+            - aux
+            - upsample_mels
         inputs:
           - name: mels
             type: INPUT
