@@ -1,4 +1,4 @@
-# horizontal-text-detection-0001
+# text-detection-0003
 
 ## Use Case and High-Level Description
 

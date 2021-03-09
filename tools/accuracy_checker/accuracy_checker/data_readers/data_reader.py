@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,10 +26,8 @@ import numpy as np
 from numpy.lib.npyio import NpzFile
 
 from ..utils import get_path, read_json, read_pickle, contains_all, UnsupportedPackage, get_parameter_value_from_config
-from ..dependency import ClassProvider, UnregisteredProviderException
-from ..config import (
-    BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField, PathField
-)
+from ..dependency import ClassProvider
+from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField
 
 try:
     import nibabel as nib
@@ -46,14 +44,7 @@ try:
 except ImportError as import_error:
     sk = UnsupportedPackage('skimage.io', import_error.msg)
 
-try:
-    import rawpy
-except ImportError as import_error:
-    rawpy = UnsupportedPackage('rawpy', import_error.msg)
-
 REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
-DOES_NOT_REQUIRED_DATA_SOURCE = REQUIRES_ANNOTATIONS + ['ncf_reader']
-DATA_SOURCE_IS_FILE = ['opencv_capture']
 
 
 class DataRepresentation:
@@ -74,69 +65,6 @@ class DataRepresentation:
 ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
 MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id', 'frames'])
 ImagePairIdentifier = namedtuple('ImagePairIdentifier', ['first', 'second'])
-ListIdentifier = namedtuple('ListIdentifier', ['values'])
-MultiInstanceIdentifier = namedtuple('MultiInstanceIdentifier', ['identifier', 'object_id'])
-
-
-def serialize_identifier(identifier):
-    if isinstance(identifier, ClipIdentifier):
-        return {
-            "type": "clip_identifier",
-            "video": identifier.video,
-            "clip_id": identifier.clip_id,
-            "frames": identifier.frames
-        }
-    if isinstance(identifier, MultiFramesInputIdentifier):
-        return {
-            "type": "multi_frame_identifier",
-            "input_id": identifier.input_id,
-            "frames": identifier.frames
-        }
-    if isinstance(identifier, ImagePairIdentifier):
-        return {
-            "type": "image_pair_identifier",
-            "first": identifier.first,
-            "second": identifier.second
-        }
-    if isinstance(identifier, ListIdentifier):
-        return {
-            "type": "list_identifier",
-            "values": identifier.values
-        }
-    if isinstance(identifier, MultiInstanceIdentifier):
-        return {
-            "type": 'multi_instance',
-            "identifier": identifier.identifier,
-            "object_id": identifier.object_id
-        }
-    return identifier
-
-
-def deserialize_identifier(identifier):
-    if isinstance(identifier, dict):
-        type_id = identifier.get('type')
-        if type_id == 'image_pair_identifier':
-            return ImagePairIdentifier(identifier['first'], identifier['second'])
-        if type_id == 'list_identifier':
-            return ListIdentifier(tuple(identifier['values']))
-        if type_id == 'multi_frame_identifier':
-            return MultiFramesInputIdentifier(identifier['input_id'], tuple(identifier['frames']))
-        if type_id == 'clip_identifier':
-            return ClipIdentifier(identifier['video'], identifier['clip_id'], tuple(identifier['frames']))
-        if type_id == 'multi_instance':
-            return MultiInstanceIdentifier(identifier['identifier'], identifier['object_id'])
-        raise ValueError('Unsupported identifier type: {}'.format(type_id))
-    return identifier
-
-
-def create_identifier_key(identifier):
-    if isinstance(identifier, list):
-        return ListIdentifier(tuple(identifier))
-    if isinstance(identifier, ClipIdentifier):
-        return ClipIdentifier(identifier.video, identifier.clip_id, tuple(identifier.frames))
-    if isinstance(identifier, MultiFramesInputIdentifier):
-        return MultiFramesInputIdentifier(tuple(identifier.input_id), tuple(identifier.frames))
-    return identifier
 
 
 def create_reader(config):
@@ -144,18 +72,15 @@ def create_reader(config):
 
 
 class DataReaderField(BaseField):
-    def validate(self, entry_, field_uri=None, fetch_only=False, validation_scheme=None):
-        errors = super().validate(entry_, field_uri)
+    def validate(self, entry_, field_uri=None):
+        super().validate(entry_, field_uri)
 
         if entry_ is None:
-            return errors
+            return
 
         field_uri = field_uri or self.field_uri
         if isinstance(entry_, str):
-            errors.extend(
-                StringField(choices=BaseReader.providers).validate(
-                    entry_, field_uri, fetch_only=fetch_only, validation_scheme=validation_scheme)
-            )
+            StringField(choices=BaseReader.providers).validate(entry_, 'reader')
         elif isinstance(entry_, dict):
             class DictReaderValidator(ConfigValidator):
                 type = StringField(choices=BaseReader.providers)
@@ -163,17 +88,9 @@ class DataReaderField(BaseField):
             dict_reader_validator = DictReaderValidator(
                 'reader', on_extra_argument=DictReaderValidator.IGNORE_ON_EXTRA_ARGUMENT
             )
-            errors.extend(
-                dict_reader_validator.validate(
-                    entry_, field_uri, fetch_only=fetch_only, validation_scheme=validation_scheme
-                ))
+            dict_reader_validator.validate(entry_)
         else:
-            msg = 'reader must be either string or dictionary'
-            if not fetch_only:
-                self.raise_error(entry_, field_uri, msg)
-            errors.append(self.build_error(entry_, field_uri, msg, validation_scheme))
-
-        return errors
+            self.raise_error(entry_, field_uri, 'reader must be either string or dictionary')
 
 
 class BaseReader(ClassProvider):
@@ -187,11 +104,9 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(ClipIdentifier, self._read_clip)
         self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
         self.read_dispatcher.register(ImagePairIdentifier, self._read_pair)
-        self.read_dispatcher.register(ListIdentifier, self._read_list_ids)
-        self.read_dispatcher.register(MultiInstanceIdentifier, self._read_multi_instance_single_object)
         self.multi_infer = False
 
-        self.validate_config(config, data_source)
+        self.validate_config()
         self.configure()
 
     def __call__(self, identifier):
@@ -218,46 +133,10 @@ class BaseReader(ClassProvider):
         self.data_source = get_path(self.data_source, is_directory=True)
         self.multi_infer = self.get_value_from_config('multi_infer')
 
-    @classmethod
-    def validate_config(cls, config, data_source=None, fetch_only=False, **kwargs):
-        uri_prefix = kwargs.pop('uri_prefix', '')
-        reader_uri = uri_prefix or 'reader'
-        if cls.__name__ == BaseReader.__name__:
-            errors = []
-            reader_type = config if isinstance(config, str) else config.get('type')
-            if not reader_type:
-                error = ConfigError(
-                    'type is not provided', config, reader_uri, validation_scheme=cls.validation_scheme()
-                )
-                if not fetch_only:
-                    raise error
-                errors.append(error)
-                return errors
-            try:
-                reader_cls = cls.resolve(reader_type)
-                reader_config = config if isinstance(config, dict) else {'type': reader_type}
-                if reader_type not in DOES_NOT_REQUIRED_DATA_SOURCE:
-                    data_source_field = PathField(
-                        is_directory=reader_type not in DATA_SOURCE_IS_FILE, description='data source'
-                    )
-                    errors.extend(
-                        data_source_field.validate(
-                            data_source, reader_uri.replace('reader', 'data_source'), fetch_only=fetch_only,
-                            validation_scheme=data_source_field
-                        )
-                    )
-                errors.extend(
-                    reader_cls.validate_config(reader_config, fetch_only=fetch_only, **kwargs, uri_prefix=uri_prefix))
-                return errors
-            except UnregisteredProviderException as exception:
-                if not fetch_only:
-                    raise exception
-                return errors
+    def validate_config(self, **kwargs):
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
-        return ConfigValidator(reader_uri, fields=cls.parameters(), **kwargs).validate(
-            config or {}, fetch_only=fetch_only, validation_scheme=cls.validation_scheme()
-        )
+        ConfigValidator(self.__class__.__name__, fields=self.parameters(), **kwargs).validate(self.config)
 
     def read(self, data_id):
         raise NotImplementedError
@@ -265,25 +144,16 @@ class BaseReader(ClassProvider):
     def _read_list(self, data_id):
         return [self.read(identifier) for identifier in data_id]
 
-    def _read_list_ids(self, data_id):
-        return self.read_dispatcher(list(data_id.values))
-
     def _read_clip(self, data_id):
         video = Path(data_id.video)
         frames_identifiers = [video / frame for frame in data_id.frames]
         return self.read_dispatcher(frames_identifiers)
 
     def _read_frames_multi_input(self, data_id):
-        return self.read_dispatcher(list(data_id.frames))
-
-    def _read_multi_instance_single_object(self, data_id):
-        return self.read_dispatcher(data_id.identifier)
+        return self.read_dispatcher(data_id.frames)
 
     def read_item(self, data_id):
-        data_rep = DataRepresentation(
-            self.read_dispatcher(data_id),
-            identifier=data_id if not isinstance(data_id, ListIdentifier) else list(data_id.values)
-        )
+        data_rep = DataRepresentation(self.read_dispatcher(data_id), identifier=data_id)
         if self.multi_infer:
             data_rep.metadata['multi_infer'] = True
         return data_rep
@@ -298,17 +168,6 @@ class BaseReader(ClassProvider):
 
     def reset(self):
         pass
-
-    @classmethod
-    def validation_scheme(cls, provider=None):
-        if cls.__name__ == BaseReader.__name__:
-            if provider:
-                return cls.resolve(provider).validation_scheme()
-            full_scheme = {}
-            for provider_ in cls.providers:
-                full_scheme[provider_] = cls.resolve(provider_).validation_scheme()
-            return full_scheme
-        return cls.parameters()
 
 
 class ReaderCombiner(BaseReader):
@@ -599,24 +458,6 @@ class NumpyDictReader(BaseReader):
         return DataRepresentation(data, identifier=identifier)
 
 
-class NumpyBinReader(BaseReader):
-    __provider__ = 'numpy_bin_reader'
-
-    @classmethod
-    def parameters(cls):
-        params = super().parameters()
-        params.update({
-            "dtype": StringField(optional=True, default='float32', description='data type for reading')
-        })
-        return params
-
-    def configure(self):
-        self.dtype = self.get_value_from_config('dtype')
-
-    def read(self, data_id):
-        return np.fromfile(self.data_source / data_id, dtype=self.dtype)
-
-
 class TensorflowImageReader(BaseReader):
     __provider__ = 'tf_imread'
 
@@ -629,11 +470,10 @@ class TensorflowImageReader(BaseReader):
                 'tf backend for image reading requires TensorFlow. '
                 'Please install it before usage. {}'.format(import_error.msg)
             )
-        if tf.__version__ < '2.0.0':
-            tf.enable_eager_execution()
+        tf.enable_eager_execution()
 
         def read_func(path):
-            img_raw = tf.read_file(str(path)) if tf.__version__ < '2.0.0' else tf.io.read_file(str(path))
+            img_raw = tf.read_file(str(path))
             img_tensor = tf.image.decode_image(img_raw, channels=3)
             return img_tensor.numpy()
 
@@ -747,35 +587,3 @@ class SkimageReader(BaseReader):
 
     def read(self, data_id):
         return sk.imread(str(self.data_source / data_id))
-
-
-class RawpyReader(BaseReader):
-    __provider__ = 'rawpy'
-
-    @classmethod
-    def parameters(cls):
-        params = super().parameters()
-        params.update({
-            'postprocess': BoolField(optional=True, default=True)
-        })
-        return params
-
-    def configure(self):
-        if isinstance(rawpy, UnsupportedPackage):
-            rawpy.raise_error(self.__provider__)
-        self.postprocess = self.get_value_from_config('postprocess')
-
-    def read(self, data_id):
-        raw = rawpy.imread(str(self.data_source / data_id))
-        if not self.postprocess:
-            return raw.raw_image_visible.astype(np.float32)
-        postprocessed = raw.postprocess(use_camera_wb=True, half_size=False, no_auto_bright=True, output_bps=16)
-        return np.float32(postprocessed / 65535.0)
-
-
-class ByteFileReader(BaseReader):
-    __provider__ = 'byte_reader'
-
-    def read(self, data_id):
-        with open(self.data_source / data_id, 'rb') as f:
-            return np.array(f.read())

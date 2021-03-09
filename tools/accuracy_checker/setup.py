@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ def check_and_update_numpy(min_acceptable='1.15'):
 
 def install_dependencies_with_pip(dependencies):
     for dep in dependencies:
-        subprocess.call(['pip3', 'install', str(dep)])
+        subprocess.call(['pip3', 'install',  str(dep)])
 
 
 class CoreInstall(install_command):

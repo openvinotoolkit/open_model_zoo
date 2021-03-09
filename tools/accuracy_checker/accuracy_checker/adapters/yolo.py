@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import BoolField, NumberField, StringField, ConfigValidator, ListField, ConfigError
 from ..representation import DetectionPrediction
+from ..topology_types import YoloV1Tiny, YoloV2, YoloV2Tiny, YoloV3, YoloV3Tiny
 from ..utils import get_or_parse_value
 
 DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h", "confidence", "probabilities"])
@@ -58,19 +59,17 @@ class TinyYOLOv1Adapter(Adapter):
     """
     __provider__ = 'tiny_yolo_v1'
     prediction_types = (DetectionPrediction, )
+    topology_types = (YoloV1Tiny, )
 
     def process(self, raw, identifiers, frame_meta):
         """
         Args:
             identifiers: list of input data identifiers
             raw: output of model
-            frame_meta: meta info about prediction
         Returns:
              list of DetectionPrediction objects
         """
-        prediction = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(prediction)
-        prediction = prediction[self.output_blob]
+        prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
 
         PROBABILITY_SIZE = 980
         CONFIDENCE_SIZE = 98
@@ -157,6 +156,7 @@ class YoloV2Adapter(Adapter):
     """
     __provider__ = 'yolo_v2'
     prediction_types = (DetectionPrediction, )
+    topology_types = (YoloV2, YoloV2Tiny, )
 
     PRECOMPUTED_ANCHORS = {
         'yolo_v2': [1.3221, 1.73145, 3.19275, 4.00944, 5.05587, 8.09892, 9.47112, 4.84053, 11.2364, 10.0071],
@@ -198,11 +198,8 @@ class YoloV2Adapter(Adapter):
         })
         return parameters
 
-    @classmethod
-    def validate_config(cls, config, fetch_only=False, **kwargs):
-        return super().validate_config(
-            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT
-        )
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
 
     def configure(self):
         self.classes = self.get_value_from_config('classes')
@@ -227,13 +224,10 @@ class YoloV2Adapter(Adapter):
         Args:
             identifiers: list of input data identifiers
             raw: output of model
-            frame_meta: meta info about data processing
         Returns:
             list of DetectionPrediction objects
         """
-        predictions = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(predictions)
-        predictions = predictions[self.output_blob]
+        predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
 
         result = []
         box_size = self.classes + self.coords + 1
@@ -259,6 +253,7 @@ class YoloV3Adapter(Adapter):
     """
     __provider__ = 'yolo_v3'
     prediction_types = (DetectionPrediction, )
+    topology_types = (YoloV3, YoloV3Tiny, )
 
     PRECOMPUTED_ANCHORS = {
         'yolo_v3': [
@@ -310,7 +305,6 @@ class YoloV3Adapter(Adapter):
                 description="Reshapes output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on 'output_format'"
                             "value ([B,Cy,Cx] by default). You may need to specify 'cells' value."
             ),
-            'transpose': ListField(optional=True, description="Transpose output tensor to specified format."),
             'cells': ListField(
                 optional=True, default=[13, 26, 52],
                 description="Grid size for each layer, according 'outputs' filed. Works only with 'do_reshape=True' or "
@@ -327,11 +321,8 @@ class YoloV3Adapter(Adapter):
 
         return parameters
 
-    @classmethod
-    def validate_config(cls, config, fetch_only=False, **kwargs):
-        return super().validate_config(
-            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
-        )
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
 
     def configure(self):
         self.classes = self.get_value_from_config('classes')
@@ -351,7 +342,6 @@ class YoloV3Adapter(Adapter):
                 per_layer_anchors.append(layer_anchors)
             self.masked_anchors = per_layer_anchors
         self.do_reshape = self.get_value_from_config('do_reshape')
-        self.transpose = self.get_value_from_config('transpose')
         self.cells = self.get_value_from_config('cells')
         if len(self.outputs) != len(self.cells):
             if self.do_reshape:
@@ -402,8 +392,6 @@ class YoloV3Adapter(Adapter):
             for layer_id, p in enumerate(prediction):
                 anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
                 num = len(anchors) // 2 if self.masked_anchors else self.num
-                if self.transpose:
-                    p = np.transpose(p, self.transpose)
                 if self.do_reshape or len(p.shape) != 3:
                     try:
                         cells = self.cells[layer_id]
@@ -414,7 +402,6 @@ class YoloV3Adapter(Adapter):
                         new_shape = (num * box_size, cells, cells)
                     else:
                         new_shape = (cells, cells, num * box_size)
-
                     p = np.reshape(p, new_shape)
                 else:
                     # Get grid size from output shape - ignore self.cells value.
@@ -484,98 +471,3 @@ class YoloV3ONNX(Adapter):
             y_maxs = transposed_boxes[2]
             result.append(DetectionPrediction(identifier, out_classes, out_scores, x_mins, y_mins, x_maxs, y_maxs))
         return result
-
-
-class YoloV3TF2(Adapter):
-    __provider__ = 'yolo_v3_tf2'
-
-    @classmethod
-    def parameters(cls):
-        params = super().parameters()
-        params.update({
-            'outputs': ListField(description="The list of output layers names."),
-            'score_threshold': NumberField(
-                description='Minimal accepted box confidence threshold', min_value=0, max_value=1, value_type=float,
-                optional=True, default=0
-            )
-        })
-        return params
-
-    def configure(self):
-        self.outputs = self.get_value_from_config('outputs')
-        self.score_threshold = self.get_value_from_config('score_threshold')
-
-    def process(self, raw, identifiers, frame_meta):
-        result = []
-        input_shape = list(frame_meta[0].get('input_shape', {'data': (1, 416, 416, 3)}).values())[0]
-        is_nchw = input_shape[1] == 3
-        input_size = min(input_shape[1], input_shape[2]) if not is_nchw else min(input_shape[2], input_shape[3])
-        raw_outputs = self._extract_predictions(raw, frame_meta)
-        batch = len(identifiers)
-        predictions = [[] for _ in range(batch)]
-        for blob in self.outputs:
-            for b in range(batch):
-                out = raw_outputs[blob][b]
-                if is_nchw:
-                    out = np.transpose(out, (1, 2, 3, 0))
-                out = np.reshape(out, (-1, out.shape[-1]))
-                predictions[b].append(out)
-        for identifier, outputs, meta in zip(identifiers, predictions, frame_meta):
-            original_image_size = meta['image_size'][:2]
-            out = np.concatenate(outputs, axis=0)
-            coords, score, label = self.postprocess_boxes(out, original_image_size, input_size)
-            x_min, y_min, x_max, y_max = coords.T
-            result.append(DetectionPrediction(identifier, label, score, x_min, y_min, x_max, y_max))
-        return result
-
-    def postprocess_boxes(self, pred_bbox, org_img_shape, input_size):
-        valid_scale = [0, np.inf]
-        pred_bbox = np.array(pred_bbox)
-
-        pred_xywh = pred_bbox[:, 0:4]
-        pred_conf = pred_bbox[:, 4]
-        pred_prob = pred_bbox[:, 5:]
-
-        # # (1) (x, y, w, h) --> (xmin, ymin, xmax, ymax)
-        pred_coor = np.concatenate([pred_xywh[:, :2] - pred_xywh[:, 2:] * 0.5,
-                                    pred_xywh[:, :2] + pred_xywh[:, 2:] * 0.5], axis=-1)
-        # # (2) (xmin, ymin, xmax, ymax) -> (xmin_org, ymin_org, xmax_org, ymax_org)
-        org_h, org_w = org_img_shape
-        resize_ratio = min(input_size / org_w, input_size / org_h)
-
-        dw = (input_size - resize_ratio * org_w) / 2
-        dh = (input_size - resize_ratio * org_h) / 2
-
-        pred_coor[:, 0::2] = 1.0 * (pred_coor[:, 0::2] - dw) / resize_ratio
-        pred_coor[:, 1::2] = 1.0 * (pred_coor[:, 1::2] - dh) / resize_ratio
-
-        # # (3) clip some boxes those are out of range
-        pred_coor = np.concatenate([np.maximum(pred_coor[:, :2], [0, 0]),
-                                    np.minimum(pred_coor[:, 2:], [org_w - 1, org_h - 1])], axis=-1)
-        invalid_mask = np.logical_or((pred_coor[:, 0] > pred_coor[:, 2]), (pred_coor[:, 1] > pred_coor[:, 3]))
-        pred_coor[invalid_mask] = 0
-
-        # # (4) discard some invalid boxes
-        bboxes_scale = np.sqrt(np.multiply.reduce(pred_coor[:, 2:4] - pred_coor[:, 0:2], axis=-1))
-        scale_mask = np.logical_and((valid_scale[0] < bboxes_scale), (bboxes_scale < valid_scale[1]))
-
-        # # (5) discard some boxes with low scores
-        classes = np.argmax(pred_prob, axis=-1)
-        scores = pred_conf * pred_prob[np.arange(len(pred_coor)), classes]
-        score_mask = scores > self.score_threshold
-        mask = np.logical_and(scale_mask, score_mask)
-        coors, scores, classes = pred_coor[mask], scores[mask], classes[mask]
-
-        return coors, scores, classes
-
-
-class YoloV5Adapter(YoloV3Adapter):
-    __provider__ = 'yolo_v5'
-
-    def configure(self):
-        super().configure()
-        if self.raw_output:
-            self.processor = YoloOutputProcessor(coord_correct=lambda x: 2.0 / (1.0 + np.exp(-x)) - 0.5,
-                                                 size_correct=lambda x: (2.0 / (1.0 + np.exp(-x))) ** 2,
-                                                 conf_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
-                                                 prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))

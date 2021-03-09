@@ -11,16 +11,14 @@ yaml-files:
 
 ignore: |
   demos/thirdparty/
-  tools/accuracy_checker/dataset_definitions.yml
+  tools/accuracy_checker/.yamllint
   tools/accuracy_checker/configs/
 
 rules:
   line-length: disable
   braces: enable
   brackets: enable
-  colons:
-    max-spaces-before: 0
-    max-spaces-after: -1
+  colons: disable
   commas: enable
   comments:
     level: warning
@@ -36,7 +34,7 @@ rules:
   key-ordering: disable
   new-line-at-end-of-file: enable
   new-lines: disable
-  octal-values: enable
+  octal-values: disable
   quoted-strings: disable
   trailing-spaces: enable
   truthy: disable

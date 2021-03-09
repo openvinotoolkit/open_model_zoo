@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import NormalizationArgsField, ConfigError
+from ..config import BaseField, ConfigError
 from ..preprocessor import Preprocessor
+from ..utils import get_or_parse_value
 
 
 class Normalize(Preprocessor):
@@ -37,27 +38,33 @@ class Normalize(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'mean': NormalizationArgsField(
+            'mean': BaseField(
                 optional=True,
                 description="Values which will be subtracted from image channels. You can specify one "
-                            "value for all channels or list of comma separated channel-wise values.",
-                precomputed_args=Normalize.PRECOMPUTED_MEANS
+                            "value for all channels or list of comma separated channel-wise values."
             ),
-            'std': NormalizationArgsField(
+            'std': BaseField(
                 optional=True,
                 description="Specifies values, on which pixels will be divided. You can specify one value for all "
-                            "channels or list of comma separated channel-wise values.",
-                precomputed_args=Normalize.PRECOMPUTED_STDS,
-                allow_zeros=False
+                            "channels or list of comma separated channel-wise values."
             )
         })
         return parameters
 
     def configure(self):
-        self.mean = self.get_value_from_config('mean')
-        self.std = self.get_value_from_config('std')
+        self.mean = get_or_parse_value(self.config.get('mean'), Normalize.PRECOMPUTED_MEANS)
+        self.std = get_or_parse_value(self.config.get('std'), Normalize.PRECOMPUTED_STDS)
         if not self.mean and not self.std:
             raise ConfigError('mean or std value should be provided')
+
+        if self.std and 0 in self.std:
+            raise ConfigError('std value should not contain 0')
+
+        if self.mean and not (len(self.mean) == 3 or len(self.mean) == 1):
+            raise ConfigError('mean should be one value or comma-separated list channel-wise values')
+
+        if self.std and not (len(self.std) == 3 or len(self.std) == 1):
+            raise ConfigError('std should be one value or comma-separated list channel-wise values')
 
     def process(self, image, annotation_meta=None):
         def process_data(data, mean, std):

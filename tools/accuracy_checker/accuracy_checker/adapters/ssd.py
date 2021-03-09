@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ from .adapter import Adapter
 from ..config import ConfigValidator, StringField, NumberField, ListField, BoolField
 from ..postprocessor import NMS
 from ..representation import DetectionPrediction, ContainerPrediction
+from ..topology_types import SSD, FasterRCNN
 
 
 class SSDAdapter(Adapter):
@@ -32,6 +33,7 @@ class SSDAdapter(Adapter):
     """
     __provider__ = 'ssd'
     prediction_types = (DetectionPrediction, )
+    topology_types = (SSD, FasterRCNN, )
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -41,9 +43,7 @@ class SSDAdapter(Adapter):
         Returns:
             list of DetectionPrediction objects
         """
-        prediction_batch = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(prediction_batch)
-        prediction_batch = prediction_batch[self.output_blob]
+        prediction_batch = self._extract_predictions(raw, frame_meta)[self.output_blob]
         prediction_count = prediction_batch.shape[2] if len(prediction_batch.shape) > 2 else prediction_batch.shape[0]
         prediction_batch = prediction_batch.reshape(prediction_count, -1)
         prediction_batch = self.remove_empty_detections(prediction_batch)
@@ -72,11 +72,8 @@ class PyTorchSSDDecoder(Adapter):
     """
     __provider__ = 'pytorch_ssd_decoder'
 
-    @classmethod
-    def validate_config(cls, config, fetch_only=False, **kwargs):
-        return super().validate_config(
-            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
-        )
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
 
     @classmethod
     def parameters(cls):
@@ -250,11 +247,8 @@ class FacePersonAdapter(Adapter):
 
         return parameters
 
-    @classmethod
-    def validate_config(cls, config, fetch_only=False, **kwargs):
-        return super().validate_config(
-            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
-        )
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
 
     def configure(self):
         self.face_detection_out = self.launcher_config['face_out']
@@ -287,7 +281,6 @@ class SSDAdapterMxNet(Adapter):
             list of DetectionPrediction objects
         """
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(raw_outputs)
         result = []
         for identifier, prediction_batch in zip(identifiers, raw_outputs[self.output_blob]):
             # Filter detections (get only detections with class_id >= 0)

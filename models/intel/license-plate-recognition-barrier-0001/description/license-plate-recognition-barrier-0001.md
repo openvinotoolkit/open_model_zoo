@@ -35,7 +35,7 @@ thoroughly. Other types of license plates may underperform.
 ## Inputs
 
 1.	name: "data" , shape: [1x3x24x94] - An input image in following format [1xCxHxW]. Expected color order is BGR.
-2.	name: "seq_ind" , shape: [88,1] - An auxiliary blob that is needed for correct decoding. Set this to `[1, 1, 1, ..., 1]`.
+2.	name: "seq_ind" , shape: [88,1] - An auxiliary blob that is needed for correct decoding. Set this to `[0, 1, 1, ..., 1]`.
 
 ## Outputs
 

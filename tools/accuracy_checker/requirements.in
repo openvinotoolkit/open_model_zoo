@@ -28,9 +28,7 @@ nltk
 # editdistance calculation
 editdistance
 
-# DNA sequence matching
-parasail
-fast-ctc-decode
 
-# raw image formats processing
-rawpy
+# DNA sequence matching
+parasail<=1.2
+fast-ctc-decode

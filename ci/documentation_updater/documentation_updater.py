@@ -20,6 +20,7 @@ import argparse
 import logging
 import re
 import ruamel.yaml
+import shlex
 
 from pathlib import Path
 from ruamel.yaml.scalarstring import FoldedScalarString
@@ -28,7 +29,7 @@ from sys import exit
 MODES = [
     'check',
     'update'
-]
+    ]
 
 LOG_LEVELS = [
     'CRITICAL',
@@ -78,7 +79,7 @@ def convert(lines):
             result += ' '
         result += line.rstrip('\n')
     result = re.sub(r"\[(.*?)\]\((.*?)\)", r"\1 <\2>", result) # Links transformation
-    result = result.replace("`", "\"").replace("\\*", "*")
+    result = result.replace("`", "\"").replace("\*", "*")
     return result.strip()
 
 

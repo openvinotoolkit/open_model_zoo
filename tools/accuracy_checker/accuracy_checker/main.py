@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,210 +36,72 @@ EVALUATION_MODE = {
 }
 
 
-def add_common_args(parser):
-    common_args = parser.add_argument_group('Common arguments')
-    common_args.add_argument(
+def build_arguments_parser():
+    parser = ArgumentParser(description='Deep Learning accuracy validation framework', allow_abbrev=False)
+    parser.add_argument(
         '-d', '--definitions',
         help='path to the yml file with definitions',
         type=get_path,
         required=False
     )
-    common_args.add_argument(
+    parser.add_argument(
         '-c', '--config',
         help='path to the yml file with local configuration',
         type=get_path,
         required=True
     )
-    common_args.add_argument(
+    parser.add_argument(
         '-m', '--models',
         help='prefix path to the models and weights',
         type=partial(get_path, is_directory=True),
         required=False,
         nargs='+'
     )
-    common_args.add_argument(
+    parser.add_argument(
         '-s', '--source',
         help='prefix path to the data source',
         type=partial(get_path, is_directory=True),
         required=False
     )
-    common_args.add_argument(
+    parser.add_argument(
         '-a', '--annotations',
         help='prefix path to the converted annotations and datasets meta data',
         type=partial(get_path, is_directory=True),
         required=False
     )
-    common_args.add_argument(
-        '--model_attributes',
-        help="path's prefix for additional models attributes",
-        type=partial(get_path, is_directory=True),
-        required=False
-    )
-    common_args.add_argument(
-        '--input_precision',
-        help='space-separated list of precisions for network inputs. '
-             'Providing several values required <layer_name>:<precision> format. '
-             'If single value without layer_name provided, then it will be applied to all input layers.',
-        required=False,
-        nargs='+'
-    )
-
-
-def add_config_filtration_args(parser):
-    config_filtration_args = parser.add_argument_group('Config filtration arguments')
-    config_filtration_args.add_argument(
-        '-tf', '--target_framework',
-        help='framework for infer',
-        required=False
-    )
-    config_filtration_args.add_argument(
-        '-td', '--target_devices',
-        help='space separated list of devices for infer',
-        required=False,
-        nargs='+'
-    )
-    config_filtration_args.add_argument(
-        '-tt', '--target_tags',
-        help='space separated list of launcher tags for infer',
-        required=False,
-        nargs='+'
-    )
-
-
-def add_dataset_related_args(parser):
-    dataset_related_args = parser.add_argument_group('Dataset related arguments')
-    dataset_related_args.add_argument(
-        '-ss', '--subsample_size',
-        help="dataset subsample size",
-        type=str,
-        required=False
-    )
-    dataset_related_args.add_argument(
-        '--shuffle',
-        help="allow shuffle annotation during creation a subset",
-        type=cast_to_bool,
-        required=False
-    )
-    dataset_related_args.add_argument(
-        '--store_subset',
-        help='allow to save evaluation data ids',
-        type=cast_to_bool,
-        default=False,
-        required=False
-    )
-    dataset_related_args.add_argument(
-        '--subset_file',
-        help='file name for saving or reading identifiers subset',
-        required=False
-    )
-
-
-def add_profiling_related_args(parser):
-    profiling_related_args = parser.add_argument_group('Profiling related arguments')
-    profiling_related_args.add_argument(
-        '--profile',
-        help='activate metric profiling mode',
-        type=cast_to_bool,
-        required=False
-    )
-    profiling_related_args.add_argument(
-        '--profiler_logs_dir',
-        help='path to save profiler logs',
-        type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
-        required=False
-    )
-    profiling_related_args.add_argument(
-        '--profile_report_type',
-        help='report type for profiler logs',
-        default='csv',
-        choices=['csv', 'json'],
-        required=False
-    )
-
-
-def add_tool_settings_args(parser):
-    tool_settings_args = parser.add_argument_group('Tool settings arguments')
-    tool_settings_args.add_argument(
-        '--progress',
-        help='progress reporter. You can select bar or print',
-        default='bar',
-        required=False
-    )
-    tool_settings_args.add_argument(
-        '--progress_interval',
-        help='interval for update progress if selected *print* progress.',
-        type=int,
-        default=1000,
-        required=False
-    )
-    tool_settings_args.add_argument(
-        '--ignore_result_formatting',
-        help='allow to get raw metrics results without data formatting',
-        type=cast_to_bool,
-        default=False,
-        required=False
-    )
-    tool_settings_args.add_argument(
-        '--stored_predictions',
-        help='path to file with saved predictions. Used for development',
-        # since at the first time file does not exist and then created we can not always check existence
-        required=False
-    )
-    tool_settings_args.add_argument(
-        '--csv_result',
-        help='file for results writing',
-        required=False,
-    )
-    tool_settings_args.add_argument(
-        '--intermediate_metrics_results',
-        help='enables intermediate metrics results printing',
-        type=cast_to_bool,
-        default=False,
-        required=False
-    )
-    tool_settings_args.add_argument(
-        '--metrics_interval',
-        help='number of iteration for updated metrics result printing',
-        type=int,
-        default=1000,
-        required=False
-    )
-    tool_settings_args.add_argument(
-        '--store_only',
-        type=cast_to_bool,
-        default=False,
-        required=False
-    )
-    tool_settings_args.add_argument(
-        '-l', '--log_file',
-        help='file for additional logging results',
-        required=False
-    )
-
-
-def add_openvino_specific_args(parser):
-    openvino_specific_args = parser.add_argument_group('OpenVINO specific arguments')
-    openvino_specific_args.add_argument(
+    parser.add_argument(
         '-e', '--extensions',
         help='prefix path to extensions folder',
         type=partial(get_path, check_exists=False),
         default=Path.cwd(),
         required=False
     )
-    openvino_specific_args.add_argument(
+    parser.add_argument(
         '--cpu_extensions_mode',
         help='specified preferable set of processor instruction for automatic searching cpu extension lib',
-        choices=['avx512', 'avx2', 'sse4'],
-        required=False
+        required=False,
+        choices=['avx512', 'avx2', 'sse4']
     )
-    openvino_specific_args.add_argument(
+    parser.add_argument(
         '-b', '--bitstreams',
         help='prefix path to bitstreams folder',
         type=partial(get_path, file_or_directory=True),
         required=False
     )
-    openvino_specific_args.add_argument(
+    parser.add_argument(
+        '--stored_predictions',
+        help='path to file with saved predictions. Used for development',
+        # since at the first time file does not exist and then created we can not always check existence
+        required=False
+    )
+    parser.add_argument(
+        '-C', '--converted_models',
+        help='directory to store Model Optimizer converted models. Used for DLSDK launcher only',
+        type=partial(get_path, is_directory=True),
+        default=Path.cwd(),
+        required=False
+    )
+    parser.add_argument(
         '-M', '--model_optimizer',
         help='path to model optimizer directory',
         type=partial(get_path, is_directory=True),
@@ -247,7 +109,7 @@ def add_openvino_specific_args(parser):
         # defined in model_conversion.py
         required=False
     )
-    openvino_specific_args.add_argument(
+    parser.add_argument(
         '--tf_custom_op_config_dir',
         help='path to directory with tensorflow custom operation configuration files for model optimizer',
         type=partial(get_path, is_directory=True),
@@ -255,7 +117,7 @@ def add_openvino_specific_args(parser):
         # defined in model_conversion.py
         required=False
     )
-    openvino_specific_args.add_argument(
+    parser.add_argument(
         '--transformations_config_dir',
         help='path to directory with Model Optimizer transformations configuration files',
         type=partial(get_path, is_directory=True),
@@ -263,7 +125,7 @@ def add_openvino_specific_args(parser):
         # defined in model_conversion.py
         required=False
     )
-    openvino_specific_args.add_argument(
+    parser.add_argument(
         '--tf_obj_detection_api_pipeline_config_path',
         help='path to directory with tensorflow object detection api pipeline configuration files for model optimizer',
         type=partial(get_path, is_directory=True),
@@ -271,87 +133,149 @@ def add_openvino_specific_args(parser):
         # defined in model_conversion.py
         required=False
     )
-    openvino_specific_args.add_argument(
-        '--deprecated_ir_v7',
-        help='allow generation IR v7 via Model Optimizer',
-        type=cast_to_bool,
+    parser.add_argument(
+        '--progress',
+        help='progress reporter. You can select bar or print',
+        required=False,
+        default='bar'
+    )
+    parser.add_argument(
+        '--progress_interval',
+        help='interval for update progress if selected *print* progress.',
+        required=False,
+        type=int,
+        default=1000
+    )
+    parser.add_argument(
+        '-tf', '--target_framework',
+        help='framework for infer',
+        required=False
+    )
+    parser.add_argument(
+        '-td', '--target_devices',
+        help='Space separated list of devices for infer',
+        required=False,
+        nargs='+'
+    )
+
+    parser.add_argument(
+        '-tt', '--target_tags',
+        help='Space separated list of launcher tags for infer',
+        required=False,
+        nargs='+'
+    )
+
+    parser.add_argument(
+        '-l', '--log_file',
+        help='file for additional logging results',
+        required=False
+    )
+
+    parser.add_argument(
+        '--ignore_result_formatting',
+        help='allow to get raw metrics results without data formatting',
+        required=False,
         default=False,
-        required=False
+        type=cast_to_bool
     )
-    openvino_specific_args.add_argument(
-        '-dc', '--device_config',
-        help='Inference Engine device specific config file',
-        type=get_path,
-        required=False
-    )
-    openvino_specific_args.add_argument(
-        '--ie_preprocessing',
-        help='enable preprocessing via Inference Engine. Accepted only for dlsdk launcher.',
-        type=cast_to_bool,
-        default=False,
-        required=False
-    )
-    openvino_specific_args.add_argument(
-        '--model_is_blob',
-        help='the tip for automatic model search to use blob for dlsdk launcher',
-        type=cast_to_bool,
-        required=False
-    )
-    openvino_specific_args.add_argument(
-        '-C', '--converted_models',
-        help='directory to store Model Optimizer converted models. Used for DLSDK launcher only',
-        type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
-        required=False
-    )
-    openvino_specific_args.add_argument(
+
+    parser.add_argument(
         '-am', '--affinity_map',
         help='prefix path to the affinity maps',
         type=partial(get_path, file_or_directory=True),
         default=Path.cwd(),
         required=False
     )
-    openvino_specific_args.add_argument(
+
+    parser.add_argument(
         '--aocl',
         help='path to aocl executable for FPGA bitstream programming',
         type=get_path,
         required=False
     )
-    openvino_specific_args.add_argument(
+    parser.add_argument(
         '--vpu_log_level',
         help='log level for VPU devices',
-        default='LOG_WARNING',
+        required=False,
         choices=['LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG'],
-        required=False
+        default='LOG_WARNING'
     )
-    openvino_specific_args.add_argument(
-        '--async_mode',
-        help='Allow evaluation in async mode',
-        type=cast_to_bool,
+    parser.add_argument(
+        '--deprecated_ir_v7',
+        help='Allow generation IR v7 via Model Optimizer',
+        required=False,
         default=False,
+        type=cast_to_bool
+    )
+    parser.add_argument(
+        '-dc', '--device_config',
+        help='Inference Engine device specific config file',
+        type=get_path,
         required=False
     )
-    openvino_specific_args.add_argument(
-        '--num_requests',
-        help='the number of infer requests',
-        required=False
-    )
-
-
-def build_arguments_parser():
-    parser = ArgumentParser(description='Deep Learning accuracy validation framework', allow_abbrev=False)
-    add_common_args(parser)
-    add_config_filtration_args(parser)
-    add_dataset_related_args(parser)
-    add_profiling_related_args(parser)
-    add_tool_settings_args(parser)
-    add_openvino_specific_args(parser)
 
     parser.add_argument(
-        '--version',
-        help='show tool version and exit',
-        action='version',
-        version='%(prog)s {version}'.format(version=__version__)
+        '--async_mode',
+        help='Allow evaluation in async mode',
+        required=False,
+        default=False,
+        type=cast_to_bool
+    )
+    parser.add_argument(
+        '--num_requests',
+        help='the number of infer requests',
+        required=False,
+    )
+    parser.add_argument(
+        '--csv_result',
+        help='file for results writing',
+        required=False,
+    )
+    parser.add_argument(
+        '--model_is_blob', help='the tip for automatic model search to use blob for dlsdk launcher',
+        required=False,
+        type=cast_to_bool
+    )
+    parser.add_argument(
+        '--model_attributes', help="path's prefix for additional models attributes",
+        required=False,
+        type=partial(get_path, is_directory=True)
+    )
+    parser.add_argument(
+        '--ie_preprocessing', help='enable preprocessing via Inference Engine. Accepted only for dlsdk launcher.',
+        required=False, default=False, type=cast_to_bool
+    )
+    parser.add_argument(
+        '-ss', '--subsample_size', help="dataset subsample size",
+        required=False,
+        type=str
+    )
+    parser.add_argument(
+        '--shuffle', help="Allow shuffle annotation during creation a subset",
+        required=False,
+        type=cast_to_bool
+    )
+    parser.add_argument(
+        '--version', action='version', version='%(prog)s {version}'.format(version=__version__),
+        help='show tool version and exit'
+    )
+    parser.add_argument(
+        '--profile',
+        help='Activate metric profiling mode',
+        required=False,
+        type=cast_to_bool
+    )
+    parser.add_argument(
+        '--profiler_logs_dir', required=False, type=partial(get_path, is_directory=True), default=Path.cwd()
+    )
+    parser.add_argument('--profile_report_type', required=False, choices=['csv', 'json'], default='csv')
+    parser.add_argument('--intermediate_metrics_results', required=False, default=False, type=cast_to_bool)
+    parser.add_argument('--metrics_interval', required=False, default=1000, type=int)
+    parser.add_argument(
+        '--input_precision', required=False, nargs='+',
+        help='space-separated list of precisions for network inputs. '
+             'Providing several values required <layer_name>:<precision> format. '
+             'If single value without layer_name provided, then it will be applayed to all input layers.'
     )
 
     return parser
@@ -371,15 +295,12 @@ def main():
         evaluator_kwargs['intermediate_metrics_results'] = intermdeiate_metrics
         evaluator_kwargs['metrics_interval'] = args.metrics_interval
         evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
-    evaluator_kwargs['store_only'] = args.store_only
 
     config, mode = ConfigReader.merge(args)
     evaluator_class = EVALUATION_MODE.get(mode)
     if not evaluator_class:
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
-        config_entry['_store_only'] = args.store_only
-        config_entry['_stored_data'] = args.stored_predictions
         try:
             processing_info = evaluator_class.get_processing_info(config_entry)
             print_processing_info(*processing_info)
@@ -392,12 +313,11 @@ def main():
             evaluator.process_dataset(
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
             )
-            if not args.store_only:
-                metrics_results, _ = evaluator.extract_metrics_results(
-                    print_results=True, ignore_results_formatting=args.ignore_result_formatting
-                )
-                if args.csv_result:
-                    write_csv_result(args.csv_result, processing_info, metrics_results)
+            metrics_results, _ = evaluator.extract_metrics_results(
+                print_results=True, ignore_results_formatting=args.ignore_result_formatting
+            )
+            if args.csv_result:
+                write_csv_result(args.csv_result, processing_info, metrics_results)
             evaluator.release()
         except Exception as e:  # pylint:disable=W0703
             exception(e)

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ from ..config import PathField, BoolField
 from ..representation import ClassificationAnnotation
 from ..utils import read_txt, get_path, check_file_existence, read_json
 
+from ..topology_types import ImageClassification
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 
 class ImageNetFormatConverter(BaseFormatConverter):
     __provider__ = 'imagenet'
     annotation_types = (ClassificationAnnotation, )
+    topology_types = (ImageClassification, )
 
     @classmethod
     def parameters(cls):

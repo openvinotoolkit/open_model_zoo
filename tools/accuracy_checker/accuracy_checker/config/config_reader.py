@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import os
 
 import warnings
 
-from ..utils import read_yaml, to_lower_register, contains_any, is_iterable
+from ..utils import read_yaml, to_lower_register, contains_any
 from .config_validator import ConfigError
 
 ENTRIES_PATHS = {
@@ -36,8 +36,7 @@ ENTRIES_PATHS = {
         'annotation': 'annotations',
         'dataset_meta': 'annotations',
         'data_source': 'source',
-        'additional_data_source': 'source',
-        "subset_file": "annotations"
+        'additional_data_source': 'source'
     },
 }
 
@@ -69,7 +68,6 @@ LIST_ENTRIES_PATHS = {
         'mxnet_weights': 'models',
         'onnx_model': 'models',
         'kaldi_model': 'models',
-        'saved_model_dir': 'models'
 }
 
 COMMAND_LINE_ARGS_AS_ENV_VARS = {
@@ -88,8 +86,7 @@ ACCEPTABLE_MODEL = [
     'mxnet_weights',
     'onnx_model',
     'kaldi_model',
-    'model',
-    'saved_model_dir'
+    'model'
 ]
 
 
@@ -684,14 +681,13 @@ def process_config(
             if annotation_conversion_config:
                 command_line_conversion = (create_command_line_mapping(annotation_conversion_config,
                                                                        'source', ANNOTATION_CONVERSION_PATHS))
-                datasets_config['_command_line_mapping'] = prepare_commandline_conversion_mapping(
-                    command_line_conversion, args
-                )
                 merge_entry_paths(command_line_conversion, annotation_conversion_config, args)
             if 'preprocessing' in datasets_config:
                 for preprocessor in datasets_config['preprocessing']:
-                    merge_entry_paths(create_command_line_mapping(preprocessor, 'models', PREPROCESSING_PATHS),
-                                      preprocessor, args)
+                    command_line_preprocessing = (
+                        create_command_line_mapping(preprocessor, 'models', PREPROCESSING_PATHS)
+                    )
+                    merge_entry_paths(command_line_preprocessing, preprocessor, args)
 
     def process_launchers(launchers_configs):
         if not isinstance(launchers_configs, list):
@@ -755,7 +751,7 @@ def process_config(
 
 def merge_entry_paths(keys, value, args, value_id=0):
     for field, argument in keys.items():
-        if not is_iterable(value) or field not in value:
+        if field not in value:
             continue
 
         config_path = Path(value[field])
@@ -863,23 +859,3 @@ def _add_subset_specific_arg(dataset_entry, arguments):
 
     if 'subsample_size' in arguments and arguments.subsample_size is not None:
         dataset_entry['subsample_size'] = arguments.subsample_size
-    if 'subset_file' in arguments and arguments.subset_file is not None:
-        dataset_entry['subset_file'] = arguments.subset_file
-    if 'store_subset' in arguments and arguments.store_subset:
-        dataset_entry['store_subset'] = arguments.store_subset
-
-
-def prepare_commandline_conversion_mapping(commandline_conversion, args):
-    mapping = {}
-    for key, value in commandline_conversion.items():
-        if not isinstance(value, list):
-            mapping[key] = args.get(value)
-        else:
-            possible_paths = []
-            for v in value:
-                if args.get(v) is None:
-                    continue
-                possible_paths.append(args[v])
-            mapping[key] = possible_paths
-
-    return mapping

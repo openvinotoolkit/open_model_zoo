@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -65,7 +65,6 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
         self.raw_masks_out = self.get_value_from_config('raw_masks_out')
         self.texts_out = self.get_value_from_config('texts_out')
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
-        self.mask_processor = self.mask_to_result if not self.scores_out else self.mask_to_result_old
 
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
@@ -98,21 +97,35 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
         results = []
 
         for identifier, image_meta in zip(identifiers, frame_meta):
-            im_scale_x, im_scale_y = image_meta['scale_x'], image_meta['scale_y']
-            img_h, img_w = image_meta['image_size'][:2]
-            boxes[:, :4] /= np.array([im_scale_x, im_scale_y, im_scale_x, im_scale_y])
-            boxes[:, 0:4:2] = np.clip(boxes[:, 0:4:2], 0, img_w - 1)
-            boxes[:, 1:4:2] = np.clip(boxes[:, 1:4:2], 0, img_h - 1)
+            original_image_size = image_meta['image_size'][:2]
+            if 'scale_x' in image_meta and 'scale_y' in image_meta:
+                im_scale_x, im_scale_y = image_meta['scale_x'], image_meta['scale_y']
+            else:
+                image_input = [shape for shape in image_meta['input_shape'].values() if len(shape) == 4]
+                assert image_input, "image input not found"
+                assert len(image_input) == 1, 'several input images detected'
+                processed_image_size = image_input[0][2:]
+                im_scale_y = processed_image_size[0] / original_image_size[0]
+                im_scale_x = processed_image_size[1] / original_image_size[1]
+            boxes[:, 0::2] /= im_scale_x
+            boxes[:, 1::2] /= im_scale_y
+            masks = []
 
-            segms = self.mask_processor(
-                boxes,
-                classes,
-                raw_masks,
-                num_classes=1,
-                mask_thr_binary=0.5,
-                img_size=(img_h, img_w)
-            )
-            rectangles = self.masks_to_rects(segms[0])
+            if self.scores_out:
+                raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
+                if raw_mask_for_all_classes:
+                    per_obj_raw_masks = []
+                    for cls, raw_mask in zip(classes, raw_masks):
+                        per_obj_raw_masks.append(raw_mask[cls, ...])
+                else:
+                    per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
+            else:
+                per_obj_raw_masks = raw_masks
+
+            for box, raw_cls_mask in zip(boxes, per_obj_raw_masks):
+                masks.append(self.segm_postprocess(box, raw_cls_mask, *original_image_size, True, False))
+
+            rectangles = self.masks_to_rects(masks)
 
             results.append(
                 TextDetectionPrediction(identifier, points=rectangles, description=texts))
@@ -123,101 +136,22 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
     def masks_to_rects(masks):
         rects = []
         for mask in masks:
-            decoded_mask = mask.astype(np.uint8)
+            decoded_mask = mask
             contours = cv2.findContours(decoded_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2]
-            contour = sorted(contours, key=lambda x: -cv2.contourArea(x))[0]
-            xys = cv2.boxPoints(cv2.minAreaRect(contour))
-            rects.append(xys)
+
+            areas = []
+            boxes = []
+            for contour in contours:
+                area = cv2.contourArea(contour)
+                areas.append(area)
+
+                rect = cv2.minAreaRect(contour)
+                box = cv2.boxPoints(rect)
+                box = np.int0(box)
+                boxes.append(box)
+
+            if areas:
+                i = np.argmax(areas)
+                rects.append(boxes[i])
 
         return rects
-
-    @staticmethod
-    def mask_to_result(det_bboxes,
-                       det_labels,
-                       det_masks,
-                       num_classes,
-                       mask_thr_binary=0.5,
-                       img_size=None):
-        masks = det_masks
-        bboxes = det_bboxes[:, :4]
-        labels = det_labels
-
-        cls_masks = [[] for _ in range(num_classes)]
-
-        for bbox, label, mask in zip(bboxes, labels, masks):
-            x0, y0, x1, y1 = bbox
-            src_points = np.float32([[0, 0], [0, mask.shape[0]], [mask.shape[1], mask.shape[0]]]) - 0.5
-            dst_points = np.float32([[x0, y0], [x0, y1], [x1, y1]]) - 0.5
-            transform_matrix = cv2.getAffineTransform(src_points, dst_points)
-            mask = cv2.warpAffine(mask, transform_matrix, img_size[::-1])
-            mask = (mask >= mask_thr_binary).astype(np.uint8)
-            cls_masks[label].append(mask)
-
-        return cls_masks
-
-    @staticmethod
-    def mask_to_result_old(det_bboxes,
-                           det_labels,
-                           det_masks,
-                           num_classes,
-                           mask_thr_binary=0.5,
-                           img_size=None):
-
-        def expand_boxes(boxes, scale):
-            """Expand an array of boxes by a given scale."""
-            w_half = (boxes[:, 2] - boxes[:, 0]) * .5
-            h_half = (boxes[:, 3] - boxes[:, 1]) * .5
-            x_c = (boxes[:, 2] + boxes[:, 0]) * .5
-            y_c = (boxes[:, 3] + boxes[:, 1]) * .5
-
-            w_half *= scale
-            h_half *= scale
-
-            boxes_exp = np.zeros(boxes.shape)
-            boxes_exp[:, 0] = x_c - w_half
-            boxes_exp[:, 2] = x_c + w_half
-            boxes_exp[:, 1] = y_c - h_half
-            boxes_exp[:, 3] = y_c + h_half
-
-            return boxes_exp
-
-        def segm_postprocess(box, raw_cls_mask, im_h, im_w, full_image_mask=False, encode=False):
-            # Add zero border to prevent upsampling artifacts on segment borders.
-            raw_cls_mask = np.pad(raw_cls_mask, ((1, 1), (1, 1)), 'constant', constant_values=0)
-            extended_box = expand_boxes(box[np.newaxis, :], raw_cls_mask.shape[0] / (raw_cls_mask.shape[0] - 2.0))[
-                0]
-            extended_box = extended_box.astype(int)
-            w, h = np.maximum(extended_box[2:] - extended_box[:2] + 1, 1)  # pylint: disable=E0633
-            x0, y0 = np.clip(extended_box[:2], a_min=0, a_max=[im_w, im_h])
-            x1, y1 = np.clip(extended_box[2:] + 1, a_min=0, a_max=[im_w, im_h])
-
-            raw_cls_mask = cv2.resize(raw_cls_mask, (w, h)) > 0.5
-            mask = raw_cls_mask.astype(np.uint8)
-
-            if full_image_mask:
-                # Put an object mask in an image mask.
-                im_mask = np.zeros((im_h, im_w), dtype=np.uint8)
-                mask_start_y = y0 - extended_box[1]
-                mask_end_y = y1 - extended_box[1]
-                mask_start_x = x0 - extended_box[0]
-                mask_end_x = x1 - extended_box[0]
-                im_mask[y0:y1, x0:x1] = mask[mask_start_y:mask_end_y, mask_start_x:mask_end_x]
-            else:
-                original_box = box.astype(int)
-                x0, y0 = np.clip(original_box[:2], a_min=0, a_max=[im_w, im_h])
-                x1, y1 = np.clip(original_box[2:] + 1, a_min=0, a_max=[im_w, im_h])
-                im_mask = np.ascontiguousarray(
-                    mask[(y0 - original_box[1]):(y1 - original_box[1]), (x0 - original_box[0]):(x1 - original_box[0])]
-                )
-
-            return im_mask
-
-        masks = []
-        per_obj_raw_masks = []
-        for cls, raw_mask in zip(det_labels, det_masks):
-            per_obj_raw_masks.append(raw_mask[cls, ...])
-
-        for box, raw_cls_mask in zip(det_bboxes, per_obj_raw_masks):
-            masks.append(segm_postprocess(box, raw_cls_mask, *img_size, True, False))
-
-        return [masks]

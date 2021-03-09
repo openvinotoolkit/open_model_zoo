@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ class SalienceMapFMeasure(PerImageEvaluationMetric):
     def configure(self):
         self.recalls, self.precisions, self.fmeasure = [], [], []
         self.meta.update({
-            'names': ['f-measure', 'recall', 'precision'],
+            'names': ['recall', 'precision', 'f-measure'],
             'calculate_mean': False,
         })
 
@@ -94,7 +94,7 @@ class SalienceMapFMeasure(PerImageEvaluationMetric):
         return fmeasure
 
     def evaluate(self, annotations, predictions):
-        return np.mean(self.fmeasure), np.mean(self.recalls), np.mean(self.precisions)
+        return np.mean(self.recalls), np.mean(self.precisions), np.mean(self.fmeasure)
 
     def reset(self):
         self.recalls, self.precisions, self.fmeasure = [], [], []

@@ -2,8 +2,9 @@
 
 ## Use Case and High-Level Description
 
-The `AclNet` model is designed to perform sound classification and is trained on internal dataset of environmental sounds for 53 different classes, listed in file `<omz_dir>/data/dataset_classes/aclnet.txt`.
-For details about the model, see this [paper](https://arxiv.org/abs/1811.06669).
+The `AclNet` model is designed to perform sound classification.
+The `AclNet` model is trained on an internal dataset of environmental sounds.
+For details about the model, see this [paper](https://arxiv.org/pdf/1811.06669.pdf).
 
 The model input is a segment of PCM audio samples in [N, C, 1, L] format.
 
@@ -14,24 +15,19 @@ The model output for `AclNet` is the sound classifier output for the 53 differen
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Classification|
-| GFLOPs            | 1.42          |
-| MParams           | 2.71          |
+| GFLOPs            | 1.4           |
+| MParams           | 2.7           |
 | Source framework  | PyTorch\*     |
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
-| Top 1  | 86.3% |
-| Top 5  | 92.0% |
-
-Metrics were computed on internal validation dataset according to following [publication](http://dcase.community/documents/workshop2019/proceedings/DCASE2019Workshop_Huang_52.pdf) and [paper](https://arxiv.org/abs/1811.06669).
+See this [publication](http://dcase.community/documents/workshop2019/proceedings/DCASE2019Workshop_Huang_52.pdf) and this [paper](https://arxiv.org/pdf/1811.06669.pdf).
 
 ## Input
 
 ### Original Model
 
-Audio, name - `input`, shape - `1,1,1,L`, format is `N,C,1,L` where:
+Audio, name - `0`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 - `N` - batch size
 - `C` - channel
@@ -39,7 +35,7 @@ Audio, name - `input`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 ### Converted Model
 
-Audio, name - `input`, shape - `1,1,1,L`, format is `N,C,1,L` where:
+Audio, name - `0`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 - `N` - batch size
 - `C` - channel
@@ -49,14 +45,14 @@ Audio, name - `input`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 ### Original Model
 
-Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet.txt`), name - `203`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see [labels](./labels.txt)), name - `203`, shape - `1,53`, output data format is `N,C` where:
 
 - `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range
 
 ### Converted Model
 
-Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet.txt`), name - `203`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see [labels](./labels.txt)), name - `203`, shape - `1,53`, output data format is `N,C` where:
 
 - `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ def string_to_tuple(string, casting_type=float):
     processed = processed.replace(')', '')
     processed = processed.split(',')
 
-    return tuple([casting_type(entry) for entry in processed]) if casting_type else tuple(processed)
+    return tuple([casting_type(entry) for entry in processed]) if not casting_type is None else tuple(processed)
 
 
 def string_to_list(string):
@@ -413,7 +413,7 @@ def set_image_metadata(annotation, images):
     if not isinstance(data, list):
         data = [data]
     for image in data:
-        data_shape = np.shape(image) if not np.isscalar(image) else 1
+        data_shape = image.shape if not np.isscalar(image) else 1
         image_sizes.append(data_shape)
     annotation.set_image_size(image_sizes)
 
@@ -490,14 +490,6 @@ class OrderedSet(MutableSet):
         return set(self) == set(other)
 
 
-def is_relative_to(path, *other):
-    try:
-        Path(path).relative_to(*other)
-        return True
-    except ValueError:
-        return False
-
-
 def get_parameter_value_from_config(config, parameters, key):
     if key not in parameters.keys():
         return None
@@ -531,14 +523,6 @@ def color_format(s, color=Color.PASSED):
 
 def softmax(x):
     return np.exp(x) / sum(np.exp(x))
-
-
-def is_iterable(maybe_iterable):
-    try:
-        iter(maybe_iterable)
-        return True
-    except TypeError:
-        return False
 
 
 class ParseError(Exception):
@@ -739,6 +723,7 @@ class MatlabDataReader():
         if isinstance(fields, str):
             fields = [fields]
 
+        empty = lambda: [list() for i in range(header['dims'][0])]
         array = {}
         for row in range(header['dims'][0]):
             for _col in range(header['dims'][1]):
@@ -746,7 +731,7 @@ class MatlabDataReader():
                     vheader, next_pos, fd_var = self.read_var_header(fd, endian)
                     data = self.read_var_array(fd_var, endian, vheader)
                     if field not in array:
-                        array[field] = [[] for _ in range(header['dims'][0])]
+                        array[field] = empty()
                     array[field][row].append(data)
                     fd.seek(next_pos)
         for field in fields:
@@ -757,7 +742,7 @@ class MatlabDataReader():
         return array
 
     def _read_char_array(self, fd, endian, header):
-        array = self._read_numeric_array(fd, endian, header, ['miUTF8', 'miUTF16'])
+        array = self._read_numeric_array(fd, endian, header, ['miUTF8'])
         if header['dims'][0] > 1:
             array = [self.asstr(bytearray(i)) for i in array]
         else:

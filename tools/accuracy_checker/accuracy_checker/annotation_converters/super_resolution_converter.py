@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,8 +30,7 @@ from .format_converter import BaseFormatConverter, ConverterReturn
 LOADERS_MAPPING = {
     'opencv': GTLoader.OPENCV,
     'pillow': GTLoader.PILLOW,
-    'dicom': GTLoader.DICOM,
-    'skimage': GTLoader.SKIMAGE
+    'dicom': GTLoader.DICOM
 }
 
 
@@ -111,7 +110,7 @@ class SRConverter(BaseFormatConverter):
                 try:
                     self.lr_dir.relative_to(self.data_dir)
                     self.upsampled_dir.relative_to(self.data_dir)
-                except ValueError:
+                except:
                     raise ConfigError('data_dir parameter should be provided for conversion as common part of paths '
                                       'lr_dir and upsampled_dir, if 2 streams used')
             self.relative_dir = self.data_dir or os.path.commonpath([self.lr_dir, self.upsampled_dir])
@@ -381,7 +380,6 @@ class SRDirectoryBased(BaseFormatConverter):
             'hr_dir': PathField(optional=True, description='directory with high resolution images', is_directory=True),
             'upsampled_dir': PathField(optional=True, description='directory with upsampled images', is_directory=True),
             'two_streams': BoolField(optional=True, default=False),
-            'hr_prefixed': BoolField(optional=True, default=False),
             'annotation_loader': StringField(
                 optional=True, choices=LOADERS_MAPPING.keys(), default='pillow',
                 description="Which library will be used for ground truth image reading. "
@@ -404,7 +402,6 @@ class SRDirectoryBased(BaseFormatConverter):
         self.hr_dir = self.get_value_from_config('hr_dir')
         self.upsample_dir = self.get_value_from_config('upsampled_dir')
         self.two_streams = self.get_value_from_config('two_streams')
-        self.hr_prefixed = self.get_value_from_config('hr_prefixed')
         error_msg_not_provided = '{} or {} should be provided'
         error_msg_the_same_dir = '{} and {} should contain different directories'
         if self.lr_dir is None:
@@ -421,12 +418,12 @@ class SRDirectoryBased(BaseFormatConverter):
         if self.images_dir:
             try:
                 self.lr_dir.relative_to(self.images_dir)
-            except ValueError:
+            except:
                 raise ConfigError('lr_dir should be relative to images_dir')
             if self.two_streams:
                 try:
                     self.upsample_dir.relative_to(self.images_dir)
-                except ValueError:
+                except:
                     raise ConfigError('upsample_dir should be relative to images_dir')
         else:
             self.images_dir = (
@@ -441,9 +438,8 @@ class SRDirectoryBased(BaseFormatConverter):
         for lr_id, lr_file in enumerate(file_list_lr):
             lr_file_name = lr_file.name
             hr_file = (
-                self.hr_dir / lr_file_name if not self.relaxed_names and not self.hr_prefixed
-                else self.find_file_by_id(self.hr_dir, lr_file_name) if self.relaxed_names
-                else self.find_file_with_prefix(self.hr_dir, lr_file_name)
+                self.hr_dir / lr_file_name if not self.relaxed_names
+                else self.find_file_by_id(self.hr_dir, lr_file_name)
             )
             if hr_file is None:
                 continue
@@ -483,14 +479,7 @@ class SRDirectoryBased(BaseFormatConverter):
             return numbers
 
         idx = get_index(file_name)
-        found_files = []
-        for i in idx:
-            found_files.extend(search_dir.glob('*{}*'.format(i)))
+        found_files = list(search_dir.glob('*{}*'.format(idx)))
         if not found_files:
             return None
         return found_files[0]
-
-    @staticmethod
-    def find_file_with_prefix(search_dir, file_name):
-        found_files = list(search_dir.glob('*{}*'.format(file_name)))
-        return found_files[0] if found_files else None

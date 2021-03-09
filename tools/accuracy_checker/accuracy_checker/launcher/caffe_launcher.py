@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import caffe
 import numpy as np
 
 from ..config import PathField, StringField, NumberField, BoolField, ConfigError
-from .launcher import Launcher
+from .launcher import Launcher, LauncherConfigValidator
 from ..logging import print_info
 
 DEVICE_REGEX = r'(?P<device>cpu$|gpu)(_(?P<identifier>\d+))?'
@@ -38,7 +38,10 @@ class CaffeLauncher(Launcher):
         super().__init__(config_entry, *args, **kwargs)
 
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
-        self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
+        caffe_launcher_config = LauncherConfigValidator(
+            'Caffe_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
+        )
+        caffe_launcher_config.validate(self.config)
         self._do_reshape = False
 
         if not self._delayed_model_loading:
@@ -101,7 +104,7 @@ class CaffeLauncher(Launcher):
         if layer_shape != data_shape:
             self._do_reshape = True
 
-        return data.astype(precision) if precision else data
+        return data.astype(precision) if precision else precision
 
     def automatic_model_search(self):
         model = Path(self.get_value_from_config('model'))

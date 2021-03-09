@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-teacher-0002.xml
-    size: 687971
-    sha256: 9adac2ba368bbd8ec24e9f37c97847b789a96ff78ecd16a21ffc6dfd091246fd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
+    size: 659991
+    sha256: 07cffbacdc614adc78c427c92056a583dfa2549dfc66ffccdde8c61f881581f6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
   - name: FP32/person-detection-action-recognition-teacher-0002.bin
     size: 7800360
     sha256: ebe9c7cdca28a408302b3b1f241afdc670abc251bd692c13a3140c78b08b0498
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
   - name: FP16/person-detection-action-recognition-teacher-0002.xml
-    size: 687727
-    sha256: a2fd0de98ee510a9c6a66b10ff6083ff43a064578e06d7655eaa1bdf84feca87
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
+    size: 659746
+    sha256: db186cfe594453aa029367746f284e67f014cc1b32905d35cb5d8045a8bf18c7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
   - name: FP16/person-detection-action-recognition-teacher-0002.bin
     size: 3900234
     sha256: 190e9b71ae02e022c6afe2dc9fb59939066e046234ff35f4ceab6ddfabab7883
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
   - name: FP16-INT8/person-detection-action-recognition-teacher-0002.xml
-    size: 1939439
-    sha256: ed62a0e5fc0e3e3faf45bad6e551aee9326e8ffa90f3036bce49798b765102f3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.xml
+    size: 1962033
+    sha256: 5bbccdb1598e230cdbefe75be4637d9abc2ea2c354214f8f439d1b1770b0fd69
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.xml
   - name: FP16-INT8/person-detection-action-recognition-teacher-0002.bin
-    size: 2055068
-    sha256: be76d2a240aff34befab38d750f813832e3896e3ec6c885e23c1613d3f9a9531
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.bin
+    size: 2055074
+    sha256: 96cad98eab14477f7428a145c8b80a3bdf294d45f79df453a36e95305400de1a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

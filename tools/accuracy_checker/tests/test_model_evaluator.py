@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ class TestModelEvaluator:
         self.postprocessor = Mock()
         self.adapter = MagicMock(return_value=[])
         self.input_feeder = Mock()
+        self.data_reader = Mock(return_value=data)
+        self.data_reader.data_source = 'source'
 
         annotation_0 = MagicMock()
         annotation_0.identifier = 0
@@ -43,9 +45,7 @@ class TestModelEvaluator:
         self.annotations = [[annotation_container_0], [annotation_container_1]]
 
         self.dataset = MagicMock()
-        self.dataset.__iter__.return_value = [
-            (range(1), self.annotations[0], data, [0]),
-            (range(1), self.annotations[1], data, [1])]
+        self.dataset.__iter__.return_value = [(range(1), self.annotations[0]), (range(1), self.annotations[1])]
 
         self.postprocessor.process_batch = Mock(side_effect=[
             ([annotation_container_0], [annotation_container_0]), ([annotation_container_1], [annotation_container_1])
@@ -64,6 +64,7 @@ class TestModelEvaluator:
             self.launcher,
             self.input_feeder,
             self.adapter,
+            self.data_reader,
             self.preprocessor,
             self.postprocessor,
             self.dataset,
@@ -98,19 +99,6 @@ class TestModelEvaluator:
         assert self.launcher.predict.called
         assert self.postprocessor.process_batch.called
         assert self.metric.update_metrics_on_batch.call_count == len(self.annotations)
-        assert not self.postprocessor.process_dataset.called
-        assert not self.postprocessor.full_process.called
-
-    def test_process_dataset_store_only(self):
-        self.postprocessor.has_dataset_processors = False
-
-        self.evaluator.process_dataset('path', None, store_only=True)
-
-        assert self.evaluator.store_predictions.called
-        assert not self.evaluator.load.called
-        assert self.launcher.predict.called
-        assert not self.postprocessor.process_batch.called
-        assert not self.metric.update_metrics_on_batch.called
         assert not self.postprocessor.process_dataset.called
         assert not self.postprocessor.full_process.called
 
@@ -153,6 +141,8 @@ class TestModelEvaluatorAsync:
         self.adapter = MagicMock(return_value=[])
         self.input_feeder = MagicMock()
         self.input_feeder.lstm_inputs = []
+        self.data_reader = Mock(return_value=data)
+        self.data_reader.data_source = 'source'
 
         annotation_0 = MagicMock()
         annotation_0.identifier = 0
@@ -167,10 +157,8 @@ class TestModelEvaluatorAsync:
         self.annotations = [[annotation_container_0], [annotation_container_1]]
 
         self.dataset = MagicMock()
-        self.dataset.__iter__.return_value = [
-            (range(1), self.annotations[0], data, [0]),
-            (range(1), self.annotations[1], data, [1])]
-        self.dataset.multi_infer = False
+        self.dataset.__iter__.return_value = [(range(1), self.annotations[0]), (range(1), self.annotations[1])]
+        self.data_reader.multi_infer = False
 
         self.postprocessor.process_batch = Mock(side_effect=[
             ([annotation_container_0], [annotation_container_0]), ([annotation_container_1], [annotation_container_1])
@@ -189,6 +177,7 @@ class TestModelEvaluatorAsync:
             self.launcher,
             self.input_feeder,
             self.adapter,
+            self.data_reader,
             self.preprocessor,
             self.postprocessor,
             self.dataset,
@@ -216,10 +205,10 @@ class TestModelEvaluatorAsync:
         self.postprocessor.has_dataset_processors = False
         self.launcher.allow_reshape_input = False
         self.preprocessor.has_multi_infer_transformations = False
-        self.dataset.multi_infer = False
 
         self.evaluator.process_dataset('path', None)
 
+        assert self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
         assert not self.launcher.predict.called
         assert self.launcher.get_async_requests.called
@@ -268,7 +257,7 @@ class TestModelEvaluatorAsync:
         self.postprocessor.has_dataset_processors = False
         self.launcher.allow_reshape_input = False
         self.preprocessor.has_multi_infer_transformations = False
-        self.dataset.multi_infer = True
+        self.data_reader.multi_infer = True
 
         self.evaluator.process_dataset(None, None)
 

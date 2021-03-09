@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,17 +29,14 @@ BACKEND_REGEX = r'(?P<backend>ocv|ie)?'
 
 
 class OpenCVLauncherConfigValidator(LauncherConfigValidator):
-    def validate(self, entry, field_uri=None, fetch_only=False):
+    def validate(self, entry, field_uri=None):
         self.fields['inputs'].optional = self.delayed_model_loading
-        error_stack = super().validate(entry, field_uri)
+        super().validate(entry, field_uri)
         if not self.delayed_model_loading:
             inputs = entry.get('inputs')
             for input_layer in inputs:
                 if 'shape' not in input_layer:
-                    if not fetch_only:
-                        raise ConfigError('input value should have shape field')
-                    error_stack.extend(self.build_error(entry, field_uri, 'input value should have shape field'))
-        return error_stack
+                    raise ConfigError('input value should have shape field')
 
 
 class OpenCVLauncher(Launcher):
@@ -81,7 +78,11 @@ class OpenCVLauncher(Launcher):
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
-        self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
+
+        opencv_launcher_config = OpenCVLauncherConfigValidator(
+            'OpenCV_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
+        )
+        opencv_launcher_config.validate(self.config)
         match = re.match(BACKEND_REGEX, self.get_value_from_config('backend').lower())
         selected_backend = match.group('backend')
         print_info('backend: {}'.format(selected_backend))
@@ -106,13 +107,6 @@ class OpenCVLauncher(Launcher):
             self._inputs_shapes = self.get_inputs_from_config(self.config)
             self.network.setInputsNames(list(self._inputs_shapes.keys()))
             self.output_names = self.network.getUnconnectedOutLayersNames()
-
-    @classmethod
-    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
-        return OpenCVLauncherConfigValidator(
-            uri_prefix or 'launcher.{}'.format(cls.__provider__),
-            fields=cls.parameters(), delayed_model_loading=delayed_model_loading
-        ).validate(config, fetch_only=fetch_only)
 
     @property
     def inputs(self):

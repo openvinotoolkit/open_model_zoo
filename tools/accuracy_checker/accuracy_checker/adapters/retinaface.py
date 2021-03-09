@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 from ..adapters import Adapter
-from ..config import ListField, BoolField, NumberField
+from ..config import ListField
 from ..postprocessor import NMS
 from ..representation import (
     DetectionPrediction,
@@ -34,24 +34,10 @@ class RetinaFaceAdapter(Adapter):
         params = super().parameters()
         params.update(
             {
-                'bboxes_outputs': ListField(description="Names for output layers with face detection boxes"),
-                'scores_outputs': ListField(description="Names for output layers with face detection score"),
-                'landmarks_outputs': ListField(
-                    optional=True, description="Names for output layers with predicted facial landmarks"
-                ),
-                'type_scores_outputs': ListField(
-                    optional=True, description="Names for output layers with attributes detection score"
-                ),
-                'include_boundaries': BoolField(
-                    optional=True, default=False, description="Allows include boundaries for NMS"
-                ),
-                'keep_top_k': NumberField(
-                    min_value=1, optional=True, description="Maximal number of boxes which should be kept",
-                    value_type=int
-                ),
-                'nms_threshold': NumberField(
-                    min_value=0, optional=True, default=0.5, description="Overlap threshold for NMS"
-                )
+                'bboxes_outputs': ListField(),
+                'scores_outputs': ListField(),
+                'landmarks_outputs': ListField(optional=True),
+                'type_scores_outputs': ListField(optional=True)
             }
         )
         return params
@@ -61,9 +47,6 @@ class RetinaFaceAdapter(Adapter):
         self.scores_output = self.get_value_from_config('scores_outputs')
         self.landmarks_output = self.get_value_from_config('landmarks_outputs') or []
         self.type_scores_output = self.get_value_from_config('type_scores_outputs') or []
-        self.include_boundaries = self.get_value_from_config('include_boundaries')
-        self.keep_top_k = self.get_value_from_config('keep_top_k')
-        self.nms_threshold = self.get_value_from_config('nms_threshold')
         _ratio = (1.,)
         self.anchor_cfg = {
             32: {'SCALES': (32, 16), 'BASE_SIZE': 16, 'RATIOS': _ratio},
@@ -79,7 +62,6 @@ class RetinaFaceAdapter(Adapter):
             self.landmark_std = 0.2
         else:
             self.landmark_std = 1.0
-        self._anchor_plane_cache = {}
 
     def process(self, raw, identifiers, frame_meta):
         raw_predictions = self._extract_predictions(raw, frame_meta)
@@ -96,18 +78,11 @@ class RetinaFaceAdapter(Adapter):
                 bbox_deltas = raw_predictions[self.bboxes_output[_idx]][batch_id]
                 height, width = bbox_deltas.shape[1], bbox_deltas.shape[2]
                 anchors_fpn = self._anchors_fpn[s]
-                if (height, width) in self._anchor_plane_cache and s in self._anchor_plane_cache[(height, width)]:
-                    anchors = self._anchor_plane_cache[(height, width)][s]
-                else:
-                    anchors = self.anchors_plane(height, width, int(s), anchors_fpn)
-                    anchors = anchors.reshape((height * width * anchor_num, 4))
-                    if (height, width) not in self._anchor_plane_cache:
-                        self._anchor_plane_cache[(height, width)] = {}
-                    self._anchor_plane_cache[(height, width)][s] = anchors
+                anchors = self.anchors_plane(height, width, int(s), anchors_fpn)
+                anchors = anchors.reshape((height * width * anchor_num, 4))
                 proposals = self._get_proposals(bbox_deltas, anchor_num, anchors)
                 x_mins, y_mins, x_maxs, y_maxs = proposals.T
-                keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, scores, self.nms_threshold,
-                               self.include_boundaries, self.keep_top_k)
+                keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, scores, 0.5, False)
                 proposals_list.extend(proposals[keep])
                 scores_list.extend(scores[keep])
                 if self.type_scores_output:

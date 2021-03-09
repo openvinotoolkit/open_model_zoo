@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -323,7 +323,7 @@ class SquadWordPieseTokenizer(WordPieceTokenizer):
                 return text
             raise ValueError(
                 "Input is not valid. Should be a string, a list/tuple of strings or a list/tuple of integers."
-            )
+                )
 
         first_ids = get_input_ids(text)
         second_ids = get_input_ids(text_pair) if text_pair is not None else None

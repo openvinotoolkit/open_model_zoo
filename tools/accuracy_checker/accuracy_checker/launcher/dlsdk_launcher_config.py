@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,20 +38,16 @@ class CPUExtensionPathField(PathField):
     def __init__(self, **kwargs):
         super().__init__(is_directory=False, **kwargs)
 
-    def validate(self, entry, field_uri=None, fetch_only=False, validation_scheme=None):
-        errors = []
+    def validate(self, entry, field_uri=None):
         if entry is None:
-            return errors
+            return
 
         field_uri = field_uri or self.field_uri
         validation_entry = ''
         try:
             validation_entry = Path(entry)
         except TypeError:
-            msg = "values is expected to be path-like"
-            if not fetch_only:
-                self.raise_error(entry, field_uri, msg)
-            errors.append(self.build_error(entry, field_uri, msg, validation_scheme=validation_scheme))
+            self.raise_error(entry, field_uri, "values is expected to be path-like")
         is_directory = False
         if validation_entry.parts[-1] == 'AUTO':
             validation_entry = validation_entry.parent
@@ -59,21 +55,11 @@ class CPUExtensionPathField(PathField):
         try:
             get_path(validation_entry, is_directory)
         except FileNotFoundError:
-            msg = "path does not exist"
-            if not fetch_only:
-                self.raise_error(validation_entry, field_uri, msg)
-            errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme=validation_scheme))
+            self.raise_error(validation_entry, field_uri, "path does not exist")
         except NotADirectoryError:
-            msg = "path is not a directory"
-            if not fetch_only:
-                self.raise_error(validation_entry, field_uri, msg)
-            errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme=validation_scheme))
+            self.raise_error(validation_entry, field_uri, "path is not a directory")
         except IsADirectoryError:
-            msg = "path is a directory, regular file expected"
-            if not fetch_only:
-                self.raise_error(validation_entry, field_uri, msg)
-            errors.append(self.build_error(validation_entry, field_uri, msg, validation_scheme=validation_scheme))
-        return errors
+            self.raise_error(validation_entry, field_uri, "path is a directory, regular file expected")
 
 
 class DLSDKLauncherConfigValidator(LauncherConfigValidator):
@@ -96,42 +82,31 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         )
         self.fields['device'].set_regex(self.supported_device_regex)
 
-    def validate(self, entry, field_uri=None, ie_core=None, fetch_only=False, validation_scheme=None):
+    def validate(self, entry, field_uri=None, ie_core=None):
         """
         Validate that launcher entry meets all configuration structure requirements.
         Args:
             entry: launcher configuration file entry.
             field_uri: id of launcher entry.
             ie_core: IECore instance.
-            fetch_only: only fetch possible error without raising
-            validation_scheme: scheme for validation
         """
         if not self.delayed_model_loading:
             framework_parameters = self.check_model_source(entry)
             self._set_model_source(framework_parameters)
-        error_stack = super().validate(entry, field_uri, fetch_only, validation_scheme)
+        super().validate(entry, field_uri)
         self.create_device_regex(known_plugins)
-        if 'device' not in entry:
-            return error_stack
         try:
-            self.fields['device'].validate(
-                entry['device'], field_uri, validation_scheme=(validation_scheme or {}).get('device')
-            )
+            self.fields['device'].validate(entry['device'], field_uri)
         except ConfigError as error:
             if ie_core is not None:
                 self.create_device_regex(ie_core.available_devices)
                 try:
-                    self.fields['device'].validate(
-                        entry['device'], field_uri, validation_scheme=(validation_scheme or {}).get('device')
-                    )
+                    self.fields['device'].validate(entry['device'], field_uri)
                 except ConfigError:
                     # workaround for devices where this metric is non implemented
                     warning('unknown device: {}'.format(entry['device']))
             else:
-                if not fetch_only:
-                    raise error
-                error_stack.append(error)
-        return error_stack
+                raise error
 
     def _set_model_source(self, framework):
         self.need_conversion = framework.name != 'dlsdk'

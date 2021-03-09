@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from ..topology_types import GenericTopology
 from ..config import BaseField, ConfigValidator, StringField, ConfigError
-from ..dependency import ClassProvider, UnregisteredProviderException
+from ..dependency import ClassProvider
 from ..utils import get_parameter_value_from_config
 
 
@@ -26,12 +27,14 @@ class Adapter(ClassProvider):
 
     __provider_type__ = 'adapter'
 
+    topology_types = (GenericTopology, )
+
     def __init__(self, launcher_config, label_map=None, output_blob=None):
         self.launcher_config = launcher_config
         self.output_blob = output_blob
         self.label_map = label_map
 
-        self.validate_config(launcher_config)
+        self.validate_config()
         self.configure()
 
     def get_value_from_config(self, key):
@@ -51,33 +54,10 @@ class Adapter(ClassProvider):
     def configure(self):
         pass
 
-    @classmethod
-    def validate_config(cls, config, fetch_only=False, uri_prefix='', **kwargs):
-        if cls.__name__ == Adapter.__name__:
-            errors = []
-            adapter_type = config if isinstance(config, str) else config.get('type')
-            if not adapter_type:
-                error = ConfigError(
-                    'type is not provided', config, uri_prefix or 'adapter', validation_scheme=cls.validation_scheme()
-                )
-                if not fetch_only:
-                    raise error
-                errors.append(error)
-                return errors
-            try:
-                adapter_cls = cls.resolve(adapter_type)
-                adapter_config = config if isinstance(config, dict) else {'type': adapter_type}
-                return adapter_cls.validate_config(adapter_config, fetch_only=fetch_only, uri_prefix=uri_prefix)
-            except UnregisteredProviderException as exception:
-                if not fetch_only:
-                    raise exception
-                return errors
+    def validate_config(self, **kwargs):
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
-        uri = '{}.{}'.format(uri_prefix, cls.__provider__) if uri_prefix else 'adapter.{}'.format(cls.__provider__)
-        return ConfigValidator(uri, fields=cls.parameters(), **kwargs).validate(
-            config, fetch_only=fetch_only, validation_scheme=cls.validation_scheme()
-        )
+        ConfigValidator(self.__class__.__name__, fields=self.parameters(), **kwargs).validate(self.launcher_config)
 
     @staticmethod
     def _extract_predictions(outputs_list, meta):
@@ -85,54 +65,26 @@ class Adapter(ClassProvider):
             return outputs_list
         return outputs_list[0]
 
-    def select_output_blob(self, outputs):
-        if self.output_blob is None:
-            self.output_blob = next(iter(outputs))
-
-    @classmethod
-    def validation_scheme(cls, provider=None):
-        if cls.__name__ == Adapter.__name__:
-            if provider:
-                return cls.resolve(provider).validation_scheme()
-            full_scheme = {}
-            for provider_ in cls.providers:
-                full_scheme[provider_] = cls.resolve(provider_).validation_scheme()
-            return full_scheme
-        return cls.parameters()
-
 
 class AdapterField(BaseField):
-    def validate(self, entry, field_uri_=None, fetch_only=False, validation_scheme=None):
-        errors_stack = super().validate(entry, field_uri_, fetch_only, validation_scheme)
+    def validate(self, entry, field_uri_=None):
+        super().validate(entry, field_uri_)
 
         if entry is None:
-            return errors_stack
+            return
 
         field_uri_ = field_uri_ or self.field_uri
         if isinstance(entry, str):
-            errors_stack.extend(
-                StringField(choices=Adapter.providers).validate(
-                    entry, field_uri_ or 'adapter', fetch_only=fetch_only, validation_scheme=validation_scheme
-                )
-            )
+            StringField(choices=Adapter.providers).validate(entry, 'adapter')
         elif isinstance(entry, dict):
             class DictAdapterValidator(ConfigValidator):
                 type = StringField(choices=Adapter.providers)
             dict_adapter_validator = DictAdapterValidator(
-                field_uri_ or 'adapter', on_extra_argument=DictAdapterValidator.IGNORE_ON_EXTRA_ARGUMENT
+                'adapter', on_extra_argument=DictAdapterValidator.IGNORE_ON_EXTRA_ARGUMENT
             )
-            errors_stack.extend(dict_adapter_validator.validate(
-                entry, field_uri_ or 'adapter', fetch_only=fetch_only, validation_scheme=validation_scheme
-            ))
+            dict_adapter_validator.validate(entry)
         else:
-            if not fetch_only:
-                errors_stack.append(
-                    self.build_error(
-                        entry, field_uri_ or 'adapter', 'adapter must be either string or dictionary', validation_scheme
-                    ))
-            else:
-                self.raise_error(entry, field_uri_ or 'adapter', 'adapter must be either string or dictionary')
-        return errors_stack
+            self.raise_error(entry, field_uri_, 'adapter must be either string or dictionary')
 
 
 def create_adapter(adapter_config, launcher=None, dataset=None):
@@ -140,7 +92,7 @@ def create_adapter(adapter_config, launcher=None, dataset=None):
     if dataset:
         metadata = dataset.metadata
         if metadata:
-            label_map = metadata.get('label_map')
+            label_map = dataset.metadata.get('label_map')
     if isinstance(adapter_config, str):
         adapter = Adapter.provide(adapter_config, {'type': adapter_config}, label_map=label_map)
     elif isinstance(adapter_config, dict):

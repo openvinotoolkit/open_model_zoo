@@ -22,7 +22,7 @@ class NYUDepthV2Converter(BaseFormatConverter):
             'images_dir': PathField(
                 optional=True, is_directory=True, description='path to directory with images', check_exists=False
             ),
-            'depth_map_dir': PathField(
+            'depth_map_dir':  PathField(
                 optional=True, is_directory=True, description='path to directory with depth maps', check_exists=False
             ),
             'data_dir': PathField(

@@ -17,11 +17,13 @@
 """
 
 import argparse
+import concurrent.futures
 import contextlib
 import functools
 import hashlib
 import re
 import requests
+import shlex
 import shutil
 import ssl
 import sys
@@ -168,26 +170,17 @@ class DirCache:
         return verify_hash(reporter, cache_sha256.digest(), model_file.sha256, path)
 
     def put(self, hash, path):
-        staging_path = None
+        # A file in the cache must have the hash implied by its name. So when we upload a file,
+        # we first copy it to a temporary file and then atomically move it to the desired name.
+        # This prevents interrupted runs from corrupting the cache.
+        with path.open('rb') as src_file:
+            with tempfile.NamedTemporaryFile(dir=str(self._staging_dir), delete=False) as staging_file:
+                staging_path = Path(staging_file.name)
+                shutil.copyfileobj(src_file, staging_file)
 
-        try:
-            # A file in the cache must have the hash implied by its name. So when we upload a file,
-            # we first copy it to a temporary file and then atomically move it to the desired name.
-            # This prevents interrupted runs from corrupting the cache.
-            with path.open('rb') as src_file:
-                with tempfile.NamedTemporaryFile(dir=str(self._staging_dir), delete=False) as staging_file:
-                    staging_path = Path(staging_file.name)
-                    shutil.copyfileobj(src_file, staging_file)
-
-            hash_path = self._hash_path(hash)
-            hash_path.parent.mkdir(parents=True, exist_ok=True)
-            staging_path.replace(self._hash_path(hash))
-            staging_path = None
-        finally:
-            # If we failed to complete our temporary file or to move it into place,
-            # get rid of it.
-            if staging_path:
-                staging_path.unlink()
+        hash_path = self._hash_path(hash)
+        hash_path.parent.mkdir(parents=True, exist_ok=True)
+        staging_path.replace(self._hash_path(hash))
 
 def try_retrieve_from_cache(reporter, cache, model_file, destination):
     try:
@@ -323,7 +316,7 @@ def main():
         help='download only models whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',
         help='download only models whose names match at least one of the patterns in the specified file')
-    parser.add_argument('--all', action='store_true', help='download all available models')
+    parser.add_argument('--all',  action='store_true', help='download all available models')
     parser.add_argument('--print_all', action='store_true', help='print all available models')
     parser.add_argument('--precisions', metavar='PREC[,PREC...]',
                         help='download only models with the specified precisions (actual for DLDT networks)')

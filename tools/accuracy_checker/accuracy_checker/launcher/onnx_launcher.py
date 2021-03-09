@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import onnxruntime.backend as backend
 import onnxruntime as onnx_rt
 from ..logging import warning
 from ..config import PathField, StringField, ListField, ConfigError
-from .launcher import Launcher
+from .launcher import Launcher, LauncherConfigValidator
 from ..utils import contains_all
 from ..logging import print_info
 
@@ -36,7 +36,10 @@ class ONNXLauncher(Launcher):
         super().__init__(config_entry, *args, **kwargs)
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
+        onnx_launcher_config = LauncherConfigValidator(
+            'ONNX_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading,
+        )
+        onnx_launcher_config.validate(self.config)
         if not self._delayed_model_loading:
             self.model = self.automatic_model_search()
             self._inference_session = self.create_inference_session(str(self.model))
@@ -146,5 +149,4 @@ class ONNXLauncher(Launcher):
         raise ValueError('ONNX Runtime Launcher does not support async mode yet')
 
     def release(self):
-        if hasattr(self, '_inference_session'):
-            del self._inference_session
+        del self._inference_session

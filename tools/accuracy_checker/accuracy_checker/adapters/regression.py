@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -47,9 +47,7 @@ class RegressionAdapter(Adapter):
         Returns:
             list of RegressionPrediction objects
         """
-        predictions = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(predictions)
-        predictions = predictions[self.output_blob]
+        predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
         if len(np.shape(predictions)) == 1 or (self.keep_shape and np.shape(predictions)[0] != len(identifiers)):
             predictions = np.expand_dims(predictions, axis=0)
         if not self.keep_shape:

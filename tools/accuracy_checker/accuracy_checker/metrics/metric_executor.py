@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@ limitations under the License.
 
 from collections import namedtuple, OrderedDict
 
-from ..config import ConfigValidator, ConfigError, StringField
 from ..presenters import BasePresenter, EvaluationResult
+from ..config import StringField
 from .metric import Metric, FullDatasetEvaluationMetric
 from .metric_profiler import ProfilingExecutor
+from ..config import ConfigValidator, ConfigError
 
 MetricInstance = namedtuple(
     'MetricInstance', ['name', 'metric_type', 'metric_fn', 'reference', 'threshold', 'presenter']
@@ -64,6 +65,13 @@ class MetricsExecutor:
     @dataset.setter
     def _set_dataset(self, dataset):
         self._dataset = dataset
+
+    def __call__(self, context, *args, **kwargs):
+        self.update_metrics_on_batch(
+            context.input_ids_batch, context.annotation_batch, context.prediction_batch
+        )
+        context.annotations.extend(context.annotation_batch)
+        context.predictions.extend(context.prediction_batch)
 
     def update_metrics_on_object(self, annotation, prediction):
         """
@@ -167,7 +175,7 @@ class MetricsExecutor:
     def get_metrics_attributes(self):
         return {
             metric.name: {
-                'direction': metric.metric_fn.meta.get('target', 'higher-better'),
+                'direction':  metric.metric_fn.meta.get('target', 'higher-better'),
                 'type': metric.metric_type
             } for metric in self.metrics
         }
@@ -181,19 +189,3 @@ class MetricsExecutor:
     def reset(self):
         for metric in self.metrics:
             metric.metric_fn.reset()
-
-    @classmethod
-    def validate_config(cls, metrics, fetch_only=False, uri_prefix=''):
-        metrics_uri = uri_prefix or 'metrics'
-        if not metrics:
-            if fetch_only:
-                upper_level_uri = (
-                    metrics_uri.replace('.metrics', '') if metrics_uri.endswith('.metrics') else metrics_uri
-                )
-                return [ConfigError("Metrics are not provided", metrics, upper_level_uri)]
-        errors = []
-        for metric_id, metric in enumerate(metrics):
-            metric_uri = '{}.{}'.format(metrics_uri, metric_id)
-            errors.extend(Metric.validate_config(metric, fetch_only=fetch_only, uri_prefix=metric_uri))
-
-        return errors

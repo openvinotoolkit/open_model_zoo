@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ class VectorPrintPresenter(BasePresenter):
                 value = value[0]
             result_dict = {
                 'name': value_names[0] if 'names' in meta else name,
-                'value': value,
+                'value':value,
                 'type': metric_type,
                 'ref': reference or ''
             }

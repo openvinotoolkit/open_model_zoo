@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@ description: >-
 task_type: classification
 files:
   - name: FP32-INT1/resnet50-binary-0001.xml
-    size: 238952
-    sha256: 26cfb446add66c651501f32e61eff2c5ad7ba3f7a508c1c73ca8778a8dd94ad2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
+    size: 232680
+    sha256: 20bb30339b0913904bd9398e52efb344a66715b4ecfe75bf069c55900b60d9f9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
   - name: FP32-INT1/resnet50-binary-0001.bin
     size: 22112984
     sha256: e1b2cd17644699369284e7a0c6113b0ae1d6411ddca6ceba2423a4cbe139072c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
   - name: FP16-INT1/resnet50-binary-0001.xml
-    size: 238853
-    sha256: 868c6032a8d698d5886fb3938e8be9773534c47f6a916ec9e5ff5ab061768359
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.xml
+    size: 232581
+    sha256: 15533a8781e8162158559a80068cc548fc469a1a5c34baf36324a8088c20ebcc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.xml
   - name: FP16-INT1/resnet50-binary-0001.bin
     size: 12348792
     sha256: fcc76148a770e81bfbb3c2af30397ee54a52532bdbc97c3bd5a29e9f7836ba58
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

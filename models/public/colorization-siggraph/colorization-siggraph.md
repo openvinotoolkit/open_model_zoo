@@ -20,18 +20,11 @@ Model give as output predict A- and B-channels of LAB-image.
 
 ## Accuracy
 
-The accuracy metrics were calculated between generated images by model and real validation images from ImageNet dataset.
-Results are obtained on subset of 2000 images.
+The accuracy metrics were calculated on the ImageNet
+validation dataset using [VGG16](https://arxiv.org/abs/1409.1556) Caffe
+model and colorization as preprocessing.
 
-| Metric | Value     |
-| ------ | --------- |
-| PSNR   | 27.73dB   |
-| SSIM   | 0.92      |
-
-Also, metrics can be calculated using [VGG16](https://arxiv.org/abs/1409.1556) caffe model and colorization as preprocessing.
-The results below are obtained on the validation images from ImageNet dataset.
-
-For preprocessing `rgb -> gray -> colorization` received values:
+For preprocessing `rgb -> gray -> colorization` recieved values:
 
 | Metric         | Value with preprocessing   | Value without preprocessing |
 |----------------|----------------------------|-----------------------------|
@@ -70,7 +63,7 @@ For preprocessing `rgb -> gray -> colorization` received values:
    from user-specified gray points with (a,b) = 0.
    If point(pixel) was specified the flag will be equal to 1.
 
-> **NOTE**: You don't need to specify all 3 inputs to use the model. If you don't want to use local user hints (user points), you can use only `data_l` input. In this case, the remaining inputs (`user_ab` and `user_map`) must be filled with zeros.
+> **NOTE**: You don't need to specify all 3 inputs to use the model. If you dont't want to use local user hints (user points), you can use only `data_l` input.
 
 ## Output
 

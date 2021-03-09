@@ -55,11 +55,12 @@ The array of summary detection information, name: `detections`, shape: [1, N, 7]
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `y_min`, `x_min`, `y_max`, `x_max`, `confidence`, `label`],
     where:
+
     - `image_id` - ID of the image in the batch
     - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
     - `confidence` - confidence for the predicted class
-    - `label` - predicted class ID, in range [1, 91], mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_91cl.txt` file
+    - `label` - predicted class ID, starting from 1
 
 ### Converted Model
 
@@ -67,8 +68,9 @@ The array of summary detection information, name: `detections`, shape: [1, 1, N,
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
     where:
+
     - `image_id` - ID of the image in the batch
-    - `label` - predicted class ID, in range [0, 90], mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_91cl.txt` file
+    - `label` - predicted class ID, starting from 0
     - `conf` - confidence for the predicted class
     - (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates stored in normalized format, in range [0, 1])
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates stored in normalized format, in range [0, 1])

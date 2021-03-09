@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -347,7 +347,7 @@ class TestPresenter:
             ),
             call(
                 result.evaluated_value[1], result.name,
-                postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
+                postfix='%', scale=100, value_name=result.meta['names'][1],  result_format='{:.2f}'
             ),
             call(
                 np.mean(np.multiply(result.evaluated_value, 100)), result.name, result.threshold,
@@ -403,7 +403,7 @@ class TestPresenter:
             ),
             call(
                 result.evaluated_value[1], result.name,
-                postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
+                postfix='%', scale=100, value_name=result.meta['names'][1],  result_format='{:.2f}'
             ),
             call(
                 np.mean(np.multiply(result.evaluated_value, 100)), result.name, result.threshold,
@@ -434,7 +434,7 @@ class TestPresenter:
                 postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 1)), result.name, result.threshold, 1,
+                np.mean(np.multiply(result.evaluated_value, 1)), result.name,  result.threshold, 1,
                 value_name='mean', postfix=' ', scale=1, result_format='{}'
             )
         ]
@@ -490,7 +490,7 @@ class TestPresenter:
             ),
             call(
                 np.mean(np.multiply(result.evaluated_value, 100)), result.name,
-                result.threshold, None, value_name='mean', postfix=result.meta['postfix'], scale=1, result_format='{:.2f}'
+                result.threshold, None, value_name='mean', postfix=result.meta['postfix'], scale=1,  result_format='{:.2f}'
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)

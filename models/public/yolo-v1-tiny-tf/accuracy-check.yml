@@ -3,6 +3,8 @@ models:
 
     launchers:
       - framework: tf
+        tags:
+          - FP32
         model: yolo-v1-tiny.pb
         inputs:
           - name: 'input_1'

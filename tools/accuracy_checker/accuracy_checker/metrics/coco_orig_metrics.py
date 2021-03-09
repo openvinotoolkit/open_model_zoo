@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import contextlib
 import os
 import tempfile
 import json
@@ -124,8 +123,10 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         coco_data_to_store = self._prepare_data_for_annotation_file(
             annotations, label_map)
 
-        with self._create_temp_json(coco_data_to_store) as coco_annotation:
-            return COCO(coco_annotation)
+        coco_annotation = self._create_json(coco_data_to_store)
+        coco = COCO(str(coco_annotation))
+
+        return coco
 
     @staticmethod
     def generate_map_pred_label_id_to_coco_cat_id(has_background, use_full_label_map):
@@ -178,10 +179,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         coco_data_to_store = []
         for pred in predictions:
             prediction_data_to_store = []
-            pred_id = pred.identifier
-            if isinstance(pred_id, tuple):
-                pred_id = pred_id.identifier
-            cur_name = Path(pred_id).name
+            cur_name = Path(pred.identifier).name
             cur_img_id = (cur_name.split(".jpg")[0]).split("_")[-1]
 
             labels = pred.labels.tolist()
@@ -207,10 +205,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         coco_data_to_store = []
         for pred in predictions:
             prediction_data_to_store = []
-            pred_id = pred.identifier
-            if isinstance(pred_id, tuple):
-                pred_id = pred_id.identifier
-            cur_name = Path(pred_id).name
+            cur_name = Path(pred.identifier).name
             assert cur_name in map_coco_img_file_name_to_img_id
             cur_img_id = map_coco_img_file_name_to_img_id[cur_name]
             if pred.size == 0:
@@ -251,10 +246,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         count = 1
         for annotation in annotations:
             annotation_data_to_store = []
-            ann_id = annotation.identifier
-            if isinstance(ann_id, tuple):
-                ann_id = ann_id.identifier
-            cur_name = Path(ann_id).name
+            cur_name = Path(annotation.identifier).name
             cur_img_id = (cur_name.split(".jpg")[0]).split("_")[-1]
 
             labels = annotation.labels
@@ -298,23 +290,19 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         return coco_data_to_store
 
     @staticmethod
-    @contextlib.contextmanager
-    def _create_temp_json(coco_data_to_store):
-        temp_name = None
+    def _create_json(coco_data_to_store):
+        with tempfile.NamedTemporaryFile() as ftmp:
+            json_file_to_store = ftmp.name + ".json"
+        with open(json_file_to_store, 'w') as f:
+            json.dump(coco_data_to_store, f, indent=4)
 
-        try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as ftmp:
-                temp_name = ftmp.name
-                json.dump(coco_data_to_store, ftmp, indent=4)
-
-            yield temp_name
-        finally:
-            if temp_name:
-                os.unlink(temp_name)
+        return json_file_to_store
 
     def _reload_results_to_coco_class(self, coco, coco_data_to_store):
-        with self._create_temp_json(coco_data_to_store) as json_file_to_load:
-            return coco.loadRes(json_file_to_load)
+        json_file_to_load = self._create_json(coco_data_to_store)
+        coco_res = coco.loadRes(json_file_to_load)
+
+        return coco_res
 
     @staticmethod
     def _debug_printing_and_displaying_predictions(coco, coco_res, data_source, should_display_debug_images):

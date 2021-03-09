@@ -7,8 +7,13 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
+from utils.distribution import sample_from_discretized_mix_logistic
 from models.fatchord_version import WaveRNN
 from utils import hparams as hp
+from utils.dsp import reconstruct_waveform, save_wav
+from utils.dsp import *
+
+
 
 ##################################################################################################
 
@@ -32,7 +37,7 @@ class WaveRNNUpsamplerONNX(nn.Module):
         return mels, aux
 
     def forward(self, mels):
-        mels = mels.transpose(1, 2)
+        mels = mels.transpose(1,2)
         aux = self.model.upsample.resnet(mels)
         aux = aux.unsqueeze(1)
         aux = self.model.upsample.resnet_stretch(aux)

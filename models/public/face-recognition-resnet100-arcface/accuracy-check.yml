@@ -15,7 +15,6 @@ models:
 
         preprocessing:
           - type: bgr_to_rgb
-          - type: auto_resize
 
         metrics:
           - type: pairwise_accuracy_subsets
@@ -28,8 +27,6 @@ models:
 
     datasets:
       - name: lfw_bin
-        preprocessing:
-          - type: auto_resize
 
         metrics:
           - type: pairwise_accuracy_subsets

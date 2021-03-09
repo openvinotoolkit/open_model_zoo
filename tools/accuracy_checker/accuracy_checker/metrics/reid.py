@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ from ..representation import (
     PlaceRecognitionAnnotation,
     ReIdentificationPrediction
 )
-from ..config import BaseField, BoolField, NumberField, StringField
+from ..config import BaseField, BoolField, NumberField
 from .metric import FullDatasetEvaluationMetric
 
 
@@ -82,7 +82,7 @@ def _precision_recall_curve(y_true, probas_pred):
 
 try:
     from sklearn.metrics import auc, precision_recall_curve
-except ImportError:
+except ImportError as import_error:
     auc = _auc
     precision_recall_curve = _precision_recall_curve
 
@@ -229,69 +229,33 @@ class PairwiseAccuracy(FullDatasetEvaluationMetric):
             'min_score': BaseField(
                 optional=True, default='train_median',
                 description="Min score for determining that objects are different. "
-                            "You can provide value or use train_median or best_train_threshold values "
-                            "which will be calculated if annotations has training subset."
-            ),
-            'distance_method': StringField(
-                optional=True, default='euclidian_distance',
-                description='Allows to choose one of the distance calculation methods',
-                choices=['euclidian_distance', 'cosine_distance']
-            ),
-            'subtract_mean': BoolField(
-                optional=True, default=False, description='Allows to subtract mean calculated on train embeddings '
-                                                          'before calculating the distance'
+                            "You can provide value or use train_median value which will be calculated "
+                            "if annotations has training subset."
             )
         })
         return parameters
 
     def configure(self):
         self.min_score = self.get_value_from_config('min_score')
-        self.distance_method = self.get_value_from_config('distance_method')
-        self.subtract_mean = self.get_value_from_config('subtract_mean')
 
     def evaluate(self, annotations, predictions):
-        min_score = self.min_score
-        if min_score == 'train_median':
-            train_distances, _train_pairs, mean = get_embedding_distances(annotations, predictions, train=True,
-                                                                          distance_method=self.distance_method,
-                                                                          save_mean=self.subtract_mean)
-            min_score_value = np.median(train_distances)
-        elif min_score == 'best_train_threshold':
-            train_distances, train_pairs, mean = get_embedding_distances(annotations, predictions, train=True,
-                                                                         distance_method=self.distance_method,
-                                                                         save_mean=self.subtract_mean)
-            thresholds = np.arange(0, 4, 0.01)
-            accuracy_train = np.zeros((thresholds.size))
-            for threshold_idx, threshold in enumerate(thresholds):
-                train_same_class = train_distances < threshold
-                accuracy = 0
-                for i, pair in enumerate(train_pairs):
-                    same_label = pair.same
-                    out_same = train_same_class[i]
-
-                    correct_prediction = (same_label and out_same) or (not same_label and not out_same)
-
-                    if correct_prediction:
-                        accuracy += 1
-                accuracy_train[threshold_idx] = accuracy
-            min_score_value = thresholds[np.argmax(accuracy_train)]
-        else:
-            min_score_value = min_score
-            mean = 0.0
-
-        embed_distances, pairs, _ = get_embedding_distances(annotations, predictions, mean=mean,
-                                                            distance_method=self.distance_method)
+        embed_distances, pairs = get_embedding_distances(annotations, predictions)
         if not pairs:
             return np.nan
 
-        embed_same_class = embed_distances < min_score_value
+        min_score = self.min_score
+        if min_score == 'train_median':
+            train_distances, _train_pairs = get_embedding_distances(annotations, predictions, train=True)
+            min_score = np.median(train_distances)
+
+        embed_same_class = embed_distances < min_score
 
         accuracy = 0
         for i, pair in enumerate(pairs):
             same_label = pair.same
             out_same = embed_same_class[i]
 
-            correct_prediction = (same_label and out_same) or (not same_label and not out_same)
+            correct_prediction = same_label and out_same or (not same_label and not out_same)
 
             if correct_prediction:
                 accuracy += 1
@@ -311,21 +275,6 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
         params.update({
             'subset_number': NumberField(
                 optional=True, min_value=1, value_type=int, default=10, description="Number of subsets for separating."
-            ),
-            'min_score': BaseField(
-                optional=True, default='train_median',
-                description="Min score for determining that objects are different. "
-                            "You can provide value or use train_median or best_train_threshold values "
-                            "which will be calculated if annotations has training subset."
-            ),
-            'distance_method': StringField(
-                optional=True, default='euclidian_distance',
-                description='Allows to choose one of the distance calculation methods',
-                choices=['euclidian_distance', 'cosine_distance']
-            ),
-            'subtract_mean': BoolField(
-                optional=True, default=False, description='Allows to subtract mean calculated on train embeddings '
-                                                          'before calculating the distance'
             )
         })
         return params
@@ -503,7 +452,8 @@ class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
         dist_mat *= valid_mask
         sorted_idx = np.argsort(-dist_mat, axis=1)[:, :self.top_k]
 
-        pred_top_k_query_ids = gallery_person_ids[sorted_idx].T
+        apply_func = lambda row: np.fromiter(map(lambda i: gallery_person_ids[i], row), dtype=np.int)
+        pred_top_k_query_ids = np.apply_along_axis(apply_func, 1, sorted_idx).T
         query_person_ids = np.tile(query_person_ids, (self.top_k, 1))
 
         tp = np.any(query_person_ids == pred_top_k_query_ids, axis=0).sum()
@@ -655,8 +605,7 @@ def get_valid_subset(gallery_cams, gallery_ids, query_index, indices, query_cams
     return valid
 
 
-def get_embedding_distances(annotation, prediction, train=False, distance_method='euclidian_distance',
-                            save_mean=False, mean=0.0):
+def get_embedding_distances(annotation, prediction, train=False):
     image_indexes = {}
     for i, pred in enumerate(prediction):
         image_indexes[pred.identifier] = i
@@ -679,23 +628,9 @@ def get_embedding_distances(annotation, prediction, train=False, distance_method
     if pairs:
         embed1 = np.asarray([prediction[idx].embedding for idx, _, _ in pairs])
         embed2 = np.asarray([prediction[idx].embedding for _, idx, _ in pairs])
-        if save_mean:
-            mean = np.mean(np.concatenate([embed1, embed2]), axis=0)
-        dist = distance(embed1 - mean, embed2 - mean, distance_method)
-        return dist, pairs, mean
-    return None, pairs, mean
+        return 0.5 * (1 - np.sum(embed1 * embed2, axis=1)), pairs
+    return None, pairs
 
-def distance(embed1, embed2, distance_method='euclidian_distance'):
-    if distance_method == 'euclidian_distance':
-        dist = 0.5 * (1 - np.sum(embed1 * embed2, axis=1))
-    else:
-        # Distance based on cosine similarity
-        dot = np.sum(np.multiply(embed1, embed2), axis=1)
-        norm = np.linalg.norm(embed1, axis=1) * np.linalg.norm(embed2, axis=1)
-        similarity = dot / norm
-        dist = np.arccos(similarity) / np.pi
-
-    return dist
 
 def binary_average_precision(y_true, y_score, interpolated_auc=True):
     def _average_precision(y_true_, y_score_):

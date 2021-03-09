@@ -194,7 +194,7 @@ def main():
         '''
         FIRST STEP: predict symbols duration
         '''
-        torch.onnx.export(encoder, input_seq, "./onnx/forward_tacotron_duration_prediction.onnx",
+        torch.onnx.export(encoder, input_seq,  "./onnx/forward_tacotron_duration_prediction.onnx",
                           opset_version=opset_version,
                           do_constant_folding=True,
                           input_names=["input_seq"],

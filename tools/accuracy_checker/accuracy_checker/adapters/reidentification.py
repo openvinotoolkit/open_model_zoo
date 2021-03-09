@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ import numpy as np
 
 from ..adapters import Adapter
 from ..representation import ReIdentificationPrediction
-from ..config import BoolField, StringField
 
 
 class ReidAdapter(Adapter):
@@ -28,28 +27,11 @@ class ReidAdapter(Adapter):
     __provider__ = 'reid'
     prediction_types = (ReIdentificationPrediction, )
 
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'grn_workaround': BoolField(
-                optional=True, default=True,
-                description='allows processing output with adding Global Region Normalization layer'
-            ),
-            'joining_method': StringField(
-                optional=True, default='sum', description='method used to join embeddings',
-                choices=['sum', 'concatenation']
-            )
-        })
-
-        return parameters
-
     def configure(self):
         """
         Specifies parameters of config entry
         """
-        self.grn_workaround = self.get_value_from_config('grn_workaround')
-        self.joining_method = self.get_value_from_config('joining_method')
+        self.grn_workaround = self.launcher_config.get("grn_workaround", True)
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -59,9 +41,7 @@ class ReidAdapter(Adapter):
         Returns:
             list of ReIdentificationPrediction objects
         """
-        raw_prediction = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(raw_prediction)
-        prediction = raw_prediction[self.output_blob]
+        prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
 
         if self.grn_workaround:
             # workaround: GRN layer
@@ -82,10 +62,8 @@ class ReidAdapter(Adapter):
         if not (meta[-1] or {}).get('multi_infer', False):
             return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
 
-        if len(outputs_list) == 2 and not isinstance(outputs_list, dict):
-            self.select_output_blob(outputs_list[0])
+        if len(outputs_list) == 2:
             emb1, emb2 = outputs_list[0][self.output_blob], outputs_list[1][self.output_blob]
-            emb = emb1 + emb2 if self.joining_method == 'sum' else np.concatenate((emb1, emb2), axis=1)
-            return {self.output_blob: emb}
+            return {self.output_blob: emb1 + emb2}
 
-        return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
+        return outputs_list[0]

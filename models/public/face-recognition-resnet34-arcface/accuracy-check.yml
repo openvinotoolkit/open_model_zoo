@@ -15,12 +15,11 @@ models:
 
         preprocessing:
           - type: bgr_to_rgb
-          - type: auto_resize
 
         metrics:
           - type: pairwise_accuracy_subsets
 
-  - name: face-recognition-resnet34-arcface
+  - name: face-recognition-resnet34-arcface-mx
 
     launchers:
       - framework: dlsdk
@@ -28,9 +27,6 @@ models:
 
     datasets:
       - name: lfw_bin
-
-        preprocessing:
-          - type: auto_resize
 
         metrics:
           - type: pairwise_accuracy_subsets

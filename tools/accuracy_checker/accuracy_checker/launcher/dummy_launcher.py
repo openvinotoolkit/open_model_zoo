@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ from ..utils import get_path, read_txt
 from ..logging import print_info
 from ..config import PathField, StringField, BoolField
 from .loaders import Loader
-from .launcher import Launcher
+from .launcher import Launcher, LauncherConfigValidator
 
 
 class DummyLauncher(Launcher):
@@ -42,8 +42,9 @@ class DummyLauncher(Launcher):
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
 
-        self.validate_config(config_entry)
-        print_info('Predictions objects loading started')
+        dummy_launcher_config = LauncherConfigValidator('Dummy_Launcher', fields=self.parameters())
+        dummy_launcher_config.validate(self.config)
+
         self.data_path = get_path(self.get_value_from_config('data_path'))
         identfiers_file = self.get_value_from_config('identifiers_list')
         if identfiers_file is not None:
@@ -51,7 +52,7 @@ class DummyLauncher(Launcher):
 
         self._loader = Loader.provide(self.get_value_from_config('loader'), self.data_path, **kwargs)
 
-        print_info("\n{} predictions objects loaded from {}".format(len(self._loader), self.data_path))
+        print_info("{} predictions objects loaded from {}".format(len(self._loader), self.data_path))
 
     def predict(self, identifiers, *args, **kwargs):
         return [self._loader[identifier] for identifier in identifiers]

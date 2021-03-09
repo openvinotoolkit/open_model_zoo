@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ from .classification_representation import (
     Classification,
     ClassificationAnnotation,
     ClassificationPrediction,
-    ArgMaxClassificationPrediction,
-    SequenceClassificationAnnotation,
-    SequenceClassificationPrediction
+    ArgMaxClassificationPrediction
 )
 from .detection_representation import (
     Detection,
@@ -83,8 +81,7 @@ from .nlp_representation import (
     TextClassificationAnnotation,
     LanguageModelingAnnotation,
     LanguageModelingPrediction,
-    QuestionAnsweringBiDAFAnnotation,
-    BERTNamedEntityRecognitionAnnotation
+    QuestionAnsweringBiDAFAnnotation
 )
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
 from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
@@ -105,8 +102,6 @@ __all__ = [
     'ClassificationAnnotation',
     'ClassificationPrediction',
     'ArgMaxClassificationPrediction',
-    'SequenceClassificationAnnotation',
-    'SequenceClassificationPrediction',
 
     'Detection',
     'DetectionAnnotation',
@@ -188,7 +183,6 @@ __all__ = [
     'TextClassificationAnnotation',
     'LanguageModelingAnnotation',
     'LanguageModelingPrediction',
-    'BERTNamedEntityRecognitionAnnotation',
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',

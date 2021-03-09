@@ -27,12 +27,10 @@ Accuracy Checker supports following set of postprocessors:
     At the moment works in the following cases only:
    - the preprocessing steps contains only one operation changing input image size, and the operation is `resize`
    - the preprocessing steps contains only two operations changing input image size, and the operations are `resize` and then `padding`.
-   * `rescale` if this option enabled, rescaling boxes on input size will be performed before applying postprocessing (Optional, default `False`).
+   * `rescale` if this option enabled, rescaling boxes on input size will be performed before appling postprocessing (Optional, default `False`).
 * `nms` - non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
   * `overlap` - overlap threshold for merging detections.
   * `use_min_area` - boolean value to determine whether to use minimum area of two bounding boxes as base area to calculate overlap.
-* `diou_nms` - distance-IoU non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
-  * `overlap` - overlap threshold for merging detections.
 * `soft_nms` - soft non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
   * `keep_top_k`  - the maximal number of detections which should be kept.
   * `sigma` - sigma-value for updated detection score calculation.
@@ -82,8 +80,8 @@ Accuracy Checker supports following set of postprocessors:
     `target` - select target image for resize (`prediction` or `annotation`)
 * `resize_style_transfer` - resizing style transfer predicted image. Supported representations: `StyleTransferAnotation`, `StyleTransferPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resizing respectively.
-* `crop_image` - cropping image. Supported representations: `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
-* `corner_crop_image` - corner crop of the image. Supported representations: `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+* `crop_ground_truth_image` - cropping ground truth image. Supported representations: `ImageInpaintingAnnotation`.
+* `corner_crop_ground_truth_image` - Corner crop of the ground truth image. Supported representations: `ImageInpaintingAnnotation`.
   * `dst_width` and `dst_height` are destination width and height
   * `corner_type` is type of the corner crop. Options are:
     * `top-left`
@@ -95,7 +93,6 @@ Accuracy Checker supports following set of postprocessors:
   * `dst_width` and `dst_height` - destination width and height for resize respectively. You can also use `size` instead in case when destination sizes are equal.
     If any of these parameters are not specified, image size will be used as default.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
-  * `resize_realization` - parameter specifies functionality of which library will be used for resize: `opencv` or `pillow` (default `pillow` is used). `opencv` library is supported for following representations: `StyleTransferAnnotation`, `StyleTransferPrediction`, `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
 * `rgb_to_gray` - converts reference data stored in RGB format to gray scale. Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `StyleTransferAnnotation`, `StyleTransferPrediction`.
 * `bgr_to_gray` - converts reference data stored in BGR format to gray scale. Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `StyleTransferAnnotation`, `StyleTransferPrediction`.
 * `remove_repeats` - removes repeated predicted tokens. Supported representations: `MachineTranslationPrediction`, `MachineTranslationAnnotation`.
@@ -104,12 +101,8 @@ Accuracy Checker supports following set of postprocessors:
   * `target_color` - target color space for super resolution image - `bgr` and `rgb` are supported. (Optional, default `rgb`).
   * `size` - size of model input for recovering YCrCb image.
   * `dst_width` and `dst_height` - width and height of model input respectively for recovering YCrCb image.
-* `colorization_recovery` - restores BGR image from Colorization models results represented as AB-channels in LAB color space. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+* `colorization_recovery` - restores RGB image from Colorization models results represented as AB-channels in LAB color space. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
 * `argmax_segmentation_mask` - translates categorical annotation segmentation mask to numerical. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
 * `shift_labels` - shifts predicted detection labels. Supported representation: `DetectionPrediction`.
   * `offset` - value for shift.
 * `normalize_salience_map` - converts reference salience map from [0, 255] to [0, 1] range. Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
-* `min_max_normalization` - normalize regression data into [0, 1] with given min and max values. Supported representation: `FeatureRegressionAnnotation`, `RegressionAnnotation`, `RegressionPrediction`
-  * `min` - minimal value in range, optional, default 0.
-  * `max`- maximal value in range.
-  * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).

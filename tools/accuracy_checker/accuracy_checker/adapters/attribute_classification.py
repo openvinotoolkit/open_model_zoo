@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,11 +43,8 @@ class AttributeClassificationAdapter(Adapter):
         super().configure()
         self.output_layers = self.get_value_from_config('output_layer_map')
 
-    @classmethod
-    def validate_config(cls, config, fetch_only=False, **kwargs):
-        return super().validate_config(
-            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
-        )
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
 
     def process(self, raw, identifiers, frame_meta):
         """

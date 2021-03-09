@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -174,23 +174,16 @@ class DLSDKLauncher(Launcher):
         if '_list_lstm_inputs' in self.config:
             self._configure_lstm_inputs()
 
-    @classmethod
-    def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
-        field_uri = uri_prefix or 'launcher.{}'.format(cls.__provider__)
-        return DLSDKLauncherConfigValidator(
-            field_uri, fields=cls.parameters(),
-            delayed_model_loading=delayed_model_loading
-        ).validate(
-            config, field_uri=field_uri,
-            validation_scheme=cls.validation_scheme(), fetch_only=fetch_only
-        )
-
     @property
     def device(self):
         return self._device
 
     @property
     def inputs(self):
+        """
+        Returns:
+            inputs in NCHW format.
+        """
         if self.network is None:
             has_info = hasattr(self.exec_network, 'input_info')
             if not has_info:
@@ -207,11 +200,16 @@ class DLSDKLauncher(Launcher):
 
     @property
     def output_blob(self):
-        if hasattr(self, 'original_outputs'):
-            return next(iter(self.original_outputs))
-        return None
+        return next(iter(self.original_outputs))
 
     def predict(self, inputs, metadata=None, **kwargs):
+        """
+        Args:
+            inputs: dictionary where keys are input layers names and values are data for them.
+            metadata: metadata of input representations
+        Returns:
+            raw data from network.
+        """
         if self._lstm_inputs:
             return self._predict_sequential(inputs, metadata)
 
@@ -727,9 +725,11 @@ class DLSDKLauncher(Launcher):
         else:
             for key, value in device_configuration.items():
                 if isinstance(value, dict):
-                    if key not in ie.known_plugins:
-                        warnings.warn('{} device is unknown. Config loading may lead to error.'.format(key))
-                    self.ie_core.set_config(value, key)
+                    if key in ie.known_plugins:
+                        self.ie_core.set_config(value, key)
+                    else:
+                        warnings.warn('Option {key}: {value} will be skipped because device is '
+                                      'unknown'.format(key=key, value=value))
                 else:
                     warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
                                   'applied is not specified or option is not a dict-like'.format(key=key, value=value))
@@ -884,9 +884,9 @@ class DLSDKLauncher(Launcher):
             if 'precision' in input_config:
                 if self.network:
                     if not has_info:
-                        self.network.inputs[input_config['name']].precision = input_config['precision'].upper()
+                        self.network.inputs[input_config['name']].precision = input_config['precision']
                     else:
-                        self.network.input_info[input_config['name']].precision = input_config['precision'].upper()
+                        self.network.input_info[input_config['name']].precision = input_config['precision']
 
     def _set_input_shape(self):
         if not self.network:

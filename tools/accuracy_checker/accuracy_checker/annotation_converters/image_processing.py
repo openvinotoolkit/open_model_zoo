@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,8 +23,7 @@ from .format_converter import BaseFormatConverter, ConverterReturn
 LOADERS_MAPPING = {
     'opencv': GTLoader.OPENCV,
     'pillow': GTLoader.PILLOW,
-    'dicom': GTLoader.DICOM,
-    'skimage': GTLoader.SKIMAGE
+    'dicom': GTLoader.DICOM
 }
 
 

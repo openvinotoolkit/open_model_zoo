@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,18 +37,14 @@ FaceDetectionLayerOutput = namedtuple('FaceDetectionLayerOutput', [
     'win_trans_y'
 ])
 
-
 class TFObjectDetectionAPIAdapter(Adapter):
     """
     Class for converting output of SSD model to DetectionPrediction representation
     """
     __provider__ = 'tf_object_detection'
 
-    @classmethod
-    def validate_config(cls, config, fetch_only=False, **kwargs):
-        return super().validate_config(
-            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
-        )
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
 
     @classmethod
     def parameters(cls):
@@ -176,6 +172,7 @@ class MTCNNPAdapter(Adapter):
                 DetectionPrediction(identifier, np.full_like(scores, 1), scores, x_mins, y_mins, x_maxs, y_maxs)
             )
 
+
         return results
 
     @staticmethod
@@ -234,13 +231,10 @@ class ClassAgnosticDetectionAdapter(Adapter):
     DetectionPrediction representation
     """
     __provider__ = 'class_agnostic_detection'
-    prediction_types = (DetectionPrediction,)
+    prediction_types = (DetectionPrediction, )
 
-    @classmethod
-    def validate_config(cls, config, fetch_only=False, **kwargs):
-        return super().validate_config(
-            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
-        )
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
 
     @classmethod
     def parameters(cls):
@@ -369,11 +363,11 @@ class RFCNCaffe(Adapter):
         assert len(predicted_classes.shape) == 2
         assert predicted_deltas.shape[-1] == 8
         predicted_boxes = self.bbox_transform_inv(predicted_proposals, predicted_deltas)
-        num_classes = predicted_classes.shape[-1] - 1  # skip background
+        num_classes = predicted_classes.shape[-1] - 1 # skip background
         x_mins, y_mins, x_maxs, y_maxs = predicted_boxes[:, 4:].T
         detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
         for cls_id in range(num_classes):
-            cls_scores = predicted_classes[:, cls_id + 1]
+            cls_scores = predicted_classes[:, cls_id+1]
             keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, cls_scores, 0.3, include_boundaries=False)
             filtered_score = cls_scores[keep]
             x_cls_mins = x_mins[keep]
@@ -381,7 +375,7 @@ class RFCNCaffe(Adapter):
             x_cls_maxs = x_maxs[keep]
             y_cls_maxs = y_maxs[keep]
             # Save detections
-            labels = np.full_like(filtered_score, cls_id + 1)
+            labels = np.full_like(filtered_score, cls_id+1)
             detections['labels'].extend(labels)
             detections['scores'].extend(filtered_score)
             detections['x_mins'].extend(x_cls_mins)
@@ -392,7 +386,6 @@ class RFCNCaffe(Adapter):
             identifiers[0], detections['labels'], detections['scores'], detections['x_mins'],
             detections['y_mins'], detections['x_maxs'], detections['y_maxs']
         )]
-
     @staticmethod
     def bbox_transform_inv(boxes, deltas):
         if boxes.shape[0] == 0:
@@ -425,11 +418,8 @@ class FaceBoxesAdapter(Adapter):
     """
     __provider__ = 'faceboxes'
 
-    @classmethod
-    def validate_config(cls, config, fetch_only=False, **kwargs):
-        return super().validate_config(
-            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
-        )
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
 
     @classmethod
     def parameters(cls):
@@ -444,7 +434,6 @@ class FaceBoxesAdapter(Adapter):
     def configure(self):
         self.scores_out = self.get_value_from_config('scores_out')
         self.boxes_out = self.get_value_from_config('boxes_out')
-        self._anchors_cache = {}
 
         # Set default values
         self.min_sizes = [[32, 64, 128], [256], [512]]
@@ -515,15 +504,11 @@ class FaceBoxesAdapter(Adapter):
             image_info = meta.get("image_info")[0:2]
 
             # Prior boxes
-            if (image_info[0], image_info[1]) not in self._anchors_cache:
-                feature_maps = [[math.ceil(image_info[0] / step), math.ceil(image_info[1] / step)] for step in
-                                self.steps]
-                prior_data = self.prior_boxes(feature_maps, image_info)
-                self._anchors_cache[(image_info[0], image_info[1])] = prior_data
-            else:
-                prior_data = self._anchors_cache[(image_info[0], image_info[1])]
+            feature_maps = [[math.ceil(image_info[0] / step), math.ceil(image_info[1] / step)] for step in
+                            self.steps]
+            prior_data = self.prior_boxes(feature_maps, image_info)
 
-            # Boxes
+             # Boxes
             boxes[:, :2] = self.variance[0] * boxes[:, :2]
             boxes[:, 2:] = self.variance[1] * boxes[:, 2:]
             boxes[:, :2] = boxes[:, :2] * prior_data[:, 2:] + prior_data[:, :2]
@@ -584,13 +569,12 @@ class FaceBoxesAdapter(Adapter):
 
         return result
 
-
 class FaceDetectionAdapter(Adapter):
     """
     Class for converting output of Face Detection model to DetectionPrediction representation
     """
     __provider__ = 'face_detection'
-    predcition_types = (DetectionPrediction,)
+    predcition_types = (DetectionPrediction, )
 
     @classmethod
     def parameters(cls):
@@ -686,10 +670,10 @@ class FaceDetectionAdapter(Adapter):
                             candidate_width = layer.win_length
                             candidate_height = layer.win_length
 
-                            reg_x = reg_arr[0][layer.anchor_index * 4 + 0][row][col] * layer.win_length
-                            reg_y = reg_arr[0][layer.anchor_index * 4 + 1][row][col] * layer.win_length
-                            reg_width = reg_arr[0][layer.anchor_index * 4 + 2][row][col] * layer.win_length
-                            reg_height = reg_arr[0][layer.anchor_index * 4 + 3][row][col] * layer.win_length
+                            reg_x = reg_arr[0][layer.anchor_index*4+0][row][col] * layer.win_length
+                            reg_y = reg_arr[0][layer.anchor_index*4+1][row][col] * layer.win_length
+                            reg_width = reg_arr[0][layer.anchor_index*4+2][row][col] * layer.win_length
+                            reg_height = reg_arr[0][layer.anchor_index*4+3][row][col] * layer.win_length
 
                             candidate_x += reg_x
                             candidate_y += reg_y
@@ -710,7 +694,6 @@ class FaceDetectionAdapter(Adapter):
             result.append(
                 DetectionPrediction(
                     identifier=identifier,
-                    labels=np.zeros_like(detections['scores']),
                     x_mins=detections['x_mins'],
                     y_mins=detections['y_mins'],
                     x_maxs=detections['x_maxs'],
@@ -721,10 +704,10 @@ class FaceDetectionAdapter(Adapter):
 
         return result
 
-
 class FaceDetectionRefinementAdapter(Adapter):
+
     __provider__ = 'face_detection_refinement'
-    prediction_types = (DetectionPrediction,)
+    prediction_types = (DetectionPrediction, )
 
     @classmethod
     def parameters(cls):
@@ -786,8 +769,8 @@ class FaceDetectionRefinementAdapter(Adapter):
             detections['scores'].append(score)
             detections['x_mins'].append(x)
             detections['y_mins'].append(y)
-            detections['x_maxs'].append(x + width)
-            detections['y_maxs'].append(y + height)
+            detections['x_maxs'].append(x+width)
+            detections['y_maxs'].append(y+height)
 
         return [
             DetectionPrediction(
@@ -868,95 +851,4 @@ class TwoStageDetector(Adapter):
             labels = np.argmax(conf, axis=1)
             scores = np.max(conf, axis=1)
             result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_mins + w, y_mins + h))
-        return result
-
-
-class DETRAdapter(Adapter):
-    __provider__ = 'detr'
-
-    @classmethod
-    def parameters(cls):
-        params = super().parameters()
-        params.update({
-            'scores_out': StringField(description='scores output'),
-            'boxes_out': StringField(description='boxes output')
-        })
-        return params
-
-    def configure(self):
-        self.scores_out = self.get_value_from_config('scores_out')
-        self.boxes_out = self.get_value_from_config('boxes_out')
-
-    def process(self, raw, identifiers, frame_meta):
-        result = []
-        raw_output = self._extract_predictions(raw, frame_meta)
-
-        def box_cxcywh_to_xyxy(x):
-            x_c, y_c, w, h = x.T
-            b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
-                 (x_c + 0.5 * w), (y_c + 0.5 * h)]
-            return b
-
-        def softmax(x):
-            exp_x = np.exp(x)
-            return exp_x / np.sum(exp_x)
-
-        for identifier, logits, boxes in zip(identifiers, raw_output[self.scores_out], raw_output[self.boxes_out]):
-            x_mins, y_mins, x_maxs, y_maxs = box_cxcywh_to_xyxy(boxes)
-            scores = softmax(logits)
-            labels = np.argmax(scores[:, :-1], axis=-1)
-            det_scores = np.max(scores[:, :-1], axis=-1)
-            result.append(DetectionPrediction(identifier, labels, det_scores, x_mins, y_mins, x_maxs, y_maxs))
-
-        return result
-
-
-class UltraLightweightFaceDetectionAdapter(Adapter):
-    """
-    Class for converting output of Ultra-Lightweight Face Detection models to DetectionPrediction representation
-    """
-    __provider__ = 'ultra_lightweight_face_detection'
-
-    @classmethod
-    def validate_config(cls, config, fetch_only=False, **kwargs):
-        return super().validate_config(
-            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT
-        )
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'scores_out': StringField(description="Scores output layer name."),
-            'boxes_out': StringField(description="Boxes output layer name."),
-            'score_threshold': NumberField(
-                value_type=float, min_value=0, max_value=1, default=0.7, optional=True,
-                description='Minimal accepted score for valid boxes'),
-        })
-
-        return parameters
-
-    def configure(self):
-        self.scores_out = self.get_value_from_config('scores_out')
-        self.boxes_out = self.get_value_from_config('boxes_out')
-        self.score_threshold = self.get_value_from_config('score_threshold')
-
-    def process(self, raw, identifiers, frame_meta):
-        raw_outputs = self._extract_predictions(raw, frame_meta)
-
-        batch_scores = raw_outputs[self.scores_out]
-        batch_boxes = raw_outputs[self.boxes_out]
-
-        result = []
-        for identifier, scores, boxes in zip(identifiers, batch_scores, batch_boxes):
-            x_mins, y_mins, x_maxs, y_maxs = [], [], [], []
-            score = np.transpose(scores)[1]
-            mask = score > self.score_threshold
-            filtered_boxes, filtered_score = boxes[mask, :], score[mask]
-            if filtered_score.size != 0:
-                x_mins, y_mins, x_maxs, y_maxs = filtered_boxes.T
-            labels = np.full_like(filtered_score, 1, dtype=int)
-
-            result.append(DetectionPrediction(identifier, labels, filtered_score, x_mins, y_mins, x_maxs, y_maxs))
-
         return result

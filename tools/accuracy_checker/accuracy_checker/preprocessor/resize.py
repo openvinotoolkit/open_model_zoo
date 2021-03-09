@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -250,17 +250,15 @@ class _TFResizer(_Resizer):
             import tensorflow as tf # pylint: disable=C0415
         except ImportError as import_error:
             UnsupportedPackage("tf", import_error.msg).raise_error(self.__provider__)
-        if tf.__version__ < '2.0.0':
-            tf.enable_eager_execution()
-            self._resize = tf.image.resize_images
-        else:
-            self._resize = tf.image.resize
+        tf.enable_eager_execution()
         self._supported_interpolations = {
             'BILINEAR': tf.image.ResizeMethod.BILINEAR,
             'AREA': tf.image.ResizeMethod.AREA,
             'BICUBIC': tf.image.ResizeMethod.BICUBIC,
         }
         self.default_interpolation = 'BILINEAR'
+        self._resize = tf.image.resize_images
+
         super().__init__(interpolation)
 
     def resize(self, data, new_height, new_width):
@@ -338,7 +336,6 @@ class Resize(Preprocessor):
                 optional=True,
                 description="Specifies usage of TensorFlow Image for resizing. Requires TensorFlow installation."
             ),
-
             'resize_realization': StringField(
                 optional=True, choices=_Resizer.providers,
                 description="Parameter specifies functionality of which library will be used for resize: "

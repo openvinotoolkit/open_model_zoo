@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -171,7 +171,7 @@ class XNLIDatasetConverter(BaseGLUETextClassificationConverter):
                 description='comma-separated list of languages for selection only appropriate annotations.'
                 'If not provided full dataset used',
                 optional=True
-            )
+                )
         })
 
         return params
@@ -277,7 +277,7 @@ class BertXNLITFRecordConverter(BertTextClassificationTFRecordConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations, _, errors = super().convert(check_content, progress_callback, progress_interval, **kwargs)
 
-        return ConverterReturn(annotations, {'label_map': dict(enumerate(labels['xnli']))}, errors)
+        return ConverterReturn(annotations, {'label_map':  dict(enumerate(labels['xnli']))}, errors)
 
 
 class MRPCConverter(BaseGLUETextClassificationConverter):

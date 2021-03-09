@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,9 +26,8 @@ class ImageInpaintingAdapter(Adapter):
 
     def process(self, raw, identifiers, frame_meta):
         result = []
-        raw_outputs = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(raw_outputs)
-        for identifier, img in zip(identifiers, raw_outputs[self.output_blob]):
+        raw_outputs = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        for identifier, img in zip(identifiers, raw_outputs):
             if img.shape[0] == 3:
                 img = np.transpose(img, (1, 2, 0))
             result.append(ImageInpaintingPrediction(identifier, img.astype(np.uint8)))

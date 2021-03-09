@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from ..topology_types import ObjectDetection
 from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
@@ -135,6 +136,7 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
 class PascalVOCDetectionConverter(BaseFormatConverter):
     __provider__ = 'voc_detection'
     annotation_types = (DetectionAnnotation, )
+    topology_types = (ObjectDetection, )
 
     @classmethod
     def parameters(cls):

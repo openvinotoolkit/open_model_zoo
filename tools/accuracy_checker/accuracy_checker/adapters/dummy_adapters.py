@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -103,7 +103,6 @@ class GVADetectionAdapter(Adapter):
 
 class GVAClassificationAdapter(Adapter):
     __provider__ = 'gva_classification'
-
     def process(self, raw, identifiers, frame_meta):
         results = []
         for identifier, image_data in zip(identifiers, raw):

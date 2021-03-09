@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .launcher import Launcher, ListInputsField
+from .launcher import Launcher, LauncherConfigValidator, ListInputsField
 from ..config import PathField, StringField
 
 
@@ -46,7 +46,10 @@ class TFLiteLauncher(Launcher):
         self.default_layout = 'NHWC'
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
+        tf_launcher_config = LauncherConfigValidator(
+            'TF_Lite_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
+        )
+        tf_launcher_config.validate(self.config)
         if not self._delayed_model_loading:
             self._interpreter = self.tf_lite.Interpreter(model_path=str(self.config['model']))
             self._interpreter.allocate_tensors()

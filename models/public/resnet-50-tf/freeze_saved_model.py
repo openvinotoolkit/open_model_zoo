@@ -1,6 +1,7 @@
 import argparse
 import tensorflow.compat.v1 as tf
 
+from tensorflow.python.framework import graph_io
 from tensorflow.python.tools import optimize_for_inference_lib
 
 def parse_args():

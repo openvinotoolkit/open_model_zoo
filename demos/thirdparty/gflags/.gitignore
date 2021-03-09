@@ -2,7 +2,6 @@
 /build/
 /builds/
 /build-*/
-/_build/
 .DS_Store
 CMakeCache.txt
 DartConfiguration.tcl

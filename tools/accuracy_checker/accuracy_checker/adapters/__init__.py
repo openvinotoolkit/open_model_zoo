@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,26 +20,23 @@ from .action_recognition import ActionDetection
 from .text_detection import (
     TextDetectionAdapter,
     TextProposalsDetectionAdapter,
-    EASTTextDetectionAdapter,
-    CRAFTTextDetectionAdapter
+    EASTTextDetectionAdapter
 )
 
 from .text_recognition import (
     BeamSearchDecoder,
     CTCGreedySearchDecoder,
-    LPRAdapter,
-    AttentionOCRAdapter
+    LPRAdapter
 )
 
 from .image_processing import (
-    ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter, SuperResolutionYUV, TrimapAdapter
+    ImageProcessingAdapter, SuperResolutionAdapter, MultiSuperResolutionAdapter, SuperResolutionYUV
 )
 from .attributes_recognition import (
     HeadPoseEstimatorAdapter,
     VehicleAttributesRecognitionAdapter,
     PersonAttributesAdapter,
     AgeGenderAdapter,
-    AgeRecognitionAdapter,
     LandmarksRegressionAdapter,
     GazeEstimationAdapter,
     PRNetAdapter
@@ -54,9 +51,7 @@ from .detection import (
     FaceDetectionAdapter,
     FaceDetectionRefinementAdapter,
     FasterRCNNONNX,
-    TwoStageDetector,
-    DETRAdapter,
-    UltraLightweightFaceDetectionAdapter
+    TwoStageDetector
 )
 from .detection_person_vehicle import (
     PersonVehicleDetectionAdapter,
@@ -65,8 +60,8 @@ from .detection_person_vehicle import (
 from .detection_head import HeadDetectionAdapter
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
 from .retinaface import RetinaFaceAdapter
-from .retinanet import RetinaNetAdapter, MultiOutRetinaNet, RetinaNetTF2
-from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX, YoloV3TF2, YoloV5Adapter
+from .retinanet import RetinaNetAdapter, MultiOutRetinaNet
+from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter
 from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
@@ -81,10 +76,7 @@ from .mask_rcnn import MaskRCNNAdapter
 from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
 from .yolact import YolactAdapter
 
-from .nlp import (
-    MachineTranslationAdapter, QuestionAnsweringAdapter, QuestionAnsweringBiDAFAdapter,
-    BertTextClassification, BERTNamedEntityRecognition
-)
+from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter, QuestionAnsweringBiDAFAdapter
 
 from .centernet import CTDETAdapter
 
@@ -122,7 +114,6 @@ __all__ = [
     'MTCNNPAdapter',
     'CTDETAdapter',
     'RetinaNetAdapter',
-    'RetinaNetTF2',
     'ClassAgnosticDetectionAdapter',
     'RetinaFaceAdapter',
     'FaceBoxesAdapter',
@@ -133,15 +124,11 @@ __all__ = [
     'HeadDetectionAdapter',
     'FasterRCNNONNX',
     'TwoStageDetector',
-    'DETRAdapter',
-    'UltraLightweightFaceDetectionAdapter',
 
     'TinyYOLOv1Adapter',
     'YoloV2Adapter',
     'YoloV3Adapter',
     'YoloV3ONNX',
-    'YoloV3TF2',
-    'YoloV5Adapter',
 
     'SSDAdapter',
     'SSDAdapterMxNet',
@@ -163,13 +150,11 @@ __all__ = [
     'SuperResolutionAdapter',
     'MultiSuperResolutionAdapter',
     'SuperResolutionYUV',
-    'TrimapAdapter',
 
     'HeadPoseEstimatorAdapter',
     'VehicleAttributesRecognitionAdapter',
     'PersonAttributesAdapter',
     'AgeGenderAdapter',
-    'AgeRecognitionAdapter',
     'LandmarksRegressionAdapter',
     'GazeEstimationAdapter',
     'PRNetAdapter',
@@ -177,12 +162,10 @@ __all__ = [
     'TextDetectionAdapter',
     'TextProposalsDetectionAdapter',
     'EASTTextDetectionAdapter',
-    'CRAFTTextDetectionAdapter',
 
     'BeamSearchDecoder',
     'LPRAdapter',
     'CTCGreedySearchDecoder',
-    'AttentionOCRAdapter',
 
     'AssociativeEmbeddingAdapter',
     'HumanPoseAdapter',
@@ -202,8 +185,6 @@ __all__ = [
     'MachineTranslationAdapter',
     'QuestionAnsweringAdapter',
     'QuestionAnsweringBiDAFAdapter',
-    'BERTNamedEntityRecognition',
-    'BertTextClassification',
 
     'MonoDepthAdapter',
 

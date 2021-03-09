@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,8 +33,7 @@ LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
     'NDCWH': [0, 1, 4, 3, 2],
     'NCHWD': [0, 2, 3, 4, 1],
     'NC': [0, 1],
-    'CN': [1, 0],
-    'CNH': [1, 0, 2]
+    'CN': [1, 0]
 }
 
 DIM_IDS_TO_LAYOUT = {
@@ -44,8 +43,7 @@ DIM_IDS_TO_LAYOUT = {
     (0, 1, 4, 2, 3): 'NDHWC',
     (0, 1, 4, 3, 2): 'NDCWH',
     (0, 1): 'NC',
-    (1, 0): 'CN',
-    (1, 0, 2): 'CNH'
+    (1, 0): 'CN'
 }
 
 PRECISION_TO_DTYPE = {
@@ -57,7 +55,7 @@ PRECISION_TO_DTYPE = {
     'I16': np.int16,  # signed short
     'I32': np.int32,  # signed int
     'I64': np.int64,  # signed long int
-    'STR': str,  # string
+    'STR': np.str,  # string
 }
 
 INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'IGNORE_INPUT', 'LSTM_INPUT']
@@ -187,6 +185,7 @@ class InputFeeder:
         lstm_inputs = []
         ignore_inputs = []
 
+
         for input_ in inputs_entry:
             name = input_['name']
             if name not in self.network_inputs:
@@ -200,11 +199,10 @@ class InputFeeder:
             value = input_.get('value')
 
             if input_['type'] == 'CONST_INPUT':
-                precision = self.get_layer_precision(input_, name, precision_info, precisions) or np.float32
                 if isinstance(value, list):
-                    value = np.array(value, dtype=precision)
-                if isinstance(value, (int, float)) and 'shape' in input_:
-                    value = np.full(input_['shape'], value, dtype=precision)
+                    value = np.array(value)
+                    precision = self.get_layer_precision(input_, name, precision_info, precisions)
+                    value = value.astype(precision) if precision is not None else value
                 constant_inputs[name] = value
             else:
                 config_non_constant_inputs.append(name)
@@ -334,7 +332,7 @@ class InputFeeder:
             input_config['precision'] = precision
         if 'precision' not in input_config:
             return None
-        input_precision = PRECISION_TO_DTYPE.get(input_config['precision'].upper())
+        input_precision = PRECISION_TO_DTYPE.get(input_config['precision'])
         if input_precision is None:
             raise ConfigError("unsupported precision {} for layer {}".format(input_config['precision'], input_name))
         precisions[input_name] = input_precision

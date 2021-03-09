@@ -27,11 +27,14 @@ For the tests to work, the test data directory must contain:
 """
 
 import argparse
+import collections
 import contextlib
 import csv
+import itertools
 import json
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -141,7 +144,7 @@ def main():
 
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
-        demos_to_test = [demo for demo in DEMOS if demo.subdirectory in names_of_demos_to_test]
+        demos_to_test = [demo for demo in DEMOS if demo.full_name in names_of_demos_to_test]
     else:
         demos_to_test = DEMOS
 
@@ -150,13 +153,11 @@ def main():
 
         num_failures = 0
 
-        demo_environment = {**os.environ,
-            'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir),
-        }
+        os.putenv('PYTHONPATH',  "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir))
+        os.putenv('PYTHONIOENCODING',  'utf-8')
 
         for demo in demos_to_test:
-            print('Testing {}...'.format(demo.subdirectory))
+            print('Testing {}...'.format(demo.full_name))
             print()
 
             declared_model_names = {model['name']
@@ -167,6 +168,7 @@ def main():
 
             with temp_dir_as_path() as temp_dir:
                 arg_context = ArgContext(
+                    source_dir=demos_dir / demo.subdirectory,
                     dl_dir=dl_dir,
                     data_sequence_dir=temp_dir / 'data_seq',
                     data_sequences=DATA_SEQUENCES,
@@ -212,8 +214,7 @@ def main():
                         try:
                             start_time = timeit.default_timer()
                             subprocess.check_output(fixed_args + dev_arg + case_args,
-                                stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
-                                env=demo_environment)
+                                stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8')
                             execution_time = timeit.default_timer() - start_time
                         except subprocess.CalledProcessError as e:
                             print(e.output)
@@ -222,7 +223,7 @@ def main():
                             execution_time = -1
 
                         if args.report_file:
-                            collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
+                            collect_result(demo.full_name, device, case_model_names, execution_time, args.report_file)
 
             print()
 

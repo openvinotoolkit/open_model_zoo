@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,9 +38,7 @@ class HitRatioAdapter(Adapter):
             list of HitRatioPrediction objects.
         """
 
-        raw_prediction = self._extract_predictions(raw, frame_meta)
-        self.select_output_blob(raw_prediction)
-        prediction = raw_prediction[self.output_blob]
+        prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
         prediction = np.reshape(prediction, -1)
 
         result = []

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ class NormalizeLandmarksPoints(Postprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'use_annotation_rect': BoolField(
+            'use_annotation_rect' : BoolField(
                 optional=True, default=False,
                 description="Allows to use size of rectangle saved in annotation metadata for point scaling"
                             " instead source image size."

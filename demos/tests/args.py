@@ -18,7 +18,7 @@ import shutil
 from pathlib import Path
 
 ArgContext = collections.namedtuple('ArgContext',
-    ['test_data_dir', 'dl_dir', 'model_info', 'data_sequences', 'data_sequence_dir'])
+    ['source_dir', 'test_data_dir', 'dl_dir', 'model_info', 'data_sequences', 'data_sequence_dir'])
 
 OMZ_DIR = Path(__file__).parents[2].resolve()
 
@@ -100,3 +100,11 @@ class DataDirectoryOrigFileNamesArg:
                 shutil.copyfile(seq_item, str(seq_dir / Path(seq_item).name))
 
         return str(seq_dir)
+
+
+class DemoFileArg:
+    def __init__(self, file_name):
+        self.file_name = file_name
+
+    def resolve(self, context):
+        return str(context.source_dir / self.file_name)

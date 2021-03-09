@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -104,7 +104,6 @@ class SquadExample:
             self.end_position = char_to_word_offset[
                 min(start_position_character + len(answer_text) - 1, len(char_to_word_offset) - 1)
             ]
-
 
 class SQUADConverter(BaseFormatConverter):
     __provider__ = "squad"
@@ -250,16 +249,16 @@ class SQUADConverter(BaseFormatConverter):
 
             spans = self.set_max_context(spans)
 
-            for sp_id, span in enumerate(spans):
+            for span in spans:
                 # Identify the position of the CLS token
                 cls_index = span["input_ids"].index(self.tokenizer.cls_token_id)
 
                 p_mask = self.fill_p_mask(span, len(truncated_query), sequence_added_tokens, cls_index)
                 idx = example_index
-                identifier = ['input_ids_{}_{}'.format(idx, sp_id),
-                              'input_mask_{}_{}'.format(idx, sp_id),
-                              'segment_ids_{}_{}'.format(idx, sp_id),
-                              'position_ids_{}_{}'.format(idx, sp_id)]
+                identifier = ['input_ids_{}'.format(idx),
+                              'input_mask_{}'.format(idx),
+                              'segment_ids_{}'.format(idx),
+                              'position_ids_{}'.format(idx)]
                 annotation = QuestionAnsweringAnnotation(
                     identifier=identifier,
                     question_id=example.qas_id,

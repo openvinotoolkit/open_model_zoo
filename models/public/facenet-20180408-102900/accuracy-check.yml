@@ -3,20 +3,13 @@ models:
 
     launchers:
       - framework: dlsdk
-        adapter:
-          type: reid
-          joining_method: concatenation
+        adapter: reid
 
     datasets:
-      - name: lfw_mtcnn_align
+      - name: lfw
 
         preprocessing:
-          - type: auto_resize
-          - type: flip
-            mode: vertical
-            merge_with_original: True
-        metrics:
-          - type: pairwise_accuracy_subsets
-            min_score: best_train_threshold
-            distance_method: 'cosine_distance'
-            subtract_mean: True
+          - type: point_alignment
+            size: 400
+          - type: resize
+            size: 160

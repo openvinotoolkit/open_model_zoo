@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-0006.xml
-    size: 880828
-    sha256: d7c2591e746fac09014aca95ce57273a2b7b25419be26402c40e70f3e3ca151a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/person-detection-action-recognition-0006/FP32/person-detection-action-recognition-0006.xml
+    size: 752661
+    sha256: ead7637ecfcb40b63c0d4f9821085c3c2caaaae7651c07eef4f3d3b9d9973960
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-0006/FP32/person-detection-action-recognition-0006.xml
   - name: FP32/person-detection-action-recognition-0006.bin
-    size: 7458360
-    sha256: c7a75e84aa6023b682dcd12c838efa2052f5ee2084a8120f7d0a639e9de56231
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/person-detection-action-recognition-0006/FP32/person-detection-action-recognition-0006.bin
+    size: 7458352
+    sha256: 888d01b994c58baa65ab20b948439620222512ee49d45e6f443f271d7637f603
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-0006/FP32/person-detection-action-recognition-0006.bin
   - name: FP16/person-detection-action-recognition-0006.xml
-    size: 880530
-    sha256: 84a1cd69d95b37e3d7a0c8a7ba3326b21bf9be265a0a09d81b055f2bebbd76cc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/person-detection-action-recognition-0006/FP16/person-detection-action-recognition-0006.xml
+    size: 752383
+    sha256: 4f5bb4490b4eda35b9699f20fee7190b4b822db19df6db735ffd371dd2877a91
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-0006/FP16/person-detection-action-recognition-0006.xml
   - name: FP16/person-detection-action-recognition-0006.bin
-    size: 3729226
-    sha256: d78a8abf54a4484d60ad88c614148fd0693e4a1fbb919dbb3b44529370b8220a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/person-detection-action-recognition-0006/FP16/person-detection-action-recognition-0006.bin
+    size: 3729222
+    sha256: 6752e639f4035582f77209a6030cded78ec4869b628ad9cdde1907d8cfd13368
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-0006/FP16/person-detection-action-recognition-0006.bin
   - name: FP16-INT8/person-detection-action-recognition-0006.xml
-    size: 2288399
-    sha256: db38858da18e7739ad4eb57fe83d19a07b44474b06164d32d09dc9e0777b88bb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/person-detection-action-recognition-0006/FP16-INT8/person-detection-action-recognition-0006.xml
+    size: 2187800
+    sha256: e31cc3c1a68d707d7defed7cca1507930aba950e02008b3e6f7329cf3553c800
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-0006/FP16-INT8/person-detection-action-recognition-0006.xml
   - name: FP16-INT8/person-detection-action-recognition-0006.bin
-    size: 1982819
-    sha256: 02cbcb7bd5a5b22f3ab1a7ff60debea3da3dc8d665c7d29a43ac944d38a866ce
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/person-detection-action-recognition-0006/FP16-INT8/person-detection-action-recognition-0006.bin
+    size: 1982776
+    sha256: 79ae53bf1f80644eee9f59d80cba1c27473419ee1c21e40fcd9ead8568364c5d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-detection-action-recognition-0006/FP16-INT8/person-detection-action-recognition-0006.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

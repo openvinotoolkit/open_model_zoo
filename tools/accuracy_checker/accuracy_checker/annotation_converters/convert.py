@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,30 +19,18 @@ import warnings
 import copy
 import json
 from pathlib import Path
-import pickle
 from argparse import ArgumentParser
-from collections import namedtuple
 from functools import partial
 
 import numpy as np
 
-from .. import __version__
 from ..representation import (
     ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
 )
 from ..utils import get_path, OrderedSet
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
-from ..utils import cast_to_bool, is_relative_to
-
-DatasetConversionInfo = namedtuple('DatasetConversionInfo',
-                                   [
-                                       'dataset_name',
-                                       'conversion_parameters',
-                                       'subset_parameters',
-                                       'dataset_size',
-                                       'ac_version'
-                                   ])
+from ..utils import cast_to_bool
 
 
 def build_argparser():
@@ -200,7 +188,7 @@ def main():
     main_argparser = ArgumentParser(parents=[main_argparser, converter_argparser])
     args = main_argparser.parse_args()
 
-    converter, converter_config = configure_converter(converter_args, args, converter)
+    converter = configure_converter(converter_args, args, converter)
     out_dir = args.output_dir or Path.cwd()
 
     results = converter.convert()
@@ -220,6 +208,7 @@ def main():
             subsample_size = int(args.subsample)
 
         converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed, args.shuffle)
+
     if args.analyze_dataset:
         analyze_dataset(converted_annotation, meta)
 
@@ -229,63 +218,24 @@ def main():
 
     annotation_file = out_dir / annotation_name
     meta_file = out_dir / meta_name
-    dataset_config = {
-        'name': annotation_name,
-        'annotation_conversion': converter_config,
-        'subsample_size': subsample,
-        'subsample_seed': args.subsample_seed,
-        'shuffle': args.shuffle
-    }
 
-    save_annotation(converted_annotation, meta, annotation_file, meta_file, dataset_config)
+    save_annotation(converted_annotation, meta, annotation_file, meta_file)
 
 
-def save_annotation(annotation, meta, annotation_file, meta_file, dataset_config=None):
+def save_annotation(annotation, meta, annotation_file, meta_file):
     if annotation_file:
-        conversion_meta = get_conversion_attributes(dataset_config, len(annotation)) if dataset_config else None
         annotation_dir = annotation_file.parent
         if not annotation_dir.exists():
             annotation_dir.mkdir(parents=True)
         with annotation_file.open('wb') as file:
-            if conversion_meta:
-                pickle.dump(conversion_meta, file)
             for representation in annotation:
                 representation.dump(file)
-
     if meta_file and meta:
         meta_dir = meta_file.parent
         if not meta_dir.exists():
             meta_dir.mkdir(parents=True)
         with meta_file.open('wt') as file:
             json.dump(meta, file)
-
-
-def get_conversion_attributes(config, dataset_size):
-    dataset_name = config.get('name', '')
-    conversion_parameters = copy.deepcopy(config.get('annotation_conversion', {}))
-    for key, value in config.get('annotation_conversion', {}).items():
-        if key in config.get('_command_line_mapping', {}):
-            m_path = config['_command_line_mapping'][key]
-            if not m_path:
-                conversion_parameters[key] = str(value)
-                continue
-
-            if isinstance(m_path, list):
-                for m_path in config['_command_line_mapping'][key]:
-                    if is_relative_to(value, m_path):
-                        break
-            conversion_parameters[key] = str(value.relative_to(m_path))
-
-    subset_size = config.get('subsample_size')
-    subset_parameters = {}
-    if subset_size is not None:
-        shuffle = config.get('shuffle', True)
-        subset_parameters = {
-            'subsample_size': subset_size,
-            'subsample_seed': config.get('subsample_seed'),
-            'shuffle': shuffle
-        }
-    return DatasetConversionInfo(dataset_name, conversion_parameters, subset_parameters, dataset_size, __version__)
 
 
 def configure_converter(converter_options, args, converter):
@@ -296,10 +246,10 @@ def configure_converter(converter_options, args, converter):
     }
     converter_config['converter'] = args.converter
     converter.config = converter_config
-    converter.validate_config(converter_config)
+    converter.validate_config()
     converter.configure()
 
-    return converter, converter_config
+    return converter
 
 
 def get_converter_arguments(arguments):

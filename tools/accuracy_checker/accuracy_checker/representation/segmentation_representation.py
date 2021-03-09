@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ class SegmentationAnnotation(SegmentationRepresentation):
         mask = self._encode_mask(self.mask, segmentation_colors) if segmentation_colors else self.mask
 
         polygons = defaultdict(list)
-        indexes = np.unique(mask) if not label_map else set(np.unique(mask)) & set(label_map.keys())
+        indexes = np.unique(mask) if not label_map else set(np.unique(mask))&set(label_map.keys())
         for i in indexes:
             binary_mask = np.uint8(mask == i)
             contours, _ = cv.findContours(binary_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)

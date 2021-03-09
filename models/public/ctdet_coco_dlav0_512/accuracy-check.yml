@@ -4,9 +4,9 @@ models:
       - framework: dlsdk
         adapter:
           type: ctdet
-          center_heatmap_out: center_heatmap
-          width_height_out: width_height
-          regression_out: regression
+          center_heatmap_out: "508"
+          width_height_out: "514"
+          regression_out: "511"
 
 
     datasets:

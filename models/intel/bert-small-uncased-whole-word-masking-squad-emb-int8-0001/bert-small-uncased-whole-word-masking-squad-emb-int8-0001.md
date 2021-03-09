@@ -18,7 +18,7 @@ The model created by 3 steps:
 1. Initial BERT-large model finetuned to produce embeddings on SQuAD v1.1 training set from original
 bert-large-uncased-whole-word-masking provided by the [Transformers](https://github.com/huggingface/transformers) library.
 2. Then the finetuned model is distilled to much smaller FP32 model on SQuAD v1.1 training set
-3. On final step the distilled small model symmetrically quantized to INT8.
+3. On final step the distilled small model symmetricaly quantized to INT8.
 
 ## Specification
 

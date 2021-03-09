@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ limitations under the License.
 
 from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ..representation import DetectionAnnotation, ActionDetectionAnnotation, ContainerAnnotation
+from ..topology_types import ObjectDetection
 from ..utils import read_xml, check_file_existence
 from ..config import PathField, ConfigError, StringField
 
@@ -70,7 +71,7 @@ ACTIONS_BACK = {
         2: 'raising_hand'
     },
 
-    'common_6_actions': {
+    'common_6_actions':{
         0: 'sitting',
         1: 'writing',
         2: 'raising_hand',
@@ -95,6 +96,7 @@ ACTIONS_BACK = {
 class CVATPersonDetectionActionRecognitionConverter(FileBasedAnnotationConverter):
     __provider__ = 'cvat_person_detection_action_recognition'
     annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    topology_types = (ObjectDetection, )
 
     @classmethod
     def parameters(cls):

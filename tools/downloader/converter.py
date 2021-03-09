@@ -16,6 +16,7 @@
 
 import argparse
 import os
+import re
 import string
 import sys
 
@@ -160,10 +161,9 @@ def main():
             for arg in model.mo_args]
 
         for model_precision in sorted(model_precisions):
-            data_type = model_precision.split('-')[0]
             mo_cmd = [str(args.python), '--', str(mo_path),
                 '--framework={}'.format(model_format),
-                '--data_type={}'.format(data_type),
+                '--data_type={}'.format(model_precision),
                 '--output_dir={}'.format(output_dir / model.subdirectory / model_precision),
                 '--model_name={}'.format(model.name),
                 *expanded_mo_args, *extra_mo_args]

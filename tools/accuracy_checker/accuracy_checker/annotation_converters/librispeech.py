@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ limitations under the License.
 from pathlib import Path
 import re
 import json
-import wave
 import numpy as np
 
 from ..representation import CharacterRecognitionAnnotation
@@ -35,7 +34,6 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
         params.update({
             'annotation_file': PathField(optional=True),
             'top_n': NumberField(optional=True, value_type=int),
-            'max_duration': NumberField(optional=True, value_type=float, default=0),
             'use_numpy': BoolField(optional=True, default=False)
         })
         return params
@@ -44,7 +42,6 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
         self.data_dir = self.get_value_from_config('data_dir')
         self.annotation_file = self.get_value_from_config('annotation_file')
         self.top_n = self.get_value_from_config('top_n')
-        self.max_duration = self.get_value_from_config('max_duration')
         self.numpy_files = self.get_value_from_config('use_numpy')
 
     def convert(self, check_content=False, **kwargs):
@@ -64,13 +61,6 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
                     fname = fname.with_suffix('.wav' if not self.numpy_files else '.npy')
                     if file_list and fname.name not in file_list:
                         continue
-
-                    if self.max_duration > 0:
-                        with wave.open(str(fname), "rb") as wav:
-                            duration = wav.getnframes() / wav.getframerate()
-                        if duration > self.max_duration:
-                            continue
-
                     identifier = str(fname.relative_to(data_folder))
                     annotations.append(CharacterRecognitionAnnotation(
                         identifier, transcript.upper()

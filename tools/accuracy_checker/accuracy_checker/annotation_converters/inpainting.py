@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2021 Intel Corporation
+Copyright (c) 2018-2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ class InpaintingConverter(BaseFormatConverter):
         images = [
             im for im in self.image_dir.iterdir()
             if im.name.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'))
-        ]
+            ]
         if self.masks_dir is not None:
             masks = [
                 mask for mask in self.masks_dir.iterdir()
