@@ -4,7 +4,7 @@ OpenVINO&trade; toolkit provides a set of public models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
 
-The models can be downloaded and converted to OpenVINO Inference Engine format (\*.xml + \*.bin) using Model Downloader and other automation tools.
+You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ Model Downloader and other automation tools.
 Review tools description in the file `<OPENVINO_INSTALL_DIR>/deployment_tools/open_model_zoo/tools/downloader/README.md` for the details.
 
 ## Classification
