@@ -150,7 +150,7 @@ def main():
         dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test)
 
         num_failures = 0
-        
+
         python_module_subdir = "" if platform.system() == "Windows" else "/lib"
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
