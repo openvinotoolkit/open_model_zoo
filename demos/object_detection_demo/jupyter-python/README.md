@@ -1,4 +1,4 @@
-# Object Detection Async Demo
+# Object Detection Jupyter Notebook Demo
 
 This demo showcases Object Detection on Open Model Zoo models with Async API.
 Async API usage can improve the overall frame-rate of the application, because
