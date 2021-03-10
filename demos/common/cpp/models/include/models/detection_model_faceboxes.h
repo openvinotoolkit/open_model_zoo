@@ -16,6 +16,7 @@
 
 #pragma once
 #include "detection_model.h"
+#include <utils/nms.hpp>
 
 class ModelFaceBoxes : public DetectionModel {
 public:

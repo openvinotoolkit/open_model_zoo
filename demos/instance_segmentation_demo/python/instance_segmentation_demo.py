@@ -25,11 +25,12 @@ import cv2
 import numpy as np
 from openvino.inference_engine import IECore
 
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+
 from instance_segmentation_demo.model_utils import check_model
 from instance_segmentation_demo.tracker import StaticIOUTracker
 from instance_segmentation_demo.visualizer import Visualizer
 
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
 

@@ -19,7 +19,7 @@ import re
 import numpy as np
 
 from .model import Model
-from .utils import DetectionWithLandmarks, Detection, resize_image
+from .utils import DetectionWithLandmarks, Detection, resize_image, nms
 
 
 class RetinaFace(Model):
@@ -133,33 +133,6 @@ class RetinaFacePostprocessor:
 
         return anchors
 
-    @staticmethod
-    def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True):
-        b = 1 if include_boundaries else 0
-        areas = (x2 - x1 + b) * (y2 - y1 + b)
-        order = scores.argsort()[::-1]
-
-        keep = []
-        while order.size > 0:
-            i = order[0]
-            keep.append(i)
-
-            xx1 = np.maximum(x1[i], x1[order[1:]])
-            yy1 = np.maximum(y1[i], y1[order[1:]])
-            xx2 = np.minimum(x2[i], x2[order[1:]])
-            yy2 = np.minimum(y2[i], y2[order[1:]])
-
-            w = np.maximum(0.0, xx2 - xx1)
-            h = np.maximum(0.0, yy2 - yy1)
-            intersection = w * h
-
-            union = (areas[i] + areas[order[1:]] - intersection)
-            overlap = np.divide(intersection, union, out=np.zeros_like(intersection, dtype=float), where=union != 0)
-
-            order = order[np.where(overlap <= thresh)[0] + 1] # pylint: disable=W0143
-
-        return keep
-
     def process_output(self, raw_output, scale_x, scale_y, face_prob_threshold, mask_prob_threshold):
         bboxes_outputs = [raw_output[name][0] for name in raw_output if re.search('.bbox.', name)]
         bboxes_outputs.sort(key=lambda x: x.shape[1])
@@ -205,8 +178,8 @@ class RetinaFacePostprocessor:
             landmarks_list = np.array(landmarks_list)
             mask_scores_list = np.array(mask_scores_list)
             x_mins, y_mins, x_maxs, y_maxs = proposals_list.T
-            keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, scores_list, self.nms_threshold,
-                            include_boundaries=not self._process_landmarks)
+            keep = nms(x_mins, y_mins, x_maxs, y_maxs, scores_list, self.nms_threshold,
+                       include_boundaries=not self._process_landmarks)
             proposals_list = proposals_list[keep]
             scores_list = scores_list[keep]
             if self._process_landmarks:
