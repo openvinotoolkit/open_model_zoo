@@ -71,10 +71,14 @@ class Visualizer(object):
 
     def get_palette_from_file(self, colors_path):
         with open(colors_path, 'r') as file:
-            return [eval(line.strip()) for line in file.readlines()]
+            colors = []
+            for line in file.readlines():
+                values = line[line.index('(')+1:line.index(')')].split(',')
+                colors.append([int(v.strip()) for v in values])
+            return colors
 
     def create_color_map(self):
-        classes = np.array(self.color_palette, dtype=np.uint8)[:, ::-1] # BGR to RGB
+        classes = np.array(self.color_palette, dtype=np.uint8)[:, ::-1] # RGB to BGR
         color_map = np.zeros((256, 1, 3), dtype=np.uint8)
         classes_num = len(classes)
         color_map[:classes_num, 0, :] = classes
