@@ -36,7 +36,7 @@ option during installation, as well as the option to disable the PATH length lim
 
 2. Clone the Open Model Zoo repository to your computer with `git clone https://github.com/openvinotoolkit/open_model_zoo.git`
 
-3. Use the `cd` command to go to the correct directory: `cd open_model_zoo/demos/object_detection_demo/jupyter-python`
+3. Use the `cd` command to go to the correct directory: `cd open_model_zoo/demos/object_detection_demo/jupyter_python`
 
 3. Create a virtual environment with `python -m venv openvino_env` and activate it by typing:
    - Linux: `source openvino_env/bin/activate`

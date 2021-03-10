@@ -79,9 +79,9 @@ class NotebookDemo(Demo):
     execute to test the notebook.
     """
 
-    def __init__(self, name, implementation='jupyter-python', device_keys=None, test_cases=None, test_code=None):
+    def __init__(self, name, implementation='jupyter_python', device_keys=None, test_cases=None, test_code=None):
         super().__init__(name, implementation, device_keys, test_cases)
-        self._exec_name = self._exec_name.replace('_jupyter-python', '')
+        self._exec_name = self._exec_name.replace('_jupyter_python', '')
         self.test_code = test_code
 
     def fixed_args(self, source_dir, build_dir):
