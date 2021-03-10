@@ -96,7 +96,7 @@ include(CMakeParseArguments)
 #     [DEPENDENCIES <dependencies>])
 macro(add_demo)
     set(oneValueArgs NAME)
-    set(multiValueArgs SOURCES HEADERS DEPENDENCIES OPENCV_DEPENDENCIES INCLUDE_DIRECTORIES)
+    set(multiValueArgs SOURCES HEADERS DEPENDENCIES INCLUDE_DIRECTORIES)
     cmake_parse_arguments(IE_SAMPLE "${options}" "${oneValueArgs}"
                           "${multiValueArgs}" ${ARGN})
 
