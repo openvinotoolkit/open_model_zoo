@@ -14,10 +14,6 @@
  limitations under the License.
 """
 
-import sys
-from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parents[3] / 'common/python/models'))
-
 from collections import namedtuple
 import cv2
 import numpy as np
