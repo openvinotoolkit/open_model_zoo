@@ -313,7 +313,7 @@ class ModelEvaluator(BaseEvaluator):
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
             batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
             for pred in batch_predictions:
-                np.save(pred.value, self.dataset.data_provider.data_reader.data_source / (pred.identifier.replace('.JPEG', '.npy')))
+                np.save(self.dataset.data_provider.data_reader.data_source / (pred.identifier.replace('.JPEG', '.npy')), pred.value)
 
         annotations, predictions = self.postprocessor.process_batch(
             batch_annotations, batch_predictions, batch_meta
