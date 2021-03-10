@@ -230,5 +230,5 @@ def main():
 
     sys.exit(0 if num_failures == 0 else 1)
 
-if __name__ == main():
+if __name__ == '__main__':
     main()
