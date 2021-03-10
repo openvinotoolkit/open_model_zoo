@@ -100,7 +100,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 To run the demo, please provide paths to the model in the IR format, to a file with class labels, and to an input video, image, or folder with images:
 ```bash
 python3 instance_segmentation_demo/instance_segmentation_demo.py \
-    -m <path_to_model>/instance-segmentation-security-0050.xml \
+    -m <path_to_model>/instance-segmentation-security-0228.xml \
     --label <omz_dir>/data/dataset_classes/coco.txt \
     --no_keep_aspect_ratio \
     -i 0 \
