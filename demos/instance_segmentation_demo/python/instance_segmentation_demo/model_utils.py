@@ -17,7 +17,7 @@
 from collections import namedtuple
 import cv2
 import numpy as np
-from utils import nms
+from models.utils import nms
 
 ModelAttributes = namedtuple('ModelAttributes', ['required_outputs', 'postprocessor'])
 
