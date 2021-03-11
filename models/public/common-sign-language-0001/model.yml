@@ -17,7 +17,7 @@ description: >-
   person as an input and outputs logits of predicted classes. The model is based on
   the S3D-Mobilet-V3 backbone developed for fast inference and outputs an logits
   vector of 27 floats.
-task_type: object_attributes
+task_type: action_recognition
 files:
   - name: s3d-rgb-mobilenet-v3-large-stream-jester.onnx
     size: 16647750

@@ -63,12 +63,12 @@ classifications matching those in the ImageNet database.
 
 ### Original Model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000,1,1`, contains predicted
+Object classifier according to ImageNet classes, name - `fc6`,  shape - `1,1000,1,1`, contains predicted
 probability for each class in logits format.
 
 ### Converted Model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000,1,1`, contains predicted
+Object classifier according to ImageNet classes, name - `fc6`,  shape - `1,1000,1,1`, contains predicted
 probability for each class in logits format.
 
 ## Legal Information
