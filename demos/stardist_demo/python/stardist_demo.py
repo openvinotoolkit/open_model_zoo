@@ -1,10 +1,13 @@
 import argparse
+from threading import Thread
+from queue import Queue
+from math import pi, ceil
+import time
+
 import numpy as np
 import cv2 as cv
-from math import pi, ceil
 from openslide import OpenSlide
-from openvino.inference_engine import IECore
-import time
+from openvino.inference_engine import IECore, StatusCode
 
 def get_percentiles_range(inp, percentiles):
     inp = inp.reshape(-1)
@@ -27,12 +30,13 @@ def normalize_percentile(inp, percentiles=[1.0, 99.0]):
 
 
 def get_tile(img, level, x, y, tile_size):
-    width = img.level_dimensions[level][0]
-    height = img.level_dimensions[level][1]
-    y = min(y * tile_size, height - tile_size)  # Last tile offset
-    x = min(x * tile_size, width - tile_size)
+    width = img.dimensions[0]
+    height = img.dimensions[1]
+    scale = int(img.level_downsamples[level])
+    y = min(y * scale * tile_size, height - tile_size)  # Last tile offset
+    x = min(x * scale * tile_size, width - tile_size)
     tile = img.read_region((x, y), level, (tile_size, tile_size))
-    return np.array(tile.getdata()).reshape(tile_size, tile_size, 4)
+    return np.asarray(tile).reshape(tile_size, tile_size, 4)
 
 
 def nms(contours, probs, nms_threshold):
@@ -57,7 +61,7 @@ def nms(contours, probs, nms_threshold):
         return inter_area / union_area
 
 
-    # Precomute all contours areas and masks once
+    # Precompute all contours areas and masks once
     areas = [cv.contourArea(c) for c in contours]
     masks = []
     for ctr in contours:
@@ -94,7 +98,7 @@ if __name__ == '__main__':
                         help='Path to *.xml file of the model')
     parser.add_argument('-d', dest='device', default='CPU',
                         help='Device to be utilized for deep learning inference')
-    parser.add_argument('-t', dest='confidence_threshold', default=0.5, type=float,
+    parser.add_argument('-t', dest='confidence_threshold', default=0.7, type=float,
                         help='Probability threshold for detection')
     parser.add_argument('--nms', dest='nms_threshold', default=0.5, type=float,
                         help='NMS procedure threshold for IoU')
@@ -124,25 +128,36 @@ if __name__ == '__main__':
     num_tiles_y = ceil(width / sz)
     print('Number of tiles:', num_tiles_x * num_tiles_y)
 
-    ie = IECore()
-    net = ie.read_network(args.model)
-    exec_net = ie.load_network(net, args.device)
+    #
+    # Thread which performs tiling: data reading and preprocessing
+    #
+    tiles_queue = Queue()
+    def tiling_thread_body():
+        for y in range(num_tiles_y):
+            for x in range(num_tiles_x):
+                tile = get_tile(img, level, x, y, sz)
 
-    predictions = [[None] * num_tiles_x for _ in range(num_tiles_y)]
-    start_time = time.time()
-    for y in range(num_tiles_y):
-        for x in range(num_tiles_x):
-            tile = get_tile(img, level, x, y, sz)
+                # RGBA to RGB
+                tile = tile[:,:,:3]
+                tile = normalize_percentile(tile.astype(np.float32))
 
-            # RGBA to RGB
-            tile = tile[:, :, :3]
-            tile = normalize_percentile(tile.astype(np.float32))
+                # NHWC to NCHW
+                tile = np.expand_dims(tile.transpose(2, 0, 1), axis=0)
 
-            # NHWC to NCHW
-            tile = np.expand_dims(tile.transpose(2, 0, 1), axis=0)
+                # Save raw tile data and position
+                tiles_queue.put((tile, x, y))
 
-            out = exec_net.infer({'input': tile})
-            out = next(iter(out.values()))
+    #
+    # Thread which performs postprocessing
+    #
+    predictions_queue = Queue()
+    detections = [[None] * num_tiles_x for _ in range(num_tiles_y)]
+
+    def postprocess_thread_body():
+        while True:
+            out, tile_x, tile_y = predictions_queue.get()
+            if out is None:  # Termination criteria
+                break
 
             # Network predicts two concatenated tensors - probabilities of the nucleos
             # and the distances among an every anchor ray.
@@ -160,8 +175,70 @@ if __name__ == '__main__':
                                centers[0] + distances * np.sin(angles).reshape(-1, 1)])
             coords = coords.reshape(2, 32, -1).transpose(2, 1, 0).astype(np.int32)
             ids = nms(coords, probs, args.nms_threshold)
-            predictions[y][x] = coords[ids]
+            detections[tile_y][tile_x] = coords[ids]
 
+
+    tiling_thread = Thread(target=tiling_thread_body)
+    tiling_thread.start()
+
+    postprocess_thread = Thread(target=postprocess_thread_body)
+    postprocess_thread.start()
+
+    #
+    # Inference loop
+    #
+    ie = IECore()
+    net = ie.read_network(args.model)
+    exec_net = ie.load_network(net, args.device, config={'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'}, num_requests=0)
+    inp_name = next(iter(exec_net.input_info.keys()))
+    out_name = next(iter(exec_net.outputs.keys()))
+
+    req_tile_pos = [None] * len(exec_net.requests)  # A list of tiles positions per request. None is initial value
+    start_time = time.time()
+    iter_id = 0
+    while tiling_thread.is_alive() or not tiles_queue.empty():
+        tile, x, y = tiles_queue.get()
+
+        # Get idle infer request
+        req_id = exec_net.get_idle_request_id()
+        if req_id < 0:
+            status = exec_net.wait(num_requests=1)
+            if status != StatusCode.OK:
+                raise Exception('Wait for idle request failed!')
+            req_id = exec_net.get_idle_request_id()
+            if req_id < 0:
+                raise Exception('Invalid request id!')
+
+        request = exec_net.requests[req_id]
+
+        if req_tile_pos[req_id]:
+            out_x, out_y = req_tile_pos[req_id]
+            # Copy output prediction
+            out = request.output_blobs[out_name].buffer
+            predictions_queue.put((out.copy(), out_x, out_y))
+
+            iter_id += 1
+            if iter_id == 10:
+                start_time = time.time()
+            elif iter_id % 100 == 0:
+                t = time.time() - start_time
+                # Try to keep balance between tiles queue and predictions queue. They should be stable and not empty.
+                # Too small tiles queue might give lower FPS because of not fully utilized device.
+                # Too big predictions queue may lead to huge memory usage and lower FPS because of it
+                # (increase confidence threshold to speed up postprocessing this way).
+                print('Processed {} tiles. Tiles in queue: {}. Predictions queue: {}. Average FPS: {:.2f}'.format(
+                        iter_id,
+                        tiles_queue.qsize(),
+                        predictions_queue.qsize(),
+                        (iter_id - 10) / t))
+
+        # Run inference
+        req_tile_pos[req_id] = (x, y)
+        request.async_infer({inp_name: tile})
+
+    tiling_thread.join()  # Sanity join
+    predictions_queue.put((None, None, None))
+    postprocess_thread.join()
     print('Done!', time.time() - start_time)
 
     # Render single tile at the time. User might navigate between tiles by arrows.
@@ -175,7 +252,7 @@ if __name__ == '__main__':
     tile_x = num_tiles_x // 2
     tile_y = num_tiles_y // 2
     while True:
-        preds = predictions[tile_y][tile_x]
+        preds = detections[tile_y][tile_x]
 
         print('')
         print('Tile position:     ({},{})'.format(tile_x, tile_y))
