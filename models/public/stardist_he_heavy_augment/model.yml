@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@
 
 description: >-
   StarDist model trained on brightfield images to detect nuclei (https://github.com/stardist/stardist)
-task_type: segmentation
+task_type: instance_segmentation
 files:
-  - name: dsb2018_heavy_augment.zip
-    size: 5327180
-    sha256: b0eb820e455db0ec8326d3b6f456a1b2d4aff8d7dd818a71481f8041958309e3
-    source: https://github.com/stardist/stardist-imagej/raw/master/src/main/resources/models/2D/dsb2018_heavy_augment.zip
+  - name: he_heavy_augment.zip
+    size: 5303737
+    sha256: 2837637f098c3c00b76cd25b1ad6ec0ac49dab5bfab2a86399fafbf10eddc2ba
+    source: https://github.com/stardist/stardist-imagej/raw/master/src/main/resources/models/2D/he_heavy_augment.zip
 postprocessing:
   - $type: unpack_archive
     format: zip
-    file: dsb2018_heavy_augment.zip
+    file: he_heavy_augment.zip
 model_optimizer_args:
   - --input_shape=[1,1024,1024,3]
   - --saved_model_dir=$dl_dir
