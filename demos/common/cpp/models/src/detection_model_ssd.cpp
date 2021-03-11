@@ -24,7 +24,8 @@ using namespace InferenceEngine;
 ModelSSD::ModelSSD(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize,
     const std::vector<std::string>& labels) :
-    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
+    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels),
+    shoulPostprocessMultipleOutputs(false) {
 }
 
 std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
@@ -41,6 +42,12 @@ std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputDa
 }
 
 std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
+        return shoulPostprocessMultipleOutputs ?
+            postprocessMultipleOutputs(infResult) :
+            postprocessSingleOutput(infResult);
+}
+
+std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& infResult) {
     LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
     const float *detections = outputMapped.as<float*>();
 
@@ -68,6 +75,40 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
             desc.y = detections[i * objectSize + 4] * internalData.inputImgHeight;
             desc.width = detections[i * objectSize + 5] * internalData.inputImgWidth - desc.x;
             desc.height = detections[i * objectSize + 6] * internalData.inputImgHeight - desc.y;
+
+            /** Filtering out objects with confidence < confidence_threshold probability **/
+            result->objects.push_back(desc);
+        }
+    }
+
+    return retVal;
+}
+
+std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult& infResult) {
+    LockedMemory<const void> boxesMapped = infResult.outputsData[outputsNames[0]]->rmap();
+    LockedMemory<const void> labelsMapped = infResult.outputsData[outputsNames[1]]->rmap();
+    const float *boxes = boxesMapped.as<float*>();
+    const float *labels = labelsMapped.as<float*>();
+
+    DetectionResult* result = new DetectionResult;
+    auto retVal = std::unique_ptr<ResultBase>(result);
+
+    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+
+    const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
+
+    for (size_t i = 0; i < maxProposalCount; i++) {
+        float confidence = boxes[i * objectSize + 4];
+        if (confidence > confidenceThreshold) {
+            DetectedObject desc;
+
+            desc.confidence = confidence;
+            desc.labelID = static_cast<int>(labels[i]);
+            desc.label = getLabelName(desc.labelID);
+            desc.x = boxes[i * objectSize] /netInputWidth * internalData.inputImgWidth;
+            desc.y = boxes[i * objectSize + 1] /netInputHeight * internalData.inputImgHeight;
+            desc.width = boxes[i * objectSize + 2] / netInputWidth * internalData.inputImgWidth - desc.x;
+            desc.height = boxes[i * objectSize + 3] / netInputHeight * internalData.inputImgHeight - desc.y;
 
             /** Filtering out objects with confidence < confidence_threshold probability **/
             result->objects.push_back(desc);
@@ -120,9 +161,20 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Prepare output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
     OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
-    if (outputInfo.size() != 1) {
-        throw std::logic_error("This demo accepts networks having only one output");
+    if (outputInfo.size() == 1) {
+        prepareSingleOutput(outputInfo);
+        shoulPostprocessMultipleOutputs = false;
     }
+    else if(outputInfo.size() == 8 || outputInfo.size() == 9) {
+        prepareMultipleOutputs(outputInfo);
+        shoulPostprocessMultipleOutputs = true;
+    }
+    else {
+        throw std::logic_error("This model accepts networks having only 1, 8 or 9 outputs");
+    }
+}
+
+void ModelSSD::prepareSingleOutput(OutputsDataMap& outputInfo) {
     DataPtr& output = outputInfo.begin()->second;
     outputsNames.push_back(outputInfo.begin()->first);
 
@@ -140,4 +192,26 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 
     output->setPrecision(Precision::FP32);
     output->setLayout(Layout::NCHW);
+}
+
+void ModelSSD::prepareMultipleOutputs(OutputsDataMap& outputInfo) {
+    if (outputInfo.find("boxes") == outputInfo.end() && outputInfo.find("labels") != outputInfo.end()) {
+        throw std::logic_error("This model should have 'boxes' and 'labels' outputs");
+    }
+    outputsNames.push_back("boxes");
+    outputsNames.push_back("labels");
+
+    const SizeVector outputDims = outputInfo[outputsNames[0]]->getTensorDesc().getDims();
+    if (outputDims.size() != 2) {
+        throw std::logic_error("Incorrect output dimensions for Person Detection model");
+    }
+
+    maxProposalCount = outputDims[0];
+    objectSize = outputDims[1];
+    if (objectSize != 5) {
+        throw std::logic_error("Boxes output should have 5 as a last dimension");
+    }
+
+    outputInfo[outputsNames[0]]->setPrecision(Precision::FP32);
+    outputInfo[outputsNames[1]]->setPrecision(Precision::FP32);
 }
