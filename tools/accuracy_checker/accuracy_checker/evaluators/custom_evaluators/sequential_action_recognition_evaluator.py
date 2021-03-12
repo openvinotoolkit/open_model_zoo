@@ -256,6 +256,9 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             ignore_results_formatting = config.get('ignore_results_formatting', False)
         return compute_intermediate_metric_res, metric_interval, ignore_results_formatting
 
+    @property
+    def dataset_size(self):
+        return self.dataset.size
 
 class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):

@@ -253,6 +253,10 @@ class AutomaticSpeechRecognitionEvaluator(BaseEvaluator):
 
         return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
 
+    @property
+    def dataset_size(self):
+        return self.dataset.size
+
 
 class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):

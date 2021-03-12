@@ -122,6 +122,10 @@ class Im2latexEvaluator(BaseEvaluator):
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
             presenter.write_result(metric_result, ignore_results_formatting)
 
+    @property
+    def dataset_size(self):
+        return self.dataset.size
+
     def release(self):
         self.model.release()
         self.launcher.release()
