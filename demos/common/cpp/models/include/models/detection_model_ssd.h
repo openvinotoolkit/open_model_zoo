@@ -42,5 +42,4 @@ protected:
     void prepareMultipleOutputs(InferenceEngine::OutputsDataMap& outputInfo);
     size_t maxProposalCount = 0;
     size_t objectSize = 0;
-    bool shoulPostprocessMultipleOutputs;
 };
