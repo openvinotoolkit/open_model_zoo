@@ -255,7 +255,8 @@ If the specified precision is not supported for a model, that model will be skip
 
 The script will attempt to locate Model Optimizer using the environment
 variables set by the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
-script. You can override this heuristic with the `--mo` option:
+script. Or trying to use PyPI distribution.
+You can override this heuristic with the `--mo` option:
 
 ```sh
 ./converter.py --all --mo my/openvino/path/model_optimizer/mo.py
