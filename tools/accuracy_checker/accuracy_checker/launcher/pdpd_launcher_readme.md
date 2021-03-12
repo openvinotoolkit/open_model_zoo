@@ -21,7 +21,7 @@ Each input description should has following info:
     Optionally you can determine `shape` of input (actually does not used, ONNX Runtime launcher uses info given from network),`layout` in case when your model was trained with non-standard data layout (For ONNX Runtime default layout is `NCHW`)
     and `precision` (Supported precisions: `FP32` - float, `FP16` - signed shot, `U8`  - unsigned char, `U16` - unsigned short int, `I8` - signed char, `I16` - short int, `I32` - int, `I64` - long int).
 
-MXNet launcher config example:
+PaddlePaddle launcher config example:
 
 ```yml
 launchers:
