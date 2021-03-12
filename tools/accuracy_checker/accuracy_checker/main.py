@@ -445,9 +445,9 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
                 'metric_name': metric_result['name'],
                 'metric_type': metric_result['type'],
                 'metric_value': metric_result['value'],
-                'metric_target': metric_meta['target'],
-                'metric_scale': metric_meta['scale'],
-                'metric_postfix': metric_meta['postfix']
+                'metric_target': metric_meta.get('target', 'higher-better'),
+                'metric_scale': metric_meta.get('scale', 100),
+                'metric_postfix': metric_meta.get('postfix', '%')
             })
 
 
