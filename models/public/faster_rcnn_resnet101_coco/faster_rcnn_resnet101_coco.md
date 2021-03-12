@@ -73,18 +73,18 @@ bounding boxes. For each detection, the description has the format:
     - (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates stored in normalized format, in range [0, 1])
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates stored in normalized format, in range [0, 1])
 
-## Download a Model and Convert it into OpenVINO™ Inference Engine Format
+## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
-python3 downloader.py --name <model_name>
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
 ```
 
 An example of using the Model Converter:
 ```
-python3 converter.py --name <model_name>
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
 ```
 
 ## Legal Information

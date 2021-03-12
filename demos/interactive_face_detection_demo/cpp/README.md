@@ -94,19 +94,17 @@ Options:
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or Intel pre-trained models. You can download models and if necessary convert them into Inference Engine format using the OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below. The models which are supported by the demo are listed in the [models.lst](./models.lst) file.
+To run the demo, you can use public or Intel pre-trained models. You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below. The models which are supported by the demo are listed in the [models.lst](./models.lst) file.
 
 An example of using the Model Downloader:
 ```
-python3 downloader.py --list models.lst
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
 ```
 
 An example of using the Model Converter:
 ```
-python3 converter.py --list models.lst
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 ```
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is downloaded and converted to the Inference Engine format (\*.xml + \*.bin) using OpenVINO™ [Model Downloader and other automation tools](../../../tools/downloader/README.md).
 
 For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
