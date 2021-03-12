@@ -573,6 +573,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(self._psnr_differ, *args, **kwargs)
         self.meta['target'] = 'higher-better'
+        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse'}
 
     def configure(self):
         super().configure()
@@ -668,6 +669,7 @@ class StructuralSimilarity(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)
         self.meta['target'] = 'higher-better'
+        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse'}
 
 
 class PercentageCorrectKeypoints(PerImageEvaluationMetric):
