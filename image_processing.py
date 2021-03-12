@@ -72,6 +72,10 @@ class ImageProcessingConverter(BaseFormatConverter):
         file_list_in = []
         data_dir_files = [file for file in self.data_dir.glob('**/*') if file.is_file()] if self.recursive \
             else self.data_dir.iterdir()
+        # if self.recursive:
+        #     data_dir_files = [file for file in self.data_dir.glob('**/*') if file.is_file()]
+        # else:
+        #     data_dir_files = self.data_dir.iterdir()
         for file_in_dir in data_dir_files:
             if self.in_suffix in file_in_dir.parts[-1]:
                 file_list_in.append(file_in_dir)
@@ -80,6 +84,10 @@ class ImageProcessingConverter(BaseFormatConverter):
         num_iterations = len(file_list_in)
         for in_id, in_file in enumerate(file_list_in):
             in_file_name = in_file.relative_to(self.data_dir) if self.recursive else in_file.parts[-1]
+            # if self.recursive:
+            #     in_file_name = in_file.relative_to(self.data_dir)
+            # else:
+            #     in_file_name = in_file.parts[-1]
             gt_file_name = Path(self.out_suffix.join(str(in_file_name).split(self.in_suffix))) if self.recursive \
                 else self.out_suffix.join(in_file_name.split(self.in_suffix))
             if check_content:

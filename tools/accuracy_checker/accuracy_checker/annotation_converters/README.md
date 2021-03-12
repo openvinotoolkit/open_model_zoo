@@ -172,6 +172,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `data_dir` - path to folder, where images in low and high resolution are located.
   * `input_suffix` - input file name's suffix (default `in`).
   * `target_suffix` - target ground truth file name's suffix (default `out`).
+  * `recursive` - enables acquiring of dataset files from `data_dir` subcatalogs (default False)
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
 * `super_resolution` - converts dataset for single image super resolution task to `SuperResolutionAnnotation`.
   * `data_dir` - path to folder, where images in low and high resolution are located.
