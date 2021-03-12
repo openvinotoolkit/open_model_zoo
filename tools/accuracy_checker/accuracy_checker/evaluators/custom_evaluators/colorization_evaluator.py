@@ -174,6 +174,10 @@ class ColorizationEvaluator(BaseEvaluator):
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
             presenter.write_results(metric_result, ignore_results_formatting)
 
+    @property
+    def dataset_size(self):
+        return self.dataset.size
+
     def release(self):
         self.test_model.release()
         self.check_model.release()

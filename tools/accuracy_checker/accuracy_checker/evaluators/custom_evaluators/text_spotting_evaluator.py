@@ -256,6 +256,10 @@ class TextSpottingEvaluator(BaseEvaluator):
         elif num_images is not None:
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
 
+    @property
+    def dataset_size(self):
+        return self.dataset.size
+
 
 class BaseModel:
     def __init__(self, network_info, launcher, default_model_suffix, delayed_model_loading=False):

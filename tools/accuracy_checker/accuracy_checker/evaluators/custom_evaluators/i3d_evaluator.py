@@ -213,6 +213,10 @@ class I3DEvaluator(BaseEvaluator):
 
         return extracted_results, extracted_meta
 
+    @property
+    def dataset_size(self):
+        return self.dataset.size
+
     def release(self):
         self.rgb_model.release()
         self.flow_model.release()

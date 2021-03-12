@@ -165,6 +165,10 @@ class TextToSpeechEvaluator(BaseEvaluator):
     def set_profiling_dir(self, profiler_dir):
         self.metric_executor.set_profiling_dir(profiler_dir)
 
+    @property
+    def dataset_size(self):
+        return self.dataset.size
+
     def release(self):
         self.model.release()
         self.launcher.release()
