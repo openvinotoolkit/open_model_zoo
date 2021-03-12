@@ -42,9 +42,9 @@ std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputDa
 }
 
 std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
-        return shoulPostprocessMultipleOutputs ?
-            postprocessMultipleOutputs(infResult) :
-            postprocessSingleOutput(infResult);
+    return outputsNames.size() > 1 ?
+        postprocessMultipleOutputs(infResult) :
+        postprocessSingleOutput(infResult);
 }
 
 std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& infResult) {
