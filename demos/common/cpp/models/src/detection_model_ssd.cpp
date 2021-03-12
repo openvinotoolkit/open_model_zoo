@@ -116,7 +116,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
             desc.confidence = confidence;
             desc.labelID = static_cast<int>(labels[i]);
             desc.label = getLabelName(desc.labelID);
-            desc.x = boxes[i * objectSize] * widthScale;    
+            desc.x = boxes[i * objectSize] * widthScale;
             desc.y = boxes[i * objectSize + 1] * heightScale;
             desc.width = boxes[i * objectSize + 2] * widthScale - desc.x;
             desc.height = boxes[i * objectSize + 3] * heightScale - desc.y;
