@@ -74,6 +74,7 @@ from .segmentation import (
 from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
 from .pose_estimation_openpose import OpenPoseAdapter
 from .pose_estimation_associative_embedding import AssociativeEmbeddingAdapter
+from .pose_estimation_hrnet import HumanPoseHRNetAdapter
 
 from .pose_estimation_3d import HumanPose3dAdapter
 
@@ -191,6 +192,7 @@ __all__ = [
     'AssociativeEmbeddingAdapter',
     'HumanPoseAdapter',
     'HumanPose3dAdapter',
+    'HumanPoseHRNetAdapter',
     'OpenPoseAdapter',
     'SingleHumanPoseAdapter',
     'StackedHourGlassNetworkAdapter',
