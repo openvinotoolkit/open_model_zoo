@@ -6,8 +6,80 @@ import time
 
 import numpy as np
 import cv2 as cv
-from openslide import OpenSlide
 from openvino.inference_engine import IECore, StatusCode
+
+
+class OpenSlideImageReader:
+    def __init__(self, path, pixel_size=0.5):
+        from openslide import OpenSlide
+        self.img = OpenSlide(path)
+
+        # Get level for a given scale
+        level = None
+        for i, scale in enumerate(self.img.level_downsamples):
+            if pixel_size == 1.0 / scale:
+                level = i
+                break
+        if not level:
+            raise Exception('No level found for pixel size {}. Available levels are {}'.format(pixel_size, self.img.level_dimensions))
+
+        self.width = self.img.level_dimensions[level][0]
+        self.height = self.img.level_dimensions[level][1]
+        self.level = level
+        self.scale = int(self.img.level_downsamples[level])
+
+
+    def get_tile(self, x, y, sz):
+        y = min(y * self.scale * sz, self.height - sz)  # Last tile offset
+        x = min(x * self.scale * sz, self.width - sz)
+        tile = self.img.read_region((x, y), self.level, (sz, sz))
+        tile = np.asarray(tile).reshape(sz, sz, 4)  # RGBA
+        return tile[:, :, :3]  # RGB
+
+
+class BFImageReader:
+    def __init__(self, path, channel='DAPI'):
+        import javabridge
+        import bioformats as bf
+
+        self.javabridge = javabridge
+        self.javabridge.start_vm(class_path=bf.JARS, run_headless=True)
+
+        # It's a kind of magic lines that disable DEBUG logging
+        JAVABRIDGE_DEFAULT_LOG_LEVEL = 'ERROR'
+        rootLoggerName = self.javabridge.get_static_field("org/slf4j/Logger", "ROOT_LOGGER_NAME", "Ljava/lang/String;")
+        rootLogger = self.javabridge.static_call("org/slf4j/LoggerFactory", "getLogger",
+                                            "(Ljava/lang/String;)Lorg/slf4j/Logger;",
+                                            rootLoggerName)
+        jvm_log_level = self.javabridge.get_static_field("ch/qos/logback/classic/Level", JAVABRIDGE_DEFAULT_LOG_LEVEL,
+                                                    "Lch/qos/logback/classic/Level;")
+        self.javabridge.call(rootLogger, "setLevel", "(Lch/qos/logback/classic/Level;)V", jvm_log_level)
+
+        # Retrieve image sizes
+        meta = bf.get_omexml_metadata(args.input)
+        meta = bf.OMEXML(meta).image().Pixels
+
+        self.width = meta.get_SizeX()
+        self.height = meta.get_SizeY()
+
+        # Find an index of channel
+        self.channel_id = None
+        for i in range(meta.channel_count):
+            if meta.Channel(i).Name == channel:
+                self.channel_id = i
+                break
+        if not self.channel_id:
+            raise Exception('Unable to find channel ' + channel)
+
+        self.reader = bf.ImageReader(path)
+
+
+    def get_tile(self, x, y, sz):
+        y = min(y * sz, self.height - sz)  # Last tile offset
+        x = min(x * sz, self.width - sz)
+        data = self.reader.read(XYWH=((x, y, sz, sz)), rescale=False)
+        return data[:, :, self.channel_id:self.channel_id + 1]
+
 
 def get_percentiles_range(inp, percentiles):
     inp = inp.reshape(-1)
@@ -23,20 +95,12 @@ def get_percentiles_range(inp, percentiles):
 def normalize_percentile(inp, percentiles=[1.0, 99.0]):
     for i in range(inp.shape[2]):
         rng = get_percentiles_range(inp[:, :, i], percentiles)
+        if rng[0] == rng[1]:
+            continue
         scale = 1.0 / (rng[1] - rng[0])
         offset = -rng[0]
         inp[:, :, i] = (inp[:, :, i] + offset) * scale
     return inp
-
-
-def get_tile(img, level, x, y, tile_size):
-    width = img.dimensions[0]
-    height = img.dimensions[1]
-    scale = int(img.level_downsamples[level])
-    y = min(y * scale * tile_size, height - tile_size)  # Last tile offset
-    x = min(x * scale * tile_size, width - tile_size)
-    tile = img.read_region((x, y), level, (tile_size, tile_size))
-    return np.asarray(tile).reshape(tile_size, tile_size, 4)
 
 
 def nms(contours, probs, nms_threshold):
@@ -92,8 +156,7 @@ def nms(contours, probs, nms_threshold):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', dest='input', required=True,
-                        help='Path to *.ndpi image. In example, from http://openslide.cs.cmu.edu/download/openslide-testdata/Hamamatsu/')
+    parser.add_argument('-i', dest='input', required=True, help='Path to input image')
     parser.add_argument('-m', dest='model', required=True,
                         help='Path to *.xml file of the model')
     parser.add_argument('-d', dest='device', default='CPU',
@@ -102,43 +165,32 @@ if __name__ == '__main__':
                         help='Probability threshold for detection')
     parser.add_argument('--nms', dest='nms_threshold', default=0.5, type=float,
                         help='NMS procedure threshold for IoU')
-    parser.add_argument('--pixel_size', default=0.5, type=float,
-                        help='Scale factor for image to perform detection')
-    parser.add_argument('--tile_size', default=1024, help='Tile size')
+    parser.add_argument('--tile_size', default=1024, type=int, help='Tile size')
     args = parser.parse_args()
 
-    sz = args.tile_size
-    angles = np.arange(0, 2 * pi, pi / 16)  # Get 32 angles
-    coords = np.array([np.cos(angles), np.sin(angles)])
-
-    img = OpenSlide(args.input)
-
-    # Get level for a given scale
-    level = None
-    for i, scale in enumerate(img.level_downsamples):
-        if args.pixel_size == 1.0 / scale:
-            level = i
-            break
-    if not level:
-        raise Exception('No level found for pixel size {}. Available levels are {}'.format(args.pixel_size, img.level_dimensions))
-
-    width = img.level_dimensions[level][0]
-    height = img.level_dimensions[level][1]
-    num_tiles_x = ceil(height / sz)
-    num_tiles_y = ceil(width / sz)
-    print('Number of tiles:', num_tiles_x * num_tiles_y)
+    if args.input.endswith('.ndpi'):
+        img = OpenSlideImageReader(args.input)
+    else:
+        img = BFImageReader(args.input)
 
     #
     # Thread which performs tiling: data reading and preprocessing
     #
     tiles_queue = Queue()
+
     def tiling_thread_body():
+        sz = args.tile_size
+
+        if isinstance(img, BFImageReader):
+            img.javabridge.attach()
+
+        num_tiles_x = ceil(img.height / sz)
+        num_tiles_y = ceil(img.width / sz)
+        print('Number of tiles:', num_tiles_x * num_tiles_y)
+
         for y in range(num_tiles_y):
             for x in range(num_tiles_x):
-                tile = get_tile(img, level, x, y, sz)
-
-                # RGBA to RGB
-                tile = tile[:,:,:3]
+                tile = img.get_tile(x, y, sz)
                 tile = normalize_percentile(tile.astype(np.float32))
 
                 # NHWC to NCHW
@@ -147,13 +199,18 @@ if __name__ == '__main__':
                 # Save raw tile data and position
                 tiles_queue.put((tile, x, y))
 
+        tiles_queue.put((None, None, None))  # Termination criteria
+
     #
     # Thread which performs postprocessing
     #
     predictions_queue = Queue()
-    detections = [[None] * num_tiles_x for _ in range(num_tiles_y)]
+    detections = {}
 
     def postprocess_thread_body():
+        angles = np.arange(0, 2 * pi, pi / 16)  # Get 32 angles
+        cos_angles = np.cos(angles).reshape(-1, 1)
+        sin_angles = np.sin(angles).reshape(-1, 1)
         while True:
             out, tile_x, tile_y = predictions_queue.get()
             if out is None:  # Termination criteria
@@ -171,11 +228,11 @@ if __name__ == '__main__':
             centers = np.where(mask)
 
             # Compute the coordinates of contours
-            coords = np.array([centers[1] + distances * np.cos(angles).reshape(-1, 1),
-                               centers[0] + distances * np.sin(angles).reshape(-1, 1)])
+            coords = np.array([centers[1] + distances * cos_angles,
+                               centers[0] + distances * sin_angles])
             coords = coords.reshape(2, 32, -1).transpose(2, 1, 0).astype(np.int32)
             ids = nms(coords, probs, args.nms_threshold)
-            detections[tile_y][tile_x] = coords[ids]
+            detections[(tile_y, tile_x)] = coords[ids]
 
 
     tiling_thread = Thread(target=tiling_thread_body)
@@ -189,15 +246,22 @@ if __name__ == '__main__':
     #
     ie = IECore()
     net = ie.read_network(args.model)
-    exec_net = ie.load_network(net, args.device, config={'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'}, num_requests=0)
+    config = {}
+    for device in ['CPU', 'GPU']:
+        if device in args.device:
+            config[device + '_THROUGHPUT_STREAMS'] = device + '_THROUGHPUT_AUTO'
+    exec_net = ie.load_network(net, args.device, config, num_requests=0)
     inp_name = next(iter(exec_net.input_info.keys()))
     out_name = next(iter(exec_net.outputs.keys()))
 
+    print('Number of asynchronous requests:', len(exec_net.requests))
     req_tile_pos = [None] * len(exec_net.requests)  # A list of tiles positions per request. None is initial value
     start_time = time.time()
     iter_id = 0
-    while tiling_thread.is_alive() or not tiles_queue.empty():
+    while True:
         tile, x, y = tiles_queue.get()
+        if tile is None:  # Termination criteria
+            break
 
         # Get idle infer request
         req_id = exec_net.get_idle_request_id()
@@ -249,20 +313,28 @@ if __name__ == '__main__':
     KEY_UP = 82
     KEY_RIGHT = 83
     KEY_DOWN = 84
+    if isinstance(img, BFImageReader):
+        img.javabridge.attach()
+
+    num_tiles_x = ceil(img.height / args.tile_size)
+    num_tiles_y = ceil(img.width / args.tile_size)
     tile_x = num_tiles_x // 2
     tile_y = num_tiles_y // 2
     while True:
-        preds = detections[tile_y][tile_x]
+        preds = detections[(tile_y, tile_x)]
 
         print('')
         print('Tile position:     ({},{})'.format(tile_x, tile_y))
         print('Number of objects: {}'.format(len(preds)))
 
-        tile = get_tile(img, level, tile_x, tile_y, sz)
+        tile = img.get_tile(tile_x, tile_y, args.tile_size)
 
-        # RGBA to BGR
-        tile = tile[:, :, [2, 1, 0]].astype(np.uint8)
-        tile = cv.drawContours(tile.copy(), preds, -1, (0, 0, 255))
+        if tile.shape[2] == 1:
+            tile = np.repeat(tile, 3, axis=-1)
+        else:
+            tile = cv.cvtColor(tile, cv.COLOR_RGB2BGR)
+
+        tile = cv.drawContours(tile, preds, -1, (0, 0, 255))
         cv.imshow(WIN_NAME, tile)
 
         key = cv.waitKey()
