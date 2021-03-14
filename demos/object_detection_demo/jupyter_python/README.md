@@ -25,8 +25,8 @@ for more information on optimizing models.
 
 ## Run this demo on your computer
 
-To run this notebook on your computer, you need to install Python (3.6, 3.7 or 3.8) and Git. If you do not have Python yet,
-install it from https://www.python.org/downloads/release/python-379/. For Windows, choose the [executable installer
+To run this notebook on your computer, you need to install Python (see https://github.com/openvinotoolkit/openvino/blob/master/docs/install_guides/pypi-openvino-rt.md for supported Python versions) and Git. If you do not have Python yet,
+install Python 3.7 from https://www.python.org/downloads/release/python-379/. For Windows, choose the [executable installer
 for x86-64](https://www.python.org/ftp/python/3.7.9/python-3.7.9-amd64.exe) and select the *Add Python to your PATH*
 option during installation, as well as the option to disable the PATH length limit. Git can be downloaded from [git-scm.com](https://git-scm.com/).
 
@@ -38,21 +38,22 @@ option during installation, as well as the option to disable the PATH length lim
 
 3. Use the `cd` command to go to the correct directory: `cd open_model_zoo/demos/object_detection_demo/jupyter_python`
 
-3. Create a virtual environment with `python -m venv openvino_env` and activate it by typing:
+4. Create a virtual environment with `python -m venv openvino_env` and activate it by typing:
    - Linux: `source openvino_env/bin/activate`
    - Windows: `openvino_env\Scripts\activate`
 
    Note: on Linux, depending on the distribution, it may be necessary to type `python3` instead of `python`. On Windows, if yo
    followed the default installation for Python, you can choose a specific version of Python by typing for example `py -3.7` instead of `python` to select version 3.7.
 
-4. Install the required Python packages
-   - In the demo directory, type the following command: `pip install -r requirements.txt`
+5. Install the required Python packages
+   - If you do not have OpenVINO installed globally, install OpenVINO in the virtual environment with `pip install openvino-dev`.
+   - Type `pip install -r requirements.txt` to install the packages that are required to run the notebook.
 
-5. Create a Jupyter kernel for the virtual environment with `python -m ipykernel install --user --name openvino_env`
+6. Create a Jupyter kernel for the virtual environment with `python -m ipykernel install --user --name openvino_env`
 
-6. Run Jupyter Lab with `jupyter lab` and select the *object_detection_demo.ipynb* file in the file browser, or run Jupyter Notebook with `jupyter notebook object_detection_demo.ipynb`. If you made the virtual environment named *openvino_env*, the notebook should start with the virtual environment kernel. If it does not, you can select the kernel for your virtual environment with the Kernel->*Change Kernel* menu item.
+7. Run Jupyter Lab with `jupyter lab` and select the *object_detection_demo.ipynb* file in the file browser, or run Jupyter Notebook with `jupyter notebook object_detection_demo.ipynb`. If you made the virtual environment named *openvino_env*, the notebook should start with the virtual environment kernel. If it does not, you can select the kernel for your virtual environment with the Kernel->*Change Kernel* menu item.
 
-7. To quit Jupyter Lab or Jupyter Notebook, press `Ctrl-C` in the terminal. To deactivate the virtual environment type `deactivate`.
+8. To quit Jupyter Lab or Jupyter Notebook, press `Ctrl-C` in the terminal. To deactivate the virtual environment type `deactivate`.
 
 ## Optional
 
@@ -60,6 +61,7 @@ option during installation, as well as the option to disable the PATH length lim
 
 If you want to run the notebook in dashboard mode, without showing all the
 code, you can use Voila. Instead of typing `jupyter lab` type `voila
+
 --TagRemovePreprocessor.remove_cell_tags=hide` and click on the `object_detection_demo` notebook.
 In *dashboard mode* you cannot upload your own video, but video's that you already uploaded in Jupyter Lab
 can be used in *dashboard mode.
