@@ -68,7 +68,7 @@ class BFImageReader:
             if meta.Channel(i).Name == channel:
                 self.channel_id = i
                 break
-        if not self.channel_id:
+        if self.channel_id is None:
             raise Exception('Unable to find channel ' + channel)
 
         self.reader = bf.ImageReader(path)
@@ -79,6 +79,38 @@ class BFImageReader:
         x = min(x * sz, self.width - sz)
         data = self.reader.read(XYWH=((x, y, sz, sz)), rescale=False)
         return data[:, :, self.channel_id:self.channel_id + 1]
+
+
+class Contour:
+    def __init__(self, pts):
+        self.pts = pts
+        self.area = cv.contourArea(pts)
+        if self.area < 0:
+            raise Exception('Negative area!')
+
+        self.xmin, self.ymin = np.amin(pts, axis=0)
+        self.xmax, self.ymax = np.amax(pts, axis=0)
+        mask = np.zeros((self.ymax - self.ymin + 1,
+                         self.xmax - self.xmin + 1), dtype=np.uint8)
+        self.mask = cv.drawContours(mask, [pts - [self.xmin, self.ymin]], -1, (255), cv.FILLED)
+
+
+    def inter_area(self, ctr):
+        '''
+        Compute an intersection area with another contour
+        '''
+        xmin = max(self.xmin, ctr.xmin)
+        xmax = min(self.xmax, ctr.xmax)
+        ymin = max(self.ymin, ctr.ymin)
+        ymax = min(self.ymax, ctr.ymax)
+        if xmax < xmin or ymax < ymin:
+            return 0.0
+
+        inter_mask = np.logical_and(self.mask[ymin - self.ymin : ymax - self.ymin,
+                                              xmin - self.xmin : xmax - self.xmin],
+                                    ctr.mask[ymin - ctr.ymin : ymax - ctr.ymin,
+                                             xmin - ctr.xmin : xmax - ctr.xmin])
+        return np.sum(inter_mask)
 
 
 def get_percentiles_range(inp, percentiles):
@@ -103,49 +135,21 @@ def normalize_percentile(inp, percentiles=[1.0, 99.0]):
     return inp
 
 
-def nms(contours, probs, nms_threshold):
+def nms(coords, probs, nms_threshold):
 
-    def get_iou(ctr1, ctr2, ctr1_area, ctr2_area, ctr1_mask, ctr2_mask):
-        mask1, xmin1, ymin1, xmax1, ymax1 = ctr1_mask
-        mask2, xmin2, ymin2, xmax2, ymax2 = ctr2_mask
-
-        xmin = max(xmin1, xmin2)
-        xmax = min(xmax1, xmax2)
-        ymin = max(ymin1, ymin2)
-        ymax = min(ymax1, ymax2)
-        if xmax < xmin or ymax < ymin:
-            return 0.0
-
-        inter_mask = np.logical_and(mask1[ymin - ymin1 : ymax - ymin1,
-                                          xmin - xmin1 : xmax - xmin1],
-                                    mask2[ymin - ymin2 : ymax - ymin2,
-                                          xmin - xmin2 : xmax - xmin2])
-        inter_area = np.sum(inter_mask)
-        union_area = ctr1_area + ctr2_area - inter_area
+    def get_iou(ctr1, ctr2):
+        inter_area = ctr1.inter_area(ctr2)
+        union_area = ctr1.area + ctr2.area - inter_area
         return inter_area / union_area
 
 
-    # Precompute all contours areas and masks once
-    areas = [cv.contourArea(c) for c in contours]
-    masks = []
-    for ctr in contours:
-        xmin, ymin = np.amin(ctr, axis=0)
-        xmax, ymax = np.amax(ctr, axis=0)
-        mask = np.zeros((ymax - ymin + 1, xmax - xmin + 1), dtype=np.uint8)
-        mask = cv.drawContours(mask, [ctr - [xmin, ymin]], -1, (255), cv.FILLED)
-        masks.append((mask, xmin, ymin, xmax, ymax))
-
-        area = cv.contourArea(ctr)
-        if area < 0:
-            raise Exception('Negative area!')
-        areas.append(area)
-
+    contours = [Contour(pts) for pts in coords]
     ids = []
     for i in reversed(np.argsort(probs)):
         # Check this contour with contours with higher probabilities:
         keep = True
         for idx in ids:
-            iou = get_iou(contours[i], contours[idx], areas[i], areas[idx], masks[i], masks[idx])
+            iou = get_iou(contours[i], contours[idx])
             if iou > nms_threshold:
                 keep = False
                 break
