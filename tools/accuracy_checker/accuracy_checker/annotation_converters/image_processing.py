@@ -82,10 +82,7 @@ class ImageProcessingConverter(BaseFormatConverter):
         num_iterations = len(file_list_in)
         for in_id, in_file in enumerate(file_list_in):
             in_file_name = str(in_file.relative_to(self.data_dir)) if self.recursive else in_file.parts[-1]
-            if self.recursive:
-                gt_file_name = Path(self.out_suffix.join(str(in_file_name).split(self.in_suffix)))
-            else:
-                gt_file_name = self.out_suffix.join(in_file_name.split(self.in_suffix))
+            gt_file_name = self.out_suffix.join(in_file_name.split(self.in_suffix))
             if check_content:
                 if not check_file_existence(self.data_dir / gt_file_name):
                     content_errors.append('{}: does not exist'.format(self.data_dir / gt_file_name))
