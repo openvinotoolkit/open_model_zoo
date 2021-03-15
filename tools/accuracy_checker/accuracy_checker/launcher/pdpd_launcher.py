@@ -15,7 +15,6 @@ limitations under the License.
 """
 from pathlib import Path
 import numpy as np
-from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor
 from .launcher import Launcher
 from ..config import PathField, StringField, ConfigError
 from ..logging import print_info
@@ -29,7 +28,15 @@ class PaddlePaddleLauncher(Launcher):
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
-
+        try:
+            from paddle.fluid.core import PaddleTensor, AnalysisConfig, create_paddle_predictor # pylint: disable=C0415
+        except ImportError as import_error:
+            raise ValueError(
+                "PaddlePaddle isn't installed. Please, install it before using. \n{}".format(import_error.msg)
+            )
+        self._paddle_tensor = PaddleTensor
+        self._analysis_config = AnalysisConfig
+        self._create_paddle_predictor = create_paddle_predictor
         self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
         if not self._delayed_model_loading:
             self.load_model()
@@ -47,12 +54,12 @@ class PaddlePaddleLauncher(Launcher):
 
     def load_model(self):
         model, params = self.automatic_model_search()
-        config = AnalysisConfig(str(model), str(params))
+        config = self._analysis_config(str(model), str(params))
         config.disable_glog_info()
         device = self.get_value_from_config('device')
         if device.upper() == 'CPU':
             config.disable_gpu()
-        self._predictor = create_paddle_predictor(config)
+        self._predictor = self._create_paddle_predictor(config)
 
     @property
     def inputs(self):
@@ -113,13 +120,13 @@ class PaddlePaddleLauncher(Launcher):
             if len(layer_shape) == 3:
                 if np.shape(data)[0] != 1:
                     raise ValueError('Only for batch size 1 first dimension can be omitted')
-                return PaddleTensor(data[0].astype(input_precision))
-            return PaddleTensor(data.astype(input_precision))
+                return self._paddle_tensor(data[0].astype(input_precision))
+            return self._paddle_tensor(data.astype(input_precision))
         if len(np.shape(data)) == 5 and len(layout) == 5:
-            return PaddleTensor(np.transpose(data, layout).astype(input_precision))
+            return self._paddle_tensor(np.transpose(data, layout).astype(input_precision))
         if len(np.shape(data))-1 == len(layer_shape):
-            return PaddleTensor(np.array(data[0]).astype(input_precision))
-        return PaddleTensor(np.array(data).astype(input_precision))
+            return self._paddle_tensor(np.array(data[0]).astype(input_precision))
+        return self._paddle_tensor(np.array(data).astype(input_precision))
 
     def predict_async(self, *args, **kwargs):
         raise ValueError('PaddlePaddle Launcher does not support async mode yet')
