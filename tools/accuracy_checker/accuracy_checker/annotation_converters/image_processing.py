@@ -73,7 +73,7 @@ class ImageProcessingConverter(BaseFormatConverter):
         if self.recursive:
             data_dir_files = [file for file in self.data_dir.glob('**/*') if file.is_file()]
         else:
-            data_dir_files = data_dir.iterdir()
+            data_dir_files = self.data_dir.iterdir()
         for file_in_dir in data_dir_files:
             if self.in_suffix in file_in_dir.parts[-1]:
                 file_list_in.append(file_in_dir)
