@@ -81,7 +81,7 @@ class ImageProcessingConverter(BaseFormatConverter):
         annotation = []
         num_iterations = len(file_list_in)
         for in_id, in_file in enumerate(file_list_in):
-            in_file_name = in_file.relative_to(self.data_dir) if self.recursive else in_file.parts[-1]
+            in_file_name = str(in_file.relative_to(self.data_dir)) if self.recursive else in_file.parts[-1]
             if self.recursive:
                 gt_file_name = Path(self.out_suffix.join(str(in_file_name).split(self.in_suffix)))
             else:
