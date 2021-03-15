@@ -93,36 +93,34 @@ class NotebookDemo(Demo):
 
         notebook_file = source_dir / self.subdirectory / (self._exec_name + '.ipynb')
         python_file = notebook_file.with_suffix('.py')
-        python_test_file = str(python_file.with_suffix('')) + '_test.py'
+        python_test_file = python_file.with_name(python_file.stem + '_test.py')
         subprocess.run([sys.executable, '-m', 'jupyter', 'nbconvert', '--to', 'python', str(notebook_file)], env=demo_env)
 
-        changedir_command = f"import os\nos.chdir(r'{os.path.dirname(python_file)}')\n"
+        changedir_command = f"import os\nos.chdir(r'{os.path.dirname(python_file)}')"
         original_content = python_file.read_text()
         # Add `test_code` to the test script and make it accept command line arguments
-        content = inspect.cleandoc(f"""
-        # Change the working directory to the directory that contains the notebook
-        {changedir_command}
-        {original_content}
+        content = f"""
+{changedir_command}
+{original_content}
+from os.path import dirname
+import argparse
 
-        from os.path import dirname
-        import argparse
+def parse_args():
+   parser = argparse.ArgumentParser()
+   parser.add_argument('-m')
+   parser.add_argument('-i')
+   return parser.parse_args()
 
-        def parse_args():
-            parser = argparse.ArgumentParser()
-            parser.add_argument('-m')
-            parser.add_argument('-i')
-            return parser.parse_args()
+args = parse_args()
+# Change settings for test script
+base_model_dir=dirname(dirname(dirname(dirname(args.m))))
+# Add a line that executes the function that is tested
+{self.test_code}"""
 
-        args = parse_args()
-        # Change settings for test script
-        content += '\nbase_model_dir=dirname(dirname(dirname(dirname(args.m))))'
-        # Add a line that executes the function that is tested
-        content += f'\n{self.test_code}'
-        """)
-        # Write test script to file
-        python_file.write_text(content)
+        # Write script with additions to test file
+        python_test_file.write_text(content)
 
-        return [sys.executable, python_test_file]
+        return [sys.executable, str(python_test_file)]
 
 
 def join_cases(*args):
@@ -786,9 +784,9 @@ PYTHON_DEMOS = [
 
 NOTEBOOK_DEMOS = [
    NotebookDemo(name='object_detection_demo', device_keys=[],
-   test_code = '''JUMP_FRAMES=200
+   test_code = inspect.cleandoc('''JUMP_FRAMES=200
                   result=get_results_for_model(os.path.basename(args.m)[:-4], args.i, 4, 4, 4)
-                  assert len(result[0]) > 2''',
+                  assert len(result[0]) > 2'''),
    test_cases=[
        TestCase(options={'-m': ModelArg('yolo-v3-tiny-tf', precision='FP16'),
                          '-i': TestDataArg('Image_Retrieval/d0c460d0-4d75-4315-98a8-a0116d3dfb81.dav'),
