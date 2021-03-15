@@ -34,7 +34,7 @@ Fully convolutional network for recognition of eye state ('open', 'closed').
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../../tools/downloader/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
