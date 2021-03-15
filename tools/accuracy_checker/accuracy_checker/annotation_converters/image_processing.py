@@ -71,7 +71,7 @@ class ImageProcessingConverter(BaseFormatConverter):
         content_errors = [] if check_content else None
         file_list_in = []
         if self.recursive:
-            data_dir_files = [file for file in self.data_dir.glob('**/*') if file.is_file()]
+            data_dir_files = [file for file in self.data_dir.rglob('*') if file.is_file()]
         else:
             data_dir_files = self.data_dir.iterdir()
         for file_in_dir in data_dir_files:
