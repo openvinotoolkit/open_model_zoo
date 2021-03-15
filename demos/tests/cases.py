@@ -85,10 +85,13 @@ class NotebookDemo(Demo):
         self.test_code = test_code
 
     def fixed_args(self, source_dir, build_dir):
+        demo_env = {**os.environ,
+                   'PATH': f"{os.environ['PATH']}{os.pathsep}"
+                           f"{os.path.dirname(sys.executable)}"}
         notebook_file = source_dir / self.subdirectory / (self._exec_name + '.ipynb')
         python_file = notebook_file.with_suffix('.py')
         python_test_file = str(python_file.with_suffix('')) + '_test.py'
-        subprocess.run([sys.executable, '-m', 'jupyter', 'nbconvert', '--to', 'python', str(notebook_file)])
+        subprocess.run([sys.executable, '-m', 'jupyter', 'nbconvert', '--to', 'python', str(notebook_file)], env=demo_env)
 
         changedir_command = f"import os\nos.chdir(r'{os.path.dirname(python_file)}')\n"
         original_content = python_file.read_text()

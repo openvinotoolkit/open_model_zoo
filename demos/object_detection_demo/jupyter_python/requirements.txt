@@ -2,5 +2,4 @@ jupyterlab
 ipywidgets
 voila
 matplotlib
-opencv-python-headless
 -r ../../../tools/downloader/requirements.in
