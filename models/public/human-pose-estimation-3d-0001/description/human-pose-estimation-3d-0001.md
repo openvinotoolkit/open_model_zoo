@@ -35,7 +35,7 @@ The net outputs three blobs with the following shapes: `[1, 57, 32, 56]`, `[1, 1
 
 ## Download a Model and Convert it into Inference Engine Format
 
-You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../../tools/downloader/README.md) as shown in the examples below.
 
 An example of using the Model Downloader:
 ```
