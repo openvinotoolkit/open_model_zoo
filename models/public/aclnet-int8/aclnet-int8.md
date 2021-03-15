@@ -50,17 +50,31 @@ Audio, name - `result.1`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 ### Original Model
 
-Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet.txt`), name - `486`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet_53cl.txt`), name - `486`, shape - `1,53`, output data format is `N,C` where:
 
 - `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range
 
 ### Converted Model
 
-Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet.txt`), name - `486`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet_53cl.txt`), name - `486`, shape - `1,53`, output data format is `N,C` where:
 
 - `N` - batch size
 - `C` - Predicted softmax scores for each class in [0, 1] range
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 
