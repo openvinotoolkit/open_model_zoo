@@ -31,7 +31,7 @@ files:
 model_optimizer_args:
   - --input_shape=[1,1,1,16000]
   - --input=input
-  - --output=203
+  - --output=output
   - --input_model=$dl_dir/aclnet_des_53.onnx
 framework: onnx
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
