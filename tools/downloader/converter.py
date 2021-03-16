@@ -109,11 +109,11 @@ def main():
             mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/model_optimizer/mo.py'
         except KeyError:
             try:
-                # For OpenVINO from PyPI
+                # For OpenVINO from PYTHONPATH
                 mo_path = subprocess.run([args.python, '-c',
                                           'import mo,sys; sys.stdout.write(mo.__file__)'],
-                                         check=True, stdout=subprocess.PIPE).stdout.decode('utf-8')
-                mo_path = (Path(mo_path).parents[2] / 'mo.py').resolve(strict=True)
+                                         check=True, stdout=subprocess.PIPE, encoding='utf-8').stdout
+                mo_path = (Path(mo_path).parent / '__main__.py').resolve(strict=True)
             except Exception:
                 sys.exit('Unable to locate Model Optimizer. '
                     + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
