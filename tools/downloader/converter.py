@@ -115,7 +115,7 @@ def main():
                                           'import mo,sys; sys.stdout.write(mo.__file__)'],
                                          check=True, stdout=subprocess.PIPE, encoding='utf-8').stdout
                 mo_path = (Path(mo_path).parent / '__main__.py').resolve(strict=True)
-            except Exception:
+            except (subprocess.CalledProcessError, OSError, FileNotFoundError):
                 sys.exit('Unable to locate Model Optimizer. '
                     + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
