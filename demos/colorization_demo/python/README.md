@@ -6,7 +6,7 @@ You can use the following models with the demo:
 * `colorization-v2`
 * `colorization-siggraph`
 
-For more information about the pre-trained models, refer to the <a href="https://github.com/opencv/open_model_zoo/blob/master/models/public/index.md">model documentation</a>.
+For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
 
 ### How It Works
 
