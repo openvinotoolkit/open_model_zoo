@@ -204,7 +204,7 @@ versions are: `VS2015`, `VS2017`, `VS2019`. For example, to build the demos usin
 build_demos_msvc.bat VS2017
 ```
 
-The demo applications binaries are in the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build_build\intel64\Release` directory.
+The demo applications binaries are in the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\intel64\Release` directory.
 
 You can also build a generated solution by yourself, for example, if you want to
 build binaries in Debug configuration. Run the appropriate version of the
