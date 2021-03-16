@@ -501,6 +501,10 @@ class ModelEvaluator(BaseEvaluator):
         with open(stored_predictions, 'wb'):
             print_info("File {} will be cleared for storing predictions".format(stored_predictions))
 
+    @property
+    def dataset_size(self):
+        return self.dataset.size
+
     def reset_progress(self, progress_reporter):
         progress_reporter.reset(self.dataset.size)
 

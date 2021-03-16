@@ -17,6 +17,7 @@
 #pragma once
 #include <vector>
 #include "detection_model.h"
+#include <utils/nms.hpp>
 
 class ModelRetinaFace
     : public DetectionModel {

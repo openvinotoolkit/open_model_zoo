@@ -33,7 +33,7 @@ where each number corresponds to [`num_anchors`, `cls_reg_obj_params`, `y_loc`, 
 - `cls_reg_obj_params`: parameters for classification and regression. The values are made up of the following:
   * Regression parameters (4)
   * Objectness score (1)
-  * Class score (20)
+  * Class score (20), mapping to class names provided by `<omz_dir>/data/dataset_classes/voc_20cl.txt` file.
 - `y_loc` and `x_loc`: spatial location of each grid
 
 ## Legal Information

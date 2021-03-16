@@ -115,6 +115,10 @@ class ModuleEvaluator(BaseEvaluator):
     def set_profiling_dir(self, profiler_dir):
         self._internal_module.set_profiling_dir(profiler_dir)
 
+    @property
+    def dataset_size(self):
+        return self._internal_module.dataset_size
+
 
 def load_module(model_cls, python_path=None):
     module_parts = model_cls.split(".")
