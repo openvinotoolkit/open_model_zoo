@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..config import PathField, StringField, ConfigError
+from ..config import PathField, StringField, ConfigError, BoolField
 from ..representation import ImageProcessingAnnotation
 from ..representation.image_processing import GTLoader
 from ..utils import check_file_existence
@@ -45,6 +45,9 @@ class ImageProcessingConverter(BaseFormatConverter):
             'target_suffix': StringField(
                 optional=True, default="out", description="gt file name's suffix."
             ),
+            'recursive': BoolField(
+                optional=True, default=False, description="Recursively lists data_dir subcatalogs for dataset files"
+            ),
             'annotation_loader': StringField(
                 optional=True, choices=LOADERS_MAPPING.keys(), default='pillow',
                 description="Which library will be used for ground truth image reading. "
@@ -58,6 +61,7 @@ class ImageProcessingConverter(BaseFormatConverter):
         self.data_dir = self.get_value_from_config('data_dir')
         self.in_suffix = self.get_value_from_config('input_suffix')
         self.out_suffix = self.get_value_from_config('target_suffix')
+        self.recursive = self.get_value_from_config('recursive')
         self.annotation_loader = LOADERS_MAPPING.get(self.get_value_from_config('annotation_loader'))
         if not self.annotation_loader:
             raise ConfigError('provided not existing loader')
@@ -65,14 +69,18 @@ class ImageProcessingConverter(BaseFormatConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_errors = [] if check_content else None
         file_list_in = []
-        for file_in_dir in self.data_dir.iterdir():
+        if self.recursive:
+            data_dir_files = [file for file in self.data_dir.rglob('*') if file.is_file()]
+        else:
+            data_dir_files = self.data_dir.iterdir()
+        for file_in_dir in data_dir_files:
             if self.in_suffix in file_in_dir.parts[-1]:
                 file_list_in.append(file_in_dir)
 
         annotation = []
         num_iterations = len(file_list_in)
         for in_id, in_file in enumerate(file_list_in):
-            in_file_name = in_file.parts[-1]
+            in_file_name = str(in_file.relative_to(self.data_dir)) if self.recursive else in_file.parts[-1]
             gt_file_name = self.out_suffix.join(in_file_name.split(self.in_suffix))
             if check_content:
                 if not check_file_existence(self.data_dir / gt_file_name):
