@@ -29,6 +29,7 @@ For the tests to work, the test data directory must contain:
 import argparse
 import contextlib
 import csv
+import io
 import json
 import os
 import platform
@@ -129,6 +130,8 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
     return dl_dir
 
 def main():
+    sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
+	sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
     args = parse_args()
 
     omz_dir = (Path(__file__).parent / '../..').resolve()
