@@ -110,6 +110,7 @@ def main():
         except KeyError:
             try:
                 # For OpenVINO from PYTHONPATH
+                os.putenv('PYTHONIOENCODING', 'utf-8')
                 mo_path = subprocess.run([args.python, '-c',
                                           'import mo,sys; sys.stdout.write(mo.__file__)'],
                                          check=True, stdout=subprocess.PIPE, encoding='utf-8').stdout

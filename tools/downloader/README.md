@@ -261,7 +261,7 @@ script. You can override this heuristic with the `--mo` option:
 ./converter.py --all --mo my/openvino/path/model_optimizer/mo.py
 ```
 
-Or add Model Optimizer to `PYTHONPATH`:
+Or add Model Optimizer to `PYTHONPATH`. The path should point to a location of `mo` package.
 ```sh
 export PYTHONPATH=my/openvino/path/model_optimizer/:$PYTHONPATH
 ```
