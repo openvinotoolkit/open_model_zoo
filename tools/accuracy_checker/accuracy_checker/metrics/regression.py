@@ -523,9 +523,9 @@ def calculate_distance(x_coords, y_coords, selected_points):
 
 
 def mae_differ(annotation_val, prediction_val):
-    if (isinstance(annotation_val, np.ndarray) and isinstance(prediction_val, np.ndarray) 
-    and annotation_val.shape[0] < prediction_val.shape[0]
-    ):
+    if (isinstance(annotation_val, np.ndarray) and isinstance(prediction_val, np.ndarray)
+        and annotation_val.shape[0] < prediction_val.shape[0]
+        ):
         prediction_val = prediction_val[:annotation_val.shape[0]]
     return np.abs(annotation_val - prediction_val)
 
