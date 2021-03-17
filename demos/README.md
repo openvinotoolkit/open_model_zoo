@@ -146,7 +146,7 @@ The officially supported Linux* build environment is the following:
 
 * Ubuntu* 16.04 LTS 64-bit or CentOS* 7.4 64-bit
 * GCC* 5.4.0 (for Ubuntu* 16.04) or GCC* 4.8.5 (for CentOS* 7.4)
-* CMake* version 2.8 or higher.
+* CMake* version 3.10 or higher.
 
 To build the demo applications for Linux, go to the directory with the `build_demos.sh` script and
 run it:
@@ -187,7 +187,7 @@ for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 The recommended Windows* build environment is the following:
 * Microsoft Windows* 10
 * Microsoft Visual Studio* 2015, 2017, or 2019
-* CMake* version 2.8 or higher
+* CMake* version 3.10 or higher
 
 > **NOTE**: If you want to use Microsoft Visual Studio 2019, you are required to install CMake 3.14.
 
