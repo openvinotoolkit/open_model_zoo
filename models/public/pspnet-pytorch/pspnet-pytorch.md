@@ -60,13 +60,7 @@ Integer values in a range [0, 20], which represent an index of a predicted class
 
 ### Converted Model
 
-1. Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `Unsqueeze_259`, shape: `1, 1, 512, 512` in `B, 1, H, W` format, where
-
-    - B - batch size
-    - H - image height
-    - W - image width
-
-2. Float values, which represent scores of a predicted class for each image pixel. Name: `8802.0`, shape: `1, 1, 512, 512` in `B, 1, H, W` format, where
+Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `Unsqueeze_259`, shape: `1, 1, 512, 512` in `B, 1, H, W` format, where
 
     - B - batch size
     - H - image height
