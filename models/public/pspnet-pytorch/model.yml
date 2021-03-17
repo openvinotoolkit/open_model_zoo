@@ -16,7 +16,8 @@ description: >-
   pspnet-pytorch is a semantic segmentation model, pretrained on Pascal VOC <http://host.robots.ox.ac.uk/pascal/VOC/>
   dataset for 21 object classes. The model was built on ResNetV1-50 <https://arxiv.org/pdf/1812.01187.pdf>
   backbone and PSP segmentation head. This model is used for pixel-level prediction
-  tasks. For details see repository <https://github.com/open-mmlab/mmsegmentation/tree/master>.
+  tasks. For details see repository <https://github.com/open-mmlab/mmsegmentation/tree/master>,
+  paper <https://arxiv.org/abs/1612.01105>.
 task_type: semantic_segmentation
 files:
   - name: pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
