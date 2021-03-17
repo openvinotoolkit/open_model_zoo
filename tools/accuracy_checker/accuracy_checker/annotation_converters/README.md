@@ -416,7 +416,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `dense_features` - Name of model dense features input
   * `sparse_features` - Name of model sparse features input. For multiple inputs use comma-separated list in form `<name>:<index>`
   * `lso_features` - Name of lS_o-like features input
-* `im2latex` - converts im2latex-like datasets to `CharacterRecognitionAnnotation`. [Example of the dataset](http://lstm.seas.harvard.edu/latex/data/)
+* `im2latex_formula_recognition` - converts im2latex-like datasets to `CharacterRecognitionAnnotation`. [Example of the dataset](http://lstm.seas.harvard.edu/latex/data/)
   * `images_dir` - path to input images (rendered or scanned formulas)
   * `formula_file` - path to file containing one formula per line
   * `split_file` - path to file containing `img_name` and corresponding formula `index` in `formula_file` separated by tab per line
