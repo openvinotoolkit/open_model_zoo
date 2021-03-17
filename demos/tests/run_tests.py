@@ -29,6 +29,7 @@ For the tests to work, the test data directory must contain:
 import argparse
 import contextlib
 import csv
+import io
 import json
 import os
 import platform
