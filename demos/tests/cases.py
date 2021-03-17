@@ -663,6 +663,12 @@ PYTHON_DEMOS = [
                 ]
             ),
             *combine_cases(
+                TestCase(options={'--architecture_type': 'ultra_lightweight_face_detection'}),
+                single_option_cases('-m',
+                    ModelArg('ultra-lightweight-face-detection-rfb-320'),
+                    ModelArg('ultra-lightweight-face-detection-slim-320')),
+            ),
+            *combine_cases(
                 TestCase(options={'--architecture_type': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('mobilefacedet-v1-mxnet'),

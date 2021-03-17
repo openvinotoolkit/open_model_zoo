@@ -140,6 +140,8 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | SSH                                  | MXNet\*                  | [ssh-mxnet](./ssh-mxnet/ssh-mxnet.md) | 84.80% | 267.0594 | 19.7684 |
 | RetinaFace-R50                       | MXNet\*                  | [retinaface-resnet50](./retinaface-resnet50/retinaface-resnet50.md) | 87.2902% | 100.8478 | 29.427 |
 | RetinaFace-Anti-Cov                  | MXNet\*                  | [retinaface-anti-cov](./retinaface-anti-cov/retinaface-anti-cov.md)  | 77.1531% | 2.7781 | 0.5955 |
+| Ultra Lightweight Face Detection RFB 320| PyTorch\*             | [ultra-lightweight-face-detection-rfb-320](./ultra-lightweight-face-detection-rfb-320/ultra-lightweight-face-detection-rfb-320.md)|84.78% | 0.2106 | 0.3004 |
+| Ultra Lightweight Face Detection slim 320| PyTorch\*            | [ultra-lightweight-face-detection-slim-320](./ultra-lightweight-face-detection-slim-320/ultra-lightweight-face-detection-slim-320.md)|83.32% | 0.1724 | 0.2844 |
 | YOLO v1 Tiny                         | TensorFlow.js\*          | [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | 72.1716% | 6.9883	 |	15.8587 |
 | YOLO v2 Tiny                         | Keras\*                  | [yolo-v2-tiny-tf](./yolo-v2-tiny-tf/yolo-v2-tiny-tf.md) | 27.3443%/29.1184%| 5.4236	 |	11.2295 |
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/yolo-v2-tf.md) | 53.1453%/56.483% | 63.0301	 |	50.9526 |
