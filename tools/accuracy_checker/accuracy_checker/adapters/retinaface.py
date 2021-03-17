@@ -172,7 +172,7 @@ class RetinaFaceAdapter(Adapter):
         if boxes.shape[0] == 0:
             return np.zeros((0, box_deltas.shape[1]))
 
-        boxes = boxes.astype(np.float, copy=False)
+        boxes = boxes.astype(float, copy=False)
         widths = boxes[:, 2] - boxes[:, 0] + 1.0
         heights = boxes[:, 3] - boxes[:, 1] + 1.0
         ctr_x = boxes[:, 0] + 0.5 * (widths - 1.0)
@@ -267,7 +267,7 @@ class RetinaFaceAdapter(Adapter):
     def landmark_pred(boxes, landmark_deltas):
         if boxes.shape[0] == 0:
             return np.zeros((0, landmark_deltas.shape[1]))
-        boxes = boxes.astype(np.float, copy=False)
+        boxes = boxes.astype(float, copy=False)
         widths = boxes[:, 2] - boxes[:, 0] + 1.0
         heights = boxes[:, 3] - boxes[:, 1] + 1.0
         ctr_x = boxes[:, 0] + 0.5 * (widths - 1.0)

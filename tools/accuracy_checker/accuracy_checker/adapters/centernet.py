@@ -67,8 +67,8 @@ class CTDETAdapter(Adapter):
         topk_scores = scores[np.arange(scores.shape[0])[:, None], topk_inds]
 
         topk_inds = topk_inds % (height * width)
-        topk_ys = (topk_inds / width).astype(np.int32).astype(np.float)
-        topk_xs = (topk_inds % width).astype(np.int32).astype(np.float)
+        topk_ys = (topk_inds / width).astype(np.int32).astype(float)
+        topk_xs = (topk_inds % width).astype(np.int32).astype(float)
 
         topk_scores = topk_scores.reshape((-1))
         topk_ind = np.argpartition(topk_scores, -K)[-K:]
@@ -143,7 +143,7 @@ class CTDETAdapter(Adapter):
 
             wh = self._tranpose_and_gather_feat(wh, inds)
             wh = wh.reshape((num_predictions, 2))
-            clses = clses.reshape((num_predictions, 1)).astype(np.float)
+            clses = clses.reshape((num_predictions, 1)).astype(float)
             scores = scores.reshape((num_predictions, 1))
             bboxes = np.concatenate((xs - wh[..., 0:1] / 2,
                                      ys - wh[..., 1:2] / 2,
