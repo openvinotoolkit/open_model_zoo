@@ -103,8 +103,8 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
 
         if not (mask_name.exists() and input_name.exists()):
 
-            inp = np.zeros([1, self.wD, self.wH, self.wW], dtype=np.float)
-            ref = np.zeros([self.wD, self.wH, self.wW, CLS], dtype=np.float)
+            inp = np.zeros([1, self.wD, self.wH, self.wW], dtype=float)
+            ref = np.zeros([self.wD, self.wH, self.wW, CLS], dtype=float)
             for d in range(self.wD):
                 for h in range(self.wH):
                     for w in range(self.wW):
