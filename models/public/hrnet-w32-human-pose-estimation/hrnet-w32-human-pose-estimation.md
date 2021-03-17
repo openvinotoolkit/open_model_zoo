@@ -21,7 +21,7 @@ For details about implementation of model, check out the [HigherHRNet: Scale-Awa
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Average Precision (AP)  | 64,1%          | 64,1%           |
+| Average Precision (AP)  | 65,03%          | 65,03%           |
 
 ## Input
 

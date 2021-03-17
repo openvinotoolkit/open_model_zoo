@@ -20,15 +20,9 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, ConfigError
 from ..representation import PoseEstimationPrediction
-from ..utils import UnsupportedPackage
 
 from .pose_estimation_openpose import HeatmapNMS
 from .pose_estimation_associative_embedding import AssociativeEmbeddingDecoder
-
-try:
-    from munkres import Munkres
-except ImportError as error:
-    Munkres = UnsupportedPackage('munkres', error.msg)
 
 
 def contains_all(container, args):
@@ -69,7 +63,7 @@ class HumanPoseHRNetAdapter(Adapter):
             num_joints=17,
             adjust=True,
             refine=True,
-            dist_reweight=False,
+            dist_reweight=True,
             delta=0.0,
             max_num_people=30,
             detection_threshold=0.1,
@@ -151,13 +145,6 @@ class HumanPoseHRNetAdapter(Adapter):
 
 
 class AssociativeEmbeddingHRNetDecoder(AssociativeEmbeddingDecoder):
-    @staticmethod
-    def _max_match(scores):
-        m = Munkres()
-        tmp = m.compute(scores)
-        tmp = np.array(tmp).astype(np.int32)
-        return tmp
-
     @staticmethod
     def adjust(ans, heatmaps):
         H, W = heatmaps.shape[-2:]

@@ -6,7 +6,7 @@ models:
         allow_reshape_input: True
         adapter:
           type: human_pose_estimation_hrnet
-          heatmaps_lr_and_embeddings_out: heatmaps_lr_and_embeddings
+          heatmaps_lr_and_embeddings_out: embeddings_and_lr_heatmaps
           heatmaps_out: heatmaps
 
     datasets:
@@ -18,7 +18,7 @@ models:
             interpolation: LINEAR
             aspect_ratio_scale: greater
           - type: padding
-            stride: 64
+            stride: 32
             pad_type: center
             left_top_extend: True
 

@@ -65,7 +65,7 @@ conversion_to_onnx_args:
   - --weights=$dl_dir/ckpt/pose_higher_hrnet_w32_512.pth
   - --input-shape=1,3,512,512
   - --input-names=image
-  - --output-names=heatmaps_lr_and_embeddings,heatmaps
+  - --output-names=embeddings_and_lr_heatmaps,heatmaps
   - --output-file=$conv_dir/hrnet-w32-human-pose-estimation.onnx
 model_optimizer_args:
   - --reverse_input_channels
@@ -73,7 +73,7 @@ model_optimizer_args:
   - --input=image
   - --mean_values=image[123.675,116.28,103.53]
   - --scale_values=image[58.395,57.12,57.375]
-  - --output=heatmaps_lr_and_embeddings,heatmaps
+  - --output=embeddings_and_lr_heatmaps,heatmaps
   - --input_model=$conv_dir/hrnet-w32-human-pose-estimation.onnx
 framework: pytorch
 license: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/LICENSE

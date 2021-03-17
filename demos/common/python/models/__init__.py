@@ -20,6 +20,7 @@ from .deblurring import Deblurring
 from .ctpn import CTPN
 from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
+from .hpe_hrnet import HpeHRNet
 from .open_pose import OpenPose
 from .retinaface import RetinaFace
 from .segmentation import SegmentationModel, SalientObjectDetectionModel

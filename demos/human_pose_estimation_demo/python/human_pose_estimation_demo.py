@@ -43,7 +43,7 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=('ae', 'openpose'))
+                      type=str, required=True, choices=('ae', 'hrnet', 'openpose'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -97,6 +97,8 @@ def build_argparser():
 def get_model(ie, args, aspect_ratio):
     if args.architecture_type == 'ae':
         Model = models.HpeAssociativeEmbedding
+    elif args.architecture_type == 'hrnet':
+        Model = models.HpeHRNet
     elif args.architecture_type == 'openpose':
         Model = models.OpenPose
     else:
