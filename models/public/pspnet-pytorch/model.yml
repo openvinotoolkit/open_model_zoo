@@ -103,9 +103,13 @@ postprocessing:
     replacement: '# \g<0>'
     file: models/mmcv-1.2.0/mmcv/utils/config.py
   - $type: regex_replace
-    pattern: 'from .vi'
+    pattern: 'from (.video|.visualization|.fileio|.image)'
     replacement: '# \g<0>'
     file: models/mmcv-1.2.0/mmcv/__init__.py
+  - $type: regex_replace
+    pattern: 'import cv2'
+    replacement: '# \g<0>'
+    file: models/mmcv-1.2.0/mmcv/utils/env.py
 
 conversion_to_onnx_args:
   - --model-path=$config_dir
