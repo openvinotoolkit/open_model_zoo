@@ -1,14 +1,14 @@
-import random
-import numpy as np
 import colorsys
-import cv2
 import os
+import random
 import sys
 import urllib
+from pathlib import Path
 
-open_model_zoo_path =  os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.curdir))))
+import cv2
+import numpy as np
 
-sys.path.append(os.path.join(open_model_zoo_path, "demos", "common", "python"))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from models import SSD, YOLO, FaceBoxes, CenterNet, RetinaFace
 
@@ -81,8 +81,8 @@ def download_video(path: str, video_directory: str) -> np.ndarray:
 
     # Set User-Agent to Mozilla because some websites block requests with User-Agent Python
     request = urllib.request.Request(path, headers={"User-Agent": "Mozilla/5.0"})
-    response = urllib.request.urlopen(request)
-    data = response.read()
-    os.makedirs(video_directory, exist_ok=True)
-    with open(os.path.join(video_directory, os.path.basename(path)), "wb") as f:
-        f.write(data)
+    with urllib.request.urlopen(request) as response:
+        data = response.read()
+        os.makedirs(video_directory, exist_ok=True)
+        with open(os.path.join(video_directory, os.path.basename(path)), "wb") as f:
+            f.write(data)

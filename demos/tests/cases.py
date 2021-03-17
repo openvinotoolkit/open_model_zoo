@@ -85,36 +85,36 @@ class NotebookDemo(Demo):
         self.test_code = test_code
 
     def fixed_args(self, source_dir, build_dir):
-        demo_env = {**os.environ,
-                   'PATH': f"{os.environ['PATH']}{os.pathsep}"
-                           f"{os.path.dirname(sys.executable)}",
-                   'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}"
-                                 f"{os.path.join(os.path.dirname(os.path.abspath(os.curdir)), 'common', 'python')}"}
-
         notebook_file = source_dir / self.subdirectory / (self._exec_name + '.ipynb')
         python_file = notebook_file.with_suffix('.py')
         python_test_file = python_file.with_name(python_file.stem + '_test.py')
-        subprocess.run([sys.executable, '-m', 'jupyter', 'nbconvert', '--to', 'python', str(notebook_file)], env=demo_env)
+        subprocess.run([sys.executable, '-m', 'jupyter', 'nbconvert', '--to', 'python', str(notebook_file)])
 
-        changedir_command = f"import os\nos.chdir(r'{os.path.dirname(python_file)}')"
         original_content = python_file.read_text()
+        original_content = original_content.replace("DOWNLOAD_MODELS = True", "DOWNLOAD_MODELS = False")
         # Add `test_code` to the test script and make it accept command line arguments
         content = f"""
-{changedir_command}
+import os
+os.chdir(r'{os.path.dirname(python_file)}')
+
 {original_content}
+
 from os.path import dirname
 import argparse
 
 def parse_args():
-   parser = argparse.ArgumentParser()
-   parser.add_argument('-m')
-   parser.add_argument('-i')
-   return parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m')
+    parser.add_argument('-i')
+    return parser.parse_args()
 
 args = parse_args()
+
 # Change settings for test script
 base_model_dir=dirname(dirname(dirname(dirname(args.m))))
-# Add a line that executes the function that is tested
+
+PRECISION = 'FP32'
+# Add code that execute the function that is tested
 {self.test_code}"""
 
         # Write script with additions to test file
@@ -788,10 +788,10 @@ NOTEBOOK_DEMOS = [
                   result=get_results_for_model(os.path.basename(args.m)[:-4], args.i, 4, 4, 4)
                   assert len(result[0]) > 2'''),
    test_cases=[
-       TestCase(options={'-m': ModelArg('yolo-v3-tiny-tf', precision='FP16'),
+       TestCase(options={'-m': ModelArg('yolo-v3-tiny-tf', precision='FP32'),
                          '-i': TestDataArg('Image_Retrieval/d0c460d0-4d75-4315-98a8-a0116d3dfb81.dav'),
        }),
-       TestCase(options= {'-m': ModelArg('face-detection-0200', precision='FP16'),
+       TestCase(options= {'-m': ModelArg('face-detection-0200', precision='FP32'),
                           '-i': TestDataArg('Image_Retrieval/636e91cc-4829-40bd-a8bc-18505b943a9b.dav'),
        }),
   ]),

@@ -1,3 +1,5 @@
+ipywidgets
+jupyterlab
 matplotlib
 motmetrics
 nibabel
@@ -8,6 +10,3 @@ tokenizers
 tensorboard
 tensorboardX
 tqdm
-jupyterlab
-ipywidgets
-opencv-python-headless
