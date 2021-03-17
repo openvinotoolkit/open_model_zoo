@@ -352,7 +352,8 @@ NATIVE_DEMOS = [
                     ModelArg('fastseg-large'),
                     ModelArg('fastseg-small'),
                     ModelArg('hrnet-v2-c1-segmentation'),
-                    ModelArg('deeplabv3'))),
+                    ModelArg('deeplabv3'),
+                    ModelArg('pspnet-pytorch'))),
         ],
     )),
 
@@ -722,7 +723,8 @@ PYTHON_DEMOS = [
                     ModelArg('icnet-camvid-ava-sparse-30-0001'),
                     ModelArg('icnet-camvid-ava-sparse-60-0001'),
                     ModelArg('unet-camvid-onnx-0001'),
-                    ModelArg('deeplabv3'))),
+                    ModelArg('deeplabv3'),
+                    ModelArg('pspnet-pytorch'))),
             TestCase(options={
                 '-m': ModelArg('f3net'),
                 '-i': DataPatternArg('road-segmentation-adas'),
