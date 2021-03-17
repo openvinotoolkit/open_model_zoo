@@ -18,20 +18,20 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/text-recognition-0013.xml
-    size: 216459
-    sha256: 50fe5e0bbe4292130de3b40e1dceb214b67d3d179657d3af8b4e6bd108697998
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/text-recognition-0013/FP32/text-recognition-0013.xml
+    size: 212339
+    sha256: c0f62b5a41a8465c380f4163915917bd3956e157ab63091468279682c14e2589
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-recognition-0013/FP32/text-recognition-0013.xml
   - name: FP32/text-recognition-0013.bin
-    size: 30873560
-    sha256: ff3104b5a05a88ca8e0f0b6d9ab221819c69b350b202e3f83491ee5f214e9955
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/text-recognition-0013/FP32/text-recognition-0013.bin
+    size: 30873576
+    sha256: 87e97556a60af7e706027c22c3ca5a4af544738fae0174ef38bc5dd18e15f986
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-recognition-0013/FP32/text-recognition-0013.bin
   - name: FP16/text-recognition-0013.xml
-    size: 216409
-    sha256: b519dfa8d811c00352b56b4b2fa23fe03b4cd7de9786c4f5d2acb5d1a9ece89a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/text-recognition-0013/FP16/text-recognition-0013.xml
+    size: 212289
+    sha256: 75bf8755d2b1baeffaf37ee5b80ee788d76f0275d220ef8888bd435582b4119b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-recognition-0013/FP16/text-recognition-0013.xml
   - name: FP16/text-recognition-0013.bin
-    size: 15436934
-    sha256: d92970e4cbe43069d343e6fd114b9d1ccf245be80c76eca5c5bcbabb64125d19
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/text-recognition-0013/FP16/text-recognition-0013.bin
+    size: 15436950
+    sha256: 3fd478351383fc776584ac58fd0348f7251ac2df278c74da83fdbbcae00d61f5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-recognition-0013/FP16/text-recognition-0013.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
