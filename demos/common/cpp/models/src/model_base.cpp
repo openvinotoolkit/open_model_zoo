@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -56,7 +56,6 @@ ExecutableNetwork ModelBase::loadExecutableNetwork(const CnnConfig& cnnConfig, I
     this->cnnConfig = cnnConfig;
     auto cnnNetwork = prepareNetwork(core);
 
-    // --------------------------- Loading model to the device ------------------------------------------
     slog::info << "Loading model to the device" << slog::endl;
     execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.devices, cnnConfig.execNetworkConfig);
     return execNetwork;

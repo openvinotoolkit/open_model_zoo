@@ -20,7 +20,7 @@
 using namespace InferenceEngine;
 
 SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useAutoResize) :
-    ImageModel(modelFileName,useAutoResize) {
+    ImageModel(modelFileName, useAutoResize) {
 }
 
 void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
