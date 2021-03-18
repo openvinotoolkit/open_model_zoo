@@ -16,6 +16,7 @@
 
 #include <ngraph/ngraph.hpp>
 #include <utils/common.hpp>
+#include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 #include "models/detection_model_retinaface.h"
 
@@ -53,7 +54,7 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
     const InferenceEngine::TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
-
+    imgResizer = new LetterboxResizer(netInputWidth, netInputHeight);
     // --------------------------- Prepare output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
 
@@ -124,6 +125,22 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
             }
         }
     }
+}
+
+std::shared_ptr<InternalModelData> ModelRetinaFace::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+    auto& img = inputData.asRef<ImageInputData>().inputImage;
+
+    // if (useAutoResize) {
+    //     /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
+    //     request->SetBlob(inputsNames[0], wrapMat2Blob(img));
+    //     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
+    //     return std::make_shared<InternalImageMatModelData>(img);
+    // }
+    /* Resize and copy data from the image to the input blob */
+    InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
+    auto resizedImg = imgResizer->resize(img);
+    matU8ToBlob<uint8_t>(resizedImg, frameBlob);
+    return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
 
 std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& anchor, const std::vector<int>& ratios) {
@@ -335,10 +352,12 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         DetectedObject desc;
         desc.confidence = scores[i];
         //--- Scaling coordinates
-        bboxes[i].left /= scaleX;
-        bboxes[i].top /= scaleY;
-        bboxes[i].right /= scaleX;
-        bboxes[i].bottom /= scaleY;
+        imgResizer->scaleCoord2Origin(bboxes[i].left, bboxes[i].top);
+        imgResizer->scaleCoord2Origin(bboxes[i].right, bboxes[i].bottom);
+        //bboxes[i].left /= scaleX;
+        //bboxes[i].top /= scaleY;
+        //bboxes[i].right /= scaleX;
+        //bboxes[i].bottom /= scaleY;
 
         desc.x = bboxes[i].left;
         desc.y = bboxes[i].top;
@@ -351,8 +370,9 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
 
         //--- Scaling landmarks coordinates
         for (size_t l = 0; l < ModelRetinaFace::LANDMARKS_NUM && shouldDetectLandmarks; ++l) {
-            landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].x /= scaleX;
-            landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].y /= scaleY;
+            //landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].x /= scaleX;
+            //landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].y /= scaleY;
+            imgResizer->scaleCoord2Origin(landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].x, landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l].y);
             result->landmarks.push_back(landmarks[i * ModelRetinaFace::LANDMARKS_NUM + l]);
         }
     }

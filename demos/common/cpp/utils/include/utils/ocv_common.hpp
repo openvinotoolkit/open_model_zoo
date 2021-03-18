@@ -13,36 +13,109 @@
 
 #include "utils/common.hpp"
 
+class Resizer {
+protected:
+    size_t dstW;
+    size_t dstH;
+    size_t origW;
+    size_t origH;
+    float scaleX;
+    float scaleY;
+public:
+    Resizer(size_t w, size_t h) : dstW(w), dstH(h), origW(0), origH(0),
+                scaleX(0.0f), scaleY(0.0f){}
+    virtual cv::Mat resize(const cv::Mat& img) = 0;
+    virtual void scaleCoord2Origin(float& x, float& y) = 0;
+};
+
+class StretchResizer : public Resizer {
+public:
+    StretchResizer(size_t w, size_t h) : Resizer(w, h) {};
+    cv::Mat resize(const cv::Mat& img) override {
+        origW = img.size().width;
+        origH = img.size().height;
+        scaleX = static_cast<float>(origW) / dstW;
+        scaleY = static_cast<float>(origH) / dstH;
+        
+        cv::Mat resizedImage(img);
+        if (dstW != origW ||dstH != origH) {
+            cv::resize(img, resizedImage, cv::Size(dstW, dstH));
+        }
+        return resizedImage;
+    }
+
+    void scaleCoord2Origin(float& x, float& y) override {
+        x *= scaleX;
+        y *= scaleY;
+    }
+};
+
+class LetterboxResizer : public Resizer {
+protected:
+    size_t dx;
+    size_t dy;
+public:
+    LetterboxResizer(size_t w, size_t h) : Resizer(w, h), dx(0), dy(0) {};
+    cv::Mat resize(const cv::Mat & img) override {
+        origW = img.size().width;
+        origH = img.size().height;
+        scaleX = scaleY = std::fmaxf(static_cast<float>(origW) / dstW, static_cast<float>(origH) / dstH);
+        size_t newW = static_cast<size_t>(origW / scaleX);
+        size_t newH = static_cast<size_t>(origH / scaleY);
+        cv::Mat resizedImage(img);
+        dx = (dstW - newW) / 2;
+        dy = (dstH - newH) / 2;
+        if (static_cast<int>(dstW) != img.size().width ||
+            static_cast<int>(dstH) != img.size().height) {
+            cv::resize(img, resizedImage, cv::Size(0, 0), 1 / scaleX, 1 / scaleY);
+        }
+        cv::Mat imgBuf(resizedImage.rows + dx * 2, resizedImage.cols + dy * 2, resizedImage.depth());
+        cv::copyMakeBorder(resizedImage, imgBuf, dy, dy,
+            dx, dx, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+        cv::imshow("res", imgBuf);
+        cv::waitKey(0);
+        return imgBuf;
+    }
+
+    void scaleCoord2Origin(float& x, float& y) override {
+        x -= dx;
+        y -= dy;
+        x *= scaleX;
+        y *= scaleY;
+    }
+};
+
 /**
 * @brief Sets image data stored in cv::Mat object to a given Blob object.
-* @param orig_image - given cv::Mat object with an image data.
+* @param origImage - given cv::Mat object with an image data.
 * @param blob - Blob object which to be filled by an image data.
 * @param batchIndex - batch index of an image inside of the blob.
 */
 template <typename T>
-void matU8ToBlob(const cv::Mat& orig_image, InferenceEngine::Blob::Ptr& blob, int batchIndex = 0) {
+void matU8ToBlob(const cv::Mat& origImage, InferenceEngine::Blob::Ptr& blob, int batchIndex = 0) {
     InferenceEngine::SizeVector blobSize = blob->getTensorDesc().getDims();
     const size_t width = blobSize[3];
     const size_t height = blobSize[2];
     const size_t channels = blobSize[1];
-    if (static_cast<size_t>(orig_image.channels()) != channels) {
+    if (static_cast<size_t>(origImage.channels()) != channels) {
         THROW_IE_EXCEPTION << "The number of channels for net input and image must match";
     }
     InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
     T* blob_data = blobMapped.as<T*>();
 
-    cv::Mat resized_image(orig_image);
-    if (static_cast<int>(width) != orig_image.size().width ||
-            static_cast<int>(height) != orig_image.size().height) {
-        cv::resize(orig_image, resized_image, cv::Size(width, height));
-    }
+    //auto resizedImage = r.resize(origImage);
+    // cv::Mat resizedImage(origImage);
+    // if (static_cast<int>(width) != origImage.size().width ||
+    //         static_cast<int>(height) != origImage.size().height) {
+    //     cv::resize(origImage, resizedImage, cv::Size(width, height));
+    // }
 
     int batchOffset = batchIndex * width * height * channels;
 
     if (channels == 1) {
         for (size_t  h = 0; h < height; h++) {
             for (size_t w = 0; w < width; w++) {
-                blob_data[batchOffset + h * width + w] = resized_image.at<uchar>(h, w);
+                blob_data[batchOffset + h * width + w] = origImage.at<uchar>(h, w);
             }
         }
     } else if (channels == 3) {
@@ -50,7 +123,7 @@ void matU8ToBlob(const cv::Mat& orig_image, InferenceEngine::Blob::Ptr& blob, in
             for (size_t  h = 0; h < height; h++) {
                 for (size_t w = 0; w < width; w++) {
                     blob_data[batchOffset + c * width * height + h * width + w] =
-                            resized_image.at<cv::Vec3b>(h, w)[c];
+                            origImage.at<cv::Vec3b>(h, w)[c];
                 }
             }
         }
