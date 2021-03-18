@@ -198,7 +198,8 @@ class YOLO(Model):
     def postprocess(self, outputs, meta):
         detections = list()
 
-        for layer_name, out_blob in outputs.items():
+        for layer_name in self.yolo_layer_params.keys():
+            out_blob = outputs[layer_name]
             layer_params = self.yolo_layer_params[layer_name]
             out_blob.shape = layer_params[0]
             detections += self._parse_yolo_region(out_blob, meta['resized_shape'], layer_params[1], self.threshold)
@@ -283,3 +284,31 @@ class YoloV4(YOLO):
                 objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
                                          confidence.item(), class_id.item()))
         return objects
+
+
+class YoloV4Tiny(YoloV4):
+    class Params:
+        def __init__(self, sides, mask):
+            self.num = 2
+            self.coords = 4
+            self.classes = 80
+            self.sides = sides
+            anchors = [10.0, 14.0, 23.0, 27.0, 37.0, 58.0,
+                       81.0, 82.0, 135.0, 169.0, 344.0, 319.0]
+            masked_anchors = []
+            for idx in mask:
+                masked_anchors += [anchors[idx * 2], anchors[idx * 2 + 1]]
+            self.anchors = masked_anchors
+
+
+    def _get_output_info(self):
+        masks = [[1, 2, 3], [3, 4, 5]]
+        outputs = sorted(self.net.outputs.items(), key=lambda x: x[1].shape[2], reverse=True)
+
+        output_info = {}
+        for i, (name, layer) in enumerate(outputs):
+            if name.startswith('conv'):
+                shape = layer.shape
+                yolo_params = self.Params(shape[2:4], mask=masks[len(output_info)])
+                output_info[name] = (shape, yolo_params)
+        return output_info

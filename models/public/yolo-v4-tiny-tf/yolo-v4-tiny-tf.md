@@ -27,7 +27,7 @@ Accuracy metrics obtained on COCO\* validation dataset for converted model.
 
 ### Original model
 
-Image, name - `input_1`, shape - `1,608,608,3`, format is `B,H,W,C` where:
+Image, name - `input_1`, shape - `1,416,416,3`, format is `B,H,W,C` where:
 
 - `B` - batch size
 - `H` - height
@@ -39,7 +39,7 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `input_1`, shape - `1,3,608,608`, format is `B,C,H,W` where:
+Image, name - `input_1`, shape - `1,3,416,416`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -52,7 +52,7 @@ Channel order is `BGR`.
 
 ### Original model
 
-1. The array of detection summary info, name - `conv2d_20/BiasAdd`, shape - `1,38,38,255`. The anchor values are `10,14, 23,27, 37,58`.
+1. The array of detection summary info, name - `conv2d_20/BiasAdd`, shape - `1,38,38,255`. The anchor values are `23,27, 37,58, 81,82`.
 
 2. The array of detection summary info, name - `conv2d_17/BiasAdd`, shape - `1,19,19,255`. The anchor values are `81,82, 135,169, 344,319`.
 
@@ -72,7 +72,7 @@ The model was trained on Microsoft\* COCO dataset version with 80 categories of 
 
 ### Converted model
 
-1. The array of detection summary info, name - `conv2d_20/BiasAdd/Add`, shape - `1,38,38,255`. The anchor values are `10,14, 23,27, 37,58`.
+1. The array of detection summary info, name - `conv2d_20/BiasAdd/Add`, shape - `1,38,38,255`. The anchor values are `23,27, 37,58, 81,82`.
 
 2. The array of detection summary info, name - `conv2d_17/BiasAdd/Add`, shape - `1,19,19,255`. The anchor values are `81,82, 135,169, 344,319`.
 
