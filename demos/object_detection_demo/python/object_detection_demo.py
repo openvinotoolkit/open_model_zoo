@@ -204,6 +204,9 @@ def draw_detections(frame, detections, palette, labels, threshold):
             if isinstance(detection, models.DetectionWithLandmarks):
                 for landmark in detection.landmarks:
                     cv2.circle(frame, (int(landmark[0]), int(landmark[1])), 2, (0, 255, 255), 2)
+    y_scale, x_scale = [i / j for i, j in zip(size, (720, 1280))]
+    scale = max(x_scale, y_scale, 1)
+    frame = cv2.resize(frame, (int(size[1]/scale), int(size[0]/scale)))
     return frame
 
 
