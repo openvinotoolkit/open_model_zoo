@@ -17,20 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/face-detection-0206.xml
-    size: 1555947
-    sha256: a2a53594a54936d6a13e5a2e57dc80ac69b659aba1ed19b1ff221f470f142463
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/face-detection-0206/FP32/face-detection-0206.xml
+    size: 1553909
+    sha256: 778be088bddcb2a2ee4c6565dc4151f0db6a6df8f237361654f928929151c6df
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-0206/FP32/face-detection-0206.xml
   - name: FP32/face-detection-0206.bin
     size: 254925280
-    sha256: 4f53fa1c86bc91a49175ad55505652e24647115d8ad010faa14782a8d52358f1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/face-detection-0206/FP32/face-detection-0206.bin
+    sha256: 86efa5f16810092f50914fc0dee717e89f0491c4fa66a401d7821b0df70c3a37
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-0206/FP32/face-detection-0206.bin
   - name: FP16/face-detection-0206.xml
-    size: 1555459
-    sha256: 1e1913fa3444f2023430f58cc0ca45821de747b73fcc469809ba08970b4af3dd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/face-detection-0206/FP16/face-detection-0206.xml
+    size: 1553420
+    sha256: 498dc335806a252e7ded6b7d90f5a81ca8430e58322021150afba5e574d36925
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-0206/FP16/face-detection-0206.xml
   - name: FP16/face-detection-0206.bin
     size: 127462856
-    sha256: 52a9b0ef428a7a5f745eee58bf9fcd4acab988238fc7b1e5710b10849326bc76
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/face-detection-0206/FP16/face-detection-0206.bin
+    sha256: 60f585cf471d2d2635c45e407dc410ba8a1d08e581ea3f7f6f87a6cd5fd9f4a4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-0206/FP16/face-detection-0206.bin
+  - name: FP16-INT8/face-detection-0206.xml
+    size: 2715057
+    sha256: e1f438e2e18fbec7e1ad3f91e28c08f23211ad600719859b171d917291237fe4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-0206/FP16-INT8/face-detection-0206.xml
+  - name: FP16-INT8/face-detection-0206.bin
+    size: 64135656
+    sha256: 257302169fec728624ba90dffeb7fcbe3f359c4f280501403158e20374aa080e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-0206/FP16-INT8/face-detection-0206.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

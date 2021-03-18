@@ -58,6 +58,20 @@ Floating point values in range [0, 1], which represent probabilities for classes
 
 Floating point values in a range [0, 1], which represent probabilities for classes in a dataset. Name: `densenet161/predictions/Reshape_1/Transpose`, shape: [1, 1, 1, 1000].
 
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
+
 ## Legal Information
 
 The original model is distributed under the

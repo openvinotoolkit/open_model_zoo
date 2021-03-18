@@ -18,20 +18,20 @@ description: >-
 task_type: text_to_speech
 files:
   - name: FP32/text-to-speech-en-0001-generation.xml
-    size: 326958
-    sha256: 44f7228381988ba6bd50d403f48ee85ee386fb033cfdfc9d65ef0d6a7fcd58cd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP32/text-to-speech-en-0001-generation.xml
+    size: 326986
+    sha256: 97083816738b45f98664afc084aa46f7c2a47d9983c9fa70b5f1798c220992fc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP32/text-to-speech-en-0001-generation.xml
   - name: FP32/text-to-speech-en-0001-generation.bin
     size: 51082912
     sha256: befc19247052b07875b1a2ffcaaed3d41e4f48aca886151987891cb44633a298
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP32/text-to-speech-en-0001-generation.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP32/text-to-speech-en-0001-generation.bin
   - name: FP16/text-to-speech-en-0001-generation.xml
-    size: 326830
-    sha256: 5f05e6feb2f01a1ad489768a8607273720a4aff2120c23ffe7716d6771794525
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16/text-to-speech-en-0001-generation.xml
+    size: 326858
+    sha256: 4ca19ee66e4afb9d415aa6439641344108363725825bf284ae711c75ec4a3cc8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16/text-to-speech-en-0001-generation.xml
   - name: FP16/text-to-speech-en-0001-generation.bin
     size: 25541584
     sha256: 9a202c36543e14b54fe63beec54fe26dd5df7f221a5aff3d27f882a1de72778e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/1/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16/text-to-speech-en-0001-generation.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16/text-to-speech-en-0001-generation.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
