@@ -299,6 +299,21 @@ class TFLauncher(Launcher):
 
         return graph
 
+    def fit_to_input(self, data, layer_name, layout, precision):
+        layer_shape = self.inputs[layer_name]
+        if (
+            len(layer_shape) > len(np.shape(data)) and
+            len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(np.shape(data))))
+        ):
+            if -1 not in layer_shape:
+                data = np.resize(data, layer_shape)
+
+        if len(np.shape(data)) == len(layout):
+            data = np.transpose(data, layout)
+        else:
+            data = np.array(data)
+        return data.astype(precision) if precision else data
+
     def _get_graph_inputs(self, graph, config_inputs=None):
         inputs_ops = {'Placeholder'}
         inputs = [x for x in graph.as_graph_def().node if not x.input and x.op in inputs_ops]

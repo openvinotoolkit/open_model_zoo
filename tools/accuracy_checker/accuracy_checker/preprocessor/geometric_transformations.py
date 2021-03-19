@@ -254,6 +254,7 @@ class Padding(Preprocessor):
         pref_height = self.dst_height or image.metadata.get('preferable_height', height)
         pref_width = self.dst_width or image.metadata.get('preferable_width', width)
         height = min(height, pref_height)
+        width_pref_init = pref_width
         pref_height = math.ceil(pref_height / float(self.stride)) * self.stride
         pref_width = max(pref_width, width)
         pref_width = math.ceil(pref_width / float(self.stride)) * self.stride
@@ -271,9 +272,10 @@ class Padding(Preprocessor):
             'height': height,
             'resized': False
         }
-        if image.data.shape[:2] != (pref_height, pref_width):
-            image.data = cv2.resize(image.data, (pref_height, pref_width))
+        if self.enable_resize and image.data[:2] != [pref_height, width_pref_init]:
+            image.data = cv2.resize(image.data, (width_pref_init, pref_height))
             meta['resized'] = True
+            meta['pref_width'] = width_pref_init
 
         image.metadata.setdefault('geometric_operations', []).append(
             GeometricOperationMetadata('padding', meta))
