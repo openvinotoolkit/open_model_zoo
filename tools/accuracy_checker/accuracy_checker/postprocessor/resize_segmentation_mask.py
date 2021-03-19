@@ -124,7 +124,7 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
                 return data
             cmin = data.min()
             cmax = data.max()
-            if cmin >= 0 and cmax <= 255:
+            if cmin >= 0 and cmax <= 255 and data.dtype not in [np.float32, np.float16, float]:
                 return data.astype(np.uint8)
             cscale = cmax - cmin
             if cscale == 0:
