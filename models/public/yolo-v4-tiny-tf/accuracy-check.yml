@@ -14,7 +14,7 @@ models:
           raw_output: True
           output_format: HWB
           do_reshape: True
-          cells: [76, 38, 19]
+          cells: [26, 13]
           outputs:
             - conv2d_17/BiasAdd/Add
             - conv2d_20/BiasAdd/Add

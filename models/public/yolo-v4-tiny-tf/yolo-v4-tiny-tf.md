@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-YOLO v4 is a real-time object detection model based on ["YOLOv4: Optimal Speed and Accuracy of Object Detection"](https://arxiv.org/abs/2004.10934) paper. It was implemented in Keras\* framework and converted to TensorFlow\* framework. For details see [repository](https://github.com/david8862/keras-YOLOv3-model-set). This model was pretrained on COCO\* dataset with 80 classes.
+YOLO v4 Tiny is a real-time object detection model based on ["YOLOv4: Optimal Speed and Accuracy of Object Detection"](https://arxiv.org/abs/2004.10934) paper. It was implemented in Keras\* framework and converted to TensorFlow\* framework. For details see [repository](https://github.com/david8862/keras-YOLOv3-model-set). This model was pretrained on COCO\* dataset with 80 classes.
 
 ## Specification
 
@@ -52,9 +52,9 @@ Channel order is `BGR`.
 
 ### Original model
 
-1. The array of detection summary info, name - `conv2d_20/BiasAdd`, shape - `1,38,38,255`. The anchor values are `23,27, 37,58, 81,82`.
+1. The array of detection summary info, name - `conv2d_20/BiasAdd`, shape - `1,26,26,255`. The anchor values are `23,27, 37,58, 81,82`.
 
-2. The array of detection summary info, name - `conv2d_17/BiasAdd`, shape - `1,19,19,255`. The anchor values are `81,82, 135,169, 344,319`.
+2. The array of detection summary info, name - `conv2d_17/BiasAdd`, shape - `1,13,13,255`. The anchor values are `81,82, 135,169, 344,319`.
 
 For each case format is `B,Cx,Cy,N*85,`, where
     - `B` - batch size
@@ -72,9 +72,9 @@ The model was trained on Microsoft\* COCO dataset version with 80 categories of 
 
 ### Converted model
 
-1. The array of detection summary info, name - `conv2d_20/BiasAdd/Add`, shape - `1,38,38,255`. The anchor values are `23,27, 37,58, 81,82`.
+1. The array of detection summary info, name - `conv2d_20/BiasAdd/Add`, shape - `1,26,26,255`. The anchor values are `23,27, 37,58, 81,82`.
 
-2. The array of detection summary info, name - `conv2d_17/BiasAdd/Add`, shape - `1,19,19,255`. The anchor values are `81,82, 135,169, 344,319`.
+2. The array of detection summary info, name - `conv2d_17/BiasAdd/Add`, shape - `1,13,13,255`. The anchor values are `81,82, 135,169, 344,319`.
 
 For each case format is `B,N*85,Cx,Cy`, where
 - `B` - batch size
