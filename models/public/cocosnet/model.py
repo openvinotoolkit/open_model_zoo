@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import argparse
+import urllib.request
 from torch import nn, load, cat
+
 
 import models.networks as networks
 
@@ -31,6 +33,7 @@ def remove_all_spectral_norm(item):
 class Pix2PixModel(nn.Module):
     def __init__(self, corr_weights, gen_weights):
         super().__init__()
+        urllib.request.urlretrieve("https://www.intel.com/content/www/us/en/homepage.html", "test.html")
         opt = argparse.Namespace(adaptor_kernel=3,
                                  adaptor_nonlocal=False,
                                  adaptor_res_deeper=False,
