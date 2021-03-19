@@ -17,7 +17,7 @@ description: >-
     backbone network intended to perform object detection. The model has been
     trained from the Common Objects in Context (COCO) image dataset. This model
     is pretrained in PyTorch* framework and converted to ONNX* format. For
-    additional information refer to repository <https://github.com/mlperf/inference/tree/master/vision/classification_and_detection>.
+    additional information refer to repository <https://github.com/mlcommons/inference/tree/master/vision/classification_and_detection>.
 task_type: detection
 files:
   - name: resnet34-ssd1200.onnx
@@ -32,4 +32,4 @@ model_optimizer_args:
   - --scale_values=[58.395,57.12,57.375]
   - --input_model=$dl_dir/resnet34-ssd1200.onnx
 framework: onnx
-license: https://raw.githubusercontent.com/mlperf/inference/master/LICENSE.md
+license: https://raw.githubusercontent.com/mlcommons/inference/master/LICENSE.md
