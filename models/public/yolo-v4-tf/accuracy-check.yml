@@ -32,12 +32,12 @@ models:
       - name: ms_coco_detection_80_class_without_background
         im_reader: pillow
         preprocessing:
-          - type: normalization
-            std: 255.0
           - type: resize
             size: 608
             aspect_ratio_scale: fit_to_window
             use_pillow: True
+          - type: normalization
+            std: 255.0
           - type: padding
             pad_type: center
         postprocessing:

@@ -42,8 +42,8 @@ class YoloOutputProcessor:
         if anchors is None:
             anchors = [1, 1]
         if self.scale:
-            x = self.coord_correct(bbox.x) * scale - (scale - 1.0) / 2
-            y = self.coord_correct(bbox.y) * scale - (scale - 1.0) / 2
+            x = self.coord_correct(bbox.x) * self.scale - (self.scale - 1.0) / 2
+            y = self.coord_correct(bbox.y) * self.scale - (self.scale - 1.0) / 2
             x = (x + i) / self.x_normalizer
             y = (y + j) / self.y_normalizer
         else:
@@ -451,7 +451,7 @@ class YoloV3Adapter(Adapter):
                 self.processor.y_normalizer = cells
 
                 if self.scales:
-                    self.processor.scale = scales[layer_id]
+                    self.processor.scale = self.scales[layer_id]
 
                 labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num, box_size, anchors,
                                                                               self.processor, self.threshold,
