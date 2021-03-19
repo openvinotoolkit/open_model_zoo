@@ -302,8 +302,8 @@ class TFLauncher(Launcher):
     def fit_to_input(self, data, layer_name, layout, precision):
         layer_shape = self.inputs[layer_name]
         if (
-            len(layer_shape) > len(np.shape(data)) and
-            len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(np.shape(data))))
+                len(layer_shape) > len(np.shape(data)) and
+                len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(np.shape(data))))
         ):
             if -1 not in layer_shape:
                 data = np.resize(data, layer_shape)
