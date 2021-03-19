@@ -59,6 +59,7 @@ AccuracyChecker supports following set of adapters:
   * `do_reshape` - forces reshape output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on `output_format` value ([B,Cy,Cx] by default). You may need to specify `cells` value.
   * `transpose` - transpose output tensor to specified format (optional).
   * `multi_labels` - allows multiple labels for single box (optional, default `False`)
+  * `scales` - sets scales for grid sensivity elimination (used for YOLO v4 model). Optional, none by default.
 * `yolo_v3_onnx` - converting output of ONNX Yolo V3 model to `DetectionPrediction`.
   * `boxes_out` - the name of layer with bounding boxes
   * `scores_out` - the name of output layer with detection scores for each class and box pair.

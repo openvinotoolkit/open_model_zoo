@@ -36,12 +36,19 @@ class YoloOutputProcessor:
         self.prob_correct = prob_correct if prob_correct else lambda x: x
         self.x_normalizer, self.y_normalizer = coord_normalizer
         self.width_normalizer, self.height_normalizer = size_normalizer
+        self.scale = None
 
     def __call__(self, bbox, i, j, anchors=None):
         if anchors is None:
             anchors = [1, 1]
-        x = (self.coord_correct(bbox.x) + i) / self.x_normalizer
-        y = (self.coord_correct(bbox.y) + j) / self.y_normalizer
+        if self.scale:
+            x = self.coord_correct(bbox.x) * scale - (scale - 1.0) / 2
+            y = self.coord_correct(bbox.y) * scale - (scale - 1.0) / 2
+            x = (x + i) / self.x_normalizer
+            y = (y + j) / self.y_normalizer
+        else:
+            x = (self.coord_correct(bbox.x) + i) / self.x_normalizer
+            y = (self.coord_correct(bbox.y) + j) / self.y_normalizer
 
         w = self.size_correct(bbox.w) * anchors[0] / self.width_normalizer
         h = self.size_correct(bbox.h) * anchors[1] / self.height_normalizer
@@ -334,6 +341,10 @@ class YoloV3Adapter(Adapter):
             'multi_label': BoolField(
                 optional=True, default=False,
                 description='Allows multiple labels for single box'
+            ),
+            'scales': ListField(
+                optional=True, default=None,
+                description="Scales for elimination grid sensivity (for YOLO v4)(none by default"
             )
         })
 
@@ -353,6 +364,7 @@ class YoloV3Adapter(Adapter):
         self.threshold = self.get_value_from_config('threshold')
         self.outputs = self.get_value_from_config('outputs')
         self.multi_label = self.get_value_from_config('multi_label')
+        self.scales = self.get_value_from_config('scales')
         anchor_masks = self.get_value_from_config('anchor_masks')
         self.masked_anchors = None
         if anchor_masks is not None:
@@ -437,6 +449,9 @@ class YoloV3Adapter(Adapter):
 
                 self.processor.x_normalizer = cells
                 self.processor.y_normalizer = cells
+
+                if self.scales:
+                    self.processor.scale = scales[layer_id]
 
                 labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num, box_size, anchors,
                                                                               self.processor, self.threshold,
