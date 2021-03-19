@@ -15,6 +15,7 @@ models:
           output_format: HWB
           do_reshape: True
           cells: [76, 38, 19]
+          scales: [1.2, 1.1, 1.05]
           outputs:
             - conv2d_93/BiasAdd
             - conv2d_101/BiasAdd
@@ -29,14 +30,18 @@ models:
           - conv2d_109/BiasAdd
     datasets:
       - name: ms_coco_detection_80_class_without_background
+        im_reader: pillow
         preprocessing:
-          - type: bgr_to_rgb
           - type: normalization
             std: 255.0
           - type: resize
             size: 608
+            aspect_ratio_scale: fit_to_window
+            use_pillow: True
+          - type: padding
+            pad_type: center
         postprocessing:
-          - type: resize_prediction_boxes
+          - type: letterbox_postprocessing_resize
           - type: filter
             apply_to: prediction
             min_confidence: 0.001
@@ -71,13 +76,16 @@ models:
           threshold: 0.001
           anchor_masks: [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
           raw_output: True
+          scales: [1.2, 1.1, 1.05]
           outputs:
             - conv2d_93/BiasAdd/Add
             - conv2d_101/BiasAdd/Add
             - conv2d_109/BiasAdd/Add
     datasets:
       - name: ms_coco_detection_80_class_without_background
+        im_reader: pillow
         preprocessing:
+          - type: rgb_to_bgr
           - type: resize
             size: 608
             aspect_ratio_scale: fit_to_window
