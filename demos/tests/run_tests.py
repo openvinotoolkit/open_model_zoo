@@ -132,8 +132,7 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
 
 def main():
     args = parse_args()
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
-
+    sys.stdout = sys.__stdout__
     omz_dir = (Path(__file__).parent / '../..').resolve()
     demos_dir = omz_dir / 'demos'
     auto_tools_dir = omz_dir / 'tools/downloader'
