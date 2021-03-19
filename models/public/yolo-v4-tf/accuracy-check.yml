@@ -46,8 +46,10 @@ models:
             apply_to: prediction
             min_confidence: 0.001
             remove_filtered: true
-          - type: diou_nms
+          - type: nms
             overlap: 0.5
+            diou: True
+            nms_per_class: True
           - type: clip_boxes
             apply_to: prediction
         metrics:
@@ -98,8 +100,10 @@ models:
             apply_to: prediction
             min_confidence: 0.001
             remove_filtered: true
-          - type: diou_nms
+          - type: nms
             overlap: 0.5
+            diou: True
+            nms_per_class: True
           - type: clip_boxes
             apply_to: prediction
         metrics:
