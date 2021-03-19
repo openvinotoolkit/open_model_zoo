@@ -101,8 +101,6 @@ def main():
     parser.add_argument('--dry-run', action='store_true', help=argparse.SUPPRESS)
 
     args = parser.parse_args()
-    
-    os.system('wget https://www.intel.com/content/www/us/en/homepage.html')
 
     mo_path = args.mo
     if mo_path is None:
