@@ -272,7 +272,7 @@ class Padding(Preprocessor):
             'height': height,
             'resized': False
         }
-        if self.enable_resize and image.data[:2] != [pref_height, width_pref_init]:
+        if self.enable_resize and image.data.shape[:2] != (pref_height, width_pref_init):
             image.data = cv2.resize(image.data, (width_pref_init, pref_height))
             meta['resized'] = True
             meta['pref_width'] = width_pref_init
