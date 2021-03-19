@@ -18,28 +18,14 @@
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 
-using namespace InferenceEngine;
-
 ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize) :
     ModelBase(modelFileName),
     useAutoResize(useAutoResize) {
 }
 
-InferenceEngine::ExecutableNetwork ImageModel::loadExecutableNetwork(const CnnConfig & cnnConfig, InferenceEngine::Core & core) {
-    this->cnnConfig = cnnConfig;
-    auto cnnNetwork = prepareNetwork(core);
-    execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.devices, cnnConfig.execNetworkConfig);
-    return execNetwork;
-}
-
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& data = inputData.asRef<ImageInputData>();
-    int width = 0;
-    int height = 0;
-
     auto& img = data.inputImage;
-    width = img.cols;
-    height = img.rows;
 
     if (useAutoResize) {
         /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
@@ -48,7 +34,7 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
         return std::make_shared<InternalImageMatModelData>(img);
     }
     /* Resize and copy data from the image to the input blob */
-    Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
+    InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
     matU8ToBlob<uint8_t>(img, frameBlob);
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }

@@ -137,7 +137,7 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
 
-    for (auto& inputInfoItem : inputInfo) {
+    for (const auto& inputInfoItem : inputInfo) {
         if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
             if (inputsNames.empty()) {
                 inputsNames.push_back(inputInfoItem.first);

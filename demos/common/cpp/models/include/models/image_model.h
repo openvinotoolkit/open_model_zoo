@@ -24,8 +24,6 @@ public:
     /// @param useAutoResize - if true, image is resized by IE.
     ImageModel(const std::string& modelFileName, bool useAutoResize);
 
-    virtual InferenceEngine::ExecutableNetwork loadExecutableNetwork(const CnnConfig& cnnConfig, InferenceEngine::Core& core) override;
-
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
 
 protected:

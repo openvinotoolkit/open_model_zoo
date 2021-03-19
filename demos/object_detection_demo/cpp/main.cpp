@@ -172,7 +172,7 @@ public:
         colorCandidates.resize(numCandidates);
         for (size_t i = 1; i < n; ++i) {
             std::generate(colorCandidates.begin(), colorCandidates.end(),
-                [] () { return cv::Scalar{ getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) }; });
+                []() { return cv::Scalar{ getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) }; });
             hsvColors.push_back(maxMinDistance(hsvColors, colorCandidates));
         }
 
@@ -239,13 +239,13 @@ cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& p
     for (const auto& obj : result.objects) {
         if (FLAGS_r) {
             slog::info << " "
-                       << std::left << std::setw(9) << obj.label << " | "
-                       << std::setw(10) << obj.confidence << " | "
-                       << std::setw(4) << std::max(int(obj.x), 0) << " | "
-                       << std::setw(4) << std::max(int(obj.y), 0) << " | "
-                       << std::setw(4) << std::min(int(obj.x + obj.width), outputImg.cols) << " | "
-                       << std::setw(4) << std::min(int(obj.y + obj.height), outputImg.rows)
-                       << slog::endl;
+                << std::left << std::setw(9) << obj.label << " | "
+                << std::setw(10) << obj.confidence << " | "
+                << std::setw(4) << std::max(int(obj.x), 0) << " | "
+                << std::setw(4) << std::max(int(obj.y), 0) << " | "
+                << std::setw(4) << std::min(int(obj.x + obj.width), outputImg.cols) << " | "
+                << std::setw(4) << std::min(int(obj.y + obj.height), outputImg.rows)
+                << slog::endl;
         }
 
         std::ostringstream conf;
@@ -316,8 +316,7 @@ int main(int argc, char *argv[]) {
 
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
-            core
-            );
+            core);
         Presenter presenter(FLAGS_u);
 
         bool keepRunning = true;
@@ -326,11 +325,8 @@ int main(int argc, char *argv[]) {
         uint32_t framesProcessed = 0;
 
         cv::VideoWriter videoWriter;
-        cv::Size frameSize;
-        double fps = 30;
-
-
-        int skip=0;
+        cv::Size videoFrameSize;
+        double videoFps = 30;
 
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
@@ -349,17 +345,17 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                frameSize = curr_frame.size();
-                fps = cap->fps();
+                videoFrameSize = curr_frame.size();
+                videoFps = cap->fps();
 
                 frameNum = pipeline.submitData(ImageInputData(curr_frame),
-                                               std::make_shared<ImageMetaData>(curr_frame, startTime));
+                    std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 
             // Preparing video writer if needed
             if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
                 if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                          fps, frameSize)) {
+                    videoFps, videoFrameSize)) {
                     throw std::runtime_error("Can't open video writer");
                 }
             }
