@@ -13,8 +13,6 @@ limitations under the License.
 
 from ..representation import DetectionPrediction, DetectionAnnotation
 from ..postprocessor.postprocessor import Postprocessor
-from ..utils import get_size_from_config
-from ..config import NumberField, BoolField
 
 
 class LetterboxPostprocessingResize(Postprocessor):
