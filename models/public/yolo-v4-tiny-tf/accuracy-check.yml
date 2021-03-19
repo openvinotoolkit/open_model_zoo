@@ -16,15 +16,15 @@ models:
           do_reshape: True
           cells: [26, 13]
           outputs:
-            - conv2d_17/BiasAdd/Add
             - conv2d_20/BiasAdd/Add
+            - conv2d_17/BiasAdd/Add
         inputs:
           - name: 'image_input'
             type: INPUT
             shape: [1, 416, 416, 3]
         outputs:
-          - conv2d_17/BiasAdd
           - conv2d_20/BiasAdd
+          - conv2d_17/BiasAdd
     datasets:
       - name: ms_coco_detection_80_class_without_background
         preprocessing:
@@ -70,8 +70,8 @@ models:
           anchor_masks: [[1, 2, 3], [3, 4, 5]]
           raw_output: True
           outputs:
-            - conv2d_17/BiasAdd/Add
             - conv2d_20/BiasAdd/Add
+            - conv2d_17/BiasAdd/Add
     datasets:
       - name: ms_coco_detection_80_class_without_background
         preprocessing:
