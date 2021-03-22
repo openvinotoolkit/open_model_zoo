@@ -45,7 +45,7 @@ InferenceEngine::CNNNetwork ModelBase::prepareNetwork(InferenceEngine::Core& cor
     InferenceEngine::CNNNetwork cnnNetwork = core.ReadNetwork(modelFileName);
     /** Set batch size to 1 **/
     slog::info << "Batch size is forced to 1." << slog::endl;
-    reshape(cnnNetwork);
+    setBatchOne(cnnNetwork);
 
     // -------------------------- Reading all outputs names and customizing I/O blobs (in inherited classes)
     prepareInputsOutputs(cnnNetwork);

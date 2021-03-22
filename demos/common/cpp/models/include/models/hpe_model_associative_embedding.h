@@ -51,7 +51,7 @@ protected:
     static const float tagThreshold;
     static const float delta;
 
-    void reshape(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork);
 
     std::string findLayerByName(const std::string layerName,
                                 const std::vector<std::string>& outputsNames);

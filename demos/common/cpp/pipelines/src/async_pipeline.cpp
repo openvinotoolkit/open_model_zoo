@@ -25,7 +25,7 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
 
     execNetwork = model->loadExecutableNetwork(cnnConfig, core);
 
-    // --------------------------- 5. Create infer requests ------------------------------------------------
+    // --------------------------- Create infer requests ------------------------------------------------
     unsigned int nireq = cnnConfig.maxAsyncRequests;
     if (nireq == 0) {
         try {
@@ -38,7 +38,7 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
     }
     requestsPool.reset(new RequestsPool(execNetwork, nireq));
 
-    // --------------------------- 6. Call onLoadCompleted to complete initialization of model -------------
+    // --------------------------- Call onLoadCompleted to complete initialization of model -------------
     model->onLoadCompleted(requestsPool->getInferRequestsList());
 }
 

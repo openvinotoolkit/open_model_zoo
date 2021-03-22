@@ -37,7 +37,7 @@ public:
 
     std::string getModelFileName() { return modelFileName; }
 
-    virtual void reshape(InferenceEngine::CNNNetwork & cnnNetwork) {
+    void setBatchOne(InferenceEngine::CNNNetwork & cnnNetwork) {
         auto shapes = cnnNetwork.getInputShapes();
         for (auto& shape : shapes)
             shape.second[0] = 1;

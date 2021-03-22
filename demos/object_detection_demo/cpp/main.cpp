@@ -222,10 +222,7 @@ cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& p
         throw std::invalid_argument("Renderer: metadata is null");
     }
 
-    auto& imgMetaData = result.metaData->asRef<ImageMetaData>();
-
-    cv::Mat outputImg;
-    outputImg = result.metaData->asRef<ImageMetaData>().img;
+    auto outputImg = result.metaData->asRef<ImageMetaData>().img;
 
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
