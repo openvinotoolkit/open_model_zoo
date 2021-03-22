@@ -1,13 +1,38 @@
+#!/usr/bin/env python3
+"""
+ Copyright (C) 2018-2021 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
+import sys
 import argparse
-from threading import Thread
-from queue import Queue
 from math import pi, ceil
 import time
+import logging
+from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 import cv2 as cv
-from openvino.inference_engine import IECore, StatusCode
+from openvino.inference_engine import IECore
 
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+
+from pipelines import AsyncPipeline
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
+log = logging.getLogger()
 
 class OpenSlideImageReader:
     def __init__(self, path, pixel_size=0.5):
@@ -29,7 +54,8 @@ class OpenSlideImageReader:
         self.scale = int(self.img.level_downsamples[level])
 
 
-    def get_tile(self, x, y, sz):
+    def get_tile(self, tile_id, sz):
+        x, y = tile_id
         y = min(y * self.scale * sz, self.height - sz)  # Last tile offset
         x = min(x * self.scale * sz, self.width - sz)
         tile = self.img.read_region((x, y), self.level, (sz, sz))
@@ -42,21 +68,20 @@ class BFImageReader:
         import javabridge
         import bioformats as bf
 
-        self.javabridge = javabridge
-        self.javabridge.start_vm(class_path=bf.JARS, run_headless=True)
+        javabridge.start_vm(class_path=bf.JARS, run_headless=True)
 
         # It's a kind of magic lines that disable DEBUG logging
         JAVABRIDGE_DEFAULT_LOG_LEVEL = 'ERROR'
-        rootLoggerName = self.javabridge.get_static_field("org/slf4j/Logger", "ROOT_LOGGER_NAME", "Ljava/lang/String;")
-        rootLogger = self.javabridge.static_call("org/slf4j/LoggerFactory", "getLogger",
+        rootLoggerName = javabridge.get_static_field("org/slf4j/Logger", "ROOT_LOGGER_NAME", "Ljava/lang/String;")
+        rootLogger = javabridge.static_call("org/slf4j/LoggerFactory", "getLogger",
                                             "(Ljava/lang/String;)Lorg/slf4j/Logger;",
                                             rootLoggerName)
-        jvm_log_level = self.javabridge.get_static_field("ch/qos/logback/classic/Level", JAVABRIDGE_DEFAULT_LOG_LEVEL,
+        jvm_log_level = javabridge.get_static_field("ch/qos/logback/classic/Level", JAVABRIDGE_DEFAULT_LOG_LEVEL,
                                                     "Lch/qos/logback/classic/Level;")
-        self.javabridge.call(rootLogger, "setLevel", "(Lch/qos/logback/classic/Level;)V", jvm_log_level)
+        javabridge.call(rootLogger, "setLevel", "(Lch/qos/logback/classic/Level;)V", jvm_log_level)
 
         # Retrieve image sizes
-        meta = bf.get_omexml_metadata(args.input)
+        meta = bf.get_omexml_metadata(path)
         meta = bf.OMEXML(meta).image().Pixels
 
         self.width = meta.get_SizeX()
@@ -74,7 +99,8 @@ class BFImageReader:
         self.reader = bf.ImageReader(path)
 
 
-    def get_tile(self, x, y, sz):
+    def get_tile(self, tile_id, sz):
+        x, y = tile_id
         y = min(y * sz, self.height - sz)  # Last tile offset
         x = min(x * sz, self.width - sz)
         data = self.reader.read(XYWH=((x, y, sz, sz)), rescale=False)
@@ -84,92 +110,157 @@ class BFImageReader:
 class Contour:
     def __init__(self, pts):
         self.pts = pts
-        self.area = cv.contourArea(pts)
-        if self.area < 0:
-            raise Exception('Negative area!')
-
         self.xmin, self.ymin = np.amin(pts, axis=0)
         self.xmax, self.ymax = np.amax(pts, axis=0)
         mask = np.zeros((self.ymax - self.ymin + 1,
                          self.xmax - self.xmin + 1), dtype=np.uint8)
-        self.mask = cv.drawContours(mask, [pts - [self.xmin, self.ymin]], -1, (255), cv.FILLED)
-
-
-    def inter_area(self, ctr):
-        '''
-        Compute an intersection area with another contour
-        '''
-        xmin = max(self.xmin, ctr.xmin)
-        xmax = min(self.xmax, ctr.xmax)
-        ymin = max(self.ymin, ctr.ymin)
-        ymax = min(self.ymax, ctr.ymax)
-        if xmax < xmin or ymax < ymin:
-            return 0.0
-
-        inter_mask = np.logical_and(self.mask[ymin - self.ymin : ymax - self.ymin,
-                                              xmin - self.xmin : xmax - self.xmin],
-                                    ctr.mask[ymin - ctr.ymin : ymax - ctr.ymin,
-                                             xmin - ctr.xmin : xmax - ctr.xmin])
-        return np.sum(inter_mask)
-
-
-def get_percentiles_range(inp, percentiles):
-    inp = inp.reshape(-1)
-    n = inp.shape[0]
-    result = [0] * len(percentiles)
-    inp_sorted = np.sort(inp.reshape(-1))
-    for i in range(len(percentiles)):
-        idx = int(percentiles[i] / 100 * n)
-        result[i] = inp_sorted[idx]
-    return result
+        self.mask = cv.drawContours(mask, [pts - [self.xmin, self.ymin]], -1, (1), cv.FILLED)
 
 
 def normalize_percentile(inp, percentiles=[1.0, 99.0]):
-    for i in range(inp.shape[2]):
-        rng = get_percentiles_range(inp[:, :, i], percentiles)
-        if rng[0] == rng[1]:
-            continue
-        scale = 1.0 / (rng[1] - rng[0])
-        offset = -rng[0]
-        inp[:, :, i] = (inp[:, :, i] + offset) * scale
-    return inp
+    num_channels = inp.shape[2]
+    total = inp.shape[0] * inp.shape[1]
+    num_colors = 256
+    scale = []
+    offset = []
+    for ch in range(num_channels):
+        # Compute a histogram for a channel
+        hist_item = cv.calcHist([inp], [ch], None, [num_colors], [0, num_colors])
+
+        # Find two percentiles from colors distribution
+        counter = 0
+        i = 0
+        ind = int(percentiles[i] / 100.0 * total)
+        rng = [0, 0]
+        for color in range(num_colors):
+            counter += hist_item[color]
+            if counter >= ind:
+                rng[i] = color
+                if i == 1:
+                    break
+                else:
+                    i += 1
+                ind = int(percentiles[i] / 100.0 * total)
+        scale.append(1.0 / (rng[1] - rng[0]))
+        offset.append(-rng[0])
+
+    return (inp + offset) * scale
 
 
-def nms(coords, probs, nms_threshold):
+def nms(coords, probs, nms_threshold, tile_size):
+    # To optimize NMS we compare contours not with each other but with a global
+    # predictions mask
+    global_mask = np.zeros((tile_size, tile_size), dtype=np.uint8)
 
-    def get_iou(ctr1, ctr2):
-        inter_area = ctr1.inter_area(ctr2)
-        union_area = ctr1.area + ctr2.area - inter_area
-        return inter_area / union_area
-
-
+    coords = [np.clip(pts, 0, tile_size - 1) for pts in coords]
     contours = [Contour(pts) for pts in coords]
     ids = []
     for i in reversed(np.argsort(probs)):
-        # Check this contour with contours with higher probabilities:
-        keep = True
-        for idx in ids:
-            iou = get_iou(contours[i], contours[idx])
-            if iou > nms_threshold:
-                keep = False
-                break
-        if keep:
+        ctr = contours[i]
+        ref_mask = global_mask[ctr.ymin : ctr.ymax + 1, ctr.xmin : ctr.xmax + 1]
+
+        inter_area = np.count_nonzero(np.logical_and(ref_mask, ctr.mask))
+        union_area = np.count_nonzero(np.logical_or(ref_mask, ctr.mask))
+        iou = inter_area / union_area
+        if iou <= nms_threshold:
             ids.append(i)
+            ref_mask[:, :] |= ctr.mask[:, :]
+
     return ids
 
 
-if __name__ == '__main__':
+class StarDistModel:
+    def __init__(self, ie, args):
+        self.net = ie.read_network(args.model)
+        self.inp_name = next(iter(self.net.input_info.keys()))
+        self.out_name = next(iter(self.net.outputs.keys()))
+
+        angles = np.arange(0, 2 * pi, pi / 16)  # Get 32 angles
+        self.cos_angles = np.cos(angles).reshape(-1, 1)
+        self.sin_angles = np.sin(angles).reshape(-1, 1)
+        self.nms_threshold = args.nms_threshold
+        self.confidence_threshold = args.confidence_threshold
+
+
+    def preprocess(self, tile):
+        tile = normalize_percentile(tile)
+        # NHWC to NCHW
+        tile = np.expand_dims(tile.transpose(2, 0, 1), axis=0)
+        return {self.inp_name: tile}, None
+
+
+    def postprocess(self, outputs, meta):
+        out = outputs[self.out_name]
+
+        # Network predicts two concatenated tensors - probabilities of the nucleos
+        # and the distances among an every anchor ray.
+        probs = out[0, 0]
+        distances = out[0, 1:]
+
+        # Filter nucleor by probabilities.
+        mask = probs > self.confidence_threshold
+        probs = probs[mask]
+        distances = distances[:, mask]
+        centers = np.where(mask)
+
+        # Compute the coordinates of contours
+        coords = np.array([centers[1] + distances * self.cos_angles,
+                           centers[0] + distances * self.sin_angles])
+        coords = coords.reshape(2, 32, -1).transpose(2, 1, 0).astype(np.int32)
+        ids = nms(coords, probs, self.nms_threshold, tile_size=out.shape[-1])
+        return coords[ids]
+
+
+def get_plugin_configs(device, num_streams, num_threads):
+    config_user_specified = {}
+
+    devices_nstreams = {}
+    if num_streams:
+        devices_nstreams = {device: num_streams for device in ['CPU', 'GPU'] if device in device} \
+            if num_streams.isdigit() \
+            else dict(device.split(':', 1) for device in num_streams.split(','))
+
+    if 'CPU' in device:
+        if num_threads is not None:
+            config_user_specified['CPU_THREADS_NUM'] = str(num_threads)
+        if 'CPU' in devices_nstreams:
+            config_user_specified['CPU_THROUGHPUT_STREAMS'] = devices_nstreams['CPU'] \
+                if int(devices_nstreams['CPU']) > 0 \
+                else 'CPU_THROUGHPUT_AUTO'
+
+    if 'GPU' in device:
+        if 'GPU' in devices_nstreams:
+            config_user_specified['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] \
+                if int(devices_nstreams['GPU']) > 0 \
+                else 'GPU_THROUGHPUT_AUTO'
+
+    return config_user_specified
+
+
+def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', dest='input', required=True, help='Path to input image')
-    parser.add_argument('-m', dest='model', required=True,
+    parser.add_argument('-i', '--input', required=True, help='Path to input image')
+    parser.add_argument('-m', '--model', required=True,
                         help='Path to *.xml file of the model')
-    parser.add_argument('-d', dest='device', default='CPU',
+    parser.add_argument('-d', '--device', default='CPU',
                         help='Device to be utilized for deep learning inference')
-    parser.add_argument('-t', dest='confidence_threshold', default=0.7, type=float,
+    parser.add_argument('-t', '--confidence_threshold', default=0.7, type=float,
                         help='Probability threshold for detection')
     parser.add_argument('--nms', dest='nms_threshold', default=0.5, type=float,
                         help='NMS procedure threshold for IoU')
     parser.add_argument('--tile_size', default=1024, type=int, help='Tile size')
+    parser.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
+
+    infer_args = parser.add_argument_group('Inference options')
+    infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
+                            default=0, type=int)
+    infer_args.add_argument('-nstreams', '--num_streams',
+                            help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
+                                 'mode (for HETERO and MULTI device cases use format '
+                                 '<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>).',
+                            default='0', type=str)
+    infer_args.add_argument('-nthreads', '--num_threads', default=None, type=int,
+                            help='Optional. Number of threads to use for inference on CPU (including HETERO cases).')
     args = parser.parse_args()
 
     if args.input.endswith('.ndpi'):
@@ -177,174 +268,84 @@ if __name__ == '__main__':
     else:
         img = BFImageReader(args.input)
 
-    #
-    # Thread which performs tiling: data reading and preprocessing
-    #
-    tiles_queue = Queue()
-
-    def tiling_thread_body():
-        sz = args.tile_size
-
-        if isinstance(img, BFImageReader):
-            img.javabridge.attach()
-
-        num_tiles_x = ceil(img.height / sz)
-        num_tiles_y = ceil(img.width / sz)
-        print('Number of tiles:', num_tiles_x * num_tiles_y)
-
-        for y in range(num_tiles_y):
-            for x in range(num_tiles_x):
-                tile = img.get_tile(x, y, sz)
-                tile = normalize_percentile(tile.astype(np.float32))
-
-                # NHWC to NCHW
-                tile = np.expand_dims(tile.transpose(2, 0, 1), axis=0)
-
-                # Save raw tile data and position
-                tiles_queue.put((tile, x, y))
-
-        tiles_queue.put((None, None, None))  # Termination criteria
-
-    #
-    # Thread which performs postprocessing
-    #
-    predictions_queue = Queue()
-    detections = {}
-
-    def postprocess_thread_body():
-        angles = np.arange(0, 2 * pi, pi / 16)  # Get 32 angles
-        cos_angles = np.cos(angles).reshape(-1, 1)
-        sin_angles = np.sin(angles).reshape(-1, 1)
-        while True:
-            out, tile_x, tile_y = predictions_queue.get()
-            if out is None:  # Termination criteria
-                break
-
-            # Network predicts two concatenated tensors - probabilities of the nucleos
-            # and the distances among an every anchor ray.
-            probs = out[0, 0]
-            distances = out[0, 1:]
-
-            # Filter nucleor by probabilities.
-            mask = probs > args.confidence_threshold
-            probs = probs[mask]
-            distances = distances[:, mask]
-            centers = np.where(mask)
-
-            # Compute the coordinates of contours
-            coords = np.array([centers[1] + distances * cos_angles,
-                               centers[0] + distances * sin_angles])
-            coords = coords.reshape(2, 32, -1).transpose(2, 1, 0).astype(np.int32)
-            ids = nms(coords, probs, args.nms_threshold)
-            detections[(tile_y, tile_x)] = coords[ids]
-
-
-    tiling_thread = Thread(target=tiling_thread_body)
-    tiling_thread.start()
-
-    postprocess_thread = Thread(target=postprocess_thread_body)
-    postprocess_thread.start()
-
-    #
-    # Inference loop
-    #
-    ie = IECore()
-    net = ie.read_network(args.model)
-    config = {}
-    for device in ['CPU', 'GPU']:
-        if device in args.device:
-            config[device + '_THROUGHPUT_STREAMS'] = device + '_THROUGHPUT_AUTO'
-    exec_net = ie.load_network(net, args.device, config, num_requests=0)
-    inp_name = next(iter(exec_net.input_info.keys()))
-    out_name = next(iter(exec_net.outputs.keys()))
-
-    print('Number of asynchronous requests:', len(exec_net.requests))
-    req_tile_pos = [None] * len(exec_net.requests)  # A list of tiles positions per request. None is initial value
-    start_time = time.time()
-    iter_id = 0
-    while True:
-        tile, x, y = tiles_queue.get()
-        if tile is None:  # Termination criteria
-            break
-
-        # Get idle infer request
-        req_id = exec_net.get_idle_request_id()
-        if req_id < 0:
-            status = exec_net.wait(num_requests=1)
-            if status != StatusCode.OK:
-                raise Exception('Wait for idle request failed!')
-            req_id = exec_net.get_idle_request_id()
-            if req_id < 0:
-                raise Exception('Invalid request id!')
-
-        request = exec_net.requests[req_id]
-
-        if req_tile_pos[req_id]:
-            out_x, out_y = req_tile_pos[req_id]
-            # Copy output prediction
-            out = request.output_blobs[out_name].buffer
-            predictions_queue.put((out.copy(), out_x, out_y))
-
-            iter_id += 1
-            if iter_id == 10:
-                start_time = time.time()
-            elif iter_id % 100 == 0:
-                t = time.time() - start_time
-                # Try to keep balance between tiles queue and predictions queue. They should be stable and not empty.
-                # Too small tiles queue might give lower FPS because of not fully utilized device.
-                # Too big predictions queue may lead to huge memory usage and lower FPS because of it
-                # (increase confidence threshold to speed up postprocessing this way).
-                print('Processed {} tiles. Tiles in queue: {}. Predictions queue: {}. Average FPS: {:.2f}'.format(
-                        iter_id,
-                        tiles_queue.qsize(),
-                        predictions_queue.qsize(),
-                        (iter_id - 10) / t))
-
-        # Run inference
-        req_tile_pos[req_id] = (x, y)
-        request.async_infer({inp_name: tile})
-
-    tiling_thread.join()  # Sanity join
-    predictions_queue.put((None, None, None))
-    postprocess_thread.join()
-    print('Done!', time.time() - start_time)
-
-    # Render single tile at the time. User might navigate between tiles by arrows.
-    WIN_NAME = 'StarDist with OpenVINO'
-    cv.namedWindow(WIN_NAME, cv.WINDOW_NORMAL)
-    KEY_ESC = 27
-    KEY_LEFT = 81
-    KEY_UP = 82
-    KEY_RIGHT = 83
-    KEY_DOWN = 84
-    if isinstance(img, BFImageReader):
-        img.javabridge.attach()
-
     num_tiles_x = ceil(img.height / args.tile_size)
     num_tiles_y = ceil(img.width / args.tile_size)
-    tile_x = num_tiles_x // 2
-    tile_y = num_tiles_y // 2
-    while True:
-        preds = detections[(tile_y, tile_x)]
+    print('Number of tiles:', num_tiles_x * num_tiles_y)
 
-        print('')
-        print('Tile position:     ({},{})'.format(tile_x, tile_y))
-        print('Number of objects: {}'.format(len(preds)))
+    log.info('Initializing Inference Engine...')
+    ie = IECore()
 
-        tile = img.get_tile(tile_x, tile_y, args.tile_size)
+    plugin_config = get_plugin_configs(args.device, args.num_streams, args.num_threads)
 
-        if tile.shape[2] == 1:
-            tile = np.repeat(tile, 3, axis=-1)
+    log.info('Loading network...')
+
+    model = StarDistModel(ie, args)
+
+    detector_pipeline = AsyncPipeline(ie, model, plugin_config,
+                                      device=args.device, max_num_requests=args.num_infer_requests)
+
+    tile_id = (0, 0)
+    ready_tile_id = (0, 0)
+    num_tiles_x = ceil(img.height / args.tile_size)
+    num_tiles_y = ceil(img.width / args.tile_size)
+    log.info('Number of tiles: {}'.format(num_tiles_x * num_tiles_y))
+
+    def next_tile(tile_id):
+        x, y = tile_id
+        if x < num_tiles_x - 1:
+            return (x + 1, y)
+        elif y < num_tiles_y - 1:
+            return (0, y + 1)
         else:
-            tile = cv.cvtColor(tile, cv.COLOR_RGB2BGR)
+            return None
 
-        tile = cv.drawContours(tile, preds, -1, (0, 0, 255))
-        cv.imshow(WIN_NAME, tile)
+    start = time.time()
 
-        key = cv.waitKey()
-        if key == KEY_ESC:
-            break
-        elif key == KEY_UP or key == KEY_DOWN:
-            tile_y = max(0, min(tile_y + (1 if key == KEY_DOWN else -1), num_tiles_y - 1))
-        elif key == KEY_LEFT or key == KEY_RIGHT:
-            tile_x = max(0, min(tile_x + (1 if key == KEY_RIGHT else -1), num_tiles_x - 1))
+    while True:
+        if detector_pipeline.callback_exceptions:
+            raise detector_pipeline.callback_exceptions[0]
+        # Process all completed requests
+        results = detector_pipeline.get_result(ready_tile_id)
+        if results:
+            contours, frame_meta = results
+            tile = frame_meta['tile']
+            if not args.no_show:
+                if tile.shape[2] == 1:
+                    tile = np.repeat(tile, 3, axis=-1)
+                else:
+                    tile = cv.cvtColor(tile, cv.COLOR_RGB2BGR)
+
+                # Draw detections
+                tile = cv.drawContours(tile, contours, -1, (0, 0, 255))
+
+                cv.imshow('StarDist with OpenVINO', tile)
+                print(ready_tile_id)
+                key = cv.waitKey()
+
+                ESC_KEY = 27
+                # Quit.
+                if key in {ord('q'), ord('Q'), ESC_KEY}:
+                    break
+
+            ready_tile_id = next_tile(ready_tile_id)
+            if ready_tile_id is None:
+                break
+
+        if detector_pipeline.is_ready():
+            # Get new tile
+            start_time = perf_counter()
+            tile = img.get_tile(tile_id, args.tile_size)
+            detector_pipeline.submit_data(tile, tile_id,
+                                          meta={'tile': tile, 'start_time': start_time})
+            tile_id = next_tile(tile_id)
+            if tile_id is None:
+                break
+        else:
+            # Wait for empty request
+            detector_pipeline.await_any()
+
+    log.info('Finished in {:.2f} seconds'.format(time.time() - start))
+
+
+if __name__ == '__main__':
+    sys.exit(main() or 0)

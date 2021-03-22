@@ -25,6 +25,7 @@ postprocessing:
     format: zip
     file: he_heavy_augment.zip
 model_optimizer_args:
+  - --input=input
   - --input_shape=[1,1024,1024,3]
   - --saved_model_dir=$dl_dir
 framework: tf
