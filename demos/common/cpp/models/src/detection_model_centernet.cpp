@@ -218,8 +218,8 @@ void transform(std::vector<ModelCenterNet::BBox>& bboxes, const InferenceEngine:
         ModelCenterNet::BBox newbb;
 
         newbb.left = trans.at<float>(0, 0) *  b.left + trans.at<float>(0, 1) *  b.top + trans.at<float>(0, 2);
-        newbb.top = trans.at<float>(1, 0)* b.left + trans.at<float>(1, 1) * b.top + trans.at<float>(1, 2);
-        newbb.right = trans.at<float>(0, 0)* b.right + trans.at<float>(0, 1) * b.bottom + trans.at<float>(0, 2);
+        newbb.top = trans.at<float>(1, 0) * b.left + trans.at<float>(1, 1) * b.top + trans.at<float>(1, 2);
+        newbb.right = trans.at<float>(0, 0) * b.right + trans.at<float>(0, 1) * b.bottom + trans.at<float>(0, 2);
         newbb.bottom = trans.at<float>(1, 0) *  b.right + trans.at<float>(1, 1) *  b.bottom + trans.at<float>(1, 2);
 
         b = newbb;

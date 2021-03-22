@@ -37,7 +37,7 @@ public:
         origH = img.size().height;
         scaleX = static_cast<float>(origW) / dstW;
         scaleY = static_cast<float>(origH) / dstH;
-        
+
         cv::Mat resizedImage(img);
         if (dstW != origW ||dstH != origH) {
             cv::resize(img, resizedImage, cv::Size(dstW, dstH), 0., 0., interType);
