@@ -100,11 +100,11 @@ void matU8ToBlob(const cv::Mat& origImage, InferenceEngine::Blob::Ptr& blob, int
     InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
     T* blobData = blobMapped.as<T*>();
 
-     cv::Mat resizedImage(origImage);
-     if (static_cast<int>(width) != origImage.size().width ||
-             static_cast<int>(height) != origImage.size().height) {
-         cv::resize(origImage, resizedImage, cv::Size(width, height));
-     }
+    cv::Mat resizedImage(origImage);
+    if (static_cast<int>(width) != origImage.size().width ||
+            static_cast<int>(height) != origImage.size().height) {
+        cv::resize(origImage, resizedImage, cv::Size(width, height));
+    }
 
     int batchOffset = batchIndex * width * height * channels;
 
