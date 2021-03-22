@@ -59,12 +59,12 @@ class HumanPoseHRNetAdapter(Adapter):
         self.heatmaps = self.get_value_from_config('heatmaps_out')
         self.nms = HeatmapNMS(kernel=5)
         self.num_joints = 17
-        self.decoder = AssociativeEmbeddingHRNetDecoder(
+        self.decoder = AssociativeEmbeddingDecoder(
             num_joints=17,
             adjust=True,
             refine=True,
             dist_reweight=True,
-            delta=0.0,
+            delta=0.5,
             max_num_people=30,
             detection_threshold=0.1,
             tag_threshold=1.0,
@@ -142,61 +142,3 @@ class HumanPoseHRNetAdapter(Adapter):
         new_pt = np.array([pt[0], pt[1], 1.])
         new_pt = np.dot(t, new_pt)
         return new_pt[:2]
-
-
-class AssociativeEmbeddingHRNetDecoder(AssociativeEmbeddingDecoder):
-    @staticmethod
-    def adjust(ans, heatmaps):
-        H, W = heatmaps.shape[-2:]
-        for n, people in enumerate(ans):
-            for person in people:
-                for k, joint in enumerate(person):
-                    if joint[2] > 0:
-                        heatmap = heatmaps[n, k]
-                        px = int(joint[0])
-                        py = int(joint[1])
-
-                        diff = np.array([
-                            heatmap[py, min(px + 1, W - 1)] - heatmap[py, max(px - 1, 0)],
-                            heatmap[min(py + 1, H - 1), px] - heatmap[max(py - 1, 0), px]
-                        ])
-                        joint[:2] += np.sign(diff) * .25 + 0.5
-        return ans
-
-    @staticmethod
-    def refine(heatmap, tag, keypoints, pose_tag=None):
-        K, H, W = heatmap.shape
-        if len(tag.shape) == 3:
-            tag = tag[..., None]
-
-        if pose_tag is not None:
-            prev_tag = pose_tag
-        else:
-            tags = []
-            for i in range(K):
-                if keypoints[i, 2] > 0:
-                    x, y = keypoints[i][:2].astype(int)
-                    tags.append(tag[i, y, x])
-            prev_tag = np.mean(tags, axis=0)
-
-        for i, (_heatmap, _tag) in enumerate(zip(heatmap, tag)):
-            if keypoints[i, 2] > 0:
-                continue
-            # Get position with the closest tag value to the pose tag.
-            diff = np.abs(_tag[..., 0] - prev_tag) + 0.5
-            diff = diff.astype(np.int32).astype(_heatmap.dtype)
-            diff -= _heatmap
-            idx = diff.argmin()
-            y, x = np.divmod(idx, _heatmap.shape[-1])
-            # Corresponding keypoint detection score.
-            val = _heatmap[y, x]
-
-            if val > 0:
-                keypoints[i, :3] = x, y, val
-                diff = np.array([
-                    _heatmap[y, min(x + 1, W - 1)] - _heatmap[y, max(x - 1, 0)],
-                    _heatmap[min(y + 1, H - 1), x] - _heatmap[max(y - 1, 0), x]
-                ])
-                keypoints[i, :2] += np.sign(diff) * .25 + 0.5
-
-        return keypoints
