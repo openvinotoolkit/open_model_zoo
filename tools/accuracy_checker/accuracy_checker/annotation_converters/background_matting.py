@@ -77,6 +77,6 @@ class BackgroundMattingConverter(BaseFormatConverter):
             if progress_callback is not None and idx % progress_interval == 0:
                 progress_callback(idx / num_iterations * 100)
 
-        return ConverterReturn(annotations, {
-            'label_map': {'background': 0, 'foreground': list(range(1, 256))}
-        } , content_errors)
+        return ConverterReturn(
+            annotations, {'label_map': {'background': 0, 'foreground': list(range(1, 256))}}, content_errors
+        )
