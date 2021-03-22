@@ -58,7 +58,7 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     inputsNames.push_back(imageInputName);
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
-
+    imgResizer.reset(new LetterboxResizer(netInputWidth, netInputHeight));
     // --------------------------- Prepare output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
 
@@ -224,19 +224,17 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
     // --------------------------- Create detection result objects --------------------------------------------------------
     DetectionResult* result = new DetectionResult;
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
-    auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
-    auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
-    float scaleX = static_cast<float>(netInputWidth) / imgWidth;
-    float scaleY = static_cast<float>(netInputHeight) / imgHeight;
 
     result->objects.reserve(keep.size());
     for (auto i : keep) {
         DetectedObject desc;
         desc.confidence = scores.second[i];
-        desc.x = bboxes[i].left / scaleX;
-        desc.y = bboxes[i].top / scaleY;
-        desc.width = bboxes[i].getWidth() / scaleX;
-        desc.height = bboxes[i].getHeight() / scaleY;
+        imgResizer->scaleCoord2Origin(bboxes[i].left, bboxes[i].top);
+        imgResizer->scaleCoord2Origin(bboxes[i].right, bboxes[i].bottom);
+        desc.x = bboxes[i].left;
+        desc.y = bboxes[i].top;
+        desc.width = bboxes[i].getWidth();
+        desc.height = bboxes[i].getHeight();
         desc.labelID =  0;
         desc.label = labels[0];
 

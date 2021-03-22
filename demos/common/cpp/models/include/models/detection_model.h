@@ -42,6 +42,6 @@ protected:
 
     size_t netInputHeight = 0;
     size_t netInputWidth = 0;
-    Resizer* imgResizer = nullptr;
+    std::unique_ptr<Resizer> imgResizer = nullptr;
     std::string getLabelName(int labelID) { return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
 };

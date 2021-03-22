@@ -21,8 +21,9 @@ protected:
     size_t origH;
     float scaleX;
     float scaleY;
+    int interType;
 public:
-    Resizer(size_t w, size_t h) : dstW(w), dstH(h), origW(0), origH(0),
+    Resizer(size_t w, size_t h, int interType) : dstW(w), dstH(h), interType(interType), origW(0), origH(0),
                 scaleX(0.0f), scaleY(0.0f){}
     virtual cv::Mat resize(const cv::Mat& img) = 0;
     virtual void scaleCoord2Origin(float& x, float& y) = 0;
@@ -30,7 +31,7 @@ public:
 
 class StretchResizer : public Resizer {
 public:
-    StretchResizer(size_t w, size_t h) : Resizer(w, h) {};
+    StretchResizer(size_t w, size_t h, int interType = cv::INTER_LINEAR) : Resizer(w, h, interType) {};
     cv::Mat resize(const cv::Mat& img) override {
         origW = img.size().width;
         origH = img.size().height;
@@ -39,7 +40,7 @@ public:
         
         cv::Mat resizedImage(img);
         if (dstW != origW ||dstH != origH) {
-            cv::resize(img, resizedImage, cv::Size(dstW, dstH));
+            cv::resize(img, resizedImage, cv::Size(dstW, dstH), 0., 0., interType);
         }
         return resizedImage;
     }
@@ -52,10 +53,12 @@ public:
 
 class LetterboxResizer : public Resizer {
 protected:
-    size_t dx;
-    size_t dy;
+    size_t dx = 0;
+    size_t dy = 0;
+    int borderType;
+    cv::Scalar color;
 public:
-    LetterboxResizer(size_t w, size_t h) : Resizer(w, h), dx(0), dy(0) {};
+    LetterboxResizer(size_t w, size_t h, int interpolation = cv::INTER_LINEAR, int border = cv::BORDER_CONSTANT) : borderType(border), Resizer(w, h, interpolation) {};
     cv::Mat resize(const cv::Mat & img) override {
         origW = img.size().width;
         origH = img.size().height;
@@ -65,23 +68,17 @@ public:
         cv::Mat resizedImage(img);
         dx = (dstW - newW) / 2;
         dy = (dstH - newH) / 2;
-        if (static_cast<int>(dstW) != img.size().width ||
-            static_cast<int>(dstH) != img.size().height) {
+        if (dstW != origW || dstH != origH) {
             cv::resize(img, resizedImage, cv::Size(0, 0), 1 / scaleX, 1 / scaleY);
+            cv::copyMakeBorder(resizedImage, resizedImage, dy, dy,
+                dx, dx, borderType, cv::Scalar(0, 0, 0));
         }
-        cv::Mat imgBuf(resizedImage.rows + dx * 2, resizedImage.cols + dy * 2, resizedImage.depth());
-        cv::copyMakeBorder(resizedImage, imgBuf, dy, dy,
-            dx, dx, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
-        cv::imshow("res", imgBuf);
-        cv::waitKey(0);
-        return imgBuf;
+        return resizedImage;
     }
 
     void scaleCoord2Origin(float& x, float& y) override {
-        x -= dx;
-        y -= dy;
-        x *= scaleX;
-        y *= scaleY;
+        x = (x - dx) * scaleX;
+        y = (y - dy) * scaleY;
     }
 };
 
@@ -101,28 +98,27 @@ void matU8ToBlob(const cv::Mat& origImage, InferenceEngine::Blob::Ptr& blob, int
         THROW_IE_EXCEPTION << "The number of channels for net input and image must match";
     }
     InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
-    T* blob_data = blobMapped.as<T*>();
+    T* blobData = blobMapped.as<T*>();
 
-    //auto resizedImage = r.resize(origImage);
-    // cv::Mat resizedImage(origImage);
-    // if (static_cast<int>(width) != origImage.size().width ||
-    //         static_cast<int>(height) != origImage.size().height) {
-    //     cv::resize(origImage, resizedImage, cv::Size(width, height));
-    // }
+     cv::Mat resizedImage(origImage);
+     if (static_cast<int>(width) != origImage.size().width ||
+             static_cast<int>(height) != origImage.size().height) {
+         cv::resize(origImage, resizedImage, cv::Size(width, height));
+     }
 
     int batchOffset = batchIndex * width * height * channels;
 
     if (channels == 1) {
         for (size_t  h = 0; h < height; h++) {
             for (size_t w = 0; w < width; w++) {
-                blob_data[batchOffset + h * width + w] = origImage.at<uchar>(h, w);
+                blobData[batchOffset + h * width + w] = origImage.at<uchar>(h, w);
             }
         }
     } else if (channels == 3) {
         for (size_t c = 0; c < channels; c++) {
             for (size_t  h = 0; h < height; h++) {
                 for (size_t w = 0; w < width; w++) {
-                    blob_data[batchOffset + c * width * height + h * width + w] =
+                    blobData[batchOffset + c * width * height + h * width + w] =
                             origImage.at<cv::Vec3b>(h, w)[c];
                 }
             }

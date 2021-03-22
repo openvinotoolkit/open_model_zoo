@@ -38,7 +38,7 @@ std::shared_ptr<InternalModelData> DetectionModel::preprocess(const InputData& i
     }
     /* Resize and copy data from the image to the input blob */
     Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-    matU8ToBlob<uint8_t>(img, frameBlob);
+    matU8ToBlob<uint8_t>(imgResizer->resize(img), frameBlob);
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
 

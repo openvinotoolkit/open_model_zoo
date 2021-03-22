@@ -44,8 +44,6 @@ public:
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
     ModelRetinaFace(const std::string& model_name, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold);
-    std::shared_ptr<InternalModelData> preprocess(const InputData& inputData,
-        InferenceEngine::InferRequest::Ptr& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:

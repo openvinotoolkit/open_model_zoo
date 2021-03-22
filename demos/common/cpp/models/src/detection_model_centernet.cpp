@@ -50,7 +50,7 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     inputsNames.push_back(imageInputName);
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
-
+    imgResizer.reset(new LetterboxResizer(netInputWidth, netInputWidth));
     // --------------------------- Prepare output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
 
@@ -108,23 +108,6 @@ cv::Mat getAffineTransform(float centerX, float centerY, int srcW, float rot, si
     }
 
     return trans;
-}
-
-std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
-    auto& img = inputData.asRef<ImageInputData>().inputImage;
-
-    int imgWidth = img.cols;
-    int imgHeight = img.rows;
-    float centerX = imgWidth / 2.0f;
-    float centerY = imgHeight / 2.0f;
-    int scale = std::max(imgWidth, imgHeight);
-
-    auto transInput = getAffineTransform(centerX, centerY, scale, 0, netInputWidth, netInputHeight);
-    cv::Mat resizedImg;
-    cv::warpAffine(img, resizedImg, transInput, cv::Size(netInputWidth, netInputHeight), cv::INTER_LINEAR);
-    request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg));
-
-    return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
 }
 
 std::vector<std::pair<size_t, float>> nms(float* scoresPtr, InferenceEngine::SizeVector sz, float threshold, int kernel = 3) {
@@ -235,8 +218,8 @@ void transform(std::vector<ModelCenterNet::BBox>& bboxes, const InferenceEngine:
         ModelCenterNet::BBox newbb;
 
         newbb.left = trans.at<float>(0, 0) *  b.left + trans.at<float>(0, 1) *  b.top + trans.at<float>(0, 2);
-        newbb.top = trans.at<float>(1, 0) *  b.left + trans.at<float>(1, 1) *  b.top + trans.at<float>(1, 2);
-        newbb.right = trans.at<float>(0, 0) *  b.right + trans.at<float>(0, 1) *  b.bottom + trans.at<float>(0, 2);
+        newbb.top = trans.at<float>(1, 0)* b.left + trans.at<float>(1, 1) * b.top + trans.at<float>(1, 2);
+        newbb.right = trans.at<float>(0, 0)* b.right + trans.at<float>(0, 1) * b.bottom + trans.at<float>(0, 2);
         newbb.bottom = trans.at<float>(1, 0) *  b.right + trans.at<float>(1, 1) *  b.bottom + trans.at<float>(1, 2);
 
         b = newbb;
@@ -265,7 +248,7 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
     float centerX = imgWidth / 2.0f;
     float centerY = imgHeight / 2.0f;
 
-    transform(bboxes, sz, scale, centerX, centerY);
+    //transform(bboxes, sz, scale, centerX, centerY);
 
     // --------------------------- Create detection result objects ------------------------------------
     DetectionResult* result = new DetectionResult;
@@ -274,9 +257,13 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
     result->objects.reserve(scores.size());
     for (int i = 0; i < scores.size(); ++i) {
         DetectedObject desc;
+
         desc.confidence = scores[i].second;
         desc.labelID = scores[i].first / chSize;
         desc.label = getLabelName(desc.labelID);
+
+        imgResizer->scaleCoord2Origin(bboxes[i].left, bboxes[i].top);
+        imgResizer->scaleCoord2Origin(bboxes[i].right, bboxes[i].bottom);
         desc.x = bboxes[i].left;
         desc.y = bboxes[i].top;
         desc.width = bboxes[i].getWidth();

@@ -52,7 +52,7 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     const TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
-
+    imgResizer.reset(new StretchResizer(netInputWidth, netInputWidth));
     // --------------------------- Prepare output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
     OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());

@@ -103,6 +103,7 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
             const TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
             netInputHeight = getTensorHeight(inputDesc);
             netInputWidth = getTensorWidth(inputDesc);
+            imgResizer.reset(new StretchResizer(netInputWidth, netInputWidth));
         }
         else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
             inputsNames.resize(2);
