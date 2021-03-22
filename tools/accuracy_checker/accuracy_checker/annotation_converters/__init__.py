@@ -98,6 +98,7 @@ from .common_object_detection import CommonDetectionConverter
 from .wflw import WFLWConverter
 from .see_in_the_dark import SeeInTheDarkDatasetConverter
 from .conll_ner import CONLLDatasetConverter
+from .background_matting import BackgroundMattingConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -188,5 +189,6 @@ __all__ = [
     'CommonDetectionConverter',
     'WFLWConverter',
     'SeeInTheDarkDatasetConverter',
-    'CONLLDatasetConverter'
+    'CONLLDatasetConverter',
+    'BackgroundMattingConverter'
 ]
