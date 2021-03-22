@@ -107,7 +107,7 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
         def _process_2d(data, shape):
             height, width = shape
             bytedata = _bytescale(data)
-            image = Image.frombytes('L', (width, height), bytedata.tostring())
+            image = Image.frombytes('L', (width, height), bytedata.tobytes())
 
             return image
 
@@ -115,7 +115,7 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
             bytedata = _bytescale(data)
             height, width, channels = shape
             mode = 'RGB' if channels == 3 else 'RGBA'
-            image = Image.frombytes(mode, (width, height), bytedata.tostring())
+            image = Image.frombytes(mode, (width, height), bytedata.tobytes())
 
             return image
 
