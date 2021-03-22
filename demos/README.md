@@ -165,11 +165,7 @@ cd build
   ```sh
   cmake -DCMAKE_BUILD_TYPE=Debug <open_model_zoo>/demos
   ```
-4. Run `make` to build the demos:
-```sh
-make
-```
-Or you can use `cmake --build` tool:
+4. Run `cmake --build` tool to build the demos:
 ```sh
 cmake --build .
 ```
@@ -217,7 +213,7 @@ cd build
 ```
 3. Run CMake to generate project files:
 ```
-cmake <open_model_zoo>/demos
+cmake -A x64 <open_model_zoo>/demos
 ```
 4. Run `cmake --build` tool to  build the demos:
   - For release configuration
@@ -244,8 +240,8 @@ cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON=ON <open_model_zoo>/demos
 ### <a name="build_specific_demos"></a>Build Specific Demos
 
 To build specific demos, follow the instructions for building the demo applications above,
-but add `--target <list of demos>` to the `cmake` or `--target="<list of demos>"` to the `build_demos*` command.
-Note,  CMake `--build` tool supports multiple targets starting with version 3.15. With lower versions you can specify only one target to the `cmake`
+but add `--target <demo1> <demo2> ...` to the `cmake --build` command` or `--target="<demo1> <demo2> ..."` to the `build_demos*` command.
+Note, `cmake --build` tool supports multiple targets starting with version 3.15. With lower versions you can specify only one target to the `cmake`
 or use `build_demos*` command.
 
 For Linux*:
@@ -260,7 +256,7 @@ build_demos.sh --target="classification_demo segmentation_demo"
 For Microsoft Windows* OS:
 
 ```
-cmake <open_model_zoo>/demos
+cmake -A x64 <open_model_zoo>/demos
 cmake --build . --config Release --target classification_demo segmentation_demo
 ```
 or
