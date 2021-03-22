@@ -56,11 +56,21 @@ class OpenSlideImageReader:
 
     def get_tile(self, tile_id, sz):
         x, y = tile_id
-        y = min(y * self.scale * sz, self.height - sz)  # Last tile offset
-        x = min(x * self.scale * sz, self.width - sz)
+        x = min(x * self.scale * sz, self.img.level_dimensions[0][0] - sz)  # Last tile offset
+        y = min(y * self.scale * sz, self.img.level_dimensions[0][1] - sz)
         tile = self.img.read_region((x, y), self.level, (sz, sz))
         tile = np.asarray(tile).reshape(sz, sz, 4)  # RGBA
         return tile[:, :, :3]  # RGB
+
+
+    def get_preview(self, max_width):
+        for i in range(self.img.level_count):
+            if self.img.level_dimensions[i][0] <= max_width:
+                break
+        w, h = self.img.level_dimensions[i]
+        preview = self.img.read_region((0, 0), i, (w, h))
+        preview = np.asarray(preview).reshape(h, w, 4)  # RGBA
+        return preview[:, :, [2, 1, 0]], self.img.level_dimensions[i][0] / self.width
 
 
 class BFImageReader:
@@ -105,6 +115,10 @@ class BFImageReader:
         x = min(x * sz, self.width - sz)
         data = self.reader.read(XYWH=((x, y, sz, sz)), rescale=False)
         return data[:, :, self.channel_id:self.channel_id + 1]
+
+
+    def get_preview(self, max_width):
+        return None, None
 
 
 class Contour:
@@ -268,10 +282,6 @@ def main():
     else:
         img = BFImageReader(args.input)
 
-    num_tiles_x = ceil(img.height / args.tile_size)
-    num_tiles_y = ceil(img.width / args.tile_size)
-    print('Number of tiles:', num_tiles_x * num_tiles_y)
-
     log.info('Initializing Inference Engine...')
     ie = IECore()
 
@@ -286,9 +296,12 @@ def main():
 
     tile_id = (0, 0)
     ready_tile_id = (0, 0)
-    num_tiles_x = ceil(img.height / args.tile_size)
-    num_tiles_y = ceil(img.width / args.tile_size)
+    num_tiles_x = ceil(img.width / args.tile_size)
+    num_tiles_y = ceil(img.height / args.tile_size)
     log.info('Number of tiles: {}'.format(num_tiles_x * num_tiles_y))
+
+    if not args.no_show:
+        img_preview, preview_scale = img.get_preview(max_width=256)
 
     def next_tile(tile_id):
         x, y = tile_id
@@ -318,9 +331,18 @@ def main():
                 # Draw detections
                 tile = cv.drawContours(tile, contours, -1, (0, 0, 255))
 
+                # Draw a preview
+                if img_preview is not None:
+                    offset = tile.shape[1] - img_preview.shape[1]
+                    tile[0:img_preview.shape[0], offset:] = img_preview
+                    preview_roi_sz = int(args.tile_size * preview_scale)
+                    preview_roi_x = int(ready_tile_id[0] * preview_roi_sz)
+                    preview_roi_y = int(ready_tile_id[1] * preview_roi_sz)
+                    cv.rectangle(tile, (offset + preview_roi_x, preview_roi_y, preview_roi_sz, preview_roi_sz),
+                                 (0, 0, 255))
+
                 cv.imshow('StarDist with OpenVINO', tile)
-                print(ready_tile_id)
-                key = cv.waitKey()
+                key = cv.waitKey(1)
 
                 ESC_KEY = 27
                 # Quit.
