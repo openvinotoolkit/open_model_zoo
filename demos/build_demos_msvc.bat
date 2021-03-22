@@ -39,7 +39,7 @@ if not "%1" == "" (
     rem list the necessary demos separated by space,
     rem ex. --target="classification_demo segmentation_demo"
     if "%1" == "--target" (
-        set BUILD_TARGETS=%BUILD_TARGETS% %1 %~2
+        set BUILD_TARGETS=%BUILD_TARGETS% %~2
         shift & shift
         goto argParse
     )
@@ -136,10 +136,8 @@ echo cmake --build . --config Release %BUILD_TARGETS%
 if "%BUILD_TARGETS%"=="" (
     cmake --build . --config Release
 ) else (
-    for %%a in (%BUILD_TARGETS%) do (
-        if not "%%a"=="--target" (
-            cmake --build . --config Release --target %%a
-        )
+    for %%t in (%BUILD_TARGETS%) do (
+        cmake --build . --config Release --target %%t
     )
 )
 

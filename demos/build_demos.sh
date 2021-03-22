@@ -36,7 +36,7 @@ for opt in "$@"; do
     --target=*)
         tmp="${opt%\"}"
         tmp="${tmp#\"}"
-        build_targets+=("${tmp//=/ }")
+        build_targets+=("${tmp#*=}")
         ;;
     *)
         printf "Unknown option: %q\n" "$opt"
@@ -89,12 +89,10 @@ mkdir -p "$build_dir"
 
 (cd "$build_dir" && cmake -DCMAKE_BUILD_TYPE=Release "${extra_cmake_opts[@]}" "$DEMOS_PATH")
 
-if [ -z "$build_targets" ]; then
+if [ ${#build_targets[@]} -eq 0 ]; then
     cmake --build "$build_dir" -- "$NUM_THREADS"
 else
-    targets=($build_targets)
-    for t in "${targets[@]:1}"
-    do
+    for t in $build_targets; do
         cmake --build "$build_dir" --target "$t" -- "$NUM_THREADS"
     done
 fi
