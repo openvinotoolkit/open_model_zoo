@@ -240,7 +240,7 @@ cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON=ON <open_model_zoo>/demos
 ### <a name="build_specific_demos"></a>Build Specific Demos
 
 To build specific demos, follow the instructions for building the demo applications above,
-but add `--target <demo1> <demo2> ...` to the `cmake --build` command` or `--target="<demo1> <demo2> ..."` to the `build_demos*` command.
+but add `--target <demo1> <demo2> ...` to the `cmake --build` command or `--target="<demo1> <demo2> ..."` to the `build_demos*` command.
 Note, `cmake --build` tool supports multiple targets starting with version 3.15. With lower versions you can specify only one target to the `cmake`
 or use `build_demos*` command.
 
