@@ -56,9 +56,9 @@ protected:
 
     bool shouldDetectMasks;
     bool shouldDetectLandmarks;
-    float landmarkStd;
     const float boxIOUThreshold;
     const float maskThreshold;
+    float landmarkStd;
 
     enum EOutputType {
         OT_BBOX,

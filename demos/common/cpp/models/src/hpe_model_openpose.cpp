@@ -189,8 +189,8 @@ public:
 private:
     const std::vector<cv::Mat>& heatMaps;
     float minPeaksDistance;
-    float confidenceThreshold;
     std::vector<std::vector<Peak> >& peaksFromHeatMap;
+    float confidenceThreshold;
 };
 
 std::vector<HumanPose> HPEOpenPose::extractPoses(

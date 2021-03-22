@@ -36,8 +36,8 @@ protected:
 
     cv::Size inputLayerSize;
     double aspectRatio;
-    float confidenceThreshold;
     int targetSize;
+    float confidenceThreshold;
 
     std::string embeddingsBlobName;
     std::string heatmapsBlobName;

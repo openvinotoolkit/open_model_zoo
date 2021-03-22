@@ -24,24 +24,24 @@ template <typename Anchor>
 std::vector<int> nms(const std::vector<Anchor>& boxes, const std::vector<float>& scores,
                      const float thresh, bool includeBoundaries=false) {
     std::vector<float> areas(boxes.size());
-    for (int i = 0; i < boxes.size(); ++i) {
+    for (size_t i = 0; i < boxes.size(); ++i) {
         areas[i] = (boxes[i].right - boxes[i].left + includeBoundaries) * (boxes[i].bottom - boxes[i].top + includeBoundaries);
     }
     std::vector<int> order(scores.size());
     std::iota(order.begin(), order.end(), 0);
     std::sort(order.begin(), order.end(), [&scores](int o1, int o2) { return scores[o1] > scores[o2]; });
 
-    int ordersNum = 0;
+    size_t ordersNum = 0;
     for (; ordersNum < order.size() && scores[order[ordersNum]] >= 0; ordersNum++);
 
     std::vector<int> keep;
     bool shouldContinue = true;
-    for (int i = 0; shouldContinue && i < ordersNum; ++i) {
+    for (size_t i = 0; shouldContinue && i < ordersNum; ++i) {
         auto idx1 = order[i];
         if (idx1 >= 0) {
             keep.push_back(idx1);
             shouldContinue = false;
-            for (int j = i + 1; j < ordersNum; ++j) {
+            for (size_t j = i + 1; j < ordersNum; ++j) {
                 auto idx2 = order[j];
                 if (idx2 >= 0) {
                     shouldContinue = true;
