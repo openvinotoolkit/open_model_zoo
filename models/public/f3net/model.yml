@@ -26,7 +26,7 @@ files:
     sha256: 9394eb1efc31d20610c31408fd08a567d7c89f394ceffcd745b6aad18ff0b7a9
     source: https://raw.githubusercontent.com/weijun88/F3Net/eecace3adf1e8946b571a4f4397681252f9dc1b8/src/dataset.py
   - name: f3net/model-32
-    size: 102506472 
+    size: 102506472
     sha256: 88e567f915fb7d22db6922102e147d0401123d3600cd0de6c74a200c4fc69b36
     source:
       $type: google_drive
@@ -38,7 +38,7 @@ postprocessing:
     replacement: "torch.load(self.cfg.snapshot, map_location=torch.device('cpu'))"
   - $type: regex_replace
     file: f3net/net.py
-# remove extra feature maps used for calculation loss during training
+    # remove extra feature maps used for calculation loss during training
     pattern: 'return pred1, pred2, out2h, out3h, out4h, out5h'
     replacement: "return pred2"
 
@@ -62,4 +62,3 @@ model_optimizer_args:
   - --output="1256"
 framework: pytorch
 license: https://github.com/weijun88/F3Net/blob/master/LICENSE
-

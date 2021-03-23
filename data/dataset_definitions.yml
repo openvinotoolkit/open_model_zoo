@@ -1242,4 +1242,3 @@ datasets:
     data_source: PASCAL-S/image
     additional_data_source: PASCAL-S/mask
     annotation: pascal-s.pickle
-
