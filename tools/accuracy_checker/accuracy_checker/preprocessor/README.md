@@ -95,7 +95,7 @@ Accuracy Checker supports following set of preprocessors:
 * `point_alignment` - aligning keypoints stored in annotation metadata.
   * `draw_points` - allows visualize points.
   * `normalize` - allows to use normalization for keypoints.
-  * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.*
+  * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
 * `corner_crop` - Corner crop of the image.
   * `dst_width` and `dst_height` are destination width and height
   * `corner_type` is type of the corner crop. Options are:
