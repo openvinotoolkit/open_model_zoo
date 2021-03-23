@@ -131,12 +131,13 @@ cd "%SOLUTION_DIR64%" && cmake -G "Visual Studio !VS_VERSION!" -A %PLATFORM% %EX
 echo.
 echo ###############^|^| Build Open Model Zoo Demos using MS Visual Studio ^|^|###############
 echo.
-echo cmake --build . --config Release %BUILD_TARGETS%
 
 if "%BUILD_TARGETS%"=="" (
+    echo cmake --build . --config Release
     cmake --build . --config Release
 ) else (
     for %%t in (%BUILD_TARGETS%) do (
+        echo cmake --build . --config Release --target %%t
         cmake --build . --config Release --target %%t
     )
 )
