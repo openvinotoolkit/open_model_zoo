@@ -90,7 +90,8 @@ class DeepSpeechPipeline:
         self.max_candidates = max_candidates
         alphabet = self.p['alphabet']
         if alphabet is None:
-            self.alphabet = alphabet_module.get_default_alphabet()
+            # self.alphabet = alphabet_module.get_default_alphabet()
+            self.alphabet = alphabet_module.get_default_CN_alphabet()
         elif isinstance(alphabet, str):
             self.alphabet = alphabet_module.load_alphabet(alphabet)  # shall not include <blank> token
         else:
