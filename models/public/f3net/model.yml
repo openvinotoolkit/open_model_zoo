@@ -38,9 +38,17 @@ postprocessing:
     replacement: "torch.load(self.cfg.snapshot, map_location=torch.device('cpu'))"
   - $type: regex_replace
     file: f3net/net.py
+    pattern: 'import matplotlib.pyplot as plt'
+    replacement: ''
+  - $type: regex_replace
+    file: f3net/net.py
     # remove extra feature maps used for calculation loss during training
     pattern: 'return pred1, pred2, out2h, out3h, out4h, out5h'
     replacement: "return pred2"
+  - $type: regex_replace
+    file: f3net/dataset.py
+    pattern: 'import cv2'
+    replacement: ''
 
 conversion_to_onnx_args:
   - --model-name=f3net
