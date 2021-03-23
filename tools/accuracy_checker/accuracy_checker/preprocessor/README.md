@@ -45,6 +45,7 @@ Accuracy Checker supports following set of preprocessors:
   * `std` specifies values, on which pixels will be divided.
      You can specify one value for all channels or list of comma separated channel-wise values.
      These parameters support work with precomputed values of frequently used datasets (e.g. `cifar10` or `imagenet`).
+  * `images_only` - prevent usage normalization for non-image inputs in multi input mode (Optional, default `False`).
 * `resize3d` - resizing 3d image (e.g. MRI scans) to new size:
   * `size` in format `(H,W,D)`. All values will be interpolated with 1st-order spline.
 * `crop_brats`  -  performing crop of 3d images (e.g. MRI scans) by cropping all non-zero voxels. Also sets bounding boxes for `segmentation_prediction_resample` preprocessor (see [Postprocessors](../postprocessor/README.md))
@@ -94,7 +95,7 @@ Accuracy Checker supports following set of preprocessors:
 * `point_alignment` - aligning keypoints stored in annotation metadata.
   * `draw_points` - allows visualize points.
   * `normalize` - allows to use normalization for keypoints.
-  * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.
+  * `dst_width` and `dst_height` are destination width and height for keypoints resizing respectively. You can also use `size` instead in case when destination sizes are equal.*
 * `corner_crop` - Corner crop of the image.
   * `dst_width` and `dst_height` are destination width and height
   * `corner_type` is type of the corner crop. Options are:
