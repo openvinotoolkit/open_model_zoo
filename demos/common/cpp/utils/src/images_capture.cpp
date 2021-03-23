@@ -35,12 +35,17 @@ class ImreadWrapper : public ImagesCapture {
 
 public:
     ImreadWrapper(const std::string &input, bool loop) : ImagesCapture{loop}, canRead{true} {
+        auto startTime = std::chrono::steady_clock::now();
+
         std::ifstream file(input.c_str());
         if (!file.good())
             throw InvalidInput("Can't find the image by " + input);
+
         img = cv::imread(input);
         if(!img.data)
             throw OpenError("Can't open the image from " + input);
+        else
+            readerMetrics.update(startTime);
     }
 
     double fps() const override {return 1.0;}
@@ -91,14 +96,18 @@ public:
     double fps() const override {return 1.0;}
 
     cv::Mat read() override {
+        auto startTime = std::chrono::steady_clock::now();
+
         while (fileId < names.size() && nextImgId < readLengthLimit) {
             cv::Mat img = cv::imread(input + '/' + names[fileId]);
             ++fileId;
             if (img.data) {
                 ++nextImgId;
+                readerMetrics.update(startTime);
                 return img;
             }
         }
+
         if (loop) {
             fileId = 0;
             size_t readImgs = 0;
@@ -109,6 +118,7 @@ public:
                     ++readImgs;
                     if (readImgs - 1 >= initialImageId) {
                         nextImgId = 1;
+                        readerMetrics.update(startTime);
                         return img;
                     }
                 }
@@ -140,11 +150,14 @@ public:
     double fps() const override {return cap.get(cv::CAP_PROP_FPS);}
 
     cv::Mat read() override {
+        auto startTime = std::chrono::steady_clock::now();
+
         if (nextImgId >= readLengthLimit) {
             if (loop && cap.set(cv::CAP_PROP_POS_FRAMES, initialImageId)) {
                 nextImgId = 1;
                 cv::Mat img;
                 cap.read(img);
+                readerMetrics.update(startTime);
                 return img;
             }
             return cv::Mat{};
@@ -156,6 +169,7 @@ public:
         } else {
             ++nextImgId;
         }
+        readerMetrics.update(startTime);
         return img;
     }
 };
@@ -190,6 +204,8 @@ public:
     double fps() const override {return cap.get(cv::CAP_PROP_FPS) > 0 ? cap.get(cv::CAP_PROP_FPS) : 30;}
 
     cv::Mat read() override {
+        auto startTime = std::chrono::steady_clock::now();
+
         if (nextImgId >= readLengthLimit) {
             return cv::Mat{};
         }
@@ -198,6 +214,8 @@ public:
             throw std::runtime_error("The image can't be captured from the camera");
         }
         ++nextImgId;
+
+        readerMetrics.update(startTime);
         return img;
     }
 };
