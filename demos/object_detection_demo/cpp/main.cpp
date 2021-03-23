@@ -322,8 +322,6 @@ int main(int argc, char *argv[]) {
         uint32_t framesProcessed = 0;
 
         cv::VideoWriter videoWriter;
-        cv::Size videoFrameSize;
-        double videoFps = 30;
 
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
@@ -342,9 +340,6 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                videoFrameSize = curr_frame.size();
-                videoFps = cap->fps();
-
                 frameNum = pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
@@ -352,7 +347,7 @@ int main(int argc, char *argv[]) {
             // Preparing video writer if needed
             if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
                 if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                    videoFps, videoFrameSize)) {
+                    cap->fps(), curr_frame.size())) {
                     throw std::runtime_error("Can't open video writer");
                 }
             }
