@@ -92,7 +92,7 @@ mkdir -p "$build_dir"
 if [ ${#build_targets[@]} -eq 0 ]; then
     cmake --build "$build_dir" -- "$NUM_THREADS"
 else
-    for t in $build_targets; do
+    for t in "${build_targets[@]}"; do
         cmake --build "$build_dir" --target "$t" -- "$NUM_THREADS"
     done
 fi
