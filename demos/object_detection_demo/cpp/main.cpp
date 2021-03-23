@@ -325,6 +325,8 @@ int main(int argc, char *argv[]) {
 
         cv::VideoWriter videoWriter;
 
+        PerformanceMetrics renderMetrics;
+
         cv::Size outputResolution;
         OutputTransform outputTransform = OutputTransform();
         size_t found = FLAGS_output_resolution.find("x");
@@ -379,7 +381,9 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to DetectionResult*
             //    and use your own processing instead of calling renderDetectionData().
             while (keepRunning && (result = pipeline.getResult())) {
+                auto renderingStart = std::chrono::steady_clock::now();
                 cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
+
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -388,6 +392,7 @@ int main(int argc, char *argv[]) {
                     videoWriter.write(outFrame);
                 }
                 framesProcessed++;
+
                 if (!FLAGS_no_show) {
                     cv::imshow("Detection Results", outFrame);
                     //--- Processing keyboard events
@@ -399,6 +404,7 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
+                renderMetrics.update(renderingStart);
             }
         }
 
@@ -424,6 +430,17 @@ int main(int argc, char *argv[]) {
         //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << slog::endl << "Metric reports:" << slog::endl;
         metrics.printTotal();
+        slog::info << slog::endl << "Avg time:\n";
+        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
+            cap->getMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Preprocessing:\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Inference:\t\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getInferenceMetircs().getTotal().latency << " ms\n";
+        slog::info << "  * Postprocessing:\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getPostprocessMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
+            renderMetrics.getTotal().latency << " ms" << slog::endl;
 
         slog::info << presenter.reportMeans() << slog::endl;
     }
