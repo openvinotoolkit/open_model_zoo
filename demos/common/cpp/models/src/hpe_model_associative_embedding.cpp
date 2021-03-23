@@ -146,7 +146,8 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
         nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsDims);
     }
 
-    std::vector<HumanPose> poses = extractPoses(heatMaps, aembdsMaps, nmsHeatMaps);
+    std::vector<cv::Mat> nmsHeatMaps = heatMapNMS(heatMaps, 5);
+    std::vector<HumanPose> poses = extractPoses(heatMaps, newEmbds, nmsHeatMaps);
 
     // Rescale poses to the original image
     const auto& scale = infResult.internalModelData->asRef<InternalScaleMatData>();

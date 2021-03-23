@@ -43,7 +43,6 @@ protected:
 
     std::string embeddingsBlobName;
     std::string heatmapsBlobName;
-    std::string nmsHeatmapsBlobName;
 
     static const int numJoints = 17;
     static const int stride = 32;
