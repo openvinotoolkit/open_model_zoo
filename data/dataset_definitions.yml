@@ -1233,3 +1233,13 @@ datasets:
       input_suffix: blur.png
       target_suffix: sharp.png
     annotation: GOPRO.pickle
+
+  - name: PASCAL-S
+    annotation_conversion:
+      converter: salient_object_detection
+      images_dir: PASCAL-S/image
+      masks_dir: PASCAL-S/mask
+    data_source: PASCAL-S/image
+    additional_data_source: PASCAL-S/mask
+    annotation: pascal-s.pickle
+

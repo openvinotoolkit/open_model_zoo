@@ -1,0 +1,89 @@
+# f3net
+
+## Use Case and High-Level Description
+
+F3Net: Fusion, Feedback and Focus for Salient Object Detection. For details see
+the [repository](https://github.com/weijun88/F3Net), [paper](https://arxiv.org/abs/1911.11445)
+
+## Specification
+
+| Metric                          | Value                                    |
+|---------------------------------|------------------------------------------|
+| Type                            | Salient object detection                 |
+| GFLOPs                          | 31.2883                                  |
+| MParams                         | 25.2791                                  |
+| Source framework                | PyTorch\*                                |
+
+## Accuracy
+
+| Metric    | Value |
+| --------- | ----- |
+| F-measure | 84.21%|
+
+The F-measure estimated on Pascal-S dataset and defined as the harmonic mean of precision and recall.
+
+## Input
+
+### Original model
+
+Image, name - `input.1` , shape - `1,3,352,352`, format `B,C,H,W`,
+   where:
+
+    - `B` - batch size
+    - `C` - number of channels
+    - `H` - image height
+    - `W` - image width
+
+   Expected color order - `RGB`.
+   Mean values - [124.55, 118.90, 102.94]
+   Scale values - [56.77,  55.97,  57.50]
+
+### Converted model
+
+Image, name - `input.1` , shape - `1,3,352,352`, format `B,C,H,W`,
+   where:
+
+    - `B` - batch size
+    - `C` - number of channels
+    - `H` - image height
+    - `W` - image width
+
+   Expected color order - `BGR`.
+
+## Output
+
+### Original model
+
+
+### Converted model
+
+The converted model has the same parameters as the original model.
+
+## Legal Information
+
+The original model is distributed under the following
+[license](https://github.com/weijun88/F3Net/blob/master/LICENSE):
+
+```
+MIT License
+
+Copyright (c) 2019 Jun Wei
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
