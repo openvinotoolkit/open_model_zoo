@@ -221,7 +221,7 @@ def main():
                 presenter.handleKey(key)
             continue
 
-        if pipeline.is_ready():
+        if pipeline.is_ready() and next_frame_id_to_show - next_frame_id <= 1:
             # Get new frame
             start_time = perf_counter()
             frame = cap.read()
