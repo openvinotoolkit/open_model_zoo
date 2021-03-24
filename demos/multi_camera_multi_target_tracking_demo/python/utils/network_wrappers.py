@@ -14,6 +14,7 @@
 import json
 import logging as log
 from abc import ABC, abstractmethod
+from types import SimpleNamespace as namespace
 
 import cv2
 import numpy as np
@@ -162,12 +163,15 @@ class MaskRCNN(DetectorInterface):
         processed_image = cv2.resize(frame, None, fx=scale, fy=scale)
         processed_image = processed_image.astype('float32').transpose(2, 0, 1)
 
-        sample = dict(original_image=frame,
-                      meta=dict(original_size=frame.shape[:2],
-                                processed_size=processed_image.shape[1:3]),
-                      im_data=processed_image,
-                      im_info=np.array([processed_image.shape[1], processed_image.shape[2], 1.0], dtype='float32'))
-        return sample
+        return namespace(
+            original_image=frame,
+            meta=namespace(
+                original_size=frame.shape[:2],
+                processed_size=processed_image.shape[1:3],
+            ),
+            im_data=processed_image,
+            im_info=np.array([processed_image.shape[1], processed_image.shape[2], 1.0], dtype='float32'),
+        )
 
     def forward(self, im_data, im_info):
         input_name = 'im_data' if self.segmentoly_type else 'image'
@@ -202,16 +206,16 @@ class MaskRCNN(DetectorInterface):
         outputs = []
         for frame in frames:
             data_batch = self.preprocess(frame)
-            im_data = data_batch['im_data']
-            im_info = data_batch['im_info'] if self.segmentoly_type else None
-            meta = data_batch['meta']
+            im_data = data_batch.im_data
+            im_info = data_batch.im_info if self.segmentoly_type else None
+            meta = data_batch.meta
 
             boxes, classes, scores, _, masks = self.forward(im_data, im_info)
             scores, classes, boxes, masks = postprocess(scores, classes, boxes, masks,
-                                                        im_h=meta['original_size'][0],
-                                                        im_w=meta['original_size'][1],
-                                                        im_scale_y=meta['processed_size'][0] / meta['original_size'][0],
-                                                        im_scale_x=meta['processed_size'][1] / meta['original_size'][1],
+                                                        im_h=meta.original_size[0],
+                                                        im_w=meta.original_size[1],
+                                                        im_scale_y=meta.processed_size[0] / meta.original_size[0],
+                                                        im_scale_x=meta.processed_size[1] / meta.original_size[1],
                                                         full_image_masks=True, encode_masks=False,
                                                         confidence_threshold=self.confidence,
                                                         segmentoly_type=self.segmentoly_type)
