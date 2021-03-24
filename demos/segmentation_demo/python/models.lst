@@ -1,4 +1,5 @@
 # This file can be used with the --list option of the model downloader.
+# For --architecture_type=segmentation
 deeplabv3
 fastseg-large
 fastseg-small
@@ -8,3 +9,5 @@ icnet-camvid-ava-sparse-??-????
 road-segmentation-adas-????
 semantic-segmentation-adas-????
 unet-camvid-onnx-????
+# For --architecture_type=salient_object_detection
+f3net

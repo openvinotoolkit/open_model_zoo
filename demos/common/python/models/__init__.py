@@ -22,7 +22,7 @@ from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
 from .open_pose import OpenPose
 from .retinaface import RetinaFace
-from .segmentation import SegmentationModel
+from .segmentation import SegmentationModel, SalientObjectDetectionModel
 from .ssd import SSD
 from .utils import DetectionWithLandmarks
 from .yolo import YOLO, YoloV4
@@ -36,6 +36,7 @@ __all__ = [
     'HpeAssociativeEmbedding',
     'OpenPose',
     'RetinaFace',
+    'SalientObjectDetectionModel',
     'SegmentationModel',
     'SSD',
     'YOLO',

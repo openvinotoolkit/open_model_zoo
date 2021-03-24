@@ -27,7 +27,7 @@ from openvino.inference_engine import IECore
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
-from models import SegmentationModel
+from models import SegmentationModel, SalientObjectDetectionModel
 import monitors
 from pipelines import AsyncPipeline
 from images_capture import open_images_capture
@@ -100,6 +100,8 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
+    args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
+                      type=str, required=False, default='segmentation', choices=('segmentation', 'salient_object_detection'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -163,6 +165,14 @@ def get_plugin_configs(device, num_streams, num_threads):
     return config_user_specified
 
 
+def get_model(ie, args):
+    if args.architecture_type == 'segmentation':
+        return SegmentationModel(ie, args.model)
+    if args.architecture_type == 'salient_object_detection':
+        return SalientObjectDetectionModel(ie, args.model)
+    raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
+
+
 def main():
     metrics = PerformanceMetrics()
     args = build_argparser().parse_args()
@@ -174,7 +184,7 @@ def main():
 
     log.info('Loading network...')
 
-    model = SegmentationModel(ie, args.model)
+    model = get_model(ie, args)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 

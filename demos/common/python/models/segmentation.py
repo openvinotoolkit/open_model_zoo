@@ -84,3 +84,15 @@ class SegmentationModel(Model):
 
         result = cv2.resize(result, (input_image_width, input_image_height), 0, 0, interpolation=cv2.INTER_NEAREST)
         return result
+
+
+class SalientObjectDetectionModel(SegmentationModel):
+
+    def postprocess(self, outputs, meta):
+        input_image_height = meta['original_shape'][0]
+        input_image_width = meta['original_shape'][1]
+        mask = outputs[self.out_blob_name].squeeze()
+        mask = 1/(1 + np.exp(-mask))
+        mask = mask.astype(np.uint8)
+        result = cv2.resize(mask, (input_image_width, input_image_height), 0, 0, interpolation=cv2.INTER_NEAREST)
+        return result
