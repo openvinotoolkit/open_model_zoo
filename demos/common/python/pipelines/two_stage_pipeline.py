@@ -17,6 +17,7 @@
 from collections import deque
 
 from pipelines import AsyncPipeline
+from models.utils import preprocess_output
 
 
 class TwoStagePipeline:
@@ -57,7 +58,7 @@ class TwoStagePipeline:
             return None
 
         self.submitted_data.popleft()
-        data = self.encoder_model.prepare(encoder_result)
+        data = preprocess_output(encoder_result)
         self.decoder_result = [None for _ in data]
         self.submit_to_decoder(data)
         self.postprocess_all()

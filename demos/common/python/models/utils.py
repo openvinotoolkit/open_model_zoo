@@ -70,3 +70,16 @@ def resize_image_letterbox(image, size):
     resized_image = np.pad(image, ((dy, dy + (h - nh) % 2), (dx, dx + (w - nw) % 2), (0, 0)),
                            mode='constant', constant_values=128)
     return resized_image
+
+
+def preprocess_output(result):
+    detections, frame_meta = result
+    frame = frame_meta['frame']
+    boxes = []
+    for detection in detections:
+        xmin = max(int(detection.xmin), 0)
+        ymin = max(int(detection.ymin), 0)
+        xmax = min(int(detection.xmax), frame.shape[1])
+        ymax = min(int(detection.ymax), frame.shape[0])
+        boxes.append(frame[ymin:ymax, xmin:xmax])
+    return boxes

@@ -37,6 +37,3 @@ class Model:
             new_shape = [batch] + self.net.input_info[input_layer].input_data.shape[1:]
             shapes.update({input_layer: new_shape})
         self.net.reshape(shapes)
-
-    def prepare(self, result):
-        return result

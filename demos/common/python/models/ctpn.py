@@ -118,18 +118,6 @@ class CTPN(Model):
         return [Detection(box[0], box[1], box[2], box[5], box[8], 0)
                 for box in boxes if box[0] != box[2] and box[1] != box[5]]
 
-    def prepare(self, result):
-        detections, frame_meta = result
-        frame = frame_meta['frame']
-        boxes = []
-        for detection in detections:
-            xmin = max(int(detection.xmin), 0)
-            ymin = max(int(detection.ymin), 0)
-            xmax = min(int(detection.xmax), frame.shape[1])
-            ymax = min(int(detection.ymax), frame.shape[0])
-            boxes.append(frame[ymin:ymax, xmin:xmax])
-        return boxes
-
     @staticmethod
     def ctpn_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
         scale = min(dst_height, dst_width)
