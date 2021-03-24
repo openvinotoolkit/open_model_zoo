@@ -50,6 +50,9 @@ Review the tools description in the file `<OPENVINO_INSTALL_DIR>/deployment_tool
 | ResNeXt 101, alpha=0.25     | MXNet\*                            | [octave-resnext-101-0.25](./octave-resnext-101-0.25/octave-resnext-101-0.25.md)   | 79.556%/94.444% | 11.521 | 44.169 |
 | SE-ResNet 50, alpha=0.125   | MXNet\*                            | [octave-se-resnet-50-0.125](./octave-se-resnet-50-0.125/octave-se-resnet-50-0.125.md) | 78.706%/94.09% | 7.246 | 28.082 |
 | open-closed-eye-0001        | PyTorch\*                          | [open-closed-eye-0001](./open-closed-eye-0001/description/open-closed-eye-0001.md) |  95.84%   | 0.0014 | 0.0113|
+| RepVGG A0                   | PyTorch\*                          | [repvgg-a0](./repvgg-a0/repvgg-a0.md) | 72.40%/90.49% | 2.7286 | 8.3094 |
+| RepVGG B1                   | PyTorch\*                          | [repvgg-b1](./repvgg-b1/repvgg-b1.md) | 78.37%/94.09% | 23.6472 | 51.8295|
+| RepVGG B3                   | PyTorch\*                          | [repvgg-b3](./repvgg-b3/repvgg-b3.md) | 80.50%/95.25% | 52.4407 | 110.9609|
 | ResNeSt 50                  | PyTorch\*                          | [resnest-50-pytorch](./resnest-50-pytorch/resnest-50-pytorch.md) | 81.11%/95.36% | 10.8148 |  27.4493|
 | ResNet 18                   | PyTorch\*                          | [resnet-18-pytorch](./resnet-18-pytorch/resnet-18-pytorch.md) | 69.754%/89.088% | 3.637 |  11.68 |
 | ResNet 34                   | PyTorch\*                          | [resnet-34-pytorch](./resnet-34-pytorch/resnet-34-pytorch.md) | 73.30%/91.42% | 7.3409 | 21.7892 |
