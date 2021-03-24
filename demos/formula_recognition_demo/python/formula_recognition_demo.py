@@ -159,8 +159,8 @@ def non_interactive_demo(model, args):
     renderer = create_renderer()
     show_window = not args.no_show
     for rec in tqdm(model.images_list):
-        log.info("Starting inference for %s", rec['img_name'])
-        image = rec['img']
+        log.info("Starting inference for %s", rec.img_name)
+        image = rec.img
         distribution, targets = model.infer_sync(image)
         prob = calculate_probability(distribution)
         log.info("Confidence score is %s", prob)
@@ -168,9 +168,9 @@ def non_interactive_demo(model, args):
             phrase = model.vocab.construct_phrase(targets)
             if args.output_file:
                 with open(args.output_file, 'a') as output_file:
-                    output_file.write(rec['img_name'] + '\t' + phrase + '\n')
+                    output_file.write(rec.img_name + '\t' + phrase + '\n')
             else:
-                print("\n\tImage name: {}\n\tFormula: {}\n".format(rec['img_name'], phrase))
+                print("\n\tImage name: {}\n\tFormula: {}\n".format(rec.img_name, phrase))
                 if renderer is not None:
                     rendered_formula, _ = renderer.render(phrase)
                     if rendered_formula is not None and show_window:
