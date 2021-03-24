@@ -14,7 +14,7 @@
 // limitations under the License.
 */
 
-#include "models/detection_model.h"
+#include "models/image_model.h"
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 

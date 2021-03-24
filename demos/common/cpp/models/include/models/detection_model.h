@@ -15,7 +15,6 @@
 */
 #pragma once
 #include "models/image_model.h"
-#include "opencv2/core.hpp"
 
 class DetectionModel : public ImageModel {
 public:

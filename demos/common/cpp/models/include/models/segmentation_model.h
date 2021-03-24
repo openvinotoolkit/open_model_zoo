@@ -15,7 +15,6 @@
 */
 
 #include "image_model.h"
-#include "opencv2/core.hpp"
 
 #pragma once
 class SegmentationModel : public ImageModel {

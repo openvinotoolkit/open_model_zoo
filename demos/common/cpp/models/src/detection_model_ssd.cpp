@@ -53,9 +53,6 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& i
     DetectionResult* result = new DetectionResult;
     auto retVal = std::unique_ptr<ResultBase>(result);
 
-    auto desc = infResult.getFirstOutputBlob()->getTensorDesc();
-    auto vec = desc.getDims();
-
     *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
