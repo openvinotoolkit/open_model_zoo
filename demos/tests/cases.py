@@ -706,8 +706,7 @@ PYTHON_DEMOS = [
             TestCase(options={
                 '-m': ModelArg('f3net'), 
                 '-i': DataPatternArg('road-segmentation-adas'),
-                '-at': 'salient_object_detection'
-                })
+                '-at': 'salient_object_detection' })
         ],
     )),
 
