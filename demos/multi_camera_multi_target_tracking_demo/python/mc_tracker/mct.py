@@ -21,7 +21,7 @@ from .sct import SingleCameraTracker, clusters_distance, THE_BIGGEST_DISTANCE
 
 class MultiCameraTracker:
     def __init__(self, num_sources, reid_model,
-                 sct_config={},
+                 sct_config,
                  time_window=20,
                  global_match_thresh=0.35,
                  bbox_min_aspect_ratio=1.2,
@@ -41,7 +41,8 @@ class MultiCameraTracker:
         for i in range(num_sources):
             self.scts.append(SingleCameraTracker(i, self._get_next_global_id,
                                                  self._release_global_id,
-                                                 reid_model, visual_analyze=visual_analyze, **sct_config))
+                                                 reid_model, visual_analyze=visual_analyze,
+                                                 **vars(sct_config)))
 
     def process(self, frames, all_detections, masks=None):
         assert len(frames) == len(all_detections) == len(self.scts)
