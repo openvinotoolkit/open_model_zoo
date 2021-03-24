@@ -704,7 +704,7 @@ PYTHON_DEMOS = [
                     ModelArg('unet-camvid-onnx-0001'),
                     ModelArg('deeplabv3'))),
             TestCase(options={
-                '-m': ModelArg('f3net'), 
+                '-m': ModelArg('f3net'),
                 '-i': DataPatternArg('road-segmentation-adas'),
                 '-at': 'salient_object_detection' })
         ],
