@@ -21,6 +21,10 @@ description: >-
   Codebase for Image Classification Research <https://github.com/facebookresearch/pycls>.
 task_type: classification
 files:
+  - name: configs/dds_baselines/regnetx/RegNetX-3.2GF_dds_8gpu.yaml
+    size: 362
+    sha256: 166491e53c668ecc181692dde27221b4358f1b889e7726396690c24547e53f5f
+    source: https://raw.githubusercontent.com/facebookresearch/pycls/ca89a79161e437deca8f39f31ceaef3b05873f30/configs/dds_baselines/regnetx/RegNetX-3.2GF_dds_8gpu.yaml
   - name: pycls/__init__.py
     size: 0
     sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
@@ -89,8 +93,9 @@ postprocessing:
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir
-  - --model-name=regnetx_32gf
+  - --model-name=regnet
   - --import-module=model
+  - --model-param=config_path=r"$dl_dir/configs/dds_baselines/regnetx/RegNetX-3.2GF_dds_8gpu.yaml"
   - --model-param=weights_path=r"$dl_dir/ckpt/regnetx-3.2gf.pyth"
   - --input-shape=1,3,224,224
   - --input-names=data

@@ -293,7 +293,7 @@ class ModelEvaluator(BaseEvaluator):
                     batch_input_ids, batch_meta, enable_profiling, output_callback)
 
             if progress_reporter:
-                progress_reporter.update(batch_id, len(batch_predictions))
+                progress_reporter.update(batch_id, len(batch_identifiers))
                 if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
                     self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting)
 
@@ -500,6 +500,10 @@ class ModelEvaluator(BaseEvaluator):
     def _reset_stored_predictions(stored_predictions):
         with open(stored_predictions, 'wb'):
             print_info("File {} will be cleared for storing predictions".format(stored_predictions))
+
+    @property
+    def dataset_size(self):
+        return self.dataset.size
 
     def reset_progress(self, progress_reporter):
         progress_reporter.reset(self.dataset.size)

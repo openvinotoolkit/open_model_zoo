@@ -29,8 +29,10 @@ from ...utils import contains_all, contains_any, extract_image_representations, 
 from ...progress_reporters import ProgressReporter
 from ...logging import print_info
 
+
 def generate_name(prefix, with_prefix, layer_name):
     return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
+
 
 class SuperResolutionFeedbackEvaluator(BaseEvaluator):
     def __init__(self, dataset_config, launcher, model):
@@ -170,6 +172,10 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
             presenter.write_result(metric_result, ignore_results_formatting)
+
+    @property
+    def dataset_size(self):
+        return self.dataset.size
 
     def release(self):
         self.srmodel.release()

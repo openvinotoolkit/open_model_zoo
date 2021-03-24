@@ -15,7 +15,8 @@
 import pycls.core.checkpoint
 import pycls.models.model_zoo
 
-def regnetx_32gf(weights_path):
-    model = pycls.models.model_zoo.regnetx("RegNetX-3.2GF")
+def regnet(config_path, weights_path):
+    pycls.core.config.cfg.merge_from_file(config_path)
+    model = pycls.models.model_zoo.RegNet()
     pycls.core.checkpoint.load_checkpoint(weights_path, model)
     return model

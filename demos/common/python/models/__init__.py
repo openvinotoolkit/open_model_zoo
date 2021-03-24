@@ -25,6 +25,7 @@ from .retinaface import RetinaFace
 from .segmentation import SegmentationModel
 from .ssd import SSD
 from .text_recognition import TextRecognition
+from .ultra_lightweight_face_detection import UltraLightweightFaceDetection
 from .utils import DetectionWithLandmarks
 from .yolo import YOLO, YoloV4
 
@@ -40,6 +41,7 @@ __all__ = [
     'SegmentationModel',
     'SSD',
     'TextRecognition',
+    'UltraLightweightFaceDetection',
     'YOLO',
     'YoloV4',
 ]

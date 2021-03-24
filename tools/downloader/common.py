@@ -22,6 +22,7 @@ import queue
 import re
 import shlex
 import shutil
+import signal
 import subprocess
 import sys
 import threading
@@ -104,13 +105,31 @@ class JobContext:
     def interrupt(self):
         self._interrupted = True
 
+    @staticmethod
+    def _signal_message(signal_num):
+        # once Python 3.8 is the minimum supported version,
+        # signal.strsignal can be used here
+
+        signals = type(signal.SIGINT)
+
+        try:
+            signal_str = f'{signals(signal_num).name} ({signal_num})'
+        except ValueError:
+            signal_str = f'{signal_num}'
+
+        return f'Terminated by signal {signal_str}'
 
 class DirectOutputContext(JobContext):
     def print(self, value, *, end='\n', file=sys.stdout, flush=False):
         print(value, end=end, file=file, flush=flush)
 
     def subprocess(self, args, **kwargs):
-        return subprocess.run(args, **kwargs).returncode == 0
+        return_code = subprocess.run(args, **kwargs).returncode
+
+        if return_code < 0:
+            print(self._signal_message(-return_code), file=sys.stderr)
+
+        return return_code == 0
 
 
 class QueuedOutputContext(JobContext):
@@ -126,8 +145,12 @@ class QueuedOutputContext(JobContext):
                 universal_newlines=True, **kwargs) as p:
             for line in p.stdout:
                 self._output_queue.put((sys.stdout, line))
-            return p.wait() == 0
+            return_code = p.wait()
 
+        if return_code < 0:
+            self._output_queue.put((sys.stderr, self._signal_message(-return_code)))
+
+        return return_code == 0
 
 class JobWithQueuedOutput():
     def __init__(self, context, output_queue, future):

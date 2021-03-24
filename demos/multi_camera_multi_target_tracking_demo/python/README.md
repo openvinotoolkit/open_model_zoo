@@ -105,7 +105,7 @@ python multi_camera_multi_target_tracking_demo.py \
 # videos with instance segmentation model
 python multi_camera_multi_person_tracking.py \
     -i <path_to_video>/video_1.avi <path_to_video>/video_2.avi \
-    --m_segmentation <path_to_model>/instance-segmentation-security-0050.xml \
+    --m_segmentation <path_to_model>/instance-segmentation-security-0228.xml \
     --m_reid <path_to_model>/person-reidentification-retail-0107.xml \
     --config configs/person.py
 

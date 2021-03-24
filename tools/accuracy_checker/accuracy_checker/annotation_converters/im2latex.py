@@ -47,8 +47,6 @@ def read_vocab(vocab_path):
     return vocab_dict["id2sign"]
 
 
-
-
 class Im2latexDatasetConverter(DirectoryBasedAnnotationConverter):
     __provider__ = 'im2latex_formula_recognition'
     annotation_types = (CharacterRecognitionAnnotation, )

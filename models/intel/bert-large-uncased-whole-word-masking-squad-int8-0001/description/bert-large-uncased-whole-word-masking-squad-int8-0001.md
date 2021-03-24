@@ -6,7 +6,7 @@ This is a BERT-large model pretrained on lower-cased English text using Whole-Wo
 
 Tokenization occurs using the BERT tokenizer (see the demo code for implementation details) and the enclosed `vocab.txt` dictionary file. Input is to be lower-cased before tokenizing.
 
-The model has been further quantized to INT8 precision using quantization-aware finetuning with [NNCF](https://github.com/openvinotoolkit/nncf_pytorch).
+The model has been further quantized to INT8 precision using quantization-aware finetuning with [NNCF](https://github.com/openvinotoolkit/nncf).
 
 ## Specification
 

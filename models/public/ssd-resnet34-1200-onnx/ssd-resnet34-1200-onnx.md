@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `ssd-resnet-34-1200-onnx` model is a multiscale SSD based on ResNet-34 backbone network intended to perform object detection. The model has been trained from the Common Objects in Context (COCO) image dataset. This model is pretrained in PyTorch\* framework and converted to ONNX\* format. For additional information refer to [repository](https://github.com/mlperf/inference/tree/master/vision/classification_and_detection).
+The `ssd-resnet-34-1200-onnx` model is a multiscale SSD based on ResNet-34 backbone network intended to perform object detection. The model has been trained from the Common Objects in Context (COCO) image dataset. This model is pretrained in PyTorch\* framework and converted to ONNX\* format. For additional information refer to [repository](https://github.com/mlcommons/inference/tree/master/vision/classification_and_detection).
 
 ## Specification
 
@@ -62,8 +62,22 @@ Channel order is `BGR`.
 2. Probability, shape - `1,200`, contains confidence of each detected bounding boxes.
 3. Detection boxes, shape - `1,200,4`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are in normalized format, in range [0, 1].
 
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
+
 ## Legal Information
 
 The original model is distributed under the
-[Apache License, Version 2.0](https://raw.githubusercontent.com/mlperf/inference/master/LICENSE.md).
+[Apache License, Version 2.0](https://raw.githubusercontent.com/mlcommons/inference/master/LICENSE.md).
 A copy of the license is provided in [APACHE-2.0-MLPerf.txt](../licenses/APACHE-2.0-MLPerf.txt).

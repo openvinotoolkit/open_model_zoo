@@ -43,7 +43,9 @@ from ..representation import (
     PoseEstimationAnnotation,
     PoseEstimationPrediction,
     OpticalFlowAnnotation,
-    OpticalFlowPrediction
+    OpticalFlowPrediction,
+    BackgroundMattingAnnotation,
+    BackgroundMattingPrediction
 )
 
 from .metric import PerImageEvaluationMetric
@@ -53,9 +55,12 @@ from ..utils import string_to_tuple, finalize_metric_result, contains_all
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
     annotation_types = (
-        RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation, ImageProcessingAnnotation
+        RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation, ImageProcessingAnnotation,
+        BackgroundMattingAnnotation
     )
-    prediction_types = (RegressionPrediction, DepthEstimationPrediction, ImageProcessingPrediction)
+    prediction_types = (
+        RegressionPrediction, DepthEstimationPrediction, ImageProcessingPrediction, BackgroundMattingPrediction
+    )
 
     def __init__(self, value_differ, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -573,6 +578,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(self._psnr_differ, *args, **kwargs)
         self.meta['target'] = 'higher-better'
+        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse'}
 
     def configure(self):
         super().configure()
@@ -668,6 +674,7 @@ class StructuralSimilarity(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)
         self.meta['target'] = 'higher-better'
+        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse'}
 
 
 class PercentageCorrectKeypoints(PerImageEvaluationMetric):

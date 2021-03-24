@@ -126,12 +126,9 @@ NATIVE_DEMOS = [
             *combine_cases(
                 TestCase(options={'-at': 'ae'}),
                 single_option_cases('-m',
-                    ModelArg('human-pose-estimation-0002'),
-                    ModelArg('human-pose-estimation-0003'),
-                    ModelArg('human-pose-estimation-0004'),
-                    # ModelArg('human-pose-estimation-0005'),
-                    # ModelArg('human-pose-estimation-0006'),
-                    # ModelArg('human-pose-estimation-0007')
+                    ModelArg('human-pose-estimation-0005'),
+                    ModelArg('human-pose-estimation-0006'),
+                    ModelArg('human-pose-estimation-0007')
                 )),
         ],
     )),
@@ -150,6 +147,9 @@ NATIVE_DEMOS = [
             ModelArg('densenet-121-tf'),
             ModelArg('densenet-169'),
             ModelArg('mobilenet-v2-pytorch'),
+            ModelArg('repvgg-a0'),
+            ModelArg('repvgg-b1'),
+            ModelArg('repvgg-b3'),
             ModelArg('resnet-50-caffe2')),
     )),
 
@@ -395,7 +395,12 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('text-detection')}),
         single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
-        single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+        [
+            *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+            TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
+                              '-tr_pt_first': None,
+                              '-tr_o_blb_nm': 'logits'}),
+        ]
     )),
 ]
 
@@ -476,6 +481,14 @@ PYTHON_DEMOS = [
        })
     )),
 
+    PythonDemo(name='face_detection_mtcnn_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': image_net_arg('00000002'),
+                          '-m_p': ModelArg('mtcnn-p'),
+                          '-m_r': ModelArg('mtcnn-r'),
+                          '-m_o': ModelArg('mtcnn-o')}),
+    )),
+
     PythonDemo(name='gesture_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
                           '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
@@ -503,9 +516,9 @@ PYTHON_DEMOS = [
             *combine_cases(
                 TestCase(options={'-at': 'ae'}),
                 single_option_cases('-m',
-                    ModelArg('human-pose-estimation-0002'),
-                    ModelArg('human-pose-estimation-0003'),
-                    ModelArg('human-pose-estimation-0004'))),
+                    ModelArg('human-pose-estimation-0005'),
+                    ModelArg('human-pose-estimation-0006'),
+                    ModelArg('human-pose-estimation-0007'))),
         ],
     )),
 
@@ -532,15 +545,11 @@ PYTHON_DEMOS = [
             '-d': 'CPU',  # GPU is not supported
             '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
         single_option_cases('-m',
-            ModelArg('instance-segmentation-security-0010'),
-            ModelArg('instance-segmentation-security-0050'),
-            ModelArg('instance-segmentation-security-0083'),
-            ModelArg('instance-segmentation-security-1025')),
-            #ModelArg('instance-segmentation-security-0002'),
-            #ModelArg('instance-segmentation-security-0091'),
-            #ModelArg('instance-segmentation-security-0228'),
-            #ModelArg('instance-segmentation-security-1039'),
-            #ModelArg('instance-segmentation-security-1040')),
+            ModelArg('instance-segmentation-security-0002'),
+            ModelArg('instance-segmentation-security-0091'),
+            ModelArg('instance-segmentation-security-0228'),
+            ModelArg('instance-segmentation-security-1039'),
+            ModelArg('instance-segmentation-security-1040')),
     )),
 
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
@@ -549,7 +558,6 @@ PYTHON_DEMOS = [
                '-m': ModelArg('machine-translation-nar-en-ru-0001'),
                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
-               '--output-name': 'pred',
                '-i': [
                    'The quick brown fox jumps over the lazy dog.',
                    'The five boxing wizards jump quickly.',
@@ -560,7 +568,6 @@ PYTHON_DEMOS = [
                '-m': ModelArg('machine-translation-nar-ru-en-0001'),
                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
-               '--output-name': 'pred',
                '-i': [
                    'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
                    'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',
@@ -634,6 +641,8 @@ PYTHON_DEMOS = [
                         ModelArg('person-vehicle-bike-detection-2000'),
                         ModelArg('person-vehicle-bike-detection-2001'),
                         ModelArg('person-vehicle-bike-detection-2002'),
+                        ModelArg('person-vehicle-bike-detection-2003'),
+                        ModelArg('person-vehicle-bike-detection-2004'),
                         ModelArg('pelee-coco'),
                         ModelArg('product-detection-0001'),
                         ModelArg('rfcn-resnet101-coco-tf'),
@@ -653,6 +662,12 @@ PYTHON_DEMOS = [
                         ModelArg('vehicle-license-plate-detection-barrier-0106')),
                     TestCase(options={'-d': 'CPU', '-m': ModelArg('person-detection-0106')}),  # GPU is not supported
                 ]
+            ),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'ultra_lightweight_face_detection'}),
+                single_option_cases('-m',
+                    ModelArg('ultra-lightweight-face-detection-rfb-320'),
+                    ModelArg('ultra-lightweight-face-detection-slim-320')),
             ),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'yolo'}),
@@ -717,9 +732,9 @@ PYTHON_DEMOS = [
                           '-i': DataPatternArg('text-detection')}),
         [
             TestCase(options={
-                '-m_m': ModelArg('text-spotting-0003-detector'),
-                '-m_te': ModelArg('text-spotting-0003-recognizer-encoder'),
-                '-m_td': ModelArg('text-spotting-0003-recognizer-decoder'),
+                '-m_m': ModelArg('text-spotting-0004-detector'),
+                '-m_te': ModelArg('text-spotting-0004-recognizer-encoder'),
+                '-m_td': ModelArg('text-spotting-0004-recognizer-decoder'),
                 '--no_track': None
             }),
         ]

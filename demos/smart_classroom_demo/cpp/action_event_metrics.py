@@ -16,9 +16,9 @@ from argparse import ArgumentParser
 from collections import namedtuple
 from os.path import exists
 
+import defusedxml.ElementTree as etree
 import numpy as np
 from builtins import range
-from lxml import etree
 from tqdm import tqdm
 
 BBoxDesc = namedtuple('BBoxDesc', 'id, label, det_conf, xmin, ymin, xmax, ymax')

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-fastseg-large is an accurate real-time semantic segmentation model, pretrained on [Cityscapes](https://www.cityscapes-dataset.com) dataset for 19 object classes, see Cityscapes classes [definition](https://www.cityscapes-dataset.com/dataset-overview). The model was built on MobileNetV3 large backbone and modified segmentation head based on LR-ASPP. This model can be used for efficient segmentation on a variety of real-world street images. For details see [repository](https://github.com/ekzhang/fastseg).
+fastseg-large is an accurate real-time semantic segmentation model, pretrained on [Cityscapes](https://www.cityscapes-dataset.com) dataset for 19 object classes, listed in `<omz_dir>/data/dataset_classes/cityscapes_19cl.txt` file. See Cityscapes classes [definition](https://www.cityscapes-dataset.com/dataset-overview) for more details. The model was built on MobileNetV3 large backbone and modified segmentation head based on LR-ASPP. This model can be used for efficient segmentation on a variety of real-world street images. For model implementation details see original [repository](https://github.com/ekzhang/fastseg).
 
 ## Specification
 
@@ -65,6 +65,20 @@ Float values, which represent scores of a predicted class for each image pixel. 
     - N - number of classes
     - H - image height
     - W - image width
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

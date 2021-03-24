@@ -4,8 +4,8 @@ OpenVINO&trade; toolkit provides a set of public models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
 
-The models can be downloaded via Model Downloader
-(`<OPENVINO_INSTALL_DIR>/deployment_tools/open_model_zoo/tools/downloader`).
+You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ Model Downloader and other automation tools.
+Review the tools description in the file `<OPENVINO_INSTALL_DIR>/deployment_tools/open_model_zoo/tools/downloader/README.md` for details.
 
 ## Classification
 
@@ -50,6 +50,9 @@ The models can be downloaded via Model Downloader
 | ResNeXt 101, alpha=0.25     | MXNet\*                            | [octave-resnext-101-0.25](./octave-resnext-101-0.25/octave-resnext-101-0.25.md)   | 79.556%/94.444% | 11.521 | 44.169 |
 | SE-ResNet 50, alpha=0.125   | MXNet\*                            | [octave-se-resnet-50-0.125](./octave-se-resnet-50-0.125/octave-se-resnet-50-0.125.md) | 78.706%/94.09% | 7.246 | 28.082 |
 | open-closed-eye-0001        | PyTorch\*                          | [open-closed-eye-0001](./open-closed-eye-0001/description/open-closed-eye-0001.md) |  95.84%   | 0.0014 | 0.0113|
+| RepVGG A0                   | PyTorch\*                          | [repvgg-a0](./repvgg-a0/repvgg-a0.md) | 72.40%/90.49% | 2.7286 | 8.3094 |
+| RepVGG B1                   | PyTorch\*                          | [repvgg-b1](./repvgg-b1/repvgg-b1.md) | 78.37%/94.09% | 23.6472 | 51.8295|
+| RepVGG B3                   | PyTorch\*                          | [repvgg-b3](./repvgg-b3/repvgg-b3.md) | 80.50%/95.25% | 52.4407 | 110.9609|
 | ResNeSt 50                  | PyTorch\*                          | [resnest-50-pytorch](./resnest-50-pytorch/resnest-50-pytorch.md) | 81.11%/95.36% | 10.8148 |  27.4493|
 | ResNet 18                   | PyTorch\*                          | [resnet-18-pytorch](./resnet-18-pytorch/resnet-18-pytorch.md) | 69.754%/89.088% | 3.637 |  11.68 |
 | ResNet 34                   | PyTorch\*                          | [resnet-34-pytorch](./resnet-34-pytorch/resnet-34-pytorch.md) | 73.30%/91.42% | 7.3409 | 21.7892 |
@@ -140,6 +143,8 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | SSH                                  | MXNet\*                  | [ssh-mxnet](./ssh-mxnet/ssh-mxnet.md) | 84.80% | 267.0594 | 19.7684 |
 | RetinaFace-R50                       | MXNet\*                  | [retinaface-resnet50](./retinaface-resnet50/retinaface-resnet50.md) | 87.2902% | 100.8478 | 29.427 |
 | RetinaFace-Anti-Cov                  | MXNet\*                  | [retinaface-anti-cov](./retinaface-anti-cov/retinaface-anti-cov.md)  | 77.1531% | 2.7781 | 0.5955 |
+| Ultra Lightweight Face Detection RFB 320| PyTorch\*             | [ultra-lightweight-face-detection-rfb-320](./ultra-lightweight-face-detection-rfb-320/ultra-lightweight-face-detection-rfb-320.md)|84.78% | 0.2106 | 0.3004 |
+| Ultra Lightweight Face Detection slim 320| PyTorch\*            | [ultra-lightweight-face-detection-slim-320](./ultra-lightweight-face-detection-slim-320/ultra-lightweight-face-detection-slim-320.md)|83.32% | 0.1724 | 0.2844 |
 | YOLO v1 Tiny                         | TensorFlow.js\*          | [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | 72.1716% | 6.9883	 |	15.8587 |
 | YOLO v2 Tiny                         | Keras\*                  | [yolo-v2-tiny-tf](./yolo-v2-tiny-tf/yolo-v2-tiny-tf.md) | 27.3443%/29.1184%| 5.4236	 |	11.2295 |
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/yolo-v2-tf.md) | 53.1453%/56.483% | 63.0301	 |	50.9526 |
@@ -182,7 +187,7 @@ Since this task contains - in the general setting - some ambiguity, the resultin
 | Model Name                  | Implementation | OMZ Model Name                | Accuracy | GFlops    | mParams |
 | --------------------------- | -------------- | ----------------------------- | -------- | --------- | ------- |
 | midasnet                    | PyTorch\*      | [midasnet](./midasnet/midasnet.md)| 0.07071 | 207.25144  |    104.081     |
-| FCRN ResNet50-Upproj          | TensorFlow\*   | [fcrn-dp-nyu-depth-v2-tf](./fcrn-dp-nyu-depth-v2-tf/fcrn-dp-nyu-depth-v2-tf.md)| 0.573 | 63.5421 | 34.5255 |
+| FCRN ResNet50-Upproj        | TensorFlow\*   | [fcrn-dp-nyu-depth-v2-tf](./fcrn-dp-nyu-depth-v2-tf/fcrn-dp-nyu-depth-v2-tf.md)| 0.573 | 63.5421 | 34.5255 |
 
 ## Image Inpainting
 

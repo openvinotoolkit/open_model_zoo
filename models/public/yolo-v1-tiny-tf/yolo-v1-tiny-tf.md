@@ -94,6 +94,8 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
 - `class_no_1`,...,`class_no_20` - probability distribution over the classes in logits format, apply [softmax function](https://en.wikipedia.org/wiki/Softmax_function) and multiply by obtained confidence value to get confidence of each class
 
+Mapping to class names provided by `<omz_dir>/data/dataset_classes/voc_20cl.txt` file.
+
 The anchor values are `1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52`.
 
 ### Converted model
@@ -109,7 +111,23 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `box_score` - confidence of detection box in [0,1] range
 - `class_no_1`,...,`class_no_20` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
 
+Mapping to class names provided by `<omz_dir>/data/dataset_classes/voc_20cl.txt` file.
+
 The anchor values are `1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52`.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

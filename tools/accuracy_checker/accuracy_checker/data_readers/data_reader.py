@@ -75,6 +75,7 @@ ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
 MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id', 'frames'])
 ImagePairIdentifier = namedtuple('ImagePairIdentifier', ['first', 'second'])
 ListIdentifier = namedtuple('ListIdentifier', ['values'])
+MultiInstanceIdentifier = namedtuple('MultiInstanceIdentifier', ['identifier', 'object_id'])
 
 
 def serialize_identifier(identifier):
@@ -102,6 +103,12 @@ def serialize_identifier(identifier):
             "type": "list_identifier",
             "values": identifier.values
         }
+    if isinstance(identifier, MultiInstanceIdentifier):
+        return {
+            "type": 'multi_instance',
+            "identifier": identifier.identifier,
+            "object_id": identifier.object_id
+        }
     return identifier
 
 
@@ -116,6 +123,8 @@ def deserialize_identifier(identifier):
             return MultiFramesInputIdentifier(identifier['input_id'], tuple(identifier['frames']))
         if type_id == 'clip_identifier':
             return ClipIdentifier(identifier['video'], identifier['clip_id'], tuple(identifier['frames']))
+        if type_id == 'multi_instance':
+            return MultiInstanceIdentifier(identifier['identifier'], identifier['object_id'])
         raise ValueError('Unsupported identifier type: {}'.format(type_id))
     return identifier
 
@@ -179,6 +188,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
         self.read_dispatcher.register(ImagePairIdentifier, self._read_pair)
         self.read_dispatcher.register(ListIdentifier, self._read_list_ids)
+        self.read_dispatcher.register(MultiInstanceIdentifier, self._read_multi_instance_single_object)
         self.multi_infer = False
 
         self.validate_config(config, data_source)
@@ -265,6 +275,9 @@ class BaseReader(ClassProvider):
 
     def _read_frames_multi_input(self, data_id):
         return self.read_dispatcher(list(data_id.frames))
+
+    def _read_multi_instance_single_object(self, data_id):
+        return self.read_dispatcher(data_id.identifier)
 
     def read_item(self, data_id):
         data_rep = DataRepresentation(

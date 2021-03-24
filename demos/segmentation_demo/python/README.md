@@ -8,7 +8,7 @@ This topic demonstrates how to run the Image Segmentation demo application, whic
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network. The demo runs inference and shows results for each image captured from an input. Depending on number of inference requests processing simultaneously (-nireq parameter) the pipeline might minimize the time required to process each single image (for nireq 1) or maximize utilization of the device and overall processing performance.
+Upon the start-up the demo application reads command line parameters and loads a network. The demo runs inference and shows results for each image captured from an input. Demo provides default mapping of classes to colors and optionally, allow to specify mapping of classes to colors from simple text file, with using `--colors` argument. Depending on number of inference requests processing simultaneously (-nireq parameter) the pipeline might minimize the time required to process each single image (for nireq 1) or maximize utilization of the device and overall processing performance.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
@@ -85,6 +85,14 @@ You can use the following command to do inference on CPU on images captured by a
 ```
     python3 segmentation_demo.py -i 0 -m <path_to_model>/semantic-segmentation-adas-0001.xml
 ```
+
+## Color palettes
+
+The color palette is used to visualize predicted classes. By default, the colors from PASCAL VOC dataset are applied. In case then the number of output classes is larger than number of classes provided by PASCAL VOC dataset, the rest classes are randomly colorized.
+Also, one can use predefined colors from other datasets, like CAMVID.
+
+Available colors files are in `<omz_dir>/data/palettes`.
+If you want to assign custom colors for classes, you should create a `.txt` file, where the each line contains colors in `(R, G, B)` format.
 
 ## Demo Output
 

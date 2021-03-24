@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/person-reidentification-retail-0277.xml
-    size: 505140
-    sha256: 8a3f19accc49fe3d08ca509627d6f30f7aa2afed0394996c721325141a35c37b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.xml
+    size: 558899
+    sha256: 0e2b6015d4181d20273b07e716a1005f787dc1d1d3a481bc22b9212d61f23621
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.xml
   - name: FP32/person-reidentification-retail-0277.bin
     size: 8357560
-    sha256: cf497eff2c8264099ca56fac5d665b45950b1a2070eefd2fc3b4be08d3742062
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.bin
+    sha256: d3f1959a6c6411ff3b24246f9e4b5c1510a827f3f51fb56143bc8c399853ac92
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-reidentification-retail-0277/FP32/person-reidentification-retail-0277.bin
   - name: FP16/person-reidentification-retail-0277.xml
-    size: 505022
-    sha256: a25ccb661d221850b52377a1be916b22acdaa6b20b3d041a6e4ef43d6290b8b9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.xml
+    size: 558781
+    sha256: 49204f5f2ddbe53b64de72e99d73183bb38ef312e21c06649b5e6f457eea1505
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.xml
   - name: FP16/person-reidentification-retail-0277.bin
     size: 4178812
-    sha256: 105f5897019274c6373c00ecaee2f2cbbb6f7e9cc8e371796536fc95bd1a1167
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.bin
+    sha256: f809b4a16f6105d69eaa8c709894d0103064fe5322c333cde763fcab09d1647e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-reidentification-retail-0277/FP16/person-reidentification-retail-0277.bin
   - name: FP16-INT8/person-reidentification-retail-0277.xml
-    size: 1431178
-    sha256: 05d27aaedf9747b75d0cd11a81097bf675a62381242d41cb3af44ad7f9b4e488
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-reidentification-retail-0277/FP16-INT8/person-reidentification-retail-0277.xml
+    size: 1458806
+    sha256: fe4511fafd5fe98a06b7db82e848cdf3df41c2d6cfedd1753e6f5397ce91b296
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-reidentification-retail-0277/FP16-INT8/person-reidentification-retail-0277.xml
   - name: FP16-INT8/person-reidentification-retail-0277.bin
     size: 2202802
-    sha256: a7402b5d618ca56c43541140f9fd9d137e126aa8773eddba43ce506ee3095a35
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.2/models_bin/3/person-reidentification-retail-0277/FP16-INT8/person-reidentification-retail-0277.bin
+    sha256: cb6daa804643c43028a88c615a8ac8c7dcde541533ac2ac7be85dba3ed4bcbf7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-reidentification-retail-0277/FP16-INT8/person-reidentification-retail-0277.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

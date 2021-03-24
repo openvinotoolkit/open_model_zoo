@@ -20,8 +20,8 @@ Accuracy metrics obtained on COCO\* validation dataset for converted model.
 | Metric | Value |
 | ------ | ------|
 | mAP    | 71.17% |
-| [COCO\* mAP (0.5)](http://cocodataset.org/#detection-eval) | 75.02% |
-| [COCO\* mAP (0.5:0.05:0.95)](http://cocodataset.org/#detection-eval) | 49.2% |
+| [COCO\* mAP (0.5)](https://cocodataset.org/#detection-eval) | 75.02% |
+| [COCO\* mAP (0.5:0.05:0.95)](https://cocodataset.org/#detection-eval) | 49.2% |
 
 ## Input
 
@@ -93,6 +93,20 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 
 
 The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

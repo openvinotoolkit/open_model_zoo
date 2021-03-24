@@ -37,6 +37,7 @@ except ImportError as import_error:
     maskUtils = UnsupportedPackage("pycocotools", import_error.msg)
 
 from ..representation.segmentation_representation import GTMaskLoader
+from  ..data_readers import MultiInstanceIdentifier
 
 from ..logging import warning
 
@@ -525,7 +526,7 @@ class MSCocoSingleKeypointsConverter(FileBasedAnnotationConverter):
             image_annotation = get_image_annotation(image[0], annotations)
             if not image_annotation:
                 continue
-            for target in image_annotation:
+            for target_id, target in enumerate(image_annotation):
                 x_vals, y_vals, visibility, labels, areas, is_crowd, bboxes, difficult = [], [], [], [], [], [], [], []
                 if target['num_keypoints'] == 0:
                     continue
@@ -537,8 +538,9 @@ class MSCocoSingleKeypointsConverter(FileBasedAnnotationConverter):
                 areas.append(target['area'])
                 bboxes.append(target['bbox'])
                 is_crowd.append(target['iscrowd'])
+                idx = MultiInstanceIdentifier(identifier, target_id)
                 keypoints_annotation = PoseEstimationAnnotation(
-                    identifier, np.array(x_vals), np.array(y_vals), np.array(visibility), np.array(labels)
+                    idx, np.array(x_vals), np.array(y_vals), np.array(visibility), np.array(labels)
                 )
                 keypoints_annotation.metadata['areas'] = areas
                 keypoints_annotation.metadata['rects'] = bboxes

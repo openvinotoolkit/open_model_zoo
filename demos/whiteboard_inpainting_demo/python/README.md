@@ -81,7 +81,7 @@ Example of a command:
 ```
 python whiteboard_inpainting_demo.py \
     -i <path_to_video>/video.avi \
-    -m_i <path_to_model>/instance-segmentation-security-0050.xml
+    -m_i <path_to_model>/instance-segmentation-security-0228.xml
 ```
 
 ## Demo output

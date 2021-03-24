@@ -1,0 +1,150 @@
+(120, 120, 120) # wall
+(180, 120, 120) # building;edifice
+(  6, 230, 230) # sky
+( 80,  50,  50) # floor;flooring
+(  4, 200,   3) # tree
+(120, 120,  80) # ceiling
+(140, 140, 140) # road;route
+(204,   5, 255) # bed
+(230, 230, 230) # windowpane;window
+(  4, 250,   7) # grass
+(224,   5, 255) # cabinet
+(235, 255,   7) # sidewalk;pavement
+(150,   5,  61) # person;individual;someone;somebody;mortal;soul
+(120, 120,  70) # earth;ground
+(  8, 255,  51) # door;double
+(255,   6,  82) # table
+(143, 255, 140) # mountain;mount
+(204, 255,   4) # plant;flora;life
+(255,  51,   7) # curtain;drape;drapery;mantle;pall
+(204,  70,   3) # chair
+(  0, 102, 200) # car;auto;automobile;machine;motorcar
+(61,  230, 250) # water
+(255,   6,  51) # painting;picture
+( 11, 102, 255) # sofa;couch;lounge
+(255,   7,  71) # shelf
+(255,   9, 224) # house
+(  9,   7, 230) # sea
+(220, 220, 220) # mirror
+(255,   9,  92) # rug;carpet;carpeting
+(112,   9, 255) # field
+(  8, 255, 214) # armchair
+(  7, 255, 224) # seat
+(255, 184,   6) # fence;fencing
+( 10, 255,  71) # desk
+(255,  41,  10) # rock;stone
+(  7, 255, 255) # wardrobe;closet;press
+(224, 255,   8) # lamp
+(102,   8, 255) # bathtub;bathing;tub;bath
+(255,  61,   6) # railing;rail
+(255, 194,   7) # cushion
+(255, 122,   8) # base;pedestal;stand
+(0,   255,  20) # box
+(255,   8,  41) # column;pillar
+(255,   5, 153) # signboard;sign
+(6,    51, 255) # chest;of;drawers;bureau;dresser
+(235,  12, 255) # counter
+(160, 150,  20) # sand
+(  0, 163, 255) # sink
+(140, 140, 140) # skyscraper
+(250,  10,  15) # fireplace;hearth;open
+( 20, 255,   0) # refrigerator;icebox
+( 31, 255,   0) # grandstand;covered;stand
+(255,  31,   0) # path
+(255, 224,   0) # stairs;steps
+(153, 255,   0) # runway
+(  0,   0, 255) # case;display;showcase;vitrine
+(255,  71,   0) # pool;table;billiard;snooker
+(  0, 235, 255) # pillow
+(  0, 173, 255) # screen;door
+( 31,   0, 255) # stairway;staircase
+( 11, 200, 200) # river
+(255,  82,   0) # bridge;span
+(  0, 255, 245) # bookcase
+(  0,  61, 255) # blind;screen
+(  0, 255, 112) # coffee;table;cocktail
+(  0, 255, 133) # toilet;can;commode;crapper;pot;potty;stool;throne
+(255,   0,   0) # flower
+(255, 163,   0) # book
+(255, 102,   0) # hill
+(194, 255,   0) # bench
+(  0, 143, 255) # countertop
+( 51, 255,   0) # stove;kitchen;range;cooking
+(  0,  82, 255) # palm;tree
+(  0, 255,  41) # kitchen;island
+(  0, 255, 173) # computer;computing;machine;device;data;processor;electronic;information;processing;system
+( 10,   0, 255) # swivel;chair
+(173, 255,   0) # boat
+(  0, 255, 153) # bar
+(255,  92,   0) # arcade;machine
+(255,   0, 255) # hovel;hut;hutch;shack;shanty
+(255,   0, 245) # bus;autobus;coach;charabanc;double-decker;jitney;motorbus;motorcoach;omnibus;passenger;vehicle
+(255,   0, 102) # towel
+(255,  173,  0) # light;source
+(255,    0, 20) # truck;motortruck
+(255, 184, 184) # tower
+(  0,  31, 255) # chandelier;pendant;pendent
+(  0, 255,  61) # awning;sunshade;sunblind
+(  0,  71, 255) # streetlight;street;lamp
+(255,   0, 204) # booth;cubicle;stall;kiosk
+(  0, 255, 194) # television;receiver;set;tv;box;boob;tube;telly;goggle
+(  0, 255,  82) # airplane;aeroplane;plane
+(  0,  10, 255) # dirt;track
+(  0, 112, 255) # apparel;wearing;dress;clothes
+( 51,   0, 255) # pole
+(  0, 194, 255) # land;ground;soil
+(  0, 122, 255) # bannister;banister;balustrade;balusters;handrail
+(  0, 255, 163) # escalator;moving;staircase;stairway
+(255, 153,   0) # ottoman;pouf;pouffe;puff;hassock
+(  0, 255,  10) # bottle
+(255, 112,   0) # buffet;counter;sideboard
+(143, 255,   0) # poster;posting;placard;notice;bill;card
+( 82,   0, 255) # stage
+(163, 255,   0) # van
+(255, 235,   0) # ship
+(  8, 184, 170) # fountain
+(133,   0, 255) # conveyer;belt;conveyor;transporter
+(  0, 255,  92) # canopy
+(184,   0, 255) # washer;automatic;washing;machine
+(255,   0,  31) # plaything;toy
+(  0, 184, 255) # swimming;pool;bath;natatorium
+(  0, 214, 255) # stool
+(255,   0, 112) # barrel;cask
+( 92, 255,   0) # basket;handbasket
+(  0, 224, 255) # waterfall;falls
+(112, 224, 255) # tent;collapsible;shelter
+( 70, 184, 160) # bag
+(163,   0, 255) # minibike;motorbike
+(153,   0, 255) # cradle
+( 71, 255,   0) # oven
+(255,   0, 163) # ball
+(255, 204,   0) # food;solid
+(255,   0, 143) # step;stair
+(  0, 255, 235) # tank;storage
+(133, 255,   0) # trade;name;brand;marque
+(255,   0, 235) # microwave;microwave;oven
+(245,   0, 255) # pot;flowerpot
+(255,   0, 122) # animal;animate;being;beast;brute;creature;fauna
+(255, 245,   0) # bicycle;bike;wheel;cycle
+( 10, 190, 212) # lake
+(214, 255,   0) # dishwasher;dish;washer;dishwashing;machine
+(  0, 204, 255) # screen;silver;projection
+( 20,   0, 255) # blanket;cover
+(255, 255,   0) # sculpture
+(  0, 153, 255) # hood;exhaust
+(  0,  41, 255) # sconce
+(  0, 255, 204) # vase
+( 41,   0, 255) # traffic;light;signal;stoplight
+( 41, 255,   0) # tray
+(173,   0, 255) # ashcan;trash;can;garbage;wastebin;ash;bin;ash-bin;ashbin;dustbin;barrel
+(  0, 245, 255) # fan
+( 71,   0, 255) # pier;wharf;wharfage;dock
+(122,   0, 255) # crt;screen
+(  0, 255, 184) # plate
+(  0,  92, 255) # monitor;monitoring;device
+(184, 255,   0) # bulletin;board;notice
+(  0, 133, 255) # shower
+(255, 214,   0) # radiator
+( 25, 194, 194) # glass;drinkin
+(102, 255,   0) # clock
+( 92,   0, 255) # flag

@@ -69,7 +69,8 @@ LIST_ENTRIES_PATHS = {
         'mxnet_weights': 'models',
         'onnx_model': 'models',
         'kaldi_model': 'models',
-        'saved_model_dir': 'models'
+        'saved_model_dir': 'models',
+        'params': 'models'
 }
 
 COMMAND_LINE_ARGS_AS_ENV_VARS = {
@@ -89,7 +90,8 @@ ACCEPTABLE_MODEL = [
     'onnx_model',
     'kaldi_model',
     'model',
-    'saved_model_dir'
+    'saved_model_dir',
+    'params'
 ]
 
 

@@ -1,0 +1,44 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Person Vehicle Bike Detection based on MobileNetV2 (ATSS) on 448x256 resolution.
+task_type: detection
+files:
+  - name: FP32/person-vehicle-bike-detection-2004.xml
+    size: 1262910
+    sha256: 027f02741477e5826c922e4fd0e4cc9608322c2b550a7ba086044b116cc28b83
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-vehicle-bike-detection-2004/FP32/person-vehicle-bike-detection-2004.xml
+  - name: FP32/person-vehicle-bike-detection-2004.bin
+    size: 7811824
+    sha256: e5da7b3b5ff4510196e65933ffddb4c19f9c00fd77cd94956c6691d0cd2a6d3b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-vehicle-bike-detection-2004/FP32/person-vehicle-bike-detection-2004.bin
+  - name: FP16/person-vehicle-bike-detection-2004.xml
+    size: 1262738
+    sha256: bfc29e9756753a2ab09b732c8a26293bbb7780e65517bc7ac57a72fe95bb91f4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-vehicle-bike-detection-2004/FP16/person-vehicle-bike-detection-2004.xml
+  - name: FP16/person-vehicle-bike-detection-2004.bin
+    size: 3906096
+    sha256: 1e4c76c94ee8cfe258600187cfb3781cfff4ad18963349b62eba826ced98ccc6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-vehicle-bike-detection-2004/FP16/person-vehicle-bike-detection-2004.bin
+  - name: FP16-INT8/person-vehicle-bike-detection-2004.xml
+    size: 1880370
+    sha256: 4d1b5406d84eea943f22b151879b0205bd8a3df80c02d501fc7f0459cc138a61
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-vehicle-bike-detection-2004/FP16-INT8/person-vehicle-bike-detection-2004.xml
+  - name: FP16-INT8/person-vehicle-bike-detection-2004.bin
+    size: 2055432
+    sha256: bb6557cd39ae9d8128fd41b442778de92a0f8fc2577f7dcbca614ae9d1a0e8af
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-vehicle-bike-detection-2004/FP16-INT8/person-vehicle-bike-detection-2004.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

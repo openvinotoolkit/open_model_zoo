@@ -839,6 +839,10 @@ class MTCNNEvaluator(BaseEvaluator):
             return progress_reporter
         return None if not check_progress else self._create_progress_reporter(check_progress, self.dataset.size)
 
+    @property
+    def dataset_size(self):
+        return self.dataset.size
+
 
 def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_mapping, iou_type=None):
     score = out[0][outputs_mapping['probability_out']][:, 1]

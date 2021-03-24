@@ -4,7 +4,7 @@ nibabel
 numpy
 scikit-learn
 scipy
-tokenizers
+tokenizers>=0.9.3
 tensorboard
 tensorboardX
 tqdm

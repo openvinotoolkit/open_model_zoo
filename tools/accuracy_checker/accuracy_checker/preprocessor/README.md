@@ -45,6 +45,7 @@ Accuracy Checker supports following set of preprocessors:
   * `std` specifies values, on which pixels will be divided.
      You can specify one value for all channels or list of comma separated channel-wise values.
      These parameters support work with precomputed values of frequently used datasets (e.g. `cifar10` or `imagenet`).
+  * `images_only` - prevent usage normalization for non-image inputs in multi input mode (Optional, default `False`).
 * `resize3d` - resizing 3d image (e.g. MRI scans) to new size:
   * `size` in format `(H,W,D)`. All values will be interpolated with 1st-order spline.
 * `crop_brats`  -  performing crop of 3d images (e.g. MRI scans) by cropping all non-zero voxels. Also sets bounding boxes for `segmentation_prediction_resample` preprocessor (see [Postprocessors](../postprocessor/README.md))
@@ -214,6 +215,11 @@ Accuracy Checker supports following set of preprocessors:
   * `black_level` - black level on the input image.
   * `ratio` - exposure scale ratio, optional, can be replaced by value from annotation if not provided.
   * `9-channels` - for packing 9 channels images (Optional, default `False`).
+* `alpha` - extracts alpha-channel data from the image.
+  * `channel` - number of channel to extract (Optional, default 3).
+* `trimap` - concatenates image data with alpha-channel based information for cut, keep and calculation zones in image.
+  * `cut_treshold` - maximum level of alpha values in cut zone. Optional, default is 0.1.
+  * `keep_treshold` - minimum level of alpha values in keep zone. Optional, default is 0.9. Pixels with alpha-channel values between `cut_threshold` and `keep_treshold` are in calculation zone.
 
 ## Optimized preprocessing via OpenVINO Inference Engine
 OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`.

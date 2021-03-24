@@ -1,0 +1,37 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Ultra-lightweight Face Detection slim 320 is a version of the lightweight face detection
+  model with network backbone simplification. The model designed for edge computing
+  devices and pre-trained on the WIDER FACE <http://shuoyang1213.me/WIDERFACE/> dataset
+  with 320x240 input resolutions.
+
+  For details see repository <https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB>.
+task_type: detection
+files:
+  - name: ultra-lightweight-face-detection-slim-320.onnx
+    size: 1195330
+    sha256: e9adbd0f920ddcce9368434c4d34d72520dc0c19b526fd44b4ef49bde2c3b1a8
+    source: https://raw.githubusercontent.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB/3cb8d7f9a9e418ab594b5b0bb349756a49699517/models/onnx/version-slim-320.onnx
+model_optimizer_args:
+  - --input_shape=[1,3,240,320]
+  - --input=input
+  - --input_model=$dl_dir/ultra-lightweight-face-detection-slim-320.onnx
+  - --mean_values=input[127.0,127.0,127.0]
+  - --scale_values=input[128.0,128.0,128.0]
+  - --output=boxes,scores
+  - --reverse_input_channels
+framework: onnx
+license: https://raw.githubusercontent.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB/master/LICENSE

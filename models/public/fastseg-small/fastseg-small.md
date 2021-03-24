@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-fastseg-small is an accurate real-time semantic segmentation model, pretrained on [Cityscapes](https://www.cityscapes-dataset.com) dataset for 19 object classes, see Cityscapes classes [definition](https://www.cityscapes-dataset.com/dataset-overview). The model was built on MobileNetV3 small backbone and modified segmentation head based on LR-ASPP. This model can be used for efficient segmentation on a variety of real-world street images. For details see [repository](https://github.com/ekzhang/fastseg).
+fastseg-small is an accurate real-time semantic segmentation model, pretrained on [Cityscapes](https://www.cityscapes-dataset.com) dataset for 19 object classes, listed in `<omz_dir>/data/dataset_classes/cityscapes_19cl.txt` file. See Cityscapes classes [definition](https://www.cityscapes-dataset.com/dataset-overview) for more details. The model was built on MobileNetV3 small backbone and modified segmentation head based on LR-ASPP. This model can be used for efficient segmentation on a variety of real-world street images. For model implementation details see original [repository](https://github.com/ekzhang/fastseg).
 
 ## Specification
 
@@ -25,11 +25,10 @@ fastseg-small is an accurate real-time semantic segmentation model, pretrained o
 
 Image, name: `input0`, shape: `1, 3, 1024, 2048`, format: `B, C, H, W`,
    where:
-
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+    - `B` - batch size
+    - `C` - number of channels
+    - `H` - image height
+    - `W` - image width
 
    Expected color order: RGB.
 Mean values: [123.675, 116.28, 103.53], scale values: [58.395, 57.12, 57.375]
@@ -38,11 +37,10 @@ Mean values: [123.675, 116.28, 103.53], scale values: [58.395, 57.12, 57.375]
 
 Image, name: `input0`, shape: `1, 3, 1024, 2048`, format: `B, C, H, W`,
    where:
-
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+    - `B` - batch size
+    - `C` - number of channels
+    - `H` - image height
+    - `W` - image width
 
    Expected color order: BGR.
 
@@ -51,20 +49,32 @@ Image, name: `input0`, shape: `1, 3, 1024, 2048`, format: `B, C, H, W`,
 ### Original Model
 
 Float values, which represent scores of a predicted class for each image pixel. The model was trained on Cityscapes dataset with 19 categories of objects. Name: `output0`, shape: `1, 19, 1024, 2048` in `B, N, H, W` format, where
-
-    - B - batch size
-    - N - number of classes
-    - H - image height
-    - W - image width
+    - `B` - batch size
+    - `N` - number of classes
+    - `H` - image height
+    - `W` - image width
 
 ### Converted Model
 
 Float values, which represent scores of a predicted class for each image pixel. The model was trained on Cityscapes dataset with 19 categories of objects. Name: `output0`, shape: `1, 19, 1024, 2048` in `B, N, H, W` format, where
+    - `B` - batch size
+    - `N` - number of classes
+    - `H` - image height
+    - `W` - image width
 
-    - B - batch size
-    - N - number of classes
-    - H - image height
-    - W - image width
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

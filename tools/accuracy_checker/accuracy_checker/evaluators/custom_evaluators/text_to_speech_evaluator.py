@@ -81,7 +81,9 @@ class TextToSpeechEvaluator(BaseEvaluator):
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             batch_data, batch_meta = extract_image_representations(batch_inputs)
-            input_names = [s.split('.')[-1] for s in batch_inputs[0].identifier]
+            input_names = ['{}{}'.format(
+                'forward_tacotron_duration_' if self.model.with_prefix else '',
+                s.split('.')[-1]) for s in batch_inputs[0].identifier]
             temporal_output_callback = None
             if output_callback:
                 temporal_output_callback = partial(output_callback,
@@ -162,6 +164,10 @@ class TextToSpeechEvaluator(BaseEvaluator):
 
     def set_profiling_dir(self, profiler_dir):
         self.metric_executor.set_profiling_dir(profiler_dir)
+
+    @property
+    def dataset_size(self):
+        return self.dataset.size
 
     def release(self):
         self.model.release()
@@ -297,11 +303,16 @@ class SequentialModel:
         self.melgan = create_network(
             network_info.get('melgan', {}), launcher, "melganupsample", delayed_model_loading
         )
-        self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
+        if not delayed_model_loading:
+            self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
+            self.melgan_input = next(iter(self.melgan.inputs))
+        else:
+            self.forward_tacotron_duration_input = None
+            self.melgan_input = None
         self.forward_tacotron_regression_input = network_info['forward_tacotron_regression_inputs']
-        self.melgan_input = next(iter(self.melgan.inputs))
         self.duration_output = 'duration'
         self.embeddings_output = 'embeddings'
+        self.mel_output = 'mel'
         self.audio_output = 'audio'
         self.max_mel_len = int(network_info['max_mel_len'])
         self.max_regression_len = int(network_info['max_regression_len'])
@@ -362,7 +373,7 @@ class SequentialModel:
             mels = self.forward_tacotron_regression.predict({self.forward_tacotron_regression_input: processed_emb})
         if callback:
             callback(mels)
-        melgan_input = mels[self.melgan_input]
+        melgan_input = mels[self.mel_output]
         if np.ndim(melgan_input) != 3:
             melgan_input = np.expand_dims(melgan_input, 0)
         melgan_input = melgan_input[:, :, :self.max_mel_len]
@@ -424,12 +435,16 @@ class SequentialModel:
         with_prefix = current_name.startswith('forward_tacotron_duration_')
         if with_prefix != self.with_prefix:
             self.duration_output = generate_name('forward_tacotron_duration_', with_prefix, self.duration_output)
-            self.embeddings_output = generate_name('forward_tacotron_duration', with_prefix, self.embeddings_output)
-            self.audio_output = generate_name('melgan', with_prefix, self.audio_output)
+            self.embeddings_output = generate_name('forward_tacotron_duration_', with_prefix, self.embeddings_output)
+            self.mel_output = generate_name('forward_tacotron_regression_', with_prefix, self.mel_output)
+            self.audio_output = generate_name('melgan_', with_prefix, self.audio_output)
             self.adapter.output_blob = self.audio_output
             self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
-            self.forward_tacotron_regression_input = next(iter(self.forward_tacotron_regression.inputs))
             self.melgan_input = next(iter(self.melgan.inputs))
+            for key, value in self.forward_tacotron_regression_input.items():
+                self.forward_tacotron_regression_input[key] = generate_name(
+                    'forward_tacotron_regression_', with_prefix, value
+                )
 
         self.with_prefix = with_prefix
 

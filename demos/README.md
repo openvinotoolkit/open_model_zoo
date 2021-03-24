@@ -16,6 +16,7 @@ The Open Model Zoo includes the following demos:
 - [Colorization Python\* Demo](./colorization_demo/python/README.md) - Colorization demo colorizes input frames.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/cpp/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
 - [Deblurring Python\* Demo](./deblurring_demo/python/README.md) - Demo for deblurring the input images.
+- [Face Detection MTCNN Python\* Demo](./face_detection_mtcnn_demo/python/README.md) - The demo demonstrates how to run MTCNN face detection model to detect faces on images.
 - [Formula Recognition Python\* Demo](./formula_recognition_demo/python/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/cpp/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
 - [Gesture Recognition Python\* Demo](./gesture_recognition_demo/python/README.md) - Demo application for Gesture Recognition algorithm (e.g. American Sign Language gestures), which classifies gesture actions that are being performed on input video.
@@ -83,15 +84,16 @@ The table below shows the correlation between models, demos, and supported plugi
 | head-pose-estimation-adas-0001                   | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   | Supported       |
 | head-pose-estimation-adas-0001                   | [Gaze Estimation Demo](./gaze_estimation_demo/cpp/README.md)                                                     | Supported | Supported | Supported   | Supported       |
 | human-pose-estimation-0001                       | [Human Pose Estimation Demo](./human_pose_estimation_demo/cpp/README.md)<br>[Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)      | Supported | Supported | Supported   | Supported       |
-| human-pose-estimation-0002                       | [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)                   | Supported | Supported |             |                 |
-| human-pose-estimation-0003                       | [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)                   | Supported | Supported |             |                 |
-| human-pose-estimation-0004                       | [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)                   | Supported | Supported |             |                 |
+| human-pose-estimation-0005                       | [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)                   | Supported | Supported |             |                 |
+| human-pose-estimation-0006                       | [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)                   | Supported | Supported |             |                 |
+| human-pose-estimation-0007                       | [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)                   | Supported | Supported |             |                 |
 | human-pose-estimation-3d-0001                    | [3D Human Pose Estimation Python\* Demo](./human_pose_estimation_3d_demo/python/README.md)             | Supported | Supported |             |                 |
 | image-retrieval-0001                             | [Image Retrieval Python\* Demo](./image_retrieval_demo/python/README.md)                               | Supported | Supported | Supported   | Supported       |
-| instance-segmentation-security-0010              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
-| instance-segmentation-security-0050              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
-| instance-segmentation-security-0083              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
-| instance-segmentation-security-1025              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
+| instance-segmentation-security-0002              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
+| instance-segmentation-security-0091              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
+| instance-segmentation-security-0228              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
+| instance-segmentation-security-1039              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
+| instance-segmentation-security-1040              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
 | landmarks-regression-retail-0009                 | [Smart Classroom Demo](./smart_classroom_demo/cpp/README.md)                                                     | Supported | Supported | Supported   | Supported       |
 | license-plate-recognition-barrier-0001           | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   | Supported       |
 | pedestrian-and-vehicle-detector-adas-0001        | any demo that supports SSD\*-based models                                                                    | Supported | Supported | Supported   | Supported       |
@@ -118,6 +120,7 @@ The table below shows the correlation between models, demos, and supported plugi
 | text-detection-0003                              | [Text Detection Demo](./text_detection_demo/cpp/README.md)                                                       | Supported | Supported | Supported   | Supported       |
 | text-detection-0004                              | [Text Detection Demo](./text_detection_demo/cpp/README.md)                                                       | Supported | Supported | Supported   | Supported       |
 | text-recognition-0012                            | [Text Detection Demo](./text_detection_demo/cpp/README.md)                                                       | Supported | Supported | Supported   |                 |
+| text-recognition-0013                            | [Text Detection Demo](./text_detection_demo/cpp/README.md)                                                       | Supported | Supported | Supported   |                 |
 | vehicle-attributes-recognition-barrier-0039      | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   | Supported       |
 | vehicle-attributes-recognition-barrier-0042      | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   |                 |
 | vehicle-license-plate-detection-barrier-0106     | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   | Supported       |
@@ -144,7 +147,7 @@ The officially supported Linux* build environment is the following:
 
 * Ubuntu* 16.04 LTS 64-bit or CentOS* 7.4 64-bit
 * GCC* 5.4.0 (for Ubuntu* 16.04) or GCC* 4.8.5 (for CentOS* 7.4)
-* CMake* version 2.8 or higher.
+* CMake* version 3.10 or higher.
 
 To build the demo applications for Linux, go to the directory with the `build_demos.sh` script and
 run it:
@@ -185,7 +188,7 @@ for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 The recommended Windows* build environment is the following:
 * Microsoft Windows* 10
 * Microsoft Visual Studio* 2015, 2017, or 2019
-* CMake* version 2.8 or higher
+* CMake* version 3.10 or higher
 
 > **NOTE**: If you want to use Microsoft Visual Studio 2019, you are required to install CMake 3.14.
 

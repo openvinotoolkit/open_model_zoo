@@ -31,13 +31,9 @@ from warnings import warn
 from collections.abc import MutableSet, Sequence
 from io import BytesIO
 
+import defusedxml.ElementTree as et
 import numpy as np
 import yaml
-
-try:
-    import lxml.etree as et
-except ImportError:
-    import xml.etree.cElementTree as et
 
 try:
     from shapely.geometry.polygon import Polygon

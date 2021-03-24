@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `alexnet` model is designed to perform image classification. Just like other common classification models, the `alexnet` model has been pretrained on the ImageNet image database. For details about this model, check out the [paper](http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf).
+The `alexnet` model is designed to perform image classification. Just like other common classification models, the `alexnet` model has been pretrained on the ImageNet image database. For details about this model, check out the [paper](https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf).
 
 The model input is a blob that consists of a single image of 1x3x227x227 in BGR order. The BGR mean values need to be subtracted as follows: [104, 117, 123] before passing the image blob into the network.
 
@@ -69,6 +69,20 @@ Object classifier according to ImageNet classes, name - `prob`, shape - `1,1000`
 - `B` - batch size
 - `C` - Predicted probabilities for each class in  [0, 1] range
 
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

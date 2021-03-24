@@ -18,7 +18,7 @@ import math
 import cv2
 import numpy as np
 from ..adapters import Adapter
-from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction
+from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction, BackgroundMattingPrediction
 from ..config import ConfigError, ConfigValidator, BoolField, ListField, NumberField, StringField
 from ..utils import contains_any
 
@@ -222,4 +222,19 @@ class DUCSegmentationAdapter(Adapter):
             labels = cv2.resize(labels, (w, h), interpolation=cv2.INTER_LINEAR)
             labels = np.transpose(labels, [2, 0, 1])
             result.append(SegmentationPrediction(identifier, labels))
+        return result
+
+
+class BackgroundMattingAdapter(Adapter):
+    __provider__ = 'background_matting'
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        frame_meta = frame_meta or [] * len(identifiers)
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
+        for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
+            output *= 255
+            result.append(BackgroundMattingPrediction(identifier, output.astype(np.uint8)))
+
         return result

@@ -66,7 +66,7 @@ class SSD(Model):
             pass
 
         try:
-            parser = BoxesLabelsParser(net.outputs, net.input_info[image_blob_name].input_data.shape[2:])
+            parser = BoxesLabelsParser(net.outputs, net.input_info[image_blob_name].input_data.shape[2:][::-1])
             self.logger.info('Use BoxesLabelsParser')
             return parser
         except ValueError:

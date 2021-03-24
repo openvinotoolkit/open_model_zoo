@@ -60,7 +60,7 @@ class Dataset:
     def __init__(self, config_entry, delayed_annotation_loading=False):
         self.name = config_entry.get('name')
         self._config = config_entry
-        self.batch = self.config.get('batch')
+        self._batch = self.config.get('batch')
         self.iteration = 0
         self.data_provider = None
         ConfigValidator('dataset', fields=self.parameters()).validate(self.config)
@@ -187,7 +187,19 @@ class Dataset:
         if data_reader_type in REQUIRES_ANNOTATIONS:
             data_source = annotation
         data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
-        self.data_provider = DataProvider(data_reader, AnnotationProvider(annotation, meta), dataset_config=self.config)
+        self.data_provider = DataProvider(
+            data_reader, AnnotationProvider(annotation, meta), dataset_config=self.config, batch=self.batch
+        )
+
+    @property
+    def batch(self):
+        return self._batch
+
+    @batch.setter
+    def batch(self, b):
+        self._batch = b
+        if self.data_provider:
+            self.data_provider.batch = b
 
     @property
     def config(self):
@@ -488,12 +500,15 @@ class AnnotationProvider:
 
 
 class DataProvider:
-    def __init__(self, data_reader, annotation_provider=None, tag='', dataset_config=None, data_list=None, subset=None):
+    def __init__(
+            self, data_reader, annotation_provider=None, tag='', dataset_config=None, data_list=None, subset=None,
+            batch=None
+    ):
         self.tag = tag
         self.data_reader = data_reader
         self.annotation_provider = annotation_provider
         self.dataset_config = dataset_config or {}
-        self.batch = None
+        self.batch = batch
         self.subset = subset
         self.create_data_list(data_list)
         if self.store_subset:

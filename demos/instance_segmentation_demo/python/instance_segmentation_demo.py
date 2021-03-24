@@ -25,11 +25,12 @@ import cv2
 import numpy as np
 from openvino.inference_engine import IECore
 
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+
 from instance_segmentation_demo.model_utils import check_model
 from instance_segmentation_demo.tracker import StaticIOUTracker
 from instance_segmentation_demo.visualizer import Visualizer
 
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
 
@@ -108,7 +109,8 @@ def main():
     # Read IR
     log.info('Loading network')
     net = ie.read_network(args.model, args.model.with_suffix('.bin'))
-    image_input, image_info_input, (n, c, h, w), postprocessor = check_model(net)
+    image_input, image_info_input, (n, c, h, w), model_type, postprocessor = check_model(net)
+    args.no_keep_aspect_ratio = model_type == 'yolact' or args.no_keep_aspect_ratio
 
     log.info('Loading IR to the plugin...')
     exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)

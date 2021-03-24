@@ -80,7 +80,7 @@ AccuracyChecker supports following set of adapters:
   * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.05).
   * `nms_threshold` - overlap threshold for NMS (optional, default 0.5).
   * `keep_top_k ` - maximal number of boxes which should be kept (optional, default 200).
-  * `feat_size` - features size in format [[feature_width, feature_height], ...] (Optional, default values got from [MLPerf](https://github.com/mlperf/inference/blob/0691366473fd4fbbc4eb432fad990683a5a87099/v0.5/classification_and_detection/python/models/ssd_r34.py#L208))
+  * `feat_size` - features size in format [[feature_width, feature_height], ...] (Optional, default values got from [MLPerf](https://github.com/mlcommons/inference/blob/0691366473fd4fbbc4eb432fad990683a5a87099/v0.5/classification_and_detection/python/models/ssd_r34.py#L208))
   * `do_softmax` - boolean flag which says should be softmax applied to detection scores or not. (Optional, default True)
 * `ssd_onnx` - converting output of SSD-based model from PyTorch with NonMaxSuppression layer.
   * `labels_out` - name of output layer with labels or regular expression for it searching.
@@ -386,3 +386,9 @@ AccuracyChecker supports following set of adapters:
 * `detr` - converts output of DETR models family to `DetectionPrediction`.
     * `scores_out` - output layer name with detection scores logits.
     * `boxes_out` - output layer name with detection boxes coordinates in [Cx,Cy,W, H] format, where Cx - x coordinate of box center, Cy - y coordinate of box center, W, H - width and height respectively.
+* `ultra_lightweight_face_detection` - converts output of Ultra-Lightweight Face Detection models to `DetectionPrediction` representation.
+  * `scores_out` - name of output layer with bounding boxes scores.
+  * `boxes_out` - name of output layer with bounding boxes coordinates.
+  * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0.7).
+* `trimap` - converts greyscale model output to `ImageProcessingPrediction`. Replaces pixel values in cut and keep zones with 0 and 1 respectively. All other postprocessing inherited from `image_processing` adapter.
+* `background_matting` - converts output of background matting model to `BackgroundMattingPrediction`.

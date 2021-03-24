@@ -41,6 +41,7 @@ from .data_reader import (
     MultiFramesInputIdentifier,
     ImagePairIdentifier,
     ListIdentifier,
+    MultiInstanceIdentifier,
 
     serialize_identifier,
     deserialize_identifier,
@@ -78,6 +79,7 @@ __all__ = [
     'MultiFramesInputIdentifier',
     'ImagePairIdentifier',
     'ListIdentifier',
+    'MultiInstanceIdentifier',
     'create_reader',
     'REQUIRES_ANNOTATIONS',
 
