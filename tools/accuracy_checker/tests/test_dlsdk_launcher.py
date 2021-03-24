@@ -181,9 +181,9 @@ class TestDLSDKLauncherInfer:
         dlsdk_test_model.predict([{'data': input_blob.astype(np.float32)}], [image.metadata])
         assert dlsdk_test_model.output_blob == 'fc3'
 
+
 @pytest.mark.skipif(ng is None and not has_layers(), reason='no functionality to set affinity')
 class TestDLSDKLauncherAffinity:
-    @pytest.mark.skip(reason='runtime issue with affinity setting')
     @pytest.mark.usefixtures('mock_affinity_map_exists')
     def test_dlsdk_launcher_valid_affinity_map(self, mocker, models_dir):
         affinity_map = {'conv1': 'GPU'}
