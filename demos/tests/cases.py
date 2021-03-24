@@ -687,6 +687,7 @@ PYTHON_DEMOS = [
                     ModelArg('yolo-v3-tf')),
             ),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
+            TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
         ],
     )),
 
