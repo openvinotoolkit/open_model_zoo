@@ -106,7 +106,7 @@ class YOLO(Model):
     @staticmethod
     def _parse_yolo_region(predictions, input_size, params, threshold, multiple_labels=True):
         # ------------------------------------------ Extracting layer parameters ---------------------------------------
-        objects = list()
+        objects = []
         size_normalizer = input_size if params.isYoloV3 else params.sides
         bbox_size = params.coords + 1 + params.classes
         # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
@@ -198,7 +198,7 @@ class YOLO(Model):
         return detections
 
     def postprocess(self, outputs, meta):
-        detections = list()
+        detections = []
 
         for layer_name in self.yolo_layer_params.keys():
             out_blob = outputs[layer_name]

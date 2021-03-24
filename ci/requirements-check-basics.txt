@@ -1,9 +1,15 @@
 # use update-requirements.py to update this file
 
-flake8==3.9.0
+flake8-comprehensions==3.4.0
     # via -r ci/requirements-check-basics.in
+flake8==3.9.0
+    # via
+    #   -r ci/requirements-check-basics.in
+    #   flake8-comprehensions
 importlib-metadata==3.7.3
-    # via flake8
+    # via
+    #   flake8
+    #   flake8-comprehensions
 mccabe==0.6.1
     # via flake8
 mistune==2.0.0a6

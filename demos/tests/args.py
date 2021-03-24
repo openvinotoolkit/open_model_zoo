@@ -61,7 +61,7 @@ class DataPatternArg:
         seq = [Path(data.resolve(context))
             for data in context.data_sequences[self.sequence_name]]
 
-        assert len(set(data.suffix for data in seq)) == 1, "all images in the sequence must have the same extension"
+        assert len({data.suffix for data in seq}) == 1, "all images in the sequence must have the same extension"
         assert '%' not in seq[0].suffix
 
         name_format = 'input-%04d' + seq[0].suffix

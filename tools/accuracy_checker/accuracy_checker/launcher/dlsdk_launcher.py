@@ -156,7 +156,7 @@ class DLSDKLauncher(Launcher):
         self.disable_resize_to_input = False
         self._do_reshape = False
         self._use_set_blob = False
-        self._output_layouts = dict()
+        self._output_layouts = {}
         self.preprocessor = preprocessor
 
         if not delayed_model_loading:
@@ -772,7 +772,7 @@ class DLSDKLauncher(Launcher):
                 output_tuple = string_to_tuple(output_string, casting_type=None)
                 if len(output_tuple) == 1:
                     return output_string
-                return tuple([output_tuple[0], int(output_tuple[1])])
+                return (output_tuple[0], int(output_tuple[1]))
             preprocessed_outputs = [output_preprocessing(output) for output in outputs]
             self.network.add_outputs(preprocessed_outputs)
         if input_shapes is not None:
@@ -861,7 +861,7 @@ class DLSDKLauncher(Launcher):
             if len(data_shape) == 1:
                 return np.transpose([data])
             if len(data_shape) > 2:
-                if all([dim == 1 for dim in layer_shape]) and all([dim == 1 for dim in data_shape]):
+                if all(dim == 1 for dim in layer_shape) and all(dim == 1 for dim in data_shape):
                     return np.resize(data, layer_shape)
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)

@@ -119,7 +119,7 @@ class MSASLContiniousConverter(BaseFormatConverter):
 
             annotations.append(ClassificationAnnotation(identifier, record.label))
 
-        return ConverterReturn(annotations, dict(), content_errors)
+        return ConverterReturn(annotations, {}, content_errors)
 
     @staticmethod
     def load_annotations(ann_file):
