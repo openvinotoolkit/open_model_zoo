@@ -145,9 +145,7 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
         float* nmsHeatMapsMapped = nmsHeats->rmap().as<float*>();
         nmsHeatMaps = split(nmsHeatMapsMapped, nmsHeatMapsDims);
     }
-
-    std::vector<cv::Mat> nmsHeatMaps = heatMapNMS(heatMaps, 5);
-    std::vector<HumanPose> poses = extractPoses(heatMaps, newEmbds, nmsHeatMaps);
+    std::vector<HumanPose> poses = extractPoses(heatMaps, aembdsMaps, nmsHeatMaps);
 
     // Rescale poses to the original image
     const auto& scale = infResult.internalModelData->asRef<InternalScaleMatData>();
@@ -192,7 +190,7 @@ std::vector<cv::Mat> HpeAssociativeEmbedding::split(float* data, const SizeVecto
     return flattenData;
 }
 
-std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(
+std::vector<HumanPose> HpeHRNet::extractPoses(
     std::vector<cv::Mat>& heatMaps,
     const std::vector<cv::Mat>& aembdsMaps,
     const std::vector<cv::Mat>& nmsHeatMaps) const {

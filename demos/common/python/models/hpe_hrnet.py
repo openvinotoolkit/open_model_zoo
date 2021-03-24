@@ -14,9 +14,7 @@
  limitations under the License.
 """
 
-import cv2
 import numpy as np
-from skimage.measure import block_reduce
 
 from .hpe_associative_embedding import AssociativeEmbeddingDecoder
 from .model import Model
@@ -28,7 +26,10 @@ class HpeHRNet(Model):
         super().__init__(ie, model_path)
         self.image_blob_name = self._get_inputs(self.net)
         self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)
-        self.nms = HeatmapNMS(kernel=5)
+        try:
+            self.nms_heatmaps_blob_name = find_layer_by_name('nms_heatmaps', self.net.outputs)
+        except ValueError:
+            self.nms_heatmaps_blob_name = self.heatmaps_blob_name
         self.embeddings_blob_name = find_layer_by_name('embeddings', self.net.outputs)
 
         self.output_scale = self.net.input_info[self.image_blob_name].input_data.shape[-1] / self.net.outputs[self.heatmaps_blob_name].shape[-1]
@@ -68,7 +69,7 @@ class HpeHRNet(Model):
             if len(blob.input_data.shape) == 4:
                 image_blob_name = blob_name
             else:
-                raise RuntimeError('Unsupported {}D input layer "{}". Only 2D and 4D input layers are supported'
+                raise RuntimeError('Unsupported {}D input layer "{}". Only 4D input layers are supported'
                                    .format(len(blob.shape), blob_name))
         if image_blob_name is None:
             raise RuntimeError('Failed to identify the input for the image.')
@@ -94,15 +95,9 @@ class HpeHRNet(Model):
 
     def postprocess(self, outputs, meta):
         heatmaps = outputs[self.heatmaps_blob_name]
+        nms_heatmaps = outputs[self.nms_heatmaps_blob_name]
         aembds = outputs[self.embeddings_blob_name]
-        # resize lr_heatmaps and aembds to heatmaps size
-        aembds = cv2.resize(np.transpose(aembds[0], (1, 2, 0)), heatmaps.shape[2:4][::-1])
-        aembds = np.transpose(aembds, (2, 0, 1))[None]
-        num_joints = heatmaps.shape[1]
-        # average of heatmaps and apply nms
-        heatmaps = (heatmaps + aembds[:, :num_joints, :, :]) / 2
-        nms_heatmaps = self.nms(heatmaps)
-        aembds = aembds[:, num_joints:, :, :]
+
         poses, scores = self.decoder(heatmaps, aembds, nms_heatmaps=nms_heatmaps)
         # Rescale poses to the original image.
         poses = self.transform_preds(poses, meta)
@@ -139,28 +134,3 @@ def find_layer_by_name(name, layers):
         raise ValueError('More than 1 layer matched to "{}" output'.format(name))
 
     return suitable_layers[0]
-
-
-class HeatmapNMS:
-    def __init__(self, kernel):
-        self.kernel = kernel
-        self.pad = (kernel - 1) // 2
-
-    def max_pool(self, x):
-        # Max pooling kernel x kernel with stride 1 x 1.
-        k = self.kernel
-        p = self.pad
-        pooled = np.zeros_like(x)
-        hmap = np.pad(x, ((0, 0), (0, 0), (p, p), (p, p)))
-        h, w = hmap.shape[-2:]
-        for i in range(k):
-            n = (h - i) // k * k
-            for j in range(k):
-                m = (w - j) // k * k
-                hmap_slice = hmap[..., i:i + n, j:j + m]
-                pooled[..., i::k, j::k] = block_reduce(hmap_slice, (1, 1, k, k), np.max)
-        return pooled
-
-    def __call__(self, heatmaps):
-        pooled = self.max_pool(heatmaps)
-        return heatmaps * (pooled == heatmaps).astype(heatmaps.dtype)

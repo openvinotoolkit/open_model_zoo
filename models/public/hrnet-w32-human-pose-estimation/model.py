@@ -14,11 +14,38 @@
 
 from config import cfg
 import models
+import torch
 
 
-def get_net(file_config):
+class HpeHRNet(torch.nn.Module):
+    def __init__(self, cfg, weights):
+        super().__init__()
+        self.impl = models.pose_higher_hrnet.PoseHigherResolutionNet(cfg)
+        checkpoint = torch.load(weights, map_location='cpu')
+        self.impl.load_state_dict(checkpoint)
+        self.impl.eval()
+        self.pool = torch.nn.MaxPool2d(kernel_size=5, stride=1, padding=2)
+
+    def forward(self, image):
+        outputs = self.impl(image)
+        outputs[0] = torch.nn.functional.interpolate(
+                outputs[0],
+                size=(outputs[-1].size(2), outputs[-1].size(3)),
+                mode='bilinear',
+                align_corners=False
+            )
+        outputs[1] = (outputs[0][:, :17, :, :] + outputs[1]) / 2
+        outputs[0] = outputs[0][:, 17:, :, :]
+        # apply nms
+        maxm = self.pool(outputs[1])
+        maxm = torch.eq(maxm, outputs[1]).float()
+        outputs.append(outputs[1] * maxm)
+        return outputs
+
+
+def get_net(file_config, weights):
     cfg.defrost()
     cfg.merge_from_file(file_config)
 
-    model = models.pose_higher_hrnet.PoseHigherResolutionNet(cfg)
+    model = HpeHRNet(cfg, weights)
     return model

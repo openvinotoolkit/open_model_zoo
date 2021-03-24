@@ -78,7 +78,3 @@ void adjustAndRefine(std::vector<Pose>& allPoses,
                      const std::vector<cv::Mat>& heatMaps,
                      const std::vector<cv::Mat>& aembdsMaps,
                      int poseId, float delta);
-
-cv::Mat maxPool(const cv::Mat& map, int kernel);
-
-std::vector<cv::Mat> heatMapNMS(const std::vector<cv::Mat>& heatmaps, int kernel);

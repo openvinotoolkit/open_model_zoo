@@ -14,14 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import cv2
 import numpy as np
 
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, ConfigError
 from ..representation import PoseEstimationPrediction
 
-from .pose_estimation_openpose import HeatmapNMS
 from .pose_estimation_associative_embedding import AssociativeEmbeddingDecoder
 
 
@@ -37,12 +35,15 @@ class HumanPoseHRNetAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'heatmaps_lr_and_embeddings_out': StringField(
-                description="Name of output layer with keypoints heatmaps ans associative embeddings.",
+            'embeddings_out': StringField(
+                description="Name of output layer with associative embeddings.",
                 optional=True
             ),
             'heatmaps_out': StringField(
                 description="Name of output layer with keypoints heatmaps.", optional=True
+            ),
+            'nms_heatmaps_out': StringField(
+                description="Name of output layer with keypoints heatmaps after NMS.", optional=True
             ),
         })
 
@@ -55,9 +56,10 @@ class HumanPoseHRNetAdapter(Adapter):
         )
 
     def configure(self):
-        self.heatmaps_lr_and_tags = self.get_value_from_config('heatmaps_lr_and_embeddings_out')
+        self.embeddings = self.get_value_from_config('embeddings_out')
         self.heatmaps = self.get_value_from_config('heatmaps_out')
-        self.nms = HeatmapNMS(kernel=5)
+        self.nms_heatmaps = self.get_value_from_config('nms_heatmaps_out')
+
         self.num_joints = 17
         self.decoder = AssociativeEmbeddingDecoder(
             num_joints=17,
@@ -74,33 +76,20 @@ class HumanPoseHRNetAdapter(Adapter):
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        if not contains_all(raw_outputs, (self.heatmaps_lr_and_tags, self.heatmaps)):
+        if not contains_all(raw_outputs, (self.embeddings, self.heatmaps, self.nms_heatmaps)):
             raise ConfigError('Some of the outputs are not found')
 
-        heatmaps_lr_and_tags = raw_outputs[self.heatmaps_lr_and_tags][None]
-        heatmaps = raw_outputs[self.heatmaps][None]
-        raw_output = zip(identifiers, heatmaps_lr_and_tags, heatmaps, frame_meta)
+        raw_output = zip(identifiers, raw_outputs[self.heatmaps][None],
+                         raw_outputs[self.nms_heatmaps][None],
+                         raw_outputs[self.embeddings][None], frame_meta)
 
-        for identifier, heatmap_lr_and_tag, heatmap, meta in raw_output:
+        for identifier, heatmap, nms_heatmap, embedding, meta in raw_output:
             h, w, _ = meta['image_size']
-            # resize heatmaps_lr and tags to size of input layer
-            heatmap_lr_and_tag = np.transpose(heatmap_lr_and_tag[0], (1, 2, 0))
-            heatmap_and_tag = cv2.resize(heatmap_lr_and_tag, (0, 0), fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
-
-            heatmap = np.transpose(heatmap[0], (1, 2, 0))
-
-            heatmaps = (heatmap_and_tag[:, :, :self.num_joints] + heatmap) / 2
-            heatmaps = cv2.resize(heatmaps, (0, 0), fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
-            heatmaps = np.transpose(heatmaps, (2, 0, 1))[None]
-            tags = heatmap_and_tag[:, :, self.num_joints:]
-            tags = cv2.resize(tags, (0, 0), fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
-            tags = np.transpose(tags, (2, 0, 1))[None]
-            nms_heatmaps = self.nms(heatmaps)
 
             # using decoder
-            poses, scores = self.decoder(heatmaps, tags, nms_heatmaps=nms_heatmaps)
+            poses, scores = self.decoder(heatmap, embedding, nms_heatmaps=nms_heatmap)
 
-            poses = self.transform_preds(poses, (h, w), heatmaps.shape[2:])
+            poses = self.transform_preds(poses, (h, w), heatmap.shape[2:])
 
             if len(scores) == 0:
                 result.append(PoseEstimationPrediction(

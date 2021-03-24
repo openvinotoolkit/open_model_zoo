@@ -49,10 +49,11 @@ Channel order is `BGR`.
 
 ## Output
 
-The net outputs two blobs:
+The net outputs three blobs:
 
 - `heatmaps` of shape B, 17, 256, 256 containing location heatmaps for keypoints of all types.
-- `heatmaps_lr_and_embeddings` of shape B, 34, 128, 128 containing location heatmaps with resolution `128x128`and associative embedding values, which are used for grouping individual keypoints into poses.
+- `nms_heatmaps` of shape B, 17, 256, 256 containing location heatmaps that are filtered out by non-maximum suppression algorithm.
+- `embeddings` of shape B, 17, 256, 256 containing associative embedding values, which are used for grouping individual keypoints into poses.
 
 ## Legal Information
 

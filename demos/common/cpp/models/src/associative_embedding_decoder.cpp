@@ -191,37 +191,3 @@ void adjustAndRefine(std::vector<Pose>& allPoses,
         }
     }
 }
-
-cv::Mat maxPool(const cv::Mat& map, int kernel) {
-    int pad = (kernel - 1) / 2;
-    // padding
-    cv::Mat paddedImage;
-    cv::copyMakeBorder(map, paddedImage, pad, pad, pad, pad,
-                       cv::BORDER_CONSTANT, 0);
-    // maxPool
-    cv::Mat res(map.rows, map.cols, map.type(), cv::Scalar::all(0));
-    for (int i = 0; i < res.rows; i++)
-    {
-        for (int j = 0; j < res.cols; j++)
-        {
-            cv::Mat temp;
-            cv::Rect roi = cv::Rect(j, i, kernel, kernel);
-            paddedImage(roi).copyTo(temp);
-            double min, max;
-            cv::minMaxLoc(temp, &min, &max);
-            res.at<float>(i, j) = static_cast<float>(max);
-        }
-    }
-    return res;
-}
-
-std::vector<cv::Mat> heatMapNMS(const std::vector<cv::Mat>& heatMaps, int kernel) {
-    std::vector<cv::Mat> result(heatMaps.size());
-    for (size_t i = 0; i < heatMaps.size(); i++) {
-        cv::Mat maxs = maxPool(heatMaps[i], kernel);
-        cv::Mat eq = (heatMaps[i] == maxs) / 255;
-        eq.convertTo(eq, heatMaps[i].type());
-        result[i] = heatMaps[i].mul(eq);
-    }
-    return result;
-}
