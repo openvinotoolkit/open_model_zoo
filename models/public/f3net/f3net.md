@@ -20,7 +20,18 @@ the [repository](https://github.com/weijun88/F3Net), [paper](https://arxiv.org/a
 | --------- | ----- |
 | F-measure | 84.21%|
 
-The F-measure estimated on Pascal-S dataset and defined as the harmonic mean of precision and recall.
+The F-measure estimated on [Pascal-S](http://cbs.ic.gatech.edu/salobj/) dataset and defined as the weighted harmonic mean of precision and recall.
+
+`F-measure` = `(1 + β^2) * (Precision * Recall) / (β^2 * (Precision + Recall))`
+
+Empirically, `β^2` is set to 0.3 to put more emphasis on precision.
+
+Precision and Recall are calculated based on the binarized salient object mask and ground-truth:
+
+`Precision` = `TP` / `TP` + `FP`, `Recall` = `TP` / `TP` + `FN`,
+
+where `TP`, `TN`, `FP`, `FN` denote true-positive, true-negative, false-positive, and false-negative respectively.
+More details regarding evaluation procedure can be found in this [paper](https://ieeexplore.ieee.org/document/5206596)
 
 ## Input
 
