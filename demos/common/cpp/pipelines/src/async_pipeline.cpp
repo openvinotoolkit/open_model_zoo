@@ -67,15 +67,13 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     if (!request)
         return -1;
 
-    auto startTime = std::chrono::steady_clock::now();
     auto internalModelData = model->preprocess(inputData, request);
 
     request->SetCompletionCallback([this,
         frameID,
         request,
         internalModelData,
-        metaData,
-        startTime] {
+        metaData] {
             {
                 std::lock_guard<std::mutex> lock(mtx);
 
