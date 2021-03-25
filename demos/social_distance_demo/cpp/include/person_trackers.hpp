@@ -24,7 +24,7 @@ public:
 
 class PersonTrackers {
 public:
-    PersonTrackers() : trackId_generator{0}, similarity_threshold{0.7}, max_disappeared{10} {}
+    PersonTrackers() : trackId_generator{0}, similarity_threshold{0.7f}, max_disappeared{10} {}
 
     void similarity(std::list<TrackableObject> &tos) {
         std::deque<std::pair<int, float>> sim;
@@ -101,7 +101,7 @@ public:
             denom_a += a[i] * a[i];
             denom_b += b[i] * b[i];
         }
-        return dot / (sqrt(denom_a) * sqrt(denom_b) + 1e-6);
+        return static_cast<float>(dot / (sqrt(denom_a) * sqrt(denom_b) + 1e-6));
     }
 
     void register_trackers(const std::list<TrackableObject> &tos) {
