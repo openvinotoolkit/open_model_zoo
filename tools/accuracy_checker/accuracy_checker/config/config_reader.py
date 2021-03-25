@@ -375,6 +375,9 @@ class ConfigReader:
                     if 'ie_preprocessing' in arguments and arguments.ie_preprocessing:
                         dataset_entry['_ie_preprocessing'] = arguments.ie_preprocessing
 
+                    if 'ignore_normalization' in arguments and arguments.ignore_normalization:
+                        dataset_entry['_ignore_normalization'] = arguments.ignore_normalization
+
                     if profile_dataset:
                         dataset_entry['_profile'] = profile_dataset
                         dataset_entry['_report_type'] = profile_report_type

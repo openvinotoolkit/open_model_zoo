@@ -16,6 +16,7 @@ limitations under the License.
 
 import warnings
 from ..config import ConfigValidator, StringField
+from  ..logging import print_info
 from .preprocessor import Preprocessor, MULTI_INFER_PREPROCESSORS
 from .ie_preprocessor import IEPreprocessor, ie_preprocess_available
 
@@ -24,12 +25,15 @@ class PreprocessingExecutor:
     def __init__(
             self, processors=None, dataset_name='custom', dataset_meta=None,
             input_shapes=None,
-            enable_ie_preprocessing=False
+            enable_ie_preprocessing=False, ignore_normalization=False
     ):
         self.processors = []
         self.dataset_meta = dataset_meta
         self._multi_infer_transformations = False
         self.ie_processor = None
+        if ignore_normalization:
+            print_info('Normalization parameters in preprocessing will be ignored')
+            processors = self.remove_normalization(processors)
         if enable_ie_preprocessing:
             if not ie_preprocess_available():
                 warnings.warn(
@@ -113,6 +117,9 @@ class PreprocessingExecutor:
 
         return errors
 
+    @staticmethod
+    def remove_normalization(processors):
+        return [processor for processor in processors if processor.get('type') != 'normalization']
 
 class PreprocessorConfig(ConfigValidator):
     type = StringField(choices=Preprocessor.providers)

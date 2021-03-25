@@ -69,7 +69,8 @@ class ModelEvaluator(BaseEvaluator):
         )
         preprocessor = PreprocessingExecutor(
             dataset_config.get('preprocessing'), dataset_name, dataset.metadata,
-            enable_ie_preprocessing=enable_ie_preprocessing
+            enable_ie_preprocessing=enable_ie_preprocessing,
+            ignore_normalization=dataset_config.get('_ignore_normalization', False)
         )
         input_precision = launcher_config.get('_input_precision', [])
         if enable_ie_preprocessing:

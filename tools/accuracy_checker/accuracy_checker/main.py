@@ -132,6 +132,13 @@ def add_dataset_related_args(parser):
         help='file name for saving or reading identifiers subset',
         required=False
     )
+    dataset_related_args.add_argument(
+        '--ignore_normalization',
+        help='enable/disable ignoring normalization parameters',
+        required=False,
+        default=False,
+        type=cast_to_bool
+    )
 
 
 def add_profiling_related_args(parser):
