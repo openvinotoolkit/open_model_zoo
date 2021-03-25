@@ -211,7 +211,7 @@ double get_distance(const cv::Point2d &PF, const cv::Point2d &E, const cv::Point
         }
     }
 
-    cnt = cnt * coef;
+    cnt = static_cast<unsigned int>(cnt * coef);
     return cnt;
 }
 
@@ -253,10 +253,10 @@ std::tuple<bool, bool, double> social_distance(std::tuple<int, int> &frame_shape
     std::tie(bd_a, bd_k) = get_line_component(B, D);
     std::tie(ac_a, ac_k) = get_line_component(A, C);
 
-    double bdinf = B.x < D.x ? -9999999999 : 9999999999;
+    double bdinf = B.x < D.x ? -9999999999. : 9999999999.;
     Line2d BDinf = get_line(D, cv::Point2d(bdinf, get_y(bdinf, bd_a, bd_k)));
 
-    double acinf = A.x < C.x ? -9999999999 : 9999999999;
+    double acinf = A.x < C.x ? -9999999999. : 9999999999.;
     Line2d ACinf = get_line(C, cv::Point2d(acinf, get_y(acinf, ac_a, ac_k)));
 
     // Vanishing point

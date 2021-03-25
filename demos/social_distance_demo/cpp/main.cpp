@@ -16,7 +16,7 @@
 
 #include <cldnn/cldnn_config.hpp>
 #include <inference_engine.hpp>
-#include <vpu/vpu_plugin_config.hpp>
+#include <vpu/hddl_config.hpp>
 #include <monitors/presenter.h>
 #include <utils/args_helper.hpp>
 #include <utils/ocv_common.hpp>
@@ -759,7 +759,7 @@ int main(int argc, char* argv[]) {
         auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
             std::map<std::string, std::string> config;
             if (FLAGS_tag && deviceName == "HDDL") {
-                config[VPU_HDDL_CONFIG_KEY(GRAPH_TAG)] = "tag" + suffix;
+                config[HDDL_GRAPH_TAG] = "tag" + suffix;
             }
             return config;
         };
