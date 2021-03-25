@@ -4,7 +4,7 @@
 
   This is a Keras\* version of `mobilenet-yolov4` model, one of the YOLO group of models
   designed to perform real-time object detection mainly to vehicles.
-  The weights are pretrained by [BDD100k](https://bair.berkeley.edu/blog/2018/05/30/bdd/) 
+  The weights are pretrained by [BDD100k](https://bdd-data.berkeley.edu/#download-section) 
   and retrained by our own dataset.
   For details see repository <https://github.com/ermubuzhiming/OMZ-files-download/>,
   paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
@@ -63,7 +63,7 @@ Channel order is `BGR`.
 
 3. The array of detection summary info, name - `separable_conv2d_38`,  shape - `1,13,13,42`. The anchor values are `142,110,  192,243,  459,401`.
 
-For each case format is `B,Cx,Cy,N*85,`, where
+For each case format is `B,Cx,Cy,N*14,`, where
     - `B` - batch size
     - `Cx`, `Cy` - cell index
     - `N` - number of detection boxes for cell
