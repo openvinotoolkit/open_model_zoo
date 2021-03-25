@@ -16,7 +16,7 @@ description: >-
   This is a Keras\* version of `mobilenet-yolov4` model, one of the YOLO group of models
   designed to perform real-time object detection mainly to vehicles.
   The weights are pretrained by BDD100k and retrained by our own dataset.
-  For details see repository <https://github.com/ermubuzhiming/omz-test/>,
+  For details see repository <https://github.com/ermubuzhiming/OMZ-files-download/>,
   paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
 task_type: detection
 
@@ -30,8 +30,8 @@ files:
     sha256: e1738caa72b6ad173ea4727a439cfb9bef513d5a010488f6c4c3e86c963d5a61
     source: https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/yolo_pb2ir.json
   - name: VOCdevkit0829.zip
-    size: 1798772644
-    sha256: b379c0ba16aa5c4a27dc81d80042cf0a4b6b757e8517b4f5d98ac39753e6f7cf
+    size: 1796812125
+    sha256: 442ff73b0fea7148fefacc7a37dbadf93a15037ef22839ddb71e5a84c7832a61
     source: https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/VOCdevkit0829.zip
   - name: mobilenet-yolo-syg.h5
     size: 42753056
