@@ -37,6 +37,7 @@ mobilenet-v2
 mobilenet-v2-1.0-224
 mobilenet-v2-1.4-224
 mobilenet-v2-pytorch
+nfnet-f0
 octave-densenet-121-0.125
 octave-resnet-101-0.125
 octave-resnet-200-0.125
