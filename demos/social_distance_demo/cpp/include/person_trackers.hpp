@@ -9,102 +9,115 @@
 #include <tuple>
 #include <deque>
 
-#include <opencv2/core.hpp>
-
 class TrackableObject {
 public:
-    TrackableObject(cv::Rect2i bb, const std::vector<float> &r, cv::Point centroid)
+    TrackableObject(std::tuple<int, int, int, int> bb, const std::vector<float> &r, std::tuple<int, int> centroid)
             : bbox{bb}, reid{r}, updated{false} {
         centroids.push_back(centroid);
     }
 
-    //std::tuple<int, int, int, int> bbox;
-    cv::Rect bbox;
+    std::tuple<int, int, int, int> bbox;
     std::vector<float> reid;
-    std::vector<cv::Point> centroids;
+    std::vector<std::tuple<int, int>> centroids;
     bool updated;
 };
 
 class PersonTrackers {
 public:
-    PersonTrackers() : trackIdGenerator{0}, similarityThreshold{0.7f}, maxDisappeared{10} {}
+    PersonTrackers() : trackId_generator{0}, similarity_threshold{0.7}, max_disappeared{10} {}
 
     void similarity(std::list<TrackableObject> &tos) {
         std::deque<std::pair<int, float>> sim;
         if (trackers.size() > 0) {
             auto ntos = tos.size();
-            for (const auto& to : tos) {
-                for (auto &tracker : trackers) {
-                    float cosine = 0;
-                    cosine = cosineSimilarity(to.reid, tracker.second.reid);
-     
-                    if (cosine > similarityThreshold)
-                        sim.push_back(std::make_pair(tracker.first, cosine));
-                }
-                if (!sim.empty()) {
-                    int maxSimilarity = getMaxSimilarity(sim);
-                    if (maxSimilarity < 0)
-                        continue;
-                    trackers.at(maxSimilarity).reid = to.reid;
-                    trackers.at(maxSimilarity).bbox = to.bbox;
-                    trackers.at(maxSimilarity).centroids.push_back(to.centroids[0]);
-                    trackers.at(maxSimilarity).updated = true;
-                    dissapeared.at(maxSimilarity) = 0;
-                } else {
-                    trackers.insert({trackIdGenerator, to});
-                    trackers.at(trackIdGenerator).updated = true;
-                    dissapeared.insert({trackIdGenerator, 0});
-                    trackIdGenerator += 1;
-                }
-            }
-
-            for (auto it = trackers.begin(); it != trackers.end(); ) {
-                if (!it->second.updated) {
+            if (ntos == 0) {
+                for (auto it = trackers.begin(); it != trackers.end(); ) {
                     dissapeared.at(it->first) += 1;
-                    if (dissapeared.at(it->first) > maxDisappeared) {
+                    if (dissapeared.at(it->first) > max_disappeared) {
                         dissapeared.erase(it->first);
                         it = trackers.erase(it);
                         continue;
                     }
+                    ++it;
                 }
+            } else {
+                for (const auto& to : tos) {
+                    for (auto &tracker : trackers) {
+                        float cosine = 0;
+                        try {
+                            cosine = cosine_similarity(to.reid, tracker.second.reid);
+                        } catch (std::exception& e) {
+                            slog::err << e.what();
+                            continue;
+                        }
+                        if (cosine > similarity_threshold)
+                            sim.push_back(std::make_pair(tracker.first, cosine));
+                    }
+                    if (!sim.empty()) {
+                        int max_similarity = get_max_similarity(sim);
+                        if (max_similarity < 0)
+                            continue;
+                        trackers.at(max_similarity).reid = to.reid;
+                        trackers.at(max_similarity).bbox = to.bbox;
+                        trackers.at(max_similarity).centroids.push_back(to.centroids[0]);
+                        trackers.at(max_similarity).updated = true;
+                        dissapeared.at(max_similarity) = 0;
+                    } else {
+                        trackers.insert({trackId_generator, to});
+                        trackers.at(trackId_generator).updated = true;
+                        dissapeared.insert({trackId_generator, 0});
+                        trackId_generator += 1;
+                    }
+                }
+
                 if (ntos <= trackers.size()) {
-                    it->second.updated = false;
+                    for (auto it = trackers.begin(); it != trackers.end(); ) {
+                        if (!it->second.updated) {
+                            dissapeared.at(it->first) += 1;
+                            if (dissapeared.at(it->first) > max_disappeared) {
+                                dissapeared.erase(it->first);
+                                it = trackers.erase(it);
+                                continue;
+                            }
+                        }
+                        it->second.updated = false;
+                        ++it;
+                    }
                 }
-                ++it;
             }
         } else {
-            registerTrackers(tos);
+            register_trackers(tos);
         }
     }
 
-    float cosineSimilarity(const std::vector<float> &a, const std::vector<float> &b) {
+    float cosine_similarity(const std::vector<float> &a, const std::vector<float> &b) {
         if (a.size() != b.size()) {
             throw "Vector sizes don't match!";
         }
 
-        float dot = 0.0, denomA = 0.0, denomB = 0.0;
+        float dot = 0.0, denom_a = 0.0, denom_b = 0.0;
         for (std::vector<float>::size_type i = 0; i < a.size(); ++i) {
             dot += a[i] * b[i];
-            denomA += a[i] * a[i];
-            denomB += b[i] * b[i];
+            denom_a += a[i] * a[i];
+            denom_b += b[i] * b[i];
         }
-        return static_cast<float>(dot / (sqrt(denomA) * sqrt(denomB) + 1e-6));
+        return dot / (sqrt(denom_a) * sqrt(denom_b) + 1e-6);
     }
 
-    void registerTrackers(const std::list<TrackableObject> &tos) {
+    void register_trackers(const std::list<TrackableObject> &tos) {
         for (auto &to : tos) {
-            trackers.insert({trackIdGenerator, to});
-            dissapeared.insert({trackIdGenerator, 0});
-            trackIdGenerator += 1;
+            trackers.insert({trackId_generator, to});
+            dissapeared.insert({trackId_generator, 0});
+            trackId_generator += 1;
         }
     }
 
-    int getMaxSimilarity(std::deque<std::pair<int, float>> &similList) {
-        std::sort(similList.begin(), similList.end(), [](std::pair<int, float> a, std::pair<int, float> b) {
+    int get_max_similarity(std::deque<std::pair<int, float>> &simil_list) {
+        std::sort(simil_list.begin(), simil_list.end(), [](std::pair<int, float> a, std::pair<int, float> b) {
             return std::get<1>(a) > std::get<1>(b);
         });
 
-        for (auto &sim : similList) {
+        for (auto &sim : simil_list) {
             if (!trackers.at(std::get<0>(sim)).updated)
                 return std::get<0>(sim);
         }
@@ -114,7 +127,7 @@ public:
 
     void clear() {
         trackers.clear();
-        trackIdGenerator = 0;
+        trackId_generator = 0;
     }
 
 public:
@@ -122,7 +135,7 @@ public:
 
 private:
     std::unordered_map<int, int> dissapeared;
-    int trackIdGenerator;
-    float similarityThreshold;
-    int maxDisappeared;
+    int trackId_generator;
+    float similarity_threshold;
+    int max_disappeared;
 };
