@@ -39,7 +39,7 @@ if not "%1" == "" (
     rem list the necessary demos separated by space,
     rem ex. --target="classification_demo segmentation_demo"
     if "%1" == "--target" (
-        set BUILD_TARGETS=%BUILD_TARGETS% %~2
+        set BUILD_TARGETS=%BUILD_TARGETS% %1 %~2
         shift & shift
         goto argParse
     )
@@ -131,16 +131,8 @@ cd "%SOLUTION_DIR64%" && cmake -G "Visual Studio !VS_VERSION!" -A %PLATFORM% %EX
 echo.
 echo ###############^|^| Build Open Model Zoo Demos using MS Visual Studio ^|^|###############
 echo.
-
-if "%BUILD_TARGETS%"=="" (
-    echo cmake --build . --config Release
-    cmake --build . --config Release
-) else (
-    for %%t in (%BUILD_TARGETS%) do (
-        echo cmake --build . --config Release --target %%t
-        cmake --build . --config Release --target %%t
-    )
-)
+echo cmake --build . --config Release %BUILD_TARGETS%
+cmake --build . --config Release %BUILD_TARGETS%
 
 if ERRORLEVEL 1 goto errorHandling
 
