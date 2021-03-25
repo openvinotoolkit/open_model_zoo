@@ -24,6 +24,7 @@ The command yields the following usage message:
 
 ```
 usage: segmentation_demo.py [-h] -m MODEL -i INPUT
+                            [-at {segmentation,salient_object_detection}
                             [-d DEVICE] [-c COLORS]
                             [-nireq NUM_INFER_REQUESTS]
                             [-nstreams NUM_STREAMS]
