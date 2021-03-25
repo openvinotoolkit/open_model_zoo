@@ -18,9 +18,9 @@
 #include <inference_engine.hpp>
 #include <vpu/vpu_plugin_config.hpp>
 #include <monitors/presenter.h>
-#include <samples/args_helper.hpp>
-#include <samples/ocv_common.hpp>
-#include <samples/slog.hpp>
+#include <utils/args_helper.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/slog.hpp>
 
 #include "common.hpp"
 #include "grid_mat.hpp"

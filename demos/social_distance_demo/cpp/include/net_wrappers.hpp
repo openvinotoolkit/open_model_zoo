@@ -11,8 +11,8 @@
 #include <map>
 
 #include <inference_engine.hpp>
-#include <samples/common.hpp>
-#include <samples/ocv_common.hpp>
+#include <utils/common.hpp>
+#include <utils/ocv_common.hpp>
 
 class PersonDetector {
 public:
