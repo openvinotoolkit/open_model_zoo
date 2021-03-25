@@ -1,0 +1,12 @@
+# This file can be used with the --list option of the model downloader.
+# The detector models for --model_od
+mobilenet-ssd
+pedestrian-and-vehicle-detector-adas-????
+pedestrian-detection-adas-????
+person-detection-retail-0013
+person-vehicle-bike-detection-crossroad-????
+ssd???
+ssd_mobilenet_v?_*
+ssdlite_mobilenet_v2
+# The pose estimation models for --model_hpe
+single-human-pose-estimation-????

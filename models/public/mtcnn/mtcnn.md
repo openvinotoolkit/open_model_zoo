@@ -34,8 +34,6 @@ The model output is a blob with a vector containing the first pass of face data.
 | MParams           | 0.007         |
 
 
-### Performance
-
 ### Input
 
 #### Original model
@@ -87,8 +85,6 @@ The model output is a blob with a vector containing the refined face data. If th
 | GFLOPs            | 0.003         |
 | MParams           | 0.1           |
 
-
-### Performance
 
 ### Input
 
@@ -142,8 +138,6 @@ The model output is a blob with a vector containing the output face data.
 | MParams           | 0.389         |
 
 
-### Performance
-
 ### Input
 
 #### Original model
@@ -183,6 +177,20 @@ Expected color order: `RGB`.
 2. Face location, name - `conv6-2`, contains final clarifications for boxes produced by `mtcnn-p` and refined by `mtcnn-r`.
 3. Control points, name - `conv6-3`, contains five facial landmarks: `left eye`, `right eye`, `nose`, `left mouth corner`, `right mouth corner` coordinates for each face region.
 
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

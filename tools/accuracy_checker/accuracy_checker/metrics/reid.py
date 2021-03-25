@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,17 +21,74 @@ import numpy as np
 from ..representation import (
     ReIdentificationClassificationAnnotation,
     ReIdentificationAnnotation,
+    PlaceRecognitionAnnotation,
     ReIdentificationPrediction
 )
-from ..config import BaseField, BoolField, NumberField
+from ..config import BaseField, BoolField, NumberField, StringField
 from .metric import FullDatasetEvaluationMetric
+
+
+def _auc(x, y):
+    if x.shape[0] < 2:
+        raise ValueError('At least 2 points are needed to compute'
+                         ' area under curve, but x.shape = {}'.format(x.shape))
+    direction = 1
+    dx = np.diff(x)
+    if np.any(dx < 0):
+        if np.all(dx <= 0):
+            direction = -1
+        else:
+            raise ValueError("x is neither increasing nor decreasing "
+                             ": {}.".format(x))
+    area = direction * np.trapz(y, x)
+    return area
+
+
+def _binary_clf_curve(y_true, y_score):
+    pos_label = 1.
+
+    # make y_true a boolean vector
+    y_true = (y_true == pos_label)
+
+    # sort scores and corresponding truth values
+    desc_score_indices = np.argsort(y_score, kind="mergesort")[::-1]
+    y_score = y_score[desc_score_indices]
+    y_true = y_true[desc_score_indices]
+    weight = 1.
+
+    distinct_value_indices = np.where(np.diff(y_score))[0]
+    threshold_idxs = np.r_[distinct_value_indices, y_true.size - 1]
+
+    # accumulate the true positives with decreasing threshold
+    tps = np.cumsum((y_true * weight), axis=None, dtype=np.float64)[threshold_idxs]
+    fps = 1 + threshold_idxs - tps
+    return fps, tps, y_score[threshold_idxs]
+
+
+def _precision_recall_curve(y_true, probas_pred):
+
+    fps, tps, thresholds = _binary_clf_curve(y_true, probas_pred,)
+
+    precision = tps / (tps + fps)
+    precision[np.isnan(precision)] = 0
+    recall = tps / tps[-1]
+
+    # stop when full recall attained
+    # and reverse the outputs so recall is decreasing
+    last_ind = tps.searchsorted(tps[-1])
+    sl = slice(last_ind, None, -1)
+    return np.r_[precision[sl], 1], np.r_[recall[sl], 0], thresholds[sl]
+
 
 try:
     from sklearn.metrics import auc, precision_recall_curve
 except ImportError:
-    auc, precision_recall_curve = None, None
+    auc = _auc
+    precision_recall_curve = _precision_recall_curve
+
 
 PairDesc = namedtuple('PairDesc', 'image1 image2 same')
+
 
 def _average_binary_score(binary_metric, y_true, y_score):
     def binary_target(y):
@@ -172,33 +229,69 @@ class PairwiseAccuracy(FullDatasetEvaluationMetric):
             'min_score': BaseField(
                 optional=True, default='train_median',
                 description="Min score for determining that objects are different. "
-                            "You can provide value or use train_median value which will be calculated "
-                            "if annotations has training subset."
+                            "You can provide value or use train_median or best_train_threshold values "
+                            "which will be calculated if annotations has training subset."
+            ),
+            'distance_method': StringField(
+                optional=True, default='euclidian_distance',
+                description='Allows to choose one of the distance calculation methods',
+                choices=['euclidian_distance', 'cosine_distance']
+            ),
+            'subtract_mean': BoolField(
+                optional=True, default=False, description='Allows to subtract mean calculated on train embeddings '
+                                                          'before calculating the distance'
             )
         })
         return parameters
 
     def configure(self):
         self.min_score = self.get_value_from_config('min_score')
+        self.distance_method = self.get_value_from_config('distance_method')
+        self.subtract_mean = self.get_value_from_config('subtract_mean')
 
     def evaluate(self, annotations, predictions):
-        embed_distances, pairs = get_embedding_distances(annotations, predictions)
+        min_score = self.min_score
+        if min_score == 'train_median':
+            train_distances, _train_pairs, mean = get_embedding_distances(annotations, predictions, train=True,
+                                                                          distance_method=self.distance_method,
+                                                                          save_mean=self.subtract_mean)
+            min_score_value = np.median(train_distances)
+        elif min_score == 'best_train_threshold':
+            train_distances, train_pairs, mean = get_embedding_distances(annotations, predictions, train=True,
+                                                                         distance_method=self.distance_method,
+                                                                         save_mean=self.subtract_mean)
+            thresholds = np.arange(0, 4, 0.01)
+            accuracy_train = np.zeros((thresholds.size))
+            for threshold_idx, threshold in enumerate(thresholds):
+                train_same_class = train_distances < threshold
+                accuracy = 0
+                for i, pair in enumerate(train_pairs):
+                    same_label = pair.same
+                    out_same = train_same_class[i]
+
+                    correct_prediction = (same_label and out_same) or (not same_label and not out_same)
+
+                    if correct_prediction:
+                        accuracy += 1
+                accuracy_train[threshold_idx] = accuracy
+            min_score_value = thresholds[np.argmax(accuracy_train)]
+        else:
+            min_score_value = min_score
+            mean = 0.0
+
+        embed_distances, pairs, _ = get_embedding_distances(annotations, predictions, mean=mean,
+                                                            distance_method=self.distance_method)
         if not pairs:
             return np.nan
 
-        min_score = self.min_score
-        if min_score == 'train_median':
-            train_distances, _train_pairs = get_embedding_distances(annotations, predictions, train=True)
-            min_score = np.median(train_distances)
-
-        embed_same_class = embed_distances < min_score
+        embed_same_class = embed_distances < min_score_value
 
         accuracy = 0
         for i, pair in enumerate(pairs):
             same_label = pair.same
             out_same = embed_same_class[i]
 
-            correct_prediction = same_label and out_same or (not same_label and not out_same)
+            correct_prediction = (same_label and out_same) or (not same_label and not out_same)
 
             if correct_prediction:
                 accuracy += 1
@@ -218,6 +311,21 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
         params.update({
             'subset_number': NumberField(
                 optional=True, min_value=1, value_type=int, default=10, description="Number of subsets for separating."
+            ),
+            'min_score': BaseField(
+                optional=True, default='train_median',
+                description="Min score for determining that objects are different. "
+                            "You can provide value or use train_median or best_train_threshold values "
+                            "which will be calculated if annotations has training subset."
+            ),
+            'distance_method': StringField(
+                optional=True, default='euclidian_distance',
+                description='Allows to choose one of the distance calculation methods',
+                choices=['euclidian_distance', 'cosine_distance']
+            ),
+            'subtract_mean': BoolField(
+                optional=True, default=False, description='Allows to subtract mean calculated on train embeddings '
+                                                          'before calculating the distance'
             )
         })
         return params
@@ -236,6 +344,9 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
         ))
 
         idx_subsets = self.make_subsets(self.subset_num, len(first_images_annotations))
+        if not idx_subsets:
+            return 0
+
         for subset in range(self.subset_num):
             test_subset = self.get_subset(first_images_annotations, idx_subsets[subset]['test'])
             test_subset = self.mark_subset(test_subset, False)
@@ -253,7 +364,8 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
     def make_subsets(subset_num, dataset_size):
         subsets = []
         if subset_num > dataset_size:
-            raise ValueError('It is impossible to divide dataset on more than number of annotations subsets.')
+            warnings.warn('It is impossible to divide dataset on more than number of annotations subsets.')
+            return []
 
         for subset in range(subset_num):
             lower_bnd = subset * dataset_size // subset_num
@@ -279,6 +391,7 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
             subset += container[bound[0]: bound[1]]
 
         return subset
+
 
 class FaceRecognitionTAFAPairMetric(FullDatasetEvaluationMetric):
     __provider__ = 'face_recognition_tafa_pair_metric'
@@ -330,6 +443,7 @@ class FaceRecognitionTAFAPairMetric(FullDatasetEvaluationMetric):
 
         return [(tp+tn) / (tp+fp+tn+fn)]
 
+
 class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
     """
     Accuracy score calculated with normalized embedding dot products
@@ -380,6 +494,8 @@ class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
         query_cam_ids = self.extract_cam_id(annotations, True)
 
         valid_mask = self.eval_valid_matrix(gallery_person_ids, gallery_cam_ids, query_person_ids, query_cam_ids)
+        if np.size(gallery_embeddings) == 0 or np.size(query_embeddings) == 0:
+            return 0
 
         gallery_embeddings = gallery_embeddings / np.linalg.norm(gallery_embeddings, axis=1).reshape(-1, 1)
         query_embeddings = query_embeddings / np.linalg.norm(query_embeddings, axis=1).reshape(-1, 1)
@@ -387,8 +503,7 @@ class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
         dist_mat *= valid_mask
         sorted_idx = np.argsort(-dist_mat, axis=1)[:, :self.top_k]
 
-        apply_func = lambda row: np.fromiter(map(lambda i: gallery_person_ids[i], row), dtype=np.int)
-        pred_top_k_query_ids = np.apply_along_axis(apply_func, 1, sorted_idx).T
+        pred_top_k_query_ids = gallery_person_ids[sorted_idx].T
         query_person_ids = np.tile(query_person_ids, (self.top_k, 1))
 
         tp = np.any(query_person_ids == pred_top_k_query_ids, axis=0).sum()
@@ -397,6 +512,7 @@ class NormalizedEmbeddingAccuracy(FullDatasetEvaluationMetric):
         if (tp+fp) == 0:
             return 0
         return tp/(tp+fp)
+
 
 def regroup_pairs(annotations, predictions):
     image_indexes = {}
@@ -415,9 +531,11 @@ def regroup_pairs(annotations, predictions):
 
     return pairs
 
+
 def extract_embeddings(annotation, prediction, query):
     embeddings = [pred.embedding for pred, ann in zip(prediction, annotation) if ann.query == query]
     return np.stack(embeddings) if embeddings else embeddings
+
 
 def get_gallery_query_pids(annotation):
     gallery_pids = np.asarray([ann.person_id for ann in annotation if not ann.query])
@@ -537,7 +655,8 @@ def get_valid_subset(gallery_cams, gallery_ids, query_index, indices, query_cams
     return valid
 
 
-def get_embedding_distances(annotation, prediction, train=False):
+def get_embedding_distances(annotation, prediction, train=False, distance_method='euclidian_distance',
+                            save_mean=False, mean=0.0):
     image_indexes = {}
     for i, pred in enumerate(prediction):
         image_indexes[pred.identifier] = i
@@ -560,13 +679,25 @@ def get_embedding_distances(annotation, prediction, train=False):
     if pairs:
         embed1 = np.asarray([prediction[idx].embedding for idx, _, _ in pairs])
         embed2 = np.asarray([prediction[idx].embedding for _, idx, _ in pairs])
-        return 0.5 * (1 - np.sum(embed1 * embed2, axis=1)), pairs
-    return None, pairs
+        if save_mean:
+            mean = np.mean(np.concatenate([embed1, embed2]), axis=0)
+        dist = distance(embed1 - mean, embed2 - mean, distance_method)
+        return dist, pairs, mean
+    return None, pairs, mean
 
+def distance(embed1, embed2, distance_method='euclidian_distance'):
+    if distance_method == 'euclidian_distance':
+        dist = 0.5 * (1 - np.sum(embed1 * embed2, axis=1))
+    else:
+        # Distance based on cosine similarity
+        dot = np.sum(np.multiply(embed1, embed2), axis=1)
+        norm = np.linalg.norm(embed1, axis=1) * np.linalg.norm(embed2, axis=1)
+        similarity = dot / norm
+        dist = np.arccos(similarity) / np.pi
+
+    return dist
 
 def binary_average_precision(y_true, y_score, interpolated_auc=True):
-    if auc is None:
-        raise ValueError('please install sklearn')
     def _average_precision(y_true_, y_score_):
         precision, recall, _ = precision_recall_curve(y_true_, y_score_)
         if not interpolated_auc:
@@ -578,3 +709,49 @@ def binary_average_precision(y_true, y_score, interpolated_auc=True):
         return auc(recall, precision)
 
     return _average_binary_score(_average_precision, y_true, y_score)
+
+
+class LocalizationRecall(FullDatasetEvaluationMetric):
+    __provider__ = 'localization_recall'
+    annotation_types = (PlaceRecognitionAnnotation, )
+    prediction_types = (ReIdentificationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'top_k': NumberField(optional=True, value_type=int, min_value=1, default=1),
+            'distance_threshold': NumberField(optional=True, default=25)
+        })
+        return params
+
+    def configure(self):
+        self.top_k = self.get_value_from_config('top_k')
+        self.distance_threshold = self.get_value_from_config('distance_threshold')
+
+    def evaluate(self, annotations, predictions):
+        gallery_embeddings = extract_embeddings(annotations, predictions, query=False)
+        query_embeddings = extract_embeddings(annotations, predictions, query=True)
+        query_ann = [ann for ann in annotations if ann.query]
+        gallery_ann = [ann for ann in annotations if not ann.query]
+        query_len = np.shape(query_embeddings)[0]
+        not_empty = np.size(gallery_embeddings) > 0 and np.size(query_embeddings) > 0
+        if not not_empty:
+            warnings.warn('No gallery or query embeddings for evaluation')
+            return 0
+        l2_distance = (
+            np.sum(query_embeddings ** 2, axis=1, keepdims=True)
+            + np.sum(gallery_embeddings ** 2, axis=1)
+            - 2 * np.dot(query_embeddings, gallery_embeddings.transpose())
+        )
+        correct_at_n = 0
+        for i, q in enumerate(query_ann):
+            indices = np.argsort(l2_distance[i, :])[:self.top_k]
+            for ind in indices:
+                g_loc = gallery_ann[ind].coords
+                q_loc = q.coords
+                dist = np.linalg.norm(q_loc - g_loc)
+                if dist < self.distance_threshold:
+                    correct_at_n += 1
+        recall = correct_at_n / query_len
+        return recall

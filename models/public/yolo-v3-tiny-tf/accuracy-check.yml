@@ -1,0 +1,96 @@
+models:
+  - name: yolo-v3-tiny-tf
+    launchers:
+      - framework: tf
+        model:   yolo-v3-tiny.pb
+        adapter:
+          type: yolo_v3
+          anchors: tiny_yolo_v3
+          num: 6
+          coords: 4
+          classes: 80
+          threshold: 0.001
+          anchor_masks: [[3, 4, 5], [1, 2, 3]]
+          raw_output: True
+          output_format: HWB
+          cells: [13, 26]
+          outputs:
+            - conv2d_9/BiasAdd
+            - conv2d_12/BiasAdd
+        inputs:
+          - name: 'image_input'
+            type: INPUT
+        outputs:
+          - conv2d_9/BiasAdd
+          - conv2d_12/BiasAdd
+
+    datasets:
+      - name: ms_coco_detection_80_class_without_background
+
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: normalization
+            std: 255.0
+          - type: resize
+            size: 416
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.001
+            remove_filtered: true
+          - type: nms
+            overlap: 0.5
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: true
+            presenter: print_scalar
+          - type: coco_precision
+            max_detections: 100
+            threshold: 0.5
+
+  - name: yolo-v3-tiny-tf
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: yolo_v3
+          anchors: tiny_yolo_v3
+          num: 3
+          coords: 4
+          classes: 80
+          threshold: 0.001
+          anchor_masks: [[3, 4, 5], [1, 2, 3]]
+          outputs:
+            - conv2d_9/Conv2D/YoloRegion
+            - conv2d_12/Conv2D/YoloRegion
+
+    datasets:
+      - name: ms_coco_detection_80_class_without_background
+        preprocessing:
+          - type: resize
+            size: 416
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.001
+            remove_filtered: true
+          - type: nms
+            overlap: 0.5
+          - type: clip_boxes
+            apply_to: prediction
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: true
+            presenter: print_scalar
+          - type: coco_precision
+            max_detections: 100
+            threshold: 0.5

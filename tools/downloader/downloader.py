@@ -17,13 +17,11 @@
 """
 
 import argparse
-import concurrent.futures
 import contextlib
 import functools
 import hashlib
 import re
 import requests
-import shlex
 import shutil
 import ssl
 import sys
@@ -40,6 +38,7 @@ CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 
 def process_download(reporter, chunk_iterable, size, progress, file):
     start_time = time.monotonic()
+    start_size = progress.size
 
     try:
         for chunk in chunk_iterable:
@@ -51,7 +50,7 @@ def process_download(reporter, chunk_iterable, size, progress, file):
                 progress.hasher.update(chunk)
 
                 if duration != 0:
-                    speed = int(progress.size / (1024 * duration))
+                    speed = int((progress.size - start_size) / (1024 * duration))
                 else:
                     speed = '?'
 
@@ -124,6 +123,7 @@ def verify_hash(reporter, actual_hash, expected_hash, path):
 
 class NullCache:
     def has(self, hash): return False
+    def get(self, model_file, path, reporter): return False
     def put(self, hash, path): pass
 
 class DirCache:
@@ -146,30 +146,59 @@ class DirCache:
     def has(self, hash):
         return self._hash_path(hash).exists()
 
-    def get(self, hash, path):
-        shutil.copyfile(str(self._hash_path(hash)), str(path))
+    def get(self, model_file, path, reporter):
+        cache_path = self._hash_path(model_file.sha256)
+        cache_sha256 = hashlib.sha256()
+        cache_size = 0
+
+        with open(cache_path, 'rb') as cache_file, open(path, 'wb') as destination_file:
+            while True:
+                data = cache_file.read(CHUNK_SIZE)
+                if not data:
+                    break
+                cache_size += len(data)
+                if cache_size > model_file.size:
+                    reporter.log_error("Cached file is longer than expected ({} B), copying aborted", model_file.size)
+                    return False
+                cache_sha256.update(data)
+                destination_file.write(data)
+        if cache_size < model_file.size:
+            reporter.log_error("Cached file is shorter ({} B) than expected ({} B)", cache_size, model_file.size)
+            return False
+        return verify_hash(reporter, cache_sha256.digest(), model_file.sha256, path)
 
     def put(self, hash, path):
-        # A file in the cache must have the hash implied by its name. So when we upload a file,
-        # we first copy it to a temporary file and then atomically move it to the desired name.
-        # This prevents interrupted runs from corrupting the cache.
-        with path.open('rb') as src_file:
-            with tempfile.NamedTemporaryFile(dir=str(self._staging_dir), delete=False) as staging_file:
-                staging_path = Path(staging_file.name)
-                shutil.copyfileobj(src_file, staging_file)
+        staging_path = None
 
-        hash_path = self._hash_path(hash)
-        hash_path.parent.mkdir(parents=True, exist_ok=True)
-        staging_path.replace(self._hash_path(hash))
+        try:
+            # A file in the cache must have the hash implied by its name. So when we upload a file,
+            # we first copy it to a temporary file and then atomically move it to the desired name.
+            # This prevents interrupted runs from corrupting the cache.
+            with path.open('rb') as src_file:
+                with tempfile.NamedTemporaryFile(dir=str(self._staging_dir), delete=False) as staging_file:
+                    staging_path = Path(staging_file.name)
+                    shutil.copyfileobj(src_file, staging_file)
 
-def try_retrieve_from_cache(reporter, cache, files):
+            hash_path = self._hash_path(hash)
+            hash_path.parent.mkdir(parents=True, exist_ok=True)
+            staging_path.replace(self._hash_path(hash))
+            staging_path = None
+        finally:
+            # If we failed to complete our temporary file or to move it into place,
+            # get rid of it.
+            if staging_path:
+                staging_path.unlink()
+
+def try_retrieve_from_cache(reporter, cache, model_file, destination):
     try:
-        if all(cache.has(file[0]) for file in files):
-            for hash, destination in files:
-                reporter.job_context.check_interrupted()
+        if cache.has(model_file.sha256):
+            reporter.job_context.check_interrupted()
 
-                reporter.print_section_heading('Retrieving {} from the cache', destination)
-                cache.get(hash, destination)
+            reporter.print_section_heading('Retrieving {} from the cache', destination)
+            if not cache.get(model_file, destination, reporter):
+                reporter.print('Will retry from the original source.')
+                reporter.print()
+                return False
             reporter.print()
             return True
     except Exception:
@@ -187,7 +216,7 @@ def try_update_cache(reporter, cache, hash, source):
 def try_retrieve(reporter, destination, model_file, cache, num_attempts, start_download):
     destination.parent.mkdir(parents=True, exist_ok=True)
 
-    if try_retrieve_from_cache(reporter, cache, [[model_file.sha256, destination]]):
+    if try_retrieve_from_cache(reporter, cache, model_file, destination):
         return True
 
     reporter.print_section_heading('Downloading {}', destination)
@@ -206,6 +235,9 @@ def try_retrieve(reporter, destination, model_file, cache, num_attempts, start_d
 
 def download_model(reporter, args, cache, session_factory, requested_precisions, model):
     session = session_factory()
+
+    reporter.print_group_heading('Downloading {}', model.name)
+
     reporter.emit_event('model_download_begin', model=model.name, num_files=len(model.files))
 
     output = args.output_dir / model.subdirectory
@@ -236,6 +268,17 @@ def download_model(reporter, args, cache, session_factory, requested_precisions,
         model_file_reporter.emit_event('model_file_download_end', successful=True)
 
     reporter.emit_event('model_download_end', model=model.name, successful=True)
+
+    if model.postprocessing:
+        reporter.emit_event('model_postprocessing_begin', model=model.name)
+
+        for postproc in model.postprocessing:
+            postproc.apply(reporter, output)
+
+        reporter.emit_event('model_postprocessing_end', model=model.name)
+
+        reporter.print()
+
     return True
 
 
@@ -280,10 +323,11 @@ def main():
         help='download only models whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',
         help='download only models whose names match at least one of the patterns in the specified file')
-    parser.add_argument('--all',  action='store_true', help='download all available models')
+    parser.add_argument('--all', action='store_true', help='download all available models')
     parser.add_argument('--print_all', action='store_true', help='print all available models')
     parser.add_argument('--precisions', metavar='PREC[,PREC...]',
-                        help='download only models with the specified precisions (actual for DLDT networks)')
+                        help='download only models with the specified precisions (actual for DLDT networks); specify one or more of: '
+                             + ','.join(common.KNOWN_PRECISIONS))
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
         default=Path.cwd(), help='path where to save models')
     parser.add_argument('--cache_dir', type=Path, metavar='DIR',
@@ -319,7 +363,6 @@ def main():
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    reporter.print_group_heading('Downloading models')
     with contextlib.ExitStack() as exit_stack:
         session_factory = ThreadSessionFactory(exit_stack)
         if args.jobs == 1:
@@ -332,19 +375,6 @@ def main():
                 models)
 
     failed_models = {model.name for model, successful in zip(models, results) if not successful}
-
-    reporter.print_group_heading('Post-processing')
-    for model in models:
-        if model.name in failed_models or not model.postprocessing: continue
-
-        reporter.emit_event('model_postprocessing_begin', model=model.name)
-
-        output = args.output_dir / model.subdirectory
-
-        for postproc in model.postprocessing:
-            postproc.apply(reporter, output)
-
-        reporter.emit_event('model_postprocessing_end', model=model.name)
 
     if failed_models:
         reporter.print('FAILED:')

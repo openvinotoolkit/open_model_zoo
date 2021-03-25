@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: image_processing
 files:
   - name: FP32/single-image-super-resolution-1033.xml
-    size: 53136
-    sha256: 1295b0c647b6dddbb0c48d2820ed02819c60081013df4df663322f7c80a9bd57
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.xml
+    size: 55728
+    sha256: 53854bcf22d90434f02959163b81c7ed7c1ba85e10cdca4158ffc742a74a327b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.xml
   - name: FP32/single-image-super-resolution-1033.bin
-    size: 121772
-    sha256: 38d59d276acf2ebf3307d4079d1a0aeed23a45756f7174f0ac436298872519da
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
+    size: 121780
+    sha256: ba6247c93395bc0649986f28dec0c745d543afcf667c732877b712e05564fb16
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
   - name: FP16/single-image-super-resolution-1033.xml
-    size: 53097
-    sha256: 075d08862c3380473f0d7be673edbd895922af7b46af2c9f3ab785f4605424b3
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.xml
+    size: 55685
+    sha256: 5eea9d2c1b37433f1ba6590f4a8c634cadde84e1e90de12d3cd0912d6ebe3a22
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.xml
   - name: FP16/single-image-super-resolution-1033.bin
-    size: 60930
-    sha256: 94dccc9df4225512e1cf253413bad614abc862d9273be2ff1d8419524e27945e
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
+    size: 60938
+    sha256: 9a9d5a8cbd9520e4c282600feea95b31228d7de9716e8807acb53c572bd9cd31
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
   - name: FP16-INT8/single-image-super-resolution-1033.xml
-    size: 146187
-    sha256: de06fdb9f32cb5fa5e39cba78008dc8fcedc965cc63195a2b70c0af197fb50c6
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/single-image-super-resolution-1033/FP16-INT8/single-image-super-resolution-1033.xml
+    size: 143857
+    sha256: 75867cf80c533ce290211db3b3bf812de001b2d8b875e6f31746e5adba5d12fd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/single-image-super-resolution-1033/FP16-INT8/single-image-super-resolution-1033.xml
   - name: FP16-INT8/single-image-super-resolution-1033.bin
-    size: 31671
-    sha256: a3996c564de5fe142b6e77a6f89fae671f5383db3b7dbe63043c3ddd0000bd7d
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/single-image-super-resolution-1033/FP16-INT8/single-image-super-resolution-1033.bin
+    size: 31681
+    sha256: 40cc62f8451f2cef4c76305d339218ebdf8c77c65dc49f759322ed119938e6ec
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/single-image-super-resolution-1033/FP16-INT8/single-image-super-resolution-1033.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

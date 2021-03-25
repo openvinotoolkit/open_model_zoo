@@ -1,0 +1,10 @@
+matplotlib
+motmetrics
+nibabel
+numpy
+scikit-learn
+scipy
+tokenizers>=0.9.3
+tensorboard
+tensorboardX
+tqdm

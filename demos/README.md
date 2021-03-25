@@ -1,40 +1,55 @@
-Open Model Zoo Demos
-====================
+# Open Model Zoo Demos
 
-The Open Model Zoo demo applications are console applications that demonstrate how you can use the Inference Engine in your applications to solve specific use-cases.
+The Open Model Zoo demo applications are console applications that provide robust application templates to help you implement specific deep learning scenarios. These applications involve increasingly complex processing pipelines that gather analysis data from several models that run inference simultaneously, such as detecting a person in a video stream along with detecting the person's physical attributes, such as age, gender, and emotional state
+
+For the Intel® Distribution of OpenVINO™ toolkit, the demos are available after installation in the following directory: `<INSTALL_DIR>/deployment_tools/open_model_zoo/demos`.
+The demos can also be obtained from the Open Model Zoo [GitHub repository](https://github.com/openvinotoolkit/open_model_zoo/).
+C++, C++ G-API and Python versions are located in the `cpp`, `cpp_gapi` and `python` subdirectories respectively.
 
 The Open Model Zoo includes the following demos:
 
-- [3D Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_3d_demo/README.md) - 3D human pose estimation demo.
-- [Action Recognition Python* Demo](./python_demos/action_recognition/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
-- [Colorization Python* Demo](./python_demos/colorization_demo/README.md) - Colorization demo colorizes input frames.
-- [Crossroad Camera C++ Demo](./crossroad_camera_demo/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
-- [Gaze Estimation C++ Demo](./gaze_estimation_demo/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
-- [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/README.md) - Human pose estimation demo.
-- [Image Inpainting Python Demo](./python_demos/image_inpainting_demo/README.md) - Demo application for GMCNN inpainting network.
-- [Image Retrieval Python* Demo](./python_demos/image_retrieval_demo/README.md) - The demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
-- [Image Segmentation C++ Demo](./segmentation_demo/README.md) - Inference of image segmentation networks like FCN8 (the demo supports only images as inputs).
-- [Instance Segmentation Python* Demo](./python_demos/instance_segmentation_demo/README.md) - Inference of instance segmentation networks trained in `Detectron` or `maskrcnn-benchmark`.
-- [Interactive Face Detection C++ Demo](./interactive_face_detection_demo/README.md) - Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
-- [Mask R-CNN C++ Demo for TensorFlow* Object Detection API](./mask_rcnn_demo/README.md) - Inference of instance segmentation networks created with TensorFlow\* Object Detection API.
-- [Monodepth Python* Demo](./python_demos/monodepth_demo/README.md) - The demo demonstrates how to run monocular depth estimation models.
-- [Multi-Camera Multi-Target Tracking Python* Demo](./python_demos/multi_camera_multi_target_tracking/README.md) Demo application for multiple targets (persons or vehicles) tracking on multiple cameras.
-- [Multi-Channel C++ Demos](./multi_channel/README.md) - Several demo applications for multi-channel scenarios.
-- [Object Detection for CenterNet Python* Demo](./python_demos/object_detection_demo_centernet/README.md) - Demo application for CenterNet object detection network.
-- [Object Detection for Faster R-CNN C++ Demo](./object_detection_demo_faster_rcnn/README.md) - Inference of object detection networks like Faster R-CNN (the demo supports only images as inputs).
-- [Object Detection for RetinaFace Python\* Demo](./python_demos/object_detection_demo_retinaface/README.md) - Demo application for RetinaFace face detection model.
-- [Object Detection for SSD C++ Demo](./object_detection_demo_ssd_async/README.md) - Demo application for SSD-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
-- [Object Detection for YOLO V3 C++ Demo](./object_detection_demo_yolov3_async/README.md) - Demo application for YOLOV3-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
-- [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/README.md) - Demo application for pedestrian tracking scenario.
-- [Security Barrier Camera C++ Demo](./security_barrier_camera_demo/README.md) - Vehicle Detection followed by the Vehicle Attributes and License-Plate Recognition, supports images/video and camera inputs.
-- [Single Human Pose Estimation Python* Demo](./python_demos/single_human_pose_estimation_demo/README.md) - 2D human pose estimation demo.
-- [Smart Classroom C++ Demo](./smart_classroom_demo/README.md) - Face recognition and action detection demo for classroom environment.
-- [Super Resolution C++ Demo](./super_resolution_demo/README.md) - Super Resolution demo (the demo supports only images as inputs). It enhances the resolution of the input image.
-- [Text Detection C++ Demo](./text_detection_demo/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
-- [Text Spotting Python* Demo](./python_demos/text_spotting_demo/README.md) - The demo demonstrates how to run Text Spotting models.
-- [Handwritten Japanese Recognition Python* Demo](./python_demos/handwritten_japanese_recognition_demo/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models.
-
-\* Several C++ demos referenced above have simplified implementation in Python\*, located in the `python_demos` directory.
+- [3D Human Pose Estimation Python\* Demo](./human_pose_estimation_3d_demo/python/README.md) - 3D human pose estimation demo.
+- [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
+- [BERT Question Answering Python\* Demo](./bert_question_answering_demo/python/README.md)
+- [BERT Question Answering Embedding Python\* Demo](./bert_question_answering_embedding_demo/python/README.md) - The demo demonstrates how to run BERT based models for question answering task.
+- [Classification C++ Demo](./classification_demo/cpp/README.md) - Shows an example of using neural networks for image classification.
+- [Colorization Python\* Demo](./colorization_demo/python/README.md) - Colorization demo colorizes input frames.
+- [Crossroad Camera C++ Demo](./crossroad_camera_demo/cpp/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
+- [Deblurring Python\* Demo](./deblurring_demo/python/README.md) - Demo for deblurring the input images.
+- [Face Detection MTCNN Python\* Demo](./face_detection_mtcnn_demo/python/README.md) - The demo demonstrates how to run MTCNN face detection model to detect faces on images.
+- [Formula Recognition Python\* Demo](./formula_recognition_demo/python/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
+- [Gaze Estimation C++ Demo](./gaze_estimation_demo/cpp/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
+- [Gesture Recognition Python\* Demo](./gesture_recognition_demo/python/README.md) - Demo application for Gesture Recognition algorithm (e.g. American Sign Language gestures), which classifies gesture actions that are being performed on input video.
+- [Handwritten Text Recognition Python\* Demo](./handwritten_text_recognition_demo/python/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models and Handwritten Simplified Chinese Recognition models.
+- [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/cpp/README.md) - Human pose estimation demo.
+- [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md) - Human pose estimation demo.
+- [Image Inpainting Python\* Demo](./image_inpainting_demo/python/README.md) - Demo application for GMCNN inpainting network.
+- [Image Retrieval Python\* Demo](./image_retrieval_demo/python/README.md) - The demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
+- [Image Segmentation C++ Demo](./segmentation_demo/cpp/README.md) - Inference of semantic segmentation networks (supports video and camera inputs).
+- [Image Segmentation Python\* Demo](./segmentation_demo/python/README.md) - Inference of semantic segmentation networks (supports video and camera inputs).
+- [Image Translation Python\* Demo](./image_translation_demo/python/README.md) - Demo application to synthesize a photo-realistic image based on exemplar image.
+- [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md) - Inference of instance segmentation networks trained in `Detectron` or `maskrcnn-benchmark`.
+- [Interactive Face Detection C++ Demo](./interactive_face_detection_demo/cpp/README.md) - Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
+- [Interactive Face Detection G-API Demo](./interactive_face_detection_demo/cpp_gapi/README.md) - G-API based Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
+- [Machine Translation Python\* Demo](./machine_translation_demo/python/README.md) - The demo demonstrates how to run non-autoregressive machine translation models.
+- [Mask R-CNN C++ Demo for TensorFlow\* Object Detection API](./mask_rcnn_demo/cpp/README.md) - Inference of instance segmentation networks created with TensorFlow\* Object Detection API.
+- [Monodepth Python\* Demo](./monodepth_demo/python/README.md) - The demo demonstrates how to run monocular depth estimation models.
+- [Multi-Camera Multi-Target Tracking Python\* Demo](./multi_camera_multi_target_tracking_demo/python/README.md) Demo application for multiple targets (persons or vehicles) tracking on multiple cameras.
+- [Multi-Channel Face Detection C++ Demo](./multi_channel_face_detection_demo/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel face detection scenario.
+- [Multi-Channel Human Pose Estimation C++ Demo](./multi_channel_human_pose_estimation_demo/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel human pose estimation scenario.
+- [Multi-Channel Object Detection Yolov3 C++ Demo](./multi_channel_object_detection_demo_yolov3/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel common object detection scenario.
+- [Object Detection Python\* Demo](./object_detection_demo/python/README.md) - Demo application for several object detection model types (like SSD, Yolo, etc).
+- [Object Detection C++ Demo](./object_detection_demo/cpp/README.md) - Demo application for Object Detection networks (different models architectures are supported), async API showcase, simple OpenCV interoperability (supports video and camera inputs).
+- [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/cpp/README.md) - Demo application for pedestrian tracking scenario.
+- [Security Barrier Camera C++ Demo](./security_barrier_camera_demo/cpp/README.md) - Vehicle Detection followed by the Vehicle Attributes and License-Plate Recognition, supports images/video and camera inputs.
+- [Speech Recognition Python\* Demo](./speech_recognition_demo/python/README.md) - Speech recognition demo: takes audio file with an English phrase on input, and converts it into text.
+- [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md) - 2D human pose estimation demo.
+- [Smart Classroom C++ Demo](./smart_classroom_demo/cpp/README.md) - Face recognition and action detection demo for classroom environment.
+- [Sound Classification Python\* Demo](./sound_classification_demo/python/README.md) - Demo application for sound classification algorithm.
+- [Super Resolution C++ Demo](./super_resolution_demo/cpp/README.md) - Super Resolution demo (the demo supports only images as inputs). It enhances the resolution of the input image.
+- [Text Detection C++ Demo](./text_detection_demo/cpp/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
+- [Text Spotting Python\* Demo](./text_spotting_demo/python/README.md) - The demo demonstrates how to run Text Spotting models.
+- [Text-to-speech Python\* Demo](./text_to_speech_demo/python/README.md) - Shows an example of using Forward Tacotron and WaveRNN neural networks for text to speech task.
 
 ## Media Files Available for Demos
 
@@ -50,60 +65,67 @@ The table below shows the correlation between models, demos, and supported plugi
 > **NOTE:** **MYRIAD** below stands for Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ Vision Processing Units.
 
 | Model                                            | Demos supported on the model                                                                                 | CPU       | GPU       | MYRIAD/HDDL | HETERO:FPGA,CPU |
-|--------------------------------------------------|----------------------------------------------------------------------------------------------------------------|-----------|-----------|-------------|-----------------|
-| human-pose-estimation-3d-0001                    | [3D Human Pose Estimation Python\* Demo](./python_demos/human_pose_estimation_3d_demo/README.md)    | Supported | Supported |             |                 |
-| action-recognition-0001-decoder                  | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
-| action-recognition-0001-encoder                  | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
-| driver-action-recognition-adas-0002-decoder      | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
-| driver-action-recognition-adas-0002-encoder      | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             | Supported       |
-| person-attributes-recognition-crossroad-0230     | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
-| person-reidentification-retail-0031              | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
-| person-reidentification-retail-0076              | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./python_demos/multi_camera_multi_target_tracking/README.md)                           | Supported | Supported | Supported   | Supported       |
-| person-reidentification-retail-0079              | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./python_demos/multi_camera_multi_target_tracking/README.md)                            | Supported | Supported | Supported   | Supported       |
-| person-vehicle-bike-detection-crossroad-0078     | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
-| person-vehicle-bike-detection-crossroad-yolov3-1020 | [Object Detection for YOLO V3 Python\* Demo](./python_demos/object_detection_demo_yolov3_async/README.md) | Supported |           |             |                 |
-| human-pose-estimation-0001                       | [Human Pose Estimation Demo](./human_pose_estimation_demo/README.md)                  | Supported | Supported | Supported   | Supported       |
-| image-retrieval-0001                             | [Image Retrieval Python\* Demo](./python_demos/image_retrieval_demo/README.md)         | Supported | Supported | Supported   | Supported       |
-| semantic-segmentation-adas-0001                  | [Image Segmentation Demo](./segmentation_demo/README.md)                              | Supported | Supported |             | Supported       |
-| instance-segmentation-security-0010              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
-| instance-segmentation-security-0050              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
-| instance-segmentation-security-0083              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
-| instance-segmentation-security-1025              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
-| age-gender-recognition-retail-0013               | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
-| emotions-recognition-retail-0003                 | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
-| face-detection-adas-0001                         | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
-| face-detection-adas-binary-0001                  | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported |             |                 |
-| face-detection-retail-0004                       | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
-| facial-landmarks-35-adas-0002                    | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
-| head-pose-estimation-adas-0001                   | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
-| license-plate-recognition-barrier-0001           | [Security Barrier Camera Demo](./security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
-| vehicle-attributes-recognition-barrier-0039      | [Security Barrier Camera Demo](./security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
-| vehicle-attributes-recognition-barrier-0042      | [Security Barrier Camera Demo](./security_barrier_camera_demo/README.md)              | Supported |           |             |                 |
-| vehicle-license-plate-detection-barrier-0106     | [Security Barrier Camera Demo](./security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
-| vehicle-license-plate-detection-barrier-0123     | [Security Barrier Camera Demo](./security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
-| landmarks-regression-retail-0009                 | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
-| person-detection-action-recognition-0005         | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
-| person-detection-action-recognition-teacher-0002 | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported |             | Supported       |
-| single-human-pose-estimation-0001                | [Single Human Pose Estimation Python\* Demo](./python_demos/single_human_pose_estimation_demo/README.md)     | Supported | Supported |  |      |
-| single-image-super-resolution-1032               | [Super Resolution Demo](./super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
-| single-image-super-resolution-1033               | [Super Resolution Demo](./super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
-| text-detection-0003                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
-| text-detection-0004                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
-| text-recognition-0012                            | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             |                 |
-| handwritten-japanese-recognition-0001            | [Handwritten Japanese Recognition Python\* Demo](./python_demos/handwritten_japanese_recognition_demo/README.md)                             | Supported        |        Supported     |        Supported     |                 |
-| gaze-estimation-adas-0002                        | [Gaze Estimation Demo](./gaze_estimation_demo/README.md)                              | Supported | Supported | Supported | Supported |
-| head-pose-estimation-adas-0001                   | [Gaze Estimation Demo](./gaze_estimation_demo/README.md)                              | Supported | Supported | Supported | Supported |
-| facial-landmarks-35-adas-0002                    | [Gaze Estimation Demo](./gaze_estimation_demo/README.md)                              | Supported | Supported | Supported | Supported |
-| pedestrian-and-vehicle-detector-adas-0001        | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
-| pedestrian-detection-adas-0002                   | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
-| pedestrian-detection-adas-binary-0001            | any demo that supports SSD\*-based models, above                                                               | Supported | Supported |             |                 |
-| person-detection-retail-0002                     | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
-| person-detection-retail-0013                     | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
-| road-segmentation-adas-0001                      | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
-| vehicle-detection-adas-binary-0001               | any demo that supports SSD\*-based models, above                                                               | Supported | Supported |             |                 |
-| vehicle-detection-adas-0002                      | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
-| yolo-v2-tiny-vehicle-detection-0001              | [Object Detection for YOLO V3 Python\* Demo](./python_demos/object_detection_demo_yolov3_async/README.md) | Supported |           |             |                 |
-
+|--------------------------------------------------|--------------------------------------------------------------------------------------------------------------|-----------|-----------|-------------|-----------------|
+| action-recognition-0001-decoder                  | [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md)                              | Supported | Supported | Supported   |                 |
+| action-recognition-0001-encoder                  | [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md)                              | Supported | Supported | Supported   |                 |
+| age-gender-recognition-retail-0013               | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   | Supported       |
+| asl-recognition-0004                             | [Gesture Recognition Python\* Demo](./gesture_recognition_demo/python/README.md)                       | Supported | Supported |             |                 |
+| driver-action-recognition-adas-0002-decoder      | [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md)                              | Supported | Supported | Supported   |                 |
+| driver-action-recognition-adas-0002-encoder      | [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md)                              | Supported | Supported | Supported   | Supported       |
+| emotions-recognition-retail-0003                 | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   | Supported       |
+| face-detection-adas-0001                         | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   | Supported       |
+| face-detection-retail-0004                       | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   | Supported       |
+| facial-landmarks-35-adas-0002                    | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   | Supported       |
+| facial-landmarks-35-adas-0002                    | [Gaze Estimation Demo](./gaze_estimation_demo/cpp/README.md)                                                     | Supported | Supported | Supported   | Supported       |
+| gaze-estimation-adas-0002                        | [Gaze Estimation Demo](./gaze_estimation_demo/cpp/README.md)                                                     | Supported | Supported | Supported   | Supported       |
+| handwritten-japanese-recognition-0001            | [Handwritten Text Recognition Python\* Demo](./handwritten_text_recognition_demo/python/README.md)     | Supported | Supported | Supported   |                 |
+| handwritten-simplified-chinese-recognition-0001  | [Handwritten Text Recognition Python\* Demo](./handwritten_text_recognition_demo/python/README.md)     | Supported | Supported | Supported   |                 |
+| head-pose-estimation-adas-0001                   | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   | Supported       |
+| head-pose-estimation-adas-0001                   | [Gaze Estimation Demo](./gaze_estimation_demo/cpp/README.md)                                                     | Supported | Supported | Supported   | Supported       |
+| human-pose-estimation-0001                       | [Human Pose Estimation Demo](./human_pose_estimation_demo/cpp/README.md)<br>[Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)      | Supported | Supported | Supported   | Supported       |
+| human-pose-estimation-0005                       | [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)                   | Supported | Supported |             |                 |
+| human-pose-estimation-0006                       | [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)                   | Supported | Supported |             |                 |
+| human-pose-estimation-0007                       | [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)                   | Supported | Supported |             |                 |
+| human-pose-estimation-3d-0001                    | [3D Human Pose Estimation Python\* Demo](./human_pose_estimation_3d_demo/python/README.md)             | Supported | Supported |             |                 |
+| image-retrieval-0001                             | [Image Retrieval Python\* Demo](./image_retrieval_demo/python/README.md)                               | Supported | Supported | Supported   | Supported       |
+| instance-segmentation-security-0002              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
+| instance-segmentation-security-0091              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
+| instance-segmentation-security-0228              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
+| instance-segmentation-security-1039              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
+| instance-segmentation-security-1040              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             | Supported       |
+| landmarks-regression-retail-0009                 | [Smart Classroom Demo](./smart_classroom_demo/cpp/README.md)                                                     | Supported | Supported | Supported   | Supported       |
+| license-plate-recognition-barrier-0001           | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   | Supported       |
+| pedestrian-and-vehicle-detector-adas-0001        | any demo that supports SSD\*-based models                                                                    | Supported | Supported | Supported   | Supported       |
+| pedestrian-detection-adas-0002                   | any demo that supports SSD\*-based models                                                                    | Supported | Supported | Supported   | Supported       |
+| person-attributes-recognition-crossroad-0230     | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported | Supported   | Supported       |
+| person-attributes-recognition-crossroad-0234     | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported | Supported   |                 |
+| person-attributes-recognition-crossroad-0238     | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported | Supported   |                 |
+| person-detection-retail-0002                     | [Pedestrian Tracker Demo](./pedestrian_tracker_demo/cpp/README.md)                                               | Supported | Supported | Supported   | Supported       |
+| person-detection-retail-0013                     | [Object Detection Demo](./object_detection_demo/cpp/README.md)                                                   | Supported | Supported | Supported   | Supported       |
+| person-reidentification-retail-0277              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported |             |                 |
+| person-reidentification-retail-0286              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./multi_camera_multi_target_tracking_demo/python/README.md)    | Supported | Supported |       |        |
+| person-reidentification-retail-0287              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./multi_camera_multi_target_tracking_demo/python/README.md)    | Supported | Supported |       |        |
+| person-reidentification-retail-0288              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./multi_camera_multi_target_tracking_demo/python/README.md)    | Supported | Supported |       |        |
+| person-vehicle-bike-detection-crossroad-0078     | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported | Supported   | Supported       |
+| person-vehicle-bike-detection-crossroad-1016     | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported | Supported   |                 |
+| person-vehicle-bike-detection-crossroad-yolov3-1020 | [Object Detection Python\* Demo](./object_detection_demo/python/README.md)                          | Supported | Supported | Supported   |                 |
+| person-detection-action-recognition-0005         | [Smart Classroom Demo](./smart_classroom_demo/cpp/README.md)                                                     | Supported | Supported | Supported   | Supported       |
+| person-detection-action-recognition-teacher-0002 | [Smart Classroom Demo](./smart_classroom_demo/cpp/README.md)                                                     | Supported | Supported | Supported   | Supported       |
+| road-segmentation-adas-0001                      | [Segmentation Demo](./segmentation_demo/cpp/README.md)                                                           | Supported | Supported | Supported   | Supported       |
+| semantic-segmentation-adas-0001                  | [Image Segmentation Demo](./segmentation_demo/cpp/README.md)                                                     | Supported | Supported | Supported   | Supported       |
+| single-human-pose-estimation-0001                | [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md)     | Supported | Supported | Supported   |                 |
+| single-image-super-resolution-1032               | [Super Resolution Demo](./super_resolution_demo/cpp/README.md)                                                   | Supported | Supported | Supported   | Supported       |
+| single-image-super-resolution-1033               | [Super Resolution Demo](./super_resolution_demo/cpp/README.md)                                                   | Supported | Supported | Supported   | Supported       |
+| text-detection-0003                              | [Text Detection Demo](./text_detection_demo/cpp/README.md)                                                       | Supported | Supported | Supported   | Supported       |
+| text-detection-0004                              | [Text Detection Demo](./text_detection_demo/cpp/README.md)                                                       | Supported | Supported | Supported   | Supported       |
+| text-recognition-0012                            | [Text Detection Demo](./text_detection_demo/cpp/README.md)                                                       | Supported | Supported | Supported   |                 |
+| text-recognition-0013                            | [Text Detection Demo](./text_detection_demo/cpp/README.md)                                                       | Supported | Supported | Supported   |                 |
+| vehicle-attributes-recognition-barrier-0039      | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   | Supported       |
+| vehicle-attributes-recognition-barrier-0042      | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   |                 |
+| vehicle-license-plate-detection-barrier-0106     | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   | Supported       |
+| vehicle-license-plate-detection-barrier-0123     | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   | Supported       |
+| vehicle-detection-adas-0002                      | any demo that supports SSD\*-based models                                                                    | Supported | Supported | Supported   | Supported       |
+| yolo-v2-tiny-vehicle-detection-0001              | [Object Detection Python\* Demo](./object_detection_demo/python/README.md)                             | Supported | Supported | Supported   |                 |
 
 Notice that the FPGA support comes through a [heterogeneous execution](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_HETERO.html), for example, when the post-processing is happening on the CPU.
 
@@ -114,11 +136,8 @@ Please run the following command before the demos build (assuming that the binar
 ```sh
 source <INSTALL_DIR>/deployment_tools/bin/setupvars.sh
 ```
-You can also build demos manually using Inference Engine binaries from the
-[openvino](https://github.com/openvinotoolkit/openvino) repo. In this case please set `InferenceEngine_DIR` to a CMake folder you built the Inference Engine from, for example `<openvino_repo>/inference-engine/build`.
-Please also set the `OpenCV_DIR` variable pointing to the required OpenCV package. The same OpenCV
-version should be used both for the inference engine and demos build.
-Please refer to the Inference Engine <a href="https://github.com/openvinotoolkit/openvino/blob/master/build-instruction.md">build instructions</a>
+You can also build demos manually using Inference Engine built from the [openvino](https://github.com/openvinotoolkit/openvino) repo. In this case please set `InferenceEngine_DIR` environment variable to a folder containing `InferenceEngineConfig.cmake` and `ngraph_DIR` to a folder containing `ngraphConfig.cmake` in a build folder. Please also set the `OpenCV_DIR` to point to the OpenCV package to use. The same OpenCV version should be used both for Inference Engine and demos build. Alternatively these values can be provided via command line while running `cmake`. See [CMake's search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
+Please refer to the Inference Engine [build instructions](https://github.com/openvinotoolkit/openvino/blob/master/build-instruction.md)
 for details. Please also add path to built Inference Engine libraries to `LD_LIBRARY_PATH` (Linux*) or `PATH` (Windows*) variable before building the demos.
 
 ### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*
@@ -127,7 +146,7 @@ The officially supported Linux* build environment is the following:
 
 * Ubuntu* 16.04 LTS 64-bit or CentOS* 7.4 64-bit
 * GCC* 5.4.0 (for Ubuntu* 16.04) or GCC* 4.8.5 (for CentOS* 7.4)
-* CMake* version 2.8 or higher.
+* CMake* version 3.10 or higher.
 
 To build the demo applications for Linux, go to the directory with the `build_demos.sh` script and
 run it:
@@ -168,7 +187,7 @@ for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 The recommended Windows* build environment is the following:
 * Microsoft Windows* 10
 * Microsoft Visual Studio* 2015, 2017, or 2019
-* CMake* version 2.8 or higher
+* CMake* version 3.10 or higher
 
 > **NOTE**: If you want to use Microsoft Visual Studio 2019, you are required to install CMake 3.14.
 
@@ -179,7 +198,7 @@ build_demos_msvc.bat
 ```
 
 By default, the script automatically detects the highest Microsoft Visual Studio version installed on the machine and uses it to create and build
-a solution for a demo code. Optionally, you can also specify the preffered Microsoft Visual Studio version to be used by the script. Supported
+a solution for a demo code. Optionally, you can also specify the preferred Microsoft Visual Studio version to be used by the script. Supported
 versions are: `VS2015`, `VS2017`, `VS2019`. For example, to build the demos using the Microsoft Visual Studio 2017, use the following command:
 ```bat
 build_demos_msvc.bat VS2017
@@ -192,7 +211,7 @@ build binaries in Debug configuration. Run the appropriate version of the
 Microsoft Visual Studio and open the generated solution file from the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\Demos.sln`
 directory.
 
-### <a name="build_python_extensions"></a>Build the Native Python* Extension Modules
+### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
 
 Some of the Python demo applications require native Python extension modules to be built before they can be run.
 This requires you to have Python development files (headers and import libraries) installed.

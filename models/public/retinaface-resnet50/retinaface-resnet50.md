@@ -1,7 +1,7 @@
-# RetinaFace-ResNet50
+# retinaface-resnet50
 
 ## Use Case and High-Level Description
-RetinaFace-R50 is a medium size model with ResNet50 backbone for Face Localization. It can output face bounding boxes and five facial landmarks in a single forward pass. More details provided in the [paper](https://arxiv.org/abs/1905.00641) and [repository](https://github.com/deepinsight/insightface/tree/master/RetinaFace)
+RetinaFace-R50 is a medium size model with ResNet50 backbone for Face Localization. It can output face bounding boxes and five facial landmarks in a single forward pass. More details provided in the [paper](https://arxiv.org/abs/1905.00641) and [repository](https://github.com/deepinsight/insightface/tree/master/detection/RetinaFace)
 
 ## Specification
 
@@ -18,7 +18,7 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 64 x 64 pixels.
 
 Accuracy validation approach different from described in the original repo.
-For details about original WIDER results please see [https://github.com/deepinsight/insightface/tree/master/RetinaFace]()
+For details about original WIDER results please see [https://github.com/deepinsight/insightface/tree/master/detection/RetinaFace]()
 
 ## Input
 
@@ -63,7 +63,7 @@ Model outputs are floating points tensors:
 8. name: `face_rpn_bbox_stride16`,  shape: `1,8,80,80`, format: `[B, Ax4, H, W]`, represents detection box deltas from Feature Pyramid Network (FPN) level with stride 8.
 
 9. name: `face_rpn_landmark_pred_stride16`, shape: `1,20,80,80`, format: `[B, Ax10, H, W]`, represents facial landmarks from Feature Pyramid Network (FPN) level with stride 8.
-   
+
 For each output format:
 - `B` - batch size
 - `A` - number of anchors
@@ -83,6 +83,20 @@ Facial landmarks have format `[x1, y1, x2, y2, x3, y3, x4, y4, x5, y5]`, where:
 
 ### Converted model
 The converted model has the same parameters as the original model.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

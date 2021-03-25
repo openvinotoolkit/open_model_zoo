@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ from .classification_representation import (
     Classification,
     ClassificationAnnotation,
     ClassificationPrediction,
-    ArgMaxClassificationPrediction
+    ArgMaxClassificationPrediction,
+    SequenceClassificationAnnotation,
+    SequenceClassificationPrediction
 )
 from .detection_representation import (
     Detection,
@@ -33,6 +35,7 @@ from .detection_representation import (
 from .reid_representation import (
     ReIdentificationAnnotation,
     ReIdentificationClassificationAnnotation,
+    PlaceRecognitionAnnotation,
     ReIdentificationPrediction
 )
 from .segmentation_representation import (
@@ -44,6 +47,10 @@ from .segmentation_representation import (
     CoCoInstanceSegmentationAnnotation,
     CoCocInstanceSegmentationPrediction,
     OAR3DTilingSegmentationAnnotation,
+    SalientRegionAnnotation,
+    SalientRegionPrediction,
+    BackgroundMattingAnnotation,
+    BackgroundMattingPrediction
 )
 from .character_recognition_representation import (
     CharacterRecognition,
@@ -73,9 +80,13 @@ from .nlp_representation import (
     MachineTranslationPrediction,
     QuestionAnsweringAnnotation,
     QuestionAnsweringPrediction,
+    QuestionAnsweringEmbeddingAnnotation,
+    QuestionAnsweringEmbeddingPrediction,
     TextClassificationAnnotation,
     LanguageModelingAnnotation,
-    LanguageModelingPrediction
+    LanguageModelingPrediction,
+    QuestionAnsweringBiDAFAnnotation,
+    BERTNamedEntityRecognitionAnnotation
 )
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
 from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
@@ -83,6 +94,12 @@ from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
 from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPrediction
 from .image_processing import ImageProcessingAnnotation, ImageProcessingPrediction
 from .quality_assessment import QualityAssessmentAnnotation, QualityAssessmentPrediction
+from .dna_sequence import DNASequenceAnnotation, DNASequencePrediction
+
+from .raw_representation import RawTensorAnnotation, RawTensorPrediction
+
+from .optical_flow import OpticalFlowAnnotation, OpticalFlowPrediction
+
 __all__ = [
     'BaseRepresentation',
 
@@ -90,6 +107,8 @@ __all__ = [
     'ClassificationAnnotation',
     'ClassificationPrediction',
     'ArgMaxClassificationPrediction',
+    'SequenceClassificationAnnotation',
+    'SequenceClassificationPrediction',
 
     'Detection',
     'DetectionAnnotation',
@@ -102,11 +121,18 @@ __all__ = [
 
     'ReIdentificationAnnotation',
     'ReIdentificationClassificationAnnotation',
+    'PlaceRecognitionAnnotation',
     'ReIdentificationPrediction',
 
     'SegmentationRepresentation',
     'SegmentationAnnotation',
     'SegmentationPrediction',
+
+    'SalientRegionAnnotation',
+    'SalientRegionPrediction',
+
+    'BackgroundMattingAnnotation',
+    'BackgroundMattingPrediction',
 
     'BrainTumorSegmentationAnnotation',
     'BrainTumorSegmentationPrediction',
@@ -161,12 +187,26 @@ __all__ = [
     'MachineTranslationPrediction',
     'QuestionAnsweringAnnotation',
     'QuestionAnsweringPrediction',
+    'QuestionAnsweringEmbeddingAnnotation',
+    'QuestionAnsweringEmbeddingPrediction',
+    'QuestionAnsweringBiDAFAnnotation',
     'TextClassificationAnnotation',
     'LanguageModelingAnnotation',
     'LanguageModelingPrediction',
+    'BERTNamedEntityRecognitionAnnotation',
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',
+
     'QualityAssessmentAnnotation',
     'QualityAssessmentPrediction',
+
+    'DNASequenceAnnotation',
+    'DNASequencePrediction',
+
+    'RawTensorAnnotation',
+    'RawTensorPrediction',
+
+    'OpticalFlowAnnotation',
+    'OpticalFlowPrediction',
 ]

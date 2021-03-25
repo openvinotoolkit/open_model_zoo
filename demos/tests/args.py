@@ -18,7 +18,9 @@ import shutil
 from pathlib import Path
 
 ArgContext = collections.namedtuple('ArgContext',
-    ['source_dir', 'test_data_dir', 'dl_dir', 'model_info', 'data_sequences', 'data_sequence_dir'])
+    ['test_data_dir', 'dl_dir', 'model_info', 'data_sequences', 'data_sequence_dir'])
+
+OMZ_DIR = Path(__file__).parents[2].resolve()
 
 
 class TestDataArg:
@@ -59,7 +61,7 @@ class DataPatternArg:
         seq = [Path(data.resolve(context))
             for data in context.data_sequences[self.sequence_name]]
 
-        assert len(set(data.suffix for data in seq)) == 1, "all images in the sequence must have the same extension"
+        assert len({data.suffix for data in seq}) == 1, "all images in the sequence must have the same extension"
         assert '%' not in seq[0].suffix
 
         name_format = 'input-%04d' + seq[0].suffix
@@ -98,11 +100,3 @@ class DataDirectoryOrigFileNamesArg:
                 shutil.copyfile(seq_item, str(seq_dir / Path(seq_item).name))
 
         return str(seq_dir)
-
-
-class DemoFileArg:
-    def __init__(self, file_name):
-        self.file_name = file_name
-
-    def resolve(self, context):
-        return str(context.source_dir / self.file_name)

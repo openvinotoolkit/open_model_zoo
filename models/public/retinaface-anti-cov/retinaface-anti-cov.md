@@ -1,7 +1,7 @@
 # retinaface-anti-cov
 
 ## Use Case and High-Level Description
-RetinaFace-Anti-Cov is a customized one stage face detector to help people protect themselves from CovID-19. More details provided in the [paper](https://arxiv.org/abs/1905.00641) and [repository](https://github.com/deepinsight/insightface/tree/master/RetinaFaceAntiCov)
+RetinaFace-Anti-Cov is a customized one stage face detector to help people protect themselves from CovID-19. More details provided in the [paper](https://arxiv.org/abs/1905.00641) and [repository](https://github.com/deepinsight/insightface/tree/master/detection/RetinaFaceAntiCov)
 
 ## Specification
 
@@ -89,6 +89,20 @@ The third element in attributes score is a mask attribute. This score determines
 
 ### Converted model
 The converted model has the same parameters as the original model.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

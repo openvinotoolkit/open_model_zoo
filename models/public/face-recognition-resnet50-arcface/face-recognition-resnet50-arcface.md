@@ -6,8 +6,6 @@ The original name of the model is [LResNet50E-IR,ArcFace@ms1m-refine-v1](https:/
 
 [Deep face recognition net with ResNet50 backbone and Arcface loss](https://arxiv.org/abs/1801.07698)
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -21,9 +19,7 @@ The original name of the model is [LResNet50E-IR,ArcFace@ms1m-refine-v1](https:/
 
 | Metric | Value |
 | ------ | ----- |
-| LFW accuracy | 98.8835%|
-
-## Performance
+| LFW accuracy | 99.80%|
 
 ## Input
 
@@ -68,6 +64,20 @@ Face embeddings, name: `pre_fc1`,  shape: `1,512`, output data format: `B,C`, wh
 - `C` - row-vector of 512 floating points values, face embeddings
 
 The net outputs on different images are comparable in cosine distance.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

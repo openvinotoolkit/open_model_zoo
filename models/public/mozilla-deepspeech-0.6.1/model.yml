@@ -1,0 +1,38 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  "mozilla-deepspeech-0.6.1" is a speech recognition neural network pre-trained by Mozilla
+  based on DeepSpeech architecture (CTC decoder with beam search and n-gram language model)
+  with modified neural network.
+  For details on the original DeepSpeech see paper <https://arxiv.org/abs/1412.5567>.
+task_type: speech_recognition
+files:
+  - name: deepspeech-0.6.1-models.tar.gz
+    size: 1229020343
+    sha256: 5d51fb06c531511b8a86b2d738262647d48fe008364f9936b2e52732e323892a
+    source: https://github.com/mozilla/DeepSpeech/releases/download/v0.6.1/deepspeech-0.6.1-models.tar.gz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: deepspeech-0.6.1-models.tar.gz
+model_optimizer_args:
+  - --input_model=$dl_dir/deepspeech-0.6.1-models/output_graph.pb
+  - --freeze_placeholder_with_value=input_lengths->[16]
+  - --input=input_node,previous_state_h,previous_state_c
+  - --input_shape=[1,16,19,26],[1,2048],[1,2048]
+  - --output=logits,cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd,cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1
+  - --disable_nhwc_to_nchw
+framework: tf
+license: https://raw.githubusercontent.com/mozilla/DeepSpeech/master/LICENSE

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -63,9 +63,9 @@ class SquadExample:
             qas_id,
             question_text,
             context_text,
-            answer_text,
-            start_position_character,
             title,
+            answer_text=None,
+            start_position_character=None,
             answers=None,
             is_impossible=False,
     ):
@@ -99,11 +99,12 @@ class SquadExample:
         self.char_to_word_offset = char_to_word_offset
 
         # Start and end positions only has a value during evaluation.
-        if start_position_character is not None and not is_impossible:
+        if start_position_character is not None and not is_impossible and answer_text is not None:
             self.start_position = char_to_word_offset[start_position_character]
             self.end_position = char_to_word_offset[
                 min(start_position_character + len(answer_text) - 1, len(char_to_word_offset) - 1)
             ]
+
 
 class SQUADConverter(BaseFormatConverter):
     __provider__ = "squad"
@@ -249,30 +250,34 @@ class SQUADConverter(BaseFormatConverter):
 
             spans = self.set_max_context(spans)
 
-            for span in spans:
+            for sp_id, span in enumerate(spans):
                 # Identify the position of the CLS token
                 cls_index = span["input_ids"].index(self.tokenizer.cls_token_id)
 
                 p_mask = self.fill_p_mask(span, len(truncated_query), sequence_added_tokens, cls_index)
                 idx = example_index
-                identifier = ['input_ids_{}'.format(idx), 'input_mask_{}'.format(idx), 'segment_ids_{}'.format(idx)]
+                identifier = ['input_ids_{}_{}'.format(idx, sp_id),
+                              'input_mask_{}_{}'.format(idx, sp_id),
+                              'segment_ids_{}_{}'.format(idx, sp_id),
+                              'position_ids_{}_{}'.format(idx, sp_id)]
                 annotation = QuestionAnsweringAnnotation(
-                    identifier,
-                    example.qas_id,
-                    np.array(unique_id),
-                    np.array(span["input_ids"]),
-                    np.array(span["attention_mask"]),
-                    np.array(span["token_type_ids"]),
-                    np.array(cls_index),
-                    p_mask,
-                    example.answers,
-                    example.context_text,
-                    example.doc_tokens,
-                    example.is_impossible,
-                    span["paragraph_len"],
-                    span["tokens"],
-                    span["token_is_max_context"],
-                    span["token_to_orig_map"],
+                    identifier=identifier,
+                    question_id=example.qas_id,
+                    unique_id=np.array(unique_id),
+                    input_ids=np.array(span["input_ids"]),
+                    input_mask=np.array(span["attention_mask"]),
+                    segment_ids=np.array(span["token_type_ids"]),
+                    position_ids=np.arange(len(span["token_type_ids"])),
+                    cls_index=np.array(cls_index),
+                    p_mask=p_mask,
+                    orig_answer_text=example.answers,
+                    paragraph_text=example.context_text,
+                    doc_tokens=example.doc_tokens,
+                    is_impossible=example.is_impossible,
+                    paragraph_len=span["paragraph_len"],
+                    tokens=span["tokens"],
+                    token_is_max_context=span["token_is_max_context"],
+                    token_to_orig_map=span["token_to_orig_map"],
                 )
                 annotation.metadata['lower_case'] = self.lower_case
                 annotations.append(annotation)

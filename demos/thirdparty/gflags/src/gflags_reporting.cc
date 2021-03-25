@@ -296,10 +296,10 @@ static void ShowUsageWithFlagsMatching(const char *argv0,
   }
 }
 
-void ShowUsageWithFlagsRestrict(const char *argv0, const char *restrict) {
+void ShowUsageWithFlagsRestrict(const char *argv0, const char *restrict_) {
   vector<string> substrings;
-  if (restrict != NULL && *restrict != '\0') {
-    substrings.push_back(restrict);
+  if (restrict_ != NULL && *restrict_ != '\0') {
+    substrings.push_back(restrict_);
   }
   ShowUsageWithFlagsMatching(argv0, substrings);
 }
@@ -389,8 +389,8 @@ void HandleCommandLineHelpFlags() {
     gflags_exitfunc(1);
 
   } else if (!FLAGS_helpon.empty()) {
-    string restrict = PATH_SEPARATOR + FLAGS_helpon + ".";
-    ShowUsageWithFlagsRestrict(progname, restrict.c_str());
+    string restrict_ = PATH_SEPARATOR + FLAGS_helpon + ".";
+    ShowUsageWithFlagsRestrict(progname, restrict_.c_str());
     gflags_exitfunc(1);
 
   } else if (!FLAGS_helpmatch.empty()) {

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -54,7 +54,8 @@ class WMTConverter(BaseFormatConverter):
         with open(str(self.input_file), 'r', encoding="utf-8") as input_f:
             input_lines = input_f.readlines()
 
-        subword_option = self.reference_file.name.split('.')[2]
+        subword_option = self.reference_file.name.split('.')[2] if len(
+            self.reference_file.name.split('.')) >= 3 else None
         with open(str(self.reference_file), 'r', encoding="utf-8") as ref_f:
             reference_lines = ref_f.readlines()
 

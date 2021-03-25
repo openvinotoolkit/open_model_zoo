@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import numpy as np
 import cv2
 from .postprocessor import Postprocessor
 from ..representation import DepthEstimationAnnotation, DepthEstimationPrediction
@@ -29,6 +30,9 @@ class ResizeDepthMap(Postprocessor):
         h, w, _ = self.image_size
 
         for target_prediction in prediction:
-            target_prediction.depth_map = cv2.resize(target_prediction.depth_map, (w, h))
+            depth_map = target_prediction.depth_map
+            if len(depth_map.shape) == 3 and 1 in depth_map.shape:
+                depth_map = np.squeeze(depth_map)
+            target_prediction.depth_map = cv2.resize(depth_map, (w, h))
 
         return annotation, prediction

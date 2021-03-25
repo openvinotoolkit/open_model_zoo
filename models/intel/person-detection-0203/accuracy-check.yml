@@ -1,0 +1,27 @@
+models:
+  - name: person-detection-0203
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+
+          type: class_agnostic_detection
+          scale: [0.0011574, 0.0020833]
+
+    datasets:
+      - name: crossroad_extra_untagged_person_hb
+        preprocessing:
+          - type: resize
+            dst_width: 864
+            dst_height: 480
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: cast_to_int
+          - type: nms
+            overlap: 0.6
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: coco_orig_precision

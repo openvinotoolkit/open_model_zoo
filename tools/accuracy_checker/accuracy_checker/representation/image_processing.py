@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ class GTLoader(Enum):
     PILLOW = 0
     OPENCV = 1
     DICOM = 2
+    RAWPY = 3
+    SKIMAGE = 4
 
 
 class ImageProcessingRepresentation(BaseRepresentation):
@@ -35,7 +37,9 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
     LOADERS = {
         GTLoader.PILLOW: 'pillow_imread',
         GTLoader.OPENCV: 'opencv_imread',
-        GTLoader.DICOM: 'dicom_reader'
+        GTLoader.DICOM: 'dicom_reader',
+        GTLoader.RAWPY: 'rawpy',
+        GTLoader.SKIMAGE: 'skimage_imread'
     }
 
     def __init__(self, identifier, path_to_gt, gt_loader=GTLoader.PILLOW):
@@ -54,9 +58,12 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
     @property
     def value(self):
         if self._value is None:
-            loader = BaseReader.provide(self._gt_loader, self.metadata['data_source'])
+            data_source = self.metadata.get('additional_data_source')
+            if not data_source:
+                data_source = self.metadata['data_source']
+            loader = BaseReader.provide(self._gt_loader, data_source)
             gt = loader.read(self._image_path)
-            return gt.astype(np.uint8) if self._gt_loader != 'dicom_reader' else gt
+            return gt.astype(np.uint8) if self._gt_loader not in ['dicom_reader', 'rawpy'] else gt
         return self._value
 
     @value.setter

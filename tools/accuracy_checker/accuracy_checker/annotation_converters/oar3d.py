@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -103,8 +103,8 @@ class OAR3DTilingConverter(DirectoryBasedAnnotationConverter):
 
         if not (mask_name.exists() and input_name.exists()):
 
-            inp = np.zeros([1, self.wD, self.wH, self.wW], dtype=np.float)
-            ref = np.zeros([self.wD, self.wH, self.wW, CLS], dtype=np.float)
+            inp = np.zeros([1, self.wD, self.wH, self.wW], dtype=float)
+            ref = np.zeros([self.wD, self.wH, self.wW, CLS], dtype=float)
             for d in range(self.wD):
                 for h in range(self.wH):
                     for w in range(self.wW):

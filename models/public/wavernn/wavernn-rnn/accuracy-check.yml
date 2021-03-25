@@ -1,0 +1,41 @@
+models:
+  - name: wavernn-rnn
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: multi_output_regression
+          outputs:
+            - h1
+            - h2
+            - logits
+        inputs:
+          - name: a1_t
+            type: INPUT
+            value: .*a1_t
+          - name: a2_t
+            type: INPUT
+            value: .*a2_t
+          - name: a3_t
+            type: INPUT
+            value: .*a3_t
+          - name: a4_t
+            type: INPUT
+            value: .*a4_t
+          - name: h1.1
+            type: INPUT
+            value: .*h1*
+          - name: h2.1
+            type: INPUT
+            value: .*h2*
+          - name: m_t
+            type: INPUT
+            value: .*m_t
+          - name: x
+            type: INPUT
+            value: .*x
+        allow_reshape_input: True
+    datasets:
+      - name: wavernn-io
+        metrics:
+          - type: mae
+            presenter: print_vector

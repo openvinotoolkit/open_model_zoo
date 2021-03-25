@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import onnxruntime.backend as backend
 import onnxruntime as onnx_rt
 from ..logging import warning
 from ..config import PathField, StringField, ListField, ConfigError
-from .launcher import Launcher, LauncherConfigValidator
+from .launcher import Launcher
 from ..utils import contains_all
 from ..logging import print_info
 
@@ -36,10 +36,7 @@ class ONNXLauncher(Launcher):
         super().__init__(config_entry, *args, **kwargs)
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        onnx_launcher_config = LauncherConfigValidator(
-            'ONNX_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading,
-        )
-        onnx_launcher_config.validate(self.config)
+        self.validate_config(config_entry, delayed_model_loading=self._delayed_model_loading)
         if not self._delayed_model_loading:
             self.model = self.automatic_model_search()
             self._inference_session = self.create_inference_session(str(self.model))
@@ -49,7 +46,7 @@ class ONNXLauncher(Launcher):
             for input_info in self._inference_session.get_inputs():
                 dtype = input_info.type.replace('tensor(', '').replace(')', '')
                 if dtype == 'float':
-                    dtype = 'float32'
+                    dtype += '32'
                 self._input_precisions[input_info.name] = dtype
 
     @classmethod
@@ -84,7 +81,7 @@ class ONNXLauncher(Launcher):
         if model.is_dir():
             model_list = list(model.glob('{}.onnx'.format(self._model_name)))
             if not model_list:
-                model_list = model.glob('*.onnx')
+                model_list = list(model.glob('*.onnx'))
                 if not model_list:
                     raise ConfigError('Model not found')
             if len(model_list) != 1:
@@ -141,10 +138,13 @@ class ONNXLauncher(Launcher):
             return data.astype(input_precision)
         if len(np.shape(data)) == 5 and len(layout) == 5:
             return np.transpose(data, layout).astype(input_precision)
+        if len(np.shape(data))-1 == len(layer_shape):
+            return np.array(data[0]).astype(input_precision)
         return np.array(data).astype(input_precision)
 
     def predict_async(self, *args, **kwargs):
         raise ValueError('ONNX Runtime Launcher does not support async mode yet')
 
     def release(self):
-        del self._inference_session
+        if hasattr(self, '_inference_session'):
+            del self._inference_session

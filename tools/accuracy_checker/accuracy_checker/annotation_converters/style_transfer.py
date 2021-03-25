@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -40,7 +40,10 @@ class StyleTransferConverter(BaseFormatConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_check_errors = [] if check_content else None
         annotations = []
-        images = list(im for im in self.image_dir.iterdir())
+        images = [
+            im for im in self.image_dir.iterdir()
+            if im.name.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'))
+        ]
         for image in images:
             identifiers = image.name
             annotation = StyleTransferAnnotation(identifiers, image.name)

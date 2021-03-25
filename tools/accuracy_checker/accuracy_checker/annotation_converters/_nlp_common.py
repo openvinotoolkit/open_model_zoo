@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@ limitations under the License.
 """
 
 import unicodedata
+
 from collections import OrderedDict
+from ..config import ConfigError
+from ..utils import contains_all, UnsupportedPackage
+
 try:
     import sentencepiece as spm
-except ImportError:
-    spm = None
-from ..config import ConfigError
-from ..utils import contains_all
+except ImportError as import_error:
+    spm = UnsupportedPackage("sentencepiece", import_error.msg)
 
 
 SPIECE_UNDERLINE = '\N{LOWER ONE EIGHTH BLOCK}'
@@ -321,7 +323,7 @@ class SquadWordPieseTokenizer(WordPieceTokenizer):
                 return text
             raise ValueError(
                 "Input is not valid. Should be a string, a list/tuple of strings or a list/tuple of integers."
-                )
+            )
 
         first_ids = get_input_ids(text)
         second_ids = get_input_ids(text_pair) if text_pair is not None else None
@@ -460,7 +462,7 @@ class SquadWordPieseTokenizer(WordPieceTokenizer):
         if already_has_special_tokens:
             if token_ids_1 is not None:
                 raise ValueError("You should not supply a second sequence if the provided sequence of "
-                                 "ids is already formated with special tokens for the model.")
+                                 "ids is already formatted with special tokens for the model.")
             return list(map(lambda x: 1 if x in [self.sep_token_id, self.cls_token_id] else 0, token_ids_0))
 
         if token_ids_1 is not None:
@@ -593,8 +595,8 @@ def truncate_seq_pair(tokens_a, tokens_b, max_length):
 
 class SentencePieceTokenizer:
     def __init__(self, tokenizer_model, lower_case=True, remove_space=True):
-        if spm is None:
-            raise ConfigError('Sentence piece tokenizer required sentencepiece, please install it before usage')
+        if isinstance(spm, UnsupportedPackage):
+            spm.raise_error("Sentence piece tokenizer")
         self.encoder = spm.SentencePieceProcessor()
         self.encoder.Load(str(tokenizer_model))
         self.lower_case = lower_case

@@ -9,6 +9,7 @@ models:
         preprocessing:
           - type: padding
             size: 513
+            enable_resize: True
         postprocessing:
           - type: encode_segmentation_mask
             apply_to: annotation

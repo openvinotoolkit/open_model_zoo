@@ -8,8 +8,6 @@ The model input is a blob that consists of a single image of 1x3x300x300 in BGR 
 
 The model output is a typical vector containing the tracked object data, as previously described.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -26,8 +24,6 @@ The model output is a typical vector containing the tracked object data, as prev
 |  mAP | 79.8377% |
 
 See [the original repository](https://github.com/chuanqi305/MobileNet-SSD).
-
-## Performance
 
 ## Input
 
@@ -62,7 +58,7 @@ The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
 
 - `image_id` - ID of the image in the batch
-- `label` - predicted class ID
+- `label` - predicted class ID (1..20 - PASCAL VOC defined class ids). Mapping to class names provided by `<omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt` file.
 - `conf` - confidence for the predicted class
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates are in normalized format, in range [0, 1])
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates are in normalized format, in range [0, 1])
@@ -73,10 +69,24 @@ The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
 
 - `image_id` - ID of the image in the batch
-- `label` - predicted class ID
+- `label` - predicted class ID (1..20 - PASCAL VOC defined class ids). Mapping to class names provided by `<omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt` file.
 - `conf` - confidence for the predicted class
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates are in normalized format, in range [0, 1])
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates are in normalized format, in range [0, 1])
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

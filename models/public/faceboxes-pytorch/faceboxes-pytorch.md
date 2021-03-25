@@ -3,9 +3,7 @@
 ## Use Case and High-Level Description
 
 FaceBoxes: A CPU Real-time Face Detector with High Accuracy. For details see
-the [repository](https://github.com/zisianw/FaceBoxes.PyTorch), [paper](https://arxiv.org/pdf/1708.05234.pdf)
-
-## Example
+the [repository](https://github.com/zisianw/FaceBoxes.PyTorch), [paper](https://arxiv.org/abs/1708.05234)
 
 ## Specification
 
@@ -21,8 +19,6 @@ the [repository](https://github.com/zisianw/FaceBoxes.PyTorch), [paper](https://
 | Metric | Value |
 | ------ | ----- |
 | mAP   | 83.565%|
-
-## Performance
 
 ## Input
 
@@ -55,17 +51,31 @@ Image, name - `input.1` , shape - [1x3x1024x1024], format [BxCxHxW],
 
 ### Original model
 
-1. Bounding boxes deltas , name: `342`, shape - [1x21824x4]. Presented in format [BxAx4],
+1. Bounding boxes deltas , name: `boxes`, shape - [1x21824x4]. Presented in format [BxAx4],
     where:
 
     - B - batch size
     - A - number of prior box anchors
 
-2. Scores, name: `353`, shape - [1x21824x2]. Contains scores for 2 classes - the first is background, the second is face.
+2. Scores, name: `scores`, shape - [1x21824x2]. Contains scores for 2 classes - the first is background, the second is face.
 
 ### Converted model
 
 The converted model has the same parameters as the original model.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

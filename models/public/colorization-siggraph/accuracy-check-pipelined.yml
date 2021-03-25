@@ -1,0 +1,24 @@
+evaluations:
+  - name: colorization-siggraph
+    module: custom_evaluators.colorization_evaluator.ColorizationEvaluator
+    module_config:
+      network_info:
+        colorization_network: {}
+
+        verification_network:
+          adapter: classification
+
+      launchers:
+        - framework: dlsdk
+
+      datasets:
+        - name: imagenet_1000_classes
+          reader: pillow_imread
+
+          preprocessing:
+            - type: resize
+              size: 256
+              use_pillow: True
+              interpolation: Bicubic
+            - type: normalization
+              std: 255

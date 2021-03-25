@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,28 +17,28 @@ description: >-
 task_type: image_processing
 files:
   - name: FP32/text-image-super-resolution-0001.xml
-    size: 11301
-    sha256: 4194b05a97f9c6338d5ae33d9f17e4f095c6b393e68e925d1924d4fb142de107
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.xml
+    size: 11454
+    sha256: 025ad67e662998f0a36f69e2e27decbd88cb3ffb9b628b5a1488ea21316c2267
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.xml
   - name: FP32/text-image-super-resolution-0001.bin
     size: 10836
     sha256: b9405f0bce254c61f0487b0fa53c89621dc440cbc560c7dc92506900b62d6af5
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.bin
   - name: FP16/text-image-super-resolution-0001.xml
-    size: 11291
-    sha256: b3ca836a488e0c01f7cac9dfc477370a9ec8ef2df7f940f84aa7e66750db27ba
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.xml
+    size: 11444
+    sha256: 7b7ee21bdf1892b063fe18805325e0d38a151fb3b6327ef1e178886d49d277b4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.xml
   - name: FP16/text-image-super-resolution-0001.bin
     size: 5418
     sha256: f203818d73b933e5004aff85aeb84783dbf0be9e5c296d2995fc0678ff719e9c
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.bin
   - name: FP16-INT8/text-image-super-resolution-0001.xml
-    size: 27379
-    sha256: b9c827feaef68e9c161c584cef69351649ad8376b9694051a5750b4e87efcd15
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-image-super-resolution-0001/FP16-INT8/text-image-super-resolution-0001.xml
+    size: 25162
+    sha256: 5a51d946f4d92f0793e95ed2bf21cb7cb0ae3bc309bc6827c5783c82c2db9426
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-image-super-resolution-0001/FP16-INT8/text-image-super-resolution-0001.xml
   - name: FP16-INT8/text-image-super-resolution-0001.bin
-    size: 4224
-    sha256: 8c1ec28bb810a0ad4de8d9c4d2c37939cfe1a64bbb36d4a9379815c154f8339f
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/text-image-super-resolution-0001/FP16-INT8/text-image-super-resolution-0001.bin
+    size: 4222
+    sha256: 1d45a7631da0ea6b2acb03e6b73b5b6bed871913907ab9f56ab5daa7112caf63
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-image-super-resolution-0001/FP16-INT8/text-image-super-resolution-0001.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

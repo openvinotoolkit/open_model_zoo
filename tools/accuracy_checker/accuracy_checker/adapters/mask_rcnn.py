@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,14 +19,16 @@ import warnings
 import cv2
 import numpy as np
 
-try:
-    import pycocotools.mask as mask_util
-except ImportError:
-    mask_util = None
 from .adapter import Adapter
 from ..config import StringField, ConfigError
 from ..representation import CoCocInstanceSegmentationPrediction, DetectionPrediction, ContainerPrediction
 from ..postprocessor import FRCNNPostprocessingBboxResize
+from ..utils import UnsupportedPackage
+
+try:
+    import pycocotools.mask as mask_util
+except ImportError as import_error:
+    mask_util = UnsupportedPackage("pycocotools", import_error.msg)
 
 
 class MaskRCNNAdapter(Adapter):
@@ -34,8 +36,8 @@ class MaskRCNNAdapter(Adapter):
 
     def __init__(self, launcher_config, label_map=None, output_blob=None):
         super().__init__(launcher_config, label_map, output_blob)
-        if mask_util is None:
-            raise ImportError('pycocotools is not installed. Please install it before using mask_rcnn adapter.')
+        if isinstance(mask_util, UnsupportedPackage):
+            mask_util.raise_error(self.__provider__)
         self.encoder = mask_util.encode
 
     @classmethod
@@ -173,7 +175,7 @@ class MaskRCNNAdapter(Adapter):
         if classes is None:
             classes = np.ones(len(boxes), np.uint32)
 
-        valid_detections_mask = classes > 0
+        valid_detections_mask = classes > 0 if self.scores_out else np.sum(boxes, axis=1) > 0
         classes = classes[valid_detections_mask]
         boxes = boxes[valid_detections_mask]
         scores = scores[valid_detections_mask]
@@ -238,7 +240,7 @@ class MaskRCNNAdapter(Adapter):
         if raw_mask_for_all_classes:
             per_obj_raw_masks = []
             for cls, raw_mask in zip(classes, raw_masks):
-                per_obj_raw_masks.append(raw_mask[cls, ...])
+                per_obj_raw_masks.append(raw_mask[cls, ...] if self.scores_out else raw_mask)
         else:
             per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
 

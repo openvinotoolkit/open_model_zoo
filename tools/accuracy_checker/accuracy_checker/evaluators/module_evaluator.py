@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -106,12 +106,18 @@ class ModuleEvaluator(BaseEvaluator):
     def dataset(self):
         return self._internal_module.dataset
 
-
     @staticmethod
     def get_processing_info(config):
         module = config['module']
         python_path = config.get('python_path')
         return load_module(module, python_path).get_processing_info(config)
+
+    def set_profiling_dir(self, profiler_dir):
+        self._internal_module.set_profiling_dir(profiler_dir)
+
+    @property
+    def dataset_size(self):
+        return self._internal_module.dataset_size
 
 
 def load_module(model_cls, python_path=None):

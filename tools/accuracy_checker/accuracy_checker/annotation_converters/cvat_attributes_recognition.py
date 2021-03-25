@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ limitations under the License.
 
 from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ..representation import ClassificationAnnotation, ContainerAnnotation
-from ..topology_types import ImageClassification
 from ..utils import read_xml, check_file_existence
 from ..config import StringField, PathField, ConfigError
 
@@ -24,7 +23,6 @@ from ..config import StringField, PathField, ConfigError
 class CVATAttributesRecognitionConverter(FileBasedAnnotationConverter):
     __provider__ = 'cvat_attributes_recognition'
     annotation_types = (ClassificationAnnotation, )
-    topology_types = (ImageClassification, )
 
     @classmethod
     def parameters(cls):

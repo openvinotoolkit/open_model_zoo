@@ -24,8 +24,6 @@ Normed Error (NE) for i<sup>th</sup> sample has the following form:
 
 where N is the number of landmarks, _p_-hat and _p_ are, correspondingly, the prediction and ground truth vectors of k<sup>th</sup> landmark of i<sup>th</sup> sample, and d<sub>i</sub> is the interocular distance for i<sup>th</sup> sample.
 
-## Performance
-
 ## Inputs
 
 Name: "data" , shape: [1x3x48x48] - An input image in the format [BxCxHxW],

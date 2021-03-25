@@ -1,0 +1,36 @@
+models:
+  - name: colorization-siggraph
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: image_processing
+          std: 1
+          cast_to_uint8: false
+        inputs:
+          - name: "user_map"
+            type: CONST_INPUT
+            value: 0
+            shape: [1, 2, 256, 256]
+          - name: "user_ab"
+            type: CONST_INPUT
+            value: 0
+            shape: [1, 1, 256, 256]
+    datasets:
+      - name: imagenet_colorization
+        subsample_size: 2000
+        shuffle: False
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: bgr_to_lab
+          - type: select_channel
+            channel: 0
+        postprocessing:
+          - type: colorization_recovery
+          - type: resize
+            apply_to: prediction
+        metrics:
+          - type: psnr
+            presenter: print_vector
+          - type: ssim
+            presenter: print_vector

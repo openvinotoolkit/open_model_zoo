@@ -4,8 +4,6 @@
 
 The `googlenet-v3` model is the first of the Inception family of models designed to perform image classification. For details about this family of models, check out the [paper](https://arxiv.org/abs/1602.07261).
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -21,8 +19,6 @@ The `googlenet-v3` model is the first of the Inception family of models designed
 | ------ | ----- |
 | Top 1  | 77.904% |
 | Top 5  | 93.808%|
-
-## Performance
 
 ## Input
 
@@ -58,8 +54,22 @@ Object classifier according to ImageNet classes, name: `InceptionV3/Predictions/
     - B - batch size
     - C - vector of probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.
 
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
+
 ## Legal Information
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).

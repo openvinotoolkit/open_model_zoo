@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -48,9 +48,15 @@ class InpaintingConverter(BaseFormatConverter):
         content_check_errors = [] if check_content else None
 
         annotations = []
-        images = list(im for im in self.image_dir.iterdir())
+        images = [
+            im for im in self.image_dir.iterdir()
+            if im.name.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'))
+        ]
         if self.masks_dir is not None:
-            masks = list(mask for mask in self.masks_dir.iterdir())
+            masks = [
+                mask for mask in self.masks_dir.iterdir()
+                if mask.name.endswith('.npy')
+            ]
             if len(masks) < len(images):
                 warning('Number of masks is smaller than number of images.'
                         'Only {} first images will be used'.format(len(masks)))

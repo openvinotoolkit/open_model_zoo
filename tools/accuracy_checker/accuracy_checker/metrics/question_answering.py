@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,9 +17,13 @@ limitations under the License.
 import re
 from collections import Counter
 import string
+import numpy
 
 from ..representation import QuestionAnsweringAnnotation, QuestionAnsweringPrediction
-from .metric import PerImageEvaluationMetric
+from ..representation import QuestionAnsweringEmbeddingAnnotation, QuestionAnsweringEmbeddingPrediction
+from ..representation import QuestionAnsweringBiDAFAnnotation
+from .metric import PerImageEvaluationMetric, FullDatasetEvaluationMetric
+from ..config import NumberField
 
 
 def normalize_answer(s):
@@ -46,6 +50,7 @@ def get_tokens(s):
     if not s:
         return []
     return normalize_answer(s).split()
+
 
 class ScoreF1(PerImageEvaluationMetric):
     __provider__ = 'f1'
@@ -94,8 +99,8 @@ class ScoreF1(PerImageEvaluationMetric):
 class ExactMatchScore(PerImageEvaluationMetric):
     __provider__ = 'exact_match'
 
-    annotation_types = (QuestionAnsweringAnnotation,)
-    prediction_types = (QuestionAnsweringPrediction,)
+    annotation_types = (QuestionAnsweringAnnotation, QuestionAnsweringBiDAFAnnotation, )
+    prediction_types = (QuestionAnsweringPrediction, )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -122,3 +127,57 @@ class ExactMatchScore(PerImageEvaluationMetric):
     def reset(self):
         del self.per_question_results
         self.per_question_results = {}
+
+
+class QuestionAnsweringEmbeddingAccuracy(FullDatasetEvaluationMetric):
+
+    __provider__ = 'qa_embedding_accuracy'
+    annotation_types = (QuestionAnsweringEmbeddingAnnotation,)
+    prediction_types = (QuestionAnsweringEmbeddingPrediction,)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'top_k': NumberField(
+                value_type=int, min_value=1, max_value=1000, default=5, optional=True,
+                description='Specifies the number of closest context embeddings to check.'
+            ),
+        })
+        return parameters
+
+    def configure(self):
+        self.top_k = self.get_value_from_config('top_k')
+
+    def evaluate(self, annotations, predictions):
+
+        ap_pairs = list(zip(annotations, predictions))
+
+        #check data alignment
+        assert all(
+            a.identifier is p.identifier
+            if not isinstance(p.identifier, tuple)
+            else p.identifier.values
+            for a, p in ap_pairs), "annotations and predictions are not aligned"
+
+        q_pairs = [(a, p) for a, p in ap_pairs if a.context_pos_indetifier is not None]
+        c_pairs = [(a, p) for a, p in ap_pairs if a.context_pos_indetifier is None]
+
+        c_data_identifiers = [a.identifier for a, p in c_pairs]
+        c_vecs = numpy.array([p.embedding for a, p in c_pairs])
+
+        # calc distances from each question to all contexts and check if top_k has true positives
+        true_pos = 0
+        for q_a, q_p in q_pairs:
+
+            #calc distance between question embedding with all context embeddings
+            d = c_vecs - q_p.embedding[None, :]
+            dist = numpy.linalg.norm(d, ord=2, axis=1)
+            index = dist.argsort()
+
+            #check that right context in the list of top_k
+            c_pos_index = c_data_identifiers.index(q_a.context_pos_indetifier)
+            if c_pos_index in index[:self.top_k]:
+                true_pos += 1
+
+        return [true_pos/len(q_pairs)]

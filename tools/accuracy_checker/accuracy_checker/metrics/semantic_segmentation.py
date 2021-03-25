@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -58,6 +58,8 @@ class SegmentationMetric(PerImageEvaluationMetric):
             raise ConfigError('semantic segmentation metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerated annotation')
         self.ignore_label = self.get_value_from_config('ignore_label')
+        if self.profiler:
+            self.profiler.names = self.dataset.labels
 
     def update(self, annotation, prediction):
         n_classes = len(self.dataset.labels)
@@ -86,6 +88,8 @@ class SegmentationMetric(PerImageEvaluationMetric):
     def reset(self):
         self.state = {}
         self._update_iter = 0
+        if self.profiler:
+            self.profiler.reset()
 
 
 class SegmentationAccuracy(SegmentationMetric):
@@ -93,10 +97,15 @@ class SegmentationAccuracy(SegmentationMetric):
 
     def update(self, annotation, prediction):
         cm = super().update(annotation, prediction)
-        return np.diag(cm).sum() / cm.sum()
+        result = np.diag(cm).sum() / cm.sum()
+        if self.profiler:
+            self.profiler.update(annotation.identifier, self.name, cm, result, prediction.mask)
+        return result
 
     def evaluate(self, annotations, predictions):
         confusion_matrix = self.state[self.CONFUSION_MATRIX_KEY]
+        if self.profiler:
+            self.profiler.finish()
         return np.diag(confusion_matrix).sum() / confusion_matrix.sum()
 
 
@@ -110,6 +119,8 @@ class SegmentationIOU(SegmentationMetric):
         iou = np.divide(diagonal, union, out=np.full_like(diagonal, np.nan), where=union != 0)
         if self.ignore_label is not None:
             iou = np.delete(iou, self.ignore_label)
+        if self.profiler:
+            self.profiler.update(annotation.identifier, self.name, cm, iou, prediction.mask)
 
         return iou
 
@@ -126,6 +137,9 @@ class SegmentationIOU(SegmentationMetric):
         values, names = finalize_metric_result(iou, cls_names)
         self.meta['names'] = names
 
+        if self.profiler:
+            self.profiler.finish()
+
         return values
 
 
@@ -137,7 +151,8 @@ class SegmentationMeanAccuracy(SegmentationMetric):
         diagonal = np.diag(cm).astype(float)
         per_class_count = cm.sum(axis=1)
         acc_cls = np.divide(diagonal, per_class_count, out=np.full_like(diagonal, np.nan), where=per_class_count != 0)
-
+        if self.profiler:
+            self.profiler.update(annotation.identifier, self.name, cm, acc_cls, prediction.mask)
         return acc_cls
 
     def evaluate(self, annotations, predictions):
@@ -148,6 +163,9 @@ class SegmentationMeanAccuracy(SegmentationMetric):
 
         values, names = finalize_metric_result(acc_cls, list(self.dataset.labels.values()))
         self.meta['names'] = names
+
+        if self.profiler:
+            self.profiler.finish()
 
         return values
 
@@ -161,8 +179,12 @@ class SegmentationFWAcc(SegmentationMetric):
         union = cm.sum(axis=1) + cm.sum(axis=0) - diagonal
         iou = np.divide(diagonal, union, out=np.zeros_like(diagonal), where=union != 0)
         freq = cm.sum(axis=1) / cm.sum()
+        result = (freq[freq > 0] * iou[freq > 0]).sum()
 
-        return (freq[freq > 0] * iou[freq > 0]).sum()
+        if self.profiler:
+            self.profiler.update(annotation.identifier, self.name, cm, result, prediction.mask)
+
+        return result
 
     def evaluate(self, annotations, predictions):
         confusion_matrix = self.state[self.CONFUSION_MATRIX_KEY]
@@ -170,6 +192,8 @@ class SegmentationFWAcc(SegmentationMetric):
         union = confusion_matrix.sum(axis=1) + confusion_matrix.sum(axis=0) - diagonal
         iou = np.divide(diagonal, union, out=np.zeros_like(diagonal), where=union != 0)
         freq = confusion_matrix.sum(axis=1) / confusion_matrix.sum()
+        if self.profiler:
+            self.profiler.finish()
 
         return (freq[freq > 0] * iou[freq > 0]).sum()
 
@@ -241,8 +265,9 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
             raise RuntimeError("For '{}' metric prediction mask should has only 1 channel, but more found. "
                                "Specify 'make_argmax' option in adapter or postprocessor."
                                .format(self.__provider__))
+        label_order = getattr(prediction, 'label_order', [0, 1, 2, 3])
 
-        for c, p in enumerate(prediction.label_order, 1):
+        for c, p in enumerate(label_order, 1):
             annotation_data_ = (annotation_data == c)
             prediction_data_ = (prediction_data == p)
 
@@ -277,6 +302,69 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         self.meta['names'] = names_mean + names_median
         self.meta['calculate_mean'] = False
         self.overall_metric = []
+
+
+class SegmentationUnet3D(PerImageEvaluationMetric):
+    __provider__ = 'dice_unet3d'
+    annotation_types = (BrainTumorSegmentationAnnotation, SegmentationAnnotation, OAR3DTilingSegmentationAnnotation)
+    prediction_types = (BrainTumorSegmentationPrediction, SegmentationPrediction, )
+
+    overall_metric = []
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'mean': BoolField(optional=True, default=True, description='Allows calculation mean value.'),
+            'median': BoolField(optional=True, default=False, description='Allows calculation median value.'),
+        })
+
+        return parameters
+
+    def configure(self):
+        self.mean = self.get_value_from_config('mean')
+        self.median = self.get_value_from_config('median')
+        self.output_order = self.get_value_from_config('output_order')
+
+        labels = ['whole tumor', 'tumor core', 'enhancing tumor']
+        self.classes = len(labels)
+
+        names_mean = ['mean@{}'.format(name) for name in labels] if self.mean else []
+        names_median = ['median@{}'.format(name) for name in labels] if self.median else []
+        self.meta['names'] = names_mean + names_median
+
+        self.meta['calculate_mean'] = False
+
+        self.overall_metric = []
+
+    def update(self, annotation, prediction):
+        result = np.zeros(shape=self.classes)
+
+        annotation_data = annotation.mask
+        prediction_data = prediction.mask
+
+        for c in range(self.classes):
+            annotation_data_ = (annotation_data > c)
+            prediction_data_ = (prediction_data > c)
+            intersection_count = np.logical_and(annotation_data_, prediction_data_).sum()
+            union_count = annotation_data_.sum() + prediction_data_.sum()
+            if union_count > 0:
+                result[c] = 2.0*intersection_count / union_count
+            else:
+                result[c] = np.nan
+
+        self.overall_metric.append(result)
+        return result
+
+    def evaluate(self, annotations, predictions):
+        mean = np.nanmean(self.overall_metric, axis=0) if self.mean else []
+        median = np.nanmedian(self.overall_metric, axis=0) if self.median else []
+        result = np.concatenate((mean, median))
+        return result
+
+    def reset(self):
+        self.overall_metric = []
+
 
 class SegmentationOAR3DTiling(PerImageEvaluationMetric):
     __provider__ = 'dice_oar3d'

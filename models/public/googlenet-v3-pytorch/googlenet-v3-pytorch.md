@@ -13,8 +13,6 @@ in RGB order.
 The model output is typical object classifier for the 1000 different classifications
 matching with those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -28,10 +26,8 @@ matching with those in the ImageNet database.
 
 | Metric | Value |
 | ------ | ----- |
-| Top 1  | 77.696%|
-| Top 5  | 93.696%|
-
-## Performance
+| Top 1  | 77.69%|
+| Top 5  | 93.7%|
 
 ## Input
 
@@ -47,7 +43,7 @@ Image, name - `data`, shape - [1x3x299x299], format [BxCxHxW],
 
 Expected color order - `RGB`.
 
-Mean values - [127.5, 127.5, 127.5], scale factor for each channel - 127.5
+Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
 
 ### Converted model
 
@@ -67,6 +63,20 @@ Object classifier according to ImageNet classes, name - `prob`, shape - [1,1000]
 
 - `B` - batch size
 - `C` - vector of probabilities for each class in [0, 1] range
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

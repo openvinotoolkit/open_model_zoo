@@ -1,0 +1,44 @@
+models:
+  - name: regnetx-3.2gf
+
+    launchers:
+      - framework: onnx_runtime
+        model: regnetx-3.2gf.onnx
+        adapter: classification
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 1,3,224,224
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BICUBIC
+          - type: crop
+            size: 224
+            use_pillow: True
+          - type: normalization
+            mean: (103.53,116.28,123.675)
+            std: (57.375,57.12,58.395)
+
+  - name: regnetx-3.2gf
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BICUBIC
+          - type: crop
+            size: 224
+            use_pillow: True

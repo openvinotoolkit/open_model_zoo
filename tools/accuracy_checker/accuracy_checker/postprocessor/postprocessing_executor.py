@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -95,6 +95,17 @@ class PostprocessingExecutor:
             self._image_processors.append(postprocessor)
         else:
             self._dataset_processors.append(postprocessor)
+
+    @classmethod
+    def validate_config(cls, processors, fetch_only=False, uri_prefix=''):
+        if not processors:
+            return []
+        errors = []
+        for processor_id, processor in enumerate(processors):
+            processor_uri = '{}.{}'.format(uri_prefix or 'postprocessing', processor_id)
+            errors.extend(Postprocessor.validate_config(processor, fetch_only=fetch_only, uri_prefix=processor_uri))
+
+        return errors
 
 
 class PostprocessorConfig(ConfigValidator):

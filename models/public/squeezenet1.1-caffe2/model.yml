@@ -15,7 +15,7 @@
 description: >-
   This is a Caffe2* version of "squeezenet1.1" model, designed to perform image classification.
   This model was converted from Caffe* to Caffe2* format.  For details see repository
-  <https://github.com/caffe2/models/tree/master/squeezenet>, paper <https://arxiv.org/abs/1602.07360>.
+  <https://github.com/facebookarchive/models/tree/master/squeezenet>, paper <https://arxiv.org/abs/1602.07360>.
 task_type: classification
 files:
   - name: predict_net.pb
@@ -40,4 +40,4 @@ model_optimizer_args:
   - --mean_values=data[103.96,116.78,123.68]
   - --input_model=$conv_dir/squeezenet1.1-caffe2.onnx
 quantizable: yes
-license: https://raw.githubusercontent.com/caffe2/models/master/LICENSE
+license: https://raw.githubusercontent.com/facebookarchive/models/master/LICENSE

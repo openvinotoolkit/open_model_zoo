@@ -1,9 +1,0 @@
-matplotlib
-motmetrics
-nibabel
-numpy
-scikit-learn
-scipy
-tensorboard
-tensorboardX
-tqdm

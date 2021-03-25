@@ -4,8 +4,6 @@
 
 This is a reimplemented and retrained version of the [YOLO v2](https://arxiv.org/abs/1612.08242) object detection network trained with the VOC2012 training dataset.
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -14,10 +12,8 @@ This is a reimplemented and retrained version of the [YOLO v2](https://arxiv.org
 | Flops                           | 48.29Bn\*                                  |
 | Source framework                | TensorFlow\*                              |
 
-For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
+For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](https://doi.org/10.1007/s11263-009-0275-4).
 Tested on the VOC 2012 validation dataset.
-
-## Performance
 
 ## Inputs
 
@@ -37,7 +33,7 @@ where each number corresponds to [`num_anchors`, `cls_reg_obj_params`, `y_loc`, 
 - `cls_reg_obj_params`: parameters for classification and regression. The values are made up of the following:
   * Regression parameters (4)
   * Objectness score (1)
-  * Class score (20)
+  * Class score (20), mapping to class names provided by `<omz_dir>/data/dataset_classes/voc_20cl.txt` file.
 - `y_loc` and `x_loc`: spatial location of each grid
 
 ## Legal Information

@@ -18,8 +18,6 @@ by 0.017.
 The model output for `densenet-161` is the typical object classifier output for
 the 1000 different classifications matching those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -38,8 +36,6 @@ the 1000 different classifications matching those in the ImageNet database.
 
 See [the original repository](https://github.com/shicai/DenseNet-Caffe).
 
-## Performance
-
 ## Input
 
 ### Original model
@@ -52,7 +48,7 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`.
-Mean values - [103.94,116.78,123.68], scale value - 58.8235294117647
+Mean values - [103.94,116.78,123.68], scale value - 58.8235294117647.
 
 ### Converted model
 
@@ -63,19 +59,33 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `BGR`
+Channel order is `BGR`.
 
 ## Output
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000,1,1`, contains predicted
-probability for each class in logits format
+Object classifier according to ImageNet classes, name - `fc6`,  shape - `1,1000,1,1`, contains predicted
+probability for each class in logits format.
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000,1,1`, contains predicted
-probability for each class in logits format
+Object classifier according to ImageNet classes, name - `fc6`,  shape - `1,1000,1,1`, contains predicted
+probability for each class in logits format.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

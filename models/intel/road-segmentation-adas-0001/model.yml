@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,28 @@ description: >-
 task_type: semantic_segmentation
 files:
   - name: FP32/road-segmentation-adas-0001.xml
-    size: 357646
-    sha256: c78d4d83245e999654598b6aea4a010695a704fe385dea2e809957ac25895ca9
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.xml
+    size: 393864
+    sha256: 89c3154132097e4ee82cad82fc6914da6b67def127fc6ae7ef94ddd74f167efd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.xml
   - name: FP32/road-segmentation-adas-0001.bin
-    size: 737200
-    sha256: ae43e7d5dd1ad62cbe62a2d8aa5dd3721b7581f26763ba3c69660da2a91c3d87
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.bin
+    size: 737192
+    sha256: 3c1847f6f62ed91b8ca2d94b4242b833bfcfb9be6dfdb007e83d13084fb15e0b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.bin
   - name: FP16/road-segmentation-adas-0001.xml
-    size: 357491
-    sha256: 81fee6f0909fb6196b2c898d338161eb9cc30411bcdb3a59aca4c6f3e5dc579c
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.xml
+    size: 393709
+    sha256: e5e8dac5e895893496e1eb9b49ff0b34f31b8b1074bb78eb7c6b0c9731f1ffe4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.xml
   - name: FP16/road-segmentation-adas-0001.bin
-    size: 368632
-    sha256: ddbc38aaee27ed8166d1190519380a91cdea8cf7f4bc71585d939fd6ead6b159
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.bin
+    size: 368620
+    sha256: 056718eb78682a144eae1b037c7dba84f4f30013fca193fe83263ee3cda10bad
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.bin
   - name: FP16-INT8/road-segmentation-adas-0001.xml
-    size: 1117249
-    sha256: c471f291d895b14f779d9813f4f0a34bf1492f423e2b67fb30f2ae204b282a7d
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/road-segmentation-adas-0001/FP16-INT8/road-segmentation-adas-0001.xml
+    size: 1118855
+    sha256: f8ab09f768834f682eecfb00527b34839b02267908c5859d2f5487bcc474d7c3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/road-segmentation-adas-0001/FP16-INT8/road-segmentation-adas-0001.xml
   - name: FP16-INT8/road-segmentation-adas-0001.bin
-    size: 212302
-    sha256: 1a5aaba1ff8ff83f28f226af0d60de3fa8441ab270d832c35a2fbf36a02629d9
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/road-segmentation-adas-0001/FP16-INT8/road-segmentation-adas-0001.bin
+    size: 212312
+    sha256: 581fe939c1790d42d1805e83ec72190cdc71bd348c775795a2a7930a6f9ab11d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/road-segmentation-adas-0001/FP16-INT8/road-segmentation-adas-0001.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ class AFLW20003DConverter(DirectoryBasedAnnotationConverter):
             annotation_file = self.data_dir / image.name.replace('jpg', 'mat')
             if not annotation_file.exists():
                 if check_content:
-                    content_errors.append('{}: does not exists'.format(str(annotation_file)))
+                    content_errors.append('{}: does not exist'.format(annotation_file))
                 continue
 
             image_info = loadmat(annotation_file)

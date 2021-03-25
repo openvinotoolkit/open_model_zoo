@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,32 +13,32 @@
 # limitations under the License.
 
 description: >-
-  YOLO Tiny v2 (https://arxiv.org/pdf/1612.08242.pdf) fine-tuned for vehicles detection
+  YOLO Tiny v2 (https://arxiv.org/abs/1612.08242) fine-tuned for vehicles detection
 task_type: detection
 files:
   - name: FP32/yolo-v2-tiny-vehicle-detection-0001.xml
-    size: 31450
-    sha256: 5795bbc941181e34151613275414d44238b596ce526441bd18f95de4dc1d7499
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/FP32/yolo-v2-tiny-vehicle-detection-0001.xml
+    size: 32651
+    sha256: 68eae54f156264713cd8565c2974ef7f8b113656e2a27f9ed75cb50c557662f7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP32/yolo-v2-tiny-vehicle-detection-0001.xml
   - name: FP32/yolo-v2-tiny-vehicle-detection-0001.bin
     size: 44918056
     sha256: b15e36bcc6763676fd25db67c328242875f0257ef7faf2d3bd8cebfb032151f5
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/FP32/yolo-v2-tiny-vehicle-detection-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP32/yolo-v2-tiny-vehicle-detection-0001.bin
   - name: FP16/yolo-v2-tiny-vehicle-detection-0001.xml
-    size: 31430
-    sha256: 502f03b6591ca4168166592882b6552f0e078e5bc1018ec6d808660cd48ed4a9
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/FP16/yolo-v2-tiny-vehicle-detection-0001.xml
+    size: 32631
+    sha256: 8e33c3a2a48caae0a176f4a86e3e708360599279a66c1b110cdb44aa577b86d9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16/yolo-v2-tiny-vehicle-detection-0001.xml
   - name: FP16/yolo-v2-tiny-vehicle-detection-0001.bin
     size: 22459030
     sha256: 15aee0ac39cdfeff0f8dfdb85e8b3152331df42d879ba76e9d3c5e7548ca3007
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/FP16/yolo-v2-tiny-vehicle-detection-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16/yolo-v2-tiny-vehicle-detection-0001.bin
   - name: FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.xml
-    size: 76025
-    sha256: d185ea66bae7f3d9afe59d5da1f22b60c0e47f4fea164992416352efa1b9511e
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.xml
+    size: 72297
+    sha256: e118e95f0a8c92ed9ffa538cb90c3bb77b58375cca978d7e8a5f3da054ee5971
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.xml
   - name: FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.bin
-    size: 11244400
-    sha256: fef3b00120b62f500fc16bf3c652803f656d3bbfcb7c4ae2be773b5c4149cbaf
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.4/open_model_zoo/models_bin/3/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.bin
+    size: 11244398
+    sha256: b2d276fcf12b65c68cb5b6d85ed6ed0a72c9ef42d7d9759b3a502c22152cc8bf
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.bin
 framework: dldt
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

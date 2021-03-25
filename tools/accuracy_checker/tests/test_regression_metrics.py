@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -224,7 +224,7 @@ class TestRegressionMetric:
         ]
         config = [{'type': 'mae_on_interval', 'end': 1, 'ignore_values_not_in_interval': False}]
         expected = EvaluationResult(
-            pytest.approx([2.0, 0.0, 0.5, 0.0,  0.0, 0.0]),
+            pytest.approx([2.0, 0.0, 0.5, 0.0, 0.0, 0.0]),
             None,
             'mae_on_interval',
             'mae_on_interval',
@@ -328,7 +328,7 @@ class TestRegressionMetric:
             RegressionPrediction('identifier', 3),
             RegressionPrediction('identifier', 1)
         ]
-        config = [{'type': 'mae_on_interval', 'intervals': [2.0,  0.0, 4.0]}]
+        config = [{'type': 'mae_on_interval', 'intervals': [2.0, 0.0, 4.0]}]
         expected = EvaluationResult(
             pytest.approx([0.0, 0.0, 1.0, 0.0]),
             None,
@@ -357,7 +357,7 @@ class TestUpdateRegressionMetrics:
         config = [{'type': 'mae'}]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 2
         assert metric_result[1][0].result == 4
 
@@ -367,7 +367,7 @@ class TestUpdateRegressionMetrics:
         config = [{'type': 'mse'}]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 4
         assert metric_result[1][0].result == 16
 
@@ -377,7 +377,7 @@ class TestUpdateRegressionMetrics:
         config = [{'type': 'rmse'}]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 2
         assert metric_result[1][0].result == 4
 
@@ -387,7 +387,7 @@ class TestUpdateRegressionMetrics:
         predictions = [RegressionPrediction('identifier', 5), RegressionPrediction('identifier2', 5)]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 2
         assert metric_result[1][0].result == 4
 
@@ -397,7 +397,7 @@ class TestUpdateRegressionMetrics:
         predictions = [RegressionPrediction('identifier', 5), RegressionPrediction('identifier2', 5)]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 4
         assert metric_result[1][0].result == 16
 
@@ -407,7 +407,7 @@ class TestUpdateRegressionMetrics:
         predictions = [RegressionPrediction('identifier', 5), RegressionPrediction('identifier2', 5)]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 2
         assert metric_result[1][0].result == 4
 
@@ -418,7 +418,7 @@ class TestUpdateRegressionMetrics:
         predictions = [FacialLandmarksPrediction('identifier', np.array([1, 1, 1, 1, 1]), np.array([1, 1, 1, 1, 1]))]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert np.equal(metric_result[0][0].result.all(), np.zeros(5).all())
 
     def test_update_normed_error(self):
@@ -428,5 +428,5 @@ class TestUpdateRegressionMetrics:
         predictions = [FacialLandmarksPrediction('identifier', np.array([1, 1, 1, 1, 1]), np.array([1, 1, 1, 1, 1]))]
         dispatcher = MetricsExecutor(config, None)
 
-        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        metric_result, _ = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
         assert metric_result[0][0].result == 0

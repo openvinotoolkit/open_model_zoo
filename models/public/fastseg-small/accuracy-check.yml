@@ -1,0 +1,14 @@
+models:
+  - name: fastseg-small
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: segmentation
+          make_argmax: True
+
+    datasets:
+      - name: cityscapes
+        metrics:
+          - type: mean_iou
+            use_argmax: false
+            presenter: print_scalar

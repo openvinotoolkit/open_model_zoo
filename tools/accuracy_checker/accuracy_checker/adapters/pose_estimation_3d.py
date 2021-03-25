@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -62,8 +62,11 @@ class HumanPose3dAdapter(Adapter):
 
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT
+        )
 
     def configure(self):
         self.features_3d = self.get_value_from_config('features_3d_out')
@@ -190,11 +193,11 @@ class HumanPose3dAdapter(Adapter):
             poses_2d.append(pose_2d)
         poses_2d = np.array(poses_2d)
 
-        keypoint_treshold = 0.1
+        keypoint_threshold = 0.1
         poses_3d = np.ones((poses_2d.shape[0], num_kpt_panoptic * 4), dtype=np.float32) * -1
         for pose_id in range(poses_3d.shape[0]):
             pose_3d = poses_3d[pose_id]
-            if poses_2d[pose_id, 2] <= keypoint_treshold:
+            if poses_2d[pose_id, 2] <= keypoint_threshold:
                 continue
             neck_2d = poses_2d[pose_id, 0:2].astype(np.int32)
             # read all pose coordinates at neck location
@@ -208,7 +211,7 @@ class HumanPose3dAdapter(Adapter):
             # refine keypoints coordinates at corresponding limbs locations
             for limb in limbs:
                 for kpt_id_from in limb:
-                    if poses_2d[pose_id, kpt_id_from * 3 + 2] <= keypoint_treshold:
+                    if poses_2d[pose_id, kpt_id_from * 3 + 2] <= keypoint_threshold:
                         continue
                     for kpt_id_where in limb:
                         kpt_from_2d = poses_2d[pose_id, kpt_id_from * 3: kpt_id_from * 3 + 2].astype(np.int32)

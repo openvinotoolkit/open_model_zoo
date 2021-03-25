@@ -5,10 +5,8 @@
 This is a Caffe2\* version of `densenet-121` model, one of the DenseNet
 group of models designed to perform image classification. This model
 was converted from Caffe\* to Caffe2\* format.
-For details see repository <https://github.com/caffe2/models/tree/master/densenet121>,
+For details see repository <https://github.com/facebookarchive/models/tree/master/densenet121>,
 paper <https://arxiv.org/abs/1608.06993>.
-
-## Example
 
 ## Specification
 
@@ -25,8 +23,6 @@ paper <https://arxiv.org/abs/1608.06993>.
 | ------ | ----- |
 | Top 1  | 74.904% |
 | Top 5  | 92.192% |
-
-## Performance
 
 ## Input
 
@@ -65,8 +61,22 @@ probability for each class in logits format.
 Object classifier according to ImageNet classes, name - `fc6`,  shape - `1,1000,1,1`, contains predicted
 probability for each class in logits format.
 
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
+
 ## Legal Information
 
 The original model is distributed under the
-[Apache License, Version 2.0](https://raw.githubusercontent.com/caffe2/models/master/LICENSE).
+[Apache License, Version 2.0](https://raw.githubusercontent.com/facebookarchive/models/master/LICENSE).
 A copy of the license is provided in [APACHE-2.0.txt](../licenses/APACHE-2.0.txt).

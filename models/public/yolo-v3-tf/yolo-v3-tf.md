@@ -6,36 +6,22 @@ YOLO v3 is a real-time object detection model implemented with Keras\* from this
 
 ## Conversion
 
-1. Download or clone the official [repository](https://github.com/david8862/keras-YOLOv3-model-set) (tested on `ffede5` commit).
-2. Use the folllowing commands to get original model (named `yolov3` in repository) and convert it to Keras\* format (see details in the [README.md](https://github.com/david8862/keras-YOLOv3-model-set/blob/ffede5d316568479610b75a3424e2a7b81f0209b/README.md)  file in the official repository):
+1. Download or clone the official [repository](https://github.com/david8862/keras-YOLOv3-model-set) (tested on `d38c3d8` commit).
+2. Use the following commands to get original model (named `yolov3` in repository) and convert it to Keras\* format (see details in the [README.md](https://github.com/david8862/keras-YOLOv3-model-set/blob/d38c3d865f7190ee9b19a30e91f2b750a31320c1/README.md)  file in the official repository):
 
    1. Download YOLO v3 weights:
         ```
         wget -O weights/yolov3.weights https://pjreddie.com/media/files/yolov3.weights
         ```
 
-   1. Convert model weights to Keras\*:
+   2. Convert model weights to Keras\*:
         ```
-        python tools/convert.py cfg/yolov3.cfg weights/yolov3.weights weights/yolov3.h5
+        python tools/model_converter/convert.py cfg/yolov3.cfg weights/yolov3.weights weights/yolov3.h5
         ```
-3. Convert the produced model to protobuf format.
-
-    1. Get conversion script from [repository](https://github.com/amir-abdi/keras_to_tensorflow):
-        ```buildoutcfg
-        git clone https://github.com/amir-abdi/keras_to_tensorflow
-        ```
-    1. (Optional) Checkout the commit that the conversion was tested on:
-        ```
-        git checkout c841508a88faa5aa1ffc7a4947c3809ea4ec1228
-        ```
-    1. Apply `keras_to_tensorflow.py.patch`:
-        ```
-        git apply keras_to_tensorflow.py.patch
-        ```
-    1. Run script:
-        ```
-        python keras_to_tensorflow.py --input_model=yolov3.h5 --output_model=yolov3.pb
-        ```
+3. Convert model to protobuf:
+    ```
+    python tools/model_converter/keras_to_tensorflow.py --input_model weights/yolov3.h5 --output_model=weights/yolo-v3.pb
+    ```
 
 
 ## Specification
@@ -54,7 +40,7 @@ Accuracy metrics obtained on COCO\* validation dataset for converted model.
 | Metric | Value |
 | ------ | ------|
 | mAP    | 62.27% |
-| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 67.7% |
+| [COCO\* mAP](https://cocodataset.org/#detection-eval) | 67.7% |
 
 ## Input
 
@@ -102,6 +88,8 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
 - `class_no_1`,...,`class_no_80` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) and multiply by obtained confidence value to get confidence of each class
 
+The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
+
 ### Converted model
 
 1. The array of detection summary info, name - `conv2d_58/BiasAdd/YoloRegion`,  shape - `1,255,13,13`. The anchor values are `116,90,  156,198,  373,326`.
@@ -120,6 +108,23 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
 - `box_score` - confidence of detection box in [0,1] range
 - `class_no_1`,...,`class_no_80` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
+
+
+The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a network for handwritten Japanese text recognition scenario. It consists of a VGG16-like backbone, 
+This is a network for handwritten Japanese text recognition scenario. It consists of a VGG16-like backbone,
 reshape layer and a fully connected layer.
 The network is able to recognize Japanese text consisting of characters in the [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html) datasets.
 
@@ -26,18 +26,19 @@ This demo adopts [label error rate](https://dl.acm.org/doi/abs/10.1145/1143844.1
 
 ## Inputs
 
-Shape: [1x1x96x2000] - An input image in the format [BxCxHxW],
+Grayscale image, name - `actual_input`, shape - [1x1x96x2000], format is [BxCxHxW]
+
 where:
   - B - batch size
   - C - number of channels
   - H - image height
   - W - image width
 
-Note that the source image should be converted to grayscale, resized to specific height (such as 96) while keeping aspect ratio, and right-bottom padded.
+> **NOTE:**  the source image should be resized to specific height (such as 96) while keeping aspect ratio, and the width after resizing should be no larger than 2000 and then the width should be right-bottom padded to 2000 with edge values.
 
 ## Outputs
 
-The net outputs a blob with the shape [186, 1, 4442] in the format [WxBxL], where:
+Name - `output`, shape - [186x1x4442], format is [WxBxL], where:
   - W - output sequence length
   - B - batch size
   - L - confidence distribution across the supported symbols in [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html).

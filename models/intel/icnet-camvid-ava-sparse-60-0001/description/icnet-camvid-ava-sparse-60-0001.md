@@ -6,7 +6,19 @@ A trained model of ICNet for fast semantic segmentation, trained on the CamVid\*
 
 The model input is a blob that consists of a single image of `1x3x720x960` in the BGR order. The pixel values are integers in the [0, 255] range.
 
-The model output for `icnet-camvid-ava-sparse-60-0001` is the predicted class index of each input pixel belonging to one of the 12 classes of the CamVid dataset.
+The model output for `icnet-camvid-ava-sparse-60-0001` is the predicted class index of each input pixel belonging to one of the 12 classes of the CamVid dataset:
+- Sky
+- Building
+- Pole
+- Road
+- Pavement
+- Tree
+- SignSymbol
+- Fence
+- Vehicle
+- Pedestrian
+- Bike
+- Unlabeled
 
 ## Specification
 
@@ -29,8 +41,6 @@ The quality metrics were calculated on the CamVid\* validation dataset. The `unl
   - `FN` - number of false negative pixels for given class
   - `FP` - number of false positive pixels for given class
 
-
-## Performance
 
 ## Input
 

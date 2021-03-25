@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class ImageRetrievalConverter(BaseFormatConverter):
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_errors = None if not check_content else []
-        gallery = list()
+        gallery = []
         gallery_ids = set()
         if progress_callback:
             num_iteration = len(read_txt(self.gallery_annotation_file)) + len(read_txt(self.queries_annotation_file))
@@ -67,7 +67,7 @@ class ImageRetrievalConverter(BaseFormatConverter):
             if progress_callback and line_id % progress_interval == 0:
                 progress_callback(line_id * 100 / num_iteration)
 
-        queries = list()
+        queries = []
         queries_ids = set()
         for line_id, line in enumerate(read_txt(self.queries_annotation_file)):
             identifier, image_id = line.split()

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
                 description="Max number of predicted results per image. If you have more predictions, "
                             "the results with minimal confidence will be ignored."
             ),
-            'threshold' : BaseField(
+            'threshold': BaseField(
                 optional=True, default='.50:.05:.95',
                 description="Intersection over union threshold. "
                             "You can specify one value or comma separated range of values. "
@@ -78,13 +78,15 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         compute_iou, create_boxes = select_specific_parameters(annotation)
         per_class_results = []
+        profile_boxes = self.profiler is not None
 
         for label_id, label in enumerate(self.labels):
             detections, scores, dt_difficult = prepare_predictions(prediction, label, self.max_detections)
             ground_truth, gt_difficult, iscrowd, boxes, areas = prepare_annotations(annotation, label, create_boxes)
             iou = compute_iou(ground_truth, detections, boxes, areas)
             eval_result = evaluate_image(
-                ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, self.thresholds
+                ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, self.thresholds,
+                profile_boxes
             )
             self.matching_results[label_id].append(eval_result)
             per_class_results.append(eval_result)
@@ -98,6 +100,8 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
         self.matching_results = [[] for _ in self.labels]
         label_map = self.dataset.metadata.get('label_map', {})
         self.meta['names'] = [label_map[label] for label in self.labels]
+        if self.profiler:
+            self.profiler.reset()
 
 
 class MSCOCOAveragePrecision(MSCOCOBaseMetric):
@@ -105,11 +109,18 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
 
     def update(self, annotation, prediction):
         per_class_matching = super().update(annotation, prediction)
-        return [
+        per_class_result = [
             compute_precision_recall(self.thresholds, [per_class_matching[i]])[0] for i, _ in enumerate(self.labels)
         ]
+        if self.profiler:
+            for class_match, class_metric in zip(per_class_matching, per_class_result):
+                class_match['result'] = class_metric
+            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(per_class_result))
+        return per_class_result
 
     def evaluate(self, annotations, predictions):
+        if self.profiler:
+            self.profiler.finish()
         precision = [
             compute_precision_recall(self.thresholds, self.matching_results[i])[0]
             for i, _ in enumerate(self.labels)
@@ -124,11 +135,18 @@ class MSCOCORecall(MSCOCOBaseMetric):
 
     def update(self, annotation, prediction):
         per_class_matching = super().update(annotation, prediction)
-        return [
+        per_class_result = [
             compute_precision_recall(self.thresholds, [per_class_matching[i]])[1] for i, _ in enumerate(self.labels)
         ]
+        if self.profiler:
+            for class_match, class_metric in zip(per_class_matching, per_class_result):
+                class_match['result'] = class_metric
+            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(per_class_result))
+        return per_class_result
 
     def evaluate(self, annotations, predictions):
+        if self.profiler:
+            self.profiler.finish()
         recalls = [
             compute_precision_recall(self.thresholds, self.matching_results[i])[1]
             for i, _ in enumerate(self.labels)
@@ -220,7 +238,7 @@ class MSCOCOKeypointsPrecision(MSCOCOKeypointsBaseMetric):
 
 
 class MSCOCOKeypointsRecall(MSCOCOKeypointsBaseMetric):
-    __provider__ = 'coco_keypoints_precision'
+    __provider__ = 'coco_keypoints_recall'
 
     def update(self, annotation, prediction):
         per_class_matching = super().update(annotation, prediction)
@@ -323,8 +341,8 @@ def compute_precision_recall(thresholds, matching_results):
     npig = np.count_nonzero(gt_ignored == 0)
     tps = np.logical_and(dtm, np.logical_not(dt_ignored))
     fps = np.logical_and(np.logical_not(dtm), np.logical_not(dt_ignored))
-    tp_sum = np.cumsum(tps, axis=1).astype(dtype=np.float)
-    fp_sum = np.cumsum(fps, axis=1).astype(dtype=np.float)
+    tp_sum = np.cumsum(tps, axis=1).astype(dtype=float)
+    fp_sum = np.cumsum(fps, axis=1).astype(dtype=float)
     if npig == 0:
         return np.nan, np.nan
     for t, (tp, fp) in enumerate(zip(tp_sum, fp_sum)):
@@ -415,7 +433,9 @@ def compute_oks(annotation_points, prediction_points, annotation_boxes, annotati
     return oks
 
 
-def evaluate_image(ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, thresholds):
+def evaluate_image(
+        ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, thresholds, profile=False
+):
     thresholds_num = len(thresholds)
     gt_num = len(ground_truth)
     dt_num = len(detections)
@@ -449,13 +469,21 @@ def evaluate_image(ground_truth, gt_difficult, iscrowd, detections, dt_difficult
                 dt_matched[tind, dtind] = 1
                 gt_matched[tind, matched_id] = dtind
     # store results for given image
-    return {
+    results = {
         'dt_matches': dt_matched,
         'gt_matches': gt_matched,
         'gt_ignore': gt_ignored,
         'dt_ignore': np.logical_or(dt_ignored, dt_difficult),
         'scores': scores
     }
+    if profile:
+        results.update({
+            'dt': detections,
+            'gt': ground_truth,
+            'iou': iou
+        })
+
+    return results
 
 
 def process_threshold(threshold):

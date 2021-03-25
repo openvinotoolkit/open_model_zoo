@@ -1,0 +1,26 @@
+models:
+  - name: wavernn-upsampler
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: multi_output_regression
+          outputs:
+            - aux
+            - upsample_mels
+        inputs:
+          - name: mels
+            type: INPUT
+            layout: NHWC
+        allow_reshape_input: True
+    datasets:
+      - name: wavernn-io-upsampler
+        data_source: wavernn_io/upsampler
+        reader: numpy_dict_reader
+        annotation_conversion:
+          converter: multi_feature_regression
+          data_dir: wavernn_io/upsampler
+          input_suffix: in
+          reference_suffix: out
+        metrics:
+          - type: mae
+            presenter: print_vector

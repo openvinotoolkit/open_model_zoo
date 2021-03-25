@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import numpy as np
 import cv2
 
 from ..base_evaluator import BaseEvaluator
-from ..quantization_model_evaluator import  create_dataset_attributes
+from ..quantization_model_evaluator import create_dataset_attributes
 from ...adapters import create_adapter, MTCNNPAdapter
 from ...launcher import create_launcher, InputFeeder
 from ...preprocessor import PreprocessingExecutor
@@ -171,7 +171,7 @@ class RefineBaseStage(BaseStage):
     include_boundaries = True
     default_model_name = 'mtcnn-r'
 
-    def preprocess_data(self, batch_input, batch_annotation, previous_stage_prediction, *lrgs, **kwargs):
+    def preprocess_data(self, batch_input, batch_annotation, previous_stage_prediction, *args, **kwargs):
         batch_input = self.model_specific_preprocessor.process(batch_input, batch_annotation)
         batch_input = self.common_preprocessor.process(batch_input, batch_annotation)
         _, batch_meta = extract_image_representations(batch_input)
@@ -601,8 +601,6 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
         return output_per_box
 
 
-
-
 class MTCNNEvaluator(BaseEvaluator):
     def __init__(
             self, dataset_config, launcher, stages
@@ -623,12 +621,17 @@ class MTCNNEvaluator(BaseEvaluator):
             output_callback=None,
             allow_pairwise_subset=False,
             dump_prediction_to_annotation=False,
+            calculate_metrics=True,
             **kwargs):
         def no_detections(batch_pred):
             return batch_pred[0].size == 0
         self._prepare_dataset(dataset_tag)
         self._create_subset(subset, num_images, allow_pairwise_subset)
         _progress_reporter = self._prepare_progress_reporter(check_progress, kwargs.get('progress_reporter'))
+        compute_intermediate_metric_res = kwargs.get('intermediate_metrics_results', False)
+        if compute_intermediate_metric_res:
+            metric_interval = kwargs.get('metrics_interval', 1000)
+            ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_prediction = []
@@ -652,18 +655,15 @@ class MTCNNEvaluator(BaseEvaluator):
                 )
                 if no_detections(batch_prediction):
                     break
-
             batch_annotation, batch_prediction = self.postprocessor.process_batch(batch_annotation, batch_prediction)
-
             metrics_result = None
             if self.metric_executor:
-                metrics_result = self.metric_executor.update_metrics_on_batch(
+                metrics_result, _ = self.metric_executor.update_metrics_on_batch(
                     batch_input_ids, batch_annotation, batch_prediction
                 )
                 if self.metric_executor.need_store_predictions:
                     self._annotations.extend(batch_annotation)
                     self._predictions.extend(batch_prediction)
-
             if output_callback:
                 output_callback(
                     list(self.stages.values())[-1].transform_for_callback(batch_size, batch_raw_prediction),
@@ -673,6 +673,10 @@ class MTCNNEvaluator(BaseEvaluator):
                 )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
+                if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
+                    self.compute_metrics(
+                        print_results=True, ignore_results_formatting=ignore_results_formatting
+                    )
 
         if _progress_reporter:
             _progress_reporter.finish()
@@ -726,7 +730,6 @@ class MTCNNEvaluator(BaseEvaluator):
         models_info = config['network_info']
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
         stages = build_stages(models_info, [], launcher, config.get('_models'), delayed_model_loading)
-
         return cls(dataset_config, launcher, stages)
 
     @staticmethod
@@ -739,6 +742,9 @@ class MTCNNEvaluator(BaseEvaluator):
             model_name, launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
             dataset_config['name']
         )
+
+    def set_profiling_dir(self, profiler_dir):
+        self.metric_executor.set_profiling_dir(profiler_dir)
 
     def release(self):
         for _, stage in self.stages.items():
@@ -833,6 +839,10 @@ class MTCNNEvaluator(BaseEvaluator):
             return progress_reporter
         return None if not check_progress else self._create_progress_reporter(check_progress, self.dataset.size)
 
+    @property
+    def dataset_size(self):
+        return self.dataset.size
+
 
 def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_mapping, iou_type=None):
     score = out[0][outputs_mapping['probability_out']][:, 1]
@@ -892,34 +902,39 @@ def bbreg(boundingbox, reg):
 
     return boundingbox
 
+def filter_valid(dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph):
+    mask = np.ones(len(tmph))
+    tmp_ys_len = (edy + 1) - dy
+    tmp_xs_len = (edx + 1) - dx
+    img_ys_len = (ey + 1) - y
+    img_xs_len = (ex + 1) - x
+    mask = np.logical_and(mask, np.logical_and(tmph > 0, tmpw > 0))
+    mask = np.logical_and(mask, np.logical_and(tmp_ys_len > 0, tmp_xs_len > 0))
+    mask = np.logical_and(mask, np.logical_and(img_xs_len > 0, img_ys_len > 0))
+    mask = np.logical_and(mask, np.logical_and(tmp_xs_len == img_xs_len, tmp_ys_len == img_ys_len))
+    return dy[mask], edy[mask], dx[mask], edx[mask], y[mask], ey[mask], x[mask], ex[mask], tmpw[mask], tmph[mask], mask
 
 def pad(boxesA, h, w):
     boxes = boxesA.copy()
-
     tmph = boxes[:, 3] - boxes[:, 1] + 1
     tmpw = boxes[:, 2] - boxes[:, 0] + 1
     numbox = boxes.shape[0]
-
     dx = np.ones(numbox)
     dy = np.ones(numbox)
     edx = tmpw
     edy = tmph
-
     x = boxes[:, 0:1][:, 0]
     y = boxes[:, 1:2][:, 0]
     ex = boxes[:, 2:3][:, 0]
     ey = boxes[:, 3:4][:, 0]
-
     tmp = np.where(ex > w)[0]
     if tmp.shape[0] != 0:
         edx[tmp] = -ex[tmp] + w - 1 + tmpw[tmp]
         ex[tmp] = w - 1
-
     tmp = np.where(ey > h)[0]
     if tmp.shape[0] != 0:
         edy[tmp] = -ey[tmp] + h - 1 + tmph[tmp]
         ey[tmp] = h - 1
-
     tmp = np.where(x < 1)[0]
     if tmp.shape[0] != 0:
         dx[tmp] = 2 - x[tmp]
@@ -929,7 +944,6 @@ def pad(boxesA, h, w):
     if tmp.shape[0] != 0:
         dy[tmp] = 2 - y[tmp]
         y[tmp] = np.ones_like(y[tmp])
-
     # for python index from 0, while matlab from 1
     dy = np.maximum(0, dy - 1)
     dx = np.maximum(0, dx - 1)
@@ -939,18 +953,16 @@ def pad(boxesA, h, w):
     edx = np.maximum(0, edx - 1)
     ey = np.maximum(0, ey - 1)
     ex = np.maximum(0, ex - 1)
-    return [dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph]
+    return filter_valid(dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph)
 
 
 def rerec(bboxA):
     w = bboxA[:, 2] - bboxA[:, 0]
     h = bboxA[:, 3] - bboxA[:, 1]
-    l = np.maximum(w, h).T
-
-    bboxA[:, 0] = bboxA[:, 0] + w * 0.5 - l * 0.5
-    bboxA[:, 1] = bboxA[:, 1] + h * 0.5 - l * 0.5
-    bboxA[:, 2:4] = bboxA[:, 0:2] + np.repeat([l], 2, axis=0).T
-
+    max_side = np.maximum(w, h).T
+    bboxA[:, 0] = bboxA[:, 0] + w * 0.5 - max_side * 0.5
+    bboxA[:, 1] = bboxA[:, 1] + h * 0.5 - max_side * 0.5
+    bboxA[:, 2:4] = bboxA[:, 0:2] + np.repeat([max_side], 2, axis=0).T
     return bboxA
 
 
@@ -963,7 +975,8 @@ def cut_roi(image, prediction, dst_size, include_bound=True):
     img = image.data
     bboxes = rerec(bboxes)
     bboxes[:, 0:4] = np.fix(bboxes[:, 0:4])
-    dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph = pad(bboxes, *img.shape[:2])
+    dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph, mask = pad(bboxes, *img.shape[:2])
+    bboxes = bboxes[mask]
     numbox = bboxes.shape[0]
     tempimg = np.zeros((numbox, dst_size, dst_size, 3))
     for k in range(numbox):
@@ -977,5 +990,4 @@ def cut_roi(image, prediction, dst_size, include_bound=True):
         tmp[tmp_ys, tmp_xs] = img[img_ys, img_xs]
         tempimg[k, :, :, :] = cv2.resize(tmp, (dst_size, dst_size))
     image.data = tempimg
-
     return image

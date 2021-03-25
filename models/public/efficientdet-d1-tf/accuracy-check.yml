@@ -1,0 +1,23 @@
+models:
+  - name: efficientdet-d1-tf
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+    datasets:
+      - name: ms_coco_detection_90_class_without_background
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: fit_to_window
+            size: 640
+          - type: padding
+            size: 640
+            pad_type: right_bottom
+
+        postprocessing:
+          - type: faster_rcnn_postprocessing_resize
+            size: 640
+          - type: shift_labels
+            offset: 1
+
+        metrics:
+          - type: coco_precision

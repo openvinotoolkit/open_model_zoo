@@ -8,7 +8,7 @@ scikit-image
 scikit-learn
 
 # cpu extension usage
-py-cpuinfo<=4.0
+py-cpuinfo!=5.0,!=6.0
 
 # text detection
 shapely
@@ -23,6 +23,14 @@ pydicom
 # nlp, tokenization
 sentencepiece
 tokenizers
+nltk
 
 # editdistance calculation
 editdistance
+
+# DNA sequence matching
+parasail
+fast-ctc-decode
+
+# raw image formats processing
+rawpy

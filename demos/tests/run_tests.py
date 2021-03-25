@@ -22,18 +22,17 @@ For the tests to work, the test data directory must contain:
   https://drive.google.com/open?id=1A2IU8Sgea1h3fYLpYtFb2v7NYdMjvEhU);
 * a "ILSVRC2012_img_val" subdirectory with the ILSVRC2012 dataset;
 * a "Image_Retrieval" subdirectory with image retrieval dataset (images, videos) (see https://github.com/19900531/test)
-  and list of images (see https://github.com/opencv/openvino_training_extensions/blob/develop/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt)
+  and list of images (see https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt)
+* a "msasl" subdirectory with the MS-ASL dataset (https://www.microsoft.com/en-us/research/project/ms-asl/)
 """
 
 import argparse
-import collections
 import contextlib
 import csv
-import itertools
 import json
 import os
+import platform
 import shlex
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -143,7 +142,7 @@ def main():
 
     if args.demos is not None:
         names_of_demos_to_test = set(args.demos.split(','))
-        demos_to_test = [demo for demo in DEMOS if demo.full_name in names_of_demos_to_test]
+        demos_to_test = [demo for demo in DEMOS if demo.subdirectory in names_of_demos_to_test]
     else:
         demos_to_test = DEMOS
 
@@ -152,10 +151,14 @@ def main():
 
         num_failures = 0
 
-        os.putenv('PYTHONPATH',  "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir))
+        python_module_subdir = "" if platform.system() == "Windows" else "/lib"
+        demo_environment = {**os.environ,
+            'PYTHONIOENCODING': 'utf-8',
+            'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{python_module_subdir}",
+        }
 
         for demo in demos_to_test:
-            print('Testing {}...'.format(demo.full_name))
+            print('Testing {}...'.format(demo.subdirectory))
             print()
 
             declared_model_names = {model['name']
@@ -166,7 +169,6 @@ def main():
 
             with temp_dir_as_path() as temp_dir:
                 arg_context = ArgContext(
-                    source_dir=demos_dir / demo.subdirectory,
                     dl_dir=dl_dir,
                     data_sequence_dir=temp_dir / 'data_seq',
                     data_sequences=DATA_SEQUENCES,
@@ -212,7 +214,8 @@ def main():
                         try:
                             start_time = timeit.default_timer()
                             subprocess.check_output(fixed_args + dev_arg + case_args,
-                                stderr=subprocess.STDOUT, universal_newlines=True)
+                                stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
+                                env=demo_environment)
                             execution_time = timeit.default_timer() - start_time
                         except subprocess.CalledProcessError as e:
                             print(e.output)
@@ -221,7 +224,7 @@ def main():
                             execution_time = -1
 
                         if args.report_file:
-                            collect_result(demo.full_name, device, case_model_names, execution_time, args.report_file)
+                            collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
 
             print()
 
@@ -229,5 +232,5 @@ def main():
 
     sys.exit(0 if num_failures == 0 else 1)
 
-if __name__ == main():
+if __name__ == '__main__':
     main()

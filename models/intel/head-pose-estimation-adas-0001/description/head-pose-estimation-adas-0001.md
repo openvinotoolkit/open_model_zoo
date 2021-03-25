@@ -31,8 +31,6 @@ one output.
 | pitch |  5.5 ± 5.3                                                                                                                                            |
 | roll  |  4.6 ± 5.6                                                                                                                                            |
 
-## Performance
-
 ## Inputs
 
 1. name: "data" , shape: [1x3x60x60] - An input image in [1xCxHxW] format. Expected color order is BGR.

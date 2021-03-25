@@ -1,5 +1,4 @@
-Model Downloader and other automation tools
-===========================================
+# Model Downloader and other automation tools
 
 This directory contains scripts that automate certain model-related tasks
 based on configuration files in the models' directories.
@@ -21,10 +20,9 @@ Please use these tools instead of attempting to parse the configuration files
 directly. Their format is undocumented and may change in incompatible ways in
 future releases.
 
-Prerequisites
--------------
+## Prerequisites
 
-1. Install Python (version 3.5.2 or higher)
+1. Install Python (version 3.6 or higher)
 2. Install the tools' dependencies with the following command:
 
 ```sh
@@ -35,34 +33,28 @@ For the model converter, you will also need to install the OpenVINO&trade;
 toolkit and the prerequisite libraries for Model Optimizer. See the
 [OpenVINO toolkit documentation](https://docs.openvinotoolkit.org/) for details.
 
-If you using models from PyTorch or Caffe2 framework, you will also need to use intermediate
-conversion to ONNX format. To use automatic conversion install additional dependencies.
+To convert models from certain frameworks, you will also need to install
+additional dependencies.
 
-For models from PyTorch:
-```sh
-python3 -mpip install --user -r ./requirements-pytorch.in
-```
 For models from Caffe2:
+
 ```sh
 python3 -mpip install --user -r ./requirements-caffe2.in
 ```
 
-When running the model downloader with Python 3.5.x on macOS, you may encounter
-an error similar to the following:
-
-> requests.exceptions.SSLError: [...] (Caused by SSLError(SSLError(1, '[SSL: TLSV1_ALERT_PROTOCOL_VERSION]
-tlsv1 alert protocol version (\_ssl.c:719)'),))
-
-You can work around this by installing additional packages:
+For models from PyTorch:
 
 ```sh
-python3 -mpip install --user 'requests[security]'
+python3 -mpip install --user -r ./requirements-pytorch.in
 ```
 
-Alternatively, upgrade to Python 3.6 or a later version.
+For models from TensorFlow:
 
-Model downloader usage
-----------------------
+```sh
+python3 -mpip install --user -r ./requirements-tensorflow.in
+```
+
+## Model downloader usage
 
 The basic usage is to run the script like this:
 
@@ -86,7 +78,7 @@ You may use `--precisions` flag to specify comma separated precisions of weights
 to be downloaded.
 
 ```sh
-./downloader.py --name face-detection-retail-0004 --precisions FP16,INT8
+./downloader.py --name face-detection-retail-0004 --precisions FP16,FP16-INT8
 ```
 
 By default, the script will attempt to download each file only once. You can use
@@ -220,8 +212,7 @@ In particular:
   is set to a value greater than 1, event sequences for different files or models
   may get interleaved.
 
-Model converter usage
----------------------
+## Model converter usage
 
 The basic usage is to run the script like this:
 
@@ -307,13 +298,12 @@ To do this, use the `--dry_run` option:
 See the "Shared options" section for information on other options accepted by
 the script.
 
-Model Quantizer Usage
----------------------
+## Model Quantizer Usage
 
 Before you run the model quantizer, you must prepare a directory with
 the datasets required for the quantization process. This directory will be
 referred to as `<DATASET_DIR>` below. You can find more detailed information
-about dataset preparation in the <a href="https://github.com/opencv/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.
+about dataset preparation in the [Dataset Preparation Guide](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md).
 
 The basic usage is to run the script like this:
 
@@ -389,8 +379,7 @@ Toolkit will still be created, so that you can inspect it.
 See the "Shared options" section for information on other options accepted by
 the script.
 
-Model information dumper usage
-------------------------------
+## Model information dumper usage
 
 The basic usage is to run the script like this:
 
@@ -426,8 +415,6 @@ describing a single model. Each such object has the following keys:
   * `FP32`
   * `FP32-INT1`
   * `FP32-INT8`
-  * `INT1`
-  * `INT8`
 
   Additional possible values might be added in the future.
 
@@ -439,6 +426,7 @@ describing a single model. Each such object has the following keys:
 
   * `action_recognition`
   * `classification`
+  * `colorization`
   * `detection`
   * `face_recognition`
   * `feature_extraction`
@@ -446,19 +434,24 @@ describing a single model. Each such object has the following keys:
   * `human_pose_estimation`
   * `image_inpainting`
   * `image_processing`
+  * `image_translation`
   * `instance_segmentation`
+  * `machine_translation`
   * `monocular_depth_estimation`
   * `object_attributes`
   * `optical_character_recognition`
+  * `place_recognition`
   * `question_answering`
   * `semantic_segmentation`
   * `sound_classification`
+  * `speech_recognition`
   * `style_transfer`
+  * `token_recognition`
+  * `text_to_speech`
 
   Additional possible values might be added in the future.
 
-Shared options
---------------
+## Shared options
 
 The are certain options that all tools accept.
 
@@ -516,7 +509,6 @@ driver-action-recognition-adas-0002-decoder
 driver-action-recognition-adas-0002-encoder
 emotions-recognition-retail-0003
 face-detection-adas-0001
-face-detection-adas-binary-0001
 face-detection-retail-0004
 face-detection-retail-0005
 [...]

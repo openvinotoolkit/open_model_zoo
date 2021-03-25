@@ -1,0 +1,38 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  "mozilla-deepspeech-0.8.2" is a speech recognition neural network pre-trained by Mozilla
+  based on DeepSpeech architecture (CTC decoder with beam search and n-gram language model)
+  with modified neural network.
+  For details on the original DeepSpeech see paper <https://arxiv.org/abs/1412.5567>.
+task_type: speech_recognition
+files:
+  - name: deepspeech-0.8.2-models.pbmm
+    size: 188915984
+    sha256: f1ad4347b276b7f0f35bc47954feb7240fad913f3a1b85605628ab6d6209b0c9
+    source: https://github.com/mozilla/DeepSpeech/releases/download/v0.8.2/deepspeech-0.8.2-models.pbmm
+  - name: deepspeech-0.8.2-models.scorer
+    size: 953363776
+    sha256: d0cf926ab9cab54a8a7d70003b931b2d62ebd9105ed392d1ec9c840029867799
+    source: https://github.com/mozilla/DeepSpeech/releases/download/v0.8.2/deepspeech-0.8.2-models.scorer
+model_optimizer_args:
+  - --input_model=$conv_dir/deepspeech-0.8.2-models.pb
+  - --freeze_placeholder_with_value=input_lengths->[16]
+  - --input=input_node,previous_state_h,previous_state_c
+  - --input_shape=[1,16,19,26],[1,2048],[1,2048]
+  - --output=logits,cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd,cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/GatherNd_1
+  - --disable_nhwc_to_nchw
+framework: tf
+license: https://raw.githubusercontent.com/mozilla/DeepSpeech/master/LICENSE

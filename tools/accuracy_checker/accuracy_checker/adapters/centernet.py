@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -67,8 +67,8 @@ class CTDETAdapter(Adapter):
         topk_scores = scores[np.arange(scores.shape[0])[:, None], topk_inds]
 
         topk_inds = topk_inds % (height * width)
-        topk_ys = (topk_inds / width).astype(np.int32).astype(np.float)
-        topk_xs = (topk_inds % width).astype(np.int32).astype(np.float)
+        topk_ys = (topk_inds / width).astype(np.int32).astype(float)
+        topk_xs = (topk_inds % width).astype(np.int32).astype(float)
 
         topk_scores = topk_scores.reshape((-1))
         topk_ind = np.argpartition(topk_scores, -K)[-K:]
@@ -115,11 +115,11 @@ class CTDETAdapter(Adapter):
         return target_coords
 
     @staticmethod
-    def _transform(dets, center, scale, heigth, width):
+    def _transform(dets, center, scale, height, width):
         dets[:, :2] = CTDETAdapter._transform_preds(
-            dets[:, 0:2], center, scale, (width, heigth))
+            dets[:, 0:2], center, scale, (width, height))
         dets[:, 2:4] = CTDETAdapter._transform_preds(
-            dets[:, 2:4], center, scale, (width, heigth))
+            dets[:, 2:4], center, scale, (width, height))
         return dets
 
     def process(self, raw, identifiers, frame_meta):
@@ -143,7 +143,7 @@ class CTDETAdapter(Adapter):
 
             wh = self._tranpose_and_gather_feat(wh, inds)
             wh = wh.reshape((num_predictions, 2))
-            clses = clses.reshape((num_predictions, 1)).astype(np.float)
+            clses = clses.reshape((num_predictions, 1)).astype(float)
             scores = scores.reshape((num_predictions, 1))
             bboxes = np.concatenate((xs - wh[..., 0:1] / 2,
                                      ys - wh[..., 1:2] / 2,

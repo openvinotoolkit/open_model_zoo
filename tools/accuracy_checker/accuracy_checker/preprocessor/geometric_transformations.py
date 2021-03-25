@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@ import numpy as np
 
 from ..config import ConfigError, NumberField, StringField, BoolField, ListField
 from ..preprocessor import Preprocessor
-from ..utils import get_size_from_config, string_to_tuple
+from ..utils import get_size_from_config, string_to_tuple, UnsupportedPackage
 from ..logging import warning
 
 try:
     from skimage.transform import estimate_transform, warp
-except ImportError:
-    estimate_transform, warp = None, None
+except ImportError as import_error:
+    estimate_transform = UnsupportedPackage("skimage.transform", import_error.msg)
+    warp = UnsupportedPackage("skimage.transform", import_error.msg)
 
 # The field .type should be string, the field .parameters should be dict
 GeometricOperationMetadata = namedtuple('GeometricOperationMetadata', ['type', 'parameters'])
@@ -46,6 +47,9 @@ class Flip(Preprocessor):
             'mode': StringField(
                 choices=FLIP_MODES.keys(), default='horizontal',
                 description="Specifies the axis for flipping (vertical or horizontal)."
+            ),
+            'merge_with_original': BoolField(
+                optional=True, description='allow joint flipped image to original', default=False
             )
         })
         return parameters
@@ -54,9 +58,16 @@ class Flip(Preprocessor):
         mode = self.get_value_from_config('mode')
         if isinstance(mode, str):
             self.mode = FLIP_MODES[mode]
+        self.merge = self.get_value_from_config('merge_with_original')
 
     def process(self, image, annotation_meta=None):
-        image.data = cv2.flip(image.data, self.mode)
+        flipped_data = cv2.flip(image.data, self.mode)
+        if self.merge:
+            image.data = [image.data, flipped_data]
+            image.metadata['multi_infer'] = True
+        else:
+            image.data = flipped_data
+
         image.metadata.setdefault(
             'geometric_operations', []).append(GeometricOperationMetadata('flip', {'mode': self.mode}))
         return image
@@ -82,7 +93,7 @@ class PointAligner(Preprocessor):
                 optional=True, default=True, description="Allows to use normalization for keypoints."),
             'size': NumberField(
                 value_type=int, optional=True, min_value=1,
-                description="Destination size for keypoints resizing for both destination dimentions."
+                description="Destination size for keypoints resizing for both destination dimensions."
             ),
             'dst_width': NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination width for keypoints resizing."
@@ -217,6 +228,9 @@ class Padding(Preprocessor):
                 optional=True, default='constant',
                 choices=['constant', 'edge', 'maximum', 'minimum', 'mean', 'median', 'wrap'],
                 description="If use_numpy is True, Numpy padding mode,including constant, edge, mean, etc."
+            ),
+            'enable_resize': BoolField(
+                optional=True, default=False, description='allow resize images if source image large then padding size'
             )
         })
 
@@ -233,12 +247,14 @@ class Padding(Preprocessor):
         self.pad_func = padding_func[self.get_value_from_config('pad_type')]
         self.use_numpy = self.get_value_from_config('use_numpy')
         self.numpy_pad_mode = self.get_value_from_config('numpy_pad_mode')
+        self.enable_resize = self.get_value_from_config('enable_resize')
 
     def process(self, image, annotation_meta=None):
         height, width, _ = image.data.shape
         pref_height = self.dst_height or image.metadata.get('preferable_height', height)
         pref_width = self.dst_width or image.metadata.get('preferable_width', width)
         height = min(height, pref_height)
+        width_pref_init = pref_width
         pref_height = math.ceil(pref_height / float(self.stride)) * self.stride
         pref_width = max(pref_width, width)
         pref_width = math.ceil(pref_width / float(self.stride)) * self.stride
@@ -246,18 +262,23 @@ class Padding(Preprocessor):
         image.metadata['padding'] = pad
         padding_realization_func = self._opencv_padding if not self.use_numpy else self._numpy_padding
         image.data = padding_realization_func(image.data, pad)
+        meta = {
+            'pad': pad,
+            'dst_width': self.dst_width,
+            'dst_height': self.dst_height,
+            'pref_width': pref_width,
+            'pref_height': pref_height,
+            'width': width,
+            'height': height,
+            'resized': False
+        }
+        if self.enable_resize and image.data.shape[:2] != (pref_height, width_pref_init):
+            image.data = cv2.resize(image.data, (width_pref_init, pref_height))
+            meta['resized'] = True
+            meta['pref_width'] = width_pref_init
 
         image.metadata.setdefault('geometric_operations', []).append(
-            GeometricOperationMetadata('padding',
-                                       {
-                                           'pad': pad,
-                                           'dst_width': self.dst_width,
-                                           'dst_height': self.dst_height,
-                                           'pref_width': pref_width,
-                                           'pref_height': pref_height,
-                                           'width': width,
-                                           'height': height
-                                       }))
+            GeometricOperationMetadata('padding', meta))
 
         return image
 
@@ -293,12 +314,12 @@ class Tiling(Preprocessor):
             'margin': NumberField(value_type=int, min_value=1, description="Margin for tiled fragment of image."),
             'size': NumberField(
                 value_type=int, optional=True, min_value=1,
-                description="Destination size of tiled fragment for both dimentions."
+                description="Destination size of tiled fragment for both dimensions."
             ),
-            'dst_width'  : NumberField(
+            'dst_width': NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination width of tiled fragment."
             ),
-            'dst_height' : NumberField(
+            'dst_height': NumberField(
                 value_type=int, optional=True, min_value=1, description="Destination height of tiled fragment."
             ),
         })
@@ -553,8 +574,8 @@ class SimilarityTransfom(Preprocessor):
         return params
 
     def configure(self):
-        if estimate_transform is None:
-            raise ConfigError('similarity_transform_box requires skimage installation. Please install it before usage.')
+        if isinstance(estimate_transform, UnsupportedPackage):
+            estimate_transform.raise_error(self.__provider__)
         self.box_scale = self.get_value_from_config('box_scale')
         self.dst_height, self.dst_width = get_size_from_config(self.config)
 

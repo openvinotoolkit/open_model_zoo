@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,13 +31,9 @@ from warnings import warn
 from collections.abc import MutableSet, Sequence
 from io import BytesIO
 
+import defusedxml.ElementTree as et
 import numpy as np
 import yaml
-
-try:
-    import lxml.etree as et
-except ImportError:
-    import xml.etree.cElementTree as et
 
 try:
     from shapely.geometry.polygon import Polygon
@@ -99,7 +95,7 @@ def string_to_tuple(string, casting_type=float):
     processed = processed.replace(')', '')
     processed = processed.split(',')
 
-    return tuple([casting_type(entry) for entry in processed]) if not casting_type is None else tuple(processed)
+    return tuple(map(casting_type, processed)) if casting_type else tuple(processed)
 
 
 def string_to_list(string):
@@ -108,8 +104,14 @@ def string_to_list(string):
     processed = processed.replace(']', '')
     processed = processed.split(',')
 
-    return list(entry for entry in processed)
+    return processed
 
+
+def validate_print_interval(value, min_value=0, max_value=None):
+    if value <= min_value:
+        raise ValueError('{} less than minimum required {}'.format(value, min_value))
+    if max_value and value >= max_value:
+        raise ValueError('{} greater than maximum required {}'.format(value, max_value))
 
 class JSONDecoderWithAutoConversion(json.JSONDecoder):
     """
@@ -268,6 +270,10 @@ def is_single_metric_source(source):
     return np.size(source.split(',')) == 1
 
 
+def is_path(data):
+    return isinstance(data, (Path, str))
+
+
 def read_txt(file: Union[str, Path], sep='\n', **kwargs):
     def is_empty(string):
         return not string or string.isspace()
@@ -403,15 +409,11 @@ def set_image_metadata(annotation, images):
     if not isinstance(data, list):
         data = [data]
     for image in data:
-        data_shape = image.shape if not np.isscalar(image) else 1
+        data_shape = np.shape(image) if not np.isscalar(image) else 1
         image_sizes.append(data_shape)
     annotation.set_image_size(image_sizes)
 
     return annotation, images
-
-
-def get_indexs(container, element):
-    return [index for index, container_element in enumerate(container) if container_element == element]
 
 
 def find_nearest(array, value, mode=None):
@@ -484,6 +486,14 @@ class OrderedSet(MutableSet):
         return set(self) == set(other)
 
 
+def is_relative_to(path, *other):
+    try:
+        Path(path).relative_to(*other)
+        return True
+    except ValueError:
+        return False
+
+
 def get_parameter_value_from_config(config, parameters, key):
     if key not in parameters.keys():
         return None
@@ -519,6 +529,14 @@ def softmax(x):
     return np.exp(x) / sum(np.exp(x))
 
 
+def is_iterable(maybe_iterable):
+    try:
+        iter(maybe_iterable)
+        return True
+    except TypeError:
+        return False
+
+
 class ParseError(Exception):
     pass
 
@@ -543,7 +561,7 @@ class MatlabDataReader():
             'miUTF16': {'n': 17, 'fmt': 's'},
             'miUTF32': {'n': 18, 'fmt': 's'}
         }
-        self.inv_etypes = dict((v['n'], k) for k, v in self.etypes.items())
+        self.inv_etypes = {v['n']: k for k, v in self.etypes.items()}
         self.mclasses = {
             'mxCELL_CLASS': 1,
             'mxSTRUCT_CLASS': 2,
@@ -576,7 +594,7 @@ class MatlabDataReader():
             'mxINT64_CLASS': 'miINT64',
             'mxUINT64_CLASS': 'miUINT64'
         }
-        self.inv_mclasses = dict((v, k) for k, v in self.mclasses.items())
+        self.inv_mclasses = {v: k for k, v in self.mclasses.items()}
         self.compressed_numeric = ['miINT32', 'miUINT16', 'miINT16', 'miUINT8']
 
     def read_var_header(self, fd, endian):
@@ -691,12 +709,12 @@ class MatlabDataReader():
             return data
         rowcount = header['dims'][0]
         colcount = header['dims'][1]
-        array = [list(data[c * rowcount + r] for c in range(colcount))
+        array = [[data[c * rowcount + r] for c in range(colcount)]
                  for r in range(rowcount)]
         return self._squeeze(array)
 
     def _read_cell_array(self, fd, endian, header):
-        array = [list() for i in range(header['dims'][0])]
+        array = [[] for i in range(header['dims'][0])]
         for row in range(header['dims'][0]):
             for _col in range(header['dims'][1]):
                 vheader, next_pos, fd_var = self.read_var_header(fd, endian)
@@ -717,7 +735,6 @@ class MatlabDataReader():
         if isinstance(fields, str):
             fields = [fields]
 
-        empty = lambda: [list() for i in range(header['dims'][0])]
         array = {}
         for row in range(header['dims'][0]):
             for _col in range(header['dims'][1]):
@@ -725,7 +742,7 @@ class MatlabDataReader():
                     vheader, next_pos, fd_var = self.read_var_header(fd, endian)
                     data = self.read_var_array(fd_var, endian, vheader)
                     if field not in array:
-                        array[field] = empty()
+                        array[field] = [[] for _ in range(header['dims'][0])]
                     array[field][row].append(data)
                     fd.seek(next_pos)
         for field in fields:
@@ -736,7 +753,7 @@ class MatlabDataReader():
         return array
 
     def _read_char_array(self, fd, endian, header):
-        array = self._read_numeric_array(fd, endian, header, ['miUTF8'])
+        array = self._read_numeric_array(fd, endian, header, ['miUTF8', 'miUTF16'])
         if header['dims'][0] > 1:
             array = [self.asstr(bytearray(i)) for i in array]
         else:
@@ -798,3 +815,17 @@ def loadmat(filename):
         fd.seek(next_position)
     fd.close()
     return mdict
+
+
+class UnsupportedPackage:
+    def __init__(self, package, message):
+        self.package = package
+        self.msg = message
+
+    def raise_error(self, provider):
+        msg = "{package} is not installed. Please install it before using {provider}.\n{message}".format(
+            provider=provider, package=self.package, message=self.msg)
+        raise ImportError(msg)
+
+    def __call__(self, *args, **kwargs):
+        self.raise_error('')

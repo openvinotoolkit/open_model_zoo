@@ -5,8 +5,6 @@
 This is a TensorFlow\* version of `densenet-161` model, one of the DenseNet
 group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details see [repository](https://github.com/pudae/tensorflow-densenet/), [paper](https://arxiv.org/abs/1608.06993).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -22,8 +20,6 @@ group of models designed to perform image classification. The weights were conve
 | ------ | ----- |
 | Top 1  | 76.446% |
 | Top 5  | 93.228%|
-
-## Performance
 
 ## Input
 
@@ -61,6 +57,20 @@ Floating point values in range [0, 1], which represent probabilities for classes
 ### Converted Model
 
 Floating point values in a range [0, 1], which represent probabilities for classes in a dataset. Name: `densenet161/predictions/Reshape_1/Transpose`, shape: [1, 1, 1, 1000].
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

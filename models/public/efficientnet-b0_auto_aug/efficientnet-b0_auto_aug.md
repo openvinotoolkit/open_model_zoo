@@ -9,8 +9,6 @@ This model was pretrained in TensorFlow\*.
 All the EfficientNet models have been pretrained on the ImageNet\* image database.
 For details about this family of models, check out the [TensorFlow Cloud TPU repository](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet).
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -26,8 +24,6 @@ For details about this family of models, check out the [TensorFlow Cloud TPU rep
 | ------ | -------------- | --------------- |
 | Top 1  | 76.43%          | 76.43%           |
 | Top 5  | 93.04%          | 93.04%           |
-
-## Performance
 
 ## Input
 
@@ -60,14 +56,28 @@ Channel order is `BGR`.
 Object classifier according to ImageNet classes, name - `logits`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in the [0, 1] range
+- `C` - predicted probabilities for each class in the logits format
 
 ### Converted Model
 
 Object classifier according to ImageNet classes, name - `efficientnet-b0/model/head/dense/MatMul`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in the [0, 1] range
+- `C` - predicted probabilities for each class in the logits format
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

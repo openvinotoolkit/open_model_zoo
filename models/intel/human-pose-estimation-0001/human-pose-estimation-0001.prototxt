@@ -624,7 +624,7 @@ layer {
     kernel_size: 3
     group: 256
     #engine: CAFFE
-    stride: 1    
+    stride: 1
     weight_filler {
       type: "msra"
     }

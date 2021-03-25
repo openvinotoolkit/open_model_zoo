@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ from collections import OrderedDict
 
 import numpy as np
 from ..config import PathField, StringField, DictField, NumberField, ListField
-from .launcher import Launcher, LauncherConfigValidator
+from .launcher import Launcher
 
 MODULE_REGEX = r'(?:\w+)(?:(?:.\w+)*)'
 DEVICE_REGEX = r'(?P<device>cpu$|cuda)?'
@@ -43,7 +43,7 @@ class PyTorchLauncher(Launcher):
                 description='appendix for PYTHONPATH for making network module visible in current python environment'
             ),
             'module_args': ListField(optional=True, description='positional arguments for network module'),
-            'module_kwargs':  DictField(
+            'module_kwargs': DictField(
                 key_type=str, validate_values=False, optional=True, default={},
                 description='keyword arguments for network module'
             ),
@@ -64,8 +64,7 @@ class PyTorchLauncher(Launcher):
         except ImportError as import_error:
             raise ValueError("PyTorch isn't installed. Please, install it before using. \n{}".format(import_error.msg))
         self._torch = torch
-        pytorch_launcher_config = LauncherConfigValidator('Pytorch_Launcher', fields=self.parameters())
-        pytorch_launcher_config.validate(self.config)
+        self.validate_config(config_entry)
         module_args = config_entry.get("module_args", ())
         module_kwargs = config_entry.get("module_kwargs", {})
         self.cuda = 'cuda' in self.get_value_from_config('device')

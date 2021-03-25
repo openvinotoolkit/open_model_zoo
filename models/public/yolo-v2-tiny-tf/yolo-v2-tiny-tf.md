@@ -1,40 +1,8 @@
-# yolo-v2-tiny
+# yolo-v2-tiny-tf
 
 ## Use Case and High-Level Description
 
-YOLO v2 Tiny is a real-time object detection model from TensorFlow.js\* framework. This model was pretrained on COCO\* dataset with 80 classes.
-
-## Conversion
-
-0. Install additional dependencies:
-    ```
-    h5py
-    keras
-    tensorflowjs
-    ```
-1. Download the model from [here](https://github.com/shaqian/tfjs-yolo-demo/tree/master/dist/model/v2tiny) (tested on `aa4354c` commit).
-2. Convert the model to Keras\* format using `tensorflowjs_converter` script, e.g.:
-    ```
-    tensorflowjs_converter --input_format tfjs_layers_model --output_format keras <model_in>.json <model_out>.h5
-    ```
-3. Convert the produced model to protobuf format.
-
-    1. Get conversion script from [repository](https://github.com/amir-abdi/keras_to_tensorflow):
-        ```buildoutcfg
-        git clone https://github.com/amir-abdi/keras_to_tensorflow
-        ```
-    1. (Optional) Checkout the commit that the conversion was tested on:
-        ```
-        git checkout c841508a88faa5aa1ffc7a4947c3809ea4ec1228
-        ```
-    1. Apply `keras_to_tensorflow.py.patch`:
-        ```
-        git apply keras_to_tensorflow.py.patch
-        ```
-    1. Run script:
-        ```
-        python keras_to_tensorflow.py --input_model=<model_in>.h5 --output_model=<model_out>.pb
-        ```
+YOLO v2 Tiny is a real-time object detection model implemented with Keras\* from this [repository](https://github.com/david8862/keras-YOLOv3-model-set) and converted to TensorFlow\* framework. This model was pretrained on COCO\* dataset with 80 classes.
 
 ## Specification
 
@@ -43,7 +11,7 @@ YOLO v2 Tiny is a real-time object detection model from TensorFlow.js\* framewor
 | Type              | Detection     |
 | GFLOPs            | 5.424         |
 | MParams           | 11.229        |
-| Source framework  | TensorFlow.js\*  |
+| Source framework  | Keras\*  |
 
 ## Accuracy
 
@@ -52,13 +20,13 @@ Accuracy metrics obtained on COCO\* validation dataset for converted model.
 | Metric | Value |
 | ------ | ------|
 | mAP    | 27.34% |
-| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 29.11%  |
+| [COCO\* mAP](https://cocodataset.org/#detection-eval) | 29.11%  |
 
 ## Input
 
 ### Original model
 
-Image, name - `input_1`, shape - `1,416,416,3`, format is `B,H,W,C` where:
+Image, name - `image_input`, shape - `1,416,416,3`, format is `B,H,W,C` where:
 
 - `B` - batch size
 - `H` - height
@@ -70,7 +38,7 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `input_1`, shape - `1,3,416,416`, format is `B,C,H,W` where:
+Image, name - `image_input`, shape - `1,3,416,416`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -94,6 +62,8 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
 - `class_no_1`,...,`class_no_80` - probability distribution over the classes in logits format, apply [softmax function](https://en.wikipedia.org/wiki/Softmax_function) and multiply by obtained confidence value to get confidence of each class
 
+
+The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
 
 ### Converted model
@@ -109,15 +79,33 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `box_score` - confidence of detection box in [0,1] range
 - `class_no_1`,...,`class_no_80` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
 
+
+The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 
 The original model is distributed under the following
-[license](https://raw.githubusercontent.com/shaqian/tfjs-yolo/master/LICENSE):
+[license](https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE):
 
 ```
-Copyright (c) 2018 Qian Sha
+MIT License
+
+Copyright (c) 2019 david8862
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -129,11 +117,11 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
-OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 ```

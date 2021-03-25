@@ -11,11 +11,6 @@ The model input is a blob that consists of a single image of "1x3x384x384" in `R
 
 The model output is an inverse depth map that is defined up to an unknown scale factor.
 
-> **NOTE**: Originally the model weights are stored at [Google Drive](https://drive.google.com/file/d/1Jf7qRG9N8IW8CaZ7gPisO5RtlLl63mNA),
-which is unstable to download from due to weights size. Weights were additionally uploaded to
-[https://download.01.org/opencv/public_models](https://download.01.org/opencv/public_models),
-OpenVINO [Model Downloader](../../../tools/downloader/README.md) uses this location for downloading.
-
 ## Example
 
 See [here](https://github.com/intel-isl/MiDaS)
@@ -25,15 +20,15 @@ See [here](https://github.com/intel-isl/MiDaS)
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Monodepth     |
-| GFLOPs            | 207.4915      |
-| MParams           | 104.0814      |
+| GFLOPs            | 207.25144     |
+| MParams           | 104.081       |
 | Source framework  | PyTorch\*     |
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
-| rmse   | 7.5878|
+| Metric | Value   |
+| ------ | ------- |
+| rmse   | 0.07071 |
 
 ## Input
 
@@ -83,6 +78,20 @@ Inverse depth map, name - `inverse_depth`, shape - `1,384,384`, format is `B,H,W
 - `W` - width
 
 Inverse depth map is defined up to an unknown scale factor.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

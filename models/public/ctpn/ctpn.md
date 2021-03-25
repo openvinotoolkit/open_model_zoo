@@ -4,8 +4,6 @@
 
 Detecting Text in Natural Image with Connectionist Text Proposal Network. For details see [paper](https://arxiv.org/abs/1609.03605).
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -20,8 +18,6 @@ Detecting Text in Natural Image with Connectionist Text Proposal Network. For de
 | Metric | Value |
 | ------ | ----- |
 | hmean  | 73.67%|
-
-## Performance
 
 ## Input
 
@@ -83,6 +79,20 @@ Expected color order: BGR.
     - A - vector of 2\*N class probabilities (0 class for background, 1 class for text), where N is the number of detected anchors.
     - H - image height
     - W - image width
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

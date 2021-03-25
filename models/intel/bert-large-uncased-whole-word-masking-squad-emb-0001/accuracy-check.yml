@@ -1,0 +1,35 @@
+models:
+  - name: bert-large-uncased-whole-word-masking-squad-emb-0001
+    launchers:
+      - framework: dlsdk
+        allow_reshape_input: True
+        adapter:
+          type: bert_question_answering_embedding
+          embedding: "embedding"
+        inputs:
+          - name: "input_ids"
+            type: INPUT
+            value: "input_ids"
+          - name: "attention_mask"
+            type: INPUT
+            value: "input_mask"
+          - name: "token_type_ids"
+            type: INPUT
+            value: "segment_ids"
+          - name: "position_ids"
+            type: INPUT
+            value: "position_ids"
+
+    datasets:
+      - name: squad_emb_v1_1_msl384_mql32_lowercase
+        reader:
+          type: annotation_features_extractor
+          features:
+            - input_ids
+            - input_mask
+            - segment_ids
+            - position_ids
+        metrics:
+          - name: 'top_5_acc'
+            type: 'qa_embedding_accuracy'
+            top_k: 5

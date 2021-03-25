@@ -1,0 +1,37 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Recognizes alphanumeric text. Architecture: VGG-like + BiLSTM as an encoder -  BiLSTM
+  as a decoder. The same as 0012 but trained in pytorch
+task_type: optical_character_recognition
+files:
+  - name: FP32/text-recognition-0013.xml
+    size: 212339
+    sha256: c0f62b5a41a8465c380f4163915917bd3956e157ab63091468279682c14e2589
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-recognition-0013/FP32/text-recognition-0013.xml
+  - name: FP32/text-recognition-0013.bin
+    size: 30873576
+    sha256: 87e97556a60af7e706027c22c3ca5a4af544738fae0174ef38bc5dd18e15f986
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-recognition-0013/FP32/text-recognition-0013.bin
+  - name: FP16/text-recognition-0013.xml
+    size: 212289
+    sha256: 75bf8755d2b1baeffaf37ee5b80ee788d76f0275d220ef8888bd435582b4119b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-recognition-0013/FP16/text-recognition-0013.xml
+  - name: FP16/text-recognition-0013.bin
+    size: 15436950
+    sha256: 3fd478351383fc776584ac58fd0348f7251ac2df278c74da83fdbbcae00d61f5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-recognition-0013/FP16/text-recognition-0013.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

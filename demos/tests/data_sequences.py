@@ -15,6 +15,19 @@
 from args import image_net_arg, brats_arg, image_retrieval_arg
 
 DATA_SEQUENCES = {
+    '375x500': [
+        image_net_arg('00000009'),
+        image_net_arg('00000022'),
+        image_net_arg('00000026'),
+        image_net_arg('00000036'),
+        image_net_arg('00000085'),
+        image_net_arg('00000442'),
+        image_net_arg('00008165'),
+        image_net_arg('00018801'),
+        image_net_arg('00033752'),
+        image_net_arg('00045630'),
+    ],
+
     'action-recognition': [
         image_net_arg('00000001'),
         image_net_arg('00000002'),
@@ -75,7 +88,6 @@ DATA_SEQUENCES = {
     ],
 
     'human-pose-estimation': [
-        image_net_arg('00000002'),
         image_net_arg('00000184'),
         image_net_arg('00000442'),
         image_net_arg('00017291'),
@@ -131,7 +143,7 @@ DATA_SEQUENCES = {
 
     'multi-camera-multi-target-tracking/repeated': [image_net_arg('00000002')] * 11,
 
-    'object-detection-demo-ssd-async': [
+    'object-detection-demo': [
         image_net_arg('00000001'),
         image_net_arg('00000002'),
         image_net_arg('00000003'),

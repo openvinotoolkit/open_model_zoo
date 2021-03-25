@@ -1,0 +1,39 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  BERT like small model distilled on the SQuAD v1.1 train set from the BERT-large
+  (transformers's bert-large-uncased-whole-word-masking-finetuned-squad) pretrained
+  on lower-cased English text using Whole-Word-Masking and fine-tuned on the SQuAD
+  v1.1 training set (91.9% F1 -  85.4% EM on the v1.1 dev set).
+task_type: question_answering
+files:
+  - name: FP32/bert-small-uncased-whole-word-masking-squad-0002.xml
+    size: 697961
+    sha256: 4a513987b068e1b79a908812b4de91e8c7fd27ebf15c74e714155ca07141ae0e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/bert-small-uncased-whole-word-masking-squad-0002/FP32/bert-small-uncased-whole-word-masking-squad-0002.xml
+  - name: FP32/bert-small-uncased-whole-word-masking-squad-0002.bin
+    size: 164528332
+    sha256: 2789cb720ef8dc4296541af33485832397f312d2cd75abfd07bb215991bb5b9f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/bert-small-uncased-whole-word-masking-squad-0002/FP32/bert-small-uncased-whole-word-masking-squad-0002.bin
+  - name: FP16/bert-small-uncased-whole-word-masking-squad-0002.xml
+    size: 697706
+    sha256: d3559ae67d2c9bdbd28b6d1b22b70230676888324c1228f189cd8b02d76c6a29
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/bert-small-uncased-whole-word-masking-squad-0002/FP16/bert-small-uncased-whole-word-masking-squad-0002.xml
+  - name: FP16/bert-small-uncased-whole-word-masking-squad-0002.bin
+    size: 82264244
+    sha256: 43e6cae76673287cd9c19dd431239f3fdc71a29a43065e5a02f4898ca691f848
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/bert-small-uncased-whole-word-masking-squad-0002/FP16/bert-small-uncased-whole-word-masking-squad-0002.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

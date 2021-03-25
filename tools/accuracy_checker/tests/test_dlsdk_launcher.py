@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,14 +33,26 @@ from accuracy_checker.launcher.model_conversion import FrameworkParameters
 from tests.common import update_dict
 from accuracy_checker.data_readers import DataRepresentation
 from accuracy_checker.utils import contains_all
+try:
+    import ngraph as ng
+except ImportError:
+    ng = None
 
 
 def no_available_myriad():
     try:
         from openvino.inference_engine import IECore
-        return 'MYRIAD' not in IECore().availabe_devices
-    except:
+        return 'MYRIAD' not in IECore().available_devices
+    except Exception:
         return True
+
+
+def has_layers():
+    try:
+        from openvino.inference_engine import IENetwork
+        return hasattr(IENetwork, 'layers')
+    except Exception:
+        return False
 
 
 @pytest.fixture()
@@ -153,7 +165,7 @@ class TestDLSDKLauncherInfer:
         assert np.argmax(result[0][dlsdk_test_model.output_blob]) == 7
         assert image.metadata['input_shape'] == {'data': [1, 3, 32, 32]}
 
-    def test_dlsdk_laucher_model_search(self, models_dir):
+    def test_dlsdk_launcher_model_search(self, models_dir):
         config_update = {
             'model': str(models_dir),
             'weights': str(models_dir)
@@ -170,11 +182,15 @@ class TestDLSDKLauncherInfer:
         assert dlsdk_test_model.output_blob == 'fc3'
 
 
-
+@pytest.mark.skipif(ng is None and not has_layers(), reason='no functionality to set affinity')
 class TestDLSDKLauncherAffinity:
     @pytest.mark.usefixtures('mock_affinity_map_exists')
     def test_dlsdk_launcher_valid_affinity_map(self, mocker, models_dir):
         affinity_map = {'conv1': 'GPU'}
+        if not has_layers():
+            affinity_map.update({
+                'conv1/Dims294/copy_const': 'GPU'
+            })
 
         mocker.patch(
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
@@ -183,9 +199,17 @@ class TestDLSDKLauncherAffinity:
         dlsdk_test_model = get_dlsdk_test_model(models_dir, {
             'device': 'HETERO:CPU,GPU', 'affinity_map': './affinity_map.yml'
         })
-        layers = dlsdk_test_model.network.layers
-        for key, value in affinity_map.items():
-            assert layers[key].affinity == value
+        if has_layers():
+            layers = dlsdk_test_model.network.layers
+            for key, value in affinity_map.items():
+                assert layers[key].affinity == value
+        else:
+            ng_function = ng.function_from_cnn(dlsdk_test_model.network)
+            for node in ng_function.get_ordered_ops():
+                if node.get_friendly_name() != 'conv1':
+                    continue
+                assert node.get_friendly_name() in affinity_map
+                assert node.get_rt_info()['affinity'] == affinity_map[node.get_friendly_name()]
 
     @pytest.mark.usefixtures('mock_file_exists')
     def test_dlsdk_launcher_affinity_map_invalid_device(self, mocker, models_dir):
@@ -196,18 +220,18 @@ class TestDLSDKLauncherAffinity:
         )
 
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,CPU', 'affinity_map' : './affinity_map.yml'})
+            get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,CPU', 'affinity_map': './affinity_map.yml'})
 
     @pytest.mark.usefixtures('mock_file_exists')
     def test_dlsdk_launcher_affinity_map_invalid_layer(self, mocker, models_dir):
-        affinity_map = {'none-existing-layer' : 'CPU'}
+        affinity_map = {'none-existing-layer': 'CPU'}
 
         mocker.patch(
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,CPU', 'affinity_map' : './affinity_map.yml'})
+            get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,CPU', 'affinity_map': './affinity_map.yml'})
 
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inference_engine', 'mock_inputs')
@@ -525,7 +549,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_meta': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to/source_models',
             'adapter': 'classification',
             'should_log_cmd': False
         }
@@ -542,7 +565,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_use_custom_operations_config': 'ssd_v2_support.json'},
             '_tf_custom_op_config_dir': 'config/dir'
@@ -570,7 +592,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_use_custom_operations_config': 'config.json'}
         }
@@ -596,7 +617,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_object_detection_api_pipeline_config': 'operations.config'},
             '_tf_obj_detection_api_pipeline_config_path': None
@@ -1111,6 +1131,50 @@ class TestDLSDKLauncher:
         with pytest.raises(ConfigError):
             DLSDKLauncher(config)
 
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_config_not_dict_like(self, mocker, models_dir):
+        device_config = 'ENFORCE_BF16'
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.raises(ConfigError):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_device_unknown(self, mocker, models_dir):
+        device_config = {'device': {'ENFORCE_BF16': 'NO'}}
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.warns(Warning):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_one_option_for_device_is_not_dict(self, mocker, models_dir):
+        device_config = {'CPU': {'ENFORCE_BF16': 'NO'}, 'GPU': 'ENFORCE_BF16'}
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.warns(Warning):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
+    @pytest.mark.usefixtures('mock_file_exists')
+    def test_dlsdk_launcher_device_config_one_option_is_not_binding_to_device(self, mocker, models_dir):
+        device_config = {'CPU': {'ENFORCE_BF16': 'NO'}, 'ENFORCE_BF16': 'NO'}
+
+        mocker.patch(
+            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
+        )
+
+        with pytest.warns(Warning):
+            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inputs', 'mock_inference_engine')
 class TestDLSDKLauncherConfig:
@@ -1186,8 +1250,7 @@ class TestDLSDKLauncherConfig:
 
     def test_dlsdk_launcher(self):
         launcher = {
-            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': 'ssd', 'device': 'cpu',
-            '_models_prefix': 'models'
+            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': 'ssd', 'device': 'cpu'
         }
         create_launcher(launcher)
 

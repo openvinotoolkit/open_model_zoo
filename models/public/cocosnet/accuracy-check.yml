@@ -1,0 +1,55 @@
+evaluations:
+  - name: cocosnet
+    module: custom_evaluators.cocosnet_evaluator.CocosnetEvaluator
+    module_config:
+      network_info:
+        cocosnet_network:
+          adapter:
+            type: image_processing
+            mean: 127.5
+            std: 127.5
+
+      launchers:
+        - framework: dlsdk
+          inputs:
+            - name: "input_seg_map"
+              type: INPUT
+              value: "(.*)ADE(.*)val(.*).png"
+            - name: "ref_image"
+              type: INPUT
+              value: "(.*)train(.*).jpg"
+            - name: "ref_seg_map"
+              type: INPUT
+              value: "(.*)ADE(.*)train(.*).png"
+
+      datasets:
+        - name: cocosnet_image_translation
+
+          preprocessing_mask:
+            - type: bgr_to_gray
+            - type: resize
+              size: 256
+              interpolation: NEAREST
+              use_pillow: False
+            - type: one_hot_encoding
+              number_of_classes: 151
+              axis: 2
+              base: 0
+              value: 1
+
+          preprocessing_image:
+            - type: resize
+              size: 256
+              interpolation: BICUBIC
+              use_pillow: False
+
+          postprocessing:
+            - type: resize
+              apply_to: prediction
+
+          metrics:
+            - type: psnr
+              scale_border: 0
+              presenter: print_vector
+            - type: ssim
+              presenter: print_vector

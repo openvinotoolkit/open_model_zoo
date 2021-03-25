@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -51,10 +51,13 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
     def configure(self):
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self.to_dst_image_size = self.get_value_from_config('to_dst_image_size')
+        self._deprocess_predictions = False
 
     def process_image(self, annotation, prediction):
         target_height = self.dst_height or self.image_size[0]
         target_width = self.dst_width or self.image_size[1]
+        if self._deprocess_predictions:
+            target_height, target_width = self.image_size[:2]
 
         @singledispatch
         def resize_segmentation_mask(entry, height, width):
@@ -84,6 +87,7 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
 
         for target in prediction:
             resize_segmentation_mask(target, target_height, target_width)
+        self._deprocess_predictions = False
 
         return annotation, prediction
 
@@ -103,7 +107,7 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
         def _process_2d(data, shape):
             height, width = shape
             bytedata = _bytescale(data)
-            image = Image.frombytes('L', (width, height), bytedata.tostring())
+            image = Image.frombytes('L', (width, height), bytedata.tobytes())
 
             return image
 
@@ -111,7 +115,7 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
             bytedata = _bytescale(data)
             height, width, channels = shape
             mode = 'RGB' if channels == 3 else 'RGBA'
-            image = Image.frombytes(mode, (width, height), bytedata.tostring())
+            image = Image.frombytes(mode, (width, height), bytedata.tobytes())
 
             return image
 
@@ -120,6 +124,8 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
                 return data
             cmin = data.min()
             cmax = data.max()
+            if cmin >= 0 and cmax <= 255 and data.dtype not in [np.float32, np.float16, float]:
+                return data.astype(np.uint8)
             cscale = cmax - cmin
             if cscale == 0:
                 cscale = 1

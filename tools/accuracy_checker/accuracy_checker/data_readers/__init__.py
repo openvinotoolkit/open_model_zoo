@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ from .data_reader import (
     BaseReader,
     DataReaderField,
     ReaderCombiner,
-    JSONReaderConfig,
     OpenCVFrameReader,
     OpenCVImageReader,
     PillowImageReader,
@@ -26,14 +25,28 @@ from .data_reader import (
     NiftiImageReader,
     NumPyReader,
     NumpyTXTReader,
+    NumpyDictReader,
+    NumpyBinReader,
     TensorflowImageReader,
     AnnotationFeaturesReader,
     WavReader,
     DicomReader,
+    PickleReader,
+    SkimageReader,
+    RawpyReader,
+    ByteFileReader,
 
     DataRepresentation,
     ClipIdentifier,
     MultiFramesInputIdentifier,
+    ImagePairIdentifier,
+    ListIdentifier,
+    MultiInstanceIdentifier,
+
+    serialize_identifier,
+    deserialize_identifier,
+    create_identifier_key,
+
     create_reader,
     REQUIRES_ANNOTATIONS
 )
@@ -43,7 +56,6 @@ __all__ = [
     'DataReaderField',
     'DataRepresentation',
     'ReaderCombiner',
-    'JSONReaderConfig',
     'OpenCVFrameReader',
     'OpenCVImageReader',
     'PillowImageReader',
@@ -53,12 +65,25 @@ __all__ = [
     'AnnotationFeaturesReader',
     'WavReader',
     'DicomReader',
+    'PickleReader',
     'NumPyReader',
     'NumpyTXTReader',
+    'NumpyDictReader',
+    'NumpyBinReader',
+    'SkimageReader',
+    'RawpyReader',
+    'ByteFileReader',
 
     'DataRepresentation',
     'ClipIdentifier',
     'MultiFramesInputIdentifier',
+    'ImagePairIdentifier',
+    'ListIdentifier',
+    'MultiInstanceIdentifier',
     'create_reader',
-    'REQUIRES_ANNOTATIONS'
+    'REQUIRES_ANNOTATIONS',
+
+    'serialize_identifier',
+    'deserialize_identifier',
+    'create_identifier_key'
 ]

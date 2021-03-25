@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 This is a network for text recognition scenario. It consists of VGG16-like backbone and bidirectional LSTM encoder-decoder.
-The network is able to recognize case-insensitive alpha-numeric text (36 unique symbols).
+The network is able to recognize case-insensitive alphanumeric text (36 unique symbols).
 
 ## Example
 
@@ -18,8 +18,6 @@ The network is able to recognize case-insensitive alpha-numeric text (36 unique 
 | GFlops                                         | 1.485              |
 | MParams                                        | 5.568              |
 | Source framework                               | TensorFlow         |
-
-## Performance
 
 ## Inputs
 
@@ -37,7 +35,7 @@ The net outputs a blob with the shape [30, 1, 37] in the format [WxBxL],
 where:
   - W - output sequence length
   - B - batch size
-  - L - confidence distribution across alpha-numeric symbols: "0123456789abcdefghijklmnopqrstuvwxyz#", where # - special blank character for CTC decoding algorithm.
+  - L - confidence distribution across alphanumeric symbols: "0123456789abcdefghijklmnopqrstuvwxyz#", where # - special blank character for CTC decoding algorithm.
 
 The network output can be decoded by CTC Greedy Decoder or CTC Beam Search decoder.
 

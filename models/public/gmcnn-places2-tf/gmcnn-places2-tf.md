@@ -30,8 +30,6 @@ git apply path/to/freeze_model.patch
 python3 freeze_model.py --ckpt_dir path/to/downloaded_weights --save_dir path/to/save_directory
 ```
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -46,11 +44,9 @@ python3 freeze_model.py --ckpt_dir path/to/downloaded_weights --save_dir path/to
 Accuracy metrics are obtained on 2000 image subset of VOC2012 dataset. Images were cropped to input size
 and disguised at random positions with pre-generated free-form masks.
 
-| Metric | Original model | Converted model |
-| ------ | -------------- | --------------- |
-| PSNR   | 33.47Db        | 33.47Db         |
-
-## Performance
+| Metric | Value          |
+| ------ | -------------- |
+| PSNR   | 33.41dB        |
 
 ## Input
 
@@ -106,7 +102,7 @@ Restored image, name `Cast`, shape: [1x512x680x3], format: [BxHxWxC]
     - W - image width
     - C - number of channels
 
-   Expected color order: RGB.
+   Expected color order: BGR.
 
 ### Converted Model
 
@@ -118,7 +114,21 @@ Restored image, name: `Cast`, shape: [1x3x512x680], format: [BxCxHxW]
     - H - image height
     - W - image width
 
-   Expected color order: RGB.
+   Expected color order: BGR.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

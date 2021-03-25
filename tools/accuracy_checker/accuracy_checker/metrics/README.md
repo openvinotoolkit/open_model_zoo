@@ -13,8 +13,9 @@ Every metric has parameters available for configuration.
 Accuracy Checker supports following set of metrics:
 
 * `accuracy` - classification accuracy metric, defined as the number of correct predictions divided by the total number of predictions.
-Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
+Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`, `ArgMaxClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
+  * `match` - Batch-oriented binary classification metric. Metric value calculated for each record in batch. Parameter `top_k` ignored in this mode.
 * `accuracy_per_class` - classification accuracy metric which represents results for each class. Supported representation: `ClassificationAnnotation`, `ClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
@@ -23,6 +24,8 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
 * `classification_f1-score` - [F1 score](https://en.wikipedia.org/wiki/F1_score) metric for classification task. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
 * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
 * `metthews_correlation_coef` - [Matthews correlation coefficient (MCC)](https://en.wikipedia.org/wiki/Matthews_correlation_coefficient) for binary classification. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
+* `roc_auc_score` - [ROC AUC score](https://en.wikipedia.org/wiki/Receiver_operating_characteristic) for binary classification. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction` `ArgMaxClassificationPrediction`.
+* `acer_score` - metric for the classification tasks. Can be obtained from the following formula: `ACER = (APCER + BPCER)/2 = ((fp / (tn + fp)) + (fn / (fn + tp)))/2`. For more details about metrics see the section 9.3: <https://arxiv.org/abs/2007.12342>. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
 * `map` - mean average precision. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
   * `overlap_method` - method for calculation bbox overlap. You can choose between intersection over union (`iou`), defined as area of intersection divided by union of annotation and prediction boxes areas, and intersection over area (`ioa`), defined as area of intersection divided by ara of prediction box.
@@ -67,7 +70,7 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
 * `frequency_weighted_accuracy` - frequency weighted accuracy for semantic segmentation models. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
   * `use_argmax` - allows to use argmax for prediction mask.
   * `ignore_label` - specified which class_id prediction should be ignored during metric calculation. (Optional, if not provided, all labels will be used)
-More detailed information about calculation segmentation metrics you can find [here](https://arxiv.org/abs/1411.4038v2).
+More detailed information about calculation segmentation metrics you can find [here](https://arxiv.org/abs/1411.4038).
 * `cmc` - Cumulative Matching Characteristics (CMC) score. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
   * `top_k` -  number of k highest ranked samples to consider when matching.
   * `separate_camera_set` - should identities from the same camera view be filtered out.
@@ -77,24 +80,34 @@ More detailed information about calculation segmentation metrics you can find [h
 * `reid_map` - Mean Average Precision score for object reidentification. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
   * `uninterpolated_auc` - should area under precision recall curve be computed using trapezoidal rule or directly.
 * `pairwise_accuracy` - pairwise accuracy for object reidentification. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
-  * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` value which will be calculated if annotations has training subset.
+  * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` or `best_train_threshold` values which will be calculated if annotations has training subset.
+  * `distance_method` - allows to choose one of the distance calculation methods (optional, supported methods are `euclidian_distance` and `cosine_distance`, default - `euclidian_distance`).
+  * `subtract_mean` - allows to subtract mean calculated on train embeddings before calculating the distance(optional, default - `False`).
 * `pairwise_accuracy_subsets` - object reidentification pairwise accuracy with division dataset on test and train subsets for calculation mean score. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
   * `subset_number` - number of subsets for separating.
-* `mae` - [Mean Absolute Error](https://en.wikipedia.org/wiki/Mean_absolute_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
+  * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` or `best_train_threshold` values which will be calculated if annotations has training subset.
+  * `distance_method` - allows to choose one of the distance calculation methods (optional, supported methods are `euclidian_distance` and `cosine_distance`, default - `euclidian_distance`).
+  * `subtract_mean` - allows to subtract mean calculated on train embeddings before calculating the distance(optional, default - `False`).
+* `localization_recall` - recall metric used for evaluation place recognition task. Supported representations: `PlaceRecognitionAnnotation`, `ReidentificationPrediction`.
+  * `top_k` - number of k highest ranked samples to consider when matching.
+  * `distance_threshold` - distance threshold for search positive matching pairs between query and gallery (Optional, default 25).
+* `mae` - [Mean Absolute Error](https://en.wikipedia.org/wiki/Mean_absolute_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
 * `mae_on_intervals` - Mean Absolute Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start` , `step`, `end` - way to generate range of intervals from `start` to `end` with length `step`.
-* `mse` - [Mean Squared Error](https://en.wikipedia.org/wiki/Mean_squared_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
+* `mse` - [Mean Squared Error](https://en.wikipedia.org/wiki/Mean_squared_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
 * `mse_on_intervals` - Mean Squared Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start`, `step`, `end` - generate range of intervals from `start` to `end` with length `step`.
-* `rmse` - [Root Mean Squared Error](https://en.wikipedia.org/wiki/Root-mean-square_deviation). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
+* `rmse` - [Root Mean Squared Error](https://en.wikipedia.org/wiki/Root-mean-square_deviation). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
 * `rmse_on_intervals` - Root Mean Squared Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start`, `step`, `end` - generate range of intervals from `start` to `end` with length `step`.
+* `mape` - [Mean Absolute Percentage Error](https://en.wikipedia.org/wiki/Mean_absolute_percentage_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
+* `log10_error` - Logarithmic mean absolute error. Supported representations: Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
 * `per_point_normed_error` - Normed Error for measurement the quality of landmarks' positions. Estimated results for each point independently. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`, `FacialLandmarks3DAnnotation`, `FacialLandmarks3DPrediction`.
 * `normed_error` - Normed Error for measurement the quality of landmarks' positions. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`, `FacialLandmarks3DAnnotation`, `FacialLandmarks3DPrediction`.
   * `calculate_std` - allows calculation of standard deviation (default value: `False`)
@@ -103,8 +116,11 @@ More detailed information about calculation segmentation metrics you can find [h
   `only_2d` - evaluate metric only for 2d case.
 * `psnr` - [Peak signal to noise ratio](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
   * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
+  * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
 * `ssim` - [Structural similarity](https://en.wikipedia.org/wiki/Structural_similarity). Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`, `SuperResolutionAnnotation`, `SuperResolutionPrediction`.
 * `angle_error` - Mean angle error and Standard deviation of angle error for gaze estimation. Supported representations: `GazeVectorAnnotation`, `GazeVectorPrediction`.
+* `relative_l2_error` - Mean relative error defined like L2 norm for difference between annotation and prediction normalized by L2 norm for annotation value. Supported representations:
+  `FeatureRegressionAnnotation`, `RegressionPrediction`.
 * `multi_accuracy` - accuracy for multilabel recognition task. Supported representations: `MultiLabelRecognitionAnnotation`, `MultiLabelRecognitionPrediction`.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
   * `calculate_average` - allows calculation of average accuracy (default value: `True`).
@@ -173,11 +189,27 @@ More detailed information about calculation segmentation metrics you can find [h
 * `dice_index` - [Sørensen–Dice coefficient](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). Supported representations: `BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction`, `SegmentationAnnotation, SegmentationPrediction`. Supports result representation for multiple classes. Metric represents result for each class if `label_map` for used dataset is provided, otherwise it represents overall result. For `brats_numpy` converter file with labels set in `labels_file` tag.
   * `mean` - allows calculation mean value (default - `True`).
   * `median` - allows calculation median value (default - `False`).
+* `dice_unet3d` - [Sørensen–Dice coefficient](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). Supported representations: `BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction`.
+Applied for models trained on brats data with labels in range (0, 1, 2, 3). The metric is quite similar to `dice_index` with only the difference that represents data for three statically defined labels:  1) `whole tumor` - aggregated data for labels (1, 2, 3) of the dataset; 2) `tumor core` - aggregated data for labels (2, 3) of the dataset; 3) `enhancing tumor` - data for label (3) of the dataset.
+  * `mean` - allows calculation mean value (default - `True`).
+  * `median` - allows calculation median value (default - `False`).
 * `bleu` - [Bilingual Evaluation Understudy](https://en.wikipedia.org/wiki/BLEU). Supperted representations: `MachineTranslationAnnotation`, `MachineTranslationPrediction`.
-  * `smooth` - Whether or not to apply Lin et al. 2004 smoothing.
+  * `smooth` - Whether or not to apply Lin et al. 2004 smoothing (Optional, default `False`)
   *  `max_order` - Maximum n-gram order to use when computing BLEU score. (Optional, default 4).
+  * `smooth_method` - The smoothing method to use. Supported values: `exp`, `floor`, `add-k`, `none` (Optional, default value is `exp` is `smooth` is enabled and `none` if not).
+  * `smooth_value` - the value for smoothing for `floor` or `add-k` smoothing methods. (Optional, applicable only if specific smoothing methods selected, default values are 0 or 1 for `floor` and `add-k` methods respectively).
+  * `lower_case` - convert annotation and prediction tokens to lower case (Optional, default `False`).
 * `f1` - F1-score for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
 * `exact_match` - Exact matching (EM) metric for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
+* `qa_embedding_accuracy` - Right context detection accuracy metric for question answering task solved by question vs context embeddings comparison. Supported representations: `QuestionAnsweringEmbeddingAnnotation`, `QuestionAnsweringEmbeddingPrediction`.
+* `ner_accuracy` - Token-level accuracy used for Named Entity Recognition task. Supported representations: `BERTNamedEntityRecognitionAnnotation`, `SequenceClassificationAnnotation`, `SequenceClassificationPrediction`.
+   * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
+* `ner_recall` - Token-level recall used for Named Entity Recognition task. Supported representations: `BERTNamedEntityRecognitionAnnotation`, `SequenceClassificationAnnotation`, `SequenceClassificationPrediction`.
+   * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
+* `ner_precision` - Token-level precision for Named Entity Recognition task. Supported representations: `BERTNamedEntityRecognitionAnnotation`, `SequenceClassificationAnnotation`, `SequenceClassificationPrediction`.
+   * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
+* `ner_f_score` - Token-level F-score used for Named Entity Recognition task. Supported representations: `BERTNamedEntityRecognitionAnnotation`, `SequenceClassificationAnnotation`, `SequenceClassificationPrediction`.
+   * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
 * `mpjpe_multiperson` - [Mean Per Joint Position Error](http://vision.imar.ro/human3.6m/pami-h36m.pdf) extended for multi-person case. Supported representations: `PoseEstimation3dAnnotation`, `PoseEstimation3dPrediction`. As the first step, correspondence between ground truth and prediction skeletons is established for each image. Then MPJPE is computed for each ground truth and prediction pair. The error is averaged over poses in each frame, then over all frames.
 * `face_recognition_tafa_pair_metric` - accuracy for face recognition models based on dot product of embedding values. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
   * `threshold` - minimal dot product value of embeddings to identify as matched face pair.
@@ -196,7 +228,71 @@ More detailed information about calculation segmentation metrics you can find [h
   * `attributes`: names of attributes.
   * `calculate_average` - allows calculation of average precision (default value: `True`).
 * `wer` - Word error rate ([WER](https://en.wikipedia.org/wiki/Word_error_rate)). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
-* `greedy_wer` - approach to calculate WER as length normalized [edit distance](https://en.wikipedia.org/wiki/Edit_distance). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
+* `cer` - Character error rate, character-level counterpart of [WER](https://en.wikipedia.org/wiki/Word_error_rate). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
 * `score_class_comparison` - allows calculate an accuracy of quality score class(low/normal/good). It sorts all quality scores from annotations and predictions and set the k1 highest scores as high class and the k2 lowest scores as low class where k1 is `num_high_quality` and k2 is `num_low_quality`. Supported representations: `QualityAssessmentAnnotation`, `QualityAssessmentPrediction`.
   * `num_high_quality` - the number of high class in total (default value: `1`).
   * `num_low_quality` - the number of low class in total (default value: `1`).
+* `im2latex_images_match` - This metric gets formulas in `CharacterRecognitionAnnotation` and `CharacterRecognitionPrediction` format and based on this given text renders images with this formulas. Then for every two corresponding formulas images are getting compared. The result accuracy is percent of the equivalent formulas.
+  >Note: this metric requires installed packages texlive and imagemagick. In linux you can do it this way:
+  > `sudo apt-get update && apt-get install texlive imagemagick`
+* `pckh` - Percentage of Correct Keypoints normalized by head size.  A detected joint is considered correct if the distance between the predicted and the true joint is within a certain threshold. Supported representations: `PoseEstimationAnnotation`, `PoseEstimationPrediction`.
+  * `threshold` - distance threshold (Optional, default 0.5).
+  * `scale_bias` - bias for scale head size (Optional, default 0.6).
+* `dna_seq_accuracy` - accuracy for DNA sequencing task. Supported representations: `DNASequenceAnnotation`, `DNASequencePrediction`, `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
+  * `min_coverage` - minimum sequence coverage between predicted sequence and reference for positive measurement (Optional, default 0.5).
+  * `balansed` - balanced accuracy metric (Optional, default false).
+* `inception_score` - [Inception score](https://arxiv.org/abs/1801.01973) for generated images by GAN models. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+  * `eps` - epsilon to avoid nan during calculate log for metric.
+  * `length` - length of input feature vector for metric.
+* `fid` - Frechet Inception Distance to measure the distance between the distributions of synthesized images and real images. Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+  * `eps` - epsilon to avoid nan during calculate sqrtm for metric.
+  * `length` - length of input feature vector for metric.
+* `epe` - Average End Point Error (EPE) metric for optical flow estimation task, defined as Euclidean distance between ground truth and predicted flow. Supported representations: `OpticalFlowAnnotation`, `OpticalFlowPrediction`.
+* `salience_mae` - Mean Absolute Error for salient object detection task. Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
+* `salience_f-measure` - f-measure metric for salient object detection task. Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
+* `salience_e-measure` - enhanced alignment measure for salient object detection task, defined in following [paper](https://arxiv.org/abs/1805.10421). Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
+* `salience_s-measure` - simularity measure for salient object detection task, defined in following [paper](https://arxiv.org/abs/1708.00786). Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
+
+## Metrics profiling
+Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.
+This feature can be useful for debug purposes. For enabling this behaviour you need to provide `--profile True` in accuracy checker command line.
+Additionally, you can specify directory for saving profiling results `--profiler_logs_dir` and select data format in `--profile_report_type` between `csv` (brief) and `json` (more detailed).
+
+Supported for profiling metrics:
+* Classification:
+  * `accuracy`
+  * `accuracy_per_class`
+  * `classification_f1-score`
+  * `metthews_correlation_coef`
+  * `multi_accuracy`
+  * `multi_recall`
+  * `multi_precision`
+  * `f1-score`
+* Regression:
+  * `mae`
+  * `mse`
+  * `rmse`
+  * `mae_on_interval`
+  * `mse_on_interval`
+  * `rmse_on_interval`
+  * `angle_error`
+  * `psnr`
+  * `ssim`
+  * `normed_error`
+  * `per_point_normed_error`
+* Object Detection:
+  * `map`
+  * `recall`
+  * `miss_rate`
+  * `coco_precision`
+  * `coco_recall`
+* Semantic Segmentation
+  * `segmentation_accuracy`
+  * `mean_iou`
+  * `mean_accuracy`
+  * `frequency_weighted_accuracy`
+* Instance Segmentation
+  * `coco_orig_segm_precision`
+* GAN:
+  * `inception_score`
+  * `fid`

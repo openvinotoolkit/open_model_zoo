@@ -16,7 +16,6 @@
 
 import argparse
 import os
-import re
 import string
 import sys
 
@@ -25,12 +24,30 @@ from pathlib import Path
 import common
 
 
-def convert_to_onnx(reporter, model, output_dir, args):
+def run_pre_convert(reporter, model, output_dir, args):
+    script = common.MODEL_ROOT / model.subdirectory / 'pre-convert.py'
+    if not script.exists():
+        return True
+
+    reporter.print_section_heading('{}Running pre-convert script for {}',
+        '(DRY RUN) ' if args.dry_run else '', model.name)
+
+    cmd = [str(args.python), '--', str(script), '--',
+        str(args.download_dir / model.subdirectory), str(output_dir / model.subdirectory)]
+
+    reporter.print('Pre-convert command: {}', common.command_string(cmd))
+    reporter.print(flush=True)
+
+    success = True if args.dry_run else reporter.job_context.subprocess(cmd)
+    reporter.print()
+
+    return success
+
+def convert_to_onnx(reporter, model, output_dir, args, template_variables):
     reporter.print_section_heading('{}Converting {} to ONNX',
         '(DRY RUN) ' if args.dry_run else '', model.name)
 
-    conversion_to_onnx_args = [string.Template(arg).substitute(conv_dir=output_dir / model.subdirectory,
-                                                               dl_dir=args.download_dir / model.subdirectory)
+    conversion_to_onnx_args = [string.Template(arg).substitute(template_variables)
                                for arg in model.conversion_to_onnx_args]
     cmd = [str(args.python), str(Path(__file__).absolute().parent / model.converter_to_onnx), *conversion_to_onnx_args]
 
@@ -119,24 +136,34 @@ def main():
             reporter.print()
             return True
 
+        (output_dir / model.subdirectory).mkdir(parents=True, exist_ok=True)
+
+        if not run_pre_convert(reporter, model, output_dir, args):
+            return False
+
         model_format = model.framework
 
+        template_variables = {
+            'config_dir': common.MODEL_ROOT / model.subdirectory,
+            'conv_dir': output_dir / model.subdirectory,
+            'dl_dir': args.download_dir / model.subdirectory,
+            'mo_dir': mo_path.parent,
+        }
+
         if model.conversion_to_onnx_args:
-            if not convert_to_onnx(reporter, model, output_dir, args):
+            if not convert_to_onnx(reporter, model, output_dir, args, template_variables):
                 return False
             model_format = 'onnx'
 
         expanded_mo_args = [
-            string.Template(arg).substitute(dl_dir=args.download_dir / model.subdirectory,
-                                            mo_dir=mo_path.parent,
-                                            conv_dir=output_dir / model.subdirectory,
-                                            config_dir=common.MODEL_ROOT / model.subdirectory)
+            string.Template(arg).substitute(template_variables)
             for arg in model.mo_args]
 
         for model_precision in sorted(model_precisions):
+            data_type = model_precision.split('-')[0]
             mo_cmd = [str(args.python), '--', str(mo_path),
                 '--framework={}'.format(model_format),
-                '--data_type={}'.format(model_precision),
+                '--data_type={}'.format(data_type),
                 '--output_dir={}'.format(output_dir / model.subdirectory / model_precision),
                 '--model_name={}'.format(model.name),
                 *expanded_mo_args, *extra_mo_args]

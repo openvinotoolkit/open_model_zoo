@@ -12,8 +12,6 @@ order. Before passing the image blob to the network, do the following:
 The model output for `efficientnet-b0-pytorch` is the typical object classifier output for
 1000 different classifications matching those in the ImageNet database.
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -29,8 +27,6 @@ The model output for `efficientnet-b0-pytorch` is the typical object classifier 
 | ------ | -------------- | --------------- |
 | Top 1  | 76.91%          | 76.91%           |
 | Top 5  | 93.21%          | 93.21%           |
-
-## Performance
 
 ## Input
 
@@ -64,14 +60,28 @@ Channel order is `BGR`.
 Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in the [0, 1] range
+- `C` - predicted probabilities for each class in the logits format
 
 ### Converted Model
 
 Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in the [0, 1] range
+- `C` - predicted probabilities for each class in the logits format
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

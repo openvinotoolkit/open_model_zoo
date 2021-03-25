@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 from collections import namedtuple
+from copy import deepcopy
 import numpy as np
 
 from .utils import Color, color_format
@@ -113,13 +114,14 @@ class VectorPrintPresenter(BasePresenter):
 
     def extract_result(self, evaluation_result):
         value, reference, name, metric_type, _, meta = evaluation_result
-        value_names = ['{}@{}'.format(name, value_name) for value_name in meta.get('names', range(0, len(value)))]
+        len_value = len(value) if not np.isscalar(value) else 1
+        value_names = ['{}@{}'.format(name, value_name) for value_name in meta.get('names', range(0, len_value))]
         if np.isscalar(value) or np.size(value) == 1:
             if not np.isscalar(value):
                 value = value[0]
             result_dict = {
                 'name': value_names[0] if 'names' in meta else name,
-                'value':value,
+                'value': value,
                 'type': metric_type,
                 'ref': reference or ''
             }
@@ -129,7 +131,15 @@ class VectorPrintPresenter(BasePresenter):
             mean_value = np.mean(value)
             value = np.append(value, mean_value)
             meta['names'] = value_names
-        per_value_meta = [meta for _ in value_names]
+        per_value_meta = []
+        target_per_value = meta.pop('target_per_value', {})
+        target = meta.pop('target', 'higher-better')
+        for v_name in value_names:
+            orig_name = v_name.split('@')[-1]
+            target_for_value = target_per_value.get(orig_name, target)
+            meta_for_value = deepcopy(meta)
+            meta_for_value['target'] = target_for_value
+            per_value_meta.append(meta_for_value)
         results = []
         for idx, value_item in enumerate(value):
             results.append(

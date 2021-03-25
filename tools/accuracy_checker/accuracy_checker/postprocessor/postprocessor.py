@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import warnings
 from enum import Enum
 from ..representation import ContainerRepresentation
 from ..config import ConfigValidator, StringField, ConfigError, BaseField
-from ..dependency import ClassProvider
+from ..dependency import ClassProvider, UnregisteredProviderException
 from ..utils import (
     zipped_transform,
     string_to_list,
@@ -71,7 +71,7 @@ class Postprocessor(ClassProvider):
         if self.prediction_source and not isinstance(self.prediction_source, list):
             self.prediction_source = string_to_list(self.prediction_source)
 
-        self.validate_config()
+        self.validate_config(config)
         self.setup()
 
     def __call__(self, *args, **kwargs):
@@ -117,10 +117,36 @@ class Postprocessor(ClassProvider):
     def configure(self):
         pass
 
-    def validate_config(self):
-        ConfigValidator(
-            self.name, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=self.parameters()
-        ).validate(self.config)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, uri_prefix=''):
+        errors = []
+        if cls.__name__ == Postprocessor.__name__:
+            processing_provider = config.get('type')
+            if not processing_provider:
+                error = ConfigError('type does not found', config, uri_prefix or 'postprocessing')
+                if not fetch_only:
+                    raise error
+                errors.append(error)
+                return errors
+            try:
+                processor_cls = cls.resolve(processing_provider)
+            except UnregisteredProviderException as exception:
+                if not fetch_only:
+                    raise exception
+                errors.append(
+                    ConfigError(
+                        "postprocessor {} unregistered".format(processing_provider), config,
+                        uri_prefix or 'postprocessing', validation_scheme=cls.validation_scheme()
+                    )
+                )
+                return errors
+            errors.extend(processor_cls.validate_config(config, fetch_only=fetch_only, uri_prefix=uri_prefix))
+            return errors
+
+        postprocessing_uri = uri_prefix or 'postprocessing.{}'.format(cls.__provider__)
+        return ConfigValidator(
+            postprocessing_uri, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=cls.parameters()
+        ).validate(config, fetch_only=fetch_only, validation_scheme=cls.validation_scheme())
 
     def get_entries(self, annotation, prediction):
         message_not_found = '{}: {} is not found in container'
@@ -155,6 +181,17 @@ class Postprocessor(ClassProvider):
 
         return annotation_entries, prediction_entries
 
+    @classmethod
+    def validation_scheme(cls, provider=None):
+        if cls.__name__ == Postprocessor.__name__:
+            if provider:
+                return cls.resolve(provider).validation_scheme()
+            full_scheme = []
+            for provider_ in cls.providers:
+                full_scheme.append(cls.resolve(provider_).validation_scheme())
+            return full_scheme
+        return cls.parameters()
+
 
 class ApplyToOption(Enum):
     ANNOTATION = 'annotation'
@@ -177,7 +214,9 @@ class PostprocessorWithSpecificTargets(Postprocessor):
 
     def setup(self):
         apply_to = self.get_value_from_config('apply_to')
+        self._required_both = False
         self.apply_to = ApplyToOption(apply_to) if apply_to else None
+        self._deprocess_predictions = False
 
         if (self.annotation_source or self.prediction_source) and self.apply_to:
             raise ConfigError("apply_to and sources both provided. You need specify only one from them")
@@ -215,13 +254,18 @@ class PostprocessorWithSpecificTargets(Postprocessor):
         return target_annotations, target_predictions
 
     def _choose_targets_using_apply_to(self, annotations, predictions):
+        if all(annotation is None for annotation in annotations):
+            apply_to = ApplyToOption.PREDICTION
+            self._deprocess_predictions = True
+        else:
+            apply_to = self.apply_to if not self._required_both else ApplyToOption.ALL
         targets_specification = {
             ApplyToOption.ANNOTATION: (annotations, []),
             ApplyToOption.PREDICTION: ([], predictions),
             ApplyToOption.ALL: (annotations, predictions)
         }
 
-        return targets_specification[self.apply_to]
+        return targets_specification[apply_to]
 
     def process_image(self, annotation, prediction):
         raise NotImplementedError

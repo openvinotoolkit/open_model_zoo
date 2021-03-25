@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import BaseField, ConfigError
+from ..config import NormalizationArgsField, ConfigError, BoolField
 from ..preprocessor import Preprocessor
-from ..utils import get_or_parse_value
 
 
 class Normalize(Preprocessor):
@@ -38,36 +37,39 @@ class Normalize(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'mean': BaseField(
+            'mean': NormalizationArgsField(
                 optional=True,
                 description="Values which will be subtracted from image channels. You can specify one "
-                            "value for all channels or list of comma separated channel-wise values."
+                            "value for all channels or list of comma separated channel-wise values.",
+                precomputed_args=Normalize.PRECOMPUTED_MEANS
             ),
-            'std': BaseField(
+            'std': NormalizationArgsField(
                 optional=True,
                 description="Specifies values, on which pixels will be divided. You can specify one value for all "
-                            "channels or list of comma separated channel-wise values."
+                            "channels or list of comma separated channel-wise values.",
+                precomputed_args=Normalize.PRECOMPUTED_STDS,
+                allow_zeros=False
+            ),
+            'images_only': BoolField(
+                optional=True, default=False, description='in multi input mode, process only images.'
             )
         })
         return parameters
 
     def configure(self):
-        self.mean = get_or_parse_value(self.config.get('mean'), Normalize.PRECOMPUTED_MEANS)
-        self.std = get_or_parse_value(self.config.get('std'), Normalize.PRECOMPUTED_STDS)
+        self.mean = self.get_value_from_config('mean')
+        self.std = self.get_value_from_config('std')
+        self.images_only = self.get_value_from_config('images_only')
         if not self.mean and not self.std:
             raise ConfigError('mean or std value should be provided')
 
-        if self.std and 0 in self.std:
-            raise ConfigError('std value should not contain 0')
-
-        if self.mean and not (len(self.mean) == 3 or len(self.mean) == 1):
-            raise ConfigError('mean should be one value or comma-separated list channel-wise values')
-
-        if self.std and not (len(self.std) == 3 or len(self.std) == 1):
-            raise ConfigError('std should be one value or comma-separated list channel-wise values')
-
     def process(self, image, annotation_meta=None):
         def process_data(data, mean, std):
+            if (
+                    self.images_only and len(data.shape) not in [2, 3] or
+                    (len(data.shape) == 3 and data.shape[-1] not in [1, 3, 4])
+            ):
+                return data
             if self.mean:
                 data = data - mean
             if self.std:

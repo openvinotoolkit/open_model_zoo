@@ -4,8 +4,6 @@
 
 `mobilenet-v1-1.0-224` is one of [MobileNet V1 architecture](https://arxiv.org/abs/1704.04861) with the width multiplier 1.0 and resolution 224. It is small, low-latency, low-power models parameterized to meet the resource constraints of a variety of use cases. They can be built upon for classification, detection, embeddings and segmentation similar to how other popular large scale models are used.
 
-## Example
-
 ## Specification
 
 | Metric                          | Value                                     |
@@ -21,8 +19,6 @@
 | ------ | ----- |
 | Top 1  | 69.496%|
 | Top 5  | 89.224%|
-
-## Performance
 
 ## Input
 
@@ -64,6 +60,20 @@ Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000
 
 - `B` - batch size
 - `C` - Predicted probabilities for each class in  [0, 1] range
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

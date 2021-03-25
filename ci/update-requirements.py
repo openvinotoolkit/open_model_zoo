@@ -18,7 +18,7 @@ from pathlib import Path
 # Package dependencies can vary depending on the Python version.
 # We thus have to run pip-compile with the lowest Python version that
 # the project supports.
-EXPECTED_PYTHON_VERSION = (3, 5)
+EXPECTED_PYTHON_VERSION = (3, 6)
 
 repo_root = Path(__file__).resolve().parent.parent
 script_name = Path(__file__).name
@@ -27,7 +27,8 @@ def fixup_req_file(req_path, path_placeholders):
     contents = req_path.read_text()
 
     for path, placeholder in path_placeholders:
-        contents = contents.replace('-r {}/'.format(path), '-r ${{{}}}/'.format(placeholder))
+        contents = contents.replace(f'-r {path}/', f'-r ${{{placeholder}}}/')
+        contents = contents.replace(f'({path}/', f'(${{{placeholder}}}/')
 
     contents = "# use {} to update this file\n\n".format(script_name) + contents
     req_path.write_text(contents)
@@ -65,15 +66,22 @@ def main():
     pc('ci/requirements-ac.txt',
         'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements.in')
     pc('ci/requirements-ac-test.txt',
-        'tools/accuracy_checker/requirements.in', 'tools/accuracy_checker/requirements-test.in', 
+        'tools/accuracy_checker/requirements.in', 'tools/accuracy_checker/requirements-test.in',
         'tools/accuracy_checker/requirements-core.in')
+    pc('ci/requirements-check-basics.txt',
+       'ci/requirements-check-basics.in', 'ci/requirements-documentation.in')
     pc('ci/requirements-conversion.txt',
-        'tools/downloader/requirements-pytorch.in', 'tools/downloader/requirements-caffe2.in',
-        openvino_dir / 'deployment_tools/model_optimizer/requirements.txt')
+        *(f'tools/downloader/requirements-{suffix}.in' for suffix in ['caffe2', 'pytorch', 'tensorflow']),
+        *(openvino_dir / f'deployment_tools/model_optimizer/requirements_{suffix}.txt'
+            for suffix in ['caffe', 'mxnet', 'onnx', 'tf2']))
     pc('ci/requirements-demos.txt',
-        'demos/python_demos/requirements.txt', openvino_dir / 'python/requirements.txt')
+        'demos/requirements.txt', openvino_dir / 'python/requirements.txt')
     pc('ci/requirements-downloader.txt',
         'tools/downloader/requirements.in')
+    pc('ci/requirements-quantization.txt',
+        'tools/accuracy_checker/requirements-core.in', 'tools/accuracy_checker/requirements.in',
+        openvino_dir / 'deployment_tools/tools/post_training_optimization_toolkit/setup.py',
+        openvino_dir / 'deployment_tools/model_optimizer/requirements_kaldi.txt')
 
 if __name__ == '__main__':
     main()

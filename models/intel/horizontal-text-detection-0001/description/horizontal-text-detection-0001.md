@@ -1,4 +1,4 @@
-# text-detection-0003
+# horizontal-text-detection-0001
 
 ## Use Case and High-Level Description
 
@@ -18,8 +18,6 @@ The key benefit of this model compared to the [base model](../../text-detection-
 | MParams                                                       | 2.26                   |
 | Source framework                                              | PyTorch\*              |
 
-
-## Performance
 
 ## Inputs
 

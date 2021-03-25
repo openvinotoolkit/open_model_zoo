@@ -1,0 +1,59 @@
+models:
+  - name: mozilla-deepspeech-0.8.2
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: ctc_beam_search_decoder_with_lm
+          probability_out: logits
+          logarithmic_prob: False
+          beam_size: 32
+
+          # Use option "accuracy_check [...] --model_attributes <path_to_lm>" to provide path to deepspeech-0.8.2-models.kenlm
+          # deepspeech-0.8.2-models.kenlm is generated from deepspeech-0.8.2-models.scorer by scorer_to_kenlm.py script.
+          lm_file: deepspeech-0.8.2-models.kenlm
+          lm_alpha: 0.93128901720047
+          lm_beta: 1.1834137439727783
+          lm_vocabulary_offset: 941209108
+        inputs:
+          - name: input_node
+            type: INPUT
+            layout: NHWC
+          - name: previous_state_c
+            type: LSTM_INPUT
+            value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.2'
+          - name: previous_state_h
+            type: LSTM_INPUT
+            value: 'cudnn_lstm/rnn/multi_rnn_cell/cell_0/cudnn_compatible_lstm_cell/BlockLSTM/TensorIterator.1'
+    datasets:
+      - name: librispeech-test-clean
+        reader:
+          type: wav_reader
+        preprocessing:
+          - type: audio_normalization
+            int16mode: True
+          - type: clip_audio
+            duration: 512 samples
+            overlap: 192 samples
+          - type: hanning_window
+            base: 512
+          - type: audio_spectrogram
+            fftbase: 512
+            magnitude_squared: True
+            skip_channels: True
+          - type: audio_triangle_filtering
+            filter_amplitudes: True
+            base: 257
+            filterbank_channel_count: 40
+            lower_frequency_limit: 20
+            upper_frequency_limit: 8000
+            sample_rate: 16000
+          - type: audio_dct
+            filterbank_channel_count: 40
+            numceps: 26
+          - type: clip_cepstrum
+            context: 9
+            numceps: 26
+          - type: pack_cepstrum
+            step: 16
+        metrics:
+          - type: wer

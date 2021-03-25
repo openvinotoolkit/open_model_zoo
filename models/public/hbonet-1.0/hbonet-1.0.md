@@ -4,8 +4,6 @@
 
 The `hbonet-1.0` model is one of the classification models from [repository](https://github.com/d-li14/HBONet) with `width_mult=1.0`
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -21,8 +19,6 @@ The `hbonet-1.0` model is one of the classification models from [repository](htt
 | ------ | -------------- |
 | Top 1  | 73.10%          |
 | Top 5  | 91.00%          |
-
-## Performance
 
 ## Input
 
@@ -55,6 +51,20 @@ Object classifier according to ImageNet classes, shape: [1,1000] in [BxC] format
 
 - B - batch size
 - C - vector of probabilities for all dataset classes.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

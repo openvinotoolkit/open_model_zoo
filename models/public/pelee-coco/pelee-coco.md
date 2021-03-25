@@ -1,7 +1,7 @@
 # pelee-coco
 
 ## Use Case and High-Level Description
-The [Pelee](https://arxiv.org/pdf/1804.06882.pdf) is a Real-Time Object Detection System on Mobile Devices
+The [Pelee](https://arxiv.org/abs/1804.06882) is a Real-Time Object Detection System on Mobile Devices
 based on Single Shot Detection approach. The model is implemented using the
 Caffe\* framework and trained on MSCOCO\* dataset.
 For details about this model, check out the [repository](https://github.com/Robert-JunWang/Pelee).
@@ -22,8 +22,6 @@ For details about this model, check out the [repository](https://github.com/Robe
 | coco_precision | 21.9761% |
 
 See [here](https://github.com/Robert-JunWang/Pelee).
-
-## Performance
 
 ## Input
 
@@ -58,7 +56,7 @@ The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
 
 - `image_id` - ID of the image in the batch
-- `label` - predicted class ID
+- `label` - predicted class ID in range [1, 80], mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file
 - `conf` - confidence for the predicted class
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates are in normalized format, in range [0, 1])
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates are in normalized format, in range [0, 1])
@@ -69,10 +67,24 @@ The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
 
 - `image_id` - ID of the image in the batch
-- `label` - predicted class ID
+- `label` - predicted class ID in range [1, 80], mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl_bkgr.txt` file
 - `conf` - confidence for the predicted class
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates are in normalized format, in range [0, 1])
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates are in normalized format, in range [0, 1])
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

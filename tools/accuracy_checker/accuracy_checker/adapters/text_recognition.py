@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ from collections import defaultdict
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, BoolField, ConfigError
+from ..config import ConfigValidator, ConfigError, NumberField, BoolField, DictField, ListField, StringField
 from ..representation import CharacterRecognitionPrediction
 
 
@@ -40,22 +40,36 @@ class BeamSearchDecoder(Adapter):
             ),
             'softmaxed_probabilities': BoolField(
                 optional=True, default=False, description="Indicator that model uses softmax for output layer "
-            )
+            ),
+            'logits_output': StringField(optional=True, description='Logits output layer name'),
+            'custom_label_map': DictField(optional=True, description='Label map')
         })
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
+        )
+
+    def configure(self):
         self.beam_size = self.get_value_from_config('beam_size')
         self.blank_label = self.launcher_config.get('blank_label')
         self.softmaxed_probabilities = self.get_value_from_config('softmaxed_probabilities')
+        self.logits_output = self.get_value_from_config("logits_output")
+        self.custom_label_map = self.get_value_from_config("custom_label_map")
 
     def process(self, raw, identifiers, frame_meta):
         if not self.label_map:
             raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
         if self.blank_label is None:
             self.blank_label = len(self.label_map)
+        if self.logits_output:
+            self.output_blob = self.logits_output
+        if self.custom_label_map:
+            self.label_map = self.custom_label_map
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
         output = np.swapaxes(output, 0, 1)
 
@@ -93,7 +107,7 @@ class BeamSearchDecoder(Adapter):
         times, symbols = probabilities.shape
         # Initialize the beam with the empty sequence, a probability of 1 for ending in blank
         # and zero for ending in non-blank (in log space).
-        beam = [(tuple(), (0.0, -np.inf))]
+        beam = [((), (0.0, -np.inf))]
 
         for time in range(times):
             # A default dictionary to store the next step candidates.
@@ -148,20 +162,35 @@ class CTCGreedySearchDecoder(Adapter):
         parameters.update({
             'blank_label': NumberField(
                 optional=True, value_type=int, min_value=0, default=0, description="Index of the CTC blank label."
-            )
+            ),
+            'logits_output': StringField(optional=True, description='Logits output layer name'),
+            'custom_label_map': DictField(optional=True, description='Label map')
+
         })
         return parameters
 
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
-        self.blank_label = self.launcher_config.get('blank_label')
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
+        )
+
+    def configure(self):
+        self.blank_label = self.get_value_from_config('blank_label')
+        self.logits_output = self.get_value_from_config("logits_output")
+        self.custom_label_map = self.get_value_from_config("custom_label_map")
 
     def process(self, raw, identifiers=None, frame_meta=None):
         if not self.label_map:
             raise ConfigError('CTCGreedy Search Decoder requires dataset label map for correct decoding.')
         if self.blank_label is None:
             self.blank_label = 0
+        if self.logits_output:
+            self.output_blob = self.logits_output
+        if self.custom_label_map:
+            self.label_map = self.custom_label_map
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
         preds_index = np.argmax(output, 2)
         preds_index = preds_index.transpose(1, 0)
@@ -200,6 +229,7 @@ class LPRAdapter(Adapter):
         if not self.label_map:
             raise ConfigError('LPR adapter requires dataset label map for correct decoding.')
         raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
         predictions = raw_output[self.output_blob]
         result = []
         for identifier, output in zip(identifiers, predictions):
@@ -216,3 +246,46 @@ class LPRAdapter(Adapter):
             decode_out += str(self.label_map[int(output)])
 
         return decode_out
+
+
+class AttentionOCRAdapter(Adapter):
+    __provider__ = 'aocr'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'output_blob': StringField(description='network output with predicted labels name', optional=True),
+            'labels': ListField(
+                description='label list for decoding', optional=True,
+                default=['', '', ''] + [chr(i) for i in range(32, 127)]),
+            'eos_index': NumberField(
+                default=2, optional=True, description='end of string symbol index', value_type=int),
+            'to_lower_case': BoolField(optional=True, default=True,
+                                       description='should be output string converted to lower case or not')
+        })
+        return params
+
+    def configure(self):
+        self._output_blob = self.get_value_from_config('output_blob')
+        self.labels = self.get_value_from_config('labels')
+        self.eos_index = self.get_value_from_config('eos_index')
+        self.lower_case = self.get_value_from_config('to_lower_case')
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_out = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_out)
+        result = []
+        if isinstance(raw_out[self.output_blob], bytes):
+            out_str = raw_out[self.output_blob].decode('iso-8859-1')
+            if self.lower_case:
+                out_str = out_str.lower()
+            return [CharacterRecognitionPrediction(identifiers[0], out_str)]
+
+        for identifier, out in zip(identifiers, raw_out[self.output_blob]):
+            valid_out = out[out != self.eos_index]
+            decoded_out = ''.join([self.labels[idx] for idx in valid_out])
+            if self.lower_case:
+                decoded_out = decoded_out.lower()
+            result.append(CharacterRecognitionPrediction(identifier, decoded_out))
+        return result
