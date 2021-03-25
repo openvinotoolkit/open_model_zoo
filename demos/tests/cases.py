@@ -410,8 +410,11 @@ NATIVE_DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('person-detection-retail')}),
-        TestCase(options={'-m_det': ModelArg('person-detection-retail-0013')}),
-        single_option_cases('--m_reid',
+        [
+            TestCase(options={'-m_det': ModelArg('person-detection-retail-0002')}),
+            TestCase(options={'-m_det': ModelArg('person-detection-retail-0013')}),
+        ],
+        single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
             ModelArg('person-reidentification-retail-0287'),
