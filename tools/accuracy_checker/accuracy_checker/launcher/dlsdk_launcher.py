@@ -157,6 +157,7 @@ class DLSDKLauncher(Launcher):
         self._do_reshape = False
         self._use_set_blob = False
         self._output_layouts = {}
+        self._output_precisions = {}
         self.preprocessor = preprocessor
 
         if not delayed_model_loading:
@@ -248,6 +249,8 @@ class DLSDKLauncher(Launcher):
                 meta_['input_shape'] = self.inputs_info_for_meta()
                 if self._output_layouts:
                     meta_['output_layout'] = self._output_layouts
+                if self._output_precisions:
+                    meta_['output_precision'] = self._output_precisions
         self._do_reshape = False
         self._use_set_blob = self.disable_resize_to_input
 
@@ -271,6 +274,8 @@ class DLSDKLauncher(Launcher):
                 meta_['input_shape'] = self.inputs_info_for_meta()
                 if self._output_layouts:
                     meta_['output_layout'] = self._output_layouts
+                if self._output_precisions:
+                    meta_['output_precision'] = self._output_precisions
 
         self._do_reshape = False
 
@@ -283,6 +288,8 @@ class DLSDKLauncher(Launcher):
                 meta_['input_shape'] = self.inputs_info_for_meta()
                 if self._output_layouts:
                     meta_['output_layout'] = self._output_layouts
+                if self._output_precisions:
+                    meta_['output_precision'] = self._output_precisions
 
         ir.infer(infer_inputs, metadata, context)
 
@@ -946,6 +953,7 @@ class DLSDKLauncher(Launcher):
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
             print_info('\tshape: {}\n'.format(output_info.shape))
+            self._output_precisions[name] = PRECISION_TO_DTYPE[output_info.precision]
             self._output_layouts[name] = output_info.layout
 
     def _set_preprocess(self, preprocess):

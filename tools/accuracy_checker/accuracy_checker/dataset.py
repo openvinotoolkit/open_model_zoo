@@ -314,9 +314,11 @@ class Dataset:
     def metadata(self):
         return self.data_provider.metadata
 
+    @property
     def identifiers(self):
         return self.data_provider.identifiers
 
+    @property
     def multi_infer(self):
         return self.data_provider.multi_infer
 
