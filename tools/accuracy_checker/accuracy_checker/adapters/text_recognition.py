@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 from collections import defaultdict
-
 import numpy as np
 
 from ..adapters import Adapter
@@ -267,7 +266,7 @@ class AttentionOCRAdapter(Adapter):
         return params
 
     def configure(self):
-        self._output_blob = self.get_value_from_config('output_blob')
+        self.output_blob = self.get_value_from_config('output_blob')
         self.labels = self.get_value_from_config('labels')
         self.eos_index = self.get_value_from_config('eos_index')
         self.lower_case = self.get_value_from_config('to_lower_case')
