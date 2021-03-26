@@ -689,7 +689,7 @@ PYTHON_DEMOS = [
             TestCase(options={
                 '-m': ModelArg('road-segmentation-adas-0001'),
                 '-i': DataPatternArg('road-segmentation-adas'),
-                '-at': 'segmentation'
+                '-at': 'segmentation',
             }),
             *combine_cases(
                 TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
