@@ -37,40 +37,38 @@ More details regarding evaluation procedure can be found in this [paper](https:/
 
 ### Original model
 
-Image, name - `input.1` , shape - `1,3,352,352`, format `B,C,H,W`,
-   where:
+Image, name - `input.1` , shape - `1,3,352,352`, format `B,C,H,W`, where:
 
-    - `B` - batch size
-    - `C` - number of channels
-    - `H` - image height
-    - `W` - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-   Expected color order - `RGB`.
-   Mean values - [124.55, 118.90, 102.94]
-   Scale values - [56.77,  55.97,  57.50]
+Expected color order - `RGB`.
+Mean values - [124.55, 118.90, 102.94]
+Scale values - [56.77,  55.97,  57.50]
 
 ### Converted model
 
-Image, name - `input.1` , shape - `1,3,352,352`, format `B,C,H,W`,
-   where:
+Image, name - `input.1` , shape - `1,3,352,352`, format `B,C,H,W`, where:
 
-    - `B` - batch size
-    - `C` - number of channels
-    - `H` - image height
-    - `W` - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-   Expected color order - `BGR`.
+Expected color order - `BGR`.
 
 ## Output
 
 ### Original model
-Saliency map, name `1256`, shape `1,1,352,352`, format `B,C,H,W`
-   where:
+Saliency map, name `1256`, shape `1,1,352,352`, format `B,C,H,W` where:
 
-    - `B` - batch size
-    - `C` - number of channels
-    - `H` - image height
-    - `W` - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
 [Sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) should be applied on saliency map for conversion probability into [0, 1] range.
 
 ### Converted model
