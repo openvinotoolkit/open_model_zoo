@@ -303,7 +303,7 @@ the script.
 Before you run the model quantizer, you must prepare a directory with
 the datasets required for the quantization process. This directory will be
 referred to as `<DATASET_DIR>` below. You can find more detailed information
-about dataset preparation in the <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md">Dataset Preparation Guide</a>.
+about dataset preparation in the [Dataset Preparation Guide](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md).
 
 The basic usage is to run the script like this:
 
@@ -426,6 +426,7 @@ describing a single model. Each such object has the following keys:
 
   * `action_recognition`
   * `classification`
+  * `colorization`
   * `detection`
   * `face_recognition`
   * `feature_extraction`
@@ -439,6 +440,7 @@ describing a single model. Each such object has the following keys:
   * `monocular_depth_estimation`
   * `object_attributes`
   * `optical_character_recognition`
+  * `place_recognition`
   * `question_answering`
   * `semantic_segmentation`
   * `sound_classification`

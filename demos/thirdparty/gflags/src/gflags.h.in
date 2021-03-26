@@ -441,6 +441,27 @@ class GFLAGS_DLL_DECL FlagRegisterer {
                  FlagType* current_storage, FlagType* defvalue_storage);
 };
 
+// Force compiler to not generate code for the given template specialization.
+#if defined(_MSC_VER) && _MSC_VER < 1800 // Visual Studio 2013 version 12.0
+  #define GFLAGS_DECLARE_FLAG_REGISTERER_CTOR(type)
+#else
+  #define GFLAGS_DECLARE_FLAG_REGISTERER_CTOR(type)                  \
+    extern template GFLAGS_DLL_DECL FlagRegisterer::FlagRegisterer(  \
+        const char* name, const char* help, const char* filename,    \
+        type* current_storage, type* defvalue_storage)
+#endif
+
+// Do this for all supported flag types.
+GFLAGS_DECLARE_FLAG_REGISTERER_CTOR(bool);
+GFLAGS_DECLARE_FLAG_REGISTERER_CTOR(int32);
+GFLAGS_DECLARE_FLAG_REGISTERER_CTOR(uint32);
+GFLAGS_DECLARE_FLAG_REGISTERER_CTOR(int64);
+GFLAGS_DECLARE_FLAG_REGISTERER_CTOR(uint64);
+GFLAGS_DECLARE_FLAG_REGISTERER_CTOR(double);
+GFLAGS_DECLARE_FLAG_REGISTERER_CTOR(std::string);
+
+#undef GFLAGS_DECLARE_FLAG_REGISTERER_CTOR
+
 // If your application #defines STRIP_FLAG_HELP to a non-zero value
 // before #including this file, we remove the help message from the
 // binary file. This can reduce the size of the resulting binary
@@ -478,7 +499,7 @@ extern GFLAGS_DLL_DECL const char kStrippedFlagHelp[];
     static const type FLAGS_nono##name = value;                         \
     /* We always want to export defined variables, dll or no */         \
     GFLAGS_DLL_DEFINE_FLAG type FLAGS_##name = FLAGS_nono##name;        \
-    type FLAGS_no##name = FLAGS_nono##name;                             \
+    static type FLAGS_no##name = FLAGS_nono##name;                      \
     static GFLAGS_NAMESPACE::FlagRegisterer o_##name(                   \
       #name, MAYBE_STRIPPED_HELP(help), __FILE__,                       \
       &FLAGS_##name, &FLAGS_no##name);                                  \

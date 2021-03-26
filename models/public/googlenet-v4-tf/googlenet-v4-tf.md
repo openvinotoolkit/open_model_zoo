@@ -63,11 +63,25 @@ Object classifier according to ImageNet classes, name - `InceptionV4/Logits/Pred
 - `B` - batch size
 - `C` - Predicted probabilities for each class in  [0, 1] range
 
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
+
 ## Legal Information
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://github.com/tensorflow/models/blob/master/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).
+A copy of the license is provided in [APACHE-2.0-TF-Models.txt](../licenses/APACHE-2.0-TF-Models.txt).
 
 The original model uses the TF-Slim library, which is distributed under the
 [Apache License, Version 2.0](https://github.com/google-research/tf-slim/blob/master/LICENSE).

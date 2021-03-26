@@ -132,8 +132,8 @@ Accuracy Checker supports following set of preprocessors:
 * `decode_by_sentence_piece_bpe_tokenizer` - Decode words to set of indexes using SentencePieceBPETokenizer.
   * `vocabulary_file` - path to vocabulary file for decoding. Path can be prefixed with `--models` argument.
   * `merges_file` - path to merges file for decoding. Path can be prefixed with `--models` argument.
-  * `sos_symbol` - string representation of start_of_sentence symbol (default='<s>').
-  * `eos_symbol` - string representation of end_of_sentence symbol (default='</s>').
+  * `sos_symbol` - string representation of start_of_sentence symbol (default=`<s>`).
+  * `eos_symbol` - string representation of end_of_sentence symbol (default=`</s>`).
   * `add_symbols` - add sos/eos symbols to sentence (default=True).
 *  `pad_with_eos` - supplement the input sequence to a specific size using a line terminator character or index.
   * `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
@@ -172,6 +172,27 @@ Accuracy Checker supports following set of preprocessors:
   * `overlap` - sets overlapping for clips in percents or samples (use `%` or `samples` suffixes respectively) (no overlapping by default), e.g. `25%`, `4000samples`
   * `max_clips` - sets the maximum number of clips (clips all record by default)
 * `audio_normalization` - normalize audio record with mean sample subtraction and division on standard deviation of samples.
+* `audio_to_mel_spectrogram` - performs all needed preprocessing to calculate MEL spectrogram from time-domain audio signal
+  * `window_size` - size of time-domain signal frame, seconds
+  * `window_stride` - intersection of frames in time-domain, seconds
+  * `window`- weighting window type, possible choices:
+    * `hann` - applies Hanning window to each signal frame
+    * `hamming` - applies Hamming window to each signal frame
+    * `blackman` - applies Blackman window to each signal frame
+    * `bartlett` - applies Bartlett window to each signal frame
+    * `none` - no window
+  * `n_fft` - STFT base, samples
+  * `n_filt` - number of MEL filters
+  * `splicing` - number of sequentially concastenated MEL spectrums
+  * `sample_rate` - audio sampling frequency, Hz
+  * `pad_to` - desired length of features
+  * `preemph` - preemph factor
+  * `log` - applies log() to MEL features values
+  * `use_deterministic_dithering` - Controls  dithering mode:
+    * `True` - there are no dithering in time-domain, fixed value from `dither` parameter added to signal spectrum
+    * `False` - dithering in time-domain, random values with  `dither` magnitude added to signal spectrum
+  * `dither` - dithering value
+
 * `similarity_transform_box` - apply to image similarity transformation to get rectangle region stored in annotation metadata/
     * `box_scale` - box scale factor (Optional, default 1).
     * `dst_width` and `dst_height` are destination width and height for transformed image respectively.
@@ -189,6 +210,15 @@ Accuracy Checker supports following set of preprocessors:
   * `base` - number for encoding other classes.
   * `axis` - axis responsible for classes.
   * `number_of_classes` - number of used classes.
+* `pack_raw_image` - pack raw image to [H, W, 4] normalized image format with black level removal.
+  * `black_level` - black level on the input image.
+  * `ratio` - exposure scale ratio, optional, can be replaced by value from annotation if not provided.
+  * `9-channels` - for packing 9 channels images (Optional, default `False`).
+* `alpha` - extracts alpha-channel data from the image.
+  * `channel` - number of channel to extract (Optional, default 3).
+* `trimap` - concatenates image data with alpha-channel based information for cut, keep and calculation zones in image.
+  * `cut_treshold` - maximum level of alpha values in cut zone. Optional, default is 0.1.
+  * `keep_treshold` - minimum level of alpha values in keep zone. Optional, default is 0.9. Pixels with alpha-channel values between `cut_threshold` and `keep_treshold` are in calculation zone.
 
 ## Optimized preprocessing via OpenVINO Inference Engine
 OpenVINO™ is able perform preprocessing during model execution. For enabling this behaviour you can use command line parameter `--ie_preprocessing True`.

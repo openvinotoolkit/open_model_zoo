@@ -34,7 +34,7 @@ Image, name: `input.1`, shape: [1x3x550x550], format: [BxCxHxW],
     - C - number of channels
 
    Expected color order: `RGB`.
-   Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
+   Mean values - [123.675,116.78,103.94], scale values - [58.395,57.12,57.375].
 
 
 ### Converted Model
@@ -75,6 +75,20 @@ Final mask prediction can be obtained by matrix multiplication of `proto` and tr
 ### Converted Model
 
 Converted model outputs are the same as in the original model.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

@@ -1,3 +1,25 @@
+* Sun Nov 11 2018 - Andreas Schuh <andreas.schuh.84@gmail.com>
+
+- gflags: version 2.2.2
+Fixed 267: Support build with GCC option "-fvisibility=hidden".
+Fixed 262: Declare FALGS_no##name variables as static to avoid "previous extern" warning.
+Fixed 261: Declare FlagRegisterer c’tor explicit template instanations as extern in header
+Fixed 257: Build with _UNICODE support on Windows.
+Fixed 233/234/235: Move CMake defines that are unused by Bazel to separate header; makes config.h private again
+Fixed 228: Build with recent MinGW versions that define setenv.
+Fixed 226: Remove obsolete and unused CleanFileName code
+Merged 266: Various PVS Studio and GCC warnings.
+Merged 258: Fix build with some Clang variants that define "restrict" macro.
+Merged 252: Update documentation on how to use Bazel.
+Merged 249: Use "_debug" postfix for debug libraries. 
+Merged 247: CMake "project" VERSION; no enable_testing(); "gflags::" import target prefix.
+Merged 246: Add Bazel-on-Windows support.
+Merged 239: Use GFLAGS_NAMESPACE instead of "gflags" in test executable.
+Merged 237: Removed unused functions; fixes compilation with -Werror compiler option.
+Merged 232: Fix typo in Bazel's BUILD definition
+Merged 230: Remove using ::fLS::clstring.
+Merged 221: Add convenience 'uninstall' target
+
 * Tue Jul 11 2017 - Andreas Schuh <andreas.schuh.84@gmail.com>
 
 - gflags: version 2.2.1

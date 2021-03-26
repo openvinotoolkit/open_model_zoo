@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 Cross-domain correspondence network is a exemplar-based image translation model, consisting of correspondence and translation parts. Model was pre-trained on ADE20k dataset.
-For details see [paper](https://arxiv.org/pdf/2004.05571) and [repository](https://github.com/microsoft/CoCosNet).
+For details see [paper](https://arxiv.org/abs/2004.05571) and [repository](https://github.com/microsoft/CoCosNet).
 
 ## Specification
 
@@ -19,6 +19,7 @@ For details see [paper](https://arxiv.org/pdf/2004.05571) and [repository](https
 Metrics were calculated between generated images by model and real validation images from ADE20k dataset.
 For some GAN metrics (IS and FID) you need to use classification model as verification network.
 In our case it is [Inception-V3](../googlenet-v3/googlenet-v3.md) model.
+For details, please check Accuracy Checker [config](accuracy-check-pipelined.yml).
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
@@ -62,6 +63,20 @@ Image, name: "exemplar_based_output", shape: [1x3x256x256] - A result (generated
     - W - image width
 
     Output color order is RGB.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

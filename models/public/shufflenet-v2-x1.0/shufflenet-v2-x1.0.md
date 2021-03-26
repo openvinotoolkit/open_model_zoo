@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Shufflenet V2 x1.0 is image classification model pretrained on ImageNet dataset. This is PyTorch implementation based on architecture described in paper ["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"](https://arxiv.org/pdf/1807.11164.pdf) in TorchVision package (see [here](https://github.com/pytorch/vision)).
+Shufflenet V2 x1.0 is image classification model pretrained on ImageNet dataset. This is PyTorch implementation based on architecture described in paper ["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"](https://arxiv.org/abs/1807.11164) in TorchVision package (see [here](https://github.com/pytorch/vision)).
 
 The model input is a blob that consists of a single image of "1x3x224x224" in RGB order.
 
@@ -61,6 +61,20 @@ Object classifier according to ImageNet classes, name - `output`,  shape - `1,10
 ### Converted model
 
 The converted model has the same parameters as the original model.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

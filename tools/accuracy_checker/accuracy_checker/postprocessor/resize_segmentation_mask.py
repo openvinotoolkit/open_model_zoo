@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -124,6 +124,8 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
                 return data
             cmin = data.min()
             cmax = data.max()
+            if cmin >= 0 and cmax <= 255:
+                return data.astype(np.uint8)
             cscale = cmax - cmin
             if cscale == 0:
                 cscale = 1

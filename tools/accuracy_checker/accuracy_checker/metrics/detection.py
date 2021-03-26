@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ from .metric import Metric, FullDatasetEvaluationMetric, PerImageEvaluationMetri
 class APIntegralType(enum.Enum):
     voc_11_point = '11point'
     voc_max = 'max'
+
 
 
 class BaseDetectionMetricMixin(Metric):
@@ -103,7 +104,7 @@ class BaseDetectionMetricMixin(Metric):
                 self.ignore_difficult, self.allow_multiple_matches_per_ignored, self.include_boundaries,
                 self.use_filtered_tp
             )
-            gt_boxes = [np.array(ann.boxes)[ann.labels == label] for  ann in annotations]
+            gt_boxes = [np.array(ann.boxes)[ann.labels == label] for ann in annotations]
 
             if not tp.size:
                 labels_stat[label] = {
@@ -236,7 +237,7 @@ class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEv
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'fppi_level' : NumberField(min_value=0, max_value=1, description="False Positive Per Image level.")
+            'fppi_level': NumberField(min_value=0, max_value=1, description="False Positive Per Image level.")
         })
         return parameters
 

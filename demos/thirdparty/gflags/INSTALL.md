@@ -78,11 +78,6 @@ your WORKSPACE file:
         remote = "https://github.com/gflags/gflags.git",
     )
 
-    bind(
-        name = "gflags",
-        actual = "@com_github_gflags_gflags//:gflags",
-    )
-
-You can then add `//external:gflags` to the `deps` section of a `cc_binary` or
-`cc_library` rule, and `#include <gflags/gflags.h>` to include it in your source
-code.
+You can then add `@com_github_gflags_gflags//:gflags` to the `deps` section of a
+`cc_binary` or `cc_library` rule, and `#include <gflags/gflags.h>` to include it
+in your source code.

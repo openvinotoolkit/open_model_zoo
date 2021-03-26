@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from ..config import PathField, BoolField
+from ..config import PathField, BoolField, StringField
 from ..representation import ReIdentificationClassificationAnnotation
 from ..utils import read_txt, check_file_existence, OrderedSet
 
@@ -43,6 +43,9 @@ class LFWConverter(BaseFormatConverter):
             'images_dir': PathField(
                 is_directory=True, optional=True,
                 description='path to dataset images, used only for content existence check'
+            ),
+            'extension': StringField(
+                optional=True, default='jpg', description='images extension', choices=['jpg', 'png']
             )
         })
 
@@ -52,6 +55,7 @@ class LFWConverter(BaseFormatConverter):
         self.pairs_file = self.get_value_from_config('pairs_file')
         self.landmarks_file = self.get_value_from_config('landmarks_file')
         self.images_dir = self.get_value_from_config('images_dir') or self.pairs_file.parent
+        self.extension = self.get_value_from_config('extension')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         landmarks_map = {}
@@ -66,10 +70,9 @@ class LFWConverter(BaseFormatConverter):
 
         return test_annotations
 
-    @staticmethod
-    def get_image_name(person, image_id):
-        image_path_pattern = '{}/{}_{}{}.jpg'
-        return image_path_pattern.format(person, person, '0' * (4 - len(image_id)), image_id)
+    def get_image_name(self, person, image_id):
+        image_path_pattern = '{}/{}_{}{}.{}'
+        return image_path_pattern.format(person, person, '0' * (4 - len(image_id)), image_id, self.extension)
 
     def convert_positive(self, pairs, all_images):
         positives = defaultdict(OrderedSet)

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ from .filter import (
 
 from .cast_to_int import CastToInt
 from .clip_boxes import ClipBoxes
-from .nms import NMS, SoftNMS
+from .nms import NMS, SoftNMS, DIoUNMS
 from .resize_prediction_boxes import ResizePredictionBoxes
 from .faster_rcnn_postprocessing_resize import FRCNNPostprocessingBboxResize
 from .correct_yolo_v2_boxes import CorrectYoloV2Boxes
@@ -51,7 +51,6 @@ from .align_prediction_depth_map import AlignDepth
 from .resize_prediction_depth_map import ResizeDepthMap
 from .resize_super_resolution import ResizeSuperResolution
 from .resize_style_transfer import ResizeStyleTransfer
-from .crop_ground_truth_image import CropGTImage, CornerCropGTImage
 from .resize import Resize
 from .to_gray_scale_ref_image import RGB2GRAYAnnotation, BGR2GRAYAnnotation
 from .remove_repeats import RemoveRepeatTokens
@@ -59,6 +58,8 @@ from .tokens_to_lower_case import TokensToLowerCase
 from .super_resolution_image_recovery import SRImageRecovery, ColorizationLABRecovery
 from .argmax_segmentation_mask import ArgMaxSegmentationMask
 from .normalize_salient_map import SalientMapNormalizer
+from .min_max_normalization import MinMaxRegressionNormalization
+from .crop_image import CropImage, CornerCropImage
 
 
 __all__ = [
@@ -77,6 +78,7 @@ __all__ = [
     'ClipBoxes',
     'NMS',
     'SoftNMS',
+    'DIoUNMS',
     'ResizePredictionBoxes',
     'FRCNNPostprocessingBboxResize',
     'CorrectYoloV2Boxes',
@@ -89,6 +91,7 @@ __all__ = [
     'ExtendSegmentationMask',
     'ZoomSegMask',
     'CropSegmentationMask',
+    'CropOrPadSegmentationMask',
     'ClipSegmentationMask',
     'ArgMaxSegmentationMask',
 
@@ -96,6 +99,8 @@ __all__ = [
     'TransformBratsPrediction',
 
     'NormalizeLandmarksPoints',
+
+    'ClipPoints',
 
     'ExtractSQUADPrediction',
     'ExtractSQUADPredictionBiDAF',
@@ -115,9 +120,6 @@ __all__ = [
     'RGB2GRAYAnnotation',
     'BGR2GRAYAnnotation',
 
-    'CropGTImage',
-    'CornerCropGTImage',
-
     'Resize',
 
     'RemoveRepeatTokens',
@@ -126,5 +128,10 @@ __all__ = [
     'SRImageRecovery',
     'ColorizationLABRecovery',
 
-    'SalientMapNormalizer'
+    'SalientMapNormalizer',
+
+    'MinMaxRegressionNormalization',
+
+    'CropImage',
+    'CornerCropImage',
 ]

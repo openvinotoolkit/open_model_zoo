@@ -33,10 +33,24 @@ Expected color order is BGR.
 
 The net outputs three blobs with the following shapes: `[1, 57, 32, 56]`, `[1, 19, 32, 56]`, and `[1, 38, 32, 56]`. The first blob contains coordinates in 3D space, the second blob contains keypoint heatmaps and the third blob is keypoint pairwise relations (part affinity fields).
 
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
+
 ## Legal Information
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE).
-A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../../licenses/APACHE-2.0.txt).
+A copy of the license is provided in [APACHE-2.0.txt](../../licenses/APACHE-2.0.txt).
 
 [*] Other names and brands may be claimed as the property of others.

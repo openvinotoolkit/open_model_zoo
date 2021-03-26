@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -154,7 +154,11 @@ class QuestionAnsweringEmbeddingAccuracy(FullDatasetEvaluationMetric):
         ap_pairs = list(zip(annotations, predictions))
 
         #check data alignment
-        assert all(a.identifier is p.identifier for a, p in ap_pairs), "annotations and predictions are not aligned"
+        assert all(
+            a.identifier is p.identifier
+            if not isinstance(p.identifier, tuple)
+            else p.identifier.values
+            for a, p in ap_pairs), "annotations and predictions are not aligned"
 
         q_pairs = [(a, p) for a, p in ap_pairs if a.context_pos_indetifier is not None]
         c_pairs = [(a, p) for a, p in ap_pairs if a.context_pos_indetifier is None]

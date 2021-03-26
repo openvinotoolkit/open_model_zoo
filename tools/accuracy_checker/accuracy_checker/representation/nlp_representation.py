@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import numpy as np
 from .base_representation import BaseRepresentation
-from .classification_representation import ClassificationAnnotation
+from .classification_representation import ClassificationAnnotation, SequenceClassificationAnnotation
 
 
 class MachineTranslationRepresentation(BaseRepresentation):
@@ -34,9 +35,11 @@ class MachineTranslationPrediction(MachineTranslationRepresentation):
         super().__init__(identifier)
         self.translation = translation
 
+
 class LanguageModeling(BaseRepresentation):
     def __init__(self, identifier=''):
         super().__init__(identifier)
+
 
 class LanguageModelingAnnotation(LanguageModeling):
     def __init__(self, identifier, unique_id, input_ids, tokens, labels=None):
@@ -46,14 +49,17 @@ class LanguageModelingAnnotation(LanguageModeling):
         self.input_ids = input_ids
         self.labels = labels if labels is not None else []
 
+
 class LanguageModelingPrediction(LanguageModeling):
     def __init__(self, identifier, logits):
         super().__init__(identifier)
         self.logits = logits
 
+
 class QuestionAnswering(BaseRepresentation):
     def __init__(self, identifier=''):
         super().__init__(identifier)
+
 
 class QuestionAnsweringAnnotation(QuestionAnswering):
     def __init__(self, identifier, question_id, unique_id,
@@ -100,6 +106,7 @@ class QuestionAnsweringEmbeddingAnnotation(QuestionAnswering):
         self.position_ids = position_ids
         self.context_pos_indetifier = context_pos_identifier
 
+
 class QuestionAnsweringEmbeddingPrediction(QuestionAnswering):
     def __init__(self, identifier, embedding):
         super().__init__(identifier)
@@ -129,3 +136,13 @@ class TextClassificationAnnotation(ClassificationAnnotation):
         self.input_mask = input_mask if input_mask is not None else []
         self.segment_ids = segment_ids if segment_ids is not None else []
         self.tokens = tokens if tokens is not None else []
+
+
+class BERTNamedEntityRecognitionAnnotation(SequenceClassificationAnnotation):
+    def __init__(self, identifier, input_ids, input_mask, segment_ids, label_id, valid_ids=None, label_mask=None):
+        super().__init__(identifier, label_id)
+        self.input_ids = input_ids
+        self.input_mask = input_mask if input_mask is not None else []
+        self.segment_ids = segment_ids if segment_ids is not None else []
+        self.valid_ids = np.array(valid_ids, dtype=bool) if valid_ids is not None else valid_ids
+        self.label_mask = np.array(label_mask, dtype=bool) if label_mask is not None else label_mask

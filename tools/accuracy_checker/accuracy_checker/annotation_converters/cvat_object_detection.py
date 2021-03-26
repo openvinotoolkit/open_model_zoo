@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ limitations under the License.
 
 from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ..representation import DetectionAnnotation
-from ..topology_types import ObjectDetection
 from ..utils import read_xml, check_file_existence, read_json
 from ..config import PathField, ConfigError, BoolField
 
@@ -24,7 +23,6 @@ from ..config import PathField, ConfigError, BoolField
 class CVATObjectDetectionConverter(FileBasedAnnotationConverter):
     __provider__ = 'cvat_object_detection'
     annotation_types = (DetectionAnnotation, )
-    topology_types = (ObjectDetection, )
 
     @classmethod
     def parameters(cls):

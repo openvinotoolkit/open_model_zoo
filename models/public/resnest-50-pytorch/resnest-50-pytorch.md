@@ -8,7 +8,7 @@ The model input is a blob that consists of a single image of "1x3x224x224" in RG
 
 The model output is typical object classifier for the 1000 different classifications  matching with those in the ImageNet database.
 
-For details see [repository](https://github.com/zhanghang1989/ResNeSt) and [paper](https://arxiv.org/pdf/2004.08955.pdf).
+For details see [repository](https://github.com/zhanghang1989/ResNeSt) and [paper](https://arxiv.org/abs/2004.08955).
 
 ## Specification
 
@@ -63,6 +63,20 @@ Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000
 ### Converted model
 
 The converted model has the same parameters as the original model.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

@@ -25,7 +25,7 @@ Tested on a COCO validation subset from the original paper [Realtime Multi-Perso
 
 ## Inputs
 
-Name: `input`, shape: [1x3x256x456]. An input image in the [BxCxHxW] format ,
+Name: `data`, shape: [1x3x256x456]. An input image in the [BxCxHxW] format,
 where:
   - B - batch size
   - C - number of channels

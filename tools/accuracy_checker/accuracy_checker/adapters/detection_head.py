@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from collections import namedtuple
+import numpy as np
 
 from ..adapters import Adapter
 from ..config import NumberField, ListField, ConfigError
@@ -144,6 +145,7 @@ class HeadDetectionAdapter(Adapter):
             result.append(
                 DetectionPrediction(
                     identifier=identifier,
+                    labels=np.zeros_like(detections['scores']),
                     x_mins=detections['x_mins'],
                     y_mins=detections['y_mins'],
                     x_maxs=detections['x_maxs'],

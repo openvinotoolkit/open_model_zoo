@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-  MobileFace Detection V1 is a Light and Fast Face Detector for Edge Devices (LFFD) model based on Yolo V3 architecture and trained with MXNet\*. For details see the [repository](https://github.com/becauseofAI/MobileFace) and [paper](https://arxiv.org/pdf/1904.10633.pdf).
+  MobileFace Detection V1 is a Light and Fast Face Detector for Edge Devices (LFFD) model based on Yolo V3 architecture and trained with MXNet\*. For details see the [repository](https://github.com/becauseofAI/MobileFace) and [paper](https://arxiv.org/abs/1904.10633).
 
 ## Specification
 
@@ -79,6 +79,20 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`face_score`], where:
 - `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get height and width values relative to cell
 - `box_score` - confidence of detection box in [0,1] range
 - `face_score` - probability that detected object belongs to face class in [0,1] range
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

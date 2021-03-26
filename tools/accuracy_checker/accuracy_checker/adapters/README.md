@@ -28,6 +28,7 @@ AccuracyChecker supports following set of adapters:
 * `tiny_yolo_v1` - converting output of Tiny YOLO v1 model to `DetectionPrediction` representation.
 * `reid` - converting output of reidentification model to `ReIdentificationPrediction` representation.
   * `grn_workaround` - enabling processing output with adding Global Region Normalization layer.
+  * `joining_method` - method used to join embeddings (optional, supported methods are `sum` and `concatenation`, default - `sum`).
 * `yolo_v2` - converting output of YOLO v2 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 20).
   * `anchors` - anchor values provided as comma-separated list or one of precomputed:
@@ -56,11 +57,21 @@ AccuracyChecker supports following set of adapters:
   * `output_format` - setting output layer format - boxes first (`BHW`)(default, also default for generated IRs), boxes last (`HWB`). Applicable only if network output not 3D (4D with batch) tensor.
   * `cells` - sets grid size for each layer, according `outputs` filed. Works only with `do_reshape=True` or when output tensor dimensions not equal 3.
   * `do_reshape` - forces reshape output tensor to [B,Cy,Cx] or [Cy,Cx,B] format, depending on `output_format` value ([B,Cy,Cx] by default). You may need to specify `cells` value.
+  * `transpose` - transpose output tensor to specified format (optional).
 * `yolo_v3_onnx` - converting output of ONNX Yolo V3 model to `DetectionPrediction`.
   * `boxes_out` - the name of layer with bounding boxes
   * `scores_out` - the name of output layer with detection scores for each class and box pair.
   * `indices_out` - the name of output layer with indices triplets (class_id, score_id, bbox_id).
+* `yolo_v3_tf2` - converting output of TensorFlow 2 Yolo V3 with embedded box decoding to `DetectionPrediction`.
+  * `outputs` - the list of output layers names.
+  * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0).
+* `yolo_v5` - converting output of YOLO v5 family models to `DetectionPrediction` representation. The parameters are the same as for the `yolo_v3` models.
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
+* `aocr` - converting output of attention-ocr model to `CharacterRecognitionPrediction`.
+  * `output_blob` - name of output layer with predicted labels or string (Optional, if not provided, first founded output will be used).
+  * `labels` - optional, list of supported tokens for decoding raw labels (Optional, default configuration is ascii charmap, this parameter ignored if you have decoding part in the model).
+  * `eos_index` - index of end of string token in labels. (Optional, default 2, ignored if you have decoding part in the model).
+  * `to_lower_case` - allow converting decoded characters to lower case (Optional, default is `True`).
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
 * `ssd_mxnet` - converting output of SSD-based models from MXNet framework to `DetectionPrediction` representation.
 * `pytorch_ssd_decoder` - converts output of SSD model from PyTorch without embedded decoder.
@@ -96,6 +107,19 @@ AccuracyChecker supports following set of adapters:
   * `post_nms_top_k` - final number of detections after NMS applied (Optional, default 100).
   * `nms_threshold` - threshold for NMS (Optional, default 0.5).
   * `min_conf` - minimal confidence threshold for detections (Optional, default 0.05).
+* `retinanet_tf2` - converting output of RetinaNet-based model from TensorFlow 2 official implementation.
+  * `boxes_outputs` - list of outputs with boxes.
+  * `class_outputs` - list of outputs with class probabilities.
+  **Important note: the number of boxes outputs and class outputs should be equal.**
+  * `aspect_ratios` - the list of aspect ratios for anchor generation (Optional, default [1.0, 2.0, 0.5]).
+  * `min_level` - minimal pyramid level (Optional, default 3).
+  * `max_level` - maximal pyramid level (Optional, default 7).
+  * `num_scales` - number of anchor scales (Optional, default 3).
+  * `anchor_size` - size of anchor box (Optional, default 4).
+  * `pre_nms_top_k` - keep top k boxes before NMS applied (Optional, default 5000).
+  * `total_size` - final number of detections after NMS applied (Optional, default 100).
+  * `nms_threshold` - threshold for NMS (Optional, default 0.5).
+  * `score_threshold` - minimal confidence threshold for detections (Optional, default 0.05).
 * `rfcn_class_agnostic` - convert output of Caffe RFCN model with agnostic bounding box regression approach.
   * `cls_out` - the name of output layer with detected probabilities for each class. The layer shape is [num_boxes, num_classes], where `num_boxes` is number of predicted boxes, `num_classes` - number of classes in the dataset including background.
   * `bbox_out` - the name of output layer with detected boxes deltas. The layer shape is [num_boxes, 8] where  `num_boxes` is number of predicted boxes, 8 (4 for background + 4 for foreground) bounding boxes coordinates.
@@ -115,7 +139,9 @@ AccuracyChecker supports following set of adapters:
 * `age_gender` - converting age gender recognition model output to `ContainerPrediction` with `ClassificationPrediction` named `gender` for gender recognition, `ClassificationPrediction` named `age_classification` and `RegressionPrediction` named `age_error` for age recognition.
   * `age_out` - output layer name for age recognition.
   * `gender_out` - output layer name for gender recognition.
-* `action_detection` - converting output of model for person detection and action recognition tasks to `ContainerPrediction` with `DetectionPrdiction` for class agnostic metric calculation and `ActionDetectionPrediction` for action recognition. The representations in container have names `class_agnostic_prediction` and `action_prediction` respectively.
+* `age_recognition` - converting age recognition model output to `ContainerPrediction` with `ClassificationPrediction` named `age_classification` and `RegressionPrediction` named `age_error` for age recognition.
+  * `age_out` - output layer name for age recognition (Optional).
+* `action_detection` - converting output of model for person detection and action recognition tasks to `ContainerPrediction` with `DetectionPrediction` for class agnostic metric calculation and `ActionDetectionPrediction` for action recognition. The representations in container have names `class_agnostic_prediction` and `action_prediction` respectively.
   * `priorbox_out` - name of layer containing prior boxes in SSD format.
   * `loc_out` - name of layer containing box coordinates in SSD format.
   * `main_conf_out` - name of layer containing detection confidences.
@@ -187,6 +213,11 @@ AccuracyChecker supports following set of adapters:
   * `score_map_threshold` - threshold for score map (Optional, default 0.8).
   * `nms_threshold` - threshold for text boxes NMS (Optional, default 0.2).
   * `box_threshold` - minimal confidence threshold for text boxes (Optional, default 0.1).
+* `craft_text_detection` - converting output of CRAFT like model for text detection to `TextDetectionPrediction`.
+  * `score_out` - the name of output layer which contains score map.
+  * `text_threshold` - text confidence threshold (Optional, default 0.7).
+  * `link_threshold` - link confidence threshold (Optional, default 0.4).
+  * `low_text` - text low-bound score (Optional, default 0.4).
 * `human_pose_estimation` - converting output of model for human pose estimation to `PoseEstimationPrediction`.
   * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).
   * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
@@ -203,6 +234,8 @@ AccuracyChecker supports following set of adapters:
   * `beam_size` -  size of the beam to use during decoding (default 10).
   * `blank_label` - index of the CTC blank label.
   * `softmaxed_probabilities` - indicator that model uses softmax for output layer (default False).
+  * `logits_output` - Name of the output layer of the network to use in decoder
+  * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm.
 * `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
   * `blank_label` - index of the CTC blank label (default 0).
 * `ctc_beam_search_decoder` - Python implementation of CTC beam search decoder without LM for speech recognition.
@@ -219,7 +252,7 @@ AccuracyChecker supports following set of adapters:
   * `lm_oov_score` - Replace LM score for out-of-vocabulary words with this value (default -1000, ignored without LM)
   * `lm_vocabulary_offset` - Start of vocabulary strings section in the LM file.  Default is to not filter candidate words using vocabulary (ignored without LM)
   * `lm_vocabulary_length` - Size in bytes of vocabulary strings section in the LM file (ignored without LM)
-* `fast_ctc_beam_search_decoder_with_lm` - CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition, depends on [`ctcdecode_numpy` Python module](../../../../demos/python_demos/speech_recognition_demo/ctcdecode-numpy/README.md).
+* `fast_ctc_beam_search_decoder_with_lm` - CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition, depends on [`ctcdecode_numpy` Python module](../../../../demos/speech_recognition_demo/python/ctcdecode-numpy/README.md).
   * `beam_size` - Size of the beam to use during decoding (default 10).
   * `logarithmic_prob` - Set to "True" to indicate that network gives natural-logarithmic probabilities. Default is False for plain probabilities (after softmax).
   * `probability_out` - Name of the network's output with character probabilities (required)
@@ -242,16 +275,18 @@ AccuracyChecker supports following set of adapters:
   * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.json). Path can be prefixed with `--models` arguments.
   * `merges_file` - file which contains merges for encoding model predicted indexes to words (e. g. merges.txt). Path can be prefixed with `--models` arguments.
   * `output_name` - name of model's output layer if need (optional).
-  * `sos_symbol` - string representation of start_of_sentence symbol (default='<s>').
-  * `eos_symbol` - string representation of end_of_sentence symbol (default='</s>').
-  * `pad_symbol` - string representation of pad symbol (default='<pad>').
+  * `sos_symbol` - string representation of start_of_sentence symbol (default=`<s>`).
+  * `eos_symbol` - string representation of end_of_sentence symbol (default=`</s>`).
+  * `pad_symbol` - string representation of pad symbol (default=`<pad>`).
   * `remove_extra_symbols` - remove sos/eos/pad symbols from predicted string (default=True)
 * `bert_question_answering` - converting output of BERT model trained to solve question answering task to `QuestionAnsweringPrediction`.
 * `bidaf_question_answering` - converting output of BiDAF model trained to solve question answering task to `QuestionAnsweringPrediction`.
   * `start_pos_output` - name of output layer with answer start position.
   * `end_pos_output` - name of output layer with answer end position.
-* `bert_classification` - converting output of BERT model trained for classification task to `ClassificationPrediction`.
+* `bert_classification` - converting output of BERT model trained for text classification task to `ClassificationPrediction`.
   * `num_classes` - number of predicted classes.
+  * `classification_out` - name of output layer with classification probabilities. (Optional, if not provided default first output blob will be used).
+* `bert_ner` - converting output of BERT model trained for named entity recognition task to `SequenceClassificationPrediction`.
   * `classification_out` - name of output layer with classification probabilities. (Optional, if not provided default first output blob will be used).
 * `human_pose_estimation_3d` - converting output of model for 3D human pose estimation to `PoseEstimation3dPrediction`.
   * `features_3d_out` - name of output layer with 3D coordinates maps.
@@ -295,6 +330,9 @@ AccuracyChecker supports following set of adapters:
    * `bboxes_outputs` - the list of names for output layers with face detection boxes in order belonging to 32-, 16-, 8-strides.
    * `landmarks_outputs` - the list of names for output layers with predicted facial landmarks in order belonging to 32-, 16-, 8-strides (optional, if not provided, only `DetectionPrediction` will be generated).
    * `type_scores_outputs` - the list of names for output layers with attributes detection score in order belonging to 32-, 16-, 8-strides (optional, if not provided, only `DetectionPrediction` will be generated).
+   * `nms_threshold` - overlap threshold for NMS (optional, default 0.5).
+   * `keep_top_k ` - maximal number of boxes which should be kept (optional).
+   * `include_boundaries` - allows include boundaries for NMS (optional, default False).
 * `faceboxes` - converting output of FaceBoxes model to `DetectionPrediction` representation.
   * `scores_out` - name of output layer with bounding boxes scores.
   * `boxes_out` - name of output layer with bounding boxes coordinates.
@@ -330,10 +368,11 @@ AccuracyChecker supports following set of adapters:
     * `cell_width` - Specifies cell width to extract predictions.
     * `label_num` - Specifies number of output label classes.
 * `stacked_hourglass` - converts output of Stacked Hourglass Networks for single human pose estimation to `PoseEstimationPrediction`.
-   * `score_map_out`- the name of output layers for getting score map (Optional, default output blob will be used if not provided).
+   * `score_map_output`- the name of output layers for getting score map (Optional, default output blob will be used if not provided).
 * `dna_seq_beam_search` - converts output of DNA sequencing model to `DNASequencePrediction` using beam search decoding.
   * `beam_size` - beam size for CTC Beam Search (Optional, default 5).
   * `threshold` - beam cut threshold (Optional, default 1e-3).
+  * `output_blob` - name of output layer with sequence prediction.
 * `pwcnet` - converts output of PWCNet network to `OpticalFlowPrediction`.
   * `flow_out` - target output layer name.
 * `salient_object_detection` - converts output of salient object detection model to `SalientRegionPrediction`
@@ -341,3 +380,14 @@ AccuracyChecker supports following set of adapters:
 * `two_stage_detection` - converts output of 2-stage detector to `DetectionPrediction`.
   * `boxes_out` - output with bounding boxes in format BxNx[x_min, y_min, width, height], where B - network batch size, N - number of detected boxes.
   * `cls_out` - output with classification probabilities in format [BxNxC], where B - network batch size, N - number of detected boxes, C - number of classed.
+* `dumb_decoder` - converts  audio recognition model output to  `CharacterRecognitionPrediction`.
+  * `alphabet` - model alphabet.
+  * `uppercase` - produce prediction in uppercase, default is `True`.
+* `detr` - converts output of DETR models family to `DetectionPrediction`.
+    * `scores_out` - output layer name with detection scores logits.
+    * `boxes_out` - output layer name with detection boxes coordinates in [Cx,Cy,W, H] format, where Cx - x coordinate of box center, Cy - y coordinate of box center, W, H - width and height respectively.
+* `ultra_lightweight_face_detection` - converts output of Ultra-Lightweight Face Detection models to `DetectionPrediction` representation.
+  * `scores_out` - name of output layer with bounding boxes scores.
+  * `boxes_out` - name of output layer with bounding boxes coordinates.
+  * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0.7).
+* `trimap` - converts greyscale model output to `ImageProcessingPrediction`. Replaces pixel values in cut and keep zones with 0 and 1 respectively. All other postprocessing inherited from `image_processing` adapter.

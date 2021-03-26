@@ -1,0 +1,37 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  MelGAN model for text to speech task. This model represents a mel-spectrogram to
+  audio regression.
+task_type: text_to_speech
+files:
+  - name: FP32/text-to-speech-en-0001-generation.xml
+    size: 326986
+    sha256: 97083816738b45f98664afc084aa46f7c2a47d9983c9fa70b5f1798c220992fc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP32/text-to-speech-en-0001-generation.xml
+  - name: FP32/text-to-speech-en-0001-generation.bin
+    size: 51082912
+    sha256: befc19247052b07875b1a2ffcaaed3d41e4f48aca886151987891cb44633a298
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP32/text-to-speech-en-0001-generation.bin
+  - name: FP16/text-to-speech-en-0001-generation.xml
+    size: 326858
+    sha256: 4ca19ee66e4afb9d415aa6439641344108363725825bf284ae711c75ec4a3cc8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16/text-to-speech-en-0001-generation.xml
+  - name: FP16/text-to-speech-en-0001-generation.bin
+    size: 25541584
+    sha256: 9a202c36543e14b54fe63beec54fe26dd5df7f221a5aff3d27f882a1de72778e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-generation/FP16/text-to-speech-en-0001-generation.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -1,5 +1,5 @@
 """
-Copyright (c) 2018-2020 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 from .adapter import Adapter
-from ..config import NumberField, ConfigError
+from ..config import NumberField, StringField, ConfigError
 from ..representation import DNASequencePrediction
 from ..utils import UnsupportedPackage
 
@@ -34,8 +34,11 @@ class DNASeqRecognition(Adapter):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'beam_size': NumberField(optional=True, value_type=int, default=5, min_value=1),
-            'threshold': NumberField(optional=True, min_value=0, default=1e-3)
+            'beam_size': NumberField(optional=True, value_type=int, default=5, min_value=1, description='size of beam'),
+            'threshold': NumberField(
+                optional=True, min_value=0, default=1e-3, description='threshold ofr valid prediction'
+            ),
+            'output_blob': StringField(optional=True, description='name of output layer')
         })
         return params
 
@@ -44,12 +47,14 @@ class DNASeqRecognition(Adapter):
             beam_search.raise_error(self.__provider__)
         self.beam_size = self.get_value_from_config('beam_size')
         self.threshold = self.get_value_from_config('threshold')
+        self.output_blob = self.get_value_from_config('output_blob')
 
     def process(self, raw, identifiers, frame_meta):
         if not self.label_map:
             raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
         alphabet = list(self.label_map.values())
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_outputs)
         result = []
         for identifier, out in zip(identifiers, np.exp(raw_outputs[self.output_blob])):
             if self.beam_size == 1:

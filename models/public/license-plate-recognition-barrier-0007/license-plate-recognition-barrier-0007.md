@@ -7,7 +7,7 @@ Chinese license plates in traffic.
 
 ## Validation Dataset - Internal
 
-300320 Sythetic Chinese plates i.e. the plate text on them consists of symbols generated randomly (but to conform to the plate requirements in terms of the number of characters, sequence, shape, placement, etc.). The “real-looking” appearance of the plates (rotation, dirt, color, lightening, etc.) is achieved by a style transfer procedure.
+300320 Sythetic Chinese plates i.e. the plate text on them consists of symbols generated randomly (but to conform to the plate requirements in terms of the number of characters, sequence, shape, placement, etc.). The “real-looking” appearance of the plates (rotation, dirt, color, lighting, etc.) is achieved by a style transfer procedure.
 
 ## Example
 
@@ -207,6 +207,20 @@ is an integer number encoding a character according to this dictionary:
         67 X
         68 Y
         69 Z
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 The original model is distributed under the

@@ -3,19 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   intel/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.xml
-        weights: intel/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.bin
-        adapter:
-          type: class_agnostic_detection
-          scale: 0.0014204
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   intel/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.xml
-        weights: intel/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.bin
         adapter:
           type: class_agnostic_detection
           scale: 0.0014204
@@ -42,6 +29,3 @@ models:
             ignore_difficult: True
             area_recall_constrain: 0.5
             area_precision_constrain: 0.5
-
-
-global_definitions: ../dataset_definitions.yml

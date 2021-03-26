@@ -20,11 +20,18 @@ Model give as output predict A- and B-channels of LAB-image.
 
 ## Accuracy
 
-The accuracy metrics calculated on ImageNet
-validation dataset using [VGG16](https://arxiv.org/abs/1409.1556) caffe
-model and colorization as preprocessing.
+The accuracy metrics were calculated between generated images by model and real validation images from ImageNet dataset.
+Results are obtained on subset of 2000 images.
 
-For preprocessing `rgb -> gray -> colorization` recieved values:
+| Metric | Value     |
+| ------ | --------- |
+| PSNR   | 26.99dB   |
+| SSIM   | 0.90      |
+
+Also, metrics can be calculated using [VGG16](https://arxiv.org/abs/1409.1556) caffe model and colorization as preprocessing.
+The results below are obtained on the validation images from ImageNet dataset.
+
+For preprocessing `rgb -> gray -> colorization` received values:
 
 | Metric         | Value with preprocessing   | Value without preprocessing |
 |----------------|----------------------------|-----------------------------|
@@ -78,6 +85,20 @@ Image, name - `color_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is AB channels of LAB-image.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 The original model is distributed under the following

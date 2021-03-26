@@ -1,0 +1,25 @@
+models:
+  - name: person-vehicle-bike-detection-2003
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: faster_rcnn_onnx
+          labels_out: 'labels'
+          boxes_out: 'boxes'
+
+    datasets:
+      - name: crossroad_extra_untagged
+        preprocessing:
+          - type: resize
+            dst_width: 864
+            dst_height: 480
+
+        postprocessing:
+          - type: filter
+            apply_to: prediction
+            min_confidence: 0.05
+
+        metrics:
+          - type: coco_orig_precision
+            include_boundaries: false
