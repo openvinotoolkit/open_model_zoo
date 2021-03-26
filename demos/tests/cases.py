@@ -411,6 +411,9 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('person-detection-retail')}),
         [
+            TestCase(options={'-m_det': ModelArg('person-detection-0200')}),
+            TestCase(options={'-m_det': ModelArg('person-detection-0201')}),
+            TestCase(options={'-m_det': ModelArg('person-detection-0202')}),
             TestCase(options={'-m_det': ModelArg('person-detection-retail-0002')}),
             TestCase(options={'-m_det': ModelArg('person-detection-retail-0013')}),
         ],
