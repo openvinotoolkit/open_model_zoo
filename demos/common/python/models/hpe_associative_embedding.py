@@ -68,7 +68,7 @@ class HpeAssociativeEmbedding(Model):
             if len(blob.input_data.shape) == 4:
                 image_blob_name = blob_name
             else:
-                raise RuntimeError('Unsupported {}D input layer "{}". Only 2D and 4D input layers are supported'
+                raise RuntimeError('Unsupported {}D input layer "{}". Only 4D input layers are supported'
                                    .format(len(blob.shape), blob_name))
         if image_blob_name is None:
             raise RuntimeError('Failed to identify the input for the image.')
