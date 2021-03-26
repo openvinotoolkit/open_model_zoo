@@ -157,6 +157,7 @@ class DLSDKLauncher(Launcher):
         self._do_reshape = False
         self._use_set_blob = False
         self._output_layouts = {}
+        self._output_precisions = {}
         self.preprocessor = preprocessor
 
         if not delayed_model_loading:
@@ -244,10 +245,7 @@ class DLSDKLauncher(Launcher):
             results.append(result)
 
         if metadata is not None:
-            for meta_ in metadata:
-                meta_['input_shape'] = self.inputs_info_for_meta()
-                if self._output_layouts:
-                    meta_['output_layout'] = self._output_layouts
+            self._fill_meta(metadata)
         self._do_reshape = False
         self._use_set_blob = self.disable_resize_to_input
 
@@ -267,24 +265,23 @@ class DLSDKLauncher(Launcher):
                 self._reshape_input(input_shapes)
 
         if metadata is not None:
-            for meta_ in metadata:
-                meta_['input_shape'] = self.inputs_info_for_meta()
-                if self._output_layouts:
-                    meta_['output_layout'] = self._output_layouts
-
+            self._fill_meta(metadata)
         self._do_reshape = False
-
         return results
 
     def predict_async(self, ir, inputs, metadata=None, context=None, **kwargs):
         infer_inputs = inputs[0]
         if metadata is not None:
-            for meta_ in metadata:
-                meta_['input_shape'] = self.inputs_info_for_meta()
-                if self._output_layouts:
-                    meta_['output_layout'] = self._output_layouts
-
+            self._fill_meta(metadata)
         ir.infer(infer_inputs, metadata, context)
+
+    def _fill_meta(self, metadata):
+        for meta_ in metadata:
+            meta_['input_shape'] = self.inputs_info_for_meta()
+            if self._output_layouts:
+                meta_['output_layout'] = self._output_layouts
+            if self._output_precisions:
+                meta_['output_precision'] = self._output_precisions
 
     def _is_hetero(self):
         return self._device.startswith(HETERO_KEYWORD)
@@ -299,7 +296,6 @@ class DLSDKLauncher(Launcher):
         if self._is_multi():
             device = self._device[len(MULTI_DEVICE_KEYWORD):]
             device = re.sub(NIREQ_REGEX, '', device)
-
         return [platform_.upper().strip() for platform_ in device.split(',')]
 
     def _set_affinity(self, affinity_map_path):
@@ -410,11 +406,9 @@ class DLSDKLauncher(Launcher):
     def _prepare_bitstream_firmware(self, config):
         if not self._is_fpga():
             return
-
         compiler_mode = os.environ.get(FPGA_COMPILER_MODE_VAR)
         if compiler_mode == '3':
             return
-
         bitstream = config.get('bitstream')
         if bitstream:
             previous_bitstream = config.get('_prev_bitstream', '')
@@ -946,6 +940,7 @@ class DLSDKLauncher(Launcher):
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
             print_info('\tshape: {}\n'.format(output_info.shape))
+            self._output_precisions[name] = PRECISION_TO_DTYPE[output_info.precision]
             self._output_layouts[name] = output_info.layout
 
     def _set_preprocess(self, preprocess):
