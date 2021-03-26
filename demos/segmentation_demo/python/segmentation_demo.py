@@ -170,8 +170,6 @@ def get_model(ie, args):
         return SegmentationModel(ie, args.model)
     if args.architecture_type == 'salient_object_detection':
         return SalientObjectDetectionModel(ie, args.model)
-    raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
-
 
 def main():
     metrics = PerformanceMetrics()
