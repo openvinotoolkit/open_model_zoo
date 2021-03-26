@@ -53,4 +53,5 @@ protected:
     InferenceEngine::ExecutableNetwork execNetwork;
     std::string modelFileName;
     CnnConfig cnnConfig = {};
+    bool isCompiledNetwork;
 };

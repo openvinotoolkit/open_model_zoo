@@ -38,8 +38,8 @@ protected:
     std::unique_ptr<ResultBase> postprocessSingleOutput(InferenceResult& infResult);
     std::unique_ptr<ResultBase> postprocessMultipleOutputs(InferenceResult& infResult);
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
-    void prepareSingleOutput(InferenceEngine::OutputsDataMap& outputInfo);
-    void prepareMultipleOutputs(InferenceEngine::OutputsDataMap& outputInfo);
+    void prepareSingleOutput(InferenceEngine::ConstOutputsDataMap& outputInfo);
+    void prepareMultipleOutputs(InferenceEngine::ConstOutputsDataMap& outputInfo);
     size_t maxProposalCount = 0;
     size_t objectSize = 0;
 };
