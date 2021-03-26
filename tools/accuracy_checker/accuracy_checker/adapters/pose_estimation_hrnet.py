@@ -1,5 +1,5 @@
 """
-Copyright (c) 2020-2021 Intel Corporation
+Copyright (c) 2018-2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,12 +19,9 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, ConfigError
 from ..representation import PoseEstimationPrediction
+from ..utils import contains_all
 
 from .pose_estimation_associative_embedding import AssociativeEmbeddingDecoder
-
-
-def contains_all(container, args):
-    return set(container).intersection(args) == set(args)
 
 
 class HumanPoseHRNetAdapter(Adapter):

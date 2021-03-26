@@ -19,9 +19,9 @@ For details about implementation of model, check out the [HigherHRNet: Scale-Awa
 
 ## Accuracy
 
-| Metric | Original model | Converted model |
-| ------ | -------------- | --------------- |
-| Average Precision (AP)  | 65,02%          | 65,02%           |
+| Metric                     | Original model    | Converted model |
+| -------------------------- | ----------------- | --------------- |
+| Average Precision (AP)     | 65,02%            | 65,02%          |
 
 ## Input
 
@@ -51,9 +51,9 @@ Channel order is `BGR`.
 
 The net outputs three blobs:
 
-- `heatmaps` of shape B, 17, 256, 256 containing location heatmaps for keypoints of all types.
-- `nms_heatmaps` of shape B, 17, 256, 256 containing location heatmaps that are filtered out by non-maximum suppression algorithm.
-- `embeddings` of shape B, 17, 256, 256 containing associative embedding values, which are used for grouping individual keypoints into poses.
+- `heatmaps` of shape `1, 17, 256, 256` containing location heatmaps for keypoints of pose.
+- `nms_heatmaps` of shape `1, 17, 256, 256` containing location heatmaps that are filtered out by non-maximum suppression algorithm.
+- `embeddings` of shape `1, 17, 256, 256` containing associative embedding values, which are used for grouping individual keypoints into poses.
 
 ## Legal Information
 

@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import torch
 from config import cfg
 import models
-import torch
 
 
 class HpeHRNet(torch.nn.Module):
@@ -24,19 +24,24 @@ class HpeHRNet(torch.nn.Module):
         checkpoint = torch.load(weights, map_location='cpu')
         self.impl.load_state_dict(checkpoint)
         self.impl.eval()
+        # pooling operation to get nms_heatmaps from heatmaps out of model
         self.pool = torch.nn.MaxPool2d(kernel_size=5, stride=1, padding=2)
 
     def forward(self, image):
         outputs = self.impl(image)
+        # output[0] - heatmaps_lr_and_embeddings out with size [1, 34, h/4, w/4]
+        # output[1] - heatmaps out with size [1, 17, h/2, h/2]
+        # resize low-resolution heatmaps and embeddings (outputs[0]) to heatmaps shape (output[1])
         outputs[0] = torch.nn.functional.interpolate(
                 outputs[0],
                 size=(outputs[-1].size(2), outputs[-1].size(3)),
                 mode='bilinear',
                 align_corners=False
             )
+        # average of heatmaps
         outputs[1] = (outputs[0][:, :17, :, :] + outputs[1]) / 2
         outputs[0] = outputs[0][:, 17:, :, :]
-        # apply nms
+        # apply nms for heatmaps
         maxm = self.pool(outputs[1])
         maxm = torch.eq(maxm, outputs[1]).float()
         outputs.append(outputs[1] * maxm)
