@@ -100,7 +100,7 @@ public:
             }
             auto label = static_cast<decltype(detectionTresholds.size())>(detections[i * objectSize + 1]);
             float confidence = detections[i * objectSize + 2];
-            if (label - 1 < detectionTresholds.size() && confidence < detectionTresholds[label - 1]) {
+            if (0  < detectionTresholds.size() && confidence < detectionTresholds[0]) {
                 continue;
             }
 

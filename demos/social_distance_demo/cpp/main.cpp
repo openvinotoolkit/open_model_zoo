@@ -490,6 +490,10 @@ bool DetectionsProcessor::isReady() {
 
         for (PersonDetector::Result result : results) {
             switch (result.label) {
+                case 0: {
+                    personRects.emplace_back(result.location & cv::Rect{cv::Point(0, 0), sharedVideoFrame->frame.size()});
+                    break;
+                }
                 case 1: {
                     personRects.emplace_back(result.location & cv::Rect{cv::Point(0, 0), sharedVideoFrame->frame.size()});
                     break;
