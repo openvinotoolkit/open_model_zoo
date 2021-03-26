@@ -49,12 +49,12 @@ The application outputs cleaned wave to output file.
 
 ## Supported Models
 [Open Model Zoo Models](../../../models/intel/index.md) feature
-example BERT-large trained on the Squad*.
+example dns-poconet-like-*.
 
 [OpenVINO Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 Specifically the example command-line is as follows:
 ```
-    python3 mo.py -m <path_to_model>/dns-poconet.onnx
+    python3 mo.py -m <path_to_model>/dns-poconet-like-0001.onnx
 ```
 
 ## Example Demo Cmd-Line
@@ -62,7 +62,7 @@ You can use the following command to try the demo (assuming the model from the O
 [Model Downloader](../../../tools/downloader/README.md) executed with "--name dns*"):
 ```
     python3 deep_noise_suppresion.py
-            --model=<path_to_model>/dns-poconet-0001.xml
+            --model=<path_to_model>/dns-poconet-like-0001.xml
             --input=noisy.flac
             --output=cleaned.flac
 ```

@@ -277,5 +277,12 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 | text-to-speech-en-0001-regression                                                         | 7.65                 | 4.96       |
 | text-to-speech-en-0001-generation                                                         | 48.38                | 12.77      |
 
+Deep Learning models for noise suppression.
+
+| Model Name                                                                                | Complexity (GFLOPs)  | Size (Mp)  |
+|-------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [dns-poconet-like-0001](./dns-poconet-like-0001/dns-poconet-like-0001.md)                 | 1.2                  | 7.22       |
+
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
