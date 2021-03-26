@@ -128,12 +128,13 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
     return retVal;
 }
 
-void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void ModelSSD::checkCompiledNetworkInputsOutputs() {
+    ConstInputsDataMap nputInfo(execNetwork.GetInputsInfo());
+    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
+    ConstInputsDataMap inputInfo;
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
-
     for (const auto& inputInfoItem : inputInfo) {
         if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
             if (inputsNames.empty()) {
@@ -143,15 +144,6 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
                 inputsNames[0] = inputInfoItem.first;
             }
 
-            //if(!isCompiledNetwork)
-                //inputInfoItem.second->setPrecision(Precision::U8);
-            if (useAutoResize) {
-               // inputInfoItem.second->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-                inputInfoItem.second->getInputData()->setLayout(Layout::NHWC);
-            }
-            else {
-                inputInfoItem.second->getInputData()->setLayout(Layout::NCHW);
-            }
             const TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
             netInputHeight = getTensorHeight(inputDesc);
             netInputWidth = getTensorWidth(inputDesc);
@@ -159,7 +151,6 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
         else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
             inputsNames.resize(2);
             inputsNames[1] = inputInfoItem.first;
-            //inputInfoItem.second->setPrecision(Precision::FP32);
         }
         else {
             throw std::logic_error("Unsupported " +
@@ -173,6 +164,103 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
     ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
     if (outputInfo.size() == 1) {
+        CDataPtr& output = outputInfo.begin()->second;
+        outputsNames.push_back(outputInfo.begin()->first);
+
+        const SizeVector outputDims = output->getTensorDesc().getDims();
+
+        if (outputDims.size() != 4) {
+            throw std::logic_error("Incorrect output dimensions for SSD");
+        }
+
+        maxProposalCount = outputDims[2];
+        objectSize = outputDims[3];
+        if (objectSize != 7) {
+            throw std::logic_error("Output should have 7 as a last dimension");
+        }
+    }
+    else {
+        if (outputInfo.find("bboxes") != outputInfo.end() && outputInfo.find("labels") != outputInfo.end() &&
+            outputInfo.find("scores") != outputInfo.end()) {
+            outputsNames.push_back("bboxes");
+            outputsNames.push_back("labels");
+            outputsNames.push_back("scores");
+        }
+        else if (outputInfo.find("boxes") != outputInfo.end() && outputInfo.find("labels") != outputInfo.end()) {
+            outputsNames.push_back("boxes");
+            outputsNames.push_back("labels");
+        }
+        else {
+            throw std::logic_error("Non-supported model architecutre (wrong number of outputs or wrong outputs names)");
+        }
+
+        const SizeVector outputDims = outputInfo[outputsNames[0]]->getTensorDesc().getDims();
+
+        if (outputDims.size() == 2) {
+            maxProposalCount = outputDims[0];
+            objectSize = outputDims[1];
+
+            if (objectSize != 5) {
+                throw std::logic_error("Incorrect 'boxes' output shape, [n][5] shape is required");
+            }
+        }
+        else if (outputDims.size() == 3) {
+            maxProposalCount = outputDims[1];
+            objectSize = outputDims[2];
+
+            if (objectSize != 4) {
+                throw std::logic_error("Incorrect 'bboxes' output shape, [b][n][4] shape is required");
+            }
+        }
+        else {
+            throw std::logic_error("Incorrect number of 'boxes' output dimensions");
+        }
+    }
+}
+
+void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+    // --------------------------- Configure input & output -------------------------------------------------
+    // --------------------------- Prepare input blobs ------------------------------------------------------
+    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
+    InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+    for (const auto& inputInfoItem : inputInfo) {
+        if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
+            if (inputsNames.empty()) {
+                inputsNames.push_back(inputInfoItem.first);
+            }
+            else {
+                inputsNames[0] = inputInfoItem.first;
+            }
+
+            inputInfoItem.second->setPrecision(Precision::U8);
+            if (useAutoResize) {
+                inputInfoItem.second->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
+                inputInfoItem.second->getInputData()->setLayout(Layout::NHWC);
+            }
+            else {
+                inputInfoItem.second->getInputData()->setLayout(Layout::NCHW);
+            }
+            const TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
+            netInputHeight = getTensorHeight(inputDesc);
+            netInputWidth = getTensorWidth(inputDesc);
+        }
+        else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
+            inputsNames.resize(2);
+            inputsNames[1] = inputInfoItem.first;
+            inputInfoItem.second->setPrecision(Precision::FP32);
+        }
+        else {
+            throw std::logic_error("Unsupported " +
+                std::to_string(inputInfoItem.second->getTensorDesc().getDims().size()) + "D "
+                "input layer '" + inputInfoItem.first + "'. "
+                "Only 2D and 4D input layers are supported");
+        }
+    }
+
+    // --------------------------- Prepare output blobs -----------------------------------------------------
+    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
+    OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
+    if (outputInfo.size() == 1) {
         prepareSingleOutput(outputInfo);
     }
     else {
@@ -180,8 +268,8 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     }
 }
 
-void ModelSSD::prepareSingleOutput(ConstOutputsDataMap & outputInfo) {
-    CDataPtr& output = outputInfo.begin()->second;
+void ModelSSD::prepareSingleOutput(OutputsDataMap& outputInfo) {
+    DataPtr& output = outputInfo.begin()->second;
     outputsNames.push_back(outputInfo.begin()->first);
 
     const SizeVector outputDims = output->getTensorDesc().getDims();
@@ -196,11 +284,11 @@ void ModelSSD::prepareSingleOutput(ConstOutputsDataMap & outputInfo) {
         throw std::logic_error("Output should have 7 as a last dimension");
     }
 
-   // output->setPrecision(Precision::FP32);
-    //output->setLayout(Layout::NCHW);
+    output->setPrecision(Precision::FP32);
+    output->setLayout(Layout::NCHW);
 }
 
-void ModelSSD::prepareMultipleOutputs(ConstOutputsDataMap& outputInfo) {
+void ModelSSD::prepareMultipleOutputs(OutputsDataMap& outputInfo) {
     if (outputInfo.find("bboxes") != outputInfo.end() && outputInfo.find("labels") != outputInfo.end() &&
         outputInfo.find("scores") != outputInfo.end()) {
         outputsNames.push_back("bboxes");
@@ -237,7 +325,7 @@ void ModelSSD::prepareMultipleOutputs(ConstOutputsDataMap& outputInfo) {
         throw std::logic_error("Incorrect number of 'boxes' output dimensions");
     }
 
-    //for(auto name : outputsNames) {
-    //    outputInfo[name]->setPrecision(Precision::FP32);
-    //}
+    for(auto name : outputsNames) {
+        outputInfo[name]->setPrecision(Precision::FP32);
+    }
 }
