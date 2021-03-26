@@ -2,6 +2,9 @@
 # Copyright (C) 2020 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
+
+from types import SimpleNamespace as namespace
+
 import numpy as np
 
 import ctcdecode_numpy
@@ -37,7 +40,7 @@ class CtcnumpyBeamSearchDecoder:
         output, scores, timesteps, out_seq_len = self.decoder_state.decode(probs[np.newaxis])
         assert out_seq_len.shape[0] == 1
         beam_results = [
-            dict(
+            namespace(
                 conf=scores[0, res_idx],
                 text=self.alphabet.decode(output[0, res_idx, :out_seq_len[0, res_idx]]),
                 ts=list(timesteps[0, res_idx]),

@@ -1,20 +1,22 @@
+from types import SimpleNamespace as namespace
+
 random_seed = 100
 
-obj_det = dict(
+obj_det = namespace(
     trg_classes=(1,)
 )
 
-obj_segm = dict(
+obj_segm = namespace(
     trg_classes=(3, 6, 8)
 )
 
-mct_config = dict(
+mct_config = namespace(
     time_window=5,
     global_match_thresh=0.2,
     bbox_min_aspect_ratio=0.1
 )
 
-sct_config = dict(
+sct_config = namespace(
     time_window=4,
     continue_time_thresh=3,
     track_clear_thresh=3000,
@@ -30,19 +32,19 @@ sct_config = dict(
     rectify_thresh=0.1
 )
 
-normalizer_config = dict(
+normalizer_config = namespace(
     enabled=False,
     clip_limit=.5,
     tile_size=8
 )
 
-visualization_config = dict(
+visualization_config = namespace(
     show_all_detections=True,
     max_window_size=(1920, 1080),
     stack_frames='vertical'
 )
 
-analyzer = dict(
+analyzer = namespace(
     enable=False,
     show_distances=True,
     save_distances='',
@@ -52,8 +54,8 @@ analyzer = dict(
     crop_size=(32, 64)
 )
 
-embeddings = dict(
+embeddings = namespace(
     save_path='',
-    use_images=True,  # Use it with `analyzer['enable'] = True` to save crops of objects
+    use_images=True,  # Use it with `analyzer.enable = True` to save crops of objects
     step=0  # Equal to subdirectory for `save_path`
 )
