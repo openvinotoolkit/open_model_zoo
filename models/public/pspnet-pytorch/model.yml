@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  pspnet-pytorch is a semantic segmentation model, pretrained on Pascal VOC <http://host.robots.ox.ac.uk/pascal/VOC/>
+  "pspnet-pytorch" is a semantic segmentation model, pre-trained on Pascal VOC <http://host.robots.ox.ac.uk/pascal/VOC/>
   dataset for 21 object classes. The model was built on ResNetV1-50 <https://arxiv.org/pdf/1812.01187.pdf>
   backbone and PSP segmentation head. This model is used for pixel-level prediction
   tasks. For details see repository <https://github.com/open-mmlab/mmsegmentation/tree/master>,
@@ -44,10 +44,10 @@ files:
     size: 321
     sha256: 27e0d1e40cf3956e2af35b8de32436eb78f91715570ba435144b29b515b1b5a1
     source: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/993be2523b908d1e0cb45bc68e92d210b5b2cda1/configs/_base_/default_runtime.py
-  - name: models/mmsegmentation-0.8.0-py3-none-any.whl
-    size: 131477
-    sha256: d123820d7aea83459eaad15c6253867914e35e6965f974598a5774f1f6e0a3a7
-    source: https://files.pythonhosted.org/packages/7c/3c/47e53005fd0789c55f280fb1179d4750c74a259d4aeea2fccef3ce021321/mmsegmentation-0.8.0-py3-none-any.whl
+  - name: models/mmsegmentation-0.11.0-py3-none-any.whl
+    size: 147357
+    sha256: 5b28a1b1c84fef8a28ac6852ef72dfab6f56dc13c33b4b24ebb358f4ea003a4a
+    source: https://files.pythonhosted.org/packages/b4/f9/4722a9dfc9bf2d6d6f5cabb90cd61d549ae316ccbe226fc6e245b586d5f9/mmsegmentation-0.11.0-py3-none-any.whl
   - name: models/addict-2.4.0-py3-none-any.whl
     size: 3832
     sha256: 249bb56bbfd3cdc2a004ea0ff4c2b6ddc84d53bc2194761636eb314d5cfa5dfc
@@ -65,7 +65,7 @@ postprocessing:
     file: models/addict-2.4.0-py3-none-any.whl
   - $type: unpack_archive
     format: zip
-    file: models/mmsegmentation-0.8.0-py3-none-any.whl
+    file: models/mmsegmentation-0.11.0-py3-none-any.whl
 
   - $type: regex_replace
     pattern: '''../_base_/schedules/schedule_20k.py'''
