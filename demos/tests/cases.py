@@ -151,9 +151,9 @@ NATIVE_DEMOS = [
             ModelArg('repvgg-b1'),
             ModelArg('repvgg-b3'),
             ModelArg('resnet-50-caffe2')),
-        single_option_cases('-nthreads', NumThreads(1), NumThreads(2), NumThreads(4), NumThreads(8)),
-        single_option_cases('-nstreams', NumStreams(1), NumStreams(2), NumStreams(4), NumStreams(8)),
-        single_option_cases('-nireq', NumIRequests(1), NumIRequests(2), NumIRequests(4), NumIRequests(8))
+        # single_option_cases('-nthreads', NumThreads(1), NumThreads(2), NumThreads(4), NumThreads(8)),
+        # single_option_cases('-nstreams', NumStreams(1), NumStreams(2), NumStreams(4), NumStreams(8)),
+        # single_option_cases('-nireq', NumIRequests(1), NumIRequests(2), NumIRequests(4), NumIRequests(8))
     )),
 
     CppDemo(name='interactive_face_detection_demo',
