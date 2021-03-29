@@ -95,9 +95,9 @@ class SegmentationVisualizer:
 
 class SaliencyMapVisualizer:
     def overlay_masks(self, frame, objects):
-        saliency_map = cv2.merge([objects, objects, objects]) * 255
+        saliency_map = (objects * 255).astype(np.uint8)
+        saliency_map = cv2.merge([saliency_map, saliency_map, saliency_map])
         return np.floor_divide(frame, 2) + np.floor_divide(saliency_map, 2)
-
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
