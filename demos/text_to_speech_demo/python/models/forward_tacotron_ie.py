@@ -29,6 +29,8 @@ class ForwardTacotronIE:
         self.ie = ie
 
         self.duration_predictor_net = self.load_network(model_duration)
+        orig_shape = self.duration_predictor_net.input_info['input_seq'].input_data.shape
+        self.duration_predictor_net.reshape({"input_seq": (2 * orig_shape[0], 512)})
         self.duration_predictor_exec = self.create_exec_network(self.duration_predictor_net)
 
         self.forward_net = self.load_network(model_forward)
