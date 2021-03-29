@@ -40,6 +40,7 @@ Review the tools description in the file `<OPENVINO_INSTALL_DIR>/deployment_tool
 | MobileNet V2 1.4 224        | TensorFlow\*                       | [mobilenet-v2-1.4-224](./mobilenet-v2-1.4-224/mobilenet-v2-1.4-224.md) | 74.09%/91.97% | 1.183  | 6.087 |
 | MobileNet V3 Small 1.0      | TensorFlow\*                       | [mobilenet-v3-small-1.0-224-tf](./mobilenet-v3-small-1.0-224-tf/mobilenet-v3-small-1.0-224-tf.md) | 67.36%/87.45% | 0.121 | 2.537 |
 | MobileNet V3 Large 1.0      | TensorFlow\*                       | [mobilenet-v3-large-1.0-224-tf](./mobilenet-v3-large-1.0-224-tf/mobilenet-v3-large-1.0-224-tf.md) | 75.70%/92.76% | 0.4536 | 5.4721 |
+| NFNet F0                    | PyTorch\*                          | [nfnet-f0](./nfnet-f0/nfnet-f0.md) | 83.34%/96.56% | 24.8053 | 71.4444 |
 | DenseNet 121, alpha=0.125   | MXNet\*                            | [octave-densenet-121-0.125](./octave-densenet-121-0.125/octave-densenet-121-0.125.md) | 76.066%/93.044% | 4.883 | 7.977 |
 | RegNetX-3.2GF               | PyTorch\*                          | [regnetx-3.2gf](./regnetx-3.2gf/regnetx-3.2gf.md) | 78.17%/94.08% | 6.3893 | 15.2653 |
 | ResNet 26, alpha=0.25       | MXNet\*                            | [octave-resnet-26-0.25](./octave-resnet-26-0.25/octave-resnet-26-0.25.md)     | 76.076%/92.584%| 3.768 | 15.99 |
