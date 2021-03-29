@@ -111,6 +111,30 @@ postprocessing:
     pattern: 'import cv2'
     replacement: '# \g<0>'
     file: models/mmcv-1.2.0/mmcv/utils/env.py
+  - $type: regex_replace
+    pattern: 'import (regex as re|re)'
+    replacement: 'pass'
+    file: models/mmcv-1.2.0/mmcv/cnn/bricks/plugin.py
+  - $type: regex_replace
+    pattern: '(import (regex as re|re)|shutil.copyfile.+)'
+    replacement: 'pass'
+    file: models/mmcv-1.2.0/mmcv/utils/config.py
+  - $type: regex_replace
+    pattern: '(.+re.sub.+|.+osp.basename\(temp_config_file.name\))'
+    replacement: '# \g<0>'
+    file: models/mmcv-1.2.0/mmcv/utils/config.py
+  - $type: regex_replace
+    pattern: 'use_predefined_variables=True'
+    replacement: 'use_predefined_variables=False'
+    file: models/mmcv-1.2.0/mmcv/utils/config.py
+  - $type: regex_replace
+    pattern: 'osp.splitext\(temp_config_name\)\[0\]'
+    replacement: 'osp.splitext(osp.basename(filename))[0]'
+    file: models/mmcv-1.2.0/mmcv/utils/config.py
+  - $type: regex_replace
+    pattern: 'sys.path.insert\(0, temp_config_dir\)'
+    replacement: 'sys.path.insert(0, osp.dirname(filename))'
+    file: models/mmcv-1.2.0/mmcv/utils/config.py
 
 conversion_to_onnx_args:
   - --model-path=$config_dir
