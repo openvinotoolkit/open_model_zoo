@@ -267,6 +267,15 @@ The task of image deblurring.
 | -------------- | -------------- | ---------------------------------------------- | -------- | ------- | -------- |
 | DeblurGAN-v2   | PyTorch\*      | [deblurgan-v2](./deblurgan-v2/deblurgan-v2.md) | 28.25Db  | 80.8919 | 2.1083   |
 
+## Salient object detection
+
+ Salient object detection is a task-based on a visual attention mechanism,
+ in which algorithms aim to explore objects or regions more attentive than the surrounding areas on the scene or images.
+
+| Model Name     | Implementation | OMZ Model Name            | Accuracy | GFlops  | mParams  |
+| -------------- | -------------- | ------------------------- | -------- | ------- | -------- |
+| F3Net          | PyTorch\*      | [f3net](./f3net/f3net.md) | 84.21%   | 31.2883 | 25.2791  |
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.
