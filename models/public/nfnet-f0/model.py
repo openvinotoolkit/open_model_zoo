@@ -17,11 +17,11 @@ from timm.models.nfnet import NfCfg, NormFreeNet
 
 
 def create_normfreenet():
-    attn_kwargs = dict(reduction_ratio=0.5, divisor=8)
     channels = (256, 512, 1536, 1536)
     model_cfg = NfCfg(depths=(1, 2, 6, 3), channels=channels, stem_type='deep_quad', stem_chs=128, group_size=128,
                       bottle_ratio=0.5, extra_conv=True, gamma_in_act=True, same_padding=True, skipinit=True,
-                      num_features=channels[-1] * 2, act_layer='gelu', attn_layer='se', attn_kwargs=attn_kwargs)
+                      num_features=channels[-1] * 2, act_layer='gelu', attn_layer='se',
+                      attn_kwargs={'reduction_ratio': 0.5, 'divisor': 8})
 
     model = NormFreeNet(cfg=model_cfg)
 
