@@ -487,7 +487,15 @@ class NiftiImageReader(BaseReader):
         parameters = super().parameters()
         parameters.update({
             'channels_first': BoolField(optional=True, default=False,
-                                        description='Allows read files and transpose in order where channels first.')
+                                        description='Allows read files and transpose in order where channels first.'),
+            'frame_separator': StringField(optional=True, default='#',
+                                           description="Separator between filename and frame number"),
+            'multi_frame': BoolField(optional=True, default=False,
+                                    description="Add annotation for each frame in source file"),
+            'to_4D': BoolField(optional=True, default=True,
+                                    description="Ensure that data are 4D"),
+            'frame_axis': NumberField(optional=True, default=-1,
+                                           description="Frames dimension axis"),
         })
         return parameters
 
@@ -496,16 +504,29 @@ class NiftiImageReader(BaseReader):
             nib.raise_error(self.__provider__)
         self.channels_first = self.get_value_from_config('channels_first')
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.frame_axis = int(self.get_value_from_config('frame_axis'))
+        self.frame_separator = self.get_value_from_config('frame_separator')
+        self.multi_frame = self.get_value_from_config('multi_frame')
+        self.to_4D = self.get_value_from_config('to_4D')
+
         if not self.data_source:
             raise ConfigError('data_source parameter is required to create "{}" '
                               'data reader and read data'.format(self.__provider__))
 
     def read(self, data_id):
+        if self.multi_frame:
+            parts = data_id.split(self.frame_separator)
+            frame_number = int(parts[1])
+            data_id = parts[0]
         nib_image = nib.load(str(get_path(self.data_source / data_id)))
         image = np.array(nib_image.dataobj)
-        if len(image.shape) != 4:  # Make sure 4D
-            image = np.expand_dims(image, -1)
-        image = np.transpose(image, (3, 0, 1, 2) if self.channels_first else (2, 1, 0, 3))
+        if self.multi_frame:
+            image = image[:, :, frame_number]
+            image = np.expand_dims(image, 0)
+        if self.to_4D:
+            if len(image.shape) != 4:  # Make sure 4D
+                image = np.expand_dims(image, -1)
+            image = np.transpose(image, (3, 0, 1, 2) if self.channels_first else (2, 1, 0, 3))
 
         return image
 
