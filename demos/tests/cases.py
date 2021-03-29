@@ -409,7 +409,7 @@ NATIVE_DEMOS = [
     CppDemo(name='social_distance_demo', device_keys=['-d_det', '-d_reid'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
-            '-i': DataPatternArg('person-detection-retail')}),
+            '-i': DataDirectoryArg('person-detection-retail')}),
         [
             TestCase(options={'-m_det': ModelArg('person-detection-0200')}),
             TestCase(options={'-m_det': ModelArg('person-detection-0201')}),
