@@ -62,7 +62,7 @@ Expected color order - `BGR`.
 ## Output
 
 ### Original model
-Saliency map, name `1256`, shape `1,1,352,352`, format `B,C,H,W` where:
+Saliency map, name `saliency_map`, shape `1,1,352,352`, format `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - number of channels

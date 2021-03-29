@@ -37,7 +37,7 @@ logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, 
 log = logging.getLogger()
 
 
-class Visualizer(object):
+class SegmentationVisualizer:
     pascal_voc_palette = [
         (0,   0,   0),
         (128, 0,   0),
@@ -92,6 +92,10 @@ class Visualizer(object):
     def overlay_masks(self, frame, objects):
         # Visualizing result data over source image
         return np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2)
+
+class SaliencyMapVisualizer:
+    def overlay_masks(self, frame, objects):
+        return np.floor_divide(frame, 2) + np.floor_divide(objects * 255, 2)
 
 
 def build_argparser():
@@ -167,9 +171,9 @@ def get_plugin_configs(device, num_streams, num_threads):
 
 def get_model(ie, args):
     if args.architecture_type == 'segmentation':
-        return SegmentationModel(ie, args.model)
+        return SegmentationModel(ie, args.model), SegmentationVisualizer(args.colors)
     if args.architecture_type == 'salient_object_detection':
-        return SalientObjectDetectionModel(ie, args.model)
+        return SalientObjectDetectionModel(ie, args.model), SaliencyMapVisualizer()
 
 def main():
     metrics = PerformanceMetrics()
@@ -182,7 +186,7 @@ def main():
 
     log.info('Loading network...')
 
-    model = get_model(ie, args)
+    model, visualizer = get_model(ie, args)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
@@ -194,7 +198,6 @@ def main():
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
-    visualizer = Visualizer(args.colors)
     presenter = None
     video_writer = cv2.VideoWriter()
 
@@ -228,7 +231,6 @@ def main():
             objects, frame_meta = results
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
-
             frame = visualizer.overlay_masks(frame, objects)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
