@@ -829,3 +829,11 @@ class UnsupportedPackage:
 
     def __call__(self, *args, **kwargs):
         self.raise_error('')
+
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+
+def generate_layer_name(prefix, with_prefix, layer_name):
+    return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]

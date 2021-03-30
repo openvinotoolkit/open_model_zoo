@@ -28,7 +28,12 @@ class TacotronDataConverter(FileBasedAnnotationConverter):
         num_iter = len(examples)
         for example_id, example in enumerate(examples):
             gt = example['synthesis']
-            identifier = [example['text_encoder_out'], example['domain'], example['f0_labels'], example['bert_embedding']]
+            identifier = [
+                example['text_encoder_out'],
+                example['domain'],
+                example['f0_labels'],
+                example['bert_embedding']
+            ]
             annotations.append(FeaturesRegressionAnnotation(identifier, gt, is_bin=True))
             if progress_callback and example_id % progress_interval == 0:
                 progress_callback(example_id * 100 / num_iter)

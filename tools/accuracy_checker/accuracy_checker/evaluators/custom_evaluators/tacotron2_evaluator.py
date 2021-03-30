@@ -14,22 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-
 from pathlib import Path
 import numpy as np
 from .text_to_speech_evaluator import TextToSpeechEvaluator, TTSDLSDKModel
 from ...adapters import create_adapter
 from ...config import ConfigError
 from ...launcher import create_launcher
-from ...utils import contains_all
-
-
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
-
-
-def generate_name(prefix, with_prefix, layer_name):
-    return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
+from ...utils import contains_all, sigmoid, generate_layer_name
 
 
 class Synthesizer:
@@ -69,12 +60,8 @@ class Synthesizer:
             'decoder': self.decoder,
             'postnet': self.postnet
         }
-        self.encoder_embedding_dim = 512
-        self.decoder_rnn_dim = 800
         self.max_decoder_steps = 500
         self.gate_threshold = 0.6
-        self.n_mel_channels = 22
-        self.attention_rnn_dim = 800
 
     def predict(self, identifiers, input_data, input_meta, input_names=None, callback=None):
         assert len(identifiers) == 1
@@ -90,26 +77,8 @@ class Synthesizer:
         offset = 20
 
         encoder_output = encoder_outputs[self.encoder.output_mapping['encoder_outputs']]
-        decoder_input = np.zeros((1, self.n_mel_channels), dtype=np.float32)
-        attention_hidden = np.zeros((1, self.attention_rnn_dim), dtype=np.float32)
-        attention_cell = np.zeros((1, self.attention_rnn_dim), dtype=np.float32)
-        decoder_hidden = np.zeros((1, self.decoder_rnn_dim), dtype=np.float32)
-        decoder_cell = np.zeros((1, self.decoder_rnn_dim), dtype=np.float32)
-        attention_weights = np.zeros((1, encoder_output.shape[1]), dtype=np.float32)
-        attention_weights_cum = np.zeros((1, encoder_output.shape[1]), dtype=np.float32)
-        attention_context = np.zeros((1, self.encoder_embedding_dim), dtype=np.float32)
-        feed_dict = {
-            'decoder_input': decoder_input,
-            'attention_hidden': attention_hidden,
-            'attention_cell': attention_cell,
-            'decoder_hidden': decoder_hidden,
-            'decoder_cell': decoder_cell,
-            'attention_weights': attention_weights,
-            'attention_weights_cum': attention_weights_cum,
-            'attention_context': attention_context,
-            'encoder_outputs': encoder_output
-        }
-        for q in range(self.max_decoder_steps):
+        feed_dict = self.decoder.init_feed_dict(encoder_output)
+        for _ in range(self.max_decoder_steps):
             decoder_outs, feed_dict = self.decoder.predict(feed_dict)
             decoder_input = decoder_outs[self.decoder.output_mapping['decoder_input']]
             finished = decoder_outs[self.decoder.output_mapping['finished']]
@@ -122,7 +91,9 @@ class Synthesizer:
 
             if n == scheduler[j]:
                 postnet_input = np.transpose(np.array(mel_outputs[-scheduler[j] - offset:]), (1, 2, 0))
-                postnet_out = self.postnet.predict({'mel_outputs': postnet_input})[next(iter(self.postnet.output_mapping))]
+                postnet_out = self.postnet.predict(
+                    {self.postnet.input_mapping['mel_outputs']: postnet_input}
+                )[self.postnet.output_mapping['postnet_outputs']]
 
                 for k in range(postnet_out.shape[2]):
                     postnet_outputs.append(postnet_out[:, :, k])
@@ -136,7 +107,9 @@ class Synthesizer:
                 mel_outputs += [mel_outputs[-1]] * 10
                 n += 10
                 postnet_input = np.transpose(np.array(mel_outputs[-n - offset:]), (1, 2, 0))
-                postnet_out = self.postnet.predict({'mel_outputs': postnet_input})[next(iter(self.postnet.output_mapping))]
+                postnet_out = self.postnet.predict(
+                    {self.postnet.input_mapping['mel_outputs']: postnet_input}
+                )[self.postnet.output_mapping['postnet_outputs']]
 
                 for k in range(postnet_out.shape[2]):
                     postnet_outputs.append(postnet_out[:, :, k])
@@ -179,6 +152,8 @@ class Synthesizer:
 
 
 class EncoderModel:
+    default_model_suffix = 'encoder'
+
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.network_info = network_info
         self.input_mapping = {
@@ -191,6 +166,7 @@ class EncoderModel:
         self.text_enc_dim = 384
         self.bert_dim = 768
         self.prepare_model(launcher, network_info, delayed_model_loading)
+        self.launcher = launcher
 
     def predict(self, feed_dict):
         feed_dict = self.prepare_inputs(feed_dict)
@@ -210,13 +186,15 @@ class EncoderModel:
 
     def update_inputs_outputs_info(self, with_prefix):
         for input_id, input_name in self.input_mapping.items():
-            self.input_mapping[input_id] = generate_name(input_name, 'encoder_', with_prefix)
+            self.input_mapping[input_id] = generate_layer_name(input_name, 'encoder_', with_prefix)
 
         for out_id, out_name in self.output_mapping.items():
-            self.output_mapping[out_id] = generate_name(out_name, 'encoder_', with_prefix)
+            self.output_mapping[out_id] = generate_layer_name(out_name, 'encoder_', with_prefix)
 
 
 class DecoderModel:
+    default_model_suffix = 'decoder'
+
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.network_info = network_info
         self.input_mapping = {
@@ -228,7 +206,7 @@ class DecoderModel:
             'attention_weights': 'attention_weights',
             'attention_weights_cum': 'attention_weights_cum',
             'attention_context': 'attention_context',
-            'encoder_outputs': 'encoder_output'
+            'encoder_outputs': 'encoder_outputs'
         }
         self.output_mapping = {
             'finished': '109',
@@ -242,8 +220,14 @@ class DecoderModel:
             'attention_context': '88'
         }
         self.prepare_model(launcher, network_info, delayed_model_loading)
+        self.launcher = launcher
+        self.n_mel_channels = 22
+        self.attention_rnn_dim = 800
+        self.encoder_embedding_dim = 512
+        self.decoder_rnn_dim = 800
 
-    def prepare_inputs(self, feed_dict):
+    @staticmethod
+    def prepare_inputs(feed_dict):
         return feed_dict
 
     def predict(self, feed_dict):
@@ -265,13 +249,36 @@ class DecoderModel:
 
     def update_inputs_outputs_info(self, with_prefix):
         for input_id, input_name in self.input_mapping.items():
-            self.input_mapping[input_id] = generate_name(input_name, 'decoder_', with_prefix)
+            self.input_mapping[input_id] = generate_layer_name(input_name, 'decoder_', with_prefix)
 
         for out_id, out_name in self.output_mapping.items():
-            self.output_mapping[out_id] = generate_name(out_name, 'decoder_', with_prefix)
+            self.output_mapping[out_id] = generate_layer_name(out_name, 'decoder_', with_prefix)
+
+    def init_feed_dict(self,encoder_output):
+        decoder_input = np.zeros((1, self.n_mel_channels), dtype=np.float32)
+        attention_hidden = np.zeros((1, self.attention_rnn_dim), dtype=np.float32)
+        attention_cell = np.zeros((1, self.attention_rnn_dim), dtype=np.float32)
+        decoder_hidden = np.zeros((1, self.decoder_rnn_dim), dtype=np.float32)
+        decoder_cell = np.zeros((1, self.decoder_rnn_dim), dtype=np.float32)
+        attention_weights = np.zeros((1, encoder_output.shape[1]), dtype=np.float32)
+        attention_weights_cum = np.zeros((1, encoder_output.shape[1]), dtype=np.float32)
+        attention_context = np.zeros((1, self.encoder_embedding_dim), dtype=np.float32)
+        return {
+            self.input_mapping['decoder_input']: decoder_input,
+            self.input_mapping['attention_hidden']: attention_hidden,
+            self.input_mapping['attention_cell']: attention_cell,
+            self.input_mapping['decoder_hidden']: decoder_hidden,
+            self.input_mapping['decoder_cell']: decoder_cell,
+            self.input_mapping['attention_weights']: attention_weights,
+            self.input_mapping['attention_weights_cum']: attention_weights_cum,
+            self.input_mapping['attention_context']: attention_context,
+            self.input_mapping['encoder_outputs']: encoder_output
+        }
 
 
 class PostNetModel:
+    default_model_suffix = 'postnet'
+
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.network_info = network_info
         self.input_mapping = {'mel_outputs': 'mel_outputs'}
@@ -282,7 +289,8 @@ class PostNetModel:
         feed_dict = self.prepare_inputs(feed_dict)
         return self.infer(feed_dict)
 
-    def prepare_inputs(self, feed_dict):
+    @staticmethod
+    def prepare_inputs(feed_dict):
         return feed_dict
 
     def infer(self, feed_dict):
@@ -293,16 +301,29 @@ class PostNetModel:
 
     def update_inputs_outputs_info(self, with_prefix):
         for input_id, input_name in self.input_mapping.items():
-            self.input_mapping[input_id] = generate_name(input_name, 'postnet_', with_prefix)
+            self.input_mapping[input_id] = generate_layer_name(input_name, 'postnet_', with_prefix)
 
         for out_id, out_name in self.output_mapping.items():
-            self.output_mapping[out_id] = generate_name(out_name, 'postnet_', with_prefix)
+            self.output_mapping[out_id] = generate_layer_name(out_name, 'postnet_', with_prefix)
 
 
 class EncoderOpenVINOModel(EncoderModel, TTSDLSDKModel):
     def prepare_model(self, launcher, network_info, delayed_model_loading):
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
+
+    def prepare_inputs(self, feed):
+        feed_dict = super().prepare_inputs(feed)
+        if (
+                feed_dict[self.input_mapping['text_encoder_outputs']].shape !=
+                self.inputs[self.input_mapping['text_encoder_outputs']].input_data.shape
+        ):
+            new_shapes = {
+                input_name: feed_dict[input_name].shape if input_name in feed_dict else self.inputs[input_name].shape
+                for input_name in self.inputs
+            }
+            self._reshape_input(new_shapes)
+        return feed_dict
 
     def infer(self, feed_dict):
         return self.exec_network.infer(feed_dict)
@@ -325,6 +346,8 @@ class BaseONNXModel:
 
     def release(self):
         del self.inference_session
+        if hasattr(self, 'launcher'):
+            self.launcher.release()
 
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
@@ -364,6 +387,27 @@ class DecoderOpenVINOModel(DecoderModel, TTSDLSDKModel):
     def infer(self, feed_dict):
         return self.exec_network.infer(feed_dict)
 
+    def prepare_inputs(self, feed_dict):
+        if next(iter(self.input_mapping.values())) not in feed_dict:
+            feed_dict_ = {self.input_mapping[input_name]: data for input_name, data in feed_dict.items()}
+            feed_dict = feed_dict_
+        if (
+                feed_dict[self.input_mapping['encoder_outputs']].shape !=
+                self.inputs[self.input_mapping['encoder_outputs']].input_data.shape
+        ):
+            new_shapes = {
+                input_name: feed_dict[input_name].shape
+                            if input_name in feed_dict else self.inputs[input_name].input_data.shape
+                for input_name in self.inputs
+            }
+            self._reshape_input(new_shapes)
+        return feed_dict
+
+    def _reshape_input(self, input_shapes):
+        del self.exec_network
+        self.network.reshape(input_shapes)
+        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
+
 
 class PostNetONNXModel(BaseONNXModel, PostNetModel):
     pass
@@ -376,6 +420,11 @@ class PostNetOpenVINOModel(PostNetModel, TTSDLSDKModel):
 
     def infer(self, feed_dict):
         return self.exec_network.infer(feed_dict)
+
+    def prepare_inputs(self, feed_dict):
+        if next(iter(self.input_mapping.values())) not in feed_dict:
+            return {self.input_mapping[input_name]: data for input_name, data in feed_dict.items()}
+        return feed_dict
 
 
 def create_encoder(model_config, launcher, delayed_model_loading=False):
