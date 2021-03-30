@@ -15,7 +15,6 @@
 import mmcv
 import torch
 
-from functools import partial
 from mmcv.onnx import register_extra_symbolics
 from mmseg.models.segmentors import EncoderDecoder
 
