@@ -220,7 +220,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `mask_channels_first` - allows read gt mask nifti files and transpose in order where channels first (Optional, default `False`)
   * `labels_file` - path to file, which contains labels (optional, if omitted no labels will be shown)
   * `relaxed_names` - allows to use more relaxed search of labels matching only numeric ids. Optional, by default full name matching required.
-  * `multi_frame` - allows annotation of 3D images as sequence of 2D frames (optional, default `False`)
+  * `multi_frame` - allows to convert annotation of 3D images as sequence of 2D frames (optional, default `False`)
   * `frame_separator` - string separator between file name and frame number in `multi_frame` (optional, default `#`)
   * `frame_axis` - number of frame axis in 3D Image (optional, default `-1`, last axis)
   * `as_regression` - allows dataset conversion as `NiftiRegressionAnnotation` annotation (optional, default `False`)
