@@ -27,6 +27,11 @@ from ...utils import contains_all
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
+
+def generate_name(prefix, with_prefix, layer_name):
+    return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
+
+
 class Synthesizer:
     def __init__(self, network_info, launcher, models_args, is_blob=None, delayed_model_loading=False):
         if not delayed_model_loading:
@@ -87,7 +92,7 @@ class Synthesizer:
         scheduler = [20] + [10] * 200
         offset = 20
 
-        encoder_output = encoder_outputs[self.encoder.output]
+        encoder_output = encoder_outputs[self.encoder.output_mapping['encoder_outputs']]
         decoder_input = np.zeros((1, self.n_mel_channels), dtype=np.float32)
         attention_hidden = np.zeros((1, self.attention_rnn_dim), dtype=np.float32)
         attention_cell = np.zeros((1, self.attention_rnn_dim), dtype=np.float32)
@@ -96,15 +101,17 @@ class Synthesizer:
         attention_weights = np.zeros((1, encoder_outputs.shape[1]), dtype=np.float32)
         attention_weights_cum = np.zeros((1, encoder_outputs.shape[1]), dtype=np.float32)
         attention_context = np.zeros((1, self.encoder_embedding_dim), dtype=np.float32)
-        feed_dict = {'decoder_input': decoder_input,
-                         'attention_hidden': attention_hidden,
-                         'attention_cell': attention_cell,
-                         'decoder_hidden': decoder_hidden,
-                         'decoder_cell': decoder_cell,
-                         'attention_weights': attention_weights,
-                         'attention_weights_cum': attention_weights_cum,
-                         'attention_context': attention_context,
-                         'encoder_outputs': encoder_outputs}
+        feed_dict = {
+            'decoder_input': decoder_input,
+            'attention_hidden': attention_hidden,
+            'attention_cell': attention_cell,
+            'decoder_hidden': decoder_hidden,
+            'decoder_cell': decoder_cell,
+            'attention_weights': attention_weights,
+            'attention_weights_cum': attention_weights_cum,
+            'attention_context': attention_context,
+            'encoder_outputs': encoder_output
+        }
         for q in range(self.max_decoder_steps):
             decoder_outs, feed_dict = self.decoder.predict(feed_dict)
             decoder_input = decoder_outs['decoder_input']
@@ -177,9 +184,9 @@ class Synthesizer:
 class EncoderModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.network_info = network_info
-        self.inputs_mapping = {
-            'text_encoder_outputs': 'text_encoder_outputs', 
-            'domain': 'domain', 
+        self.input_mapping = {
+            'text_encoder_outputs': 'text_encoder_outputs',
+            'domain': 'domain',
             'f0s': 'f0s',
             'bert_embedding': 'bert_embedding'
         }
@@ -197,17 +204,17 @@ class EncoderModel:
         raise NotImplementedError
 
     def update_inputs_outputs_info(self, with_prefix):
-        for input_id, input_name in self.inputs_mapping.items():
+        for input_id, input_name in self.input_mapping.items():
             self.input_mapping[input_id] = generate_name(input_name, 'encoder_', with_prefix)
-        
+
         for out_id, out_name in self.output_mapping.items():
-            self.output_mappint[out_id] = generate_name(out_name, 'encoder_', with_prefix)
+            self.output_mapping[out_id] = generate_name(out_name, 'encoder_', with_prefix)
 
 
 class DecoderModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.network_info = network_info
-        self.inputs_mapping = {
+        self.input_mapping = {
             'decoder_input': 'decoder_input',
             'attention_hidden': 'attention_hidden',
             'attention_cell': 'attention_cell',
@@ -216,16 +223,16 @@ class DecoderModel:
             'attention_weights': 'attention_weights',
             'attention_weights_cum': 'attention_weights_cum',
             'attention_context': 'attention_context',
-            'encoder_outputs': encoder_output
+            'encoder_outputs': 'encoder_output'
         }
         self.output_mapping = {
             'finished': '108',
             'decoder_input': '109',
-            'attention_hidden': '69', 
-            'attention_cell': '66', 
+            'attention_hidden': '69',
+            'attention_cell': '66',
             'decoder_hidden': '106',
-            'decoder_cell': '104', 
-            'attention_weights': '85', 
+            'decoder_cell': '104',
+            'attention_weights': '85',
             'attention_weights_cum': '89',
             'attention_context': '88'
         }
@@ -243,18 +250,17 @@ class DecoderModel:
         raise NotImplementedError
 
     def prepare_next_state_inputs(self, feed_dict, outputs):
-        common_layers = set(self.inputs_mapping).intersection(set(self.output_mapping))
+        common_layers = set(self.input_mapping).intersection(set(self.output_mapping))
         for common_layer in common_layers:
-            feed_dict[self.inputs_mapping[common_layer]] = outputs[self.output_mapping[common_layer]]
+            feed_dict[self.input_mapping[common_layer]] = outputs[self.output_mapping[common_layer]]
         return feed_dict
 
-
     def update_inputs_outputs_info(self, with_prefix):
-        for input_id, input_name in self.inputs_mapping.items():
+        for input_id, input_name in self.input_mapping.items():
             self.input_mapping[input_id] = generate_name(input_name, 'decoder_', with_prefix)
-        
+
         for out_id, out_name in self.output_mapping.items():
-            self.output_mappint[out_id] = generate_name(out_name, 'decoder_', with_prefix)
+            self.output_mapping[out_id] = generate_name(out_name, 'decoder_', with_prefix)
 
 
 class PostNetModel:
@@ -275,9 +281,9 @@ class PostNetModel:
         raise NotImplementedError
 
     def update_inputs_outputs_info(self, with_prefix):
-        for input_id, input_name in self.inputs_mapping.items():
+        for input_id, input_name in self.input_mapping.items():
             self.input_mapping[input_id] = generate_name(input_name, 'postnet_', with_prefix)
-        
+
         for out_id, out_name in self.output_mapping.items():
             self.output_mappint[out_id] = generate_name(out_name, 'postnet_', with_prefix)
 
@@ -288,10 +294,6 @@ class EncoderOpenVINOModel(EncoderModel, TTSDLSDKModel):
             self.load_model(network_info, launcher, log=True)
 
     def infer(self, feed_dict):
-        feature_layer_shape = self.inputs[self.feature_input]
-        if feature_layer_shape != feed_dict[self.feature_input].shape:
-            input_shapes = {in_name: value.shape for in_name, value in feed_dict.items()}
-            self._reshape_input(input_shapes)
         return self.exec_network.infer(feed_dict)
 
     def _reshape_input(self, input_shapes):
@@ -335,6 +337,10 @@ class BaseONNXModel:
             self.output_names = [output.name for output in outputs]
 
 
+class EncoderONNXModel(BaseONNXModel, EncoderModel):
+    pass
+
+
 class DecoderONNXModel(BaseONNXModel, DecoderModel):
     pass
 
@@ -371,7 +377,7 @@ def create_encoder(model_config, launcher, delayed_model_loading=False):
     if not model_class:
         raise ValueError('model for framework {} is not supported'.format(framework))
     return model_class(
-        model_config['encoder'], launcher, 
+        model_config['encoder'], launcher,
         delayed_model_loading
     )
 
@@ -400,9 +406,8 @@ def create_postnet(model_config, launcher, delayed_model_loading=False):
     if not model_class:
         raise ValueError('model for framework {} is not supported'.format(framework))
     return model_class(
-        model_config['decoder'], launcher, 'decoder', model_config['frame_size'],
-        model_config['nb_features'], delayed_model_loading
-    ))
+        model_config['postnet'], launcher, delayed_model_loading
+    )
 
 
 class Tacotron2Evaluator(TextToSpeechEvaluator):
