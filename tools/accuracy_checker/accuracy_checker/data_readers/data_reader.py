@@ -491,11 +491,9 @@ class NiftiImageReader(BaseReader):
             'frame_separator': StringField(optional=True, default='#',
                                            description="Separator between filename and frame number"),
             'multi_frame': BoolField(optional=True, default=False,
-                                    description="Add annotation for each frame in source file"),
-            'to_4D': BoolField(optional=True, default=True,
-                                    description="Ensure that data are 4D"),
-            'frame_axis': NumberField(optional=True, default=-1,
-                                           description="Frames dimension axis"),
+                                     description="Add annotation for each frame in source file"),
+            'to_4D': BoolField(optional=True, default=True, description="Ensure that data are 4D"),
+            'frame_axis': NumberField(optional=True, default=-1, description="Frames dimension axis"),
         })
         return parameters
 

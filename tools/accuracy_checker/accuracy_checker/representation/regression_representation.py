@@ -142,7 +142,7 @@ class NiftiRegressionAnnotation(BaseRepresentation):
         super().__init__(identifier)
         self.value_file = value_file
         self._reader_config = {'type': 'nifti_reader', 'to_4D': to_4D, 'channels_first': mask_channels_first,
-                                    'multi_frame': multi_frame, 'separator': separator, 'frame_axis': frame_axis}
+                               'multi_frame': multi_frame, 'separator': separator, 'frame_axis': frame_axis}
         self._value = None
 
     @property

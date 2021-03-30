@@ -45,9 +45,8 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
             'frame_separator': StringField(optional=True, default='#',
                                            description="Separator between filename and frame number"),
             'multi_frame': BoolField(optional=True, default=False,
-                                    description="Add annotation for each frame in source file"),
-            'frame_axis': NumberField(optional=True, default=-1,
-                                           description="Frames dimension axis"),
+                                     description="Add annotation for each frame in source file"),
+            'frame_axis': NumberField(optional=True, default=-1, description="Frames dimension axis"),
             'as_regression': BoolField(optional=True, default=False,
                                        description="annotate dataset as RegressionAnnotation"),
             'mask_channels_first': BoolField(optional=True, default=False)
@@ -73,11 +72,11 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
         if self.as_regression:
             annotation_class = NiftiRegressionAnnotation
             reader_config = {'to_4D': False, 'multi_frame': self.multi_frame,
-                             'separator': self.frame_separator, 'frame_axis': self.frame_axis }
+                             'separator': self.frame_separator, 'frame_axis': self.frame_axis}
         else:
             annotation_class = BrainTumorSegmentationAnnotation
             reader_config = {'loader': GTMaskLoader.NIFTI_CHANNELS_FIRST if self.mask_channels_first else
-                GTMaskLoader.NIFTI}
+                                                                             GTMaskLoader.NIFTI}
 
         mask_folder = Path(self.mask_folder)
         image_folder = Path(self.image_folder)
