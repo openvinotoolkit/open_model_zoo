@@ -20,7 +20,7 @@ class VaApiImagePool;
 class VaApiImage : public Image{
   friend class VaApiImagePool;
   public:
-    VaApiContext *context = nullptr;
+    VaApiContext *context;
 
   protected:
     std::atomic_bool completed;
@@ -36,10 +36,9 @@ class VaPooledImage{
     VaPooledImage(VaApiImage* img, VaApiImagePool* pool);
     ~VaPooledImage();
 
-    VaApiImage* image;
+    VaApiImage* image = nullptr;
   protected:
-    VaApiImagePool* pool=nullptr;
-
+    VaApiImagePool* pool = nullptr;
 };
 
 class VaApiImagePool {

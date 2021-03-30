@@ -33,8 +33,8 @@ VASurfaceID CreateVASurface(VADisplay dpy, uint32_t width, uint32_t height, Four
 } // namespace
 
 VaApiImage::VaApiImage(VaApiContext *context_, uint32_t width, uint32_t height, FourCC format, MemoryType memory_type) :
-    completed(true),
-    context(context_) {
+    context(context_),
+    completed(true) {
     this->type = memory_type;
     this->width = width;
     this->height = height;
@@ -55,8 +55,8 @@ void VaApiImage::DestroyImage() {
 }
 
 VaPooledImage::VaPooledImage(VaApiImage* img, VaApiImagePool* pool) :
-    pool(pool),
-    image(img) {
+    image(img),
+    pool(pool) {
 };
 
 VaPooledImage::~VaPooledImage() {

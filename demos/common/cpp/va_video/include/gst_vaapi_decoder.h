@@ -34,9 +34,7 @@ public:
 private:
     std::shared_ptr<InferenceBackend::Image>  CreateImage(GstSample* sampleRead,
                                                           MemoryType mem_type, GstMapFlags map_flags);
-    double fps;
 
-private:
     std::string filename_;
 
     GstElement* pipeline_;
@@ -49,6 +47,7 @@ private:
     GstElement* app_sink_;
 
     GstVideoInfo* video_info_;
+    double fps;
 };
 
 }

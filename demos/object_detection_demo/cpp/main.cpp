@@ -422,7 +422,7 @@ int main(int argc, char *argv[]) {
             // Preparing video writer if needed
             if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
                 if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                    cap->fps(), outputResolution)) {
+                    videoFps, videoFrameSize)) {
                     throw std::runtime_error("Can't open video writer");
                 }
             }
