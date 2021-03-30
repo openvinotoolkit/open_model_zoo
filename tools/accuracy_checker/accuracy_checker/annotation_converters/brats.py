@@ -113,7 +113,6 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
                         "{}{}{}".format(str(image_folder / file_name), self.frame_separator, frame_cnt),
                         "{}{}{}".format(str(mask_folder / mask_file_name), self.frame_separator, frame_cnt),
                         **reader_config
-                        # loader=GTMaskLoader.NIFTI_CHANNELS_FIRST if self.mask_channels_first else GTMaskLoader.NIFTI
                     )
                     annotations.append(annotation)
             else:
@@ -121,7 +120,6 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
                 annotation = annotation_class(
                     str(image_folder / file_name),
                     str(mask_folder / mask_file_name),
-                    # loader=GTMaskLoader.NIFTI_CHANNELS_FIRST if self.mask_channels_first else GTMaskLoader.NIFTI
                     **reader_config
                 )
 

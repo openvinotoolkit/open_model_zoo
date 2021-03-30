@@ -147,7 +147,6 @@ class NiftiRegressionAnnotation(BaseRepresentation):
 
     @property
     def value(self):
-        # return np.zeros([1,512,512])
         if self._value is None:
             data_source = self.metadata.get('additional_data_source')
             if data_source is None:
