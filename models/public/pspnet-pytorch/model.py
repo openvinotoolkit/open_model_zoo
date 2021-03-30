@@ -19,51 +19,51 @@ from mmcv.onnx import register_extra_symbolics
 from mmseg.models.segmentors import EncoderDecoder
 
 
+register_extra_symbolics(opset=11)
+
+
 def _convert_batchnorm(module):
-    module_output = module
-    if isinstance(module, torch.nn.SyncBatchNorm):
-        module_output = torch.nn.BatchNorm2d(module.num_features, module.eps,
-                                             module.momentum, module.affine,
-                                             module.track_running_stats)
-        if module.affine:
-            module_output.weight.data = module.weight.data.clone().detach()
-            module_output.bias.data = module.bias.data.clone().detach()
-            # keep requires_grad unchanged
-            module_output.weight.requires_grad = module.weight.requires_grad
-            module_output.bias.requires_grad = module.bias.requires_grad
-        module_output.running_mean = module.running_mean
-        module_output.running_var = module.running_var
-        module_output.num_batches_tracked = module.num_batches_tracked
     for name, child in module.named_children():
-        module_output.add_module(name, _convert_batchnorm(child))
-    del module
-    return module_output
+        if isinstance(child, torch.nn.SyncBatchNorm):
+            new_child  = torch.nn.BatchNorm2d(child.num_features, child.eps,
+                                                 child.momentum, child.affine,
+                                                 child.track_running_stats)
+            if child.affine:
+                new_child.weight.data = child.weight.data.clone().detach()
+                new_child.bias.data = child.bias.data.clone().detach()
+                # keep requires_grad unchanged
+                new_child.weight.requires_grad = child.weight.requires_grad
+                new_child.bias.requires_grad = child.bias.requires_grad
+            new_child.running_mean = child.running_mean
+            new_child.running_var = child.running_var
+            new_child.num_batches_tracked = child.num_batches_tracked
+            setattr(module, name, new_child)
+        else:
+            _convert_batchnorm(child)
 
 
 class PSPNet(EncoderDecoder):
     def __init__(self, weights_path, config_path):
         cfg = mmcv.Config.fromfile(config_path)
         cfg.model.pretrained = None
-        cfg.model['train_cfg'] = None
-        cfg.model['test_cfg'] = mmcv.Config({'mode': 'whole'})
-        cfg.model.pop('type')
+        cfg.model.train_cfg = None
+        cfg.model.test_cfg = mmcv.Config({'mode': 'whole'})
+        del cfg.model.type
         super().__init__(**cfg.model)
         # convert SyncBN to BN
-        self = _convert_batchnorm(self)
-
-        self.img_metas = [[{
-            'img_shape': (512, 512, 3),
-            'ori_shape': (512, 512, 3),
-            'pad_shape': (512, 512, 3),
-            'filename': '<demo>.png',
-            'scale_factor': 1.0,
-            'flip': False,
-        }]]
+        _convert_batchnorm(self)
 
         weights = torch.load(weights_path, map_location='cpu')
         self.load_state_dict(weights['state_dict'])
 
     def forward(self, img):
-        opset_version = 11
-        register_extra_symbolics(opset_version)
-        return super().forward_test([img], self.img_metas)
+        img_shape = img.shape[:0:-1]
+        img_metas = [[{
+            'img_shape': img_shape,
+            'ori_shape': img_shape,
+            'pad_shape': img_shape,
+            'filename': '<demo>.png',
+            'scale_factor': 1.0,
+            'flip': False,
+        }]]
+        return super().forward_test([img], img_metas)
