@@ -223,7 +223,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `multi_frame` - allows annotation of 3D images as sequence of 2D frames (optional, default `False`)
   * `frame_separator` - string separator between file name and frame number in `multi_frame` (optional, default `#`)
   * `frame_axis` - number of frame axis in 3D Image (optional, default `-1`, last axis)
-  * `as_regression` - allows dataset annotation as `NiftiRegressionAnnotation` annotation (optional, default `False`)
+  * `as_regression` - allows dataset conversion as `NiftiRegressionAnnotation` annotation (optional, default `False`)
 
 * `movie_lens_converter` - converts Movie Lens Datasets format to `HitRatioAnnotation` format.
   * `rating_file` - path to file which contains movieId with top score for each userID (for example ml-1m-test-ratings.csv)
