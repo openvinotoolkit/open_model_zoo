@@ -76,7 +76,7 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
         else:
             annotation_class = BrainTumorSegmentationAnnotation
             reader_config = {'loader': GTMaskLoader.NIFTI_CHANNELS_FIRST if self.mask_channels_first else
-            GTMaskLoader.NIFTI}
+                                       GTMaskLoader.NIFTI}
 
         mask_folder = Path(self.mask_folder)
         image_folder = Path(self.image_folder)
