@@ -69,7 +69,7 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
 
     def convert(self, check_content=False, **kwargs):
         if self.multi_frame and isinstance(nib, UnsupportedPackage):
-                nib.raise_error(self.__provider__)
+            nib.raise_error(self.__provider__)
         if self.as_regression:
             annotation_class = NiftiRegressionAnnotation
             reader_config = {'to_4D': False, 'multi_frame': self.multi_frame,
