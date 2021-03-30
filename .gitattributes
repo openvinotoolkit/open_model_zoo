@@ -17,6 +17,13 @@
 /demos/tests/** -omz.package
 /tools/downloader/tests/** -omz.package
 
+* omz.package.component=dev
+/LICENSE omz.package.component=tools
+/data/dataset_definitions.yml omz.package.component=tools
+/models/**/*.py omz.package.component=tools
+/models/**/*.yml omz.package.component=tools
+/tools/**/* omz.package.component=tools
+
 /ci/requirements-ac.txt omz.ci.job-for-change.ac
 /ci/requirements-ac-test.txt omz.ci.job-for-change.ac
 /ci/requirements-conversion.txt omz.ci.job-for-change.demos omz.ci.job-for-change.models
