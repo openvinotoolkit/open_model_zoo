@@ -62,7 +62,6 @@ class Synthesizer:
         self.decoder = create_decoder(network_info, launcher, delayed_model_loading)
         self.postnet = create_postnet(network_info, launcher, delayed_model_loading)
         self.adapter = create_adapter(network_info['adapter'])
-        self.adapter.output_blob = 'audio'
 
         self.with_prefix = False
         self._part_by_name = {
@@ -76,8 +75,6 @@ class Synthesizer:
         self.gate_threshold = 0.6
         self.n_mel_channels = 22
         self.attention_rnn_dim = 800
-        self.text_enc_dim = 384
-        self.bert_dim = 768
 
     def predict(self, identifiers, input_data, input_meta, input_names=None, callback=None):
         assert len(identifiers) == 1
@@ -98,8 +95,8 @@ class Synthesizer:
         attention_cell = np.zeros((1, self.attention_rnn_dim), dtype=np.float32)
         decoder_hidden = np.zeros((1, self.decoder_rnn_dim), dtype=np.float32)
         decoder_cell = np.zeros((1, self.decoder_rnn_dim), dtype=np.float32)
-        attention_weights = np.zeros((1, encoder_outputs.shape[1]), dtype=np.float32)
-        attention_weights_cum = np.zeros((1, encoder_outputs.shape[1]), dtype=np.float32)
+        attention_weights = np.zeros((1, encoder_output.shape[1]), dtype=np.float32)
+        attention_weights_cum = np.zeros((1, encoder_output.shape[1]), dtype=np.float32)
         attention_context = np.zeros((1, self.encoder_embedding_dim), dtype=np.float32)
         feed_dict = {
             'decoder_input': decoder_input,
@@ -114,8 +111,8 @@ class Synthesizer:
         }
         for q in range(self.max_decoder_steps):
             decoder_outs, feed_dict = self.decoder.predict(feed_dict)
-            decoder_input = decoder_outs['decoder_input']
-            finished = decoder_outs['finished']
+            decoder_input = decoder_outs[self.decoder.output_mapping['decoder_input']]
+            finished = decoder_outs[self.decoder.output_mapping['finished']]
             # padding for the first chunk for postnet
             if len(mel_outputs) == 0:
                 mel_outputs = [decoder_input] * 10
@@ -125,7 +122,7 @@ class Synthesizer:
 
             if n == scheduler[j]:
                 postnet_input = np.transpose(np.array(mel_outputs[-scheduler[j] - offset:]), (1, 2, 0))
-                postnet_out = self.postnet.predict({'mel_outputs': postnet_input})[0]
+                postnet_out = self.postnet.predict({'mel_outputs': postnet_input})[next(iter(self.postnet.output_mapping))]
 
                 for k in range(postnet_out.shape[2]):
                     postnet_outputs.append(postnet_out[:, :, k])
@@ -139,14 +136,14 @@ class Synthesizer:
                 mel_outputs += [mel_outputs[-1]] * 10
                 n += 10
                 postnet_input = np.transpose(np.array(mel_outputs[-n - offset:]), (1, 2, 0))
-                postnet_out = self.postnet.predict({'mel_outputs': postnet_input})[0]
+                postnet_out = self.postnet.predict({'mel_outputs': postnet_input})[next(iter(self.postnet.output_mapping))]
 
                 for k in range(postnet_out.shape[2]):
                     postnet_outputs.append(postnet_out[:, :, k])
                 break
 
-        return {'postnet_outputs': np.array(postnet_outputs)[:, 0].reshape(-1, 22)}
-
+        out_blob = {'postnet_outputs': np.array(postnet_outputs)[:, 0].reshape(1, -1, 22)}
+        return {}, self.adapter.process(out_blob, identifiers, input_meta)
 
     def release(self):
         self.encoder.release()
@@ -191,6 +188,8 @@ class EncoderModel:
             'bert_embedding': 'bert_embedding'
         }
         self.output_mapping = {'encoder_outputs': 'encoder_outputs'}
+        self.text_enc_dim = 384
+        self.bert_dim = 768
         self.prepare_model(launcher, network_info, delayed_model_loading)
 
     def predict(self, feed_dict):
@@ -199,6 +198,12 @@ class EncoderModel:
 
     def infer(self, feed_dict):
         raise NotImplementedError
+
+    def prepare_inputs(self, feed):
+        feed[0] = feed[0].reshape(1, -1, self.text_enc_dim)
+        feed[2] = feed[2].reshape(1, -1)
+        feed[3] = feed[3].reshape(1, -1, self.bert_dim)
+        return dict(zip(self.input_mapping.values(), feed))
 
     def prepare_model(self, launcher, network_info, delayed_model_loading):
         raise NotImplementedError
@@ -226,9 +231,9 @@ class DecoderModel:
             'encoder_outputs': 'encoder_output'
         }
         self.output_mapping = {
-            'finished': '108',
-            'decoder_input': '109',
-            'attention_hidden': '69',
+            'finished': '109',
+            'decoder_input': '108',
+            'attention_hidden': '68',
             'attention_cell': '66',
             'decoder_hidden': '106',
             'decoder_cell': '104',
@@ -237,6 +242,9 @@ class DecoderModel:
             'attention_context': '88'
         }
         self.prepare_model(launcher, network_info, delayed_model_loading)
+
+    def prepare_inputs(self, feed_dict):
+        return feed_dict
 
     def predict(self, feed_dict):
         feed_dict = self.prepare_inputs(feed_dict)
@@ -266,13 +274,16 @@ class DecoderModel:
 class PostNetModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.network_info = network_info
-        self.inputs_mapping = {'mel_outputs': 'mel_outputs'}
+        self.input_mapping = {'mel_outputs': 'mel_outputs'}
         self.output_mapping = {'postnet_outputs': 'postnet_outputs'}
         self.prepare_model(launcher, network_info, delayed_model_loading)
 
     def predict(self, feed_dict):
         feed_dict = self.prepare_inputs(feed_dict)
         return self.infer(feed_dict)
+
+    def prepare_inputs(self, feed_dict):
+        return feed_dict
 
     def infer(self, feed_dict):
         raise NotImplementedError
@@ -285,7 +296,7 @@ class PostNetModel:
             self.input_mapping[input_id] = generate_name(input_name, 'postnet_', with_prefix)
 
         for out_id, out_name in self.output_mapping.items():
-            self.output_mappint[out_id] = generate_name(out_name, 'postnet_', with_prefix)
+            self.output_mapping[out_id] = generate_name(out_name, 'postnet_', with_prefix)
 
 
 class EncoderOpenVINOModel(EncoderModel, TTSDLSDKModel):

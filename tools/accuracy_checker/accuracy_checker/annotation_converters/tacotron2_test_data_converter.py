@@ -20,12 +20,14 @@ from ..utils import read_csv
 
 
 class TacotronDataConverter(FileBasedAnnotationConverter):
+    __provider__ = 'tacotron2_data_converter'
+
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         examples = read_csv(self.annotation_file, delimiter='\t')
         annotations = []
         num_iter = len(examples)
         for example_id, example in enumerate(examples):
-            gt = example['syntesis']
+            gt = example['synthesis']
             identifier = [example['text_encoder_out'], example['domain'], example['f0_labels'], example['bert_embedding']]
             annotations.append(FeaturesRegressionAnnotation(identifier, gt, is_bin=True))
             if progress_callback and example_id % progress_interval == 0:
