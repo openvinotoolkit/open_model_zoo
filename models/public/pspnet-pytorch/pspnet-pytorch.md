@@ -50,7 +50,7 @@ Expected color order: `BGR`.
 
 ### Original Model
 
-Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `Unsqueeze_259`, shape: `1, 1, 512, 512` in `B, 1, H, W` format where:
+Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `segmentation_map`, shape: `1, 1, 512, 512` in `B, 1, H, W` format where:
 
 - `B` - batch size
 - `H` - image height
@@ -58,7 +58,7 @@ Integer values in a range [0, 20], which represent an index of a predicted class
 
 ### Converted Model
 
-Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `Unsqueeze_259`, shape: `1, 1, 512, 512` in `B, 1, H, W` format where:
+Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `segmentation_map`, shape: `1, 1, 512, 512` in `B, 1, H, W` format where:
 
 - `B` - batch size
 - `H` - image height

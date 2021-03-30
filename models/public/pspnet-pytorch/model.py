@@ -17,7 +17,7 @@ import torch
 
 from functools import partial
 from mmcv.onnx import register_extra_symbolics
-from mmseg.models import build_segmentor
+from mmseg.models.segmentors import EncoderDecoder
 
 
 def _convert_batchnorm(module):
@@ -41,24 +41,30 @@ def _convert_batchnorm(module):
     return module_output
 
 
-def pspnet(weights_path, config_path):
-    cfg = mmcv.Config.fromfile(config_path)
-    cfg.model.pretrained = None
-    segmentor = build_segmentor(cfg.model, train_cfg=None, test_cfg=cfg.test_cfg)
-    # convert SyncBN to BN
-    segmentor = _convert_batchnorm(segmentor)
-    img_metas = [[{
-        'img_shape': (512, 512, 3),
-        'ori_shape': (512, 512, 3),
-        'pad_shape': (512, 512, 3),
-        'filename': '<demo>.png',
-        'scale_factor': 1.0,
-        'flip': False,
-    }]]
+class PSPNet(EncoderDecoder):
+    def __init__(self, weights_path, config_path):
+        cfg = mmcv.Config.fromfile(config_path)
+        cfg.model.pretrained = None
+        cfg.model['train_cfg'] = None
+        cfg.model['test_cfg'] = mmcv.Config({'mode': 'whole'})
+        cfg.model.pop('type')
+        super().__init__(**cfg.model)
+        # convert SyncBN to BN
+        self = _convert_batchnorm(self)
 
-    segmentor.forward = partial(segmentor.forward, img_metas=img_metas, return_loss=False)
-    opset_version = 11
-    register_extra_symbolics(opset_version)
-    weights = torch.load(weights_path, map_location='cpu')
-    segmentor.load_state_dict(weights['state_dict'])
-    return segmentor
+        self.img_metas = [[{
+            'img_shape': (512, 512, 3),
+            'ori_shape': (512, 512, 3),
+            'pad_shape': (512, 512, 3),
+            'filename': '<demo>.png',
+            'scale_factor': 1.0,
+            'flip': False,
+        }]]
+
+        weights = torch.load(weights_path, map_location='cpu')
+        self.load_state_dict(weights['state_dict'])
+
+    def forward(self, img):
+        opset_version = 11
+        register_extra_symbolics(opset_version)
+        return super().forward_test([img], self.img_metas)

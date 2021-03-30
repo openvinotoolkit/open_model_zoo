@@ -72,18 +72,6 @@ postprocessing:
     replacement: '# \g<0>'
     file: models/configs/pspnet/pspnet_r50-d8_512x512_20k_voc12aug.py
   - $type: regex_replace
-    pattern: 'isinstance\(var, list\)'
-    replacement: 'isinstance(var, (list, torch.Tensor))'
-    file: models/mmseg/models/segmentors/base.py
-  - $type: regex_replace
-    pattern: 'num_augs = len\(imgs\)'
-    replacement: 'num_augs = 1'
-    file: models/mmseg/models/segmentors/base.py
-  - $type: regex_replace
-    pattern: 'imgs\[0\]'
-    replacement: 'imgs'
-    file: models/mmseg/models/segmentors/base.py
-  - $type: regex_replace
     pattern: 'from (?!.resnet)'
     replacement: '# \g<0>'
     file: models/mmseg/models/backbones/__init__.py
@@ -112,28 +100,12 @@ postprocessing:
     replacement: '# \g<0>'
     file: models/mmcv-1.2.0/mmcv/utils/env.py
   - $type: regex_replace
-    pattern: 'import (regex as re|re)'
-    replacement: 'pass'
+    pattern: 'import regex as re'
+    replacement: 'import re'
     file: models/mmcv-1.2.0/mmcv/cnn/bricks/plugin.py
   - $type: regex_replace
-    pattern: '(import (regex as re|re)|shutil.copyfile.+)'
-    replacement: 'pass'
-    file: models/mmcv-1.2.0/mmcv/utils/config.py
-  - $type: regex_replace
-    pattern: '(.+re.sub.+|.+osp.basename\(temp_config_file.name\))'
-    replacement: '# \g<0>'
-    file: models/mmcv-1.2.0/mmcv/utils/config.py
-  - $type: regex_replace
-    pattern: 'use_predefined_variables=True'
-    replacement: 'use_predefined_variables=False'
-    file: models/mmcv-1.2.0/mmcv/utils/config.py
-  - $type: regex_replace
-    pattern: 'osp.splitext\(temp_config_name\)\[0\]'
-    replacement: 'osp.splitext(osp.basename(filename))[0]'
-    file: models/mmcv-1.2.0/mmcv/utils/config.py
-  - $type: regex_replace
-    pattern: 'sys.path.insert\(0, temp_config_dir\)'
-    replacement: 'sys.path.insert(0, osp.dirname(filename))'
+    pattern: 'import regex as re'
+    replacement: 'import re'
     file: models/mmcv-1.2.0/mmcv/utils/config.py
 
 conversion_to_onnx_args:
@@ -141,13 +113,13 @@ conversion_to_onnx_args:
   - --model-path=$dl_dir/models
   - --model-path=$dl_dir/models/addict
   - --model-path=$dl_dir/models/mmcv-1.2.0
-  - --model-name=pspnet
+  - --model-name=PSPNet
   - --import-module=model
   - --model-param=weights_path=r"$dl_dir/pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth"
   - --model-param=config_path=r"$dl_dir/models/configs/pspnet/pspnet_r50-d8_512x512_20k_voc12aug.py"
   - --input-shapes=1,3,512,512
   - --input-names=input.1
-  - --output-names=Unsqueeze_259
+  - --output-names=segmentation_map
   - --output-file=$conv_dir/pspnet_r50-d8.onnx
 model_optimizer_args:
   - --input_shape=[1,3,512,512]
