@@ -80,6 +80,8 @@ class Synthesizer:
         feed_dict = self.decoder.init_feed_dict(encoder_output)
         for _ in range(self.max_decoder_steps):
             decoder_outs, feed_dict = self.decoder.predict(feed_dict)
+            if callback:
+                callback(decoder_outs)
             decoder_input = decoder_outs[self.decoder.output_mapping['decoder_input']]
             finished = decoder_outs[self.decoder.output_mapping['finished']]
             # padding for the first chunk for postnet
@@ -91,9 +93,10 @@ class Synthesizer:
 
             if n == scheduler[j]:
                 postnet_input = np.transpose(np.array(mel_outputs[-scheduler[j] - offset:]), (1, 2, 0))
-                postnet_out = self.postnet.predict(
-                    {self.postnet.input_mapping['mel_outputs']: postnet_input}
-                )[self.postnet.output_mapping['postnet_outputs']]
+                postnet_outs = self.postnet.predict({self.postnet.input_mapping['mel_outputs']: postnet_input})
+                if callback:
+                    callback(postnet_outs)
+                postnet_out = postnet_outs[self.postnet.output_mapping['postnet_outputs']]
 
                 for k in range(postnet_out.shape[2]):
                     postnet_outputs.append(postnet_out[:, :, k])
@@ -107,9 +110,10 @@ class Synthesizer:
                 mel_outputs += [mel_outputs[-1]] * 10
                 n += 10
                 postnet_input = np.transpose(np.array(mel_outputs[-n - offset:]), (1, 2, 0))
-                postnet_out = self.postnet.predict(
-                    {self.postnet.input_mapping['mel_outputs']: postnet_input}
-                )[self.postnet.output_mapping['postnet_outputs']]
+                postnet_outs = self.postnet.predict({self.postnet.input_mapping['mel_outputs']: postnet_input})
+                if callback:
+                    callback(postnet_outs)
+                postnet_out = postnet_outs[self.postnet.output_mapping['postnet_outputs']]
 
                 for k in range(postnet_out.shape[2]):
                     postnet_outputs.append(postnet_out[:, :, k])
@@ -254,7 +258,7 @@ class DecoderModel:
         for out_id, out_name in self.output_mapping.items():
             self.output_mapping[out_id] = generate_layer_name(out_name, 'decoder_', with_prefix)
 
-    def init_feed_dict(self,encoder_output):
+    def init_feed_dict(self, encoder_output):
         decoder_input = np.zeros((1, self.n_mel_channels), dtype=np.float32)
         attention_hidden = np.zeros((1, self.attention_rnn_dim), dtype=np.float32)
         attention_cell = np.zeros((1, self.attention_rnn_dim), dtype=np.float32)
