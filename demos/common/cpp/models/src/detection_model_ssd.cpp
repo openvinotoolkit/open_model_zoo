@@ -129,9 +129,8 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
 }
 
 void ModelSSD::checkCompiledNetworkInputsOutputs() {
-    ConstInputsDataMap nputInfo(execNetwork.GetInputsInfo());
+    ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    ConstInputsDataMap inputInfo;
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;

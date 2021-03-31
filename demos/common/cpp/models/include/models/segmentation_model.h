@@ -31,7 +31,7 @@ public:
 
 protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
-
+    void checkCompiledNetworkInputsOutputs() override;
     int outHeight = 0;
     int outWidth = 0;
     int outChannels = 0;

@@ -23,6 +23,46 @@ SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useA
     ImageModel(modelFileName, useAutoResize) {
 }
 
+void SegmentationModel::checkCompiledNetworkInputsOutputs() {
+    // --------------------------- Configure input & output ---------------------------------------------
+// --------------------------- Prepare input blobs -----------------------------------------------------
+    ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
+    const SizeVector& inputShapes = inputInfo.begin()->second->getTensorDesc().getDims();
+    if (inputInfo.size() != 1)
+        throw std::runtime_error("Demo supports topologies only with 1 input");
+    inputsNames.push_back(inputInfo.begin()->first);
+    const SizeVector& inSizeVector = inputInfo.begin()->second->getTensorDesc().getDims();
+    if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
+        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
+
+    // --------------------------- Prepare output blobs -----------------------------------------------------
+    ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
+    if (outputInfo.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
+
+    outputsNames.push_back(outputInfo.begin()->first);
+    CDataPtr& data = outputInfo.begin()->second;
+    // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
+    // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
+    // postprocessing
+
+    const SizeVector& outSizeVector = data->getTensorDesc().getDims();
+    switch (outSizeVector.size()) {
+    case 3:
+        outChannels = 0;
+        outHeight = (int)(outSizeVector[1]);
+        outWidth = (int)(outSizeVector[2]);
+        break;
+    case 4:
+        outChannels = (int)(outSizeVector[1]);
+        outHeight = (int)(outSizeVector[2]);
+        outWidth = (int)(outSizeVector[3]);
+        break;
+    default:
+        throw std::runtime_error("Unexpected output blob shape. Only 4D and 3D output blobs are"
+            "supported.");
+    }
+}
+
 void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input blobs -----------------------------------------------------
