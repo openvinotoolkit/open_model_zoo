@@ -219,7 +219,9 @@ class BaseReader(ClassProvider):
         self.multi_infer = self.get_value_from_config('multi_infer')
 
     @classmethod
-    def validate_config(cls, config, data_source=None, fetch_only=False, **kwargs):
+    def validate_config(
+            cls, config, data_source=None, fetch_only=False, check_data_source=True, check_reader_type=False, **kwargs
+    ):
         uri_prefix = kwargs.pop('uri_prefix', '')
         reader_uri = uri_prefix or 'reader'
         if cls.__name__ == BaseReader.__name__:
@@ -236,7 +238,7 @@ class BaseReader(ClassProvider):
             try:
                 reader_cls = cls.resolve(reader_type)
                 reader_config = config if isinstance(config, dict) else {'type': reader_type}
-                if reader_type not in DOES_NOT_REQUIRED_DATA_SOURCE:
+                if reader_type not in DOES_NOT_REQUIRED_DATA_SOURCE and check_data_source:
                     data_source_field = PathField(
                         is_directory=reader_type not in DATA_SOURCE_IS_FILE, description='data source'
                     )
@@ -252,6 +254,10 @@ class BaseReader(ClassProvider):
             except UnregisteredProviderException as exception:
                 if not fetch_only:
                     raise exception
+                if check_reader_type:
+                    error = ConfigError('Invalid value "{}" for {}'.format(reader_type, reader_uri),
+                                        config, reader_uri, validation_scheme=cls.validation_scheme())
+                    errors.append(error)
                 return errors
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT

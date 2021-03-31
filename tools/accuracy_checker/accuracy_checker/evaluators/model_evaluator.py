@@ -146,16 +146,19 @@ class ModelEvaluator(BaseEvaluator):
                         Dataset.validate_config(dataset_config, fetch_only=True, uri_prefix=current_dataset_uri)
                     )
                     config_errors.extend(
-                        BaseReader.validate_config(
-                            data_reader_config, data_source=dataset_config.get('data_source'), fetch_only=True,
-                            uri_prefix='{}.reader'.format(current_dataset_uri)
-                        )
-                    )
-                    config_errors.extend(
                         MetricsExecutor.validate_config(
                             dataset_config.get('metrics', []), fetch_only=True,
                             uri_prefix='{}.metrics'.format(current_dataset_uri))
                     )
+
+                config_errors.extend(
+                    BaseReader.validate_config(
+                        data_reader_config, data_source=dataset_config.get('data_source'), fetch_only=True,
+                        uri_prefix='{}.reader'.format(current_dataset_uri),
+                        check_data_source=not delayed_annotation_loading,
+                        check_reader_type=delayed_annotation_loading
+                    )
+                )
 
                 config_errors.extend(
                     PreprocessingExecutor.validate_config(
@@ -516,6 +519,7 @@ class ModelEvaluator(BaseEvaluator):
     def _reset_stored_predictions(stored_predictions):
         with open(stored_predictions, 'wb'):
             print_info("File {} will be cleared for storing predictions".format(stored_predictions))
+
     @property
     def dataset_size(self):
         return self.dataset.size
