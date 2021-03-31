@@ -17,15 +17,16 @@ source_group("src" FILES ${SOURCES})
 source_group("include" FILES ${HEADERS})
 
 add_library(va_video STATIC ${SOURCES} ${HEADERS})
-target_include_directories(va_video PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
-        ${VA_INCLUDE_DIRS}
-        ${GSTREAMER_INCLUDE_DIRS}
-        ${VA_INCLUDE_DIRS}
-        ${VADRM_INCLUDE_DIRS}
+target_include_directories(va_video PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"        
+${VA_INCLUDE_DIRS}
+${GSTREAMER_INCLUDE_DIRS}
+${VA_INCLUDE_DIRS}
+${VADRM_INCLUDE_DIRS}
 )
 target_link_libraries(va_video PRIVATE ${VA_LIBRARIES}
         ${GSTREAMER_LIBRARIES}
         ${VA_LIBRARIES}
         ${VADRM_LIBRARIES}
         /usr/lib/x86_64-linux-gnu/libOpenCL.so
+        opencv_core opencv_imgproc
 )

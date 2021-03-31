@@ -27,13 +27,12 @@ public:
 public:
     void open(const std::string& filename, bool sync = false);
     void play();
-    bool read(std::shared_ptr<Image>& image);
+    bool read(std::shared_ptr<VaApiImage>& image);
     void close();
     double getFPS(){ return fps;}
 
 private:
-    std::shared_ptr<InferenceBackend::Image>  CreateImage(GstSample* sampleRead,
-                                                          MemoryType mem_type, GstMapFlags map_flags);
+    std::shared_ptr<InferenceBackend::VaApiImage>  CreateImage(GstSample* sampleRead, GstMapFlags map_flags);
 
     std::string filename_;
 

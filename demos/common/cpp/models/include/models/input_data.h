@@ -38,9 +38,9 @@ struct ImageInputData : public InputData {
     cv::Mat inputImage;
 
 #ifdef USE_VA
-    std::shared_ptr<InferenceBackend::Image> vaImage;
+    std::shared_ptr<InferenceBackend::VaApiImage> vaImage;
 
-    ImageInputData(const std::shared_ptr<InferenceBackend::Image>& vaImage) :
+    ImageInputData(const std::shared_ptr<InferenceBackend::VaApiImage>& vaImage) :
         vaImage(vaImage)
     {
     }

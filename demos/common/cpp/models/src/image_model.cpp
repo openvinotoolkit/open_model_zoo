@@ -45,7 +45,7 @@ InferenceEngine::ExecutableNetwork ImageModel::loadExecutableNetwork(const CnnCo
 
         sharedVAContext = InferenceEngine::gpu::make_shared_context(core, "GPU", va_context->Display());
 
-        VaApiImagePool::ImageInfo info = { netInputWidth,netInputHeight,FOURCC_NV12,MemoryType::VAAPI };
+        VaApiImagePool::ImageInfo info = { netInputWidth,netInputHeight,FOURCC_NV12 };
 
         // Setting image input (0-index input is image input) to use NV12
         InputsDataMap inputInfo(cnnNetwork.getInputsInfo());

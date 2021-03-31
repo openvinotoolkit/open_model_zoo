@@ -30,14 +30,8 @@ struct fourcc
 namespace InferenceBackend
 {
 
-enum class MemoryType {
-    ANY = 0,
-    SYSTEM = 1,
-    DMA_BUFFER = 2,
-    VAAPI = 3,
-};
-
 enum FourCC {
+    FOURCC_NONE = 0,
     FOURCC_RGBP_F32 = 0x07282024,
     FOURCC_NV12 = fourcc<'N', 'V', '1', '2'>::code,
     FOURCC_BGRA = fourcc<'B', 'G', 'R', 'A'>::code,
@@ -50,51 +44,6 @@ enum FourCC {
     FOURCC_RGBP = fourcc<'R', 'G', 'B', 'P'>::code,
     FOURCC_I420 = fourcc<'I', '4', '2', '0'>::code
 };
-
-template <typename T>
-struct Rectangle
-{
-    static_assert(std::is_floating_point<T>::value or std::is_integral<T>::value,
-                  "struct Rectangle can only be instantiated with numeric type types");
-
-    T x;
-    T y;
-    T width;
-    T height;
-};
-
-struct Image
-{
-    MemoryType type;
-    static const uint32_t MAX_PLANES_NUMBER = 4;
-    union {
-        uint8_t *planes[MAX_PLANES_NUMBER]; // if type==SYSTEM
-        int dma_fd;                         // if type==DMA_BUFFER
-        struct {                            // if type==VAAPI
-            uint32_t va_surface_id;
-            void *va_display;
-        };
-    };
-    int format; // FourCC
-    uint32_t width;
-    uint32_t height;
-    uint32_t size;
-    uint32_t stride[MAX_PLANES_NUMBER];
-    uint32_t offsets[MAX_PLANES_NUMBER];
-    Rectangle<uint32_t> rect;
-};
-
-// Map DMA/VAAPI image into system memory
-class ImageMap
-{
-  public:
-    virtual Image Map(const Image &image) = 0;
-    virtual void Unmap() = 0;
-
-    static ImageMap *Create(MemoryType type);
-    virtual ~ImageMap() = default;
-};
-
 
 class VaApiContext
 {

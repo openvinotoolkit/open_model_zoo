@@ -238,12 +238,9 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
     cv::Mat outputImg;
 
 #ifdef USE_VA
-    static std::unique_ptr<ImageMap> mapper = std::unique_ptr<ImageMap>(ImageMap::Create(MemoryType::SYSTEM));
+    //static std::unique_ptr<ImageMap> mapper = std::unique_ptr<ImageMap>(ImageMap::Create(MemoryType::SYSTEM));
     if(imgMetaData.isVA()) {
-        auto sysImg = mapper->Map(*imgMetaData.vaImage);
-        cv::Mat nv12(sysImg.height*3/2,sysImg.width,CV_8UC1,sysImg.planes[0],{sysImg.stride[0]});
-        cv::cvtColor(nv12,outputImg,cv::COLOR_YUV2BGR_NV12);
-        mapper->Unmap();
+        outputImg = imgMetaData.vaImage->CopyToMat(VaApiImage::CONVERT_TO_BGR);
     }
     else
 #endif
@@ -341,7 +338,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef USE_VA
         pz::GstVaApiDecoder decoder;
-        std::shared_ptr<Image> srcImage;
+        std::shared_ptr<VaApiImage> srcImage;
         decoder.open(FLAGS_i);
         decoder.play();
 #endif

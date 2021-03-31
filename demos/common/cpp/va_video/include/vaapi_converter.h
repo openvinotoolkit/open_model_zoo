@@ -22,7 +22,7 @@ class VaApiConverter {
     explicit VaApiConverter(VaApiContext *context);
     ~VaApiConverter() = default;
 
-    void Convert(const Image &src, InferenceBackend::VaApiImage &dst);
+    void Convert(const VaApiImage &src, InferenceBackend::VaApiImage &dst);
 };
 
 } // namespace InferenceBackend

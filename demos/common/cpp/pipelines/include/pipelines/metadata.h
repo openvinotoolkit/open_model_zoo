@@ -33,9 +33,9 @@ struct ImageMetaData : public MetaData {
     cv::Mat img;
 
 #ifdef USE_VA
-    std::shared_ptr<InferenceBackend::Image> vaImage;
+    std::shared_ptr<InferenceBackend::VaApiImage> vaImage;
 
-    ImageMetaData(const std::shared_ptr<InferenceBackend::Image>& vaImage, std::chrono::steady_clock::time_point timeStamp) :
+    ImageMetaData(const std::shared_ptr<InferenceBackend::VaApiImage>& vaImage, std::chrono::steady_clock::time_point timeStamp) :
         vaImage(vaImage),
         timeStamp(timeStamp)
     {

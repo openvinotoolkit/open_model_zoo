@@ -69,109 +69,6 @@ VASurfaceID ConvertVASurfaceFromDifferentDisplay(VADisplay display, VASurfaceID 
                              attribs, 2));
     return va_surface_id;
 }
-
-static int GetPlanesCount(int fourcc)
-{
-    switch (fourcc)
-    {
-    case FOURCC_BGRA:
-    case FOURCC_BGRX:
-    case FOURCC_BGR:
-    case FOURCC_RGBA:
-    case FOURCC_RGBX:
-        return 1;
-    case FOURCC_NV12:
-        return 2;
-    case FOURCC_BGRP:
-    case FOURCC_RGBP:
-    case FOURCC_I420:
-        return 3;
-    }
-
-    return 0;
-}
-
-VASurfaceID ConvertDMABuf(VADisplay vpy, const Image &src, int rt_format = VA_RT_FORMAT_YUV420) {
-    if (src.type != MemoryType::DMA_BUFFER) {
-        throw std::runtime_error("MemoryType=DMA_BUFFER expected");
-    }
-
-    VASurfaceAttribExternalBuffers external = VASurfaceAttribExternalBuffers();
-    external.width = src.width;
-    external.height = src.height;
-    external.num_planes = GetPlanesCount(src.format);
-    uint64_t dma_fd = src.dma_fd;
-    external.buffers = &dma_fd;
-    external.num_buffers = 1;
-    external.pixel_format = src.format;
-    external.data_size = 0;
-    for (uint32_t i = 0; i < external.num_planes; i++) {
-        external.pitches[i] = src.stride[i];
-        external.offsets[i] = src.offsets[i];
-    }
-    external.data_size = src.size;
-
-    VASurfaceAttrib attribs[2] = {};
-    attribs[0].flags = VA_SURFACE_ATTRIB_SETTABLE;
-    attribs[0].type = VASurfaceAttribMemoryType;
-    attribs[0].value.type = VAGenericValueTypeInteger;
-    attribs[0].value.value.i = VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME;
-
-    attribs[1].flags = VA_SURFACE_ATTRIB_SETTABLE;
-    attribs[1].type = VASurfaceAttribExternalBufferDescriptor;
-    attribs[1].value.type = VAGenericValueTypePointer;
-    attribs[1].value.value.p = &external;
-
-    VAConfigAttrib format_attrib;
-    format_attrib.type = VAConfigAttribRTFormat;
-    VA_CALL(vaGetConfigAttributes(vpy, VAProfileNone, VAEntrypointVideoProc, &format_attrib, 1));
-    if (not(format_attrib.value & rt_format))
-        throw std::invalid_argument("Unsupported runtime format for surface.");
-
-    VASurfaceID va_surface_id;
-    VA_CALL(vaCreateSurfaces(vpy, rt_format, src.width, src.height, &va_surface_id, 1, attribs, 2))
-
-    return va_surface_id;
-}
-
-/* static VASurfaceID CreateVASurfaceFromAlignedBuffer(VADisplay dpy, Image &src) {
-    if (src.type != InferenceBackend::MemoryType::SYSTEM) {
-        throw std::runtime_error("MemoryType=SYSTEM expected");
-    }
-
-    VASurfaceAttribExternalBuffers external{};
-    external.pixel_format = src.format;
-    external.width = src.width;
-    external.height = src.height;
-    uintptr_t buffers[1] = {(uintptr_t)src.planes[0]};
-    external.num_buffers = 1;
-    external.buffers = buffers;
-    external.flags = VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR;
-    external.num_planes = GetPlanesCount(src.format);
-    for (uint32_t i = 0; i < external.num_planes; i++) {
-        external.pitches[i] = src.stride[i];
-        external.offsets[i] = src.planes[i] - src.planes[0];
-        external.data_size += src.stride[i] * src.height;
-    }
-
-    VASurfaceAttrib attribs[2]{};
-    attribs[0].type = (VASurfaceAttribType)VASurfaceAttribMemoryType;
-    attribs[0].flags = VA_SURFACE_ATTRIB_SETTABLE;
-    attribs[0].value.type = VAGenericValueTypeInteger;
-    attribs[0].value.value.i = VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR;
-
-    attribs[1].type = (VASurfaceAttribType)VASurfaceAttribExternalBufferDescriptor;
-    attribs[1].flags = VA_SURFACE_ATTRIB_SETTABLE;
-    attribs[1].value.type = VAGenericValueTypePointer;
-    attribs[1].value.value.p = (void *)&external;
-
-    VASurfaceID va_surface_id;
-    VA_CALL(vaCreateSurfaces(dpy, FourCc2RTFormat(src.format), src.width, src.height, &va_surface_id, 1, attribs,
-2))
-
-    return va_surface_id;
-}*/
-
 } // anonymous namespace
 
 VaApiConverter::VaApiConverter(VaApiContext *context) : _context(context) {
@@ -179,28 +76,21 @@ VaApiConverter::VaApiConverter(VaApiContext *context) : _context(context) {
         throw std::runtime_error("VaApiCintext is null. VaConverter requers not nullptr context.");
 }
 
-void VaApiConverter::Convert(const Image &src, VaApiImage &dst) {
+void VaApiConverter::Convert(const VaApiImage &src, VaApiImage &dst) {
     VASurfaceID src_surface = VA_INVALID_SURFACE;
 
     uint64_t dma_fd = 0;
 
-    if (src.type == MemoryType::VAAPI) {
-        src_surface =
-            ConvertVASurfaceFromDifferentDisplay(_context->Display(), src.va_surface_id, src.va_display, dma_fd);
-    } else if (src.type == MemoryType::DMA_BUFFER) {
-        src_surface = ConvertDMABuf(_context->Display(), src);
-    } else {
-        throw std::runtime_error("VaApiConverter::Convert: unsupported MemoryType");
-    }
+    src_surface = ConvertVASurfaceFromDifferentDisplay(_context->Display(), src.va_surface_id, src.va_display, dma_fd);
 
     VASurfaceID dst_surface = dst.va_surface_id;
 
     VAProcPipelineParameterBuffer pipeline_param = VAProcPipelineParameterBuffer();
     pipeline_param.surface = src_surface;
-    VARectangle surface_region = {.x = static_cast<int16_t>(src.rect.x),
-                                  .y = static_cast<int16_t>(src.rect.y),
-                                  .width = static_cast<uint16_t>(src.rect.width),
-                                  .height = static_cast<uint16_t>(src.rect.height)};
+    VARectangle surface_region = {.x = 0,
+                                  .y = 0,
+                                  .width = static_cast<uint16_t>(src.width),
+                                  .height = static_cast<uint16_t>(src.height)};
     if (surface_region.width > 0 && surface_region.height > 0)
         pipeline_param.surface_region = &surface_region;
 
@@ -219,8 +109,4 @@ void VaApiConverter::Convert(const Image &src, VaApiImage &dst) {
     VA_CALL(vaDestroyBuffer(_context->Display(), pipeline_param_buf_id))
 
     VA_CALL(vaDestroySurfaces(_context->Display(), &src_surface, 1))
-
-    if (src.type == MemoryType::VAAPI)
-        if (close(dma_fd) == -1)
-            throw std::runtime_error("VaApiConverter::Convert: close fd failed");
 }
