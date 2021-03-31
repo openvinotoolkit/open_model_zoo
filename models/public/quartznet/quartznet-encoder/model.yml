@@ -1,0 +1,67 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  QuartzNet model is a pair of encoder and decoder. QuartzNet’s design is based on
+  the Jasper architecture, which is a convolutional model trained with Connectionist
+  Temporal Classification (CTC) loss. The model was trained in NeMo on multiple datasets:
+  LibriSpeech, Mozilla Common Voice, WSJ, Fisher, Switchboard, and NSC Singapore English.
+  For details see repository <https://github.com/NVIDIA/NeMo>, paper <https://arxiv.org/pdf/1910.10261.pdf>.
+task_type: speech_recognition
+files:
+  - name: nemo_toolkit-0.11.0-py3-none-any.whl
+    size: 622593
+    sha256: 627a14093d22e538b4e6962ebfd43ce4479a1f5710e54e96623762ebd8140fce
+    source: https://files.pythonhosted.org/packages/70/68/7392874cb5fcb8a0317671a03a7b7f51cf7f2648614ef2546fc0f00726bc/nemo_toolkit-0.11.0-py3-none-any.whl
+  - name: multidataset_quartznet15x5_2.zip
+    size: 71104880
+    sha256: 9b057d4946a4d33932d909fa9a8c832af786fe34c86c1454af10901caff12995
+    source: https://api.ngc.nvidia.com/v2/models/nvidia/multidataset_quartznet15x5/versions/2/zip
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: nemo_toolkit-0.11.0-py3-none-any.whl
+  - $type: unpack_archive
+    format: zip
+    file: multidataset_quartznet15x5_2.zip
+  - $type: unpack_archive
+    format: gztar
+    file: QuartzNet15x5-En-Base.nemo
+
+  - $type: regex_replace
+    file: nemo/core/neural_modules.py
+    pattern: '(from ruamel|YAML =)'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: nemo/collections/asr/parts/dataset.py
+    pattern: 'import kaldi_io'
+    replacement: '# \g<0>'
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir
+  - --model-name=quartznet_encoder
+  - --import-module=model
+  - --input-shape=1,64,128
+  - --output-file=$conv_dir/quartznet_encoder.onnx
+  - --model-param=model_config=r"$dl_dir/.nemo_tmp/module.yaml"
+  - --model-param=weights=r"$dl_dir/.nemo_tmp/JasperEncoder.pt"
+  - --input-names=audio_signal
+  - --output-names=outputs
+model_optimizer_args:
+  - --input_shape=[1,64,128]
+  - --input=audio_signal
+  - --output=outputs
+  - --input_model=$conv_dir/quartznet_encoder.onnx
+framework: pytorch
+license: https://raw.githubusercontent.com/NVIDIA/NeMo/main/LICENSE

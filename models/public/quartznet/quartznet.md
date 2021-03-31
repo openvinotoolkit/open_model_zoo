@@ -1,0 +1,112 @@
+# quartznet
+
+## Use Case and High-Level Description
+
+QuartzNet model is a pair of encoder and decoder. QuartzNet’s design is based on the Jasper architecture,
+which is a convolutional model trained with Connectionist Temporal Classification (CTC) loss.
+The model was trained in NeMo on multiple datasets: LibriSpeech,
+Mozilla Common Voice, WSJ, Fisher, Switchboard, and NSC Singapore English.
+For details see [repository](https://github.com/NVIDIA/NeMo), [paper](https://arxiv.org/pdf/1910.10261.pdf).
+
+## Accuracy
+
+| Metric                       | Value |
+| ---------------------------- | ----- |
+| WER @ Librispeech test-clean | 3.86% |
+
+## Encoder model specification
+
+| Metric           | Value              |
+| ---------------- | ------------------ |
+| Type             | Speech recognition |
+| GFLOPs           | 2.4156             |
+| MParams          | 18.856             |
+| Source framework | PyTorch\*          |
+
+### Input
+
+#### Original model
+
+Audio signal, name - `audio_signal`,  shape - `1, 64, 128`, format is `B, N, C` where:
+
+- `B` - batch size
+- `N` - number of audio frames
+- `C` - clip duration
+
+#### Converted model
+
+The converted model has the same parameters as the original model.
+
+### Output
+
+#### Original model
+
+Features from encoder that are fed to a decoder, name - `outputs`,  shape - `1, 1024, 64`, format is `B, N, C` where:
+
+- `B` - batch size
+- `N` - number of features
+- `C` - number of channels
+
+#### Converted model
+
+The converted model has the same parameters as the original model.
+
+## Decoder model specification
+
+| Metric           | Value              |
+| ---------------- | ------------------ |
+| Type             | Speech recognition |
+| GFLOPs           | 0.0038             |
+| MParams          | 0.0297             |
+| Source framework | PyTorch\*          |
+
+### Input
+
+#### Original model
+
+Encoded features, name - `encoder_output`,  shape - `1, 1024, 64`, format is `B, N, C` where:
+
+- `B` - batch size
+- `N` - number of features
+- `C` - number of channels
+
+#### Converted model
+
+The converted model has the same parameters as the original model.
+
+### Output
+
+#### Original model
+
+Per-frame probabilities (after LogSoftmax) for every symbol in the alphabet, name - `output`,  shape - `1, 64, 29`, output data format is `B, N, C` where:
+
+- B - batch size
+- N - number of audio frames
+- C - alphabet size, including the CTC blank symbol
+
+The per-frame probabilities are to be decoded with a CTC decoder.
+The alphabet is: 0 = space, 1...26 = "a" to "z", 27 = apostrophe, 28 = CTC blank symbol.
+
+#### Converted model
+
+The converted model has the same parameters as the original model.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
+
+## Legal Information
+
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/NVIDIA/NeMo/main/LICENSE).
+A copy of the license is provided in [APACHE-2.0.txt](../licenses/APACHE-2.0.txt).

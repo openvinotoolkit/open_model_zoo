@@ -1,0 +1,21 @@
+evaluations:
+  - name: quartznet
+    module: custom_evaluators.asr_encoder_decoder_evaluator.AutomaticSpeechRecognitionEvaluator
+    module_config:
+      network_info:
+        encoder: {}
+
+        decoder:
+          adapter:
+            type: ctc_greedy_decoder
+            alphabet: [' ', a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z, '''']
+
+      launchers:
+        - framework: dlsdk
+
+      datasets:
+        - name: LibriSpeech_test_clean_npy_nemo
+          reader: numpy_reader
+
+          metrics:
+            - type: wer
