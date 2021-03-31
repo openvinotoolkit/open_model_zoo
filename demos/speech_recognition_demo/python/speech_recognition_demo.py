@@ -34,7 +34,7 @@ def build_argparser():
     parser.add_argument('-p', '--profile', type=str, metavar="NAME", required=True,
                         help="Choose pre/post-processing profile: "
                              "mds06x_en for Mozilla DeepSpeech v0.6.x, "
-                             "mds07x_en or mds08x_en for Mozilla DeepSpeech v0.7.x/x0.8.x, "
+                             "mds07x_en/mds08x_en/mds09x_en for Mozilla DeepSpeech v0.7.x/v0.8.x/v0.9.x(English), "
                              "other: filename of a YAML file (required)")
     parser.add_argument('-b', '--beam-width', type=int, default=500, metavar="N",
                         help="Beam width for beam search in CTC decoder (default 500)")

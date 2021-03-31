@@ -47,3 +47,4 @@ PROFILES = {
     },
 }
 PROFILES['mds08x_en'] = PROFILES['mds07x_en']
+PROFILES['mds09x_en'] = PROFILES['mds07x_en']

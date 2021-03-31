@@ -2,7 +2,7 @@
 
 This demo demonstrates Automatic Speech Recognition (ASR) with a pretrained Mozilla\* DeepSpeech 0.8.2 model.
 
-It works with version 0.6.1 as well, and should also work with other models trained with Mozilla DeepSpeech 0.6.x/0.7.x/0.8.x with ASCII alphabets.
+It works with version 0.6.1 as well, and should also work with other models trained with Mozilla DeepSpeech 0.6.x/0.7.x/0.8.x/0.9.x with ASCII alphabets.
 
 ## How It Works
 
@@ -83,8 +83,9 @@ optional arguments:
                         path to language model file (optional)
   -p NAME, --profile NAME
                         Choose pre/post-processing profile: mds06x_en for
-                        Mozilla DeepSpeech v0.6.x, mds07x_en or mds08x_en for
-                        Mozilla DeepSpeech v0.7.x/x0.8.x, other: filename of a
+                        Mozilla DeepSpeech v0.6.x,
+                        mds07x_en/mds08x_en/mds09x_en for Mozilla DeepSpeech
+                        v0.7.x/v0.8.x/v0.9.x(English), other: filename of a
                         YAML file (required)
   -b N, --beam-width N  Beam width for beam search in CTC decoder (default
                         500)
