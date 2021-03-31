@@ -487,6 +487,8 @@ The main difference between this converter and `super_resolution` in data organi
   * `max_length` - maximal input sequence length (Optional, default 128).
   * `pad_input` - allow padding for input sequence if input less that `max_length` (Optional, default `True`).
   * `include_special_token_lables` - allow extension original dataset labels with special token labels (`[CLS'`, `[SEP]`]) (Optional, default `False`).
+* `tacotron2_data_converter` - converts input data for custom tacotron2 pipeline.
+  * `annotation_file` - tsv file with location input data and reference.
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

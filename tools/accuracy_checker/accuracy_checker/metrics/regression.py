@@ -344,7 +344,8 @@ def relative_err(target, pred):
         target = target.flatten()
     if len(pred.shape) > 2:
         pred = pred.flatten()
-    return np.linalg.norm(target - pred, 2) / (np.linalg.norm(target, 2) + np.finfo(float).eps)
+    size = min(target.size, pred.size)
+    return np.linalg.norm(target[:size] - pred[:size], 2) / (np.linalg.norm(target[:size], 2) + np.finfo(float).eps)
 
 
 class RelativeL2Error(BaseRegressionMetric):
