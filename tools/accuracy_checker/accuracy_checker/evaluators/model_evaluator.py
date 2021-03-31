@@ -50,7 +50,7 @@ class ModelEvaluator(BaseEvaluator):
         self._metrics_results = []
 
     @classmethod
-    def from_configs(cls, model_config):
+    def from_configs(cls, model_config, delayed_annotation_loading=False):
         model_name = model_config['name']
         launcher_config = model_config['launchers'][0]
         dataset_config = model_config['datasets'][0]
@@ -60,22 +60,22 @@ class ModelEvaluator(BaseEvaluator):
             not model_config.get('_store_only', False) and cls._is_stored(model_config.get('_stored_data'))
         )
 
-        dataset = Dataset(dataset_config)
-
+        dataset = Dataset(dataset_config) if not delayed_annotation_loading else None
+        dataset_metadata = dataset.metadata if dataset is not None else {}
         launcher_kwargs = {'delayed_model_loading': postpone_model_loading}
         enable_ie_preprocessing = (
             dataset_config.get('_ie_preprocessing', False)
             if launcher_config['framework'] == 'dlsdk' else False
         )
         preprocessor = PreprocessingExecutor(
-            dataset_config.get('preprocessing'), dataset_name, dataset.metadata,
+            dataset_config.get('preprocessing'), dataset_name, dataset_metadata,
             enable_ie_preprocessing=enable_ie_preprocessing
         )
         input_precision = launcher_config.get('_input_precision', [])
         if enable_ie_preprocessing:
             launcher_kwargs['preprocessor'] = preprocessor
         if launcher_config['framework'] == 'dummy' and launcher_config.get('provide_identifiers', False):
-            launcher_kwargs = {'identifiers': dataset.identifiers}
+            launcher_kwargs = {'identifiers': dataset.identifiers if dataset is not None else []}
         if input_precision:
             launcher_kwargs['postpone_inputs_configuration'] = True
         launcher = create_launcher(launcher_config, model_name, **launcher_kwargs)
@@ -91,10 +91,12 @@ class ModelEvaluator(BaseEvaluator):
             if input_precision:
                 launcher.update_input_configuration(input_feeder.inputs_config)
             preprocessor.input_shapes = launcher.inputs_info_for_meta()
-        postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
-        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
-        if metric_dispatcher.profile_metrics:
-            metric_dispatcher.set_processing_info(ModelEvaluator.get_processing_info(model_config))
+        postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset_metadata)
+        metric_dispatcher = None
+        if not delayed_annotation_loading:
+            metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
+            if metric_dispatcher.profile_metrics:
+                metric_dispatcher.set_processing_info(ModelEvaluator.get_processing_info(model_config))
 
         return cls(
             launcher, input_feeder, adapter,
@@ -102,7 +104,7 @@ class ModelEvaluator(BaseEvaluator):
         )
 
     @classmethod
-    def validate_config(cls, model_config):
+    def validate_config(cls, model_config, delayed_annotation_loading=False):
         uri_prefix = ''
         if 'models' in model_config:
             model_config = model_config['models'][0]
@@ -139,15 +141,22 @@ class ModelEvaluator(BaseEvaluator):
             for dataset_id, dataset_config in enumerate(model_config['datasets']):
                 data_reader_config = dataset_config.get('reader', 'opencv_imread')
                 current_dataset_uri = '{}.{}'.format(datasets_uri, dataset_id)
-                config_errors.extend(
-                    Dataset.validate_config(dataset_config, fetch_only=True, uri_prefix=current_dataset_uri)
-                )
-                config_errors.extend(
-                    BaseReader.validate_config(
-                        data_reader_config, data_source=dataset_config.get('data_source'), fetch_only=True,
-                        uri_prefix='{}.reader'.format(current_dataset_uri)
+                if not delayed_annotation_loading:
+                    config_errors.extend(
+                        Dataset.validate_config(dataset_config, fetch_only=True, uri_prefix=current_dataset_uri)
                     )
-                )
+                    config_errors.extend(
+                        BaseReader.validate_config(
+                            data_reader_config, data_source=dataset_config.get('data_source'), fetch_only=True,
+                            uri_prefix='{}.reader'.format(current_dataset_uri)
+                        )
+                    )
+                    config_errors.extend(
+                        MetricsExecutor.validate_config(
+                            dataset_config.get('metrics', []), fetch_only=True,
+                            uri_prefix='{}.metrics'.format(current_dataset_uri))
+                    )
+
                 config_errors.extend(
                     PreprocessingExecutor.validate_config(
                         dataset_config.get('preprocessing'), fetch_only=True,
@@ -159,11 +168,6 @@ class ModelEvaluator(BaseEvaluator):
                         dataset_config.get('postprocessing'), fetch_only=True,
                         uri_prefix='{}.postprocessing'.format(current_dataset_uri)
                     )
-                )
-                config_errors.extend(
-                    MetricsExecutor.validate_config(
-                        dataset_config.get('metrics', []), fetch_only=True,
-                        uri_prefix='{}.metrics'.format(current_dataset_uri))
                 )
 
         return config_errors
@@ -209,6 +213,8 @@ class ModelEvaluator(BaseEvaluator):
             if self._is_stored(stored_predictions) and store_only_mode:
                 self._reset_stored_predictions(stored_predictions)
 
+        if self.dataset is None:
+            raise ConfigError('dataset entry is not assigned for execution')
         store_only = kwargs.get('store_only', False)
         prepare_dataset(store_only)
 
@@ -267,6 +273,9 @@ class ModelEvaluator(BaseEvaluator):
             print_info("prediction objects are save to {}".format(stored_predictions))
 
     def process_dataset_sync(self, stored_predictions, progress_reporter, *args, **kwargs):
+        if self.dataset is None:
+            raise ConfigError('dataset entry is not assigned for evaluation')
+
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
         store_only = kwargs.get('store_only', False)
