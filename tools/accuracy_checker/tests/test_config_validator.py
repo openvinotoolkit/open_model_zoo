@@ -451,6 +451,14 @@ class TestConfigValidationAPI:
         assert config_errors[0].field_uri == 'models.datasets'
 
     @pytest.mark.usefixtures('mock_file_exists')
+    def test_ignore_dataset_config(self):
+        launcher_config = {'model': 'foo', 'framework': 'dlsdk', 'device': 'cpu'}
+        config_errors = ModelEvaluator.validate_config(
+            {'models': [{'launchers': [launcher_config], 'datasets': []}]}, delayed_annotation_loading=True
+        )
+        assert not config_errors
+
+    @pytest.mark.usefixtures('mock_file_exists')
     def test_input_without_type(self):
         launcher_config = {'model': 'foo', 'framework': 'dlsdk', 'device': 'cpu', 'inputs': [{"name": 'input'}]}
         config_errors = ModelEvaluator.validate_config({'models': [{'launchers': [launcher_config], 'datasets': []}]})

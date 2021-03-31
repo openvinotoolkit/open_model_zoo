@@ -29,7 +29,7 @@ from ..adapters import create_adapter, Adapter
 from ..config import ConfigError, StringField
 from ..data_readers import BaseReader, DataRepresentation
 from .base_evaluator import BaseEvaluator
-
+from .quantization_model_evaluator import create_dataset_attributes
 
 # pylint: disable=W0223
 class ModelEvaluator(BaseEvaluator):
@@ -130,7 +130,7 @@ class ModelEvaluator(BaseEvaluator):
                         Adapter.validate_config(adapter_config, fetch_only=True, uri_prefix=adapter_uri))
 
         datasets_uri = '{}.datasets'.format(uri_prefix) if uri_prefix else 'datasets'
-        if 'datasets' not in model_config or not model_config['datasets']:
+        if 'datasets' not in model_config or (not delayed_annotation_loading and not model_config['datasets']):
             config_errors.append(
                 ConfigError(
                     'datasets section is not provided', model_config.get('datasets', []),
@@ -206,6 +206,9 @@ class ModelEvaluator(BaseEvaluator):
             ready_irs.append(request_id)
 
         def prepare_dataset(store_only_mode):
+            if self.dataset is None:
+                raise ConfigError('dataset entry is not assigned for execution')
+
             if self.dataset.batch is None:
                 self.dataset.batch = self.launcher.batch
             if progress_reporter:
@@ -213,8 +216,6 @@ class ModelEvaluator(BaseEvaluator):
             if self._is_stored(stored_predictions) and store_only_mode:
                 self._reset_stored_predictions(stored_predictions)
 
-        if self.dataset is None:
-            raise ConfigError('dataset entry is not assigned for execution')
         store_only = kwargs.get('store_only', False)
         prepare_dataset(store_only)
 
@@ -410,6 +411,12 @@ class ModelEvaluator(BaseEvaluator):
 
         return [DataRepresentation(input_data, identifier=list(range(len(data))))]
 
+    def select_dataset(self, dataset_config):
+        dataset_attributes = create_dataset_attributes(dataset_config, '', False)
+        self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
+        if self.dataset.annotation_provider and self.dataset.annotation_provider.metadata:
+            self.adapter.label_map = self.dataset.annotation_provider.metadata.get('label_map')
+
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
             del self._metrics_results
@@ -509,7 +516,6 @@ class ModelEvaluator(BaseEvaluator):
     def _reset_stored_predictions(stored_predictions):
         with open(stored_predictions, 'wb'):
             print_info("File {} will be cleared for storing predictions".format(stored_predictions))
-
     @property
     def dataset_size(self):
         return self.dataset.size
