@@ -60,8 +60,8 @@ class Synthesizer:
             'decoder': self.decoder,
             'postnet': self.postnet
         }
-        self.max_decoder_steps = 500
-        self.gate_threshold = 0.6
+        self.max_decoder_steps = int(network_info.get('max_decoder_steps', 500))
+        self.gate_threshold = float(network_info.get('gate_treshold', 0.6))
 
     def predict(self, identifiers, input_data, input_meta, input_names=None, callback=None):
         assert len(identifiers) == 1
@@ -229,6 +229,14 @@ class DecoderModel:
         self.attention_rnn_dim = 800
         self.encoder_embedding_dim = 512
         self.decoder_rnn_dim = 800
+        self.additional_inputs_filling = network_info.get('additional_input_filling', 'zeros')
+        if self.additional_inputs_filling not in ['zeros', 'random']:
+            raise ConfigError(
+                'invalid setting for additional_inputs_filling: {}'.format(self.additional_inputs_filling)
+            )
+        self.seed = int(network_info.get('seed', 666))
+        if self.additional_inputs_filling == 'random':
+            np.random.seed(self.seed)
 
     @staticmethod
     def prepare_inputs(feed_dict):
@@ -405,6 +413,16 @@ class DecoderOpenVINOModel(DecoderModel, TTSDLSDKModel):
                 for input_name in self.inputs
             }
             self._reshape_input(new_shapes)
+
+        if len(feed_dict) != len(self.inputs):
+            extra_inputs = set(self.inputs).difference(set(feed_dict))
+            for input_layer in extra_inputs:
+                shape = self.inputs[input_layer].input_data.shape
+                if self.additional_inputs_filling == 'zeros':
+                    feed_dict[input_layer] = np.zeros(shape, dtype=np.float32)
+                else:
+                    feed_dict[input_layer] = np.random.uniform(size=shape)
+
         return feed_dict
 
     def _reshape_input(self, input_shapes):
