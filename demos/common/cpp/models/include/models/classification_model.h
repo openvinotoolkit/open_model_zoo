@@ -15,9 +15,9 @@
 */
 #pragma once
 
-#include "models/model_base.h"
+#include "models/image_model.h"
 
-class ClassificationModel : public ModelBase {
+class ClassificationModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load.
@@ -28,15 +28,12 @@ public:
     /// @param labels - array of labels for every class.
     ClassificationModel(const std::string& modelFileName, size_t nTop, bool useAutoResize, const std::vector<std::string>& labels);
 
-    std::shared_ptr<InternalModelData> preprocess(
-            const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
 
 protected:
     size_t nTop;
-    bool useAutoResize;
     std::vector<std::string> labels;
 
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;

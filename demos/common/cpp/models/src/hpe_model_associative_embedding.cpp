@@ -46,6 +46,8 @@ HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileNam
 void HpeAssociativeEmbedding::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
+    changeInputSize(cnnNetwork);
+
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     if (inputShapes.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 input");
@@ -80,7 +82,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
     }
 }
 
-void HpeAssociativeEmbedding::reshape(CNNNetwork& cnnNetwork) {
+void HpeAssociativeEmbedding::changeInputSize(CNNNetwork& cnnNetwork) {
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     SizeVector& inputDims = inputShapes.begin()->second;
     if (!targetSize) {

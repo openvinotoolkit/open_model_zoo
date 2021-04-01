@@ -37,7 +37,6 @@
 #include <gflags/gflags.h>
 
 #include <pipelines/async_pipeline.h>
-#include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 #include <models/detection_model_centernet.h>
 #include <models/detection_model_faceboxes.h>
@@ -173,7 +172,7 @@ public:
         colorCandidates.resize(numCandidates);
         for (size_t i = 1; i < n; ++i) {
             std::generate(colorCandidates.begin(), colorCandidates.end(),
-                [] () { return cv::Scalar{ getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) }; });
+                []() { return cv::Scalar{ getRandom(), getRandom(0.8, 1.0), getRandom(0.5, 1.0) }; });
             hsvColors.push_back(maxMinDistance(hsvColors, colorCandidates));
         }
 
@@ -237,13 +236,13 @@ cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& p
     for (const auto& obj : result.objects) {
         if (FLAGS_r) {
             slog::info << " "
-                       << std::left << std::setw(9) << obj.label << " | "
-                       << std::setw(10) << obj.confidence << " | "
-                       << std::setw(4) << std::max(int(obj.x), 0) << " | "
-                       << std::setw(4) << std::max(int(obj.y), 0) << " | "
-                       << std::setw(4) << std::min(int(obj.x + obj.width), outputImg.cols) << " | "
-                       << std::setw(4) << std::min(int(obj.y + obj.height), outputImg.rows)
-                       << slog::endl;
+                << std::left << std::setw(9) << obj.label << " | "
+                << std::setw(10) << obj.confidence << " | "
+                << std::setw(4) << std::max(int(obj.x), 0) << " | "
+                << std::setw(4) << std::max(int(obj.y), 0) << " | "
+                << std::setw(4) << std::min(int(obj.x + obj.width), outputImg.cols) << " | "
+                << std::setw(4) << std::min(int(obj.y + obj.height), outputImg.rows)
+                << slog::endl;
         }
 
         std::ostringstream conf;
@@ -311,6 +310,7 @@ int main(int argc, char *argv[]) {
         }
 
         InferenceEngine::Core core;
+
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
@@ -320,19 +320,16 @@ int main(int argc, char *argv[]) {
         int64_t frameNum = -1;
         std::unique_ptr<ResultBase> result;
         uint32_t framesProcessed = 0;
+
         cv::VideoWriter videoWriter;
 
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
-                //--- Capturing frame
                 auto startTime = std::chrono::steady_clock::now();
+
+                //--- Capturing frame
                 curr_frame = cap->read();
-                if (frameNum == -1) {
-                    if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                              cap->fps(), curr_frame.size())) {
-                        throw std::runtime_error("Can't open video writer");
-                    }
-                }
+
                 if (curr_frame.empty()) {
                     if (frameNum == -1) {
                         throw std::logic_error("Can't read an image from the input");
@@ -345,6 +342,14 @@ int main(int argc, char *argv[]) {
 
                 frameNum = pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
+            }
+
+            // Preparing video writer if needed
+            if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
+                if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                    cap->fps(), curr_frame.size())) {
+                    throw std::runtime_error("Can't open video writer");
+                }
             }
 
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.

@@ -16,7 +16,6 @@
 #include <inference_engine.hpp>
 #include <gflags/gflags.h>
 #include <pipelines/async_pipeline.h>
-#include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 #include <models/classification_model.h>
 #include <utils/common.hpp>

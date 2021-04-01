@@ -36,7 +36,6 @@
 
 #include <pipelines/async_pipeline.h>
 #include <models/segmentation_model.h>
-#include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 
 DEFINE_INPUT_FLAGS

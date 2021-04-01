@@ -14,10 +14,9 @@
 // limitations under the License.
 */
 #pragma once
-#include "models/model_base.h"
-#include "opencv2/core.hpp"
+#include "models/image_model.h"
 
-class DetectionModel : public ModelBase {
+class DetectionModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
@@ -29,18 +28,11 @@ public:
     /// than actual classes number, default "Label #N" will be shown for missing items.
     DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels);
 
-    virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
-
     static std::vector<std::string> loadLabels(const std::string& labelFilename);
 
 protected:
     float confidenceThreshold;
-    bool useAutoResize;
-
     std::vector<std::string> labels;
-
-    size_t netInputHeight = 0;
-    size_t netInputWidth = 0;
 
     std::string getLabelName(int labelID) { return (size_t)labelID < labels.size() ? labels[labelID] : std::string("Label #") + std::to_string(labelID); }
 };
