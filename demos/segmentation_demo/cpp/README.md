@@ -16,9 +16,7 @@ Upon the start-up the demo application reads command line parameters and loads a
 
 Running the application with the `-h` option yields the following usage message:
 ```
-./segmentation_demo -h
 [ INFO ] InferenceEngine: <version>
-[ INFO ] Parsing input parameters
 
 segmentation_demo [OPTION]
 Options:
@@ -38,7 +36,7 @@ Options:
     -nthreads "<integer>"     Optional. Number of threads.
     -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
     -loop                     Optional. Enable reading the input in a loop.
-    -no_show                  Optional. Do not show processed video.
+    -no_show                  Optional. Don't show output.
     -u                        Optional. List of monitors to show initially.
 ```
 
