@@ -14,7 +14,7 @@ For details see [repository](https://github.com/NVIDIA/NeMo), [paper](https://ar
 | ---------------------------- | ----- |
 | WER @ Librispeech test-clean | 3.86% |
 
-## Encoder model specification
+## Specification
 
 | Metric           | Value              |
 | ---------------- | ------------------ |
@@ -32,43 +32,6 @@ Audio signal, name - `audio_signal`,  shape - `1, 64, 128`, format is `B, N, C` 
 - `B` - batch size
 - `N` - number of audio frames
 - `C` - clip duration
-
-#### Converted model
-
-The converted model has the same parameters as the original model.
-
-### Output
-
-#### Original model
-
-Features from encoder that are fed to a decoder, name - `outputs`,  shape - `1, 1024, 64`, format is `B, N, C` where:
-
-- `B` - batch size
-- `N` - number of features
-- `C` - number of channels
-
-#### Converted model
-
-The converted model has the same parameters as the original model.
-
-## Decoder model specification
-
-| Metric           | Value              |
-| ---------------- | ------------------ |
-| Type             | Speech recognition |
-| GFLOPs           | 0.0038             |
-| MParams          | 0.0297             |
-| Source framework | PyTorch\*          |
-
-### Input
-
-#### Original model
-
-Encoded features, name - `encoder_output`,  shape - `1, 1024, 64`, format is `B, N, C` where:
-
-- `B` - batch size
-- `N` - number of features
-- `C` - number of channels
 
 #### Converted model
 
