@@ -64,7 +64,7 @@ Options:
     -pc                        Optional. Enables per-layer performance statistics.
     -r                         Optional. Output inference results as raw values.
     -t                         Optional. Probability threshold for vehicle and license plate detections.
-    -no_show                   Optional. Do not show processed video.
+    -no_show                   Optional. Don't show output.
     -auto_resize               Optional. Enable resizable input with support of ROI crop and auto resize.
     -nireq                     Optional. Number of infer requests. 0 sets the number of infer requests equal to the number of inputs.
     -nc                        Required for web camera input. Maximum number of processed camera inputs (web cameras).

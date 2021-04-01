@@ -21,10 +21,10 @@ static const char target_device_message[] = "Optional. Specify the target device
                                             "The demo looks for a suitable plugin for a specified device.";
 static const char performance_counter_message[] = "Optional. Enable per-layer performance report";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
-                                           "Absolute path to an .xml file with the kernels descriptions";
+                                           "Absolute path to an .xml file with the kernel descriptions";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
-                                                 "Absolute path to a shared library with the kernels implementations";
-static const char no_show_processed_video[] = "Optional. Do not show processed video.";
+                                                 "Absolute path to a shared library with the kernel implementations";
+static const char no_show_message[] = "Optional. Don't show output.";
 static const char batch_size[] = "Optional. Batch size for processing (the number of frames processed per infer request)";
 static const char num_infer_requests[] = "Optional. Number of infer requests";
 static const char input_queue_size[] = "Optional. Frame queue size for input channels";
@@ -43,7 +43,7 @@ DEFINE_string(d, "CPU", target_device_message);
 DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
-DEFINE_bool(no_show, false, no_show_processed_video);
+DEFINE_bool(no_show, false, no_show_message);
 DEFINE_uint32(bs, 1, batch_size);
 DEFINE_uint32(nireq, 5, num_infer_requests);
 DEFINE_uint32(n_iqs, 5, input_queue_size);

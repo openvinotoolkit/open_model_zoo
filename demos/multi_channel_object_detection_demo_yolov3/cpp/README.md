@@ -22,8 +22,6 @@ On the start-up, the application reads command line parameters and loads the spe
 
 Running the application with the `-h` option yields the following usage message:
 ```
-./multi_channel_object_detection_demo_yolov3 -h
-
 multi_channel_object_detection_demo_yolov3 [OPTION]
 Options:
 
@@ -43,7 +41,7 @@ Options:
     -n_sp                        Optional. Number of sampling periods
     -pc                          Optional. Enable per-layer performance report
     -t                           Optional. Probability threshold for detections
-    -no_show                     Optional. Do not show processed video.
+    -no_show                     Optional. Don't show output.
     -show_stats                  Optional. Enable statistics report
     -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline
     -u                           Optional. List of monitors to show initially.
