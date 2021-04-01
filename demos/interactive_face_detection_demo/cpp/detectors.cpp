@@ -154,7 +154,7 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
             throw std::logic_error("Face Detection network output layer should have 7 as a last dimension");
         }
         if (outputDims.size() != 4) {
-            throw std::logic_error("Face Detection network output dimensions not compatible shoulld be 4, but was " +
+            throw std::logic_error("Face Detection network output dimension should be 4, but was " +
                                    std::to_string(outputDims.size()));
         }
         _output->setPrecision(Precision::FP32);
