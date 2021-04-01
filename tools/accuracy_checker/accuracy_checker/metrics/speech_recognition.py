@@ -94,7 +94,7 @@ class SpeechRecognitionSER(PerImageEvaluationMetric):
 
     def update(self, annotation, prediction):
         wer = self._wer_measure.update(annotation, prediction)
-        self.score += str(wer != 0)
+        self.score += int(wer != 0)
         self.length += 1
         return int(wer != 0)
 
