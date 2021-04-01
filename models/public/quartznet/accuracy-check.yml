@@ -15,4 +15,4 @@ models:
       - name: LibriSpeech_test_clean_npy_nemo
         reader: numpy_reader
         metrics:
-        - type: wer
+          - type: wer

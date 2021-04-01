@@ -16,8 +16,8 @@
 import torch
 import yaml
 
-import nemo
 from nemo.collections.asr import JasperEncoder, JasperDecoderForCTC
+from nemo.core import NeuralModuleFactory, DeviceType
 
 
 class QuartzNet(torch.nn.Module):
@@ -25,7 +25,7 @@ class QuartzNet(torch.nn.Module):
         super().__init__()
         with open(model_config, 'r') as config:
             model_args = yaml.safe_load(config)
-        _ = nemo.core.NeuralModuleFactory(placement=2)
+        _ = NeuralModuleFactory(placement=DeviceType.CPU)
 
         encoder_params = model_args['init_params']['encoder_params']['init_params']
         self.encoder = JasperEncoder(**encoder_params)
@@ -53,4 +53,4 @@ class QuartzNet(torch.nn.Module):
     def forward(self, input_signal):
         i_encoded = self.encoder(input_signal)
         i_log_probs = self.decoder(encoder_output=i_encoded)
-        return i_log_probs 
+        return i_log_probs
