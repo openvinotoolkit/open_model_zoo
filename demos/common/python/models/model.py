@@ -21,13 +21,16 @@ class Model:
     def __init__(self, ie, model_path, reverse_input_channels=None, mean_values=None, scale_values=None):
         self.logger = logging.getLogger()
         self.logger.info('Reading network from IR...')
-        self.net = ie.read_network(model_path, model_path.with_suffix('.bin'))
+        self.is_onnx_format = model_path.suffix == '.onnx'
+        if self.is_onnx_format:
+            self.net = ie.read_network(model_path)
+        else:
+            self.net = ie.read_network(model_path, model_path.with_suffix('.bin'))
         self.set_batch_size(1)
 
-        self.is_onnx_format = model_path.suffix == '.onnx'
         self.reverse_input_channels = reverse_input_channels
-        self.mean_values = np.array(mean_values) if mean_values else None
-        self.scale_values = np.array(scale_values) if scale_values else np.array([1, 1, 1])
+        self.mean_values = np.array(mean_values, dtype=np.float32) if mean_values else None
+        self.scale_values = np.array(scale_values, dtype=np.float32) if scale_values else None
 
     def preprocess(self, inputs):
         meta = {}
@@ -43,8 +46,7 @@ class Model:
             shapes.update({input_layer: new_shape})
         self.net.reshape(shapes)
 
-    def normalize(self, inputs):
-        normalized_inputs = np.zeros(inputs.shape, dtype=np.float32)
-        for i in range(inputs.shape[1]):
-            normalized_inputs[:, i, :, :] = (inputs[:, i, :, :] - self.mean_values[i]) / self.scale_values[i]
-        return normalized_inputs
+    def scaleshift(self, inputs):
+        if self.scale_values is None:
+            return inputs - self.mean_values[:, None, None]
+        return (inputs - self.mean_values[:, None, None]) / self.scale_values[:, None, None]

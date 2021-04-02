@@ -73,7 +73,7 @@ class FaceBoxes(Model):
         resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
 
         if self.is_onnx_format and self.mean_values is not None:
-            resized_image = self.normalize(resized_image)
+            resized_image = self.scaleshift(resized_image)
 
         dict_inputs = {self.image_blob_name: resized_image}
         return dict_inputs, meta
