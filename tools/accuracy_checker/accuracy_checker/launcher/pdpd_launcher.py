@@ -82,7 +82,7 @@ class PaddlePaddleLauncher(Launcher):
                 if not model_list:
                     raise ConfigError('Model not found')
             model = model_list[0]
-            print_info('Found model: {}'.format(model))
+
         params = self.get_value_from_config('params')
         if params is None or Path(params).is_dir():
             params_dir = model.parent if params is None else Path(params)
@@ -92,8 +92,15 @@ class PaddlePaddleLauncher(Launcher):
                 if not params_list:
                     raise ConfigError('Params not found')
             params = params_list[0]
-            print_info('Found params: {}'.format(params))
+        accepted_suffixes = ['.pdmodel']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('Found model {}'.format(model))
         params = Path(params)
+        accepted_params_suffixes = ['.pdiparams']
+        if params.suffix not in accepted_params_suffixes:
+            raise ConfigError('Params with following suffixes are allowed: {}'.format(accepted_params_suffixes))
+        print_info('Found weights {}'.format(params))
 
         return model, params
 
