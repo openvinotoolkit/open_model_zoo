@@ -16,8 +16,6 @@
 
 using namespace InferenceBackend;
 
-namespace {
-
 VASurfaceID ConvertVASurfaceFromDifferentDisplay(VADisplay display, VASurfaceID surface, VADisplay display1,
                                                  uint64_t &dma_fd_out, int rt_format = VA_RT_FORMAT_YUV420) {
     VADRMPRIMESurfaceDescriptor drm_descriptor = VADRMPRIMESurfaceDescriptor();
@@ -69,11 +67,10 @@ VASurfaceID ConvertVASurfaceFromDifferentDisplay(VADisplay display, VASurfaceID 
                              attribs, 2));
     return va_surface_id;
 }
-} // anonymous namespace
 
 VaApiConverter::VaApiConverter(VaApiContext *context) : _context(context) {
     if (!context)
-        throw std::runtime_error("VaApiCintext is null. VaConverter requers not nullptr context.");
+        throw std::runtime_error("VaApiContext is null. VaConverter requers not nullptr context.");
 }
 
 void VaApiConverter::Convert(const VaApiImage &src, VaApiImage &dst) {

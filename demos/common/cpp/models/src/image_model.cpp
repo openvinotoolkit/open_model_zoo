@@ -50,6 +50,7 @@ InferenceEngine::ExecutableNetwork ImageModel::loadExecutableNetwork(const CnnCo
         // Setting image input (0-index input is image input) to use NV12
         InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
         inputInfo[inputsNames[0]]->getPreProcess().setColorFormat(ColorFormat::NV12);
+        inputInfo[inputsNames[0]]->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
 
         // Loading network
         auto cfg = cnnConfig.execNetworkConfig;
@@ -72,6 +73,9 @@ InferenceEngine::ExecutableNetwork ImageModel::loadExecutableNetwork(const CnnCo
     return execNetwork;
 }
 
+VASurfaceID ConvertVASurfaceFromDifferentDisplay(VADisplay display, VASurfaceID surface, VADisplay display1,
+                                                 uint64_t &dma_fd_out, int rt_format = VA_RT_FORMAT_YUV420);
+
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& data = inputData.asRef<ImageInputData>();
     int width = 0;
@@ -88,13 +92,16 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
         width = vaImg->width;
         height = vaImg->height;
 
-        auto resizedImg = resizedSurfacesPool->Acquire();
-        va_converter->Convert(*vaImg, *resizedImg->image);
+        //auto resizedImg = resizedSurfacesPool->Acquire();
+        //va_converter->Convert(*vaImg, *resizedImg->image);
 
-        auto nv12_blob = InferenceEngine::gpu::make_shared_blob_nv12(netInputHeight, netInputWidth, sharedVAContext, resizedImg->image->va_surface_id);
+        auto resizedImg = vaImg->CloneToAnotherDisplay(va_context->Display());
+        //cv::imshow("aa",resizedImg->CopyToMat());
+        //VaPooledImage::Ptr(new VaPooledImage(new VaApiImage(va_context->Display(),width,height,vaImg->format,src_surface),nullptr));
+        auto nv12_blob = InferenceEngine::gpu::make_shared_blob_nv12(resizedImg->height, resizedImg->width, sharedVAContext, resizedImg->va_surface_id);
 
         request->SetBlob(inputsNames[0],nv12_blob);
-        return std::shared_ptr<InternalModelData>(new InternalImageModelData(width, height,resizedImg));
+        return std::shared_ptr<InternalModelData>(new InternalImageModelData(width, height, resizedImg));
 #else
         throw std::runtime_error("Direct GPU copy was not initialized, but input data containing VA surface is received. You have to compile code with -ENABLE_VA option as well.");
 #endif

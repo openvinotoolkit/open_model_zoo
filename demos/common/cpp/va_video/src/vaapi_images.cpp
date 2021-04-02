@@ -32,6 +32,61 @@ namespace InferenceBackend {
         throw std::invalid_argument("Cannot convert FOURCC to RT_FORMAT.");
     }
 
+VaApiImage::Ptr VaApiImage::CloneToAnotherDisplay(VADisplay newDisplay)
+{
+    int rtFormat = FourCCToVART(format);
+
+    VADRMPRIMESurfaceDescriptor drm_descriptor = VADRMPRIMESurfaceDescriptor();
+    VA_CALL(vaExportSurfaceHandle(va_display, va_surface_id, VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
+                                  VA_EXPORT_SURFACE_READ_ONLY, &drm_descriptor));
+
+    VASurfaceAttribExternalBuffers external = VASurfaceAttribExternalBuffers();
+    external.width = drm_descriptor.width;
+    external.height = drm_descriptor.height;
+    external.pixel_format = drm_descriptor.fourcc;
+
+    if (drm_descriptor.num_objects != 1)
+        throw std::invalid_argument("Unexpected objects number");
+    auto object = drm_descriptor.objects[0];
+    external.num_buffers = 1;
+    uint64_t dma_fd = object.fd;
+    external.buffers = &dma_fd;
+    external.data_size = object.size;
+
+    external.num_planes = drm_descriptor.num_layers;
+    for (uint32_t i = 0; i < external.num_planes; i++) {
+        auto layer = drm_descriptor.layers[i];
+        if (layer.num_planes != 1)
+            throw std::invalid_argument("Unexpected planes number");
+        external.pitches[i] = layer.pitch[0];
+        external.offsets[i] = layer.offset[0];
+    }
+
+    VASurfaceAttrib attribs[2] = {};
+    attribs[0].flags = VA_SURFACE_ATTRIB_SETTABLE;
+    attribs[0].type = VASurfaceAttribMemoryType;
+    attribs[0].value.type = VAGenericValueTypeInteger;
+    attribs[0].value.value.i = VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME;
+
+    attribs[1].flags = VA_SURFACE_ATTRIB_SETTABLE;
+    attribs[1].type = VASurfaceAttribExternalBufferDescriptor;
+    attribs[1].value.type = VAGenericValueTypePointer;
+    attribs[1].value.value.p = &external;
+
+    VAConfigAttrib format_attrib;
+    format_attrib.type = VAConfigAttribRTFormat;
+    VA_CALL(vaGetConfigAttributes(newDisplay, VAProfileNone, VAEntrypointVideoProc, &format_attrib, 1));
+    if (!(format_attrib.value & rtFormat))
+        throw std::invalid_argument("Unsupported runtime format for surface.");
+
+    VASurfaceID surfaceID = VA_INVALID_SURFACE;
+    VA_CALL(vaCreateSurfaces(newDisplay, rtFormat, drm_descriptor.width, drm_descriptor.height, &surfaceID, 1,
+                             attribs, 2));
+                             std::cout<<"SutfID "<<surfaceID<<std::endl;
+    return VaApiImage::Ptr(new VaApiImage(newDisplay,external.width,external.height,format,surfaceID));
+}
+
+
 VASurfaceID VaApiImage::CreateVASurface() {
     VASurfaceAttrib surface_attrib;
     surface_attrib.type = VASurfaceAttribPixelFormat;
@@ -61,28 +116,6 @@ VaApiImage::VaApiImage(VADisplay va_display, uint32_t width, uint32_t height, Fo
     this->va_surface_id = va_surface == VA_INVALID_ID ? CreateVASurface() : va_surface;
 }
 
-VaApiImage::VaApiImage( VaApiImage&& other)
-{
-    *this = std::move(other);
-}
-
-VaApiImage&& VaApiImage::operator=(VaApiImage&& other)
-{
-    this->completed = (bool)other.completed;
-    this->width = other.width;
-    this->height = other.height;
-    this->format = other.format;
-    this->va_display = other.va_display;
-    this->va_surface_id = other.va_surface_id;
-
-    other.completed = true;
-    other.width = 0;
-    other.height = 0;
-    other.format = FOURCC_NONE;
-    other.va_display = nullptr;
-    other.va_surface_id = VA_INVALID_ID;
-}
-
 
 void VaApiImage::DestroyImage() {
     if (va_surface_id != VA_INVALID_ID) {
@@ -98,19 +131,19 @@ void VaApiImage::DestroyImage() {
 cv::Mat VaApiImage::CopyToMat(VaApiImage::CONVERSION_TYPE convType) {
 
     VAImage mappedImage;
-    void *pSurface = nullptr;
+    void *pData = nullptr;
     cv::Mat outMat;
     cv::Mat mappedMat;
 
     //--- Mapping image
     VA_CALL(vaDeriveImage(va_display, va_surface_id, &mappedImage))
-    VA_CALL(vaMapBuffer(va_display, mappedImage.buf, &pSurface))
+    VA_CALL(vaMapBuffer(va_display, mappedImage.buf, &pData))
 
-    //--- Copying data to Mat. Only NV12/I420 foramts are supported now
+    //--- Copying data to Mat. Only NV12/I420 formats are supported now
     switch(format) {
         case FOURCC_NV12:
         case FOURCC_I420:
-            mappedMat = cv::Mat(mappedImage.height*3/2,mappedImage.width,CV_8UC1,pSurface,{mappedImage.pitches[0]});
+            mappedMat = cv::Mat(mappedImage.height*3/2,mappedImage.width,CV_8UC1,pData,{mappedImage.pitches[0]});
             break;
         default:
             throw std::invalid_argument("VAApiImage Map: non-supported FOURCC encountered");

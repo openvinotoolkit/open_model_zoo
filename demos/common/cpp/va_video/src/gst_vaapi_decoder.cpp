@@ -11,10 +11,6 @@ namespace pz
 
 using GstMemoryUniquePtr = std::unique_ptr<GstMemory, decltype(&gst_memory_unref)>;
 
-struct BufferMapContext {
-    GstVideoFrame frame;
-};
-
 static void on_demux_new_pad (GstElement *element, GstPad *pad, gpointer data)
 {
     GstPad* parserSinkPad;
@@ -54,50 +50,37 @@ inline int gstFormatToFourCC(int format) {
     return 0;
 }
 
-void gva_buffer_map(GstBuffer *buffer, VaApiImage &image, BufferMapContext &map_context, GstVideoInfo *info,
-                    GstMapFlags map_flags, unsigned int vpu_device_id)
+std::unique_ptr<VaApiImage> bufferToImage(GstBuffer *buffer, GstVideoInfo *info)
 {
-
     try
     {
         if (!info)
             throw std::invalid_argument("GstVideoInfo is absent during GstBuffer mapping");
 
-        map_context = BufferMapContext();
-        map_context.frame.buffer = nullptr;
-
-        image = VaApiImage(gst_mini_object_get_qdata(&buffer->mini_object, g_quark_from_static_string("VADisplay")),
+        auto image = std::unique_ptr<VaApiImage>(new VaApiImage(
+            gst_mini_object_get_qdata(&buffer->mini_object, g_quark_from_static_string("VADisplay")),
             static_cast<uint32_t>(GST_VIDEO_INFO_WIDTH(info)),
             static_cast<uint32_t>(GST_VIDEO_INFO_HEIGHT(info)),
             static_cast<FourCC>(gstFormatToFourCC(GST_VIDEO_INFO_FORMAT(info))),
             reinterpret_cast<uint64_t>(gst_mini_object_get_qdata(&buffer->mini_object, g_quark_from_static_string("VASurfaceID")))
-            );
+            ));
 
         // getting data from VA_API
-        if (!image.va_display) {
+        if (!image->va_display) {
             std::ostringstream os;
-            os << "Failed to get VADisplay=" << image.va_display;
+            os << "Failed to get VADisplay=" << image->va_display;
             throw std::runtime_error(os.str());
         }
-        if ((int)image.va_surface_id < 0) {
+        if ((int)image->va_surface_id < 0) {
             std::ostringstream os;
-            os << "Failed to get VASurfaceID=" << image.va_surface_id;
+            os << "Failed to get VASurfaceID=" << image->va_surface_id;
             throw std::runtime_error(os.str());
         }
-    } catch (const std::exception &e) {
-        image = VaApiImage();
-        map_context.frame.buffer = nullptr;
-        std::throw_with_nested(std::runtime_error("Failed to map GstBuffer to specific memory type"));
-    }
-}
 
-void gva_buffer_unmap(GstBuffer *buffer, VaApiImage &, BufferMapContext &map_context, unsigned int vpu_device_id)
-{
-    if (map_context.frame.buffer)
-    {
-        UNUSED(buffer);
-        UNUSED(vpu_device_id);
-        gst_video_frame_unmap(&map_context.frame);
+        return image;
+
+    } catch (const std::exception &e) {
+        std::throw_with_nested(std::runtime_error("Failed to make VaApiImage from GstBuffer"));
     }
 }
 
@@ -117,17 +100,10 @@ std::shared_ptr<VaApiImage> GstVaApiDecoder::CreateImage(GstSample* sample, GstM
 
         GstBuffer* buffer = gst_sample_get_buffer(sample);
 
-        std::unique_ptr<InferenceBackend::VaApiImage> unique_image = std::unique_ptr<InferenceBackend::VaApiImage>(new VaApiImage);
-        assert(unique_image.get() != nullptr);
+        auto unique_image =  bufferToImage(buffer, video_info_);
 
-        std::shared_ptr<BufferMapContext> map_context = std::make_shared<BufferMapContext>();
-        assert(map_context.get() != nullptr);
-
-        gva_buffer_map(buffer, *unique_image, *map_context, video_info_, map_flags, -1);
-
-        auto image_deleter = [sample, buffer, map_context](InferenceBackend::VaApiImage *image)
+        auto image_deleter = [sample, buffer](InferenceBackend::VaApiImage *image)
         {
-            gva_buffer_unmap(buffer, *image, *map_context, -1);
             gst_sample_unref(sample);
             delete image;
         };

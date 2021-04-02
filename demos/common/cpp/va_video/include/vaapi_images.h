@@ -12,6 +12,8 @@
 #include <vector>
 
 #include "vaapi_context.h"
+#include <va/va.h>
+#include <va/va_drmcommon.h>
 
 #include <opencv2/core.hpp>
 
@@ -24,7 +26,11 @@ class VaApiImage{
     VaApiImage(){};
     VaApiImage(VADisplay va_display, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface = VA_INVALID_ID);
     VaApiImage(VaApiImage&& other);
-    VaApiImage&& operator=(VaApiImage&& other);
+    
+    using Ptr = std::shared_ptr<VaApiImage>;    
+
+    VaApiImage::Ptr CloneToAnotherDisplay(VADisplay newDisplay);
+
 
     enum CONVERSION_TYPE {
       CONVERT_TO_RGB,
@@ -44,7 +50,7 @@ class VaApiImage{
   protected:
     std::atomic_bool completed;
  
-    VaApiImage(const VaApiImage&other) = delete;
+    VaApiImage(const VaApiImage& other) = delete;
     void DestroyImage();
 
     VASurfaceID CreateVASurface();

@@ -36,14 +36,14 @@ struct InternalModelData
 struct InternalImageModelData : public InternalModelData
 {
 #ifdef USE_VA
-    InternalImageModelData(int width, int height, InferenceBackend::VaPooledImage::Ptr vaImage=nullptr) :
+    InternalImageModelData(int width, int height, InferenceBackend::VaApiImage::Ptr vaImage=nullptr) :
         vaImage(vaImage),
         inputImgWidth(width),
         inputImgHeight(height)
     {
     }
 
-    InferenceBackend::VaPooledImage::Ptr vaImage;
+    InferenceBackend::VaApiImage::Ptr vaImage;
 #else
     InternalImageModelData(int width, int height) :
         inputImgWidth(width),
