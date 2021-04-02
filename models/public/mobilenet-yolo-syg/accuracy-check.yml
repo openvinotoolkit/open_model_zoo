@@ -1,0 +1,68 @@
+models:
+  - name: mobilenet-yolo-syg
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP16
+        model: mobilenet-yolo-syg.xml
+        weights: mobilenet-yolo-syg.bin
+        device: CPU
+     
+        adapter:
+          type: yolo_v3
+          classes: 9
+          anchors: "12,16, 19,36, 40,28, 36,75, 76,55, 72,146, 142,110, 192,243, 459,401"
+          coords: 4
+          num: 9
+          anchor_masks: [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+          threshold: 0.001
+          outputs:
+            - separable_conv2d_22/BiasAdd/YoloRegion
+            - separable_conv2d_30/BiasAdd/YoloRegion
+            - separable_conv2d_38/BiasAdd/YoloRegion
+          raw_output: True
+        batch: 1
+
+    datasets:
+      - name: VOCdevkit
+        data_source: VOCdevkit/VOC2007/JPEGImages
+        annotation: voc_detection.pickle
+        dataset_meta: voc_detection.json
+        
+      #- name: VOCdevkit
+      #  data_source: VOCdevkit/VOC2007/JPEGImages
+      #  annotation_conversion:
+      #    converter: voc_detection
+      #    imageset_file: /opt/intel/openvino_2021.2.185/deployment_tools/open_model_zoo/tools/downloader/public/mobilenet-yolo-syg/VOCdevkit/VOC2007/ImageSets/Main/val.txt
+      #   annotations_dir: /opt/intel/openvino_2021.2.185/deployment_tools/open_model_zoo/tools/downloader/public/mobilenet-yolo-syg/VOCdevkit/VOC2007/Annotations
+      #    images_dir: /opt/intel/openvino_2021.2.185/deployment_tools/open_model_zoo/tools/downloader/public/mobilenet-yolo-syg/VOCdevkit/VOC2007/JPEGImages
+      #    dataset_meta_file: /opt/intel/openvino_2021.2.185/deployment_tools/open_model_zoo/tools/downloader/public/mobilenet-yolo-syg/VOCdevkit/voc_label.json
+
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: resize
+            size: 416
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            remove_filtered: true
+            apply_to: prediction
+            min_confidence: 0.001
+          - type: nms
+            overlap: 0.5
+          - type: clip_boxes
+            apply_to: prediction
+
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: true
+            presenter: print_scalar
+          - type: coco_precision
+            max_detections: 100
+            threshold: 0.5
+            presenter: print_vector
+
+global_definitions: /opt/intel/openvino_2021.2.185/deployment_tools/open_model_zoo/tools/accuracy_checker/dataset_definitions.yml
