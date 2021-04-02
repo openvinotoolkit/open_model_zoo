@@ -19,8 +19,8 @@ For details see [repository](https://github.com/NVIDIA/NeMo), [paper](https://ar
 | Metric           | Value              |
 | ---------------- | ------------------ |
 | Type             | Speech recognition |
-| GFLOPs           | 2.4156             |
-| MParams          | 18.856             |
+| GFLOPs           | 2.4195             |
+| MParams          | 18.8857            |
 | Source framework | PyTorch\*          |
 
 ### Input

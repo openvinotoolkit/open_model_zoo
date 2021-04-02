@@ -32,12 +32,7 @@ class QuartzNet(torch.nn.Module):
         self.encoder.load_state_dict(torch.load(encoder_weights, map_location='cpu'))
 
         decoder_params = model_args['init_params']['decoder_params']['init_params']
-        num_decoder_input_features = decoder_params['feat_in']
-        self.decoder = JasperDecoderForCTC(
-            feat_in=num_decoder_input_features,
-            num_classes=decoder_params['num_classes'],
-            vocabulary=decoder_params['vocabulary'],
-        )
+        self.decoder = JasperDecoderForCTC(**decoder_params)
         self.decoder.load_state_dict(torch.load(decoder_weights, map_location='cpu'))
 
         self.encoder._prepare_for_deployment()
