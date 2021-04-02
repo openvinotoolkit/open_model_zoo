@@ -46,5 +46,5 @@ class Model:
     def normalize(self, inputs):
         normalized_inputs = np.zeros(inputs.shape, dtype=np.float32)
         for i in range(inputs.shape[1]):
-            normalized_inputs[:,i,:,:] = (inputs[:,i,:,:] - self.mean_values[i]) / self.scale_values[i]
+            normalized_inputs[:, i, :, :] = (inputs[:, i, :, :] - self.mean_values[i]) / self.scale_values[i]
         return normalized_inputs
