@@ -93,7 +93,7 @@ def get_dlsdk_test_model(models_dir, config_update=None):
     if config_update:
         config.update(config_update)
 
-    return create_launcher(config)
+    return create_launcher(config, model_name='SampLeNet')
 
 
 def get_dlsdk_test_blob(models_dir, config_update=None):
@@ -249,7 +249,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_aocl': Path('aocl')
         }
-        launcher = create_launcher(config)
+        launcher = create_launcher(config, model_name='custom')
         subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
         launcher.release()
 
@@ -264,7 +264,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_aocl': Path('aocl')
         }
-        launcher = create_launcher(config)
+        launcher = create_launcher(config, model_name='custom')
         subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
         launcher.release()
 
@@ -279,7 +279,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
         subprocess_mock.assert_not_called()
 
     def test_does_not_program_bitstream_when_hetero_without_fpga(self, mocker):
@@ -294,7 +294,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
         subprocess_mock.assert_not_called()
 
     def test_does_not_program_bitstream_if_compiler_mode_3_in_env_when_fpga_in_hetero_device(self, mocker):
@@ -310,7 +310,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         subprocess_mock.assert_not_called()
 
@@ -327,7 +327,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         subprocess_mock.assert_not_called()
 
@@ -342,7 +342,7 @@ class TestDLSDKLauncher:
             'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
 
@@ -357,7 +357,7 @@ class TestDLSDKLauncher:
             'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
         os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
 
     def test_does_not_set_dla_aocx_when_device_is_not_fpga(self, mocker):
@@ -371,7 +371,7 @@ class TestDLSDKLauncher:
             'bitstream': 'custom_bitstream',
             'adapter': 'classification',
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         os.environ.__setitem__.assert_not_called()
 
@@ -386,7 +386,7 @@ class TestDLSDKLauncher:
             'bitstream': 'custom_bitstream',
             'adapter': 'classification',
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         os.environ.__setitem__.assert_not_called()
 
@@ -402,7 +402,7 @@ class TestDLSDKLauncher:
             'bitstream': 'custom_bitstream',
             'adapter': 'classification',
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         os.environ.__setitem__.assert_not_called()
 
@@ -418,7 +418,7 @@ class TestDLSDKLauncher:
             'bitstream': 'custom_bitstream',
             'adapter': 'classification',
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         os.environ.__setitem__.assert_not_called()
 
@@ -1252,7 +1252,7 @@ class TestDLSDKLauncherConfig:
         launcher = {
             'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': 'ssd', 'device': 'cpu'
         }
-        create_launcher(launcher)
+        create_launcher(launcher, model_name='custom')
 
     def test_dlsdk_launcher_model_with_several_image_inputs_raise_value_error(self, mocker):
         launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': {'key': 'val'}}

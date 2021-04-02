@@ -366,9 +366,11 @@ class DLSDKLauncher(Launcher):
             model = Path(self.get_value_from_config('model'))
             model_is_blob = self.get_value_from_config('_model_is_blob')
             if not model.is_dir():
-                if model.suffix == '.blob':
-                    return model, True
-                return model, False
+                accepted_suffixes = ['.blob', '.onnx', '.xml']
+                if model.suffix not in accepted_suffixes:
+                    raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+                print_info('Found model {}'.format(model))
+                return model, model.suffix == '.blob'
             if model_is_blob:
                 model_list = get_blob(model)
             else:
@@ -392,7 +394,12 @@ class DLSDKLauncher(Launcher):
         if (weights is None or Path(weights).is_dir()) and model.suffix != '.onnx':
             weights_dir = weights or model.parent
             weights = Path(weights_dir) / model.name.replace('xml', 'bin')
+        if weights is not None:
+            accepted_weights_suffixes = ['.bin']
+            if weights.suffix not in accepted_weights_suffixes:
+                raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
             print_info('Found weights {}'.format(get_path(weights)))
+
         return model, weights
 
     def _is_fpga(self):
