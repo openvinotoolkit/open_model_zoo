@@ -15,6 +15,7 @@
 """
 import itertools
 import math
+import cv2
 import numpy as np
 
 from .model import Model
@@ -22,8 +23,8 @@ from .utils import Detection, resize_image, nms
 
 
 class FaceBoxes(Model):
-    def __init__(self, ie, model_path, threshold=0.5):
-        super().__init__(ie, model_path)
+    def __init__(self, ie, model_path, reverse_input_channels, mean_values, scale_values, threshold=0.5):
+        super().__init__(ie, model_path, reverse_input_channels, mean_values, scale_values)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         self.image_blob_name = next(iter(self.net.input_info))
@@ -65,8 +66,14 @@ class FaceBoxes(Model):
         resized_image = resize_image(image, (self.w, self.h))
         meta = {'original_shape': image.shape,
                 'resized_shape': resized_image.shape}
+        if self.is_onnx_format and self.reverse_input_channels:
+            resized_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
+
         resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
+
+        if self.is_onnx_format and self.mean_values is not None:
+            resized_image = self.normalize(resized_image)
 
         dict_inputs = {self.image_blob_name: resized_image}
         return dict_inputs, meta

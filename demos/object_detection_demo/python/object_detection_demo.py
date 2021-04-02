@@ -91,6 +91,18 @@ def build_argparser():
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
+    onnx_args = parser.add_argument_group('Onnx format options')
+    onnx_args.add_argument('--reverse_input_channels', default=False, action='store_true',
+                         help='Optional. Switch the input channels order from '
+                              'BGR to RGB for onnx model.')
+    onnx_args.add_argument('--mean_values', default=None, type=float, nargs=3,
+                         help='Optional. Normalize input by subtracting the mean values '
+                              'per channel for onnx model. Example: 255 255 255')
+    onnx_args.add_argument('--scale_values', default=None, type=float, nargs=3,
+                         help='Optional. Divide input by scale values per channel for onnx model. '
+                              'Division is applied after mean values '
+                              'subtraction. Example: 255 255 255')
+
     debug_args = parser.add_argument_group('Debug options')
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
                             default=False, action='store_true')
@@ -139,8 +151,9 @@ class ColorPalette:
 
 
 def get_model(ie, args):
+    common_args = (ie, args.model, args.reverse_input_channels, args.mean_values, args.scale_values)
     if args.architecture_type == 'ssd':
-        return models.SSD(ie, args.model, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
+        return models.SSD(*common_args, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
     elif args.architecture_type == 'ctpn':
         return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
     elif args.architecture_type == 'yolo':
@@ -150,13 +163,13 @@ def get_model(ie, args):
         return models.YoloV4(ie, args.model, labels=args.labels,
                              threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
     elif args.architecture_type == 'faceboxes':
-        return models.FaceBoxes(ie, args.model, threshold=args.prob_threshold)
+        return models.FaceBoxes(*common_args, threshold=args.prob_threshold)
     elif args.architecture_type == 'centernet':
-        return models.CenterNet(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
+        return models.CenterNet(*common_args, labels=args.labels, threshold=args.prob_threshold)
     elif args.architecture_type == 'retinaface':
         return models.RetinaFace(ie, args.model, threshold=args.prob_threshold)
     elif args.architecture_type == 'ultra_lightweight_face_detection':
-        return models.UltraLightweightFaceDetection(ie, args.model, threshold=args.prob_threshold)
+        return models.UltraLightweightFaceDetection(*common_args, threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
