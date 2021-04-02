@@ -34,6 +34,7 @@ Accuracy Checker supports following set of postprocessors:
   * `use_min_area` - boolean value to determine whether to use minimum area of two bounding boxes as base area to calculate overlap.
   * `per_class_nms` - enables supression only within class (`False` by default)
   * `diou` - uses distance-IoU non-maximum supression (`False` by default)
+  * `diou_pow` - sets degree for distance-IOU expression (`1` by default)
 * `soft_nms` - soft non-maximum suppression. Supported representations: `DetectionAnotation`, `DetectionPrediction`, `ActionDetectionAnnotation`, `ActionDetectionPrediction`.
   * `keep_top_k`  - the maximal number of detections which should be kept.
   * `sigma` - sigma-value for updated detection score calculation.

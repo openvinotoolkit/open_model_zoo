@@ -75,7 +75,8 @@ class NMS(Postprocessor):
             'diou': BoolField(
                 optional=True, default=False,
                 description="Use DIOU NMS"
-            )
+            ),
+            'diou_pow': NumberField(optional=True, default=1, description="Degree of DIOU expression")
         })
         return parameters
 
@@ -86,6 +87,7 @@ class NMS(Postprocessor):
         self.use_min_area = self.get_value_from_config('use_min_area')
         self.nms_per_class = self.get_value_from_config('nms_per_class')
         self.diou = self.get_value_from_config('diou')
+        self.diou_power = self.get_value_from_config('diou_pow')
 
     def process_image(self, annotations, predictions):
         for prediction in predictions:
@@ -101,13 +103,15 @@ class NMS(Postprocessor):
                         prediction.x_mins[indexes], prediction.y_mins[indexes],
                         prediction.x_maxs[indexes], prediction.y_maxs[indexes],
                         scores[indexes],
-                        self.overlap, self.include_boundaries, self.keep_top_k, self.use_min_area, self.diou
+                        self.overlap, self.include_boundaries, self.keep_top_k, self.use_min_area,
+                        self.diou, self.diou_power
                     )
                     keep.extend(indexes[keep_per_class])
             else:
                 keep = self.nms(
                     prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs, scores,
-                    self.overlap, self.include_boundaries, self.keep_top_k, self.use_min_area, self.diou
+                    self.overlap, self.include_boundaries, self.keep_top_k, self.use_min_area,
+                    self.diou, self.diou_power
                 )
 
             prediction.remove([box for box in range(len(prediction.x_mins)) if box not in keep])
@@ -116,7 +120,7 @@ class NMS(Postprocessor):
 
     @staticmethod
     def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None,
-            use_min_area=False, use_diou=False):
+            use_min_area=False, use_diou=False, diou_power=1):
         """
         Pure Python NMS baseline.
         """
@@ -162,10 +166,11 @@ class NMS(Postprocessor):
                 d_2 = ((y2[order[1:]] + y1[order[1:]]) - (y2[i] + y1[i])) ** 2 / 4
                 d_area = d_1 + d_2
 
-                overlap = overlap - pow(d_area / c_area, 0.6)
+                overlap = overlap - pow(d_area / c_area, diou_power)
             order = order[np.where(overlap <= thresh)[0] + 1] # pylint: disable=W0143
 
         return keep
+
 
 class SoftNMS(Postprocessor):
     __provider__ = 'soft_nms'
