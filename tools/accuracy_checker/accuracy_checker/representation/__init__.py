@@ -67,7 +67,8 @@ from .regression_representation import (
     FacialLandmarks3DPrediction,
     GazeVectorAnnotation,
     GazeVectorPrediction,
-    FeaturesRegressionAnnotation
+    FeaturesRegressionAnnotation,
+    NiftiRegressionAnnotation,
 )
 from .multilabel_recognition import MultiLabelRecognitionAnnotation, MultiLabelRecognitionPrediction
 from .super_resolution_representation import SuperResolutionAnnotation, SuperResolutionPrediction
@@ -209,4 +210,6 @@ __all__ = [
 
     'OpticalFlowAnnotation',
     'OpticalFlowPrediction',
+
+    'NiftiRegressionAnnotation',
 ]

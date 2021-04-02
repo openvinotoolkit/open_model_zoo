@@ -17,8 +17,7 @@ Faster R-CNN Resnet-50 model. Used for object detection. For details, see the [p
 
 | Metric | Value |
 | ------ | ----- |
-| coco_precision | 27.47%|
-| mAP| 42.87%|
+| coco_precision | 31.09%|
 
 ## Input
 

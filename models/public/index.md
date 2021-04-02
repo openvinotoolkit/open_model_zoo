@@ -97,10 +97,10 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 
 | Model Name                     | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------ | -------------- | -------------- | -------- | ------ | ------- |
-| Mask R-CNN Inception ResNet V2 | TensorFlow\*   | [mask_rcnn_inception_resnet_v2_atrous_coco](./mask_rcnn_inception_resnet_v2_atrous_coco/mask_rcnn_inception_resnet_v2_atrous_coco.md) | 39.8619%/35.3628% | 675.314 | 92.368 |
-| Mask R-CNN Inception V2        | TensorFlow\*   | [mask_rcnn_inception_v2_coco](./mask_rcnn_inception_v2_coco/mask_rcnn_inception_v2_coco.md) | 27.1199%/21.4805% | 54.926 | 21.772 |
-| Mask R-CNN ResNet 50           | TensorFlow\*   | [mask_rcnn_resnet50_atrous_coco](./mask_rcnn_resnet50_atrous_coco/mask_rcnn_resnet50_atrous_coco.md)| 	29.7512%/27.4597% | 294.738 | 50.222 |
-| Mask R-CNN ResNet 101          | TensorFlow\*   | [mask_rcnn_resnet101_atrous_coco](./mask_rcnn_resnet101_atrous_coco/mask_rcnn_resnet101_atrous_coco.md) | 34.9191%/31.301% | 674.58 | 69.188 |
+| Mask R-CNN Inception ResNet V2 | TensorFlow\*   | [mask_rcnn_inception_resnet_v2_atrous_coco](./mask_rcnn_inception_resnet_v2_atrous_coco/mask_rcnn_inception_resnet_v2_atrous_coco.md) | 39.86%/35.36% | 675.314 | 92.368 |
+| Mask R-CNN Inception V2        | TensorFlow\*   | [mask_rcnn_inception_v2_coco](./mask_rcnn_inception_v2_coco/mask_rcnn_inception_v2_coco.md) | 27.12%/21.48% | 54.926 | 21.772 |
+| Mask R-CNN ResNet 50           | TensorFlow\*   | [mask_rcnn_resnet50_atrous_coco](./mask_rcnn_resnet50_atrous_coco/mask_rcnn_resnet50_atrous_coco.md)| 	29.75%/27.46% | 294.738 | 50.222 |
+| Mask R-CNN ResNet 101          | TensorFlow\*   | [mask_rcnn_resnet101_atrous_coco](./mask_rcnn_resnet101_atrous_coco/mask_rcnn_resnet101_atrous_coco.md) | 34.92%/31.30% | 674.58 | 69.188 |
 | YOLACT ResNet 50 FPN | PyTorch\* | [yolact-resnet50-fpn-pytorch](./yolact-resnet50-fpn-pytorch/yolact-resnet50-fpn-pytorch.md) | 28.0%/30.69% | 118.575 |  36.829  |
 
 ### 3D Semantic Segmentation
@@ -124,10 +124,10 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | EfficientDet-D0                      | TensorFlow\*             | [efficientdet-d0-tf](./efficientdet-d0-tf/efficientdet-d0-tf.md)| 31.95% | 2.54 | 3.9 |
 | EfficientDet-D1                      | TensorFlow\*             | [efficientdet-d1-tf](./efficientdet-d1-tf/efficientdet-d1-tf.md)| 37.54% | 6.1 | 6.6 |
 | FaceBoxes                            | PyTorch\*                | [faceboxes-pytorch](./faceboxes-pytorch/faceboxes-pytorch.md)|83.565% | 1.8975 | 1.0059 |
-| Faster R-CNN with Inception-ResNet v2| TensorFlow\*             | [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/faster_rcnn_inception_resnet_v2_atrous_coco.md)| 36.76%/52.41% | 30.687 | 13.307 |
-| Faster R-CNN with Inception v2       | TensorFlow\*             | [faster_rcnn_inception_v2_coco](./faster_rcnn_inception_v2_coco/faster_rcnn_inception_v2_coco.md) | 25.65%/40.04%| 30.687 | 13.307 |
-| Faster R-CNN with ResNet 50          | TensorFlow\*             | [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/faster_rcnn_resnet50_coco.md) | 27.47%/42.87% | 57.203 | 29.162 |
-| Faster R-CNN with ResNet 101         | TensorFlow\*             | [faster_rcnn_resnet101_coco](./faster_rcnn_resnet101_coco/faster_rcnn_resnet101_coco.md) | 30.95%/47.21%	 | 112.052 | 48.128 |
+| Faster R-CNN with Inception-ResNet v2| TensorFlow\*             | [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/faster_rcnn_inception_resnet_v2_atrous_coco.md)| 40.69% | 30.687 | 13.307 |
+| Faster R-CNN with Inception v2       | TensorFlow\*             | [faster_rcnn_inception_v2_coco](./faster_rcnn_inception_v2_coco/faster_rcnn_inception_v2_coco.md) | 26.24%| 30.687 | 13.307 |
+| Faster R-CNN with ResNet 50          | TensorFlow\*             | [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/faster_rcnn_resnet50_coco.md) | 31.09% | 57.203 | 29.162 |
+| Faster R-CNN with ResNet 101         | TensorFlow\*             | [faster_rcnn_resnet101_coco](./faster_rcnn_resnet101_coco/faster_rcnn_resnet101_coco.md) | 35.72% | 112.052 | 48.128 |
 | MobileFace Detection V1              | MXNet\*                  | [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/mobilefacedet-v1-mxnet.md)| 	78.7488%| 3.5456 | 7.6828 |
 | MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/mtcnn.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| 48.1308%/62.2625% | <br>3.3715<br>0.0031<br>0.0263|<br>0.0066<br>0.1002<br>0.3890|
 | Pelee                                | Caffe\*                  | [pelee-coco](./pelee-coco/pelee-coco.md) | 21.9761% | 1.290 | 5.98 |

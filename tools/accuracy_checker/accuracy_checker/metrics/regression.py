@@ -45,7 +45,8 @@ from ..representation import (
     OpticalFlowAnnotation,
     OpticalFlowPrediction,
     BackgroundMattingAnnotation,
-    BackgroundMattingPrediction
+    BackgroundMattingPrediction,
+    NiftiRegressionAnnotation,
 )
 
 from .metric import PerImageEvaluationMetric
@@ -56,10 +57,10 @@ from ..utils import string_to_tuple, finalize_metric_result, contains_all
 class BaseRegressionMetric(PerImageEvaluationMetric):
     annotation_types = (
         RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation, ImageProcessingAnnotation,
-        BackgroundMattingAnnotation
+        BackgroundMattingAnnotation, NiftiRegressionAnnotation,
     )
     prediction_types = (
-        RegressionPrediction, DepthEstimationPrediction, ImageProcessingPrediction, BackgroundMattingPrediction
+        RegressionPrediction, DepthEstimationPrediction, ImageProcessingPrediction, BackgroundMattingPrediction,
     )
 
     def __init__(self, value_differ, *args, **kwargs):

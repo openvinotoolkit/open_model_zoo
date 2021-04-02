@@ -17,8 +17,7 @@ Faster R-CNN with Inception v2. Used for object detection. For details, see the 
 
 | Metric | Value |
 | ------ | ----- |
-| coco_precision | 25.65%|
-| mAP| 40.04%|
+| coco_precision | 26.24%|
 
 ## Input
 
