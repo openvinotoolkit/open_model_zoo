@@ -1,18 +1,12 @@
-# quartznet
+# quartznet-15x5-en
 
 ## Use Case and High-Level Description
 
-QuartzNet model is a pair of encoder and decoder. QuartzNet’s design is based on the Jasper architecture,
+QuartzNet model performs automatic speech recognition. QuartzNet’s design is based on the Jasper architecture,
 which is a convolutional model trained with Connectionist Temporal Classification (CTC) loss.
 The model was trained in NeMo on multiple datasets: LibriSpeech,
 Mozilla Common Voice, WSJ, Fisher, Switchboard, and NSC Singapore English.
 For details see [repository](https://github.com/NVIDIA/NeMo), [paper](https://arxiv.org/pdf/1910.10261.pdf).
-
-## Accuracy
-
-| Metric                       | Value |
-| ---------------------------- | ----- |
-| WER @ Librispeech test-clean | 3.86% |
 
 ## Specification
 
@@ -23,15 +17,21 @@ For details see [repository](https://github.com/NVIDIA/NeMo), [paper](https://ar
 | MParams          | 18.8857            |
 | Source framework | PyTorch\*          |
 
+## Accuracy
+
+| Metric                       | Value |
+| ---------------------------- | ----- |
+| WER @ Librispeech test-clean | 3.86% |
+
 ### Input
 
 #### Original model
 
-Audio signal, name - `audio_signal`,  shape - `1, 64, 128`, format is `B, N, C` where:
+Normalized Mel-Spectrogram of 16kHz audio signal, name - `audio_signal`,  shape - `1, 64, 128`, format is `B, N, C` where:
 
 - `B` - batch size
-- `N` - number of audio frames
-- `C` - clip duration
+- `N` - number of mel-spectrogram frequency bins
+- `C` - duration
 
 #### Converted model
 
@@ -48,7 +48,7 @@ Per-frame probabilities (after LogSoftmax) for every symbol in the alphabet, nam
 - C - alphabet size, including the CTC blank symbol
 
 The per-frame probabilities are to be decoded with a CTC decoder.
-The alphabet is: 0 = space, 1...26 = "a" to "z", 27 = apostrophe, 28 = CTC blank symbol.
+The alphabet is: 0 = space, 1...26 = "a" to "z", 27 = apostrophe, 28 = CTC blank symbol. Example is provided [here](../../../demos/speech_recognition_demo/python/default_alphabet_example.conf).
 
 #### Converted model
 

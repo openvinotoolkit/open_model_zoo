@@ -1,5 +1,5 @@
 models:
-  - name: quartznet
+  - name: quartznet-15x5-en
     launchers:
       - framework: dlsdk
         allow_reshape_input: True
