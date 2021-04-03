@@ -4,8 +4,8 @@
 
 QuartzNet model performs automatic speech recognition. QuartzNet’s design is based on the Jasper architecture,
 which is a convolutional model trained with Connectionist Temporal Classification (CTC) loss.
-The model was trained in NeMo on multiple datasets: LibriSpeech,
-Mozilla Common Voice, WSJ, Fisher, Switchboard, and NSC Singapore English.
+This particular model has 15 Jasper blocks each repeated 5 times. The model was trained in NeMo on multiple datasets:
+LibriSpeech, Mozilla Common Voice, WSJ, Fisher, Switchboard, and NSC Singapore English.
 For details see [repository](https://github.com/NVIDIA/NeMo), [paper](https://arxiv.org/pdf/1910.10261.pdf).
 
 ## Specification
