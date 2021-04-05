@@ -25,7 +25,7 @@ Accuracy metrics were obtained with fixed input resolution 512x512.
 
 ### Original model
 
-Image, name: `input.1`, shape: `1, 3, 512, 512`, format: `B, C, H, W` where:
+Image, name: `input.1`, shape: `1, 3, 512, 512`, format: `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -37,7 +37,7 @@ Mean values: [123.675, 116.28, 103.53], scale values: [58.395, 57.12, 57.375]
 
 ### Converted Model
 
-Image, name: `input.1`, shape: `1, 3, 512, 512`, format: `B, C, H, W` where:
+Image, name: `input.1`, shape: `1, 3, 512, 512`, format: `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -50,7 +50,7 @@ Expected color order: `BGR`.
 
 ### Original Model
 
-Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `segmentation_map`, shape: `1, 1, 512, 512` in `B, 1, H, W` format where:
+Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `segmentation_map`, shape: `1, 1, 512, 512` in `B, 1, H, W` format, where:
 
 - `B` - batch size
 - `H` - image height
@@ -58,11 +58,25 @@ Integer values in a range [0, 20], which represent an index of a predicted class
 
 ### Converted Model
 
-Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `segmentation_map`, shape: `1, 1, 512, 512` in `B, 1, H, W` format where:
+Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `segmentation_map`, shape: `1, 1, 512, 512` in `B, 1, H, W` format, where:
 
 - `B` - batch size
 - `H` - image height
 - `W` - image width
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 
