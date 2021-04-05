@@ -41,7 +41,7 @@ Name: `data`, shape: [1x3x64x64] - An input image in [1xCxHxW] format. Expected 
 ## Outputs
 
 1. name: "prob_emotion", shape: [1, 5, 1, 1] - Softmax output across five emotions
-   ('neutral', 'happy', 'sad', 'surprise', 'anger').
+   (0 - 'neutral', 1 - 'happy', 2 - 'sad', 3 - 'surprise', 4 - 'anger').
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
