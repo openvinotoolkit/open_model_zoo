@@ -414,7 +414,6 @@ NATIVE_DEMOS = [
             TestCase(options={'-m_det': ModelArg('person-detection-0200')}),
             TestCase(options={'-m_det': ModelArg('person-detection-0201')}),
             TestCase(options={'-m_det': ModelArg('person-detection-0202')}),
-            TestCase(options={'-m_det': ModelArg('person-detection-retail-0002')}),
             TestCase(options={'-m_det': ModelArg('person-detection-retail-0013')}),
         ],
         single_option_cases('-m_reid',
