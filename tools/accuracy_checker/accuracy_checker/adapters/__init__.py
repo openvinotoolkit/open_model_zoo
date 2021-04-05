@@ -104,7 +104,7 @@ from .audio_recognition import (
     CTCBeamSearchDecoderWithLm,
     FastCTCBeamSearchDecoderWithLm
 )
-
+from .wfst_decoder import WFSTDecodingAdapter
 from .regression import RegressionAdapter, MultiOutputRegression
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
@@ -228,6 +228,7 @@ __all__ = [
     'CTCGreedyDecoder',
     'CTCBeamSearchDecoderWithLm',
     'FastCTCBeamSearchDecoderWithLm',
+    'WFSTDecodingAdapter',
 
     'QualityAssessmentAdapter',
 
