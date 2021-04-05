@@ -65,8 +65,8 @@ class UltraLightweightFaceDetection(Model):
         resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
 
-        if self.is_onnx_format and self.mean_values is not None:
-            resized_image = self.scaleshift(resized_image)
+        if self.is_onnx_format:
+            resized_image = (resized_image - self.mean_values[:, None, None]) / self.scale_values[:, None, None]
 
         dict_inputs = {self.image_blob_name: resized_image}
         return dict_inputs, meta
