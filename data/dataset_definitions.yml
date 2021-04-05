@@ -1242,3 +1242,11 @@ datasets:
     data_source: PASCAL-S/image
     additional_data_source: PASCAL-S/mask
     annotation: pascal-s.pickle
+
+  - name: LibriSpeech_test_clean_npy_nemo
+    data_source: librispeech/test/LibriSpeech/test-clean.npy
+    annotation: librispeech_npy.pickle
+    annotation_conversion:
+      converter: librispeech
+      data_dir: librispeech/test/LibriSpeech/test-clean.npy
+      use_numpy: true
