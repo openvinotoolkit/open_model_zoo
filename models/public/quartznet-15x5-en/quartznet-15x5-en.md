@@ -27,7 +27,7 @@ For details see [repository](https://github.com/NVIDIA/NeMo), [paper](https://ar
 
 #### Original model
 
-Normalized Mel-Spectrogram of 16kHz audio signal, name - `audio_signal`,  shape - `1, 64, 128`, format is `B, N, C` where:
+Normalized Mel-Spectrogram of 16kHz audio signal, name - `audio_signal`,  shape - `1, 64, 128`, format is `B, N, C`, where:
 
 - `B` - batch size
 - `N` - number of mel-spectrogram frequency bins
@@ -41,7 +41,7 @@ The converted model has the same parameters as the original model.
 
 #### Original model
 
-Per-frame probabilities (after LogSoftmax) for every symbol in the alphabet, name - `output`,  shape - `1, 64, 29`, output data format is `B, N, C` where:
+Per-frame probabilities (after LogSoftmax) for every symbol in the alphabet, name - `output`,  shape - `1, 64, 29`, output data format is `B, N, C`, where:
 
 - B - batch size
 - N - number of audio frames
