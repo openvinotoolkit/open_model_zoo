@@ -6,9 +6,9 @@
 
 #include <tuple>
 
-std::tuple<bool, bool, double> social_distance(std::tuple<int, int> &frame_shape,
+std::tuple<bool, bool, double> socialDistance(std::tuple<int, int> &frameShape,
                                                std::tuple<int, int> &a, std::tuple<int, int> &b,
                                                std::tuple<int, int> &c, std::tuple<int, int> &d,
-                                               unsigned min_iter = 3, double min_w = 0, double max_w = 0);
+                                               unsigned minIter = 3, double minW = 0, double maxW = 0);
 
-std::tuple<int, int, int, int> get_crop(std::tuple<int, int, int, int> a, std::tuple<int, int, int, int> b);
+std::tuple<int, int, int, int> getCrop(std::tuple<int, int, int, int> a, std::tuple<int, int, int, int> b);

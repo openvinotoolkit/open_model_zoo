@@ -8,27 +8,27 @@
 #include <list>
 #include <map>
 #include <memory>
-#include <stdexcept>
-#include <string>
 #include <utility>
 #include <vector>
 #include <set>
+#include <stdexcept>
+#include <string>
 
 #include <cldnn/cldnn_config.hpp>
 #include <inference_engine.hpp>
-#include <vpu/hddl_config.hpp>
 #include <monitors/presenter.h>
+#include <vpu/hddl_config.hpp>
 #include <utils/args_helper.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 
 #include "common.hpp"
+#include "geodist.hpp"
 #include "grid_mat.hpp"
 #include "input_wrappers.hpp"
-#include "social_distance_demo.hpp"
 #include "net_wrappers.hpp"
 #include "person_trackers.hpp"
-#include "geodist.hpp"
+#include "social_distance_demo.hpp"
 
 using namespace InferenceEngine;
 
@@ -166,8 +166,8 @@ struct Context {  // stores all global data for tasks
     } videoFramesContext;
     struct {
         std::vector<PersonTrackers> personTracker;
-        std::vector<int> min_w;
-        std::vector<int> max_w;
+        std::vector<int> minW;
+        std::vector<int> maxW;
     } trackersContext;
     std::weak_ptr<Worker> resAggregatorsWorker;
     std::mutex classifiersAggregatorPrintMutex;
@@ -228,11 +228,11 @@ public:
     }
 
     void push(BboxAndDescr &&bboxAndDescr) {
-        boxesAndDescrs.lockedPush_back(std::move(bboxAndDescr));
+        boxesAndDescrs.lockedPushBack(std::move(bboxAndDescr));
     }
 
     void push(TrackableObject &&tracker) {
-        trackers.lockedPush_back(std::move(tracker));
+        trackers.lockedPushBack(std::move(tracker));
     }
 
     const VideoFrame::Ptr sharedVideoFrame;
@@ -406,11 +406,11 @@ void ResAggregator::process() {
             switch (bboxAndDescr.objectType) {
                 case BboxAndDescr::ObjectType::NONE:
                     cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  2);
-                    if (bboxAndDescr.rect.width < context.trackersContext.min_w[sourceID]) {
-                        context.trackersContext.min_w[sourceID] = bboxAndDescr.rect.width;
+                    if (bboxAndDescr.rect.width < context.trackersContext.minW[sourceID]) {
+                        context.trackersContext.minW[sourceID] = bboxAndDescr.rect.width;
                     }
-                    if (bboxAndDescr.rect.width > context.trackersContext.max_w[sourceID]) {
-                        context.trackersContext.max_w[sourceID] = bboxAndDescr.rect.width;
+                    if (bboxAndDescr.rect.width > context.trackersContext.maxW[sourceID]) {
+                        context.trackersContext.maxW[sourceID] = bboxAndDescr.rect.width;
                     }
                     break;
                 default: throw std::exception();  // must never happen
@@ -447,13 +447,13 @@ void ResAggregator::process() {
                 }
 
                 std::tuple<int, int> frame_shape(h, w);
-                auto result = social_distance(frame_shape, a, b, c, d, 4 /* ~ 5 feets */,
-                        context.trackersContext.min_w[sourceID],
-                        context.trackersContext.max_w[sourceID]);
+                auto result = socialDistance(frame_shape, a, b, c, d, 4 /* ~ 5 feets */,
+                        context.trackersContext.minW[sourceID],
+                        context.trackersContext.maxW[sourceID]);
 
                 if (std::get<1>(result)) {
                     int xmin, ymin, xmax, ymax;
-                    std::tie(xmin, ymin, xmax, ymax) = get_crop(l1, l2);
+                    std::tie(xmin, ymin, xmax, ymax) = getCrop(l1, l2);
                     cv::Rect bb1(std::get<0>(l1), std::get<1>(l1), std::get<2>(l1) - std::get<0>(l1), std::get<3>(l1) - std::get<1>(l1));
                     cv::Rect bb2(std::get<0>(l2), std::get<1>(l2), std::get<2>(l2) - std::get<0>(l2), std::get<3>(l2) - std::get<1>(l2));
                     cv::rectangle(sharedVideoFrame->frame, bb1, {0, 255, 255}, 2);
@@ -505,7 +505,7 @@ bool DetectionsProcessor::isReady() {
             }
         }
 
-        context.detectorsInfers.inferRequests.lockedPush_back(*inferRequest);
+        context.detectorsInfers.inferRequests.lockedPushBack(*inferRequest);
         requireGettingNumberOfDetections = false;
     }
 
@@ -545,7 +545,7 @@ void DetectionsProcessor::process() {
                                  classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::NONE, rect, std::move(std::string("fake"))});
                                  classifiersAggregator->push(TrackableObject{std::make_tuple(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height),
                                         std::move(result), std::make_tuple(rect.x + rect.width/2, rect.y + rect.height)});
-                                 context.reidInfers.inferRequests.lockedPush_back(reidRequest);
+                                 context.reidInfers.inferRequests.lockedPushBack(reidRequest);
                           },
                           classifiersAggregator, std::ref(reidRequest), personRect, std::ref(context)));
 
@@ -712,7 +712,7 @@ int main(int argc, char* argv[]) {
                 devices.insert(device);
             }
         }
-        std::map<std::string, uint32_t> device_nstreams = parseValuePerDevice(devices, FLAGS_nstreams);
+        std::map<std::string, uint32_t> deviceNStreams = parseValuePerDevice(devices, FLAGS_nstreams);
 
         for (const std::string& device : devices) {
             slog::info << "Loading device " << device << slog::endl;
@@ -723,8 +723,8 @@ int main(int argc, char* argv[]) {
             if ("CPU" == device) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-                    ie.AddExtension(extension_ptr, "CPU");
+                    auto extensionPtr = make_so_pointer<IExtension>(FLAGS_l);
+                    ie.AddExtension(extensionPtr, "CPU");
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
                 if (FLAGS_nthreads != 0) {
@@ -732,9 +732,9 @@ int main(int argc, char* argv[]) {
                 }
                 ie.SetConfig({{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }}, "CPU");
                 ie.SetConfig({{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
-                                (device_nstreams.count("CPU") > 0 ? std::to_string(device_nstreams.at("CPU")) :
+                                (deviceNStreams.count("CPU") > 0 ? std::to_string(deviceNStreams.at("CPU")) :
                                                                     CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) }}, "CPU");
-                device_nstreams["CPU"] = std::stoi(ie.GetConfig("CPU", CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
+                deviceNStreams["CPU"] = std::stoi(ie.GetConfig("CPU", CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
             }
 
             if ("GPU" == device) {
@@ -743,9 +743,9 @@ int main(int argc, char* argv[]) {
                     ie.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
                 }
                 ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
-                                (device_nstreams.count("GPU") > 0 ? std::to_string(device_nstreams.at("GPU")) :
+                                (deviceNStreams.count("GPU") > 0 ? std::to_string(deviceNStreams.at("GPU")) :
                                                                     CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) }}, "GPU");
-                device_nstreams["GPU"] = std::stoi(ie.GetConfig("GPU", CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
+                deviceNStreams["GPU"] = std::stoi(ie.GetConfig("GPU", CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
                 if (devices.end() != devices.find("CPU")) {
                     // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
                     // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
@@ -796,15 +796,15 @@ int main(int argc, char* argv[]) {
                                               std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()))};
 
         slog::info << "Number of InferRequests: " << nireq << " (detection), " << nreidireq << " (re-identification)" << slog::endl;
-        std::ostringstream device_ss;
-        for (const auto& nstreams : device_nstreams) {
-            if (!device_ss.str().empty()) {
-                device_ss << ", ";
+        std::ostringstream deviceSS;
+        for (const auto& nstreams : deviceNStreams) {
+            if (!deviceSS.str().empty()) {
+                deviceSS << ", ";
             }
-            device_ss << nstreams.second << " streams for " << nstreams.first;
+            deviceSS << nstreams.second << " streams for " << nstreams.first;
         }
-        if (!device_ss.str().empty()) {
-            slog::info << device_ss.str() << slog::endl;
+        if (!deviceSS.str().empty()) {
+            slog::info << deviceSS.str() << slog::endl;
         }
         slog::info << "Display resolution: " << FLAGS_display_resolution << slog::endl;
 

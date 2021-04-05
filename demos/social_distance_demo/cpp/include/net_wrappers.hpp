@@ -133,7 +133,7 @@ public:
     ReId(InferenceEngine::Core& ie, const std::string & deviceName, const std::string& xmlPath, const bool autoResize,
         const std::map<std::string, std::string> &pluginConfig) :
         ie_{ie} {
-        auto network = ie.ReadNetwork(FLAGS_m_reid);
+        auto network = ie.ReadNetwork(xmlPath);
 
         /** Re-ID network should have only one input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
@@ -143,13 +143,13 @@ public:
         }
         InferenceEngine::InputInfo::Ptr& ReIdInputInfoFirst = ReIdInputInfo.begin()->second;
         ReIdInputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
-        if (FLAGS_auto_resize) {
+        if (autoResize) {
             ReIdInputInfoFirst->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
             ReIdInputInfoFirst->setLayout(InferenceEngine::Layout::NHWC);
         } else {
             ReIdInputInfoFirst->setLayout(InferenceEngine::Layout::NCHW);
         }
-        ReIdInputName = ReIdInputInfo.begin()->first;
+        reIdInputName = ReIdInputInfo.begin()->first;
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
@@ -157,7 +157,7 @@ public:
         if (ReIdOutputInfo.size() != 1) {
             throw std::logic_error("Re-ID should have 1 output");
         }
-        ReIdOutputName = ReIdOutputInfo.begin()->first;
+        reIdOutputName = ReIdOutputInfo.begin()->first;
         InferenceEngine::DataPtr& _output = ReIdOutputInfo.begin()->second;
         const InferenceEngine::SizeVector outputDims = _output->getTensorDesc().getDims();
         if (outputDims.size() != 2) {
@@ -174,13 +174,13 @@ public:
     }
 
     void setImage(InferenceEngine::InferRequest& inferRequest, const cv::Mat& img, const cv::Rect personRect) {
-        InferenceEngine::Blob::Ptr roiBlob = inferRequest.GetBlob(ReIdInputName);
+        InferenceEngine::Blob::Ptr roiBlob = inferRequest.GetBlob(reIdInputName);
         if (InferenceEngine::Layout::NHWC == roiBlob->getTensorDesc().getLayout()) {  // autoResize is set
             InferenceEngine::ROI cropRoi{0, static_cast<size_t>(personRect.x), static_cast<size_t>(personRect.y), static_cast<size_t>(personRect.width),
                 static_cast<size_t>(personRect.height)};
             InferenceEngine::Blob::Ptr frameBlob = wrapMat2Blob(img);
             InferenceEngine::Blob::Ptr roiBlob = make_shared_blob(frameBlob, cropRoi);
-            inferRequest.SetBlob(ReIdInputName, roiBlob);
+            inferRequest.SetBlob(reIdInputName, roiBlob);
         } else {
             const cv::Mat& personImage = img(personRect);
             matU8ToBlob<uint8_t>(personImage, roiBlob);
@@ -190,7 +190,7 @@ public:
     std::vector<float> getResults(InferenceEngine::InferRequest& inferRequest) {
         std::vector<float> result;
         InferenceEngine::LockedMemory<const void> reIdOutputMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
-            inferRequest.GetBlob(ReIdOutputName))->rmap();
+            inferRequest.GetBlob(reIdOutputName))->rmap();
         const auto data = reIdOutputMapped.as<float*>();
         for (int i = 0; i < reidLen; i++) {
             result.push_back(data[i]);
@@ -200,8 +200,8 @@ public:
 
 private:
     int reidLen;
-    std::string ReIdInputName;
-    std::string ReIdOutputName;
+    std::string reIdInputName;
+    std::string reIdOutputName;
     InferenceEngine::Core ie_;  // The only reason to store a device as to assure that it lives at least as long as ExecutableNetwork
     InferenceEngine::ExecutableNetwork net;
 };
