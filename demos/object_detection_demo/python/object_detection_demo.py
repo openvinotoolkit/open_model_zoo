@@ -95,10 +95,10 @@ def build_argparser():
     onnx_args.add_argument('--reverse_input_channels', default=False, action='store_true',
                          help='Optional. Switch the input channels order from '
                               'BGR to RGB for onnx model.')
-    onnx_args.add_argument('--mean_values', default=None, type=float, nargs=3,
+    onnx_args.add_argument('--mean_values', default=(0.0, 0.0, 0.0), type=float, nargs=3,
                          help='Optional. Normalize input by subtracting the mean values '
                               'per channel for onnx model. Example: 255 255 255')
-    onnx_args.add_argument('--scale_values', default=None, type=float, nargs=3,
+    onnx_args.add_argument('--scale_values', default=(1.0, 1.0, 1.0), type=float, nargs=3,
                          help='Optional. Divide input by scale values per channel for onnx model. '
                               'Division is applied after mean values '
                               'subtraction. Example: 255 255 255')

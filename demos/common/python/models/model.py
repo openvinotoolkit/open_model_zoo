@@ -26,8 +26,8 @@ class Model:
         self.set_batch_size(1)
 
         self.reverse_input_channels = reverse_input_channels
-        self.mean_values = np.array(mean_values, dtype=np.float32) if mean_values else np.zeros(3)
-        self.scale_values = np.array(scale_values, dtype=np.float32) if scale_values else np.ones(3)
+        self.mean_values = np.array(mean_values, dtype=np.float32)
+        self.scale_values = np.array(scale_values, dtype=np.float32)
 
     def preprocess(self, inputs):
         meta = {}
