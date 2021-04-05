@@ -137,11 +137,11 @@ public:
         std::lock_guard<std::mutex> lock{mutex};
         return container.size();
     }
-    void lockedPush_back(const typename C::value_type& value) {
+    void lockedPushBack(const typename C::value_type& value) {
         std::lock_guard<std::mutex> lock{mutex};
         container.push_back(value);
     }
-    bool lockedTry_pop(typename C::value_type& value) {
+    bool lockedTryPop(typename C::value_type& value) {
         mutex.lock();
         if (!container.empty()) {
             value = container.back();
