@@ -242,6 +242,9 @@ int main(int argc, char *argv[]) {
         else if (FLAGS_at == "ae") {
             model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
         }
+        else if (FLAGS_at == "hrnet") {
+            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, 0.5f, "center"));
+        }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;

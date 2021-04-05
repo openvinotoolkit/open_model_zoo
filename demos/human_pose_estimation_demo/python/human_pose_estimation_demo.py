@@ -96,14 +96,17 @@ def build_argparser():
 
 def get_model(ie, args, aspect_ratio):
     if args.architecture_type == 'ae':
-        Model = models.HpeAssociativeEmbedding
+        model = models.HpeAssociativeEmbedding(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
+                                               prob_threshold=args.prob_threshold)
     elif args.architecture_type == 'hrnet':
-        Model = models.HpeHRNet
+        model = models.HpeAssociativeEmbedding(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
+                                               prob_threshold=args.prob_threshold, delta=0.5, padding_mode='center')
     elif args.architecture_type == 'openpose':
-        Model = models.OpenPose
+        model = models.OpenPose(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
+                                prob_threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
-    return Model(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio, prob_threshold=args.prob_threshold)
+    return model
 
 
 def get_plugin_configs(device, num_streams, num_threads):

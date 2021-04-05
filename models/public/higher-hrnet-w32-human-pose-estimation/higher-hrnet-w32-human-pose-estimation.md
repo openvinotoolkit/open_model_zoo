@@ -1,11 +1,11 @@
-# hrnet-w32-human-pose-estimation
+# higher-hrnet-w32-human-pose-estimation
 
 ## Use Case and High-Level Description
 
-The `HRNet-W32` model is one of the [HigherHRNet](https://arxiv.org/pdf/1908.10357).
+The `HigherHRNet-W32` model is one of the [HigherHRNet](https://arxiv.org/pdf/1908.10357).
 `HigherHRNet` is a novel bottom-up human pose
 estimation method for learning scale-aware representations using high-resolution feature pyramids. The network uses HRNet as backbone, followed by one or more deconvolution modules to generate multi-resolution and high-resolution heatmaps. For every person in an image, the network detects a human pose: a body skeleton consisting of keypoints and connections between them. The pose may contain up to 17 keypoints: ears, eyes, nose, shoulders, elbows, wrists, hips, knees, and ankles.
-This is PyTorch\* implementation pretrained on COCO dataset.
+This is PyTorch\* implementation pre-trained on COCO dataset.
 For details about implementation of model, check out the [HigherHRNet: Scale-Aware Representation Learning for Bottom-Up Human Pose Estimation](https://github.com/HRNet/HigherHRNet-Human-Pose-Estimation) repository.
 
 ## Specification
@@ -21,24 +21,26 @@ For details about implementation of model, check out the [HigherHRNet: Scale-Awa
 
 | Metric                     | Original model    | Converted model |
 | -------------------------- | ----------------- | --------------- |
-| Average Precision (AP)     | 65,02%            | 65,02%          |
+| Average Precision (AP)     | 64.63%            | 64.63%          |
+
+These are the results of the accuracy check for single pass inference (without flip of image, which used by default in original repository)
 
 ## Input
 
 ### Original Model
 
-Image, name - `image`,  shape - `1,3,512,512`, format is `B,C,H,W`, where:
+Image, name - `image`,  shape - `1, 3, 512, 512`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`. Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
+Channel order is `RGB`. Mean values - [123.675, 116.28, 103.53], scale values - [58.395, 57.12, 57.375].
 
 ### Converted Model
 
-Image, name - `image`,  shape - `1,3,512,512`, format is `B,C,H,W`, where:
+Image, name - `image`,  shape - `1, 3, 512, 512`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -49,10 +51,9 @@ Channel order is `BGR`.
 
 ## Output
 
-The net outputs three blobs:
+The net outputs two blobs:
 
-- `heatmaps` of shape `1, 17, 256, 256` containing location heatmaps for keypoints of pose.
-- `nms_heatmaps` of shape `1, 17, 256, 256` containing location heatmaps that are filtered out by non-maximum suppression algorithm.
+- `heatmaps` of shape `1, 17, 256, 256` containing location heatmaps for keypoints of pose. Locations that are filtered out by non-maximum suppression algorithm have negated values assigned to them.
 - `embeddings` of shape `1, 17, 256, 256` containing associative embedding values, which are used for grouping individual keypoints into poses.
 
 ## Legal Information

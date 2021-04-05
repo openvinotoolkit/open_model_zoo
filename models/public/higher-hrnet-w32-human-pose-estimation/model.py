@@ -42,9 +42,10 @@ class HpeHRNet(torch.nn.Module):
         outputs[1] = (outputs[0][:, :17, :, :] + outputs[1]) / 2
         outputs[0] = outputs[0][:, 17:, :, :]
         # apply nms for heatmaps
-        maxm = self.pool(outputs[1])
-        maxm = torch.eq(maxm, outputs[1]).float()
-        outputs.append(outputs[1] * maxm)
+        pooled = self.pool(outputs[1])
+        mask = torch.eq(pooled, outputs[1]).float()
+        mask = mask * 2 - 1
+        outputs[1] *= mask
         return outputs
 
 

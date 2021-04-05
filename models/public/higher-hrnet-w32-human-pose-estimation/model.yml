@@ -13,14 +13,14 @@
 # limitations under the License.
 
 description: >-
-  The "HRNet-W32" model is one of the HigherHRNet <https://arxiv.org/pdf/1908.10357>.
+  The "HigherHRNet-W32" model is one of the HigherHRNet <https://arxiv.org/pdf/1908.10357>.
   "HigherHRNet" is a novel bottom-up human pose estimation method for learning scale-aware
   representations using high-resolution feature pyramids. The network uses HRNet as
   backbone, followed by one or more deconvolution modules to generate multi-resolution
   and high-resolution heatmaps. For every person in an image, the network detects
   a human pose: a body skeleton consisting of keypoints and connections between them.
   The pose may contain up to 17 keypoints: ears, eyes, nose, shoulders, elbows, wrists,
-  hips, knees, and ankles. This is PyTorch* implementation pretrained on COCO dataset.
+  hips, knees, and ankles. This is PyTorch* implementation pre-trained on COCO dataset.
   For details about implementation of model, check out the HigherHRNet: Scale-Aware
   Representation Learning for Bottom-Up Human Pose Estimation <https://github.com/HRNet/HigherHRNet-Human-Pose-Estimation>
   repository.
@@ -65,7 +65,7 @@ conversion_to_onnx_args:
   - --model-param=weights=r"$dl_dir/ckpt/pose_higher_hrnet_w32_512.pth"
   - --input-shape=1,3,512,512
   - --input-names=image
-  - --output-names=embeddings,heatmaps,nms_heatmaps
+  - --output-names=embeddings,heatmaps
   - --output-file=$conv_dir/hrnet-w32-human-pose-estimation.onnx
 model_optimizer_args:
   - --reverse_input_channels
@@ -73,7 +73,7 @@ model_optimizer_args:
   - --input=image
   - --mean_values=image[123.675,116.28,103.53]
   - --scale_values=image[58.395,57.12,57.375]
-  - --output=embeddings,heatmaps,nms_heatmaps
+  - --output=embeddings,heatmaps
   - --input_model=$conv_dir/hrnet-w32-human-pose-estimation.onnx
 framework: pytorch
 license: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/LICENSE

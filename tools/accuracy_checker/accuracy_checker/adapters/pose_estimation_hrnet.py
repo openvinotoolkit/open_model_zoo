@@ -37,10 +37,12 @@ class HumanPoseHRNetAdapter(Adapter):
                 optional=True
             ),
             'heatmaps_out': StringField(
-                description="Name of output layer with keypoints heatmaps.", optional=True
+                description="Name of output layer with keypoints heatmaps.",
+                optional=True
             ),
             'nms_heatmaps_out': StringField(
-                description="Name of output layer with keypoints heatmaps after NMS.", optional=True
+                description="Name of output layer with keypoints heatmaps after NMS.",
+                optional=True
             ),
         })
 

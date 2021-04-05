@@ -33,14 +33,15 @@ using namespace InferenceEngine;
 const cv::Vec3f HpeAssociativeEmbedding::meanPixel = cv::Vec3f::all(128);
 const float HpeAssociativeEmbedding::detectionThreshold = 0.1f;
 const float HpeAssociativeEmbedding::tagThreshold = 1.0f;
-const float HpeAssociativeEmbedding::delta = 0.0f;
 
 HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio,
-    int targetSize, float confidenceThreshold) :
+    int targetSize, float confidenceThreshold, float delta, std::string paddingMode) :
     ModelBase(modelFileName),
     aspectRatio(aspectRatio),
     targetSize(targetSize),
-    confidenceThreshold(confidenceThreshold) {
+    confidenceThreshold(confidenceThreshold),
+    delta(delta),
+    paddingMode(paddingMode) {
 }
 
 void HpeAssociativeEmbedding::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
@@ -112,9 +113,17 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
         slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
     }
     cv::Mat paddedImage;
-    int bottom = inputLayerSize.height - h;
-    int right = inputLayerSize.width - w;
-    cv::copyMakeBorder(resizedImage, paddedImage, 0, bottom, 0, right,
+    int left = 0, right = 0, top = 0, bottom = 0;
+    if (paddingMode == "center") {
+        left = (inputLayerSize.width - w + 1) / 2;
+        right = (inputLayerSize.width - w) / 2;
+        top = (inputLayerSize.height - h + 1) / 2;
+        bottom = (inputLayerSize.height - h) / 2;
+    } else {
+        right = inputLayerSize.width - w;
+        bottom = inputLayerSize.height - h;
+    }
+    cv::copyMakeBorder(resizedImage, paddedImage, top, bottom, left, right,
                        cv::BORDER_CONSTANT, meanPixel);
     request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
@@ -147,15 +156,26 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     // Rescale poses to the original image
     const auto& scale = infResult.internalModelData->asRef<InternalScaleMatData>();
     float outputScale = inputLayerSize.width / static_cast<float>(heatMapsDims[3]);
-    float scaleX = scale.x * outputScale;
-    float scaleY = scale.y * outputScale;
+    float shiftX = 0.0, shiftY = 0.0;
+    float scaleX = 1.0, scaleY = 1.0;
+
+    if (paddingMode == "center") {
+        scaleX = scaleY = std::min(scale.x, scale.y);
+        if (aspectRatio >= 1.0)
+            shiftX = static_cast<float>((targetSize * scaleX * aspectRatio - scale.mat.cols * scaleX) / 2);
+        else
+            shiftY = static_cast<float>((targetSize * scaleY / aspectRatio - scale.mat.rows * scaleY) / 2);
+        scaleX = scaleY *= outputScale;
+    } else {
+        scaleX = scale.x * outputScale;
+        scaleY = scale.y * outputScale;
+    }
 
     for (auto& pose : poses) {
         for (auto& keypoint : pose.keypoints) {
             if (keypoint != cv::Point2f(-1, -1)) {
-                keypoint.x *= scaleX;
-                keypoint.y *= scaleY;
-                std::swap(keypoint.x, keypoint.y);
+                keypoint.x = keypoint.x * scaleX + shiftX;
+                keypoint.y = keypoint.y * scaleY + shiftY;
             }
         }
         result->poses.push_back(pose);
@@ -187,7 +207,7 @@ std::vector<cv::Mat> HpeAssociativeEmbedding::split(float* data, const SizeVecto
     return flattenData;
 }
 
-std::vector<HumanPose> HpeHRNet::extractPoses(
+std::vector<HumanPose> HpeAssociativeEmbedding::extractPoses(
     std::vector<cv::Mat>& heatMaps,
     const std::vector<cv::Mat>& aembdsMaps,
     const std::vector<cv::Mat>& nmsHeatMaps) const {
@@ -197,9 +217,16 @@ std::vector<HumanPose> HpeHRNet::extractPoses(
         findPeaks(nmsHeatMaps, aembdsMaps, allPeaks, i, maxNumPeople, detectionThreshold);
     }
     std::vector<Pose> allPoses = matchByTag(allPeaks, maxNumPeople, numJoints, tagThreshold);
+    // swap for all poses
+    for (auto& pose : allPoses) {
+        for (size_t j = 0; j < numJoints; j++) {
+            Peak& peak = pose.getPeak(j);
+            std::swap(peak.keypoint.x, peak.keypoint.y);
+        }
+    }
     std::vector<HumanPose> poses;
     for (size_t i = 0; i < allPoses.size(); i++) {
-        Pose pose = allPoses[i];
+        Pose& pose = allPoses[i];
         // Filtering poses with low mean scores
         if (pose.getMeanScore() <= confidenceThreshold) {
             continue;
