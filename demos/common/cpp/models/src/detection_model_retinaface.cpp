@@ -103,27 +103,79 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
         throw std::logic_error("Expected 6, 9 or 12 output blobs");
     }
 
-    for (size_t idx = 0; idx < outputsSizes[OT_BBOX].size(); ++idx) {
-        size_t width = outputsSizes[OT_BBOX][idx];
-        size_t height = outputsSizes[OT_BBOX][idx];
-        auto s = anchorCfg[idx].stride;
-        auto anchorNum = anchorsFpn[s].size();
+    calculatePriorBoxes(outputsSizes[OT_BBOX]);
+}
 
-        anchors.push_back(std::vector<ModelRetinaFace::Anchor>(height * width * anchorNum));
-        for (size_t iw = 0; iw < width; ++iw) {
-            size_t sw = iw * s;
-            for (size_t ih = 0; ih < height; ++ih) {
-                size_t sh = ih * s;
-                for (size_t k = 0; k < anchorNum; ++k) {
-                    Anchor& anc = anchors[idx][(ih * width + iw) * anchorNum + k];
-                    anc.left = anchorsFpn[s][k].left + sw;
-                    anc.top = anchorsFpn[s][k].top + sh;
-                    anc.right = anchorsFpn[s][k].right + sw;
-                    anc.bottom = anchorsFpn[s][k].bottom + sh;
-                }
+void ModelRetinaFace::checkCompiledNetworkInputsOutputs() {
+    // --------------------------- Check input & output -------------------------------------------------
+    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
+    InferenceEngine::ConstInputsDataMap& inputInfo(execNetwork.GetInputsInfo());
+    if (inputInfo.size() != 1) {
+        throw std::logic_error("This demo accepts networks that have only one input");
+    }
+    InferenceEngine::InputInfo::CPtr& input = inputInfo.begin()->second;
+    std::string imageInputName = inputInfo.begin()->first;
+    inputsNames.push_back(imageInputName);
+    if (input->getPrecision() != InferenceEngine::Precision::U8) {
+        throw std::logic_error("This demo accepts compiled networks with U8 input precision");
+    }
+    //--- Reading image input parameters
+    imageInputName = inputInfo.begin()->first;
+    const InferenceEngine::TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
+    netInputHeight = getTensorHeight(inputDesc);
+    netInputWidth = getTensorWidth(inputDesc);
+
+    // --------------------------- Check output blobs -----------------------------------------------------
+    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
+
+    InferenceEngine::ConstOutputsDataMap& outputInfo(execNetwork.GetOutputsInfo());
+
+    std::vector<size_t> outputsSizes[OT_MAX];
+    for (const auto& output : outputInfo) {
+        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
+            throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
+        }
+        outputsNames.push_back(output.first);
+
+        EOutputType type = OT_MAX;
+        if (output.first.find("bbox") != std::string::npos) {
+            type = OT_BBOX;
+        }
+        else if (output.first.find("cls") != std::string::npos) {
+            type = OT_SCORES;
+        }
+        else if (output.first.find("landmark") != std::string::npos) {
+            type = OT_LANDMARK;
+            shouldDetectLandmarks = true;
+        }
+        else if (output.first.find("type") != std::string::npos) {
+            type = OT_MASKSCORES;
+            labels.clear();
+            labels.push_back("No Mask");
+            labels.push_back("Mask");
+            shouldDetectMasks = true;
+            landmarkStd = 0.2f;
+        }
+        else {
+            continue;
+        }
+
+        size_t num = output.second->getDims()[2];
+        size_t i = 0;
+        for (; i < outputsSizes[type].size(); ++i) {
+            if (num < outputsSizes[type][i]) {
+                break;
             }
         }
+        separateOutputsNames[type].insert(separateOutputsNames[type].begin() + i, output.first);
+        outputsSizes[type].insert(outputsSizes[type].begin() + i, num);
     }
+
+    if (outputsNames.size() != 6 && outputsNames.size() != 9 && outputsNames.size() != 12) {
+        throw std::logic_error("Expected 6, 9 or 12 output blobs");
+    }
+
+    calculatePriorBoxes(outputsSizes[OT_BBOX]);
 }
 
 std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& anchor, const std::vector<int>& ratios) {
@@ -181,6 +233,29 @@ void ModelRetinaFace::generateAnchorsFpn() {
     }
 }
 
+void ModelRetinaFace::calculatePriorBoxes(InferenceEngine::SizeVector bboxSize) {
+    for (size_t idx = 0; idx < bboxSize.size(); ++idx) {
+        size_t width = bboxSize[idx];
+        size_t height = bboxSize[idx];
+        auto s = anchorCfg[idx].stride;
+        auto anchorNum = anchorsFpn[s].size();
+
+        anchors.push_back(std::vector<ModelRetinaFace::Anchor>(height * width * anchorNum));
+        for (size_t iw = 0; iw < width; ++iw) {
+            size_t sw = iw * s;
+            for (size_t ih = 0; ih < height; ++ih) {
+                size_t sh = ih * s;
+                for (size_t k = 0; k < anchorNum; ++k) {
+                    Anchor& anc = anchors[idx][(ih * width + iw) * anchorNum + k];
+                    anc.left = anchorsFpn[s][k].left + sw;
+                    anc.top = anchorsFpn[s][k].top + sh;
+                    anc.right = anchorsFpn[s][k].right + sw;
+                    anc.bottom = anchorsFpn[s][k].bottom + sh;
+                }
+            }
+        }
+    }
+}
 
 std::vector<size_t> thresholding(const InferenceEngine::MemoryBlob::Ptr& rawData, const int anchorNum, const float confidenceThreshold) {
     std::vector<size_t> indices;

@@ -37,4 +37,5 @@ protected:
     std::vector<std::string> labels;
 
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void checkCompiledNetworkInputsOutputs() override;
 };

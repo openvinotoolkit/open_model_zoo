@@ -87,6 +87,59 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
 
 }
 
+void ModelFaceBoxes::checkCompiledNetworkInputsOutputs() {
+    // --------------------------- Check input & output -------------------------------------------------
+    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
+    InferenceEngine::ConstInputsDataMap& inputInfo(execNetwork.GetInputsInfo());
+
+    if (inputInfo.size() != 1) {
+        throw std::logic_error("This demo accepts networks that have only one input");
+    }
+
+    InferenceEngine::InputInfo::CPtr& input = inputInfo.begin()->second;
+    const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
+    if (input->getPrecision() != InferenceEngine::Precision::U8) {
+        throw std::logic_error("This demo accepts compiled networks with U8 input precision");
+    }
+
+    if (inputDesc.getDims()[1] != 3) {
+        throw std::logic_error("Expected 3-channel input");
+    }
+
+    // --------------------------- Reading image input parameters -------------------------------------------
+    std::string imageInputName = inputInfo.begin()->first;
+    inputsNames.push_back(imageInputName);
+    netInputHeight = getTensorHeight(inputDesc);
+    netInputWidth = getTensorWidth(inputDesc);
+
+    // --------------------------- Check output blobs -----------------------------------------------------
+    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
+
+    InferenceEngine::ConstOutputsDataMap& outputInfo(execNetwork.GetOutputsInfo());
+
+    if (outputInfo.size() != 2) {
+        throw std::logic_error("This demo expect networks that have 2 outputs blobs");
+    }
+
+    const InferenceEngine::TensorDesc& outputDesc = outputInfo.begin()->second->getTensorDesc();
+    maxProposalsCount = outputDesc.getDims()[1];
+
+    for (auto& output : outputInfo) {
+        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
+            throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
+        }
+        outputsNames.push_back(output.first);
+    }
+
+    // --------------------------- Calculating anchors ----------------------------------------------------
+    std::vector<std::pair<size_t, size_t>> featureMaps;
+    for (auto s : steps) {
+        featureMaps.push_back({ netInputHeight / s, netInputWidth / s });
+    }
+
+    priorBoxes(featureMaps);
+}
+
 void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>& anchors, const std::vector<float>& vx, const std::vector<float>& vy,
     const int minSize, const int step) {
     float skx = static_cast<float>(minSize);

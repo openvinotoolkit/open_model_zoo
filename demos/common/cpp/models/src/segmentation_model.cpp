@@ -24,8 +24,7 @@ SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useA
 }
 
 void SegmentationModel::checkCompiledNetworkInputsOutputs() {
-    // --------------------------- Configure input & output ---------------------------------------------
-// --------------------------- Prepare input blobs -----------------------------------------------------
+    // --------------------------- Check input & output ---------------------------------------------
     ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
     const SizeVector& inputShapes = inputInfo.begin()->second->getTensorDesc().getDims();
     if (inputInfo.size() != 1)
@@ -35,15 +34,19 @@ void SegmentationModel::checkCompiledNetworkInputsOutputs() {
     if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
+    if (inputInfo.begin()->second->getPrecision() != InferenceEngine::Precision::U8) {
+        throw std::logic_error("This demo accepts compiled networks with U8 input precision");
+    }
+    // --------------------------- Check output blobs -----------------------------------------------------
     ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
     if (outputInfo.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
 
     outputsNames.push_back(outputInfo.begin()->first);
     CDataPtr& data = outputInfo.begin()->second;
-    // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
-    // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
-    // postprocessing
+
+    if (data->getPrecision() != InferenceEngine::Precision::FP32) {
+        throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
+    }
 
     const SizeVector& outSizeVector = data->getTensorDesc().getDims();
     switch (outSizeVector.size()) {

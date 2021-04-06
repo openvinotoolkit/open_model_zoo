@@ -137,3 +137,9 @@ cv::Size stringToSize(const std::string& str) {
     }
     return {std::stoi(strings[0]), std::stoi(strings[1])};
 }
+
+std::string fileExt(const std::string& filename) {
+    auto pos = filename.rfind('.');
+    if (pos == std::string::npos) return "";
+    return filename.substr(pos + 1);
+}

@@ -38,3 +38,10 @@ std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>&
                                                     const std::string& values_string);
 
 cv::Size stringToSize(const std::string& str);
+
+/**
+* @brief Get extension from filename
+* @param filename - name of the file which extension should be extracted
+* @return string with extracted file extension
+*/
+std::string fileExt(const std::string & filename);

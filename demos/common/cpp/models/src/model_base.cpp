@@ -54,16 +54,16 @@ InferenceEngine::CNNNetwork ModelBase::prepareNetwork(InferenceEngine::Core& cor
 ExecutableNetwork ModelBase::loadExecutableNetwork(const CnnConfig& cnnConfig, InferenceEngine::Core& core) {
     this->cnnConfig = cnnConfig;
     // ---------------------- Determine network type ---------------------------------------------------
-    isCompiledNetwork = split(modelFileName, '.')[1] == "blob";
 
-    if (!isCompiledNetwork) {
+    isNetworkCompiled = fileExt(modelFileName) == "blob";
+
+    slog::info << "Loading model to the device" << slog::endl;
+    if (!isNetworkCompiled) {
         auto cnnNetwork = prepareNetwork(core);
-        slog::info << "Loading model to the device" << slog::endl;
         execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.devices, cnnConfig.execNetworkConfig);
     }
     else {
         slog::info << "Network is compiled" << slog::endl;
-        slog::info << "Loading model to the device" << slog::endl;
         execNetwork = core.ImportNetwork(modelFileName, cnnConfig.devices, cnnConfig.execNetworkConfig);
         checkCompiledNetworkInputsOutputs();
     }

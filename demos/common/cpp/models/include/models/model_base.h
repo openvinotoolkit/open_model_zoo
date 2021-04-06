@@ -22,7 +22,7 @@
 class ModelBase {
 public:
     ModelBase(const std::string& modelFileName)
-        : modelFileName(modelFileName)
+        : modelFileName(modelFileName), isNetworkCompiled(false)
     {}
 
     virtual ~ModelBase() {}
@@ -53,5 +53,5 @@ protected:
     InferenceEngine::ExecutableNetwork execNetwork;
     std::string modelFileName;
     CnnConfig cnnConfig = {};
-    bool isCompiledNetwork;
+    bool isNetworkCompiled;
 };

@@ -131,8 +131,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
 void ModelSSD::checkCompiledNetworkInputsOutputs() {
     ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
+    // --------------------------- Check input & output -------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     for (const auto& inputInfoItem : inputInfo) {
         if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
@@ -142,12 +141,17 @@ void ModelSSD::checkCompiledNetworkInputsOutputs() {
             else {
                 inputsNames[0] = inputInfoItem.first;
             }
-
+            if (inputInfoItem.second->getPrecision() != InferenceEngine::Precision::U8) {
+                throw std::logic_error("This demo accepts compiled networks with U8 input precision for 1st input");
+            }
             const TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
             netInputHeight = getTensorHeight(inputDesc);
             netInputWidth = getTensorWidth(inputDesc);
         }
         else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
+            if (inputInfoItem.second->getPrecision() != InferenceEngine::Precision::FP32) {
+                throw std::logic_error("This demo accepts compiled networks with FP32 input precision for 2nd input");
+            }
             inputsNames.resize(2);
             inputsNames[1] = inputInfoItem.first;
         }
@@ -159,7 +163,7 @@ void ModelSSD::checkCompiledNetworkInputsOutputs() {
         }
     }
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
+    // --------------------------- Check output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
     ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
     if (outputInfo.size() == 1) {
@@ -176,6 +180,9 @@ void ModelSSD::checkCompiledNetworkInputsOutputs() {
         objectSize = outputDims[3];
         if (objectSize != 7) {
             throw std::logic_error("Output should have 7 as a last dimension");
+        }
+        if (output->getPrecision() != InferenceEngine::Precision::FP32) {
+            throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
         }
     }
     else {
@@ -213,6 +220,11 @@ void ModelSSD::checkCompiledNetworkInputsOutputs() {
         }
         else {
             throw std::logic_error("Incorrect number of 'boxes' output dimensions");
+        }
+        for (auto name : outputsNames) {
+            if (outputInfo[name]->getPrecision() != InferenceEngine::Precision::FP32) {
+                throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
+            }
         }
     }
 }
