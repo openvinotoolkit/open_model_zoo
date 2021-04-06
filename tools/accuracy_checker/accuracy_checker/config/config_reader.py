@@ -409,7 +409,7 @@ class ConfigReader:
             'model_optimizer', 'tf_custom_op_config_dir',
             'tf_obj_detection_api_pipeline_config_path',
             'transformations_config_dir',
-            'cpu_extensions_mode', 'vpu_log_level', 'device_config'
+            'cpu_extensions_mode', 'vpu_log_level'
         ]
         arguments_dict = arguments if isinstance(arguments, dict) else vars(arguments)
         update_launcher_entry = {}
@@ -418,6 +418,9 @@ class ConfigReader:
             value = arguments_dict.get(key)
             if value:
                 update_launcher_entry['_{}'.format(key)] = value
+
+        if arguments_dict.get('device_config'):
+            update_launcher_entry['device_config'] = read_yaml(arguments_dict['device_config'])
 
         return functors_by_mode[mode](config, arguments, update_launcher_entry)
 

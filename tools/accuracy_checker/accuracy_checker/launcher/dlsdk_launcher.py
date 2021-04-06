@@ -107,6 +107,7 @@ class DLSDKLauncher(Launcher):
                             "In multi device mode allows setting comma-separated list for numbers "
                             "or one value which will be used for all devices"
             ),
+            'device_config': DictField(optional=True, description='device configuration'),
             '_model_optimizer': PathField(optional=True, is_directory=True, description="Model optimizer."),
             '_tf_obj_detection_api_config_dir': PathField(
                 optional=True, is_directory=True, description="TF Object Detection API Config."
@@ -124,7 +125,6 @@ class DLSDKLauncher(Launcher):
                 optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
             ),
             '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)"),
-            '_device_config': PathField(optional=True, description='path to file with device configuration'),
             '_model_is_blob': BoolField(optional=True, description='hint for auto model search')
         })
 
@@ -649,7 +649,7 @@ class DLSDKLauncher(Launcher):
             if log_level:
                 for device in devices:
                     self.ie_core.set_config({'LOG_LEVEL': log_level}, device)
-        device_config = self.config.get('_device_config')
+        device_config = self.config.get('device_config')
         if device_config:
             self._set_device_config(device_config)
 
@@ -720,13 +720,12 @@ class DLSDKLauncher(Launcher):
                 print_info('    {} - {}'.format(device, nreq))
 
     def _set_device_config(self, device_config):
-        device_configuration = read_yaml(device_config)
-        if not isinstance(device_configuration, dict):
+        if not isinstance(device_config, dict):
             raise ConfigError('device configuration should be a dict-like')
-        if all(not isinstance(value, dict) for value in device_configuration.values()):
-            self.ie_core.set_config(device_configuration, self.device)
+        if all(not isinstance(value, dict) for value in device_config.values()):
+            self.ie_core.set_config(device_config, self.device)
         else:
-            for key, value in device_configuration.items():
+            for key, value in device_config.items():
                 if isinstance(value, dict):
                     if key not in ie.known_plugins:
                         warnings.warn('{} device is unknown. Config loading may lead to error.'.format(key))
