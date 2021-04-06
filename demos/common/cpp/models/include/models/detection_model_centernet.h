@@ -38,4 +38,5 @@ public:
 
 protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void checkCompiledNetworkInputsOutputs() override;
 };

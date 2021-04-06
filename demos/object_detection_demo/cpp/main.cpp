@@ -289,21 +289,21 @@ int main(int argc, char *argv[]) {
         ColorPalette palette(labels.size() > 0 ? labels.size() : 100);
 
         std::unique_ptr<ModelBase> model;
-        //if (FLAGS_at == "centernet") {
-        //    model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels));
-        //}
-        //else if (FLAGS_at == "faceboxes") {
-        //    model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
-        //}
-        //else if (FLAGS_at == "retinaface") {
-        //    model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
-        //}
-        if (FLAGS_at == "ssd") {
+        if (FLAGS_at == "centernet") {
+            model.reset(new ModelCenterNet(FLAGS_m, (float)FLAGS_t, labels));
+        }
+        else if (FLAGS_at == "faceboxes") {
+            model.reset(new ModelFaceBoxes(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
+        }
+        else if (FLAGS_at == "retinaface") {
+            model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
+        }
+        else if (FLAGS_at == "ssd") {
             model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
-        //else if (FLAGS_at == "yolo") {
-        //    model.reset(new ModelYolo3(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
-        //}
+        else if (FLAGS_at == "yolo") {
+            model.reset(new ModelYolo3(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
+        }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
