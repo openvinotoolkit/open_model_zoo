@@ -85,12 +85,9 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                     result.internalModelData = std::move(internalModelData);
 
                     for (const auto& outName : model->getOutputsNames()) {
-                        Blob::Ptr blob_ptr = request->GetBlob(outName);
-                        TBlob<float> blob = *as<TBlob<float>>(blob_ptr);
                         result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outName))));
 
                     }
-
                     completedInferenceResults.emplace(frameID, result);
                     this->requestsPool->setRequestIdle(request);
                 }
