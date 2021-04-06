@@ -35,6 +35,7 @@ from .data_reader import (
     SkimageReader,
     RawpyReader,
     ByteFileReader,
+    LMDBReader,
 
     DataRepresentation,
     ClipIdentifier,
@@ -73,6 +74,7 @@ __all__ = [
     'SkimageReader',
     'RawpyReader',
     'ByteFileReader',
+    'LMDBReader',
 
     'DataRepresentation',
     'ClipIdentifier',
