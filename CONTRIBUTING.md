@@ -248,7 +248,7 @@ The documentation should contain:
 * detailed description of input and output for original and converted models
 * the model's licensing terms
 
-Learn the detailed structure and headers naming convention from any model documentation (for example, [alexnet](./models/public/alexnet/alexnet.md)).
+Learn the detailed structure and headers naming convention from any model documentation (for example, [alexnet](./models/public/alexnet/README.md)).
 
 ## Legal Information
 
