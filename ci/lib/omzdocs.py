@@ -58,3 +58,8 @@ class DocumentationPage:
                 yield ExternalReference('image', node['src'])
             elif node['type'] == 'link':
                 yield ExternalReference('link', node['link'])
+
+    def html_fragments(self):
+        for node in _get_all_ast_nodes(self._ast):
+            if node['type'] == 'inline_html':
+                yield node['text']
