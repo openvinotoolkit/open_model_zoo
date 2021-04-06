@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import lmdb
 from pathlib import Path
 from functools import singledispatch
 from collections import OrderedDict, namedtuple
@@ -844,3 +845,26 @@ class ByteFileReader(BaseReader):
         data_path = self.data_source / data_id if self.data_source is not None else data_id
         with open(data_path, 'rb') as f:
             return np.array(f.read())
+
+
+class LMDBReader(BaseReader):
+    __provider__ = 'lmdb_reader'
+
+    @classmethod
+    def parameters(cls):
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
+            'data_dir': PathField(optional=False, is_directory=True)
+        })
+        return configuration_parameters
+
+    def configure(self):
+        super().configure()
+        self.data_dir = self.get_value_from_config('data_dir')
+        self.database = lmdb.open(bytes(self.data_dir), readonly=True)
+
+    def read(self, data_id):
+        with self.database.begin(write=False) as txn:
+            img_key = 'image-%09d'.encode() % data_id
+            image_bytes = txn.get(img_key)
+            return cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
