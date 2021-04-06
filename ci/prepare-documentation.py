@@ -39,16 +39,20 @@ import argparse
 import logging
 import re
 import shutil
+import sys
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
 from pathlib import Path
 
-import mistune
 import yaml
 
 OMZ_ROOT = Path(__file__).resolve().parents[1]
+
+sys.path.append(str(OMZ_ROOT / 'ci/lib'))
+
+import omzdocs
 
 XML_ID_ATTRIBUTE = '{http://www.w3.org/XML/1998/namespace}id'
 
@@ -62,29 +66,6 @@ HUMAN_READABLE_TASK_TYPES = {
     'object_attributes': 'Object Attribute Estimation',
     'text_to_speech': 'Text-to-speech',
 }
-
-parse_markdown = mistune.create_markdown(renderer=mistune.AstRenderer())
-
-
-def get_all_ast_nodes(ast_nodes):
-    for node in ast_nodes:
-        yield node
-        if 'children' in node:
-            # workaround for https://github.com/lepture/mistune/issues/269
-            if isinstance(node['children'], str):
-                yield {'type': 'text', 'text': node['children']}
-            else:
-                yield from get_all_ast_nodes(node['children'])
-
-
-def get_text_from_ast(ast_nodes):
-    def get_text_from_node(node):
-        if node['type'] != 'text':
-            raise RuntimeError(f'unsupported node type: {node["type"]}')
-        return node['text']
-
-    return ''.join(map(get_text_from_node, ast_nodes))
-
 
 def add_page(output_root, parent, *, id=None, path=None, title=None):
     if parent.tag == 'tab':
@@ -105,13 +86,13 @@ def add_page(output_root, parent, *, id=None, path=None, title=None):
     with (OMZ_ROOT / path).open('r', encoding='utf-8') as input_file:
         lines = input_file.readlines()
 
-    ast = parse_markdown(''.join(lines))
+    page = omzdocs.DocumentationPage(''.join(lines))
 
-    if not ast or ast[0]['type'] != 'heading' or ast[0]['level'] != 1:
+    if page.title is None:
         raise RuntimeError(f'{path}: must begin with level 1 heading')
 
     if not title:
-        title = get_text_from_ast(ast[0]['children'])
+        title = page.title
 
     element.attrib['title'] = title
 
@@ -128,7 +109,7 @@ def add_page(output_root, parent, *, id=None, path=None, title=None):
         output_file.writelines(lines)
 
     # copy all referenced images
-    image_urls = [node['src'] for node in get_all_ast_nodes(ast) if node['type'] == 'image']
+    image_urls = [ref.url for ref in page.external_references() if ref.type == 'image']
 
     for image_url in image_urls:
         parsed_image_url = urllib.parse.urlparse(image_url)

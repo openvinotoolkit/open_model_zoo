@@ -145,6 +145,10 @@ def main():
     if subprocess.run([sys.executable, '-m', 'flake8', '--config=.flake8'], cwd=OMZ_ROOT).returncode != 0:
         all_passed = False
 
+    print('running documentation checks...', flush=True)
+    if subprocess.run([sys.executable, '--', str(OMZ_ROOT / 'ci/check-documentation.py')]).returncode != 0:
+        all_passed = False
+
     sys.exit(0 if all_passed else 1)
 
 
