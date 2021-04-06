@@ -662,7 +662,7 @@ class TensorflowImageReader(BaseReader):
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config, **kwargs)
         try:
-            import tensorflow as tf # pylint: disable=C0415
+            import tensorflow as tf  # pylint: disable=C0415
         except ImportError as import_error:
             raise ImportError(
                 'tf backend for image reading requires TensorFlow. '
@@ -865,6 +865,6 @@ class LMDBReader(BaseReader):
             image_bytes = txn.get(img_key)
             img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_UNCHANGED)
             if len(img.shape) < 3:
-                img = np.stack((img,)*3, axis=-1)
+                img = np.stack((img,) * 3, axis=-1)
             assert img.shape[-1] == 3
             return img
