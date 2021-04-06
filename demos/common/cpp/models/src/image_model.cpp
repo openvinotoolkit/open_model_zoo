@@ -41,9 +41,8 @@ InferenceEngine::ExecutableNetwork ImageModel::loadExecutableNetwork(const CnnCo
     if (cnnConfig.useGPURemoteContext) {
 #ifdef USE_VA
         va_context.reset(new InferenceBackend::VaApiContext);
-        va_converter.reset(new InferenceBackend::VaApiConverter(va_context.get()));
 
-        sharedVAContext = InferenceEngine::gpu::make_shared_context(core, "GPU", va_context->Display());
+        sharedVAContext = InferenceEngine::gpu::make_shared_context(core, "GPU", va_context->display());
 
         VaApiImagePool::ImageInfo info = { netInputWidth,netInputHeight,FOURCC_NV12 };
 
@@ -63,7 +62,7 @@ InferenceEngine::ExecutableNetwork ImageModel::loadExecutableNetwork(const CnnCo
 
         cfg[CLDNNConfigParams::KEY_CLDNN_NV12_TWO_INPUTS] = PluginConfigParams::YES;
         execNetwork = core.LoadNetwork(cnnNetwork, sharedVAContext, cfg);
-        resizedSurfacesPool.reset(new InferenceBackend::VaApiImagePool(va_context.get(), cnnConfig.maxAsyncRequests+1, info));
+        resizedSurfacesPool.reset(new InferenceBackend::VaApiImagePool(va_context, cnnConfig.maxAsyncRequests+1, info));
 #else
         throw std::runtime_error("Demos should be compiled with ENABLE_VA=TRUE option to use remote GPU context");
 #endif
@@ -72,9 +71,6 @@ InferenceEngine::ExecutableNetwork ImageModel::loadExecutableNetwork(const CnnCo
         execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.devices, cnnConfig.execNetworkConfig);
     return execNetwork;
 }
-
-VASurfaceID ConvertVASurfaceFromDifferentDisplay(VADisplay display, VASurfaceID surface, VADisplay display1,
-                                                 uint64_t &dma_fd_out, int rt_format = VA_RT_FORMAT_YUV420);
 
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& data = inputData.asRef<ImageInputData>();
@@ -95,9 +91,8 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
         //auto resizedImg = resizedSurfacesPool->Acquire();
         //va_converter->Convert(*vaImg, *resizedImg->image);
 
-        auto resizedImg = vaImg->CloneToAnotherDisplay(va_context->Display());
+        auto resizedImg = vaImg->CloneToAnotherContext(va_context);
         //cv::imshow("aa",resizedImg->CopyToMat());
-        //VaPooledImage::Ptr(new VaPooledImage(new VaApiImage(va_context->Display(),width,height,vaImg->format,src_surface),nullptr));
         auto nv12_blob = InferenceEngine::gpu::make_shared_blob_nv12(resizedImg->height, resizedImg->width, sharedVAContext, resizedImg->va_surface_id);
 
         request->SetBlob(inputsNames[0],nv12_blob);

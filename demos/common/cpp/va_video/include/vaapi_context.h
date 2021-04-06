@@ -15,6 +15,7 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <memory>
 
 namespace
 {
@@ -48,21 +49,26 @@ enum FourCC {
 class VaApiContext
 {
   private:
-    VADisplay _va_display = nullptr;
-    VAConfigID _va_config = VA_INVALID_ID;
-    VAContextID _va_context_id = VA_INVALID_ID;
-    int _dri_file_descriptor = 0;
-    bool _own_va_display = false;
-    std::function<void(const char *)> message_callback;
+    VADisplay vaDisplay = nullptr;
+    VAConfigID vaConfig = VA_INVALID_ID;
+    VAContextID vaContextId = VA_INVALID_ID;
+    int driFileDescriptor = 0;
+    bool isOwningVaDisplay = false;
 
   public:
-    explicit VaApiContext(VADisplay va_display);
+    using Ptr=std::shared_ptr<VaApiContext>;
+    explicit VaApiContext(VADisplay display);
     VaApiContext();
 
     ~VaApiContext();
 
-    VADisplay Display();
-    VAContextID Id();
+    VAContextID contextId() {
+      return vaContextId;
+    }
+
+    VADisplay display() {
+      return vaDisplay;
+    }
 };
 
 } // namespace InferenceBackend

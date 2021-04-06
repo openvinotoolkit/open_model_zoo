@@ -15,7 +15,7 @@
 #include "vaapi_utils.h"
 
 using namespace InferenceBackend;
-
+/*
 VASurfaceID ConvertVASurfaceFromDifferentDisplay(VADisplay display, VASurfaceID surface, VADisplay display1,
                                                  uint64_t &dma_fd_out, int rt_format = VA_RT_FORMAT_YUV420) {
     VADRMPRIMESurfaceDescriptor drm_descriptor = VADRMPRIMESurfaceDescriptor();
@@ -78,7 +78,7 @@ void VaApiConverter::Convert(const VaApiImage &src, VaApiImage &dst) {
 
     uint64_t dma_fd = 0;
 
-    src_surface = ConvertVASurfaceFromDifferentDisplay(_context->Display(), src.va_surface_id, src.va_display, dma_fd);
+    src_surface = ConvertVASurfaceFromDifferentDisplay(_context->display(), src.va_surface_id, src.va_display, dma_fd);
 
     VASurfaceID dst_surface = dst.va_surface_id;
 
@@ -107,3 +107,4 @@ void VaApiConverter::Convert(const VaApiImage &src, VaApiImage &dst) {
 
     VA_CALL(vaDestroySurfaces(_context->Display(), &src_surface, 1))
 }
+*/

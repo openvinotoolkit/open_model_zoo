@@ -23,25 +23,33 @@ class VaApiImagePool;
 class VaApiImage{
   friend class VaApiImagePool;
   public:
-    VaApiImage(){};
-    VaApiImage(VADisplay va_display, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface = VA_INVALID_ID);
-    VaApiImage(VaApiImage&& other);
+    enum RESIZE_MODE {
+      RESIZE_FILL,
+      RESIZE_KEEP_ASPECT,
+      RESIZE_KEEP_ASPECT_LETTERBOX
+    };
     
-    using Ptr = std::shared_ptr<VaApiImage>;    
-
-    VaApiImage::Ptr CloneToAnotherDisplay(VADisplay newDisplay);
-
-
     enum CONVERSION_TYPE {
       CONVERT_TO_RGB,
       CONVERT_TO_BGR,
       CONVERT_COPY
     };
 
+  public:
+    VaApiImage(){};
+    ~VaApiImage(){DestroyImage();}
+    VaApiImage(const VaApiContext::Ptr& context, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface = VA_INVALID_ID);
+    VaApiImage(VaApiImage&& other);
+
+    using Ptr = std::shared_ptr<VaApiImage>;
+
+    VaApiImage::Ptr CloneToAnotherContext(const VaApiContext::Ptr& newContext);
+    VaApiImage::Ptr Resize(cv::Size newSize, VaApiImage::RESIZE_MODE resizeMode);
+
     cv::Mat CopyToMat(CONVERSION_TYPE convType = CONVERT_TO_BGR);
 
     uint32_t va_surface_id = VA_INVALID_ID;
-    VADisplay va_display = nullptr;
+    VaApiContext::Ptr context = nullptr;
 
     FourCC format = FOURCC_NONE; // FourCC
     uint32_t width = 0 ;
@@ -79,14 +87,14 @@ class VaApiImagePool {
         FourCC format;
     };
     void Flush();
-    VaApiImagePool(VaApiContext *context_, size_t image_pool_size, ImageInfo info);
+    VaApiImagePool(const VaApiContext::Ptr& context_, size_t image_pool_size, ImageInfo info);
     ~VaApiImagePool();
   private:
     std::vector<std::unique_ptr<VaApiImage>> _images;
     std::condition_variable _free_image_condition_variable;
     std::mutex _free_images_mutex;
 
-    VaApiContext *context;
+    VaApiContext::Ptr context;
     ImageInfo info;
 };
 

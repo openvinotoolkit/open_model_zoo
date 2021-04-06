@@ -304,7 +304,17 @@ int main(int argc, char *argv[]) {
 
         //------------------------------- Preparing Input ------------------------------------------------------
         slog::info << "Reading input" << slog::endl;
-        auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+        std::unique_ptr<ImagesCapture> cap;
+#ifdef USE_VA
+        pz::GstVaApiDecoder decoder;
+        VaApiImage::Ptr srcImage;
+        if(FLAGS_varc) {
+            decoder.open(FLAGS_i);
+            decoder.play();
+        }
+        else
+#endif
+        cap=openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat curr_frame;
 
         //------------------------------ Running Detection routines ----------------------------------------------
@@ -336,13 +346,6 @@ int main(int argc, char *argv[]) {
 
         InferenceEngine::Core core;
 
-#ifdef USE_VA
-        pz::GstVaApiDecoder decoder;
-        std::shared_ptr<VaApiImage> srcImage;
-        decoder.open(FLAGS_i);
-        decoder.play();
-#endif
-
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads, FLAGS_varc),
             core);
@@ -364,7 +367,6 @@ int main(int argc, char *argv[]) {
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
                 auto startTime = std::chrono::steady_clock::now();
-                curr_frame = cap->read();
  #ifdef USE_VA
                 if (FLAGS_varc) {
                     if (decoder.read(srcImage)) {
@@ -477,8 +479,10 @@ int main(int argc, char *argv[]) {
         slog::info << slog::endl << "Metric reports:" << slog::endl;
         metrics.printTotal();
         slog::info << slog::endl << "Latencies:\n";
+        if(cap) {
         slog::info << "  * Decoding only: \t" << std::fixed << std::setprecision(2) <<
             cap->getMetrics().getTotal().latency << " ms\n";
+        }
         slog::info << "  * Preprocessing only:\t" << std::fixed << std::setprecision(2) <<
             pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
         slog::info << "  * Inference only: \t" << std::fixed << std::setprecision(2) <<

@@ -57,8 +57,14 @@ std::unique_ptr<VaApiImage> bufferToImage(GstBuffer *buffer, GstVideoInfo *info)
         if (!info)
             throw std::invalid_argument("GstVideoInfo is absent during GstBuffer mapping");
 
+        static VaApiContext::Ptr vaContext;
+        if(!vaContext)
+        {
+            vaContext.reset(new VaApiContext(gst_mini_object_get_qdata(&buffer->mini_object, g_quark_from_static_string("VADisplay"))));
+        }
+
         auto image = std::unique_ptr<VaApiImage>(new VaApiImage(
-            gst_mini_object_get_qdata(&buffer->mini_object, g_quark_from_static_string("VADisplay")),
+            vaContext, // TODO: check this for consistancy
             static_cast<uint32_t>(GST_VIDEO_INFO_WIDTH(info)),
             static_cast<uint32_t>(GST_VIDEO_INFO_HEIGHT(info)),
             static_cast<FourCC>(gstFormatToFourCC(GST_VIDEO_INFO_FORMAT(info))),
@@ -66,9 +72,9 @@ std::unique_ptr<VaApiImage> bufferToImage(GstBuffer *buffer, GstVideoInfo *info)
             ));
 
         // getting data from VA_API
-        if (!image->va_display) {
+        if (!image->context->display()) {
             std::ostringstream os;
-            os << "Failed to get VADisplay=" << image->va_display;
+            os << "Failed to get VADisplay=" << image->context->display();
             throw std::runtime_error(os.str());
         }
         if ((int)image->va_surface_id < 0) {

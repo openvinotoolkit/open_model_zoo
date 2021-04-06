@@ -32,12 +32,12 @@ namespace InferenceBackend {
         throw std::invalid_argument("Cannot convert FOURCC to RT_FORMAT.");
     }
 
-VaApiImage::Ptr VaApiImage::CloneToAnotherDisplay(VADisplay newDisplay)
+VaApiImage::Ptr VaApiImage::CloneToAnotherContext(const VaApiContext::Ptr& newContext)
 {
     int rtFormat = FourCCToVART(format);
 
     VADRMPRIMESurfaceDescriptor drm_descriptor = VADRMPRIMESurfaceDescriptor();
-    VA_CALL(vaExportSurfaceHandle(va_display, va_surface_id, VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
+    VA_CALL(vaExportSurfaceHandle(context->display(), va_surface_id, VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
                                   VA_EXPORT_SURFACE_READ_ONLY, &drm_descriptor));
 
     VASurfaceAttribExternalBuffers external = VASurfaceAttribExternalBuffers();
@@ -75,15 +75,15 @@ VaApiImage::Ptr VaApiImage::CloneToAnotherDisplay(VADisplay newDisplay)
 
     VAConfigAttrib format_attrib;
     format_attrib.type = VAConfigAttribRTFormat;
-    VA_CALL(vaGetConfigAttributes(newDisplay, VAProfileNone, VAEntrypointVideoProc, &format_attrib, 1));
+    VA_CALL(vaGetConfigAttributes(newContext->display(), VAProfileNone, VAEntrypointVideoProc, &format_attrib, 1));
     if (!(format_attrib.value & rtFormat))
         throw std::invalid_argument("Unsupported runtime format for surface.");
 
     VASurfaceID surfaceID = VA_INVALID_SURFACE;
-    VA_CALL(vaCreateSurfaces(newDisplay, rtFormat, drm_descriptor.width, drm_descriptor.height, &surfaceID, 1,
+    VA_CALL(vaCreateSurfaces(newContext->display(), rtFormat, drm_descriptor.width, drm_descriptor.height, &surfaceID, 1,
                              attribs, 2));
                              std::cout<<"SutfID "<<surfaceID<<std::endl;
-    return VaApiImage::Ptr(new VaApiImage(newDisplay,external.width,external.height,format,surfaceID));
+    return VaApiImage::Ptr(new VaApiImage(newContext,external.width,external.height,format,surfaceID));
 }
 
 
@@ -98,21 +98,21 @@ VASurfaceID VaApiImage::CreateVASurface() {
 
     VAConfigAttrib format_attrib;
     format_attrib.type = VAConfigAttribRTFormat;
-    VA_CALL(vaGetConfigAttributes(va_display, VAProfileNone, VAEntrypointVideoProc, &format_attrib, 1));
+    VA_CALL(vaGetConfigAttributes(context->display(), VAProfileNone, VAEntrypointVideoProc, &format_attrib, 1));
     if (!(format_attrib.value & rt_format))
         throw std::invalid_argument("Unsupported runtime format for surface.");
 
     VASurfaceID va_surface_id;
-    VA_CALL(vaCreateSurfaces(va_display, rt_format, width, height, &va_surface_id, 1, &surface_attrib, 1))
+    VA_CALL(vaCreateSurfaces(context->display(), rt_format, width, height, &va_surface_id, 1, &surface_attrib, 1))
     return va_surface_id;
 }
 
-VaApiImage::VaApiImage(VADisplay va_display, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface) {
+VaApiImage::VaApiImage(const VaApiContext::Ptr& context, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface) {
     completed = true;
     this->width = width;
     this->height = height;
     this->format = format;
-    this->va_display = va_display;
+    this->context = context;
     this->va_surface_id = va_surface == VA_INVALID_ID ? CreateVASurface() : va_surface;
 }
 
@@ -120,7 +120,7 @@ VaApiImage::VaApiImage(VADisplay va_display, uint32_t width, uint32_t height, Fo
 void VaApiImage::DestroyImage() {
     if (va_surface_id != VA_INVALID_ID) {
         try {
-            VA_CALL(vaDestroySurfaces(va_display, (uint32_t *)&va_surface_id, 1));
+            VA_CALL(vaDestroySurfaces(context->display(), (uint32_t *)&va_surface_id, 1));
         } catch (const std::exception &e) {
             std::string error_message = std::string("VA surface destroying failed with exception: ") + e.what();
             std::cout << error_message.c_str() << std::endl;
@@ -136,8 +136,8 @@ cv::Mat VaApiImage::CopyToMat(VaApiImage::CONVERSION_TYPE convType) {
     cv::Mat mappedMat;
 
     //--- Mapping image
-    VA_CALL(vaDeriveImage(va_display, va_surface_id, &mappedImage))
-    VA_CALL(vaMapBuffer(va_display, mappedImage.buf, &pData))
+    VA_CALL(vaDeriveImage(context->display(), va_surface_id, &mappedImage))
+    VA_CALL(vaMapBuffer(context->display(), mappedImage.buf, &pData))
 
     //--- Copying data to Mat. Only NV12/I420 formats are supported now
     switch(format) {
@@ -162,11 +162,9 @@ cv::Mat VaApiImage::CopyToMat(VaApiImage::CONVERSION_TYPE convType) {
             break;
     }
 
-    //--- Unmapping image
     try {
-        VA_CALL(vaUnmapBuffer(va_display, mappedImage.buf))
-        VA_CALL(vaDestroyImage(va_display, mappedImage.image_id))
-        va_display=0;
+        VA_CALL(vaUnmapBuffer(context->display(), mappedImage.buf))
+        VA_CALL(vaDestroyImage(context->display(), mappedImage.image_id));
     } catch (const std::exception &e) {
         std::string error_message =
             std::string("VA buffer unmapping (destroying) failed with exception: ") + e.what();
@@ -175,6 +173,36 @@ cv::Mat VaApiImage::CopyToMat(VaApiImage::CONVERSION_TYPE convType) {
 
     return outMat;
 }
+
+VaApiImage::Ptr VaApiImage::Resize(cv::Size newSize, VaApiImage::RESIZE_MODE resizeMode) {
+    auto dstImage = std::make_shared<VaApiImage>(context,newSize.width,newSize.height,format);
+
+    VAProcPipelineParameterBuffer pipelineParam = VAProcPipelineParameterBuffer();
+    pipelineParam.surface = va_surface_id;
+    VARectangle surface_region = {.x = 0,
+                                  .y = 0,
+                                  .width = static_cast<uint16_t>(newSize.width),
+                                  .height = static_cast<uint16_t>(newSize.height)};
+    if (surface_region.width > 0 && surface_region.height > 0)
+        pipelineParam.surface_region = &surface_region;
+
+    // pipeline_param.filter_flags = VA_FILTER_SCALING_HQ; // High-quality scaling method
+
+    VABufferID pipelineParamBufId = VA_INVALID_ID;
+    VA_CALL(vaCreateBuffer(context->display(), context->contextId(), VAProcPipelineParameterBufferType,
+                           sizeof(pipelineParam), 1, &pipelineParam, &pipelineParamBufId));
+
+    VA_CALL(vaBeginPicture(context->display(), context->contextId(), dstImage->va_surface_id))
+
+    VA_CALL(vaRenderPicture(context->display(), context->contextId(), &pipelineParamBufId, 1))
+
+    VA_CALL(vaEndPicture(context->display(), context->contextId()))
+
+    VA_CALL(vaDestroyBuffer(context->display(), pipelineParamBufId))
+
+    return dstImage;
+}
+
 
 
 VaPooledImage::VaPooledImage(VaApiImage* img, VaApiImagePool* pool) :
@@ -188,7 +216,7 @@ VaPooledImage::~VaPooledImage() {
 }
 
 
-VaApiImagePool::VaApiImagePool(VaApiContext *context_, size_t image_pool_size, ImageInfo info) :
+VaApiImagePool::VaApiImagePool(const VaApiContext::Ptr& context_, size_t image_pool_size, ImageInfo info) :
     context(context_),
     info(info)
 {
@@ -196,7 +224,7 @@ VaApiImagePool::VaApiImagePool(VaApiContext *context_, size_t image_pool_size, I
         throw std::invalid_argument("VaApiContext is nullptr");
     for (size_t i = 0; i < image_pool_size; ++i) {
         _images.push_back(std::unique_ptr<VaApiImage>(
-            new VaApiImage(context_->Display(), info.width, info.height, info.format)));
+            new VaApiImage(context_, info.width, info.height, info.format)));
     }
 }
 

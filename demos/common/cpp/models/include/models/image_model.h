@@ -47,8 +47,7 @@ protected:
     VAContextPtr sharedVAContext;
 
 #ifdef USE_VA
-    std::unique_ptr<InferenceBackend::VaApiContext> va_context;
-    std::unique_ptr<InferenceBackend::VaApiConverter> va_converter;
+    InferenceBackend::VaApiContext::Ptr va_context;
 
     std::unique_ptr<InferenceBackend::VaApiImagePool> resizedSurfacesPool;
     #endif

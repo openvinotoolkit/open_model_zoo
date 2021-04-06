@@ -70,45 +70,37 @@ std::tuple<VAConfigID, VAContextID> create_config_and_context(VADisplay display,
 
 } // namespace
 
-VaApiContext::VaApiContext(VADisplay va_display) : _va_display(va_display) {
-    if (!_va_display)
+VaApiContext::VaApiContext(VADisplay display) : vaDisplay(display) {
+    if (!vaDisplay)
         throw std::runtime_error("VADisplay is nullptr. Cannot initialize VaApiContext without VADisplay.");
-    std::tie(_va_config, _va_context_id) = create_config_and_context(_va_display);
+    std::tie(vaConfig, vaContextId) = create_config_and_context(vaDisplay);
 }
 
 VaApiContext::VaApiContext() {
-    std::tie(_va_display, _dri_file_descriptor) = create_va_display_and_device_descriptor();
-    _own_va_display = true;
-    std::tie(_va_config, _va_context_id) = create_config_and_context(_va_display);
+    std::tie(vaDisplay, driFileDescriptor) = create_va_display_and_device_descriptor();
+    isOwningVaDisplay = true;
+    std::tie(vaConfig, vaContextId) = create_config_and_context(vaDisplay);
 }
 
 VaApiContext::~VaApiContext() {
-    if (_va_context_id != VA_INVALID_ID) {
-        vaDestroyContext(_va_display, _va_context_id);
+    if (vaContextId != VA_INVALID_ID) {
+        vaDestroyContext(vaDisplay, vaContextId);
     }
-    if (_va_config != VA_INVALID_ID) {
-        vaDestroyConfig(_va_display, _va_config);
+    if (vaConfig != VA_INVALID_ID) {
+        vaDestroyConfig(vaDisplay, vaConfig);
     }
-    if (_va_display && _own_va_display) {
-        VAStatus status = vaTerminate(_va_display);
+    if (vaDisplay && isOwningVaDisplay) {
+        VAStatus status = vaTerminate(vaDisplay);
         if (status != VA_STATUS_SUCCESS) {
             std::string error_message =
                 std::string("VA Display termination failed with code ") + std::to_string(status);
             std::cerr << error_message.c_str() << std::endl;
         }
-        int status_code = close(_dri_file_descriptor);
+        int status_code = close(driFileDescriptor);
         if (status_code != 0) {
             std::string error_message =
                 std::string("DRI file descriptor closing failed with code ") + std::to_string(status_code);
             std::cout << error_message.c_str() << std::endl;
         }
     }
-}
-
-VAContextID VaApiContext::Id() {
-    return _va_context_id;
-}
-
-VADisplay VaApiContext::Display() {
-    return _va_display;
 }
