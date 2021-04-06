@@ -284,9 +284,9 @@ Scene text recognition is a task to recognize text on a given image.
 Researchers compete on creating algorithms which are able to recognize text of different shapes, fonts and background.
 See details about datasets in [here](./text-recognition-resnet-fc/resnet-fc.md)
 
-| Model Name     | Implementation | OMZ Model Name            | Accuracy | GFlops  | mParams  |
-| -------------- | -------------- | ------------------------- | -------- | ------- | -------- |
-| Resnet-FC          | PyTorch\*      | [resnet-fc](./text-recognition-resnet-fc/resnet-fc.md) | 84.21% \ 92.85% \ 90.94% \ 77.80% \ 88.41% \ 87.77% | 177.9668  |
+| Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
+| -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
+| Resnet-FC      | PyTorch\*      | [resnet-fc](./text-recognition-resnet-fc/resnet-fc.md) | 84.21% \ 92.85% \ 90.94% \ 77.80% \ 88.41% \ 87.77% | 40.3704 | 177.9668  |
 
 ## Legal Information
 
