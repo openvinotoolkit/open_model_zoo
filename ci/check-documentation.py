@@ -5,6 +5,7 @@ This script is like check-basics.py, but specific to the documentation.
 It's split off into a separate script, so that it can be easily run on its own.
 """
 
+import re
 import sys
 import urllib.parse
 import urllib.request
@@ -16,6 +17,17 @@ OMZ_ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(OMZ_ROOT / 'ci/lib'))
 
 import omzdocs
+
+HTML_FRAGMENT_RE = re.compile(r'</?([^>\s]+)', re.IGNORECASE)
+
+# taken from https://www.doxygen.nl/manual/htmlcmds.html
+ALLOWED_HTML_ELEMENTS = frozenset([
+    'a', 'b', 'blockquote', 'br', 'caption', 'center', 'code', 'dd', 'del',
+    'dfn', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'hr', 'i', 'img', 'ins', 'kbd', 'li', 'ol', 'p', 'pre', 's', 'small',
+    'span', 'strike', 'strong', 'sub', 'sup', 'table', 'td', 'th', 'tr',
+    'tt', 'u', 'ul', 'var',
+])
 
 def find_md_files():
     thirdparty_dir = OMZ_ROOT / 'demos' / 'thirdparty'
@@ -67,6 +79,17 @@ def main():
                     ' does not exist or is not a file')
                 continue
 
+        # check for HTML fragments that are unsupported by Doxygen
+
+        for html_fragment in doc_page.html_fragments():
+            match = HTML_FRAGMENT_RE.match(html_fragment)
+            if not match:
+                complain(f'{md_path_rel}: cannot parse HTML fragment {html_fragment!r}')
+                continue
+
+            if match.group(1).lower() not in ALLOWED_HTML_ELEMENTS:
+                complain(f'{md_path_rel}: unknown/disallowed HTML element in {html_fragment!r}')
+                continue
 
     sys.exit(0 if all_passed else 1)
 
