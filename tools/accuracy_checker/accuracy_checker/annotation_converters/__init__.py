@@ -102,6 +102,7 @@ from .background_matting import BackgroundMattingConverter
 from .tacotron2_test_data_converter import TacotronDataConverter
 from .noise_suppression_dataset import NoiseSuppressionDatasetConverter
 from .vimeo90k_sr import Vimeo90KSuperResolutionDatasetConverter
+from .lmdb import LMDBConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -196,5 +197,6 @@ __all__ = [
     'BackgroundMattingConverter',
     'TacotronDataConverter',
     'NoiseSuppressionDatasetConverter',
-    'Vimeo90KSuperResolutionDatasetConverter'
+    'Vimeo90KSuperResolutionDatasetConverter',
+    'LMDBConverter',
 ]
