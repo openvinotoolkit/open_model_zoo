@@ -19,7 +19,7 @@ import cv2
 
 from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
 from ..representation import CharacterRecognitionAnnotation
-from ..logging import print_info
+from ..config import BoolField
 
 
 class LMDBConverter(DirectoryBasedAnnotationConverter):
@@ -29,11 +29,14 @@ class LMDBConverter(DirectoryBasedAnnotationConverter):
     @classmethod
     def parameters(cls):
         configuration_parameters = super().parameters()
-
+        configuration_parameters.update({
+            'lower_case': BoolField(description='Convert GT text to lowercase.', optional=True)
+        })
         return configuration_parameters
 
     def configure(self):
         super().configure()
+        self.lower_case = self.get_value_from_config('lower_case')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         """Reads data from disk and returns dataset in converted for AC format
@@ -54,8 +57,8 @@ class LMDBConverter(DirectoryBasedAnnotationConverter):
             for index in range(1, num_iterations + 1):
                 label_key = 'label-%09d'.encode() % index
                 text = txn.get(label_key).decode('utf-8')
-
-                # identifier = cv2.imdecode(imgbuf, cv2.IMREAD_ANYCOLOR)
+                if self.lower_case:
+                    text = text.lower()
                 if progress_callback is not None and index % progress_interval == 0:
                     progress_callback(index / num_iterations * 100)
                 if check_content:

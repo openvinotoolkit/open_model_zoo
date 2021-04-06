@@ -579,41 +579,41 @@ datasets:
     data_source: evaluation/ic15_1811
     annotation_conversion:
       converter: lmdb_database
+      lower_case: true
       data_dir: evaluation/ic15_1811
     annotation: icdar15_recognition.pickle
     reader:
       type: lmdb_reader
-      data_dir: /home/vloginov/work/vedastr/data/data_lmdb_release/evaluation/ic15_1811
 
   - name: ICDAR03_recognition
     data_source: evaluation/ic03_867
     annotation_conversion:
       converter: lmdb_database
+      lower_case: true
       data_dir: evaluation/ic03_867
     annotation: icdar03_recognition.pickle
     reader:
       type: lmdb_reader
-      data_dir: /home/vloginov/work/vedastr/data/data_lmdb_release/evaluation/ic03_867
 
   - name: SVT_recognition
     data_source: evaluation/svt_647
     annotation_conversion:
       converter: lmdb_database
+      lower_case: true
       data_dir: evaluation/svt_647
     annotation: svt_recognition.pickle
     reader:
       type: lmdb_reader
-      data_dir: /home/vloginov/work/vedastr/data/data_lmdb_release/evaluation/svt_647
 
   - name: IIIT5K
     data_source: evaluation/IIIT5K_3000
     annotation_conversion:
       converter: lmdb_database
+      lower_case: true
       data_dir: evaluation/IIIT5K_3000
     annotation: IIIT5K_3000.pickle
     reader:
       type: lmdb_reader
-      data_dir: /home/vloginov/work/vedastr/data/data_lmdb_release/evaluation/IIIT5K_3000
 
   - name: ICDAR2015_word_spotting
     data_source: ICDAR15_DET/ch4_test_images

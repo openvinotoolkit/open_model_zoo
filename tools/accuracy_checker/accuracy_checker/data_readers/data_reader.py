@@ -853,18 +853,18 @@ class LMDBReader(BaseReader):
     @classmethod
     def parameters(cls):
         configuration_parameters = super().parameters()
-        configuration_parameters.update({
-            'data_dir': PathField(optional=False, is_directory=True)
-        })
         return configuration_parameters
 
     def configure(self):
         super().configure()
-        self.data_dir = self.get_value_from_config('data_dir')
-        self.database = lmdb.open(bytes(self.data_dir), readonly=True)
+        self.database = lmdb.open(bytes(self.data_source), readonly=True)
 
     def read(self, data_id):
         with self.database.begin(write=False) as txn:
             img_key = 'image-%09d'.encode() % data_id
             image_bytes = txn.get(img_key)
-            return cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
+            img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_UNCHANGED)
+            if len(img.shape) < 3:
+                img = np.stack((img,)*3, axis=-1)
+            assert img.shape[-1] == 3
+            return img
