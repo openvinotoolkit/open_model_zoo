@@ -85,11 +85,10 @@ class HpeAssociativeEmbedding(Model):
         resize_img_scale = np.array((inputs.shape[1] / w, inputs.shape[0] / h), np.float32)
 
         if self.padding_mode == 'center':
-            pad = [(self.h - h + 1) // 2, (self.w - w + 1) // 2, (self.h - h) // 2, (self.w - w) // 2]
+            pad = ((self.h - h + 1) // 2, (self.h - h) // 2, (self.w - w + 1) // 2, (self.w - w) // 2)
         else:
-            pad = [0, 0, self.h - h, self.w - w]
-        img = np.pad(img, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
-                     mode='constant', constant_values=0)
+            pad = (0, self.h - h, 0, self.w - w)
+        img = np.pad(img, (pad[:2], pad[2:], (0, 0)), mode='constant', constant_values=0)
         img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         img = img[None]
         meta = {

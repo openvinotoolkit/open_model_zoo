@@ -26,6 +26,8 @@ class HpeHRNet(torch.nn.Module):
         self.impl.eval()
         # pooling operation to get nms_heatmaps from heatmaps out of model
         self.pool = torch.nn.MaxPool2d(kernel_size=5, stride=1, padding=2)
+        # ReLU operation to avoid negative values at heatmap
+        self.relu = torch.nn.ReLU()
 
     def forward(self, image):
         outputs = self.impl(image)
@@ -38,8 +40,9 @@ class HpeHRNet(torch.nn.Module):
                 mode='bilinear',
                 align_corners=False
             )
-        # average of heatmaps
+        # average of heatmaps and apply relu
         outputs[1] = (outputs[0][:, :17, :, :] + outputs[1]) / 2
+        outputs[1] = self.relu(outputs[1])
         outputs[0] = outputs[0][:, 17:, :, :]
         # apply nms for heatmaps
         pooled = self.pool(outputs[1])

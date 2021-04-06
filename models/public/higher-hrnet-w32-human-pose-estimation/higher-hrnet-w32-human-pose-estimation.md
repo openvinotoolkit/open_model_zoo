@@ -21,7 +21,7 @@ For details about implementation of model, check out the [HigherHRNet: Scale-Awa
 
 | Metric                     | Original model    | Converted model |
 | -------------------------- | ----------------- | --------------- |
-| Average Precision (AP)     | 64.63%            | 64.63%          |
+| Average Precision (AP)     | 64.64%            | 64.64%          |
 
 These are the results of the accuracy check for single pass inference (without flip of image, which used by default in original repository)
 
