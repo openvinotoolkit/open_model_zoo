@@ -107,9 +107,9 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
 }
 
 void ModelRetinaFace::checkCompiledNetworkInputsOutputs() {
-    // --------------------------- Check input & output -------------------------------------------------
+    // --------------------------- Check input  ---------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    InferenceEngine::ConstInputsDataMap& inputInfo(execNetwork.GetInputsInfo());
+    InferenceEngine::ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
     }
@@ -119,16 +119,16 @@ void ModelRetinaFace::checkCompiledNetworkInputsOutputs() {
     if (input->getPrecision() != InferenceEngine::Precision::U8) {
         throw std::logic_error("This demo accepts compiled networks with U8 input precision");
     }
-    //--- Reading image input parameters
+    //--- --------------- Reading image input parameters --------------------------------------------
     imageInputName = inputInfo.begin()->first;
     const InferenceEngine::TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
 
-    // --------------------------- Check output blobs -----------------------------------------------------
+    // --------------------------- Check output -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
 
-    InferenceEngine::ConstOutputsDataMap& outputInfo(execNetwork.GetOutputsInfo());
+    InferenceEngine::ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
 
     std::vector<size_t> outputsSizes[OT_MAX];
     for (const auto& output : outputInfo) {

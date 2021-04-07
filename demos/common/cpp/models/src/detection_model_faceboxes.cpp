@@ -88,9 +88,9 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
 }
 
 void ModelFaceBoxes::checkCompiledNetworkInputsOutputs() {
-    // --------------------------- Check input & output -------------------------------------------------
+    // --------------------------- Check input  -------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    InferenceEngine::ConstInputsDataMap& inputInfo(execNetwork.GetInputsInfo());
+    InferenceEngine::ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
 
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
@@ -112,10 +112,10 @@ void ModelFaceBoxes::checkCompiledNetworkInputsOutputs() {
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
 
-    // --------------------------- Check output blobs -----------------------------------------------------
+    // --------------------------- Check output  -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
 
-    InferenceEngine::ConstOutputsDataMap& outputInfo(execNetwork.GetOutputsInfo());
+    InferenceEngine::ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
 
     if (outputInfo.size() != 2) {
         throw std::logic_error("This demo expect networks that have 2 outputs blobs");

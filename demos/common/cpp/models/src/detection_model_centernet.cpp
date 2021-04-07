@@ -66,6 +66,45 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     }
 }
 
+void ModelCenterNet::checkCompiledNetworkInputsOutputs() {
+    // --------------------------- Check input -------------------------------------------------
+    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
+    InferenceEngine::ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
+    if (inputInfo.size() != 1) {
+        throw std::logic_error("This demo accepts networks that have only one input");
+    }
+
+    InferenceEngine::InputInfo::CPtr& input = inputInfo.begin()->second;
+    const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
+    if (input->getPrecision() != InferenceEngine::Precision::U8) {
+        throw std::logic_error("This demo accepts compiled networks with U8 input precision");
+    }
+    if (inputDesc.getDims()[1] != 3) {
+        throw std::logic_error("Expected 3-channel input");
+    }
+
+    // --------------------------- Reading image input parameters -------------------------------------------
+    std::string imageInputName = inputInfo.begin()->first;
+    inputsNames.push_back(imageInputName);
+    netInputHeight = getTensorHeight(inputDesc);
+    netInputWidth = getTensorWidth(inputDesc);
+
+    // --------------------------- Check output  -----------------------------------------------------
+    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
+
+    InferenceEngine::ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
+    if (outputInfo.size() != 3) {
+        throw std::logic_error("This demo expect networks that have 3 outputs blobs");
+    }
+
+    for (auto& output : outputInfo) {
+        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
+            throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
+        }
+        outputsNames.push_back(output.first);
+    }
+}
+
 cv::Point2f getDir(const cv::Point2f& srcPoint, float rotRadius) {
     float sn = sinf(rotRadius);
     float cs = cosf(rotRadius);

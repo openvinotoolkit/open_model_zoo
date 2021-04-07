@@ -131,7 +131,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
 void ModelSSD::checkCompiledNetworkInputsOutputs() {
     ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    // --------------------------- Check input & output -------------------------------------------------
+    // --------------------------- Check input -------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     for (const auto& inputInfoItem : inputInfo) {
         if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
@@ -163,7 +163,7 @@ void ModelSSD::checkCompiledNetworkInputsOutputs() {
         }
     }
 
-    // --------------------------- Check output blobs -----------------------------------------------------
+    // --------------------------- Check output -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
     ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
     if (outputInfo.size() == 1) {
