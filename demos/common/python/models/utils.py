@@ -47,13 +47,13 @@ class InputTransform:
         self.reverse_input_channels = reverse_input_channels
         self.mean_values = np.array(mean_values, dtype=np.float32)
         self.scale_values = np.array(scale_values, dtype=np.float32)
-
-    def is_trivial(self):
-        return np.array_equal(self.mean_values, [0., 0., 0.]) and \
-               np.array_equal(self.scale_values, [1., 1., 1.]) and \
-               not self.reverse_input_channels
+        self.is_trivial = np.array_equal(self.mean_values, [0., 0., 0.]) and \
+                          np.array_equal(self.scale_values, [1., 1., 1.]) and \
+                          not self.reverse_input_channels
 
     def apply(self, inputs):
+        if self.is_trivial:
+            return inputs
         if self.reverse_input_channels:
             inputs = cv2.cvtColor(inputs, cv2.COLOR_BGR2RGB)
         return (inputs - self.mean_values) / self.scale_values

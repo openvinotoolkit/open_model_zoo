@@ -153,7 +153,7 @@ class ColorPalette:
 def get_model(ie, args):
     input_transform = models.InputTransform(args.reverse_input_channels, args.mean_values, args.scale_values)
     common_args = (ie, args.model, input_transform)
-    if args.architecture_type in ('ctpn', 'yolo', 'yolov4', 'retinaface') and not input_transform.is_trivial():
+    if args.architecture_type in ('ctpn', 'yolo', 'yolov4', 'retinaface') and not input_transform.is_trivial:
         raise ValueError("{} model doesn't support input transforms.".format(args.architecture_type))
 
     if args.architecture_type == 'ssd':
