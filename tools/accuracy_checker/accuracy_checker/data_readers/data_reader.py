@@ -21,7 +21,6 @@ from functools import singledispatch
 from pathlib import Path
 
 import cv2
-import lmdb
 import numpy as np
 from numpy.lib.npyio import NpzFile
 from PIL import Image
@@ -31,6 +30,12 @@ from ..dependency import ClassProvider, UnregisteredProviderException
 from ..config import (
     BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField, PathField
 )
+
+try:
+    import lmdb
+except ImportError as import_error:
+    lmdb = UnsupportedPackage("lmdb", import_error.msg)
+
 
 try:
     import nibabel as nib
