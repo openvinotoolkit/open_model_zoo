@@ -13,13 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import lmdb
 import numpy as np
 import cv2
 
 from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
+from ..utils import UnsupportedPackage
 from ..representation import CharacterRecognitionAnnotation
 from ..config import BoolField
+
+try:
+    import lmdb
+except ImportError as import_error:
+    lmdb = UnsupportedPackage("lmdb", import_error.msg)
 
 
 class LMDBConverter(DirectoryBasedAnnotationConverter):

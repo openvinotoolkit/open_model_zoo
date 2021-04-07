@@ -36,7 +36,6 @@ try:
 except ImportError as import_error:
     lmdb = UnsupportedPackage("lmdb", import_error.msg)
 
-
 try:
     import nibabel as nib
 except ImportError as import_error:
