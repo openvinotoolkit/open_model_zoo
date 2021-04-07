@@ -15,12 +15,12 @@ limitations under the License.
 """
 
 from collections import defaultdict
-from scipy.special import softmax
 import numpy as np
 
 from ..adapters import Adapter
 from ..config import ConfigValidator, ConfigError, NumberField, BoolField, DictField, ListField, StringField
 from ..representation import CharacterRecognitionPrediction
+from ..utils import softmax
 
 
 class BeamSearchDecoder(Adapter):
