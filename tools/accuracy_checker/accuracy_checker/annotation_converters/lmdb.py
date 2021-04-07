@@ -23,7 +23,7 @@ from ..config import BoolField
 
 
 class LMDBConverter(DirectoryBasedAnnotationConverter):
-    __provider__ = 'lmdb_database'
+    __provider__ = 'lmdb_text_recognition_database'
     annotation_types = (CharacterRecognitionAnnotation, )
 
     @classmethod
