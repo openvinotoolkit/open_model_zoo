@@ -36,6 +36,7 @@ class SpeechRecognitionWER(PerImageEvaluationMetric):
             editdistance.raise_error(self.__provider__)
         self.words = 0
         self.score = 0
+        self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
         cur_score = editdistance.eval(annotation.label.split(), prediction.label.split())
@@ -61,6 +62,7 @@ class SpeechRecognitionCER(PerImageEvaluationMetric):
             editdistance.raise_error(self.__provider__)
         self.length = 0
         self.score = 0
+        self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
         cur_score = editdistance.eval(annotation.label, prediction.label)
