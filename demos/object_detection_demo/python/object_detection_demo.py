@@ -91,17 +91,17 @@ def build_argparser():
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
-    onnx_args = parser.add_argument_group('Onnx format options')
-    onnx_args.add_argument('--reverse_input_channels', default=False, action='store_true',
-                         help='Optional. Switch the input channels order from '
-                              'BGR to RGB for onnx model.')
-    onnx_args.add_argument('--mean_values', default=(0.0, 0.0, 0.0), type=float, nargs=3,
-                         help='Optional. Normalize input by subtracting the mean values '
-                              'per channel for onnx model. Example: 255 255 255')
-    onnx_args.add_argument('--scale_values', default=(1.0, 1.0, 1.0), type=float, nargs=3,
-                         help='Optional. Divide input by scale values per channel for onnx model. '
-                              'Division is applied after mean values '
-                              'subtraction. Example: 255 255 255')
+    input_transform_args = parser.add_argument_group('Input transform options')
+    input_transform_args.add_argument('--reverse_input_channels', default=False, action='store_true',
+                                      help='Optional. Switch the input channels order from '
+                                           'BGR to RGB.')
+    input_transform_args.add_argument('--mean_values', default=(0.0, 0.0, 0.0), type=float, nargs=3,
+                                      help='Optional. Normalize input by subtracting the mean '
+                                           'values per channel. Example: 255 255 255')
+    input_transform_args.add_argument('--scale_values', default=(1.0, 1.0, 1.0), type=float, nargs=3,
+                                      help='Optional. Divide input by scale values per channel. '
+                                           'Division is applied after mean values subtraction. '
+                                           'Example: 255 255 255')
 
     debug_args = parser.add_argument_group('Debug options')
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
@@ -151,15 +151,11 @@ class ColorPalette:
 
 
 def get_model(ie, args):
-    if args.architecture_type in ('ctpn', 'yolo', 'yolov4', 'retinaface') and \
-       (
-           args.reverse_input_channels or
-           not np.array_equal(args.mean_values, [0., 0., 0.]) or
-           not np.array_equal(args.scale_values, [1., 1., 1.])
-       ):
-        raise ValueError("{} model doesn't support input transforms.".format(args.architecture_type))
     input_transform = models.InputTransform(args.reverse_input_channels, args.mean_values, args.scale_values)
     common_args = (ie, args.model, input_transform)
+    if args.architecture_type in ('ctpn', 'yolo', 'yolov4', 'retinaface') and not input_transform.is_trivial():
+        raise ValueError("{} model doesn't support input transforms.".format(args.architecture_type))
+
     if args.architecture_type == 'ssd':
         return models.SSD(*common_args, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
     elif args.architecture_type == 'ctpn':

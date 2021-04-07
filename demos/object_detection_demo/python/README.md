@@ -115,17 +115,17 @@ Input/output options:
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 
-Onnx format options:
+Input transform options:
   --reverse_input_channels REVERSE_CHANNELS
                         Optional. Switch the input channels order from
-                        BGR to RGB for onnx model.
+                        BGR to RGB.
   --mean_values MEAN_VALUES
-                        Optional. Normalize input by subtracting the mean values
-                        per channel for onnx model. Example: 255 255 255
+                        Optional. Normalize input by subtracting the mean
+                        values per channel. Example: 255 255 255
   --scale_values SCALE_VALUES
                         Optional. Divide input by scale values per channel
-                        for onnx model. Division is applied after mean values
-                        subtraction. Example: 255 255 255
+                        Division is applied after mean values subtraction.
+                        Example: 255 255 255
 
 Debug options:
   -r, --raw_output_message
