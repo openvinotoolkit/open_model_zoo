@@ -6,7 +6,7 @@ models:
         weights: models/VGGNet/VOC0712Plus/SSD_300x300_ft/VGG_VOC0712Plus_SSD_300x300_ft_iter_160000.caffemodel
         adapter: ssd
     datasets:
-      - name: VOC2012
+      - name: VOC2007_detection
         preprocessing:
           - type: resize
             size: 300
@@ -14,6 +14,12 @@ models:
             mean: 104, 117, 123
         postprocessing:
           - type: resize_prediction_boxes
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: True
+            presenter: print_scalar
+
 
   - name: ssd300
     launchers:
@@ -21,9 +27,14 @@ models:
         adapter: ssd
 
     datasets:
-      - name: VOC2012
+      - name: VOC2007_detection
         preprocessing:
           - type: resize
             size: 300
         postprocessing:
           - type: resize_prediction_boxes
+        metrics:
+          - type: map
+            integral: 11point
+            ignore_difficult: True
+            presenter: print_scalar
