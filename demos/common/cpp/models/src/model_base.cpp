@@ -56,7 +56,6 @@ InferenceEngine::CNNNetwork ModelBase::prepareNetwork(InferenceEngine::Core& cor
 ExecutableNetwork ModelBase::loadExecutableNetwork(const CnnConfig& cnnConfig, InferenceEngine::Core& core) {
     this->cnnConfig = cnnConfig;
     // ---------------------- Determine network type ---------------------------------------------------
-
     isNetworkCompiled = fileExt(modelFileName) == "blob";
 
     slog::info << "Loading model to the device" << slog::endl;

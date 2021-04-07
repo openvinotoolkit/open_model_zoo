@@ -119,7 +119,7 @@ void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnN
 
 void ClassificationModel::checkCompiledNetworkInputsOutputs() {
     // --------------------------- Check input & output -------------------------------------------------
-    InferenceEngine::ConstInputsDataMap& inputInfo(execNetwork.GetInputsInfo());
+    InferenceEngine::ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
     if (inputInfo.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 input");
     inputsNames.push_back(inputInfo.begin()->first);
@@ -137,7 +137,7 @@ void ClassificationModel::checkCompiledNetworkInputsOutputs() {
     }
 
     // --------------------------- Check output blobs -----------------------------------------------------
-    InferenceEngine::ConstOutputsDataMap& outputsDataMap(execNetwork.GetOutputsInfo());
+    InferenceEngine::ConstOutputsDataMap outputsDataMap(execNetwork.GetOutputsInfo());
     if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
 
     outputsNames.push_back(outputsDataMap.begin()->first);
