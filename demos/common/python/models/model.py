@@ -15,19 +15,15 @@
 """
 
 import logging
-import numpy as np
+
 
 class Model:
-    def __init__(self, ie, model_path, reverse_input_channels=None, mean_values=None, scale_values=None):
+    def __init__(self, ie, model_path, input_transform=None, mean_values=None, scale_values=None):
         self.logger = logging.getLogger()
         self.logger.info('Reading network from IR...')
-        self.is_onnx_format = model_path.suffix == '.onnx'
         self.net = ie.read_network(model_path)
         self.set_batch_size(1)
-
-        self.reverse_input_channels = reverse_input_channels
-        self.mean_values = np.array(mean_values, dtype=np.float32)
-        self.scale_values = np.array(scale_values, dtype=np.float32)
+        self.input_transform = input_transform
 
     def preprocess(self, inputs):
         meta = {}

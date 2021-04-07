@@ -21,9 +21,8 @@ from .utils import Detection, resize_image, load_labels
 
 
 class SSD(Model):
-    def __init__(self, ie, model_path, reverse_input_channels, mean_values, scale_values,
-                 labels=None, keep_aspect_ratio_resize=False):
-        super().__init__(ie, model_path, reverse_input_channels, mean_values, scale_values)
+    def __init__(self, ie, model_path, input_transform, labels=None, keep_aspect_ratio_resize=False):
+        super().__init__(ie, model_path, input_transform)
 
         self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
         if isinstance(labels, (list, tuple)):
@@ -85,14 +84,12 @@ class SSD(Model):
         if h != self.h or w != self.w:
             resized_image = np.pad(resized_image, ((0, self.h - h), (0, self.w - w), (0, 0)),
                                    mode='constant', constant_values=0)
-        if self.is_onnx_format and self.reverse_input_channels:
+        if self.input_transform.reverse_input_channels:
             resized_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
+        resized_image = (resized_image - self.input_transform.mean_values) / self.input_transform.scale_values
 
         resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
-
-        if self.is_onnx_format:
-            resized_image = (resized_image - self.mean_values[:, None, None]) / self.scale_values[:, None, None]
 
         dict_inputs = {self.image_blob_name: resized_image}
         if self.image_info_blob_name:

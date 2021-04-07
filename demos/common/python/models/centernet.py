@@ -23,9 +23,8 @@ from .utils import Detection, load_labels
 
 
 class CenterNet(Model):
-    def __init__(self, ie, model_path, reverse_input_channels, mean_values, scale_values,
-                 labels=None, threshold=0.3):
-        super().__init__(ie, model_path, reverse_input_channels, mean_values, scale_values)
+    def __init__(self, ie, model_path, input_transform, labels=None, threshold=0.3):
+        super().__init__(ie, model_path, input_transform)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         assert len(self.net.outputs) == 3, "Expected 3 output blobs"
@@ -52,14 +51,12 @@ class CenterNet(Model):
         scale = max(height, width)
         trans_input = self.get_affine_transform(center, scale, 0, [self.w, self.h])
         resized_image = cv2.warpAffine(image, trans_input, (self.w, self.h), flags=cv2.INTER_LINEAR)
-        if self.is_onnx_format and self.reverse_input_channels:
+        if self.input_transform.reverse_input_channels:
             resized_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
+        resized_image = (resized_image - self.input_transform.mean_values) / self.input_transform.scale_values
 
         resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
-
-        if self.is_onnx_format:
-            resized_image = (resized_image - self.mean_values[:, None, None]) / self.scale_values[:, None, None]
 
         dict_inputs = {self.image_blob_name: resized_image}
         return dict_inputs, meta

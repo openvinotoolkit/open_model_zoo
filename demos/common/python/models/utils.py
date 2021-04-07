@@ -42,6 +42,13 @@ class DetectionWithLandmarks(Detection):
             self.landmarks.append((x, y))
 
 
+class InputTransform:
+    def __init__(self, reverse_input_channels, mean_values, scale_values):
+        self.reverse_input_channels = reverse_input_channels
+        self.mean_values = np.array(mean_values, dtype=np.float32)
+        self.scale_values = np.array(scale_values, dtype=np.float32)
+
+
 def load_labels(label_file):
     with open(label_file, 'r') as f:
         labels_map = [x.strip() for x in f]
