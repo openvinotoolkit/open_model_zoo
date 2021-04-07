@@ -55,18 +55,18 @@ class LMDBConverter(DirectoryBasedAnnotationConverter):
         with lmdb_env.begin(write=False) as txn:
             num_iterations = int(txn.get('num-samples'.encode()))
             for index in range(1, num_iterations + 1):
-                label_key = 'label-%09d'.encode() % index
+                label_key = f'label-{index:09d}'.encode()
                 text = txn.get(label_key).decode('utf-8')
                 if self.lower_case:
                     text = text.lower()
                 if progress_callback is not None and index % progress_interval == 0:
                     progress_callback(index / num_iterations * 100)
                 if check_content:
-                    img_key = 'image-%09d'.encode() % index
+                    img_key = f'label-{index:09d}'.encode()
                     image_bytes = txn.get(img_key)
                     image = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_ANYCOLOR)
                     if image is None:
-                        content_errors.append('{}: does not exist'.format('image-%09d' % index))
+                        content_errors.append(f'label-{index:09d}: does not exist')
                 annotations.append(CharacterRecognitionAnnotation(index, text))
 
         return ConverterReturn(annotations, None, content_errors)

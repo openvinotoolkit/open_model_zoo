@@ -14,17 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import lmdb
-from pathlib import Path
-from functools import singledispatch
-from collections import OrderedDict, namedtuple
 import re
 import wave
+from collections import OrderedDict, namedtuple
+from functools import singledispatch
+from pathlib import Path
 
 import cv2
-from PIL import Image
+import lmdb
 import numpy as np
 from numpy.lib.npyio import NpzFile
+from PIL import Image
 
 from ..utils import get_path, read_json, read_pickle, contains_all, UnsupportedPackage, get_parameter_value_from_config
 from ..dependency import ClassProvider, UnregisteredProviderException
@@ -861,7 +861,7 @@ class LMDBReader(BaseReader):
 
     def read(self, data_id):
         with self.database.begin(write=False) as txn:
-            img_key = 'image-%09d'.encode() % data_id
+            img_key = f'image-{data_id:09d}'.encode()
             image_bytes = txn.get(img_key)
             img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_UNCHANGED)
             if len(img.shape) < 3:
