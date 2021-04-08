@@ -854,10 +854,6 @@ class ByteFileReader(BaseReader):
 class LMDBReader(BaseReader):
     __provider__ = 'lmdb_reader'
 
-    @classmethod
-    def parameters(cls):
-        configuration_parameters = super().parameters()
-        return configuration_parameters
 
     def configure(self):
         super().configure()
