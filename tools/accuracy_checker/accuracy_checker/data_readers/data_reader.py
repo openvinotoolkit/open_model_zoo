@@ -714,6 +714,20 @@ class WavReader(BaseReader):
         2: np.int16
     }
 
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'mono': BoolField(optional=True, default=False,
+                              description='get mean along channels if multichannel audio loaded'),
+            'to_float': BoolField(optional=True, default=False, description='converts audio signal to float')
+        })
+        return params
+
+    def configure(self):
+        self.mono = self.get_value_from_config('mono')
+        self.to_float = self.get_value_from_config('to_float')
+
     def read(self, data_id):
         with wave.open(str(self.data_source / data_id), "rb") as wav:
             sample_rate = wav.getframerate()
@@ -727,7 +741,13 @@ class WavReader(BaseReader):
                                    "(reader only supports {})"
                                    .format(self.__provider__, self.data_source / data_id,
                                            sample_width, [*self._samplewidth_types.keys()]))
-            data = data.reshape(-1, wav.getnchannels()).T
+            channels = wav.getnchannels()
+
+            data = data.reshape(-1, channels).T
+            if channels > 1 and self.mono:
+                data = data.mean(1)
+            if self.to_float:
+                data = data.astype(np.float32) / np.iinfo(self._samplewidth_types[sample_width]).max
 
         return data, {'sample_rate': sample_rate}
 

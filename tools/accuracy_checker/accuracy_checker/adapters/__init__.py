@@ -109,6 +109,7 @@ from .face_recognition_quality_assessment import QualityAssessmentAdapter
 from .dna_seq_recognition import DNASeqRecognition
 from .optical_flow import PWCNetAdapter
 from .salient_objects_detection import SalientObjectDetection
+from .noise_suppression import NoiseSuppressionAdapter
 from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
 
 __all__ = [
@@ -229,6 +230,8 @@ __all__ = [
     'DNASeqRecognition',
 
     'PWCNetAdapter',
+
+    'NoiseSuppressionAdapter',
 
     'GVADetectionAdapter',
     'GVAClassificationAdapter',

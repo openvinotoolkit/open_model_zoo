@@ -495,6 +495,8 @@ The main difference between this converter and `super_resolution` in data organi
   * `include_special_token_lables` - allow extension original dataset labels with special token labels (`[CLS'`, `[SEP]`]) (Optional, default `False`).
 * `tacotron2_data_converter` - converts input data for custom tacotron2 pipeline.
   * `annotation_file` - tsv file with location input data and reference.
+* `noise_suppression_dataset` - converts dataset for audio denoising to `NoiseSuppressionAnnotation`
+  * `annotation_file` - txt file with file pairs `<clean_signal> <noisy_signal>`.
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
