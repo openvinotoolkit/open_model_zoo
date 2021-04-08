@@ -576,7 +576,7 @@ datasets:
     annotation: icdar15_detection.pickle
 
   - name: ICDAR2015_recognition
-    data_source: evaluation/ic15_1811
+    data_source: ic15_1811
     annotation_conversion:
       converter: lmdb_text_recognition_database
       lower_case: true
