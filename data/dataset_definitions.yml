@@ -580,37 +580,37 @@ datasets:
     annotation_conversion:
       converter: lmdb_text_recognition_database
       lower_case: true
-      data_dir: evaluation/ic15_1811
+      data_dir: ic15_1811
     annotation: icdar15_recognition.pickle
     reader:
       type: lmdb_reader
 
   - name: ICDAR03_recognition
-    data_source: evaluation/ic03_867
+    data_source: ic03_867
     annotation_conversion:
       converter: lmdb_text_recognition_database
       lower_case: true
-      data_dir: evaluation/ic03_867
+      data_dir: ic03_867
     annotation: icdar03_recognition.pickle
     reader:
       type: lmdb_reader
 
   - name: SVT_recognition
-    data_source: evaluation/svt_647
+    data_source: svt_647
     annotation_conversion:
       converter: lmdb_text_recognition_database
       lower_case: true
-      data_dir: evaluation/svt_647
+      data_dir: svt_647
     annotation: svt_recognition.pickle
     reader:
       type: lmdb_reader
 
   - name: IIIT5K
-    data_source: evaluation/IIIT5K_3000
+    data_source: IIIT5K_3000
     annotation_conversion:
       converter: lmdb_text_recognition_database
       lower_case: true
-      data_dir: evaluation/IIIT5K_3000
+      data_dir: IIIT5K_3000
     annotation: IIIT5K_3000.pickle
     reader:
       type: lmdb_reader
