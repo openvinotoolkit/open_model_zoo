@@ -28,7 +28,10 @@ class SISDRMetric(PerImageEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'delay': NumberField(optional=True, default=0, value_type=int, min_value=0)
+            'delay': NumberField(
+                optional=True, default=0, value_type=int, min_value=0,
+                description='shift output by delay to align with reference'
+            )
         })
         return parameters
 

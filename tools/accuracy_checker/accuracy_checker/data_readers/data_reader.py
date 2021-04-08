@@ -718,8 +718,9 @@ class WavReader(BaseReader):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'mono': BoolField(optional=True, default=False),
-            'to_float': BoolField(optional=True, default=False)
+            'mono': BoolField(optional=True, default=False,
+                              description='get mean along channels if multichannel audio loaded'),
+            'to_float': BoolField(optional=True, default=False, description='converts audio signal to float')
         })
         return params
 
@@ -744,7 +745,7 @@ class WavReader(BaseReader):
 
             data = data.reshape(-1, channels).T
             if channels > 1 and self.mono:
-                data = data.mean()
+                data = data.mean(1)
             if self.to_float:
                 data = data.astype(np.float32) / np.iinfo(self._samplewidth_types[sample_width]).max
 

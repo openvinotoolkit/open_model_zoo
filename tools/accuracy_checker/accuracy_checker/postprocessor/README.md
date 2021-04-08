@@ -113,3 +113,4 @@ Accuracy Checker supports following set of postprocessors:
   * `min` - minimal value in range, optional, default 0.
   * `max`- maximal value in range.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
+* `pad_signal` - add left padding to reference signal if it was done for input data. Supported representations: `NoiseSuppressionAnnotation`, `NoiseSuppressionPrediction`.
