@@ -39,6 +39,7 @@ class SISDRMetric(PerImageEvaluationMetric):
         self.delay = self.get_value_from_config('delay')
         self.buffer = []
         self.meta.update({'scale': 1, 'postfix': 'Db', 'calculate_mean': False, 'names': ['mean', 'std']})
+        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse'}
 
     def reset(self):
         del self.buffer
