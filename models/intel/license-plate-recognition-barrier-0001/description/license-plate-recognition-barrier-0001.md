@@ -25,7 +25,7 @@ Chinese license plates in traffic.
 | Ratio of correct reads | 88.58%                  |
 | GFlops                 | 0.328                   |
 | MParams                | 1.218                   |
-| Source framework       | Caffe*                  |
+| Source framework       | Caffe\*                 |
 
 ## Limitations
 
@@ -34,13 +34,20 @@ thoroughly. Other types of license plates may underperform.
 
 ## Inputs
 
-1.	name: "data" , shape: [1x3x24x94] - An input image in following format [1xCxHxW]. Expected color order is BGR.
-2.	name: "seq_ind" , shape: [88,1] - An auxiliary blob that is needed for correct decoding. Set this to `[1, 1, 1, ..., 1]`.
+1. Image, name: `data`, shape: `1, 3, 24, 94` in the format `1, C, H, W`, where:
+
+    - `C` - number of channels
+    - `H` - image height
+    - `W` - image width
+
+    Expected color order is `BGR`.
+
+2. An auxiliary blob that is needed for correct decoding, name: `seq_ind`, shape: `88,1`. Set this to `[1, 1, 1, ..., 1]`.
 
 ## Outputs
 
-1. name: "decode", shape: [1, 88, 1, 1] - Encoded vector of floats. Each float
-   is an integer number encoding a character according to this dictionary:
+Encoded vector of floats, name: `decode`, shape: `1, 88, 1, 1`. Each float
+is an integer number encoding a character according to this dictionary:
 
         0 0
         1 1

@@ -12,13 +12,12 @@ The network is able to recognize Japanese text consisting of characters in the [
 
 ## Specification
 
-| Metric                                         | Value              |
-|------------------------------------------------|--------------------|
-| GFlops                                         | 117.136            |
-| MParams                                        | 15.31              |
-| Accuracy on Kondate test set and test set generated from Nakayosi           | 98.16%             |
-| Source framework                               | PyTorch\*          |
-
+| Metric                                                            | Value              |
+|-------------------------------------------------------------------|--------------------|
+| GFlops                                                            | 117.136            |
+| MParams                                                           | 15.31              |
+| Accuracy on Kondate test set and test set generated from Nakayosi | 98.16%             |
+| Source framework                                                  | PyTorch\*          |
 
 ## Accuracy Values
 
@@ -26,22 +25,22 @@ This demo adopts [label error rate](https://dl.acm.org/doi/abs/10.1145/1143844.1
 
 ## Inputs
 
-Grayscale image, name - `actual_input`, shape - [1x1x96x2000], format is [BxCxHxW]
+Grayscale image, name - `actual_input`, shape - `1, 1, 96, 2000`, format is `B, C, H, W`, where:
 
-where:
-  - B - batch size
-  - C - number of channels
-  - H - image height
-  - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
 > **NOTE:**  the source image should be resized to specific height (such as 96) while keeping aspect ratio, and the width after resizing should be no larger than 2000 and then the width should be right-bottom padded to 2000 with edge values.
 
 ## Outputs
 
-Name - `output`, shape - [186x1x4442], format is [WxBxL], where:
-  - W - output sequence length
-  - B - batch size
-  - L - confidence distribution across the supported symbols in [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html).
+Name - `output`, shape - `186, 1, 4442`, format is `W, B, L`, where:
+
+- `W` - output sequence length
+- `B` - batch size
+- `L` - confidence distribution across the supported symbols in [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html).
 
 The network output can be decoded by CTC Greedy Decoder.
 

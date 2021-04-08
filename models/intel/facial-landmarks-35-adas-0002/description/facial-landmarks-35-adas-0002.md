@@ -4,7 +4,6 @@
 
 This is a custom-architecture convolutional neural network for 35 facial landmarks estimation.
 
-
 ## Example and Landmarks Definition
 
 ![](./landmarks_illustration.png)
@@ -32,15 +31,13 @@ This is a custom-architecture convolutional neural network for 35 facial landmar
 **p19~p25**: boundary points, evenly distributed along the curve p18-p26;
 **p27~p33**: boundary points, evenly distributed along the curve p26-p34.
 
-
 ## Specification
 
 | Metric                | Value                                       |
 |-----------------------|---------------------------------------------|
 | GFlops                | 0.042                                       |
 | MParams               | 4.595                                       |
-| Source framework      | Caffe*                                      |
-
+| Source framework      | Caffe\*                                     |
 
 ## Validation Dataset
 
@@ -54,36 +51,22 @@ The quality of landmarks' positions prediction is evaluated through the use of N
 
 where N is the number of landmarks, _p_-hat and _p_ are, correspondingly, the prediction and ground truth vectors of the k<sup>th</sup> landmark of the i<sup>th</sup> sample, and d<sub>i</sub> is the interocular distance for the i<sup>th</sup> sample.
 
-
-| Dataset | Mean NE | 90<sup>th</sup> [Percentile](https://en.wikipedia.org/wiki/Percentile) NE | [Standard deviation](https://en.wikipedia.org/wiki/Standard_deviation) of NE |
-| - | - | - | - |
-| Internal dataset | 0.106 | 0.143 | 0.038 |
-
+| Dataset          | Mean NE | 90<sup>th</sup> [Percentile](https://en.wikipedia.org/wiki/Percentile) NE |[Standard deviation](https://en.wikipedia.org/wiki/Standard_deviation) of NE |
+|------------------|---------|---------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| Internal dataset | 0.106   | 0.143                                                                     | 0.038                                                                       |
 
 ## Inputs
 
-* Blob in the format [BxCxHxW]
-   where:
-   * B - batch size
-   * C - number of channels
-   * H - image height
-   * W - image width
+Image, name: `data`, shape: `1, 3, 60, 60` in the format `B, C, H, W`, where:
 
-with the name `data` and the shape [1x3x60x60].
-
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
 ## Outputs
 
-The net outputs a blob with the shape: [1, 70], containing row-vector of 70 floating point values for 35 landmarks' normed coordinates in the form (x0, y0, x1, y1, ..., x34, y34).
-
-Output layer name in Inference Engine format:
-
-`align_fc3`
-
-Output layer name in Caffe* format:
-
-`align_fc3`
-
+The net outputs a blob `align_fc3` with the shape: `1, 70`, containing row-vector of 70 floating point values for 35 landmarks' normed coordinates in the form (x0, y0, x1, y1, ..., x34, y34).
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

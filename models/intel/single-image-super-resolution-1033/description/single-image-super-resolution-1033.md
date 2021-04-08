@@ -26,33 +26,31 @@ Super resolution:
 | PSNR                            | 30.97 dB                                  |
 | GFlops                          | 16.062                                    |
 | MParams                         | 0.030                                     |
-| Source framework                | PyTorch*                                  |
+| Source framework                | PyTorch\*                                 |
 
 For reference, PSNR for bicubic upsampling on test dataset is 28.48 dB.
 
 ## Inputs
 
-1. name: "0" , shape: [1x3x360x640] - An input image in the format [BxCxHxW],
-  where:
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+1. Image, name: `0`, shape: `1, 3, 360, 640` in the format `B, C, H, W`, where:
 
-2. name: "1" , shape: [1x3x1080x1920] - Bicubic interpolation of the input image in the format [BxCxHxW],
-  where:
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+    - `B` - batch size
+    - `C` - number of channels
+    - `H` - image height
+    - `W` - image width
 
+2. Bicubic interpolation of the input image, name: `1`, shape: `1, 3, 1080, 1920` in the format `B, C, H, W`, where:
 
-  Expected color order is BGR.
+    - `B` - batch size
+    - `C` - number of channels
+    - `H` - image height
+    - `W` - image width
+
+  Expected color order is `BGR`.
 
 ## Outputs
 
-1. The net outputs one blobs with shapes [1, 3, 1080, 1920] that contains image after super
-   resolution.
+The net output is a blob with shapes `1, 3, 1080, 1920` that contains image after super resolution.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

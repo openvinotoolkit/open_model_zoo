@@ -34,17 +34,18 @@ AP is defined as the area under the
 
 ## Inputs
 
-The net expects one input image of the shape [1x3x256x128] in the [BxCxHxW] format, where:
-- B - batch size
-- C - number of channels
-- H - image height
-- W - image width
+The net expects one input image of the shape `1, 3, 256, 128` in the `B, C, H, W` format, where:
 
-The expected color order is BGR.
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+The expected color order is `BGR`.
 
 ## Outputs
 
-1. The net outputs a blob with the [1, 256] shape named `descriptor`, which can be
+1. The net outputs a blob with the `1, 256` shape named `descriptor` which can be
 compared with other descriptors using the
 [cosine distance](https://en.wikipedia.org/wiki/Cosine_similarity).
 

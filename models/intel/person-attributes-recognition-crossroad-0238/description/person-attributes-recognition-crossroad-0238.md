@@ -18,7 +18,6 @@ that are probabilities of the corresponding 7 attributes.
 | MParams               | 21.797                                                                                                |
 | Source framework      | PyTorch\*                                                                                             |
 
-
 ## Accuracy
 
 | Attribute         |  F1   |
@@ -33,22 +32,20 @@ that are probabilities of the corresponding 7 attributes.
 
 ## Inputs
 
-1.  name: `input` , shape: [1x3x160x80] - An input image in the format [1xCxHxW], where
+Image, name: `input`, shape: `1, 3, 160, 80` in the format `1, C, H, W`, where:
 
-    - C - number of channels
-    - H - image height
-    - W - image width
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-    The expected color order is BGR.
-
+The expected color order is `BGR`.
 
 ## Outputs
 
-1.  The net output is a blob named `attributes` with shape [1, 7] across seven attributes:
-    [`is_male`, `has_bag`, `has_hat`, `has_longsleeves`, `has_longpants`, `has_longhair`,
-     `has_coat_jacket`].
-    Value > 0.5 means that the corresponding attribute is present.
-
+The net output is a blob named `attributes` with shape `1, 7` across seven attributes:
+[`is_male`, `has_bag`, `has_hat`, `has_longsleeves`, `has_longpants`, `has_longhair`,
+ `has_coat_jacket`].
+Value > 0.5 means that the corresponding attribute is present.
 
 ## Legal Information
 [\*] Other names and brands may be claimed as the property of others.

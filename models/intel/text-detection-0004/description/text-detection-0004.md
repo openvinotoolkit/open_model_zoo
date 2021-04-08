@@ -15,25 +15,24 @@ Text detector based on [PixelLink](https://arxiv.org/abs/1801.01315) architectur
 | F-measure (Harmonic mean of precision and recall on ICDAR2015)| 79.43%                  |
 | GFlops                                                        | 23.305                  |
 | MParams                                                       | 4.328                   |
-| Source framework                                              | TensorFlow              |
+| Source framework                                              | TensorFlow\*            |
 
 ## Inputs
 
-Name: `input`, shape: [1x3x768x1280] - An input image in the format [BxCxHxW],
-where:
+Image, name: `input`, shape: `1, 3, 768, 1280` in the format `B, C, H, W`, where:
 
-   - B - batch size
-   - C - number of channels
-   - H - image height
-   - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-Expected color order: BGR.
+Expected color order: `BGR`.
 
 ## Outputs
 
-1. name: "model/link\_logits\_/add", shape: [1x16x192x320] - logits related to linkage between pixels and their neighbors.
+1. name: `model/link\_logits\_/add`, shape: `1, 16, 192, 320` - logits related to linkage between pixels and their neighbors.
 
-2. name: "model/segm\_logits/add", shape: [1x2x192x320] - logits related to text/no-text classification for each pixel.
+2. name: `model/segm\_logits/add`, shape: `1, 2, 192, 320` - logits related to text/no-text classification for each pixel.
 
 Refer to [PixelLink](https://arxiv.org/abs/1801.01315) and demos for details.
 

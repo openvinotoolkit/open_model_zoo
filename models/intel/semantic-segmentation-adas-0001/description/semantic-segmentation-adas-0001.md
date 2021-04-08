@@ -35,7 +35,7 @@ This is a segmentation network to classify each pixel into 20 classes:
 | Image size      | 2048x1024 |
 | GFlops          | 58.572    |
 | MParams         | 6.686     |
-| Source framework| Caffe*    |
+| Source framework| Caffe\*   |
 
 ## Accuracy
 
@@ -72,17 +72,17 @@ The quality metrics calculated on 2000 images:
 
 ## Inputs
 
-The blob with BGR image in format: [B, C=3, H=1024, W=2048], where:
+The blob with `BGR` image and the shape `1, 3, 1024, 2048` in the format `B, C, H, W`, where:
 
-- B - batch size,
-- C - number of channels
-- H - image height
-- W - image width
+- `B` – batch size
+- `C` – number of channels
+- `H` – image height
+- `W` – image width
 
 ## Outputs
 
-1. The net outputs a blob with the shape [B, C=1, H=1024, W=2048]. It can be treated as a
-   one-channel feature map, where each pixel is a label of one of the classes.
+The net output is a blob with the shape `1, 1, 1024, 2048` in the format `B, C, H, W`. It can be treated as a
+one-channel feature map, where each pixel is a label of one of the classes.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -21,37 +21,38 @@ This is an action detector for the Smart Classroom scenario. It is based on the 
 | Min pedestrian height             | 80 pixels (on 1080p)                      |
 | GFlops                            | 8.225                                     |
 | MParams                           | 2.001                                     |
-| Source framework                  | TensorFlow*                               |
+| Source framework                  | TensorFlow\*                              |
 
 Average Precision (AP) is defined as an area under the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve.
 
 ## Inputs
 
-Name: `input`, shape: [1x400x680x3] - An input image in the format [BxHxWxC],
-   where:
-    - B - batch size
-    - H - image height
-    - W - image width
-    - C - number of channels
+Image, name: `input`, shape: `1, 3, 400, 680` in the format `B, C, H, W`, where:
 
-   Expected color order is BGR.
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Expected color order is `BGR`.
 
 ## Outputs
 
 The net outputs four branches:
 
-1. name: `ActionNet/out_detection_loc`, shape: [b, num_priors*4] - Box coordinates in SSD format
-2. name: `ActionNet/out_detection_conf`, shape: [b, num_priors*2] - Detection confidences
-3. name: `ActionNet/action_heads/out_head_1_anchor_1`, shape: [b, 6, 50, 86] - Action confidences
-4. name: `ActionNet/action_heads/out_head_2_anchor_1`, shape: [b, 6, 25, 43] - Action confidences
-5. name: `ActionNet/action_heads/out_head_2_anchor_2`, shape: [b, 6, 25, 43] - Action confidences
-6. name: `ActionNet/action_heads/out_head_2_anchor_3`, shape: [b, 6, 25, 43] - Action confidences
-7. name: `ActionNet/action_heads/out_head_2_anchor_4`, shape: [b, 6, 25, 43] - Action confidences
+1. name: `ActionNet/out_detection_loc`, shape: `b, num_priors*4` - Box coordinates in SSD format
+2. name: `ActionNet/out_detection_conf`, shape: `b, num_priors*2` - Detection confidences
+3. name: `ActionNet/action_heads/out_head_1_anchor_1`, shape: `b, 6, 50, 86` - Action confidences
+4. name: `ActionNet/action_heads/out_head_2_anchor_1`, shape: `b, 6, 25, 43` - Action confidences
+5. name: `ActionNet/action_heads/out_head_2_anchor_2`, shape: `b, 6, 25, 43` - Action confidences
+6. name: `ActionNet/action_heads/out_head_2_anchor_3`, shape: `b, 6, 25, 43` - Action confidences
+7. name: `ActionNet/action_heads/out_head_2_anchor_4`, shape: `b, 6, 25, 43` - Action confidences
 
 Where:
-    - b - batch size
-    - num_priors -  number of priors in SSD format (equal to 50x86x1+25x43x4=8600)
+
+- `b` - batch size
+- `num_priors` -  number of priors in SSD format (equal to 50x86x1+25x43x4=8600)
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

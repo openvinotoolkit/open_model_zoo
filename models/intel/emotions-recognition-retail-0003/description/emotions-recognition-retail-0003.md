@@ -26,7 +26,7 @@ only the images containing five aforementioned emotions is chosen. The total amo
 | Min object width      | 64 pixels               |
 | GFlops                | 0.126                   |
 | MParams               | 2.483                   |
-| Source framework      | Caffe                   |
+| Source framework      | Caffe\*                 |
 
 ## Accuracy
 
@@ -36,12 +36,18 @@ only the images containing five aforementioned emotions is chosen. The total amo
 
 ## Inputs
 
-Name: `data`, shape: [1x3x64x64] - An input image in [1xCxHxW] format. Expected color order is BGR.
+Image, name: `data`, shape: `1, 3, 64, 64` in `1, C, H, W` format, where:
+
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Expected color order is `BGR`.
 
 ## Outputs
 
-1. name: "prob_emotion", shape: [1, 5, 1, 1] - Softmax output across five emotions
-   (0 - 'neutral', 1 - 'happy', 2 - 'sad', 3 - 'surprise', 4 - 'anger').
+Name: `prob_emotion`, shape: `1, 5, 1, 1` - Softmax output across five emotions
+(0 - 'neutral', 1 - 'happy', 2 - 'sad', 3 - 'surprise', 4 - 'anger').
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

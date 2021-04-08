@@ -14,15 +14,13 @@ Tokenization occurs using the SentencePieceBPETokenizer (see the demo code for i
 | MParams           | 77.47                 |
 | Source framework  | PyTorch\*             |
 
-
 ## Accuracy
 
-The quality metrics were calculated on the wmt19-en-de dataset ("test" split in lower case).
+The quality metrics were calculated on the wmt19-en-de dataset (`test` split in lower case).
 
 | Metric                    | Value         |
 |---------------------------|---------------|
 | BLEU                      |        21.4 % |
-
 
 ## Input
 

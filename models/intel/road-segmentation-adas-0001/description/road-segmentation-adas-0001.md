@@ -9,12 +9,13 @@ This is a segmentation network to classify each pixel into four classes: BG, roa
 ![](./road-segmentation-adas-0001.png)
 
 ## Specification
+
 | Metric          | Value    |
 |-----------------|----------|
 | Image size      | 896x512  |
 | GFlops          | 4.770    |
 | MParams         | 0.184    |
-| Source framework| PyTorch* |
+| Source framework| PyTorch\*|
 
 ## Accuracy
 
@@ -38,16 +39,16 @@ that was converted for four class classification task are:
 
 ## Inputs
 
-A blob with a BGR image in the format: [B, C=3, H=512, W=896], where:
+A blob with a `BGR` image and the shape `1, 3, 512, 896` in the format `B, C, H, W`, where:
 
-- B – batch size
-- C – number of channels
-- H – image height
-- W – image width
+- `B` – batch size
+- `C` – number of channels
+- `H` – image height
+- `W` – image width
 
 ## Outputs
 
-The output is a blob with the shape [B, C=4, H=512, W=896]. It can be treated as a four-channel feature map, where each channel is a probability of one of the classes: BG, road, curb, mark.
+The output is a blob with the shape `1, 4, 512, 896` in the format `B, C, H, W`. It can be treated as a four-channel feature map, where each channel is a probability of one of the classes: BG, road, curb, mark.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

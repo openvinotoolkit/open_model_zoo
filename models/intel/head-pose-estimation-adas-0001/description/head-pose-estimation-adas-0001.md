@@ -21,7 +21,7 @@ one output.
 | Supported ranges      | YAW [-90,90], PITCH [-70,70], ROLL [-70,70] |
 | GFlops                | 0.105                                       |
 | MParams               | 1.911                                       |
-| Source framework      | Caffe*                                      |
+| Source framework      | Caffe\*                                     |
 
 ## Accuracy
 
@@ -33,25 +33,22 @@ one output.
 
 ## Inputs
 
-1. name: "data" , shape: [1x3x60x60] - An input image in [1xCxHxW] format. Expected color order is BGR.
+Image, name: `data`, shape: `1, 3, 60, 60` in `1, C, H, W` format, where:
+
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Expected color order is `BGR`.
 
 ## Outputs
 
-Output layer names in Inference Engine format:
-
-1. name: "angle_y_fc", shape: [1, 1] - Estimated yaw (in degrees).
-2. name: "angle_p_fc", shape: [1, 1] - Estimated pitch (in degrees).
-3. name: "angle_r_fc", shape: [1, 1] - Estimated roll (in degrees).
-
-Output layer names in Caffe* format:
-
-1. name: "fc_y", shape: [1, 1] - Estimated yaw (in degrees).
-2. name: "fc_p", shape: [1, 1] - Estimated pitch (in degrees).
-3. name: "fc_r", shape: [1, 1] - Estimated roll (in degrees).
-
-
 Each output contains one float value that represents value in Tait-Bryan angles
 (yaw, pitch or roll).
+
+1. name: `angle_y_fc`, shape: `1, 1` - Estimated yaw (in degrees).
+2. name: `angle_p_fc`, shape: `1, 1` - Estimated pitch (in degrees).
+3. name: `angle_r_fc`, shape: `1, 1` - Estimated roll (in degrees).
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

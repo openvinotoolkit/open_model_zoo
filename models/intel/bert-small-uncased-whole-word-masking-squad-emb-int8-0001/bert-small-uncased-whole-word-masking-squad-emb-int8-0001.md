@@ -15,9 +15,9 @@ The difference between this model and similar [FP32 version large model](../bert
 is that this model is significantly smaller and quantized to INT8.
 
 The model created by 3 steps:
-1. Initial BERT-large model finetuned to produce embeddings on SQuAD v1.1 training set from original
+1. Initial BERT-large model fine-tuned to produce embeddings on SQuAD v1.1 training set from original
 bert-large-uncased-whole-word-masking provided by the [Transformers](https://github.com/huggingface/transformers) library.
-2. Then the finetuned model is distilled to much smaller FP32 model on SQuAD v1.1 training set
+2. Then the fine-tuned model is distilled to much smaller FP32 model on SQuAD v1.1 training set
 3. On final step the distilled small model symmetrically quantized to INT8.
 
 ## Specification
@@ -27,7 +27,8 @@ bert-large-uncased-whole-word-masking provided by the [Transformers](https://git
 | GOps              | 23.9                  |
 | MParams           | 41.1                  |
 | Source framework  | PyTorch\*             |
-GOps is calculated for for [1,384] input size that is suitable for long context
+
+GOps is calculated for for `1, 384` input size that is suitable for long context
 
 ## Accuracy
 
@@ -45,37 +46,34 @@ If the right context is in top 5 context embedding list sorted by distance to th
 
 ## Input
 
-1. Token IDs, name: `input_ids`, shape: [1x384] for context and [1x32] for question.
+1. Token IDs, name: `input_ids`, shape: `1, 384` for context and `1, 32` for question.
 Token IDs is sequence of integer values that is representing the tokenized context or question.
 The sequence structure is as follows (`[CLS]`, `[SEP]` and `[PAD]` should be replaced by corresponding token IDs
 as specified by the dictionary):
 `[CLS]` + *tokenized context or question* + `[SEP]`  + (`[PAD]` tokens to pad to the maximum sequence length of 384 or 32)
 
-2. Input mask, name: `attention_mask`, shape: [1x384] for context and [1x32] for question.
+2. Input mask, name: `attention_mask`, shape: `1, 384` for context and `1, 32` for question.
 Input mask is a sequence of integer values representing the mask of valid values in the input.
 The values of this input are equal to:
     * `1` at positions corresponding to the `[CLS]` + *tokenized context or question* + `[SEP]` part of the `input_ids`  (i.e. all positions except those containing the `[PAD]` tokens), and
     * `[PAD]` at all other positions
 
-3. Token types,  name: `token_type_ids`, shape: [1x384] for context and [1x32] for question.
+3. Token types,  name: `token_type_ids`, shape: `1, 384` for context and `1, 32` for question.
 Token types is sequence of integer values representing the segmentation of the `input_ids` into question and premise.
 The values are equal to:
     * `0` at positions corresponding to the `[CLS]` + *tokenized context or question* + `[SEP]` part of the `input_ids`  (i.e. all positions except those containing the `[PAD]` tokens), and
     * `[PAD]` at all other positions
 
+4. Position indexes,  name: `position_ids`, shape: `1, 384` for context and `1, 32` for question.
+Position indexes are sequence of integer values from 0 to 383 (or 31 for question) representing the position index for each input token. The `position_ids` is always the same for any input tokens set
+
 * `[CLS]` is a special symbol added in front of the question.
 * `[SEP]` is a special separator token inserted between the question and premise of the question.
 * `[PAD]` is a special token used to fill the rest of the input to get given input length (384).
 
-4. Position indexes,  name: `position_ids`, shape: [1x384] for context and [1x32] for question.
-Position indexes are sequence of integer values from 0 to 383 (or 31 for question) representing the position index for each input token. The `position_ids` is always the same for any input tokens set
-
 ## Output
 
-The outputs of the net is `1, 1024` floating point-valued embedding vector. These vectors can be used to find better context with answer to the question by simple comparing the context embedding vector with question context embedding vector in 1024D embedding space.
-
-1. Embedding: name: `embedding`, shape: [1x1024].
-embedding vector that represent input context or question.
+Embeddings, name: `embedding`, shape `1, 1024`. These vectors can be used to find better context with answer to the question by simple comparing the context embedding vector with question context embedding vector in 1024D embedding space.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
