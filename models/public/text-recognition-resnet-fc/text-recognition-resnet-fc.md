@@ -45,7 +45,7 @@ Output tensor is `output.0` with the shape `1, 26, 37` in the format `B, W, L`,
       - L - confidence distribution across alphanumeric symbols:
         "[s]0123456789abcdefghijklmnopqrstuvwxyz", where [s] - special end of sequence character for decoder.
 
-The network output can be decoded by [simple decoder](../../../tools/accuracy_checker/accuracy_checker/adapters/text_recognition.py).
+The network output decoding process is pretty easy: get the argmax on `L` dimension, transform indices to letters and slice the resulting phrase on the first entry of `end-of-sequence` symbol.
 
 ## Legal Information
 
