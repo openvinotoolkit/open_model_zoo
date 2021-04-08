@@ -896,10 +896,10 @@ class KaldiARKReader(BaseReader):
                     key = KaldiARKReader.read_token(fd)
                     if not key:
                         break
-                    fd.peek(4)
+                    _ = fd.read(2)
                     ark_type = KaldiARKReader.read_token(fd)
-                    float_size = 4 if ark_type[2] == 'F' else 8
-                    float_type = np.float32 if ark_type[2] == 'F' else float
+                    float_size = 4 if ark_type[0] == 'F' else 8
+                    float_type = np.float32 if ark_type[0] == 'F' else float
                     num_rows = KaldiARKReader.read_int32(fd)
                     num_cols = KaldiARKReader.read_int32(fd)
                     mat_data = fd.read(float_size * num_cols * num_rows)

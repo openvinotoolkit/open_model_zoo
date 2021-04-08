@@ -91,6 +91,7 @@ class SpeechRecognitionSER(PerImageEvaluationMetric):
         self.length = 0
         self.score = 0
         self._wer_measure = SpeechRecognitionWER({'type': 'wer'}, self.dataset)
+        self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
         wer = self._wer_measure.update(annotation, prediction)
