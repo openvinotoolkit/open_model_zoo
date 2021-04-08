@@ -391,7 +391,9 @@ class ModelEvaluator(BaseEvaluator):
                 data_reader_type = data_reader_config['type']
             else:
                 raise ConfigError('reader should be dict or string')
-            self._reader = BaseReader.provide(data_reader_type, data_source, data_reader_config, postpone_data_source=True)
+            self._reader = BaseReader.provide(
+                data_reader_type, data_source, data_reader_config, postpone_data_source=True
+            )
         elif not hasattr(self, '_reader'):
             self._reader = self.dataset.data_provider.data_reader
         input_data = self._prepare_data_for_single_inference(image)

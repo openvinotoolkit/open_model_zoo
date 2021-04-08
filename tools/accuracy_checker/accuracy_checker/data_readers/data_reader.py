@@ -465,7 +465,7 @@ class JSONReader(BaseReader):
         if not self.data_source:
             if not self._postpone_data_source:
                 raise ConfigError('data_source parameter is required to create "{}" '
-                                'data reader and read data'.format(self.__provider__))
+                                  'data reader and read data'.format(self.__provider__))
 
     def read(self, data_id):
 
