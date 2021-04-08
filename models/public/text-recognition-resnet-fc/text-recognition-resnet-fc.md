@@ -2,7 +2,7 @@
 
 ## Use-case and high-level description
 
-This is a scene text recognition model. Source implementation on a PyTorch\* framework could be found [here](https://github.com/Media-Smart/vedastr). Model is able to recognize alphanumeric text.
+`text-recognition-resnet-fc` is a simple and preformant scene text recognition model based on ResNet with Fully Connected text recognition head. Source implementation on a PyTorch\* framework could be found [here](https://github.com/Media-Smart/vedastr). Model is able to recognize alphanumeric text.
 
 ## Specification
 
