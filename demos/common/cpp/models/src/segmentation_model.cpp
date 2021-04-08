@@ -26,7 +26,6 @@ SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useA
 void SegmentationModel::checkCompiledNetworkInputsOutputs() {
     // --------------------------- Check input ---------------------------------------------
     ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
-    const SizeVector& inputShapes = inputInfo.begin()->second->getTensorDesc().getDims();
     if (inputInfo.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 input");
     inputsNames.push_back(inputInfo.begin()->first);

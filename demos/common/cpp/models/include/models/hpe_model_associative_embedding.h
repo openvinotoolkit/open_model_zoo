@@ -33,7 +33,7 @@ public:
 
 protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
-
+    void checkCompiledNetworkInputsOutputs() override { throw std::logic_error("Compiled networks aren't supported in this demo"); };
     cv::Size inputLayerSize;
     double aspectRatio;
     int targetSize;
