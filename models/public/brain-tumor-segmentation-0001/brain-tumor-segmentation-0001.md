@@ -13,7 +13,7 @@ Each input modality has its own encoder which are later fused together to produc
 | Type              | Segmentation  |
 | GFLOPs            | 409.996       |
 | MParams           | 38.192        |
-| Source framework  | MXNet         |
+| Source framework  | MXNet\*       |
 
 ## Accuracy
 
@@ -33,15 +33,14 @@ The following accuracy metrics are measured on a `brain tumor` training subset o
 
 See [the original repository](https://github.com/lachinov/brats2018-graphlabunn).
 
-
 ## Input
 
 The model takes as an input four MRI modalities `T1`, `T2`, `T1ce`, `Flair`. The inputs are cropped, resamped and z-score normalized. You can find additional information on the BraTS 2018 [page](https://www.med.upenn.edu/sbia/brats2018/data.html) and [wiki](https://en.wikipedia.org/wiki/Magnetic_resonance_imaging).
-In the preprocessing pipeline, all non-zero voxels are cropped and resampled to `128,128,128` resolution first. Then, each modality is z-score normalized separately. The input tensor is a concatenation of the four input modalities.
+In the preprocessing pipeline, all non-zero voxels are cropped and resampled to `128, 128, 128` resolution first. Then, each modality is z-score normalized separately. The input tensor is a concatenation of the four input modalities.
 
 ### Original model
 
-MR Image, name - `data_crop`, shape - `1,4,128,128,128`, format is `B,C,D,H,W` where:
+MR Image, name - `data_crop`, shape - `1, 4, 128, 128, 128`, format is `B, C, D, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -53,7 +52,7 @@ The channels are ordered as `T1`, `T2`, `T1ce`, `Flair`.
 
 ### Converted model
 
-MR Image, name - `data_crop`, shape - `1,4,128,128,128`, format is `B,C,D,H,W` where:
+MR Image, name - `data_crop`, shape - `1, 4, 128, 128, 128`, format is `B, C, D, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -67,8 +66,7 @@ The channels are ordered as `T1`, `T2`, `T1ce`, `Flair`.
 
 ### Original model
 
-
-Probabilities of the given voxel to be in the corresponding class, name - `softmax_lbl3`, shape - `1,4,128,128,128`, output data format is `B,C,D,H,W` where:
+Probabilities of the given voxel to be in the corresponding class, name - `softmax_lbl3`, shape - `1, 4, 128, 128, 128`, output data format is `B, C, D, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -80,7 +78,7 @@ With the following channels: `background`, `necrotic core`, `edema` and `enhanci
 
 ### Converted model
 
-Probabilities of the given voxel to be in the corresponding class, name - `softmax_lbl3`, shape - `1,4,128,128,128`, output data format is `B,C,D,H,W` where:
+Probabilities of the given voxel to be in the corresponding class, name - `softmax_lbl3`, shape - `1, 4, 128, 128, 128`, output data format is `B, C, D, H, W`, where:
 
 - `B` - batch size
 - `C` - channel

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-YOLO v4 is a real-time object detection model based on ["YOLOv4: Optimal Speed and Accuracy of Object Detection"](https://arxiv.org/abs/2004.10934) paper. It was implemented in Keras\* framework and converted to TensorFlow\* framework. For details see [repository](https://github.com/david8862/keras-YOLOv3-model-set). This model was pretrained on COCO\* dataset with 80 classes.
+YOLO v4 is a real-time object detection model based on ["YOLOv4: Optimal Speed and Accuracy of Object Detection"](https://arxiv.org/abs/2004.10934) paper. It was implemented in Keras\* framework and converted to TensorFlow\* framework. For details see [repository](https://github.com/david8862/keras-YOLOv3-model-set). This model was pre-trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset with 80 classes.
 
 ## Specification
 
@@ -15,19 +15,19 @@ YOLO v4 is a real-time object detection model based on ["YOLOv4: Optimal Speed a
 
 ## Accuracy
 
-Accuracy metrics obtained on COCO\* validation dataset for converted model.
+Accuracy metrics obtained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) validation dataset for converted model.
 
-| Metric | Value |
-| ------ | ------|
-| mAP    | 71.17% |
-| [COCO\* mAP (0.5)](https://cocodataset.org/#detection-eval) | 75.02% |
-| [COCO\* mAP (0.5:0.05:0.95)](https://cocodataset.org/#detection-eval) | 49.2% |
+| Metric                                                                | Value  |
+| --------------------------------------------------------------------- | -------|
+| mAP                                                                   | 71.17% |
+| [COCO mAP (0.5)](https://cocodataset.org/#detection-eval)             | 75.02% |
+| [COCO mAP (0.5:0.05:0.95)](https://cocodataset.org/#detection-eval)   | 49.2%  |
 
 ## Input
 
 ### Original model
 
-Image, name - `input_1`, shape - `1,608,608,3`, format is `B,H,W,C` where:
+Image, name - `input_1`, shape - `1, 608, 608, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
 - `H` - height
@@ -39,7 +39,7 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `input_1`, shape - `1,3,608,608`, format is `B,C,H,W` where:
+Image, name - `input_1`, shape - `1, 3, 608, 608`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -52,47 +52,49 @@ Channel order is `BGR`.
 
 ### Original model
 
-1. The array of detection summary info, name - `conv2d_93/BiasAdd`, shape - `1,76,76,255`. The anchor values are `12,16, 19,36, 40,28`.
+1. The array of detection summary info, name - `conv2d_93/BiasAdd`, shape - `1, 76, 76, 255`. The anchor values are `12,16, 19,36, 40,28`.
 
-2. The array of detection summary info, name - `conv2d_101/BiasAdd`, shape - `1,38,38,255`. The anchor values are `36,75, 76,55, 72,146`.
+2. The array of detection summary info, name - `conv2d_101/BiasAdd`, shape - `1, 38, 38, 255`. The anchor values are `36,75, 76,55, 72,146`.
 
-3. The array of detection summary info, name - `conv2d_109/BiasAdd`, shape - `1,19,19,255`. The anchor values are `142,110, 192,243, 459,401`.
+3. The array of detection summary info, name - `conv2d_109/BiasAdd`, shape - `1, 19, 19, 255`. The anchor values are `142,110, 192,243, 459,401`.
 
-For each case format is `B,Cx,Cy,N*85,`, where
-    - `B` - batch size
-    - `Cx`, `Cy` - cell index
-    - `N` - number of detection boxes for cell
+For each case format is `B, Cx, Cy, N*85,`, where:
 
-Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_80`], where:
-- (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get relative to the cell coordinates
-- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
-- `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
-- `class_no_1`,...,`class_no_80` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) and multiply by obtained confidence value to get confidence of each class
+- `B` - batch size
+- `Cx`, `Cy` - cell index
+- `N` - number of detection boxes for cell
 
+Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `class_no_80`], where:
 
-The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
+- (`x`, `y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get relative to the cell coordinates
+- `h`, `w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
+- `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0, 1] range
+- `class_no_1`, ..., `class_no_80` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) and multiply by obtained confidence value to get confidence of each class
+
+The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 
 ### Converted model
 
-1. The array of detection summary info, name - `conv2d_93/BiasAdd/Add`, shape - `1,76,76,255`. The anchor values are `12,16, 19,36, 40,28`.
+1. The array of detection summary info, name - `conv2d_93/BiasAdd/Add`, shape - `1, 76, 76, 255`. The anchor values are `12,16, 19,36, 40,28`.
 
-2. The array of detection summary info, name - `conv2d_101/BiasAdd/Add`, shape - `1,38,38,255`. The anchor values are `36,75, 76,55, 72,146`.
+2. The array of detection summary info, name - `conv2d_101/BiasAdd/Add`, shape - `1, 38, 38, 255`. The anchor values are `36,75, 76,55, 72,146`.
 
-3. The array of detection summary info, name - `conv2d_109/BiasAdd/Add`, shape - `1,19,19,255`. The anchor values are `142,110, 192,243, 459,401`.
+3. The array of detection summary info, name - `conv2d_109/BiasAdd/Add`, shape - `1, 19, 19, 255`. The anchor values are `142,110, 192,243, 459,401`.
 
-For each case format is `B,N*85,Cx,Cy`, where
+For each case format is `B, N*85, Cx, Cy`, where:
+
 - `B` - batch size
 - `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index
 
-Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_80`], where:
-- (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get relative to the cell coordinates
-- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
-- `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
-- `class_no_1`,...,`class_no_80` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) and multiply by obtained confidence value to get confidence of each class
+Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `class_no_80`], where:
 
+- (`x`, `y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get relative to the cell coordinates
+- `h`, `w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
+- `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0, 1] range
+- `class_no_1`, ..., `class_no_80` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) and multiply by obtained confidence value to get confidence of each class
 
-The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
+The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 
 ## Download a Model and Convert it into Inference Engine Format
 

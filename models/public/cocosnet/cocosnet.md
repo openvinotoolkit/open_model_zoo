@@ -30,39 +30,39 @@ For details, please check Accuracy Checker [config](accuracy-check-pipelined.yml
 
 ### Inputs
 
-1. name: "input_seg_map", shape: [1x151x256x256] - Input semantic segmentation mask (one-hot label map) in the format [BxCxHxW],
-   where:
-    - B - batch size
-    - C - number of classes (151 for ADE20k)
-    - H - mask height
-    - W - mask width
+1. name: `input_seg_map`, shape: `1, 151, 256, 256` - Input semantic segmentation mask (one-hot label map) in the format `B, C, H, W`, where:
 
-2. name: "ref_image", shape: [1x3x256x256] - An reference image (exemplar) in the format [BxCxHxW],
-   where:
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+    - `B` - batch size
+    - `C` - number of classes (151 for ADE20k)
+    - `H` - mask height
+    - `W` - mask width
 
-    Expected color order is BGR (At original model expected color order is RGB).
+2. name: `ref_image`, shape: `1, 3, 256, 256` - An reference image (exemplar) in the format `B, C, H, W`, where:
 
-3. name: "ref_seg_map", shape: [1x151x256x256] - A mask (one-hot label map) for reference image in the format [BxCxHxW],
-   where:
-    - B - batch size
-    - C - number of classes (151 for ADE20k)
-    - H - mask height
-    - W - mask width
+    - `B` - batch size
+    - `C` - number of channels
+    - `H` - image height
+    - `W` - image width
+
+    Expected color order is `BGR` (At original model expected color order is `RGB`).
+
+3. name: `ref_seg_map`, shape: `1, 151, 256, 256` - A mask (one-hot label map) for reference image in the format `B, C, H, W`, where:
+
+    - `B` - batch size
+    - `C` - number of classes (151 for ADE20k)
+    - `H` - mask height
+    - `W` - mask width
 
 ### Output
 
-Image, name: "exemplar_based_output", shape: [1x3x256x256] - A result (generated) image based on exemplar in the format [BxCxHxW],
-   where:
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+Image, name: `exemplar_based_output`, shape: `1, 3, 256, 256` - A result (generated) image based on exemplar in the format `B, C, H, W`, where:
 
-    Output color order is RGB.
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Output color order is `RGB`.
 
 ## Download a Model and Convert it into Inference Engine Format
 

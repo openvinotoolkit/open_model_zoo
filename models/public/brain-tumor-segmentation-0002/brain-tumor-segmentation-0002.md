@@ -11,7 +11,7 @@ This model was created for participation in the [Brain Tumor Segmentation Challe
 | Type              | Segmentation  |
 | GFLOPs            | 300.801       |
 | MParams           | 4.51          |
-| Source framework  | PyTorch\*       |
+| Source framework  | PyTorch\*     |
 
 ## Accuracy
 
@@ -42,8 +42,7 @@ The following accuracy metrics are measured on a `brain tumor` training subset o
 - Dice index for "edema": 83.5%
 - Dice index for "enhancing tumor": 86%
 
-
-> **NOTE**: The accuracy achieved with ONNX\* model adapted for OpenVINO™ can slightly differ from the accuracy achieved with the original PyTorch model since the upsampling operation was changed from the `trilinear` to `nearest` mode.
+> **NOTE**: The accuracy achieved with ONNX\* model adapted for OpenVINO™ can slightly differ from the accuracy achieved with the original PyTorch\* model since the upsampling operation was changed from the `trilinear` to `nearest` mode.
 
 ## Input
 
@@ -52,7 +51,7 @@ In the preprocessing pipeline, each modality should be z-score normalized separa
 
 ### Original Model
 
-MR Image, name - `0`, shape - `1,4,128,128,128`, format is `B,C,D,H,W`, where:
+MR Image, name - `0`, shape - `1, 4, 128, 128, 128`, format is `B, C, D, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -64,7 +63,7 @@ The channels are ordered as `T1`, `T1ce`, `T2`, `Flair`.
 
 ### Converted Model
 
-MR Image, name - `0`, shape - `1,4,128,128,128`, format is `B,C,D,H,W`, where:
+MR Image, name - `0`, shape - `1, 4, 128, 128, 128`, format is `B, C, D, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -78,7 +77,7 @@ The channels are ordered as `T1`, `T1ce`, `T2`, `Flair`.
 
 ### Original Model
 
-Probabilities of the given voxel to be in the corresponding class, name - `304`, shape - `1,3,128,128,128`, output data format is `B,C,D,H,W`, where:
+Probabilities of the given voxel to be in the corresponding class, name - `304`, shape - `1, 3, 128, 128, 128`, output data format is `B, C, D, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -90,7 +89,7 @@ The channels are ordered as `whole tumor`, `tumor core`, and `enhancing tumor`.
 
 ### Converted Model
 
-Probabilities of the given voxel to be in the corresponding class, name - `304`, shape - `1,3,128,128,128`, output data format is `B,C,D,H,W`, where:
+Probabilities of the given voxel to be in the corresponding class, name - `304`, shape - `1, 3, 128, 128, 128`, output data format is `B, C, D, H, W`, where:
 
 - `B` - batch size
 - `C` - channel

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-YOLO v1 Tiny is a real-time object detection model from TensorFlow.js\* framework. This model was pretrained on VOC\* dataset with 20 classes.
+YOLO v1 Tiny is a real-time object detection model from TensorFlow.js\* framework. This model was pre-trained on VOC dataset with 20 classes.
 
 ## Conversion
 
@@ -36,29 +36,28 @@ YOLO v1 Tiny is a real-time object detection model from TensorFlow.js\* framewor
         python keras_to_tensorflow.py --input_model=<model_in>.h5 --output_model=<model_out>.pb
         ```
 
-
 ## Specification
 
-| Metric            | Value         |
-|-------------------|---------------|
-| Type              | Detection     |
-| GFLOPs            | 6.988         |
-| MParams           | 15.858        |
-| Source framework  | TensorFlow.js\*  |
+| Metric            | Value           |
+|-------------------|-----------------|
+| Type              | Detection       |
+| GFLOPs            | 6.988           |
+| MParams           | 15.858          |
+| Source framework  | TensorFlow.js\* |
 
 ## Accuracy
 
 Accuracy metric obtained on test data from VOC2007 dataset for converted model.
 
-| Metric | Value |
-| ------ | ------|
+| Metric | Value  |
+| ------ | -------|
 | mAP    | 54.79% |
 
 ## Input
 
 ### Original model
 
-Image, name - `input_1`, shape - `1,416,416,3`, format is `B,H,W,C` where:
+Image, name - `input_1`, shape - `1, 416, 416, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
 - `H` - height
@@ -70,7 +69,7 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `input_1`, shape - `1,3,416,416`, format is `B,C,H,W` where:
+Image, name - `input_1`, shape - `1, 3, 416, 416`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -83,16 +82,18 @@ Channel order is `BGR`.
 
 ### Original model
 
-The array of detection summary info, name - `conv2d_9/BiasAdd`,  shape - `1,13,13,125`, format is `B,Cx,Cy,N*25` where
+The array of detection summary info, name - `conv2d_9/BiasAdd`,  shape - `1, 13, 13, 125`, format is `B, Cx, Cy, N*25`, where:
+
 - `B` - batch size
 - `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index
 
-Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_20`], where:
-- (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get coordinates relative to the cell
-- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get height and width values relative to cell
-- `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
-- `class_no_1`,...,`class_no_20` - probability distribution over the classes in logits format, apply [softmax function](https://en.wikipedia.org/wiki/Softmax_function) and multiply by obtained confidence value to get confidence of each class
+Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `class_no_20`], where:
+
+- (`x`, `y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get coordinates relative to the cell
+- `h`, `w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get height and width values relative to cell
+- `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0, 1] range
+- `class_no_1`, ..., `class_no_20` - probability distribution over the classes in logits format, apply [softmax function](https://en.wikipedia.org/wiki/Softmax_function) and multiply by obtained confidence value to get confidence of each class
 
 Mapping to class names provided by `<omz_dir>/data/dataset_classes/voc_20cl.txt` file.
 
@@ -100,16 +101,18 @@ The anchor values are `1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52`
 
 ### Converted model
 
-The array of detection summary info, name - `conv2d_9/BiasAdd/YoloRegion`,  shape - `1,21125`, which could be reshaped to `1, 125, 13, 13`, format is `B,N*25,Cx,Cy` where
+The array of detection summary info, name - `conv2d_9/BiasAdd/YoloRegion`,  shape - `1, 21125`, which could be reshaped to `1, 125, 13, 13`, format is `B, N*25, Cx, Cy`, where:
+
 - `B` - batch size
 - `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index
 
-Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_20`], where:
-- (`x`,`y`) - coordinates of box center relative to the cell
-- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply with corresponding anchors to get height and width values relative to the cell
-- `box_score` - confidence of detection box in [0,1] range
-- `class_no_1`,...,`class_no_20` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
+Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `class_no_20`], where:
+
+- (`x`, `y`) - coordinates of box center relative to the cell
+- `h`, `w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply with corresponding anchors to get height and width values relative to the cell
+- `box_score` - confidence of detection box in [0, 1] range
+- `class_no_1`, ..., `class_no_20` - probability distribution over the classes in the [0, 1] range, multiply by confidence value to get confidence of each class
 
 Mapping to class names provided by `<omz_dir>/data/dataset_classes/voc_20cl.txt` file.
 

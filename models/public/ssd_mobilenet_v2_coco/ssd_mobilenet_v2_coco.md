@@ -4,9 +4,9 @@
 
 The `ssd_mobilenet_v2_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/abs/1801.04381) network intended to perform object detection. The model has been trained from the Common Objects in Context (COCO) image dataset.
 
-The model input is a blob that consists of a single image of 1x3x300x300 in RGB order.
+The model input is a blob that consists of a single image of `1, 3, 300, 300` in `RGB` order.
 
-The model output is a typical vector containing the tracked object data, as previously described. Note that the "class_id" data is now significant and should be used to determine the classification for any detected object.
+The model output is a typical vector containing the tracked object data, as previously described. Note that the `class_id` data is now significant and should be used to determine the classification for any detected object.
 
 ## Specification
 
@@ -15,12 +15,12 @@ The model output is a typical vector containing the tracked object data, as prev
 | Type              | Detection     |
 | GFLOPs            | 3.775         |
 | MParams           | 16.818        |
-| Source framework  | TensorFlow\*    |
+| Source framework  | TensorFlow\*  |
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric         | Value   |
+| -------------- | ------- |
 | coco_precision | 24.9452%|
 
 ## Input
@@ -29,7 +29,7 @@ Note that original model expects image in `RGB` format, converted model - in `BG
 
 ### Original model
 
-Image, shape - `1,300,300,3`, format is `B,H,W,C` where:
+Image, shape - `1, 300, 300, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
 - `H` - height
@@ -40,7 +40,7 @@ Channel order is `RGB`.
 
 ### Converted model
 
-Image, name - `image_tensor`, shape - `1,300,300,3`, format is `B,H,W,C` where:
+Image, name - `image_tensor`, shape - `1, 300, 300, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
 - `H` - height
@@ -55,15 +55,14 @@ Channel order is `BGR`.
 
 ### Original model
 
-1. Classifier, name - `detection_classes`, contains predicted bounding boxes classes in range [1, 91]. The model was trained on Microsoft\* COCO dataset version with 91 categories of object,  0 class is for background. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_91cl_bkgr.txt` file.
+1. Classifier, name - `detection_classes`, contains predicted bounding boxes classes in range [1, 91]. The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 91 categories of object,  0 class is for background. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_91cl_bkgr.txt` file.
 2. Probability, name - `detection_scores`, contains probability of detected bounding boxes.
 3. Detection box, name - `detection_boxes`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are rescaled to input image size.
 4. Detections number, name - `num_detections`, contains the number of predicted detection boxes.
 
-
 ### Converted model
 
-The array of summary detection information, name - `detection_out`,  shape - `1, 1, N, 7`, where N is the number of detected bounding boxes. For each detection, the description has the format:
+The array of summary detection information, name - `detection_out`,  shape - `1, 1, 100, 7` in the format `1, 1, N, 7`, where `N` is the number of detected bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
 
 - `image_id` - ID of the image in the batch

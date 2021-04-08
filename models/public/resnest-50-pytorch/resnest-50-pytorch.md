@@ -2,9 +2,9 @@
 
 ## Use Case and High-Level Description
 
-ResNeSt-50 is image classification model pretrained on ImageNet dataset. ResNeSt is stacked in ResNet-style from modular Split-Attention blocks that enables attention across feature-map groups.
+ResNeSt-50 is image classification model pre-trained on ImageNet dataset. ResNeSt is stacked in ResNet-style from modular Split-Attention blocks that enables attention across feature-map groups.
 
-The model input is a blob that consists of a single image of "1x3x224x224" in RGB order.
+The model input is a blob that consists of a single image of `1, 3, 224, 224` in `RGB` order.
 
 The model output is typical object classifier for the 1000 different classifications  matching with those in the ImageNet database.
 
@@ -15,14 +15,14 @@ For details see [repository](https://github.com/zhanghang1989/ResNeSt) and [pape
 | Metric           | Value          |
 | ---------------- | -------------- |
 | Type             | Classification |
-| GFLOPs           | 10.8148         |
-| MParams          | 27.4493       |
+| GFLOPs           | 10.8148        |
+| MParams          | 27.4493        |
 | Source framework | PyTorch\*      |
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric | Value  |
+| ------ | ------ |
 | Top 1  | 81.11% |
 | Top 5  | 95.36% |
 
@@ -30,7 +30,7 @@ For details see [repository](https://github.com/zhanghang1989/ResNeSt) and [pape
 
 ### Original model
 
-Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -38,11 +38,11 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `RGB`.
-Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
+Mean values - [123.675, 116.28, 103.53], scale values - [58.395, 57.12, 57.375].
 
 ### Converted model
 
-Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -55,10 +55,10 @@ Channel order is `BGR`.
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`,  shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ### Converted model
 

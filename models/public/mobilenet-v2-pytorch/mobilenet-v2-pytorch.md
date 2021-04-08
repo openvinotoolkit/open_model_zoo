@@ -2,13 +2,13 @@
 
 ## Use Case and High-Level Description
 
-MobileNet V2 is image classification model pretrained on ImageNet dataset. This
-is a PyTorch implementation of MobileNetV2 architecture as described in
+MobileNet V2 is image classification model pre-trained on ImageNet dataset. This
+is a PyTorch\* implementation of MobileNetV2 architecture as described in
 the paper ["Inverted Residuals and Linear Bottlenecks: Mobile Networks for Classification,
 Detection and Segmentation"](https://arxiv.org/abs/1801.04381).
 
-The model input is a blob that consists of a single image of "1x3x224x224"
-in RGB order.
+The model input is a blob that consists of a single image of `1, 3, 224, 224`
+in `RGB` order.
 
 The model output is typical object classifier for the 1000 different classifications
 matching with those in the ImageNet database.
@@ -33,7 +33,7 @@ matching with those in the ImageNet database.
 
 ### Original model
 
-Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -41,11 +41,11 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `RGB`.
-Mean values - [123.675,116.28,103.53], scale value - [58.624,57.12,57.375]
+Mean values - [123.675, 116.28, 103.53], scale value - [58.624, 57.12, 57.375]
 
 ### Converted model
 
-Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -58,17 +58,17 @@ Channel order is `BGR`
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`,  shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`,  shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ## Download a Model and Convert it into Inference Engine Format
 

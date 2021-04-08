@@ -24,40 +24,37 @@ the [repository](https://github.com/zisianw/FaceBoxes.PyTorch), [paper](https://
 
 ### Original model
 
-Image, name - `input.1` , shape - [1x3x1024x1024], format [BxCxHxW],
-   where:
+Image, name - `input.1`, shape - `1, 3, 1024, 1024`, format - `B, C, H, W`, where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-   Expected color order - BGR.
-   Mean values - [104.0, 117.0, 123.0]
+Expected color order - `BGR`.
+Mean values - [104.0, 117.0, 123.0]
 
 ### Converted model
 
-Image, name - `input.1` , shape - [1x3x1024x1024], format [BxCxHxW],
-   where:
+Image, name - `input.1`, shape - `1, 3, 1024, 1024`, format - `B, C, H, W`, where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-   Expected color order - BGR.
+Expected color order - `BGR`.
 
 ## Output
 
 ### Original model
 
-1. Bounding boxes deltas , name: `boxes`, shape - [1x21824x4]. Presented in format [BxAx4],
-    where:
+1. Bounding boxes deltas, name: `boxes`, shape - `1, 21824, 4`. Presented in format `B, A, 4`, where:
 
-    - B - batch size
-    - A - number of prior box anchors
+    - `B` - batch size
+    - `A` - number of prior box anchors
 
-2. Scores, name: `scores`, shape - [1x21824x2]. Contains scores for 2 classes - the first is background, the second is face.
+2. Scores, name: `scores`, shape - `1, 21824, 2`. Contains scores for 2 classes - the first is background, the second is face.
 
 ### Converted model
 

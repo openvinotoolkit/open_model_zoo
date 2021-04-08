@@ -4,10 +4,9 @@
 
 MidasNet is a model for monocular depth estimation trained by mixing several datasets;
 as described in the following paper:
-"Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-Shot Cross-Dataset Transfer"
-<https://arxiv.org/abs/1907.01341>
+[Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-Shot Cross-Dataset Transfer](https://arxiv.org/abs/1907.01341)
 
-The model input is a blob that consists of a single image of "1x3x384x384" in `RGB` order.
+The model input is a blob that consists of a single image of `1, 3, 384, 384` in `RGB` order.
 
 The model output is an inverse depth map that is defined up to an unknown scale factor.
 
@@ -34,7 +33,7 @@ See [here](https://github.com/intel-isl/MiDaS)
 
 ### Original Model
 
-Image, name - `image`, shape - `1,3,384,384`, format is `B,C,H,W` where:
+Image, name - `image`, shape - `1, 3, 384, 384`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -48,7 +47,7 @@ Scale values - [51.525, 50.4, 50.625].
 
 ### Converted Model
 
-Image, name - `image`, shape - `1,3,384,384`, format is `B,C,H,W` where:
+Image, name - `image`, shape - `1, 3, 384, 384`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -61,7 +60,7 @@ Channel order is `BGR`.
 
 ### Original Model
 
-Inverse depth map, name - `inverse_depth`, shape - `1,384,384`, format is `B,H,W` where:
+Inverse depth map, name - `inverse_depth`, shape - `1, 384, 384`, format is `B, H, W`, where:
 
 - `B` - batch size
 - `H` - height
@@ -71,7 +70,7 @@ Inverse depth map is defined up to an unknown scale factor.
 
 ### Converted Model
 
-Inverse depth map, name - `inverse_depth`, shape - `1,384,384`, format is `B,H,W` where:
+Inverse depth map, name - `inverse_depth`, shape - `1, 384, 384`, format is `B, H, W`, where:
 
 - `B` - batch size
 - `H` - height

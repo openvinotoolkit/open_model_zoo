@@ -20,38 +20,36 @@ For details see [paper](https://arxiv.org/abs/1904.07850), [repository](https://
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| mAP    | 44.2%           | 44.28%           |
+| mAP    | 44.2%           | 44.28%         |
 
 ## Input
 
 ### Original Model
 
-Image, name: `input.1`, shape: [1x3x512x512], format: [BxCxHxW]
-where:
+Image, name: `input.1`, shape: `1, 3, 512, 512`, format: `B, C, H, W`, where:
 
-   - B - batch size
-   - C - number of channels
-   - H - image height
-   - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-Expected color order: BGR.
-   Mean values: [104.04, 113.985, 119.85], scale values: [73.695, 69.87, 70.89].
+Expected color order: `BGR`.
+Mean values: [104.04, 113.985, 119.85], scale values: [73.695, 69.87, 70.89].
 
 ### Converted Model
 
-Image, name: `input.1`, shape: [1x3x512x512], format: [BxCxHxW]
-where:
+Image, name: `input.1`, shape: `1, 3, 512, 512`, format: `B, C, H, W`, where:
 
-   - B - batch size
-   - C - number of channels
-   - H - image height
-   - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-Expected color order: BGR.
+Expected color order: `BGR`.
 
 ## Output
 
-1. Object center points heatmap, name: `center_heatmap`. Contains predicted objects center point, for each of the 80 categories, according to MSCOCO\* dataset version with 80 categories of objects, without background label, mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
+1. Object center points heatmap, name: `center_heatmap`. Contains predicted objects center point, for each of the 80 categories, according to [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of objects, without background label, mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 2. Object size output, name: `width_height`. Contains predicted width and height for each object.
 3. Regression output, name: `regression`. Contains offsets for each prediction.
 

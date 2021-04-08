@@ -15,9 +15,9 @@ The input for each models is a blob with specific face data. The mean values nee
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
-| mAP | 48.1308%|
+| Metric | Value   |
+| ------ | ------- |
+| mAP    | 48.1308%|
 | Recall | 62.2625%|
 
 ## mtcnn-p model specification
@@ -33,12 +33,11 @@ The model output is a blob with a vector containing the first pass of face data.
 | GFLOPs            | 3.366         |
 | MParams           | 0.007         |
 
-
 ### Input
 
 #### Original model
 
-Image, shape - `1,3,720,1280`, format is `B,C,W,H`, where:
+Image, shape - `1, 3, 720, 1280`, format is `B, C, W, H`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -50,7 +49,7 @@ Mean values - [127.5, 127.5, 127.5], scale value - 128
 
 #### Converted model
 
-Image, shape - `1,3,720,1280`, format is `B,C,W,H`, where:
+Image, shape - `1, 3, 720, 1280`, format is `B, C, W, H`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -63,14 +62,13 @@ Expected color order: `RGB`.
 
 #### Original model
 
-1. Face detection, name - `prob1`, shape - `1,2,W,H`, contains scores across two classes (0 - no face, 1 - face) for each pixel whether it contains face or not.
+1. Face detection, name - `prob1`, shape - `1, 2, W, H`, contains scores across two classes (0 - no face, 1 - face) for each pixel whether it contains face or not.
 2. Face location, name - `conv4-2`, contains regions with detected faces.
 
 #### Converted model
 
-1. Face detection, name - `prob1`, shape - `1,2,W,H`, contains scores across two classes (0 - no face, 1 - face) for each pixel whether it contains face or not.
+1. Face detection, name - `prob1`, shape - `1, 2, W, H`, contains scores across two classes (0 - no face, 1 - face) for each pixel whether it contains face or not.
 2. Face location, name - `conv4-2`, contains regions with detected faces.
-
 
 ## mtcnn-r model specification
 
@@ -85,29 +83,28 @@ The model output is a blob with a vector containing the refined face data. If th
 | GFLOPs            | 0.003         |
 | MParams           | 0.1           |
 
-
 ### Input
 
 #### Original model
 
-Image, name - `data`, shape - `1,3,24,24` in `B,C,W,H` format, where
+Image, name - `data`, shape - `1, 3, 24, 24` in `B, C, W, H` format, where:
 
-* `B` - input batch size
-* `C` - number of image channels
-* `W` - width
-* `H` - height
+- `B` - input batch size
+- `C` - number of image channels
+- `W` - width
+- `H` - height
 
 Expected color order: `RGB`
 Mean values - [127.5, 127.5, 127.5], scale value - 128
 
 #### Converted model
 
-Image, name - `data`, shape - `1,3,24,24` in `B,C,W,H` format, where
+Image, name - `data`, shape - `1, 3, 24, 24` in `B, C, W, H` format, where:
 
-* `B` - input batch size
-* `C` - number of image channels
-* `W` - width
-* `H` - height
+- `B` - input batch size
+- `C` - number of image channels
+- `W` - width
+- `H` - height
 
 Expected color order: `RGB`
 
@@ -115,14 +112,13 @@ Expected color order: `RGB`
 
 #### Original model
 
-1. Face detection, name - `prob1`, shape - `1,2,B`, contains scores across two classes (`0 `- no face, `1` - face) for each input in batch. This is necessary to refine face regions from `mtcnn-p`.
+1. Face detection, name - `prob1`, shape - `1, 2, B`, contains scores across two classes (`0`- no face, `1` - face) for each input in batch. This is necessary to refine face regions from `mtcnn-p`.
 2. Face location, name - `conv5-2`, contains clarifications for boxes produced by `mtcnn-p`.
 
 #### Converted model
 
-1. Face detection, name - `prob1`, shape - `1,2,B`, contains scores across two classes (`0 `- no face, `1` - face) for each input in batch. This is necessary to refine face regions from `mtcnn-p`.
+1. Face detection, name - `prob1`, shape - `1, 2, B`, contains scores across two classes (`0`- no face, `1` - face) for each input in batch. This is necessary to refine face regions from `mtcnn-p`.
 2. Face location, name - `conv5-2`, contains clarifications for boxes produced by `mtcnn-p`.
-
 
 ## mtcnn-o model specification
 
@@ -137,12 +133,11 @@ The model output is a blob with a vector containing the output face data.
 | GFLOPs            | 0.026         |
 | MParams           | 0.389         |
 
-
 ### Input
 
 #### Original model
 
-Image, name - `data`, shape - `1,3,48,48` in `B,C,W,H` format, where
+Image, name - `data`, shape - `1, 3, 48, 48` in `B, C, W, H` format, where:
 
 - `B` - input batch size
 - `C` - number of image channels
@@ -154,7 +149,7 @@ Mean values - [127.5, 127.5, 127.5], scale value - 128
 
 #### Converted model
 
-Image, name - `data`, shape - `1,3,48,48` in `B,C,W,H` format, where
+Image, name - `data`, shape - `1, 3, 48, 48` in `B, C, W, H` format, where:
 
 - `B` - input batch size
 - `C` - number of image channels
@@ -167,16 +162,15 @@ Expected color order: `RGB`.
 
 #### Original model
 
-1. Face detection, name - `prob1`, shape  - `1,2,B`, contains scores across two classes (`0 `- no face, `1` - face) for each input in batch. This is necessary for final face regions refining after`mtcnn-p` and `mtcnn-r`.
+1. Face detection, name - `prob1`, shape  - `1, 2, B`, contains scores across two classes (`0`- no face, `1` - face) for each input in batch. This is necessary for final face regions refining after`mtcnn-p` and `mtcnn-r`.
 2. Face location, name - `conv6-2`, contains final clarifications for boxes produced by `mtcnn-p` and refined by `mtcnn-r`.
 3. Control points, name - `conv6-3`, contains five facial landmarks: `left eye`, `right eye`, `nose`, `left mouth corner`, `right mouth corner` coordinates for each face region.
 
 #### Converted model
 
-1. Face detection, name - `prob1`, shape  - `1,2,B`, contains scores across two classes (`0 `- no face, `1` - face) for each input in batch. This is necessary for final face regions refining after`mtcnn-p` and `mtcnn-r`.
+1. Face detection, name - `prob1`, shape  - `1, 2, B`, contains scores across two classes (`0`- no face, `1` - face) for each input in batch. This is necessary for final face regions refining after`mtcnn-p` and `mtcnn-r`.
 2. Face location, name - `conv6-2`, contains final clarifications for boxes produced by `mtcnn-p` and refined by `mtcnn-r`.
 3. Control points, name - `conv6-3`, contains five facial landmarks: `left eye`, `right eye`, `nose`, `left mouth corner`, `right mouth corner` coordinates for each face region.
-
 
 ## Download a Model and Convert it into Inference Engine Format
 

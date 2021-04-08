@@ -2,13 +2,13 @@
 
 ## Use Case and High-Level Description
 
-Inception v3 is image classification model pretrained on ImageNet dataset. This
-PyTorch implementation of architecture described in the paper ["Rethinking
+Inception v3 is image classification model pre-trained on ImageNet dataset. This
+PyTorch\* implementation of architecture described in the paper ["Rethinking
 the Inception Architecture for Computer Vision"](https://arxiv.org/abs/1512.00567) in
 TorchVision package (see [here](https://github.com/pytorch/vision)).
 
-The model input is a blob that consists of a single image of "1x3x299x299"
-in RGB order.
+The model input is a blob that consists of a single image of `1, 3, 299, 299`
+in `RGB` order.
 
 The model output is typical object classifier for the 1000 different classifications
 matching with those in the ImageNet database.
@@ -27,14 +27,13 @@ matching with those in the ImageNet database.
 | Metric | Value |
 | ------ | ----- |
 | Top 1  | 77.69%|
-| Top 5  | 93.7%|
+| Top 5  | 93.7% |
 
 ## Input
 
 ### Original model
 
-Image, name - `data`, shape - [1x3x299x299], format [BxCxHxW],
-   where:
+Image, name - `data`, shape - `1, 3, 299, 299`, format - `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -42,13 +41,11 @@ Image, name - `data`, shape - [1x3x299x299], format [BxCxHxW],
 - `W` - image width
 
 Expected color order - `RGB`.
-
-Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
+Mean values - [123.675, 116.28, 103.53], scale values - [58.395, 57.12, 57.375].
 
 ### Converted model
 
-Image, name - `data`, shape - [1x3x299x299], format [BxCxHxW],
-   where:
+Image, name - `data`, shape - `1, 3, 299, 299`, format - `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -59,7 +56,7 @@ Expected color order - `BGR`.
 
 ## Output
 
-Object classifier according to ImageNet classes, name - `prob`, shape - [1,1000] in [BxC] format, where:
+Object classifier according to ImageNet classes, name - `prob`, shape - `1, 1000` in `B, C` format, where:
 
 - `B` - batch size
 - `C` - vector of probabilities for each class in [0, 1] range

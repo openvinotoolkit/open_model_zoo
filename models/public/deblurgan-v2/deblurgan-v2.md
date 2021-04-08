@@ -4,7 +4,7 @@
 DeblurGAN-v2 is a generative adversarial network (GAN) for single image motion deblurring.
 This model is based on a relativistic conditional GAN with a double-scale discriminator.
 For details about architecture of model, check out the [paper](https://arxiv.org/abs/1908.03826).
-Model used Mobilenet as backbone and was trained on GoPro, DVD, NFS datasets.
+Model used MobileNet as backbone and was trained on GoPro, DVD, NFS datasets.
 For details about implementation of model,
 check out the [DeblurGAN-v2: Deblurring (Orders-of-Magnitude) Faster and Better](https://github.com/VITA-Group/DeblurGANv2) repository.
 
@@ -12,7 +12,7 @@ check out the [DeblurGAN-v2: Deblurring (Orders-of-Magnitude) Faster and Better]
 
 | Metric            | Value           |
 |-------------------|-----------------|
-| Type              | Image Processing |
+| Type              | Image Processing|
 | GFLOPs            | 80.8919         |
 | MParams           | 2.1083          |
 | Source framework  | PyTorch\*       |
@@ -30,18 +30,18 @@ Model was tested on GoPro test dataset.
 
 ### Original Model
 
-Image, name - `blur_image`,  shape - `1,3,736,1312`, format is `B,C,H,W`, where:
+Image, name - `blur_image`,  shape - `1, 3, 736, 1312`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`. Mean values - [127.5,127.5,127.5], scale values - [127.5,127.5,127.5].
+Channel order is `RGB`. Mean values - [127.5, 127.5, 127.5], scale values - [127.5, 127.5, 127.5].
 
 ### Converted Model
 
-Image, name - `blur_image`,  shape - `1,3,736,1312`, format is `B,C,H,W`, where:
+Image, name - `blur_image`,  shape - `1, 3, 736, 1312`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -54,7 +54,7 @@ Channel order is `BGR`.
 
 ### Original Model
 
-Deblurred image, name - `deblur_image`,  shape - `1,3,736,1312`, output data format is `B,C,H,W` where:
+Deblurred image, name - `deblur_image`,  shape - `1, 3, 736, 1312`, output data format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -65,7 +65,7 @@ Channel order is `RGB`.
 
 ### Converted Model
 
-Deblurred image, name - `deblur_image`,  shape - `1,3,736,1312`, output data format is `B,C,H,W` where:
+Deblurred image, name - `deblur_image`,  shape - `1, 3, 736, 1312`, output data format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel

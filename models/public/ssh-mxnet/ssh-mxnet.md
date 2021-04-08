@@ -22,53 +22,60 @@ SSH: Single Stage Headless Face Detector. More details provided in the [reposito
 ## Input
 
 ### Original model:
-Image, name - `data` , shape - [1x3x640x640], format [BxCxHxW], where:
 
-- B - batch size
-- C - number of channels
-- H - image height
-- W - image width
+Image, name - `data`, shape - `1, 3, 640, 640`, format `B, C, H, W`, where:
 
-Expected color order - RGB.
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Expected color order - `RGB`.
 Mean values - [123.68, 116.779, 103.939]
 
 ### Converted model:
-Image, name - `data` , shape - [1x3x640x640], format [BxCxHxW], where:
 
-- B - batch size
-- C - number of channels
-- H - image height
-- W - image width
+Image, name - `data`, shape - `1, 3, 640, 640`, format `B, C, H, W`, where:
 
-Expected color order - BGR.
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Expected color order - `BGR`.
 
 ## Output
 
 ### Original model
+
 Model outputs are floating points tensors:
-1. name: `rpn_cls_prob_reshape_stride32`, shape: `1, 4, 20, 20`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 32 for 2 classes: background and face.
 
-2. name: `rpn_bbox_pred_stride32`,  shape: `1, 8, 20, 20`, format: `[B, Ax4, H, W]`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 32.
+1. name: `rpn_cls_prob_reshape_stride32`, shape: `1, 4, 20, 20`, format: `B, Ax2, H, W`, represents detection scores from Feature Pyramid Network (FPN) level with stride 32 for 2 classes: background and face.
 
-5. name: `rpn_cls_prob_reshape_stride16`, shape: `1, 4, 40, 40`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 16 for 2 classes: background and face.
+2. name: `rpn_bbox_pred_stride32`,  shape: `1, 8, 20, 20`, format: `B, Ax4, H, W`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 32.
 
-6. name: `rpn_bbox_pred_stride16`,  shape: `1, 8, 40, 40`, format: `[B, Ax4, H, W]`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 16.
+5. name: `rpn_cls_prob_reshape_stride16`, shape: `1, 4, 40, 40`, format: `B, Ax2, H, W`, represents detection scores from Feature Pyramid Network (FPN) level with stride 16 for 2 classes: background and face.
 
-9. name: `rpn_cls_prob_reshape_stride8`, shape: `1, 4, 80, 80`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 8 for 2 classes: background and face.
+6. name: `rpn_bbox_pred_stride16`,  shape: `1, 8, 40, 40`, format: `B, Ax4, H, W`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 16.
 
-10. name: `rpn_bbox_pred_stride8`,  shape: `1, 8, 80, 80`, format: `[B, Ax4, H, W]`, represents detection box deltas from Feature Pyramid Network (FPN) level with stride 8.
+9. name: `rpn_cls_prob_reshape_stride8`, shape: `1, 4, 80, 80`, format: `B, Ax2, H, W`, represents detection scores from Feature Pyramid Network (FPN) level with stride 8 for 2 classes: background and face.
+
+10. name: `rpn_bbox_pred_stride8`,  shape: `1, 8, 80, 80`, format: `B, Ax4, H, W`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 8.
 
 For each output format:
+
 - `B` - batch size
 - `A` - number of anchors
 - `H` - feature height
 - `W` - feature width
 
 Detection box deltas have format `[dx, dy, dh, dw]`, where:
+
 - `(dx, dy)` - regression for left-upper corner of bounding box,
 - `(dh, dw)` - regression by height and width of bounding box.
 
 ### Converted model
+
 The converted model has the same parameters as the original model.
 
 ## Download a Model and Convert it into Inference Engine Format

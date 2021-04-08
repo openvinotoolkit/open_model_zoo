@@ -40,7 +40,7 @@ For preprocessing `rgb -> gray -> colorization` received values:
 
 ## Input
 
-1. Image, name - `data_l`, shape - `1,1,256,256`, format is `B,C,H,W` where:
+1. Image, name - `data_l`, shape - `1, 1, 256, 256`, format is `B, C, H, W`, where:
 
    - `B` - batch size
    - `C` - channel
@@ -49,7 +49,7 @@ For preprocessing `rgb -> gray -> colorization` received values:
 
    L-channel of LAB-image.
 
-2. Image, name - `user_ab`, shape - `1,2,256,256`, format is `B,C,H,W` where:
+2. Image, name - `user_ab`, shape - `1, 2, 256, 256`, format is `B, C, H, W`, where:
 
    - `B` - batch size
    - `C` - channel
@@ -58,7 +58,7 @@ For preprocessing `rgb -> gray -> colorization` received values:
 
    Channel order is AB channels of LAB-image. Input for user points.
 
-3. Mask, name - `user_map`, shape - `1,1,256,256`, format is `B,C,H,W` where:
+3. Mask, name - `user_map`, shape - `1, 1, 256, 256`, format is `B, C, H, W`, where:
 
    - `B` - batch size
    - `C` - number of flags for pixel
@@ -74,7 +74,7 @@ For preprocessing `rgb -> gray -> colorization` received values:
 
 ## Output
 
-Image, name - `color_ab`, shape - `1,2,256,256`, format is `B,C,H,W` where:
+Image, name - `color_ab`, shape - `1, 2, 256, 256`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel

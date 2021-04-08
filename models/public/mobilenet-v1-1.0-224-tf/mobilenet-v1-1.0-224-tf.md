@@ -24,27 +24,26 @@
 
 ### Original Model
 
-Image, name: `input` , shape: [1x224x224x3], format: [BxHxWxC],
-   where:
+Image, name: `input`, shape: `1, 224, 224, 3`, format: `B, H, W, C`, where:
 
-    - B - batch size
-    - H - image height
-    - W - image width
-    - C - number of channels
+- `B` - batch size
+- `H` - image height
+- `W` - image width
+- `C` - number of channels
 
-   Expected color order: RGB.
-   Mean values: [127.5, 127.5, 127.5], scale factor for each channel: 127.5
+Expected color order: `RGB`.
+Mean values: [127.5, 127.5, 127.5], scale factor for each channel: 127.5
 
 ### Converted Model
 
-Image, name: `input`, shape: [1x3x224x224], format: [BxCxHxW], where:
+Image, name: `input`, shape: `1, 3, 224, 224`, format: `B, C, H, W`, where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-   Expected color order: BGR.
+Expected color order: `BGR`.
 
 ## Output
 
@@ -54,11 +53,10 @@ Probabilities for all dataset classes (0 class is background). Probabilities are
 
 ### Converted Model
 
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `MobilenetV1/Predictions/Softmax`, shape: [1,1001], format: [BxC],
-    where:
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `MobilenetV1/Predictions/Softmax`, shape: `1, 1001`, format: `B, C`, where:
 
-    - B - batch size
-    - C - vector of probabilities.
+- `B` - batch size
+- `C` - vector of probabilities.
 
 ## Download a Model and Convert it into Inference Engine Format
 

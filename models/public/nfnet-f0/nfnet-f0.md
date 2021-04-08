@@ -32,7 +32,7 @@ For details see [repository](https://github.com/rwightman/pytorch-image-models) 
 
 ### Original model
 
-Image, name - `image`,  shape - `1, 3, 256, 256`, format is `B, C, H, W` where:
+Image, name - `image`,  shape - `1, 3, 256, 256`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -44,7 +44,7 @@ Mean values - [123.675,116.28,103.53], scale values - [58.395, 57.12, 57.375].
 
 ### Converted model
 
-Image, name - `image`,  shape - `1, 3, 256, 256`, format is `B, C, H, W` where:
+Image, name - `image`,  shape - `1, 3, 256, 256`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -57,14 +57,14 @@ Channel order is `BGR`.
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `probs`,  shape - `1, 1000`, output data format is `B, C` where:
+Object classifier according to ImageNet classes, name - `probs`,  shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
 - `C` - predicted probabilities for each class in [0, 1] range
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `probs`,  shape - `1, 1000`, output data format is `B, C` where:
+Object classifier according to ImageNet classes, name - `probs`,  shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
 - `C` - predicted probabilities for each class in [0, 1] range

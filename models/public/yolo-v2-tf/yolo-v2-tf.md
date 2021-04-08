@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-YOLO v2 is a real-time object detection model implemented with Keras\* from this [repository](https://github.com/david8862/keras-YOLOv3-model-set) and converted to TensorFlow\* framework. This model was pretrained on COCO\* dataset with 80 classes.
+YOLO v2 is a real-time object detection model implemented with Keras\* from this [repository](https://github.com/david8862/keras-YOLOv3-model-set) and converted to TensorFlow\* framework. This model was pre-trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset with 80 classes.
 
 ## Conversion
 
@@ -23,7 +23,6 @@ YOLO v2 is a real-time object detection model implemented with Keras\* from this
     python tools/model_converter/keras_to_tensorflow.py --input_model weights/yolov2.h5 --output_model=weights/yolo-v2.pb
     ```
 
-
 ## Specification
 
 | Metric            | Value         |
@@ -35,18 +34,18 @@ YOLO v2 is a real-time object detection model implemented with Keras\* from this
 
 ## Accuracy
 
-Accuracy metrics obtained on COCO\* validation dataset for converted model.
+Accuracy metrics obtained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) validation dataset for converted model.
 
-| Metric | Value |
-| ------ | ------|
-| mAP    | 53.15% |
-| [COCO\* mAP](https://cocodataset.org/#detection-eval) | 56.5% |
+| Metric                                                | Value  |
+| ----------------------------------------------------- | -------|
+| mAP                                                   | 53.15% |
+| [COCO mAP](https://cocodataset.org/#detection-eval)   | 56.5%  |
 
 ## Input
 
 ### Original model
 
-Image, name - `image_input`, shape - `1,608,608,3`, format is `B,H,W,C` where:
+Image, name - `image_input`, shape - `1, 608, 608, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
 - `H` - height
@@ -58,7 +57,7 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - `image_input`, shape - `1,3,608,608`, format is `B,C,H,W` where:
+Image, name - `image_input`, shape - `1, 3, 608, 608`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -71,34 +70,38 @@ Channel order is `BGR`.
 
 ### Original model
 
-The array of detection summary info, name - `conv2d_22/BiasAdd`,  shape - `1,19,19,425`, format is `B,Cx,Cy,N*85` where
+The array of detection summary info, name - `conv2d_22/BiasAdd`,  shape - `1, 19, 19, 425`, format is `B, Cx, Cy, N*85`, where:
+
 - `B` - batch size
 - `Cx`, `Cy` - cell index
 - `N` - number of detection boxes for cell
 
-Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_80`], where:
-- (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get coordinates relative to the cell
-- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get height and width values relative to the cell
-- `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
-- `class_no_1`,...,`class_no_80` - probability distribution over the classes in logits format, apply [softmax function](https://en.wikipedia.org/wiki/Softmax_function) and multiply by obtained confidence value to get confidence of each class.
+Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `class_no_80`], where:
 
-The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
+- (`x`, `y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get coordinates relative to the cell
+- `h`, `w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get height and width values relative to the cell
+- `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0, 1] range
+- `class_no_1`, ..., `class_no_80` - probability distribution over the classes in logits format, apply [softmax function](https://en.wikipedia.org/wiki/Softmax_function) and multiply by obtained confidence value to get confidence of each class.
+
+The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
 
 ### Converted model
 
-The array of detection summary info, name - `conv2d_22/BiasAdd/YoloRegion`,  shape - `1,153425`, which could be reshaped to `1,425,19,19` with format `B,N*85,Cx,Cy` where
+The array of detection summary info, name - `conv2d_22/BiasAdd/YoloRegion`,  shape - `1, 153425`, which could be reshaped to `1, 425, 19, 19` with format `B, N*85, Cx, Cy`, where:
+
 - `B` - batch size
 - `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index
 
-Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_80`], where:
-- (`x`,`y`) - coordinates of box center relative to the cell
-- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply with corresponding anchors to get height and width values relative to the cell
-- `box_score` - confidence of detection box in [0,1] range
-- `class_no_1`,...,`class_no_80` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
+Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `class_no_80`], where:
 
-The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
+- (`x`, `y`) - coordinates of box center relative to the cell
+- `h`, `w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply with corresponding anchors to get height and width values relative to the cell
+- `box_score` - confidence of detection box in [0, 1] range
+- `class_no_1`, ..., `class_no_80` - probability distribution over the classes in the [0, 1] range, multiply by confidence value to get confidence of each class
+
+The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
 
 ## Download a Model and Convert it into Inference Engine Format

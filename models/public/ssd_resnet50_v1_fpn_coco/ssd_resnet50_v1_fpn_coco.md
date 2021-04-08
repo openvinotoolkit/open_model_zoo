@@ -18,15 +18,15 @@ and [paper](https://arxiv.org/abs/1708.02002).
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric         | Value    |
+| -------------- | -------- |
 | coco_precision | 38.4557% |
 
 ## Input
 
 ### Original model
 
-Image, name - `image_tensor`, shape - `[1x640x640x3]`, format -`[BxHxWxC]` where:
+Image, name - `image_tensor`, shape - `1, 640, 640, 3`, format -`B, H, W, C`, where:
 
 - `B` - batch size
 - `H` - height
@@ -37,7 +37,7 @@ Expected color order -  `RGB`.
 
 ### Converted model
 
-Image, name - `image_tensor`, shape - `[1x3x640x640]`, format is `[BxCxHxW]` where:
+Image, name - `image_tensor`, shape - `1, 3, 640, 640`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -52,15 +52,14 @@ Expected color order - `BGR`.
 
 ### Original model
 
-1. Classifier, name - `detection_classes`, contains predicted bounding boxes classes in range [1, 91]. The model was trained on Microsoft\* COCO dataset version with 91 categories of object, 0 class is for background. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_91cl_bkgr.txt` file
+1. Classifier, name - `detection_classes`, contains predicted bounding boxes classes in range [1, 91]. The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 91 categories of object, 0 class is for background. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_91cl_bkgr.txt` file
 2. Probability, name - `detection_scores`, contains probability of detected bounding boxes.
 3. Detection box, name - `detection_boxes`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are rescaled to input image size.
 4. Detections number, name - `num_detections`, contains the number of predicted detection boxes.
 
-
 ### Converted model
 
-The array of summary detection information, name - `detection_out`,  shape - `[1x1xNx7]`, where N is the number of detected bounding boxes. For each detection, the description has the format:
+The array of summary detection information, name - `detection_out`,  shape - `1, 1, 100, 7` in the format `1, 1, N, 7`, where `N` is the number of detected bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
 
 - `image_id` - ID of the image in the batch

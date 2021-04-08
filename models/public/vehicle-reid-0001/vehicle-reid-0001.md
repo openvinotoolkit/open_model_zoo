@@ -31,7 +31,7 @@ AP is defined as the area under the
 
 ### Original Model
 
-One image of the shape [1x3x208x208] in the [BxCxHxW] format, where:
+One image of the shape `1, 3, 208, 208` in the `B, C, H, W` format, where:
 
 - `B` - batch size
 - `C` - channel
@@ -42,7 +42,7 @@ Channel order is `RGB`.
 
 ### Converted Model
 
-One image of the shape [1x3x208x208] in the [BxCxHxW] format, where:
+One image of the shape `1, 3, 208, 208` in the `B, C, H, W` format, where:
 
 - `B` - batch size
 - `C` - channel
@@ -58,18 +58,17 @@ The net outputs a vector descriptor, which can be compared with other descriptor
 
 ### Original Model
 
-Blob of the shape [1, 512] in the [BxC] format, where:
+Blob of the shape `1, 512` in the `B, C` format, where:
 
 - `B` - batch size
 - `C` - predicted descriptor size
 
 ### Converted Model
 
-Blob of the shape [1, 512] in the [BxC] format, where:
+Blob of the shape `1, 512` in the `B, C` format, where:
 
 - `B` - batch size
 - `C` - predicted descriptor size
-
 
 ## Download a Model and Convert it into Inference Engine Format
 

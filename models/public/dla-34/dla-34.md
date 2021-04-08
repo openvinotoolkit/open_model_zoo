@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 The `dla-34` model is one of the [DLA](https://arxiv.org/pdf/1707.06484)
-models designed to perform image classification. This model was pretrained in PyTorch\*. All DLA (Deep Layer Aggregation) classification models have been pretrained on the ImageNet\* dataset. For details about this family of models, check out the [Code for the CVPR Paper "Deep Layer Aggregation"](https://github.com/ucbdrive/dla).
+models designed to perform image classification. This model was pre-trained in PyTorch\*. All DLA (Deep Layer Aggregation) classification models have been pre-trained on the ImageNet dataset. For details about this family of models, check out the [Code for the CVPR Paper "Deep Layer Aggregation"](https://github.com/ucbdrive/dla).
 
 ## Specification
 
@@ -25,7 +25,7 @@ models designed to perform image classification. This model was pretrained in Py
 
 ### Original model
 
-Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -33,11 +33,11 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `RGB`.
-Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
+Mean values - [123.675, 116.28, 103.53], scale values - [58.395, 57.12, 57.375].
 
 ### Converted model
 
-Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -50,17 +50,17 @@ Channel order is `BGR`
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`,  shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in  [0, 1] range
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`,  shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in  [0, 1] range
 
 ## Download a Model and Convert it into Inference Engine Format
 

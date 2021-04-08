@@ -6,7 +6,7 @@ The `AclNet-int8` model is quantized and fine-tuned with NNCF variant of [AclNet
 The `AclNet-int8` model is trained on an internal dataset of environmental sounds for 53 different classes, listed in file `<omz_dir>/data/dataset_classes/aclnet.txt`.
 For details about the model, see this [paper](https://arxiv.org/abs/1811.06669).
 
-The model input is a segment of PCM audio samples in [N, C, 1, L] format.
+The model input is a segment of PCM audio samples in `N, C, 1, L` format.
 
 The model output for `AclNet-int8` is the sound classifier output for the 53 different environmental sound classes from the internal sound database.
 
@@ -32,7 +32,7 @@ Metrics were computed on internal validation dataset according to following [pub
 
 ### Original Model
 
-Audio, name - `result.1`, shape - `1,1,1,L`, format is `N,C,1,L` where:
+Audio, name - `result.1`, shape - `1, 1, 1, L`, format is `N, C, 1, L`, where:
 
 - `N` - batch size
 - `C` - channel
@@ -40,7 +40,7 @@ Audio, name - `result.1`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 ### Converted Model
 
-Audio, name - `result.1`, shape - `1,1,1,L`, format is `N,C,1,L` where:
+Audio, name - `result.1`, shape - `1, 1, 1, L`, format is `N, C, 1, L`, where:
 
 - `N` - batch size
 - `C` - channel
@@ -50,17 +50,17 @@ Audio, name - `result.1`, shape - `1,1,1,L`, format is `N,C,1,L` where:
 
 ### Original Model
 
-Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet_53cl.txt`), name - `486`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet_53cl.txt`), name - `486`, shape - `1, 53`, output data format is `N, C`, where:
 
 - `N` - batch size
-- `C` - Predicted softmax scores for each class in [0, 1] range
+- `C` - predicted softmax scores for each class in [0, 1] range
 
 ### Converted Model
 
-Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet_53cl.txt`), name - `486`, shape - `1,53`, output data format is `N,C` where:
+Sound classifier (see labels file, `<omz_dir>/data/dataset_classes/aclnet_53cl.txt`), name - `486`, shape - `1, 53`, output data format is `N, C`, where:
 
 - `N` - batch size
-- `C` - Predicted softmax scores for each class in [0, 1] range
+- `C` - predicted softmax scores for each class in [0, 1] range
 
 ## Download a Model and Convert it into Inference Engine Format
 

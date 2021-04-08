@@ -6,24 +6,24 @@
 
 ## Specification
 
-| Metric            | Value         |
-|-------------------|---------------|
+| Metric            | Value            |
+|-------------------|------------------|
 | Type              | Face recognition |
-| GFLOPs            | 3.504         |
-| MParams           | 22.671        |
-| Source framework  | Caffe\*       |
+| GFLOPs            | 3.504            |
+| MParams           | 22.671           |
+| Source framework  | Caffe\*          |
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric       | Value   |
+| ------------ | ------- |
 | LFW accuracy | 98.8321%|
 
 ## Input
 
 ### Original model
 
-Image, name - `data`,  shape - `1,3,112,96`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1, 3, 112, 96`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -31,11 +31,11 @@ Image, name - `data`,  shape - `1,3,112,96`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`.
-Mean values - [127.5,127.5,127.5], scale value - 128
+Mean values - [127.5, 127.5, 127.5], scale value - 128
 
 ### Converted model
 
-Image, name - `data`,  shape - `1,3,112,96`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1, 3, 112, 96`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -48,7 +48,7 @@ Channel order is `BGR`.
 
 ### Original model
 
-Face embeddings, name - `fc5`,  shape - `1,512`, output data format  - `B,C`, where:
+Face embeddings, name - `fc5`,  shape - `1, 512`, output data format  - `B, C`, where:
 
 - `B` - batch size
 - `C` - row-vector of 512 floating points values, face embeddings
@@ -57,7 +57,7 @@ The net outputs on different images are comparable in cosine distance.
 
 ### Converted model
 
-Face embeddings, name - `fc5`,  shape - `1,512`, output data format  - `B,C`, where:
+Face embeddings, name - `fc5`,  shape - `1, 512`, output data format  - `B, C`, where:
 
 - `B` - batch size
 - `C` - row-vector of 512 floating points values, face embeddings

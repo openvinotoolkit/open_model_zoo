@@ -4,8 +4,8 @@
 
 This is a Caffe2\* version of `vgg19` model, designed to perform image classification.
 This model was converted from Caffe\* to Caffe2\* format.
-For details see repository <https://github.com/facebookarchive/models/tree/master/vgg19>,
-paper <https://arxiv.org/abs/1409.1556>.
+For details see [repository](https://github.com/facebookarchive/models/tree/master/vgg19),
+[paper](https://arxiv.org/abs/1409.1556).
 
 ## Specification
 
@@ -18,8 +18,8 @@ paper <https://arxiv.org/abs/1409.1556>.
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric | Value  |
+| ------ | ------ |
 | Top 1  | 71.062%|
 | Top 5  | 89.832%|
 
@@ -27,7 +27,7 @@ paper <https://arxiv.org/abs/1409.1556>.
 
 ### Original mode
 
-Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -39,7 +39,7 @@ Mean values - [103.939, 116.779, 123.68].
 
 ### Converted model
 
-Image, name - `data`, shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `data`, shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -52,17 +52,17 @@ Channel order is `BGR`.
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `prob`, shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`, shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `prob`, shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`, shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ## Download a Model and Convert it into Inference Engine Format
 

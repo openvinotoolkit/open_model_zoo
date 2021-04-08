@@ -2,9 +2,9 @@
 
 ## Use Case and High-Level Description
 
-ReXNet V1 x1.0 is network from Rank eXpansion Network (ReXNet) models family, derived from research to mitigate the representational bottleneck. It is image classification model pretrained on ImageNet dataset.
+ReXNet V1 x1.0 is network from Rank eXpansion Network (ReXNet) models family, derived from research to mitigate the representational bottleneck. It is image classification model pre-trained on ImageNet dataset.
 
-The model input is a blob that consists of a single image of "1x3x224x224" in RGB order.
+The model input is a blob that consists of a single image of `1, 3, 224, 224` in `RGB` order.
 
 The model output is typical object classifier for the 1000 different classifications  matching with those in the ImageNet database.
 
@@ -30,7 +30,7 @@ For details see [repository](https://github.com/clovaai/rexnet) and [paper](http
 
 ### Original model
 
-Image, name - `input.1`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `input.1`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -38,11 +38,11 @@ Image, name - `input.1`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `RGB`.
-Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
+Mean values - [123.675, 116.28, 103.53], scale values - [58.395, 57.12, 57.375].
 
 ### Converted model
 
-Image, name - `input.1`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `input.1`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -55,10 +55,10 @@ Channel order is `BGR`.
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`,  shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ### Converted model
 

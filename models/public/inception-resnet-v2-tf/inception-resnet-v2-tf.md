@@ -15,8 +15,8 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric | Value  |
+| ------ | ------ |
 | Top 1  | 80.14% |
 | Top 5  | 95.10% |
 
@@ -24,28 +24,26 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 
 ### Original Model
 
-Image, name: `input` , shape: [1x299x299x3], format: [BxHxWxC],
-   where:
+Image, name: `input`, shape: `1, 299, 299, 3`, format: `B, H, W, C`, where:
 
-    - B - batch size
-    - H - image height
-    - W - image width
-    - C - number of channels
+- `B` - batch size
+- `H` - image height
+- `W` - image width
+- `C` - number of channels
 
-   Expected color order: RGB.
-   Mean values: [127.5, 127.5, 127.5], scale factor for each channel: 127.5
+Expected color order: `RGB`.
+Mean values: [127.5, 127.5, 127.5], scale factor for each channel: 127.5
 
 ### Converted Model
 
-Image, name: `input`, shape: [1x3x299x299], format: [BxCxHxW],
-where:
+Image, name: `input`, shape: `1, 3, 299, 299`, format: `B, C, H, W`, where:
 
-   - B - batch size
-   - C - number of channels
-   - H - image height
-   - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-Expected color order: BGR.
+Expected color order: `BGR`.
 
 ## Output
 
@@ -55,11 +53,10 @@ Probabilities for all dataset classes (0 class is background). Probabilities are
 
 ### Converted Model
 
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `InceptionResnetV2/AuxLogits/Logits/MatMul`, shape: [1,1001] in [BxC] format,
-    where:
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `InceptionResnetV2/AuxLogits/Logits/MatMul`, shape: `1, 1001` in `B, C` format, where:
 
-    - B - batch size
-    - C - vector of probabilities.
+- `B` - batch size
+- `C` - vector of probabilities.
 
 ## Download a Model and Convert it into Inference Engine Format
 

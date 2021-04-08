@@ -4,8 +4,8 @@
 
 This is a Caffe2\* version of `squeezenet1.1` model, designed to perform image classification.
 This model was converted from Caffe\* to Caffe2\* format.
-For details see repository <https://github.com/facebookarchive/models/tree/master/squeezenet>,
-paper <https://arxiv.org/abs/1602.07360>.
+For details see [repository](https://github.com/facebookarchive/models/tree/master/squeezenet),
+[paper](https://arxiv.org/abs/1602.07360).
 
 ## Specification
 
@@ -18,8 +18,8 @@ paper <https://arxiv.org/abs/1602.07360>.
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric | Value  |
+| ------ | ------ |
 | Top 1  | 56.502%|
 | Top 5  | 79.576%|
 
@@ -27,7 +27,7 @@ paper <https://arxiv.org/abs/1602.07360>.
 
 ### Original model
 
-Image, name - `data`, shape - `1,3,227,227`, format is `B,C,H,W` where:
+Image, name - `data`, shape - `1, 3, 227, 227`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -35,11 +35,11 @@ Image, name - `data`, shape - `1,3,227,227`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`.
-Mean values - [103.96,116.78,123.68].
+Mean values - [103.96, 116.78, 123.68].
 
 ### Converted model
 
-Image, name - `data`, shape - `1,3,227,227`, format is `B,C,H,W` where:
+Image, name - `data`, shape - `1, 3, 227, 227`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -52,17 +52,17 @@ Channel order is `BGR`.
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `softmaxout`, shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `softmaxout`, shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `softmaxout`, shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `softmaxout`, shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ## Download a Model and Convert it into Inference Engine Format
 

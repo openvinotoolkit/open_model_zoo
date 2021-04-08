@@ -1,11 +1,12 @@
 # hrnet-v2-c1-segmentation
 
 ## Use Case and High-Level Description
+
 This model is a pair of encoder and decoder. The encoder is HRNetV2-W48 and the decoder is C1 (one convolution module and interpolation).
 HRNetV2-W48 is semantic-segmentation model based on architecture described in paper
 [High-Resolution Representations for Labeling Pixels and Regions](https://arxiv.org/abs/1904.04514).
 This is PyTorch\* implementation based on retaining high resolution representations throughout the model
-and pretrained on ADE20k dataset.
+and pre-trained on ADE20k dataset.
 For details about implementation of model, check out the [Semantic Segmentation on MIT ADE20K dataset in PyTorch](https://github.com/CSAILVision/semantic-segmentation-pytorch) repository.
 
 ## Specification
@@ -15,31 +16,31 @@ For details about implementation of model, check out the [Semantic Segmentation 
 | Type              | Segmentation  |
 | GFLOPs            | 81.9930       |
 | MParams           | 66.4768       |
-| Source framework  | PyTorch\*  |
+| Source framework  | PyTorch\*     |
 
 ## Accuracy
 
-| Metric | Original model | Converted model |
-| ------ | -------------- | --------------- |
-| Pixel accuracy  | 77.69%          | 77.69%           |
-| mean IoU        | 33.02%          | 33.02%           |
+| Metric         | Original model | Converted model |
+| -------------- | -------------- | --------------- |
+| Pixel accuracy | 77.69%         | 77.69%          |
+| mean IoU       | 33.02%         | 33.02%          |
 
 ## Input
 
 ### Original Model
 
-Image, name - `image`,  shape - `[1x3x320x320]`, format is `[BxCxHxW]`, where:
+Image, name - `image`,  shape - `1, 3, 320, 320`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `H` - height
 - `W` - width
 - `C` - channel
 
-Channel order is `RGB`. Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
+Channel order is `RGB`. Mean values - [123.675, 116.28, 103.53], scale values - [58.395, 57.12, 57.375].
 
 ### Converted Model
 
-Image, name - `input.1`,  shape - `[1x3x320x320]`, format is `[BxCxHxW]`, where:
+Image, name - `input.1`,  shape - `1, 3, 320, 320`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -52,7 +53,7 @@ Channel order is `BGR`.
 
 ### Original Model
 
-Semantic-segmentation mask according to ADE20k classes, name - `softmax`,  shape - `1,150,320,320`, output data format is `B,C,H,W` where:
+Semantic-segmentation mask according to ADE20k classes, name - `softmax`,  shape - `1, 150, 320, 320`, output data format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - predicted probabilities for each class in [0, 1] range
@@ -61,7 +62,7 @@ Semantic-segmentation mask according to ADE20k classes, name - `softmax`,  shape
 
 ### Converted Model
 
-Semantic-segmentation mask according to ADE20k classes, name - `softmax`,  shape - `1,150,320,320`, output data format is `B,C,H,W` where:
+Semantic-segmentation mask according to ADE20k classes, name - `softmax`,  shape - `1, 150, 320, 320`, output data format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - predicted probabilities for each class in [0, 1] range

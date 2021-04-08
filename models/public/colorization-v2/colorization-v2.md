@@ -42,7 +42,7 @@ For preprocessing `rgb -> gray -> colorization` received values:
 
 ### Original model
 
-Image, name - `data_l`,  shape - `1,1,256,256`, format is `B,C,H,W` where:
+Image, name - `data_l`,  shape - `1, 1, 256, 256`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -53,7 +53,7 @@ Channel order is L-channel.
 
 ### Converted model
 
-Image, name - `data_l`,  shape - `1,1,256,256`, format is `B,C,H,W` where:
+Image, name - `data_l`,  shape - `1, 1, 256, 256`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -66,7 +66,7 @@ Channel order is L-channel.
 
 ### Original model
 
-Image, name - `color_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
+Image, name - `color_ab`,  shape - `1, 2, 256, 256`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -77,7 +77,7 @@ Channel order is AB channels of LAB-image.
 
 ### Converted model
 
-Image, name - `color_ab`,  shape - `1,2,256,256`, format is `B,C,H,W` where:
+Image, name - `color_ab`,  shape - `1, 2, 256, 256`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel

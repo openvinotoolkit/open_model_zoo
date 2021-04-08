@@ -15,8 +15,8 @@
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric | Value  |
+| ------ | ------ |
 | Top 1  | 77.596%|
 | Top 5  | 93.85% |
 
@@ -24,7 +24,7 @@
 
 ### Original Model
 
-Image, name: `data`,  shape: `1,3,224,224`, format is `B,C,H,W` where:
+Image, name: `data`,  shape: `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -32,11 +32,11 @@ Image, name: `data`,  shape: `1,3,224,224`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`.
-Mean values: [104.0,117.0,123.0].
+Mean values: [104.0, 117.0, 123.0].
 
 ### Converted Model
 
-Image, name: `data`,  shape: `1,3,224,224`, format is `B,C,H,W` where:
+Image, name: `data`,  shape: `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -49,14 +49,14 @@ Channel order is `BGR`.
 
 ### Original Model
 
-Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name: `prob`,  shape: `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
 - `C` - predicted probabilities for each class in the range [0, 1]
 
 ### Converted Model
 
-Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name: `prob`,  shape: `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
 - `C` - predicted probabilities for each class in the range [0, 1]
