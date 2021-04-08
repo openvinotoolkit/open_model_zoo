@@ -41,7 +41,6 @@ class SISDRMetric(PerImageEvaluationMetric):
         self.meta.update({'scale': 1, 'postfix': 'Db', 'calculate_mean': False, 'names': ['mean', 'std']})
 
     def reset(self):
-
         del self.buffer
         self.buffer = []
 
