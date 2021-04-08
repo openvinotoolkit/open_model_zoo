@@ -4,7 +4,7 @@ This demo demonstrates Automatic Speech Recognition (ASR) with pretrained Quartz
 
 ## How It Works
 
-After computing audio features, running a neural network to get haracter probabilities, and CTC greedy decoding, the demo prints the decoded text together.
+After computing audio features, running a neural network to get character probabilities, and CTC greedy decoding, the demo prints the decoded text.
 
 ## Running Demo
 

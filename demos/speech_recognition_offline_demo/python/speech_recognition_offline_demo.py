@@ -28,28 +28,29 @@ class QuartzNet:
     pad_to = 16
     alphabet = " abcdefghijklmnopqrstuvwxyz'"
 
-    def __init__(self, ie, xml_path, input_shape, device):
+    def __init__(self, ie, model_path, input_shape, device):
         assert not input_shape[2] % self.pad_to, f"{self.pad_to} must be a divisor of input_shape's third dimension"
         self.ie = ie
-        net = self.ie.read_network(xml_path)
-        if len(net.input_info) != 1:
+        network = self.ie.read_network(model_path)
+        if len(network.input_info) != 1:
             raise RuntimeError('QuartzNet must have one input')
-        encoder_input_shape = next(iter(net.input_info.values())).input_data.shape
-        if len(encoder_input_shape) != 3:
+        model_input_shape = next(iter(network.input_info.values())).input_data.shape
+        if len(model_input_shape) != 3:
             raise RuntimeError('QuartzNet input must be 3-dimensional')
-        if encoder_input_shape[1] != input_shape[1]:
+        if model_input_shape[1] != input_shape[1]:
             raise RuntimeError("QuartzNet input second dimension can't be reshaped")
-        if encoder_input_shape[2] % self.pad_to:
+        if model_input_shape[2] % self.pad_to:
             raise RuntimeError(f'{self.pad_to} must be a divisor of QuartzNet input third dimension')
-        if len(net.outputs) != 1:
+        if len(network.outputs) != 1:
             raise RuntimeError('QuartzNet must have one output')
-        decoder_output_shape = next(iter(net.outputs.values())).shape
-        if len(decoder_output_shape) != 3:
-            raise RuntimeError('QuartzNet decoder output must be 3-dimensional')
-        if decoder_output_shape[2] != len(self.alphabet) + 1:  # +1 for blank char
-            raise RuntimeError('QuartzNet decoder second dimension must be similar to a length of an alphabet assumed')
-        net.reshape({next(iter(net.input_info)): input_shape})
-        self.exec_net = self.ie.load_network(net, device)
+        model_output_shape = next(iter(network.outputs.values())).shape
+        if len(model_output_shape) != 3:
+            raise RuntimeError('QuartzNet output must be 3-dimensional')
+        if model_output_shape[2] != len(self.alphabet) + 1:  # +1 for blank char
+            raise RuntimeError('QuartzNet third dimension must be greater by 1 then a length of the alphabet QuartzNet'
+                'is assumed to be trained on')
+        network.reshape({next(iter(network.input_info)): input_shape})
+        self.exec_net = self.ie.load_network(network, device)
 
     def infer(self, melspectrogram):
         return next(iter(self.exec_net.infer({next(iter(self.exec_net.input_info)): melspectrogram}).values()))
@@ -101,6 +102,7 @@ def main():
         assert sample_width == 2, "Only 16-bit WAV PCM supported"
         assert compression_type == 'NONE', "Only linear PCM WAV files supported"
         assert channel_num == 1, "Only mono WAV PCM supported"
+        assert sampling_rate == 16000, "Only 16 KHz audio supported"
         audio = np.frombuffer(wave_read.readframes(pcm_length * channel_num), dtype=np.int16).reshape((pcm_length, channel_num))
 
     log_melspectrum = QuartzNet.audio_to_melspectrum(audio.flatten(), sampling_rate)
