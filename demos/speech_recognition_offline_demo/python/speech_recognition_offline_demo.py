@@ -47,8 +47,7 @@ class QuartzNet:
         if len(model_output_shape) != 3:
             raise RuntimeError('QuartzNet output must be 3-dimensional')
         if model_output_shape[2] != len(self.alphabet) + 1:  # +1 for blank char
-            raise RuntimeError('QuartzNet third dimension must be greater by 1 then a length of the alphabet QuartzNet'
-                'is assumed to be trained on')
+            raise RuntimeError(f'QuartzNet output third dimension size must be {len(self.alphabet) + 1}')
         network.reshape({next(iter(network.input_info)): input_shape})
         self.exec_net = self.ie.load_network(network, device)
 
