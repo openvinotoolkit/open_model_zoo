@@ -1,4 +1,4 @@
-# Resnet-FC text recognition model
+# text-recognition-resnet-fc
 
 ## Use-case and high-level description
 
@@ -27,23 +27,22 @@ Alphanumeric subset of common scene text recognition benchmarks are used. For yo
 
 ## Input
 
-Input tensor is `input.0`.
-Shape: `1, 1, 32, 100` - An input image in the format `B, C, H, W`,
-where:
-  - B - batch size
-  - C - number of channels
-  - H - image height
-  - W - image width
+Image, name: `input.0`, shape: `1, 1, 32, 100` in the format `B, C, H, W`, where:
+
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
 Note that the source image should be tight aligned crop with detected text converted to grayscale.
 
 ## Outputs
-Output tensor is `output.0` with the shape `1, 26, 37` in the format `B, W, L`,
-    where:
-      - W - output sequence length
-      - B - batch size
-      - L - confidence distribution across alphanumeric symbols:
-        "[s]0123456789abcdefghijklmnopqrstuvwxyz", where [s] - special end of sequence character for decoder.
+Output tensor, name: `output.0`, shape: `1, 26, 37` in the format `B, W, L`, where:
+
+- `W` - output sequence length
+- `B` - batch size
+- `L` - confidence distribution across alphanumeric symbols:
+  `[s]0123456789abcdefghijklmnopqrstuvwxyz`, where [s] - special end of sequence character for decoder.
 
 The network output decoding process is pretty easy: get the argmax on `L` dimension, transform indices to letters and slice the resulting phrase on the first entry of `end-of-sequence` symbol.
 
