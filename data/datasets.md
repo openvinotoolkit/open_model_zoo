@@ -114,6 +114,30 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
     * `SegmentationClass` - directory containing the VOC2012 segmentation masks
 
 ### Datasets in dataset_definitions.yml
-* `VOC2012` used for evaluation models on VOC2012 dataset for object detection task. Background label + label map with 20 object categories are used. (model examples: [`mobilenet-ssd`](../models/public/mobilenet-ssd/mobilenet-ssd.md), [`ssd300`](../models/public/ssd300/ssd300.md))
+* `VOC2012` used for evaluation models on VOC2012 dataset for object detection task. Background label + label map with 20 object categories are used.
 * `VOC2012_without_background` used for evaluation models on VOC2012 dataset for object detection tasks. Label map with 20 object categories is used.(model examples: [`yolo-v2-ava-0001`](../models/intel/yolo-v2-ava-0001/description/yolo-v2-ava-0001.md), [`yolo-v2-tiny-ava-0001`](../models/intel/yolo-v2-tiny-ava-0001/description/yolo-v2-tiny-ava-0001.md))
 * `VOC2012_Segmentation` used for evaluation models on VOC2012 dataset for segmentation tasks. Background label + label map with 20 object categories are used.(model examples: [`deeplabv3`](../models/public/deeplabv3/deeplabv3.md))
+
+## [Visual Object Classes Challenge 2007 (VOC2007)](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/)
+
+### How download dataset
+
+To download VOC2007 dataset, you need to follow the steps below:
+1. Go to the [VOC2007](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/) website
+2. Go to the [`Development Kit`](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/#devkit) section
+3. Select [`Download the training/validation data`](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar) and download archive
+4. Unpack archive
+
+### Files layout
+
+To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the following:
+
+* `VOCdevkit/VOC2007` - directory containing annotations, images and image sets files directories
+    * `Annotations` - directory containing the VOC2007 annotation files
+    * `JPEGImages` - directory containing the VOC2007 images
+    * `ImageSets` - directory containing the VOC2007 text files specifying lists of images for different tasks
+        * `Main/test.txt` - image sets file for detection tasks
+
+### Datasets in dataset_definitions.yml
+* `VOC2007_detection` used for evaluation models on VOC2007 dataset for object detection task. Background label + label map with 20 object categories are used. (model examples: [`mobilenet-ssd`](../models/public/mobilenet-ssd/mobilenet-ssd.md), [`ssd300`](../models/public/ssd300/ssd300.md))
+* `VOC2007_detection_no_bkgr` used for evaluation models on VOC2007 dataset for object detection tasks. Label map with 20 object categories is used.(model examples: [`yolo-v1-tiny-tf`](../models/public/yolo-v1-tiny-tf/yolo-v1-tiny-tf.md))
