@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2021 Intel Corporation
+// Copyright (C) 2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,15 +35,17 @@
 
 #include <pipelines/async_pipeline.h>
 #include <models/image_processing_model.h>
-#include <pipelines/config_factory.h>
+#include <models/super_resolution_model.h>
+#include <models/deblurring_model.h>
 #include <pipelines/metadata.h>
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Type of architecture: super_resolution, deblurring";
+static const char at_message[] = "Required. Type of the network, either 'sr' for Super Resolution task or 'deblur' for Deblurring";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
+static const char original_img_message[] = "Optional. Display the original image together with the resulting image.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
@@ -63,6 +65,7 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
+DEFINE_bool(orig, false, original_img_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
@@ -85,6 +88,7 @@ static void showUsage() {
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -i \"<path>\"               " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
+    std::cout << "    -orig                     " << original_img_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
@@ -127,17 +131,17 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-std::unique_ptr<ImageProcessingModel> getModel(const cv::Size& frameSize) {
-    if (FLAGS_at == "super_resolution") {
-        return std::unique_ptr<ImageProcessingModel>(new ImageProcessingModel(FLAGS_m));
+std::unique_ptr<ImageProcessingModel> getModel(const cv::Size& frameSize, const std::string& type) {
+    if (type == "sr") {
+        return std::unique_ptr<ImageProcessingModel>(new SuperResolutionModel(FLAGS_m, false));
     }
-    if (FLAGS_at == "deblurring") {
-        return std::unique_ptr<ImageProcessingModel>(new ImageProcessingModel(FLAGS_m, frameSize));
+    if (type == "deblur") {
+        return std::unique_ptr<ImageProcessingModel>(new DeblurringModel(FLAGS_m, false, frameSize));
     }
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
 
-cv::Mat renderResultData(const ImageProcessingResult& result) {
+cv::Mat renderResultData(const ImageResult& result, bool origImgDisplay) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -148,21 +152,24 @@ cv::Mat renderResultData(const ImageProcessingResult& result) {
     if (inputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
     }
-    size_t h = result.resultImage.rows;
-    size_t w = result.resultImage.cols;
-    size_t c = result.resultImage.channels();
+    int h = result.resultImage.rows;
+    int w = result.resultImage.cols;
+    int c = result.resultImage.channels();
 
     if (inputImg.rows != h || inputImg.cols != w)
         cv::resize(inputImg, inputImg, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
 
-    cv::Mat out;
-    if (inputImg.channels() != c) {
-        cv::Mat bgrResult;
-        cv::cvtColor(result.resultImage, bgrResult, cv::COLOR_GRAY2BGR);
-        cv::hconcat(inputImg, bgrResult, out);
-    }
+    cv::Mat resultImg;
+    if (inputImg.channels() != c)
+        cv::cvtColor(result.resultImage, resultImg, cv::COLOR_GRAY2BGR);
     else
-        cv::hconcat(inputImg, result.resultImage, out);
+        resultImg = result.resultImage;
+
+    cv::Mat out;
+    if (origImgDisplay)
+        cv::hconcat(inputImg, resultImg, out);
+    else
+        out = resultImg;
 
     return out;
 }
@@ -191,23 +198,24 @@ int main(int argc, char *argv[]) {
 
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
         InferenceEngine::Core core;
-        std::unique_ptr<ImageProcessingModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows));
-        auto viewResult = model->getViewInfo();
+        std::unique_ptr<ImageProcessingModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at);
+        auto viewResult = model->getViewSize();
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
 
         bool keepRunning = true;
-        int64_t frameNum = pipeline.submitData(ImageInputData(curr_frame),
-                    std::make_shared<ImageMetaData>(curr_frame, startTime));;
+        pipeline.submitData(ImageInputData(curr_frame),
+            std::make_shared<ImageMetaData>(curr_frame, startTime));;
         std::unique_ptr<ResultBase> result;
         uint32_t framesProcessed = 0;
 
         cv::VideoWriter videoWriter;
+        int k = FLAGS_orig ? 2 : 1;
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
                                                   cap->fps(),
-                                                  cv::Size(2 * viewResult.width, viewResult.height))) {
+                                                  cv::Size(k * viewResult.width, viewResult.height))) {
             throw std::runtime_error("Can't open video writer");
         }
 
@@ -221,7 +229,7 @@ int main(int argc, char *argv[]) {
                     break;
                 }
 
-                frameNum = pipeline.submitData(ImageInputData(curr_frame),
+                pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 
@@ -229,10 +237,10 @@ int main(int argc, char *argv[]) {
             pipeline.waitForData();
 
             //--- Checking for results and rendering data if it's ready
-            //--- If you need just plain data without rendering - cast result's underlying pointer to ImageProcessingResult*
+            //--- If you need just plain data without rendering - cast result's underlying pointer to ImageResult*
             //    and use your own processing instead of calling renderResultData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderResultData(result->asRef<ImageProcessingResult>());
+                cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -258,7 +266,7 @@ int main(int argc, char *argv[]) {
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
         while (result = pipeline.getResult()) {
-            cv::Mat outFrame = renderResultData(result->asRef<ImageProcessingResult>());
+            cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,

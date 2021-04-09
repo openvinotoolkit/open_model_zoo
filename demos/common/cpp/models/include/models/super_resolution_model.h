@@ -1,9 +1,5 @@
 /*
-<<<<<<< HEAD
 // Copyright (C) 2021 Intel Corporation
-=======
-// Copyright (C) 2018-2021 Intel Corporation
->>>>>>> first version of image_processing demo
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

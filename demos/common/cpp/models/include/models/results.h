@@ -84,7 +84,7 @@ struct RetinaFaceDetectionResult : public DetectionResult {
     std::vector<cv::Point2f> landmarks;
 };
 
-struct ImageProcessingResult: public ResultBase {
+struct ImageResult: public ResultBase {
     cv::Mat resultImage;
 };
 

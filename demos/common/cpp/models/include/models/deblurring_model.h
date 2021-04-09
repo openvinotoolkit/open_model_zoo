@@ -14,24 +14,24 @@
 // limitations under the License.
 */
 
-#pragma once
-#include "image_model.h"
+#include "image_processing_model.h"
 
-class ImageProcessingModel : public ImageModel {
+#pragma once
+class DeblurringModel : public ImageProcessingModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    /// @param viewInfo size of view of the result of model
     /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
-    ImageProcessingModel(const std::string& modelFileName, bool useAutoResize);
+    DeblurringModel(const std::string& modelFileName, bool useAutoResize, const cv::Size& inputImgSize);
 
-    cv::Size getViewSize();
+    std::shared_ptr<InternalModelData> preprocess(
+        const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
+    std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
+
 protected:
+    void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
+    void changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork);
 
-    int outHeight = 0;
-    int outWidth = 0;
-    int outChannels = 0;
-
-    cv::Size viewSize = cv::Size(0, 0);
+    static const size_t stride = 32;
 };

@@ -162,13 +162,13 @@ NATIVE_DEMOS = [
             '-i': DataDirectoryArg('single-image-super-resolution')}),
         [
             *combine_cases(
-                TestCase(options={'-at': 'super_resolution'}),
+                TestCase(options={'-at': 'sr'}),
                 single_option_cases('-m',
                     ModelArg('single-image-super-resolution-1032'),
                     ModelArg('single-image-super-resolution-1033'),
                     ModelArg('text-image-super-resolution-0001'))
             ),
-            TestCase(options={'-at': 'deblurring',
+            TestCase(options={'-at': 'deblur',
                 '-m': ModelArg('deblurgan-v2')}
             ),
         ]
