@@ -22,25 +22,49 @@ import yaml
 import common
 from pathlib import Path
 
-def compile(compiler_path, model,target_device, output_dir):
-    
-    compile_cmd = [str(compiler_path), 
-        '-d={}'.format(target_device),
-        '-ip={}'.format(compiler_input_precision),
-        '-op={}'.format(compiler_input_precision),
-    ]
-    
-    success = True
+def compile(reporter, compiler_path, model, args, output_dir):
+    precisions = common.KNOWN_COMPILABLE_PRECISIONS
+    if not model.compilable:
+        reporter.print_section_heading('Skipping {} (compilation not supported)', model.name)
+        reporter.print()
+        return False
+    else:
+        for model_precision in sorted(precisions):
+            (output_dir / model.subdirectory).mkdir(parents=True, exist_ok=True)
 
-    if not args.dry_run:
-        reporter.print(flush=True)
-
-        success = reporter.job_context.subprocess(ompile_cmd, env={**os.environ, **pot_env})
-    reporter.print()
+            compile_cmd = [str(compiler_path),
+                '-m={}'.format(args.model_dir / model.subdirectory / model_precision / (model.name + '.xml')),
+                '-d={}'.format(args.target_device),
+                '-ip={}'.format('U8' if args.input_precision is None else args.input_precision),
+                '-op={}'.format(model_precision if args.output_precision is None else args.output_precision),
+                '-o={}'.format(output_dir / model.subdirectory / model_precision /(model.name + '.blob')),
+            ]
+            reporter.print_section_heading('{}Compiling {} to BLOB ({})',
+                '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
+            
+            reporter.print('Conversion command: {}', common.command_string(compile_cmd))
+            if not args.dry_run:
+                reporter.print(flush=True)            
+                if not reporter.job_context.subprocess(compile_cmd):
+                    return False
+            reporter.print()
     return True
 
+def num_jobs_arg(value_str):
+    if value_str == 'auto':
+        return os.cpu_count() or 1
+
+    try:
+        value = int(value_str)
+        if value > 0: return value
+    except ValueError:
+        pass
+
+    raise argparse.ArgumentTypeError('must be a positive integer or "auto" (got {!r})'.format(value_str))
+
 def main():
-    parser.add_argument('--model_dir', type=Path, metavar='DIR',
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--model_dir', type=Path, metavar='DIR',
         default=Path.cwd(), help='root of the directory tree with IR model files')
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
         help='root of the directory tree to place compiled models files into')
@@ -48,40 +72,41 @@ def main():
         help='compile only models whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',
         help='compile only models whose names match at least one of the patterns in the specified file')
-    parser.add_argument('--target_device', help='target device for the compiled model')
+    parser.add_argument('-ip', '--input_precision', dest='input_precision',
+        help='Input precision of compiled network')
+    parser.add_argument('-op', '--output_precision', dest='output_precision',
+        help='output_precision of compiled network')
+    parser.add_argument('--target_device', help='target device for the compiled model', default='MYRIAD')
     parser.add_argument('--all', action='store_true', help='quantize all available models')
     parser.add_argument('--print_all', action='store_true', help='print all available models')
-    parser.add_argument('--ct', type=Path, help='Compiler Tool executable entry point')
+    parser.add_argument('--compiler', type=Path, help='Compile Tool executable entry point')
     parser.add_argument('--dry_run', action='store_true',
         help='print the quantization commands without running them')
+    parser.add_argument('-j', '--jobs', type=num_jobs_arg, default=1,
+        help='number of conversions to run concurrently')
     args = parser.parse_args()
     
 
     compiler_path = args.compiler
-    if compiler_path  is None:
+    if compiler_path is None:
         try:
             compiler_path  = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/tools/compile_tool/compile_tool'
         except KeyError:
-            sys.exit('Unable to locate compiler tool. '
+            sys.exit('Unable to locate Compile Tool. '
                 + 'Use --compiler or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
     
     models = common.load_models_from_args(parser, args)
-    
+
     reporter = common.Reporter(common.DirectOutputContext())
 
-    output_dir = args.output_dir or args.model_dir
+    if args.jobs == 1 or args.dry_run:
+        results = [compile(reporter, compiler_path, model, args, output_dir) for model in models]
+    else:
+        results = common.run_in_parallel(args.jobs,
+            lambda context, model: compile(common.Reporter(context), compiler_path, model, args, output_dir),
+            models)
 
-    for model in models:
-        if not model.quantizable:
-            reporter.print_section_heading('Skipping {} (quantization not supported)', model.name)
-            reporter.print()
-            continue
-
-        for precision in sorted(requested_precisions):
-            if not quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
-                failed_models.append(model.name)
-                break
-
+    failed_models = [model.name for model, successful in zip(models, results) if not successful]
 
     if failed_models:
         reporter.print('FAILED:')

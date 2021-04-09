@@ -80,6 +80,7 @@ KNOWN_TASK_TYPES = {
 }
 
 KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}
+KNOWN_COMPILABLE_PRECISIONS = {'FP16', 'FP32'}
 assert KNOWN_QUANTIZED_PRECISIONS.keys() <= KNOWN_PRECISIONS
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
@@ -480,7 +481,7 @@ Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Model:
     def __init__(self, name, subdirectory, files, postprocessing, mo_args, quantizable, framework,
-                 description, license_url, precisions, task_type, conversion_to_onnx_args):
+                 description, license_url, precisions, task_type, conversion_to_onnx_args, compilable = True):
         self.name = name
         self.subdirectory = subdirectory
         self.files = files
@@ -494,6 +495,7 @@ class Model:
         self.task_type = task_type
         self.conversion_to_onnx_args = conversion_to_onnx_args
         self.converter_to_onnx = KNOWN_FRAMEWORKS[framework]
+        self.compilable = compilable
 
     @classmethod
     def deserialize(cls, model, name, subdirectory):
