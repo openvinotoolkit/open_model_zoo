@@ -1,54 +1,51 @@
 # single-human-pose-estimation-0001
 
 ## Use Case and High-Level Description
-Single human pose estimation model based on https://arxiv.org/abs/1906.04104.
+
+Single human pose estimation model based on [paper](https://arxiv.org/abs/1906.04104).
 
 ## Specification
 
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
-| AP(coco orig)                                                 | 69.04%                   |
+| AP(coco orig)                                                 | 69.04%                  |
 | GFlops                                                        | 60.125                  |
 | MParams                                                       | 33.165                  |
 | Source framework                                              | PyTorch\*               |
-
 
 ## Inputs
 
 ### Original model
 
-Name: "data" , shape: [1x3x384x288] - An input image in the format [BxCxHxW],
-   where:
+Image, name: `data`, shape: `1, 3, 384, 288` in the format `B, C, H, W`, where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-   Expected color order - RGB. Mean values - [123.675,116.28,103.53]. Scale values - [58.395,57.12,57.375]
+Expected color order - `RGB`. Mean values - [123.675, 116.28, 103.53]. Scale values - [58.395, 57.12, 57.375]
 
 ### Converted model
 
-Name: "data" , shape: [1x3x384x288] - An input image in the format [BxCxHxW],
-where:
+Image, name: `data`, shape: `1, 3, 384, 288` in the format `B, C, H, W`, where:
 
-   - B - batch size
-   - C - number of channels
-   - H - image height
-   - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-Expected color order: BGR.
+Expected color order: `BGR`.
 
 ## Outputs
 
 ### Original model
 
-The net outputs list of tensor. Count of list elements is 6. Every tensor with shapes: [1x17x48x36] ( For every keypoint own heatmap). The six outputs are necessary in order to calculate the loss in during training. But in the future, for obtaining the results of prediction and postprocessing them, the last output is used. Each following tensor gives more accurate predictions ( in context metric AP).
-
+The net outputs list of tensor. Count of list elements is 6. Every tensor with shapes: `1, 17, 48, 36` (For every keypoint own heatmap). The six outputs are necessary in order to calculate the loss in during training. But in the future, for obtaining the results of prediction and postprocessing them, the last output is used. Each following tensor gives more accurate predictions (in context metric AP).
 
 ### Converted model
 
-The net outputs tensor with shapes: [1x17x48x36]. ( For every keypoint own heatmap)
+The net output is a tensor with name `heatmaps` and  shape `1, 17, 48, 36`. (For every keypoint own heatmap)
 
 ## Download a Model and Convert it into Inference Engine Format
 

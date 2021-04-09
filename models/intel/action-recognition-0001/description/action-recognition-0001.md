@@ -13,8 +13,7 @@ Please refer to the [kinetics](https://deepmind.com/research/open-source/open-so
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Source framework                | PyTorch*                                  |
-
+| Source framework                | PyTorch\*                                 |
 
 ## Encoder model specification
 
@@ -26,22 +25,20 @@ Video frames should be sampled to cover ~1 second fragment (i.e. skip every seco
 | GFlops                          | 7.340                                     |
 | MParams                         | 21.276                                    |
 
-
 ### Inputs
 
-1. name: "0", shape: [1x3x224x224] - An input image in the format [BxCxHxW],
-   where:
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+Image, name: `0`, shape: `1, 3, 224, 224` in the format `B, C, H, W`, where:
 
-   Expected color order is BGR.
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Expected color order is `BGR`.
 
 ### Outputs
 
-The model outputs a tensor with the shape [1x512x1x1], representing embedding of processed frame.
-
+The model outputs a tensor with the shape `1, 512, 1, 1`, representing embedding of processed frame.
 
 ## Decoder model specification
 
@@ -52,18 +49,17 @@ The action-recognition-0001-decoder model accepts stack of frame embeddings, com
 | GFlops                          | 0.147                                     |
 | MParams                         | 4.405                                     |
 
-
 ### Inputs
 
-1. name: "0" , shape: [1x16x512] - An embedding image in the format [BxTxC],
-   where:
-    - B - batch size.
-    - T - Duration of input clip.
-    - C - dimension of embedding.
+An embedding image, name: `0`, shape: `1, 16, 512` in the format `B, T, C`, where:
+
+- `B` - batch size
+- `T` - duration of input clip
+- `C` - dimension of embedding
 
 ### Outputs
 
-The model outputs a tensor with the shape [bx400], each row is a logits vector of performed actions.
+The model outputs a tensor with the shape `1, 400`, each row is a logits vector of performed actions.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

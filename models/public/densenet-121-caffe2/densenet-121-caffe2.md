@@ -5,8 +5,8 @@
 This is a Caffe2\* version of `densenet-121` model, one of the DenseNet
 group of models designed to perform image classification. This model
 was converted from Caffe\* to Caffe2\* format.
-For details see repository <https://github.com/facebookarchive/models/tree/master/densenet121>,
-paper <https://arxiv.org/abs/1608.06993>.
+For details see [repository](https://github.com/facebookarchive/models/tree/master/densenet121),
+[paper](https://arxiv.org/abs/1608.06993).
 
 ## Specification
 
@@ -19,8 +19,8 @@ paper <https://arxiv.org/abs/1608.06993>.
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric | Value   |
+| ------ | ------- |
 | Top 1  | 74.904% |
 | Top 5  | 92.192% |
 
@@ -28,7 +28,7 @@ paper <https://arxiv.org/abs/1608.06993>.
 
 ### Original model
 
-Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -36,11 +36,11 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`.
-Mean values - [103.94,116.78,123.68], scale value - 58.8235294.
+Mean values - [103.94, 116.78, 123.68], scale value - 58.8235294.
 
 ### Converted model
 
-Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -53,12 +53,12 @@ Channel order is `BGR`.
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `fc6`,  shape - `1,1000,1,1`, contains predicted
+Object classifier according to ImageNet classes, name - `fc6`,  shape - `1, 1000, 1, 1`, contains predicted
 probability for each class in logits format.
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `fc6`,  shape - `1,1000,1,1`, contains predicted
+Object classifier according to ImageNet classes, name - `fc6`,  shape - `1, 1000, 1, 1`, contains predicted
 probability for each class in logits format.
 
 ## Download a Model and Convert it into Inference Engine Format

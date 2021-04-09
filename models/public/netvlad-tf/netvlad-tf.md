@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-NetVLAD is a CNN architecture which tackles the problem of large scale visual place recognition. The architecture uses VGG 16 as base network and NetVLAD - a new trainable generalized VLAD (Vector of Locally Aggregated Descriptors) layer. It is a place recognition model pretrained on the [Pittsburgh 250k](http://www.ok.ctrl.titech.ac.jp/~torii/project/repttile/) dataset.
+NetVLAD is a CNN architecture which tackles the problem of large scale visual place recognition. The architecture uses VGG 16 as base network and NetVLAD - a new trainable generalized VLAD (Vector of Locally Aggregated Descriptors) layer. It is a place recognition model pre-trained on the [Pittsburgh 250k](http://www.ok.ctrl.titech.ac.jp/~torii/project/repttile/) dataset.
 
 For details see [repository](https://github.com/uzh-rpg/netvlad_tf_open) and [paper](https://arxiv.org/abs/1511.07247).
 
@@ -27,7 +27,7 @@ Accuracy metrics are obtained on a smaller validation subset of Pittsburgh 250k 
 
 ### Original model
 
-Image, name - `Placeholder`,  shape - `1,200,300,3`, format is `B,H,W,C` where:
+Image, name - `Placeholder`,  shape - `1, 200, 300, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -38,7 +38,7 @@ Channel order is `RGB`.
 
 ### Converted model
 
-Image, name - `Placeholder`,  shape - `1,3,200,300`, format is `B,C,H,W` where:
+Image, name - `Placeholder`,  shape - `1, 3, 200, 300`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -51,14 +51,14 @@ Channel order is `BGR`.
 
 ### Original model
 
-Floating point embeddings, name - `vgg16_netvlad_pca/l2_normalize_1`,  shape - `1,4096`, output data format  - `B,C`, where:
+Floating point embeddings, name - `vgg16_netvlad_pca/l2_normalize_1`,  shape - `1, 4096`, output data format  - `B, C`, where:
 
 - `B` - batch size
 - `C` - vector of 4096 floating points values, local image descriptors
 
 ### Converted model
 
-Floating point embeddings, name - `vgg16_netvlad_pca/l2_normalize_1`,  shape - `1,4096`, output data format  - `B,C`, where:
+Floating point embeddings, name - `vgg16_netvlad_pca/l2_normalize_1`,  shape - `1, 4096`, output data format  - `B, C`, where:
 
 - `B` - batch size
 - `C` - vector of 4096 floating points values, local image descriptors

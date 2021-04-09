@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `gmcnn-places2-tf` is the TensorFlow implementation of GMCNN Image Inpainting model,
+The `gmcnn-places2-tf` is the TensorFlow\* implementation of GMCNN Image Inpainting model,
 aimed to estimate suitable pixel information to fill holes in images. `gmcnn-places2-tf`
 is trained on Places2 dataset with free-form masks. Originally redistributed as checkpoint files,
 it was converted to a frozen graph. For details see [repository](https://github.com/shepnerd/inpainting_gmcnn).
@@ -24,7 +24,7 @@ git apply path/to/freeze_model.patch
 ```
 4. Install the [original dependencies](https://github.com/shepnerd/inpainting_gmcnn#prerequisites).
 (TensorFlow\* version used - 1.14.0, CPU).
-5. Download the [pretrained weights](https://drive.google.com/file/d/1aakVS0CPML_Qg-PuXGE1Xaql96hNEKOU/view?usp=sharing)
+5. Download the [pre-trained weights](https://drive.google.com/file/d/1aakVS0CPML_Qg-PuXGE1Xaql96hNEKOU/view?usp=sharing)
 6. Run sample conversion script:
 ```sh
 python3 freeze_model.py --ckpt_dir path/to/downloaded_weights --save_dir path/to/save_directory
@@ -52,69 +52,63 @@ and disguised at random positions with pre-generated free-form masks.
 
 ### Original Model
 
-1. Image, name: `Placeholder`, shape: [1x512x680x3], format: [BxHxWxC]
-  where:
+1. Image, name: `Placeholder`, shape: `1, 512, 680, 3`, format: `B, H, W, C`, where:
 
-    - B - batch size
-    - H - image height
-    - W - image width
-    - C - number of channels
+    - `B` - batch size
+    - `H` - image height
+    - `W` - image width
+    - `C` - number of channels
 
-   Expected color order: BGR.
+   Expected color order: `BGR`.
 
-2. Mask, name: `Placeholder_1`, shape: [1x512x680x1], format: [BxHxWxC]
-  where:
+2. Mask, name: `Placeholder_1`, shape: `1, 512, 680, 1`, format: `B, H, W, C`, where:
 
-    - B - batch size
-    - H - mask height
-    - W - mask width
-    - C - number of channels
+    - `B` - batch size
+    - `H` - mask height
+    - `W` - mask width
+    - `C` - number of channels
 
 ### Converted Model
 
-1. Image, name: `Placeholder`, shape: [1x3x512x680], format: [BxCxHxW]
-  where:
+1. Image, name: `Placeholder`, shape: `1, 3, 512, 680`, format: `B, C, H, W`, where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+    - `B` - batch size
+    - `C` - number of channels
+    - `H` - image height
+    - `W` - image width
 
-   Expected color order: BGR.
+   Expected color order: `BGR`.
 
-2. Mask, name: `Placeholder_1`, shape: [1x1x512x680], format: [BxCxHxW]
-  where:
+2. Mask, name: `Placeholder_1`, shape: `1, 1, 512, 680`, format: `B, C, H, W`, where:
 
-    - B - batch size
-    - C - number of channels
-    - H - mask height
-    - W - mask width
+    - `B` - batch size
+    - `C` - number of channels
+    - `H` - mask height
+    - `W` - mask width
 
 ## Output
 
 ### Original Model
 
-Restored image, name `Cast`, shape: [1x512x680x3], format: [BxHxWxC]
-  where:
+Restored image, name `Cast`, shape: `1, 512, 680, 3`, format: `B, H, W, C`, where:
 
-    - B - batch size
-    - H - image height
-    - W - image width
-    - C - number of channels
+- `B` - batch size
+- `H` - image height
+- `W` - image width
+- `C` - number of channels
 
-   Expected color order: BGR.
+Expected color order: `BGR`.
 
 ### Converted Model
 
-Restored image, name: `Cast`, shape: [1x3x512x680], format: [BxCxHxW]
-  where:
+Restored image, name: `Cast`, shape: `1, 3, 512, 680`, format: `B, C, H, W`, where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-   Expected color order: BGR.
+Expected color order: `BGR`.
 
 ## Download a Model and Convert it into Inference Engine Format
 

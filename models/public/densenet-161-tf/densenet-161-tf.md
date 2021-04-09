@@ -16,37 +16,35 @@ group of models designed to perform image classification. The weights were conve
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric | Value   |
+| ------ | ------- |
 | Top 1  | 76.446% |
-| Top 5  | 93.228%|
+| Top 5  | 93.228% |
 
 ## Input
 
 ### Original Model
 
-Image, name: `Placeholder` , shape: [1x224x224x3], format: [BxHxWxC],
-   where:
+Image, name: `Placeholder`, shape: `1, 224, 224, 3`, format: `B, H, W, C`, where:
 
-    - B - batch size
-    - H - image height
-    - W - image width
-    - C - number of channels
+- `B` - batch size
+- `H` - image height
+- `W` - image width
+- `C` - number of channels
 
-   Expected color order: RGB.
-   Mean values: [123.68, 116.78, 103.94], scale factor for each channel: 58.8235294
+Expected color order: `RGB`.
+Mean values: [123.68, 116.78, 103.94], scale factor for each channel: 58.8235294
 
 ### Converted Model
 
-Image, name: `Placeholder`, shape: [1x3x224x224], format: [BxCxHxW],
-where:
+Image, name: `Placeholder`, shape: `1, 3, 224, 224`, format: `B, C, H, W`, where:
 
-   - B - batch size
-   - C - number of channels
-   - H - image height
-   - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-Expected color order: BGR.
+Expected color order: `BGR`.
 
 ## Output
 
@@ -56,7 +54,7 @@ Floating point values in range [0, 1], which represent probabilities for classes
 
 ### Converted Model
 
-Floating point values in a range [0, 1], which represent probabilities for classes in a dataset. Name: `densenet161/predictions/Reshape_1/Transpose`, shape: [1, 1, 1, 1000].
+Floating point values in a range [0, 1], which represent probabilities for classes in a dataset. Name: `densenet161/predictions/Reshape_1/Transpose`, shape: `1, 1, 1, 1000`.
 
 ## Download a Model and Convert it into Inference Engine Format
 

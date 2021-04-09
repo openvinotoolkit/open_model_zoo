@@ -50,19 +50,19 @@ This model presents a vehicle attributes classification algorithm for a traffic 
 
 ## Inputs
 
-Name: `input` , shape: [1x3x72x72] - an input image in following format
-[1xCxHxW], where:
-- C - number of channels
-- H - image height
-- W - image width
+Image, name: `input`, shape: `1, 3, 72, 72` in format `1, C, H, W`, where:
 
-Expected color order: BGR.
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Expected color order: `BGR`.
 
 ## Outputs
 
-1.	Name: `color`, shape: [1, 7] - probabilities across seven color classes
+1.	Name: `color`, shape: `1, 7` - probabilities across seven color classes
     [`white`, `gray`, `yellow`, `red`, `green`, `blue`, `black`]
-2.	Name: `type`, shape: [1, 4] - probabilities across four type classes
+2.	Name: `type`, shape: `1, 4` - probabilities across four type classes
     [`car`, `van`, `truck`, `bus`]
 
 ## Legal Information

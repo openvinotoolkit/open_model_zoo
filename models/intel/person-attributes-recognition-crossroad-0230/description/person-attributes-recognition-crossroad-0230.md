@@ -1,6 +1,7 @@
 # person-attributes-recognition-crossroad-0230
 
 ## Use Case and High-Level Description
+
 This model presents a person attributes classification algorithm analysis scenario. It produces probability of person attributions existing on the sample and a position of two point on sample, which can be used for color prob (like, color picker in graphical editors)
 
 ## Examples
@@ -21,8 +22,7 @@ This model presents a person attributes classification algorithm analysis scenar
 | Supported attributes  | is_male, has_bag, has_backpack, has hat, has longsleeves, has longpants, has longhair, has coat_jacket|
 | GFlops                | 0.174                                                                                                |
 | MParams               | 0.735                                                                                                |
-| Source framework      | PyTorch*                                                                                             |
-
+| Source framework      | PyTorch\*                                                                                            |
 
 ## Accuracy
 
@@ -39,24 +39,21 @@ This model presents a person attributes classification algorithm analysis scenar
 
 ## Inputs
 
-1.  name: `input` , shape: [1x3x160x80] - An input image in following format
-[1xCxHxW], where
+Image, name: `input`, shape: `1, 3, 160, 80` in the format `1, C, H, W`, where:
 
-    - C - number of channels
-        - H - image height
-        - W - image width
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-    The expected color order is BGR.
-
+The expected color order is `BGR`.
 
 ## Outputs
 
-1.  The net outputs a blob named 453 with shape: [1, 8, 1, 1] across eight attributes:
+1.  The net outputs a blob named `453` with shape: `1, 8, 1, 1` across eight attributes:
     [`is_male`, `has_bag`, `has_backpack`, `has_hat`, `has_longsleeves`, `has_longpants`, `has_longhair`,
      `has_coat_jacket`]. Value > 0.5 means that an attribute is present.
-2.  The net outputs a blob named 456 with shape: [1, 2, 1, 1]. It is location of point with top color.
-3.  The net outputs a blob named 459 with shape: [1, 2, 1, 1]. It is location of point with bottom color.
-
+2.  The net outputs a blob named `456` with shape: `1, 2, 1, 1`. It is location of point with top color.
+3.  The net outputs a blob named `459` with shape: `1, 2, 1, 1`. It is location of point with bottom color.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

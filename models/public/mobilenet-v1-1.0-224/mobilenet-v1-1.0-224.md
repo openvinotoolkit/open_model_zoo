@@ -11,12 +11,12 @@
 | Type                            | Classification                            |
 | GFlops                          | 1.148                                     |
 | MParams                         | 4.221                                     |
-| Source framework                | Caffe\*                              |
+| Source framework                | Caffe\*                                   |
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric | Value  |
+| ------ | ------ |
 | Top 1  | 69.496%|
 | Top 5  | 89.224%|
 
@@ -24,42 +24,42 @@
 
 ### Original model
 
-Image, name - `input` , shape - `1,3,224,224`, format `B,C,H,W`, where:
+Image, name - `input`, shape - `1, 3, 224, 224`, format `B, C, H, W`, where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-   Expected color order: BGR.
-   Mean values - [103.94,116.78,123.68], scale factor for each channel - 58.8235294117647
+Expected color order: `BGR`.
+Mean values - [103.94, 116.78, 123.68], scale factor for each channel - 58.8235294117647
 
 ### Converted model
 
-Image, name - `input` , shape - `1,3,224,224`, format `B,C,H,W`, where:
+Image, name - `input`, shape - `1, 3, 224, 224`, format `B, C, H, W`, where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-   Expected color order: BGR.
+Expected color order: `BGR`.
 
 ## Output
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`,  shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`,  shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ## Download a Model and Convert it into Inference Engine Format
 

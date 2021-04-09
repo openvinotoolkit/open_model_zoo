@@ -15,8 +15,8 @@ CaffeNet\* model is used for classification. For details see [paper](https://arx
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric | Value  |
+| ------ | ------ |
 | Top 1  | 56.714%|
 | Top 5  | 79.916%|
 
@@ -24,39 +24,37 @@ CaffeNet\* model is used for classification. For details see [paper](https://arx
 
 ### Original Model
 
-Image, name: `data`, shape: [1x3x227x227], format: [BxCxHxW]
-where:
+Image, name: `data`, shape: `1, 3, 227, 227`, format: `B, C, H, W`, where:
 
-   - B - batch size
-   - C - number of channels
-   - H - image height
-   - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-Expected color order: BGR.
+Expected color order: `BGR`.
 Mean values: [104.0, 117.0, 123.0].
 
 ### Converted Model
 
-Image, name: `data`, shape: [1x3x227x227], format: [BxCxHxW]
-where:
+Image, name: `data`, shape: `1, 3, 227, 227`, format: `B, C, H, W`, where:
 
-   - B - batch size
-   - C - number of channels
-   - H - image height
-   - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-Expected color order: BGR.
+Expected color order: `BGR`.
 
 ## Output
 
 ### Original Model
 
-Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`. Contains predicted
+Object classifier according to ImageNet classes, name: `prob`,  shape: `1, 1000`. Contains predicted
 probability for each class.
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`. Contains predicted
+Object classifier according to ImageNet classes, name: `prob`,  shape: `1, 1000`. Contains predicted
 probability for each class.
 
 ## Download a Model and Convert it into Inference Engine Format

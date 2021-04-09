@@ -14,29 +14,34 @@ detection and segmentation heads.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| MS COCO val2017 box AP          | 32.9%                                     |
-| MS COCO val2017 mask AP         | 28.6%                                     |
+| COCO val2017 box AP             | 32.9%                                     |
+| COCO val2017 mask AP            | 28.6%                                     |
 | Max objects to detect           | 100                                       |
 | GFlops                          | 13.9672                                   |
 | MParams                         | 10.5674                                   |
 | Source framework                | PyTorch\*                                 |
 
 Average Precision (AP) is defined and measured according to standard
-[MS COCO evaluation procedure](https://cocodataset.org/#detection-eval).
+[COCO evaluation procedure](https://cocodataset.org/#detection-eval).
 
 ## Inputs
 
-1.	name: `image` , shape: [1x3x480x480] - An input image in the format
-    [1xCxHxW]. The expected channel order is BGR.
+Image, name: `image`, shape: `1, 3, 480, 480` in the format `1, C, H, W`, where:
+
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+The expected channel order is `BGR`
 
 ## Outputs
 
-1.	name: `labels`, shape: [100] - Contiguous integer class ID for every
+1.	Name: `labels`, shape: `100` - Contiguous integer class ID for every
     detected object.
-2.	name: `boxes`, shape: [100, 5] - Bounding boxes around every detected objects
+2.	Name: `boxes`, shape: `100, 5` - Bounding boxes around every detected objects
     in (top_left_x, top_left_y, bottom_right_x, bottom_right_y) format and its
     confidence score in range [0, 1].
-3.	name: `masks`, shape: [100, 14, 14] - Segmentation heatmaps for every output
+3.	Name: `masks`, shape: `100, 14, 14` - Segmentation heatmaps for every output
     bounding box.
 
 ## Legal Information

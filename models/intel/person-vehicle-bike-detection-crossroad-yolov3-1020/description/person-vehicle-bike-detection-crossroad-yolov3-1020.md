@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a YOLO V3 network finetuned for Person/Vehicle/Bike detection for security
+This is a YOLO V3 network fine-tuned for Person/Vehicle/Bike detection for security
 surveillance applications. It works in a variety of scenes and weather/lighting
 conditions.
 
@@ -10,9 +10,8 @@ Yolo V3 is a real-time object detection model implemented with Keras\*
 from this [repository](https://github.com/david8862/keras-YOLOv3-model-set)
 and converted to TensorFlow\* framework.
 
-This model was pretrained on COCO\* dataset with 80 classes and then finetuned for
+This model was pre-trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset with 80 classes and then fine-tuned for
 Person/Vehicle/Bike detection.
-
 
 ## Example
 
@@ -52,34 +51,36 @@ Similarly, training dataset has 17084 images with:
 
 ## Inputs
 
-Name: `image_input` , shape: [1x3x416x416] - An input image in the format [BxCxHxW],
-   where
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+Image, name: `image_input`, shape: `1, 3, 416, 416` in the format `B, C, H, W`, where:
 
-   Expected color order: BGR.
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Expected color order: `BGR`.
 
 ## Outputs
 
-1. The array of detection summary info, name - `conv2d_58/Conv2D/YoloRegion`,  shape - `1,255,13,13`. The anchor values are `116,90,  156,198,  373,326`.
+1. The array of detection summary info, name: `conv2d_58/Conv2D/YoloRegion`,  shape: `1, 255, 13, 13`. The anchor values are `116,90,  156,198,  373,326`.
 
-2. The array of detection summary info, name - `conv2d_66/Conv2D/YoloRegion`,  shape - `1,255,26,26`. The anchor values are `30,61,  62,45,  59,119`.
+2. The array of detection summary info, name: `conv2d_66/Conv2D/YoloRegion`,  shape: `1, 255, 26, 26`. The anchor values are `30,61,  62,45,  59,119`.
 
-3. The array of detection summary info, name - `conv2d_74/Conv2D/YoloRegion`,  shape - `1,255,52,52`. The anchor values are `10,13,  16,30,  33,23`.
+3. The array of detection summary info, name: `conv2d_74/Conv2D/YoloRegion`,  shape: `1, 255, 52, 52`. The anchor values are `10,13,  16,30,  33,23`.
 
-For each of the arrays the output format is `B,N*85,Cx,Cy`, where
+For each of the arrays the output format is `B, N*85, Cx, Cy`, where:
+
 - `B` - batch size
 - `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index
 
-Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_80`], where:
-- (`x`,`y`) - coordinates of box center relative to the cell
-- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function)
+Detection box has format [`x`, `y`, `h`, `w`, `box_score`, `class_no_1`, ..., `class_no_80`], where:
+
+- (`x`, `y`) - coordinates of box center relative to the cell
+- `h`, `w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function)
     and multiply them by the corresponding anchors to get the absolute height and width values
-- `box_score` - confidence of detection box in [0,1] range
-- `class_no_1`,...,`class_no_80` - probability distribution over the classes in the [0,1] range,
+- `box_score` - confidence of detection box in [0, 1] range
+- `class_no_1`, ..., `class_no_80` - probability distribution over the classes in the [0, 1] range,
     multiply them by the confidence value `box_score` to get confidence of each class
 
 Since the model is finetuned on person/vehicle/bike detection dataset, it returns non-zero scores for the following classes:
@@ -87,7 +88,7 @@ Since the model is finetuned on person/vehicle/bike detection dataset, it return
 * non-vehicle (bike/motorcycle) - the second class score
 * vehicle - the third class score
 Note that the indexes of these 3 classes are aligned with the indexes of the classes `person`, `bike`, and `car` in the
-original COCO\* dataset.
+original [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset.
 Also note that the model returns class scores for all 80 COCO classes for backward compatibility with the original Yolo V3.
 
 ## Legal information

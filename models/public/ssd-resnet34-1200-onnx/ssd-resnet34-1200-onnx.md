@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `ssd-resnet-34-1200-onnx` model is a multiscale SSD based on ResNet-34 backbone network intended to perform object detection. The model has been trained from the Common Objects in Context (COCO) image dataset. This model is pretrained in PyTorch\* framework and converted to ONNX\* format. For additional information refer to [repository](https://github.com/mlcommons/inference/tree/master/vision/classification_and_detection).
+The `ssd-resnet-34-1200-onnx` model is a multiscale SSD based on ResNet-34 backbone network intended to perform object detection. The model has been trained from the Common Objects in Context (COCO) image dataset. This model is pre-trained in PyTorch\* framework and converted to ONNX\* format. For additional information refer to [repository](https://github.com/mlcommons/inference/tree/master/vision/classification_and_detection).
 
 ## Specification
 
@@ -15,10 +15,10 @@ The `ssd-resnet-34-1200-onnx` model is a multiscale SSD based on ResNet-34 backb
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
-| coco_precision | 20.7198%|
-| mAP | 39.2752%	|
+| Metric         | Value    |
+| -------------- | -------- |
+| coco_precision | 20.7198% |
+| mAP            | 39.2752%	|
 
 ## Input
 
@@ -26,7 +26,7 @@ Note that original model expects image in `RGB` format, converted model - in `BG
 
 ### Original model
 
-Image, shape - `1,3,1200,1200,`, format is `B,C,H,W` where:
+Image, shape - `1, 3, 1200, 1200`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -37,7 +37,7 @@ Channel order is `RGB`.
 
 ### Converted model
 
-Image, shape - `1,3,1200,1200,`, format is `B,C,H,W` where:
+Image, shape - `1, 3, 1200, 1200`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -52,15 +52,15 @@ Channel order is `BGR`.
 
 ### Original model
 
-1. Classifier, name - `labels`, shape - `1,N`, contains predicted classes for each detected bounding box in [1, 81] range. The model was trained on Microsoft\* COCO dataset version with 80 categories of object,  0 class is for background. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl_bkgr.txt` file
-2. Probability, name - `scores`, shape - `1,N`, contains confidence of each detected bounding boxes.
-3. Detection boxes, name - `bboxes`, shape - `1,N,4`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are rescaled to input image size.
+1. Classifier, name - `labels`, shape - `1, N`, contains predicted classes for each detected bounding box in [1, 81] range. The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of object,  0 class is for background. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl_bkgr.txt` file
+2. Probability, name - `scores`, shape - `1, N`, contains confidence of each detected bounding boxes.
+3. Detection boxes, name - `bboxes`, shape - `1, N, 4`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are rescaled to input image size.
 
 ### Converted model
 
-1. Classifier, shape - `1,200`, contains predicted class ID for each detected bounding box in [1, 81] range. The model was trained on Microsoft\* COCO dataset version with 80 categories of object, 0 class is for background. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl_bkgr.txt` file
-2. Probability, shape - `1,200`, contains confidence of each detected bounding boxes.
-3. Detection boxes, shape - `1,200,4`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are in normalized format, in range [0, 1].
+1. Classifier, shape - `1, 200`, contains predicted class ID for each detected bounding box in [1, 81] range. The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of object, 0 class is for background. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl_bkgr.txt` file
+2. Probability, shape - `1, 200`, contains confidence of each detected bounding boxes.
+3. Detection boxes, shape - `1, 200, 4`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are in normalized format, in range [0, 1].
 
 ## Download a Model and Convert it into Inference Engine Format
 

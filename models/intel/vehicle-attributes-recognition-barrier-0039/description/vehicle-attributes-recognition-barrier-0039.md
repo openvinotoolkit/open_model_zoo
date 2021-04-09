@@ -50,20 +50,19 @@ This model presents a vehicle attributes classification algorithm for a traffic 
 
 ## Inputs
 
-1.	name: `input` , shape: [1x3x72x72] - An input image in following format
-[1xCxHxW], where:
+Image, name: `input`, shape: `1, 3, 72, 72` in the format `1, C, H, W`, where:
 
-    - C - number of channels
-    - H - image height
-    - W - image width
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-Expected color order: BGR.
+Expected color order: `BGR`.
 
 ## Outputs
 
-1.	name: "color", shape: [1, 7, 1, 1] - Softmax output across seven color classes
+1.	name: `color`, shape: `1, 7, 1, 1` - Softmax output across seven color classes
     [white, gray, yellow, red, green, blue, black]
-2.	name: "type", shape: [1, 4, 1, 1] - Softmax output across four type classes
+2.	name: `type`, shape: `1, 4, 1, 1` - Softmax output across four type classes
     [car, bus, truck, van]
 
 ## Legal Information

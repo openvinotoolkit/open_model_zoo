@@ -8,9 +8,11 @@ WaveRNN performs waveform regression from mel-spectrogram.
 For details see [paper](https://arxiv.org/abs/1703.10135), [repository](https://github.com/as-ideas/ForwardTacotron).
 
 ## ONNX Models
-We provide pretrained models in ONNX format for user convenience.
+
+We provide pre-trained models in ONNX format for user convenience.
 
 ### Steps to Reproduce PyTorch to ONNX Conversion
+
 Model is provided in ONNX format, which was obtained by the following steps.
 
 1. Clone the original repository
@@ -24,7 +26,7 @@ git checkout 78789c1aa845057bb2f799e702b1be76bf7defd0
 ```
 3. Follow README.md and preprocess LJSpeech dataset.
 4. Copy provided script `wavernn_to_onnx.py` to ForwardTacotron root directory, and apply git patch `0001-Added-batch-norm-fusing-to-conv-layers.patch`.
-5. Download WaveRNN model from https://github.com/fatchord/WaveRNN/tree/master/pretrained/ and extract in to pretrained directory.
+5. Download WaveRNN model from https://github.com/fatchord/WaveRNN/tree/master/pretrained/ and extract in to pre-trained directory.
 ```sh
 mkdir pretrained
 wget https://raw.githubusercontent.com/fatchord/WaveRNN/master/pretrained/ljspeech.wavernn.mol.800k.zip
@@ -40,7 +42,7 @@ Note: by the reason of autoregressive nature of the network, the model is divide
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Source framework                | PyTorch*                                  |
+| Source framework                | PyTorch\*                                 |
 
 ### Accuracy
 
@@ -57,29 +59,28 @@ The wavernn-upsampler model accepts mel-spectrogram and produces two feature map
 
 ### Input
 
-Mel-spectrogram, name: `mels`, shape: [1x200x80], format: [BxTxC]
-where:
+Mel-spectrogram, name: `mels`, shape: `1, 200, 80`, format: `B, T, C`, where:
 
-   - B - batch size
-   - T - time in mel-spectrogram
-   - C - number of mels in mel-spectrogram
+- `B` - batch size
+- `T` - time in mel-spectrogram
+- `C` - number of mels in mel-spectrogram
 
 ### Output
 
-1. Processed mel-spectrogram, name: `aux`, shape: [1x53888x128], format: [BxTxC]
-where:
-   - B - batch size
-   - T - time in audio (equal to `time in mel spectrogram` * `hop_length`)
-   - C - number of features in processed mel-spectrogram.
+1. Processed mel-spectrogram, name: `aux`, shape: `1, 53888, 128`, format: `B, T, C`, where:
 
-2. Upsampled and processed (by time) mel-spectrogram, name: `upsample_mels`, shape: [1x55008x80], format: [BxT'xC]
-where:
-   - B - batch size
-   - T' - time in audio padded with number of samples for crossfading between batches
-   - C - number of mels in mel-spectrogram
+   - `B` - batch size
+   - `T` - time in audio (equal to `time in mel spectrogram` * `hop_length`)
+   - `C` - number of features in processed mel-spectrogram.
 
+2. Upsampled and processed (by time) mel-spectrogram, name: `upsample_mels`, shape: `1, 55008, 80`, format: `B, T', C`, where:
+
+   - `B` - batch size
+   - `T'` - time in audio padded with number of samples for crossfading between batches
+   - `C` - number of mels in mel-spectrogram
 
 ## wavernn-rnn model specification
+
 The wavernn-rnn model accepts two feature maps from wavernn-upsampler and produces parameters for mixture of logistics distribution that is used for audio regression by B samples per forward step, where B is batch size.
 
 | Metric                          | Value                                     |
@@ -88,18 +89,25 @@ The wavernn-rnn model accepts two feature maps from wavernn-upsampler and produc
 | MParams                         | 3.83                                      |
 
 ### Input
-1. Time slice in `upsampled_mels`, name: `m_t`. Shape: [Bx80]
-2. Time/space slices in `aux`, name: `a1_t`, `a2_t`, `a3_t`,`a4_t`. Shape: [Bx32]. Second dimension is 32 = aux.shape[1] / 4
-3. Hidden states for GRU layers in autoregression, name `h1.1`, `h2.1`. Shape: [Bx512].
-4. Previous prediction for autoregression (initially equal to zero), name: `x`. Shape: [Bx1]
 
-Note: B - batch size.
+1. Time slice in `upsampled_mels`, name: `m_t`, shape: `B, 80`
+2. Time/space slice in `aux`, name: `a1_t`, shape: `B, 32`, where second dimension is 32 = aux.shape[1] / 4
+3. Time/space slice in `aux`, name: `a2_t`, shape: `B, 32`, where second dimension is 32 = aux.shape[1] / 4
+4. Time/space slice in `aux`, name: `a3_t`, shape: `B, 32`, where second dimension is 32 = aux.shape[1] / 4
+5. Time/space slice in `aux`, name: `a4_t`, shape: `B, 32`, where second dimension is 32 = aux.shape[1] / 4
+6. Hidden state for GRU layers in autoregression, name: `h1.1`, shape: `B, 512`
+7. Hidden state for GRU layers in autoregression, name: `h2.1`, shape: `B, 512`
+8. Previous prediction for autoregression (initially equal to zero), name: `x`, shape: `B, 1`
+
+Note: `B` - batch size.
 
 ### Output
-1. Hidden states for GRU layers in autoregression, name `h1`, `h2`. Shape: [Bx512].
-2. Parameters for mixture of logistics distribution, name: `logits`. Shape: [Bx30]. Can be divided to parameters of mixture of logistic distributions: probabilities = logits[:, :10], means = logits[:, 10:20], scales = logits[:, 20:30].
 
-Note: B - batch size.
+1. Hidden state for GRU layers in autoregression, name: `h1`, shape: `B, 512`
+2. Hidden state for GRU layers in autoregression, name: `h2`, shape: `B, 512`
+3. Parameters for mixture of logistics distribution, name: `logits`, shape: `B, 30`. Can be divided to parameters of mixture of logistic distributions: probabilities = logits[:, :10], means = logits[:, 10:20], scales = logits[:, 20:30]
+
+Note: `B` - batch size.
 
 ## Download a Model and Convert it into Inference Engine Format
 

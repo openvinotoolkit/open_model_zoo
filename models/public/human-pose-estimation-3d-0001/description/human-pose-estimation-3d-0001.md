@@ -19,19 +19,22 @@ Multi-person 3D human pose estimation model based on the [Lightweight OpenPose](
 
 ## Inputs
 
-Name: `data`, shape: `[1x3x256x448]`. An input image in the `[BxCxHxW]` format,
-where:
+Image, name: `data`, shape: `1, 3, 256, 448` in the `B, C, H, W` format, where:
 
-- B - batch size
-- C - number of channels
-- H - image height
-- W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-Expected color order is BGR.
+Expected color order is `BGR`.
 
 ## Outputs
 
-The net outputs three blobs with the following shapes: `[1, 57, 32, 56]`, `[1, 19, 32, 56]`, and `[1, 38, 32, 56]`. The first blob contains coordinates in 3D space, the second blob contains keypoint heatmaps and the third blob is keypoint pairwise relations (part affinity fields).
+The net outputs are three blobs:
+
+1. Name: `features`, shape: `1, 57, 32, 56` - coordinates in 3D space.
+2. Name: `heatmaps`, shape: `1, 19, 32, 56` - keypoint heatmaps.
+3. Name: `pafs`, shape: `1, 38, 32, 56` - keypoint pairwise relations (part affinity fields).
 
 ## Download a Model and Convert it into Inference Engine Format
 

@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 The `googlenet-v1-tf` model is one of the Inception family, designed to perform image classification.
-Like the other Inception models, the `googlenet-v1-tf` model has been pretrained on the ImageNet image database.
+Like the other Inception models, the `googlenet-v1-tf` model has been pre-trained on the ImageNet image database.
 For details about this family of models, check out the [paper](https://arxiv.org/abs/1602.07261), [repository](https://github.com/tensorflow/models/tree/master/research/slim).
 
 ## Specification
@@ -19,14 +19,14 @@ For details about this family of models, check out the [paper](https://arxiv.org
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 69.81%          | 69.81%           |
-| Top 5  | 89.61%          | 89.61%           |
+| Top 1  | 69.81%          | 69.81%         |
+| Top 5  | 89.61%          | 89.61%         |
 
 ## Input
 
 ### Original model
 
-Image, name - `input`, shape - `1,224,224,3`, format is `B,H,W,C` where:
+Image, name - `input`, shape - `1, 224, 224, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
 - `H` - height
@@ -38,7 +38,7 @@ Mean values - [127.5, 127.5, 127.5], scale value - 127.5
 
 ### Converted model
 
-Image,  name - `data`, shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image,  name - `data`, shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -51,17 +51,17 @@ Channel order is `BGR`
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `InceptionV1/Logits/Predictions/Softmax`,  shape - `1,1001`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `InceptionV1/Logits/Predictions/Softmax`,  shape - `1, 1001`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `InceptionV1/Logits/Predictions/Softmax`,  shape - `1,1001`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `InceptionV1/Logits/Predictions/Softmax`,  shape - `1, 1001`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ## Download a Model and Convert it into Inference Engine Format
 

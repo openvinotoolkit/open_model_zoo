@@ -4,7 +4,7 @@
 
 The `vgg16` model is one of the [vgg](https://arxiv.org/abs/1409.1556) models designed to perform image classification in Caffe\*format.
 
-The model input is a blob that consists of a single image of "1x3x224x224" in BGR order. The BGR mean values need to be subtracted as follows: [103.939, 116.779, 123.68] before passing the image blob into the network.
+The model input is a blob that consists of a single image of `1, 3, 224, 224` in `BGR` order. The BGR mean values need to be subtracted as follows: [103.939, 116.779, 123.68] before passing the image blob into the network.
 
 The model output for `vgg16` is the typical object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
@@ -15,12 +15,12 @@ The model output for `vgg16` is the typical object classifier output for the 100
 | Type              | Classification|
 | GFLOPs            | 30.974        |
 | MParams           | 138.358       |
-| Source framework  | Caffe\*        |
+| Source framework  | Caffe\*       |
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric | Value  |
+| ------ | ------ |
 | Top 1  | 70.968%|
 | Top 5  | 89.878%|
 
@@ -28,7 +28,7 @@ The model output for `vgg16` is the typical object classifier output for the 100
 
 ### Original mode
 
-Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -40,7 +40,7 @@ Mean values - [103.939, 116.779, 123.68]
 
 ### Converted model
 
-Image, name - `data`, shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `data`, shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -53,17 +53,17 @@ Channel order is `BGR`.
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `prob`, shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`, shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `prob`, shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`, shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ## Download a Model and Convert it into Inference Engine Format
 

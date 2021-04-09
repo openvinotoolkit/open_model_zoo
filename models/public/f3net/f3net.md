@@ -37,7 +37,7 @@ More details regarding evaluation procedure can be found in this [paper](https:/
 
 ### Original model
 
-Image, name - `input.1` , shape - `1,3,352,352`, format `B,C,H,W`, where:
+Image, name - `input.1`, shape - `1, 3, 352, 352`, format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -50,7 +50,7 @@ Scale values - [56.77,  55.97,  57.50]
 
 ### Converted model
 
-Image, name - `input.1` , shape - `1,3,352,352`, format `B,C,H,W`, where:
+Image, name - `input.1`, shape - `1, 3, 352, 352`, format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -62,7 +62,7 @@ Expected color order - `BGR`.
 ## Output
 
 ### Original model
-Saliency map, name `saliency_map`, shape `1,1,352,352`, format `B,C,H,W` where:
+Saliency map, name `saliency_map`, shape `1, 1, 352, 352`, format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -74,6 +74,20 @@ Saliency map, name `saliency_map`, shape `1,1,352,352`, format `B,C,H,W` where:
 ### Converted model
 
 The converted model has the same parameters as the original model.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

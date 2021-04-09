@@ -25,7 +25,7 @@ Chinese license plates in traffic.
 | Ratio of correct reads | 98%                     |
 | GFlops                 | 0.347                   |
 | MParams                | 1.435                   |
-| Source framework       | TensorFlow*             |
+| Source framework       | TensorFlow\*            |
 
 ## Limitations
 
@@ -36,7 +36,7 @@ thoroughly. Other types of license plates may underperform.
 
 ### Original Model
 
-Image,	name: `data` , shape: `1,3,24,94`, format is `1,C,H,W` where:
+Image,	name: `data`, shape: `1, 3, 24, 94`, format is `1, C, H, W`, where:
 
 - `C` - channel
 - `H` - height
@@ -46,7 +46,7 @@ Channel order is `BGR`.
 
 ### Converted Model
 
-Image,	name: `data` , shape: `1,3,24,94`, format is `1,C,H,W` where:
+Image,	name: `data`, shape: `1, 3, 24, 94`, format is `1, C, H, W`, where:
 
 - `C` - channel
 - `H` - height
@@ -58,7 +58,7 @@ Channel order is `BGR`.
 
 ### Original Model
 
-Encoded vector of floats, name: `decode`, shape: `1,88,1,1`. Each float
+Encoded vector of floats, name: `decode`, shape: `1, 88, 1, 1`. Each float
 is an integer number encoding a character according to this dictionary:
 
         0 0
@@ -134,7 +134,7 @@ is an integer number encoding a character according to this dictionary:
 
 ### Converted Model
 
-Encoded vector of floats, name: `decode`, shape: `1,88,1,1`. Each float
+Encoded vector of floats, name: `decode`, shape: `1, 88, 1, 1`. Each float
 is an integer number encoding a character according to this dictionary:
 
         0 0

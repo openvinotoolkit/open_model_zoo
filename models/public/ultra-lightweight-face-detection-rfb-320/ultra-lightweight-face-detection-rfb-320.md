@@ -25,7 +25,7 @@ For details see [repository](https://github.com/Linzaer/Ultra-Light-Fast-Generic
 
 ### Original model
 
-Image, name - `input` , shape - `1, 3, 240, 320`, format `B, C, H, W`, where:
+Image, name - `input`, shape - `1, 3, 240, 320`, format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -40,7 +40,7 @@ Scale values - [128.0, 128.0, 128.0].
 
 ### Converted model
 
-Image, name - `input` , shape - `1, 3, 240, 320`, format `B, C, H, W`, where:
+Image, name - `input`, shape - `1, 3, 240, 320`, format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -55,13 +55,13 @@ Expected color order is `BGR`.
 
 1. Bounding boxes, name: `boxes`, shape - `1, 4420, 4`. Presented in format `B, A, 4`, where:
 
-- `B` - batch size
-- `A` - number of detected anchors
+    - `B` - batch size
+    - `A` - number of detected anchors
 
-For each detection, the description has the format: [`x_min`, `y_min`, `x_max`, `y_max`], where:
+    For each detection, the description has the format: [`x_min`, `y_min`, `x_max`, `y_max`], where:
 
-- (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates are in normalized format, in range [0, 1])
-- (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner (coordinates are in normalized format, in range [0, 1])
+    - (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates are in normalized format, in range [0, 1])
+    - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner (coordinates are in normalized format, in range [0, 1])
 
 2. Scores, name: `scores`, shape - `1, 4420, 2`. Contains scores for 2 classes - the first is background, the second is face.
 
@@ -69,15 +69,29 @@ For each detection, the description has the format: [`x_min`, `y_min`, `x_max`, 
 
 1. Bounding boxes, name: `boxes`, shape - `1, 4420, 4`. Presented in format `B, A, 4`, where:
 
-- `B` - batch size
-- `A` - number of detected anchors
+    - `B` - batch size
+    - `A` - number of detected anchors
 
-For each detection, the description has the format: [`x_min`, `y_min`, `x_max`, `y_max`], where:
+    For each detection, the description has the format: [`x_min`, `y_min`, `x_max`, `y_max`], where:
 
-- (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates are in normalized format, in range [0, 1])
-- (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner (coordinates are in normalized format, in range [0, 1])
+    - (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates are in normalized format, in range [0, 1])
+    - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner (coordinates are in normalized format, in range [0, 1])
 
 2. Scores, name: `scores`, shape - `1, 4420, 2`. Contains scores for 2 classes - the first is background, the second is face.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

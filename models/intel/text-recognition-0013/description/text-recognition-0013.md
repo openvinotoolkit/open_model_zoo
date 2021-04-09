@@ -17,26 +17,26 @@ The network is able to recognize case-insensitive alphanumeric text (36 unique s
 | Text location requirements                     | Tight aligned crop |
 | GFlops                                         | 0.2726             |
 | MParams                                        | 1.4187             |
-| Source framework                               | PyTorch            |
+| Source framework                               | PyTorch\*          |
 
 ## Inputs
-Input tensor is `imgs`.
-Shape: `1, 1, 32, 120` - An input image in the format `B, C, H, W`,
-where:
-  - B - batch size
-  - C - number of channels
-  - H - image height
-  - W - image width
+
+Image, name: `imgs`, shape: `1, 1, 32, 120` in the format `B, C, H, W`, where:
+
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
 Note that the source image should be tight aligned crop with detected text converted to grayscale.
 
 ## Outputs
-The net outputs 2 blobs
-*  `logits` with the shape `30, 1, 37` in the format `W, B, L`,
-    where:
-      - W - output sequence length
-      - B - batch size
-      - L - confidence distribution across alphanumeric symbols: "#0123456789abcdefghijklmnopqrstuvwxyz", where # - special blank character for CTC decoding algorithm.
+
+The net output is a blob with name `logits` and the shape `30, 1, 37` in the format `W, B, L`, where:
+
+- `W` - output sequence length
+- `B` - batch size
+- `L` - confidence distribution across alphanumeric symbols: `#0123456789abcdefghijklmnopqrstuvwxyz`, where # - special blank character for CTC decoding algorithm.
 
 The network output can be decoded by CTC Greedy Decoder or CTC Beam Search decoder.
 

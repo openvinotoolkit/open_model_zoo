@@ -4,7 +4,7 @@
 
 The `squeezenet1.0` model is one of the [SqueezeNet](https://arxiv.org/abs/1602.07360) topology models, is designed to perform image classification. The SqueezeNet models have been pre-trained on the ImageNet image database. For details about this family of models, check out the [repository](https://github.com/forresti/SqueezeNet).
 
-The model input is a blob that consists of a single image of 1x3x227x227 in BGR order. The BGR mean values need to be subtracted as follows: [104, 117, 123] before passing the image blob into the network.
+The model input is a blob that consists of a single image of `1, 3, 227, 227` in `BGR` order. The BGR mean values need to be subtracted as follows: [104, 117, 123] before passing the image blob into the network.
 
 The model output for `squeezenet1.0` is the typical object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
@@ -15,12 +15,12 @@ The model output for `squeezenet1.0` is the typical object classifier output for
 | Type              | Classification|
 | GFLOPs            | 1.737         |
 | MParams           | 1.248         |
-| Source framework  | Caffe\*         |
+| Source framework  | Caffe\*       |
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric | Value  |
+| ------ | ------ |
 | Top 1  | 57.684%|
 | Top 5  | 80.38% |
 
@@ -28,7 +28,7 @@ The model output for `squeezenet1.0` is the typical object classifier output for
 
 ### Original model
 
-Image, name - `data`, shape - `1,3,227,227`, format is `B,C,H,W` where:
+Image, name - `data`, shape - `1, 3, 227, 227`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -40,7 +40,7 @@ Mean values - [104, 117, 123]
 
 ### Converted model
 
-Image, name - `data`, shape - `1,3,227,227`, format is `B,C,H,W` where:
+Image, name - `data`, shape - `1, 3, 227, 227`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -53,17 +53,17 @@ Channel order is `BGR`.
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `prob`, shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`, shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `prob`, shape - `1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `prob`, shape - `1, 1000`, output data format is `B, C`, where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ## Download a Model and Convert it into Inference Engine Format
 

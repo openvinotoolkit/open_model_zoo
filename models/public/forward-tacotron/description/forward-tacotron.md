@@ -7,7 +7,7 @@ then converted to ONNX\* format. The model was trained on LJSpeech dataset. Forw
 For details see [paper](https://arxiv.org/abs/1703.10135), [paper](https://arxiv.org/abs/1905.09263), [repository](https://github.com/as-ideas/ForwardTacotron).
 
 ## ONNX Models
-We provide pretrained models in ONNX format for user convenience.
+We provide pre-trained models in ONNX format for user convenience.
 
 ### Steps to Reproduce training in PyTorch and Conversion to ONNX
 Model is provided in ONNX format, which was obtained by the following steps.
@@ -35,7 +35,7 @@ Notes:
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Source framework                | PyTorch*                                  |
+| Source framework                | PyTorch\*                                 |
 
 ### Accuracy
 
@@ -53,22 +53,24 @@ duration in time for every processed embedding.
 
 ### Input
 
-Sequence, name: `input_seq`, shape: [1x241], format: [BxC]
-where:
+Sequence, name: `input_seq`, shape: `1, 241`, format: `B, C`, where:
 
-   - B - batch size
-   - C - number of symbols in sequence (letters or phonemes)
+- `B` - batch size
+- `C` - number of symbols in sequence (letters or phonemes)
 
 ### Output
 
-1. Duration for input symbols, name: `duration`, shape: [1, 241, 1], format [BxCxH]. Contains predicted duration for each of the symbol in sequence.
-   - B - batch size
-   - C - number of symbols in sequence (letters or phonemes)
-   - H - empty dimension.
-2. Processed embeddings, name: `embeddings`, shape: [1, 241, 512], format [BxCxH]. Contains processed embeddings for each symbol in sequence.
-   - B - batch size
-   - C - number of symbols in sequence (letters or phonemes)
-   - H - height of the intermediate feature map.
+1. Duration for input symbols, name: `duration`, shape: `1, 241, 1`, format `B, C, H`. Contains predicted duration for each of the symbol in sequence.
+
+   - `B` - batch size
+   - `C` - number of symbols in sequence (letters or phonemes)
+   - `H` - empty dimension
+
+2. Processed embeddings, name: `embeddings`, shape: `1, 241, 512`, format `B, C, H`. Contains processed embeddings for each symbol in sequence.
+
+   - `B` - batch size
+   - `C` - number of symbols in sequence (letters or phonemes)
+   - `H` - height of the intermediate feature map
 
 ## forward-tacotron-regression model specification
 
@@ -81,20 +83,18 @@ The forward-tacotron-regression model accepts aligned by duration processed embe
 
 ### Input
 
-Processed embeddigs aligned by durations, name: `data`, shape: [1x805x512], format: [BxTxC]
-where:
+Processed embeddings aligned by durations, name: `data`, shape: `1, 805, 512`, format: `B, T, C`, where:
 
-   - B - batch size
-   - T - time in mel-spectrogram
-   - C - processed embedding dimension
+- `B` - batch size
+- `T` - time in mel-spectrogram
+- `C` - processed embedding dimension
 
 ### Output
 
-Mel-spectrogram, name: `mel`, shape: [80x805], format: [CxT]
-where:
+Mel-spectrogram, name: `mel`, shape: `80, 805`, format: `C, T`, where:
 
-   - T - time in mel-spectrogram
-   - C - number of mels in mel-spectrogram
+- `T` - time in mel-spectrogram
+- `C` - number of mels in mel-spectrogram
 
 ## Download a Model and Convert it into Inference Engine Format
 

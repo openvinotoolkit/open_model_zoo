@@ -1,6 +1,7 @@
 # retinaface-anti-cov
 
 ## Use Case and High-Level Description
+
 RetinaFace-Anti-Cov is a customized one stage face detector to help people protect themselves from CovID-19. More details provided in the [paper](https://arxiv.org/abs/1905.00641) and [repository](https://github.com/deepinsight/insightface/tree/master/detection/RetinaFaceAntiCov)
 
 ## Specification
@@ -14,71 +15,78 @@ RetinaFace-Anti-Cov is a customized one stage face detector to help people prote
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
-| mAP | 77.1531%|
+| Metric | Value   |
+| ------ | ------- |
+| mAP    | 77.1531%|
 
 ## Input
 
 ### Original model:
-Image, name - `data` , shape - [1x3x640x640], format [BxCxHxW], where:
 
-- B - batch size
-- C - number of channels
-- H - image height
-- W - image width
+Image, name - `data`, shape - `1, 3, 640, 640`, format - `B, C, H, W`, where:
 
-Expected color order - RGB.
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Expected color order - `RGB`.
 
 ### Converted model:
-Image, name - `data` , shape - [1x3x640x640], format [BxCxHxW], where:
 
-- B - batch size
-- C - number of channels
-- H - image height
-- W - image width
+Image, name - `data`, shape - `1, 3, 640, 640`, format - `B, C, H, W`, where:
 
-Expected color order - BGR.
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Expected color order - `BGR`.
 
 ## Output
 
 ### Original model
+
 Model outputs are floating points tensors:
-1. name: `face_rpn_cls_prob_reshape_stride32`, shape: `1,4, 20, 20`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 32 for 2 classes: background and face.
 
-2. name: `face_rpn_bbox_stride32`,  shape: `1,8,20,20`, format: `[B, Ax4, H, W]`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 32.
+1. name: `face_rpn_cls_prob_reshape_stride32`, shape: `1, 4, 20, 20`, format: `B, Ax2, H, W`, represents detection scores from Feature Pyramid Network (FPN) level with stride 32 for 2 classes: background and face.
 
-3. name: `face_rpn_landmark_pred_stride32`, shape: `1,20,20,20`, format: `[B, Ax10, H, W]`, represents *facial landmarks* from Feature Pyramid Network (FPN) level with stride 32.
+2. name: `face_rpn_bbox_stride32`,  shape: `1, 8, 20, 20`, format: `B, Ax4, H, W`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 32.
 
-4. name: `face_rpn_type_prob_reshape_stride32`, shape: `1,6,20,20`, format: `[B, Ax3, H, W]`, represents *attributes score*.
+3. name: `face_rpn_landmark_pred_stride32`, shape: `1, 20, 20, 20`, format: `B, Ax10, H, W`, represents *facial landmarks* from Feature Pyramid Network (FPN) level with stride 32.
 
-5. name: `face_rpn_cls_prob_reshape_stride16`, shape: `1,4,40,40`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 16 for 2 classes: background and face.
+4. name: `face_rpn_type_prob_reshape_stride32`, shape: `1, 6, 20, 20`, format: `B, Ax3, H, W`, represents *attributes score*.
 
-6. name: `face_rpn_bbox_stride16`,  shape: `1,8,40,40`, format: `[B, Ax4, H, W]`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 16.
+5. name: `face_rpn_cls_prob_reshape_stride16`, shape: `1, 4, 40, 40`, format: `B, Ax2, H, W`, represents detection scores from Feature Pyramid Network (FPN) level with stride 16 for 2 classes: background and face.
 
-7. name: `face_rpn_landmark_pred_stride16`, shape: `1,20,40,40`, format: `[B, Ax10, H, W]`, represents facial landmarks from Feature Pyramid Network (FPN) level with stride 16.
+6. name: `face_rpn_bbox_stride16`,  shape: `1, 8, 40, 40`, format: `B, Ax4, H, W`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 16.
 
-8. name: `face_rpn_type_prob_reshape_stride16`, shape: `1,6,40,40`, format: `[B, Ax3, H, W]`, represents *attributes score*.
+7. name: `face_rpn_landmark_pred_stride16`, shape: `1, 20, 40, 40`, format: `B, Ax10, H, W`, represents *facial landmarks* from Feature Pyramid Network (FPN) level with stride 16.
 
-9. name: `face_rpn_cls_prob_reshape_stride16`, shape: `1,4,80,80`, format: `[B, Ax2, H, W]`, represents detection scores from Feature Pyramid Network (FPN) level with stride 8 for 2 classes: background and face.
+8. name: `face_rpn_type_prob_reshape_stride16`, shape: `1, 6, 40, 40`, format: `B, Ax3, H, W`, represents *attributes score*.
 
-10. name: `face_rpn_bbox_stride16`,  shape: `1,8,80,80`, format: `[B, Ax4, H, W]`, represents detection box deltas from Feature Pyramid Network (FPN) level with stride 8.
+9. name: `face_rpn_cls_prob_reshape_stride8`, shape: `1, 4, 80, 80`, format: `B, Ax2, H, W`, represents detection scores from Feature Pyramid Network (FPN) level with stride 8 for 2 classes: background and face.
 
-11. name: `face_rpn_landmark_pred_stride16`, shape: `1,20,80,80`, format: `[B, Ax10, H, W]`, represents facial landmarks from Feature Pyramid Network (FPN) level with stride 8.
+10. name: `face_rpn_bbox_stride8`,  shape: `1, 8, 80, 80`, format: `B, Ax4, H, W`, represents *detection box deltas* from Feature Pyramid Network (FPN) level with stride 8.
 
-12. name: `face_rpn_type_prob_reshape_stride8`, shape: `1,6,80,80`, format: `[B, Ax3, H, W]`, represents *attributes score*.
+11. name: `face_rpn_landmark_pred_stride8`, shape: `1, 20, 80, 80`, format: `B, Ax10, H, W`, represents *facial landmarks* from Feature Pyramid Network (FPN) level with stride 8.
+
+12. name: `face_rpn_type_prob_reshape_stride8`, shape: `1, 6, 80, 80`, format: `B, Ax3, H, W`, represents *attributes score*.
 
 For each output format:
+
 - `B` - batch size
 - `A` - number of anchors
 - `H` - feature height
 - `W` - feature width
 
 Detection box deltas have format `[dx, dy, dh, dw]`, where:
+
 - `(dx, dy)` - regression for left-upper corner of bounding box,
 - `(dh, dw)` - regression by height and width of bounding box.
 
 Facial landmarks have format `[x1, y1, x2, y2, x3, y3, x4, y4, x5, y5]`, where:
+
 - `(x1, y1)` - coordinates of left eye
 - `(x2, y2)` - coordinates of rights eye
 - `(x3, y3)` - coordinates of nose
@@ -88,6 +96,7 @@ Facial landmarks have format `[x1, y1, x2, y2, x3, y3, x4, y4, x5, y5]`, where:
 The third element in attributes score is a mask attribute. This score determines the presence or absence of a mask on a person.
 
 ### Converted model
+
 The converted model has the same parameters as the original model.
 
 ## Download a Model and Convert it into Inference Engine Format

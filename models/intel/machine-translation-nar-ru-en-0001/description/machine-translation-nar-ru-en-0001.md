@@ -14,7 +14,6 @@ Tokenization occurs using the SentencePieceBPETokenizer (see the demo code for i
 | MParams           | 69.29                 |
 | Source framework  | PyTorch\*             |
 
-
 ## Accuracy
 
 The quality metrics were calculated on the wmt19-ru-en dataset ("test" split in lower case).
@@ -23,19 +22,18 @@ The quality metrics were calculated on the wmt19-ru-en dataset ("test" split in 
 |---------------------------|---------------|
 | BLEU                      |        22.8 % |
 
-
 ## Input
 
-name: tokens
-shape: [1, 192]
+name: `tokens`
+shape: `1, 192`
 description: sequence of tokens (integer values) representing the tokenized sentence.
 The sequence structure is as follows (`<s>`, `</s>` and `<pad>` should be replaced by corresponding token IDs as specified by the dictionary):
 `<s>` + *tokenized sentence* + `</s>` + (`<pad>` tokens to pad to the maximum sequence length of 192)
 
 ## Output
 
-name: pred
-shape: [1, 192]
+name: `pred`
+shape: `1, 192`
 description: sequence of tokens (integer values) representing the tokenized translation.
 The sequence structure is as follows (`<s>`, `</s>` and `<pad>` should be replaced by corresponding token IDs as specified by the dictionary):
 `<s>` + *tokenized sentence* + `</s>` + (`<pad>` tokens to pad to the maximum sequence length of 192)

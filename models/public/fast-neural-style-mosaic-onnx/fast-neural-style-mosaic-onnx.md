@@ -9,7 +9,6 @@ Transfer and Super-Resolution](https://arxiv.org/abs/1603.08155) along with
 [Instance Normalization](https://arxiv.org/abs/1607.08022). Original ONNX
 models are provided in the [repository](https://github.com/onnx/models).
 
-
 ## Specification
 
 | Metric            | Value            |
@@ -21,7 +20,7 @@ models are provided in the [repository](https://github.com/onnx/models).
 
 ## Accuracy
 
-Accuracy metrics are obtained on MS COCO val2017 dataset. Images were resized to input size.
+Accuracy metrics are obtained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) val2017 dataset. Images were resized to input size.
 
 | Metric | Original model | Converted model (FP32) | Converted model (FP16) |
 | ------ | -------------- | ---------------------- | ---------------------- |
@@ -31,49 +30,49 @@ Accuracy metrics are obtained on MS COCO val2017 dataset. Images were resized to
 
 ### Original model
 
-Image, name - `input1`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `input1`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
 
-Expected color order: RGB.
+Expected color order: `RGB`.
 
 ### Converted model
 
-Image, name - `input1`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `input1`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
 
-Expected color order: BGR.
+Expected color order: `BGR`.
 
 ## Output
 
 ### Original model
 
-Image, name - `output1`, shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `output1`, shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
 
-Expected color order: RGB.
+Expected color order: `RGB`.
 
 ### Converted model
 
-Image, name - `output1`, shape - `1,3,224,224`, format is `B,C,H,W` where:
+Image, name - `output1`, shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
 
-Expected color order: RGB.
+Expected color order: `RGB`.
 
 ## Download a Model and Convert it into Inference Engine Format
 

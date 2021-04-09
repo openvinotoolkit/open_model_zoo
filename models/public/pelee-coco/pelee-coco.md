@@ -1,9 +1,10 @@
 # pelee-coco
 
 ## Use Case and High-Level Description
+
 The [Pelee](https://arxiv.org/abs/1804.06882) is a Real-Time Object Detection System on Mobile Devices
 based on Single Shot Detection approach. The model is implemented using the
-Caffe\* framework and trained on MSCOCO\* dataset.
+Caffe\* framework and trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset.
 For details about this model, check out the [repository](https://github.com/Robert-JunWang/Pelee).
 
 ## Specification
@@ -17,8 +18,8 @@ For details about this model, check out the [repository](https://github.com/Robe
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
+| Metric         | Value    |
+| -------------- | -------- |
 | coco_precision | 21.9761% |
 
 See [here](https://github.com/Robert-JunWang/Pelee).
@@ -27,7 +28,7 @@ See [here](https://github.com/Robert-JunWang/Pelee).
 
 ### Original model
 
-Image, name - ` data`, shape - `1,3,304,304`, format is `B,C,H,W` where:
+Image, name - `data`, shape - `1, 3, 304, 304`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -35,11 +36,11 @@ Image, name - ` data`, shape - `1,3,304,304`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`.
-Mean values - [103.94,116.78,123.68], Scale - 58.8235.
+Mean values - [103.94, 116.78, 123.68],  Scale - 58.8235.
 
 ### Converted model
 
-Image, name - ` data`, shape - `1,3,304,304`, format is `B,C,H,W` where:
+Image, name - `data`, shape - `1, 3, 304, 304`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -52,7 +53,7 @@ Channel order is `BGR`.
 
 ### Original model
 
-The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 7`, where N is the number of detected bounding boxes. For each detection, the description has the format:
+The array of detection summary info, name - `detection_out`,  shape - `1, 1, 200, 7` in the format `1, 1, N, 7`, where `N` is the number of detected bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
 
 - `image_id` - ID of the image in the batch
@@ -63,7 +64,7 @@ The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 
 
 ### Converted model
 
-The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 7`, where N is the number of detected bounding boxes. For each detection, the description has the format:
+The array of detection summary info, name - `detection_out`,  shape - `1, 1, 200, 7` in the format `1, 1, N, 7`, where `N` is the number of detected bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
 
 - `image_id` - ID of the image in the batch

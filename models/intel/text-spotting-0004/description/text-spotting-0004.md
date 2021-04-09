@@ -15,10 +15,10 @@ Alphabet is alphanumeric: `abcdefghijklmnopqrstuvwxyz0123456789`.
 
 ## Composite model specification
 
-| Metric                                        | Value     |
-|-----------------------------------------------|-----------|
-| Word spotting hmean ICDAR2015, without a dictionary | 70.34% |
-| Source framework                              | PyTorch\* |
+| Metric                                              | Value     |
+|-----------------------------------------------------|-----------|
+| Word spotting hmean ICDAR2015, without a dictionary | 70.34%    |
+| Source framework                                    | PyTorch\* |
 
 *Hmean Word spotting* is defined and measured according to the
 [Incidental Scene Text (ICDAR2015) challenge](https://rrc.cvc.uab.es/?ch=4&com=introduction).
@@ -34,8 +34,14 @@ The text-spotting-0004-detector model is a Mask-RCNN-based text detector with Re
 
 ### Inputs
 
-1.	Name: `im_data` , shape: `1, 3, 768, 1280`. An input image in the `1, C, H, W` format.
-    The expected channel order is BGR.
+1. Image, name: `im_data`, shape: `1, 3, 768, 1280` in the `1, C, H, W` format, where:
+
+    - `C` - number of channels
+    - `H` - image height
+    - `W` - image width
+
+    The expected channel order is `BGR`.
+
 2.	Name: `im_info`, shape: `1, 3`. Image information: processed image height,
     processed image width, and processed image scale with respect to the original image resolution.
 
@@ -59,7 +65,7 @@ The text-spotting-0004-recognizer-encoder model is a fully-convolutional encoder
 
 ### Inputs
 
-Name: `input` , shape: `1, 64, 28, 28`. Text recognition features obtained from detection part.
+Name: `input`, shape: `1, 64, 28, 28`. Text recognition features obtained from detection part.
 
 ### Outputs
 
@@ -74,16 +80,15 @@ Name: `output`, shape: `1, 256, 28, 28`. Encoded text recognition features.
 
 ### Inputs
 
-1.	Name: `encoder_outputs` , shape: `1, (28*28), 256`. Encoded text recognition features.
-1.	Name: `prev_symbol` , shape: `1, 1`. Index in alphabet of previously generated symbol.
-1.	Name: `prev_hidden`, shape: `1, 1, 256`. Previous hidden state of GRU.
+1.	Name: `encoder_outputs`, shape: `1, (28*28), 256`. Encoded text recognition features.
+2.	Name: `prev_symbol`, shape: `1, 1`. Index in alphabet of previously generated symbol.
+3.	Name: `prev_hidden`, shape: `1, 1, 256`. Previous hidden state of GRU.
 
 ### Outputs
 
 1.	Name: `output`, shape: `1, 38`. Encoded text recognition features. Indices starting from 2 correspond to symbols from the
 alphabet. The 0 and 1 are special Start of Sequence and End of Sequence symbols correspondingly.
-1.	Name: `hidden`, shape: `1, 1, 256`. Current hidden state of GRU.
-
+2.	Name: `hidden`, shape: `1, 1, 256`. Current hidden state of GRU.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

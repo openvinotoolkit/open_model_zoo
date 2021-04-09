@@ -15,55 +15,51 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 
 ## Accuracy
 
-| Metric | Value |
-| ------ | ----- |
-| mean_iou  | 66.85%|
+| Metric   | Value |
+| -------- | ----- |
+| mean_iou | 66.85%|
 
 ## Input
 
 ### Original model
 
-Image, name: `ImageTensor`, shape: [1x513x513x3], format: [BxHxWxC],
-   where:
+Image, name: `ImageTensor`, shape: `1, 513, 513, 3`, format: `B, H, W, C`, where:
 
-    - B - batch size
-    - H - image height
-    - W - image width
-    - C - number of channels
+- `B` - batch size
+- `H` - image height
+- `W` - image width
+- `C` - number of channels
 
-   Expected color order: RGB.
+Expected color order: `RGB`.
 
 ### Converted Model
 
-Image, name: `mul_1/placeholder_port_1`, shape: [1x3x513x513], format: [BxCxHxW],
-   where:
+Image, name: `mul_1/placeholder_port_1`, shape: `1, 3, 513, 513`, format: `B, C, H, W`, where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-   Expected color order: BGR.
+Expected color order: `BGR`.
 
 ## Output
 
 ### Original Model
 
-Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `ArgMax`, shape: [1x513x513] in [BxHxW] format, where
+Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `ArgMax`, shape: `1, 513, 513` in `B, H, W` format, where:
 
-    - B - batch size
-    - H - image height
-    - W - image width
-
+- `B` - batch size
+- `H` - image height
+- `W` - image width
 
 ### Converted Model
 
-Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `ArgMax/Squeeze`, shape: [1x513x513] in [BxHxW] format, where
+Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `ArgMax/Squeeze`, shape: `1, 513, 513` in `B, H, W` format, where:
 
-    - B - batch size
-    - H - image height
-    - W - image width
-
+- `B` - batch size
+- `H` - image height
+- `W` - image width
 
 ## Download a Model and Convert it into Inference Engine Format
 

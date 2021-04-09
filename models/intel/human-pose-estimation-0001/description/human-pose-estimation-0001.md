@@ -17,7 +17,7 @@ The pose may contain up to 18 keypoints: ears, eyes, nose, neck, shoulders, elbo
 | Average Precision (AP)          | 42.8%                                     |
 | GFlops                          | 15.435                                    |
 | MParams                         | 4.099                                     |
-| Source framework                | Caffe*                                    |
+| Source framework                | Caffe\*                                   |
 
 Average Precision metric described in [COCO Keypoint Evaluation site](https://cocodataset.org/#keypoints-eval).
 
@@ -25,17 +25,21 @@ Tested on a COCO validation subset from the original paper [Realtime Multi-Perso
 
 ## Inputs
 
-Name: `data`, shape: [1x3x256x456]. An input image in the [BxCxHxW] format,
-where:
-  - B - batch size
-  - C - number of channels
-  - H - image height
-  - W - image width
-Expected color order is BGR.
+Image, name: `data`, shape: `1, 3, 256, 456` in the `B, C, H, W` format, where:
+
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
+
+Expected color order is `BGR`.
 
 ## Outputs
 
-The net outputs two blobs with the [1, 38, 32, 57] and [1, 19, 32, 57] shapes. The first blob contains keypoint pairwise relations (part affinity fields), while the second blob contains keypoint heatmaps.
+The net outputs are two blobs:
+
+1. Name: `Mconv7_stage2_L1`, shape: `1, 38, 32, 57` contains keypoint pairwise relations (part affinity fields).
+2. Name: `Mconv7_stage2_L2`, shape: `1, 19, 32, 57` contains keypoint heatmaps.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `i3d-rgb-tf` is a model for video classification, based on paper ["Quo Vadis, Action Recognition? A New Model and the Kinetics Dataset"](https://arxiv.org/abs/1705.07750). This model use RGB input stream and trained on Kinetics-400\* dataset   . Additionally, this model has initialize values from Inception v1 model pretrained on ImageNet\* dataset.
+The `i3d-rgb-tf` is a model for video classification, based on paper ["Quo Vadis, Action Recognition? A New Model and the Kinetics Dataset"](https://arxiv.org/abs/1705.07750). This model use RGB input stream and trained on Kinetics-400 dataset. Additionally, this model has initialize values from Inception v1 model pre-trained on ImageNet dataset.
 
 Originally redistributed as a checkpoint file, was converted to frozen graph.
 
@@ -29,16 +29,16 @@ Originally redistributed as a checkpoint file, was converted to frozen graph.
 
 ## Specification
 
-| Metric            | Value         |
-|-------------------|---------------|
+| Metric            | Value              |
+|-------------------|--------------------|
 | Type              | Action recognition |
-| GFLOPs            | 278.981       |
-| MParams           | 12.69         |
-| Source framework  | TensorFlow\*  |
+| GFLOPs            | 278.981            |
+| MParams           | 12.69              |
+| Source framework  | TensorFlow\*       |
 
 ## Accuracy
 
-Accuracy validations performed on validation part of [Kinetics-400\*](https://www.deepmind.com/research/open-source/kinetics) dataset.  Subset consists of 400 randomly chosen videos from this dataset.
+Accuracy validations performed on validation part of [Kinetics-400](https://www.deepmind.com/research/open-source/kinetics) dataset.  Subset consists of 400 randomly chosen videos from this dataset.
 
 | Metric | Converted Model | Converted Model (subset 400) |
 | ------ | --------------- | ---------------------------- |
@@ -49,7 +49,8 @@ Accuracy validations performed on validation part of [Kinetics-400\*](https://ww
 
 ### Original Model
 
-Video clip, name - `Placeholder`, shape - `1,79,224,224,3`, format is `B,D,H,W,C`, where:
+Video clip, name - `Placeholder`, shape - `1, 79, 224, 224, 3`, format is `B, D, H, W, C`, where:
+
 - `B` - batch size
 - `D` - duration of input clip
 - `H` - height
@@ -60,7 +61,8 @@ Channel order is `RGB`. Mean value - 127.5, scale value - 127.5.
 
 ### Converted Model
 
-Video clip, name - `Placeholder`, shape - `1,79,3,224,224`, format is `B,D,C,H,W`, where:
+Video clip, name - `Placeholder`, shape - `1, 79, 3, 224, 224`, format is `B, D, C, H, W`, where:
+
 - `B` - batch size
 - `D` - duration of input clip
 - `C` - channel
@@ -73,15 +75,17 @@ Channel order is `RGB`.
 
 ### Original Model
 
-Action classifier according to Kinetics-400\* action classes, name - `Softmax`, shape - `1,400`, format is `B,C`, where:
+Action classifier according to [Kinetics-400](https://www.deepmind.com/research/open-source/kinetics) action classes, name - `Softmax`, shape - `1, 400`, format is `B, C`, where:
+
 - `B` - batch size
 - `C` - predicted probabilities for each class in  [0, 1] range
 
 ### Converted Model
 
-Action classifier according to Kinetics-400\* action classes, name - `Softmax`, shape - `1,400`, format is `B,C`, where:
+Action classifier according to [Kinetics-400](https://www.deepmind.com/research/open-source/kinetics) action classes, name - `Softmax`, shape - `1, 400`, format is `B, C`, where:
+
 - `B` - batch size
-- `C` - predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in [0, 1] range
 
 ## Download a Model and Convert it into Inference Engine Format
 

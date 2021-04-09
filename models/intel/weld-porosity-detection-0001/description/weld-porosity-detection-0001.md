@@ -18,22 +18,20 @@ This is a porosity weld recognition model. It runs on a video stream capturing w
 | MParams                         | 11.173                                    |
 | Source framework                | PyTorch\*                                 |
 
-
 ## Inputs
 
-Name: `input`, shape: [1x3x224x224] - An input image in the format [BxCxHxW],
-where:
+Image, name: `input`, shape: `1, 3, 224, 224` in the format `B, C, H, W`, where:
 
-- B - batch size
-- C - number of channels
-- H - image height
-- W - image width
+- `B` - batch size
+- `C` - number of channels
+- `H` - image height
+- `W` - image width
 
-Expected color order is BGR.
+Expected color order is `BGR`.
 
 ## Outputs
 
-The `features` is a blob with the shape [1, 3] containing logits for three output classes ("no weld", "normal weld" and "porosity").
+The `features` is a blob with the shape `1, 3` containing logits for three output classes ("no weld", "normal weld" and "porosity").
 
 ## Legal Information
 [\*] Other names and brands may be claimed as the property of others.

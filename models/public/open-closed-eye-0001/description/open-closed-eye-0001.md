@@ -14,10 +14,10 @@ Fully convolutional network for recognition of eye state ('open', 'closed').
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Source framework                | PyTorch*                                  |
+| Source framework                | PyTorch\*                                 |
 | GFlops                          | 0.0014                                    |
 | MParams                         | 0.0113                                    |
-| Accuracy                        | 95.84%                                     |
+| Accuracy                        | 95.84%                                    |
 
 ## Dataset
 
@@ -25,11 +25,17 @@ Fully convolutional network for recognition of eye state ('open', 'closed').
 
 ## Inputs
 
-1. name: "input.1" , shape: [1x3x32x32] - An input image in [1xCxHxW] format. Expected color order is BGR.
+Image, name: `input.1`, shape: `1, 3, 32, 32` in `1, C, H, W` format, where:
+
+- `C` - channel
+- `H` - height
+- `W` - width
+
+Expected color order is `BGR`.
 
 ## Outputs
 
-1. name: "19", shape: [1, 2, 1, 1] - Softmax output across 2 type classes [open, closed]
+Name: `19`, shape: `1, 2, 1, 1` - Softmax output across 2 type classes: [open, closed]
 
 
 ## Download a Model and Convert it into Inference Engine Format
