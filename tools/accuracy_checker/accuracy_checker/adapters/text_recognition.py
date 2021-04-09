@@ -60,14 +60,14 @@ class BeamSearchDecoder(Adapter):
         self.custom_label_map = self.get_value_from_config("custom_label_map")
 
     def process(self, raw, identifiers, frame_meta):
+        if self.custom_label_map:
+            self.label_map = self.custom_label_map
         if not self.label_map:
             raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
         if self.blank_label is None:
             self.blank_label = len(self.label_map)
         if self.logits_output:
             self.output_blob = self.logits_output
-        if self.custom_label_map:
-            self.label_map = self.custom_label_map
         raw_output = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
@@ -181,14 +181,14 @@ class CTCGreedySearchDecoder(Adapter):
         self.custom_label_map = self.get_value_from_config("custom_label_map")
 
     def process(self, raw, identifiers=None, frame_meta=None):
+        if self.custom_label_map:
+            self.label_map = self.custom_label_map
         if not self.label_map:
             raise ConfigError('CTCGreedy Search Decoder requires dataset label map for correct decoding.')
         if self.blank_label is None:
             self.blank_label = 0
         if self.logits_output:
             self.output_blob = self.logits_output
-        if self.custom_label_map:
-            self.label_map = self.custom_label_map
         raw_output = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
