@@ -238,6 +238,9 @@ AccuracyChecker supports following set of adapters:
   * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm.
 * `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
   * `blank_label` - index of the CTC blank label (default 0).
+* `simple_decoder` - easiest decoder for text recognition models, convers indices of classes to given letters, slices output on the first entry of `eos_label`
+  * `eos_label` - label which should finish decoding
+  * `custom_label_map` - label map (if not provided by the dataset meta)
 * `ctc_beam_search_decoder` - Python implementation of CTC beam search decoder without LM for speech recognition.
 * `ctc_greedy_decoder` - CTC greedy decoder for speech recognition.
 * `ctc_beam_search_decoder_with_lm` - Python implementation of CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition.
