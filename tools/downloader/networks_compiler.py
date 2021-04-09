@@ -98,7 +98,9 @@ def main():
     models = common.load_models_from_args(parser, args)
 
     reporter = common.Reporter(common.DirectOutputContext())
-
+    
+    output_dir = args.model_dir if args.output_dir is None else args.output_dir
+    
     if args.jobs == 1 or args.dry_run:
         results = [compile(reporter, compiler_path, model, args, output_dir) for model in models]
     else:
