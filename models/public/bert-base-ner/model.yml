@@ -25,10 +25,10 @@ files:
     size: 1973484
     sha256: 9826e4d5febc70d4ee6accd4d3f2a2a15e714e18c237ab82c95a6c0faaa001df
     source: https://files.pythonhosted.org/packages/ed/d5/f4157a376b8a79489a76ce6cfe147f4f3be1e029b7144fa7b8432e8acb26/transformers-4.4.2-py3-none-any.whl
-  - name: bert-base-ner/pytorch_model.bin
-    size: 433316646
-    sha256: 4c0b01790e435da1337ea519d76e747427f2d3ee9c0e49b4952caa06298021f6
-    source: https://huggingface.co/dslim/bert-base-NER/resolve/main/pytorch_model.bin
+  # - name: bert-base-ner/pytorch_model.bin
+  #   size: 433316646
+  #   sha256: 4c0b01790e435da1337ea519d76e747427f2d3ee9c0e49b4952caa06298021f6
+  #   source: https://huggingface.co/dslim/bert-base-NER/resolve/main/pytorch_model.bin
   - name: bert-base-ner/config.json
     size: 829
     sha256: a5dc77a0d60dadf5645103017f3c7b8ece4ef1b450bc1ea68e17da1d3ae7e515
@@ -41,6 +41,10 @@ postprocessing:
   - $type: unpack_archive
     format: zip
     file: transformers-4.4.2-py3-none-any.whl
+  - $type: regex_replace
+    file: transformers/__init__.py
+    pattern: 'from . import dependency_versions_check'
+    replacement: '# \g<0>'
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-path=$config_dir
