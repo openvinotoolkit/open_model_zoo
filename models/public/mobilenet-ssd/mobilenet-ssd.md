@@ -19,9 +19,11 @@ The model output is a typical vector containing the tracked object data, as prev
 
 ## Accuracy
 
+The accuracy results were obtained on test data from VOC2007 dataset.
+
 | Metric | Value |
 | ------ | ----- |
-|  mAP | 79.8377% |
+|  mAP   | 67.00% |
 
 See [the original repository](https://github.com/chuanqi305/MobileNet-SSD).
 

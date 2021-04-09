@@ -133,9 +133,9 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Pelee                                | Caffe\*                  | [pelee-coco](./pelee-coco/pelee-coco.md) | 21.9761% | 1.290 | 5.98 |
 | RetinaNet with Resnet 50             | TensorFlow\*             | [retinanet-tf](./retinanet-tf/retinanet-tf.md) | 33.15% | 238.9469 | 64.9706 |
 | R-FCN with Resnet-101                | TensorFlow\*             | [rfcn-resnet101-coco-tf](./rfcn-resnet101-coco-tf/rfcn-resnet101-coco-tf.md) | 28.40%/45.02% | 53.462 | 171.85 |
-| SSD 300                              | Caffe\*                  | [ssd300](./ssd300/ssd300.md)  | 85.0791% | 62.815 | 26.285 |
-| SSD 512                              | Caffe\*                  | [ssd512](./ssd512/ssd512.md) | 90.3845% | 180.611 | 27.189 |
-| SSD with MobileNet                   | Caffe\* <br>TensorFlow\* | [mobilenet-ssd](./mobilenet-ssd/mobilenet-ssd.md) <br>[ssd_mobilenet_v1_coco](./ssd_mobilenet_v1_coco/ssd_mobilenet_v1_coco.md) | 79.8377%<br>23.32%| 2.316~2.494 | 5.783~6.807 |
+| SSD 300                              | Caffe\*                  | [ssd300](./ssd300/ssd300.md)  | 87.09% | 62.815 | 26.285 |
+| SSD 512                              | Caffe\*                  | [ssd512](./ssd512/ssd512.md) | 91.07% | 180.611 | 27.189 |
+| SSD with MobileNet                   | Caffe\* <br>TensorFlow\* | [mobilenet-ssd](./mobilenet-ssd/mobilenet-ssd.md) <br>[ssd_mobilenet_v1_coco](./ssd_mobilenet_v1_coco/ssd_mobilenet_v1_coco.md) | 67.00%<br>23.32%| 2.316~2.494 | 5.783~6.807 |
 | SSD with MobileNet FPN               | TensorFlow\*             | [ssd_mobilenet_v1_fpn_coco](./ssd_mobilenet_v1_fpn_coco/ssd_mobilenet_v1_fpn_coco.md) | 35.5453% | 123.309 | 36.188 |
 | SSD with MobileNet V2                | TensorFlow\*             | [ssd_mobilenet_v2_coco](./ssd_mobilenet_v2_coco/ssd_mobilenet_v2_coco.md) | 24.9452% | 3.775 | 16.818 |
 | SSD lite with MobileNet V2           | TensorFlow\*             | [ssdlite_mobilenet_v2](./ssdlite_mobilenet_v2/ssdlite_mobilenet_v2.md) | 24.2946% | 1.525 | 4.475 |
@@ -146,7 +146,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | RetinaFace-Anti-Cov                  | MXNet\*                  | [retinaface-anti-cov](./retinaface-anti-cov/retinaface-anti-cov.md)  | 77.1531% | 2.7781 | 0.5955 |
 | Ultra Lightweight Face Detection RFB 320| PyTorch\*             | [ultra-lightweight-face-detection-rfb-320](./ultra-lightweight-face-detection-rfb-320/ultra-lightweight-face-detection-rfb-320.md)|84.78% | 0.2106 | 0.3004 |
 | Ultra Lightweight Face Detection slim 320| PyTorch\*            | [ultra-lightweight-face-detection-slim-320](./ultra-lightweight-face-detection-slim-320/ultra-lightweight-face-detection-slim-320.md)|83.32% | 0.1724 | 0.2844 |
-| YOLO v1 Tiny                         | TensorFlow.js\*          | [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | 72.1716% | 6.9883	 |	15.8587 |
+| YOLO v1 Tiny                         | TensorFlow.js\*          | [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | 54.79% | 6.9883	 |	15.8587 |
 | YOLO v2 Tiny                         | Keras\*                  | [yolo-v2-tiny-tf](./yolo-v2-tiny-tf/yolo-v2-tiny-tf.md) | 27.3443%/29.1184%| 5.4236	 |	11.2295 |
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/yolo-v2-tf.md) | 53.1453%/56.483% | 63.0301	 |	50.9526 |
 | YOLO v3                              | Keras\*                  | [yolo-v3-tf](./yolo-v3-tf/yolo-v3-tf.md) | 62.2759%/67.7221% | 65.9843	 |	61.9221 |
