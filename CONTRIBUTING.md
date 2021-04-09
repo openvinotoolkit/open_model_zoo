@@ -44,7 +44,7 @@ Place your files as shown in the table below:
 File | Destination
 ---|---
 configuration file | `models/public/<model_name>/model.yml`
-documentation file | `models/public/<model_name>/<model_name>.md`
+documentation file | `models/public/<model_name>/README.md`
 validation configuration file|`models/public/<model_name>/accuracy-check.yml`
 demo|`demos/<demo_name>`<br>or<br>`demos/python_demos/<demo_name>`
 
@@ -232,7 +232,7 @@ models:
 
 ## Documentation
 
-Documentation is a very important part of model contribution as it helps to better understand the possible usage of the model. Documentation must be named in accordance with the name of the model.
+Documentation is a very important part of model contribution as it helps to better understand the possible usage of the model. It must be located in a `README.md` file in the model subdirectory.
 The documentation should contain:
 * description of a model
 	* main purpose
