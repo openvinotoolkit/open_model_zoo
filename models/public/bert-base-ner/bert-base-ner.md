@@ -59,7 +59,7 @@ The values are equal to `0` at all other positions (all text belongs to single s
 
 ### Original model
 
-Token classifier, name: `output`, shape: `1, 9, 128`
+Token classifier, name: `output`, shape: `1, 128, 9`
 floating point-valued logit scores vectors that represents probability of belonging each token to 9 classes:
 
 | Abbreviation| Description                                                                  |
