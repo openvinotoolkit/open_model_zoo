@@ -34,8 +34,9 @@ from .quantization_model_evaluator import create_dataset_attributes
 # pylint: disable=W0223
 class ModelEvaluator(BaseEvaluator):
     def __init__(
-            self, launcher, input_feeder, adapter, preprocessor, postprocessor, dataset, metric, async_mode
+            self, launcher, input_feeder, adapter, preprocessor, postprocessor, dataset, metric, async_mode, config
     ):
+        self.config = config
         self.launcher = launcher
         self.input_feeder = input_feeder
         self.adapter = adapter
@@ -100,7 +101,7 @@ class ModelEvaluator(BaseEvaluator):
 
         return cls(
             launcher, input_feeder, adapter,
-            preprocessor, postprocessor, dataset, metric_dispatcher, async_mode
+            preprocessor, postprocessor, dataset, metric_dispatcher, async_mode, model_config
         )
 
     @classmethod
@@ -380,6 +381,21 @@ class ModelEvaluator(BaseEvaluator):
         return free_irs, queued_irs
 
     def process_single_image(self, image):
+        if self.dataset is None and not hasattr(self, '_reader'):
+            data_reader_config = self.config['datasets'][0].get('reader', 'opencv_imread')
+            data_source = None
+            if isinstance(data_reader_config, str):
+                data_reader_type = data_reader_config
+                data_reader_config = None
+            elif isinstance(data_reader_config, dict):
+                data_reader_type = data_reader_config['type']
+            else:
+                raise ConfigError('reader should be dict or string')
+            self._reader = BaseReader.provide(
+                data_reader_type, data_source, data_reader_config, postpone_data_source=True
+            )
+        elif not hasattr(self, '_reader'):
+            self._reader = self.dataset.data_provider.data_reader
         input_data = self._prepare_data_for_single_inference(image)
         batch_input = self.preprocessor.process(input_data)
         _, batch_meta = extract_image_representations(batch_input)
@@ -400,8 +416,8 @@ class ModelEvaluator(BaseEvaluator):
         def get_data(image, create_representation=True):
             if is_path(image):
                 return [
-                    DataRepresentation(self.dataset.data_provider.data_reader.read_dispatcher(image), identifier=image)
-                    if create_representation else self.dataset.data_provider.data_reader.read_dispatcher(image)]
+                    DataRepresentation(self._reader.read_dispatcher(image), identifier=image)
+                    if create_representation else self._reader.read_dispatcher(image)]
             return [DataRepresentation(image, identifier='image') if create_representation else image]
 
         if not isinstance(data, list):
