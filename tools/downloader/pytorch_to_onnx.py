@@ -11,6 +11,18 @@ import torch
 import torch.onnx
 
 
+INPUT_DTYPE_TO_TORCH = {
+        'float': torch.float,
+        'half': torch.half,
+        'double': torch.double,
+        'uint8': torch.uint8,
+        'int8': torch.int8,
+        'int': torch.int32,
+        'short': torch.short,
+        'long': torch.long,
+        'bool': torch.bool
+}
+
 def is_sequence(element):
     return isinstance(element, (list, tuple))
 
@@ -29,6 +41,10 @@ def shapes_arg(values):
             if not isinstance(value, int) or value < 0:
                 raise argparse.ArgumentTypeError('Argument {!r} must be a positive integer'.format(value))
     return shapes
+
+
+def dtype_arg(value):
+    return INPUT_DTYPE_TO_TORCH[value]
 
 
 def model_parameter(parameter):
@@ -65,6 +81,7 @@ def parse_args():
                         help='Comma-separated names of the output layers')
     parser.add_argument('--model-param', type=model_parameter, default=[], action='append',
                         help='Pair "name"="value" of model constructor parameter')
+    parser.add_argument('--inputs-dtype', type=str, required=False, choices=INPUT_DTYPE_TO_TORCH)
     return parser.parse_args()
 
 
@@ -101,12 +118,13 @@ def load_model(model_name, weights, model_paths, module_name, model_params):
 
 
 @torch.no_grad()
-def convert_to_onnx(model, input_shapes, output_file, input_names, output_names):
+def convert_to_onnx(model, input_shapes, output_file, input_names, output_names, inputs_dtype):
     """Convert PyTorch model to ONNX and check the resulting onnx model"""
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     model.eval()
-    dummy_inputs = tuple(torch.randn(input_shape) for input_shape in input_shapes)
+    input_kwargs = {} if inputs_dtype is None else {'dtype': dtype_arg(inputs_dtype)}
+    dummy_inputs = tuple(torch.zeros(input_shape, **input_kwargs) for input_shape in input_shapes)
     model(*dummy_inputs)
     torch.onnx.export(model, dummy_inputs, str(output_file), verbose=False, opset_version=11,
                       input_names=input_names.split(','), output_names=output_names.split(','))
@@ -125,7 +143,7 @@ def main():
     model = load_model(args.model_name, args.weights,
                        args.model_paths, args.import_module, dict(args.model_param))
 
-    convert_to_onnx(model, args.input_shapes, args.output_file, args.input_names, args.output_names)
+    convert_to_onnx(model, args.input_shapes, args.output_file, args.input_names, args.output_names, args.inputs_dtype)
 
 
 if __name__ == '__main__':

@@ -438,6 +438,7 @@ describing a single model. Each such object has the following keys:
   * `instance_segmentation`
   * `machine_translation`
   * `monocular_depth_estimation`
+  * `named_entity_recognition`
   * `object_attributes`
   * `optical_character_recognition`
   * `place_recognition`
