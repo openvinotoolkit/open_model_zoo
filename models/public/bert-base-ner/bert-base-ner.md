@@ -30,7 +30,7 @@ The quality metric was calculated on CONNL-2003 Named Entity Recognition dataset
 
 ## Input
 
-### Original model 
+### Original model
 
 1. Token IDs, name: `input_ids`, shape: `1, 128`.
 Token IDs is sequence of integer values that is representing the tokenized input sentence.
@@ -59,11 +59,11 @@ The values are equal to `0` at all other positions (all text belongs to single s
 
 ### Original model
 
-Token classifier, name: `output`, shape: `1, 9, 128` 
+Token classifier, name: `output`, shape: `1, 9, 128`
 floating point-valued logit scores vectors that represents probability of belonging each token to 9 classes:
 
 | Abbreviation| Description                                                                  |
-| ----------- | ---------------------------------------------------------------------------- | 
+| ----------- | ---------------------------------------------------------------------------- |
 | O           | Outside of a named entity                                                    |
 | B-MIS       | Beginning of a miscellaneous entity right after another miscellaneous entity |
 | I-MIS       | Miscellaneous entity                                                         |
@@ -71,7 +71,7 @@ floating point-valued logit scores vectors that represents probability of belong
 | I-PER       | Person’s name                                                                |
 | B-ORG       | Beginning of an organisation right after another organisation                |
 | I-ORG       | Organisation                                                                 |
-| B-LOC       | Beginning of a location right after another location                         | 
+| B-LOC       | Beginning of a location right after another location                         |
 | I-LOC       | Location                                                                     |
 
 ### Converted model

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
- bert-base-ner is a fine-tuned BERT model that is ready to use for Named Entity Recognition and achieves state-of-the-art performance for the NER task. 
+ bert-base-ner is a fine-tuned BERT model that is ready to use for Named Entity Recognition and achieves state-of-the-art performance for the NER task.
  It has been trained to recognize four types of entities: location (LOC), organizations (ORG), person (PER) and Miscellaneous (MISC).
 
  Specifically, this model is a bert-base-cased model that was fine-tuned on the English version of the standard [CoNLL-2003 Named Entity Recognition <https://www.aclweb.org/anthology/W03-0419.pdf> dataset.
@@ -22,7 +22,7 @@ description: >-
 task_type: named_entity_recognition
 files:
   - name: transformers-4.4.2-py3-none-any.whl
-    size: 1973484 
+    size: 1973484
     sha256: 9826e4d5febc70d4ee6accd4d3f2a2a15e714e18c237ab82c95a6c0faaa001df
     source: https://files.pythonhosted.org/packages/ed/d5/f4157a376b8a79489a76ce6cfe147f4f3be1e029b7144fa7b8432e8acb26/transformers-4.4.2-py3-none-any.whl
   - name: bert-base-ner/pytorch_model.bin
