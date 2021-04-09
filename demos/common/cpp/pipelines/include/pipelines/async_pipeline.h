@@ -73,9 +73,6 @@ protected:
     /// @returns InferenceResult with processed information or empty InferenceResult (with negative frameID) if there's no any results yet.
     virtual InferenceResult getInferenceResult(bool shouldKeepOrder);
 
-    std::unique_ptr<RequestsPool> requestsPool;
-    std::unordered_map<int64_t, InferenceResult> completedInferenceResults;
-
     InferenceEngine::ExecutableNetwork execNetwork;
 
     std::mutex mtx;
@@ -86,7 +83,12 @@ protected:
 
     std::exception_ptr callbackException = nullptr;
 
+    // Do not change members order here to avoid deadlock
     std::unique_ptr<ModelBase> model;
+    std::unique_ptr<RequestsPool> requestsPool;
+
+    std::unordered_map<int64_t, InferenceResult> completedInferenceResults;
+
     PerformanceMetrics inferenceMetrics;
     PerformanceMetrics preprocessMetrics;
 };

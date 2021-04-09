@@ -10,8 +10,7 @@
 #include <gst/gstquery.h>
 #include <gst/video/video.h>
 
-#include "vaapi_context.h"
-#include "vaapi_converter.h"
+#include "vaapi_images.h"
 
 using namespace InferenceBackend;
 
@@ -33,7 +32,9 @@ public:
 
 private:
     std::shared_ptr<InferenceBackend::VaApiImage>  CreateImage(GstSample* sampleRead, GstMapFlags map_flags);
+    std::unique_ptr<VaApiImage> bufferToImage(GstBuffer *buffer);
 
+    VaApiContext::Ptr vaContext;;
     std::string filename_;
 
     GstElement* pipeline_;

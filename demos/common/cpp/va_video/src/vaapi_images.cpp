@@ -6,6 +6,7 @@
 
 #include "vaapi_images.h"
 #include <iostream>
+#include <unistd.h>
 #include <opencv2/imgproc.hpp>
 
 namespace InferenceBackend {
@@ -82,8 +83,15 @@ VaApiImage::Ptr VaApiImage::CloneToAnotherContext(const VaApiContext::Ptr& newCo
     VASurfaceID surfaceID = VA_INVALID_SURFACE;
     VA_CALL(vaCreateSurfaces(newContext->display(), rtFormat, drm_descriptor.width, drm_descriptor.height, &surfaceID, 1,
                              attribs, 2));
-                             std::cout<<"SutfID "<<surfaceID<<std::endl;
-    return VaApiImage::Ptr(new VaApiImage(newContext,external.width,external.height,format,surfaceID));
+//!!!                             std::cout<<"SurfID "<<surfaceID<<std::endl;
+    return VaApiImage::Ptr(new VaApiImage(newContext,external.width,external.height,format,surfaceID),
+        [dma_fd](VaApiImage* img) {
+            if (close(dma_fd) == -1) {
+                throw std::runtime_error("VaApiConverter::Convert: close fd failed");
+            }
+            delete img;
+        }
+    );
 }
 
 
@@ -104,15 +112,20 @@ VASurfaceID VaApiImage::CreateVASurface() {
 
     VASurfaceID va_surface_id;
     VA_CALL(vaCreateSurfaces(context->display(), rt_format, width, height, &va_surface_id, 1, &surface_attrib, 1))
+                                 std::cout<<"Created "<<va_surface_id<<std::endl;
     return va_surface_id;
 }
 
-VaApiImage::VaApiImage(const VaApiContext::Ptr& context, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface) {
-    completed = true;
+VaApiImage::VaApiImage(const VaApiContext::Ptr& context, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface, bool autoDestroySurface) {
+    this->completed = true;
     this->width = width;
     this->height = height;
     this->format = format;
     this->context = context;
+    this->autoDestroySurface = autoDestroySurface;
+//!!!    if(va_surface!=VA_INVALID_ID) {
+//        std::cout<<"Received: "<<va_surface<<std::endl;
+//    }
     this->va_surface_id = va_surface == VA_INVALID_ID ? CreateVASurface() : va_surface;
 }
 
@@ -120,6 +133,7 @@ VaApiImage::VaApiImage(const VaApiContext::Ptr& context, uint32_t width, uint32_
 void VaApiImage::DestroyImage() {
     if (va_surface_id != VA_INVALID_ID) {
         try {
+//!!!            std::cout<<"Destr:"<<va_surface_id<<std::endl;
             VA_CALL(vaDestroySurfaces(context->display(), (uint32_t *)&va_surface_id, 1));
         } catch (const std::exception &e) {
             std::string error_message = std::string("VA surface destroying failed with exception: ") + e.what();
@@ -174,19 +188,22 @@ cv::Mat VaApiImage::CopyToMat(VaApiImage::CONVERSION_TYPE convType) {
     return outMat;
 }
 
-VaApiImage::Ptr VaApiImage::Resize(cv::Size newSize, VaApiImage::RESIZE_MODE resizeMode) {
-    auto dstImage = std::make_shared<VaApiImage>(context,newSize.width,newSize.height,format);
+void VaApiImage::ResizeTo(VaApiImage::Ptr dstImage, VaApiImage::RESIZE_MODE resizeMode) {
+    if(context->display() != dstImage->context->display() || context->contextId() != dstImage->context->contextId())
+    {
+        throw std::invalid_argument("ResizeTo: (context, display) of the source and destination images should be the same");
+    }
 
     VAProcPipelineParameterBuffer pipelineParam = VAProcPipelineParameterBuffer();
     pipelineParam.surface = va_surface_id;
     VARectangle surface_region = {.x = 0,
                                   .y = 0,
-                                  .width = static_cast<uint16_t>(newSize.width),
-                                  .height = static_cast<uint16_t>(newSize.height)};
+                                  .width = (uint16_t)this->width,
+                                  .height = (uint16_t)this->height};
     if (surface_region.width > 0 && surface_region.height > 0)
         pipelineParam.surface_region = &surface_region;
 
-    // pipeline_param.filter_flags = VA_FILTER_SCALING_HQ; // High-quality scaling method
+    //pipelineParam.filter_flags = VA_FILTER_SCALING_HQ; // High-quality scaling method
 
     VABufferID pipelineParamBufId = VA_INVALID_ID;
     VA_CALL(vaCreateBuffer(context->display(), context->contextId(), VAProcPipelineParameterBufferType,
@@ -199,22 +216,11 @@ VaApiImage::Ptr VaApiImage::Resize(cv::Size newSize, VaApiImage::RESIZE_MODE res
     VA_CALL(vaEndPicture(context->display(), context->contextId()))
 
     VA_CALL(vaDestroyBuffer(context->display(), pipelineParamBufId))
-
-    return dstImage;
 }
-
-
-
-VaPooledImage::VaPooledImage(VaApiImage* img, VaApiImagePool* pool) :
-    image(img),
-    pool(pool) {
-};
 
 VaPooledImage::~VaPooledImage() {
-    if(pool)
-        pool->Release(image);
+    pool->Release(this);
 }
-
 
 VaApiImagePool::VaApiImagePool(const VaApiContext::Ptr& context_, size_t image_pool_size, ImageInfo info) :
     context(context_),
@@ -223,48 +229,51 @@ VaApiImagePool::VaApiImagePool(const VaApiContext::Ptr& context_, size_t image_p
     if (!context_)
         throw std::invalid_argument("VaApiContext is nullptr");
     for (size_t i = 0; i < image_pool_size; ++i) {
-        _images.push_back(std::unique_ptr<VaApiImage>(
-            new VaApiImage(context_, info.width, info.height, info.format)));
+        images.push_back(Element(std::unique_ptr<VaApiImage>(new VaApiImage(context, info.width, info.height, info.format)), false));
     }
 }
 
 VaApiImagePool::~VaApiImagePool() {
+    WaitForCompletion();
 }
 
-VaPooledImage::Ptr VaApiImagePool::Acquire() {
-    std::unique_lock<std::mutex> lock(_free_images_mutex);
+VaApiImage::Ptr VaApiImagePool::Acquire() {
+    std::unique_lock<std::mutex> lock(mtx);
     for (;;) {
-        for (auto &image : _images) {
-            if (image->completed) {
-                image->completed = false;
-                return VaPooledImage::Ptr(new VaPooledImage(image.get(),this));
+        for (auto &imagePair : images) {
+            if (!imagePair.second) {
+                imagePair.second = true;
+                auto& image= imagePair.first;
+                return std::make_shared<VaPooledImage>(image->context,image->width, image->height, image->format, image->va_surface_id, this);
             }
         }
-        _images.push_back(std::unique_ptr<VaApiImage>(
-            new VaApiImage(context, info.width, info.height, info.format)));
-        _images.back()->completed=false;
-        return VaPooledImage::Ptr(new VaPooledImage(_images.back().get(),this));
-    }
-}
 
-void VaApiImagePool::Release(VaPooledImage::Ptr& imagePtr) {
-    Release(imagePtr->image);
+        images.push_back(Element(std::unique_ptr<VaApiImage>(new VaApiImage(context, info.width, info.height, info.format)),true));
+        auto& image = images.back().first;
+        return std::make_shared<VaPooledImage>(image->context,image->width, image->height, image->format, image->va_surface_id, this);
+    }
 }
 
 void VaApiImagePool::Release(VaApiImage* image) {
     if (!image)
-        throw std::runtime_error("Received VA-API image is null");
+        throw std::runtime_error("VaApiImagePool: Received image ptr is null");
 
-    std::unique_lock<std::mutex> lock(_free_images_mutex);
-    image->completed = true;
-    _free_image_condition_variable.notify_one();
+    std::unique_lock<std::mutex> lock(mtx);
+    for(auto& imagePair : images) {
+        if(imagePair.first->va_surface_id == image->va_surface_id &&
+            imagePair.first->context->display() == image->context->display()) {
+            imagePair.second = false;
+            _free_image_condition_variable.notify_one();
+            return;
+        }
+    }
+    throw std::runtime_error("VaApiImagePool: An attempt to release non-pooled image is deteted");
 }
 
-void VaApiImagePool::Flush() {
-    std::unique_lock<std::mutex> lock(_free_images_mutex);
-    for (auto &image : _images) {
-        std::unique_lock<std::mutex> lock(_free_images_mutex);
-        while(!image->completed)
+void VaApiImagePool::WaitForCompletion() {
+    std::unique_lock<std::mutex> lock(mtx);
+    for (auto &imagePair : images) {
+        while(imagePair.second)
             _free_image_condition_variable.wait(lock);
     }
 }

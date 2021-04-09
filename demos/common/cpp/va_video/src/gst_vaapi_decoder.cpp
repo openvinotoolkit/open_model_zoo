@@ -50,26 +50,29 @@ inline int gstFormatToFourCC(int format) {
     return 0;
 }
 
-std::unique_ptr<VaApiImage> bufferToImage(GstBuffer *buffer, GstVideoInfo *info)
+std::unique_ptr<VaApiImage> GstVaApiDecoder::bufferToImage(GstBuffer *buffer)
 {
     try
     {
-        if (!info)
+        if (!video_info_)
             throw std::invalid_argument("GstVideoInfo is absent during GstBuffer mapping");
 
-        static VaApiContext::Ptr vaContext;
-        if(!vaContext)
+        auto bufDisplay = gst_mini_object_get_qdata(&buffer->mini_object, g_quark_from_static_string("VADisplay"));
+        if(!vaContext || vaContext->display()!= bufDisplay)
         {
-            vaContext.reset(new VaApiContext(gst_mini_object_get_qdata(&buffer->mini_object, g_quark_from_static_string("VADisplay"))));
+            vaContext = std::make_shared<VaApiContext>(bufDisplay);
         }
 
         auto image = std::unique_ptr<VaApiImage>(new VaApiImage(
             vaContext, // TODO: check this for consistancy
-            static_cast<uint32_t>(GST_VIDEO_INFO_WIDTH(info)),
-            static_cast<uint32_t>(GST_VIDEO_INFO_HEIGHT(info)),
-            static_cast<FourCC>(gstFormatToFourCC(GST_VIDEO_INFO_FORMAT(info))),
-            reinterpret_cast<uint64_t>(gst_mini_object_get_qdata(&buffer->mini_object, g_quark_from_static_string("VASurfaceID")))
+            static_cast<uint32_t>(GST_VIDEO_INFO_WIDTH(video_info_)),
+            static_cast<uint32_t>(GST_VIDEO_INFO_HEIGHT(video_info_)),
+            static_cast<FourCC>(gstFormatToFourCC(GST_VIDEO_INFO_FORMAT(video_info_))),
+            reinterpret_cast<uint64_t>(gst_mini_object_get_qdata(&buffer->mini_object, g_quark_from_static_string("VASurfaceID"))),
+            false
             ));
+
+//!!!            std::cout<<"GS img:"<<reinterpret_cast<uint64_t>(gst_mini_object_get_qdata(&buffer->mini_object, g_quark_from_static_string("VASurfaceID")))<<std::endl;
 
         // getting data from VA_API
         if (!image->context->display()) {
@@ -106,7 +109,7 @@ std::shared_ptr<VaApiImage> GstVaApiDecoder::CreateImage(GstSample* sample, GstM
 
         GstBuffer* buffer = gst_sample_get_buffer(sample);
 
-        auto unique_image =  bufferToImage(buffer, video_info_);
+        auto unique_image =  bufferToImage(buffer);
 
         auto image_deleter = [sample, buffer](InferenceBackend::VaApiImage *image)
         {

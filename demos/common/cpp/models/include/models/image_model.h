@@ -17,10 +17,6 @@
 #include "models/model_base.h"
 
 #ifdef USE_VA
-#include "vaapi_converter.h"
-#endif
-
-#ifdef USE_VA
 #include <gpu/gpu_context_api_va.hpp>
 using VAContextPtr = InferenceEngine::gpu::VAContext::Ptr;
 #else

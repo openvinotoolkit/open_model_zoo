@@ -36,15 +36,14 @@ class VaApiImage{
     };
 
   public:
-    VaApiImage(){};
-    ~VaApiImage(){DestroyImage();}
-    VaApiImage(const VaApiContext::Ptr& context, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface = VA_INVALID_ID);
-    VaApiImage(VaApiImage&& other);
+    VaApiImage() {};
+    VaApiImage(const VaApiContext::Ptr& context, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface = VA_INVALID_ID, bool autoDestroySurface=true);
+    virtual ~VaApiImage() { if(autoDestroySurface) DestroyImage(); }    
 
     using Ptr = std::shared_ptr<VaApiImage>;
 
     VaApiImage::Ptr CloneToAnotherContext(const VaApiContext::Ptr& newContext);
-    VaApiImage::Ptr Resize(cv::Size newSize, VaApiImage::RESIZE_MODE resizeMode);
+    void ResizeTo(VaApiImage::Ptr dstImage, VaApiImage::RESIZE_MODE resizeMode = RESIZE_FILL);
 
     cv::Mat CopyToMat(CONVERSION_TYPE convType = CONVERT_TO_BGR);
 
@@ -57,6 +56,7 @@ class VaApiImage{
 
   protected:
     std::atomic_bool completed;
+    bool autoDestroySurface;
  
     VaApiImage(const VaApiImage& other) = delete;
     void DestroyImage();
@@ -65,34 +65,34 @@ class VaApiImage{
     static int FourCCToVART(FourCC fourcc);
 };
 
-class VaPooledImage{
+class VaPooledImage : public VaApiImage{
   public:
     using Ptr = std::shared_ptr<VaPooledImage>;
-    VaPooledImage(VaApiImage* img, VaApiImagePool* pool);
-    ~VaPooledImage();
+    VaPooledImage(const VaApiContext::Ptr& context, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface, VaApiImagePool* pool) :
+      VaApiImage(context, width, height, format, va_surface, false), pool(pool) {}
+    ~VaPooledImage() override;
 
-    VaApiImage* image = nullptr;
   protected:
     VaApiImagePool* pool = nullptr;
 };
 
 class VaApiImagePool {
   public:
-    VaPooledImage::Ptr Acquire();
-    void Release(VaPooledImage::Ptr& image);
+    VaApiImage::Ptr Acquire();
     void Release(VaApiImage* image);
     struct ImageInfo {
         size_t width;
         size_t height;
         FourCC format;
     };
-    void Flush();
+    void WaitForCompletion();
     VaApiImagePool(const VaApiContext::Ptr& context_, size_t image_pool_size, ImageInfo info);
     ~VaApiImagePool();
   private:
-    std::vector<std::unique_ptr<VaApiImage>> _images;
+    using Element = std::pair<std::unique_ptr<VaApiImage>, bool>;
+    std::vector<std::pair<std::unique_ptr<VaApiImage>, bool>> images; // second is true if image is in use
     std::condition_variable _free_image_condition_variable;
-    std::mutex _free_images_mutex;
+    std::mutex mtx;
 
     VaApiContext::Ptr context;
     ImageInfo info;
