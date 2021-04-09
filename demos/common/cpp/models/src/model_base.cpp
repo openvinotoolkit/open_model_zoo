@@ -27,7 +27,7 @@ InferenceEngine::CNNNetwork ModelBase::prepareNetwork(InferenceEngine::Core& cor
     slog::info << "Loading Inference Engine" << slog::endl;
 
     slog::info << "Device info: " << slog::endl;
-    slog::info << printable(core.GetVersions(cnnConfig.devices));
+    slog::info << printable(core.GetVersions(cnnConfig.devices)) << slog::endl;
 
     /** Load extensions for the plugin **/
     if (!cnnConfig.cpuExtensionsPath.empty()) {

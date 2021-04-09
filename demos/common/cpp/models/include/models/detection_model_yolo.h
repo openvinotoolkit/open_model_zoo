@@ -37,7 +37,7 @@ protected:
 
         Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo);
     };
-
+    std::string regionFile;
 public:
     /// Constructor.
     /// @param modelFileName name of model to load
@@ -52,13 +52,14 @@ public:
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
     ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-        bool useAdvancedPostprocessing = true, float boxIOUThreshold = 0.5, const std::vector<std::string>& labels = std::vector<std::string>());
+        bool useAdvancedPostprocessing = true, float boxIOUThreshold = 0.5, const std::vector<std::string>& labels = std::vector<std::string>(),
+        const std::string& regionFile = std::string());
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
-    void checkCompiledNetworkInputsOutputs() override {};
+    void checkCompiledNetworkInputsOutputs() override;
     void parseYOLOV3Output(const std::string& output_name, const InferenceEngine::Blob::Ptr& blob,
         const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,
         const unsigned long original_im_w, std::vector<DetectedObject>& objects);

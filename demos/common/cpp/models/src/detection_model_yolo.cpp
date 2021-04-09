@@ -18,14 +18,15 @@
 #include <utils/slog.hpp>
 #include <utils/common.hpp>
 #include <ngraph/ngraph.hpp>
+#include <opencv2/core.hpp>
 
 using namespace InferenceEngine;
 
 ModelYolo3::ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-    bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels) :
+    bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels, const std::string& regionFile) :
     DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels),
     boxIOUThreshold(boxIOUThreshold),
-    useAdvancedPostprocessing(useAdvancedPostprocessing) {
+    useAdvancedPostprocessing(useAdvancedPostprocessing), regionFile(regionFile) {
 }
 
 void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -63,6 +64,9 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     }
 
     if (auto ngraphFunction = (cnnNetwork).getFunction()) {
+        int i = 0;
+        cv::FileStorage fs("../../intel64/Release/regions.yml", cv::FileStorage::WRITE);
+        fs << "Layers" << "[:";
         for (const auto op : ngraphFunction->get_ops()) {
             auto outputLayer = outputInfo.find(op->get_friendly_name());
             if (outputLayer != outputInfo.end()) {
@@ -71,14 +75,88 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
                     throw std::runtime_error("Invalid output type: " +
                         std::string(op->get_type_info().name) + ". RegionYolo expected");
                 }
-
+                auto rg = Region(regionYolo);
+                fs << "{:";
+                fs << "name" << outputLayer->first;
+                fs << "num" << rg.num;
+                fs << "classes" << rg.classes;
+                fs << "coords" << rg.coords;
+                fs << "anchors" << "[:";
+                for (auto a : rg.anchors) {
+                    fs << a;
+                }
+                fs << "]";
+               fs << "}";
                 regions.emplace(outputLayer->first, Region(regionYolo));
             }
         }
+        fs << "]";
+        fs.release();
     }
     else {
         throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
     }
+}
+
+void ModelYolo3::checkCompiledNetworkInputsOutputs() {
+    // --------------------------- Check input blobs ------------------------------------------------------
+    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
+    ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
+    if (inputInfo.size() != 1) {
+        throw std::logic_error("This demo accepts networks that have only one input");
+    }
+
+    InputInfo::CPtr& input = inputInfo.begin()->second;
+    inputsNames.push_back(inputInfo.begin()->first);
+    if (input->getPrecision() != InferenceEngine::Precision::U8) {
+        throw std::logic_error("This demo accepts compiled networks with U8 input precision");
+    }
+
+    //--- Reading image input parameters
+    const TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
+    netInputHeight = getTensorHeight(inputDesc);
+    netInputWidth = getTensorWidth(inputDesc);
+
+    // --------------------------- Prepare output blobs -----------------------------------------------------
+    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
+    ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
+    for (auto& output : outputInfo) {
+        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
+            throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
+        }
+        outputsNames.push_back(output.first);
+    }
+    //cv::FileStorage fs("../../intel64/Release/regions.yml", cv::FileStorage::WRITE);
+    //if (auto ngraphFunction = (cnnNetwork).getFunction()) {
+    //    int i = 0;
+    //    for (const auto op : ngraphFunction->get_ops()) {
+    //        auto outputLayer = outputInfo.find(op->get_friendly_name());
+    //        if (outputLayer != outputInfo.end()) {
+    //            auto regionYolo = std::dynamic_pointer_cast<ngraph::op::RegionYolo>(op);
+    //            if (!regionYolo) {
+    //                throw std::runtime_error("Invalid output type: " +
+    //                    std::string(op->get_type_info().name) + ". RegionYolo expected");
+    //            }
+    //            auto rg = Region(regionYolo);
+    //            fs << "Layer_" + std::to_string(i++) << "{";
+    //            fs << "name" << outputLayer->first;
+    //            fs << "num" << rg.num;
+    //            fs << "classes" << rg.classes;
+    //            fs << "coords" << rg.coords;
+    //            fs << "anchors" << "[:";
+    //            for (auto a : rg.anchors) {
+    //                fs << a;
+    //            }
+    //            fs << "]";
+    //            fs << "}";
+    //            regions.emplace(outputLayer->first, Region(regionYolo));
+    //        }
+    //    }
+    //    fs.release();
+    //}
+    //else {
+    //    throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
+    //}
 }
 
 std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult) {
