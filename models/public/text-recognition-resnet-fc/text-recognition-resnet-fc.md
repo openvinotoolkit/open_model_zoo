@@ -15,7 +15,7 @@
 
 ## Accuracy
 
-Alphanumeric subset of common scene text recognition benchmarks are used. For your convenience you can see dataset size. Note, that we use here ICDAR15 alphanumeric subset without irregular (arbitrary oriented, perspective or curved) texts. See details [here](https://arxiv.org/pdf/1709.02054.pdf), section 4.1. All reported results are achieved without using any lexicon.
+Alphanumeric subset of common scene text recognition benchmarks are used. For your convenience you can see dataset size. Note, that we use here ICDAR15 alphanumeric subset without irregular (arbitrary oriented, perspective or curved) texts. See details [here](https://arxiv.org/abs/1709.02054), section 4.1. All reported results are achieved without using any lexicon.
 
 | Dataset  | Accuracy | Dataset size |
 | -------- | -------- | ------------ |
