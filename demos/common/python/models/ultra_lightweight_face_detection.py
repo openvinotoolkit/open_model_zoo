@@ -20,8 +20,8 @@ from .utils import Detection, resize_image, nms
 
 
 class UltraLightweightFaceDetection(Model):
-    def __init__(self, ie, model_path, threshold=0.5):
-        super().__init__(ie, model_path)
+    def __init__(self, ie, model_path, input_transform, threshold=0.5):
+        super().__init__(ie, model_path, input_transform)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         self.image_blob_name = next(iter(self.net.input_info))
@@ -58,6 +58,7 @@ class UltraLightweightFaceDetection(Model):
         resized_image = resize_image(image, (self.w, self.h))
         meta = {'original_shape': image.shape,
                 'resized_shape': resized_image.shape}
+        resized_image = self.input_transform(resized_image)
         resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
 
