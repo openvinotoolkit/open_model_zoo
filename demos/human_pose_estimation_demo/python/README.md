@@ -32,7 +32,7 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -at {ae,hrnet,openpose}, --architecture_type {ae,hrnet,openpose}
+  -at {ae,higherhrnet,openpose}, --architecture_type {ae,higherhrnet,openpose}
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a

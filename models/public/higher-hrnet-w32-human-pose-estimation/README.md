@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `HigherHRNet-W32` model is one of the [HigherHRNet](https://arxiv.org/pdf/1908.10357).
+The `HigherHRNet-W32` model is one of the [HigherHRNet](https://arxiv.org/abs/1908.10357).
 `HigherHRNet` is a novel bottom-up human pose
 estimation method for learning scale-aware representations using high-resolution feature pyramids. The network uses HRNet as backbone, followed by one or more deconvolution modules to generate multi-resolution and high-resolution heatmaps. For every person in an image, the network detects a human pose: a body skeleton consisting of keypoints and connections between them. The pose may contain up to 17 keypoints: ears, eyes, nose, shoulders, elbows, wrists, hips, knees, and ankles.
 This is PyTorch\* implementation pre-trained on COCO dataset.
@@ -23,7 +23,7 @@ For details about implementation of model, check out the [HigherHRNet: Scale-Awa
 | -------------------------- | ----------------- | --------------- |
 | Average Precision (AP)     | 64.64%            | 64.64%          |
 
-These are the results of the accuracy check for single pass inference (without flip of image, which used by default in original repository)
+Model was tested on COCO dataset with `val2017` split. These are the results of the accuracy check for single pass inference (without flip of image, which used by default in original repository)
 
 ## Input
 
@@ -55,6 +55,20 @@ The net outputs two blobs:
 
 - `heatmaps` of shape `1, 17, 256, 256` containing location heatmaps for keypoints of pose. Locations that are filtered out by non-maximum suppression algorithm have negated values assigned to them.
 - `embeddings` of shape `1, 17, 256, 256` containing associative embedding values, which are used for grouping individual keypoints into poses.
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

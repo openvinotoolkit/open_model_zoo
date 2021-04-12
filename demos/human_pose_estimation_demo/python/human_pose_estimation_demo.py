@@ -43,7 +43,7 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=('ae', 'hrnet', 'openpose'))
+                      type=str, required=True, choices=('ae', 'higherhrnet', 'openpose'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -98,7 +98,7 @@ def get_model(ie, args, aspect_ratio):
     if args.architecture_type == 'ae':
         model = models.HpeAssociativeEmbedding(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
                                                prob_threshold=args.prob_threshold)
-    elif args.architecture_type == 'hrnet':
+    elif args.architecture_type == 'higherhrnet':
         model = models.HpeAssociativeEmbedding(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
                                                prob_threshold=args.prob_threshold, delta=0.5, padding_mode='center')
     elif args.architecture_type == 'openpose':

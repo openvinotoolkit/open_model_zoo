@@ -45,7 +45,8 @@ DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Type of the network, either 'ae' for Associative Embedding or 'openpose' for OpenPose.";
+static const char at_message[] = "Required. Type of the network, either 'ae' for Associative Embedding, 'higherhrnet' for HigherHRNet models based on ae "
+"or 'openpose' for OpenPose.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_size_message[] = "Optional. Target input size.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
@@ -242,8 +243,10 @@ int main(int argc, char *argv[]) {
         else if (FLAGS_at == "ae") {
             model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
         }
-        else if (FLAGS_at == "hrnet") {
-            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, 0.5f, "center"));
+        else if (FLAGS_at == "higherhrnet") {
+            float delta = 0.5f;
+            std::string pad_mode = "center";
+            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, delta, pad_mode));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;

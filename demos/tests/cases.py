@@ -123,7 +123,7 @@ NATIVE_DEMOS = [
             TestCase(options={'-at': 'openpose',
                               '-m': ModelArg('human-pose-estimation-0001')}
             ),
-            TestCase(options={'-at': 'hrnet',
+            TestCase(options={'-at': 'higherhrnet',
                               '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}
             ),
             *combine_cases(
@@ -516,7 +516,7 @@ PYTHON_DEMOS = [
             '-i': DataPatternArg('human-pose-estimation')}),
         [
             TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
-            TestCase(options={'-at': 'hrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
+            TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
             *combine_cases(
                 TestCase(options={'-at': 'ae'}),
                 single_option_cases('-m',
