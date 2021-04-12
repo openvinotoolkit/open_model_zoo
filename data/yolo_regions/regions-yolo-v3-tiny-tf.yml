@@ -1,0 +1,15 @@
+%YAML:1.0
+---
+Regions:
+   -
+      name: conv2d_9/Conv2D/YoloRegion
+      num: 3
+      classes: 80
+      coords: 4
+      anchors: [ 81., 82., 135., 169., 344., 319. ]
+   -
+      name: conv2d_12/Conv2D/YoloRegion
+      num: 3
+      classes: 80
+      coords: 4
+      anchors: [ 23., 27., 37., 58., 81., 82. ]
