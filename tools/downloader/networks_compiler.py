@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2022 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,10 +34,10 @@ def compile(reporter, compiler_path, model, model_precision, args, output_dir):
     ]
     reporter.print_section_heading('{}Compiling {} to BLOB ({})',
         '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
-    
+
     reporter.print('Conversion command: {}', common.command_string(compile_cmd))
     if not args.dry_run:
-        reporter.print(flush=True)            
+        reporter.print(flush=True)
         if not reporter.job_context.subprocess(compile_cmd):
             return False
     reporter.print()
@@ -78,7 +78,7 @@ def main():
     parser.add_argument('--dry_run', action='store_true',
         help='print the quantization commands without running them')
     args = parser.parse_args()
-    
+
 
     compiler_path = args.compiler
     if compiler_path is None:
@@ -87,9 +87,9 @@ def main():
         except KeyError:
             sys.exit('Unable to locate Compile Tool. '
                 + 'Use --compiler or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
-    
+
     models = common.load_models_from_args(parser, args)
-    
+
     if args.precisions is None:
         requested_precisions = common.KNOWN_COMPILABLE_PRECISIONS
     else:
@@ -99,9 +99,9 @@ def main():
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
     reporter = common.Reporter(common.DirectOutputContext())
-    
+
     output_dir = args.model_dir if args.output_dir is None else args.output_dir
-    
+
     requested_precisions = common.KNOWN_COMPILABLE_PRECISIONS
 
     failed_models = []
@@ -124,4 +124,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
