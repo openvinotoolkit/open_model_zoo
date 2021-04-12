@@ -4,8 +4,7 @@ OpenVINO&trade; toolkit provides a set of pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
 
-The models can be downloaded via Model Downloader and other automation tools.
-Review the tools description in the file `<OPENVINO_INSTALL_DIR>/deployment_tools/open_model_zoo/tools/downloader/README.md` for details.
+The models can be downloaded via [Model Downloader](../../tools/downloader/README.md).
 
 ## Object Detection Models
 
