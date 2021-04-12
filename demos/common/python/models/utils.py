@@ -44,12 +44,10 @@ class DetectionWithLandmarks(Detection):
 
 class InputTransform:
     def __init__(self, reverse_input_channels, mean_values, scale_values):
+        self.is_trivial = not (reverse_input_channels or mean_values or scale_values)
         self.reverse_input_channels = reverse_input_channels
-        self.mean_values = np.array(mean_values, dtype=np.float32)
-        self.scale_values = np.array(scale_values, dtype=np.float32)
-        self.is_trivial = np.array_equal(self.mean_values, [0., 0., 0.]) and \
-                          np.array_equal(self.scale_values, [1., 1., 1.]) and \
-                          not self.reverse_input_channels
+        self.mean_values = np.array(mean_values, dtype=np.float32) if mean_values else np.array([0., 0., 0.])
+        self.scale_values = np.array(scale_values, dtype=np.float32) if scale_values else np.array([1., 1., 1.])
 
     def __call__(self, inputs):
         if self.is_trivial:
