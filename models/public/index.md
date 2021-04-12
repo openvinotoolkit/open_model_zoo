@@ -282,12 +282,12 @@ The task of image deblurring.
 
 Scene text recognition is a task to recognize text on a given image.
 Researchers compete on creating algorithms which are able to recognize text of different shapes, fonts and background.
-See details about datasets in [here](./text-recognition-resnet-fc/text-recognition-resnet-fc.md)
+See details about datasets in [here](./text-recognition-resnet-fc/README.md)
 The reported metric is collected over the alphanumeric subset of icdar 13 (1015 images) in case-insensitive mode.
 
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
-| Resnet-FC      | PyTorch\*      | [resnet-fc](./text-recognition-resnet-fc/text-recognition-resnet-fc.md) | 90.94% | 40.3704 | 177.9668  |
+| Resnet-FC      | PyTorch\*      | [resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94% | 40.3704 | 177.9668  |
 
 ## Legal Information
 
