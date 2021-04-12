@@ -38,7 +38,6 @@ protected:
         Region(int n, int cl, int crds, std::vector<float> a) : num(n), classes(cl), coords(crds), anchors(a) {};
         Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo);
     };
-    const std::string regionsFile;
 public:
     /// Constructor.
     /// @param modelFileName name of model to load
@@ -71,4 +70,5 @@ protected:
     std::map<std::string, Region> regions;
     double boxIOUThreshold;
     bool useAdvancedPostprocessing;
+    const std::string regionsFile;
 };
