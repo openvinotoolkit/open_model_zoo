@@ -72,7 +72,6 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
                     throw std::runtime_error("Invalid output type: " +
                         std::string(op->get_type_info().name) + ". RegionYolo expected");
                 }
-                auto rg = Region(regionYolo);
                 regions.emplace(outputLayer->first, Region(regionYolo));
             }
         }
@@ -113,9 +112,9 @@ void ModelYolo3::checkCompiledNetworkInputsOutputs() {
     // ------------------------- Read yolo regions from file -----------------------------------------------
     cv::FileStorage fs(regionsFile, cv::FileStorage::READ);
     cv::FileNode regionsYolo = fs["Regions"];
-    cv::FileNodeIterator it = regionsYolo.begin(), it_end = regionsYolo.end();
+    cv::FileNodeIterator it = regionsYolo.begin(),  endIt = regionsYolo.end();
 
-    for (; it != it_end; ++it) {
+    for (; it != endIt; ++it) {
         std::vector<float> anchors;
         (*it)["anchors"] >> anchors;
         regions.emplace(static_cast<std::string>((*it)["name"]), Region((int)(*it)["num"], (int)(*it)["classes"], (int)(*it)["coords"], anchors));
