@@ -175,8 +175,8 @@ increase the quality of the output.
 
 Deep Learning models for text detection in various applications.
 
-| Model Name | Complexity (GFLOPs) | Size (Mp) |
-|------------|---------------------|-----------|
+| Model Name | Accuracy | Complexity (GFLOPs) | Size (Mp) |
+|------------|----------|---------------------|-----------|
 | [text-detection-0003](./text-detection-0003/README.md)                       | 82.12 | 51.256 | 6.747 |
 | [text-detection-0004](./text-detection-0004/README.md)                       | 79.43 | 23.305 | 4.328 |
 | [horizontal-text-detection-0001](./horizontal-text-detection-0001/README.md) | 88.45 | 7.718  | 2.259 |
