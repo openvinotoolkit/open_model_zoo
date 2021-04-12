@@ -408,8 +408,8 @@ into a different directory tree, use the `-o`/`--output_dir` option:
 ./networks_compiler.py --all --output_dir my/output/directory
 ```
 
-By default, the script will produce models in every precision that is supported
-as a quantization output. To only produce models in a specific precision, use
+By default, the script will produce models in FP16 and FP32 precisions.
+To only produce models in a specific precision, use
 the `--precisions` option:
 
 ```sh
