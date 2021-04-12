@@ -13,10 +13,13 @@
 # limitations under the License.
 
 description: >-
-  "mozilla-deepspeech-0.6.1" is a speech recognition neural network pre-trained by Mozilla
-  based on DeepSpeech architecture (CTC decoder with beam search and n-gram language model)
-  with modified neural network.
-  For details on the original DeepSpeech see paper <https://arxiv.org/abs/1412.5567>.
+  The "mozilla-deepspeech-0.6.1" model is a speech recognition neural network pre-trained
+  by Mozilla based on DeepSpeech architecture (CTC decoder with beam search and n-gram
+  language model) with changed neural network topology.
+
+  For details on the original DeepSpeech, see paper <https://arxiv.org/abs/1412.5567>.
+
+  For details on this model, see repository <https://github.com/mozilla/DeepSpeech/releases/tag/v0.6.1>.
 task_type: speech_recognition
 files:
   - name: deepspeech-0.6.1-models.tar.gz

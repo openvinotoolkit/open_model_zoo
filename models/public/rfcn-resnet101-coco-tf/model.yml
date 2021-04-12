@@ -13,8 +13,8 @@
 # limitations under the License.
 
 description: >-
-  R-FCN Resnet-101 model, pretrained on COCO* dataset. Used for object detection.
-  For details, see the paper <https://arxiv.org/abs/1605.06409>.
+  R-FCN ResNet-101 model, pre-trained on Common Objects in Context (COCO) <https://cocodataset.org/#home>
+  dataset. Used for object detection. For details, see the paper <https://arxiv.org/abs/1605.06409>.
 task_type: detection
 files:
   - name: rfcn_resnet101_coco_2018_01_28.tar.gz
