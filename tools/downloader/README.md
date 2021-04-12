@@ -425,15 +425,14 @@ script. You can override this heuristic with the `--compiler` option:
 ```
 
 It's possible to specify a target device for Compile Tool
-to compile for, by using the `--target_device` option, by default it's 'MYRIAD':
+to compile for, by using the `--target_device` option:
 
 ```sh
 ./networks_compiler.py --all --target_device MYRIAD
 ```
 
 The supported values are those accepted by the "target_device" option in
-Post-Training Optimization Toolkit's config files. If this option is unspecified,
-Post-Training Optimization Toolkit's default is used.
+Compile Tool documentation. If this option is unspecified, default is `MYRIAD`.
 
 The script can print the compile commands without actually running them.
 To do this, use the `--dry_run` option:
