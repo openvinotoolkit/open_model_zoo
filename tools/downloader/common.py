@@ -481,7 +481,7 @@ Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Model:
     def __init__(self, name, subdirectory, files, postprocessing, mo_args, quantizable, framework,
-                 description, license_url, precisions, task_type, conversion_to_onnx_args, compilable = True):
+                 description, license_url, precisions, task_type, conversion_to_onnx_args, compilable = False):
         self.name = name
         self.subdirectory = subdirectory
         self.files = files
@@ -571,6 +571,10 @@ class Model:
             if not isinstance(quantizable, bool):
                 raise DeserializationError('"quantizable": expected a boolean, got {!r}'.format(quantizable))
 
+            compilable = model.get('compilable', False)
+            if not isinstance(compilable, bool):
+                raise DeserializationError('"compilable": expected a boolean, got {!r}'.format(compilable))
+
             description = validate_string('"description"', model['description'])
 
             license_url = validate_string('"license"', model['license'])
@@ -578,7 +582,7 @@ class Model:
             task_type = validate_string_enum('"task_type"', model['task_type'], KNOWN_TASK_TYPES)
 
             return cls(name, subdirectory, files, postprocessing, mo_args, quantizable, framework,
-                description, license_url, precisions, task_type, conversion_to_onnx_args)
+                description, license_url, precisions, task_type, conversion_to_onnx_args, compilable)
 
 def load_models(args):
     models = []

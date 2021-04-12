@@ -42,4 +42,5 @@ files:
     sha256: 581fe939c1790d42d1805e83ec72190cdc71bd348c775795a2a7930a6f9ab11d
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/road-segmentation-adas-0001/FP16-INT8/road-segmentation-adas-0001.bin
 framework: dldt
+compilable: yes
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

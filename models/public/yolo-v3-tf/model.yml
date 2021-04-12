@@ -35,4 +35,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/yolo-v3.pb
 framework: tf
 quantizable: yes
+compilable: yes
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE
