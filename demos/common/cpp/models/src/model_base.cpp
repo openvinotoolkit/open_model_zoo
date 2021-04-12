@@ -65,7 +65,7 @@ ExecutableNetwork ModelBase::loadExecutableNetwork(const CnnConfig& cnnConfig, I
     }
     else {
         slog::info << "Network is compiled" << slog::endl;
-        execNetwork = core.ImportNetwork(modelFileName, cnnConfig.devices, cnnConfig.execNetworkConfig);
+        //execNetwork = core.ImportNetwork(modelFileName, cnnConfig.devices, cnnConfig.execNetworkConfig);
         checkCompiledNetworkInputsOutputs();
     }
     return execNetwork;

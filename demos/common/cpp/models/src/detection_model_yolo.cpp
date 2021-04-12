@@ -23,10 +23,10 @@
 using namespace InferenceEngine;
 
 ModelYolo3::ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-    bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels, const std::string& regionFile) :
+    bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels, const std::string& regionsFile) :
     DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels),
     boxIOUThreshold(boxIOUThreshold),
-    useAdvancedPostprocessing(useAdvancedPostprocessing), regionFile(regionFile) {
+    useAdvancedPostprocessing(useAdvancedPostprocessing), regionsFile(regionsFile) {
 }
 
 void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -65,8 +65,8 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 
     if (auto ngraphFunction = (cnnNetwork).getFunction()) {
         int i = 0;
-        cv::FileStorage fs("../../intel64/Release/regions.yml", cv::FileStorage::WRITE);
-        fs << "Layers" << "[:";
+        cv::FileStorage fs("../../intel64/Release/regions2.yml", cv::FileStorage::WRITE);
+        fs << "Regions" << "[";
         for (const auto op : ngraphFunction->get_ops()) {
             auto outputLayer = outputInfo.find(op->get_friendly_name());
             if (outputLayer != outputInfo.end()) {
@@ -76,7 +76,7 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
                         std::string(op->get_type_info().name) + ". RegionYolo expected");
                 }
                 auto rg = Region(regionYolo);
-                fs << "{:";
+                fs << "{";
                 fs << "name" << outputLayer->first;
                 fs << "num" << rg.num;
                 fs << "classes" << rg.classes;
@@ -126,37 +126,17 @@ void ModelYolo3::checkCompiledNetworkInputsOutputs() {
         }
         outputsNames.push_back(output.first);
     }
-    //cv::FileStorage fs("../../intel64/Release/regions.yml", cv::FileStorage::WRITE);
-    //if (auto ngraphFunction = (cnnNetwork).getFunction()) {
-    //    int i = 0;
-    //    for (const auto op : ngraphFunction->get_ops()) {
-    //        auto outputLayer = outputInfo.find(op->get_friendly_name());
-    //        if (outputLayer != outputInfo.end()) {
-    //            auto regionYolo = std::dynamic_pointer_cast<ngraph::op::RegionYolo>(op);
-    //            if (!regionYolo) {
-    //                throw std::runtime_error("Invalid output type: " +
-    //                    std::string(op->get_type_info().name) + ". RegionYolo expected");
-    //            }
-    //            auto rg = Region(regionYolo);
-    //            fs << "Layer_" + std::to_string(i++) << "{";
-    //            fs << "name" << outputLayer->first;
-    //            fs << "num" << rg.num;
-    //            fs << "classes" << rg.classes;
-    //            fs << "coords" << rg.coords;
-    //            fs << "anchors" << "[:";
-    //            for (auto a : rg.anchors) {
-    //                fs << a;
-    //            }
-    //            fs << "]";
-    //            fs << "}";
-    //            regions.emplace(outputLayer->first, Region(regionYolo));
-    //        }
-    //    }
-    //    fs.release();
-    //}
-    //else {
-    //    throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
-    //}
+    // ------------------------- Read yolo regions from file -----------------------------------------------
+    cv::FileStorage fs(regionsFile, cv::FileStorage::READ);
+    cv::FileNode regionsYolo = fs["Regions"];
+    cv::FileNodeIterator it = regionsYolo.begin(), it_end = regionsYolo.end();
+
+    for (; it != it_end; ++it) {
+        std::vector<float> anchors;
+        (*it)["anchors"] >> anchors;
+        regions.emplace(static_cast<std::string>((*it)["name"]), Region((int)(*it)["num"], (int)(*it)["classes"], (int)(*it)["coords"], anchors));
+    }
+    fs.release();
 }
 
 std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult) {

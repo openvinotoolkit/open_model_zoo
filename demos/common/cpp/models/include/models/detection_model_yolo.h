@@ -35,9 +35,10 @@ protected:
         int coords = 0;
         std::vector<float> anchors;
 
+        Region(int n, int cl, int crds, std::vector<float> a) : num(n), classes(cl), coords(crds), anchors(a) {};
         Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo);
     };
-    std::string regionFile;
+    const std::string regionsFile;
 public:
     /// Constructor.
     /// @param modelFileName name of model to load
@@ -53,7 +54,7 @@ public:
     /// than actual classes number, default "Label #N" will be shown for missing items.
     ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
         bool useAdvancedPostprocessing = true, float boxIOUThreshold = 0.5, const std::vector<std::string>& labels = std::vector<std::string>(),
-        const std::string& regionFile = std::string());
+        const std::string& regionsFile = std::string());
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 

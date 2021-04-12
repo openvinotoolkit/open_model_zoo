@@ -71,6 +71,7 @@ static const char no_show_processed_video[] = "Optional. Do not show processed v
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes.";
 static const char yolo_af_message[] = "Optional. Use advanced postprocessing/filtering algorithm for YOLO.";
+static const char yolo_regions_message[] = "Optional. YML file with YOLO regions for compiled networks.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
@@ -90,6 +91,7 @@ DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_bool(yolo_af, true, yolo_af_message);
+DEFINE_string(yolo_regions, "", yolo_regions_message);
 
 /**
 * \brief This function shows a help message
@@ -122,6 +124,7 @@ static void showUsage() {
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
     std::cout << "    -yolo_af                  " << yolo_af_message << std::endl;
+    std::cout << "    -yolo_regions                  " << yolo_regions_message << std::endl;
 }
 
 class ColorPalette {
@@ -302,7 +305,7 @@ int main(int argc, char *argv[]) {
             model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
         else if (FLAGS_at == "yolo") {
-            model.reset(new ModelYolo3(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
+            model.reset(new ModelYolo3(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, FLAGS_yolo_regions));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
