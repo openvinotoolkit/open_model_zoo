@@ -51,7 +51,7 @@ class InputTransform:
                           np.array_equal(self.scale_values, [1., 1., 1.]) and \
                           not self.reverse_input_channels
 
-    def apply(self, inputs):
+    def __call__(self, inputs):
         if self.is_trivial:
             return inputs
         if self.reverse_input_channels:

@@ -65,7 +65,7 @@ class FaceBoxes(Model):
         resized_image = resize_image(image, (self.w, self.h))
         meta = {'original_shape': image.shape,
                 'resized_shape': resized_image.shape}
-        resized_image = self.input_transform.apply(resized_image)
+        resized_image = self.input_transform(resized_image)
         resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
 
