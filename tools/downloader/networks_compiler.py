@@ -15,10 +15,8 @@
 # limitations under the License.
 
 import argparse
-import json
 import os
 import sys
-import yaml
 import common
 from pathlib import Path
 
