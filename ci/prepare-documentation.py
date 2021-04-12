@@ -161,13 +161,11 @@ def add_model_pages(output_root, parent_element, group, group_title):
 
         model_name = md_path_rel.parts[2]
 
-        expected_md_paths = [
-            Path('models', group, model_name, model_name + '.md'),
-            Path('models', group, model_name, 'description', model_name + '.md'),
-        ]
+        expected_md_path = Path('models', group, model_name, 'README.md')
 
-        if md_path_rel not in expected_md_paths:
-            raise RuntimeError(f'{md_path_rel}: unexpected documentation file')
+        if md_path_rel != expected_md_path:
+            raise RuntimeError(f'{md_path_rel}: unexpected documentation file,'
+                ' should be {expected_md_path}')
 
         # FIXME: use the info dumper to query model information instead of
         # parsing the configs. We're not doing that now, because the info
