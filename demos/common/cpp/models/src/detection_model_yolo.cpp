@@ -64,9 +64,6 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     }
 
     if (auto ngraphFunction = (cnnNetwork).getFunction()) {
-        int i = 0;
-        cv::FileStorage fs("../../intel64/Release/regions2.yml", cv::FileStorage::WRITE);
-        fs << "Regions" << "[";
         for (const auto op : ngraphFunction->get_ops()) {
             auto outputLayer = outputInfo.find(op->get_friendly_name());
             if (outputLayer != outputInfo.end()) {
@@ -76,22 +73,9 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
                         std::string(op->get_type_info().name) + ". RegionYolo expected");
                 }
                 auto rg = Region(regionYolo);
-                fs << "{";
-                fs << "name" << outputLayer->first;
-                fs << "num" << rg.num;
-                fs << "classes" << rg.classes;
-                fs << "coords" << rg.coords;
-                fs << "anchors" << "[:";
-                for (auto a : rg.anchors) {
-                    fs << a;
-                }
-                fs << "]";
-               fs << "}";
                 regions.emplace(outputLayer->first, Region(regionYolo));
             }
         }
-        fs << "]";
-        fs.release();
     }
     else {
         throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
