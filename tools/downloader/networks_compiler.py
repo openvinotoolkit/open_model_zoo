@@ -41,18 +41,6 @@ def compile(reporter, compiler_path, model, model_precision, args, output_dir):
     reporter.print()
     return True
 
-def num_jobs_arg(value_str):
-    if value_str == 'auto':
-        return os.cpu_count() or 1
-
-    try:
-        value = int(value_str)
-        if value > 0: return value
-    except ValueError:
-        pass
-
-    raise argparse.ArgumentTypeError('must be a positive integer or "auto" (got {!r})'.format(value_str))
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--model_dir', type=Path, metavar='DIR',
@@ -74,7 +62,7 @@ def main():
     parser.add_argument('--print_all', action='store_true', help='print all available models')
     parser.add_argument('--compiler', type=Path, help='Compile Tool executable entry point')
     parser.add_argument('--dry_run', action='store_true',
-        help='print the quantization commands without running them')
+        help='print the compilation commands without running them')
     args = parser.parse_args()
 
 
@@ -106,7 +94,7 @@ def main():
 
     for model in models:
         if not model.compilable:
-            reporter.print_section_heading('Skipping {} (quantization not supported)', model.name)
+            reporter.print_section_heading('Skipping {} (compilation not supported)', model.name)
             reporter.print()
             continue
         for precision in sorted(requested_precisions):
