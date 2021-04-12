@@ -13,10 +13,10 @@
 # limitations under the License.
 
 description: >-
-  The Pelee <https://arxiv.org/abs/1804.06882> is a Real-Time Object Detection
-  System on Mobile Devices based on Single Shot Detection approach. The model is implemented
-  using the Caffe* framework and trained on MSCOCO* dataset. For details about this
-  model, check out the repository <https://github.com/Robert-JunWang/Pelee>.
+  The Pelee <https://arxiv.org/abs/1804.06882> is a Real-Time Object Detection System
+  on Mobile Devices based on Single Shot Detection approach. The model is implemented
+  using the Caffe* framework and trained on Common Objects in Context (COCO) <https://cocodataset.org/#home>
+  dataset. For details about this model, check out the repository <https://github.com/Robert-JunWang/Pelee>.
 task_type: detection
 files:
   - name: pelee_coco.tar.gz
