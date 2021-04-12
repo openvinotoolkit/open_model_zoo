@@ -47,10 +47,6 @@ postprocessing:
     replacement: '# \g<0>'
   - $type: regex_replace
     file: transformers/file_utils.py
-    pattern: 'from packaging import version'
-    replacement: '# \g<0>'
-  - $type: regex_replace
-    file: transformers/file_utils.py
     pattern: 'from tqdm.auto import tqdm'
     replacement: '# \g<0>'
   - $type: regex_replace

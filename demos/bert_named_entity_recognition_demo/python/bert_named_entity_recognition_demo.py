@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
- Copyright (c) 2020 Intel Corporation
+ Copyright (c) 2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
 
 sentence_splitter = r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s'
-
+label_to_tag = ['O', 'B-MIS', 'I-MIS', 'B-PER', 'I-PER', 'B-ORG', 'I-ORG', 'B-LOC', 'I-LOC']
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -50,24 +50,8 @@ def build_argparser():
                       required=False, type=str, default="input_ids,attention_mask,token_type_ids")
     args.add_argument("-d", "--device",
                       help="Optional. Target device to perform inference on."
-                           "Default value is CPU",
-                      default="CPU", type=str)
+                           "Default value is CPU", default="CPU", type=str)
     return parser
-
-# return entire sentence as start-end positions for a given answer (within the sentence).
-def find_sentence_range(context, s, e):
-    # find start of sentence
-    for c_s in range(s, max(-1, s - 200), -1):
-        if context[c_s] in "\n.":
-            c_s += 1
-            break
-
-    # find end of sentence
-    for c_e in range(max(0, e - 1), min(len(context), e + 200), +1):
-        if context[c_e] in "\n.":
-            break
-
-    return c_s, c_e
 
 def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
@@ -83,6 +67,8 @@ def main():
     context = '\n'.join(paragraphs)
     log.info("Size: {} chars".format(len(context)))
     sentences = re.split(sentence_splitter, context)
+    preprocessed_sentences = [text_to_tokens(sentence, vocab) for sentence in sentences]
+    max_sent_length = max([len(tokens) + 2 for tokens, _ in preprocessed_sentences])
 
     log.info("Initializing Inference Engine")
     ie = IECore()
@@ -99,7 +85,7 @@ def main():
     # check input and output names
     input_names = [i.strip() for i in args.input_names.split(',')]
     output_names = ['output']
-    if ie_encoder.inputs.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
+    if ie_encoder.input_info.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
         log.error("Input or Output names do not match")
         log.error("    The demo expects input->output names: {}->{}. "
                   "Please use the --input_names and --output_names to specify the right names "
@@ -107,31 +93,27 @@ def main():
         log.error("    Actual network input->output names: {}->{}".format(list(ie_encoder.inputs.keys()),
                                                                           list(ie_encoder.outputs.keys())))
         raise Exception("Unexpected network input or output names")
-
+    max_length = ie_encoder.input_info[input_names[0]].input_data.shape[1]
+    if max_sent_length > max_length:
+        input_shapes = {
+            input_names[0]: [1, max_sent_length],
+            input_names[1]: [1, max_sent_length],
+            input_names[2]: [1, max_sent_length]
+        }
+        ie_encoder.reshape(input_shapes)
+        max_length = max_sent_length
     # load model to the device
     log.info("Loading model to the {}".format(args.device))
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
     # maximum number of tokens that can be processed by network at once
-    max_length = ie_encoder.inputs[input_names[0]].shape[1]
-
-    # calculate number of tokens for context in each inference request.
-    # reserve 2 positions for special tokens
-    # [CLS] tokens [SEP]
-    c_wnd_len = max_length - 2
-
-    # token num between two neighbour context windows
-    # 1/2 means that context windows are overlapped by half
-    c_stride = c_wnd_len // 2
-
     t0 = time.perf_counter()
     t_count = 0
 
-    # init a window to iterate over context
-    #c_s, c_e = 0, min(c_wnd_len, len(c_tokens_id))
+    def get_score(name):
+        out = np.exp(res[name][0])
+        return out / out.sum(axis=-1, keepdims=True)
 
-    # iterate while context window is not empty
-    for sentence in sentences:
-        c_tokens_id, c_token_s_e = text_to_tokens(sentence, vocab)
+    for sentence, (c_tokens_id, c_token_s_e) in zip(sentences, preprocessed_sentences):
         # form the request
         tok_cls = vocab['[CLS]']
         tok_sep = vocab['[SEP]']
@@ -145,7 +127,7 @@ def main():
         token_type_ids += [0] * pad_len
         attention_mask += [0] * pad_len
 
-            # create numpy inputs for IE
+        # create numpy inputs for IE
         inputs = {
             input_names[0]: np.array([input_ids], dtype=np.int32),
             input_names[1]: np.array([attention_mask], dtype=np.int32),
@@ -165,23 +147,27 @@ def main():
             t_end - t_start
         ))
 
-        # get start-end scores for context
-        def get_score(name):
-            out = np.exp(res[name][0])
-            return out / out.sum(axis=-1, keepdims=True)
 
         score = get_score(output_names[0])
         labels_idx = score.argmax(-1)
         filtered_labels_idx = [
-                (idx, label_idx)
-                for idx, label_idx in enumerate(labels_idx)
-                if label_idx != 0 and 0 < idx < max_length - pad_len
+            (idx, label_idx)
+            for idx, label_idx in enumerate(labels_idx)
+            if label_idx != 0 and 0 < idx < max_length - pad_len
         ]
 
-    for idx, label_idx in filtered_labels_idx:
-        word_s, word_e = c_token_s_e[idx - 1]
-        word = sentence[word_s:word_e]
-        print(word, score[idx][label_idx], label_idx)
+        if not filtered_labels_idx:
+            continue
+
+        log.info('Sentence: \n\t{}'.format(sentence))
+        visualized = set()
+        for idx, label_idx in filtered_labels_idx:
+            word_s, word_e = c_token_s_e[idx - 1]
+            if (word_s, word_e) in visualized:
+                continue
+            visualized.add((word_s, word_e))
+            word = sentence[word_s:word_e]
+            log.info('\n\tWord: {}\n\tConfidence: {}\n\tTag: {}'.format(word, score[idx][label_idx], label_to_tag[label_idx]))
 
     t1 = time.perf_counter()
     log.info("The performance below is reported only for reference purposes, "

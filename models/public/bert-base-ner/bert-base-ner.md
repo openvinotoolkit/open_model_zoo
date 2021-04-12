@@ -34,7 +34,7 @@ The quality metric was calculated on CONNL-2003 Named Entity Recognition dataset
 
 1. Token IDs, name: `input_ids`, shape: `1, 128`.
 Token IDs is sequence of integer values that is representing the tokenized input sentence.
-The sequence structure is as follows (`[CLS]`, `[SEP]` and `[PAD]` should be replaced by corresponding token IDs
+The sequence structure is as follows (`[CLS]` and `[SEP]`should be replaced by corresponding token IDs
 as specified by the dictionary):
 `[CLS]` + *tokenized text* + `[SEP]` + `0` (for padding to sequence length 128]
 
