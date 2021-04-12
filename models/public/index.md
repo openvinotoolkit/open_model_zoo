@@ -295,7 +295,7 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 
 | Model Name     | Implementation | OMZ Model Name                                   | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------ | -------- | ------- | --------- |
-| bert-base-NER  | PyTorch\*      | [bert-base-ner](./bert-base-ner/bert-base-ner.md) | 94.45%  | 22.3874 | 107.4319  |
+| bert-base-NER  | PyTorch\*      | [bert-base-ner](./bert-base-ner/README.md) | 94.45%  | 22.3874 | 107.4319  |
 
 ## Legal Information
 

@@ -1311,3 +1311,14 @@ datasets:
       has_background: False
     annotation: voc07_without_bkgr.pickle
     dataset_meta: voc07_without_bkgr.json
+
+  - name: CONNL2003_bert_cased
+    annotation_conversion:
+      converter: conll_ner
+      annotation_file: CONLL-2003/valid.txt
+      vocab_file: bert-base-ner/vocab.txt
+      lower_case: false
+      max_len: 128
+    annotation: bert_ner.pickle
+    dataset_meta: bert_ner.json
+
