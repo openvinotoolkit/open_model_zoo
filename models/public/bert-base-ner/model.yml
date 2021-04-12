@@ -45,6 +45,18 @@ postprocessing:
     file: transformers/__init__.py
     pattern: 'from . import dependency_versions_check'
     replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/file_utils.py
+    pattern: 'from packaging import version'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/file_utils.py
+    pattern: 'from tqdm.auto import tqdm'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/file_utils.py
+    pattern: 'from .hf_api import HfFolder'
+    replacement: '# \g<0>'
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-path=$config_dir
