@@ -13,6 +13,8 @@ ignore: |
   demos/thirdparty/
   tools/accuracy_checker/dataset_definitions.yml
   tools/accuracy_checker/configs/
+  models/public/yolo-v3-tf/regions.yml
+  models/public/yolo-v3-tiny-tf/regions.yml
 
 rules:
   line-length: disable
