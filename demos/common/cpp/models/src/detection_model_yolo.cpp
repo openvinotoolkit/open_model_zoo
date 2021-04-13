@@ -100,12 +100,12 @@ void ModelYolo3::checkCompiledNetworkInputsOutputs() {
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
+    // --------------------------- Check output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
     ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
     for (auto& output : outputInfo) {
-        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
-            throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
+        if (output.second->getPrecision() != InferenceEngine::Precision::FP16 && output.second->getPrecision() != InferenceEngine::Precision::FP32) {
+            throw std::logic_error("This demo accepts compiled networks with FP16 or FP32 output precisions");
         }
         outputsNames.push_back(output.first);
     }

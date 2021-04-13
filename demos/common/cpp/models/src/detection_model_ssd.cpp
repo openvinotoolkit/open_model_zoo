@@ -181,8 +181,8 @@ void ModelSSD::checkCompiledNetworkInputsOutputs() {
         if (objectSize != 7) {
             throw std::logic_error("Output should have 7 as a last dimension");
         }
-        if (output->getPrecision() != InferenceEngine::Precision::FP32) {
-            throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
+        if (output->getPrecision() != InferenceEngine::Precision::FP16 && output->getPrecision() != InferenceEngine::Precision::FP32) {
+            throw std::logic_error("This demo accepts compiled networks with FP16 or FP32 output precisions");
         }
     }
     else {
@@ -222,8 +222,8 @@ void ModelSSD::checkCompiledNetworkInputsOutputs() {
             throw std::logic_error("Incorrect number of 'boxes' output dimensions");
         }
         for (auto name : outputsNames) {
-            if (outputInfo[name]->getPrecision() != InferenceEngine::Precision::FP32) {
-                throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
+            if (outputInfo[name]->getPrecision() != InferenceEngine::Precision::FP16 && outputInfo[name]->getPrecision() != InferenceEngine::Precision::FP32) {
+                throw std::logic_error("This demo accepts compiled networks with FP16 or FP32 output precisions");
             }
         }
     }

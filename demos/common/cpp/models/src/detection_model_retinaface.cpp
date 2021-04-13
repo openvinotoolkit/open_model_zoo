@@ -132,8 +132,8 @@ void ModelRetinaFace::checkCompiledNetworkInputsOutputs() {
 
     std::vector<size_t> outputsSizes[OT_MAX];
     for (const auto& output : outputInfo) {
-        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
-            throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
+        if (output.second->getPrecision() != InferenceEngine::Precision::FP16 && output.second->getPrecision() != InferenceEngine::Precision::FP32) {
+            throw std::logic_error("This demo accepts compiled networks with FP16 or FP32 output precisions");
         }
         outputsNames.push_back(output.first);
 
@@ -233,7 +233,7 @@ void ModelRetinaFace::generateAnchorsFpn() {
     }
 }
 
-void ModelRetinaFace::calculatePriorBoxes(InferenceEngine::SizeVector bboxSize) {
+void ModelRetinaFace::calculatePriorBoxes(const InferenceEngine::SizeVector& bboxSize) {
     for (size_t idx = 0; idx < bboxSize.size(); ++idx) {
         size_t width = bboxSize[idx];
         size_t height = bboxSize[idx];

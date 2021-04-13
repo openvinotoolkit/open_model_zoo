@@ -74,7 +74,7 @@ protected:
     std::vector<std::vector<Anchor>> anchors;
 
     void generateAnchorsFpn();
-    void calculatePriorBoxes(InferenceEngine::SizeVector bboxSize);
+    void calculatePriorBoxes(const InferenceEngine::SizeVector& bboxSize);
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override;
 };
