@@ -98,8 +98,8 @@ void ModelCenterNet::checkCompiledNetworkInputsOutputs() {
     }
 
     for (auto& output : outputInfo) {
-        if (output.second->getPrecision() != InferenceEngine::Precision::FP16 && output.second->getPrecision() != InferenceEngine::Precision::FP32 ) {
-            throw std::logic_error("This demo accepts compiled networks with FP16 or FP32 output precisions");
+        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
+            throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
         }
         outputsNames.push_back(output.first);
     }

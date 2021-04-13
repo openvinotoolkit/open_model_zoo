@@ -43,8 +43,8 @@ void SegmentationModel::checkCompiledNetworkInputsOutputs() {
     outputsNames.push_back(outputInfo.begin()->first);
     CDataPtr& data = outputInfo.begin()->second;
 
-    if (data->getPrecision() != InferenceEngine::Precision::FP16 && data->getPrecision() != InferenceEngine::Precision::FP32) {
-        throw std::logic_error("This demo accepts compiled networks with FP16 or FP32 output precisions");
+    if (data->getPrecision() != InferenceEngine::Precision::FP32) {
+        throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
     }
 
     const SizeVector& outSizeVector = data->getTensorDesc().getDims();

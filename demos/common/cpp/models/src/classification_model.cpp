@@ -156,7 +156,7 @@ void ClassificationModel::checkCompiledNetworkInputsOutputs() {
     else if (outSizeVector[1] != labels.size())
         throw std::logic_error("Model's number of classes and parsed labels must match (" + std::to_string(outSizeVector[1]) + " and " + std::to_string(labels.size()) + ')');
 
-    if (data->getPrecision() != InferenceEngine::Precision::FP16 && data->getPrecision() != InferenceEngine::Precision::FP32) {
-        throw std::logic_error("This demo accepts compiled networks with FP16 or FP32 output precisions");
+    if (data->getPrecision() != InferenceEngine::Precision::FP32) {
+        throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
     }
 }
