@@ -41,4 +41,5 @@ files:
     sha256: a1995292449f55c49116c77c83ef3726e08d19b31ab38cc7a9540116ef8862cf
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-adas-0001/FP16-INT8/face-detection-adas-0001.bin
 framework: dldt
+compilable: yes
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

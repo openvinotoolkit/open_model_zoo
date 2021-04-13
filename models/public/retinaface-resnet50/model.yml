@@ -33,4 +33,5 @@ model_optimizer_args:
   - --reverse_input_channels
 framework: mxnet
 quantizable: yes
+compilable: yes
 license: https://raw.githubusercontent.com/deepinsight/insightface/master/LICENSE

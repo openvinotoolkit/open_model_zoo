@@ -43,4 +43,5 @@ files:
     sha256: 83998f0ff4e97859e60c3cf5569640c122531bc34d6f1eb6366731d7e7b486d6
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/semantic-segmentation-adas-0001/FP16-INT8/semantic-segmentation-adas-0001.bin
 framework: dldt
+compilable: yes
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

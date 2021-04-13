@@ -73,4 +73,5 @@ model_optimizer_args:
   - --input_model=$conv_dir/ctdet_coco_dlav0_512.onnx
 framework: pytorch
 quantizable: yes
+compilable: yes
 license: https://raw.githubusercontent.com/xingyizhou/CenterNet/master/LICENSE

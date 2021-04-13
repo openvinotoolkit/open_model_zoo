@@ -42,4 +42,5 @@ files:
     sha256: e50f9bf79aa54d28f03318c9995328af5fb4b43f3026a927f7a95dbace266063
     source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-retail-0004/FP16-INT8/face-detection-retail-0004.bin
 framework: dldt
+compilable: yes
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
