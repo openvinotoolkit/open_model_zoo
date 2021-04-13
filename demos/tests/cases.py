@@ -479,7 +479,7 @@ PYTHON_DEMOS = [
         TestCase(options={
             '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
             '-m': ModelArg('bert-base-ner'),
-            '-v': ModelDirArg('bert-base-ner', 'vocab.txt')
+            '-v': ModelDirArg('bert-base-ner', 'bert-base-ner/vocab.txt')
         }),
     )),
 
