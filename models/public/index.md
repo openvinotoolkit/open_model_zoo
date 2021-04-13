@@ -287,7 +287,7 @@ The reported metric is collected over the alphanumeric subset of icdar 13 (1015 
 
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
-| Resnet-FC      | PyTorch\*      | [resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94% | 40.3704 | 177.9668  |
+| Resnet-FC      | PyTorch\*      | [text-recognition-resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94% | 40.3704 | 177.9668  |
 
 ## Legal Information
 
