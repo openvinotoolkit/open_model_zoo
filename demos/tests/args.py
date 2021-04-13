@@ -52,6 +52,15 @@ class ModelArg:
         return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))
 
 
+class ModelDirArg:
+    def __init__(self, model_name, file_name):
+        self.model_name = model_name
+        self.file_name = file_name
+
+    def resolve(self, context):
+        return str(context.dl_dir / context.model_info[self.model_name]["subdirectory"] / self.file_name)
+
+
 class DataPatternArg:
     def __init__(self, sequence_name):
         self.sequence_name = sequence_name

@@ -51,7 +51,7 @@ from the command-line match the actual network inputs.
 
 ## Demo Outputs
 The application outputs recognized named entities (`LOC` - location, `PER` - person, `ORG` - organization, `MISC` - miscellaneous)
-for each sentence in input text. 
+for each sentence in input text.
 
 
 ## Example Demo Cmd-Line

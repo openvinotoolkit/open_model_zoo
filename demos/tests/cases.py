@@ -18,7 +18,7 @@ import sys
 
 from args import (
     DataDirectoryArg, DataDirectoryOrigFileNamesArg, DataPatternArg,
-    ModelArg, OMZ_DIR, TestDataArg, image_net_arg, image_retrieval_arg,
+    ModelArg, ModelDirArg, OMZ_DIR, TestDataArg, image_net_arg, image_retrieval_arg,
 )
 from data_sequences import DATA_SEQUENCES
 
@@ -473,6 +473,14 @@ PYTHON_DEMOS = [
                 '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
             }),
         ]
+    )),
+
+    PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={
+            '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
+            '-m': ModelArg('bert-base-ner'),
+            '-v': ModelDirArg('bert-base-ner', 'vocab.txt')
+        }),
     )),
 
     PythonDemo(name='colorization_demo', device_keys=['-d'], test_cases=combine_cases(
