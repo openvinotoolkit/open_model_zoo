@@ -67,7 +67,7 @@ You can use the following command to try the demo (assuming the model from the O
 
 ## Classifying Documents with Long Texts
 Notice that when the original "context" (text from the url) do not fit the model input
-(128 for the Bert-Base), the demo reshapes model to maximum sentence legth in the "context".
+(128 for the Bert-Base), the demo reshapes model to maximum sentence length in the "context".
 
 ## Demo Performance
 Even though the demo reports inference performance (by measuring wall-clock time for individual inference calls),
