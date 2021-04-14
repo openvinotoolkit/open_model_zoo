@@ -17,7 +17,7 @@ python3 bert_named_entity_recognition_demo.py -h
 ```
 The command yields the following usage message:
 ```
-usage: bert_question_answering_demo.py [-h] -v VOCAB -m MODEL -i INPUT
+usage: bert_named_entity_recognition_demo.py [-h] -v VOCAB -m MODEL -i INPUT
                                        [--input_names INPUT_NAMES]
                                        [-d DEVICE]
 
