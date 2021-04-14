@@ -58,7 +58,7 @@ for each sentence in input text.
 You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
 [Model Downloader](../../../tools/downloader/README.md) executed with "--name bert*"):
 ```
-    python3 bert_question_answering_demo.py
+    python3 bert_named_entity_recognition_demo.py.py
             --vocab=<models_dir>/models/public/bert-base-ner/vocab.txt
             --model=<path_to_model>/bert-base-ner.xml
             --input_names="input_ids,attention_mask,token_type_ids"
