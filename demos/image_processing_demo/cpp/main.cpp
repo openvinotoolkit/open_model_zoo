@@ -46,6 +46,9 @@ static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Type of the network, either 'sr' for Super Resolution task or 'deblur' for Deblurring";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char original_img_message[] = "Optional. Display the original image together with the resulting image.";
+static const char mixed_img_message[] = "Optional. Display the mixed image: left half for original image, right half for result of model";
+static const char vheight_message[] = "Optional. Height of view for result.";
+static const char vwidth_message[] = "Optional. Width of view for result.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
@@ -66,6 +69,9 @@ DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
 DEFINE_bool(orig, false, original_img_message);
+DEFINE_bool(mixed, false, mixed_img_message);
+DEFINE_uint32(vheight, 0, vheight_message);
+DEFINE_uint32(vwidth, 0, vwidth_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
@@ -89,6 +95,9 @@ static void showUsage() {
     std::cout << "    -i \"<path>\"               " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "    -orig                     " << original_img_message << std::endl;
+    std::cout << "    -mixed                    " << mixed_img_message << std::endl;
+    std::cout << "    -vheight \"<integer>\"      " << vheight_message << std::endl;
+    std::cout << "    -vwidth \"<integer>\"       " << vwidth_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
@@ -141,7 +150,7 @@ std::unique_ptr<ImageProcessingModel> getModel(const cv::Size& frameSize, const 
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
 
-cv::Mat renderResultData(const ImageResult& result, bool origImgDisplay) {
+cv::Mat renderResultData(ImageResult result, bool origImgDisplay, bool mixedImg, cv::Size& view) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -152,12 +161,14 @@ cv::Mat renderResultData(const ImageResult& result, bool origImgDisplay) {
     if (inputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
     }
-    int h = result.resultImage.rows;
-    int w = result.resultImage.cols;
+
     int c = result.resultImage.channels();
 
-    if (inputImg.rows != h || inputImg.cols != w)
-        cv::resize(inputImg, inputImg, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
+    if (inputImg.rows != view.height || inputImg.cols != view.width)
+        cv::resize(inputImg, inputImg, view, 0, 0, cv::INTER_CUBIC);
+
+    if (result.resultImage.rows != view.height || result.resultImage.cols != view.width)
+        cv::resize(result.resultImage, result.resultImage, view, 0, 0, cv::INTER_CUBIC);
 
     cv::Mat resultImg;
     if (inputImg.channels() != c)
@@ -165,6 +176,8 @@ cv::Mat renderResultData(const ImageResult& result, bool origImgDisplay) {
     else
         resultImg = result.resultImage;
 
+    if (mixedImg)
+        inputImg(cv::Rect(0, 0, inputImg.cols / 2, inputImg.rows)).copyTo(resultImg(cv::Rect(0, 0, resultImg.cols / 2, resultImg.rows)));
     cv::Mat out;
     if (origImgDisplay)
         cv::hconcat(inputImg, resultImg, out);
@@ -213,6 +226,10 @@ int main(int argc, char *argv[]) {
 
         cv::VideoWriter videoWriter;
         int k = FLAGS_orig ? 2 : 1;
+        if (FLAGS_vheight)
+            viewResult.height = FLAGS_vheight;
+        if (FLAGS_vwidth)
+            viewResult.width = FLAGS_vwidth;
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
                                                   cap->fps(),
                                                   cv::Size(k * viewResult.width, viewResult.height))) {
@@ -240,7 +257,7 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to ImageResult*
             //    and use your own processing instead of calling renderResultData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig);
+                cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig, FLAGS_mixed, viewResult);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -266,7 +283,7 @@ int main(int argc, char *argv[]) {
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
         while (result = pipeline.getResult()) {
-            cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig);
+            cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig, FLAGS_mixed, viewResult);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
