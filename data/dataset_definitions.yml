@@ -1312,7 +1312,7 @@ datasets:
     annotation: voc07_without_bkgr.pickle
     dataset_meta: voc07_without_bkgr.json
 
-  - name: CONNL2003_bert_cased
+  - name: CONLL2003_bert_cased
     annotation_conversion:
       converter: conll_ner
       annotation_file: CONLL-2003/valid.txt
