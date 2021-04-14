@@ -32,7 +32,7 @@ human_pose_estimation_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -at "<type>"              Required. Type of the network, either 'ae' for Associative Embedding or 'openpose' for OpenPose.
+    -at "<type>"              Required. Type of the network, either 'ae' for Associative Embedding, 'higherhrnet' for HigherHRNet models based on ae or 'openpose' for OpenPose.
     -i                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -m "<path>"               Required. Path to an .xml file with a trained model.
     -o "<path>"               Optional. Name of output to save.

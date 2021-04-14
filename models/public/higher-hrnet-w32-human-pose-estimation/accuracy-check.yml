@@ -1,0 +1,28 @@
+models:
+  - name: higher-hrnet-w32-human-pose-estimation
+
+    launchers:
+      - framework: dlsdk
+        allow_reshape_input: True
+        adapter:
+          type: human_pose_estimation_hrnet
+          embeddings_out: embeddings
+          heatmaps_out: heatmaps
+          nms_heatmaps_out: heatmaps
+
+    datasets:
+      - name: ms_coco_val2017_keypoints_5k_images
+
+        preprocessing:
+          - type: resize
+            size: 512
+            interpolation: LINEAR
+            aspect_ratio_scale: greater
+          - type: padding
+            stride: 32
+            pad_type: center
+            left_top_extend: True
+
+        metrics:
+          - name: AP
+            type: coco_orig_keypoints_precision

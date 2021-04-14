@@ -180,6 +180,7 @@ instances, thus faster than previous, because network runs once.
 |--------------------------------- | ---------------| ----------------------------- | -------- | ------ | ------- |
 | human-pose-estimation-3d-0001    | PyTorch\*      | [human-pose-estimation-3d-0001](./human-pose-estimation-3d-0001/README.md) | 100.44437mm | 18.998 |  5.074  |
 | single-human-pose-estimation-0001| PyTorch\*      | [single-human-pose-estimation-0001](./single-human-pose-estimation-0001/README.md) | 69.0491% | 60.125 | 33.165 |
+| higher-hrnet-w32-human-pose-estimation | PyTorch\* | [higher-hrnet-w32-human-pose-estimation](./higher-hrnet-w32-human-pose-estimation/README.md) | 64.64%    | 92.8364 | 28.6180 |
 
 ## Monocular Depth Estimation
 

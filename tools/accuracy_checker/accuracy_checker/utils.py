@@ -73,7 +73,7 @@ def contains_all(container, *args):
     sequence = set(container)
 
     for arg in args:
-        if len(sequence.intersection(arg)) != len(arg):
+        if sequence.intersection(arg) != set(arg):
             return False
 
     return True

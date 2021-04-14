@@ -112,7 +112,7 @@ std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
 
         if (numAdded > numGrouped) {
             cv::copyMakeBorder(matchingCost, matchingCost, 0, 0, 0, numAdded - numGrouped,
-                               cv::BORDER_CONSTANT, 10000000000);
+                               cv::BORDER_CONSTANT, 10000000);
         }
         // Get pairs
         auto res = KuhnMunkres().Solve(matchingCost);
@@ -152,7 +152,6 @@ void adjustAndRefine(std::vector<Pose>& allPoses,
                      int poseId, const float delta) {
     Pose& pose = allPoses[poseId];
     float poseTag = pose.getPoseTag();
-
     for (size_t jointId = 0; jointId < pose.size(); jointId++) {
         Peak& peak = pose.getPeak(jointId);
         const cv::Mat& heatMap = heatMaps[jointId];
@@ -172,7 +171,7 @@ void adjustAndRefine(std::vector<Pose>& allPoses,
             // Refine
             // Get position with the closest tag value to the pose tag
             cv::Mat diff = cv::abs(aembds - poseTag);
-            diff.convertTo(diff, CV_32S, 1.0, 0.5);
+            diff.convertTo(diff, CV_32S, 1.0, 0.0);
             diff.convertTo(diff, CV_32F);
             diff -= heatMap;
             double min;

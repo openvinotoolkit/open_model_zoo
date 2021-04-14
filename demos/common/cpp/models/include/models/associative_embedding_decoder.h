@@ -48,7 +48,7 @@ class Pose {
 
         float getPoseTag() const { return poseTag; }
 
-        float getMeanScore() const { return sum / static_cast<float>(validPointsNum); }
+        float getMeanScore() const { return sum / static_cast<float>(size()); }
 
         Peak& getPeak(size_t index) { return peaks[index]; }
 

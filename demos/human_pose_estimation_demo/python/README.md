@@ -19,8 +19,8 @@ the argument, refer to **When to Reverse Input Channels** section of
 
 Running the application with the `-h` option yields the following usage message:
 ```
-usage: human_pose_estimation_demo.py [-h] -m MODEL -at {ae,openpose} -i INPUT
-                                     [--loop] [-o OUTPUT]
+usage: human_pose_estimation_demo.py [-h] -m MODEL -at {ae,hrnet,openpose} -i
+                                     INPUT [--loop] [-o OUTPUT]
                                      [-limit OUTPUT_LIMIT] [-d DEVICE]
                                      [-t PROB_THRESHOLD] [--tsize TSIZE]
                                      [-nireq NUM_INFER_REQUESTS]
@@ -32,7 +32,7 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -at {ae,openpose}, --architecture_type {ae,openpose}
+  -at {ae,higherhrnet,openpose}, --architecture_type {ae,higherhrnet,openpose}
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
