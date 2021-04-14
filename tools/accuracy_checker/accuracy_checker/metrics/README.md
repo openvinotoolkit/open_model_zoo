@@ -184,6 +184,9 @@ More detailed information about calculation segmentation metrics you can find [h
 * `coco_segm_precision` - MS COCO Average Precision metric for instance segmentation task. Supported representations: `CoCoInstanceSegmentationAnnotation`, `CoCoInstanceSegmentationPrediction`.
   * `max_detections` - max number of predicted results per image. If you have more predictions,the results with minimal confidence will be ignored.
   * `threshold` - intersection over union threshold. You can specify one value or comma separated range of values. This parameter supports precomputed values for standard COCO thresholds (`.5`, `.75`, `.5:.05:.95`).
+* `coco_segm_recall` - MS COCO Average Recall metric for instance segmentation task. Supported representations: `CoCoInstanceSegmentationAnnotation`, `CoCoInstanceSegmentationPrediction`.
+  * `max_detections` - max number of predicted results per image. If you have more predictions,the results with minimal confidence will be ignored.
+  * `threshold` - intersection over union threshold. You can specify one value or comma separated range of values. This parameter supports precomputed values for standard COCO thresholds (`.5`, `.75`, `.5:.05:.95`).
 * `hit_ratio` - metric for recommendation system evaluation. Supported representations: `HitRatioAnnotation`, `HitRatioPrediction`.
   * `top_k` - definition of number elements in rank list (optional, default 10).
 * `ndcg` - [Normalized Discounted Cumulative Gain](https://en.wikipedia.org/wiki/Discounted_cumulative_gain). Supported representations: `HitRatioAnnotation`, `HitRatioPrediction`.
