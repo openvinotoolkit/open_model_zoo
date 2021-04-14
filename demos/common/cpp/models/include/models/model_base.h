@@ -17,12 +17,13 @@
 #pragma once
 #include "input_data.h"
 #include "results.h"
+#include <utils/args_helper.hpp>
 #include "utils/config_factory.h"
 
 class ModelBase {
 public:
     ModelBase(const std::string& modelFileName)
-        : modelFileName(modelFileName), isNetworkCompiled(false)
+        : modelFileName(modelFileName), isNetworkCompiled(fileExt(modelFileName) == "blob")
     {}
 
     virtual ~ModelBase() {}

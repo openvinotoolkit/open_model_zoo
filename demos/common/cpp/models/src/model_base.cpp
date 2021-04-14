@@ -16,7 +16,6 @@
 
 #include "models/model_base.h"
 #include <inference_engine.hpp>
-#include <utils/args_helper.hpp>
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
 
@@ -55,9 +54,6 @@ InferenceEngine::CNNNetwork ModelBase::prepareNetwork(InferenceEngine::Core& cor
 
 ExecutableNetwork ModelBase::loadExecutableNetwork(const CnnConfig& cnnConfig, InferenceEngine::Core& core) {
     this->cnnConfig = cnnConfig;
-    // ---------------------- Determine network type ---------------------------------------------------
-    isNetworkCompiled = fileExt(modelFileName) == "blob";
-
     slog::info << "Loading model to the device" << slog::endl;
     if (!isNetworkCompiled) {
         auto cnnNetwork = prepareNetwork(core);
