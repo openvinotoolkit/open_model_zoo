@@ -22,7 +22,7 @@ Tokenization occurs using the BERT tokenizer (see the demo code for implementati
 
 ## Accuracy
 
-The quality metric was calculated on CONNL-2003 Named Entity Recognition dataset (dev set). Input sequences were padded to 128 symbols.
+The quality metric was calculated on CONLL-2003 Named Entity Recognition dataset (dev set). Input sequences were padded to 128 symbols.
 
 | Metric                    | Value         |
 |---------------------------|---------------|
