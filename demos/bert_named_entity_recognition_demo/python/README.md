@@ -13,7 +13,7 @@ The text is then used to search named entities.
 
 Running the application with the `-h` option yields the following usage message:
 ```
-python3 question_answering_demo.py -h
+python3 bert_named_entity_recognition_demo.py -h
 ```
 The command yields the following usage message:
 ```
