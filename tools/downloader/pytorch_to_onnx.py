@@ -81,7 +81,8 @@ def parse_args():
                         help='Comma-separated names of the output layers')
     parser.add_argument('--model-param', type=model_parameter, default=[], action='append',
                         help='Pair "name"="value" of model constructor parameter')
-    parser.add_argument('--inputs-dtype', type=str, required=False, choices=INPUT_DTYPE_TO_TORCH)
+    parser.add_argument('--inputs-dtype', type=str, required=False, choices=INPUT_DTYPE_TO_TORCH,
+                        help='Data type for inputs')
     return parser.parse_args()
 
 

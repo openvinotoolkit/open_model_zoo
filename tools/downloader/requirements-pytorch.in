@@ -1,6 +1,6 @@
 onnx
+packaging
 scipy           # via torchvision
 torch>=1.8
 torchvision
 yacs
-packaging
