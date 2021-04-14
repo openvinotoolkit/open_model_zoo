@@ -14,7 +14,7 @@ models:
             type: INPUT
             value: 'segment_ids'
     datasets:
-      - name: CONNL2003_bert_cased
+      - name: CONLL2003_bert_cased
         reader:
           type: annotation_features_extractor
           features:
