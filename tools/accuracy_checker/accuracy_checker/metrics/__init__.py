@@ -81,7 +81,8 @@ from .coco_metrics import (
     MSCOCORecall,
     MSCOCOKeypointsPrecision,
     MSCOCOKeypointsRecall,
-    MSCOCOSegmAveragePrecision
+    MSCOCOSegmAveragePrecision,
+    MSCOCOSegmRecall
 )
 from .coco_orig_metrics import (
     MSCOCOorigAveragePrecision,
@@ -180,6 +181,7 @@ __all__ = [
     'MSCOCOKeypointsPrecision',
     'MSCOCOKeypointsRecall',
     'MSCOCOSegmAveragePrecision',
+    'MSCOCOSegmRecall',
     'MSCOCOorigAveragePrecision',
     'MSCOCOorigRecall',
     'MSCOCOOrigSegmAveragePrecision',

@@ -275,6 +275,18 @@ class MSCOCOSegmAveragePrecision(MSCOCOAveragePrecision):
             maskUtils.raise_error(self.__provider__)
 
 
+class MSCOCOSegmRecall(MSCOCORecall):
+    __provider__ = 'coco_segm_recall'
+
+    annotation_types = (CoCoInstanceSegmentationAnnotation, )
+    prediction_types = (CoCoInstanceSegmentationPrediction, )
+
+    def configure(self):
+        super().configure()
+        if isinstance(maskUtils, UnsupportedPackage):
+            maskUtils.raise_error(self.__provider__)
+
+
 @singledispatch
 def select_specific_parameters(annotation):
     return compute_iou_boxes, False
