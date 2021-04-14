@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 from .adapter import Adapter
 from ..config import PathField, BoolField, NumberField
-from ..utils import read_txt, UnsupportedPackage, softmax
+from ..utils import read_txt, UnsupportedPackage
 from ..representation import CharacterRecognitionPrediction
 
 try:

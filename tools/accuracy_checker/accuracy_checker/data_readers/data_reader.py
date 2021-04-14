@@ -116,7 +116,7 @@ def serialize_identifier(identifier):
     if isinstance(identifier, ListIdentifier):
         return {
             "type": "list_identifier",
-            "values": identifier.values
+            "values": serialize_identifier(identifier.values)
         }
     if isinstance(identifier, MultiInstanceIdentifier):
         return {
@@ -124,6 +124,20 @@ def serialize_identifier(identifier):
             "identifier": identifier.identifier,
             "object_id": identifier.object_id
         }
+    if isinstance(identifier, KaldiMatrixIdentifier):
+        return {
+            'type': 'kaldi_matrix',
+            'file': identifier.file,
+            'key': identifier.key
+        }
+    if isinstance(identifier, KaldiFrameIdentifier):
+        return {
+            'type': 'kaldi_frame',
+            'file': identifier.file,
+            'key': identifier.key,
+            'id': identifier.id
+        }
+
     return identifier
 
 
@@ -133,13 +147,17 @@ def deserialize_identifier(identifier):
         if type_id == 'image_pair_identifier':
             return ImagePairIdentifier(identifier['first'], identifier['second'])
         if type_id == 'list_identifier':
-            return ListIdentifier(tuple(identifier['values']))
+            return ListIdentifier(tuple([deserialize_identifier(idx) for idx in identifier['values']]))
         if type_id == 'multi_frame_identifier':
             return MultiFramesInputIdentifier(identifier['input_id'], tuple(identifier['frames']))
         if type_id == 'clip_identifier':
             return ClipIdentifier(identifier['video'], identifier['clip_id'], tuple(identifier['frames']))
         if type_id == 'multi_instance':
             return MultiInstanceIdentifier(identifier['identifier'], identifier['object_id'])
+        if type_id == 'kaldi_matrix':
+            return KaldiMatrixIdentifier(identifier['file'], identifier['key'])
+        if type_id == 'kaldi_frame':
+            return KaldiFrameIdentifier(identifier['file'], identifier['key'], identifier['id'])
         raise ValueError('Unsupported identifier type: {}'.format(type_id))
     return identifier
 
