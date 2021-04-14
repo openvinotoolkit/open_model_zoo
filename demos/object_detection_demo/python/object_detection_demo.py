@@ -296,35 +296,33 @@ def main():
 
     detector_pipeline.await_all()
     # Process completed requests
-    while detector_pipeline.has_completed_request():
+    for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = detector_pipeline.get_result(next_frame_id_to_show)
-        if results:
-            objects, frame_meta = results
-            frame = frame_meta['frame']
-            start_time = frame_meta['start_time']
+        while results is None:
+            results = detector_pipeline.get_result(next_frame_id_to_show)
+        objects, frame_meta = results
+        frame = frame_meta['frame']
+        start_time = frame_meta['start_time']
 
-            if len(objects) and args.raw_output_message:
-                print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
+        if len(objects) and args.raw_output_message:
+            print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
 
-            presenter.drawGraphs(frame)
-            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
-            metrics.update(start_time, frame)
+        presenter.drawGraphs(frame)
+        frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
+        metrics.update(start_time, frame)
 
-            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
-                video_writer.write(frame)
+        if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
+            video_writer.write(frame)
 
-            if not args.no_show:
-                cv2.imshow('Detection Results', frame)
-                key = cv2.waitKey(1)
+        if not args.no_show:
+            cv2.imshow('Detection Results', frame)
+            key = cv2.waitKey(1)
 
-                ESC_KEY = 27
-                # Quit.
-                if key in {ord('q'), ord('Q'), ESC_KEY}:
-                    break
-                presenter.handleKey(key)
-            next_frame_id_to_show += 1
-        else:
-            break
+            ESC_KEY = 27
+            # Quit.
+            if key in {ord('q'), ord('Q'), ESC_KEY}:
+                break
+            presenter.handleKey(key)
 
     metrics.print_total()
     print(presenter.reportMeans())

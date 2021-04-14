@@ -100,8 +100,8 @@ class AsyncPipeline:
         self.event = threading.Event()
 
     def inference_completion_callback(self, status, callback_args):
-        request, id, meta, preprocessing_meta = callback_args
         try:
+            request, id, meta, preprocessing_meta = callback_args
             if status != 0:
                 raise RuntimeError('Infer Request has returned status code {}'.format(status))
             raw_outputs = {key: blob.buffer for key, blob in request.output_blobs.items()}

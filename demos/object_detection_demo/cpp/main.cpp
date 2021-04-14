@@ -384,7 +384,8 @@ int main(int argc, char *argv[]) {
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
-        while (result = pipeline.getResult()) {
+        for (; framesProcessed <= frameNum; framesProcessed++) {
+            while (!(result = pipeline.getResult())) {}
             cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
@@ -398,7 +399,6 @@ int main(int argc, char *argv[]) {
                 //--- Updating output window
                 cv::waitKey(1);
             }
-            framesProcessed++;
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------

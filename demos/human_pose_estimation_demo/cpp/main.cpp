@@ -264,6 +264,7 @@ int main(int argc, char *argv[]) {
 
         uint32_t framesProcessed = 0;
         bool keepRunning = true;
+        int64_t frameNum = -1;
         std::unique_ptr<ResultBase> result;
 
         while (keepRunning) {
@@ -275,7 +276,7 @@ int main(int argc, char *argv[]) {
                     // Input stream is over
                     break;
                 }
-                pipeline.submitData(ImageInputData(curr_frame),
+                frameNum = pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
                 }
 
@@ -311,7 +312,8 @@ int main(int argc, char *argv[]) {
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
-        while (result = pipeline.getResult()) {
+        for (; framesProcessed <= frameNum; framesProcessed++) {
+            while (!(result = pipeline.getResult())) {}
             cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
@@ -325,7 +327,6 @@ int main(int argc, char *argv[]) {
                 //--- Updating output window
                 cv::waitKey(1);
             }
-            framesProcessed++;
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
