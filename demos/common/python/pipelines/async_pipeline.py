@@ -89,6 +89,7 @@ class AsyncPipeline:
         self.exec_net = ie.load_network(network=self.model.net, device_name=device,
                                         config=plugin_config, num_requests=max_num_requests)
         if max_num_requests == 0:
+            # ExecutableNetwork doesn't allow creation of additional InferRequests. Reload ExecutableNetwork
             # +1 to use it as a buffer of the pipeline
             self.exec_net = ie.load_network(network=self.model.net, device_name=device,
                                             config=plugin_config, num_requests=len(self.exec_net.requests) + 1)
