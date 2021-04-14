@@ -7,7 +7,7 @@ FCOS head for indoor and outdoor scenes shot by a front-facing camera.
 
 ## Example
 
-![](./description/face-detection-0205.png)
+![](./assets/face-detection-0205.png)
 
 ## Specification
 

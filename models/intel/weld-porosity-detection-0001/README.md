@@ -6,7 +6,7 @@ This is a porosity weld recognition model. It runs on a video stream capturing w
 
 ## Example
 
-![](./description/weld-porosity-detection-0001.png)
+![](./assets/weld-porosity-detection-0001.png)
 
 ## Specification
 

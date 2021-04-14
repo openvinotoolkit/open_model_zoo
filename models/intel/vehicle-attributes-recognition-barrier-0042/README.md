@@ -6,7 +6,7 @@ This model presents a vehicle attributes classification algorithm for a traffic 
 
 ## Example
 
-![](./description/vehicle-attributes-recognition-barrier-0042-1.png)
+![](./assets/vehicle-attributes-recognition-barrier-0042-1.png)
 
 ## Specification
 

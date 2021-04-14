@@ -26,7 +26,7 @@ This is a segmentation network to classify each pixel into 20 classes:
 
 ## Example
 
-![](./description/semantic-segmentation-adas-0001.png)
+![](./assets/semantic-segmentation-adas-0001.png)
 
 ## Specification
 

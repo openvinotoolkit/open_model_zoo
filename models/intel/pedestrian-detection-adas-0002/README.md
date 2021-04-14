@@ -6,7 +6,7 @@ Pedestrian detection network based on SSD framework with tuned MobileNet v1 as a
 
 ## Example
 
-![](./description/pedestrian-detection-adas-0002.png)
+![](./assets/pedestrian-detection-adas-0002.png)
 
 ## Specification
 

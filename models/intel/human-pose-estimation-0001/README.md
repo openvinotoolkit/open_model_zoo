@@ -8,7 +8,7 @@ The pose may contain up to 18 keypoints: ears, eyes, nose, neck, shoulders, elbo
 
 ## Example
 
-![](./description/human-pose-estimation-0001.png)
+![](./assets/human-pose-estimation-0001.png)
 
 ## Specification
 

@@ -6,7 +6,7 @@ Pedestrian and vehicle detection network based on MobileNet v1.0 + SSD.
 
 ## Example
 
-![](./description/pedestrian-and-vehicle-detector-adas-0001.png)
+![](./assets/pedestrian-and-vehicle-detector-adas-0001.png)
 
 ## Specification
 

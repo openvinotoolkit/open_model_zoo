@@ -15,7 +15,7 @@ Person/Vehicle/Bike detection.
 
 ## Example
 
-![](./description/person-vehicle-bike-detection-crossroad-yolov3-1020.png)
+![](./assets/person-vehicle-bike-detection-crossroad-yolov3-1020.png)
 
 ## Specification
 

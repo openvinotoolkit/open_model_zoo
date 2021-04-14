@@ -8,7 +8,7 @@ The key benefit of this model compared to the [base model](../text-detection-000
 
 ## Example
 
-![](./description/horizontal-text-detection-0001.png)
+![](./assets/horizontal-text-detection-0001.png)
 
 ## Specification
 

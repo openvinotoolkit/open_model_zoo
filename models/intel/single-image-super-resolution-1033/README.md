@@ -9,15 +9,15 @@ channels and changes in network architecture. It enhances the resolution of the 
 
 Low resolution:
 
-![](./description/street_640x360.png)
+![](./assets/street_640x360.png)
 
 Bicubic interpolation:
 
-![](./description/x3c_street_640x360.png)
+![](./assets/x3c_street_640x360.png)
 
 Super resolution:
 
-![](./description/x3_street_640x360.png)
+![](./assets/x3_street_640x360.png)
 
 ## Specification
 

@@ -7,7 +7,7 @@ The network can detect 12 classes of objects (`sprite`, `kool-aid`, `extra`, `oc
 
 ## Example
 
-![](./description/product-detection-0001.jpg)
+![](./assets/product-detection-0001.jpg)
 
 ## Specification
 

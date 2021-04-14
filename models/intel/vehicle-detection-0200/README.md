@@ -8,7 +8,7 @@ prior boxes for 256x256 resolution.
 
 ## Example
 
-![](./description/vehicle-detection-0200.png)
+![](./assets/vehicle-detection-0200.png)
 
 ## Specification
 

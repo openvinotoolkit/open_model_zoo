@@ -8,7 +8,7 @@ The network is able to recognize school marks that should have format either `<d
 
 ## Example
 
-![](./description/shot_25.png) -> Mark2.5
+![](./assets/shot_25.png) -> Mark2.5
 
 ## Specification
 

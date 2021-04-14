@@ -11,7 +11,7 @@ feature map outputs an embedding vector of 256 floats.
 
 ## Example
 
-![](./description/person-reidentification-retail-0287.jpg)
+![](./assets/person-reidentification-retail-0287.jpg)
 
 ## Specification
 

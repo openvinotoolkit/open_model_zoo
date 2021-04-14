@@ -6,11 +6,11 @@ This model presents a person attributes classification algorithm analysis scenar
 
 ## Examples
 
-![](./description/person-attributes-recognition-crossroad-230-1.png)
-![](./description/person-attributes-recognition-crossroad-230-2.png)
-![](./description/person-attributes-recognition-crossroad-230-3.png)
-![](./description/person-attributes-recognition-crossroad-230-4.png)
-![](./description/person-attributes-recognition-crossroad-230-5.png)
+![](./assets/person-attributes-recognition-crossroad-230-1.png)
+![](./assets/person-attributes-recognition-crossroad-230-2.png)
+![](./assets/person-attributes-recognition-crossroad-230-3.png)
+![](./assets/person-attributes-recognition-crossroad-230-4.png)
+![](./assets/person-attributes-recognition-crossroad-230-5.png)
 
 ## Specification
 

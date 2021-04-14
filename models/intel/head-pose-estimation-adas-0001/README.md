@@ -12,7 +12,7 @@ one output.
 
 ## Example
 
-![](./description/head-pose-estimation-adas-0001.png)
+![](./assets/head-pose-estimation-adas-0001.png)
 
 ## Specification
 

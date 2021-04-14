@@ -7,7 +7,7 @@ backbone with ATSS head for 864x480 resolution.
 
 ## Example
 
-![](./description/person-detection-0203.png)
+![](./assets/person-detection-0203.png)
 
 ## Specification
 

@@ -8,7 +8,7 @@ prior boxes for 384x384 resolution.
 
 ## Example
 
-![](./description/person-detection-0201.png)
+![](./assets/person-detection-0201.png)
 
 ## Specification
 

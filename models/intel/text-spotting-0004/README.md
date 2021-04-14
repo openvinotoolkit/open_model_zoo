@@ -11,7 +11,7 @@ Alphabet is alphanumeric: `abcdefghijklmnopqrstuvwxyz0123456789`.
 
 ## Example
 
-![](./description/text-spotting-0004.png)
+![](./assets/text-spotting-0004.png)
 
 ## Composite model specification
 

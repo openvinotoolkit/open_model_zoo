@@ -12,7 +12,7 @@ on the input clip.
 
 ## Example
 
-![](./description/asl-recognition-0004.jpg)
+![](./assets/asl-recognition-0004.jpg)
 
 ## Specification
 

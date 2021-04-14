@@ -8,7 +8,7 @@ FPN, RPN, detection and segmentation heads.
 
 ## Example
 
-![](./description/instance-segmentation-security-0091.png)
+![](./assets/instance-segmentation-security-0091.png)
 
 ## Specification
 

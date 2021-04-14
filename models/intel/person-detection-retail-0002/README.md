@@ -6,7 +6,7 @@ This is a pedestrian detector based on backbone with hyper-feature + R-FCN for t
 
 ## Example
 
-![](./description/person-detection-retail-0002.png)
+![](./assets/person-detection-retail-0002.png)
 
 ## Specification
 
