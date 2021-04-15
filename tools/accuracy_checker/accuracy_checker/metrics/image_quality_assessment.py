@@ -186,7 +186,9 @@ class VisionInformationFidelity(BaseRegressionMetric):
                 p = convolve2d(p, np.rot90(win, 2), mode='valid')[::2, ::2]
 
             gt_sum_sq, p_sum_sq, gt_p_sum_mul = _get_sums(gt, p, win, mode='valid')
-            sigmagt_sq, sigmap_sq, sigmagt_p = _get_sigmas(gt, p, win, mode='valid', sums=(gt_sum_sq, p_sum_sq, gt_p_sum_mul))
+            sigmagt_sq, sigmap_sq, sigmagt_p = _get_sigmas(
+                gt, p, win, mode='valid', sums=(gt_sum_sq, p_sum_sq, gt_p_sum_mul)
+            )
 
             sigmagt_sq[sigmagt_sq < 0] = 0
             sigmap_sq[sigmap_sq < 0] = 0
@@ -222,14 +224,14 @@ def gaussian_filter(ws, sigma):
     return g
 
 
-def _get_sums(gt, p, win,mode='same'):
+def _get_sums(gt, p, win, mode='same'):
     mu1 = convolve2d(gt, np.rot90(win, 2), mode=mode)
     mu2 = convolve2d(p, np.rot90(win, 2), mode=mode)
     return mu1 * mu1, mu2 * mu2, mu1 * mu2
 
 
 def _get_sigmas(gt, p, win, mode='same', sums=None):
-    if 'sums' is not None:
+    if sums is not None:
         gt_sum_sq, p_sum_sq, gt_p_sum_mul = sums
     else:
         gt_sum_sq, p_sum_sq, gt_p_sum_mul = _get_sums(gt, p, win, mode)
@@ -244,6 +246,11 @@ def _get_sigmas(gt, p, win, mode='same', sums=None):
 class LPIPS(BaseRegressionMetric):
     __provider__ = 'lpips'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(self.lpips_differ, *args, **kwargs)
+        if isinstance(lpips, UnsupportedPackage):
+            lpips.raise_error(self.__provider__)
+
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
@@ -256,6 +263,10 @@ class LPIPS(BaseRegressionMetric):
             'net': StringField(
                 optional=True, default='alex', choices=['alex', 'vgg', 'squeeze'],
                 description='network for perceptual score'
+            ),
+            'distance_threshold': NumberField(
+                optional=True, description='Distance threshold for getting image ratio greater distance',
+                value_type=float, min_value=0, max_value=1
             )
         })
 
@@ -267,7 +278,7 @@ class LPIPS(BaseRegressionMetric):
         self.normalized_images = self.get_value_from_config('normalized_images')
         self.color_scale = 255 if not self.normalized_images else 1
         self.loss = lpips.LPIPS(net=self.get_value_from_config('net'))
-
+        self.dist_threshold = self.get_value_from_config('distance_threshold')
 
     def lpips_differ(self, annotation_image, prediction_image):
         if self.color_order == 'BGR':
@@ -276,3 +287,11 @@ class LPIPS(BaseRegressionMetric):
         gt_tensor = lpips.im2tensor(annotation_image, factor=self.color_scale / 2)
         pred_tensor = lpips.im2tensor(prediction_image, factor=self.color_scale / 2)
         return self.loss(gt_tensor, pred_tensor).item()
+
+    def evaluate(self, annotations, predictions):
+        mean, std = super().evaluate(annotations, predictions)
+        if self.dist_threshold:
+            invalid_ratio = np.sum(self.magnitude > self.dist_threshold) / self.magnitude.size()
+            self.meta['names'].append('{}@ratio_greater_{}'.format(self.__provider__, self.dist_threshold))
+            return mean, std, invalid_ratio
+        return mean, std

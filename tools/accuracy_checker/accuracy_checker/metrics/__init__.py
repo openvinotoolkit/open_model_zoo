@@ -229,5 +229,10 @@ __all__ = [
     'SalienceMapMAE',
     'SalienceMapFMeasure',
     'SalienceSMeasure',
-    'SalienceEMeasure'
+    'SalienceEMeasure',
+
+    'LPIPS',
+    'VisionInformationFidelity',
+    'PeakSignalToNoiseRatio',
+    'StructuralSimilarity'
 ]
