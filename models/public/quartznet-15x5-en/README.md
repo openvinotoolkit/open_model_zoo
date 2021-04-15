@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-QuartzNet model performs automatic speech recognition. QuartzNet’s design is based on the Jasper architecture,
+QuartzNet model performs automatic speech recognition. QuartzNet's design is based on the Jasper architecture,
 which is a convolutional model trained with Connectionist Temporal Classification (CTC) loss.
 This particular model has 15 Jasper blocks each repeated 5 times. The model was trained in NeMo on multiple datasets:
 LibriSpeech, Mozilla Common Voice, WSJ, Fisher, Switchboard, and NSC Singapore English.
