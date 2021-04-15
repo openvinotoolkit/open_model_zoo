@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import argparse
+import shutil
 import subprocess
 import sys
 
@@ -26,12 +27,16 @@ def main():
     parser.add_argument('output_dir', type=Path)
     args = parser.parse_args()
 
+    saved_model_dir = args.output_dir / "efficientdet-d0_saved_model"
+    if saved_model_dir.exists():
+        shutil.rmtree(str(saved_model_dir))
+
     subprocess.run([sys.executable, '--',
         str(args.input_dir / 'model/model_inspect.py'),
         "--runmode=saved_model",
         "--model_name=efficientdet-d0",
         "--ckpt_path={}".format(args.input_dir / "efficientdet-d0"),
-        "--saved_model_dir={}".format(args.output_dir / "efficientdet-d0_saved_model")
+        "--saved_model_dir={}".format(saved_model_dir),
     ], check=True)
 
 if __name__ == '__main__':
