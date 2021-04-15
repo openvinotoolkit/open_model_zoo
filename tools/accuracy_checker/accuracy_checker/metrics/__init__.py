@@ -60,13 +60,11 @@ from .regression import (
     FacialLandmarksPerPointNormedError,
     FacialLandmarksNormedError,
 
-    PeakSignalToNoiseRatio,
-    StructuralSimilarity,
-
     AngleError,
 
     PercentageCorrectKeypoints
 )
+from .image_quality_assessment import StructuralSimilarity, PeakSignalToNoiseRatio, VisionInformationFidelity, LPIPS
 from .multilabel_recognition import MultiLabelRecall, MultiLabelPrecision, MultiLabelAccuracy, F1Score
 from .text_detection import (
     FocusedTextLocalizationPrecision,
@@ -157,8 +155,6 @@ __all__ = [
     'RootMeanSquaredErrorOnInterval',
     'FacialLandmarksPerPointNormedError',
     'FacialLandmarksNormedError',
-    'PeakSignalToNoiseRatio',
-    'StructuralSimilarity',
     'AngleError',
     'MeanAbsolutePercentageError',
     'Log10Error',
