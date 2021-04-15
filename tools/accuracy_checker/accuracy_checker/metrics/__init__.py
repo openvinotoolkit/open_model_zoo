@@ -64,7 +64,10 @@ from .regression import (
 
     PercentageCorrectKeypoints
 )
-from .image_quality_assessment import StructuralSimilarity, PeakSignalToNoiseRatio, VisionInformationFidelity, LPIPS
+from .image_quality_assessment import (
+    StructuralSimilarity, PeakSignalToNoiseRatio, VisionInformationFidelity, LPIPS,
+    PeakSignalToNoiseRatioWithBlockingEffectFactor
+)
 from .multilabel_recognition import MultiLabelRecall, MultiLabelPrecision, MultiLabelAccuracy, F1Score
 from .text_detection import (
     FocusedTextLocalizationPrecision,
@@ -234,5 +237,6 @@ __all__ = [
     'LPIPS',
     'VisionInformationFidelity',
     'PeakSignalToNoiseRatio',
-    'StructuralSimilarity'
+    'StructuralSimilarity',
+    'PeakSignalToNoiseRatioWithBlockingEffectFactor',
 ]

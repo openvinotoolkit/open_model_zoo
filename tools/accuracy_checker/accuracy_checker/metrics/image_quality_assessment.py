@@ -15,6 +15,7 @@ limitations under the License.
 """
 import math
 
+import cv2
 import numpy as np
 
 from ..config import NumberField, StringField, BoolField
@@ -98,13 +99,13 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
     def configure(self):
         super().configure()
         self.scale_border = self.get_value_from_config('scale_border')
-        color_order = self.get_value_from_config('color_order')
+        self.color_order = self.get_value_from_config('color_order')
         channel_order = {
             'BGR': [2, 1, 0],
             'RGB': [0, 1, 2],
         }
         self.meta['postfix'] = 'Db'
-        self.channel_order = channel_order[color_order]
+        self.channel_order = channel_order[self.color_order]
         self.normalized_images = self.get_value_from_config('normalized_images')
         self.color_scale = 255 if not self.normalized_images else 1
 
@@ -136,6 +137,128 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
             mse = np.mean(image_difference ** 2)
 
         return -10 * math.log10(mse)
+
+
+class PeakSignalToNoiseRatioWithBlockingEffectFactor(PeakSignalToNoiseRatio):
+    __provider__ = 'psnr-b'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'block_size': NumberField(value_type=int, min_value=1, default=8, description='block size for BEF')
+        })
+        return params
+
+    def configure(self):
+        super().configure()
+        self.block_size = self.get_value_from_config('block_size')
+
+    def _psnr_differ(self, annotation_image, prediction_image):
+        prediction = np.asarray(prediction_image).astype(np.float)
+        ground_truth = np.asarray(annotation_image).astype(np.float)
+
+        height, width = prediction.shape[:2]
+        prediction = prediction[
+            self.scale_border:height - self.scale_border,
+            self.scale_border:width - self.scale_border
+        ]
+        ground_truth = ground_truth[
+            self.scale_border:height - self.scale_border,
+            self.scale_border:width - self.scale_border
+        ]
+
+        if prediction.ndim > 2 and prediction.shape[-1] == 3:
+            if self.color_order == 'BGR':
+                ground_truth = cv2.cvtColor(ground_truth, cv2.COLOR_BGR2YCR_CB)
+                prediction = cv2.cvtColor(prediction, cv2.COLOR_BGR2YCR_CB)
+
+        return self._psnrb(ground_truth, prediction)
+
+    def _psnrb(self, gt, pred):
+        if gt.ndim == 3:
+            gt = gt[:, :, 0]
+
+        if pred.ndim == 3:
+            pred = pred[:, :, 0]
+
+        imdff = gt.astype(np.double) - pred.astype(np.double)
+
+        mse = np.mean(np.square(imdff.flatten()))
+        bef = self._compute_bef(pred, block_size=self.block_size)
+        mse_b = mse + bef
+
+        if np.amax(pred) > 2:
+            psnr_b = 10 * math.log10(255 ** 2 / mse_b)
+        else:
+            psnr_b = 10 * math.log10(1 / mse_b)
+
+        return psnr_b
+
+    @staticmethod
+    def _compute_bef(im, block_size=8):
+        if len(im.shape) == 3:
+            height, width, channels = im.shape
+        elif len(im.shape) == 2:
+            height, width = im.shape
+            channels = 1
+        else:
+            raise ValueError("Not a 1-channel/3-channel grayscale image")
+
+        if channels > 1:
+            raise ValueError("Not for color images")
+
+        h = np.array(range(0, width - 1))
+        h_b = np.array(range(block_size - 1, width - 1, block_size))
+        h_bc = np.array(list(set(h).symmetric_difference(h_b)))
+
+        v = np.array(range(0, height - 1))
+        v_b = np.array(range(block_size - 1, height - 1, block_size))
+        v_bc = np.array(list(set(v).symmetric_difference(v_b)))
+
+        d_b = 0
+        d_bc = 0
+
+        # h_b for loop
+        for i in list(h_b):
+            diff = im[:, i] - im[:, i + 1]
+            d_b += np.sum(np.square(diff))
+
+        # h_bc for loop
+        for i in list(h_bc):
+            diff = im[:, i] - im[:, i + 1]
+            d_bc += np.sum(np.square(diff))
+
+        # v_b for loop
+        for j in list(v_b):
+            diff = im[j, :] - im[j + 1, :]
+            d_b += np.sum(np.square(diff))
+
+        # V_bc for loop
+        for j in list(v_bc):
+            diff = im[j, :] - im[j + 1, :]
+            d_bc += np.sum(np.square(diff))
+
+        # N code
+        n_hb = height * (width / block_size) - 1
+        n_hbc = (height * (width - 1)) - n_hb
+        n_vb = width * (height / block_size) - 1
+        n_vbc = (width * (height - 1)) - n_vb
+
+        # D code
+        d_b /= (n_hb + n_vb)
+        d_bc /= (n_hbc + n_vbc)
+
+        # Log
+        if d_b > d_bc:
+            t = np.log2(block_size) / np.log2(min(height, width))
+        else:
+            t = 0
+
+        # BEF
+        bef = t * (d_b - d_bc)
+
+        return bef
 
 
 class VisionInformationFidelity(BaseRegressionMetric):
@@ -291,7 +414,7 @@ class LPIPS(BaseRegressionMetric):
     def evaluate(self, annotations, predictions):
         mean, std = super().evaluate(annotations, predictions)
         if self.dist_threshold:
-            invalid_ratio = np.sum(self.magnitude > self.dist_threshold) / self.magnitude.size()
+            invalid_ratio = np.sum(np.array(self.magnitude) > self.dist_threshold) / len(self.magnitude)
             self.meta['names'].append('{}@ratio_greater_{}'.format(self.__provider__, self.dist_threshold))
             return mean, std, invalid_ratio
         return mean, std
