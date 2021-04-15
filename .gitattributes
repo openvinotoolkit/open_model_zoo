@@ -41,4 +41,4 @@
 /tools/downloader/** omz.ci.job-for-change.downloader
 /tools/**/*.md -omz.ci.job-for-change.ac -omz.ci.job-for-change.downloader
 
-**/*.md omz.ci.job-for-change.documentation
+*.md omz.ci.job-for-change.documentation
