@@ -305,7 +305,7 @@ def read_yaml(file: Union[str, Path], *args, **kwargs):
 
 
 def read_csv(file: Union[str, Path], *args, **kwargs):
-    with get_path(file).open() as content:
+    with get_path(file).open(encoding='utf-8') as content:
         return list(csv.DictReader(content, *args, **kwargs))
 
 
