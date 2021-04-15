@@ -201,17 +201,17 @@ def make_subset_kaldi(annotation, size, shuffle=True):
         file_to_num_utterances[ann.identifier.file] = file_to_num_utterances.get(ann.identifier.file, []).append(ind)
 
     subset = []
-    for file_id, indicies in file_to_num_utterances.items():
-        if len(subset) + len(indicies) > size:
+    for _, indices in file_to_num_utterances.items():
+        if len(subset) + len(indices) > size:
             num_elem_to_add = size - len(subset)
             if shuffle:
-                indicies = np.random.choice(indicies, num_elem_to_add)
+                indices = np.random.choice(indices, num_elem_to_add)
             else:
-                indicies = indicies[:num_elem_to_add]
+                indices = indices[:num_elem_to_add]
         else:
             if shuffle:
-                indicies = np.random.shuffle(indicies)
-        subset.extend([annotation[idx] for idx in indicies])
+                indices = np.random.shuffle(indices)
+        subset.extend([annotation[idx] for idx in indices])
         if len(subset) == size:
             break
     return subset

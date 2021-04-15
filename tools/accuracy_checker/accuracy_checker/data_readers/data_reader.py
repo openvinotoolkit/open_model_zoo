@@ -93,72 +93,59 @@ MultiInstanceIdentifier = namedtuple('MultiInstanceIdentifier', ['identifier', '
 KaldiMatrixIdentifier = namedtuple('KaldiMatrixIdentifier', ['file', 'key'])
 KaldiFrameIdentifier = namedtuple('KaldiFrameIdentifier', ['file', 'key', 'id'])
 
+IdentifierSerializationOptions = namedtuple(
+    "identifierSerializationOptions", ['type', 'fields', 'class_id', 'recursive', 'to_tuple']
+)
+
+identifier_serialization = {
+    'ClipIdentifier': IdentifierSerializationOptions(
+        'clip_identifier', ['video', 'clip_id', 'frames'], ClipIdentifier, [False, False, False], [False, False, True]),
+    'MultiFramesInputIdentifier': IdentifierSerializationOptions(
+        'multi_frame_identifier', ['input_id', 'frames'], MultiFramesInputIdentifier, [False, False], [False, True]),
+    'ImagePairIdentifier': IdentifierSerializationOptions(
+        'image_pair_identifier', ['first', 'second'], ImagePairIdentifier, False, False),
+    'ListIdentifier': IdentifierSerializationOptions('list_identifier', ['values'], ListIdentifier, [True], [True]),
+    'MultiInstanceIdentifier': IdentifierSerializationOptions(
+        'multi_instance', ['identifier', 'instance_id'], MultiInstanceIdentifier, [False, False], [False, False]),
+    'KaldiMatrixIdentifier': IdentifierSerializationOptions(
+        'kaldi_matrix', ['file', 'key'], KaldiMatrixIdentifier, [False, False], [False, False]),
+    'KaldiFrameIdentifier': IdentifierSerializationOptions(
+        'kaldi_frame', ['file', 'key', 'id'], KaldiFrameIdentifier, [False, False, False], [False, False, False])
+}
+
+identifier_deserialization = {option.type: option for option in identifier_serialization.values()}
+
+
 def serialize_identifier(identifier):
-    if isinstance(identifier, ClipIdentifier):
-        return {
-            "type": "clip_identifier",
-            "video": identifier.video,
-            "clip_id": identifier.clip_id,
-            "frames": identifier.frames
-        }
-    if isinstance(identifier, MultiFramesInputIdentifier):
-        return {
-            "type": "multi_frame_identifier",
-            "input_id": identifier.input_id,
-            "frames": identifier.frames
-        }
-    if isinstance(identifier, ImagePairIdentifier):
-        return {
-            "type": "image_pair_identifier",
-            "first": identifier.first,
-            "second": identifier.second
-        }
-    if isinstance(identifier, ListIdentifier):
-        return {
-            "type": "list_identifier",
-            "values": serialize_identifier(identifier.values)
-        }
-    if isinstance(identifier, MultiInstanceIdentifier):
-        return {
-            "type": 'multi_instance',
-            "identifier": identifier.identifier,
-            "object_id": identifier.object_id
-        }
-    if isinstance(identifier, KaldiMatrixIdentifier):
-        return {
-            'type': 'kaldi_matrix',
-            'file': identifier.file,
-            'key': identifier.key
-        }
-    if isinstance(identifier, KaldiFrameIdentifier):
-        return {
-            'type': 'kaldi_frame',
-            'file': identifier.file,
-            'key': identifier.key,
-            'id': identifier.id
-        }
+    if type(identifier).__name__ in identifier_serialization:
+        options = identifier_serialization[type(identifier).__name__]
+        serialized_id = {'type': options.type}
+        for idx, field in options.fields:
+            serialized_id[field] = (
+                identifier[idx] if not options.recursive[idx] else serialize_identifier(identifier[idx])
+            )
+        return serialized_id
 
     return identifier
 
 
 def deserialize_identifier(identifier):
     if isinstance(identifier, dict):
-        type_id = identifier.get('type')
-        if type_id == 'image_pair_identifier':
-            return ImagePairIdentifier(identifier['first'], identifier['second'])
-        if type_id == 'list_identifier':
-            return ListIdentifier(tuple([deserialize_identifier(idx) for idx in identifier['values']]))
-        if type_id == 'multi_frame_identifier':
-            return MultiFramesInputIdentifier(identifier['input_id'], tuple(identifier['frames']))
-        if type_id == 'clip_identifier':
-            return ClipIdentifier(identifier['video'], identifier['clip_id'], tuple(identifier['frames']))
-        if type_id == 'multi_instance':
-            return MultiInstanceIdentifier(identifier['identifier'], identifier['object_id'])
-        if type_id == 'kaldi_matrix':
-            return KaldiMatrixIdentifier(identifier['file'], identifier['key'])
-        if type_id == 'kaldi_frame':
-            return KaldiFrameIdentifier(identifier['file'], identifier['key'], identifier['id'])
-        raise ValueError('Unsupported identifier type: {}'.format(type_id))
+        options = identifier_deserialization.get(identifier.get('type'))
+        if options is None:
+            raise ValueError('Unsupported identifier type: {}'.format(identifier.get('type')))
+        fields = []
+        for field, recursive, to_tuple in zip(options.fields, options.recursive, options.to_tuple):
+            if field not in identifier:
+                raise ValueError('Field {} required for identifier deserialization'.format(field))
+            data = identifier[field]
+            if recursive:
+                data = deserialize_identifier(data)
+            if to_tuple:
+                data = tuple(data)
+            fields.append(data)
+        return options.class_id(*fields)
+
     return identifier
 
 
