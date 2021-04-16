@@ -85,6 +85,9 @@ def build_argparser():
 
     io_args = parser.add_argument_group('Input/output options')
     io_args.add_argument('-no_show', '--no_show', help="Optional. Don't show output.", action='store_true')
+    io_args.add_argument('--display_resolution', default=None, type=int, nargs=2,
+                         help='Optional. Specify the maximum output window resolution '
+                              'in (width, height) format. Example: 1280, 720.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
@@ -120,14 +123,18 @@ colors = (
         (0, 170, 255))
 
 
-def draw_poses(img, poses, point_score_threshold, skeleton=default_skeleton, draw_ellipses=False):
+def draw_poses(img, poses, point_score_threshold, display_transform, skeleton=default_skeleton, draw_ellipses=False):
+    if display_transform:
+        img = display_transform.resize(img)
     if poses.size == 0:
         return img
     stick_width = 4
 
     img_limbs = np.copy(img)
     for pose in poses:
-        points = pose[:, :2].astype(int).tolist()
+        points = pose[:, :2].astype(np.int32)
+        if display_transform:
+            points = display_transform.scale(points)
         points_scores = pose[:, 2]
         # Draw joints.
         for i, (p, v) in enumerate(zip(points, points_scores)):
@@ -182,11 +189,17 @@ def main():
     next_frame_id = 1
     next_frame_id_to_show = 0
 
+    if args.display_resolution:
+        display_transform = models.DisplayTransform(frame.shape[:2], args.display_resolution)
+        display_resolution = display_transform.new_resolution
+    else:
+        display_transform = None
+        display_resolution = (frame.shape[1], frame.shape[0])
     presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                   (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
+                                   (round(display_resolution[0] / 4), round(display_resolution[1] / 8)))
     video_writer = cv2.VideoWriter()
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
-            (frame.shape[1], frame.shape[0])):
+            display_resolution):
         raise RuntimeError("Can't open video writer")
 
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
@@ -204,7 +217,7 @@ def main():
                 print_raw_results(poses, scores)
 
             presenter.drawGraphs(frame)
-            frame = draw_poses(frame, poses, args.prob_threshold)
+            frame = draw_poses(frame, poses, args.prob_threshold, display_transform)
             metrics.update(start_time, frame)
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
@@ -239,6 +252,7 @@ def main():
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = hpe_pipeline.get_result(next_frame_id_to_show)
+<<<<<<< HEAD
         while results is None:
             results = hpe_pipeline.get_result(next_frame_id_to_show)
         (poses, scores), frame_meta = results
@@ -262,6 +276,33 @@ def main():
             if key in {ord('q'), ord('Q'), ESC_KEY}:
                 break
             presenter.handleKey(key)
+=======
+        if results:
+            (poses, scores), frame_meta = results
+            frame = frame_meta['frame']
+            start_time = frame_meta['start_time']
+
+            if len(poses) and args.raw_output_message:
+                print_raw_results(poses, scores)
+
+            presenter.drawGraphs(frame)
+            frame = draw_poses(frame, poses, args.prob_threshold, display_transform)
+            metrics.update(start_time, frame)
+            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
+                video_writer.write(frame)
+            if not args.no_show:
+                cv2.imshow('Pose estimation results', frame)
+                key = cv2.waitKey(1)
+
+                ESC_KEY = 27
+                # Quit.
+                if key in {ord('q'), ord('Q'), ESC_KEY}:
+                    break
+                presenter.handleKey(key)
+            next_frame_id_to_show += 1
+        else:
+            break
+>>>>>>> 171b59c0d (Add display resizer to hpe, object_detection, segmentation demos)
 
     metrics.print_total()
     print(presenter.reportMeans())

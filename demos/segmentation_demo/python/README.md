@@ -31,6 +31,7 @@ usage: segmentation_demo.py [-h] -m MODEL -i INPUT
                             [-nthreads NUM_THREADS]
                             [--loop] [-o OUTPUT]
                             [-limit OUTPUT_LIMIT] [--no_show]
+                            [--display_resolution DISPLAY_RESOLUTION]
                             [-u UTILIZATION_MONITORS]
 Options:
   -h, --help            Show this help message and exit.
@@ -73,6 +74,9 @@ Input/output options:
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
   --no_show             Optional. Don't show output.
+  --display_resolution DISPLAY_RESOLUTION
+                        Optional. Specify the maximum output window resolution
+                        in (width, height) format. Example: 1280, 720.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```

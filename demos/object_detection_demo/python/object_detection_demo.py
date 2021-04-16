@@ -88,6 +88,9 @@ def build_argparser():
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')
     io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
+    io_args.add_argument('--display_resolution', default=None, type=int, nargs=2,
+                         help='Optional. Specify the maximum output window resolution '
+                              'in (width, height) format. Example: 1280, 720.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
@@ -178,22 +181,57 @@ def get_model(ie, args):
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
 
+<<<<<<< HEAD
 def draw_detections(frame, detections, palette, labels, threshold):
+=======
+def get_plugin_configs(device, num_streams, num_threads):
+    config_user_specified = {}
+
+    devices_nstreams = {}
+    if num_streams:
+        devices_nstreams = {device: num_streams for device in ['CPU', 'GPU'] if device in device} \
+            if num_streams.isdigit() \
+            else dict(device.split(':', 1) for device in num_streams.split(','))
+
+    if 'CPU' in device:
+        if num_threads is not None:
+            config_user_specified['CPU_THREADS_NUM'] = str(num_threads)
+        if 'CPU' in devices_nstreams:
+            config_user_specified['CPU_THROUGHPUT_STREAMS'] = devices_nstreams['CPU'] \
+                if int(devices_nstreams['CPU']) > 0 \
+                else 'CPU_THROUGHPUT_AUTO'
+
+    if 'GPU' in device:
+        if 'GPU' in devices_nstreams:
+            config_user_specified['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] \
+                if int(devices_nstreams['GPU']) > 0 \
+                else 'GPU_THROUGHPUT_AUTO'
+
+    return config_user_specified
+
+def draw_detections(frame, detections, palette, labels, threshold, display_transform):
+>>>>>>> 171b59c0d (Add display resizer to hpe, object_detection, segmentation demos)
     size = frame.shape[:2]
+    if display_transform:
+        frame = display_transform.resize(frame)
     for detection in detections:
         if detection.score > threshold:
+            class_id = int(detection.id)
+            color = palette[class_id]
+            det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
             xmin = max(int(detection.xmin), 0)
             ymin = max(int(detection.ymin), 0)
             xmax = min(int(detection.xmax), size[1])
             ymax = min(int(detection.ymax), size[0])
-            class_id = int(detection.id)
-            color = palette[class_id]
-            det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
+            if display_transform:
+                xmin, ymin, xmax, ymax = display_transform.scale([xmin, ymin, xmax, ymax])
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
             cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
                         (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
             if isinstance(detection, models.DetectionWithLandmarks):
                 for landmark in detection.landmarks:
+                    if display_transform:
+                        landmark = display_transform.scale(landmark)
                     cv2.circle(frame, (int(landmark[0]), int(landmark[1])), 2, (0, 255, 255), 2)
     return frame
 
@@ -238,6 +276,7 @@ def main():
     palette = ColorPalette(len(model.labels) if model.labels else 100)
     metrics = PerformanceMetrics()
     presenter = None
+    display_transform = None
     video_writer = cv2.VideoWriter()
 
     while True:
@@ -254,7 +293,7 @@ def main():
                 print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
 
             presenter.drawGraphs(frame)
-            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
+            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, display_transform)
             metrics.update(start_time, frame)
 
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
@@ -281,10 +320,15 @@ def main():
                     raise ValueError("Can't read an image from the input")
                 break
             if next_frame_id == 0:
+                if args.display_resolution:
+                    display_transform = models.DisplayTransform(frame.shape[:2], args.display_resolution)
+                    display_resolution = display_transform.new_resolution
+                else:
+                    display_resolution = (frame.shape[1], frame.shape[0])
                 presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                               (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
+                                               (round(display_resolution[0] / 4), round(display_resolution[1] / 8)))
                 if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                                         cap.fps(), (frame.shape[1], frame.shape[0])):
+                                                         cap.fps(), display_resolution):
                     raise RuntimeError("Can't open video writer")
             # Submit for inference
             detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
@@ -307,9 +351,15 @@ def main():
         if len(objects) and args.raw_output_message:
             print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
 
+<<<<<<< HEAD
         presenter.drawGraphs(frame)
         frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
         metrics.update(start_time, frame)
+=======
+            presenter.drawGraphs(frame)
+            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, display_transform)
+            metrics.update(start_time, frame)
+>>>>>>> 171b59c0d (Add display resizer to hpe, object_detection, segmentation demos)
 
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
             video_writer.write(frame)

@@ -109,3 +109,54 @@ inline void putHighlightedText(cv::Mat& frame,
     cv::putText(frame, message, position, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness + 1);
     cv::putText(frame, message, position, fontFace, fontScale, color, thickness);
 }
+
+
+class DisplayTransform {
+    public:
+        DisplayTransform() : doResize(false) {}
+
+        DisplayTransform(cv::Size& inputSize, cv::Size& displayResolution) :
+            doResize(true), inputSize(inputSize), displayResolution(displayResolution) {}
+
+        void computeResolution() {
+            float inputWidth = static_cast<float>(inputSize.width);
+            float inputHeight = static_cast<float>(inputSize.height);
+            scaleFactor = std::min(displayResolution.height / inputHeight, displayResolution.width / inputWidth);
+            newResolution = cv::Size{static_cast<int>(inputWidth * scaleFactor), static_cast<int>(inputHeight * scaleFactor)};
+        }
+
+        void resize(cv::Mat& image) {
+            cv::Size currSize = image.size();
+            if (currSize != inputSize) {
+                inputSize = currSize;
+                computeResolution();
+            }
+            if (scaleFactor == 1) { return; }
+            cv::resize(image, image, newResolution);
+        }
+
+        template<typename T>
+        void scaleCoord(T& coord) {
+            if (scaleFactor == 1) { return; }
+            coord.x = std::floor(coord.x * scaleFactor);
+            coord.y = std::floor(coord.y * scaleFactor);
+        }
+
+        template<typename T>
+        void scaleRect(T& rect) {
+            if (scaleFactor == 1) { return; }
+            scaleCoord(rect);
+            rect.width = std::floor(rect.width * scaleFactor);
+            rect.height = std::floor(rect.height * scaleFactor);
+        }
+
+        const cv::Size getResolution() { return newResolution; }
+
+        bool doResize;
+
+    private:
+        float scaleFactor;
+        cv::Size displayResolution;
+        cv::Size newResolution;
+        cv::Size inputSize;
+};

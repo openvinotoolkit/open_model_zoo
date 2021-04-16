@@ -107,6 +107,7 @@ static void showUsage() {
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
     std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_message << std::endl;
+    std::cout << "    -display_resolution       " << display_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
 
@@ -132,20 +133,27 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -at is not set");
     }
 
+    if (!FLAGS_display_resolution.empty() && FLAGS_display_resolution.find("x") == std::string::npos) {
+        throw std::logic_error("Incorrect format of -display_resolution parameter. "
+                               "Correct format is  \"width\"x\"height\". For example \"1920x1080\"");
+    }
     return true;
 }
 
 
-cv::Mat renderHumanPose(const HumanPoseResult& result) {
+cv::Mat renderHumanPose(HumanPoseResult& result, DisplayTransform& displayTransform) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
-        }
+    }
 
     auto outputImg = result.metaData->asRef<ImageMetaData>().img;
 
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
-   }
+    }
+    if (displayTransform.doResize) {
+        displayTransform.resize(outputImg);
+    }
     static const cv::Scalar colors[HPEOpenPose::keypointsNumber] = {
         cv::Scalar(255, 0, 0), cv::Scalar(255, 85, 0), cv::Scalar(255, 170, 0),
         cv::Scalar(255, 255, 0), cv::Scalar(170, 255, 0), cv::Scalar(85, 255, 0),
@@ -166,9 +174,12 @@ cv::Mat renderHumanPose(const HumanPoseResult& result) {
     };
     const int stickWidth = 4;
     const cv::Point2f absentKeypoint(-1.0f, -1.0f);
-    for (auto pose : result.poses) {
+    for (auto& pose : result.poses) {
         for (size_t keypointIdx = 0; keypointIdx < pose.keypoints.size(); keypointIdx++) {
             if (pose.keypoints[keypointIdx] != absentKeypoint) {
+                if (displayTransform.doResize) {
+                    displayTransform.scaleCoord(pose.keypoints[keypointIdx]);
+                }
                 cv::circle(outputImg, pose.keypoints[keypointIdx], 4, colors[keypointIdx], -1);
             }
         }
@@ -228,8 +239,25 @@ int main(int argc, char *argv[]) {
         }
 
         cv::VideoWriter videoWriter;
+
+        cv::Size displayResolution;
+        DisplayTransform displayTransform = DisplayTransform();
+        size_t found = FLAGS_display_resolution.find("x");
+
+        if (found == std::string::npos) {
+            displayResolution = curr_frame.size();
+        }
+        else {
+            displayResolution = cv::Size{
+                std::stoi(FLAGS_display_resolution.substr(0, found)),
+                std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()))
+            };
+            displayTransform = DisplayTransform(curr_frame.size(), displayResolution);
+            displayTransform.computeResolution();
+            displayResolution = displayTransform.getResolution();
+        }
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), curr_frame.size())) {
+                                                  cap->fps(), displayResolution)) {
             throw std::runtime_error("Can't open video writer");
         }
 
@@ -287,7 +315,7 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to HumanPoseResult*
             //    and use your own processing instead of calling renderHumanPose().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
+                cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), displayTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -312,9 +340,14 @@ int main(int argc, char *argv[]) {
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
+<<<<<<< HEAD
         for (; framesProcessed <= frameNum; framesProcessed++) {
             while (!(result = pipeline.getResult())) {}
             cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
+=======
+        while (result = pipeline.getResult()) {
+            cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), displayTransform);
+>>>>>>> 171b59c0d (Add display resizer to hpe, object_detection, segmentation demos)
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
