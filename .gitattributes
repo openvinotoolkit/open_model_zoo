@@ -39,4 +39,4 @@
 /tools/accuracy_checker/configs/*.yml -omz.ci.job-for-change.ac
 /tools/downloader/** omz.ci.job-for-change.downloader
 
-*.md omz.ci.job-for-change.documentation
+*.md omz.ci.job-for-change.documentation -omz.ci.job-for-change.ac -omz.ci.job-for-change.demos -omz.ci.job-for-change.downloader
