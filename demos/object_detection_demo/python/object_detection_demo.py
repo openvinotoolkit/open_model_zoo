@@ -47,7 +47,8 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=('ssd', 'yolo', 'yolov4', 'faceboxes', 'centernet', 'ctpn', 'retinaface'))
+                      type=str, required=True, choices=('ssd', 'yolo', 'yolov4', 'faceboxes', 'centernet', 'ctpn',
+                                                        'retinaface', 'ultra_lightweight_face_detection'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -89,6 +90,18 @@ def build_argparser():
     io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
+
+    input_transform_args = parser.add_argument_group('Input transform options')
+    input_transform_args.add_argument('--reverse_input_channels', default=False, action='store_true',
+                                      help='Optional. Switch the input channels order from '
+                                           'BGR to RGB.')
+    input_transform_args.add_argument('--mean_values', default=None, type=float, nargs=3,
+                                      help='Optional. Normalize input by subtracting the mean '
+                                           'values per channel. Example: 255 255 255')
+    input_transform_args.add_argument('--scale_values', default=None, type=float, nargs=3,
+                                      help='Optional. Divide input by scale values per channel. '
+                                           'Division is applied after mean values subtraction. '
+                                           'Example: 255 255 255')
 
     debug_args = parser.add_argument_group('Debug options')
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
@@ -138,8 +151,13 @@ class ColorPalette:
 
 
 def get_model(ie, args):
+    input_transform = models.InputTransform(args.reverse_input_channels, args.mean_values, args.scale_values)
+    common_args = (ie, args.model, input_transform)
+    if args.architecture_type in ('ctpn', 'yolo', 'yolov4', 'retinaface') and not input_transform.is_trivial:
+        raise ValueError("{} model doesn't support input transforms.".format(args.architecture_type))
+
     if args.architecture_type == 'ssd':
-        return models.SSD(ie, args.model, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
+        return models.SSD(*common_args, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
     elif args.architecture_type == 'ctpn':
         return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
     elif args.architecture_type == 'yolo':
@@ -149,11 +167,13 @@ def get_model(ie, args):
         return models.YoloV4(ie, args.model, labels=args.labels,
                              threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
     elif args.architecture_type == 'faceboxes':
-        return models.FaceBoxes(ie, args.model, threshold=args.prob_threshold)
+        return models.FaceBoxes(*common_args, threshold=args.prob_threshold)
     elif args.architecture_type == 'centernet':
-        return models.CenterNet(ie, args.model, labels=args.labels, threshold=args.prob_threshold)
+        return models.CenterNet(*common_args, labels=args.labels, threshold=args.prob_threshold)
     elif args.architecture_type == 'retinaface':
         return models.RetinaFace(ie, args.model, threshold=args.prob_threshold)
+    elif args.architecture_type == 'ultra_lightweight_face_detection':
+        return models.UltraLightweightFaceDetection(*common_args, threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 

@@ -68,7 +68,8 @@ class TestModelEvaluator:
             self.postprocessor,
             self.dataset,
             self.metric,
-            False
+            False,
+            {}
         )
         self.evaluator.store_predictions = Mock()
         self.evaluator.load = Mock(return_value=(
@@ -193,7 +194,8 @@ class TestModelEvaluatorAsync:
             self.postprocessor,
             self.dataset,
             self.metric,
-            True
+            True,
+            {}
         )
         self.evaluator.store_predictions = Mock()
         self.evaluator.load = Mock(return_value=(

@@ -143,12 +143,12 @@ def main():
 
         model_format = model.framework
 
-        template_variables = dict(
-            config_dir=common.MODEL_ROOT / model.subdirectory,
-            conv_dir=output_dir / model.subdirectory,
-            dl_dir=args.download_dir / model.subdirectory,
-            mo_dir=mo_path.parent,
-        )
+        template_variables = {
+            'config_dir': common.MODEL_ROOT / model.subdirectory,
+            'conv_dir': output_dir / model.subdirectory,
+            'dl_dir': args.download_dir / model.subdirectory,
+            'mo_dir': mo_path.parent,
+        }
 
         if model.conversion_to_onnx_args:
             if not convert_to_onnx(reporter, model, output_dir, args, template_variables):

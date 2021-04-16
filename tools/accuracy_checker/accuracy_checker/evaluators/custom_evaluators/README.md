@@ -55,3 +55,6 @@ Optionally you can provide `module_config` section which contains config for cus
 
 * **Video SR Evaluator** demonstrates how to evaluate super resolution model with feedback data from model output to next step model input.
   <a href="https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/sr_evaluator.py">Evaluator code</a>.
+
+* **Tacotron2 Evaluator** demonstrates how to evaluate custom Tacotron2 model for text to speech task.
+  [Evaluator code](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/tacotron2_evaluator.py)

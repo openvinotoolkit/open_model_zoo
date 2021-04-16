@@ -123,6 +123,9 @@ NATIVE_DEMOS = [
             TestCase(options={'-at': 'openpose',
                               '-m': ModelArg('human-pose-estimation-0001')}
             ),
+            TestCase(options={'-at': 'higherhrnet',
+                              '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}
+            ),
             *combine_cases(
                 TestCase(options={'-at': 'ae'}),
                 single_option_cases('-m',
@@ -147,6 +150,9 @@ NATIVE_DEMOS = [
             ModelArg('densenet-121-tf'),
             ModelArg('densenet-169'),
             ModelArg('mobilenet-v2-pytorch'),
+            ModelArg('repvgg-a0'),
+            ModelArg('repvgg-b1'),
+            ModelArg('repvgg-b3'),
             ModelArg('resnet-50-caffe2')),
     )),
 
@@ -510,6 +516,7 @@ PYTHON_DEMOS = [
             '-i': DataPatternArg('human-pose-estimation')}),
         [
             TestCase(options={'-at': 'openpose', '-m': ModelArg('human-pose-estimation-0001')}),
+            TestCase(options={'-at': 'higherhrnet', '-m': ModelArg('higher-hrnet-w32-human-pose-estimation')}),
             *combine_cases(
                 TestCase(options={'-at': 'ae'}),
                 single_option_cases('-m',
@@ -555,7 +562,6 @@ PYTHON_DEMOS = [
                '-m': ModelArg('machine-translation-nar-en-ru-0001'),
                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
-               '--output-name': 'pred',
                '-i': [
                    'The quick brown fox jumps over the lazy dog.',
                    'The five boxing wizards jump quickly.',
@@ -566,7 +572,6 @@ PYTHON_DEMOS = [
                '-m': ModelArg('machine-translation-nar-ru-en-0001'),
                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
-               '--output-name': 'pred',
                '-i': [
                    'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
                    'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',
@@ -663,6 +668,12 @@ PYTHON_DEMOS = [
                 ]
             ),
             *combine_cases(
+                TestCase(options={'--architecture_type': 'ultra_lightweight_face_detection'}),
+                single_option_cases('-m',
+                    ModelArg('ultra-lightweight-face-detection-rfb-320'),
+                    ModelArg('ultra-lightweight-face-detection-slim-320')),
+            ),
+            *combine_cases(
                 TestCase(options={'--architecture_type': 'yolo'}),
                 single_option_cases('-m',
                     ModelArg('mobilefacedet-v1-mxnet'),
@@ -680,6 +691,7 @@ PYTHON_DEMOS = [
                     ModelArg('yolo-v3-tf')),
             ),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
+            TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
         ],
     )),
 
@@ -689,6 +701,7 @@ PYTHON_DEMOS = [
             TestCase(options={
                 '-m': ModelArg('road-segmentation-adas-0001'),
                 '-i': DataPatternArg('road-segmentation-adas'),
+                '-at': 'segmentation',
             }),
             *combine_cases(
                 TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
@@ -702,6 +715,11 @@ PYTHON_DEMOS = [
                     ModelArg('icnet-camvid-ava-sparse-60-0001'),
                     ModelArg('unet-camvid-onnx-0001'),
                     ModelArg('deeplabv3'))),
+            TestCase(options={
+                '-m': ModelArg('f3net'),
+                '-i': DataPatternArg('road-segmentation-adas'),
+                '-at': 'salient_object_detection',
+            }),
         ],
     )),
 

@@ -51,19 +51,24 @@ python3 object_detection_demo.py -h
 The command yields the following usage message:
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
-                                {ssd,yolo,faceboxes,centernet,retinaface} -i INPUT
-                                [-d DEVICE] [--labels LABELS]
+                                {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection}
+                                -i INPUT [-d DEVICE] [--labels LABELS]
                                 [-t PROB_THRESHOLD] [--keep_aspect_ratio]
+                                [--input_size INPUT_SIZE INPUT_SIZE]
                                 [-nireq NUM_INFER_REQUESTS]
-                                [-nstreams NUM_STREAMS] [-nthreads NUM_THREADS]
-                                [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show]
+                                [-nstreams NUM_STREAMS]
+                                [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
+                                [-limit OUTPUT_LIMIT] [--no_show]
                                 [-u UTILIZATION_MONITORS] [-r]
+                                [--reverse_input_channels REVERSE_CHANNELS]
+                                [--mean_values MEAN_VALUES]
+                                [--scale_values SCALE_VALUES]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -at {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface}, --architecture_type {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface}
+  -at {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection}, --architecture_type {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection}
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
@@ -80,9 +85,11 @@ Common model options:
                         Optional. Probability threshold for detections
                         filtering.
   --keep_aspect_ratio   Optional. Keeps aspect ratio on resize.
-  --input_size          Optional. The first image size used for CTPN model reshaping.
-                        Default: 600 600. Note that submitted images should have the same resolution,
-                        otherwise predictions might be incorrect.
+  --input_size INPUT_SIZE INPUT_SIZE
+                        Optional. The first image size used for CTPN model
+                        reshaping. Default: 600 600. Note that submitted
+                        images should have the same resolution, otherwise
+                        predictions might be incorrect.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
@@ -107,6 +114,18 @@ Input/output options:
   --no_show             Optional. Don't show output.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+
+Input transform options:
+  --reverse_input_channels REVERSE_CHANNELS
+                        Optional. Switch the input channels order from
+                        BGR to RGB.
+  --mean_values MEAN_VALUES
+                        Optional. Normalize input by subtracting the mean
+                        values per channel. Example: 255 255 255
+  --scale_values SCALE_VALUES
+                        Optional. Divide input by scale values per channel
+                        Division is applied after mean values subtraction.
+                        Example: 255 255 255
 
 Debug options:
   -r, --raw_output_message

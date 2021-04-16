@@ -2,7 +2,10 @@
 
 ![](./instance_segmentation.gif)
 
-This demo shows how to run Instance Segmentation models from [OpenVINO&trade; Training Extensions (OTE)](https://github.com/openvinotoolkit/training_extensions/tree/develop/pytorch_toolkit/instance_segmentation#get-pretrained-models) and `yolact` models family.
+This demo shows how to perform instance segmentation with one of the following Open Model Zoo models:
+
+* `instance-segmentation-security-????`
+* `yolact-resnet50-fpn-pytorch`
 
 > **NOTE**: Only batch size of 1 is supported.
 

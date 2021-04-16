@@ -179,8 +179,9 @@ class DataReaderField(BaseField):
 class BaseReader(ClassProvider):
     __provider_type__ = 'reader'
 
-    def __init__(self, data_source, config=None, **kwargs):
+    def __init__(self, data_source, config=None, postpone_data_source=False, **kwargs):
         self.config = config or {}
+        self._postpone_data_source = postpone_data_source
         self.data_source = data_source
         self.read_dispatcher = singledispatch(self.read)
         self.read_dispatcher.register(list, self._read_list)
@@ -213,13 +214,17 @@ class BaseReader(ClassProvider):
 
     def configure(self):
         if not self.data_source:
-            raise ConfigError('data_source parameter is required to create "{}" '
-                              'data reader and read data'.format(self.__provider__))
-        self.data_source = get_path(self.data_source, is_directory=True)
+            if not self._postpone_data_source:
+                raise ConfigError('data_source parameter is required to create "{}" '
+                                  'data reader and read data'.format(self.__provider__))
+        else:
+            self.data_source = get_path(self.data_source, is_directory=True)
         self.multi_infer = self.get_value_from_config('multi_infer')
 
     @classmethod
-    def validate_config(cls, config, data_source=None, fetch_only=False, **kwargs):
+    def validate_config(
+            cls, config, data_source=None, fetch_only=False, check_data_source=True, check_reader_type=False, **kwargs
+    ):
         uri_prefix = kwargs.pop('uri_prefix', '')
         reader_uri = uri_prefix or 'reader'
         if cls.__name__ == BaseReader.__name__:
@@ -236,7 +241,7 @@ class BaseReader(ClassProvider):
             try:
                 reader_cls = cls.resolve(reader_type)
                 reader_config = config if isinstance(config, dict) else {'type': reader_type}
-                if reader_type not in DOES_NOT_REQUIRED_DATA_SOURCE:
+                if reader_type not in DOES_NOT_REQUIRED_DATA_SOURCE and check_data_source:
                     data_source_field = PathField(
                         is_directory=reader_type not in DATA_SOURCE_IS_FILE, description='data source'
                     )
@@ -252,6 +257,10 @@ class BaseReader(ClassProvider):
             except UnregisteredProviderException as exception:
                 if not fetch_only:
                     raise exception
+                if check_reader_type:
+                    error = ConfigError('Invalid value "{}" for {}'.format(reader_type, reader_uri),
+                                        config, reader_uri, validation_scheme=cls.validation_scheme())
+                    errors.append(error)
                 return errors
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
@@ -375,11 +384,12 @@ class PillowImageReader(BaseReader):
     __provider__ = 'pillow_imread'
 
     def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config)
+        super().__init__(data_source, config, **kwargs)
         self.convert_to_rgb = True
 
     def read(self, data_id):
-        with open(str(self.data_source / data_id), 'rb') as f:
+        data_path = get_path(self.data_source / data_id) if self.data_source is not None else data_id
+        with open(str(data_path), 'rb') as f:
             img = Image.open(f)
 
             return np.array(img.convert('RGB') if self.convert_to_rgb else img)
@@ -390,7 +400,8 @@ class ScipyImageReader(BaseReader):
 
     def read(self, data_id):
         # reimplementation scipy.misc.imread
-        image = Image.open(str(get_path(self.data_source / data_id)))
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+        image = Image.open(str(get_path(data_path)))
         if image.mode == 'P':
             image = image.convert('RGBA') if 'transparency' in image.info else image.convert('RGB')
 
@@ -401,7 +412,7 @@ class OpenCVFrameReader(BaseReader):
     __provider__ = 'opencv_capture'
 
     def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config)
+        super().__init__(data_source, config, **kwargs)
         self.current = -1
 
     def read(self, data_id):
@@ -452,10 +463,12 @@ class JSONReader(BaseReader):
         self.key = self.get_value_from_config('key')
         self.multi_infer = self.get_value_from_config('multi_infer')
         if not self.data_source:
-            raise ConfigError('data_source parameter is required to create "{}" '
-                              'data reader and read data'.format(self.__provider__))
+            if not self._postpone_data_source:
+                raise ConfigError('data_source parameter is required to create "{}" '
+                                  'data reader and read data'.format(self.__provider__))
 
     def read(self, data_id):
+
         data = read_json(str(self.data_source / data_id))
         if self.key:
             data = data.get(self.key)
@@ -487,7 +500,13 @@ class NiftiImageReader(BaseReader):
         parameters = super().parameters()
         parameters.update({
             'channels_first': BoolField(optional=True, default=False,
-                                        description='Allows read files and transpose in order where channels first.')
+                                        description='Allows read files and transpose in order where channels first.'),
+            'frame_separator': StringField(optional=True, default='#',
+                                           description="Separator between filename and frame number"),
+            'multi_frame': BoolField(optional=True, default=False,
+                                     description="Add annotation for each frame in source file"),
+            'to_4D': BoolField(optional=True, default=True, description="Ensure that data are 4D"),
+            'frame_axis': NumberField(optional=True, default=-1, description="Frames dimension axis"),
         })
         return parameters
 
@@ -496,16 +515,31 @@ class NiftiImageReader(BaseReader):
             nib.raise_error(self.__provider__)
         self.channels_first = self.get_value_from_config('channels_first')
         self.multi_infer = self.get_value_from_config('multi_infer')
+        self.frame_axis = int(self.get_value_from_config('frame_axis'))
+        self.frame_separator = self.get_value_from_config('frame_separator')
+        self.multi_frame = self.get_value_from_config('multi_frame')
+        self.to_4D = self.get_value_from_config('to_4D')
+
         if not self.data_source:
-            raise ConfigError('data_source parameter is required to create "{}" '
-                              'data reader and read data'.format(self.__provider__))
+            if not self._postpone_data_source:
+                raise ConfigError('data_source parameter is required to create "{}" '
+                                  'data reader and read data'.format(self.__provider__))
 
     def read(self, data_id):
-        nib_image = nib.load(str(get_path(self.data_source / data_id)))
+        if self.multi_frame:
+            parts = data_id.split(self.frame_separator)
+            frame_number = int(parts[1])
+            data_id = parts[0]
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+        nib_image = nib.load(str(get_path(data_path)))
         image = np.array(nib_image.dataobj)
-        if len(image.shape) != 4:  # Make sure 4D
-            image = np.expand_dims(image, -1)
-        image = np.transpose(image, (3, 0, 1, 2) if self.channels_first else (2, 1, 0, 3))
+        if self.multi_frame:
+            image = image[:, :, frame_number]
+            image = np.expand_dims(image, 0)
+        if self.to_4D:
+            if len(image.shape) != 4:  # Make sure 4D
+                image = np.expand_dims(image, -1)
+            image = np.transpose(image, (3, 0, 1, 2) if self.channels_first else (2, 1, 0, 3))
 
         return image
 
@@ -542,8 +576,9 @@ class NumPyReader(BaseReader):
         if self.separator and self.is_text:
             raise ConfigError('text file reading with numpy does')
         if not self.data_source:
-            raise ConfigError('data_source parameter is required to create "{}" '
-                              'data reader and read data'.format(self.__provider__))
+            if not self._postpone_data_source:
+                raise ConfigError('data_source parameter is required to create "{}" '
+                                  'data reader and read data'.format(self.__provider__))
         self.keyRegex = {k: re.compile(k + self.id_sep) for k in self.keys}
         self.valRegex = re.compile(r"([^0-9]+)([0-9]+)")
 
@@ -551,8 +586,9 @@ class NumPyReader(BaseReader):
         field_id = None
         if self.separator:
             field_id, data_id = str(data_id).split(self.separator)
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
 
-        data = np.load(str(self.data_source / data_id))
+        data = np.load(str(data_path))
 
         if not isinstance(data, NpzFile):
             return data
@@ -585,7 +621,8 @@ class NumpyDictReader(BaseReader):
     __provider__ = 'numpy_dict_reader'
 
     def read(self, data_id):
-        return np.load(str(self.data_source / data_id), allow_pickle=True)[()]
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+        return np.load(str(data_path), allow_pickle=True)[()]
 
     def read_item(self, data_id):
         dict_data = self.read_dispatcher(data_id)
@@ -614,14 +651,15 @@ class NumpyBinReader(BaseReader):
         self.dtype = self.get_value_from_config('dtype')
 
     def read(self, data_id):
-        return np.fromfile(self.data_source / data_id, dtype=self.dtype)
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+        return np.fromfile(data_path, dtype=self.dtype)
 
 
 class TensorflowImageReader(BaseReader):
     __provider__ = 'tf_imread'
 
     def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config)
+        super().__init__(data_source, config, **kwargs)
         try:
             import tensorflow as tf # pylint: disable=C0415
         except ImportError as import_error:
@@ -640,7 +678,8 @@ class TensorflowImageReader(BaseReader):
         self.read_realisation = read_func
 
     def read(self, data_id):
-        return self.read_realisation(self.data_source / data_id)
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+        return self.read_realisation(data_path)
 
 
 class AnnotationFeaturesReader(BaseReader):
@@ -689,8 +728,23 @@ class WavReader(BaseReader):
         2: np.int16
     }
 
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'mono': BoolField(optional=True, default=False,
+                              description='get mean along channels if multichannel audio loaded'),
+            'to_float': BoolField(optional=True, default=False, description='converts audio signal to float')
+        })
+        return params
+
+    def configure(self):
+        self.mono = self.get_value_from_config('mono')
+        self.to_float = self.get_value_from_config('to_float')
+
     def read(self, data_id):
-        with wave.open(str(self.data_source / data_id), "rb") as wav:
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+        with wave.open(str(data_path), "rb") as wav:
             sample_rate = wav.getframerate()
             sample_width = wav.getsampwidth()
             nframes = wav.getnframes()
@@ -702,7 +756,13 @@ class WavReader(BaseReader):
                                    "(reader only supports {})"
                                    .format(self.__provider__, self.data_source / data_id,
                                            sample_width, [*self._samplewidth_types.keys()]))
-            data = data.reshape(-1, wav.getnchannels()).T
+            channels = wav.getnchannels()
+
+            data = data.reshape(-1, channels).T
+            if channels > 1 and self.mono:
+                data = data.mean(1)
+            if self.to_float:
+                data = data.astype(np.float32) / np.iinfo(self._samplewidth_types[sample_width]).max
 
         return data, {'sample_rate': sample_rate}
 
@@ -719,7 +779,8 @@ class DicomReader(BaseReader):
             pydicom.raise_error(self.__provider__)
 
     def read(self, data_id):
-        dataset = pydicom.dcmread(str(self.data_source / data_id))
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+        dataset = pydicom.dcmread(str(data_path))
         return dataset.pixel_array
 
 
@@ -727,7 +788,8 @@ class PickleReader(BaseReader):
     __provider__ = 'pickle_reader'
 
     def read(self, data_id):
-        data = read_pickle(self.data_source / data_id)
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+        data = read_pickle(data_path)
         if isinstance(data, list) and len(data) == 2 and isinstance(data[1], dict):
             return data
 
@@ -741,12 +803,13 @@ class SkimageReader(BaseReader):
     __provider__ = 'skimage_imread'
 
     def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config)
+        super().__init__(data_source, config, **kwargs)
         if isinstance(sk, UnsupportedPackage):
             sk.raise_error(self.__provider__)
 
     def read(self, data_id):
-        return sk.imread(str(self.data_source / data_id))
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+        return sk.imread(str(data_path))
 
 
 class RawpyReader(BaseReader):
@@ -766,7 +829,8 @@ class RawpyReader(BaseReader):
         self.postprocess = self.get_value_from_config('postprocess')
 
     def read(self, data_id):
-        raw = rawpy.imread(str(self.data_source / data_id))
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+        raw = rawpy.imread(str(data_path))
         if not self.postprocess:
             return raw.raw_image_visible.astype(np.float32)
         postprocessed = raw.postprocess(use_camera_wb=True, half_size=False, no_auto_bright=True, output_bps=16)
@@ -777,5 +841,6 @@ class ByteFileReader(BaseReader):
     __provider__ = 'byte_reader'
 
     def read(self, data_id):
-        with open(self.data_source / data_id, 'rb') as f:
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+        with open(data_path, 'rb') as f:
             return np.array(f.read())

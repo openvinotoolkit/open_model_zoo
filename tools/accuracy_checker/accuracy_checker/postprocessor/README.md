@@ -91,7 +91,7 @@ Accuracy Checker supports following set of postprocessors:
     * `bottom-left`
     * `bottom-right`
   Default choice is `top-left`
-* `resize` - resizing image or segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`, `StyleTransferAnotation`, `StyleTransferPrediction`, `SuperResolutionAnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `SalientRegionAnnotation`, `SalientRegionPrediction`.
+* `resize` - resizing image or segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`, `StyleTransferAnotation`, `StyleTransferPrediction`, `SuperResolutionAnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `SalientRegionAnnotation`, `SalientRegionPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resize respectively. You can also use `size` instead in case when destination sizes are equal.
     If any of these parameters are not specified, image size will be used as default.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
@@ -113,3 +113,4 @@ Accuracy Checker supports following set of postprocessors:
   * `min` - minimal value in range, optional, default 0.
   * `max`- maximal value in range.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
+* `pad_signal` - add left padding to reference signal if it was done for input data. Supported representations: `NoiseSuppressionAnnotation`, `NoiseSuppressionPrediction`.

@@ -69,7 +69,8 @@ LIST_ENTRIES_PATHS = {
         'mxnet_weights': 'models',
         'onnx_model': 'models',
         'kaldi_model': 'models',
-        'saved_model_dir': 'models'
+        'saved_model_dir': 'models',
+        'params': 'models'
 }
 
 COMMAND_LINE_ARGS_AS_ENV_VARS = {
@@ -89,7 +90,8 @@ ACCEPTABLE_MODEL = [
     'onnx_model',
     'kaldi_model',
     'model',
-    'saved_model_dir'
+    'saved_model_dir',
+    'params'
 ]
 
 
@@ -122,7 +124,7 @@ class ConfigReader:
     @staticmethod
     def process_config(config, mode='models', arguments=None):
         if arguments is None:
-            arguments = dict()
+            arguments = {}
         ConfigReader._merge_paths_with_prefixes(arguments, config, mode)
         ConfigReader._provide_cmd_arguments(arguments, config, mode)
         ConfigReader._filter_launchers(config, arguments, mode)
@@ -407,7 +409,7 @@ class ConfigReader:
             'model_optimizer', 'tf_custom_op_config_dir',
             'tf_obj_detection_api_pipeline_config_path',
             'transformations_config_dir',
-            'cpu_extensions_mode', 'vpu_log_level', 'device_config'
+            'cpu_extensions_mode', 'vpu_log_level'
         ]
         arguments_dict = arguments if isinstance(arguments, dict) else vars(arguments)
         update_launcher_entry = {}
@@ -416,6 +418,9 @@ class ConfigReader:
             value = arguments_dict.get(key)
             if value:
                 update_launcher_entry['_{}'.format(key)] = value
+
+        if arguments_dict.get('device_config'):
+            update_launcher_entry['device_config'] = read_yaml(arguments_dict['device_config'])
 
         return functors_by_mode[mode](config, arguments, update_launcher_entry)
 
@@ -597,9 +602,10 @@ class ConfigReader:
 def create_command_line_mapping(config, default_value, value_map=None):
     mapping = {}
     value_map = value_map or {}
-    for key in config:
+    for key, value in config.items():
         if key.endswith('file') or key.endswith('dir'):
-            mapping[key] = value_map.get(key, default_value)
+            if not Path(value).is_absolute():
+                mapping[key] = value_map.get(key, default_value)
 
     return mapping
 

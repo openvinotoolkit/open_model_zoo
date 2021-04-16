@@ -321,7 +321,7 @@ class ModelEvaluator:
 
             batch_input, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
             self.launcher.predict_async(infer_requests_pool[ir_id], batch_input, batch_meta,
-                                        context=tuple([batch_id, batch_input_ids, batch_annotation, batch_identifiers]))
+                                        context=(batch_id, batch_input_ids, batch_annotation, batch_identifiers))
             queued_irs.append(ir_id)
 
         return free_irs, queued_irs
@@ -403,7 +403,7 @@ class ModelEvaluator:
             self.launcher.fit_to_input, self.launcher.default_layout
         )
         if self.adapter:
-            self.adapter.output_blob = self.launcher.output_blob
+            self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
 
     def load_network_from_ir(self, models_list):
         model_paths = next(iter(models_list))
@@ -414,7 +414,7 @@ class ModelEvaluator:
             self.launcher.fit_to_input, self.launcher.default_layout
         )
         if self.adapter:
-            self.adapter.output_blob = self.launcher.output_blob
+            self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
 
     def get_network(self):
         return [{'model': self.launcher.network}]

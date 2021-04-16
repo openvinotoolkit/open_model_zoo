@@ -48,7 +48,7 @@ Predefined configuration file `accuracy-check.yml` for each Open Model Zoo model
 
 Example:
 
-[alexnet.yml](alexnet.yml) is a link for configuration file [accuracy-check.yml](../../../models/public/alexnet/accuracy-check.yml) for [alexnet](../../../models/public/alexnet/alexnet.md) model.
+[alexnet.yml](alexnet.yml) is a link for configuration file [accuracy-check.yml](../../../models/public/alexnet/accuracy-check.yml) for [alexnet](../../../models/public/alexnet/README.md) model.
 
 ## Options
 
@@ -63,7 +63,7 @@ Example:
 
 ## Example of usage
 
-See how to evaluate model with using predefined configuration file for [densenet-121-tf](../../../models/public/densenet-121-tf/densenet-121-tf.md) model.
+See how to evaluate model with using predefined configuration file for [densenet-121-tf](../../../models/public/densenet-121-tf/README.md) model.
 
 - `OMZ_ROOT` - root of Open Model Zoo project
 - `DATASET_DIR` - root directory with dataset

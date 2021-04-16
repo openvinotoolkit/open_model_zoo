@@ -43,7 +43,7 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=('ae', 'openpose'))
+                      type=str, required=True, choices=('ae', 'higherhrnet', 'openpose'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -96,12 +96,17 @@ def build_argparser():
 
 def get_model(ie, args, aspect_ratio):
     if args.architecture_type == 'ae':
-        Model = models.HpeAssociativeEmbedding
+        model = models.HpeAssociativeEmbedding(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
+                                               prob_threshold=args.prob_threshold)
+    elif args.architecture_type == 'higherhrnet':
+        model = models.HpeAssociativeEmbedding(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
+                                               prob_threshold=args.prob_threshold, delta=0.5, padding_mode='center')
     elif args.architecture_type == 'openpose':
-        Model = models.OpenPose
+        model = models.OpenPose(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
+                                prob_threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
-    return Model(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio, prob_threshold=args.prob_threshold)
+    return model
 
 
 def get_plugin_configs(device, num_streams, num_threads):

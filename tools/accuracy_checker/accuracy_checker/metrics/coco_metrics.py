@@ -21,11 +21,18 @@ from ..representation import (
     DetectionPrediction,
     DetectionAnnotation,
     PoseEstimationPrediction,
-    PoseEstimationAnnotation
+    PoseEstimationAnnotation,
+    CoCoInstanceSegmentationPrediction,
+    CoCoInstanceSegmentationAnnotation
 )
-from ..utils import get_or_parse_value, finalize_metric_result
+from ..utils import get_or_parse_value, finalize_metric_result, UnsupportedPackage
 from .overlap import Overlap
 from .metric import PerImageEvaluationMetric
+
+try:
+    import pycocotools.mask as maskUtils
+except ImportError as import_error:
+    maskUtils = UnsupportedPackage("pycocotools", import_error.msg)
 
 COCO_THRESHOLDS = {
     '0.5': [0.5],
@@ -83,7 +90,7 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
         for label_id, label in enumerate(self.labels):
             detections, scores, dt_difficult = prepare_predictions(prediction, label, self.max_detections)
             ground_truth, gt_difficult, iscrowd, boxes, areas = prepare_annotations(annotation, label, create_boxes)
-            iou = compute_iou(ground_truth, detections, boxes, areas)
+            iou = compute_iou(ground_truth, detections, annotation_boxes=boxes, annotation_areas=areas, iscrowd=iscrowd)
             eval_result = evaluate_image(
                 ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, self.thresholds,
                 profile_boxes
@@ -256,6 +263,30 @@ class MSCOCOKeypointsRecall(MSCOCOKeypointsBaseMetric):
         return recalls
 
 
+class MSCOCOSegmAveragePrecision(MSCOCOAveragePrecision):
+    __provider__ = 'coco_segm_precision'
+
+    annotation_types = (CoCoInstanceSegmentationAnnotation, )
+    prediction_types = (CoCoInstanceSegmentationPrediction, )
+
+    def configure(self):
+        super().configure()
+        if isinstance(maskUtils, UnsupportedPackage):
+            maskUtils.raise_error(self.__provider__)
+
+
+class MSCOCOSegmRecall(MSCOCORecall):
+    __provider__ = 'coco_segm_recall'
+
+    annotation_types = (CoCoInstanceSegmentationAnnotation, )
+    prediction_types = (CoCoInstanceSegmentationPrediction, )
+
+    def configure(self):
+        super().configure()
+        if isinstance(maskUtils, UnsupportedPackage):
+            maskUtils.raise_error(self.__provider__)
+
+
 @singledispatch
 def select_specific_parameters(annotation):
     return compute_iou_boxes, False
@@ -264,6 +295,11 @@ def select_specific_parameters(annotation):
 @select_specific_parameters.register(PoseEstimationAnnotation)
 def pose_estimation_params(annotation):
     return compute_oks, True
+
+
+@select_specific_parameters.register(CoCoInstanceSegmentationAnnotation)
+def instance_segmentation_params(annotation):
+    return compute_iou_masks, False
 
 
 @singledispatch
@@ -283,10 +319,16 @@ def prepare_keypoints(entry, order):
     return np.concatenate((entry.x_values[order], entry.y_values[order], entry.visibility[order]), axis=-1)
 
 
+@prepare.register(CoCoInstanceSegmentationPrediction)
+@prepare.register(CoCoInstanceSegmentationAnnotation)
+def prepare_masks(entry, order):
+    return np.array([entry.mask[idx] for idx in order])
+
+
 def prepare_predictions(prediction, label, max_detections):
     if prediction.size == 0:
         return [], [], []
-    prediction_ids = prediction.labels == label
+    prediction_ids = np.argwhere(prediction.labels == label).reshape(-1)
     scores = prediction.scores[prediction_ids]
     if np.size(scores) == 0:
         return [], [], []
@@ -303,7 +345,7 @@ def prepare_predictions(prediction, label, max_detections):
 
 
 def prepare_annotations(annotation, label, create_boxes=False):
-    annotation_ids = annotation.labels == label
+    annotation_ids = np.argwhere(np.array(annotation.labels) == label).reshape(-1)
     difficult_box_mask = np.full(annotation.size, False)
     difficult_box_indices = annotation.metadata.get("difficult_boxes", [])
     iscrowd = np.array(annotation.metadata.get('iscrowd', [0]*annotation.size))
@@ -341,8 +383,8 @@ def compute_precision_recall(thresholds, matching_results):
     npig = np.count_nonzero(gt_ignored == 0)
     tps = np.logical_and(dtm, np.logical_not(dt_ignored))
     fps = np.logical_and(np.logical_not(dtm), np.logical_not(dt_ignored))
-    tp_sum = np.cumsum(tps, axis=1).astype(dtype=np.float)
-    fp_sum = np.cumsum(fps, axis=1).astype(dtype=np.float)
+    tp_sum = np.cumsum(tps, axis=1).astype(dtype=float)
+    fp_sum = np.cumsum(fps, axis=1).astype(dtype=float)
     if npig == 0:
         return np.nan, np.nan
     for t, (tp, fp) in enumerate(zip(tp_sum, fp_sum)):
@@ -392,7 +434,7 @@ def compute_iou_boxes(annotation, prediction, *args, **kwargs):
     return iou
 
 
-def compute_oks(annotation_points, prediction_points, annotation_boxes, annotation_areas):
+def compute_oks(annotation_points, prediction_points, annotation_boxes, annotation_areas, *args, **kwargs):
     if np.size(prediction_points) == 0 or np.size(annotation_points) == 0:
         return []
     oks = np.zeros((len(prediction_points), len(annotation_points)))
@@ -431,6 +473,14 @@ def compute_oks(annotation_points, prediction_points, annotation_boxes, annotati
             oks[dt_idx, gt_idx] = np.sum(np.exp(- evaluation)) / evaluation.shape[0]
 
     return oks
+
+
+def compute_iou_masks(annotation, prediction, iscrowd, *args, **kwargs):
+    if np.size(annotation) == 0 or np.size(prediction) == 0:
+        return []
+    iou = maskUtils.iou(list(prediction), list(annotation), iscrowd)
+
+    return iou
 
 
 def evaluate_image(

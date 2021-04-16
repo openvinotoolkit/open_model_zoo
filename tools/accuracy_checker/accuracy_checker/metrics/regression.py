@@ -43,7 +43,10 @@ from ..representation import (
     PoseEstimationAnnotation,
     PoseEstimationPrediction,
     OpticalFlowAnnotation,
-    OpticalFlowPrediction
+    OpticalFlowPrediction,
+    BackgroundMattingAnnotation,
+    BackgroundMattingPrediction,
+    NiftiRegressionAnnotation,
 )
 
 from .metric import PerImageEvaluationMetric
@@ -53,9 +56,12 @@ from ..utils import string_to_tuple, finalize_metric_result, contains_all
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
     annotation_types = (
-        RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation, ImageProcessingAnnotation
+        RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation, ImageProcessingAnnotation,
+        BackgroundMattingAnnotation, NiftiRegressionAnnotation,
     )
-    prediction_types = (RegressionPrediction, DepthEstimationPrediction, ImageProcessingPrediction)
+    prediction_types = (
+        RegressionPrediction, DepthEstimationPrediction, ImageProcessingPrediction, BackgroundMattingPrediction,
+    )
 
     def __init__(self, value_differ, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -339,7 +345,8 @@ def relative_err(target, pred):
         target = target.flatten()
     if len(pred.shape) > 2:
         pred = pred.flatten()
-    return np.linalg.norm(target - pred, 2) / (np.linalg.norm(target, 2) + np.finfo(float).eps)
+    size = min(target.size, pred.size)
+    return np.linalg.norm(target[:size] - pred[:size], 2) / (np.linalg.norm(target[:size], 2) + np.finfo(float).eps)
 
 
 class RelativeL2Error(BaseRegressionMetric):
@@ -573,6 +580,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(self._psnr_differ, *args, **kwargs)
         self.meta['target'] = 'higher-better'
+        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse'}
 
     def configure(self):
         super().configure()
@@ -668,6 +676,7 @@ class StructuralSimilarity(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)
         self.meta['target'] = 'higher-better'
+        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse'}
 
 
 class PercentageCorrectKeypoints(PerImageEvaluationMetric):

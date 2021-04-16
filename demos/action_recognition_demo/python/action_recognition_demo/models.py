@@ -112,7 +112,7 @@ class IEModel:
 class DummyDecoder:
     def __init__(self, num_requests=2):
         self.num_requests = num_requests
-        self.requests = dict()
+        self.requests = {}
 
     @staticmethod
     def _average(model_input):

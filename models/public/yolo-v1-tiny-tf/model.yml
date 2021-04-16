@@ -14,7 +14,7 @@
 
 description: >-
   YOLO v1 Tiny is a real-time object detection model from TensorFlow.js* framework.
-  This model was pretrained on VOC* dataset with 20 classes.
+  This model was pre-trained on VOC dataset with 20 classes.
 task_type: detection
 files:
   - name: yolo-v1-tiny.pb

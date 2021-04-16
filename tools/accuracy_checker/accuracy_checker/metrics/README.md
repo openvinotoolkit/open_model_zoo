@@ -91,22 +91,22 @@ More detailed information about calculation segmentation metrics you can find [h
 * `localization_recall` - recall metric used for evaluation place recognition task. Supported representations: `PlaceRecognitionAnnotation`, `ReidentificationPrediction`.
   * `top_k` - number of k highest ranked samples to consider when matching.
   * `distance_threshold` - distance threshold for search positive matching pairs between query and gallery (Optional, default 25).
-* `mae` - [Mean Absolute Error](https://en.wikipedia.org/wiki/Mean_absolute_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+* `mae` - [Mean Absolute Error](https://en.wikipedia.org/wiki/Mean_absolute_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
 * `mae_on_intervals` - Mean Absolute Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start` , `step`, `end` - way to generate range of intervals from `start` to `end` with length `step`.
-* `mse` - [Mean Squared Error](https://en.wikipedia.org/wiki/Mean_squared_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+* `mse` - [Mean Squared Error](https://en.wikipedia.org/wiki/Mean_squared_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
 * `mse_on_intervals` - Mean Squared Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start`, `step`, `end` - generate range of intervals from `start` to `end` with length `step`.
-* `rmse` - [Root Mean Squared Error](https://en.wikipedia.org/wiki/Root-mean-square_deviation). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+* `rmse` - [Root Mean Squared Error](https://en.wikipedia.org/wiki/Root-mean-square_deviation). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
 * `rmse_on_intervals` - Root Mean Squared Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start`, `step`, `end` - generate range of intervals from `start` to `end` with length `step`.
-* `mape` - [Mean Absolute Percentage Error](https://en.wikipedia.org/wiki/Mean_absolute_percentage_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`.
+* `mape` - [Mean Absolute Percentage Error](https://en.wikipedia.org/wiki/Mean_absolute_percentage_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
 * `log10_error` - Logarithmic mean absolute error. Supported representations: Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
 * `per_point_normed_error` - Normed Error for measurement the quality of landmarks' positions. Estimated results for each point independently. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`, `FacialLandmarks3DAnnotation`, `FacialLandmarks3DPrediction`.
 * `normed_error` - Normed Error for measurement the quality of landmarks' positions. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`, `FacialLandmarks3DAnnotation`, `FacialLandmarks3DPrediction`.
@@ -181,6 +181,12 @@ More detailed information about calculation segmentation metrics you can find [h
 * `coco_keypoints_recall` - MS COCO Average Recall metric for keypoints recognition task. Supported representations: `PoseEstimationAnnotation`, `PoseEstimationPrediction`.
   * `max_detections` - max number of predicted results per image. If you have more predictions,the results with minimal confidence will be ignored.
   * `threshold` - intersection over union threshold. You can specify one value or comma separated range of values. This parameter supports precomputed values for standard COCO thresholds (`.5`, `.75`, `.5:.05:.95`).
+* `coco_segm_precision` - MS COCO Average Precision metric for instance segmentation task. Supported representations: `CoCoInstanceSegmentationAnnotation`, `CoCoInstanceSegmentationPrediction`.
+  * `max_detections` - max number of predicted results per image. If you have more predictions,the results with minimal confidence will be ignored.
+  * `threshold` - intersection over union threshold. You can specify one value or comma separated range of values. This parameter supports precomputed values for standard COCO thresholds (`.5`, `.75`, `.5:.05:.95`).
+* `coco_segm_recall` - MS COCO Average Recall metric for instance segmentation task. Supported representations: `CoCoInstanceSegmentationAnnotation`, `CoCoInstanceSegmentationPrediction`.
+  * `max_detections` - max number of predicted results per image. If you have more predictions,the results with minimal confidence will be ignored.
+  * `threshold` - intersection over union threshold. You can specify one value or comma separated range of values. This parameter supports precomputed values for standard COCO thresholds (`.5`, `.75`, `.5:.05:.95`).
 * `hit_ratio` - metric for recommendation system evaluation. Supported representations: `HitRatioAnnotation`, `HitRatioPrediction`.
   * `top_k` - definition of number elements in rank list (optional, default 10).
 * `ndcg` - [Normalized Discounted Cumulative Gain](https://en.wikipedia.org/wiki/Discounted_cumulative_gain). Supported representations: `HitRatioAnnotation`, `HitRatioPrediction`.
@@ -252,7 +258,8 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
 * `salience_f-measure` - f-measure metric for salient object detection task. Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
 * `salience_e-measure` - enhanced alignment measure for salient object detection task, defined in following [paper](https://arxiv.org/abs/1805.10421). Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
 * `salience_s-measure` - simularity measure for salient object detection task, defined in following [paper](https://arxiv.org/abs/1708.00786). Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
-
+* `sisdr` - Scale-invariant signal-to-distortion ratio described in [paper](https://arxiv.org/pdf/1811.02508.pdf). Supported representations: `NoiseSuppressionAnnotation`, `NoiseSuppressionPrediction`.
+  * `delay` - shift output by delay for alignment with reference (Optional, default 0).
 ## Metrics profiling
 Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.
 This feature can be useful for debug purposes. For enabling this behaviour you need to provide `--profile True` in accuracy checker command line.

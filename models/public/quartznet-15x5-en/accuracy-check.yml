@@ -1,0 +1,18 @@
+models:
+  - name: quartznet-15x5-en
+    launchers:
+      - framework: dlsdk
+        allow_reshape_input: True
+        adapter:
+          type: ctc_greedy_decoder
+          alphabet: [' ', a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z, '''']
+        inputs:
+          - name: 'audio_signal'
+            type: INPUT
+            layout: NHWC
+
+    datasets:
+      - name: LibriSpeech_test_clean_npy_nemo
+        reader: numpy_reader
+        metrics:
+          - type: wer

@@ -29,8 +29,10 @@ from ...utils import contains_all, contains_any, extract_image_representations, 
 from ...progress_reporters import ProgressReporter
 from ...logging import print_info
 
+
 def generate_name(prefix, with_prefix, layer_name):
     return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
+
 
 class SuperResolutionFeedbackEvaluator(BaseEvaluator):
     def __init__(self, dataset_config, launcher, model):
@@ -170,6 +172,10 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
             presenter.write_result(metric_result, ignore_results_formatting)
+
+    @property
+    def dataset_size(self):
+        return self.dataset.size
 
     def release(self):
         self.srmodel.release()
@@ -324,11 +330,18 @@ class BaseDLSDKModel:
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
-            print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
+        accepted_suffixes = ['.blob', '.xml']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
         if model.suffix == '.blob':
             return model, None
         weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        accepted_weights_suffixes = ['.bin']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
         print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
+
         return model, weights
 
     def load_network(self, network, launcher):

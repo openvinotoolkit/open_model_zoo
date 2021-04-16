@@ -27,7 +27,7 @@ from openvino.inference_engine import IECore
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
-from models import SegmentationModel
+from models import SegmentationModel, SalientObjectDetectionModel
 import monitors
 from pipelines import AsyncPipeline
 from images_capture import open_images_capture
@@ -37,7 +37,7 @@ logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, 
 log = logging.getLogger()
 
 
-class Visualizer(object):
+class SegmentationVisualizer:
     pascal_voc_palette = [
         (0,   0,   0),
         (128, 0,   0),
@@ -93,6 +93,11 @@ class Visualizer(object):
         # Visualizing result data over source image
         return np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2)
 
+class SaliencyMapVisualizer:
+    def overlay_masks(self, frame, objects):
+        saliency_map = (objects * 255).astype(np.uint8)
+        saliency_map = cv2.merge([saliency_map, saliency_map, saliency_map])
+        return np.floor_divide(frame, 2) + np.floor_divide(saliency_map, 2)
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -100,6 +105,8 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
+    args.add_argument('-at', '--architecture_type', help='Required. Specify the model\'s architecture type.',
+                      type=str, required=False, default='segmentation', choices=('segmentation', 'salient_object_detection'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -163,6 +170,12 @@ def get_plugin_configs(device, num_streams, num_threads):
     return config_user_specified
 
 
+def get_model(ie, args):
+    if args.architecture_type == 'segmentation':
+        return SegmentationModel(ie, args.model), SegmentationVisualizer(args.colors)
+    if args.architecture_type == 'salient_object_detection':
+        return SalientObjectDetectionModel(ie, args.model), SaliencyMapVisualizer()
+
 def main():
     metrics = PerformanceMetrics()
     args = build_argparser().parse_args()
@@ -174,7 +187,7 @@ def main():
 
     log.info('Loading network...')
 
-    model = SegmentationModel(ie, args.model)
+    model, visualizer = get_model(ie, args)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
@@ -186,7 +199,6 @@ def main():
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
-    visualizer = Visualizer(args.colors)
     presenter = None
     video_writer = cv2.VideoWriter()
 
@@ -220,7 +232,6 @@ def main():
             objects, frame_meta = results
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
-
             frame = visualizer.overlay_masks(frame, objects)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)

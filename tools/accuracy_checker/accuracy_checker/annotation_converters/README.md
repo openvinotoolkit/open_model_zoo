@@ -172,6 +172,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `data_dir` - path to folder, where images in low and high resolution are located.
   * `input_suffix` - input file name's suffix (default `in`).
   * `target_suffix` - target ground truth file name's suffix (default `out`).
+  * `recursive` - enables acquiring of dataset files from `data_dir` subcatalogs (default False).
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
 * `super_resolution` - converts dataset for single image super resolution task to `SuperResolutionAnnotation`.
   * `data_dir` - path to folder, where images in low and high resolution are located.
@@ -213,11 +214,17 @@ The main difference between this converter and `super_resolution` in data organi
 * `unicode_character_recognition` - converts [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) dataset and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html) for handwritten Japanese text recognition task , and [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release) for handwritten simplified Chinese text recognition task to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
   * `decoding_char_file` - path to decoding_char_file, consisting of all supported characters separated by '\n' in txt format.
-* `brats` - converts BraTS dataset format to `BrainTumorSegmentationAnnotation` format.
+* `brats` - converts BraTS dataset format to `BrainTumorSegmentationAnnotation` format. Also can be used to convert other nifti-based datasets.
   * `data_dir` - dataset root directory, which contain subdirectories with validation data (`imagesTr`) and ground truth labels (`labelsTr`).
   Optionally you can provide relative path for these subdirectories (if they have different location) using `image_folder` and `mask_folder` parameters respectively.
-  * `mask_channels_first` - allows read gt mask nifti files and transpose in order where channels first (Optional, default False)
+  * `mask_channels_first` - allows read gt mask nifti files and transpose in order where channels first (Optional, default `False`)
   * `labels_file` - path to file, which contains labels (optional, if omitted no labels will be shown)
+  * `relaxed_names` - allows to use more relaxed search of labels matching only numeric ids. Optional, by default full name matching required.
+  * `multi_frame` - allows to convert annotation of 3D images as sequence of 2D frames (optional, default `False`)
+  * `frame_separator` - string separator between file name and frame number in `multi_frame` (optional, default `#`)
+  * `frame_axis` - number of frame axis in 3D Image (optional, default `-1`, last axis)
+  * `as_regression` - allows dataset conversion as `NiftiRegressionAnnotation` annotation (optional, default `False`)
+
 * `movie_lens_converter` - converts Movie Lens Datasets format to `HitRatioAnnotation` format.
   * `rating_file` - path to file which contains movieId with top score for each userID (for example ml-1m-test-ratings.csv)
   * `negative_file` - path to file which contains negative examples.
@@ -242,8 +249,17 @@ The main difference between this converter and `super_resolution` in data organi
   * `mask_prefix` - prefix part for mask file names. (Optional, default is empty).
   * `image_postfix` - postfix part for mask file names (optional, default is `.png`).
   * `mask_loader` - the way how GT mask should be loaded. Supported methods: `pillow`, `opencv`, `nifti`, `numpy`, `scipy`.
-  * `dataset_meta_file` - path to json file with prepared dataset meta info. It should contains `label_map` key with dictionary in format class_id: class_name and optionally `segmentation_colors` (if your dataset uses color encoding). Segmentation colors is a list of channel-wise values for each class. (e.g. if your dataset has 3 classes in BGR colors, segmentation colors for it will looks like: `[[255, 0, 0], [0, 255, 0], [0, 0, 255]]`). (Optional, you can provide self-created file as `dataset_meta` in your config).
-**Note: since OpenVINO 2020.4 converter behaviour changed. `data_source` parameter of dataset should contains directory for images only, if you have segmentation mask in separated location, please use `segmentation_masks_source` for specifying gt masks location.**
+  * `dataset_meta_file` - path to json file with prepared dataset meta info. It should contain `label_map` key with dictionary in format class_id: class_name and optionally `segmentation_colors` (if your dataset uses color encoding). Segmentation colors is a list of channel-wise values for each class. (e.g. if your dataset has 3 classes in BGR colors, segmentation colors for it will looks like: `[[255, 0, 0], [0, 255, 0], [0, 0, 255]]`). (Optional, you can provide self-created file as `dataset_meta` in your config).
+**Note: since OpenVINO 2020.4 converter behaviour changed. `data_source` parameter of dataset should contain the directory for images only, if you have segmentation mask in separated location, please use `segmentation_masks_source` for specifying gt masks location.**
+* `background_matting` - converts general format of datasets for background matting task to `BackgroundMattingAnnotation`. The converter expects following dataset structure:
+  1. images and GT masks are located in separated directories (e.g. `<dataset_root>/images` for images and `<dataset_root>/masks` for masks respectively)
+  2. images and GT masks has common part in names and can have difference in prefix and postfix (e.g. image name is image0001.jpeg, mask for it is gt0001.png are acceptable. In this case base_part - 0001, image_prefix - image, image_postfix - .jpeg, mask_prefix - gt, mask_postfix - .png)
+  * `images_dir` - path to directory with images.
+  * `masks_dir` - path to directory with GT masks.
+  * `image_prefix` - prefix part for image file names. (Optional, default is empty).
+  * `image_postfix` - postfix part for image file names (optional, default is `.png`).
+  * `mask_prefix` - prefix part for mask file names. (Optional, default is empty).
+  * `image_postfix` - postfix part for mask file names (optional, default is `.png`).
 * `camvid` - converts CamVid dataset with 12 classes to `SegmentationAnnotation`. Dataset can be found in the following [repository](https://github.com/alexgkendall/SegNet-Tutorial/tree/master/CamVid)
   * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space)
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
@@ -308,7 +324,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
   * `language_filter` - comma-separated list of used in annotation language tags for selecting records for specific languages only. (Optional, if not used full annotation will be converted).
-* `mnli` - converts The Multi-Genre Natural Language Inference Corpus ([MNLI](http://www.nyu.edu/projects/bowman/multinli/)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+* `mnli` - converts The Multi-Genre Natural Language Inference Corpus ([MNLI](https://cims.nyu.edu/~sbowman/multinli/)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
   * `annotation_file` - path to dataset annotation file in tsv format.
   * `vocab_file` - path to model vocabulary file for WordPiece tokinezation. (Optional, can be not provided in case, when another tokenization approach used.)
   * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
@@ -342,7 +358,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotattion_file` - path to annotation file in tf records format.
 * `cmu_panoptic_keypoints` - converts CMU Panoptic dataset to `PoseEstimation3dAnnotation` format.
   * `data_dir` - dataset root directory, which contain subdirectories with validation scenes data.
-* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/openvinotoolkit/training_extensions/tree/develop/pytorch_toolkit/action_recognition#preparation).
+* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/openvinotoolkit/training_extensions/blob/develop/misc/pytorch_toolkit/action_recognition/README.md#preparation).
   * `annotation_file` - path to annotation file in json format.
   * `data_dir` - path to directory with prepared data (e. g. data/kinetics/frames_data).
   * `clips_per_video` - number of clips per video (Optional, default 3).
@@ -416,7 +432,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `dense_features` - Name of model dense features input
   * `sparse_features` - Name of model sparse features input. For multiple inputs use comma-separated list in form `<name>:<index>`
   * `lso_features` - Name of lS_o-like features input
-* `im2latex` - converts im2latex-like datasets to `CharacterRecognitionAnnotation`. [Example of the dataset](http://lstm.seas.harvard.edu/latex/data/)
+* `im2latex_formula_recognition` - converts im2latex-like datasets to `CharacterRecognitionAnnotation`. [Example of the dataset](http://lstm.seas.harvard.edu/latex/data/)
   * `images_dir` - path to input images (rendered or scanned formulas)
   * `formula_file` - path to file containing one formula per line
   * `split_file` - path to file containing `img_name` and corresponding formula `index` in `formula_file` separated by tab per line
@@ -477,6 +493,10 @@ The main difference between this converter and `super_resolution` in data organi
   * `max_length` - maximal input sequence length (Optional, default 128).
   * `pad_input` - allow padding for input sequence if input less that `max_length` (Optional, default `True`).
   * `include_special_token_lables` - allow extension original dataset labels with special token labels (`[CLS'`, `[SEP]`]) (Optional, default `False`).
+* `tacotron2_data_converter` - converts input data for custom tacotron2 pipeline.
+  * `annotation_file` - tsv file with location input data and reference.
+* `noise_suppression_dataset` - converts dataset for audio denoising to `NoiseSuppressionAnnotation`
+  * `annotation_file` - txt file with file pairs `<clean_signal> <noisy_signal>`.
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

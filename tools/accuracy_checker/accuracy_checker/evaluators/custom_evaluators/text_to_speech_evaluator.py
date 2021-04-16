@@ -165,6 +165,10 @@ class TextToSpeechEvaluator(BaseEvaluator):
     def set_profiling_dir(self, profiler_dir):
         self.metric_executor.set_profiling_dir(profiler_dir)
 
+    @property
+    def dataset_size(self):
+        return self.dataset.size
+
     def release(self):
         self.model.release()
         self.launcher.release()
@@ -480,10 +484,16 @@ class TTSDLSDKModel:
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
-            print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
+        accepted_suffixes = ['.blob', '.xml']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
         if model.suffix == '.blob':
             return model, None
         weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        accepted_weights_suffixes = ['.bin']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
         print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
 
         return model, weights

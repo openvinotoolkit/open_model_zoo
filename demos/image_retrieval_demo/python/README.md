@@ -83,7 +83,7 @@ python image_retrieval_demo.py \
 --ground_truth text_label
 ```
 
-An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/develop/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
+An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
 
 Examples of videos can be found [here](https://github.com/19900531/test).
 

@@ -60,7 +60,7 @@ Options:
     -r                           Optional. Output Inference results as raw values.
     -t                           Optional. Probability threshold for person/vehicle/bike crossroad detections.
     -t_reid                      Optional. Cosine similarity threshold between two vectors for person reidentification.
-    -no_show                     Optional. No show processed video.
+    -no_show                     Optional. Don't show output.
     -auto_resize                 Optional. Enables resizable input with support of ROI crop & auto resize.
     -u                           Optional. List of monitors to show initially.
     -person_label                Optional. The integer index of the objects' category corresponding to persons (as it is returned from the detection network, may vary from one network to another). The default value is 1.

@@ -1233,3 +1233,41 @@ datasets:
       input_suffix: blur.png
       target_suffix: sharp.png
     annotation: GOPRO.pickle
+
+  - name: PASCAL-S
+    annotation_conversion:
+      converter: salient_object_detection
+      images_dir: PASCAL-S/image
+      masks_dir: PASCAL-S/mask
+    data_source: PASCAL-S/image
+    additional_data_source: PASCAL-S/mask
+    annotation: pascal-s.pickle
+
+  - name: LibriSpeech_test_clean_npy_nemo
+    data_source: librispeech/test/LibriSpeech/test-clean.npy
+    annotation: librispeech_npy.pickle
+    annotation_conversion:
+      converter: librispeech
+      data_dir: librispeech/test/LibriSpeech/test-clean.npy
+      use_numpy: true
+
+  - name: VOC2007_detection
+    data_source: VOCdevkit/VOC2007/JPEGImages
+    annotation_conversion:
+      converter: voc_detection
+      annotations_dir: VOCdevkit/VOC2007/Annotations
+      images_dir: VOCdevkit/VOC2007/JPEGImages
+      imageset_file: VOCdevkit/VOC2007/ImageSets/Main/test.txt
+    annotation: voc07.pickle
+    dataset_meta: voc07.json
+
+  - name: VOC2007_detection_no_bkgr
+    data_source: VOCdevkit/VOC2007/JPEGImages
+    annotation_conversion:
+      converter: voc_detection
+      annotations_dir: VOCdevkit/VOC2007/Annotations
+      images_dir: VOCdevkit/VOC2007/JPEGImages
+      imageset_file: VOCdevkit/VOC2007/ImageSets/Main/test.txt
+      has_background: False
+    annotation: voc07_without_bkgr.pickle
+    dataset_meta: voc07_without_bkgr.json

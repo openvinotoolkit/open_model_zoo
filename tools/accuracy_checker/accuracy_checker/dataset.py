@@ -314,9 +314,11 @@ class Dataset:
     def metadata(self):
         return self.data_provider.metadata
 
+    @property
     def identifiers(self):
         return self.data_provider.identifiers
 
+    @property
     def multi_infer(self):
         return self.data_provider.multi_infer
 
@@ -508,7 +510,7 @@ class DataProvider:
         self.data_reader = data_reader
         self.annotation_provider = annotation_provider
         self.dataset_config = dataset_config or {}
-        self.batch = batch
+        self.batch = batch if batch is not None else dataset_config.get('batch')
         self.subset = subset
         self.create_data_list(data_list)
         if self.store_subset:

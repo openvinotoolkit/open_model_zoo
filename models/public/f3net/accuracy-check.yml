@@ -1,0 +1,39 @@
+models:
+  - name: f3net onnx
+    launchers:
+      - framework: onnx_runtime
+        model: f3net.onnx
+        adapter: salient_object_detection
+    datasets:
+      - name: PASCAL-S
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: normalization
+            mean: [124.55, 118.90, 102.94]
+            std:  [56.77, 55.97, 57.50]
+          - type: resize
+            size: 352
+        postprocessing:
+          - type: resize
+            apply_to: prediction
+          - type: normalize_salience_map
+        metrics:
+          - type: salience_f-measure
+            presenter: print_vector
+
+  - name: f3net
+    launchers:
+      - framework: dlsdk
+        adapter: salient_object_detection
+    datasets:
+      - name: PASCAL-S
+        preprocessing:
+          - type: resize
+            size: 352
+        postprocessing:
+          - type: resize
+            apply_to: prediction
+          - type: normalize_salience_map
+        metrics:
+          - type: salience_f-measure
+            presenter: print_vector

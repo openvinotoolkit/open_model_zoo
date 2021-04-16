@@ -115,7 +115,6 @@ class CaffeLauncher(Launcher):
             if len(models_list) != 1:
                 raise ConfigError('Several suitable models found, please specify required model')
             model = models_list[0]
-            print_info('Found model {}'.format(model))
         if weights is None or Path(weights).is_dir():
             weights_dir = weights or model.parent
             weights = Path(weights_dir) / model.name.replace('prototxt', 'caffemodel')
@@ -126,8 +125,15 @@ class CaffeLauncher(Launcher):
                 if len(weights_list) != 1:
                     raise ConfigError('Several suitable weights found, please specify required explicitly')
                 weights = weights_list[0]
-            print_info('Found weights {}'.format(weights))
+        accepted_suffixes = ['.prototxt']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('Found model {}'.format(model))
         weights = Path(weights)
+        accepted_weights_suffixes = ['.caffemodel']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
+        print_info('Found weights {}'.format(weights))
 
         return model, weights
 

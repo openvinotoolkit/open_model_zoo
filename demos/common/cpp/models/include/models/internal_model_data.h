@@ -28,9 +28,9 @@ struct InternalModelData {
 };
 
 struct InternalImageModelData : public InternalModelData {
-    InternalImageModelData(int width, int height) {
-        inputImgWidth = width;
-        inputImgHeight = height;
+    InternalImageModelData(int width, int height) :
+        inputImgWidth(width),
+        inputImgHeight(height) {
     }
 
     int inputImgWidth;

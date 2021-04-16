@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 from collections import defaultdict
-
 import numpy as np
 
 from ..adapters import Adapter
@@ -107,7 +106,7 @@ class BeamSearchDecoder(Adapter):
         times, symbols = probabilities.shape
         # Initialize the beam with the empty sequence, a probability of 1 for ending in blank
         # and zero for ending in non-blank (in log space).
-        beam = [(tuple(), (0.0, -np.inf))]
+        beam = [((), (0.0, -np.inf))]
 
         for time in range(times):
             # A default dictionary to store the next step candidates.
@@ -267,7 +266,7 @@ class AttentionOCRAdapter(Adapter):
         return params
 
     def configure(self):
-        self._output_blob = self.get_value_from_config('output_blob')
+        self.output_blob = self.get_value_from_config('output_blob')
         self.labels = self.get_value_from_config('labels')
         self.eos_index = self.get_value_from_config('eos_index')
         self.lower_case = self.get_value_from_config('to_lower_case')

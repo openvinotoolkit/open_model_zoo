@@ -19,7 +19,7 @@
 #include <deque>
 #include <map>
 #include <condition_variable>
-#include "pipelines/config_factory.h"
+#include "utils/config_factory.h"
 #include "pipelines/requests_pool.h"
 #include "models/results.h"
 #include "models/model_base.h"
@@ -33,7 +33,7 @@ public:
     /// @param cnnConfig - fine tuning configuration for CNN model
     /// @param engine - reference to InferenceEngine::Core instance to use.
     /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
-    AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine);
+    AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& core);
     virtual ~AsyncPipeline();
 
     /// Waits until either output data becomes available or pipeline allows to submit more input data.

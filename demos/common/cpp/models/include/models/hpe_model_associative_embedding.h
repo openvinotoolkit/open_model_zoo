@@ -24,7 +24,8 @@ public:
     /// @param targetSize - the length of a short image side used for network reshaping.
     /// @param confidenceThreshold - threshold to eliminate low-confidence poses.
     /// Any pose with confidence lower than this threshold will be ignored.
-    HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold);
+    HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold,
+                            float delta = 0.0, std::string paddingMode = "right_bottom");
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
@@ -36,8 +37,10 @@ protected:
 
     cv::Size inputLayerSize;
     double aspectRatio;
-    float confidenceThreshold;
     int targetSize;
+    float confidenceThreshold;
+    float delta;
+    std::string paddingMode;
 
     std::string embeddingsBlobName;
     std::string heatmapsBlobName;
@@ -49,9 +52,8 @@ protected:
     static const cv::Vec3f meanPixel;
     static const float detectionThreshold;
     static const float tagThreshold;
-    static const float delta;
 
-    void reshape(InferenceEngine::CNNNetwork& cnnNetwork) override;
+    void changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork);
 
     std::string findLayerByName(const std::string layerName,
                                 const std::vector<std::string>& outputsNames);

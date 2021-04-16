@@ -36,7 +36,6 @@
 
 #include <pipelines/async_pipeline.h>
 #include <models/segmentation_model.h>
-#include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 
 DEFINE_INPUT_FLAGS
@@ -58,7 +57,7 @@ static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
 "throughput mode (for HETERO and MULTI device cases use format "
 "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
-static const char no_show_processed_video[] = "Optional. Do not show processed video.";
+static const char no_show_message[] = "Optional. Don't show output.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
@@ -71,7 +70,7 @@ DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
-DEFINE_bool(no_show, false, no_show_processed_video);
+DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
 
 /**
@@ -79,7 +78,7 @@ DEFINE_string(u, "", utilization_monitors_message);
 */
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "segmentation_demo_async [OPTION]" << std::endl;
+    std::cout << "segmentation_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
@@ -97,7 +96,7 @@ static void showUsage() {
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
     std::cout << "    -loop                     " << loop_message << std::endl;
-    std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
+    std::cout << "    -no_show                  " << no_show_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
 
