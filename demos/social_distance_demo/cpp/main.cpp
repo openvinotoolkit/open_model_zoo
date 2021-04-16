@@ -433,7 +433,6 @@ void ResAggregator::process() {
                 cv::Rect2d l1 = personTracker.trackers.at(keys[i]).bbox;
                 cv::Rect2d l2 = personTracker.trackers.at(keys[j]).bbox;
 
-                //std::tuple<int, int> a, b, c, d;
                 cv::Point2d a, b, c, d;
                 if (l1.y + l1.height < l2.y + l2.height) {
                     a = { l1.x, l1.y + l1.height };
@@ -447,17 +446,6 @@ void ResAggregator::process() {
                     a = { l2.x, l2.y + l2.height };
                     b = { l2.x + l2.width, l2.y + l2.height };
                 }
-                //if (std::get<3>(l1) < std::get<3>(l2)) {
-                //    a = std::make_tuple(std::get<0>(l1), std::get<3>(l1));
-                //    b = std::make_tuple(std::get<2>(l1), std::get<3>(l1));
-                //    c = std::make_tuple(std::get<0>(l2), std::get<3>(l2));
-                //    d = std::make_tuple(std::get<2>(l2), std::get<3>(l2));
-                //} else {
-                //    c = std::make_tuple(std::get<0>(l1), std::get<3>(l1));
-                //    d = std::make_tuple(std::get<2>(l1), std::get<3>(l1));
-                //    a = std::make_tuple(std::get<0>(l2), std::get<3>(l2));
-                //    b = std::make_tuple(std::get<2>(l2), std::get<3>(l2));
-                //}
 
                 std::tuple<int, int> frame_shape(h, w);
                 auto result = socialDistance(frame_shape, a, b, c, d, 4 /* ~ 5 feets */,
@@ -466,11 +454,6 @@ void ResAggregator::process() {
 
                 if (std::get<1>(result)) {
                     cv::Rect2d inter = l1 | l2;
-
-                    //int xmin, ymin, xmax, ymax;
-                    //std::tie(xmin, ymin, xmax, ymax) = getCrop(l1, l2);
-                    //cv::Rect bb1(std::get<0>(l1), std::get<1>(l1), std::get<2>(l1) - std::get<0>(l1), std::get<3>(l1) - std::get<1>(l1));
-                    //cv::Rect bb2(std::get<0>(l2), std::get<1>(l2), std::get<2>(l2) - std::get<0>(l2), std::get<3>(l2) - std::get<1>(l2));
                     cv::rectangle(sharedVideoFrame->frame, l1, {0, 255, 255}, 2);
                     cv::rectangle(sharedVideoFrame->frame, l2, {0, 255, 255}, 2);
                     cv::rectangle(sharedVideoFrame->frame, inter, {0, 0, 255}, 3);
