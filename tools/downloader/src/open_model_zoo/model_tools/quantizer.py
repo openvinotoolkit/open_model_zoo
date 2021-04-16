@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +22,7 @@ from pathlib import Path
 
 import yaml
 
-import common
+from open_model_zoo.model_tools import _common
 
 DEFAULT_POT_CONFIG_BASE = {
     'compression': {
@@ -40,12 +38,12 @@ DEFAULT_POT_CONFIG_BASE = {
     },
 }
 
-DATASET_DEFINITIONS_PATH = common.OMZ_ROOT / 'tools/accuracy_checker/dataset_definitions.yml'
+DATASET_DEFINITIONS_PATH = _common.OMZ_ROOT / 'tools/accuracy_checker/dataset_definitions.yml'
 
 def quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
-    input_precision = common.KNOWN_QUANTIZED_PRECISIONS[precision]
+    input_precision = _common.KNOWN_QUANTIZED_PRECISIONS[precision]
 
-    pot_config_base_path = common.MODEL_ROOT / model.subdirectory / 'quantization.yml'
+    pot_config_base_path = _common.MODEL_ROOT / model.subdirectory / 'quantization.yml'
 
     try:
         with pot_config_base_path.open('rb') as pot_config_base_file:
@@ -55,7 +53,7 @@ def quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
 
     pot_config_paths = {
         'engine': {
-            'config': str(common.MODEL_ROOT/ model.subdirectory / 'accuracy-check.yml'),
+            'config': str(_common.MODEL_ROOT/ model.subdirectory / 'accuracy-check.yml'),
         },
         'model': {
             'model': str(args.model_dir / model.subdirectory / input_precision / (model.name + '.xml')),
@@ -90,9 +88,9 @@ def quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
         '--output-dir={}'.format(pot_output_dir),
     ]
 
-    reporter.print('Quantization command: {}', common.command_string(pot_cmd))
+    reporter.print('Quantization command: {}', _common.command_string(pot_cmd))
     reporter.print('Quantization environment: {}',
-        ' '.join('{}={}'.format(k, common.quote_arg(v))
+        ' '.join('{}={}'.format(k, _common.quote_arg(v))
             for k, v in sorted(pot_env.items())))
 
     success = True
@@ -145,7 +143,7 @@ def main():
             sys.exit('Unable to locate Post-Training Optimization Toolkit. '
                 + 'Use --pot or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
-    models = common.load_models_from_args(parser, args)
+    models = _common.load_models_from_args(parser, args)
 
     # We can't mark it as required, because it's not required when --print_all is specified.
     # So we have to check it manually.
@@ -153,14 +151,14 @@ def main():
         sys.exit('--dataset_dir must be specified.')
 
     if args.precisions is None:
-        requested_precisions = common.KNOWN_QUANTIZED_PRECISIONS.keys()
+        requested_precisions = _common.KNOWN_QUANTIZED_PRECISIONS.keys()
     else:
         requested_precisions = set(args.precisions.split(','))
-        unknown_precisions = requested_precisions - common.KNOWN_QUANTIZED_PRECISIONS.keys()
+        unknown_precisions = requested_precisions - _common.KNOWN_QUANTIZED_PRECISIONS.keys()
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    reporter = common.Reporter(common.DirectOutputContext())
+    reporter = _common.Reporter(_common.DirectOutputContext())
 
     output_dir = args.output_dir or args.model_dir
 

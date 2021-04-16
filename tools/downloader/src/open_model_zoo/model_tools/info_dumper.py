@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +18,7 @@ import sys
 
 from pathlib import Path
 
-import common
+from open_model_zoo.model_tools import _common
 
 def to_info(model):
     return {
@@ -44,7 +42,7 @@ def main():
     parser.add_argument('--print_all', action='store_true', help='print all available models')
     args = parser.parse_args()
 
-    models = common.load_models_from_args(parser, args)
+    models = _common.load_models_from_args(parser, args)
 
     json.dump(list(map(to_info, models)), sys.stdout, indent=4)
     print() # add a final newline

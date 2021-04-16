@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
-
 """
- Copyright (c) 2018 Intel Corporation
+ Copyright (c) 2018-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -32,7 +30,7 @@ import types
 
 from pathlib import Path
 
-import common
+from open_model_zoo.model_tools import _common
 
 CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 
@@ -246,7 +244,7 @@ def download_model(reporter, args, cache, session_factory, requested_precisions,
     for model_file in model.files:
         if len(model_file.name.parts) == 2:
             p = model_file.name.parts[0]
-            if p in common.KNOWN_PRECISIONS and p not in requested_precisions:
+            if p in _common.KNOWN_PRECISIONS and p not in requested_precisions:
                 continue
 
         model_file_reporter = reporter.with_event_context(model=model.name, model_file=model_file.name.as_posix())
@@ -327,7 +325,7 @@ def main():
     parser.add_argument('--print_all', action='store_true', help='print all available models')
     parser.add_argument('--precisions', metavar='PREC[,PREC...]',
                         help='download only models with the specified precisions (actual for DLDT networks); specify one or more of: '
-                             + ','.join(common.KNOWN_PRECISIONS))
+                             + ','.join(_common.KNOWN_PRECISIONS))
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
         default=Path.cwd(), help='path where to save models')
     parser.add_argument('--cache_dir', type=Path, metavar='DIR',
@@ -344,22 +342,22 @@ def main():
     args = parser.parse_args()
 
     def make_reporter(context):
-        return common.Reporter(context,
+        return _common.Reporter(context,
             enable_human_output=args.progress_format == 'text',
             enable_json_output=args.progress_format == 'json')
 
-    reporter = make_reporter(common.DirectOutputContext())
+    reporter = make_reporter(_common.DirectOutputContext())
 
     cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
-    models = common.load_models_from_args(parser, args)
+    models = _common.load_models_from_args(parser, args)
 
     failed_models = set()
 
     if args.precisions is None:
-        requested_precisions = common.KNOWN_PRECISIONS
+        requested_precisions = _common.KNOWN_PRECISIONS
     else:
         requested_precisions = set(args.precisions.split(','))
-        unknown_precisions = requested_precisions - common.KNOWN_PRECISIONS
+        unknown_precisions = requested_precisions - _common.KNOWN_PRECISIONS
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
@@ -369,7 +367,7 @@ def main():
             results = [download_model(reporter, args, cache, session_factory, requested_precisions, model)
                 for model in models]
         else:
-            results = common.run_in_parallel(args.jobs,
+            results = _common.run_in_parallel(args.jobs,
                 lambda context, model: download_model(
                     make_reporter(context), args, cache, session_factory, requested_precisions, model),
                 models)

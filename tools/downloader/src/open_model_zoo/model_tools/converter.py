@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,11 +19,11 @@ import sys
 
 from pathlib import Path
 
-import common
+from open_model_zoo.model_tools import _common
 
 
 def run_pre_convert(reporter, model, output_dir, args):
-    script = common.MODEL_ROOT / model.subdirectory / 'pre-convert.py'
+    script = _common.MODEL_ROOT / model.subdirectory / 'pre-convert.py'
     if not script.exists():
         return True
 
@@ -35,7 +33,7 @@ def run_pre_convert(reporter, model, output_dir, args):
     cmd = [str(args.python), '--', str(script), '--',
         str(args.download_dir / model.subdirectory), str(output_dir / model.subdirectory)]
 
-    reporter.print('Pre-convert command: {}', common.command_string(cmd))
+    reporter.print('Pre-convert command: {}', _common.command_string(cmd))
     reporter.print(flush=True)
 
     success = True if args.dry_run else reporter.job_context.subprocess(cmd)
@@ -47,11 +45,15 @@ def convert_to_onnx(reporter, model, output_dir, args, template_variables):
     reporter.print_section_heading('{}Converting {} to ONNX',
         '(DRY RUN) ' if args.dry_run else '', model.name)
 
+    converter_path = Path(__file__).absolute().parent / \
+        'internal_scripts' / model.converter_to_onnx
+
     conversion_to_onnx_args = [string.Template(arg).substitute(template_variables)
                                for arg in model.conversion_to_onnx_args]
-    cmd = [str(args.python), str(Path(__file__).absolute().parent / model.converter_to_onnx), *conversion_to_onnx_args]
 
-    reporter.print('Conversion to ONNX command: {}', common.command_string(cmd))
+    cmd = [str(args.python), '--', str(converter_path), *conversion_to_onnx_args]
+
+    reporter.print('Conversion to ONNX command: {}', _common.command_string(cmd))
     reporter.print(flush=True)
 
     success = True if args.dry_run else reporter.job_context.subprocess(cmd)
@@ -113,14 +115,14 @@ def main():
     extra_mo_args = args.extra_mo_args or []
 
     if args.precisions is None:
-        requested_precisions = common.KNOWN_PRECISIONS
+        requested_precisions = _common.KNOWN_PRECISIONS
     else:
         requested_precisions = set(args.precisions.split(','))
-        unknown_precisions = requested_precisions - common.KNOWN_PRECISIONS
+        unknown_precisions = requested_precisions - _common.KNOWN_PRECISIONS
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    models = common.load_models_from_args(parser, args)
+    models = _common.load_models_from_args(parser, args)
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
@@ -144,7 +146,7 @@ def main():
         model_format = model.framework
 
         template_variables = {
-            'config_dir': common.MODEL_ROOT / model.subdirectory,
+            'config_dir': _common.MODEL_ROOT / model.subdirectory,
             'conv_dir': output_dir / model.subdirectory,
             'dl_dir': args.download_dir / model.subdirectory,
             'mo_dir': mo_path.parent,
@@ -171,7 +173,7 @@ def main():
             reporter.print_section_heading('{}Converting {} to IR ({})',
                 '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
 
-            reporter.print('Conversion command: {}', common.command_string(mo_cmd))
+            reporter.print('Conversion command: {}', _common.command_string(mo_cmd))
 
             if not args.dry_run:
                 reporter.print(flush=True)
@@ -183,13 +185,13 @@ def main():
 
         return True
 
-    reporter = common.Reporter(common.DirectOutputContext())
+    reporter = _common.Reporter(_common.DirectOutputContext())
 
     if args.jobs == 1 or args.dry_run:
         results = [convert(reporter, model) for model in models]
     else:
-        results = common.run_in_parallel(args.jobs,
-            lambda context, model: convert(common.Reporter(context), model),
+        results = _common.run_in_parallel(args.jobs,
+            lambda context, model: convert(_common.Reporter(context), model),
             models)
 
     failed_models = [model.name for model, successful in zip(models, results) if not successful]
