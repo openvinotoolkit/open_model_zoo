@@ -9,16 +9,19 @@
 #include <tuple>
 #include <deque>
 
+#include <opencv2/core.hpp>
+
 class TrackableObject {
 public:
-    TrackableObject(std::tuple<int, int, int, int> bb, const std::vector<float> &r, std::tuple<int, int> centroid)
+    TrackableObject(cv::Rect2i bb, const std::vector<float> &r, cv::Point centroid)
             : bbox{bb}, reid{r}, updated{false} {
         centroids.push_back(centroid);
     }
 
-    std::tuple<int, int, int, int> bbox;
+    //std::tuple<int, int, int, int> bbox;
+    cv::Rect bbox;
     std::vector<float> reid;
-    std::vector<std::tuple<int, int>> centroids;
+    std::vector<cv::Point> centroids;
     bool updated;
 };
 

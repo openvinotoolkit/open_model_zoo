@@ -4,10 +4,8 @@
 
 #include <cmath>
 #include <tuple>
-#include <opencv2/core/core.hpp>
-
 #include <vector>
-
+#include "geodist.hpp"
 
 typedef std::pair<cv::Point2d, cv::Point2d> Line2d;
 
@@ -217,15 +215,15 @@ double getDistance(const cv::Point2d &PF, const cv::Point2d &E, const cv::Point2
 
 // euclidean, alert, distance
 std::tuple<bool, bool, double> socialDistance(std::tuple<int, int> &frameShape,
-                                               std::tuple<int, int> &a, std::tuple<int, int> &b,
-                                               std::tuple<int, int> &c, std::tuple<int, int> &d,
-                                               unsigned minIter = 3, double minW = 0, double maxW = 0) {
+                                               cv::Point2d &A, cv::Point2d &B,
+                                               cv::Point2d &C, cv::Point2d &D,
+                                               unsigned minIter, double minW, double maxW) {
     double h, w;
     std::tie(h, w) = frameShape;
-    cv::Point2d A(std::get<0>(a), std::get<1>(a));
-    cv::Point2d B(std::get<0>(b), std::get<1>(b));
-    cv::Point2d C(std::get<0>(c), std::get<1>(c));
-    cv::Point2d D(std::get<0>(d), std::get<1>(d));
+    //cv::Point2d A(std::get<0>(a), std::get<1>(a));
+    //cv::Point2d B(std::get<0>(b), std::get<1>(b));
+    //cv::Point2d C(std::get<0>(c), std::get<1>(c));
+    //cv::Point2d D(std::get<0>(d), std::get<1>(d));
     Line2d AB = getLine(A, B);
     Line2d CD = getLine(C, D);
 
