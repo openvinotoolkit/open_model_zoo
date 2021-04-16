@@ -2,7 +2,7 @@
 
 This demo showcases a retail social distance application that detects people and measures the distance between them. If this distance is less than a value previously provided by the user, then an alert is triggered. With this application you can use the [person-detection-retail-0013](../../../models/intel/person-detection-retail-0013/description/person-detection-retail-0013.md) and [person-reidentification-retail-0277](../../../models/intel/person-reidentification-retail-0277/description/person-reidentification-retail-0277.md) Intel® pre-trained models, that can be downloaded using the **model downloader**. The **model downloader** downloads the __.xml__ and __.bin__ files that is used by the application. All supported models by this demo are listed in [models list](models.lst).
 
-For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 Other demo objectives are:
 * Video/Camera as inputs, via OpenCV\*
@@ -120,6 +120,6 @@ The demo uses OpenCV to display the resulting frame with detections rendered as 
 > Other models may produce unexpected results on these devices.
 
 ## See Also
-* [Using Open Model Zoo demos](../README.md)
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/downloader/README.md)
