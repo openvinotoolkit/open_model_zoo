@@ -115,7 +115,7 @@ class DisplayTransform {
     public:
         DisplayTransform() : doResize(false) {}
 
-        DisplayTransform(cv::Size& inputSize, cv::Size& displayResolution) :
+        DisplayTransform(cv::Size inputSize, cv::Size displayResolution) :
             doResize(true), inputSize(inputSize), displayResolution(displayResolution) {}
 
         void computeResolution() {
