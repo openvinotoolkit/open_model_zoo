@@ -33,60 +33,44 @@ public:
         std::deque<std::pair<int, float>> sim;
         if (trackers.size() > 0) {
             auto ntos = tos.size();
-            if (ntos == 0) {
-                for (auto it = trackers.begin(); it != trackers.end(); ) {
+            for (const auto& to : tos) {
+                for (auto &tracker : trackers) {
+                    float cosine = 0;
+                    cosine = cosineSimilarity(to.reid, tracker.second.reid);
+     
+                    if (cosine > similarityThreshold)
+                        sim.push_back(std::make_pair(tracker.first, cosine));
+                }
+                if (!sim.empty()) {
+                    int maxSimilarity = getMaxSimilarity(sim);
+                    if (maxSimilarity < 0)
+                        continue;
+                    trackers.at(maxSimilarity).reid = to.reid;
+                    trackers.at(maxSimilarity).bbox = to.bbox;
+                    trackers.at(maxSimilarity).centroids.push_back(to.centroids[0]);
+                    trackers.at(maxSimilarity).updated = true;
+                    dissapeared.at(maxSimilarity) = 0;
+                } else {
+                    trackers.insert({trackIdGenerator, to});
+                    trackers.at(trackIdGenerator).updated = true;
+                    dissapeared.insert({trackIdGenerator, 0});
+                    trackIdGenerator += 1;
+                }
+            }
+
+            for (auto it = trackers.begin(); it != trackers.end(); ) {
+                if (!it->second.updated) {
                     dissapeared.at(it->first) += 1;
                     if (dissapeared.at(it->first) > maxDisappeared) {
                         dissapeared.erase(it->first);
                         it = trackers.erase(it);
                         continue;
                     }
-                    ++it;
                 }
-            } else {
-                for (const auto& to : tos) {
-                    for (auto &tracker : trackers) {
-                        float cosine = 0;
-                        try {
-                            cosine = cosineSimilarity(to.reid, tracker.second.reid);
-                        } catch (std::exception& e) {
-                            slog::err << e.what();
-                            continue;
-                        }
-                        if (cosine > similarityThreshold)
-                            sim.push_back(std::make_pair(tracker.first, cosine));
-                    }
-                    if (!sim.empty()) {
-                        int maxSimilarity = getMaxSimilarity(sim);
-                        if (maxSimilarity < 0)
-                            continue;
-                        trackers.at(maxSimilarity).reid = to.reid;
-                        trackers.at(maxSimilarity).bbox = to.bbox;
-                        trackers.at(maxSimilarity).centroids.push_back(to.centroids[0]);
-                        trackers.at(maxSimilarity).updated = true;
-                        dissapeared.at(maxSimilarity) = 0;
-                    } else {
-                        trackers.insert({trackIdGenerator, to});
-                        trackers.at(trackIdGenerator).updated = true;
-                        dissapeared.insert({trackIdGenerator, 0});
-                        trackIdGenerator += 1;
-                    }
-                }
-
                 if (ntos <= trackers.size()) {
-                    for (auto it = trackers.begin(); it != trackers.end(); ) {
-                        if (!it->second.updated) {
-                            dissapeared.at(it->first) += 1;
-                            if (dissapeared.at(it->first) > maxDisappeared) {
-                                dissapeared.erase(it->first);
-                                it = trackers.erase(it);
-                                continue;
-                            }
-                        }
-                        it->second.updated = false;
-                        ++it;
-                    }
+                    it->second.updated = false;
                 }
+                ++it;
             }
         } else {
             registerTrackers(tos);
