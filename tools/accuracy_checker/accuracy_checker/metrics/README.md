@@ -126,7 +126,7 @@ More detailed information about calculation segmentation metrics you can find [h
   * `sigma_nsq` - variance of the visual noise (default = 2).
 * `lpips` - [Learned Perceptual Image Patch Similarity](https://richzhang.github.io/PerceptualSimilarity/).  Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
 ** Metric calculation requires `lpips` package installation.**
-* `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
+  * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
   * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
   * `net` - network for perceptual loss calculation. Supported models: `alex` - for AlexNet, `vgg` - for VGG16, `squeeze` - for SqueezeNet1.1. Optional, default `alex`
   * `distance_threshold` - distance threshold for getting images ratio with greater distance. Optional, if not provided, this coefficient will not be calculated.
