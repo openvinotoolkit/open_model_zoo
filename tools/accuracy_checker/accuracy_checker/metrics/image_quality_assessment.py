@@ -415,6 +415,6 @@ class LPIPS(BaseRegressionMetric):
         mean, std = super().evaluate(annotations, predictions)
         if self.dist_threshold:
             invalid_ratio = np.sum(np.array(self.magnitude) > self.dist_threshold) / len(self.magnitude)
-            self.meta['names'].append('{}@ratio_greater_{}'.format(self.__provider__, self.dist_threshold))
+            self.meta['names'].append('ratio_greater_{}'.format(self.dist_threshold))
             return mean, std, invalid_ratio
         return mean, std
