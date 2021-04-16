@@ -255,7 +255,10 @@ Two options are available during the demo execution:
 
 By default these options are disabled.
 To enable the first one please set in configuration file for `analyzer` parameter
-`enable` to `True`, for the second one for `embeddings` specify parameter `path`
+`enable` to `True`.
+
+For the second one, install TensorBoard (for example, with `pip install tensorboard`).
+Then, for `embeddings` specify parameter `save_path`
 that is a directory where data related to embeddings will be saved
 (if it is an empty string the option is disabled). There is paramater `use_images` in `embeddings`.
 If it is `True` an image with object will be drawn for every embedding instead of point.
