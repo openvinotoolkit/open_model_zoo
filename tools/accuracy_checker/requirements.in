@@ -34,3 +34,7 @@ fast-ctc-decode
 
 # raw image formats processing
 rawpy
+
+# speech recognition with language model
+pypi-kenlm
+
