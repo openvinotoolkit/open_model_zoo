@@ -34,6 +34,3 @@ fast-ctc-decode
 
 # raw image formats processing
 rawpy
-
-# LPIPS metric
-lpips
