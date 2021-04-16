@@ -113,22 +113,6 @@ bool lineContainsPoint(const Line2d& l, const cv::Point2d& p) {
     return true;
 }
 
-std::tuple<int, int, int, int> getCrop(std::tuple<int, int, int, int> a, std::tuple<int, int, int, int> b) {
-    int axmin, aymin, axmax, aymax;
-    int bxmin, bymin, bxmax, bymax;
-    int cxmin, cymin, cxmax, cymax;
-
-    std::tie(axmin, aymin, axmax, aymax) = a;
-    std::tie(bxmin, bymin, bxmax, bymax) = b;
-
-    cxmin = axmin < bxmin ? axmin : bxmin;
-    cymin = aymin < bymin ? aymin : bymin;
-    cxmax = axmax > bxmax ? axmax : bxmax;
-    cymax = aymax > bymax ? aymax : bymax;
-
-    return std::make_tuple(cxmin, cymin, cxmax, cymax);
-}
-
 // euclidean, alert, distance
 std::tuple<bool, bool, double> euclideanDistance(const Line2d &AB, const Line2d &CD,
                                                   unsigned minIter, double coef) {
