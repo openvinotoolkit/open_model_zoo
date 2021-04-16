@@ -19,13 +19,13 @@
 #include <monitors/presenter.h>
 #include <vpu/hddl_config.hpp>
 #include <utils/args_helper.hpp>
+#include <utils/grid_mat.hpp>
+#include <utils/input_wrappers.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
+#include <utils/threads_common.hpp>
 
-#include "common.hpp"
 #include "geodist.hpp"
-#include "grid_mat.hpp"
-#include "input_wrappers.hpp"
 #include "net_wrappers.hpp"
 #include "person_trackers.hpp"
 #include "social_distance_demo.hpp"

@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -11,7 +11,7 @@
 #include <vector>
 #include <queue>
 
-#include <opencv2/core/core.hpp>
+#include <opencv2/opencv.hpp>
 
 class InputChannel;
 
