@@ -36,7 +36,7 @@ thoroughly. Other types of license plates may underperform.
 
 ### Original Model
 
-Image,	name: `data`, shape: `1, 3, 24, 94`, format is `1, C, H, W`, where:
+Image,	name: `input`, shape: `1, 3, 24, 94`, format is `1, C, H, W`, where:
 
 - `C` - channel
 - `H` - height
@@ -46,7 +46,7 @@ Channel order is `BGR`.
 
 ### Converted Model
 
-Image,	name: `data`, shape: `1, 3, 24, 94`, format is `1, C, H, W`, where:
+Image,	name: `input`, shape: `1, 3, 24, 94`, format is `1, C, H, W`, where:
 
 - `C` - channel
 - `H` - height
@@ -58,7 +58,7 @@ Channel order is `BGR`.
 
 ### Original Model
 
-Encoded vector of floats, name: `decode`, shape: `1, 88, 1, 1`. Each float
+Encoded vector of floats, name: `d_predictions`, shape: `1, 88, 1, 1`. Each float
 is an integer number encoding a character according to this dictionary:
 
         0 0
@@ -134,7 +134,7 @@ is an integer number encoding a character according to this dictionary:
 
 ### Converted Model
 
-Encoded vector of floats, name: `decode`, shape: `1, 88, 1, 1`. Each float
+Encoded vector of floats, name: `d_predictions:0`, shape: `1, 88`. Each float
 is an integer number encoding a character according to this dictionary:
 
         0 0
