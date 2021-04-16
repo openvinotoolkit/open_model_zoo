@@ -156,7 +156,7 @@ class DisplayTransform {
 
     private:
         float scaleFactor;
+        cv::Size inputSize;
         cv::Size displayResolution;
         cv::Size newResolution;
-        cv::Size inputSize;
 };
