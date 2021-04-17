@@ -117,7 +117,19 @@ More detailed information about calculation segmentation metrics you can find [h
 * `psnr` - [Peak signal to noise ratio](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
   * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
   * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
+* `psnr-b` - [Peak signal to noise ratio with blocked effect factor](https://link.springer.com/content/pdf/10.1007%2F978-3-642-34595-1_16.pdf). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
+  * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
+  * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
+  * `block_size` - block size for blocked effect factor. Optional, default `8`.
 * `ssim` - [Structural similarity](https://en.wikipedia.org/wiki/Structural_similarity). Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`, `SuperResolutionAnnotation`, `SuperResolutionPrediction`.
+* `vif` - [Visual Information Fidelity](https://en.wikipedia.org/wiki/Visual_Information_Fidelity).
+  * `sigma_nsq` - variance of the visual noise (default = 2).
+* `lpips` - [Learned Perceptual Image Patch Similarity](https://richzhang.github.io/PerceptualSimilarity/).  Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
+** Metric calculation requires `lpips` package installation.**
+  * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
+  * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
+  * `net` - network for perceptual loss calculation. Supported models: `alex` - for AlexNet, `vgg` - for VGG16, `squeeze` - for SqueezeNet1.1. Optional, default `alex`
+  * `distance_threshold` - distance threshold for getting images ratio with greater distance. Optional, if not provided, this coefficient will not be calculated.
 * `angle_error` - Mean angle error and Standard deviation of angle error for gaze estimation. Supported representations: `GazeVectorAnnotation`, `GazeVectorPrediction`.
 * `relative_l2_error` - Mean relative error defined like L2 norm for difference between annotation and prediction normalized by L2 norm for annotation value. Supported representations:
   `FeatureRegressionAnnotation`, `RegressionPrediction`.
