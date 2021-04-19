@@ -252,7 +252,6 @@ def main():
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = hpe_pipeline.get_result(next_frame_id_to_show)
-<<<<<<< HEAD
         while results is None:
             results = hpe_pipeline.get_result(next_frame_id_to_show)
         (poses, scores), frame_meta = results
@@ -263,7 +262,7 @@ def main():
             print_raw_results(poses, scores)
 
         presenter.drawGraphs(frame)
-        frame = draw_poses(frame, poses, args.prob_threshold)
+        frame = draw_poses(frame, poses, args.prob_threshold, display_transform)
         metrics.update(start_time, frame)
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
             video_writer.write(frame)
@@ -276,33 +275,6 @@ def main():
             if key in {ord('q'), ord('Q'), ESC_KEY}:
                 break
             presenter.handleKey(key)
-=======
-        if results:
-            (poses, scores), frame_meta = results
-            frame = frame_meta['frame']
-            start_time = frame_meta['start_time']
-
-            if len(poses) and args.raw_output_message:
-                print_raw_results(poses, scores)
-
-            presenter.drawGraphs(frame)
-            frame = draw_poses(frame, poses, args.prob_threshold, display_transform)
-            metrics.update(start_time, frame)
-            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
-                video_writer.write(frame)
-            if not args.no_show:
-                cv2.imshow('Pose estimation results', frame)
-                key = cv2.waitKey(1)
-
-                ESC_KEY = 27
-                # Quit.
-                if key in {ord('q'), ord('Q'), ESC_KEY}:
-                    break
-                presenter.handleKey(key)
-            next_frame_id_to_show += 1
-        else:
-            break
->>>>>>> 171b59c0d (Add display resizer to hpe, object_detection, segmentation demos)
 
     metrics.print_total()
     print(presenter.reportMeans())

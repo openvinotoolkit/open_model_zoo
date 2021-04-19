@@ -238,14 +238,13 @@ def main():
     # Process completed requests
     for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = pipeline.get_result(next_frame_id_to_show)
-<<<<<<< HEAD
         while results is None:
             results = pipeline.get_result(next_frame_id_to_show)
         objects, frame_meta = results
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
-        frame = visualizer.overlay_masks(frame, objects)
+        frame = visualizer.overlay_masks(frame, objects, display_transform)
         presenter.drawGraphs(frame)
         metrics.update(start_time, frame)
 
@@ -255,26 +254,6 @@ def main():
         if not args.no_show:
             cv2.imshow('Segmentation Results', frame)
             key = cv2.waitKey(1)
-=======
-        if results:
-            objects, frame_meta = results
-            frame = frame_meta['frame']
-            start_time = frame_meta['start_time']
-
-            frame = visualizer.overlay_masks(frame, objects, display_transform)
-            presenter.drawGraphs(frame)
-            metrics.update(start_time, frame)
-
-            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
-                video_writer.write(frame)
-
-            if not args.no_show:
-                cv2.imshow('Segmentation Results', frame)
-                key = cv2.waitKey(1)
-            next_frame_id_to_show += 1
-        else:
-            break
->>>>>>> 171b59c0d (Add display resizer to hpe, object_detection, segmentation demos)
 
     metrics.print_total()
     print(presenter.reportMeans())

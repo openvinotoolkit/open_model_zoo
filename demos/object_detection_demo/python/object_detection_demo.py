@@ -181,36 +181,7 @@ def get_model(ie, args):
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
 
-<<<<<<< HEAD
-def draw_detections(frame, detections, palette, labels, threshold):
-=======
-def get_plugin_configs(device, num_streams, num_threads):
-    config_user_specified = {}
-
-    devices_nstreams = {}
-    if num_streams:
-        devices_nstreams = {device: num_streams for device in ['CPU', 'GPU'] if device in device} \
-            if num_streams.isdigit() \
-            else dict(device.split(':', 1) for device in num_streams.split(','))
-
-    if 'CPU' in device:
-        if num_threads is not None:
-            config_user_specified['CPU_THREADS_NUM'] = str(num_threads)
-        if 'CPU' in devices_nstreams:
-            config_user_specified['CPU_THROUGHPUT_STREAMS'] = devices_nstreams['CPU'] \
-                if int(devices_nstreams['CPU']) > 0 \
-                else 'CPU_THROUGHPUT_AUTO'
-
-    if 'GPU' in device:
-        if 'GPU' in devices_nstreams:
-            config_user_specified['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] \
-                if int(devices_nstreams['GPU']) > 0 \
-                else 'GPU_THROUGHPUT_AUTO'
-
-    return config_user_specified
-
 def draw_detections(frame, detections, palette, labels, threshold, display_transform):
->>>>>>> 171b59c0d (Add display resizer to hpe, object_detection, segmentation demos)
     size = frame.shape[:2]
     if display_transform:
         frame = display_transform.resize(frame)
@@ -351,15 +322,9 @@ def main():
         if len(objects) and args.raw_output_message:
             print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
 
-<<<<<<< HEAD
         presenter.drawGraphs(frame)
-        frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
+        frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, display_transform)
         metrics.update(start_time, frame)
-=======
-            presenter.drawGraphs(frame)
-            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, display_transform)
-            metrics.update(start_time, frame)
->>>>>>> 171b59c0d (Add display resizer to hpe, object_detection, segmentation demos)
 
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
             video_writer.write(frame)

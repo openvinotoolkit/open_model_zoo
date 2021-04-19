@@ -415,14 +415,9 @@ int main(int argc, char *argv[]) {
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
-<<<<<<< HEAD
         for (; framesProcessed <= frameNum; framesProcessed++) {
             while (!(result = pipeline.getResult())) {}
-            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
-=======
-        while (result = pipeline.getResult()) {
             cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, displayTransform);
->>>>>>> 171b59c0d (Add display resizer to hpe, object_detection, segmentation demos)
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
