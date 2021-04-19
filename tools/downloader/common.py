@@ -71,6 +71,7 @@ KNOWN_TASK_TYPES = {
     'place_recognition',
     'question_answering',
     'salient_object_detection',
+    'scene_text_recognition',
     'semantic_segmentation',
     'sound_classification',
     'speech_recognition',

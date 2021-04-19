@@ -3,3 +3,4 @@ scipy           # via torchvision
 torch>=1.8
 torchvision
 yacs
+addict          # via text-recognition-resnet-fc
