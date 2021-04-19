@@ -267,7 +267,7 @@ int main(int argc, char* argv[])
             pipeline.waitForData();
 
             //--- Checking for results and rendering data if it's ready
-            //--- If you need just plain data without rendering - cast result's underlying pointer to SegmentationResult*
+            //--- If you need just plain data without rendering - cast result's underlying pointer to ImageResult*
             //    and use your own processing instead of calling renderSegmentationData().
             while ((result = pipeline.getResult()) && keepRunning) {
                 cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>(), outputTransform);

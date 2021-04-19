@@ -14,10 +14,11 @@
 // limitations under the License.
 */
 
-#include "image_processing_model.h"
-
 #pragma once
-class DeblurringModel : public ImageProcessingModel {
+
+#include "image_model.h"
+
+class DeblurringModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load

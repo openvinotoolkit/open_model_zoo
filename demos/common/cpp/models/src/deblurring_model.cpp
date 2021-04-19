@@ -21,8 +21,9 @@
 using namespace InferenceEngine;
 
 DeblurringModel::DeblurringModel(const std::string& modelFileName,  bool useAutoResize, const cv::Size& inputImgSize) :
-    ImageProcessingModel(modelFileName, useAutoResize) {
-        viewSize = inputImgSize;
+    ImageModel(modelFileName, useAutoResize) {
+        netInputHeight = inputImgSize.height;
+        netInputWidth = inputImgSize.width;
 }
 
 void DeblurringModel::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
@@ -51,17 +52,14 @@ void DeblurringModel::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
     const SizeVector& outSizeVector = data.getTensorDesc().getDims();
     if (outSizeVector.size() != 4 || outSizeVector[0] != 1 || outSizeVector[1] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's output is expected");
-    outChannels = (int)(outSizeVector[1]);
-    outHeight = (int)(outSizeVector[2]);
-    outWidth = (int)(outSizeVector[3]);
 }
 
 void DeblurringModel::changeInputSize(CNNNetwork& cnnNetwork) {
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     SizeVector& inputDims = inputShapes.begin()->second;
 
-    netInputHeight = static_cast<int>((viewSize.height + stride - 1) / stride) * stride;
-    netInputWidth = static_cast<int>((viewSize.width + stride - 1) / stride) * stride;
+    netInputHeight = static_cast<int>((netInputHeight + stride - 1) / stride) * stride;
+    netInputWidth = static_cast<int>((netInputWidth + stride - 1) / stride) * stride;
 
     inputDims[0] = 1;
     inputDims[2] = netInputHeight;
@@ -102,6 +100,9 @@ std::unique_ptr<ResultBase> DeblurringModel::postprocess(InferenceResult& infRes
     const auto outputData = outMapped.as<float*>();
 
     std::vector<cv::Mat> imgPlanes;
+    const SizeVector& outSizeVector = infResult.getFirstOutputBlob()->getTensorDesc().getDims();
+    size_t outHeight = (int)(outSizeVector[2]);
+    size_t outWidth = (int)(outSizeVector[3]);
     size_t numOfPixels = outWidth * outHeight;
     imgPlanes = std::vector<cv::Mat>{
           cv::Mat(outHeight, outWidth, CV_32FC1, &(outputData[0])),

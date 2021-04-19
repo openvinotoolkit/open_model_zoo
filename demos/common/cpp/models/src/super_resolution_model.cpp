@@ -20,8 +20,7 @@
 using namespace InferenceEngine;
 
 SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, bool useAutoResize) :
-    ImageProcessingModel(modelFileName, useAutoResize) {
-        viewSize = cv::Size(1920, 1080);
+    ImageModel(modelFileName, useAutoResize) {
 }
 
 void SuperResolutionModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -66,10 +65,6 @@ void SuperResolutionModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
     outputsNames.push_back(outputInfo.begin()->first);
     Data& data = *outputInfo.begin()->second;
     data.setPrecision(Precision::FP32);
-    const SizeVector& outSizeVector = data.getTensorDesc().getDims();
-    outChannels = (int)(outSizeVector[1]);
-    outHeight = (int)(outSizeVector[2]);
-    outWidth = (int)(outSizeVector[3]);
 }
 
 std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
@@ -105,6 +100,10 @@ std::unique_ptr<ResultBase> SuperResolutionModel::postprocess(InferenceResult& i
     const auto outputData = outMapped.as<float*>();
 
     std::vector<cv::Mat> imgPlanes;
+    const SizeVector& outSizeVector = infResult.getFirstOutputBlob()->getTensorDesc().getDims();
+    size_t outChannels = (int)(outSizeVector[1]);
+    size_t outHeight = (int)(outSizeVector[2]);
+    size_t outWidth = (int)(outSizeVector[3]);
     size_t numOfPixels = outWidth * outHeight;
     if (outChannels == 3) {
         imgPlanes = std::vector<cv::Mat>{

@@ -34,7 +34,6 @@
 #include <gflags/gflags.h>
 
 #include <pipelines/async_pipeline.h>
-#include <models/image_processing_model.h>
 #include <models/super_resolution_model.h>
 #include <models/deblurring_model.h>
 #include <pipelines/metadata.h>
@@ -140,12 +139,22 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-std::unique_ptr<ImageProcessingModel> getModel(const cv::Size& frameSize, const std::string& type) {
+std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::string& type) {
     if (type == "sr") {
-        return std::unique_ptr<ImageProcessingModel>(new SuperResolutionModel(FLAGS_m, false));
+        return std::unique_ptr<ImageModel>(new SuperResolutionModel(FLAGS_m, false));
     }
     if (type == "deblur") {
-        return std::unique_ptr<ImageProcessingModel>(new DeblurringModel(FLAGS_m, false, frameSize));
+        return std::unique_ptr<ImageModel>(new DeblurringModel(FLAGS_m, false, frameSize));
+    }
+    throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
+}
+
+cv::Size getViewSize(const cv::Size& frameSize, const std::string& type) {
+    if (type == "sr") {
+        return cv::Size(1920, 1080);
+    }
+    if (type == "deblur") {
+        return frameSize;
     }
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
@@ -176,15 +185,20 @@ cv::Mat renderResultData(ImageResult result, bool origImgDisplay, bool mixedImg,
     else
         resultImg = result.resultImage;
 
+    cv::putText(inputImg, "O", cv::Point(inputImg.cols * 0.33, 25),
+                           cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2, cv::LINE_AA);
+    cv::putText(resultImg, "P", cv::Point(resultImg.cols * 0.66, 25),
+                           cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2, cv::LINE_AA);
     if (mixedImg)
         inputImg(cv::Rect(0, 0, inputImg.cols / 2, inputImg.rows)).copyTo(resultImg(cv::Rect(0, 0, resultImg.cols / 2, resultImg.rows)));
-    cv::Mat out;
-    if (origImgDisplay)
-        cv::hconcat(inputImg, resultImg, out);
-    else
-        out = resultImg;
 
-    return out;
+    cv::Mat out;
+    if (origImgDisplay) {
+        cv::Mat concat;
+        cv::hconcat(inputImg, resultImg, concat);
+        return concat;
+    }
+    return resultImg;
 }
 
 int main(int argc, char *argv[]) {
@@ -211,8 +225,7 @@ int main(int argc, char *argv[]) {
 
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
         InferenceEngine::Core core;
-        std::unique_ptr<ImageProcessingModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at);
-        auto viewResult = model->getViewSize();
+        std::unique_ptr<ImageModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at);
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
             core);
@@ -225,6 +238,7 @@ int main(int argc, char *argv[]) {
         uint32_t framesProcessed = 0;
 
         cv::VideoWriter videoWriter;
+        auto viewResult = getViewSize(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at);
         int k = FLAGS_orig ? 2 : 1;
         if (FLAGS_vheight)
             viewResult.height = FLAGS_vheight;
@@ -257,6 +271,10 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to ImageResult*
             //    and use your own processing instead of calling renderResultData().
             while ((result = pipeline.getResult()) && keepRunning) {
+                if (!FLAGS_vheight)
+                    viewResult.height = result->asRef<ImageResult>().resultImage.rows;
+                if (!FLAGS_vwidth)
+                    viewResult.width = result->asRef<ImageResult>().resultImage.cols;
                 cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig, FLAGS_mixed, viewResult);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
@@ -283,6 +301,10 @@ int main(int argc, char *argv[]) {
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
         while (result = pipeline.getResult()) {
+            if (!FLAGS_vheight)
+                viewResult.height = result->asRef<ImageResult>().resultImage.rows;
+            if (!FLAGS_vwidth)
+                viewResult.width = result->asRef<ImageResult>().resultImage.cols;
             cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig, FLAGS_mixed, viewResult);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);

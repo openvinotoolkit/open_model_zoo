@@ -14,11 +14,11 @@
 // limitations under the License.
 */
 
-#include "image_processing_model.h"
-
 #pragma once
 
-class SuperResolutionModel : public ImageProcessingModel {
+#include "image_model.h"
+
+class SuperResolutionModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
