@@ -27,7 +27,7 @@ Alphanumeric subset of common scene text recognition benchmarks are used. For yo
 
 ## Input
 
-Image, name: `input.0`, shape: `1, 1, 32, 100` in the format `B, C, H, W`, where:
+Image, name: `input`, shape: `1, 1, 32, 100` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -37,7 +37,7 @@ Image, name: `input.0`, shape: `1, 1, 32, 100` in the format `B, C, H, W`, where
 Note that the source image should be tight aligned crop with detected text converted to grayscale.
 
 ## Outputs
-Output tensor, name: `output.0`, shape: `1, 26, 37` in the format `B, W, L`, where:
+Output tensor, name: `output`, shape: `1, 26, 37` in the format `B, W, L`, where:
 
 - `W` - output sequence length
 - `B` - batch size
