@@ -142,11 +142,8 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
             inputInfoItem.second->setPrecision(Precision::U8);
             if (useAutoResize) {
                 inputInfoItem.second->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-                inputInfoItem.second->getInputData()->setLayout(Layout::NHWC);
             }
-            else {
-                inputInfoItem.second->getInputData()->setLayout(Layout::NCHW);
-            }
+            inputInfoItem.second->getInputData()->setLayout(Layout::NHWC);
             const TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
             netInputHeight = getTensorHeight(inputDesc);
             netInputWidth = getTensorWidth(inputDesc);

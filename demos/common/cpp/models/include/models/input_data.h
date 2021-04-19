@@ -15,7 +15,7 @@
 */
 
 #pragma once
-#include <opencv2/core.hpp>
+#include <utils/uni_image.h>
 
 #ifdef USE_VA
 #include <gpu/gpu_context_api_va.hpp>
@@ -35,7 +35,7 @@ struct InputData {
 };
 
 struct ImageInputData : public InputData {
-    cv::Mat inputImage;
+    UniImage::Ptr inputImage;
 
 #ifdef USE_VA
     std::shared_ptr<InferenceBackend::VaApiImage> vaImage;
@@ -51,7 +51,7 @@ struct ImageInputData : public InputData {
 #endif
 
     ImageInputData() {}
-    ImageInputData(const cv::Mat& img) {
-        inputImage = img;
+    ImageInputData(const UniImage::Ptr& img):
+        inputImage(img){
     }
 };

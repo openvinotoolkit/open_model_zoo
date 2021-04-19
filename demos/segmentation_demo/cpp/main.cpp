@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
                     }
                 }
 
-                frameNum = pipeline.submitData(ImageInputData(curr_frame),
+                frameNum = pipeline.submitData(ImageInputData(std::make_shared<UniImageMat>(curr_frame)),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 

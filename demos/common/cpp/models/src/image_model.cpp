@@ -17,6 +17,7 @@
 #include "models/image_model.h"
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
+#include <utils/uni_image.h>
 
 #ifdef USE_VA
 #include <gpu/gpu_context_api_va.hpp>
@@ -74,8 +75,6 @@ InferenceEngine::ExecutableNetwork ImageModel::loadExecutableNetwork(const CnnCo
 
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& data = inputData.asRef<ImageInputData>();
-    int width = 0;
-    int height = 0;
     if(data.isVA())
     {
 #ifdef USE_VA
@@ -85,8 +84,6 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
         }
 
         auto& vaImg = data.vaImage;
-        width = vaImg->width;
-        height = vaImg->height;
 
         // IMPORTANT: This resizedImg will be passed to make_shared_blob_nv12. VA SurfaceIDs passed to that function are used as keys,
         // so we cannot destroy such surface as surfaceIDs of destroyed surfaces may be reused by VA API's vaCreateSurfaces function and
@@ -103,25 +100,20 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
 
         request->SetBlob(inputsNames[0],nv12_blob);
 
-        return std::shared_ptr<InternalModelData>(new InternalImageModelData(width, height, resizedImg));
+        return std::shared_ptr<InternalModelData>(new InternalImageModelData(resizedImg->width, resizedImg->height, resizedImg));
 #else
         throw std::runtime_error("Direct GPU copy was not initialized, but input data containing VA surface is received. You have to compile code with -ENABLE_VA option as well.");
 #endif
     }
     else {
-        auto& img = data.inputImage;
-        width = img.cols;
-        height = img.rows;
+        auto& img = useAutoResize ? data.inputImage :
+                data.inputImage->resize(netInputWidth, netInputHeight);
 
-        if (useAutoResize) {
-            /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
-            request->SetBlob(inputsNames[0], wrapMat2Blob(img));
-            /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-            return std::make_shared<InternalImageMatModelData>(img);
-        }
         /* Resize and copy data from the image to the input blob */
-        Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-        matU8ToBlob<uint8_t>(img, frameBlob);
-        return std::make_shared<InternalImageModelData>(img.cols, img.rows);
+        request->SetBlob(inputsNames[0], img->toBlob());
+
+        // Keeping image in internal data is important, as long as Blob shares data taken from Mat or other sources,
+        // so if source would be destroyed before async processing is over, Blob will loose the data
+        return std::make_shared<InternalImageModelData>(data.inputImage->size().width, data.inputImage->size().height, img);
     }
 }

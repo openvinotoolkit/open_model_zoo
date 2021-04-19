@@ -399,7 +399,7 @@ int main(int argc, char *argv[]) {
                     videoFrameSize = curr_frame.size();
                     videoFps = cap->fps();
 
-                    frameNum = pipeline.submitData(ImageInputData(curr_frame),
+                    frameNum = pipeline.submitData(ImageInputData(std::make_shared<UniImageMat>(curr_frame)),
                                                    std::make_shared<ImageMetaData>(curr_frame, startTime));
                 }
             }

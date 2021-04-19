@@ -39,19 +39,24 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 
     InputInfo::Ptr& input = inputInfo.begin()->second;
     inputsNames.push_back(inputInfo.begin()->first);
+
     input->setPrecision(Precision::U8);
     if (useAutoResize) {
         input->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-        input->getInputData()->setLayout(Layout::NHWC);
     }
-    else {
-        input->getInputData()->setLayout(Layout::NCHW);
-    }
+    input->getInputData()->setLayout(Layout::NHWC);
 
     //--- Reading image input parameters
     const TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
-    netInputHeight = getTensorHeight(inputDesc);
-    netInputWidth = getTensorWidth(inputDesc);
+
+    if(inputDesc.getDims()[3]==3) {
+        // Special case for mxnet
+        netInputHeight = inputDesc.getDims()[1];
+        netInputWidth = inputDesc.getDims()[2];
+    } else {
+        netInputHeight = getTensorHeight(inputDesc);
+        netInputWidth = getTensorWidth(inputDesc);
+    }
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;

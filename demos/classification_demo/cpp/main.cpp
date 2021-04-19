@@ -260,7 +260,7 @@ int main(int argc, char *argv[]) {
                 auto imageStartTime = std::chrono::steady_clock::now();
                 cv::Mat curr_frame = centerSquareCrop(inputImages[nextImageIndex]);
 
-                pipeline.submitData(ImageInputData(curr_frame),
+                pipeline.submitData(ImageInputData(std::make_shared<UniImageMat>(curr_frame)),
                     std::make_shared<ClassificationImageMetaData>(curr_frame, imageStartTime, classIndices[nextImageIndex]));
                 nextImageIndex++;
                 if (nextImageIndex == imageNames.size()) {

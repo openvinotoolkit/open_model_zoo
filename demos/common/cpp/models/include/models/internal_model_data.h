@@ -18,6 +18,7 @@
 #include "vaapi_images.h"
 #endif
 
+#include "utils/uni_image.h"
 
 #pragma once
 struct InternalModelData
@@ -45,29 +46,22 @@ struct InternalImageModelData : public InternalModelData
 
     InferenceBackend::VaApiImage::Ptr vaImage;
 #else
-    InternalImageModelData(int width, int height) :
+    InternalImageModelData(int width, int height, const UniImage::Ptr& img) :
         inputImgWidth(width),
-        inputImgHeight(height) {}
+        inputImgHeight(height),
+        img(img) {}
 #endif
 
     int inputImgWidth;
     int inputImgHeight;
+    UniImage::Ptr img;
 };
 
-struct InternalImageMatModelData : public InternalImageModelData
-{
-    InternalImageMatModelData(const cv::Mat& mat) :
-        InternalImageModelData(mat.cols, mat.rows), mat(mat) {}
-
-    cv::Mat mat;
-};
-
-struct InternalScaleMatData : public InternalModelData
-{
-    InternalScaleMatData(float scaleX, float scaleY, cv::Mat&& mat) :
-        x(scaleX), y(scaleY), mat(std::move(mat)) {}
+struct InternalScaleMatData : public InternalModelData {
+    InternalScaleMatData(float scaleX, float scaleY, const UniImage::Ptr& img) :
+        x(scaleX), y(scaleY), img(img) {}
 
     float x;
     float y;
-    cv::Mat mat;
+    UniImage::Ptr img;
 };

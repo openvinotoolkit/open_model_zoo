@@ -43,8 +43,11 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
         inputInfo.getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
         inputInfo.setLayout(Layout::NHWC);
     } else {
-        inputInfo.setLayout(Layout::NCHW);
+        inputInfo.setLayout(Layout::NHWC);
     }
+    netInputWidth = inSizeVector[3];
+    netInputHeight = inSizeVector[2];
+
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const OutputsDataMap& outputsDataMap = cnnNetwork.getOutputsInfo();
     if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
@@ -67,31 +70,6 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     default:
         throw std::runtime_error("Unexpected output blob shape. Only 4D and 3D output blobs are supported.");
     }
-}
-
-std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request)
-{
-    auto imgData = inputData.asRef<ImageInputData>();
-    auto& img = imgData.inputImage;
-
-    std::shared_ptr<InternalModelData> resPtr = nullptr;
-
-    if (useAutoResize)
-    {
-        /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
-        request->SetBlob(inputsNames[0], wrapMat2Blob(img));
-        /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-         resPtr = std::make_shared<InternalImageMatModelData>(img);
-    }
-    else
-    {
-        /* Resize and copy data from the image to the input blob */
-        Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-        matU8ToBlob<uint8_t>(img, frameBlob);
-        resPtr = std::make_shared<InternalImageModelData>(img.cols, img.rows);
-    }
-
-    return resPtr;
 }
 
 std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult) {

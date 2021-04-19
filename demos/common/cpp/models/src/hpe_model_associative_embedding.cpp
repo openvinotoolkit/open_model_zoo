@@ -35,7 +35,7 @@ const float HpeAssociativeEmbedding::detectionThreshold = 0.1f;
 const float HpeAssociativeEmbedding::tagThreshold = 1.0f;
 
 HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio,
-    int targetSize, float confidenceThreshold, float delta, std::string paddingMode) :
+    int targetSize, float confidenceThreshold, float delta, UniImage::RESIZE_MODE resizeMode) :
     ModelBase(modelFileName),
     aspectRatio(aspectRatio),
     targetSize(targetSize),
@@ -102,32 +102,17 @@ void HpeAssociativeEmbedding::changeInputSize(CNNNetwork& cnnNetwork) {
 
 std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
-    cv::Mat resizedImage;
-    float scale = std::min(inputLayerSize.height / static_cast<float>(image.rows),
-                           inputLayerSize.width / static_cast<float>(image.cols));
-    cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
-    int h = resizedImage.rows;
-    int w = resizedImage.cols;
-    if (!(inputLayerSize.height - stride < h && h <= inputLayerSize.height
-        && inputLayerSize.width - stride < w && w <= inputLayerSize.width)) {
+    cv::Rect dataRect;
+    auto paddedImage = image->resize(inputLayerSize.width, inputLayerSize.height, resizeMode,true,&dataRect);
+    if (inputLayerSize.height - stride >= dataRect.height
+        || inputLayerSize.width - stride >= dataRect.width) {
         slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
     }
-    cv::Mat paddedImage;
-    int left = 0, right = 0, top = 0, bottom = 0;
-    if (paddingMode == "center") {
-        left = (inputLayerSize.width - w + 1) / 2;
-        right = (inputLayerSize.width - w) / 2;
-        top = (inputLayerSize.height - h + 1) / 2;
-        bottom = (inputLayerSize.height - h) / 2;
-    } else {
-        right = inputLayerSize.width - w;
-        bottom = inputLayerSize.height - h;
-    }
-    cv::copyMakeBorder(resizedImage, paddedImage, top, bottom, left, right,
-                       cv::BORDER_CONSTANT, meanPixel);
-    request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
+    request->SetBlob(inputsNames[0], paddedImage->toBlob());
+
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-    return std::make_shared<InternalScaleMatData>(image.cols / static_cast<float>(w), image.rows / static_cast<float>(h), std::move(paddedImage));
+    return std::make_shared<InternalScaleMatData>(image->size().width / static_cast<float>(dataRect.width),
+        image->size().height / static_cast<float>(dataRect.height), paddedImage);
 }
 
 std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult& infResult) {

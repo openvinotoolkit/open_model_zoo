@@ -110,19 +110,10 @@ cv::Mat getAffineTransform(float centerX, float centerY, int srcW, float rot, si
 
 std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& img = inputData.asRef<ImageInputData>().inputImage;
+    auto& resizedImg = img->resize(netInputWidth, netInputHeight, UniImage::RESIZE_KEEP_ASPECT_LETTERBOX);
+    request->SetBlob(inputsNames[0], resizedImg->toBlob());
 
-    int imgWidth = img.cols;
-    int imgHeight = img.rows;
-    float centerX = imgWidth / 2.0f;
-    float centerY = imgHeight / 2.0f;
-    int scale = std::max(imgWidth, imgHeight);
-
-    auto transInput = getAffineTransform(centerX, centerY, scale, 0, netInputWidth, netInputHeight);
-    cv::Mat resizedImg;
-    cv::warpAffine(img, resizedImg, transInput, cv::Size(netInputWidth, netInputHeight), cv::INTER_LINEAR);
-    request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg));
-
-    return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
+    return std::shared_ptr<InternalModelData>(new InternalImageModelData(netInputWidth, netInputHeight,img));
 }
 
 std::vector<std::pair<size_t, float>> nms(float* scoresPtr, InferenceEngine::SizeVector sz, float threshold, int kernel = 3) {
