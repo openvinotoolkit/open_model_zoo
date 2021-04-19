@@ -80,6 +80,7 @@ COMMAND_LINE_ARGS_AS_ENV_VARS = {
     'models': 'MODELS_DIR',
     'extensions': 'EXTENSIONS_DIR',
     'model_attributes': 'MODEL_ATTRIBUTES_DIR',
+    'kaldi_bin_dir': 'KALDI_BIN_DIR'
 }
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
 CONFIG_SHARED_PARAMETERS = ['bitstream']
@@ -363,13 +364,10 @@ class ConfigReader:
                 return updated_launchers
 
             input_precisions = arguments.input_precision if 'input_precision' in arguments else None
-            kaldi_binaries = arguments.kaldi_bin_dir if 'kaldi_bin_dir' in arguments else None
 
             for model in config['models']:
                 for launcher_entry in model['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry)
-                    if kaldi_binaries:
-                        launcher_entry['_kaldi_bin_dir'] = kaldi_binaries
                 model['launchers'] = provide_models(model['launchers'])
 
                 for dataset_entry in model['datasets']:
@@ -844,6 +842,10 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
             launcher_entry['num_requests'] = arguments.num_requests
 
         return launcher_entry
+
+    kaldi_binaries = arguments.kaldi_bin_dir if 'kaldi_bin_dir' in arguments else None
+    if kaldi_binaries:
+        launcher_entry['_kaldi_bin_dir'] = kaldi_binaries
 
     if launcher_entry['framework'].lower() != 'dlsdk':
         return launcher_entry
