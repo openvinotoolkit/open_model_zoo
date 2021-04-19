@@ -497,6 +497,9 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotation_file` - tsv file with location input data and reference.
 * `noise_suppression_dataset` - converts dataset for audio denoising to `NoiseSuppressionAnnotation`
   * `annotation_file` - txt file with file pairs `<clean_signal> <noisy_signal>`.
+* `vimeo90k` - converts Vimeo-90K dataset for a systematic evaluation of video processing algorithms to `SuperResolutionAnnotation`.
+  * `annotation_file` - path to text file with list of dataset setuplets included in test.
+  * `add_flow` - allows annotation of flow data (optional, default `False`).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
