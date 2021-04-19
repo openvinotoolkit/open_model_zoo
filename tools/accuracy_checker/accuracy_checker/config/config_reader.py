@@ -50,12 +50,15 @@ PREPROCESSING_PATHS = {
 ADAPTERS_PATHS = {
     'lm_file': ['model_attributes', 'models', 'source'],
     'vocabulary_file': ['model_attributes', 'models', 'source'],
-    'merges_file': ['model_attributes', 'models', 'source']
+    'merges_file': ['model_attributes', 'models', 'source'],
+    'fst_file': ['model_attributes', 'models', 'source'],
+    'words_file': ['model_attributes', 'models', 'source'],
+    'transition_model_file': ['model_attributes', 'models', 'source'],
 }
 
 ANNOTATION_CONVERSION_PATHS = {
     'vocab_file': ['model_attributes', 'source', 'models'],
-    'merges_file': ['model_attributes', 'source', 'models']
+    'merges_file': ['model_attributes', 'source', 'models'],
 }
 
 LIST_ENTRIES_PATHS = {

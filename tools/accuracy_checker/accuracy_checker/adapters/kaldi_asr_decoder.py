@@ -36,15 +36,30 @@ class KaldiLatGenDecoder(Adapter):
             'fst_file': PathField(description='WFST state graph file'),
             'words_file': PathField(description='words table file'),
             'transition_model_file': PathField(description='transition model file'),
-            'beam': NumberField(optional=True, value_type=int, min_value=1, description='beam size'),
-            'lattice_beam': NumberField(optional=True, value_type=int, min_value=1, description='lattice beam size'),
-            'allow_partial': BoolField(optional=True, default=True, description='allow decoding'),
-            'acoustic_scale': NumberField(optional=True, default=0.1, value_type=float),
-            'min_active': NumberField(optional=True, value_type=int, min_value=9),
-            'max_active': NumberField(optional=True, value_type=int, min_value=0),
-            'inverse_acoustic_scale': NumberField(optional=True, value_type=float, default=0),
-            'word_insertion_penalty': NumberField(optional=True, default=0, value_type=float),
-            '_kaldi_bin_dir': PathField(is_directory=True, optional=True)
+            'beam': NumberField(optional=True, value_type=int, min_value=1, description='beam size', default=1),
+            'lattice_beam': NumberField(
+                optional=True, value_type=int, min_value=1, description='lattice beam size', default=1
+            ),
+            'allow_partial': BoolField(optional=True, default=True, description='allow partial decoding'),
+            'acoustic_scale': NumberField(
+                optional=True, default=0.1, value_type=float, description='acoustic scale for decoding'
+            ),
+            'min_active': NumberField(
+                optional=True, value_type=int, min_value=0, description='min active paths for decoding',
+                default=200
+            ),
+            'max_active': NumberField(
+                optional=True, value_type=int, min_value=0, default=7000, description='max active paths for decoding'
+            ),
+            'inverse_acoustic_scale': NumberField(
+                optional=True, value_type=float, default=0, description='inverse acoustic scale for lattice scaling'
+            ),
+            'word_insertion_penalty': NumberField(
+                optional=True, default=0, value_type=float,
+                description='add word insertion penalty to the lattice. Penalties are negative log-probs, '
+                            "base e, and are added to the language model' part of the cost"
+            ),
+            '_kaldi_bin_dir': PathField(is_directory=True, optional=True, description='directory with Kaldi binaries')
         })
         return params
 
@@ -74,7 +89,7 @@ class KaldiLatGenDecoder(Adapter):
     def create_cmd(self):
         self.kaldi_bin_dir = self.get_value_from_config('_kaldi_bin_dir')
         if self.kaldi_bin_dir is None:
-            raise ConfigError('Directory with Kaldi binaries is not provided')
+            raise ConfigError('Directory with Kaldi binaries is not provided. Please provide it using --kaldi_bin_dir')
         error_msg = 'Path to Kaldi executable {} is not found'
         executable = '{}' if os.name != 'nt' else '{}.exe'
         latgen_path = self.kaldi_bin_dir / executable.format('latgen-faster-mapped')

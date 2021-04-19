@@ -86,22 +86,18 @@ class SpeechRecognitionSER(PerImageEvaluationMetric):
     prediction_types = (CharacterRecognitionPrediction,)
 
     def configure(self):
-        if isinstance(editdistance, UnsupportedPackage):
-            editdistance.raise_error(self.__provider__)
         self.length = 0
         self.score = 0
-        self._wer_measure = SpeechRecognitionWER({'type': 'wer'}, self.dataset)
         self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
-        wer = self._wer_measure.update(annotation, prediction)
-        self.score += int(wer != 0)
+        ser = int(annotation.label != prediction.label)
+        self.score += ser
         self.length += 1
-        return int(wer != 0)
+        return ser
 
     def evaluate(self, annotations, predictions):
         return self.score / self.length if self.length != 0 else 0
 
     def reset(self):
         self.length, self.score = 0, 0
-        self._wer_measure.reset()
