@@ -111,17 +111,17 @@ inline void putHighlightedText(cv::Mat& frame,
 }
 
 
-class DisplayTransform {
+class OutputTransform {
     public:
-        DisplayTransform() : doResize(false) {}
+        OutputTransform() : doResize(false) {}
 
-        DisplayTransform(cv::Size inputSize, cv::Size displayResolution) :
-            doResize(true), inputSize(inputSize), displayResolution(displayResolution) {}
+        OutputTransform(cv::Size inputSize, cv::Size outputResolution) :
+            doResize(true), inputSize(inputSize), outputResolution(outputResolution) {}
 
         void computeResolution() {
             float inputWidth = static_cast<float>(inputSize.width);
             float inputHeight = static_cast<float>(inputSize.height);
-            scaleFactor = std::min(displayResolution.height / inputHeight, displayResolution.width / inputWidth);
+            scaleFactor = std::min(outputResolution.height / inputHeight, outputResolution.width / inputWidth);
             newResolution = cv::Size{static_cast<int>(inputWidth * scaleFactor), static_cast<int>(inputHeight * scaleFactor)};
         }
 
@@ -157,6 +157,6 @@ class DisplayTransform {
     private:
         float scaleFactor;
         cv::Size inputSize;
-        cv::Size displayResolution;
+        cv::Size outputResolution;
         cv::Size newResolution;
 };

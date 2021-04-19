@@ -27,7 +27,7 @@ from openvino.inference_engine import IECore
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
-from models import DisplayTransform, SegmentationModel, SalientObjectDetectionModel
+from models import OutputTransform, SegmentationModel, SalientObjectDetectionModel
 import monitors
 from pipelines import get_user_configs, AsyncPipeline
 from images_capture import open_images_capture
@@ -89,18 +89,18 @@ class SegmentationVisualizer:
         input_3d = cv2.merge([input, input, input])
         return cv2.LUT(input_3d, self.color_map)
 
-    def overlay_masks(self, frame, objects, display_transform):
+    def overlay_masks(self, frame, objects, output_transform):
         # Visualizing result data over source image
         output = np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2)
-        return display_transform.resize(output) if display_transform else output
+        return output_transform.resize(output) if output_transform else output
 
 
 class SaliencyMapVisualizer:
-    def overlay_masks(self, frame, objects, display_transform):
+    def overlay_masks(self, frame, objects, output_transform):
         saliency_map = (objects * 255).astype(np.uint8)
         saliency_map = cv2.merge([saliency_map, saliency_map, saliency_map])
         output = np.floor_divide(frame, 2) + np.floor_divide(saliency_map, 2)
-        return display_transform.resize(output) if display_transform else output
+        return output_transform.resize(output) if output_transform else output
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -142,9 +142,9 @@ def build_argparser():
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')
     io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
-    io_args.add_argument('--display_resolution', default=None, type=int, nargs=2,
+    io_args.add_argument('--output_resolution', default=None, type=str,
                          help='Optional. Specify the maximum output window resolution '
-                              'in (width height) format. Example: 1280 720.')
+                              'in (width x height) format. Example: 1280x720.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
     return parser
@@ -181,7 +181,7 @@ def main():
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     presenter = None
-    display_transform = None
+    output_transform = None
     video_writer = cv2.VideoWriter()
 
     while True:
@@ -194,15 +194,18 @@ def main():
                     raise ValueError("Can't read an image from the input")
                 break
             if next_frame_id == 0:
-                if args.display_resolution:
-                    display_transform = DisplayTransform(frame.shape[:2], args.display_resolution)
-                    display_resolution = display_transform.new_resolution
+                if args.output_resolution:
+                    if 'x' not in args.output_resolution:
+                        raise ValueError('Сorrect format of --output_resolution parameter is "width"x"height".')
+                    output_transform = OutputTransform(frame.shape[:2],
+                        [int(v) for v in args.output_resolution.split('x')])
+                    output_resolution = output_transform.new_resolution
                 else:
-                    display_resolution = (frame.shape[1], frame.shape[0])
+                    output_resolution = (frame.shape[1], frame.shape[0])
                 presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                               (round(display_resolution[0] / 4), round(display_resolution[1] / 8)))
+                                               (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
                 if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                                         cap.fps(), display_resolution):
+                                                         cap.fps(), output_resolution):
                     raise RuntimeError("Can't open video writer")
             # Submit for inference
             pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
@@ -219,7 +222,7 @@ def main():
             objects, frame_meta = results
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
-            frame = visualizer.overlay_masks(frame, objects, display_transform)
+            frame = visualizer.overlay_masks(frame, objects, output_transform)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
 
@@ -244,7 +247,7 @@ def main():
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
-        frame = visualizer.overlay_masks(frame, objects, display_transform)
+        frame = visualizer.overlay_masks(frame, objects, output_transform)
         presenter.drawGraphs(frame)
         metrics.update(start_time, frame)
 

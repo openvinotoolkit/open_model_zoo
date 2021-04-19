@@ -42,16 +42,16 @@ class DetectionWithLandmarks(Detection):
             self.landmarks.append((x, y))
 
 
-class DisplayTransform:
-    def __init__(self, input_size, display_resolution):
-        self.display_resolution = display_resolution
+class OutputTransform:
+    def __init__(self, input_size, output_resolution):
+        self.output_resolution = output_resolution
         self.compute_resolution(input_size)
 
     def compute_resolution(self, input_size):
         self.input_size = input_size
         size = self.input_size[::-1]
-        self.scale_factor = min(self.display_resolution[0] / size[0],
-                                self.display_resolution[1] / size[1])
+        self.scale_factor = min(self.output_resolution[0] / size[0],
+                                self.output_resolution[1] / size[1])
         self.new_resolution = self.scale(size)
 
     def resize(self, image):

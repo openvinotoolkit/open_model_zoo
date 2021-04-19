@@ -107,7 +107,7 @@ static void showUsage() {
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
     std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_message << std::endl;
-    std::cout << "    -display_resolution       " << display_resolution_message << std::endl;
+    std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
 
@@ -133,15 +133,14 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -at is not set");
     }
 
-    if (!FLAGS_display_resolution.empty() && FLAGS_display_resolution.find("x") == std::string::npos) {
-        throw std::logic_error("Incorrect format of -display_resolution parameter. "
-                               "Correct format is  \"width\"x\"height\". For example \"1920x1080\"");
+    if (!FLAGS_output_resolution.empty() && FLAGS_output_resolution.find("x") == std::string::npos) {
+        throw std::logic_error("Correct format of -output_resolution parameter is \"width\"x\"height\".");
     }
     return true;
 }
 
 
-cv::Mat renderHumanPose(HumanPoseResult& result, DisplayTransform& displayTransform) {
+cv::Mat renderHumanPose(HumanPoseResult& result, OutputTransform& outputTransform) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -151,8 +150,8 @@ cv::Mat renderHumanPose(HumanPoseResult& result, DisplayTransform& displayTransf
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
     }
-    if (displayTransform.doResize) {
-        displayTransform.resize(outputImg);
+    if (outputTransform.doResize) {
+        outputTransform.resize(outputImg);
     }
     static const cv::Scalar colors[HPEOpenPose::keypointsNumber] = {
         cv::Scalar(255, 0, 0), cv::Scalar(255, 85, 0), cv::Scalar(255, 170, 0),
@@ -177,8 +176,8 @@ cv::Mat renderHumanPose(HumanPoseResult& result, DisplayTransform& displayTransf
     for (auto& pose : result.poses) {
         for (size_t keypointIdx = 0; keypointIdx < pose.keypoints.size(); keypointIdx++) {
             if (pose.keypoints[keypointIdx] != absentKeypoint) {
-                if (displayTransform.doResize) {
-                    displayTransform.scaleCoord(pose.keypoints[keypointIdx]);
+                if (outputTransform.doResize) {
+                    outputTransform.scaleCoord(pose.keypoints[keypointIdx]);
                 }
                 cv::circle(outputImg, pose.keypoints[keypointIdx], 4, colors[keypointIdx], -1);
             }
@@ -240,24 +239,24 @@ int main(int argc, char *argv[]) {
 
         cv::VideoWriter videoWriter;
 
-        cv::Size displayResolution;
-        DisplayTransform displayTransform = DisplayTransform();
-        size_t found = FLAGS_display_resolution.find("x");
+        cv::Size outputResolution;
+        OutputTransform outputTransform = OutputTransform();
+        size_t found = FLAGS_output_resolution.find("x");
 
         if (found == std::string::npos) {
-            displayResolution = curr_frame.size();
+            outputResolution = curr_frame.size();
         }
         else {
-            displayResolution = cv::Size{
-                std::stoi(FLAGS_display_resolution.substr(0, found)),
-                std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()))
+            outputResolution = cv::Size{
+                std::stoi(FLAGS_output_resolution.substr(0, found)),
+                std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
             };
-            displayTransform = DisplayTransform(curr_frame.size(), displayResolution);
-            displayTransform.computeResolution();
-            displayResolution = displayTransform.getResolution();
+            outputTransform = OutputTransform(curr_frame.size(), outputResolution);
+            outputTransform.computeResolution();
+            outputResolution = outputTransform.getResolution();
         }
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), displayResolution)) {
+                                                  cap->fps(), outputResolution)) {
             throw std::runtime_error("Can't open video writer");
         }
 
@@ -315,7 +314,7 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to HumanPoseResult*
             //    and use your own processing instead of calling renderHumanPose().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), displayTransform);
+                cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -342,7 +341,7 @@ int main(int argc, char *argv[]) {
         pipeline.waitForTotalCompletion();
         for (; framesProcessed <= frameNum; framesProcessed++) {
             while (!(result = pipeline.getResult())) {}
-            cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), displayTransform);
+            cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), outputTransform);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
