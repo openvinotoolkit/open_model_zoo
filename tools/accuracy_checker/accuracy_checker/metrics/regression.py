@@ -62,9 +62,19 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         self.calculate_diff = singledispatch(self._calculate_diff_regression_rep)
         self.calculate_diff.register(DepthEstimationAnnotation, self._calculate_diff_depth_estimation_rep)
 
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'max_error': BoolField(optional=True, default=False, description='Calculate max error in magnitude')
+        })
+        return params
+
     def configure(self):
+        self.max_error = self.get_value_from_config('max_error')
         self.meta.update({
-            'names': ['mean', 'std'], 'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse'
+            'names': ['mean', 'std'] if not self.max_error else ['mean', 'std', 'max_error'],
+            'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse'
         })
         self.magnitude = []
 
@@ -131,12 +141,19 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         if isinstance(self.magnitude, dict):
             names, result = [], []
             for key, values in self.magnitude.items():
-                names.extend(['{}@mean'.format(key), '{}@std'.format(key)])
+                names.extend(
+                    ['{}@mean'.format(key), '{}@std'.format(key)]
+                    if not self.max_error else ['{}@mean'.format(key), '{}@std'.format(key), '{}@max_errir'.format(key)]
+                )
                 result.extend([np.mean(values), np.std(values)])
+                if self.max_error:
+                    result.append(np.max(values))
             self.meta['names'] = names
             return result
 
-        return np.mean(self.magnitude), np.std(self.magnitude)
+        if not self.max_error:
+            return np.mean(self.magnitude), np.std(self.magnitude)
+        return np.mean(self.magnitude), np.std(self.magnitude), np.max(self.magnitude)
 
     def reset(self):
         self.magnitude = []
@@ -544,6 +561,7 @@ def point_regression_differ(annotation_val_x, annotation_val_y, prediction_val_x
         prediction_val_y = prediction_val_y[0]
     loss = np.subtract(list(zip(annotation_val_x, annotation_val_y)), list(zip(prediction_val_x, prediction_val_y)))
     return np.linalg.norm(loss, 2, axis=1)
+
 
 
 def angle_differ(gt_gaze_vector, predicted_gaze_vector):

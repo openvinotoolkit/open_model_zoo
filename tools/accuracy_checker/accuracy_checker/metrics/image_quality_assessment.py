@@ -64,7 +64,7 @@ class StructuralSimilarity(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(_ssim, *args, **kwargs)
         self.meta['target'] = 'higher-better'
-        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse'}
+        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
 
 
 class PeakSignalToNoiseRatio(BaseRegressionMetric):
@@ -94,7 +94,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(self._psnr_differ, *args, **kwargs)
         self.meta['target'] = 'higher-better'
-        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse'}
+        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
 
     def configure(self):
         super().configure()
@@ -282,7 +282,7 @@ class VisionInformationFidelity(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(self._vif_diff, *args, **kwargs)
         self.meta['target'] = 'higher-better'
-        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse'}
+        self.meta['target_per_value'] = {'mean': 'higher-better', 'std': 'higher-worse', 'max_error': 'higher-worse'}
         if isinstance(convolve2d, UnsupportedPackage):
             convolve2d.raise_error(self.__provider__)
 
@@ -412,9 +412,9 @@ class LPIPS(BaseRegressionMetric):
         return self.loss(gt_tensor, pred_tensor).item()
 
     def evaluate(self, annotations, predictions):
-        mean, std = super().evaluate(annotations, predictions)
+        results = super().evaluate(annotations, predictions)
         if self.dist_threshold:
             invalid_ratio = np.sum(np.array(self.magnitude) > self.dist_threshold) / len(self.magnitude)
             self.meta['names'].append('ratio_greater_{}'.format(self.dist_threshold))
-            return mean, std, invalid_ratio
-        return mean, std
+            results += (invalid_ratio, )
+        return results
