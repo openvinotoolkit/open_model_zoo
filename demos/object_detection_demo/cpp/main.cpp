@@ -367,6 +367,7 @@ int main(int argc, char *argv[]) {
                 if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
                     videoWriter.write(outFrame);
                 }
+                framesProcessed++;
                 if (!FLAGS_no_show) {
                     cv::imshow("Detection Results", outFrame);
                     //--- Processing keyboard events
@@ -378,7 +379,6 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
-                framesProcessed++;
             }
         }
 

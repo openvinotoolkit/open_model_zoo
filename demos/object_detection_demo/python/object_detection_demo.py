@@ -259,6 +259,7 @@ def main():
 
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
+            next_frame_id_to_show += 1
 
             if not args.no_show:
                 cv2.imshow('Detection Results', frame)
@@ -269,7 +270,6 @@ def main():
                 if key in {ord('q'), ord('Q'), ESC_KEY}:
                     break
                 presenter.handleKey(key)
-            next_frame_id_to_show += 1
             continue
 
         if detector_pipeline.is_ready():
