@@ -363,10 +363,13 @@ class ConfigReader:
                 return updated_launchers
 
             input_precisions = arguments.input_precision if 'input_precision' in arguments else None
+            kaldi_binaries = arguments.kaldi_bin_dir if 'kaldi_bin_dir' in arguments else None
 
             for model in config['models']:
                 for launcher_entry in model['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry)
+                    if kaldi_binaries:
+                        launcher_entry['_kaldi_bin_dir'] = kaldi_binaries
                 model['launchers'] = provide_models(model['launchers'])
 
                 for dataset_entry in model['datasets']:

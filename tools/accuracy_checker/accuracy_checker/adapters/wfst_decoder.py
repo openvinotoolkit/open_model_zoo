@@ -44,7 +44,7 @@ class KaldiLatGenDecoder(Adapter):
             'max_active': NumberField(optional=True, value_type=int, min_value=0),
             'inverse_acoustic_scale': NumberField(optional=True, value_type=float, default=0),
             'word_insertion_penalty': NumberField(optional=True, default=0, value_type=float),
-            'kaldi_bin_dir': PathField(is_directory=True)
+            '_kaldi_bin_dir': PathField(is_directory=True, optional=True)
         })
         return params
 
@@ -61,7 +61,8 @@ class KaldiLatGenDecoder(Adapter):
         self.inv_acoustic_scale = self.get_value_from_config('inverse_acoustic_scale')
         self.word_insertion_penalty = self.get_value_from_config('word_insertion_penalty')
         self.allow_partial = self.get_value_from_config('allow_partial')
-        self.create_cmd()
+        self.decoder_cmd = None
+        self._temp_dir = None
 
     def read_words_table(self):
         words_table = {}
@@ -71,23 +72,25 @@ class KaldiLatGenDecoder(Adapter):
         return words_table
 
     def create_cmd(self):
-        self.kaldi_bin_dir = self.get_value_from_config('kaldi_bin_dir')
+        self.kaldi_bin_dir = self.get_value_from_config('_kaldi_bin_dir')
+        if self.kaldi_bin_dir is None:
+            raise ConfigError('Directory with Kaldi binaries is not provided')
         error_msg = 'Path to Kaldi executable {} is not found'
         executable = '{}' if os.name != 'nt' else '{}.exe'
         latgen_path = self.kaldi_bin_dir / executable.format('latgen-faster-mapped')
         if not latgen_path.exists():
             raise ConfigError(error_msg.format(latgen_path))
         latgen_cmd = ' '.join([str(latgen_path),
-                      "--min-active={}".format(self.min_active),
-                      "--max-active={}".format(self.max_active),
-                      "--max-mem=50000000",
-                      "--beam={}".format(str(self.beam)),
-                      "--lattice-beam={}".format(str(self.lattice_beam)),
-                      "--acoustic-scale={}".format(str(self.acoustic_scale)),
-                      "--allow-partial={}".format(self.allow_partial),
-                      "--word-symbol-table={}".format(self.words_file),
-                      str(self.transition_model), str(self.fst_file),
-                      "ark:{}", "ark:-"])
+                               "--min-active={}".format(self.min_active),
+                               "--max-active={}".format(self.max_active),
+                               "--max-mem=50000000",
+                               "--beam={}".format(str(self.beam)),
+                               "--lattice-beam={}".format(str(self.lattice_beam)),
+                               "--acoustic-scale={}".format(str(self.acoustic_scale)),
+                               "--allow-partial={}".format(str(self.allow_partial).lower()),
+                               "--word-symbol-table={}".format(self.words_file),
+                               str(self.transition_model), str(self.fst_file),
+                               "ark:{}", "ark:-"])
 
         lattice_scale_path = self.kaldi_bin_dir / executable.format('lattice-scale')
         if not lattice_scale_path.exists():
@@ -108,14 +111,20 @@ class KaldiLatGenDecoder(Adapter):
         self._temp_dir = tempfile.TemporaryDirectory(suffix=self.__provider__, dir=Path.cwd())
 
     def reset(self):
-        self._temp_dir.cleanup()
+        if self._temp_dir is not None:
+            self._temp_dir.cleanup()
+            self._temp_dir = None
 
     def release(self):
-        if Path(self._temp_dir.name).exists():
+        if self._temp_dir is not None and Path(self._temp_dir.name).exists():
             self._temp_dir.cleanup()
 
     def process(self, raw, identifiers, frame_meta):
         results = []
+        if self.decoder_cmd is None:
+            self.create_cmd()
+        if self._temp_dir is None:
+            self._create_temp_dir()
         preds = self._extract_predictions(raw, frame_meta)
         for identifier, log_scores in zip(identifiers, preds[self.output_blob]):
             utt_name = identifier.key if not isinstance(identifier, list) else identifier[0].key
@@ -177,3 +186,6 @@ class KaldiLatGenDecoder(Adapter):
             decoded = ' '.join([self.words_table[int(idx)] for idx in result[1:]])
             transcripts[utt] = decoded
         return transcripts
+
+    def _create_temp_dir(self):
+        self._temp_dir = tempfile.TemporaryDirectory(suffix=self.__provider__, dir=Path.cwd())

@@ -336,6 +336,10 @@ def add_openvino_specific_args(parser):
         help='the number of infer requests',
         required=False
     )
+    openvino_specific_args.add_argument(
+        '--kaldi_bin_dir', help='directory with Kaldi utility binaries. Required only for Kaldi models decoding.',
+        required=False, type=partial(get_path, is_directory=True)
+    )
 
 
 def build_arguments_parser():
