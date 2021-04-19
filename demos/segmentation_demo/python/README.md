@@ -76,7 +76,7 @@ Input/output options:
   --no_show             Optional. Don't show output.
   --display_resolution DISPLAY_RESOLUTION
                         Optional. Specify the maximum output window resolution
-                        in (width, height) format. Example: 1280, 720.
+                        in (width height) format. Example: 1280 720.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```

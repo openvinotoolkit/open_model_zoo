@@ -90,7 +90,7 @@ def build_argparser():
     io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     io_args.add_argument('--display_resolution', default=None, type=int, nargs=2,
                          help='Optional. Specify the maximum output window resolution '
-                              'in (width, height) format. Example: 1280, 720.')
+                              'in (width height) format. Example: 1280 720.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
