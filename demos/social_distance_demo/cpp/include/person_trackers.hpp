@@ -14,7 +14,7 @@
 class TrackableObject {
 public:
     TrackableObject(cv::Rect2i bb, const std::vector<float> &r, cv::Point centroid)
-            : bbox{bb}, reid{r}, updated{false} {
+            : bbox{bb}, reid{r}, updated{false}, disappeared(0) {
         centroids.push_back(centroid);
     }
 
@@ -23,6 +23,7 @@ public:
     std::vector<float> reid;
     std::vector<cv::Point> centroids;
     bool updated;
+    int disappeared;
 };
 
 class PersonTrackers {
@@ -45,24 +46,21 @@ public:
                     int maxSimilarity = getMaxSimilarity(sim);
                     if (maxSimilarity < 0)
                         continue;
-                    trackers.at(maxSimilarity).reid = to.reid;
-                    trackers.at(maxSimilarity).bbox = to.bbox;
-                    trackers.at(maxSimilarity).centroids.push_back(to.centroids[0]);
+                    trackers.at(maxSimilarity) = to;
                     trackers.at(maxSimilarity).updated = true;
-                    dissapeared.at(maxSimilarity) = 0;
+                    trackers.at(maxSimilarity).disappeared = 0;
                 } else {
                     trackers.insert({trackIdGenerator, to});
                     trackers.at(trackIdGenerator).updated = true;
-                    dissapeared.insert({trackIdGenerator, 0});
+                    trackers.at(trackIdGenerator).disappeared = 0;
                     trackIdGenerator += 1;
                 }
             }
 
             for (auto it = trackers.begin(); it != trackers.end(); ) {
                 if (!it->second.updated) {
-                    dissapeared.at(it->first) += 1;
-                    if (dissapeared.at(it->first) > maxDisappeared) {
-                        dissapeared.erase(it->first);
+                    it->second.disappeared += 1;
+                    if (it->second.disappeared > maxDisappeared) {
                         it = trackers.erase(it);
                         continue;
                     }
@@ -91,10 +89,10 @@ public:
         return static_cast<float>(dot / (sqrt(denomA) * sqrt(denomB) + 1e-6));
     }
 
-    void registerTrackers(const std::list<TrackableObject> &tos) {
+    void registerTrackers(std::list<TrackableObject> &tos) {
         for (auto &to : tos) {
+            to.disappeared = 0;
             trackers.insert({trackIdGenerator, to});
-            dissapeared.insert({trackIdGenerator, 0});
             trackIdGenerator += 1;
         }
     }
@@ -121,7 +119,6 @@ public:
     std::unordered_map<int, TrackableObject> trackers;
 
 private:
-    std::unordered_map<int, int> dissapeared;
     int trackIdGenerator;
     float similarityThreshold;
     int maxDisappeared;
