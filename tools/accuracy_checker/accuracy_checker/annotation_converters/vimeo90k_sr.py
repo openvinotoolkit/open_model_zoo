@@ -48,6 +48,5 @@ class Vimeo90KSuperResolutionDatasetConverter(BaseFormatConverter):
             if self.add_flow:
                 input_data += ['flow/{}/flow_{}.npy'.format(sept, idx) for idx in range(6)]
             annotations.append(SuperResolutionAnnotation(
-                MultiFramesInputIdentifier(list(range(len(input_data))), input_data), target)
-            )
+                MultiFramesInputIdentifier(list(range(len(input_data))), input_data), target))
         return ConverterReturn(annotations, None, None)
