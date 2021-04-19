@@ -7,7 +7,7 @@ ATSS head for indoor and outdoor scenes shot by a front-facing camera.
 
 ## Example
 
-![](./description/face-detection-0206.png)
+![](./assets/face-detection-0206.png)
 
 ## Specification
 

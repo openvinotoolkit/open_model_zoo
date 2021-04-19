@@ -8,7 +8,7 @@ amount of computation for the 3x3 convolution block.
 
 ## Example
 
-![](./description/face-detection-adas-0001.png)
+![](./assets/face-detection-adas-0001.png)
 
 ## Specification
 

@@ -6,7 +6,7 @@ This is an action recognition composite model for the driver monitoring use case
 
 ## Example
 
-![](./description/action-recognition-kelly.png)
+![](./assets/action-recognition-kelly.png)
 
 ## Composite model specification
 

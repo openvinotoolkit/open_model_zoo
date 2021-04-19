@@ -7,7 +7,7 @@ Please refer to the [kinetics](https://deepmind.com/research/open-source/open-so
 
 ## Example
 
-![](./description/demo.png)
+![](./assets/demo.png)
 
 ## Composite model specification
 

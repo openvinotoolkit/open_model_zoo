@@ -6,7 +6,7 @@ This is a vehicle detection network based on an SSD framework with tuned MobileN
 
 ## Example
 
-![](./description/vehicle-detection-adas-0002.png)
+![](./assets/vehicle-detection-adas-0002.png)
 
 ## Specification
 

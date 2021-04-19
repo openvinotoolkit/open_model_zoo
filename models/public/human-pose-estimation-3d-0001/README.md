@@ -6,7 +6,7 @@ Multi-person 3D human pose estimation model based on the [Lightweight OpenPose](
 
 ## Example
 
-![](./description/human-pose-estimation-3d-0001.jpg)
+![](./assets/human-pose-estimation-3d-0001.jpg)
 
 ## Specification
 

@@ -8,7 +8,7 @@ conditions.
 
 ## Example
 
-![](./description/person-vehicle-bike-detection-crossroad-0078.png)
+![](./assets/person-vehicle-bike-detection-crossroad-0078.png)
 
 ## Specification
 

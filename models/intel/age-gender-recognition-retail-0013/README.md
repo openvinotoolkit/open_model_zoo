@@ -14,9 +14,9 @@ applicable for children since their faces were not in the training set.
 
 | Input Image                                   | Result        |
 |-----------------------------------------------|---------------|
-| ![](./description/age-gender-recognition-retail-0001.jpg) | Female, 18.97 |
-| ![](./description/age-gender-recognition-retail-0002.png) | Male, 26.52   |
-| ![](./description/age-gender-recognition-retail-0003.png) | Male, 33.41   |
+| ![](./assets/age-gender-recognition-retail-0001.jpg) | Female, 18.97 |
+| ![](./assets/age-gender-recognition-retail-0002.png) | Male, 26.52   |
+| ![](./assets/age-gender-recognition-retail-0003.png) | Male, 33.41   |
 
 ## Specification
 

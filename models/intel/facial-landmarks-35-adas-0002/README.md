@@ -6,7 +6,7 @@ This is a custom-architecture convolutional neural network for 35 facial landmar
 
 ## Example and Landmarks Definition
 
-![](./description/landmarks_illustration.png)
+![](./assets/landmarks_illustration.png)
 
 [Left Eye]
 **p0, p1**: corners of the eye, located on the boundary of the eyeball and the eyelid.
@@ -47,7 +47,7 @@ A 1000-sample random subset of a large internal dataset containing images of 300
 
 The quality of landmarks' positions prediction is evaluated through the use of Normed Error (NE). The error for the i<sup>th</sup> sample has the form:
 
-![](./description/error_formula.png)
+![](./assets/error_formula.png)
 
 where N is the number of landmarks, _p_-hat and _p_ are, correspondingly, the prediction and ground truth vectors of the k<sup>th</sup> landmark of the i<sup>th</sup> sample, and d<sub>i</sub> is the interocular distance for the i<sup>th</sup> sample.
 

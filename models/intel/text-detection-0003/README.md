@@ -6,7 +6,7 @@ Text detector based on [PixelLink](https://arxiv.org/abs/1801.01315) architectur
 
 ## Example
 
-![](./description/text-detection-0003.png)
+![](./assets/text-detection-0003.png)
 
 ## Specification
 

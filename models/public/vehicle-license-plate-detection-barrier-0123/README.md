@@ -6,7 +6,7 @@ This is a MobileNetV2 + SSD-based vehicle and (Chinese) license plate detector f
 the "Barrier" use case.
 
 ## Example
-![](./description/vehicle-license-plate-detection-barrier-0123.jpg)
+![](./assets/vehicle-license-plate-detection-barrier-0123.jpg)
 
 ## Specification
 

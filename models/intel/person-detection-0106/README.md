@@ -7,7 +7,7 @@ backbone.
 
 ## Example
 
-![](./description/person-detection-0106.png)
+![](./assets/person-detection-0106.png)
 
 ## Specification
 

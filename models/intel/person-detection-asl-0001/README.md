@@ -6,7 +6,7 @@ This is a person detector for the ASL Recognition scenario. It is based on Shuff
 
 ## Example
 
-![](./description/person-detection-asl-0001.png)
+![](./assets/person-detection-asl-0001.png)
 
 ## Specification
 

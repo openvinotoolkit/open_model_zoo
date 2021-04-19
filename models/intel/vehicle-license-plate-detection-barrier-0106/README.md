@@ -7,7 +7,7 @@ the "Barrier" use case.
 
 ## Example
 
-![](./description/vehicle-license-plate-detection-barrier-0106.jpeg)
+![](./assets/vehicle-license-plate-detection-barrier-0106.jpeg)
 
 ## Specification
 

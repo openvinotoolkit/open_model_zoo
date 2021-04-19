@@ -6,7 +6,7 @@ Image retrieval model based on [MobileNetV2](https://arxiv.org/abs/1801.04381) a
 
 ## Example
 
-![](./description/image-retrieval-0001.jpg)
+![](./assets/image-retrieval-0001.jpg)
 
 ## Specification
 

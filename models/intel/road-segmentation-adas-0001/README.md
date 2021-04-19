@@ -6,7 +6,7 @@ This is a segmentation network to classify each pixel into four classes: BG, roa
 
 ## Example
 
-![](./description/road-segmentation-adas-0001.png)
+![](./assets/road-segmentation-adas-0001.png)
 
 ## Specification
 

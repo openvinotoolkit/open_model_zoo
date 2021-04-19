@@ -8,7 +8,7 @@ During the training of this model, training images were resized to 384x384.
 
 ## Example
 
-![](./description/face-detection-0202.png)
+![](./assets/face-detection-0202.png)
 
 ## Specification
 

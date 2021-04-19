@@ -6,9 +6,9 @@ Fully convolutional network for recognition of eye state ('open', 'closed').
 
 ## Example
 
-![](./description/1.png)
-![](./description/2.png)
-![](./description/3.png)
+![](./assets/1.png)
+![](./assets/2.png)
+![](./assets/3.png)
 
 ## Specification
 

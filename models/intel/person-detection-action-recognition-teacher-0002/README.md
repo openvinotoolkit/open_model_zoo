@@ -6,7 +6,7 @@ This is an action detector for the Smart Classroom scenario. It is based on the 
 
 ## Example
 
-![](./description/person-detection-action-recognition-teacher-0002.png)
+![](./assets/person-detection-action-recognition-teacher-0002.png)
 
 ## Specification
 

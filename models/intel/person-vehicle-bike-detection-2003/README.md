@@ -7,7 +7,7 @@ backbone with ATSS head for 864x480 resolution.
 
 ## Example
 
-![](./description/person-vehicle-bike-detection-2003.png)
+![](./assets/person-vehicle-bike-detection-2003.png)
 
 ## Specification
 

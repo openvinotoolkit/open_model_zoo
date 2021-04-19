@@ -10,7 +10,7 @@ Vocabulary file is located under corresponding model configuration directory, `<
 
 ## Example of the input data
 
-![](./description/formula-recognition-medium-scan-0001.png)
+![](./assets/formula-recognition-medium-scan-0001.png)
 
 ## Example of the output
 

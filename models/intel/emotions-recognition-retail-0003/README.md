@@ -14,7 +14,7 @@ only the images containing five aforementioned emotions is chosen. The total amo
 
 | Input Image                                 | Result        |
 |---------------------------------------------|---------------|
-| ![](./description/emotions-recognition-retail-0003.jpg) | Happiness     |
+| ![](./assets/emotions-recognition-retail-0003.jpg) | Happiness     |
 
 ## Specification
 

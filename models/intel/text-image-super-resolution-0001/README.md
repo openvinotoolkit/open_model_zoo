@@ -10,15 +10,15 @@ support the `reshape` function.
 
 ### Low Resolution
 
-![](./description/img.png)
+![](./assets/img.png)
 
 ### Bicubic Interpolation
 
-![](./description/img_x3c.png)
+![](./assets/img_x3c.png)
 
 ### Super Resolution
 
-![](./description/img_x3.png)
+![](./assets/img_x3.png)
 
 ## Specification
 

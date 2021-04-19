@@ -9,7 +9,7 @@ feature map has 12 clustered prior boxes.
 
 ## Example
 
-![](./description/person-detection-retail-0013.png)
+![](./assets/person-detection-retail-0013.png)
 
 ## Specification
 

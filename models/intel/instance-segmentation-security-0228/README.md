@@ -8,7 +8,7 @@ detection and segmentation heads.
 
 ## Example
 
-![](./description/instance-segmentation-security-0228.png)
+![](./assets/instance-segmentation-security-0228.png)
 
 ## Specification
 
