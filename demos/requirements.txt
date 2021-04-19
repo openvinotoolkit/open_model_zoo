@@ -1,3 +1,4 @@
+librosa
 matplotlib
 motmetrics
 nibabel

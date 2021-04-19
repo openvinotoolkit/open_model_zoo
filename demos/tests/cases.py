@@ -733,6 +733,9 @@ PYTHON_DEMOS = [
         ]
     )),
 
+    PythonDemo(name='speech_recognition_offline_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-m': ModelArg('quartznet-15x5-en'), '-i': TestDataArg('how_are_you_doing.wav')}))),
+
     PythonDemo(name='text_spotting_demo', device_keys=[], test_cases=combine_cases(
         TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
                           '-d': 'CPU',  # GPU is not supported
