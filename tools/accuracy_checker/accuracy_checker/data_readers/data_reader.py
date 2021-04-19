@@ -14,13 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-<<<<<<< 8b400650409c344c9d75285aca25d79ce55bd02a
-=======
-from pathlib import Path
-from functools import singledispatch
-from collections import OrderedDict, namedtuple
 import struct
->>>>>>> AC: support kaldi asr models
 import re
 import wave
 from collections import OrderedDict, namedtuple
