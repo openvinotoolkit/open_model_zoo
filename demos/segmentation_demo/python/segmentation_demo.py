@@ -29,7 +29,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from models import SegmentationModel, SalientObjectDetectionModel
 import monitors
-from pipelines import AsyncPipeline
+from pipelines import get_user_configs, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
 
@@ -144,37 +144,12 @@ def build_argparser():
     return parser
 
 
-def get_plugin_configs(device, num_streams, num_threads):
-    config_user_specified = {}
-
-    devices_nstreams = {}
-    if num_streams:
-        devices_nstreams = {device: num_streams for device in ['CPU', 'GPU'] if device in device} \
-            if num_streams.isdigit() \
-            else dict(device.split(':', 1) for device in num_streams.split(','))
-
-    if 'CPU' in device:
-        if num_threads is not None:
-            config_user_specified['CPU_THREADS_NUM'] = str(num_threads)
-        if 'CPU' in devices_nstreams:
-            config_user_specified['CPU_THROUGHPUT_STREAMS'] = devices_nstreams['CPU'] \
-                if int(devices_nstreams['CPU']) > 0 \
-                else 'CPU_THROUGHPUT_AUTO'
-
-    if 'GPU' in device:
-        if 'GPU' in devices_nstreams:
-            config_user_specified['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] \
-                if int(devices_nstreams['GPU']) > 0 \
-                else 'GPU_THROUGHPUT_AUTO'
-
-    return config_user_specified
-
-
 def get_model(ie, args):
     if args.architecture_type == 'segmentation':
         return SegmentationModel(ie, args.model), SegmentationVisualizer(args.colors)
     if args.architecture_type == 'salient_object_detection':
         return SalientObjectDetectionModel(ie, args.model), SaliencyMapVisualizer()
+
 
 def main():
     metrics = PerformanceMetrics()
@@ -183,7 +158,7 @@ def main():
     log.info('Initializing Inference Engine...')
     ie = IECore()
 
-    plugin_config = get_plugin_configs(args.device, args.num_streams, args.num_threads)
+    plugin_config = get_user_configs(args.device, args.num_streams, args.num_threads)
 
     log.info('Loading network...')
 
@@ -249,26 +224,24 @@ def main():
 
     pipeline.await_all()
     # Process completed requests
-    while pipeline.has_completed_request():
+    for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = pipeline.get_result(next_frame_id_to_show)
-        if results:
-            objects, frame_meta = results
-            frame = frame_meta['frame']
-            start_time = frame_meta['start_time']
+        while results is None:
+            results = pipeline.get_result(next_frame_id_to_show)
+        objects, frame_meta = results
+        frame = frame_meta['frame']
+        start_time = frame_meta['start_time']
 
-            frame = visualizer.overlay_masks(frame, objects)
-            presenter.drawGraphs(frame)
-            metrics.update(start_time, frame)
+        frame = visualizer.overlay_masks(frame, objects)
+        presenter.drawGraphs(frame)
+        metrics.update(start_time, frame)
 
-            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
-                video_writer.write(frame)
+        if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
+            video_writer.write(frame)
 
-            if not args.no_show:
-                cv2.imshow('Segmentation Results', frame)
-                key = cv2.waitKey(1)
-            next_frame_id_to_show += 1
-        else:
-            break
+        if not args.no_show:
+            cv2.imshow('Segmentation Results', frame)
+            key = cv2.waitKey(1)
 
     metrics.print_total()
     print(presenter.reportMeans())
