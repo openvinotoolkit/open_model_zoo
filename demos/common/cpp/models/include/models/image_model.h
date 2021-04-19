@@ -36,6 +36,7 @@ public:
 
 protected:
     bool useAutoResize;
+    bool isNHWCModelInput=false;
 
     size_t netInputHeight = 0;
     size_t netInputWidth = 0;

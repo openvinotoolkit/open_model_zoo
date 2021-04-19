@@ -110,7 +110,7 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
                 data.inputImage->resize(netInputWidth, netInputHeight);
 
         /* Resize and copy data from the image to the input blob */
-        request->SetBlob(inputsNames[0], img->toBlob());
+        request->SetBlob(inputsNames[0], img->toBlob(isNHWCModelInput));
 
         // Keeping image in internal data is important, as long as Blob shares data taken from Mat or other sources,
         // so if source would be destroyed before async processing is over, Blob will loose the data

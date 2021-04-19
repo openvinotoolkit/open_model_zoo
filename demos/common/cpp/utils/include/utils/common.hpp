@@ -256,40 +256,46 @@ inline std::size_t getTensorWidth(const InferenceEngine::TensorDesc& desc) {
     const auto& layout = desc.getLayout();
     const auto& dims = desc.getDims();
     const auto& size = dims.size();
-    if ((size >= 2) &&
-        (layout == InferenceEngine::Layout::NCHW  ||
-         layout == InferenceEngine::Layout::NHWC  ||
-         layout == InferenceEngine::Layout::NCDHW ||
-         layout == InferenceEngine::Layout::NDHWC ||
-         layout == InferenceEngine::Layout::OIHW  ||
-         layout == InferenceEngine::Layout::CHW   ||
-         layout == InferenceEngine::Layout::HW)) {
-        // Regardless of layout, dimensions are stored in fixed order
-        return dims.back();
-    } else {
-        throw std::runtime_error("Tensor does not have width dimension");
+    if (size >= 2) {
+        if (layout == InferenceEngine::Layout::NCHW  ||
+            layout == InferenceEngine::Layout::NHWC  ||
+            layout == InferenceEngine::Layout::NCDHW ||
+            layout == InferenceEngine::Layout::NDHWC) {
+            // Some inputs may be treated as having NCHW-like layout, however actually input has NHWC layout and its shape is NHWC-like.
+            // In this case we need to take dimensions using NHWC-like layout
+            return (dims.back() <= 3 && dims.at(1) > 3) ? dims.at(size - 2) : dims.back();
+        }
+        else if (layout == InferenceEngine::Layout::OIHW ||
+            layout == InferenceEngine::Layout::CHW ||
+            layout == InferenceEngine::Layout::HW) {
+            // Regardless of layout, dimensions are stored in fixed order
+            return dims.back();
+        }
     }
-    return 0;
+    THROW_IE_EXCEPTION << "Tensor does not have width dimension";
 }
 
 inline std::size_t getTensorHeight(const InferenceEngine::TensorDesc& desc) {
     const auto& layout = desc.getLayout();
     const auto& dims = desc.getDims();
     const auto& size = dims.size();
-    if ((size >= 2) &&
-        (layout == InferenceEngine::Layout::NCHW  ||
-         layout == InferenceEngine::Layout::NHWC  ||
-         layout == InferenceEngine::Layout::NCDHW ||
-         layout == InferenceEngine::Layout::NDHWC ||
-         layout == InferenceEngine::Layout::OIHW  ||
-         layout == InferenceEngine::Layout::CHW   ||
-         layout == InferenceEngine::Layout::HW)) {
-        // Regardless of layout, dimensions are stored in fixed order
-        return dims.at(size - 2);
-    } else {
-        throw std::runtime_error("Tensor does not have height dimension");
+    if (size >= 2) {
+        if (layout == InferenceEngine::Layout::NCHW  ||
+            layout == InferenceEngine::Layout::NHWC  ||
+            layout == InferenceEngine::Layout::NCDHW ||
+            layout == InferenceEngine::Layout::NDHWC) {
+            // Some inputs may be treated as having NCHW-like layout, however actually input has NHWC layout and its shape is NHWC-like.
+            // In this case we need to take dimensions using NHWC-like layout
+            return (dims.back() <= 3 && dims.at(1) > 3) ? dims.at(size - 3) : dims.at(size - 2);
+        }
+        else if (layout == InferenceEngine::Layout::OIHW ||
+            layout == InferenceEngine::Layout::CHW ||
+            layout == InferenceEngine::Layout::HW) {
+            // Regardless of layout, dimensions are stored in fixed order
+            return dims.at(size - 2);
+        }
     }
-    return 0;
+    THROW_IE_EXCEPTION << "Tensor does not have width dimension";
 }
 
 inline std::size_t getTensorChannels(const InferenceEngine::TensorDesc& desc) {

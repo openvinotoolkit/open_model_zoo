@@ -66,7 +66,7 @@ void matU8ToBlob(const cv::Mat& orig_image, InferenceEngine::Blob::Ptr& blob, in
  * @param mat - given cv::Mat object with an image data.
  * @return resulting Blob pointer.
  */
-static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
+static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat, bool isNHWCModelInput=false) {
     size_t channels = mat.channels();
     size_t height = mat.size().height;
     size_t width = mat.size().width;
@@ -82,8 +82,12 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
         throw std::runtime_error("Doesn't support conversion from not dense cv::Mat");
 
     InferenceEngine::TensorDesc tDesc(InferenceEngine::Precision::U8,
-                                      {1, channels, height, width},
-                                      InferenceEngine::Layout::NHWC);
+                                      isNHWCModelInput ? InferenceEngine::SizeVector{1, height, width, channels} :
+                                                         InferenceEngine::SizeVector{1, channels, height, width},
+                                      // If model actually has NHWC input, keep blob layout as NCHW to avoid
+                                      // adding extra conversions by IE
+                                      isNHWCModelInput ? InferenceEngine::Layout::NCHW :
+                                                         InferenceEngine::Layout::NHWC);
 
     return InferenceEngine::make_shared_blob<uint8_t>(tDesc, mat.data);
 }

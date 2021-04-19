@@ -44,19 +44,22 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     if (useAutoResize) {
         input->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
     }
-    input->getInputData()->setLayout(Layout::NHWC);
 
     //--- Reading image input parameters
     const TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
+    auto dims = inputDesc.getDims();
+    isNHWCModelInput = dims.size()==4 && inputDesc.getDims()[3] <= 3 && inputDesc.getDims()[1] > 3;
 
-    if(inputDesc.getDims()[3]==3) {
-        // Special case for mxnet
-        netInputHeight = inputDesc.getDims()[1];
-        netInputWidth = inputDesc.getDims()[2];
-    } else {
-        netInputHeight = getTensorHeight(inputDesc);
-        netInputWidth = getTensorWidth(inputDesc);
-    }
+    // Workaround: If model actually has NHWC input,
+    // but IE treats it as NHWC (due to limitations of conversion to IR)
+    // we should not manually change layout as it would add additional layout conversions.
+    // Instead, we should keep input layout as NCHW in this case.
+    // In other cases (when model actually has NCHW inputs) we should set layout to NHWC
+    // to add conversion NHWC->NCHW for auto conversion of Mat internal memory into blob
+    input->getInputData()->setLayout(isNHWCModelInput ? Layout::NCHW : Layout::NHWC);
+
+    netInputHeight = getTensorHeight(inputDesc);
+    netInputWidth = getTensorWidth(inputDesc);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;

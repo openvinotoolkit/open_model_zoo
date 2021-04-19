@@ -22,8 +22,8 @@ const cv::Mat UniImageMat::toMat() {
     return mat;
 }
 
-InferenceEngine::Blob::Ptr UniImageMat::toBlob() {
-    return wrapMat2Blob(mat);
+InferenceEngine::Blob::Ptr UniImageMat::toBlob(bool isNHWCModelInput) {
+    return wrapMat2Blob(mat, isNHWCModelInput);
 }
 
 UniImage::Ptr UniImageMat::resize(int width, int height, RESIZE_MODE resizeMode, bool hqResize, cv::Rect* dataRect) {
