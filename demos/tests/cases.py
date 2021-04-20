@@ -612,12 +612,30 @@ PYTHON_DEMOS = [
         [
             *combine_cases(
                 TestCase(options={'--architecture_type': 'centernet'}),
-                single_option_cases('-m',
-                    ModelArg('ctdet_coco_dlav0_384'),
-                    ModelArg('ctdet_coco_dlav0_512')),
+                [
+                    *single_option_cases('-m',
+                        ModelArg('ctdet_coco_dlav0_384'),
+                        ModelArg('ctdet_coco_dlav0_512'),
+                    ),
+                    *combine_cases(
+                        TestCase(options={
+                            '--mean_values': ['104.04', '113.985', '119.85'],
+                            '--scale_values': ['73.695', '69.87', '70.89']
+                        }),
+                        single_option_cases('-m',
+                            ModelFileArg('ctdet_coco_dlav0_384', 'ctdet_coco_dlav0_384.onnx'),
+                            ModelFileArg('ctdet_coco_dlav0_512', 'ctdet_coco_dlav0_512.onnx'),
+                        ),
+                    ),
+                ]
             ),
-            TestCase(options={'--architecture_type': 'faceboxes',
-                              '-m': ModelArg('faceboxes-pytorch')}
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'faceboxes'}),
+                [
+                    TestCase(options={'-m': ModelArg('faceboxes-pytorch')}),
+                    TestCase(options={'-m': ModelFileArg('faceboxes-pytorch', 'faceboxes-pytorch.onnx'),
+                                      '--mean_values': ['104.0', '117.0', '123.0']}),
+                ]
             ),
             TestCase(options={'--architecture_type': 'ctpn',
                               '-m': ModelArg('ctpn')}
@@ -673,13 +691,30 @@ PYTHON_DEMOS = [
                         ModelArg('vehicle-detection-adas-0002'),
                         ModelArg('vehicle-license-plate-detection-barrier-0106')),
                     TestCase(options={'-d': 'CPU', '-m': ModelArg('person-detection-0106')}),  # GPU is not supported
+                    TestCase(options={'-m': ModelFileArg('ssd-resnet34-1200-onnx', 'resnet34-ssd1200.onnx'),
+                                      '--reverse_input_channels': None,
+                                      '--mean_values': ['123.675', '116.28', '103.53'],
+                                      '--scale_values': ['58.395', '57.12', '57.375']}),
                 ]
             ),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'ultra_lightweight_face_detection'}),
-                single_option_cases('-m',
-                    ModelArg('ultra-lightweight-face-detection-rfb-320'),
-                    ModelArg('ultra-lightweight-face-detection-slim-320')),
+                [
+                    *single_option_cases('-m',
+                        ModelArg('ultra-lightweight-face-detection-rfb-320'),
+                        ModelArg('ultra-lightweight-face-detection-slim-320'),
+                    ),
+                    *combine_cases(
+                        TestCase(options={
+                            '--mean_values': ['127.0', '127.0', '127.0'],
+                            '--scale_values': ['128.0', '128.0', '128.0']
+                        }),
+                        single_option_cases('-m',
+                            ModelFileArg('ultra-lightweight-face-detection-rfb-320', 'ultra-lightweight-face-detection-rfb-320.onnx'),
+                            ModelFileArg('ultra-lightweight-face-detection-slim-320', 'ultra-lightweight-face-detection-rfb-320.onnx'),
+                        ),
+                    ),
+                ]
             ),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'yolo'}),
