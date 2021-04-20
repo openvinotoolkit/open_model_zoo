@@ -42,7 +42,7 @@ Optionally you can provide `module_config` section which contains config for cus
 
 * **Im2latex formula recognition** demonstrates how to run encoder-decoder model for extractring latex formula from image.
   [Evaluator code](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/im2latex_evaluator.py).
-  Configuration file example: [im2latex-medium-0002](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/configs/im2latex-medium-0002.yml).
+  Configuration file example: [im2latex-medium-0002](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/configs/formula-recognition-medium-scan-0001.yml).
 
 * **I3D Evaluator** demonstrates how to evaluate two-stream I3D model (RGB + Flow).
   [Evaluator code](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/i3d_evaluator.py).
