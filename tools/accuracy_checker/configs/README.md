@@ -70,7 +70,7 @@ See how to evaluate model with using predefined configuration file for [densenet
 - `MODEL_DIR` - root directory with model
 - `OPENVINO_DIR` - root directory with installed the OpenVINO&trade; toolkit
 
-1. First of all, you need to prepare dataset according to [Dataset Preparation Guide](https://github.com/openvinotoolkit/open_model_zoo/blob/release/data/datasets.md)
+1. First of all, you need to prepare dataset according to [Dataset Preparation Guide](../../../data/datasets.md)
 2. Download original model files from online source using [Model Downloader](../../../tools/downloader/README.md)
     ```sh
     OMZ_ROOT/tools/downloader/downloader.py --name densenet-121-tf --output_dir MODEL_DIR
