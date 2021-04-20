@@ -34,4 +34,5 @@ model_optimizer_args:
   - --input_proto=$dl_dir/mobilenet-v2.prototxt
 framework: caffe
 quantizable: yes
+compilable: yes
 license: https://raw.githubusercontent.com/shicai/MobileNet-Caffe/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/LICENSE
