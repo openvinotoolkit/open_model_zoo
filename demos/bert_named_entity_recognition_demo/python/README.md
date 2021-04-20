@@ -44,7 +44,7 @@ Options:
 
 ## Demo Inputs
 
-The application reads text from the HTML page at the given url.
+The application reads text from the HTML page at the given URL.
 The model and its parameters (inputs and outputs) are also important demo arguments.
 Notice that since order of inputs for the model does matter, the demo script checks that the inputs specified
 from the command-line match the actual network inputs.
