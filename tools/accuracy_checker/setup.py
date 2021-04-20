@@ -48,7 +48,7 @@ class PyTest(test_command):
 
 def read(*path):
     input_file = os.path.join(here, *path)
-    with open(str(input_file)) as file:
+    with open(str(input_file), encoding='utf-8') as file:
         return file.read()
 
 
