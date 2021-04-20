@@ -1,5 +1,5 @@
 # progress bar
-tqdm~=4.31.1
+tqdm>=4.54.1
 
 # image reading and preprocessing
 scikit-image~=0.17.2 ; python_version == '3.6'
