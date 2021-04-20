@@ -4,10 +4,10 @@
 
 `bert-base-ner` is a fine-tuned BERT model that is ready to use for Named Entity Recognition and achieves state-of-the-art performance for the NER task. It has been trained to recognize four types of entities: location (LOC), organizations (ORG), person (PER) and Miscellaneous (MISC).
 
-Specifically, this model is a bert-base-cased model that was fine-tuned on the English version of the standard [CoNLL-2003 Named Entity Recognition](https://www.aclweb.org/anthology/W03-0419.pdf) dataset.
+Specifically, this model is a bert-base-cased model that was fine-tuned on the English version of the standard [CoNLL-2003 Named Entity Recognition](https://www.aclweb.org/anthology/W03-0419) dataset.
 For details about the original model, check out
 [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805),
-[HuggingFace's Transformers: State-of-the-art Natural Language Processing](https://arxiv.org/abs/1910.03771) papers and [repository](https://github.com/huggingface/transformers)
+[HuggingFace's Transformers: State-of-the-art Natural Language Processing](https://arxiv.org/abs/1910.03771) papers and [repository](https://github.com/huggingface/transformers).
 
 Tokenization occurs using the BERT tokenizer (see the demo code for implementation details) and the enclosed `vocab.txt` dictionary file.
 
@@ -76,7 +76,7 @@ floating point-valued logit scores vectors that represents probability of belong
 
 ### Converted model
 
-Converted model has the same output like original
+Converted model has the same output like original.
 
 ## Download a Model and Convert it into Inference Engine Format
 
