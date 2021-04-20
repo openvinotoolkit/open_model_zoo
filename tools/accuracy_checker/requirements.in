@@ -37,4 +37,4 @@ fast-ctc-decode>=0.2.5
 rawpy>=0.16.0
 
 # lmdb dataset support
-lmdb
+lmdb>=1.2.1
