@@ -10,7 +10,7 @@
 #include <opencv2/imgproc.hpp>
 
 namespace InferenceBackend {
-    int VaApiImage::FourCCToVART(FourCC fourcc)
+    int VaApiImage::fourCCToVART(FourCC fourcc)
     {
         switch(fourcc)
         {
@@ -33,9 +33,9 @@ namespace InferenceBackend {
         throw std::invalid_argument("Cannot convert FOURCC to RT_FORMAT.");
     }
 
-VaApiImage::Ptr VaApiImage::CloneToAnotherContext(const VaApiContext::Ptr& newContext)
+VaApiImage::Ptr VaApiImage::cloneToAnotherContext(const VaApiContext::Ptr& newContext)
 {
-    int rtFormat = FourCCToVART(format);
+    int rtFormat = fourCCToVART(format);
 
     VADRMPRIMESurfaceDescriptor drm_descriptor = VADRMPRIMESurfaceDescriptor();
     VA_CALL(vaExportSurfaceHandle(context->display(), va_surface_id, VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
@@ -95,14 +95,14 @@ VaApiImage::Ptr VaApiImage::CloneToAnotherContext(const VaApiContext::Ptr& newCo
 }
 
 
-VASurfaceID VaApiImage::CreateVASurface() {
+VASurfaceID VaApiImage::createVASurface() {
     VASurfaceAttrib surface_attrib;
     surface_attrib.type = VASurfaceAttribPixelFormat;
     surface_attrib.flags = VA_SURFACE_ATTRIB_SETTABLE;
     surface_attrib.value.type = VAGenericValueTypeInteger;
     surface_attrib.value.value.i = format;
 
-    int rt_format = FourCCToVART(format);
+    int rt_format = fourCCToVART(format);
 
     VAConfigAttrib format_attrib;
     format_attrib.type = VAConfigAttribRTFormat;
@@ -122,11 +122,11 @@ VaApiImage::VaApiImage(const VaApiContext::Ptr& context, uint32_t width, uint32_
     this->format = format;
     this->context = context;
     this->autoDestroySurface = autoDestroySurface;
-    this->va_surface_id = va_surface == VA_INVALID_ID ? CreateVASurface() : va_surface;
+    this->va_surface_id = va_surface == VA_INVALID_ID ? createVASurface() : va_surface;
 }
 
 
-void VaApiImage::DestroyImage() {
+void VaApiImage::destroyImage() {
     if (va_surface_id != VA_INVALID_ID) {
         try {
             VA_CALL(vaDestroySurfaces(context->display(), (uint32_t *)&va_surface_id, 1));
@@ -137,7 +137,7 @@ void VaApiImage::DestroyImage() {
     }
 }
 
-cv::Mat VaApiImage::CopyToMat(VaApiImage::CONVERSION_TYPE convType) {
+cv::Mat VaApiImage::copyToMat(IMG_CONVERSION_TYPE convType) {
 
     VAImage mappedImage;
     void *pData = nullptr;
@@ -181,10 +181,10 @@ cv::Mat VaApiImage::CopyToMat(VaApiImage::CONVERSION_TYPE convType) {
     return outMat;
 }
 
-void VaApiImage::ResizeTo(VaApiImage::Ptr dstImage, VaApiImage::RESIZE_MODE resizeMode) {
+void VaApiImage::resizeTo(VaApiImage::Ptr dstImage, IMG_RESIZE_MODE resizeMode, bool hqResize) {
     if(context->display() != dstImage->context->display() || context->contextId() != dstImage->context->contextId())
     {
-        throw std::invalid_argument("ResizeTo: (context, display) of the source and destination images should be the same");
+        throw std::invalid_argument("resizeTo: (context, display) of the source and destination images should be the same");
     }
 
     VAProcPipelineParameterBuffer pipelineParam = VAProcPipelineParameterBuffer();
@@ -196,7 +196,7 @@ void VaApiImage::ResizeTo(VaApiImage::Ptr dstImage, VaApiImage::RESIZE_MODE resi
     if (surface_region.width > 0 && surface_region.height > 0)
         pipelineParam.surface_region = &surface_region;
 
-    //pipelineParam.filter_flags = VA_FILTER_SCALING_HQ; // High-quality scaling method
+    pipelineParam.filter_flags = hqResize ? VA_FILTER_SCALING_HQ : VA_FILTER_SCALING_DEFAULT;
 
     VABufferID pipelineParamBufId = VA_INVALID_ID;
     VA_CALL(vaCreateBuffer(context->display(), context->contextId(), VAProcPipelineParameterBufferType,

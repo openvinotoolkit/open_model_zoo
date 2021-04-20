@@ -260,7 +260,7 @@ int main(int argc, char *argv[]) {
                 auto imageStartTime = std::chrono::steady_clock::now();
                 cv::Mat curr_frame = centerSquareCrop(inputImages[nextImageIndex]);
 
-                pipeline.submitData(ImageInputData(std::make_shared<UniImageMat>(curr_frame)),
+                pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ClassificationImageMetaData>(curr_frame, imageStartTime, classIndices[nextImageIndex]));
                 nextImageIndex++;
                 if (nextImageIndex == imageNames.size()) {
@@ -280,7 +280,7 @@ int main(int argc, char *argv[]) {
                 const ClassificationImageMetaData& classificationImageMetaData
                     = classificationResult.metaData->asRef<const ClassificationImageMetaData>();
 
-                auto outputImg = classificationImageMetaData.img;
+                auto outputImg = classificationImageMetaData.img->toMat();
 
                 if (outputImg.empty()) {
                     throw std::invalid_argument("Renderer: image provided in metadata is empty");

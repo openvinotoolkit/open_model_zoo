@@ -37,20 +37,10 @@ struct InputData {
 struct ImageInputData : public InputData {
     UniImage::Ptr inputImage;
 
-#ifdef USE_VA
-    std::shared_ptr<InferenceBackend::VaApiImage> vaImage;
-
-    ImageInputData(const std::shared_ptr<InferenceBackend::VaApiImage>& vaImage) :
-        vaImage(vaImage)
-    {
-    }
-
-    bool isVA() const {return !!vaImage;}
-#else
-    bool isVA() const {return false;}
-#endif
-
     ImageInputData() {}
+    ImageInputData(const cv::Mat& mat):
+        inputImage(mat2Img(mat)){
+    }
     ImageInputData(const UniImage::Ptr& img):
         inputImage(img){
     }

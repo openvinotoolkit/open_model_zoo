@@ -40,12 +40,4 @@ protected:
 
     size_t netInputHeight = 0;
     size_t netInputWidth = 0;
-
-    VAContextPtr sharedVAContext;
-
-#ifdef USE_VA
-    InferenceBackend::VaApiContext::Ptr va_context;
-
-    std::unique_ptr<InferenceBackend::VaApiImagePool> resizedSurfacesPool;
-    #endif
 };

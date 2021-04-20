@@ -30,28 +30,19 @@ struct MetaData {
 };
 
 struct ImageMetaData : public MetaData {
-    cv::Mat img;
-
-#ifdef USE_VA
-    std::shared_ptr<InferenceBackend::VaApiImage> vaImage;
-
-    ImageMetaData(const std::shared_ptr<InferenceBackend::VaApiImage>& vaImage, std::chrono::steady_clock::time_point timeStamp) :
-        vaImage(vaImage),
-        timeStamp(timeStamp)
-    {
-    }
-
-    bool isVA() const {return vaImage!=nullptr;}
-#else
-    bool isVA() const {return false;}
-#endif
+    UniImage::Ptr img;
 
     std::chrono::steady_clock::time_point timeStamp;
 
     ImageMetaData() {
     }
 
-    ImageMetaData(cv::Mat img, std::chrono::steady_clock::time_point timeStamp) :
+    ImageMetaData(const cv::Mat& img, std::chrono::steady_clock::time_point timeStamp) :
+        img(mat2Img(img)),
+        timeStamp(timeStamp) {
+    }
+
+    ImageMetaData(const UniImage::Ptr& img, std::chrono::steady_clock::time_point timeStamp) :
         img(img),
         timeStamp(timeStamp) {
     }
@@ -60,7 +51,12 @@ struct ImageMetaData : public MetaData {
 struct ClassificationImageMetaData : public ImageMetaData {
     unsigned int groundTruthId;
 
-    ClassificationImageMetaData(cv::Mat img, std::chrono::steady_clock::time_point timeStamp, unsigned int groundTruthId) :
+    ClassificationImageMetaData(const cv::Mat& mat, std::chrono::steady_clock::time_point timeStamp, unsigned int groundTruthId) :
+        ImageMetaData(mat2Img(mat), timeStamp),
+        groundTruthId(groundTruthId) {
+    }
+
+    ClassificationImageMetaData(const UniImage::Ptr& img, std::chrono::steady_clock::time_point timeStamp, unsigned int groundTruthId) :
         ImageMetaData(img, timeStamp),
         groundTruthId(groundTruthId) {
     }

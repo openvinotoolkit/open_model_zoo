@@ -100,20 +100,19 @@ void HPEOpenPose::changeInputSize(CNNNetwork& cnnNetwork) {
 
 std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
-    cv::Rect dataRect;
-    auto paddedImage = image->resize(inputLayerSize.width, inputLayerSize.height, UniImage::RESIZE_KEEP_ASPECT, true, &dataRect);
-    double scale = inputLayerSize.height / static_cast<double>(dataRect.height);
-    if (inputLayerSize.width < dataRect.width)
+    auto paddedImage = image->resize(inputLayerSize.width, inputLayerSize.height, RESIZE_KEEP_ASPECT, true);
+    cv::Rect roi = paddedImage->getRoi();
+    if (inputLayerSize.width < roi.width)
         throw std::runtime_error("The image aspect ratio doesn't fit current model shape");
 
-    if (inputLayerSize.width - stride >= dataRect.width) {
+    if (inputLayerSize.width - stride >= roi.width) {
         slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
     }
 
     request->SetBlob(inputsNames[0], paddedImage->toBlob());
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-    return std::make_shared<InternalScaleMatData>(image->size().width / static_cast<float>(dataRect.width),
-        image->size().height / static_cast<float>(dataRect.height), std::move(paddedImage));
+    return std::make_shared<InternalScaleMatData>(image->size().width / static_cast<float>(roi.width),
+        image->size().height / static_cast<float>(roi.height), std::move(paddedImage));
 }
 
 std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult& infResult) {

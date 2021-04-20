@@ -70,15 +70,30 @@ std::tuple<VAConfigID, VAContextID> create_config_and_context(VADisplay display,
 
 } // namespace
 
-VaApiContext::VaApiContext(VADisplay display) : vaDisplay(display) {
-    if (!vaDisplay)
-        throw std::runtime_error("VADisplay is nullptr. Cannot initialize VaApiContext without VADisplay.");
-    std::tie(vaConfig, vaContextId) = create_config_and_context(vaDisplay);
+VaApiContext::VaApiContext(VADisplay display) {
+    create(display);
 }
 
-VaApiContext::VaApiContext() {
-    std::tie(vaDisplay, driFileDescriptor) = create_va_display_and_device_descriptor();
-    isOwningVaDisplay = true;
+VaApiContext::VaApiContext(VADisplay display, InferenceEngine::Core& coreForSharedContext) {
+    create(display);
+    createSharedContext(coreForSharedContext);
+}
+
+VaApiContext::VaApiContext(InferenceEngine::Core& coreForSharedContext) {
+    create(nullptr);
+    createSharedContext(coreForSharedContext);
+}
+
+void VaApiContext::create(VADisplay display) {
+    if (!display) {
+        std::tie(vaDisplay, driFileDescriptor) = create_va_display_and_device_descriptor();
+        isOwningVaDisplay = true;
+    }
+    else {
+        vaDisplay=display;
+        isOwningVaDisplay = false;
+    }
+
     std::tie(vaConfig, vaContextId) = create_config_and_context(vaDisplay);
 }
 
@@ -103,4 +118,9 @@ VaApiContext::~VaApiContext() {
             std::cout << error_message.c_str() << std::endl;
         }
     }
+}
+
+void VaApiContext::createSharedContext(InferenceEngine::Core& core)
+{
+    gpuSharedContext = InferenceEngine::gpu::make_shared_context(core, "GPU", display());
 }

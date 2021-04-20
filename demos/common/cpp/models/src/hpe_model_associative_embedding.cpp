@@ -111,8 +111,8 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
     request->SetBlob(inputsNames[0], paddedImage->toBlob());
 
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-    return std::make_shared<InternalScaleMatData>(image->size().width / static_cast<float>(dataRect.width),
-        image->size().height / static_cast<float>(dataRect.height), paddedImage);
+    return std::make_shared<InternalScaleMatData>(image->size().width / static_cast<float>(paddedImage->getRoi().width),
+        image->size().height / static_cast<float>(paddedImage->getRoi().height), paddedImage);
 }
 
 std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult& infResult) {

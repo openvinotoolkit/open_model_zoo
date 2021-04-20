@@ -12,6 +12,7 @@
 #include <stdexcept>
 
 #include <va/va.h>
+#include <gpu/gpu_context_api_va.hpp>
 
 #include <cstdint>
 #include <type_traits>
@@ -54,13 +55,17 @@ class VaApiContext
     VAContextID vaContextId = VA_INVALID_ID;
     int driFileDescriptor = 0;
     bool isOwningVaDisplay = false;
+    InferenceEngine::gpu::VAContext::Ptr gpuSharedContext = nullptr;
 
   public:
     using Ptr=std::shared_ptr<VaApiContext>;
-    explicit VaApiContext(VADisplay display);
-    VaApiContext();
+    VaApiContext(VADisplay display = nullptr);
+    VaApiContext(VADisplay display, InferenceEngine::Core& coreForSharedContext);
+    VaApiContext(InferenceEngine::Core& coreForSharedContext);
 
     ~VaApiContext();
+
+    void createSharedContext(InferenceEngine::Core& core);
 
     VAContextID contextId() {
       return vaContextId;
@@ -69,6 +74,12 @@ class VaApiContext
     VADisplay display() {
       return vaDisplay;
     }
+
+    InferenceEngine::gpu::VAContext::Ptr sharedContext() {
+      return gpuSharedContext;
+    }
+  private: 
+    void create(VADisplay display);
 };
 
 } // namespace InferenceBackend

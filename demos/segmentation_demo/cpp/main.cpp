@@ -173,7 +173,7 @@ cv::Mat renderSegmentationData(const SegmentationResult& result, OutputTransform
     }
 
     // Input image is stored inside metadata, as we put it there during submission stage
-    auto inputImg = result.metaData->asRef<ImageMetaData>().img;
+    auto inputImg = result.metaData->asRef<ImageMetaData>().img->toMat();
 
     if (inputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
                     }
                 }
 
-                frameNum = pipeline.submitData(ImageInputData(std::make_shared<UniImageMat>(curr_frame)),
+                frameNum = pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 

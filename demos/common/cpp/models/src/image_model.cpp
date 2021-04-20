@@ -38,19 +38,12 @@ InferenceEngine::ExecutableNetwork ImageModel::loadExecutableNetwork(const CnnCo
     this->cnnConfig = cnnConfig;
     auto cnnNetwork = prepareNetwork(core);
 
-    // Preparing VA context and VA images pool
-    if (cnnConfig.useGPURemoteContext) {
-#ifdef USE_VA
-        va_context.reset(new InferenceBackend::VaApiContext);
-
-        sharedVAContext = InferenceEngine::gpu::make_shared_context(core, "GPU", va_context->display());
-
-        VaApiImagePool::ImageInfo info = { netInputWidth,netInputHeight,FOURCC_NV12 };
-
+    if(cnnConfig.remoteContext->is<InferenceEngine::gpu::VAContext>())
+    {
+        // Here we adjust configuration and loading the networkwith respect to provided remote context
         // Setting image input (0-index input is image input) to use NV12
         InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
         inputInfo[inputsNames[0]]->getPreProcess().setColorFormat(ColorFormat::NV12);
-        inputInfo[inputsNames[0]]->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
 
         // Loading network
         auto cfg = cnnConfig.execNetworkConfig;
@@ -62,22 +55,17 @@ InferenceEngine::ExecutableNetwork ImageModel::loadExecutableNetwork(const CnnCo
         }
 
         cfg[CLDNNConfigParams::KEY_CLDNN_NV12_TWO_INPUTS] = PluginConfigParams::YES;
-        execNetwork = core.LoadNetwork(cnnNetwork, sharedVAContext, cfg);
-        resizedSurfacesPool.reset(new InferenceBackend::VaApiImagePool(va_context, cnnConfig.maxAsyncRequests+1, info));
-#else
-        throw std::runtime_error("Demos should be compiled with ENABLE_VA=TRUE option to use remote GPU context");
-#endif
+        execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.remoteContext, cfg);
     }
     else
         execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.devices, cnnConfig.execNetworkConfig);
+
     return execNetwork;
 }
 
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& data = inputData.asRef<ImageInputData>();
-    if(data.isVA())
-    {
-#ifdef USE_VA
+#if 0
         if(!cnnConfig.useGPURemoteContext)
         {
             throw std::runtime_error("Direct GPU copy was not initialized, but input data containing VA surface is received");
@@ -92,27 +80,22 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
         // application work. Besides that, using surfaces from pool will speed up application a little.
         auto resizedImg = resizedSurfacesPool->Acquire();
 
-        (vaImg->context->display() != va_context->display() ?
-            vaImg->CloneToAnotherContext(va_context) : vaImg)->ResizeTo(resizedImg);
+        (auto resizedImg = ()vaImg->context->display() != va_context->display() ?
+            vaImg->cloneToAnotherContext(va_context) : vaImg)->resizeTo(resizedImg);
 
         auto nv12_blob = InferenceEngine::gpu::make_shared_blob_nv12(resizedImg->height, resizedImg->width, sharedVAContext, resizedImg->va_surface_id);
 
         request->SetBlob(inputsNames[0],nv12_blob);
 
         return std::shared_ptr<InternalModelData>(new InternalImageModelData(resizedImg->width, resizedImg->height, resizedImg));
-#else
-        throw std::runtime_error("Direct GPU copy was not initialized, but input data containing VA surface is received. You have to compile code with -ENABLE_VA option as well.");
 #endif
-    }
-    else {
-        auto& img = useAutoResize ? data.inputImage :
-                data.inputImage->resize(netInputWidth, netInputHeight);
+    auto& img = useAutoResize ? data.inputImage :
+            data.inputImage->resize(netInputWidth, netInputHeight);
 
-        /* Resize and copy data from the image to the input blob */
-        request->SetBlob(inputsNames[0], img->toBlob(isNHWCModelInput));
+    /* Resize and copy data from the image to the input blob */
+    request->SetBlob(inputsNames[0], img->toBlob(isNHWCModelInput));
 
-        // Keeping image in internal data is important, as long as Blob shares data taken from Mat or other sources,
-        // so if source would be destroyed before async processing is over, Blob will loose the data
-        return std::make_shared<InternalImageModelData>(data.inputImage->size().width, data.inputImage->size().height, img);
-    }
+    // Keeping image in internal data is important, as long as Blob shares data taken from Mat or other sources,
+    // so if source would be destroyed before async processing is over, Blob will loose the data
+    return std::make_shared<InternalImageModelData>(data.inputImage->size().width, data.inputImage->size().height, img);
 }

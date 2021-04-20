@@ -94,8 +94,6 @@ DEFINE_bool(yolo_af, true, yolo_af_message);
 #ifdef USE_VA
     static const char varc_message[] = "Optional. Use gstreamer and remote VA context for video decoding.";
     DEFINE_bool(varc, false, varc_message);
-#else
-    #define FLAGS_varc false
 #endif
 
 
@@ -234,19 +232,7 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
         throw std::invalid_argument("Renderer: metadata is null");
     }
 
-    auto& imgMetaData = result.metaData->asRef<ImageMetaData>();
-    cv::Mat outputImg;
-
-#ifdef USE_VA
-    //static std::unique_ptr<ImageMap> mapper = std::unique_ptr<ImageMap>(ImageMap::Create(MemoryType::SYSTEM));
-    if(imgMetaData.isVA()) {
-        outputImg = imgMetaData.vaImage->CopyToMat(VaApiImage::CONVERT_TO_BGR);
-    }
-    else
-#endif
-    {
-        outputImg = result.metaData->asRef<ImageMetaData>().img;
-    }
+    auto outputImg = result.metaData->asRef<ImageMetaData>().img->toMat();
 
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
@@ -294,6 +280,7 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
 int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
+        InferenceEngine::Core core;
 
         slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
 
@@ -305,9 +292,15 @@ int main(int argc, char *argv[]) {
         //------------------------------- Preparing Input ------------------------------------------------------
         slog::info << "Reading input" << slog::endl;
         std::unique_ptr<ImagesCapture> cap;
+
+        InferenceEngine::RemoteContext::Ptr sharedContext = nullptr;
 #ifdef USE_VA
+        auto vaContext = std::make_shared<InferenceBackend::VaApiContext>(core);
+        sharedContext = vaContext->sharedContext();
+
         pz::GstVaApiDecoder decoder;
         VaApiImage::Ptr srcImage;
+
         if(FLAGS_varc) {
             decoder.open(FLAGS_i);
             decoder.play();
@@ -344,10 +337,8 @@ int main(int argc, char *argv[]) {
             return -1;
         }
 
-        InferenceEngine::Core core;
-
         AsyncPipeline pipeline(std::move(model),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads, FLAGS_varc),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads, sharedContext),
             core);
         Presenter presenter(FLAGS_u);
 
@@ -357,7 +348,7 @@ int main(int argc, char *argv[]) {
         uint32_t framesProcessed = 0;
 
         cv::VideoWriter videoWriter;
-        cv::Size videoFrameSize;
+        UniImage::Ptr uniImg;
         double videoFps = 30;
 
         PerformanceMetrics renderMetrics;
@@ -372,15 +363,14 @@ int main(int argc, char *argv[]) {
  #ifdef USE_VA
                 if (FLAGS_varc) {
                     if (decoder.read(srcImage)) {
-                        frameNum = pipeline.submitData(ImageInputData(srcImage),
-                                                       std::make_shared<ImageMetaData>(srcImage, startTime));
+                        uniImg = VA2Img(srcImage,vaContext);
+                        frameNum = pipeline.submitData(ImageInputData(uniImg),
+                                                       std::make_shared<ImageMetaData>(uniImg, startTime));
                     }
                     else {
                         // Input stream is over
                         break;
                     }
-                    videoFrameSize.width = srcImage->width;
-                    videoFrameSize.height = srcImage->height;
                     videoFps = decoder.getFPS();
                 }
                 else
@@ -398,11 +388,11 @@ int main(int argc, char *argv[]) {
                         }
                     }
 
-                    videoFrameSize = curr_frame.size();
                     videoFps = cap->fps();
 
-                    frameNum = pipeline.submitData(ImageInputData(std::make_shared<UniImageMat>(curr_frame)),
-                                                   std::make_shared<ImageMetaData>(curr_frame, startTime));
+                    uniImg = mat2Img(curr_frame);
+                    frameNum = pipeline.submitData(ImageInputData(uniImg),
+                                                   std::make_shared<ImageMetaData>(uniImg, startTime));
                 }
             }
 
@@ -423,7 +413,7 @@ int main(int argc, char *argv[]) {
             // Preparing video writer if needed
             if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
                 if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                    videoFps, videoFrameSize)) {
+                    videoFps, uniImg->size())) {
                     throw std::runtime_error("Can't open video writer");
                 }
             }
@@ -438,16 +428,16 @@ int main(int argc, char *argv[]) {
                 auto stRen = std::chrono::steady_clock::now();
                 cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
                 //--- Showing results and device information
-                //presenter.drawGraphs(outFrame);
+                presenter.drawGraphs(outFrame);
                 renderMetrics.update(stRen);                
-                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp);//,
-                //    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-                //if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                //    videoWriter.write(outFrame);
-                //}
+                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
+                    videoWriter.write(outFrame);
+                }
                 framesProcessed++;
                 if (!FLAGS_no_show) {
-                    //cv::imshow("Detection Results", outFrame);
+                    cv::imshow("Detection Results", outFrame);
                     //--- Processing keyboard events
                     int key = cv::waitKey(1);
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc

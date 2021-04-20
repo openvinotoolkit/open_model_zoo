@@ -139,7 +139,7 @@ cv::Mat renderHumanPose(HumanPoseResult& result, OutputTransform& outputTransfor
         throw std::invalid_argument("Renderer: metadata is null");
     }
 
-    auto outputImg = result.metaData->asRef<ImageMetaData>().img;
+    auto outputImg = result.metaData->asRef<ImageMetaData>().img->toMat();
 
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
@@ -271,7 +271,7 @@ int main(int argc, char *argv[]) {
             core);
         Presenter presenter(FLAGS_u);
 
-        pipeline.submitData(ImageInputData(std::make_shared<UniImageMat>(curr_frame)),
+        pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
 
         uint32_t framesProcessed = 0;
@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
                     // Input stream is over
                     break;
                 }
-                frameNum = pipeline.submitData(ImageInputData(std::make_shared<UniImageMat>(curr_frame)),
+                frameNum = pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
                 }
 

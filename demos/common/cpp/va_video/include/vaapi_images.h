@@ -16,6 +16,7 @@
 #include <va/va_drmcommon.h>
 
 #include <opencv2/core.hpp>
+#include "utils/uni_image_defs.h"
 
 namespace InferenceBackend {
 class VaApiImagePool;
@@ -23,29 +24,16 @@ class VaApiImagePool;
 class VaApiImage{
   friend class VaApiImagePool;
   public:
-    enum RESIZE_MODE {
-      RESIZE_FILL,
-      RESIZE_KEEP_ASPECT,
-      RESIZE_KEEP_ASPECT_LETTERBOX
-    };
-    
-    enum CONVERSION_TYPE {
-      CONVERT_TO_RGB,
-      CONVERT_TO_BGR,
-      CONVERT_COPY
-    };
-
-  public:
     VaApiImage() {};
     VaApiImage(const VaApiContext::Ptr& context, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface = VA_INVALID_ID, bool autoDestroySurface=true);
-    virtual ~VaApiImage() { if(autoDestroySurface) DestroyImage(); }    
+    virtual ~VaApiImage() { if(autoDestroySurface) destroyImage(); }    
 
     using Ptr = std::shared_ptr<VaApiImage>;
 
-    VaApiImage::Ptr CloneToAnotherContext(const VaApiContext::Ptr& newContext);
-    void ResizeTo(VaApiImage::Ptr dstImage, VaApiImage::RESIZE_MODE resizeMode = RESIZE_FILL);
+    VaApiImage::Ptr cloneToAnotherContext(const VaApiContext::Ptr& newContext);
+    void resizeTo(VaApiImage::Ptr dstImage, IMG_RESIZE_MODE resizeMode = RESIZE_FILL, bool hqResize=false);
 
-    cv::Mat CopyToMat(CONVERSION_TYPE convType = CONVERT_TO_BGR);
+    cv::Mat copyToMat(IMG_CONVERSION_TYPE convType = CONVERT_TO_BGR);
 
     uint32_t va_surface_id = VA_INVALID_ID;
     VaApiContext::Ptr context = nullptr;
@@ -59,10 +47,10 @@ class VaApiImage{
     bool autoDestroySurface;
  
     VaApiImage(const VaApiImage& other) = delete;
-    void DestroyImage();
+    void destroyImage();
 
-    VASurfaceID CreateVASurface();
-    static int FourCCToVART(FourCC fourcc);
+    VASurfaceID createVASurface();
+    static int fourCCToVART(FourCC fourcc);
 };
 
 class VaPooledImage : public VaApiImage{

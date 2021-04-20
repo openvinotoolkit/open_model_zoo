@@ -110,7 +110,7 @@ cv::Mat getAffineTransform(float centerX, float centerY, int srcW, float rot, si
 
 std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& img = inputData.asRef<ImageInputData>().inputImage;
-    auto& resizedImg = img->resize(netInputWidth, netInputHeight, UniImage::RESIZE_KEEP_ASPECT_LETTERBOX);
+    const auto& resizedImg = img->resize(netInputWidth, netInputHeight, RESIZE_KEEP_ASPECT_LETTERBOX);
     request->SetBlob(inputsNames[0], resizedImg->toBlob());
 
     return std::shared_ptr<InternalModelData>(new InternalImageModelData(netInputWidth, netInputHeight,img));

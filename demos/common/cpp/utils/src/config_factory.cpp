@@ -21,15 +21,16 @@
 #include <utils/args_helper.hpp>
 #include <utils/common.hpp>
 #include <cldnn/cldnn_config.hpp>
+#include <gpu/gpu_context_api_va.hpp>
 
 using namespace InferenceEngine;
 
 CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::string& flags_l,
     const std::string& flags_c, bool flags_pc,
     uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads,
-    bool flags_varc)
+    const InferenceEngine::RemoteContext::Ptr& remoteContext)
 {
-    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_pc, flags_nireq, flags_varc);
+    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_pc, flags_nireq, remoteContext);
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(flags_d)) {
         devices.insert(device);
@@ -65,9 +66,9 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::st
 }
 
 CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, const std::string& flags_l,
-    const std::string& flags_c, bool flags_pc, uint32_t flags_nireq, bool flags_varc)
+    const std::string& flags_c, bool flags_pc, uint32_t flags_nireq, const InferenceEngine::RemoteContext::Ptr& remoteContext)
 {
-    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_pc, flags_nireq,flags_varc);
+    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_pc, flags_nireq, remoteContext);
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(flags_d)) {
         devices.insert(device);
@@ -84,7 +85,7 @@ CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, const s
 }
 
 CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, const std::string& flags_l,
-    const std::string& flags_c, bool flags_pc, uint32_t flags_nireq, bool flags_varc)
+    const std::string& flags_c, bool flags_pc, uint32_t flags_nireq, const InferenceEngine::RemoteContext::Ptr& remoteContext)
 {
     CnnConfig config;
 
@@ -101,7 +102,7 @@ CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, const std::
     }
 
     config.maxAsyncRequests = flags_nireq;
-    config.useGPURemoteContext = flags_varc;
+    config.remoteContext = remoteContext;
 
     /** Per layer metrics **/
     if (flags_pc) {
