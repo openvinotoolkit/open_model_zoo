@@ -40,7 +40,7 @@ import timeit
 
 from pathlib import Path
 
-from args import ArgContext, Arg
+from args import ArgContext, Arg, ModelArg
 from cases import DEMOS
 from data_sequences import DATA_SEQUENCES
 
@@ -82,8 +82,8 @@ def temp_dir_as_path():
 
 
 def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_dir, demos_to_test):
-    model_names = {}
-    model_precisions = {}
+    model_names = set()
+    model_precisions = set()
 
     for demo in demos_to_test:
         for case in demo.test_cases:
