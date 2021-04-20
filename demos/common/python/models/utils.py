@@ -45,14 +45,14 @@ class DetectionWithLandmarks(Detection):
 class OutputTransform:
     def __init__(self, input_size, output_resolution):
         self.output_resolution = output_resolution
-        self.compute_resolution(input_size)
+        self.new_resolution = self.compute_resolution(input_size)
 
     def compute_resolution(self, input_size):
         self.input_size = input_size
         size = self.input_size[::-1]
         self.scale_factor = min(self.output_resolution[0] / size[0],
                                 self.output_resolution[1] / size[1])
-        self.new_resolution = self.scale(size)
+        return self.scale(size)
 
     def resize(self, image):
         curr_size = image.shape[:2]

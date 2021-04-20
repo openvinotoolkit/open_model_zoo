@@ -369,8 +369,7 @@ int main(int argc, char *argv[]) {
                         std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
                     };
                     outputTransform = OutputTransform(curr_frame.size(), outputResolution);
-                    outputTransform.computeResolution();
-                    outputResolution = outputTransform.getResolution();
+                    outputResolution = outputTransform.computeResolution();
                 }
             }
 

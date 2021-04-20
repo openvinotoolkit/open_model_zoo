@@ -118,11 +118,12 @@ class OutputTransform {
         OutputTransform(cv::Size inputSize, cv::Size outputResolution) :
             doResize(true), inputSize(inputSize), outputResolution(outputResolution) {}
 
-        void computeResolution() {
+        cv::Size computeResolution() {
             float inputWidth = static_cast<float>(inputSize.width);
             float inputHeight = static_cast<float>(inputSize.height);
             scaleFactor = std::min(outputResolution.height / inputHeight, outputResolution.width / inputWidth);
             newResolution = cv::Size{static_cast<int>(inputWidth * scaleFactor), static_cast<int>(inputHeight * scaleFactor)};
+            return newResolution;
         }
 
         void resize(cv::Mat& image) {
@@ -149,8 +150,6 @@ class OutputTransform {
             rect.width = std::floor(rect.width * scaleFactor);
             rect.height = std::floor(rect.height * scaleFactor);
         }
-
-        const cv::Size getResolution() { return newResolution; }
 
         bool doResize;
 
