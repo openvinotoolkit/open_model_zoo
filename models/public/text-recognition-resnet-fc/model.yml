@@ -209,6 +209,10 @@ files:
     source:
       $type: google_drive
       id: 1OnUGdv9RFhFbQGXUUkWMcxUZg0mPV0kK
+  - name: vedastr/addict-2.4.0-py3-none-any.whl
+    size: 3832
+    sha256: 249bb56bbfd3cdc2a004ea0ff4c2b6ddc84d53bc2194761636eb314d5cfa5dfc
+    source: https://files.pythonhosted.org/packages/6a/00/b08f23b7d7e1e14ce01419a467b583edbb93c6cdb8654e54a9cc579cd61f/addict-2.4.0-py3-none-any.whl
 postprocessing:
   - $type: regex_replace
     file: vedastr/models/heads/__init__.py
@@ -266,6 +270,13 @@ postprocessing:
     file:  vedastr/utils/config.py
     pattern: 'check_file_exist\(.*\)'
     replacement: '# \g<0>'
+  - $type: regex_replace
+    file:  vedastr/utils/config.py
+    pattern: 'addict'
+    replacement: 'vedastr.addict'
+  - $type: unpack_archive
+    format: zip
+    file:  vedastr/addict-2.4.0-py3-none-any.whl
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir
