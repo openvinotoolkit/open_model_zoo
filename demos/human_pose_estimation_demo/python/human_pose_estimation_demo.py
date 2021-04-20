@@ -189,15 +189,14 @@ def main():
     next_frame_id = 1
     next_frame_id_to_show = 0
 
+    output_transform = None
+    output_resolution = (frame.shape[1], frame.shape[0])
     if args.output_resolution:
         if 'x' not in args.output_resolution:
             raise ValueError('Сorrect format of --output_resolution parameter is "width"x"height".')
         output_transform = models.OutputTransform(frame.shape[:2],
             [int(v) for v in args.output_resolution.split('x')])
         output_resolution = output_transform.new_resolution
-    else:
-        output_transform = None
-        output_resolution = (frame.shape[1], frame.shape[0])
     presenter = monitors.Presenter(args.utilization_monitors, 55,
                                    (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
     video_writer = cv2.VideoWriter()

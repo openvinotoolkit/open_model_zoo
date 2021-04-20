@@ -239,14 +239,10 @@ int main(int argc, char *argv[]) {
 
         cv::VideoWriter videoWriter;
 
-        cv::Size outputResolution;
         OutputTransform outputTransform = OutputTransform();
+        cv::Size outputResolution = curr_frame.size();
         size_t found = FLAGS_output_resolution.find("x");
-
-        if (found == std::string::npos) {
-            outputResolution = curr_frame.size();
-        }
-        else {
+        if (found != std::string::npos) {
             outputResolution = cv::Size{
                 std::stoi(FLAGS_output_resolution.substr(0, found)),
                 std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
