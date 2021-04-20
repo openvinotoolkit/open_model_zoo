@@ -40,9 +40,10 @@ import timeit
 
 from pathlib import Path
 
-from args import ArgContext, ModelArg, ModelFileArg
+from args import ArgContext, Arg
 from cases import DEMOS
 from data_sequences import DATA_SEQUENCES
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -63,6 +64,7 @@ def parse_args():
         help='path to report file')
     return parser.parse_args()
 
+
 def collect_result(demo_name, device, pipeline, execution_time, report_file):
     first_time = not report_file.exists()
 
@@ -72,6 +74,7 @@ def collect_result(demo_name, device, pipeline, execution_time, report_file):
             testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime"])
         testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time])
 
+
 @contextlib.contextmanager
 def temp_dir_as_path():
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -79,14 +82,19 @@ def temp_dir_as_path():
 
 
 def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_dir, demos_to_test):
-    model_args = [arg
-        for demo in demos_to_test
-        for case in demo.test_cases
-        for arg in case.options.values()
-        if isinstance(arg, (ModelArg, ModelFileArg))]
+    model_names = {}
+    model_precisions = {}
 
-    model_names = {arg.name if isinstance(arg, ModelArg) else arg.model_name for arg in model_args}
-    model_precisions = {arg.precision for arg in model_args}
+    for demo in demos_to_test:
+        for case in demo.test_cases:
+            for arg in case.options.values():
+                if isinstance(arg, Arg):
+                    for model_request in arg.required_models:
+                        model_names.add(model_request.name)
+                        model_precisions.update(model_request.precisions)
+
+    if not model_precisions:
+        model_precisions.add('FP32')
 
     dl_dir = global_temp_dir / 'models'
     complete_models_lst_path = global_temp_dir / 'models.lst'
@@ -128,6 +136,7 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
     print()
 
     return dl_dir
+
 
 def main():
     args = parse_args()
@@ -232,6 +241,7 @@ def main():
     print("Failures: {}".format(num_failures))
 
     sys.exit(0 if num_failures == 0 else 1)
+
 
 if __name__ == '__main__':
     main()
