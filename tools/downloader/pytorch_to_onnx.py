@@ -12,16 +12,17 @@ import torch.onnx
 
 
 INPUT_DTYPE_TO_TORCH = {
-        'float': torch.float,
-        'half': torch.half,
-        'double': torch.double,
-        'uint8': torch.uint8,
-        'int8': torch.int8,
-        'int': torch.int32,
-        'short': torch.short,
-        'long': torch.long,
-        'bool': torch.bool
+    'bool': torch.bool,
+    'double': torch.double,
+    'float': torch.float,
+    'half': torch.half,
+    'int32': torch.int32,
+    'int8': torch.int8,
+    'long': torch.long,
+    'short': torch.short,
+    'uint8': torch.uint8,
 }
+
 
 def is_sequence(element):
     return isinstance(element, (list, tuple))
@@ -41,10 +42,6 @@ def shapes_arg(values):
             if not isinstance(value, int) or value < 0:
                 raise argparse.ArgumentTypeError('Argument {!r} must be a positive integer'.format(value))
     return shapes
-
-
-def dtype_arg(value):
-    return INPUT_DTYPE_TO_TORCH[value]
 
 
 def model_parameter(parameter):
@@ -81,7 +78,7 @@ def parse_args():
                         help='Comma-separated names of the output layers')
     parser.add_argument('--model-param', type=model_parameter, default=[], action='append',
                         help='Pair "name"="value" of model constructor parameter')
-    parser.add_argument('--inputs-dtype', type=str, required=False, choices=INPUT_DTYPE_TO_TORCH,
+    parser.add_argument('--inputs-dtype', type=str, required=False, choices=INPUT_DTYPE_TO_TORCH, default='float',
                         help='Data type for inputs')
     return parser.parse_args()
 
@@ -124,8 +121,9 @@ def convert_to_onnx(model, input_shapes, output_file, input_names, output_names,
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     model.eval()
-    input_kwargs = {} if inputs_dtype is None else {'dtype': dtype_arg(inputs_dtype)}
-    dummy_inputs = tuple(torch.zeros(input_shape, **input_kwargs) for input_shape in input_shapes)
+    dummy_inputs = tuple(
+        torch.zeros(input_shape, dtype=INPUT_DTYPE_TO_TORCH[inputs_dtype])
+        for input_shape in input_shapes)
     model(*dummy_inputs)
     torch.onnx.export(model, dummy_inputs, str(output_file), verbose=False, opset_version=11,
                       input_names=input_names.split(','), output_names=output_names.split(','))
