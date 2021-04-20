@@ -18,7 +18,7 @@ import sys
 
 from args import (
     DataDirectoryArg, DataDirectoryOrigFileNamesArg, DataPatternArg,
-    ModelArg, ModelDirArg, OMZ_DIR, TestDataArg, image_net_arg, image_retrieval_arg,
+    ModelArg, ModelFileArg, OMZ_DIR, TestDataArg, image_net_arg, image_retrieval_arg,
 )
 from data_sequences import DATA_SEQUENCES
 
@@ -479,7 +479,7 @@ PYTHON_DEMOS = [
         TestCase(options={
             '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
             '-m': ModelArg('bert-base-ner'),
-            '-v': ModelDirArg('bert-base-ner', 'bert-base-ner/vocab.txt')
+            '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
         }),
     )),
 

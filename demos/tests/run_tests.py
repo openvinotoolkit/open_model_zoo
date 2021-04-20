@@ -40,7 +40,7 @@ import timeit
 
 from pathlib import Path
 
-from args import ArgContext, ModelArg
+from args import ArgContext, ModelArg, ModelFileArg
 from cases import DEMOS
 from data_sequences import DATA_SEQUENCES
 
@@ -77,14 +77,15 @@ def temp_dir_as_path():
     with tempfile.TemporaryDirectory() as temp_dir:
         yield Path(temp_dir)
 
+
 def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_dir, demos_to_test):
     model_args = [arg
         for demo in demos_to_test
         for case in demo.test_cases
         for arg in case.options.values()
-        if isinstance(arg, ModelArg)]
+        if isinstance(arg, (ModelArg, ModelFileArg))]
 
-    model_names = {arg.name for arg in model_args}
+    model_names = {arg.name if isinstance(arg, ModelArg) else arg.model_name for arg in model_args}
     model_precisions = {arg.precision for arg in model_args}
 
     dl_dir = global_temp_dir / 'models'

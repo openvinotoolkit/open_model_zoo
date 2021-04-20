@@ -52,10 +52,11 @@ class ModelArg:
         return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))
 
 
-class ModelDirArg:
-    def __init__(self, model_name, file_name):
+class ModelFileArg:
+    def __init__(self, model_name, file_name, precision='FP32'):
         self.model_name = model_name
         self.file_name = file_name
+        self.precision = precision
 
     def resolve(self, context):
         return str(context.dl_dir / context.model_info[self.model_name]["subdirectory"] / self.file_name)
