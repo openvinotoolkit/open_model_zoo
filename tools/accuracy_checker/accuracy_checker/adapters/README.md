@@ -255,7 +255,7 @@ AccuracyChecker supports following set of adapters:
   * `lm_oov_score` - Replace LM score for out-of-vocabulary words with this value (default -1000, ignored without LM)
   * `lm_vocabulary_offset` - Start of vocabulary strings section in the LM file.  Default is to not filter candidate words using vocabulary (ignored without LM)
   * `lm_vocabulary_length` - Size in bytes of vocabulary strings section in the LM file (ignored without LM)
-* `fast_ctc_beam_search_decoder_with_lm` - CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition, depends on [`ctcdecode_numpy` Python module](../../../../demos/speech_recognition_demo/python/ctcdecode-numpy/README.md).
+* `fast_ctc_beam_search_decoder_with_lm` - CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition, depends on `ctcdecode_numpy` Python module located in the `<omz_dir>/demos/speech_recognition_demo/python/ctcdecode-numpy/` directory.
   * `beam_size` - Size of the beam to use during decoding (default 10).
   * `logarithmic_prob` - Set to "True" to indicate that network gives natural-logarithmic probabilities. Default is False for plain probabilities (after softmax).
   * `probability_out` - Name of the network's output with character probabilities (required)

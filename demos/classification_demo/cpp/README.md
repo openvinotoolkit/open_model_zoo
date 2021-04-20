@@ -7,7 +7,7 @@ You can use the following pre-trained models with the demo:
 * `alexnet`
 * `resnet-50-tf`
 * `vgg19`
-* all other classification models (please, check [models.lst](./models.lst) file)
+* all other classification models (check `<omz_dir>/demos/classification_demo/cpp/models.lst`)
 
 For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
 
@@ -57,7 +57,7 @@ For higher FPS, using `-nireq` which slightly exceeds `-nstreams` value summed o
 
 Running the application with the empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/classification_demo/cpp/models.lst`.
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
