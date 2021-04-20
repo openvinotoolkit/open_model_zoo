@@ -41,7 +41,7 @@ struct ImageMetaData : public MetaData {
     {
     }
 
-    bool isVA() const {return !!vaImage;}
+    bool isVA() const {return vaImage!=nullptr;}
 #else
     bool isVA() const {return false;}
 #endif

@@ -95,7 +95,6 @@ std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& input
         (vaImg->context->display() != va_context->display() ?
             vaImg->CloneToAnotherContext(va_context) : vaImg)->ResizeTo(resizedImg);
 
-        std::cout<<"Resized: "<<resizedImg->va_surface_id<<std::endl;
         auto nv12_blob = InferenceEngine::gpu::make_shared_blob_nv12(resizedImg->height, resizedImg->width, sharedVAContext, resizedImg->va_surface_id);
 
         request->SetBlob(inputsNames[0],nv12_blob);

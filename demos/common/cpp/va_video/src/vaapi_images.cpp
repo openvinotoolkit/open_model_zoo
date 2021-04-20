@@ -83,7 +83,7 @@ VaApiImage::Ptr VaApiImage::CloneToAnotherContext(const VaApiContext::Ptr& newCo
     VASurfaceID surfaceID = VA_INVALID_SURFACE;
     VA_CALL(vaCreateSurfaces(newContext->display(), rtFormat, drm_descriptor.width, drm_descriptor.height, &surfaceID, 1,
                              attribs, 2));
-//!!!                             std::cout<<"SurfID "<<surfaceID<<std::endl;
+
     return VaApiImage::Ptr(new VaApiImage(newContext,external.width,external.height,format,surfaceID),
         [dma_fd](VaApiImage* img) {
             if (close(dma_fd) == -1) {
@@ -112,7 +112,6 @@ VASurfaceID VaApiImage::CreateVASurface() {
 
     VASurfaceID va_surface_id;
     VA_CALL(vaCreateSurfaces(context->display(), rt_format, width, height, &va_surface_id, 1, &surface_attrib, 1))
-                                 std::cout<<"Created "<<va_surface_id<<std::endl;
     return va_surface_id;
 }
 
@@ -123,9 +122,6 @@ VaApiImage::VaApiImage(const VaApiContext::Ptr& context, uint32_t width, uint32_
     this->format = format;
     this->context = context;
     this->autoDestroySurface = autoDestroySurface;
-//!!!    if(va_surface!=VA_INVALID_ID) {
-//        std::cout<<"Received: "<<va_surface<<std::endl;
-//    }
     this->va_surface_id = va_surface == VA_INVALID_ID ? CreateVASurface() : va_surface;
 }
 
@@ -133,7 +129,6 @@ VaApiImage::VaApiImage(const VaApiContext::Ptr& context, uint32_t width, uint32_
 void VaApiImage::DestroyImage() {
     if (va_surface_id != VA_INVALID_ID) {
         try {
-//!!!            std::cout<<"Destr:"<<va_surface_id<<std::endl;
             VA_CALL(vaDestroySurfaces(context->display(), (uint32_t *)&va_surface_id, 1));
         } catch (const std::exception &e) {
             std::string error_message = std::string("VA surface destroying failed with exception: ") + e.what();
@@ -152,7 +147,6 @@ cv::Mat VaApiImage::CopyToMat(VaApiImage::CONVERSION_TYPE convType) {
     //--- Mapping image
     VA_CALL(vaDeriveImage(context->display(), va_surface_id, &mappedImage))
     VA_CALL(vaMapBuffer(context->display(), mappedImage.buf, &pData))
-
     //--- Copying data to Mat. Only NV12/I420 formats are supported now
     switch(format) {
         case FOURCC_NV12:
@@ -175,7 +169,6 @@ cv::Mat VaApiImage::CopyToMat(VaApiImage::CONVERSION_TYPE convType) {
             mappedMat.copyTo(outMat);
             break;
     }
-
     try {
         VA_CALL(vaUnmapBuffer(context->display(), mappedImage.buf))
         VA_CALL(vaDestroyImage(context->display(), mappedImage.image_id));

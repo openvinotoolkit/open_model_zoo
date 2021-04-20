@@ -360,6 +360,8 @@ int main(int argc, char *argv[]) {
         cv::Size videoFrameSize;
         double videoFps = 30;
 
+        PerformanceMetrics renderMetrics;
+
         cv::Size outputResolution;
         OutputTransform outputTransform = OutputTransform();
         size_t found = FLAGS_output_resolution.find("x");
@@ -433,17 +435,19 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to DetectionResult*
             //    and use your own processing instead of calling renderDetectionData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
+                auto stRen = std::chrono::steady_clock::now();
+                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
                 //--- Showing results and device information
-                presenter.drawGraphs(outFrame);
-                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                    videoWriter.write(outFrame);
-                }
+                //presenter.drawGraphs(outFrame);
+                renderMetrics.update(stRen);                
+                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp);//,
+                //    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                //if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
+                //    videoWriter.write(outFrame);
+                //}
                 framesProcessed++;
                 if (!FLAGS_no_show) {
-                    cv::imshow("Detection Results", outFrame);
+                    //cv::imshow("Detection Results", outFrame);
                     //--- Processing keyboard events
                     int key = cv::waitKey(1);
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc
@@ -479,14 +483,19 @@ int main(int argc, char *argv[]) {
         slog::info << slog::endl << "Metric reports:" << slog::endl;
         metrics.printTotal();
         slog::info << slog::endl << "Latencies:\n";
-        if(cap) {
         slog::info << "  * Decoding only: \t" << std::fixed << std::setprecision(2) <<
-            cap->getMetrics().getTotal().latency << " ms\n";
-        }
+#ifdef USE_VA
+            (cap ? cap->getMetrics().getTotal().latency : decoder.getMetrics().getTotal().latency)
+#else
+            cap->getMetrics().getTotal().latency
+#endif
+            << " ms\n";
         slog::info << "  * Preprocessing only:\t" << std::fixed << std::setprecision(2) <<
             pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
         slog::info << "  * Inference only: \t" << std::fixed << std::setprecision(2) <<
-            pipeline.getInferenceMetircs().getTotal().latency << " ms" << slog::endl;
+            pipeline.getInferenceMetircs().getTotal().latency << " ms\n";
+        slog::info << "  * Rendering only: \t" << std::fixed << std::setprecision(2) <<
+            renderMetrics.getTotal().latency << " ms" << slog::endl;
 
         slog::info << presenter.reportMeans() << slog::endl;
     }

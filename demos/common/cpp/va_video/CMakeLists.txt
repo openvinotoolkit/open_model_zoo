@@ -27,6 +27,8 @@ target_link_libraries(va_video PRIVATE ${VA_LIBRARIES}
         ${GSTREAMER_LIBRARIES}
         ${VA_LIBRARIES}
         ${VADRM_LIBRARIES}
+	${InferenceEngine_LIBRARIES}
+        utils
         /usr/lib/x86_64-linux-gnu/libOpenCL.so
         opencv_core opencv_imgproc
 )

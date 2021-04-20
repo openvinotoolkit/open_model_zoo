@@ -11,6 +11,7 @@
 #include <gst/video/video.h>
 
 #include "vaapi_images.h"
+#include "utils/performance_metrics.hpp"
 
 using namespace InferenceBackend;
 
@@ -29,6 +30,7 @@ public:
     bool read(std::shared_ptr<VaApiImage>& image);
     void close();
     double getFPS(){ return fps;}
+    PerformanceMetrics getMetrics() { return readerMetrics;}
 
 private:
     std::shared_ptr<InferenceBackend::VaApiImage>  CreateImage(GstSample* sampleRead, GstMapFlags map_flags);
@@ -48,6 +50,7 @@ private:
 
     GstVideoInfo* video_info_;
     double fps;
+    PerformanceMetrics readerMetrics;
 };
 
 }

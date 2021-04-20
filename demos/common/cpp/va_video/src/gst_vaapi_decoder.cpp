@@ -4,7 +4,9 @@
 #include <iostream>
 #include <sstream>
 
+#if not defined(UNUSED)
 #define UNUSED(x) (void)(x)
+#endif
 
 namespace pz
 {
@@ -205,6 +207,7 @@ void GstVaApiDecoder::play()
 
 bool GstVaApiDecoder::read(std::shared_ptr<VaApiImage>& src_image)
 {
+    auto startTime = std::chrono::steady_clock::now();
     if (gst_app_sink_is_eos(GST_APP_SINK(app_sink_)))
     {
         std::cout << "EOS received" << std::endl;
@@ -219,7 +222,7 @@ bool GstVaApiDecoder::read(std::shared_ptr<VaApiImage>& src_image)
     }
 
     src_image = CreateImage(sample, GstMapFlags(GST_MAP_READ | GST_VIDEO_FRAME_MAP_FLAG_NO_REF));
-
+    readerMetrics.update(startTime);
     return true;
 }
 
