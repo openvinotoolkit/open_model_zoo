@@ -57,7 +57,7 @@ class OutputTransform:
     def resize(self, image):
         curr_size = image.shape[:2]
         if curr_size != self.input_size:
-            self.compute_resolution(curr_size)
+            self.new_resolution = self.compute_resolution(curr_size)
         if self.scale_factor == 1:
             return image
         return cv2.resize(image, self.new_resolution)
