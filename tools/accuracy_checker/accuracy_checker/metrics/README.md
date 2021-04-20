@@ -122,7 +122,7 @@ More detailed information about calculation segmentation metrics you can find [h
 * `psnr` - [Peak signal to noise ratio](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
   * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
   * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
-* `psnr-b` - [Peak signal to noise ratio with blocked effect factor](https://link.springer.com/content/pdf/10.1007%2F978-3-642-34595-1_16.pdf). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
+* `psnr-b` - [Peak signal to noise ratio with blocked effect factor](https://doi.org/10.1007/978-3-642-34595-1_16). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
   * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
   * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
   * `block_size` - block size for blocked effect factor. Optional, default `8`.
