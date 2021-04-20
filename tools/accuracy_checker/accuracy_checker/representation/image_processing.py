@@ -70,6 +70,7 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
     def value(self, value):
         self._value = value
 
+
 class ImageProcessingPrediction(ImageProcessingRepresentation):
     def __init__(self, identifiers, prediction):
         """

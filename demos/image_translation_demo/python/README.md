@@ -69,7 +69,7 @@ To run the demo, you can use public or pre-trained models. You can download the 
 
 There are two ways to use this demo:
 
-1. Run with segmentation model in addition to translation model. You should use only models trained on ADE20k dataset.     Example: [hrnet-v2-c1-segmentation](../../../models/public/hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md).
+1. Run with segmentation model in addition to translation model. You should use only models trained on ADE20k dataset.     Example: [hrnet-v2-c1-segmentation](../../../models/public/hrnet-v2-c1-segmentation/README.md).
    In this case only input and reference images are required without any masks.
    Segmentation masks will be generated via segmentation model.
 

@@ -1,15 +1,11 @@
 # use update-requirements.py to update this file
 
-absl-py==0.12.0
-    # via tensorboard
 appdirs==1.4.4
     # via pooch
 attrs==20.3.0
     # via pytest
 audioread==2.1.9
     # via librosa
-cachetools==4.2.1
-    # via google-auth
 certifi==2020.12.5
     # via requests
 cffi==1.14.5
@@ -22,22 +18,13 @@ decorator==5.0.7
     # via librosa
 flake8-import-order==0.18.1
     # via motmetrics
-flake8==3.9.0
+flake8==3.9.1
     # via motmetrics
-google-auth-oauthlib==0.4.3
-    # via tensorboard
-google-auth==1.28.0
-    # via
-    #   google-auth-oauthlib
-    #   tensorboard
-grpcio==1.36.1
-    # via tensorboard
 idna==2.10
     # via requests
-importlib-metadata==3.7.3
+importlib-metadata==4.0.0
     # via
     #   flake8
-    #   markdown
     #   pluggy
     #   pytest
 iniconfig==1.1.1
@@ -52,8 +39,6 @@ librosa==0.8.0
     # via -r demos/requirements.txt
 llvmlite==0.36.0
     # via numba
-markdown==3.3.4
-    # via tensorboard
 matplotlib==3.3.4
     # via -r demos/requirements.txt
 mccabe==0.6.1
@@ -79,10 +64,7 @@ numpy==1.19.5 ; python_version >= "3.4"
     #   resampy
     #   scikit-learn
     #   scipy
-    #   tensorboard
     #   tensorboardx
-oauthlib==3.1.0
-    # via requests-oauthlib
 packaging==20.9
     # via
     #   nibabel
@@ -90,41 +72,33 @@ packaging==20.9
     #   pytest
 pandas==1.1.5
     # via motmetrics
-pillow==8.1.2
+pillow==8.2.0
     # via matplotlib
 pluggy==0.13.1
     # via pytest
 pooch==1.3.0
     # via librosa
-protobuf==3.15.6
-    # via
-    #   tensorboard
-    #   tensorboardx
-py-cpuinfo==7.0.0
+protobuf==3.15.8
+    # via tensorboardx
+py-cpuinfo==8.0.0
     # via pytest-benchmark
 py==1.10.0
     # via pytest
-pyasn1-modules==0.2.8
-    # via google-auth
-pyasn1==0.4.8
-    # via
-    #   pyasn1-modules
-    #   rsa
 pycodestyle==2.7.0
     # via
     #   flake8
     #   flake8-import-order
 pycparser==2.20
     # via cffi
-pyflakes==2.3.0
+pyflakes==2.3.1
     # via flake8
 pyparsing==2.4.7
     # via
     #   matplotlib
     #   packaging
-pytest-benchmark==3.2.3
+pytest-benchmark==3.4.1
     # via motmetrics
-pytest==6.2.2
+pytest==6.2.3
     # via
     #   motmetrics
     #   pytest-benchmark
@@ -134,17 +108,10 @@ python-dateutil==2.8.1
     #   pandas
 pytz==2021.1
     # via pandas
-requests-oauthlib==1.3.0
-    # via google-auth-oauthlib
 requests==2.25.1
-    # via
-    #   pooch
-    #   requests-oauthlib
-    #   tensorboard
+    # via pooch
 resampy==0.2.2
     # via librosa
-rsa==4.7.2
-    # via google-auth
 scikit-learn==0.24.1
     # via
     #   -r demos/requirements.txt
@@ -158,39 +125,26 @@ scipy==1.5.4
     #   scikit-learn
 six==1.15.0
     # via
-    #   absl-py
     #   cycler
-    #   google-auth
-    #   grpcio
     #   protobuf
     #   python-dateutil
     #   resampy
-    #   tensorboard
-    #   tensorboardx
 soundfile==0.10.3.post1
     # via librosa
-tensorboard-plugin-wit==1.8.0
-    # via tensorboard
-tensorboard==2.4.1
-    # via -r demos/requirements.txt
-tensorboardx==2.1
+tensorboardx==2.2
     # via -r demos/requirements.txt
 threadpoolctl==2.1.0
     # via scikit-learn
-tokenizers==0.10.1
+tokenizers==0.10.2
     # via -r demos/requirements.txt
 toml==0.10.2
     # via pytest
-tqdm==4.59.0
+tqdm==4.60.0
     # via -r demos/requirements.txt
 typing-extensions==3.7.4.3
     # via importlib-metadata
 urllib3==1.26.4
     # via requests
-werkzeug==1.0.1
-    # via tensorboard
-wheel==0.36.2
-    # via tensorboard
 xmltodict==0.12.0
     # via motmetrics
 zipp==3.4.1

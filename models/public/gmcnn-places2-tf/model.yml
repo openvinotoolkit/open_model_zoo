@@ -13,10 +13,11 @@
 # limitations under the License.
 
 description: >-
-  The `gmcnn-places2-tf` is the TensorFlow implementation of GMCNN Image Inpainting model,
-  aimed to estimate suitable pixel information to fill holes in images. `gmcnn-places2-tf`
-  is trained on Places2 dataset.
-  For details see repository <https://github.com/shepnerd/inpainting_gmcnn>.
+  The "gmcnn-places2-tf" is the TensorFlow* implementation of GMCNN Image Inpainting
+  model, aimed to estimate suitable pixel information to fill holes in images. "gmcnn-places2-tf"
+  is trained on Places2 dataset with free-form masks. Originally redistributed as
+  checkpoint files, it was converted to a frozen graph. For details see repository
+  <https://github.com/shepnerd/inpainting_gmcnn>.
 task_type: image_inpainting
 files:
   - name: gmcnn-places2-tf.zip

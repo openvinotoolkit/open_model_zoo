@@ -74,6 +74,7 @@ from .segmentation import (
 from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
 from .pose_estimation_openpose import OpenPoseAdapter
 from .pose_estimation_associative_embedding import AssociativeEmbeddingAdapter
+from .pose_estimation_hrnet import HumanPoseHRNetAdapter
 
 from .pose_estimation_3d import HumanPose3dAdapter
 
@@ -109,6 +110,7 @@ from .face_recognition_quality_assessment import QualityAssessmentAdapter
 from .dna_seq_recognition import DNASeqRecognition
 from .optical_flow import PWCNetAdapter
 from .salient_objects_detection import SalientObjectDetection
+from .noise_suppression import NoiseSuppressionAdapter
 from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
 
 __all__ = [
@@ -190,6 +192,7 @@ __all__ = [
     'AssociativeEmbeddingAdapter',
     'HumanPoseAdapter',
     'HumanPose3dAdapter',
+    'HumanPoseHRNetAdapter',
     'OpenPoseAdapter',
     'SingleHumanPoseAdapter',
     'StackedHourGlassNetworkAdapter',
@@ -229,6 +232,8 @@ __all__ = [
     'DNASeqRecognition',
 
     'PWCNetAdapter',
+
+    'NoiseSuppressionAdapter',
 
     'GVADetectionAdapter',
     'GVAClassificationAdapter',

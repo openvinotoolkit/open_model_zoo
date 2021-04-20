@@ -161,13 +161,11 @@ def add_model_pages(output_root, parent_element, group, group_title):
 
         model_name = md_path_rel.parts[2]
 
-        expected_md_paths = [
-            Path('models', group, model_name, model_name + '.md'),
-            Path('models', group, model_name, 'description', model_name + '.md'),
-        ]
+        expected_md_path = Path('models', group, model_name, 'README.md')
 
-        if md_path_rel not in expected_md_paths:
-            raise RuntimeError(f'{md_path_rel}: unexpected documentation file')
+        if md_path_rel != expected_md_path:
+            raise RuntimeError(f'{md_path_rel}: unexpected documentation file,'
+                ' should be {expected_md_path}')
 
         # FIXME: use the info dumper to query model information instead of
         # parsing the configs. We're not doing that now, because the info
@@ -234,6 +232,16 @@ def main():
     navindex_element = ET.SubElement(doxygenlayout_element, 'navindex')
 
     add_accuracy_checker_pages(output_root, navindex_element)
+
+    datasets_element = add_page(output_root, navindex_element,
+        id='omz_data_datasets', path='data/datasets.md')
+
+    # The xml:id here is omz_data rather than omz_data_datasets, because
+    # later we might want to have other pages in the "data" directory. If
+    # that happens, we'll create a parent page with ID "omz_data" and move
+    # the xml:id to that page, thus integrating the new pages without having
+    # to change the upstream OpenVINO documentation building process.
+    datasets_element.attrib[XML_ID_ATTRIBUTE] = 'omz_data'
 
     downloader_element = add_page(output_root, navindex_element,
         id='omz_tools_downloader', path='tools/downloader/README.md', title='Model Downloader')

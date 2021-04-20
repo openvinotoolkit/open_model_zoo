@@ -914,7 +914,9 @@ class DLSDKLauncher(Launcher):
         feed_dict = {}
         for lstm_var, output_layer in self._lstm_inputs.items():
             layer_shape = self.inputs[lstm_var].shape
-            input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(layer_shape)
+            input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(
+                layer_shape, dtype=PRECISION_TO_DTYPE[self.inputs[lstm_var].precision]
+            )
             feed_dict[lstm_var] = input_data
         return feed_dict
 

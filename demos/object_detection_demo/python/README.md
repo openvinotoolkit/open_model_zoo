@@ -60,6 +60,9 @@ usage: object_detection_demo.py [-h] -m MODEL -at
                                 [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
                                 [-limit OUTPUT_LIMIT] [--no_show]
                                 [-u UTILIZATION_MONITORS] [-r]
+                                [--reverse_input_channels REVERSE_CHANNELS]
+                                [--mean_values MEAN_VALUES]
+                                [--scale_values SCALE_VALUES]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -111,6 +114,18 @@ Input/output options:
   --no_show             Optional. Don't show output.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+
+Input transform options:
+  --reverse_input_channels REVERSE_CHANNELS
+                        Optional. Switch the input channels order from
+                        BGR to RGB.
+  --mean_values MEAN_VALUES
+                        Optional. Normalize input by subtracting the mean
+                        values per channel. Example: 255 255 255
+  --scale_values SCALE_VALUES
+                        Optional. Divide input by scale values per channel
+                        Division is applied after mean values subtraction.
+                        Example: 255 255 255
 
 Debug options:
   -r, --raw_output_message

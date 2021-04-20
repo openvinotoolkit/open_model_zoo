@@ -40,14 +40,7 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::st
             if (flags_nthreads != 0)
                 config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THREADS_NUM), std::to_string(flags_nthreads));
 
-            if (flags_d.find("MULTI") != std::string::npos
-                && devices.find("GPU") != devices.end()) {
-                config.execNetworkConfig.emplace(CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO));
-            }
-            else {
-                // pin threads for CPU portion of inference
-                config.execNetworkConfig.emplace(CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(YES));
-            }
+            config.execNetworkConfig.emplace(CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO));
 
             // for CPU execution, more throughput-oriented execution via streams
             config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS),

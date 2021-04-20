@@ -602,9 +602,10 @@ class ConfigReader:
 def create_command_line_mapping(config, default_value, value_map=None):
     mapping = {}
     value_map = value_map or {}
-    for key in config:
+    for key, value in config.items():
         if key.endswith('file') or key.endswith('dir'):
-            mapping[key] = value_map.get(key, default_value)
+            if not Path(value).is_absolute():
+                mapping[key] = value_map.get(key, default_value)
 
     return mapping
 

@@ -45,7 +45,8 @@ DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Type of the network, either 'ae' for Associative Embedding or 'openpose' for OpenPose.";
+static const char at_message[] = "Required. Type of the network, either 'ae' for Associative Embedding, 'higherhrnet' for HigherHRNet models based on ae "
+"or 'openpose' for OpenPose.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_size_message[] = "Optional. Target input size.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
@@ -242,6 +243,11 @@ int main(int argc, char *argv[]) {
         else if (FLAGS_at == "ae") {
             model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
         }
+        else if (FLAGS_at == "higherhrnet") {
+            float delta = 0.5f;
+            std::string pad_mode = "center";
+            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, delta, pad_mode));
+        }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
@@ -258,6 +264,7 @@ int main(int argc, char *argv[]) {
 
         uint32_t framesProcessed = 0;
         bool keepRunning = true;
+        int64_t frameNum = -1;
         std::unique_ptr<ResultBase> result;
 
         while (keepRunning) {
@@ -269,7 +276,7 @@ int main(int argc, char *argv[]) {
                     // Input stream is over
                     break;
                 }
-                pipeline.submitData(ImageInputData(curr_frame),
+                frameNum = pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
                 }
 
@@ -305,7 +312,8 @@ int main(int argc, char *argv[]) {
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
-        while (result = pipeline.getResult()) {
+        for (; framesProcessed <= frameNum; framesProcessed++) {
+            while (!(result = pipeline.getResult())) {}
             cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
@@ -319,7 +327,6 @@ int main(int argc, char *argv[]) {
                 //--- Updating output window
                 cv::waitKey(1);
             }
-            framesProcessed++;
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------

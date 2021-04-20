@@ -296,7 +296,7 @@ AccuracyChecker supports following set of adapters:
   * `center_heatmap_out` - name of output layer with center points heatmaps.
   * `width_height_out` - name of the output layer with object sizes.
   * `regression_out` - name of the regression output with the offset prediction.
-* `mask_rcnn` - converting raw outputs of Mask-RCNN to combination of `DetectionPrediction` and `CoCocInstanceSegmentationPrediction`.
+* `mask_rcnn` - converting raw outputs of Mask-RCNN to combination of `DetectionPrediction` and `CoCoInstanceSegmentationPrediction`.
   * `classes_out` - name of output layer with information about classes (optional, if your model has detection_output layer as output).
   * `scores_out` - name of output layer with bbox scores (optional, if your model has detection_output layer as output).
   * `boxes_out` - name of output layer with bboxes (optional, if your model has detection_output layer as output).
@@ -310,7 +310,7 @@ AccuracyChecker supports following set of adapters:
   * `raw_masks_out` - name of output layer with raw instances masks.
   * `texts_out` - name of output layer with texts.
   * `confidence_threshold` - confidence threshold that is used to filter out detected instances.
-* `yolact` - converting raw outputs of Yolact model to to combination of `DetectionPrediction` and `CoCocInstanceSegmentationPrediction`.
+* `yolact` - converting raw outputs of Yolact model to to combination of `DetectionPrediction` and `CoCoInstanceSegmentationPrediction`.
   * `loc_out` - name of output layer which contains box locations, optional if boxes decoding embedded into model.
   * `prior_out` - name of output layer which contains prior boxes, optional if boxes decoding embedded into model.
   * `boxes_out` - name of output layer which contains decoded output boxes, optional if model has `prior` a `loc` outputs for boxes decoding.
@@ -392,3 +392,5 @@ AccuracyChecker supports following set of adapters:
   * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0.7).
 * `trimap` - converts greyscale model output to `ImageProcessingPrediction`. Replaces pixel values in cut and keep zones with 0 and 1 respectively. All other postprocessing inherited from `image_processing` adapter.
 * `background_matting` - converts output of background matting model to `BackgroundMattingPrediction`.
+* `noise_suppression` - converts output of audio denoising model to `NoiseSuppressionPrediction`.
+  * `output_blob` - name of output layer with processed signal (Optional, if not provided, first found output from model will be used).

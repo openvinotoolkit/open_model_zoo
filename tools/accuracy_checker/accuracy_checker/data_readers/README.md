@@ -56,6 +56,8 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
   * `frame_axis` - number of frame axis in 3D Image (optional, default `-1`, last axis)
   * `to_4D` - controls expanding of read results to 4D dimension (optional, default `True`)
 * `wav_reader` - read WAV file into NumPy array. Also gets the samplerate.
+  * `mono` - get mean along channels if multichannel audio loaded (Optional, default `False`).
+  * `to_float` - converts audio signal to float32 (Optional, default `False`).
 * `dicom_reader` - read images stored in DICOM format.
 * `pickle_reader` - read data stored in pickle file. Supported formats of pickle content:
   1. numeric data array

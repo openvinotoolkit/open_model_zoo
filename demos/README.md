@@ -138,7 +138,7 @@ Please run the following command before the demos build (assuming that the binar
 source <INSTALL_DIR>/deployment_tools/bin/setupvars.sh
 ```
 You can also build demos manually using Inference Engine built from the [openvino](https://github.com/openvinotoolkit/openvino) repo. In this case please set `InferenceEngine_DIR` environment variable to a folder containing `InferenceEngineConfig.cmake` and `ngraph_DIR` to a folder containing `ngraphConfig.cmake` in a build folder. Please also set the `OpenCV_DIR` to point to the OpenCV package to use. The same OpenCV version should be used both for Inference Engine and demos build. Alternatively these values can be provided via command line while running `cmake`. See [CMake's search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
-Please refer to the Inference Engine [build instructions](https://github.com/openvinotoolkit/openvino/blob/master/build-instruction.md)
+Please refer to the Inference Engine [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode)
 for details. Please also add path to built Inference Engine libraries to `LD_LIBRARY_PATH` (Linux*) or `PATH` (Windows*) variable before building the demos.
 
 ### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*

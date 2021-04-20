@@ -193,7 +193,8 @@ Accuracy Checker supports following set of preprocessors:
     * `True` - there are no dithering in time-domain, fixed value from `dither` parameter added to signal spectrum
     * `False` - dithering in time-domain, random values with  `dither` magnitude added to signal spectrum
   * `dither` - dithering value
-
+* `audio_patches` - split audio signal on patches with specified `size` for multi inference processing. If input signal can not be divided by size without remainder, signal will be padded by zeros left side.
+  * `size` - patch size.
 * `similarity_transform_box` - apply to image similarity transformation to get rectangle region stored in annotation metadata/
     * `box_scale` - box scale factor (Optional, default 1).
     * `dst_width` and `dst_height` are destination width and height for transformed image respectively.

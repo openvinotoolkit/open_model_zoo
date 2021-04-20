@@ -42,6 +42,20 @@ class DetectionWithLandmarks(Detection):
             self.landmarks.append((x, y))
 
 
+class InputTransform:
+    def __init__(self, reverse_input_channels, mean_values, scale_values):
+        self.is_trivial = not (reverse_input_channels or mean_values or scale_values)
+        self.reverse_input_channels = reverse_input_channels
+        self.mean_values = np.array(mean_values, dtype=np.float32) if mean_values else np.array([0., 0., 0.])
+        self.scale_values = np.array(scale_values, dtype=np.float32) if scale_values else np.array([1., 1., 1.])
+
+    def __call__(self, inputs):
+        if self.is_trivial:
+            return inputs
+        if self.reverse_input_channels:
+            inputs = cv2.cvtColor(inputs, cv2.COLOR_BGR2RGB)
+        return (inputs - self.mean_values) / self.scale_values
+
 def load_labels(label_file):
     with open(label_file, 'r') as f:
         labels_map = [x.strip() for x in f]
