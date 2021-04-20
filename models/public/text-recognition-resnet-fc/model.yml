@@ -17,7 +17,7 @@ description: >-
   based on ResNet with Fully Connected text recognition head. Source implementation
   on a PyTorch* framework could be found here <https://github.com/Media-Smart/vedastr>.
   Model is able to recognize alphanumeric text.
-task_type: scene_text_recognition
+task_type: optical_character_recognition
 files:
   - name: vedastr/models/__init__.py
     size: 88
