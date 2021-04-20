@@ -27,7 +27,7 @@ def compile(reporter, compiler_path, model, model_precision, args, output_dir):
         '-m={}'.format(args.model_dir / model.subdirectory / model_precision / (model.name + '.xml')),
         '-d={}'.format(args.target_device),
         '-ip={}'.format('U8' if args.input_precision is None else args.input_precision),
-        '-op={}'.format(model_precision if args.output_precision is None else args.output_precision),
+        '-op={}'.format('FP32' if args.output_precision is None else args.output_precision),
         '-o={}'.format(output_dir / model.subdirectory / model_precision /(model.name + '.blob')),
     ]
     reporter.print_section_heading('{}Compiling {} to BLOB ({})',
