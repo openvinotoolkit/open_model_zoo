@@ -24,15 +24,15 @@ Optionally you can provide `module_config` section which contains config for cus
 ## Examples
 * **Sequential Action Recognition Evaluator** demonstrates how to run Action Recognition models with encoder + decoder architecture.
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/sequential_action_recognition_evaluator.py`.
-  Configuration file example: `<omz_dir>/tools/accuracy_checker/configs/action-recognition-0001.yml`.
+  Configuration file example: `<omz_dir>/models/intel/action-recognition-0001/accuracy-check.yml`.
 
 * **MTCNN Evaluator** shows how to run MTCNN model.
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/mtcnn_evaluator.py`.
-  Configuration file example: `<omz_dir>/tools/accuracy_checker/configs/mtcnn.yml`.
+  Configuration file example: `<omz_dir>/models/public/mtcnn/accuracy-check.yml`.
 
 * **Text Spotting Evaluator** demonstrates how to evaluate the `text-spotting-0004` model via Accuracy Checker.
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/text_spotting_evaluator.py`.
-  Configuration file example: `<omz_dir>/tools/accuracy_checker/configs/text-spotting-0004.yml`.
+  Configuration file example: `<omz_dir>/models/intel/text-spotting-0004/accuracy-check.yml`.
 
 * **Automatic Speech Recognition Evaluator** shows how to evaluate speech recognition pipeline (encoder + decoder).
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/asr_encoder_decoder_evaluator.py`.
@@ -42,7 +42,7 @@ Optionally you can provide `module_config` section which contains config for cus
 
 * **Im2latex formula recognition** demonstrates how to run encoder-decoder model for extractring latex formula from image.
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/im2latex_evaluator.py`.
-  Configuration file example: `<omz_dir>/tools/accuracy_checker/configs/formula-recognition-medium-scan-0001.yml`.
+  Configuration file example: `<omz_dir>/models/intel/formula-recognition-medium-scan-0001/accuracy-check.yml`.
 
 * **I3D Evaluator** demonstrates how to evaluate two-stream I3D model (RGB + Flow).
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/i3d_evaluator.py`.
