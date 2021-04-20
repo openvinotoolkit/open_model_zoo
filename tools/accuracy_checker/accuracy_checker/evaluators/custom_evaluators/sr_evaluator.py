@@ -278,6 +278,7 @@ class BaseModel:
     def release(self):
         pass
 
+
 # pylint: disable=E0203
 class BaseDLSDKModel:
     def print_input_output_info(self):
