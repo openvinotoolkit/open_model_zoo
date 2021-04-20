@@ -46,6 +46,7 @@ static const char at_message[] = "Required. Type of the network, either 'sr' for
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char original_img_message[] = "Optional. Display the original image together with the resulting image.";
 static const char mixed_img_message[] = "Optional. Display the mixed image: left half for original image, right half for result of model";
+static const char diff_img_message[] = "Optional. Display the resulting image together with difference image (|processed-original|)";
 static const char vheight_message[] = "Optional. Height of view for result.";
 static const char vwidth_message[] = "Optional. Width of view for result.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
@@ -69,6 +70,7 @@ DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
 DEFINE_bool(orig, false, original_img_message);
 DEFINE_bool(mixed, false, mixed_img_message);
+DEFINE_bool(diff, false, diff_img_message);
 DEFINE_uint32(vheight, 0, vheight_message);
 DEFINE_uint32(vwidth, 0, vwidth_message);
 DEFINE_string(d, "CPU", target_device_message);
@@ -95,6 +97,7 @@ static void showUsage() {
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "    -orig                     " << original_img_message << std::endl;
     std::cout << "    -mixed                    " << mixed_img_message << std::endl;
+    std::cout << "    -diff                     " << diff_img_message << std::endl;
     std::cout << "    -vheight \"<integer>\"      " << vheight_message << std::endl;
     std::cout << "    -vwidth \"<integer>\"       " << vwidth_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
@@ -159,7 +162,15 @@ cv::Size getViewSize(const cv::Size& frameSize, const std::string& type) {
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
 
-cv::Mat renderResultData(ImageResult result, bool origImgDisplay, bool mixedImg, cv::Size& view) {
+void markImage(cv::Mat& image, const std::vector<std::string>& parts){
+    float delta = image.cols / parts.size() * 0.5;
+    for (size_t i = 0; i < parts.size(); ++i) {
+        cv::putText(image, parts[i], cv::Point(static_cast<int>(delta * (2 * i + 1)), 25),
+                    cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
+    }
+}
+
+cv::Mat renderResultData(ImageResult result, bool origImgDisplay, bool mixedMode, bool diffMode, cv::Size& view) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -171,8 +182,6 @@ cv::Mat renderResultData(ImageResult result, bool origImgDisplay, bool mixedImg,
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
     }
 
-    int c = result.resultImage.channels();
-
     if (inputImg.rows != view.height || inputImg.cols != view.width)
         cv::resize(inputImg, inputImg, view, 0, 0, cv::INTER_CUBIC);
 
@@ -180,22 +189,35 @@ cv::Mat renderResultData(ImageResult result, bool origImgDisplay, bool mixedImg,
         cv::resize(result.resultImage, result.resultImage, view, 0, 0, cv::INTER_CUBIC);
 
     cv::Mat resultImg;
-    if (inputImg.channels() != c)
+    if (inputImg.channels() != result.resultImage.channels())
         cv::cvtColor(result.resultImage, resultImg, cv::COLOR_GRAY2BGR);
     else
         resultImg = result.resultImage;
 
-    cv::putText(inputImg, "O", cv::Point(inputImg.cols * 0.33, 25),
-                           cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2, cv::LINE_AA);
-    cv::putText(resultImg, "P", cv::Point(resultImg.cols * 0.66, 25),
-                           cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2, cv::LINE_AA);
-    if (mixedImg)
+    if (diffMode) {
+        if (mixedMode || origImgDisplay)
+            throw std::logic_error("Diff mode don't work simultaneously with orig and mixed modes!");
+        cv::Mat concat;
+        cv::Mat diffImg;
+        cv::absdiff(inputImg, resultImg, diffImg);
+        markImage(resultImg, std::vector<std::string>{"R"});
+        markImage(diffImg, std::vector<std::string>{"D"});
+        cv::hconcat(resultImg, diffImg, concat);
+        return concat;
+    }
+    if (mixedMode)
         inputImg(cv::Rect(0, 0, inputImg.cols / 2, inputImg.rows)).copyTo(resultImg(cv::Rect(0, 0, resultImg.cols / 2, resultImg.rows)));
 
     cv::Mat out;
+    markImage(inputImg, std::vector<std::string>{"O"});
+    if (mixedMode)
+        markImage(resultImg, std::vector<std::string>{"O", "R"});
+    else
+        markImage(resultImg, std::vector<std::string>{"R"});
     if (origImgDisplay) {
         cv::Mat concat;
         cv::hconcat(inputImg, resultImg, concat);
+        cv::imwrite("deblurred_image.png", concat);
         return concat;
     }
     return resultImg;
@@ -239,7 +261,7 @@ int main(int argc, char *argv[]) {
 
         cv::VideoWriter videoWriter;
         auto viewResult = getViewSize(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at);
-        int k = FLAGS_orig ? 2 : 1;
+        int k = (FLAGS_orig || FLAGS_diff) ? 2 : 1;
         if (FLAGS_vheight)
             viewResult.height = FLAGS_vheight;
         if (FLAGS_vwidth)
@@ -275,7 +297,7 @@ int main(int argc, char *argv[]) {
                     viewResult.height = result->asRef<ImageResult>().resultImage.rows;
                 if (!FLAGS_vwidth)
                     viewResult.width = result->asRef<ImageResult>().resultImage.cols;
-                cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig, FLAGS_mixed, viewResult);
+                cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig, FLAGS_mixed, FLAGS_diff, viewResult);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -305,7 +327,7 @@ int main(int argc, char *argv[]) {
                 viewResult.height = result->asRef<ImageResult>().resultImage.rows;
             if (!FLAGS_vwidth)
                 viewResult.width = result->asRef<ImageResult>().resultImage.cols;
-            cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig, FLAGS_mixed, viewResult);
+            cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig, FLAGS_mixed, FLAGS_diff, viewResult);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
