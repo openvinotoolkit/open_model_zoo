@@ -575,6 +575,46 @@ datasets:
       data_dir: ICDAR15_DET/gt
     annotation: icdar15_detection.pickle
 
+  - name: ICDAR2015_recognition
+    data_source: ic15_1811
+    annotation_conversion:
+      converter: lmdb_text_recognition_database
+      lower_case: true
+      data_dir: ic15_1811
+    annotation: icdar15_recognition.pickle
+    reader:
+      type: lmdb_reader
+
+  - name: ICDAR03_recognition
+    data_source: ic03_867
+    annotation_conversion:
+      converter: lmdb_text_recognition_database
+      lower_case: true
+      data_dir: ic03_867
+    annotation: icdar03_recognition.pickle
+    reader:
+      type: lmdb_reader
+
+  - name: SVT_recognition
+    data_source: svt_647
+    annotation_conversion:
+      converter: lmdb_text_recognition_database
+      lower_case: true
+      data_dir: svt_647
+    annotation: svt_recognition.pickle
+    reader:
+      type: lmdb_reader
+
+  - name: IIIT5K
+    data_source: IIIT5K_3000
+    annotation_conversion:
+      converter: lmdb_text_recognition_database
+      lower_case: true
+      data_dir: IIIT5K_3000
+    annotation: IIIT5K_3000.pickle
+    reader:
+      type: lmdb_reader
+
   - name: ICDAR2015_word_spotting
     data_source: ICDAR15_DET/ch4_test_images
     annotation_conversion:

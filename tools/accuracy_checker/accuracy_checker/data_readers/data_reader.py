@@ -14,22 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from pathlib import Path
-from functools import singledispatch
-from collections import OrderedDict, namedtuple
 import re
 import wave
+from collections import OrderedDict, namedtuple
+from functools import singledispatch
+from pathlib import Path
 
 import cv2
-from PIL import Image
 import numpy as np
 from numpy.lib.npyio import NpzFile
+from PIL import Image
 
 from ..utils import get_path, read_json, read_pickle, contains_all, UnsupportedPackage, get_parameter_value_from_config
 from ..dependency import ClassProvider, UnregisteredProviderException
 from ..config import (
     BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField, PathField
 )
+
+try:
+    import lmdb
+except ImportError as import_error:
+    lmdb = UnsupportedPackage("lmdb", import_error.msg)
 
 try:
     import nibabel as nib
@@ -661,7 +666,7 @@ class TensorflowImageReader(BaseReader):
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config, **kwargs)
         try:
-            import tensorflow as tf # pylint: disable=C0415
+            import tensorflow as tf  # pylint: disable=C0415
         except ImportError as import_error:
             raise ImportError(
                 'tf backend for image reading requires TensorFlow. '
@@ -844,3 +849,22 @@ class ByteFileReader(BaseReader):
         data_path = self.data_source / data_id if self.data_source is not None else data_id
         with open(data_path, 'rb') as f:
             return np.array(f.read())
+
+
+class LMDBReader(BaseReader):
+    __provider__ = 'lmdb_reader'
+
+
+    def configure(self):
+        super().configure()
+        self.database = lmdb.open(bytes(self.data_source), readonly=True)
+
+    def read(self, data_id):
+        with self.database.begin(write=False) as txn:
+            img_key = f'image-{data_id:09d}'.encode()
+            image_bytes = txn.get(img_key)
+            img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_UNCHANGED)
+            if len(img.shape) < 3:
+                img = np.stack((img,) * 3, axis=-1)
+            assert img.shape[-1] == 3
+            return img
