@@ -424,7 +424,8 @@ class SRFModel(BaseModel):
 
     def load_network(self, network_list, launcher):
         for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_network(network_dict.get('srmodel', network_dict.get('model')), launcher)
+            self._part_by_name[network_dict['name']].load_network(
+                network_dict.get('srmodel', network_dict.get('model')), launcher)
         self.update_inputs_outputs_info()
 
     def load_model(self, network_list, launcher):
