@@ -289,6 +289,14 @@ The reported metric is collected over the alphanumeric subset of icdar 13 (1015 
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | Resnet-FC      | PyTorch\*      | [text-recognition-resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94% | 40.3704 | 177.9668  |
 
+## Named Entity Recognition
+
+Named entity recognition (NER) is the task of tagging entities in text with their corresponding type.
+
+| Model Name     | Implementation | OMZ Model Name                                   | Accuracy | GFlops  | mParams  |
+| -------------- | -------------- | ------------------------------------------------ | -------- | ------- | --------- |
+| bert-base-NER  | PyTorch\*      | [bert-base-ner](./bert-base-ner/README.md) | 94.45%  | 22.3874 | 107.4319  |
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.
