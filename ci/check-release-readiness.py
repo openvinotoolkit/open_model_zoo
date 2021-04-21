@@ -32,16 +32,22 @@ def main():
         all_passed = False
 
     for model_dir in OMZ_ROOT.glob('models/*/*/'):
-        # searching recursively, because this could be a composite model
-        has_config = bool(list(model_dir.glob('**/model.yml')))
+        has_model_yml = (model_dir / 'model.yml').is_file()
+        has_composite_model_yml = (model_dir / 'composite-model.yml').is_file()
 
-        has_doc = bool(list(model_dir.glob('**/*.md')))
+        has_config = has_model_yml or has_composite_model_yml
+
+        has_doc = (model_dir / 'README.md').is_file()
 
         if has_config and not has_doc:
             complain('model {} has no documentation', model_dir.name)
 
         if has_doc and not has_config:
             complain('model {} has no config file', model_dir.name)
+
+        if has_composite_model_yml:
+            if not list(model_dir.glob('*/model.yml')):
+                complain('composite model {} has no components', model_dir.name)
 
     for models_lst_path in OMZ_ROOT.glob('demos/**/models.lst'):
         with models_lst_path.open() as models_lst:
