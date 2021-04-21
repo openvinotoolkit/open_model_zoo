@@ -7,6 +7,7 @@ The demo shows an example of using neural networks to detect and recognize print
 * `horizontal-text-detection-0001`, which is a detection network that works much faster than models above, but it is applicable to finding more or less horizontal text only.
 * `text-recognition-0012`, which is a recognition network for recognizing text.
 * `text-recognition-0013`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and specify output layer name via `-tr_o_blb_nm` option for this model (see model [description](../../../models/intel/text-recognition-0013/README.md) for details).
+* `text-recognition-resnet-fc`, which is a recognition network for recognizing text. You should add option `-tr_pt_first`.
 * `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
 
 For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
@@ -29,10 +30,11 @@ Options:
     -h                           Print a usage message.
     -i                           Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -loop                        Optional. Enable reading the input in a loop.
-    -o "<path>"                  Optional. Name of output to save.
-    -limit "<num>"               Optional. Number of frames to store in output. If 0 is set, all frames are stored.
+    -o "<path>"                Optional. Name of output to save.
+    -limit "<num>"             Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m_td "<path>"               Required. Path to the Text Detection model (.xml) file.
     -m_tr "<path>"               Required. Path to the Text Recognition model (.xml) file.
+    -dt "<path>"               Required. Type of the decoder, either 'simple' for SimpleDecoder or 'ctc' for CTC greedy and CTC beam search decoders.
     -m_tr_ss "<value>"           Optional. Symbol set for the Text Recognition model.
     -tr_pt_first                   Optional. Specifies if pad token is the first symbol in the alphabet. Default is false
     -tr_o_blb_nm                   Optional. Name of the output blob of the model which would be used as model output. If not stated, first blob of the model would be used.
@@ -64,9 +66,12 @@ For example, use the following command line command to run the application:
 ./text_detection_demo -m_td <path_to_model>/text-detection-0004.xml \
                       -m_tr <path_to_model>/text-recognition-0013.xml \
                       -i <path_to_image>/sample.jpg \
+                      -dt "ctc" \
                       -tr_pt_first \
                       -tr_o_blb_nm "logits"
 ```
+
+For `text-recognition-resnet-fc` you should use `simple` decoder for `-dt` option. For other models `ctc` decoder.
 
 ## Demo Output
 

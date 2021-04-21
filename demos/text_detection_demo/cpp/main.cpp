@@ -57,6 +57,10 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_m_td.empty() && FLAGS_m_tr.empty()) {
         throw std::logic_error("Neither parameter -m_td nor -m_tr is not set");
     }
+
+    if (!FLAGS_m_tr.empty() && FLAGS_dt.empty()) {
+        throw std::logic_error("Parameter -dt is not set");
+    }
     return true;
 }
 
@@ -127,6 +131,7 @@ int main(int argc, char *argv[]) {
         auto extension_path = FLAGS_l;
         auto cls_conf_threshold = static_cast<float>(FLAGS_cls_pixel_thr);
         auto link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
+        auto decoder_type = FLAGS_dt;
         auto decoder_bandwidth = FLAGS_b;
 
         slog::info << "Loading network files" << slog::endl;
@@ -235,13 +240,23 @@ int main(int argc, char *argv[]) {
 
                     LockedMemory<const void> blobMapped = as<MemoryBlob>(out_blob)->rmap();
                     float *output_data_pointer = blobMapped.as<float *>();
-                    std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
+                    std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[1] * output_shape[2]);
 
                     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-                    if (decoder_bandwidth == 0) {
-                        res = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
-                    } else {
-                        res = CTCBeamSearchDecoder(output_data, kAlphabet, kPadSymbol, &conf, decoder_bandwidth);
+                    if (decoder_type == "simple") {
+                        res = SimpleDecoder(output_data, kAlphabet, kPadSymbol, &conf);
+                    }
+                    else if (decoder_type == "ctc") {
+                        if (decoder_bandwidth == 0) {
+                            res = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
+                        }
+                        else {
+                            res = CTCBeamSearchDecoder(output_data, kAlphabet, kPadSymbol, &conf, decoder_bandwidth);
+                        }
+                    }
+                    else {
+                        slog::err << "No decoder type or invalid decoder type (-dt) provided: " + decoder_type << slog::endl;
+                        return -1;
                     }
                     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                     text_recognition_postproc_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();

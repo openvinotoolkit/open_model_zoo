@@ -37,6 +37,7 @@ Image, name: `input`, shape: `1, 1, 32, 100` in the format `B, C, H, W`, where:
 Note that the source image should be tight aligned crop with detected text converted to grayscale.
 
 ## Outputs
+
 Output tensor, name: `output`, shape: `1, 26, 37` in the format `B, W, L`, where:
 
 - `W` - output sequence length
@@ -45,6 +46,16 @@ Output tensor, name: `output`, shape: `1, 26, 37` in the format `B, W, L`, where
   `[s]0123456789abcdefghijklmnopqrstuvwxyz`, where [s] - special end of sequence character for decoder.
 
 The network output decoding process is pretty easy: get the argmax on `L` dimension, transform indices to letters and slice the resulting phrase on the first entry of `end-of-sequence` symbol.
+
+## Use text-detection demo
+
+Model is supported by [text-detection c++ demo](../../../demos/text_detection_demo/cpp/main.cpp). In order to use this model in the demo, user should pass the following options:
+```
+  -tr_pt_first
+  -dt "simple"
+```
+
+For more information, please, see documentation of the demo.
 
 ## Legal Information
 
