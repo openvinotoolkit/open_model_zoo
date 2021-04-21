@@ -153,7 +153,7 @@ ObjectDetector::ObjectDetector(
 
 void ObjectDetector::wait() {
     if (!request || !config_.is_async) return;
-    request->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
+    request->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
 }
 
 void ObjectDetector::fetchResults() {
