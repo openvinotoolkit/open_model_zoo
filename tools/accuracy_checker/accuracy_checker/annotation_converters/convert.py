@@ -303,7 +303,7 @@ def configure_converter(converter_options, args, converter):
 
 
 def get_converter_arguments(arguments):
-    converter = BaseFormatConverter.provide(arguments.converter)
+    converter = BaseFormatConverter.provide(arguments.converter, {})
     converter_argparser = converter.get_argparser()
     converter_options, _ = converter_argparser.parse_known_args()
     return converter, converter_argparser, converter_options
