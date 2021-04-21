@@ -205,7 +205,7 @@ private:
     std::list<TrackableObject> trackables;
 };
 
-// waits for all classifiers and recognisers accumulating results
+// waits for all reid results accumulating results
 class ClassifiersAggregator {
 public:
     explicit ClassifiersAggregator(const VideoFrame::Ptr &sharedVideoFrame) : sharedVideoFrame{sharedVideoFrame} {}
