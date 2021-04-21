@@ -231,9 +231,7 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
     }
-    if (outputTransform.doResize) {
-        outputTransform.resize(outputImg);
-    }
+    outputTransform.resize(outputImg);
     // Visualizing result data over source image
     if (FLAGS_r) {
         slog::info << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
@@ -250,9 +248,7 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
                 << std::setw(4) << std::min(int(obj.y + obj.height), outputImg.rows)
                 << slog::endl;
         }
-        if (outputTransform.doResize) {
-            outputTransform.scaleRect(obj);
-        }
+        outputTransform.scaleRect(obj);
         std::ostringstream conf;
         conf << ":" << std::fixed << std::setprecision(1) << obj.confidence * 100 << '%';
         auto color = palette[obj.labelID];
@@ -265,9 +261,7 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
 
     try {
         for (auto& lmark : result.asRef<RetinaFaceDetectionResult>().landmarks) {
-            if (outputTransform.doResize) {
-                outputTransform.scaleCoord(lmark);
-            }
+            outputTransform.scaleCoord(lmark);
             cv::circle(outputImg, lmark, 2, cv::Scalar(0, 255, 255), -1);
         }
     }

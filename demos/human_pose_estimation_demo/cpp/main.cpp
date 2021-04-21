@@ -150,9 +150,7 @@ cv::Mat renderHumanPose(HumanPoseResult& result, OutputTransform& outputTransfor
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
     }
-    if (outputTransform.doResize) {
-        outputTransform.resize(outputImg);
-    }
+    outputTransform.resize(outputImg);
     static const cv::Scalar colors[HPEOpenPose::keypointsNumber] = {
         cv::Scalar(255, 0, 0), cv::Scalar(255, 85, 0), cv::Scalar(255, 170, 0),
         cv::Scalar(255, 255, 0), cv::Scalar(170, 255, 0), cv::Scalar(85, 255, 0),
@@ -176,9 +174,7 @@ cv::Mat renderHumanPose(HumanPoseResult& result, OutputTransform& outputTransfor
     for (auto& pose : result.poses) {
         for (size_t keypointIdx = 0; keypointIdx < pose.keypoints.size(); keypointIdx++) {
             if (pose.keypoints[keypointIdx] != absentKeypoint) {
-                if (outputTransform.doResize) {
-                    outputTransform.scaleCoord(pose.keypoints[keypointIdx]);
-                }
+                outputTransform.scaleCoord(pose.keypoints[keypointIdx]);
                 cv::circle(outputImg, pose.keypoints[keypointIdx], 4, colors[keypointIdx], -1);
             }
         }

@@ -187,9 +187,7 @@ cv::Mat renderSegmentationData(const SegmentationResult& result, OutputTransform
 
     // Visualizing result data over source image
     cv::Mat output = inputImg / 2 + applyColorMap(result.mask) / 2;
-    if (outputTransform.doResize) {
-        outputTransform.resize(output);
-    }
+    outputTransform.resize(output);
     return output;
 }
 

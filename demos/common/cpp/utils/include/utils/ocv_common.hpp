@@ -127,6 +127,7 @@ class OutputTransform {
         }
 
         void resize(cv::Mat& image) {
+            if (!doResize) { return; }
             cv::Size currSize = image.size();
             if (currSize != inputSize) {
                 inputSize = currSize;
@@ -138,14 +139,14 @@ class OutputTransform {
 
         template<typename T>
         void scaleCoord(T& coord) {
-            if (scaleFactor == 1) { return; }
+            if (!doResize || scaleFactor == 1) { return; }
             coord.x = std::floor(coord.x * scaleFactor);
             coord.y = std::floor(coord.y * scaleFactor);
         }
 
         template<typename T>
         void scaleRect(T& rect) {
-            if (scaleFactor == 1) { return; }
+            if (!doResize || scaleFactor == 1) { return; }
             scaleCoord(rect);
             rect.width = std::floor(rect.width * scaleFactor);
             rect.height = std::floor(rect.height * scaleFactor);
