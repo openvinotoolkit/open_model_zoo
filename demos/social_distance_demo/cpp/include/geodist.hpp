@@ -10,5 +10,3 @@ std::tuple<bool, bool, double> socialDistance(std::tuple<int, int> &frameShape,
                                                cv::Point2d &A, cv::Point2d &B,
                                                cv::Point2d &C, cv::Point2d &D,
                                                unsigned minIter = 3, double minW = 0, double maxW = 0);
-
-std::tuple<int, int, int, int> getCrop(std::tuple<int, int, int, int> a, std::tuple<int, int, int, int> b);
