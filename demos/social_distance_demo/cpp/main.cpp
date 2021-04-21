@@ -58,14 +58,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-struct BboxAndDescr {
-    enum class ObjectType {
-        NONE,
-    } objectType;
-    cv::Rect rect;
-    std::string descr;
-};
-
 struct InferRequestsContainer {
     InferRequestsContainer() = default;
     InferRequestsContainer(const InferRequestsContainer&) = delete;
@@ -199,18 +191,18 @@ public:
 // draws results on the frame
 class ResAggregator : public Task {
 public:
-    ResAggregator(const VideoFrame::Ptr &sharedVideoFrame, std::list<BboxAndDescr> &&boxesAndDescrs,
-                  std::list<TrackableObject> &&trackers)
+    ResAggregator(const VideoFrame::Ptr &sharedVideoFrame, std::list<cv::Rect> &&boxes,
+                  std::list<TrackableObject> &&trackables)
             : Task{sharedVideoFrame, 4.0},
-              boxesAndDescrs{std::move(boxesAndDescrs)},
-              trackers{std::move(trackers)} {}
+              boxes{std::move(boxes)},
+              trackables{std::move(trackables)} {}
 
     bool isReady() override { return true; }
     void process() override;
 
 private:
-    std::list<BboxAndDescr> boxesAndDescrs;
-    std::list<TrackableObject> trackers;
+    std::list<cv::Rect> boxes;
+    std::list<TrackableObject> trackables;
 };
 
 // waits for all classifiers and recognisers accumulating results
@@ -224,23 +216,23 @@ public:
         std::cout << rawDetections;
         printMutex.unlock();
         tryPush(static_cast<ReborningVideoFrame *>(sharedVideoFrame.get())->context.resAggregatorsWorker,
-                std::make_shared<ResAggregator>(sharedVideoFrame, std::move(boxesAndDescrs), std::move(trackers)));
+                std::make_shared<ResAggregator>(sharedVideoFrame, std::move(boxes), std::move(trackables)));
     }
 
-    void push(BboxAndDescr &&bboxAndDescr) {
-        boxesAndDescrs.lockedPushBack(std::move(bboxAndDescr));
+    void push(cv::Rect &&bbox) {
+        boxes.lockedPushBack(std::move(bbox));
     }
 
-    void push(TrackableObject &&tracker) {
-        trackers.lockedPushBack(std::move(tracker));
+    void push(TrackableObject &&trackable) {
+        trackables.lockedPushBack(std::move(trackable));
     }
 
     const VideoFrame::Ptr sharedVideoFrame;
     std::string rawDetections;
 
 private:
-    ConcurrentContainer<std::list<BboxAndDescr>> boxesAndDescrs;
-    ConcurrentContainer<std::list<TrackableObject>> trackers;
+    ConcurrentContainer<std::list<cv::Rect>> boxes;
+    ConcurrentContainer<std::list<TrackableObject>> trackables;
 };
 
 // extracts detections from blob InferRequests and runs Re-Id
@@ -402,27 +394,21 @@ void ResAggregator::process() {
     unsigned sourceID = sharedVideoFrame->sourceID;
     auto& personTracker = context.trackersContext.personTracker[sourceID];
     if (!FLAGS_no_show) {
-        for (const BboxAndDescr& bboxAndDescr : boxesAndDescrs) {
-            switch (bboxAndDescr.objectType) {
-                case BboxAndDescr::ObjectType::NONE:
-                    cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  2);
-                    if (bboxAndDescr.rect.width < context.trackersContext.minW[sourceID]) {
-                        context.trackersContext.minW[sourceID] = bboxAndDescr.rect.width;
-                    }
-                    if (bboxAndDescr.rect.width > context.trackersContext.maxW[sourceID]) {
-                        context.trackersContext.maxW[sourceID] = bboxAndDescr.rect.width;
-                    }
-                    break;
-                default: throw std::exception();  // must never happen
-                          break;
+        for (const cv::Rect& bbox : boxes) {
+            cv::rectangle(sharedVideoFrame->frame, bbox, {0, 255, 0},  2);
+            if (bbox.width < context.trackersContext.minW[sourceID]) {
+                context.trackersContext.minW[sourceID] = bbox.width;
+            }
+            if (bbox.width > context.trackersContext.maxW[sourceID]) {
+                context.trackersContext.maxW[sourceID] = bbox.width;
             }
         }
 
-        personTracker.similarity(trackers);
+        personTracker.similarity(trackables);
 
         std::vector<int> keys;
-        keys.reserve(personTracker.trackers.size());
-        for (auto kv : personTracker.trackers) {
+        keys.reserve(personTracker.trackables.size());
+        for (auto kv : personTracker.trackables) {
             keys.push_back(kv.first);
         }
 
@@ -430,8 +416,8 @@ void ResAggregator::process() {
         int h = sharedVideoFrame->frame.size().height;
         for (decltype(keys)::size_type i = 0; keys.size() > 1 && i < keys.size() - 1; ++i) {
             for (decltype(keys)::size_type j = i + 1; j < keys.size(); ++j) {
-                cv::Rect2d l1 = personTracker.trackers.at(keys[i]).bbox;
-                cv::Rect2d l2 = personTracker.trackers.at(keys[j]).bbox;
+                cv::Rect2d l1 = personTracker.trackables.at(keys[i]).bbox;
+                cv::Rect2d l2 = personTracker.trackables.at(keys[j]).bbox;
 
                 cv::Point2d a, b, c, d;
                 if (l1.y + l1.height < l2.y + l2.height) {
@@ -540,7 +526,7 @@ void DetectionsProcessor::process() {
                                  reidRequest.SetCompletionCallback([] {}); // destroy the stored bind object
                                  std::vector<float> result = context.detectionsProcessorsContext.reid.getResults(reidRequest);
 
-                                 classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::NONE, rect, std::move(std::string("fake"))});
+                                 classifiersAggregator->push(cv::Rect(rect));
                                  classifiersAggregator->push(TrackableObject{rect,
                                         std::move(result), {rect.x + rect.width / 2, rect.y + rect.height } });
                                  context.reidInfers.inferRequests.lockedPushBack(reidRequest);
@@ -552,7 +538,7 @@ void DetectionsProcessor::process() {
         personRects.erase(personRects.begin(), personRectsIt);
     } else {
         for (const cv::Rect& personRect : personRects) {
-            classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::NONE, personRect, ""});
+            classifiersAggregator->push(cv::Rect(personRect));
         }
         personRects.clear();
     }
