@@ -711,7 +711,7 @@ PYTHON_DEMOS = [
                         }),
                         single_option_cases('-m',
                             ModelFileArg('ultra-lightweight-face-detection-rfb-320', 'ultra-lightweight-face-detection-rfb-320.onnx'),
-                            ModelFileArg('ultra-lightweight-face-detection-slim-320', 'ultra-lightweight-face-detection-rfb-320.onnx'),
+                            ModelFileArg('ultra-lightweight-face-detection-slim-320', 'ultra-lightweight-face-detection-slim-320.onnx'),
                         ),
                     ),
                 ]
