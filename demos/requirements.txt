@@ -1,4 +1,5 @@
 librosa
+soundfile
 matplotlib
 motmetrics
 nibabel

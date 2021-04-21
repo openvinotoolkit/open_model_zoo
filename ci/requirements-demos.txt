@@ -130,7 +130,9 @@ six==1.15.0
     #   python-dateutil
     #   resampy
 soundfile==0.10.3.post1
-    # via librosa
+    # via
+    #   -r demos/requirements.txt
+    #   librosa
 tensorboardx==2.2
     # via -r demos/requirements.txt
 threadpoolctl==2.1.0
