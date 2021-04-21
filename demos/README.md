@@ -131,7 +131,7 @@ Notice that the FPGA support comes through a [heterogeneous execution](https://d
 
 ## Build the Demo Applications
 
-To be able to build demos you need to source `InferenceEngine` and `OpenCV` environment from a binary package which is available as [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution.
+To be able to build demos you need to source InferenceEngine and OpenCV environment from a binary package which is available as [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution.
 Please run the following command before the demos build (assuming that the binary package was installed to `<INSTALL_DIR>`):
 
 ```sh
