@@ -59,7 +59,7 @@ To run the demo applications, you can use images and videos from the media files
 
 > **NOTE:** Inference Engine HDDL and FPGA plugins are available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
 
-You can download the [Intel pre-trained models](../models/intel/index.md) or [public pre-trained models](../models/public.index.md) using the OpenVINO [Model Downloader](../tools/downloader/README.md).
+You can download the [Intel pre-trained models](../models/intel/index.md) or [public pre-trained models](../models/public/index.md) using the OpenVINO [Model Downloader](../tools/downloader/README.md).
 The table below shows the correlation between models, demos, and supported plugins. The plugins names are exactly as they are passed to the demos with `-d` option. The correlation between the plugins and supported devices see in the [Supported Devices](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_Supported_Devices.html) section.
 
 > **NOTE:** **MYRIAD** below stands for Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ Vision Processing Units.
