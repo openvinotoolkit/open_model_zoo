@@ -38,6 +38,7 @@ public:
                     if (cosine > similarityThreshold)
                         sim.push_back(std::make_pair(tracker.first, cosine));
                 }
+
                 if (!sim.empty()) {
                     int maxSimilarity = getMaxSimilarity(sim);
                     if (maxSimilarity < 0)

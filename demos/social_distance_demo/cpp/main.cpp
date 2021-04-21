@@ -406,19 +406,14 @@ void ResAggregator::process() {
 
         personTracker.similarity(trackables);
 
-        std::vector<int> keys;
-        keys.reserve(personTracker.trackables.size());
-        for (auto kv : personTracker.trackables) {
-            keys.push_back(kv.first);
-        }
-
         int w = sharedVideoFrame->frame.size().width;
         int h = sharedVideoFrame->frame.size().height;
-        for (decltype(keys)::size_type i = 0; keys.size() > 1 && i < keys.size() - 1; ++i) {
-            for (decltype(keys)::size_type j = i + 1; j < keys.size(); ++j) {
-                cv::Rect2d l1 = personTracker.trackables.at(keys[i]).bbox;
-                cv::Rect2d l2 = personTracker.trackables.at(keys[j]).bbox;
-
+        for (auto it1 = personTracker.trackables.begin(); it1 != personTracker.trackables.end(); ++it1) {
+            cv::Rect2d  l1 = it1->second.bbox;
+            auto it2 = it1;
+            ++it2;
+            for (; it2 != personTracker.trackables.end(); ++it2) {
+                cv::Rect2d  l2 = it2->second.bbox;
                 cv::Point2d a, b, c, d;
                 if (l1.y + l1.height < l2.y + l2.height) {
                     a = { l1.x, l1.y + l1.height };
