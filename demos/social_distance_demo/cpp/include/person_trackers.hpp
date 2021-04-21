@@ -31,7 +31,6 @@ public:
 
     void similarity(std::list<TrackableObject> &tos) {
         if (trackables.size() > 0) {
-            auto ntos = tos.size();
             for (const auto& to : tos) {
                 std::deque<std::pair<int, float>> sim;
                 for (auto &tracker : trackables) {
