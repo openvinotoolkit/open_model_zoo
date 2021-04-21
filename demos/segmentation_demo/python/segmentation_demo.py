@@ -32,6 +32,7 @@ import monitors
 from pipelines import get_user_configs, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
+from helpers import resolution
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
 log = logging.getLogger()
@@ -91,16 +92,14 @@ class SegmentationVisualizer:
 
     def overlay_masks(self, frame, objects, output_transform):
         # Visualizing result data over source image
-        output = np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2)
-        return output_transform.resize(output) if output_transform else output
+        return output_transform.resize(np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2))
 
 
 class SaliencyMapVisualizer:
     def overlay_masks(self, frame, objects, output_transform):
         saliency_map = (objects * 255).astype(np.uint8)
         saliency_map = cv2.merge([saliency_map, saliency_map, saliency_map])
-        output = np.floor_divide(frame, 2) + np.floor_divide(saliency_map, 2)
-        return output_transform.resize(output) if output_transform else output
+        return output_transform.resize(np.floor_divide(frame, 2) + np.floor_divide(saliency_map, 2))
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -142,9 +141,10 @@ def build_argparser():
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')
     io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
-    io_args.add_argument('--output_resolution', default=None, type=str,
+    io_args.add_argument('--output_resolution', default=None, type=resolution,
                          help='Optional. Specify the maximum output window resolution '
-                              'in (width x height) format. Example: 1280x720.')
+                              'in (width x height) format. Example: 1280x720. '
+                              'Using the input frame size by default.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
     return parser
@@ -194,11 +194,8 @@ def main():
                     raise ValueError("Can't read an image from the input")
                 break
             if next_frame_id == 0:
+                output_transform = OutputTransform(frame.shape[:2], args.output_resolution)
                 if args.output_resolution:
-                    if 'x' not in args.output_resolution:
-                        raise ValueError('Сorrect format of --output_resolution parameter is "width"x"height".')
-                    output_transform = OutputTransform(frame.shape[:2],
-                        [int(v) for v in args.output_resolution.split('x')])
                     output_resolution = output_transform.new_resolution
                 else:
                     output_resolution = (frame.shape[1], frame.shape[0])

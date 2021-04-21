@@ -31,6 +31,7 @@ import monitors
 from images_capture import open_images_capture
 from pipelines import get_user_configs, AsyncPipeline
 from performance_metrics import PerformanceMetrics
+from helpers import resolution
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
 log = logging.getLogger()
@@ -85,9 +86,10 @@ def build_argparser():
 
     io_args = parser.add_argument_group('Input/output options')
     io_args.add_argument('-no_show', '--no_show', help="Optional. Don't show output.", action='store_true')
-    io_args.add_argument('--output_resolution', default=None, type=str,
+    io_args.add_argument('--output_resolution', default=None, type=resolution,
                          help='Optional. Specify the maximum output window resolution '
-                              'in (width x height) format. Example: 1280x720.')
+                              'in (width x height) format. Example: 1280x720. '
+                              'Using the input frame size by default.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
@@ -124,8 +126,7 @@ colors = (
 
 
 def draw_poses(img, poses, point_score_threshold, output_transform, skeleton=default_skeleton, draw_ellipses=False):
-    if output_transform:
-        img = output_transform.resize(img)
+    img = output_transform.resize(img)
     if poses.size == 0:
         return img
     stick_width = 4
@@ -133,8 +134,7 @@ def draw_poses(img, poses, point_score_threshold, output_transform, skeleton=def
     img_limbs = np.copy(img)
     for pose in poses:
         points = pose[:, :2].astype(np.int32)
-        if output_transform:
-            points = output_transform.scale(points)
+        points = output_transform.scale(points)
         points_scores = pose[:, 2]
         # Draw joints.
         for i, (p, v) in enumerate(zip(points, points_scores)):
@@ -189,14 +189,11 @@ def main():
     next_frame_id = 1
     next_frame_id_to_show = 0
 
-    output_transform = None
-    output_resolution = (frame.shape[1], frame.shape[0])
+    output_transform = models.OutputTransform(frame.shape[:2], args.output_resolution)
     if args.output_resolution:
-        if 'x' not in args.output_resolution:
-            raise ValueError('Сorrect format of --output_resolution parameter is "width"x"height".')
-        output_transform = models.OutputTransform(frame.shape[:2],
-            [int(v) for v in args.output_resolution.split('x')])
         output_resolution = output_transform.new_resolution
+    else:
+        output_resolution = (frame.shape[1], frame.shape[0])
     presenter = monitors.Presenter(args.utilization_monitors, 55,
                                    (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
     video_writer = cv2.VideoWriter()

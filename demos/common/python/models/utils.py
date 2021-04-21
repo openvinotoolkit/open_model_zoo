@@ -45,7 +45,8 @@ class DetectionWithLandmarks(Detection):
 class OutputTransform:
     def __init__(self, input_size, output_resolution):
         self.output_resolution = output_resolution
-        self.new_resolution = self.compute_resolution(input_size)
+        if self.output_resolution:
+            self.new_resolution = self.compute_resolution(input_size)
 
     def compute_resolution(self, input_size):
         self.input_size = input_size
@@ -55,6 +56,8 @@ class OutputTransform:
         return self.scale(size)
 
     def resize(self, image):
+        if not self.output_resolution:
+            return image
         curr_size = image.shape[:2]
         if curr_size != self.input_size:
             self.new_resolution = self.compute_resolution(curr_size)
@@ -63,7 +66,7 @@ class OutputTransform:
         return cv2.resize(image, self.new_resolution)
 
     def scale(self, inputs):
-        if self.scale_factor == 1:
+        if not self.output_resolution or self.scale_factor == 1:
             return inputs
         return (np.array(inputs) * self.scale_factor).astype(np.int32)
 
