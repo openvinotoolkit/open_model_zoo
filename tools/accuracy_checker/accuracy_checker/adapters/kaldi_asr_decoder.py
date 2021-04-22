@@ -24,6 +24,7 @@ from .adapter import Adapter
 from ..config import PathField, BoolField, NumberField, ConfigError
 from ..representation import CharacterRecognitionPrediction
 from ..utils import read_txt
+from  ..data_readers import ListIdentifier
 
 
 class KaldiLatGenDecoder(Adapter):
@@ -142,7 +143,12 @@ class KaldiLatGenDecoder(Adapter):
             self._create_temp_dir()
         preds = self._extract_predictions(raw, frame_meta)
         for identifier, log_scores in zip(identifiers, preds[self.output_blob]):
-            utt_name = identifier.key if not isinstance(identifier, list) else identifier[0].key
+            if not isinstance(identifier, (list, ListIdentifier)):
+                utt_name = identifier.key
+            elif isinstance(identifier, list):
+                utt_name = identifier[0].key
+            else:
+                utt_name = identifier.values[0].key
             scores_file = self.dump_scores(utt_name, log_scores)
             trans = self.run_decoder(scores_file)
             results.append(CharacterRecognitionPrediction(identifier, trans[utt_name]))
