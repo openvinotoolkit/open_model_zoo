@@ -28,7 +28,7 @@ def compile(reporter, compiler_path, model, model_precision, args, output_dir):
         '-d={}'.format(args.target_device),
         '-ip={}'.format('U8' if args.input_precision is None else args.input_precision),
         '-op={}'.format('FP32' if args.output_precision is None else args.output_precision),
-        '-o={}'.format(output_dir / model.subdirectory / model_precision /(model.name + '.blob')),
+        '-o={}'.format(output_dir / model.subdirectory / model_precision / (model.name + '.blob')),
     ]
     reporter.print_section_heading('{}Compiling {} to BLOB ({})',
         '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
@@ -60,7 +60,7 @@ def main():
     parser.add_argument('--target_device', help='target device for the compiled model', default='MYRIAD')
     parser.add_argument('--all', action='store_true', help='compile all available models')
     parser.add_argument('--print_all', action='store_true', help='print all available models')
-    parser.add_argument('--compiler', type=Path, help='Compile Tool executable entry point')
+    parser.add_argument('--compile_tool', type=Path, help='Compile Tool executable entry point')
     parser.add_argument('--dry_run', action='store_true',
         help='print the compilation commands without running them')
     args = parser.parse_args()
@@ -99,7 +99,7 @@ def main():
             continue
         for precision in sorted(requested_precisions):
             if not compile(reporter, compiler_path, model, precision, args, output_dir):
-                failed_models.append(model.name + ' (' + precision + ')')
+                failed_models.append(f'{model.name} ({precision})')
                 continue
 
     if failed_models:

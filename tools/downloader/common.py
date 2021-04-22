@@ -481,7 +481,7 @@ Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Model:
     def __init__(self, name, subdirectory, files, postprocessing, mo_args, quantizable, framework,
-                 description, license_url, precisions, task_type, conversion_to_onnx_args, compilable = False):
+                 description, license_url, precisions, task_type, conversion_to_onnx_args):
         self.name = name
         self.subdirectory = subdirectory
         self.files = files

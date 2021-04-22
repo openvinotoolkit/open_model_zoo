@@ -394,7 +394,7 @@ are ignored.
 The `--all` option can be replaced with other filter options to compile only
 a subset of models. See the "Shared options" section.
 
-The current directory must be the root of a tree of model files create by the model
+The current directory must be the root of a tree of model files created by the model
 converter. To specify a different model tree path, use the `--model_dir` option:
 
 ```sh
@@ -408,7 +408,7 @@ into a different directory tree, use the `-o`/`--output_dir` option:
 ./networks_compiler.py --all --output_dir my/output/directory
 ```
 
-By default, the script will produce models in FP16 and FP32 precisions.
+By default, the script will compile models in FP16 and FP32 precisions.
 To only produce models in a specific precision, use
 the `--precisions` option:
 
