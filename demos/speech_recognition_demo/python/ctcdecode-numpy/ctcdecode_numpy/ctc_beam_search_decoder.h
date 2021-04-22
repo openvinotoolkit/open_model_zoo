@@ -29,10 +29,8 @@ public:
 
   void init(
     const std::vector<std::string>& alphabet,
-    size_t blank_idx,  // 0
+    size_t blank_idx,
     size_t beam_size,
-    //float cutoff_prob = 1.0,
-    //size_t cutoff_top_n = 40,
     ScorerBase * lm_scorer = nullptr  // we don't own it: the caller is responsible for destroying it at the proper time
                                       // nullptr when no scorer
   );

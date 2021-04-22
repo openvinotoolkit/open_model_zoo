@@ -14,21 +14,19 @@ class AudioFeaturesSeqPipelineStage(BlockedSeqPipelineStage):
     def __init__(self, profile):
         self.p = deepcopy(profile)
         sampling_rate = self.p['model_sampling_rate']
-        self.window_len = round(sampling_rate * self.p['frame_window_size_seconds'])
-        self.stride_len = round(sampling_rate * self.p['frame_stride_seconds'])
+        window_len = round(sampling_rate * self.p['frame_window_size_seconds'])
+        stride_len = round(sampling_rate * self.p['frame_stride_seconds'])
 
         # window_size must be a power of 2 to match tf:
-        if not (self.window_len > 0 and (self.window_len - 1) & self.window_len == 0):
+        if not (window_len > 0 and (window_len - 1) & window_len == 0):
             raise ValueError("window_size(ms)*sampling_rate(kHz) must be a power of two")
 
         super().__init__(
-            block_len=self.stride_len, context_len=self.window_len - self.stride_len,
+            block_len=stride_len, context_len=window_len - stride_len,
             left_padding_len=0, right_padding_len=0,
             padding_shape=(), cut_alignment=False)
 
     def process_data(self, data, finish=False):
-        #if abs(sampling_rate - self.p['model_sampling_rate']) > self.p['model_sampling_rate'] * 0.1:
-        #    raise ValueError("Input audio file should be {} kHz mono".format(self.p['model_sampling_rate']/1e3))
         if data is not None:
             if len(data.shape) == 2 and data.shape[1] != 1 or len(data.shape) not in [1, 2]:
                 raise ValueError("Input audio file should be {} kHz mono".format(self.p['model_sampling_rate']/1e3))
@@ -41,7 +39,7 @@ class AudioFeaturesSeqPipelineStage(BlockedSeqPipelineStage):
         audio (numpy.ndarray), this buffer is guaranteed to contain data for 1 or more blocks
             (audio.shape[0]>=self._block_len+self._context_len)
         """
-        # Cut out view of the buffer to the whole number of frames
+        # Cut the buffer to the end of the last frame
         audio_len = audio.shape[0]
         processable_len = audio_len - (audio_len - self._context_len) % self._block_len
         buffer_skip_len = processable_len - self._context_len
@@ -49,16 +47,15 @@ class AudioFeaturesSeqPipelineStage(BlockedSeqPipelineStage):
 
         # Convert audio data type to float32 if needed
         if np.issubdtype(audio.dtype, np.uint8):
-            audio = audio/np.float32(128) - 1 # normalize to -1 to 1, uint8 to float32
+            audio = audio/np.float32(128) - 1  # normalize to -1 to 1, uint8 to float32
         elif np.issubdtype(audio.dtype, np.integer):
-            audio = audio/np.float32(32768) # normalize to -1 to 1, int16 to float32
+            audio = audio/np.float32(32768)  # normalize to -1 to 1, int16 to float32
 
-        # args: samples, sampling_rate, window_size, stride, n_mels, fmin, fmax
         melspectrum = samples_to_melspectrum(
-            audio,
-            self.p['model_sampling_rate'],
-            self.window_len,
-            self.stride_len,
+            audio,                               # samples
+            self.p['model_sampling_rate'],       # sampling_rate
+            self._context_len + self._block_len, # window_size
+            self._block_len,                     # stride
             n_mels = self.p['mel_num'],
             fmin = self.p['mel_fmin'],
             fmax = self.p['mel_fmax'],
