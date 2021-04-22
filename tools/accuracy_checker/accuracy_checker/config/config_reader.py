@@ -768,25 +768,32 @@ def merge_entry_paths(keys, value, args, value_id=0):
         if config_path.is_absolute():
             value[field] = Path(value[field])
             continue
+        argument_list = argument
 
-        if isinstance(argument, list):
-            argument = next(filter(args.get, argument), argument[-1])
+        if not isinstance(argument, list):
+            argument_list = [argument]
 
-        if argument not in args or not args[argument]:
-            continue
+        selected_argument = None
+        for arg_candidate in argument_list:
 
-        selected_argument = args[argument]
-        if isinstance(selected_argument, list):
-            if len(selected_argument) > 1:
-                if len(selected_argument) <= value_id:
-                    raise ValueError('list of arguments for {} less than number of evaluations')
-                selected_argument = selected_argument[value_id]
-            else:
-                selected_argument = selected_argument[0]
+            if arg_candidate not in args or not args[arg_candidate]:
+                continue
 
-        if not selected_argument.is_dir():
-            raise ConfigError('argument: {} should be a directory'.format(argument))
-        value[field] = selected_argument / config_path
+            selected_argument = args[arg_candidate]
+            if isinstance(selected_argument, list):
+                if len(selected_argument) > 1:
+                    if len(selected_argument) <= value_id:
+                        raise ValueError('list of arguments for {} less than number of evaluations')
+                    selected_argument = selected_argument[value_id]
+                else:
+                    selected_argument = selected_argument[0]
+
+            if not selected_argument.is_dir():
+                raise ConfigError('argument: {} should be a directory'.format(argument))
+
+            if (selected_argument / config_path).exists():
+                break
+        value[field] = selected_argument / config_path if selected_argument is not None else config_path
 
 
 def get_mode(config):
