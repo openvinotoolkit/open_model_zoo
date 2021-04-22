@@ -128,10 +128,8 @@ class InputFeeder:
             image_info_inputs = self._fill_image_info_inputs(data_representation_batch)
             filled_inputs = {**image_info_inputs}
         for idx, input_layer in enumerate(self.non_constant_inputs):
-            input_regex = None
             input_batch = []
-            if self.inputs_mapping:
-                input_regex = self.inputs_mapping[input_layer]
+            input_regex = (self.inputs_mapping or {}).get(input_layer)
             for data_representation in data_representation_batch:
                 input_data = None
                 identifiers = data_representation.identifier
@@ -166,7 +164,8 @@ class InputFeeder:
                             input_data = data_value
                             break
 
-                assert input_data is None, 'Suitable data for filling layer {} not found'.format(input_layer)
+                if input_data is None:
+                    raise ConfigError('Suitable data for filling layer {} not found'.format(input_layer))
                 input_batch.append(input_data)
 
             filled_inputs[input_layer] = input_batch
