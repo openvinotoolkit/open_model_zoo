@@ -30,12 +30,12 @@ class SeqCtcLmDecoder:
         self.cutoff_prob = cutoff_prob
         self.cutoff_top_n = cutoff_top_n
 
-        self.decoder_state = impl.CtcDecoderStateNumpy()
         if scorer_lm_fname is not None:
             assert alpha is not None and beta is not None, "alpha and beta arguments must be provided to use LM"
             self.lm_scorer = impl.ScorerYoklm(alpha, beta, scorer_lm_fname, alphabet)
         else:
             self.lm_scorer = None
+        self.decoder_state = impl.CtcDecoderStateNumpy()
         self.decoder_state.init(
             alphabet + [''],
             blank_idx = len(alphabet),
@@ -139,7 +139,3 @@ class BatchedCtcLmDecoder:
     def reset_params(self, alpha, beta):
         if self._scorer is not None:
             self._scorer.reset_params(alpha, beta)
-
-
-# For compatibility with ctcdecode_numpy version 0.2.0
-CTCBeamDecoder = BatchedCtcLmDecoder

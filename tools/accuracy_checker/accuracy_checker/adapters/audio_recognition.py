@@ -442,7 +442,7 @@ class FastCTCBeamSearchDecoderWithLm(CTCBeamSearchDecoderWithLm):
             )
         if self.sep not in [' ', '']:
             raise ValueError("fast_ctc_beam_search_decoder_with_lm does not support non-default value of sep")
-        self.ctcdecoder_state = ctcdecode_numpy.CTCBeamDecoder(
+        self.ctcdecoder_state = ctcdecode_numpy.BatchedCtcLmDecoder(
             self.alphabet,
             model_path=str(lm_file) if lm_file is not None else None,
             alpha=self.alpha,

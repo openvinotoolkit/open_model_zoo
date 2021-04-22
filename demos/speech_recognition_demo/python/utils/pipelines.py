@@ -7,44 +7,7 @@ import abc
 import numpy as np
 
 
-class SeqPipelineStage(abc.ABC):
-    """
-    One stage of a streaming data pipeline.
-
-    Each data piece (in or out) can be numpy.ndarray or None (empty piece).
-    Concatenated (along axis=0) outputs must depend only on concatenated inputs,
-    and must be invariant to different ways of representing this input.
-
-    In case your output depends on whole input sequence (e.g. BiLSTM), accumulate input
-    sequence into a buffer and process the whole sequence in the end (when finish=True).
-    """
-    @abc.abstractmethod
-    def process_data(self, data, finish=False):
-        """
-            Returns:
-        numpy.ndarray (any stage) or other type (for the last stage only), processing result
-          OR
-        None (empty data)
-        """
-        pass
-
-
-class SeqPipeline(SeqPipelineStage):
-    def __init__(self, stages):
-        self._stages = []
-        for stage in stages:
-            self.add_stage(stage)
-
-    def add_stage(self, stage):
-        self._stages.append(stage)
-
-    def process_data(self, data, finish=False):
-        for stage in self._stages:
-            data = stage.process_data(data, finish=finish)
-        return data
-
-
-class BlockedSeqPipelineStage(SeqPipelineStage):
+class BlockedSeqPipelineStage(abc.ABC):
     """
     Streaming pipeline that provides common methods for processing data in blocks of some fixed size.
     """
@@ -59,7 +22,7 @@ class BlockedSeqPipelineStage(SeqPipelineStage):
         self._reset_state()
 
     def _reset_state(self):
-        self._buffer = None  # None for buffer without left padding, [] for buffer with empty left padding
+        self._buffer = None  # "None" before adding the first chunk of data, list of chunks otherwise
         self._buffer_len = 0
 
     def _finalize_and_reset_state(self):
@@ -76,7 +39,7 @@ class BlockedSeqPipelineStage(SeqPipelineStage):
     def process_data(self, data, finish=False):
         """
             Args:
-        data (numpy.ndarray or None), new data to ba concatenated with the older data along axis=0, None for no new data
+        data (numpy.ndarray or None), new data to be concatenated with the older data along axis=0, None for no new data
         finish (bool), set to True for the last segment of data to finalize processing and flush buffers
 
             Returns:
@@ -118,48 +81,38 @@ class BlockedSeqPipelineStage(SeqPipelineStage):
         self._buffer_len = buffer.shape[0]
 
         # === Loop over blocks ===
-        # variables accepted from prev.stage: buffer, finalize
+        # variables accepted from the code above: buffer, finalize
         processed, buffer_skip_len = self._process_blocks(buffer, finish=finish)
         if finish:
             self._reset_state()
         else:
-            # start_pos contains its value for the last iteration of the loop
             buffer = buffer[buffer_skip_len:].copy()
             self._buffer = [buffer]
             self._buffer_len = self._buffer[0].shape[0]
 
         # === Postprocess ===
-        # variables accepted from prev.stage: processed, align_right_len
+        # variables accepted from the code above: processed, align_right_len
         if self._cut_alignment and finish and align_right_len > 0:
             # Crop alignment padding from the last block.
             processed[-1] = processed[-1][:-align_right_len]
 
         return self._combine_output(processed)
 
+    @abc.abstractmethod
     def _process_blocks(self, buffer, finish=False):
         """
-        Process buffer with data enough for one or more blocks
+        Process buffer containing enough data for one or more blocks
 
           Args:
         buffer (numpy.ndarray), buffer is guaranteed to contain data for 1 or more blocks
             (buffer.shape[0]>=self._block_len+self._context_len)
         finish (bool)
 
-          Return:
+          Return tuple:
         list of numpy.ndarray, to be concatenated along axis=0 outside this method
+        int, length of the buffer prefix to dismiss (the rest is to be fed to the next calls to this method)
         """
-        assert buffer.shape[0] >= self._block_len + self._context_len
-        processed = []
-        for start_pos in range(self._context_len, buffer.shape[0] - self._block_len + 1, self._block_len):
-            block = buffer[start_pos - self._context_len:start_pos + self._block_len]
-            processed.append(self._process_block(block, finish=finish and start_pos + self._block_len >= buffer.shape[0]))
-        assert not self._cut_alignment or processed[-1].shape[0] == self._block_len, "Networks with stride != 1 are not supported"
-        # Here start_pos is its value on the last iteration of the loop
-        buffer_skip_len = start_pos + self._block_len - self._context_len
-        return processed, buffer_skip_len
-
-    def _process_block(self, block, finish=False):
-        raise NotImplementedError("_process_block() should have been implemented in case inherited _process_blocks() is used")
+        pass
 
     def _combine_output(self, processed_list):
         return np.concatenate(processed_list, axis=0)

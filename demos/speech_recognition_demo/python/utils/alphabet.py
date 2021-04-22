@@ -28,15 +28,6 @@ def load_alphabet(filename):
     return characters
 
 
-def get_default_alphabet():
-    default_alphabet_characters = [
-        ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-        'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w',
-        'x', 'y', 'z', '\'',
-    ]
-    return default_alphabet_characters
-
-
 class CtcdecoderAlphabet:
     def __init__(self, characters):
         """

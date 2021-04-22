@@ -99,10 +99,6 @@ optional arguments:
   --online-window ONLINE_WINDOW
                         In online mode, show this many characters on screen
                         (default 79)
-  -l FILENAME, --cpu_extension FILENAME
-                        Optional. Required for CPU custom layers. MKLDNN
-                        (CPU)-targeted custom layers. Absolute path to a
-                        shared library with the kernels implementations.
 ```
 
 The typical command line for offline mode is:

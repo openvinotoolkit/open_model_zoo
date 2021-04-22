@@ -1,7 +1,6 @@
 # Example profile with mds08x_en configuration
 
-# alphabet: null  # use null for the default alphabet
-alphabet: default_alphabet_example.conf  # the same default alphabet; use absolute path if it's not in the current directory
+alphabet: default_alphabet_example.conf  # use absolute path if it's not in the current directory
 alpha: 0.93128901720047
 beta:  1.1834137439727783
 model_sampling_rate: 16000
