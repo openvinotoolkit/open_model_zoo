@@ -424,9 +424,26 @@ class ConfigReader:
                 update_launcher_entry['_{}'.format(key)] = value
 
         if arguments_dict.get('device_config'):
-            update_launcher_entry['device_config'] = read_yaml(arguments_dict['device_config'])
+            ConfigReader._merge_device_configs(update_launcher_entry, arguments_dict['device_config'])
 
         return functors_by_mode[mode](config, arguments, update_launcher_entry)
+
+    @staticmethod
+    def _merge_device_configs(launcher_entry, device_config_file):
+        embedded_device_config = launcher_entry.get('device_config')
+        external_device_config = read_yaml(device_config_file)
+        if not embedded_device_config:
+            embedded_device_config = external_device_config
+        elif (
+                not isinstance(next(iter(external_device_config.values())), dict)
+                and not isinstance(next(iter(embedded_device_config.values())), dict)
+        ):
+            embedded_device_config.update(external_device_config)
+        else:
+            for key, value in external_device_config.items():
+                embedded_device_config[key] = embedded_device_config.get(key, {}).update(value)
+        launcher_entry['device_config'] = embedded_device_config
+        return launcher_entry
 
     @staticmethod
     def _filter_launchers(config, arguments, mode='models'):
