@@ -74,7 +74,7 @@ class KaldiSpeechRecognitionDataConverter(BaseFormatConverter):
                 for ark in read_txt(self.feat_list_file)
             ]
         pairs = []
-        for ivector_file in self.data_dir.glob("*_ivector.ark"):
+        for ivector_file in self.data_dir.glob("*_ivector*.ark"):
             feats_file = self.data_dir / ivector_file.name.replace('_ivector', '')
             if not feats_file.exists():
                 continue
