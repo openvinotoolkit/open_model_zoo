@@ -224,7 +224,7 @@ inline std::map<std::string, std::string> getMapFullDevicesNames(InferenceEngine
                 p = ie.GetMetric(deviceName, METRIC_KEY(FULL_DEVICE_NAME));
                 devicesMap.insert(std::pair<std::string, std::string>(deviceName, p.as<std::string>()));
             }
-            catch (InferenceEngine::details::InferenceEngineException &) {
+            catch (InferenceEngine::Exception &) {
             }
         }
     }
@@ -246,7 +246,7 @@ inline std::string getFullDeviceName(InferenceEngine::Core& ie, std::string devi
         p = ie.GetMetric(device, METRIC_KEY(FULL_DEVICE_NAME));
         return  p.as<std::string>();
     }
-    catch (InferenceEngine::details::InferenceEngineException &) {
+    catch (InferenceEngine::Exception &) {
         return "";
     }
 }
@@ -266,7 +266,7 @@ inline std::size_t getTensorWidth(const InferenceEngine::TensorDesc& desc) {
         // Regardless of layout, dimensions are stored in fixed order
         return dims.back();
     } else {
-        THROW_IE_EXCEPTION << "Tensor does not have width dimension";
+         IE_THROW() << "Tensor does not have width dimension";
     }
     return 0;
 }
@@ -286,7 +286,7 @@ inline std::size_t getTensorHeight(const InferenceEngine::TensorDesc& desc) {
         // Regardless of layout, dimensions are stored in fixed order
         return dims.at(size - 2);
     } else {
-        THROW_IE_EXCEPTION << "Tensor does not have height dimension";
+        IE_THROW() << "Tensor does not have height dimension";
     }
     return 0;
 }
@@ -312,10 +312,10 @@ inline std::size_t getTensorChannels(const InferenceEngine::TensorDesc& desc) {
             case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
             case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
             default:
-                THROW_IE_EXCEPTION << "Tensor does not have channels dimension";
+                IE_THROW() << "Tensor does not have channels dimension";
         }
     } else {
-        THROW_IE_EXCEPTION << "Tensor does not have channels dimension";
+        IE_THROW() << "Tensor does not have channels dimension";
     }
     return 0;
 }
@@ -339,10 +339,10 @@ inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
             case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
             case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
             default:
-                THROW_IE_EXCEPTION << "Tensor does not have channels dimension";
+                IE_THROW() << "Tensor does not have channels dimension";
         }
     } else {
-        THROW_IE_EXCEPTION << "Tensor does not have channels dimension";
+        IE_THROW() << "Tensor does not have channels dimension";
     }
     return 0;
 }

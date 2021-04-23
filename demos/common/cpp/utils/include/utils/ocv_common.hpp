@@ -26,7 +26,7 @@ void matU8ToBlob(const cv::Mat& orig_image, InferenceEngine::Blob::Ptr& blob, in
     const size_t height = blobSize[2];
     const size_t channels = blobSize[1];
     if (static_cast<size_t>(orig_image.channels()) != channels) {
-        THROW_IE_EXCEPTION << "The number of channels for net input and image must match";
+        IE_THROW() << "The number of channels for net input and image must match";
     }
     InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
     T* blob_data = blobMapped.as<T*>();
@@ -55,7 +55,7 @@ void matU8ToBlob(const cv::Mat& orig_image, InferenceEngine::Blob::Ptr& blob, in
             }
         }
     } else {
-        THROW_IE_EXCEPTION << "Unsupported number of channels";
+        IE_THROW() << "Unsupported number of channels";
     }
 }
 
@@ -78,7 +78,7 @@ static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
             strideW == channels &&
             strideH == channels * width;
 
-    if (!is_dense) THROW_IE_EXCEPTION
+    if (!is_dense) IE_THROW()
                 << "Doesn't support conversion from not dense cv::Mat";
 
     InferenceEngine::TensorDesc tDesc(InferenceEngine::Precision::U8,
