@@ -28,6 +28,8 @@ joblib==1.0.1
     #   scikit-learn
 kiwisolver==1.3.1
     # via matplotlib
+lmdb==1.2.1
+    # via -r tools/accuracy_checker/requirements.in
 matplotlib==3.3.4
     # via scikit-image
 more-itertools==8.7.0
@@ -91,7 +93,7 @@ rawpy==0.16.0
     # via -r tools/accuracy_checker/requirements.in
 regex==2021.3.17
     # via nltk
-scikit-image==0.17.2
+scikit-image==0.17.2 ; python_version == "3.6"
     # via -r tools/accuracy_checker/requirements.in
 scikit-learn==0.24.1
     # via -r tools/accuracy_checker/requirements.in
@@ -105,7 +107,9 @@ sentencepiece==0.1.95
 shapely==1.7.1
     # via -r tools/accuracy_checker/requirements.in
 six==1.15.0
-    # via python-dateutil
+    # via
+    #   cycler
+    #   python-dateutil
 threadpoolctl==2.1.0
     # via scikit-learn
 tifffile==2020.9.3
