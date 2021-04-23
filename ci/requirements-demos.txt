@@ -27,7 +27,7 @@ motmetrics==1.2.0
     # via -r demos/requirements.txt
 nibabel==3.2.1
     # via -r demos/requirements.txt
-numpy==1.19.5 ; python_version >= "3.4"
+numpy==1.19.5
     # via
     #   -r ${INTEL_OPENVINO_DIR}/python/requirements.txt
     #   -r demos/requirements.txt
@@ -85,6 +85,7 @@ scipy==1.5.4
     #   scikit-learn
 six==1.15.0
     # via
+    #   cycler
     #   protobuf
     #   python-dateutil
     #   tensorboardx
