@@ -34,7 +34,7 @@ Options:
     -limit "<num>"             Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m_td "<path>"               Required. Path to the Text Detection model (.xml) file.
     -m_tr "<path>"               Required. Path to the Text Recognition model (.xml) file.
-    -dt "<path>"               Required. Type of the decoder, either 'simple' for SimpleDecoder or 'ctc' for CTC greedy and CTC beam search decoders.
+    -dt "<type>"               Required. Type of the decoder, either 'simple' for SimpleDecoder or 'ctc' for CTC greedy and CTC beam search decoders.
     -m_tr_ss "<value>"           Optional. Symbol set for the Text Recognition model.
     -tr_pt_first                   Optional. Specifies if pad token is the first symbol in the alphabet. Default is false
     -tr_o_blb_nm                   Optional. Name of the output blob of the model which would be used as model output. If not stated, first blob of the model would be used.
@@ -71,7 +71,7 @@ For example, use the following command line command to run the application:
                       -tr_o_blb_nm "logits"
 ```
 
-For `text-recognition-resnet-fc` you should use `simple` decoder for `-dt` option. For other models `ctc` decoder.
+For `text-recognition-resnet-fc` you should use `simple` decoder for `-dt` option. For other models use `ctc` decoder.
 
 ## Demo Output
 

@@ -46,7 +46,6 @@ Model is supported by [text-detection c++ demo](../../../demos/text_detection_de
 ```
   -tr_pt_first
   -tr_o_blb_nm "logits"
-  -dt "ctc"
 ```
 
 For more information, please, see documentation of the demo.
