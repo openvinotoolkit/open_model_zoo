@@ -167,7 +167,7 @@ cv::Mat applyColorMap(cv::Mat input) {
     return out;
 }
 
-cv::Mat renderSegmentationData(const SegmentationResult& result, OutputTransform& outputTransform) {
+cv::Mat renderSegmentationData(const ImageResult& result, OutputTransform& outputTransform) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -180,7 +180,7 @@ cv::Mat renderSegmentationData(const SegmentationResult& result, OutputTransform
     }
 
     // Visualizing result data over source image
-    cv::Mat output = inputImg / 2 + applyColorMap(result.mask) / 2;
+    cv::Mat output = inputImg / 2 + applyColorMap(result.resultImage) / 2;
     outputTransform.resize(output);
     return output;
 }
@@ -270,7 +270,7 @@ int main(int argc, char* argv[])
             //--- If you need just plain data without rendering - cast result's underlying pointer to ImageResult*
             //    and use your own processing instead of calling renderSegmentationData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>(), outputTransform);
+                cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -301,7 +301,7 @@ int main(int argc, char* argv[])
             result = pipeline.getResult();
             if (result != nullptr)
             {
-                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>(), outputTransform);
+                cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,

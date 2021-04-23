@@ -44,9 +44,9 @@ DEFINE_OUTPUT_FLAGS
 static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Type of the network, either 'sr' for Super Resolution task or 'deblur' for Deblurring";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-static const char original_img_message[] = "Optional. Display the original image together with the resulting image.";
-static const char mixed_img_message[] = "Optional. Display the mixed image: left half for original image, right half for result of model";
-static const char diff_img_message[] = "Optional. Display the resulting image together with difference image (|processed-original|)";
+static const char mode_message[] = "Optional. Result display mode: 'orig' - display the original image together with the resulting image. "
+"'mixed' - display the mixed image: left half for original image, right half for result of model. "
+"'diff' - display the resulting image together with difference image (|processed-original|).";
 static const char vheight_message[] = "Optional. Height of view for result.";
 static const char vwidth_message[] = "Optional. Width of view for result.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
@@ -68,9 +68,7 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
-DEFINE_bool(orig, false, original_img_message);
-DEFINE_bool(mixed, false, mixed_img_message);
-DEFINE_bool(diff, false, diff_img_message);
+DEFINE_string(mode, "", mode_message);
 DEFINE_uint32(vheight, 0, vheight_message);
 DEFINE_uint32(vwidth, 0, vwidth_message);
 DEFINE_string(d, "CPU", target_device_message);
@@ -95,9 +93,7 @@ static void showUsage() {
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -i \"<path>\"               " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
-    std::cout << "    -orig                     " << original_img_message << std::endl;
-    std::cout << "    -mixed                    " << mixed_img_message << std::endl;
-    std::cout << "    -diff                     " << diff_img_message << std::endl;
+    std::cout << "    -mode \"<type>\"            " << mode_message << std::endl;
     std::cout << "    -vheight \"<integer>\"      " << vheight_message << std::endl;
     std::cout << "    -vwidth \"<integer>\"       " << vwidth_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
@@ -152,25 +148,15 @@ std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::strin
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
 
-cv::Size getViewSize(const cv::Size& frameSize, const std::string& type) {
-    if (type == "sr") {
-        return cv::Size(1920, 1080);
-    }
-    if (type == "deblur") {
-        return frameSize;
-    }
-    throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
-}
-
 void markImage(cv::Mat& image, const std::vector<std::string>& parts){
-    float delta = image.cols / parts.size() * 0.5;
+    float delta = static_cast<float>(image.cols) / parts.size() * 0.5f;
     for (size_t i = 0; i < parts.size(); ++i) {
         cv::putText(image, parts[i], cv::Point(static_cast<int>(delta * (2 * i + 1)), 25),
                     cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
     }
 }
 
-cv::Mat renderResultData(ImageResult result, bool origImgDisplay, bool mixedMode, bool diffMode, cv::Size& view) {
+cv::Mat renderResultData(ImageResult result, std::string& mode, cv::Size& view) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -194,9 +180,19 @@ cv::Mat renderResultData(ImageResult result, bool origImgDisplay, bool mixedMode
     else
         resultImg = result.resultImage;
 
-    if (diffMode) {
-        if (mixedMode || origImgDisplay)
-            throw std::logic_error("Diff mode don't work simultaneously with orig and mixed modes!");
+    if (mode == "orig") {
+        markImage(inputImg, std::vector<std::string>{"O"});
+        markImage(resultImg, std::vector<std::string>{"R"});
+        cv::Mat concat;
+        cv::hconcat(inputImg, resultImg, concat);
+        return concat;
+    }
+    else if (mode == "mixed") {
+        inputImg(cv::Rect(0, 0, inputImg.cols / 2, inputImg.rows)).copyTo(resultImg(cv::Rect(0, 0, resultImg.cols / 2, resultImg.rows)));
+        markImage(resultImg, std::vector<std::string>{"O", "R"});
+        return resultImg;
+    }
+    else if (mode == "diff") {
         cv::Mat concat;
         cv::Mat diffImg;
         cv::absdiff(inputImg, resultImg, diffImg);
@@ -205,21 +201,7 @@ cv::Mat renderResultData(ImageResult result, bool origImgDisplay, bool mixedMode
         cv::hconcat(resultImg, diffImg, concat);
         return concat;
     }
-    if (mixedMode)
-        inputImg(cv::Rect(0, 0, inputImg.cols / 2, inputImg.rows)).copyTo(resultImg(cv::Rect(0, 0, resultImg.cols / 2, resultImg.rows)));
 
-    cv::Mat out;
-    markImage(inputImg, std::vector<std::string>{"O"});
-    if (mixedMode)
-        markImage(resultImg, std::vector<std::string>{"O", "R"});
-    else
-        markImage(resultImg, std::vector<std::string>{"R"});
-    if (origImgDisplay) {
-        cv::Mat concat;
-        cv::hconcat(inputImg, resultImg, concat);
-        cv::imwrite("deblurred_image.png", concat);
-        return concat;
-    }
     return resultImg;
 }
 
@@ -260,17 +242,13 @@ int main(int argc, char *argv[]) {
         uint32_t framesProcessed = 0;
 
         cv::VideoWriter videoWriter;
-        auto viewResult = getViewSize(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at);
-        int k = (FLAGS_orig || FLAGS_diff) ? 2 : 1;
+        cv::Size viewResult(0, 0);
+        auto mode = FLAGS_mode;
+        int k = (mode == "orig" || mode == "diff") ? 2 : 1;
         if (FLAGS_vheight)
             viewResult.height = FLAGS_vheight;
         if (FLAGS_vwidth)
             viewResult.width = FLAGS_vwidth;
-        if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(),
-                                                  cv::Size(k * viewResult.width, viewResult.height))) {
-            throw std::runtime_error("Can't open video writer");
-        }
 
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
@@ -297,7 +275,13 @@ int main(int argc, char *argv[]) {
                     viewResult.height = result->asRef<ImageResult>().resultImage.rows;
                 if (!FLAGS_vwidth)
                     viewResult.width = result->asRef<ImageResult>().resultImage.cols;
-                cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig, FLAGS_mixed, FLAGS_diff, viewResult);
+
+                if (!FLAGS_o.empty() && !videoWriter.isOpened() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                                                                                     cap->fps(),
+                                                                                     cv::Size(k * viewResult.width, viewResult.height))) {
+                    throw std::runtime_error("Can't open video writer");
+                }
+                cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), mode, viewResult);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -327,7 +311,13 @@ int main(int argc, char *argv[]) {
                 viewResult.height = result->asRef<ImageResult>().resultImage.rows;
             if (!FLAGS_vwidth)
                 viewResult.width = result->asRef<ImageResult>().resultImage.cols;
-            cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), FLAGS_orig, FLAGS_mixed, FLAGS_diff, viewResult);
+
+            if (!FLAGS_o.empty() && !videoWriter.isOpened() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                                                                                 cap->fps(),
+                                                                                 cv::Size(k * viewResult.width, viewResult.height))) {
+                throw std::runtime_error("Can't open video writer");
+            }
+            cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), mode, viewResult);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
