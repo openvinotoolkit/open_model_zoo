@@ -5,7 +5,16 @@
 from copy import deepcopy
 
 import numpy as np
-import librosa
+
+# Workaround to import librosa on Linux without installed libsndfile.so
+try:
+    import librosa
+except OSError:
+    import sys
+    import types
+    sys.modules['soundfile'] = types.ModuleType('fake_soundfile')
+    import librosa
+    del sys.modules['soundfile']
 
 from utils.pipelines import BlockedSeqPipelineStage
 
