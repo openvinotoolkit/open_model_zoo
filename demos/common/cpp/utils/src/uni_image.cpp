@@ -85,38 +85,6 @@ InferenceEngine::Blob::Ptr UniImageVA::toBlob(bool isNHWCModelInput) {
 
 UniImage::Ptr UniImageVA::resize(int width, int height, IMG_RESIZE_MODE resizeMode, bool hqResize) {
     // TODO: this is dumy code, image should be taken from pool
-    auto dst = std::make_shared<UniImageVA>(getVaImageFromPool(img->context, width, height));
-
-    switch (resizeMode) {
-    case RESIZE_FILL:
-    {
-        img->resizeTo(dst->img,RESIZE_FILL, hqResize);
-        dst->roi = cv::Rect(0, 0, img->width, img->height);
-        break;
-    }
-    case RESIZE_KEEP_ASPECT:
-    case RESIZE_KEEP_ASPECT_LETTERBOX:
-        // TODO: add letterbox scaling via VA
-        throw std::runtime_error("RESIZE_KEEP_ASPECT and RESIZE_KEEP_ASPECT_LETTERBOX are not supported for VA. Yet.");
-    }
-    return dst;
-}
-
-std::map<uint64_t,std::unique_ptr<InferenceBackend::VaApiImagePool>> UniImageVA::imagePools;
-
-InferenceBackend::VaApiImage::Ptr UniImageVA::getVaImageFromPool(const InferenceBackend::VaApiContext::Ptr& context, int width, int height) {
-    uint64_t key = (reinterpret_cast<uint64_t>(context-> display()) & 0xFFFFFFFF) |
-     ((static_cast<uint64_t>(width) & 0xFFFF)<<32) | ((static_cast<uint64_t>(height) & 0xFFFF)<<48);
-
-    {
-        std::unique_lock<std::mutex> lock(mtx);
-        auto it = imagePools.find(key);
-        if(it == imagePools.end()) {
-            it = imagePools.emplace(key,std::unique_ptr<InferenceBackend::VaApiImagePool>(
-                new InferenceBackend::VaApiImagePool(context, 1, 
-                InferenceBackend::VaApiImagePool::ImageInfo{(size_t)width,(size_t)height,InferenceBackend::FOURCC_NV12}))).first;
-        }
-        return it->second->Acquire();
-    }    
+    return std::make_shared<UniImageVA>(img->resizeUsingPooledSurface((uint16_t)width, (uint16_t)height, resizeMode, hqResize));
 }
 #endif

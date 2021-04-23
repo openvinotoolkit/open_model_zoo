@@ -9,6 +9,7 @@
 #include <gst/gststructure.h>
 #include <gst/gstquery.h>
 #include <gst/video/video.h>
+#include "vaapi_context.h"
 
 #include "vaapi_images.h"
 #include "utils/performance_metrics.hpp"
@@ -36,7 +37,7 @@ private:
     std::shared_ptr<InferenceBackend::VaApiImage>  CreateImage(GstSample* sampleRead, GstMapFlags map_flags);
     std::unique_ptr<VaApiImage> bufferToImage(GstBuffer *buffer);
 
-    VaApiContext::Ptr vaContext;;
+    VaApiContext::Ptr vaContext;
     std::string filename_;
 
     GstElement* pipeline_;

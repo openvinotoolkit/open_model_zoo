@@ -8,30 +8,9 @@
 #include <iostream>
 #include <unistd.h>
 #include <opencv2/imgproc.hpp>
+#include <vaapi_context.h>
 
 namespace InferenceBackend {
-    int VaApiImage::fourCCToVART(FourCC fourcc)
-    {
-        switch(fourcc)
-        {
-            case FOURCC_NV12:
-            case FOURCC_I420:
-                return VA_RT_FORMAT_YUV420;
-            case FOURCC_BGRA:
-            case FOURCC_BGRX:
-            case FOURCC_BGR:    
-            case FOURCC_RGBA:
-            case FOURCC_RGBX:
-            case FOURCC_RGB:
-                return VA_RT_FORMAT_RGB32;
-            case FOURCC_BGRP:
-            case FOURCC_RGBP:
-                return VA_RT_FORMAT_RGBP;
-            default:
-                break;
-        }
-        throw std::invalid_argument("Cannot convert FOURCC to RT_FORMAT.");
-    }
 
 VaApiImage::Ptr VaApiImage::cloneToAnotherContext(const VaApiContext::Ptr& newContext)
 {
@@ -96,27 +75,10 @@ VaApiImage::Ptr VaApiImage::cloneToAnotherContext(const VaApiContext::Ptr& newCo
 
 
 VASurfaceID VaApiImage::createVASurface() {
-    VASurfaceAttrib surface_attrib;
-    surface_attrib.type = VASurfaceAttribPixelFormat;
-    surface_attrib.flags = VA_SURFACE_ATTRIB_SETTABLE;
-    surface_attrib.value.type = VAGenericValueTypeInteger;
-    surface_attrib.value.value.i = format;
-
-    int rt_format = fourCCToVART(format);
-
-    VAConfigAttrib format_attrib;
-    format_attrib.type = VAConfigAttribRTFormat;
-    VA_CALL(vaGetConfigAttributes(context->display(), VAProfileNone, VAEntrypointVideoProc, &format_attrib, 1));
-    if (!(format_attrib.value & rt_format))
-        throw std::invalid_argument("Unsupported runtime format for surface.");
-
-    VASurfaceID va_surface_id;
-    VA_CALL(vaCreateSurfaces(context->display(), rt_format, width, height, &va_surface_id, 1, &surface_attrib, 1))
-    return va_surface_id;
+    return VaApiContext::createSurface(context->display(),width,height,format);
 }
 
 VaApiImage::VaApiImage(const VaApiContext::Ptr& context, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface, bool autoDestroySurface) {
-    this->completed = true;
     this->width = width;
     this->height = height;
     this->format = format;
@@ -181,6 +143,13 @@ cv::Mat VaApiImage::copyToMat(IMG_CONVERSION_TYPE convType) {
     return outMat;
 }
 
+VaApiImage::Ptr VaApiImage::resizeUsingPooledSurface(uint16_t width, uint16_t height, IMG_RESIZE_MODE resizeMode, bool hqResize) {
+    auto surfID = context->getSurfacesPool().acquire(width,height,format);
+    auto img = std::make_shared<VaPooledImage>(context,width,height,format,surfID);
+    resizeTo(img,resizeMode,hqResize);
+    return img;
+}
+
 void VaApiImage::resizeTo(VaApiImage::Ptr dstImage, IMG_RESIZE_MODE resizeMode, bool hqResize) {
     if(context->display() != dstImage->context->display() || context->contextId() != dstImage->context->contextId())
     {
@@ -212,62 +181,7 @@ void VaApiImage::resizeTo(VaApiImage::Ptr dstImage, IMG_RESIZE_MODE resizeMode, 
 }
 
 VaPooledImage::~VaPooledImage() {
-    pool->Release(this);
+    context->getSurfacesPool().release(*this);
 }
 
-VaApiImagePool::VaApiImagePool(const VaApiContext::Ptr& context_, size_t image_pool_size, ImageInfo info) :
-    context(context_),
-    info(info)
-{
-    if (!context_)
-        throw std::invalid_argument("VaApiContext is nullptr");
-    for (size_t i = 0; i < image_pool_size; ++i) {
-        images.push_back(Element(std::unique_ptr<VaApiImage>(new VaApiImage(context, info.width, info.height, info.format)), false));
-    }
-}
-
-VaApiImagePool::~VaApiImagePool() {
-    WaitForCompletion();
-}
-
-VaApiImage::Ptr VaApiImagePool::Acquire() {
-    std::unique_lock<std::mutex> lock(mtx);
-    for (;;) {
-        for (auto &imagePair : images) {
-            if (!imagePair.second) {
-                imagePair.second = true;
-                auto& image= imagePair.first;
-                return std::make_shared<VaPooledImage>(image->context,image->width, image->height, image->format, image->va_surface_id, this);
-            }
-        }
-
-        images.push_back(Element(std::unique_ptr<VaApiImage>(new VaApiImage(context, info.width, info.height, info.format)),true));
-        auto& image = images.back().first;
-        return std::make_shared<VaPooledImage>(image->context,image->width, image->height, image->format, image->va_surface_id, this);
-    }
-}
-
-void VaApiImagePool::Release(VaApiImage* image) {
-    if (!image)
-        throw std::runtime_error("VaApiImagePool: Received image ptr is null");
-
-    std::unique_lock<std::mutex> lock(mtx);
-    for(auto& imagePair : images) {
-        if(imagePair.first->va_surface_id == image->va_surface_id &&
-            imagePair.first->context->display() == image->context->display()) {
-            imagePair.second = false;
-            _free_image_condition_variable.notify_one();
-            return;
-        }
-    }
-    throw std::runtime_error("VaApiImagePool: An attempt to release non-pooled image is deteted");
-}
-
-void VaApiImagePool::WaitForCompletion() {
-    std::unique_lock<std::mutex> lock(mtx);
-    for (auto &imagePair : images) {
-        while(imagePair.second)
-            _free_image_condition_variable.wait(lock);
-    }
-}
 }

@@ -2,6 +2,8 @@
 #include "opencv2/core.hpp"
 #include "inference_engine.hpp"
 #include "utils/uni_image_defs.h"
+#include "vaapi_context.h"
+
 class UniImage {
 public:
     using Ptr = std::shared_ptr<UniImage>;
@@ -47,8 +49,6 @@ protected:
     InferenceBackend::VaApiImage::Ptr getVaImageFromPool(const InferenceBackend::VaApiContext::Ptr& context, int width, int height);
 private:
     UniImageVA(){}
-    std::mutex mtx;
-    static std::map<uint64_t,std::unique_ptr<InferenceBackend::VaApiImagePool>> imagePools;
 };
 
 inline UniImage::Ptr VA2Img(const InferenceBackend::VaApiImage::Ptr& img, InferenceBackend::VaApiContext::Ptr context = nullptr) {
