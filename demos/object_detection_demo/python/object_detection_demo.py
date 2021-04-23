@@ -32,7 +32,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 import models
 import monitors
-from pipelines import get_user_configs, AsyncPipeline
+from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
 
@@ -218,7 +218,7 @@ def main():
     log.info('Initializing Inference Engine...')
     ie = IECore()
 
-    plugin_config = get_user_configs(args.device, args.num_streams, args.num_threads)
+    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
     log.info('Loading network...')
 

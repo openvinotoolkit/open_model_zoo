@@ -14,12 +14,6 @@
 // limitations under the License.
 */
 
-/**
-* \brief The entry point for the Inference Engine segmentation_demo_async demo application
-* \file segmentation_demo_async/main.cpp
-* \example segmentation_demo_async/main.cpp
-*/
-
 #include <iostream>
 #include <string>
 

@@ -109,8 +109,6 @@ def load_class_map(file_path):
 
 
 def main():
-    """ Main function. """
-
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 

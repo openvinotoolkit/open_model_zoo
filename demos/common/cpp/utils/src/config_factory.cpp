@@ -34,7 +34,7 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::st
         devices.insert(device);
     }
     std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(devices, flags_nstreams);
-    for (auto& device : devices) {
+    for (const auto& device : devices) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             // limit threading for CPU portion of inference
             if (flags_nthreads != 0)
@@ -71,7 +71,7 @@ CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, const s
     for (const std::string& device : parseDevices(flags_d)) {
         devices.insert(device);
     }
-    for (auto& device : devices) {
+    for (const auto& device : devices) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1");
         }
