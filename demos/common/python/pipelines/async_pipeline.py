@@ -53,7 +53,7 @@ def parse_value_per_device(devices: Set[str], values_string: str)-> Dict[str, in
     return result
 
 
-def get_user_configs(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Dict[str, str]:
+def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Dict[str, str]:
     config = {}
 
     devices = set(parse_devices(flags_d))
