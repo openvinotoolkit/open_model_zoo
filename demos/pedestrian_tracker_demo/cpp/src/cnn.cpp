@@ -32,7 +32,7 @@ void CnnBase::Load() {
     InferenceEngine::InputsDataMap in;
     in = cnnNetwork.getInputsInfo();
     if (in.size() != 1) {
-        THROW_IE_EXCEPTION << "Network should have only one input";
+        throw std::runtime_error("Network should have only one input");
     }
 
     SizeVector inputDims = in.begin()->second->getTensorDesc().getDims();
@@ -94,7 +94,7 @@ VectorCNN::VectorCNN(const Config& config,
     Load();
 
     if (outputs_.size() != 1) {
-        THROW_IE_EXCEPTION << "Demo supports topologies only with 1 output";
+        throw std::runtime_error("Demo supports topologies only with 1 output");
     }
 
     InferenceEngine::SizeVector dims = outInfo_.begin()->second->getTensorDesc().getDims();
@@ -118,7 +118,7 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
         for (auto&& item : outputs) {
             InferenceEngine::Blob::Ptr blob = item.second;
             if (blob == nullptr) {
-                THROW_IE_EXCEPTION << "VectorCNN::Compute() Invalid blob '" << item.first << "'";
+                throw std::runtime_error("VectorCNN::Compute() Invalid blob '" + item.first + "'");
             }
             InferenceEngine::SizeVector ie_output_dims = blob->getTensorDesc().getDims();
             std::vector<int> blob_sizes(ie_output_dims.size(), 0);
