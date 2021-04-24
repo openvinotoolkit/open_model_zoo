@@ -19,7 +19,7 @@ import numpy as np
 
 from ..config import StringField, NumberField, ConfigError
 from ..postprocessor import NMS
-from ..representation import DetectionPrediction, CoCocInstanceSegmentationPrediction, ContainerPrediction
+from ..representation import DetectionPrediction, CoCoInstanceSegmentationPrediction, ContainerPrediction
 from ..utils import UnsupportedPackage
 from .adapter import Adapter
 
@@ -88,7 +88,7 @@ class YolactAdapter(Adapter):
             if scores.shape[1] == 0:
                 return [ContainerPrediction(
                     {'detection_prediction': DetectionPrediction(identifier, [], [], [], [], [], []),
-                     'segmentation_prediction': CoCocInstanceSegmentationPrediction(identifier, [], [], [])}
+                     'segmentation_prediction': CoCoInstanceSegmentationPrediction(identifier, [], [], [])}
                 )]
             num_classes = scores.shape[0]
             idx_lst, cls_lst, scr_lst = [], [], []
@@ -130,7 +130,7 @@ class YolactAdapter(Adapter):
             else:
                 x_mins, y_mins, x_maxs, y_maxs = [], [], [], []
             det_prediction = DetectionPrediction(identifier, classes, scores, x_mins, y_mins, x_maxs, y_maxs)
-            segm_prediction = CoCocInstanceSegmentationPrediction(identifier, masks, classes, scores)
+            segm_prediction = CoCoInstanceSegmentationPrediction(identifier, masks, classes, scores)
             segm_prediction.metadata['image_size'] = meta['image_size']
             result.append(ContainerPrediction(
                 {'detection_prediction': det_prediction, 'segmentation_prediction': segm_prediction}

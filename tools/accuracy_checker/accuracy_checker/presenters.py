@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 from collections import namedtuple
+from copy import deepcopy
 import numpy as np
 
 from .utils import Color, color_format
@@ -130,7 +131,15 @@ class VectorPrintPresenter(BasePresenter):
             mean_value = np.mean(value)
             value = np.append(value, mean_value)
             meta['names'] = value_names
-        per_value_meta = [meta for _ in value_names]
+        per_value_meta = []
+        target_per_value = meta.pop('target_per_value', {})
+        target = meta.pop('target', 'higher-better')
+        for v_name in value_names:
+            orig_name = v_name.split('@')[-1]
+            target_for_value = target_per_value.get(orig_name, target)
+            meta_for_value = deepcopy(meta)
+            meta_for_value['target'] = target_for_value
+            per_value_meta.append(meta_for_value)
         results = []
         for idx, value_item in enumerate(value):
             results.append(

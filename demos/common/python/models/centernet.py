@@ -23,8 +23,8 @@ from .utils import Detection, load_labels
 
 
 class CenterNet(Model):
-    def __init__(self, ie, model_path, labels=None, threshold=0.3):
-        super().__init__(ie, model_path)
+    def __init__(self, ie, model_path, input_transform, labels=None, threshold=0.3):
+        super().__init__(ie, model_path, input_transform)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         assert len(self.net.outputs) == 3, "Expected 3 output blobs"
@@ -51,7 +51,9 @@ class CenterNet(Model):
         scale = max(height, width)
         trans_input = self.get_affine_transform(center, scale, 0, [self.w, self.h])
         resized_image = cv2.warpAffine(image, trans_input, (self.w, self.h), flags=cv2.INTER_LINEAR)
-        resized_image = np.transpose(resized_image, (2, 0, 1))
+        resized_image = self.input_transform(resized_image)
+        resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+        resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
 
         dict_inputs = {self.image_blob_name: resized_image}
         return dict_inputs, meta

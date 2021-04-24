@@ -28,7 +28,8 @@ from .text_recognition import (
     BeamSearchDecoder,
     CTCGreedySearchDecoder,
     LPRAdapter,
-    AttentionOCRAdapter
+    AttentionOCRAdapter,
+    SimpleDecoder,
 )
 
 from .image_processing import (
@@ -68,10 +69,13 @@ from .retinaface import RetinaFaceAdapter
 from .retinanet import RetinaNetAdapter, MultiOutRetinaNet, RetinaNetTF2
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX, YoloV3TF2, YoloV5Adapter
 from .classification import ClassificationAdapter
-from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter
+from .segmentation import (
+    SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter, BackgroundMattingAdapter
+)
 from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
 from .pose_estimation_openpose import OpenPoseAdapter
 from .pose_estimation_associative_embedding import AssociativeEmbeddingAdapter
+from .pose_estimation_hrnet import HumanPoseHRNetAdapter
 
 from .pose_estimation_3d import HumanPose3dAdapter
 
@@ -107,6 +111,7 @@ from .face_recognition_quality_assessment import QualityAssessmentAdapter
 from .dna_seq_recognition import DNASeqRecognition
 from .optical_flow import PWCNetAdapter
 from .salient_objects_detection import SalientObjectDetection
+from .noise_suppression import NoiseSuppressionAdapter
 from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
 
 __all__ = [
@@ -156,6 +161,7 @@ __all__ = [
     'BrainTumorSegmentationAdapter',
     'DUCSegmentationAdapter',
     'SalientObjectDetection',
+    'BackgroundMattingAdapter',
 
     'ReidAdapter',
 
@@ -183,10 +189,12 @@ __all__ = [
     'LPRAdapter',
     'CTCGreedySearchDecoder',
     'AttentionOCRAdapter',
+    'SimpleDecoder',
 
     'AssociativeEmbeddingAdapter',
     'HumanPoseAdapter',
     'HumanPose3dAdapter',
+    'HumanPoseHRNetAdapter',
     'OpenPoseAdapter',
     'SingleHumanPoseAdapter',
     'StackedHourGlassNetworkAdapter',
@@ -226,6 +234,8 @@ __all__ = [
     'DNASeqRecognition',
 
     'PWCNetAdapter',
+
+    'NoiseSuppressionAdapter',
 
     'GVADetectionAdapter',
     'GVAClassificationAdapter',

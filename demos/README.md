@@ -59,7 +59,7 @@ To run the demo applications, you can use images and videos from the media files
 
 > **NOTE:** Inference Engine HDDL and FPGA plugins are available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
 
-You can download the [pre-trained models](../models/intel/index.md) using the OpenVINO [Model Downloader](../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
+You can download the [pre-trained models](../models/intel/index.md) using the OpenVINO [Model Downloader](../tools/downloader/README.md).
 The table below shows the correlation between models, demos, and supported plugins. The plugins names are exactly as they are passed to the demos with `-d` option. The correlation between the plugins and supported devices see in the [Supported Devices](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_Supported_Devices.html) section.
 
 > **NOTE:** **MYRIAD** below stands for Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ Vision Processing Units.
@@ -137,7 +137,7 @@ Please run the following command before the demos build (assuming that the binar
 source <INSTALL_DIR>/deployment_tools/bin/setupvars.sh
 ```
 You can also build demos manually using Inference Engine built from the [openvino](https://github.com/openvinotoolkit/openvino) repo. In this case please set `InferenceEngine_DIR` environment variable to a folder containing `InferenceEngineConfig.cmake` and `ngraph_DIR` to a folder containing `ngraphConfig.cmake` in a build folder. Please also set the `OpenCV_DIR` to point to the OpenCV package to use. The same OpenCV version should be used both for Inference Engine and demos build. Alternatively these values can be provided via command line while running `cmake`. See [CMake's search procedure](https://cmake.org/cmake/help/latest/command/find_package.html#search-procedure).
-Please refer to the Inference Engine [build instructions](https://github.com/openvinotoolkit/openvino/blob/master/build-instruction.md)
+Please refer to the Inference Engine [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode)
 for details. Please also add path to built Inference Engine libraries to `LD_LIBRARY_PATH` (Linux*) or `PATH` (Windows*) variable before building the demos.
 
 ### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*
@@ -146,7 +146,7 @@ The officially supported Linux* build environment is the following:
 
 * Ubuntu* 16.04 LTS 64-bit or CentOS* 7.4 64-bit
 * GCC* 5.4.0 (for Ubuntu* 16.04) or GCC* 4.8.5 (for CentOS* 7.4)
-* CMake* version 2.8 or higher.
+* CMake* version 3.10 or higher.
 
 To build the demo applications for Linux, go to the directory with the `build_demos.sh` script and
 run it:
@@ -187,7 +187,7 @@ for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 The recommended Windows* build environment is the following:
 * Microsoft Windows* 10
 * Microsoft Visual Studio* 2015, 2017, or 2019
-* CMake* version 2.8 or higher
+* CMake* version 3.10 or higher
 
 > **NOTE**: If you want to use Microsoft Visual Studio 2019, you are required to install CMake 3.14.
 
@@ -204,7 +204,7 @@ versions are: `VS2015`, `VS2017`, `VS2019`. For example, to build the demos usin
 build_demos_msvc.bat VS2017
 ```
 
-The demo applications binaries are in the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build_build\intel64\Release` directory.
+The demo applications binaries are in the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\intel64\Release` directory.
 
 You can also build a generated solution by yourself, for example, if you want to
 build binaries in Debug configuration. Run the appropriate version of the

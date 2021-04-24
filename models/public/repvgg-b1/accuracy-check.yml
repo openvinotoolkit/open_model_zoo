@@ -1,0 +1,61 @@
+models:
+  - name: repvgg-b1-onnx
+
+    launchers:
+      - framework: onnx_runtime
+        model: repvgg-b1.onnx
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: pillow_imread
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BILINEAR
+          - type: crop
+            use_pillow: True
+            size: 224
+          - type: normalization
+            std: [58.624, 57.12, 57.375]
+            mean: [123.675, 116.28, 103.53]
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5
+
+  - name: repvgg-b1
+
+    launchers:
+      - framework: dlsdk
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        reader: pillow_imread
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BILINEAR
+          - type: crop
+            use_pillow: True
+            size: 224
+          - type: rgb_to_bgr
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5

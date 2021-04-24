@@ -14,12 +14,6 @@
 // limitations under the License.
 */
 
-/**
-* \brief The entry point for the Inference Engine Human Pose Estimation demo application
-* \file human_pose_estimation_demo/main.cpp
-* \example human_pose_estimation_demo/main.cpp
-*/
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -36,7 +30,6 @@
 #include <gflags/gflags.h>
 
 #include <pipelines/async_pipeline.h>
-#include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 
 #include <models/hpe_model_associative_embedding.h>
@@ -46,7 +39,8 @@ DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Type of the network, either 'ae' for Associative Embedding or 'openpose' for OpenPose.";
+static const char at_message[] = "Required. Type of the network, either 'ae' for Associative Embedding, 'higherhrnet' for HigherHRNet models based on ae "
+"or 'openpose' for OpenPose.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_size_message[] = "Optional. Target input size.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
@@ -63,7 +57,7 @@ static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
 "throughput mode (for HETERO and MULTI device cases use format "
 "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
-static const char no_show_processed_video[] = "Optional. Do not show processed video.";
+static const char no_show_message[] = "Optional. Don't show output.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
@@ -78,7 +72,7 @@ DEFINE_double(t, 0.1, thresh_output_message);
 DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
-DEFINE_bool(no_show, false, no_show_processed_video);
+DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
 
 /**
@@ -86,16 +80,16 @@ DEFINE_string(u, "", utilization_monitors_message);
 */
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "human_pose_estimation [OPTION]" << std::endl;
+    std::cout << "human_pose_estimation_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
-    std::cout << "    -i                          " << input_message << std::endl;
+    std::cout << "    -i                        " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
-    std::cout << "    -o \"<path>\"                " << output_message << std::endl;
-    std::cout << "    -limit \"<num>\"             " << limit_message << std::endl;
-    std::cout << "    -tsize                      " << target_size_message << std::endl;
+    std::cout << "    -o \"<path>\"               " << output_message << std::endl;
+    std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
+    std::cout << "    -tsize                    " << target_size_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
@@ -106,10 +100,9 @@ static void showUsage() {
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
     std::cout << "    -loop                     " << loop_message << std::endl;
-    std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
+    std::cout << "    -no_show                  " << no_show_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
-
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
@@ -244,6 +237,11 @@ int main(int argc, char *argv[]) {
         else if (FLAGS_at == "ae") {
             model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
         }
+        else if (FLAGS_at == "higherhrnet") {
+            float delta = 0.5f;
+            std::string pad_mode = "center";
+            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, delta, pad_mode));
+        }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
@@ -255,12 +253,12 @@ int main(int argc, char *argv[]) {
             core);
         Presenter presenter(FLAGS_u);
 
-        int64_t frameNum = 0;
-        frameNum = pipeline.submitData(ImageInputData(curr_frame),
+        pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
 
         uint32_t framesProcessed = 0;
         bool keepRunning = true;
+        int64_t frameNum = -1;
         std::unique_ptr<ResultBase> result;
 
         while (keepRunning) {
@@ -291,6 +289,7 @@ int main(int argc, char *argv[]) {
                 if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
                     videoWriter.write(outFrame);
                 }
+                framesProcessed++;
                 if (!FLAGS_no_show) {
                     cv::imshow("Human Pose Estimation Results", outFrame);
                     //--- Processing keyboard events
@@ -302,13 +301,13 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
-                framesProcessed++;
             }
         }
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
-        while (result = pipeline.getResult()) {
+        for (; framesProcessed <= frameNum; framesProcessed++) {
+            while (!(result = pipeline.getResult())) {}
             cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
@@ -322,7 +321,6 @@ int main(int argc, char *argv[]) {
                 //--- Updating output window
                 cv::waitKey(1);
             }
-            framesProcessed++;
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------

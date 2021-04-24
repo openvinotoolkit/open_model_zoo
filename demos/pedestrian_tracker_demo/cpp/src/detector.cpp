@@ -137,7 +137,7 @@ ObjectDetector::ObjectDetector(
 
     const SizeVector outputDims = _output->getTensorDesc().getDims();
     if (outputDims.size() != 4) {
-        THROW_IE_EXCEPTION << "Person Detection network output dimensions not compatible shoulld be 4, but was " +
+        THROW_IE_EXCEPTION << "Person Detection network output should have 4 dimensions, but had " +
             std::to_string(outputDims.size());
     }
     max_detections_count_ = outputDims[2];

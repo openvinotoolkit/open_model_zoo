@@ -50,8 +50,14 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
 * `numpy_txt_reader`- read data stored in text format to numpy array.
 * `numpy_dict_reader` - read and unpack dictionaries saved in numpy files.
 * `nifti_reader` - read NifTI data format
-  * `channels_first` - allows read nifti files and transpose in order where channels first (Optional, default False)
+  * `channels_first` - allows read nifti files and transpose in order where channels first (Optional, default `False`)
+  * `multi_frame` - allows reading of 3D images as sequence of 2D frames (optional, default `False`)
+  * `frame_separator` - string separator between file name and frame number in `multi_frame` mode (optional, default `#`)
+  * `frame_axis` - number of frame axis in 3D Image (optional, default `-1`, last axis)
+  * `to_4D` - controls expanding of read results to 4D dimension (optional, default `True`)
 * `wav_reader` - read WAV file into NumPy array. Also gets the samplerate.
+  * `mono` - get mean along channels if multichannel audio loaded (Optional, default `False`).
+  * `to_float` - converts audio signal to float32 (Optional, default `False`).
 * `dicom_reader` - read images stored in DICOM format.
 * `pickle_reader` - read data stored in pickle file. Supported formats of pickle content:
   1. numeric data array
@@ -59,3 +65,4 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
 * `rawpy` - read raw image formats using rawpy library.
   * `postprocess` - allow image postprocessing and normalization (Optional, default `True`).
 * `byte_reader` - read raw binary data and wrap them to numpy-array.
+* `lmdb_reader` - extract image on a given index from LMDB database.

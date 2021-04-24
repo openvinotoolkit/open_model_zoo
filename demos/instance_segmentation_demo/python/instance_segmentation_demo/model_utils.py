@@ -17,6 +17,7 @@
 from collections import namedtuple
 import cv2
 import numpy as np
+from models.utils import nms
 
 ModelAttributes = namedtuple('ModelAttributes', ['required_outputs', 'postprocessor'])
 
@@ -76,7 +77,7 @@ def mask_rcnn_postprocess(
     scores = scores[detections_filter]
     classes = classes[detections_filter]
     boxes = boxes[detections_filter]
-    masks = list(segm for segm, is_valid in zip(masks, detections_filter) if is_valid)
+    masks = [segm for segm, is_valid in zip(masks, detections_filter) if is_valid]
     return scores, classes, boxes, masks
 
 
@@ -104,7 +105,7 @@ def yolact_postprocess(
             continue
         x1, x2 = sanitize_coordinates(boxes[idx, 0], boxes[idx, 2], frame_width)
         y1, y2 = sanitize_coordinates(boxes[idx, 1], boxes[idx, 3], frame_height)
-        keep = nms(x1, y1, x2, y2, cls_scores, 0.5, include_boundaries=False)
+        keep = nms(x1, y1, x2, y2, cls_scores, 0.5)
 
         idx_lst.append(idx[keep])
         cls_lst.append(np.full(len(keep), cls))
@@ -129,43 +130,6 @@ def yolact_postprocess(
             boxes, masks, scores, classes, proto, frame_width, frame_height, shift_x=shift_x, shift_y=shift_y
         )
     return scores, classes, boxes, masks
-
-
-def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None):
-    b = 1 if include_boundaries else 0
-
-    areas = (x2 - x1 + b) * (y2 - y1 + b)
-    order = scores.argsort()[::-1]
-
-    if keep_top_k:
-        order = order[:keep_top_k]
-
-    keep = []
-
-    while order.size > 0:
-        i = order[0]
-        keep.append(i)
-
-        xx1 = np.maximum(x1[i], x1[order[1:]])
-        yy1 = np.maximum(y1[i], y1[order[1:]])
-        xx2 = np.minimum(x2[i], x2[order[1:]])
-        yy2 = np.minimum(y2[i], y2[order[1:]])
-
-        w = np.maximum(0.0, xx2 - xx1 + b)
-        h = np.maximum(0.0, yy2 - yy1 + b)
-        intersection = w * h
-
-        base_area = (areas[i] + areas[order[1:]] - intersection)
-
-        overlap = np.divide(
-                intersection,
-                base_area,
-                out=np.zeros_like(intersection, dtype=float),
-                where=base_area != 0
-        )
-        order = order[np.where(overlap <= thresh)[0] + 1]
-
-    return keep
 
 
 def sanitize_coordinates(_x1, _x2, img_size, shift=0, padding=0):

@@ -24,6 +24,7 @@ The command yields the following usage message:
 
 ```
 usage: segmentation_demo.py [-h] -m MODEL -i INPUT
+                            [-at {segmentation,salient_object_detection}
                             [-d DEVICE] [-c COLORS]
                             [-nireq NUM_INFER_REQUESTS]
                             [-nstreams NUM_STREAMS]
@@ -35,6 +36,8 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
+  -at {segmentation, salient_object_detection}, --architecture_type {segmentation, salient_object_detection}
+                        Optional. Default value is segmentation. Specify model's architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.

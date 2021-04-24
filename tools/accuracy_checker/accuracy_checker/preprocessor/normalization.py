@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import NormalizationArgsField, ConfigError
+from ..config import NormalizationArgsField, ConfigError, BoolField
 from ..preprocessor import Preprocessor
 
 
@@ -49,6 +49,9 @@ class Normalize(Preprocessor):
                             "channels or list of comma separated channel-wise values.",
                 precomputed_args=Normalize.PRECOMPUTED_STDS,
                 allow_zeros=False
+            ),
+            'images_only': BoolField(
+                optional=True, default=False, description='in multi input mode, process only images.'
             )
         })
         return parameters
@@ -56,11 +59,17 @@ class Normalize(Preprocessor):
     def configure(self):
         self.mean = self.get_value_from_config('mean')
         self.std = self.get_value_from_config('std')
+        self.images_only = self.get_value_from_config('images_only')
         if not self.mean and not self.std:
             raise ConfigError('mean or std value should be provided')
 
     def process(self, image, annotation_meta=None):
         def process_data(data, mean, std):
+            if (
+                    self.images_only and len(data.shape) not in [2, 3] or
+                    (len(data.shape) == 3 and data.shape[-1] not in [1, 3, 4])
+            ):
+                return data
             if self.mean:
                 data = data - mean
             if self.std:

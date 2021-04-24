@@ -29,7 +29,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import models
 import monitors
 from images_capture import open_images_capture
-from pipelines import AsyncPipeline
+from pipelines import get_user_config, AsyncPipeline
 from performance_metrics import PerformanceMetrics
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
@@ -43,7 +43,7 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
-                      type=str, required=True, choices=('ae', 'openpose'))
+                      type=str, required=True, choices=('ae', 'higherhrnet', 'openpose'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -74,7 +74,7 @@ def build_argparser():
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
-                            default=1, type=int)
+                            default=0, type=int)
     infer_args.add_argument('-nstreams', '--num_streams',
                             help='Optional. Number of streams to use for inference on the CPU or/and GPU in throughput '
                                  'mode (for HETERO and MULTI device cases use format '
@@ -96,38 +96,17 @@ def build_argparser():
 
 def get_model(ie, args, aspect_ratio):
     if args.architecture_type == 'ae':
-        Model = models.HpeAssociativeEmbedding
+        model = models.HpeAssociativeEmbedding(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
+                                               prob_threshold=args.prob_threshold)
+    elif args.architecture_type == 'higherhrnet':
+        model = models.HpeAssociativeEmbedding(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
+                                               prob_threshold=args.prob_threshold, delta=0.5, padding_mode='center')
     elif args.architecture_type == 'openpose':
-        Model = models.OpenPose
+        model = models.OpenPose(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio,
+                                prob_threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
-    return Model(ie, args.model, target_size=args.tsize, aspect_ratio=aspect_ratio, prob_threshold=args.prob_threshold)
-
-
-def get_plugin_configs(device, num_streams, num_threads):
-    config_user_specified = {}
-
-    devices_nstreams = {}
-    if num_streams:
-        devices_nstreams = {device: num_streams for device in ['CPU', 'GPU'] if device in device} \
-            if num_streams.isdigit() \
-            else dict(device.split(':', 1) for device in num_streams.split(','))
-
-    if 'CPU' in device:
-        if num_threads is not None:
-            config_user_specified['CPU_THREADS_NUM'] = str(num_threads)
-        if 'CPU' in devices_nstreams:
-            config_user_specified['CPU_THROUGHPUT_STREAMS'] = devices_nstreams['CPU'] \
-                if int(devices_nstreams['CPU']) > 0 \
-                else 'CPU_THROUGHPUT_AUTO'
-
-    if 'GPU' in device:
-        if 'GPU' in devices_nstreams:
-            config_user_specified['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] \
-                if int(devices_nstreams['GPU']) > 0 \
-                else 'GPU_THROUGHPUT_AUTO'
-
-    return config_user_specified
+    return model
 
 
 default_skeleton = ((15, 13), (13, 11), (16, 14), (14, 12), (11, 12), (5, 11), (6, 12), (5, 6),
@@ -185,7 +164,7 @@ def main():
     log.info('Initializing Inference Engine...')
     ie = IECore()
 
-    plugin_config = get_plugin_configs(args.device, args.num_streams, args.num_threads)
+    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
     cap = open_images_capture(args.input, args.loop)
 
@@ -229,6 +208,7 @@ def main():
             metrics.update(start_time, frame)
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
+            next_frame_id_to_show += 1
             if not args.no_show:
                 cv2.imshow('Pose estimation results', frame)
                 key = cv2.waitKey(1)
@@ -238,7 +218,6 @@ def main():
                 if key in {ord('q'), ord('Q'), ESC_KEY}:
                     break
                 presenter.handleKey(key)
-            next_frame_id_to_show += 1
             continue
 
         if hpe_pipeline.is_ready():
@@ -258,33 +237,31 @@ def main():
 
     hpe_pipeline.await_all()
     # Process completed requests
-    while hpe_pipeline.has_completed_request():
+    for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = hpe_pipeline.get_result(next_frame_id_to_show)
-        if results:
-            (poses, scores), frame_meta = results
-            frame = frame_meta['frame']
-            start_time = frame_meta['start_time']
+        while results is None:
+            results = hpe_pipeline.get_result(next_frame_id_to_show)
+        (poses, scores), frame_meta = results
+        frame = frame_meta['frame']
+        start_time = frame_meta['start_time']
 
-            if len(poses) and args.raw_output_message:
-                print_raw_results(poses, scores)
+        if len(poses) and args.raw_output_message:
+            print_raw_results(poses, scores)
 
-            presenter.drawGraphs(frame)
-            frame = draw_poses(frame, poses, args.prob_threshold)
-            metrics.update(start_time, frame)
-            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
-                video_writer.write(frame)
-            if not args.no_show:
-                cv2.imshow('Pose estimation results', frame)
-                key = cv2.waitKey(1)
+        presenter.drawGraphs(frame)
+        frame = draw_poses(frame, poses, args.prob_threshold)
+        metrics.update(start_time, frame)
+        if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
+            video_writer.write(frame)
+        if not args.no_show:
+            cv2.imshow('Pose estimation results', frame)
+            key = cv2.waitKey(1)
 
-                ESC_KEY = 27
-                # Quit.
-                if key in {ord('q'), ord('Q'), ESC_KEY}:
-                    break
-                presenter.handleKey(key)
-            next_frame_id_to_show += 1
-        else:
-            break
+            ESC_KEY = 27
+            # Quit.
+            if key in {ord('q'), ord('Q'), ESC_KEY}:
+                break
+            presenter.handleKey(key)
 
     metrics.print_total()
     print(presenter.reportMeans())

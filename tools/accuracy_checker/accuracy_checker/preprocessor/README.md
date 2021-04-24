@@ -45,6 +45,7 @@ Accuracy Checker supports following set of preprocessors:
   * `std` specifies values, on which pixels will be divided.
      You can specify one value for all channels or list of comma separated channel-wise values.
      These parameters support work with precomputed values of frequently used datasets (e.g. `cifar10` or `imagenet`).
+  * `images_only` - prevent usage normalization for non-image inputs in multi input mode (Optional, default `False`).
 * `resize3d` - resizing 3d image (e.g. MRI scans) to new size:
   * `size` in format `(H,W,D)`. All values will be interpolated with 1st-order spline.
 * `crop_brats`  -  performing crop of 3d images (e.g. MRI scans) by cropping all non-zero voxels. Also sets bounding boxes for `segmentation_prediction_resample` preprocessor (see [Postprocessors](../postprocessor/README.md))
@@ -192,7 +193,8 @@ Accuracy Checker supports following set of preprocessors:
     * `True` - there are no dithering in time-domain, fixed value from `dither` parameter added to signal spectrum
     * `False` - dithering in time-domain, random values with  `dither` magnitude added to signal spectrum
   * `dither` - dithering value
-
+* `audio_patches` - split audio signal on patches with specified `size` for multi inference processing. If input signal can not be divided by size without remainder, signal will be padded by zeros left side.
+  * `size` - patch size.
 * `similarity_transform_box` - apply to image similarity transformation to get rectangle region stored in annotation metadata/
     * `box_scale` - box scale factor (Optional, default 1).
     * `dst_width` and `dst_height` are destination width and height for transformed image respectively.

@@ -69,7 +69,8 @@ LIST_ENTRIES_PATHS = {
         'mxnet_weights': 'models',
         'onnx_model': 'models',
         'kaldi_model': 'models',
-        'saved_model_dir': 'models'
+        'saved_model_dir': 'models',
+        'params': 'models'
 }
 
 COMMAND_LINE_ARGS_AS_ENV_VARS = {
@@ -89,7 +90,8 @@ ACCEPTABLE_MODEL = [
     'onnx_model',
     'kaldi_model',
     'model',
-    'saved_model_dir'
+    'saved_model_dir',
+    'params'
 ]
 
 
@@ -122,7 +124,7 @@ class ConfigReader:
     @staticmethod
     def process_config(config, mode='models', arguments=None):
         if arguments is None:
-            arguments = dict()
+            arguments = {}
         ConfigReader._merge_paths_with_prefixes(arguments, config, mode)
         ConfigReader._provide_cmd_arguments(arguments, config, mode)
         ConfigReader._filter_launchers(config, arguments, mode)
@@ -407,7 +409,7 @@ class ConfigReader:
             'model_optimizer', 'tf_custom_op_config_dir',
             'tf_obj_detection_api_pipeline_config_path',
             'transformations_config_dir',
-            'cpu_extensions_mode', 'vpu_log_level', 'device_config'
+            'cpu_extensions_mode', 'vpu_log_level'
         ]
         arguments_dict = arguments if isinstance(arguments, dict) else vars(arguments)
         update_launcher_entry = {}
@@ -416,6 +418,9 @@ class ConfigReader:
             value = arguments_dict.get(key)
             if value:
                 update_launcher_entry['_{}'.format(key)] = value
+
+        if arguments_dict.get('device_config'):
+            update_launcher_entry['device_config'] = read_yaml(arguments_dict['device_config'])
 
         return functors_by_mode[mode](config, arguments, update_launcher_entry)
 
@@ -597,9 +602,10 @@ class ConfigReader:
 def create_command_line_mapping(config, default_value, value_map=None):
     mapping = {}
     value_map = value_map or {}
-    for key in config:
+    for key, value in config.items():
         if key.endswith('file') or key.endswith('dir'):
-            mapping[key] = value_map.get(key, default_value)
+            if not Path(value).is_absolute():
+                mapping[key] = value_map.get(key, default_value)
 
     return mapping
 
@@ -762,25 +768,32 @@ def merge_entry_paths(keys, value, args, value_id=0):
         if config_path.is_absolute():
             value[field] = Path(value[field])
             continue
+        argument_list = argument
 
-        if isinstance(argument, list):
-            argument = next(filter(args.get, argument), argument[-1])
+        if not isinstance(argument, list):
+            argument_list = [argument]
 
-        if argument not in args or not args[argument]:
-            continue
+        selected_argument = None
+        for arg_candidate in argument_list:
 
-        selected_argument = args[argument]
-        if isinstance(selected_argument, list):
-            if len(selected_argument) > 1:
-                if len(selected_argument) <= value_id:
-                    raise ValueError('list of arguments for {} less than number of evaluations')
-                selected_argument = selected_argument[value_id]
-            else:
-                selected_argument = selected_argument[0]
+            if arg_candidate not in args or not args[arg_candidate]:
+                continue
 
-        if not selected_argument.is_dir():
-            raise ConfigError('argument: {} should be a directory'.format(argument))
-        value[field] = selected_argument / config_path
+            selected_argument = args[arg_candidate]
+            if isinstance(selected_argument, list):
+                if len(selected_argument) > 1:
+                    if len(selected_argument) <= value_id:
+                        raise ValueError('list of arguments for {} less than number of evaluations')
+                    selected_argument = selected_argument[value_id]
+                else:
+                    selected_argument = selected_argument[0]
+
+            if not selected_argument.is_dir():
+                raise ConfigError('argument: {} should be a directory'.format(argument))
+
+            if (selected_argument / config_path).exists():
+                break
+        value[field] = selected_argument / config_path if selected_argument is not None else config_path
 
 
 def get_mode(config):

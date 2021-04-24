@@ -114,3 +114,30 @@ class DitherSpectrum(Preprocessor):
         if self.dither > 0 and not self.use_deterministic_dithering:
             image.data = image.data + self.dither ** 2
         return image
+
+
+class SignalPatching(Preprocessor):
+    __provider__ = 'audio_patches'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'size': NumberField(value_type=int, min_value=1)
+        })
+        return params
+
+    def configure(self):
+        self.size = self.get_value_from_config('size')
+
+    def process(self, image, annotation_meta=None):
+        data = np.squeeze(image.data)
+        patch_num, rest_size = divmod(np.squeeze(data).shape[0], self.size)
+        if rest_size > 0:
+            data = np.pad(data, (self.size - rest_size, 0), mode='constant')
+            patch_num += 1
+            image.metadata['padding'] = self.size - rest_size
+        processed_data = np.split(data, patch_num)
+        image.data = processed_data
+        image.metadata['multi_infer'] = True
+        return image

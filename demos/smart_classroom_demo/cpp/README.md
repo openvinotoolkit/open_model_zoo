@@ -30,7 +30,6 @@ To recognize faces on a frame, the demo needs a gallery of reference images. Eac
 
 Running the application with the `-h` option yields the following usage message:
 ```
-./smart_classroom_demo -h
 InferenceEngine:
     API version ............ <version>
     Build .................. <number>
@@ -55,7 +54,6 @@ Options:
     -d_fd '<device>'               Optional. Specify the target device for Face Detection Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_lm '<device>'               Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_reid '<device>'             Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -out_v  '<path>'               Optional. File to write output video with visualization to.
     -greedy_reid_matching          Optional. Use faster greedy matching algorithm in face reid.
     -pc                            Optional. Enables per-layer performance statistics.
     -r                             Optional. Output Inference results as raw values.
@@ -69,7 +67,7 @@ Options:
     -t_reid                        Optional. Cosine distance threshold between two vectors for face reidentification.
     -fg                            Optional. Path to a faces gallery in .json format.
     -teacher_id                    Optional. ID of a teacher. You must also set a faces gallery parameter (-fg) to use it.
-    -no_show                       Optional. Do not show processed video.
+    -no_show                       Optional. Don't show output.
     -min_ad                        Optional. Minimum action duration in seconds.
     -d_ad                          Optional. Maximum time difference between actions in seconds.
     -student_ac                    Optional. List of student actions separated by a comma.
@@ -87,7 +85,7 @@ Options:
 
 Running the application with the empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/smart_classroom_demo/cpp/models.lst`.
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

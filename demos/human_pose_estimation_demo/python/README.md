@@ -19,8 +19,8 @@ the argument, refer to **When to Reverse Input Channels** section of
 
 Running the application with the `-h` option yields the following usage message:
 ```
-usage: human_pose_estimation_demo.py [-h] -m MODEL -at {ae,openpose} -i INPUT
-                                     [--loop] [-o OUTPUT]
+usage: human_pose_estimation_demo.py [-h] -m MODEL -at {ae,hrnet,openpose} -i
+                                     INPUT [--loop] [-o OUTPUT]
                                      [-limit OUTPUT_LIMIT] [-d DEVICE]
                                      [-t PROB_THRESHOLD] [--tsize TSIZE]
                                      [-nireq NUM_INFER_REQUESTS]
@@ -32,7 +32,7 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -at {ae,openpose}, --architecture_type {ae,openpose}
+  -at {ae,higherhrnet,openpose}, --architecture_type {ae,higherhrnet,openpose}
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
@@ -95,8 +95,7 @@ python3 human_pose_estimation.py -i 0 -m human-pose-estimation-0002.xml -at ae -
 ```
 
 To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO
-[Model Downloader](../../../tools/downloader/README.md) or from
-[https://download.01.org/opencv/](https://download.01.org/opencv/).
+[Model Downloader](../../../tools/downloader/README.md).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine
 format (\*.xml + \*.bin) using the

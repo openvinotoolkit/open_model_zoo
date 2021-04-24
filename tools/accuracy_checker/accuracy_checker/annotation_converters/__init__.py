@@ -98,6 +98,11 @@ from .common_object_detection import CommonDetectionConverter
 from .wflw import WFLWConverter
 from .see_in_the_dark import SeeInTheDarkDatasetConverter
 from .conll_ner import CONLLDatasetConverter
+from .background_matting import BackgroundMattingConverter
+from .tacotron2_test_data_converter import TacotronDataConverter
+from .noise_suppression_dataset import NoiseSuppressionDatasetConverter
+from .vimeo90k_sr import Vimeo90KSuperResolutionDatasetConverter
+from .lmdb import LMDBConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -188,5 +193,10 @@ __all__ = [
     'CommonDetectionConverter',
     'WFLWConverter',
     'SeeInTheDarkDatasetConverter',
-    'CONLLDatasetConverter'
+    'CONLLDatasetConverter',
+    'BackgroundMattingConverter',
+    'TacotronDataConverter',
+    'NoiseSuppressionDatasetConverter',
+    'Vimeo90KSuperResolutionDatasetConverter',
+    'LMDBConverter',
 ]

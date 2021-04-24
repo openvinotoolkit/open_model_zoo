@@ -234,6 +234,13 @@ class YoloV2Adapter(Adapter):
         predictions = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(predictions)
         predictions = predictions[self.output_blob]
+        out_precision = frame_meta[0].get('output_precision', {})
+        out_layout = frame_meta[0].get('outpupt_layout', {})
+        if self.output_blob in out_precision and predictions.dtype != out_precision[self.output_blob]:
+            predictions = predictions.view(out_precision[self.output_blob])
+        if self.output_blob in out_layout and out_layout[self.output_blob] == 'NHWC':
+            shape = predictions.shape
+            predictions = np.transpose(predictions, (0, 3, 1, 2)).reshape(shape)
 
         result = []
         box_size = self.classes + self.coords + 1
@@ -387,8 +394,15 @@ class YoloV3Adapter(Adapter):
 
         raw_outputs = self._extract_predictions(raw, frame_meta)
         batch = len(identifiers)
+        out_precision = frame_meta[0].get('output_precision', {})
+        out_layout = frame_meta[0].get('output_layout', {})
         predictions = [[] for _ in range(batch)]
         for blob in self.outputs:
+            if blob in out_precision and raw_outputs[blob].dtype != out_precision[blob]:
+                raw_outputs[blob] = raw_outputs[blob].view(out_precision[blob])
+            if blob in out_layout and out_layout[blob] == 'NHWC':
+                shape = raw_outputs[blob].shape
+                raw_outputs[blob] = np.transpose(raw_outputs[blob], (0, 3, 1, 2)).reshape(shape)
             for b in range(batch):
                 predictions[b].append(raw_outputs[blob][b])
 

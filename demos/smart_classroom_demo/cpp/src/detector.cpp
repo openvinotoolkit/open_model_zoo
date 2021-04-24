@@ -104,7 +104,7 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
         THROW_IE_EXCEPTION << "Face Detection network output layer should have 7 as a last dimension";
     }
     if (outputDims.size() != 4) {
-        THROW_IE_EXCEPTION << "Face Detection network output dimensions not compatible shoulld be 4, but was " +
+        THROW_IE_EXCEPTION << "Face Detection network output should have 4 dimensions, but had " +
                               std::to_string(outputDims.size());
     }
     _output->setPrecision(Precision::FP32);

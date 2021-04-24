@@ -64,7 +64,7 @@ Options:
     -pc                        Optional. Enables per-layer performance statistics.
     -r                         Optional. Output inference results as raw values.
     -t                         Optional. Probability threshold for vehicle and license plate detections.
-    -no_show                   Optional. Do not show processed video.
+    -no_show                   Optional. Don't show output.
     -auto_resize               Optional. Enable resizable input with support of ROI crop and auto resize.
     -nireq                     Optional. Number of infer requests. 0 sets the number of infer requests equal to the number of inputs.
     -nc                        Required for web camera input. Maximum number of processed camera inputs (web cameras).
@@ -83,7 +83,7 @@ Options:
 
 Running the application with an empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/security_barrier_camera_demo/cpp/models.lst`.
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

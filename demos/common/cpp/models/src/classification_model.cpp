@@ -21,26 +21,9 @@
 using namespace InferenceEngine;
 
 ClassificationModel::ClassificationModel(const std::string& modelFileName, size_t nTop, bool useAutoResize, const std::vector<std::string>& labels) :
-    ModelBase(modelFileName),
+    ImageModel(modelFileName, useAutoResize),
     nTop(nTop),
-    useAutoResize(useAutoResize),
     labels(labels) {
-}
-
-std::shared_ptr<InternalModelData> ClassificationModel::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
-    auto& img = inputData.asRef<ImageInputData>().inputImage;
-
-    if (useAutoResize) {
-        /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
-        request->SetBlob(inputsNames[0], wrapMat2Blob(img));
-    }
-    else {
-        /* Resize and copy data from the image to the input blob */
-        Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-        matU8ToBlob<uint8_t>(img, frameBlob);
-    }
-
-    return nullptr;
 }
 
 std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& infResult) {

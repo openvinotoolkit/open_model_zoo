@@ -148,6 +148,6 @@ def create_adapter(adapter_config, launcher=None, dataset=None):
     else:
         raise ConfigError('Unknown type for adapter configuration')
 
-    if launcher:
+    if launcher and adapter.output_blob is None:
         adapter.output_blob = launcher.output_blob
     return adapter

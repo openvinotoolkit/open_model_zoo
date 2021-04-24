@@ -1,0 +1,69 @@
+models:
+  - name: ultra-lightweight-face-detection-rfb-320-onnx
+
+    launchers:
+      - framework: onnx_runtime
+        model: ultra-lightweight-face-detection-rfb-320.onnx
+        adapter:
+          type: ultra_lightweight_face_detection
+          boxes_out: "boxes"
+          scores_out: "scores"
+
+    datasets:
+      - name: wider
+
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: resize
+            dst_width: 320
+            dst_height: 240
+          - type: normalization
+            mean: 127.0
+            std: 128.0
+
+        postprocessing:
+          - type: nms
+            overlap: 0.5
+            include_boundaries: False
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: annotation
+            height_range: 100
+            is_empty: True
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+
+  - name: ultra-lightweight-face-detection-rfb-320
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: ultra_lightweight_face_detection
+          boxes_out: "boxes"
+          scores_out: "scores"
+
+    datasets:
+      - name: wider
+
+        preprocessing:
+          - type: resize
+            dst_width: 320
+            dst_height: 240
+
+        postprocessing:
+          - type: nms
+            overlap: 0.5
+            include_boundaries: False
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: annotation
+            height_range: 100
+            is_empty: True
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False

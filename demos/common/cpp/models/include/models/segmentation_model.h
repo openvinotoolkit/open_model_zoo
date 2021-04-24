@@ -14,11 +14,10 @@
 // limitations under the License.
 */
 
-#include "model_base.h"
-#include "opencv2/core.hpp"
+#include "image_model.h"
 
 #pragma once
-class SegmentationModel : public ModelBase {
+class SegmentationModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
@@ -36,6 +35,4 @@ protected:
     int outHeight = 0;
     int outWidth = 0;
     int outChannels = 0;
-
-    bool useAutoResize;
 };

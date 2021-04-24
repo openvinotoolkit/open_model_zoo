@@ -53,7 +53,7 @@ def add_common_args(parser):
     common_args.add_argument(
         '-m', '--models',
         help='prefix path to the models and weights',
-        type=partial(get_path, is_directory=True),
+        type=partial(get_path, file_or_directory=True),
         required=False,
         nargs='+'
     )
@@ -393,11 +393,13 @@ def main():
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
             )
             if not args.store_only:
-                metrics_results, _ = evaluator.extract_metrics_results(
+                metrics_results, metrics_meta = evaluator.extract_metrics_results(
                     print_results=True, ignore_results_formatting=args.ignore_result_formatting
                 )
                 if args.csv_result:
-                    write_csv_result(args.csv_result, processing_info, metrics_results)
+                    write_csv_result(
+                        args.csv_result, processing_info, metrics_results, evaluator.dataset_size, metrics_meta
+                    )
             evaluator.release()
         except Exception as e:  # pylint:disable=W0703
             exception(e)
@@ -417,28 +419,35 @@ def print_processing_info(model, launcher, device, tags, dataset):
     print_info('OpenCV version: {}'.format(cv2.__version__))
 
 
-def write_csv_result(csv_file, processing_info, metric_results):
+def write_csv_result(csv_file, processing_info, metric_results, dataset_size, metrics_meta):
     new_file = not check_file_existence(csv_file)
-    field_names = ['model', 'launcher', 'device', 'dataset', 'tags', 'metric_name', 'metric_type', 'metric_value']
+    field_names = [
+        'model', 'launcher', 'device', 'dataset',
+        'tags', 'metric_name', 'metric_type', 'metric_value', 'metric_target', 'metric_scale', 'metric_postfix',
+        'dataset_size']
     model, launcher, device, tags, dataset = processing_info
     main_info = {
         'model': model,
         'launcher': launcher,
         'device': device.upper(),
         'tags': ' '.join(tags) if tags else '',
-        'dataset': dataset
+        'dataset': dataset,
+        'dataset_size': dataset_size
     }
 
     with open(csv_file, 'a+', newline='') as f:
         writer = DictWriter(f, fieldnames=field_names)
         if new_file:
             writer.writeheader()
-        for metric_result in metric_results:
+        for metric_result, metric_meta in zip(metric_results, metrics_meta):
             writer.writerow({
                 **main_info,
                 'metric_name': metric_result['name'],
                 'metric_type': metric_result['type'],
-                'metric_value': metric_result['value']
+                'metric_value': metric_result['value'],
+                'metric_target': metric_meta.get('target', 'higher-better'),
+                'metric_scale': metric_meta.get('scale', 100),
+                'metric_postfix': metric_meta.get('postfix', '%')
             })
 
 

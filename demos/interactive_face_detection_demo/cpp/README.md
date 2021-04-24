@@ -77,9 +77,9 @@ Options:
     -dyn_hp                    Optional. Enable dynamic batch size for Head Pose Estimation network
     -dyn_em                    Optional. Enable dynamic batch size for Emotions Recognition network
     -dyn_lm                    Optional. Enable dynamic batch size for Facial Landmarks Estimation network
-    -dyn_am                    Optional. Enable dynamic batch size for Antispoofing Classification network"
+    -dyn_am                    Optional. Enable dynamic batch size for Antispoofing Classification network
     -async                     Optional. Enable asynchronous mode
-    -no_show                   Optional. Do not show processed video.
+    -no_show                   Optional. Don't show output.
     -pc                        Optional. Enable per-layer performance report
     -r                         Optional. Output inference results as raw values
     -t                         Optional. Probability threshold for detections
@@ -94,7 +94,7 @@ Options:
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or Intel pre-trained models. You can download models and, if necessary, convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below. The models which are supported by the demo are listed in the [models.lst](./models.lst) file.
+To run the demo, you can use public or Intel pre-trained models. You can download models and, if necessary, convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below. The models which are supported by the demo are listed in `<omz_dir>/demos/interactive_face_detection_demo/cpp/models.lst`.
 
 An example of using the Model Downloader:
 ```

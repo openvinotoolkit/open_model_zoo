@@ -60,7 +60,7 @@ Options:
     -r                           Optional. Output Inference results as raw values.
     -t                           Optional. Probability threshold for person/vehicle/bike crossroad detections.
     -t_reid                      Optional. Cosine similarity threshold between two vectors for person reidentification.
-    -no_show                     Optional. No show processed video.
+    -no_show                     Optional. Don't show output.
     -auto_resize                 Optional. Enables resizable input with support of ROI crop & auto resize.
     -u                           Optional. List of monitors to show initially.
     -person_label                Optional. The integer index of the objects' category corresponding to persons (as it is returned from the detection network, may vary from one network to another). The default value is 1.
@@ -68,7 +68,7 @@ Options:
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/crossroad_camera_demo/cpp/models.lst`.
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
