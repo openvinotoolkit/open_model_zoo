@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import struct
 import re
 import wave
 from collections import OrderedDict, namedtuple
@@ -25,7 +26,9 @@ import numpy as np
 from numpy.lib.npyio import NpzFile
 from PIL import Image
 
-from ..utils import get_path, read_json, read_pickle, contains_all, UnsupportedPackage, get_parameter_value_from_config
+from ..utils import (
+    get_path, read_json, read_pickle, contains_all, contains_any, UnsupportedPackage, get_parameter_value_from_config
+)
 from ..dependency import ClassProvider, UnregisteredProviderException
 from ..config import (
     BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField, PathField
@@ -81,56 +84,62 @@ MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id
 ImagePairIdentifier = namedtuple('ImagePairIdentifier', ['first', 'second'])
 ListIdentifier = namedtuple('ListIdentifier', ['values'])
 MultiInstanceIdentifier = namedtuple('MultiInstanceIdentifier', ['identifier', 'object_id'])
+KaldiMatrixIdentifier = namedtuple('KaldiMatrixIdentifier', ['file', 'key'])
+KaldiFrameIdentifier = namedtuple('KaldiFrameIdentifier', ['file', 'key', 'id'])
+
+IdentifierSerializationOptions = namedtuple(
+    "identifierSerializationOptions", ['type', 'fields', 'class_id', 'recursive', 'to_tuple']
+)
+
+identifier_serialization = {
+    'ClipIdentifier': IdentifierSerializationOptions(
+        'clip_identifier', ['video', 'clip_id', 'frames'], ClipIdentifier, [False, False, False], [False, False, True]),
+    'MultiFramesInputIdentifier': IdentifierSerializationOptions(
+        'multi_frame_identifier', ['input_id', 'frames'], MultiFramesInputIdentifier, [False, False], [False, True]),
+    'ImagePairIdentifier': IdentifierSerializationOptions(
+        'image_pair_identifier', ['first', 'second'], ImagePairIdentifier, False, False),
+    'ListIdentifier': IdentifierSerializationOptions('list_identifier', ['values'], ListIdentifier, [True], [True]),
+    'MultiInstanceIdentifier': IdentifierSerializationOptions(
+        'multi_instance', ['identifier', 'instance_id'], MultiInstanceIdentifier, [False, False], [False, False]),
+    'KaldiMatrixIdentifier': IdentifierSerializationOptions(
+        'kaldi_matrix', ['file', 'key'], KaldiMatrixIdentifier, [False, False], [False, False]),
+    'KaldiFrameIdentifier': IdentifierSerializationOptions(
+        'kaldi_frame', ['file', 'key', 'id'], KaldiFrameIdentifier, [False, False, False], [False, False, False])
+}
+
+identifier_deserialization = {option.type: option for option in identifier_serialization.values()}
 
 
 def serialize_identifier(identifier):
-    if isinstance(identifier, ClipIdentifier):
-        return {
-            "type": "clip_identifier",
-            "video": identifier.video,
-            "clip_id": identifier.clip_id,
-            "frames": identifier.frames
-        }
-    if isinstance(identifier, MultiFramesInputIdentifier):
-        return {
-            "type": "multi_frame_identifier",
-            "input_id": identifier.input_id,
-            "frames": identifier.frames
-        }
-    if isinstance(identifier, ImagePairIdentifier):
-        return {
-            "type": "image_pair_identifier",
-            "first": identifier.first,
-            "second": identifier.second
-        }
-    if isinstance(identifier, ListIdentifier):
-        return {
-            "type": "list_identifier",
-            "values": identifier.values
-        }
-    if isinstance(identifier, MultiInstanceIdentifier):
-        return {
-            "type": 'multi_instance',
-            "identifier": identifier.identifier,
-            "object_id": identifier.object_id
-        }
+    if type(identifier).__name__ in identifier_serialization:
+        options = identifier_serialization[type(identifier).__name__]
+        serialized_id = {'type': options.type}
+        for idx, field in options.fields:
+            serialized_id[field] = (
+                identifier[idx] if not options.recursive[idx] else serialize_identifier(identifier[idx])
+            )
+        return serialized_id
+
     return identifier
 
 
 def deserialize_identifier(identifier):
     if isinstance(identifier, dict):
-        type_id = identifier.get('type')
-        if type_id == 'image_pair_identifier':
-            return ImagePairIdentifier(identifier['first'], identifier['second'])
-        if type_id == 'list_identifier':
-            return ListIdentifier(tuple(identifier['values']))
-        if type_id == 'multi_frame_identifier':
-            return MultiFramesInputIdentifier(identifier['input_id'], tuple(identifier['frames']))
-        if type_id == 'clip_identifier':
-            return ClipIdentifier(identifier['video'], identifier['clip_id'], tuple(identifier['frames']))
-        if type_id == 'multi_instance':
-            return MultiInstanceIdentifier(identifier['identifier'], identifier['object_id'])
-        raise ValueError('Unsupported identifier type: {}'.format(type_id))
+        options = identifier_deserialization.get(identifier.get('type'))
+        if options is None:
+            raise ValueError('Unsupported identifier type: {}'.format(identifier.get('type')))
+        fields = []
+        for field, recursive, to_tuple in zip(options.fields, options.recursive, options.to_tuple):
+            if field not in identifier:
+                raise ValueError('Field {} required for identifier deserialization'.format(field))
+            data = identifier[field]
+            if recursive:
+                data = deserialize_identifier(data)
+            if to_tuple:
+                data = tuple(data)
+            fields.append(data)
+        return options.class_id(*fields)
+
     return identifier
 
 
@@ -868,3 +877,89 @@ class LMDBReader(BaseReader):
                 img = np.stack((img,) * 3, axis=-1)
             assert img.shape[-1] == 3
             return img
+
+
+class KaldiARKReader(BaseReader):
+    __provider__ = 'kaldi_ark_reader'
+
+    def configure(self):
+        super().configure()
+        self.buffer = {}
+
+    @staticmethod
+    def read_frames(in_file):
+        ut = {}
+        with open(str(in_file), 'rb') as fd:
+            while True:
+                try:
+                    key = KaldiARKReader.read_token(fd)
+                    if not key:
+                        break
+                    _ = fd.read(2)
+                    ark_type = KaldiARKReader.read_token(fd)
+                    float_size = 4 if ark_type[0] == 'F' else 8
+                    float_type = np.float32 if ark_type[0] == 'F' else float
+                    num_rows = KaldiARKReader.read_int32(fd)
+                    num_cols = KaldiARKReader.read_int32(fd)
+                    mat_data = fd.read(float_size * num_cols * num_rows)
+                    mat = np.frombuffer(mat_data, dtype=float_type)
+                    ut[key] = mat.reshape(num_rows, num_cols)
+                except EOFError:
+                    break
+            return ut
+
+    def read_utterance(self, file_name, utterance):
+        if file_name not in self.buffer:
+            self.buffer[file_name] = self.read_frames(self.data_source / file_name)
+        return self.buffer[file_name][utterance]
+
+    def read_frame(self, file_name, utterance, idx):
+        return self.read_utterance(file_name, utterance)[idx]
+
+    @staticmethod
+    def read_int32(fd):
+        """
+            Read a value in type 'int32' in kaldi setup
+        """
+        int_size = bytes.decode(fd.read(1))
+        assert int_size == '\04', 'Expect \'\\04\', but gets {}'.format(int_size)
+        int_str = fd.read(4)
+        int_val = struct.unpack('i', int_str)
+        return int_val[0]
+
+    @staticmethod
+    def read_token(fd):
+        """
+            Read {token + ' '} from the file(this function also consume the space)
+        """
+        key = ''
+        while True:
+            c = bytes.decode(fd.read(1))
+            if c in [' ', '']:
+                break
+            key += c
+        return None if key == '' else key.strip()
+
+    def read(self, data_id, reset=True):
+        assert (
+            isinstance(data_id, (KaldiMatrixIdentifier, KaldiFrameIdentifier))
+        ), "Kaldi reader support only Kaldi specific data IDs"
+        file_id = data_id.file
+        if file_id not in self.buffer and self.buffer and reset:
+            self.reset()
+        if len(data_id) == 3:
+            return self.read_frame(data_id.file, data_id.key, data_id.id)
+        matrix = self.read_utterance(data_id.file, data_id.key)
+        if self.multi_infer:
+            matrix = matrix.tolist()
+        return matrix
+
+    def _read_list(self, data_id):
+        if not contains_any(self.buffer, [data.file for data in data_id]) and self.buffer:
+            self.reset()
+
+        return [self.read(idx, reset=False) for idx in data_id]
+
+    def reset(self):
+        del self.buffer
+        self.buffer = {}
