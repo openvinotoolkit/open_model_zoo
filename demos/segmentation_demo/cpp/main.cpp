@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -185,8 +185,10 @@ cv::Mat renderSegmentationData(const SegmentationResult& result) {
     return inputImg / 2 + applyColorMap(result.mask) / 2;
 }
 
-int main(int argc, char *argv[]) {
-    try {
+int main(int argc, char* argv[])
+{
+    try
+    {
         PerformanceMetrics metrics;
 
         slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
@@ -203,7 +205,8 @@ int main(int argc, char *argv[]) {
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
         InferenceEngine::Core core;
-        AsyncPipeline pipeline(std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m, FLAGS_auto_resize)),
+        AsyncPipeline pipeline(
+            std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m, FLAGS_auto_resize)),
             ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
@@ -228,8 +231,7 @@ int main(int argc, char *argv[]) {
                 if (curr_frame.empty()) {
                     if (frameNum == -1) {
                         throw std::logic_error("Can't read an image from the input");
-                    }
-                    else {
+                    } else {
                         // Input stream is over
                         break;
                     }
@@ -267,24 +269,29 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-        }
+        } // while(keepRunning)
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
-        for (; framesProcessed <= frameNum; framesProcessed++) {
-            while (!(result = pipeline.getResult())) {}
-            cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>());
-            //--- Showing results and device information
-            presenter.drawGraphs(outFrame);
-            metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                videoWriter.write(outFrame);
-            }
-            if (!FLAGS_no_show) {
-                cv::imshow("Segmentation Results", outFrame);
-                //--- Updating output window
-                cv::waitKey(1);
+
+        for (; framesProcessed <= frameNum; framesProcessed++)
+        {
+            result = pipeline.getResult();
+            if (result != nullptr)
+            {
+                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>());
+                //--- Showing results and device information
+                presenter.drawGraphs(outFrame);
+                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
+                    videoWriter.write(outFrame);
+                }
+                if (!FLAGS_no_show) {
+                    cv::imshow("Segmentation Results", outFrame);
+                    //--- Updating output window
+                    cv::waitKey(1);
+                }
             }
         }
 
@@ -304,5 +311,6 @@ int main(int argc, char *argv[]) {
     }
 
     slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
+
     return 0;
 }

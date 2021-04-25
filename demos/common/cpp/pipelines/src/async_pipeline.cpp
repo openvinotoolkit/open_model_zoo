@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ void AsyncPipeline::waitForData(bool shouldKeepOrder) {
         std::rethrow_exception(callbackException);
 }
 
-int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_ptr<MetaData>& metaData){
+int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_ptr<MetaData>& metaData) {
     auto frameID = inputFrameId;
 
     auto request = requestsPool->getIdleRequest();
@@ -69,11 +69,9 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
 
     auto internalModelData = model->preprocess(inputData, request);
 
-    request->SetCompletionCallback([this,
-        frameID,
-        request,
-        internalModelData,
-        metaData] {
+    request->SetCompletionCallback(
+        [this, frameID, request, internalModelData, metaData]
+        {
             {
                 std::lock_guard<std::mutex> lock(mtx);
 
@@ -85,7 +83,14 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                     result.internalModelData = std::move(internalModelData);
 
                     for (const auto& outName : model->getOutputsNames())
-                        result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(request->GetBlob(outName))));
+                    {
+                        auto blobPtr = request->GetBlob(outName);
+
+                        if(Precision::I32 == blobPtr->getTensorDesc().getPrecision())
+                            result.outputsData.emplace(outName, std::make_shared<TBlob<int>>(*as<TBlob<int>>(blobPtr)));
+                        else
+                            result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(blobPtr)));
+                    }
 
                     completedInferenceResults.emplace(frameID, result);
                     this->requestsPool->setRequestIdle(request);
@@ -96,14 +101,16 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                     }
                 }
             }
+
             condVar.notify_one();
-    });
+        });
 
     inputFrameId++;
     if (inputFrameId < 0)
         inputFrameId = 0;
 
     request->StartAsync();
+
     return frameID;
 }
 
