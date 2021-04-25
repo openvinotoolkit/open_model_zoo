@@ -17,7 +17,7 @@ DEFINE_OUTPUT_FLAGS
 static const char help_message[] = "Print a usage message.";
 static const char text_detection_model_message[] = "Required. Path to the Text Detection model (.xml) file.";
 static const char text_recognition_model_message[] = "Required. Path to the Text Recognition model (.xml) file.";
-static const char text_recognition_decoder_type_message[] = "Optional. Type of the decoder, either 'simple' for SimpleDecoder or 'ctc' for CTC greedy and CTC beam search decoders.";
+static const char text_recognition_decoder_type_message[] = "Optional. Type of the decoder, either 'simple' for SimpleDecoder or 'ctc' for CTC greedy and CTC beam search decoders. Default is 'ctc'";
 static const char text_recognition_model_symbols_set_message[] = "Optional. Symbol set for the Text Recognition model.";
 static const char text_recognition_pad_token_is_first_message[] = "Optional. Specifies if pad token is the first symbol in the alphabet. "
                                                                     "Default is false";
