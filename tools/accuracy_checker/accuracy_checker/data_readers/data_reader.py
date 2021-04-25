@@ -765,7 +765,7 @@ class WavReader(BaseReader):
 
             data = data.reshape(-1, channels).T
             if channels > 1 and self.mono:
-                data = data.mean(0,keepdims=True)
+                data = data.mean(0, keepdims=True)
             if self.to_float:
                 data = data.astype(np.float32) / np.iinfo(self._samplewidth_types[sample_width]).max
 
