@@ -103,6 +103,7 @@ from .tacotron2_test_data_converter import TacotronDataConverter
 from .noise_suppression_dataset import NoiseSuppressionDatasetConverter
 from .vimeo90k_sr import Vimeo90KSuperResolutionDatasetConverter
 from .lmdb import LMDBConverter
+from .electricity_time_series_forecasting import ElectricityTimeSeriesForecastingConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -199,4 +200,5 @@ __all__ = [
     'NoiseSuppressionDatasetConverter',
     'Vimeo90KSuperResolutionDatasetConverter',
     'LMDBConverter',
+    'ElectricityTimeSeriesForecastingConverter'
 ]

@@ -114,6 +114,8 @@ from .salient_objects_detection import SalientObjectDetection
 from .noise_suppression import NoiseSuppressionAdapter
 from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
 
+from .time_series import TemporalFusionTransformerAdapter
+
 __all__ = [
     'Adapter',
     'AdapterField',
@@ -240,4 +242,5 @@ __all__ = [
     'GVADetectionAdapter',
     'GVAClassificationAdapter',
 
+    'TemporalFusionTransformerAdapter'
 ]
