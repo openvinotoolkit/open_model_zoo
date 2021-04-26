@@ -36,12 +36,13 @@ def compile(reporter, compiler_path, model, model_precision, args, output_dir):
         '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
 
     reporter.print('Conversion command: {}', common.command_string(compile_cmd))
+    success = True
     if not args.dry_run:
         reporter.print(flush=True)
-        if not reporter.job_context.subprocess(compile_cmd):
-            return False
+        success = reporter.job_context.subprocess(compile_cmd)
     reporter.print()
-    return True
+
+    return success
 
 def main():
     parser = argparse.ArgumentParser()
