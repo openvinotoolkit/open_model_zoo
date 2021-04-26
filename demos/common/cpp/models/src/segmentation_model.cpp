@@ -55,7 +55,7 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     const SizeVector& outSizeVector = data.getTensorDesc().getDims();
     switch (outSizeVector.size()) {
     case 3:
-        outChannels = (int)(outSizeVector[0]);
+        outChannels = 1;
         outHeight = (int)(outSizeVector[1]);
         outWidth = (int)(outSizeVector[2]);
         break;
