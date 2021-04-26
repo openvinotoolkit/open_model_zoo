@@ -114,9 +114,7 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
     }
     else if (blobPtr->getTensorDesc().getPrecision() == Precision::FP32)
     {
-        cv::Mat predictions(outHeight, outWidth, CV_32FC(outChannels), pData);
-
-        float* ptr = predictions.ptr<float>(0, 0);
+        float* ptr = reinterpret_cast<float*>(pData);
         for (int rowId = 0; rowId < outHeight; ++rowId)
         {
             for (int colId = 0; colId < outWidth; ++colId)
