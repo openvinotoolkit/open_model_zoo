@@ -20,6 +20,8 @@ import sys
 import common
 from pathlib import Path
 
+KNOWN_COMPILABLE_PRECISIONS = {'FP16', 'FP32'}
+
 def compile(reporter, compiler_path, model, model_precision, args, output_dir):
     (output_dir / model.subdirectory).mkdir(parents=True, exist_ok=True)
 
@@ -43,7 +45,7 @@ def compile(reporter, compiler_path, model, model_precision, args, output_dir):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--model_dir', type=Path, metavar='DIR',
+    parser.add_argument('--model_dir', type=Path, metavar='DIR',
         default=Path.cwd(), help='root of the directory tree with IR model files')
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
         help='root of the directory tree to place compiled models files into')
@@ -51,9 +53,9 @@ def main():
         help='compile only models whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',
         help='compile only models whose names match at least one of the patterns in the specified file')
-    parser.add_argument('-ip', '--input_precision', dest='input_precision',
+    parser.add_argument('--input_precision', dest='input_precision',
         help='Input precision of compiled network')
-    parser.add_argument('-op', '--output_precision', dest='output_precision',
+    parser.add_argument('--output_precision', dest='output_precision',
         help='output_precision of compiled network')
     parser.add_argument('--precisions', metavar='PREC[,PREC...]',
         help='compile only specified precisions')
@@ -66,7 +68,7 @@ def main():
     args = parser.parse_args()
 
 
-    compiler_path = args.compiler
+    compiler_path = args.compile_tool
     if compiler_path is None:
         try:
             compiler_path  = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/tools/compile_tool/compile_tool'
@@ -77,10 +79,10 @@ def main():
     models = common.load_models_from_args(parser, args)
 
     if args.precisions is None:
-        requested_precisions = common.KNOWN_COMPILABLE_PRECISIONS
+        requested_precisions = KNOWN_COMPILABLE_PRECISIONS
     else:
         requested_precisions = set(args.precisions.split(','))
-        unknown_precisions = requested_precisions - common.KNOWN_COMPILABLE_PRECISIONS
+        unknown_precisions = requested_precisions - KNOWN_COMPILABLE_PRECISIONS
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
@@ -88,7 +90,7 @@ def main():
 
     output_dir = args.model_dir if args.output_dir is None else args.output_dir
 
-    requested_precisions = common.KNOWN_COMPILABLE_PRECISIONS
+    requested_precisions = KNOWN_COMPILABLE_PRECISIONS
 
     failed_models = []
 
