@@ -102,7 +102,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
             }
 
             condVar.notify_one();
-        });
+    });
 
     inputFrameId++;
     if (inputFrameId < 0)
