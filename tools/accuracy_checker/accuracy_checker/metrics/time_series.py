@@ -24,13 +24,13 @@ from ..representation import (
 )
 
 
-def normalised_quantile_loss(y, y_pred, quantile):
-    prediction_underflow = y - y_pred
+def normalised_quantile_loss(gt, pred, quantile):
+    prediction_underflow = gt - pred
     weighted_errors = quantile * np.maximum(prediction_underflow, 0.) \
         + (1. - quantile) * np.maximum(-prediction_underflow, 0.)
 
     quantile_loss = weighted_errors.mean()
-    normaliser = np.abs(y).mean()
+    normaliser = np.abs(gt).mean()
 
     return 2 * quantile_loss / normaliser
 
@@ -58,6 +58,9 @@ class NormalisedQuantileLoss(PerImageEvaluationMetric):
     def configure(self):
         self.quantile = float(self.get_value_from_config('quantile'))
         self.reset()
+        self.meta.update({
+            'scale': 1, 'postfix': ' '
+        })
         super().configure()
 
     def update(self, annotation, prediction):
@@ -67,13 +70,14 @@ class NormalisedQuantileLoss(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         preds, gt = [], []
         for i in range(len(self.annotations)):
+            scaler = self.annotations[i].scaler
             gt.append(
-                self.annotations[i].scaler.inverse_transform(
+                scaler.inverse_transform(
                     self.annotations[i].outputs[:, :, 0]
                 )
             )
             preds.append(
-                self.annotations[i].scaler.inverse_transform(
+                scaler.inverse_transform(
                     self.predictions[i].preds[self.quantile]
                 )
             )
