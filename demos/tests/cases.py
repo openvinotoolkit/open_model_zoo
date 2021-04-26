@@ -399,10 +399,17 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('text-detection')}),
         single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
         [
-            *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
-            TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
+            *combine_cases(
+                TestCase(options={'-dt': 'ctc'}),
+                [
+                    *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
+                                      '-tr_pt_first': None,
+                                      '-tr_o_blb_nm': 'logits'})
+                ]),
+            TestCase(options={'-m_tr': ModelArg('text-recognition-resnet-fc'),
                               '-tr_pt_first': None,
-                              '-tr_o_blb_nm': 'logits'}),
+                              '-dt': 'simple'}),
         ]
     )),
 ]
