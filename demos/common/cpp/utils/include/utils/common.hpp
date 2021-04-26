@@ -20,6 +20,7 @@
 #include <utility>
 #include <algorithm>
 #include <random>
+#include <iostream>
 
 #include <inference_engine.hpp>
 
