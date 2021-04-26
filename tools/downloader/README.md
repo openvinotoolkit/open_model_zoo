@@ -13,7 +13,7 @@ based on configuration files in the models' directories.
 * `quantizer.py` (model quantizer) quantizes full-precision models in the IR
   format into low-precision versions using Post-Training Optimization Toolkit.
 
-* `networks_compiler.py` compile models in the IR format into executable network blobs.
+* `compiler.py` compile models in the IR format into executable network blobs.
 
 * `info_dumper.py` (model information dumper) prints information about the models
   in a stable machine-readable format.
@@ -385,7 +385,7 @@ the script.
 The basic usage is to run the script like this:
 
 ```sh
-./networks_compiler.py --all
+./compiler.py --all
 ```
 
 This will compile all models for which it is supported. Other models
@@ -398,14 +398,14 @@ The current directory must be the root of a tree of model files created by the m
 converter. To specify a different model tree path, use the `--model_dir` option:
 
 ```sh
-./networks_compiler.py --all --model_dir my/model/directory
+./compiler.py --all --model_dir my/model/directory
 ```
 
 By default, the compiled models are placed into the same model tree. To place them
 into a different directory tree, use the `-o`/`--output_dir` option:
 
 ```sh
-./networks_compiler.py --all --output_dir my/output/directory
+./compiler.py --all --output_dir my/output/directory
 ```
 
 By default, the script will compile models in FP16 and FP32 precisions.
@@ -413,7 +413,7 @@ To only produce models in a specific precision, use
 the `--precisions` option:
 
 ```sh
-./networks_compiler.py --all --precisions=FP32
+./compiler.py --all --precisions=FP32
 ```
 
 The script will attempt to locate Compile Tool using
@@ -421,14 +421,14 @@ the environment variables set by the OpenVINO&trade; toolkit's `setupvars.sh`/`s
 script. You can override this heuristic with the `--compiler` option:
 
 ```sh
-./networks_compiler.py --all --compiler my/openvino/path/compile_tool/compile_tool_executable
+./compiler.py --all --compiler my/openvino/path/compile_tool/compile_tool_executable
 ```
 
 It's possible to specify a target device for Compile Tool
 to compile for, by using the `--target_device` option:
 
 ```sh
-./networks_compiler.py --all --target_device MYRIAD
+./compiler.py --all --target_device MYRIAD
 ```
 
 The supported values are those accepted by the "target_device" option in
@@ -438,7 +438,7 @@ The script can print the compile commands without actually running them.
 To do this, use the `--dry_run` option:
 
 ```sh
-./networks_compiler.py --all --dry_run
+./compiler.py --all --dry_run
 ```
 
 See the "Shared options" section for information on other options accepted by
