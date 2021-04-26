@@ -54,7 +54,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
 
     InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
-        THROW_IE_EXCEPTION << "Action Detection network should have only one input";
+        throw std::runtime_error("Action Detection network should have only one input");
     }
     InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
     inputInfoFirst->setPrecision(Precision::U8);
