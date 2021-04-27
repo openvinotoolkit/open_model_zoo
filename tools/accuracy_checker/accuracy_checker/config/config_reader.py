@@ -423,9 +423,6 @@ class ConfigReader:
             if value:
                 update_launcher_entry['_{}'.format(key)] = value
 
-        if arguments_dict.get('device_config'):
-            ConfigReader._merge_device_configs(update_launcher_entry, arguments_dict['device_config'])
-
         return functors_by_mode[mode](config, arguments, update_launcher_entry)
 
     @staticmethod
@@ -441,7 +438,7 @@ class ConfigReader:
             embedded_device_config.update(external_device_config)
         else:
             for key, value in external_device_config.items():
-                embedded_device_config[key] = embedded_device_config.get(key, {}).update(value)
+                embedded_device_config.get(key, {}).update(value)
         launcher_entry['device_config'] = embedded_device_config
         return launcher_entry
 
@@ -881,6 +878,9 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
     _convert_models_args(launcher_entry)
     _async_evaluation_args(launcher_entry)
     _fpga_specific_args(launcher_entry)
+
+    if 'device_config' in arguments:
+        ConfigReader._merge_device_configs(launcher_entry, arguments.device_config)
 
     if 'cpu_extensions' not in launcher_entry and 'extensions' in arguments and arguments.extensions:
         extensions = arguments.extensions
