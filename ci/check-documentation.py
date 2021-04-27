@@ -5,6 +5,7 @@ This script is like check-basics.py, but specific to the documentation.
 It's split off into a separate script, so that it can be easily run on its own.
 """
 
+import os
 import re
 import sys
 import urllib.parse
@@ -38,6 +39,10 @@ def find_md_files():
 
 def main():
     all_passed = True
+    
+    md_check_cases = (f'{OMZ_ROOT}{os.sep}models{os.sep}intel{os.sep}index.md', 
+                     f'{OMZ_ROOT}{os.sep}models{os.sep}public{os.sep}index.md', 
+                     f'{OMZ_ROOT}{os.sep}demos{os.sep}README.md')
 
     def complain(message):
         nonlocal all_passed
@@ -45,6 +50,25 @@ def main():
         print(message, file=sys.stderr)
 
     for md_path in sorted(find_md_files()):
+
+        check_md_links = False
+        topologies_in_index = list()
+
+        if os.path.normpath(md_path) in md_check_cases:
+            check_md_links = True
+            md_path_folder = os.path.dirname(md_path)
+
+            excluded_topologies = ['common', 'thirdparty'] if "demos" in md_path_folder
+                                  else ["licenses"]
+
+            topologies_in_folder = next(os.walk(md_path_folder))[1]
+
+            if "demos" in md_path_folder:
+                topologies_in_folder = [f"{topology}/{lang}" 
+                                        for topology in topologies_in_folder 
+                                        for lang in next(os.walk(f"{md_path_folder}/{topology}"))[1]
+                                        if topology not in excluded_topologies]
+
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
         doc_page = omzdocs.DocumentationPage(md_path.read_text(encoding='UTF-8'))
@@ -78,6 +102,17 @@ def main():
                 complain(f'{md_path_rel}: URL reference "{url}" target'
                     ' does not exist or is not a file')
                 continue
+
+            if check_md_links:
+                topology = url[url.find('/') + 1:url.rfind('/')]
+                if topology not in topologies_in_index:
+                    topologies_in_index.append(topology)
+
+        if check_md_links:
+            for topology_name in topologies_in_folder:
+                if topology_name not in topologies_in_index and topology_name not in excluded_topologies:
+                    complain(f"{topology_name} not in {os.path.basename(md_path)} file")
+                    continue
 
         # check for HTML fragments that are unsupported by Doxygen
 
