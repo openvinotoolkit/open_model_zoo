@@ -211,9 +211,8 @@ def main(args):
 
     if args.input:
         def sentences():
-            for sentence in args.input:
-                print("> {}".format(sentence))
-                yield sentence
+            print("> {}".format(args.input))
+            return args.input
     else:
         def sentences():
             while True:
