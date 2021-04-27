@@ -198,7 +198,9 @@ def make_subset_place_recognition(annotation, size, shuffle=True):
 def make_subset_kaldi(annotation, size, shuffle=True):
     file_to_num_utterances = {}
     for ind, ann in enumerate(annotation):
-        file_to_num_utterances[ann.identifier.file] = file_to_num_utterances.get(ann.identifier.file, []).append(ind)
+        if ann.identifier.file not in file_to_num_utterances:
+            file_to_num_utterances[ann.identifier.file] = []
+        file_to_num_utterances[ann.identifier.file].append(ind)
 
     subset = []
     for _, indices in file_to_num_utterances.items():
