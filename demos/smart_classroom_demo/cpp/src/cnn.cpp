@@ -27,11 +27,7 @@ void CnnDLSDKBase::Load() {
 
     InferenceEngine::InputsDataMap in = cnnNetwork.getInputsInfo();
     if (in.size() != 1) {
-<<<<<<< HEAD
-        IE_THROW() << "Network should have only one input";
-=======
         throw std::runtime_error("Network should have only one input");
->>>>>>> develop
     }
     in.begin()->second->setPrecision(Precision::U8);
     in.begin()->second->setLayout(Layout::NCHW);
@@ -91,11 +87,7 @@ VectorCNN::VectorCNN(const Config& config)
         : CnnDLSDKBase(config) {
     Load();
     if (output_blobs_names_.size() != 1) {
-<<<<<<< HEAD
-        IE_THROW() << "Demo supports topologies only with 1 output";
-=======
         throw std::runtime_error("Demo supports topologies only with 1 output");
->>>>>>> develop
     }
 }
 
@@ -116,11 +108,7 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
         for (auto&& item : outputs) {
             InferenceEngine::Blob::Ptr blob = item.second;
             if (blob == nullptr) {
-<<<<<<< HEAD
-                IE_THROW() << "VectorCNN::Compute() Invalid blob '" << item.first << "'";
-=======
                 throw std::runtime_error("VectorCNN::Compute() Invalid blob '" + item.first + "'");
->>>>>>> develop
             }
             InferenceEngine::SizeVector ie_output_dims = blob->getTensorDesc().getDims();
             std::vector<int> blob_sizes(ie_output_dims.size(), 0);
