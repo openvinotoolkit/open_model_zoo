@@ -66,7 +66,7 @@ const TrackedObjects& ObjectDetector::getResults() const {
 
 void ObjectDetector::enqueue(const cv::Mat &frame) {
     if (!request) {
-        request = net_.CreateInferRequestPtr();
+        request = std::make_shared<InferenceEngine::InferRequest>(net_.CreateInferRequest());
     }
 
     width_ = static_cast<float>(frame.cols);

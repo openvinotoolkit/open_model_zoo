@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
             if ((device.find("CPU") != std::string::npos)) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
+                    auto extension_ptr = std::make_shared<Extension>(FLAGS_l);
                     ie.AddExtension(extension_ptr, "CPU");
                     std::cout << "CPU Extension loaded: " << FLAGS_l << std::endl;
                 }
