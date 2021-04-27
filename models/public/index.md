@@ -154,6 +154,12 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | YOLO v4                              | Keras\*                  | [yolo-v4-tf](./yolo-v4-tf/README.md) | 71.17%/75.02% | 128.608	 |	64.33 |
 | YOLO v4 Tiny                         | Keras\*                  | [yolo-v4-tiny-tf](./yolo-v4-tiny-tf/README.md) | | 6.9289 | 6.0535 |
 
+## Face Detection
+
+| Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
+| ------------------------------------ | -------------- | -------------- | -------- |------ | ------- |
+| face-detection-retail-0044           | Caffe\*        | [face-detection-retail-0044](./face-detection-retail-0044/README.md) | 83.00% | 1.067 | 0.588 |
+
 ## Face Recognition
 
 | Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
@@ -164,6 +170,12 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | LResNet100E-IR,ArcFace@ms1m-refine-v2| MXNet\*        | [face-recognition-resnet100-arcface](./face-recognition-resnet100-arcface/README.md) | 99.0218%| 24.209 | 65.131 |
 | MobileFaceNet,ArcFace@ms1m-refine-v1 | MXNet\*        | [face-recognition-mobilefacenet-arcface](./face-recognition-mobilefacenet-arcface/README.md) | 98.8695% | 0.449 | 0.993 |
 | SphereFace                           | Caffe\*        | [Sphereface](./Sphereface/README.md) | 98.8321% | 3.504 | 22.671 |
+
+## Gesture Recognition
+
+| Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
+| ------------------------------------ | -------------- | -------------- | -------- |------ | ------- |
+| common-sign-language-0001            | PyTorch\*      | [common-sign-language-0001](./common-sign-language-0001/README.md) | 93.58% | 4.2269 | 4.1128 |
 
 ## Human Pose Estimation
 
@@ -253,6 +265,19 @@ The task of image translation is to generate the output based on exemplar.
 | -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
 | CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/README.md) | 12.93dB  | 1080.7032 | 167.9141 |
 
+
+## License Plates Detection
+
+| Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops    | mParams  |
+| -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
+| vehicle-license-plate-detection-barrier-0123 | TensorFlow\* | [vehicle-license-plate-detection-barrier-0123](./vehicle-license-plate-detection-barrier-0123/README.md) | 	99.52% | 0.271 | 0.547 |
+
+## License Plates Recognition
+
+| Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops    | mParams  |
+| -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
+| license-plate-recognition-barrier-0007 | TensorFlow\* | [license-plate-recognition-barrier-0007](./license-plate-recognition-barrier-0007/README.md) | 98% | 0.347 | 1.435 |
+
 ## Place Recognition
 
 The task of place recognition is to quickly and accurately recognize the location of a given query photograph.
@@ -289,6 +314,13 @@ The reported metric is collected over the alphanumeric subset of icdar 13 (1015 
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | Resnet-FC      | PyTorch\*      | [text-recognition-resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94% | 40.3704 | 177.9668  |
 
+## Text to Speech
+
+| Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
+| -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
+| ForwardTacotron | PyTorch\* | [forward-tacotron](./forward-tacotron/README.md) | - | 6.66 | 13.81 |
+| WaveRNN        | PyTorch\*      | [wavernn](./wavernn/README.md) | - | 0.37 | 0.4 |
+
 ## Named Entity Recognition
 
 Named entity recognition (NER) is the task of tagging entities in text with their corresponding type.
@@ -296,6 +328,12 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 | Model Name     | Implementation | OMZ Model Name                                   | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------ | -------- | ------- | --------- |
 | bert-base-NER  | PyTorch\*      | [bert-base-ner](./bert-base-ner/README.md) | 94.45%  | 22.3874 | 107.4319  |
+
+## Vehicle Reidentification
+
+| Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
+| -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
+| vehicle-reid-0001 | PyTorch\* | [vehicle-reid-0001](./vehicle-reid-0001/README.md) | 96.31%/85.15 % | 2.643 | 2.183 |
 
 ## Legal Information
 
