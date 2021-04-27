@@ -18,6 +18,7 @@
 
 import sys
 import time
+import tkinter as tk
 from argparse import ArgumentParser, SUPPRESS
 
 from tqdm import tqdm
@@ -27,6 +28,8 @@ from openvino.inference_engine import IECore
 
 from models.forward_tacotron_ie import ForwardTacotronIE
 from models.mel2wave_ie import WaveRNNIE, MelGANIE
+from utils.embeddings_processing import PCA
+from utils.gui import init_parameters_interactive
 
 
 def save_wav(x, path):
@@ -78,6 +81,16 @@ def build_argparser():
                        default=None, required=False,
                        type=str)
 
+    args.add_argument("-s_id", "--speaker_id",
+                       help="Ordinal number of the speaker in embeddings array for multi-speaker model.",
+                       default=19, required=False,
+                       type=int)
+
+    args.add_argument("-a", "--alpha",
+                       help="Coefficient for controlling of the speech time (inversely proportional to speed).",
+                       default=1.0, required=False,
+                       type=float)
+
     return parser
 
 
@@ -86,6 +99,10 @@ def is_correct_args(args):
             (args.model_melgan is not None and args.model_rnn is None and args.model_upsample is None)):
         print('Can not use m_rnn and m_upsample with m_melgan. Define m_melgan or [m_rnn, m_upsample]')
         return False
+    if args.alpha < 0.5 or args.alpha > 2.0:
+        print('Can not use time coefficient less than 0.5 or greater than 2.0')
+        return False
+
     return True
 
 
@@ -107,6 +124,17 @@ def main():
     forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, ie, args.device, verbose=False)
 
     audio_res = np.array([], dtype=np.int16)
+
+    speaker_emb = None
+    if forward_tacotron.has_speaker_embeddings():
+        if args.speaker_id == -1:
+            interactive_parameter = init_parameters_interactive(args)
+            args.alpha = 1.0 / interactive_parameter["speed"]
+            speaker_emb = forward_tacotron.get_pca_speaker_embedding(interactive_parameter["gender"],
+                                                                     interactive_parameter["style"])
+        else:
+            speaker_emb = forward_tacotron.get_speaker_embeddings()[args.speaker_id, :]
+
 
     len_th = 512
 
@@ -134,7 +162,7 @@ def main():
 
             for text in tqdm(texts):
                 time_s = time.perf_counter()
-                mel = forward_tacotron.forward(text)
+                mel = forward_tacotron.forward(text, alpha=args.alpha, speaker_emb=speaker_emb)
                 time_e = time.perf_counter()
                 time_forward += (time_e - time_s) * 1000
 
@@ -146,10 +174,10 @@ def main():
                 audio_res = np.append(audio_res, audio)
 
             if count % 5 == 0:
-                print('WaveRNN time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'.format(time_wavernn, time_forward))
+                print('Vocoder time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'.format(time_wavernn, time_forward))
     time_e_all = time.perf_counter()
 
-    print('All time {:.3f}ms. WaveRNN time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'
+    print('All time {:.3f}ms. Vocoder time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'
           .format((time_e_all - time_s_all) * 1000, time_wavernn, time_forward))
 
     save_wav(audio_res, args.out)
