@@ -156,25 +156,27 @@ class ModelEvaluator:
                         calculate_metrics or dump_prediction_to_annotation
                     )
                     free_irs.append(ready_ir_id)
-                    annotations, predictions = self.postprocessor.process_batch(
-                        batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
-                    )
-                    if dump_prediction_to_annotation:
-                        threshold = kwargs.get('annotation_conf_threshold', 0.0)
-                        annotations = []
-                        for prediction in predictions:
-                            generated_annotation = prediction.to_annotation(threshold=threshold)
-                            if generated_annotation:
-                                annotations.append(generated_annotation)
-                        self._dumped_annotations.extend(annotations)
+
                     metrics_result = None
-                    if self.metric_executor and calculate_metrics:
-                        metrics_result, _ = self.metric_executor.update_metrics_on_batch(
-                            batch_input_ids, annotations, predictions
+                    if calculate_metrics:
+                        annotations, predictions = self.postprocessor.process_batch(
+                            batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
                         )
-                        if self.metric_executor.need_store_predictions:
-                            self._annotations.extend(annotations)
-                            self._predictions.extend(predictions)
+                        if dump_prediction_to_annotation:
+                            threshold = kwargs.get('annotation_conf_threshold', 0.0)
+                            annotations = []
+                            for prediction in predictions:
+                                generated_annotation = prediction.to_annotation(threshold=threshold)
+                                if generated_annotation:
+                                    annotations.append(generated_annotation)
+                            self._dumped_annotations.extend(annotations)
+                        if self.metric_executor:
+                            metrics_result, _ = self.metric_executor.update_metrics_on_batch(
+                                batch_input_ids, annotations, predictions
+                            )
+                            if self.metric_executor.need_store_predictions:
+                                self._annotations.extend(annotations)
+                                self._predictions.extend(predictions)
 
                     if output_callback:
                         output_callback(
@@ -259,25 +261,27 @@ class ModelEvaluator:
             else:
                 batch_predictions = batch_raw_predictions
 
-            annotations, predictions = self.postprocessor.process_batch(
-                batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
-            )
-            if dump_prediction_to_annotation:
-                threshold = kwargs.get('annotation_conf_threshold', 0.0)
-                annotations = []
-                for prediction in predictions:
-                    generated_annotation = prediction.to_annotation(threshold=threshold)
-                    if generated_annotation:
-                        annotations.append(generated_annotation)
-                self._dumped_annotations.extend(annotations)
             metrics_result = None
-            if self.metric_executor and calculate_metrics:
-                metrics_result, _ = self.metric_executor.update_metrics_on_batch(
-                    batch_input_ids, annotations, predictions
+            if calculate_metrics:
+                annotations, predictions = self.postprocessor.process_batch(
+                    batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
                 )
-                if self.metric_executor.need_store_predictions:
-                    self._annotations.extend(annotations)
-                    self._predictions.extend(predictions)
+                if dump_prediction_to_annotation:
+                    threshold = kwargs.get('annotation_conf_threshold', 0.0)
+                    annotations = []
+                    for prediction in predictions:
+                        generated_annotation = prediction.to_annotation(threshold=threshold)
+                        if generated_annotation:
+                            annotations.append(generated_annotation)
+                    self._dumped_annotations.extend(annotations)
+
+                if self.metric_executor:
+                    metrics_result, _ = self.metric_executor.update_metrics_on_batch(
+                        batch_input_ids, annotations, predictions
+                    )
+                    if self.metric_executor.need_store_predictions:
+                        self._annotations.extend(annotations)
+                        self._predictions.extend(predictions)
 
             if output_callback:
                 if isinstance(batch_raw_predictions, list) and len(batch_raw_predictions) == 1:
