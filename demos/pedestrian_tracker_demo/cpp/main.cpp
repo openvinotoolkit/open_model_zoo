@@ -58,7 +58,7 @@ CreatePedestrianTracker(const std::string& reid_model,
             std::make_shared<DescriptorIE>(reid_config, ie, deviceName);
 
         if (descriptor_strong == nullptr) {
-            IE_THROW() << "[SAMPLES] internal error - invalid descriptor";
+            throw std::runtime_error("[SAMPLES] internal error - invalid descriptor");
         }
         std::shared_ptr<IDescriptorDistance> distance_strong =
             std::make_shared<CosDistance>(descriptor_strong->size());

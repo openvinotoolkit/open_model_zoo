@@ -20,7 +20,7 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
     // --------------------------- Changing input shape if it is needed ----------------------------------
     InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
-        IE_THROW() << "The network should have only one input";
+        throw std::runtime_error("The network should have only one input");
     }
     InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
 

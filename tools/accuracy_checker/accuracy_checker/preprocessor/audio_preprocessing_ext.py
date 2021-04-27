@@ -141,3 +141,31 @@ class SignalPatching(Preprocessor):
         image.data = processed_data
         image.metadata['multi_infer'] = True
         return image
+
+
+class ContextWindow(Preprocessor):
+    __provider__ = 'context_window'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'cw_l': NumberField(value_type=int, min_value=0, description='Context window left'),
+            'cw_r': NumberField(value_type=int, min_value=0, description='Context window right')
+        })
+        return params
+
+    def configure(self):
+        self.cw_l = self.get_value_from_config('cw_l')
+        self.cw_r = self.get_value_from_config('cw_r')
+
+    def process(self, image, annotation_meta=None):
+        def process_single(signal):
+            borders = (self.cw_l, self.cw_r) if signal.ndim == 1 else ((0, 0), (self.cw_l, self.cw_r))
+            return np.pad(signal, borders, mode='edge')
+        image.data = (
+            process_single(image.data) if not isinstance(image.data, list)
+            else [process_single(elem) for elem in image.data]
+        )
+
+        return image

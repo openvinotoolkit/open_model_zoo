@@ -115,14 +115,14 @@ ObjectDetector::ObjectDetector(
                 inputInfo->setPrecision(Precision::FP32);
                 im_info_name_ = input.first;
             } else {
-                IE_THROW() << "Unknown input for Person Detection network";
+                throw std::runtime_error("Unknown input for Person Detection network");
             }
         }
         if (input_name_.empty()) {
-            IE_THROW() << "No image input for Person Detection network found";
+            throw std::runtime_error("No image input for Person Detection network found");
         }
     } else {
-        IE_THROW() << "Person Detection network should have one or two inputs";
+        throw std::runtime_error("Person Detection network should have one or two inputs");
     }
     InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
     inputInfoFirst->setPrecision(Precision::U8);
@@ -130,20 +130,20 @@ ObjectDetector::ObjectDetector(
 
     OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     if (outputInfo.size() != 1) {
-        IE_THROW() << "Person Detection network should have only one output";
+        throw std::runtime_error("Person Detection network should have only one output");
     }
     DataPtr& _output = outputInfo.begin()->second;
     output_name_ = outputInfo.begin()->first;
 
     const SizeVector outputDims = _output->getTensorDesc().getDims();
     if (outputDims.size() != 4) {
-        IE_THROW() << "Person Detection network output should have 4 dimensions, but had " +
-            std::to_string(outputDims.size());
+        throw std::runtime_error("Person Detection network output should have 4 dimensions, but had " +
+            std::to_string(outputDims.size()));
     }
     max_detections_count_ = outputDims[2];
     object_size_ = outputDims[3];
     if (object_size_ != 7) {
-        IE_THROW() << "Person Detection network output layer should have 7 as a last dimension";
+        throw std::runtime_error("Person Detection network output layer should have 7 as a last dimension");
     }
     _output->setPrecision(Precision::FP32);
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));

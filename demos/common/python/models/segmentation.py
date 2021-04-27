@@ -50,7 +50,6 @@ class SegmentationModel(Model):
 
         blob_name = next(iter(self.net.outputs))
         blob = self.net.outputs[blob_name]
-        blob.precision = "FP32"
 
         out_size = blob.shape
         if len(out_size) == 3:

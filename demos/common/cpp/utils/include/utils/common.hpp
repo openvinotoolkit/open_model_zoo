@@ -20,6 +20,7 @@
 #include <utility>
 #include <algorithm>
 #include <random>
+#include <iostream>
 
 #include <inference_engine.hpp>
 
@@ -266,7 +267,11 @@ inline std::size_t getTensorWidth(const InferenceEngine::TensorDesc& desc) {
         // Regardless of layout, dimensions are stored in fixed order
         return dims.back();
     } else {
+<<<<<<< HEAD
          IE_THROW() << "Tensor does not have width dimension";
+=======
+        throw std::runtime_error("Tensor does not have width dimension");
+>>>>>>> develop
     }
     return 0;
 }
@@ -286,7 +291,11 @@ inline std::size_t getTensorHeight(const InferenceEngine::TensorDesc& desc) {
         // Regardless of layout, dimensions are stored in fixed order
         return dims.at(size - 2);
     } else {
+<<<<<<< HEAD
         IE_THROW() << "Tensor does not have height dimension";
+=======
+        throw std::runtime_error("Tensor does not have height dimension");
+>>>>>>> develop
     }
     return 0;
 }
@@ -312,10 +321,17 @@ inline std::size_t getTensorChannels(const InferenceEngine::TensorDesc& desc) {
             case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
             case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
             default:
+<<<<<<< HEAD
                 IE_THROW() << "Tensor does not have channels dimension";
         }
     } else {
         IE_THROW() << "Tensor does not have channels dimension";
+=======
+                throw std::runtime_error("Tensor does not have channels dimension");
+        }
+    } else {
+        throw std::runtime_error("Tensor does not have channels dimension");
+>>>>>>> develop
     }
     return 0;
 }
@@ -339,10 +355,17 @@ inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
             case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
             case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
             default:
+<<<<<<< HEAD
                 IE_THROW() << "Tensor does not have channels dimension";
         }
     } else {
         IE_THROW() << "Tensor does not have channels dimension";
+=======
+                throw std::runtime_error("Tensor does not have channels dimension");
+        }
+    } else {
+        throw std::runtime_error("Tensor does not have channels dimension");
+>>>>>>> develop
     }
     return 0;
 }
