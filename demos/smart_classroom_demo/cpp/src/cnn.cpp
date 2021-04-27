@@ -41,7 +41,7 @@ void CnnDLSDKBase::Load() {
 
     try {
         executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
-    } catch (const InferenceEngine::Exception &) {  // face-recognition-mobilefacenet-arcface may not work with dynamic batch
+    } catch (const details::InferenceEngineException&) {  // face-recognition-mobilefacenet-arcface may not work with dynamic batch
         cnnNetwork.setBatchSize(1);
         executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName, {{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::NO}});
     }

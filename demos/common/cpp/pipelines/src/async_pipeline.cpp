@@ -31,7 +31,7 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
         try {
             // +1 to use it as a buffer of the pipeline
             nireq = execNetwork.GetMetric(METRIC_KEY(OPTIMAL_NUMBER_OF_INFER_REQUESTS)).as<unsigned int>() + 1;
-        } catch (const InferenceEngine::Exception& ex) {
+        } catch (const details::InferenceEngineException& ex) {
             throw std::runtime_error(std::string("Every device used with the demo should support "
                 "OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. Failed to query the metric with error: ") + ex.what());
         }
