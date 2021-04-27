@@ -104,7 +104,7 @@ struct BaseDetection {
 
     virtual void wait() {
         if (!enabled()|| !request) return;
-        request.Wait(InferRequest::WaitMode::RESULT_READY);
+        request.Wait(IInferRequest::WaitMode::RESULT_READY);
     }
     mutable bool enablingChecked = false;
     mutable bool _enabled = false;

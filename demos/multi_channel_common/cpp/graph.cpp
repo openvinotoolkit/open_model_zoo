@@ -96,7 +96,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         postLoad(outputDataBlobNames, cnnNetwork);
 
     availableRequests.front()->StartAsync();
-    availableRequests.front()->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
+    availableRequests.front()->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
 }
 
 void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc) {
@@ -234,7 +234,7 @@ std::vector<std::shared_ptr<VideoFrame> > IEGraph::getBatchData(cv::Size frameSi
         busyBatchRequests.pop();
     }
 
-    if (nullptr != req && InferenceEngine::OK == req->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY)) {
+    if (nullptr != req && InferenceEngine::OK == req->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY)) {
         auto detections = postprocessing(req, outputDataBlobNames, frameSize);
         for (decltype(detections.size()) i = 0; i < detections.size(); i ++) {
             vframes[i]->detections = std::move(detections[i]);
@@ -273,7 +273,7 @@ IEGraph::~IEGraph() {
             if (!busyBatchRequests.empty()) {
                 auto& req = busyBatchRequests.front().req;
                 if (nullptr != req) {
-                    req->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
+                    req->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
                     availableRequests.push(std::move(req));
                 }
                 busyBatchRequests.pop();

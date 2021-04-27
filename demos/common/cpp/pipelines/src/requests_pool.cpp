@@ -59,7 +59,7 @@ void RequestsPool::waitForTotalCompletion() {
     // upon completion of request we're waiting for. Synchronization is applied there
     for (auto& pair : requests) {
         if (pair.second) {
-            pair.first->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
+            pair.first->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
         }
     }
 }
