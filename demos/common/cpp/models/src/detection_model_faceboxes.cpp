@@ -222,8 +222,7 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
     std::vector<int> keep = nms(bboxes, scores.second, boxIOUThreshold);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
-    DetectionResult* result = new DetectionResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
     float scaleX = static_cast<float>(netInputWidth) / imgWidth;

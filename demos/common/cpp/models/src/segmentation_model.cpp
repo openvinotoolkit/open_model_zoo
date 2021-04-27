@@ -94,10 +94,8 @@ std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData
     return resPtr;
 }
 
-std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult)
-{
-    SegmentationResult* result = new SegmentationResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult) {
+    SegmentationResult* result = new SegmentationResult(infResult.frameId, infResult.metaData);
 
     const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
 
