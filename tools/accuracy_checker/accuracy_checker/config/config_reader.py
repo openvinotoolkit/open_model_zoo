@@ -862,7 +862,7 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
     _async_evaluation_args(launcher_entry)
     _fpga_specific_args(launcher_entry)
 
-    if 'device_config' in arguments:
+    if 'device_config' in arguments and arguments.device_config:
         merge_device_configs(launcher_entry, arguments.device_config)
 
     if 'cpu_extensions' not in launcher_entry and 'extensions' in arguments and arguments.extensions:
