@@ -124,6 +124,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | EfficientDet-D0                      | TensorFlow\*             | [efficientdet-d0-tf](./efficientdet-d0-tf/README.md)| 31.95% | 2.54 | 3.9 |
 | EfficientDet-D1                      | TensorFlow\*             | [efficientdet-d1-tf](./efficientdet-d1-tf/README.md)| 37.54% | 6.1 | 6.6 |
 | FaceBoxes                            | PyTorch\*                | [faceboxes-pytorch](./faceboxes-pytorch/README.md)|83.565% | 1.8975 | 1.0059 |
+| Face Detection Retail                | Caffe\*                  | [face-detection-retail-0044](./face-detection-retail-0044/README.md) | 83.00% | 1.067 | 0.588 |
 | Faster R-CNN with Inception-ResNet v2| TensorFlow\*             | [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/README.md)| 40.69% | 30.687 | 13.307 |
 | Faster R-CNN with Inception v2       | TensorFlow\*             | [faster_rcnn_inception_v2_coco](./faster_rcnn_inception_v2_coco/README.md) | 26.24%| 30.687 | 13.307 |
 | Faster R-CNN with ResNet 50          | TensorFlow\*             | [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/README.md) | 31.09% | 57.203 | 29.162 |
@@ -146,6 +147,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | RetinaFace-Anti-Cov                  | MXNet\*                  | [retinaface-anti-cov](./retinaface-anti-cov/README.md)  | 77.1531% | 2.7781 | 0.5955 |
 | Ultra Lightweight Face Detection RFB 320| PyTorch\*             | [ultra-lightweight-face-detection-rfb-320](./ultra-lightweight-face-detection-rfb-320/README.md)|84.78% | 0.2106 | 0.3004 |
 | Ultra Lightweight Face Detection slim 320| PyTorch\*            | [ultra-lightweight-face-detection-slim-320](./ultra-lightweight-face-detection-slim-320/README.md)|83.32% | 0.1724 | 0.2844 |
+| Vehicle License Plate Detection Barrier | TensorFlow\* | [vehicle-license-plate-detection-barrier-0123](./vehicle-license-plate-detection-barrier-0123/README.md) | 	99.52% | 0.271 | 0.547 |
 | YOLO v1 Tiny                         | TensorFlow.js\*          | [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/README.md) | 54.79% | 6.9883	 |	15.8587 |
 | YOLO v2 Tiny                         | Keras\*                  | [yolo-v2-tiny-tf](./yolo-v2-tiny-tf/README.md) | 27.3443%/29.1184%| 5.4236	 |	11.2295 |
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/README.md) | 53.1453%/56.483% | 63.0301	 |	50.9526 |
@@ -153,12 +155,6 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | YOLO v3 Tiny                         | Keras\*                  | [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/README.md) | 35.9%/39.7% | 5.582  | 8.848 |
 | YOLO v4                              | Keras\*                  | [yolo-v4-tf](./yolo-v4-tf/README.md) | 71.17%/75.02% | 128.608	 |	64.33 |
 | YOLO v4 Tiny                         | Keras\*                  | [yolo-v4-tiny-tf](./yolo-v4-tiny-tf/README.md) | | 6.9289 | 6.0535 |
-
-## Face Detection
-
-| Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
-| ------------------------------------ | -------------- | -------------- | -------- |------ | ------- |
-| face-detection-retail-0044           | Caffe\*        | [face-detection-retail-0044](./face-detection-retail-0044/README.md) | 83.00% | 1.067 | 0.588 |
 
 ## Face Recognition
 
@@ -170,12 +166,6 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | LResNet100E-IR,ArcFace@ms1m-refine-v2| MXNet\*        | [face-recognition-resnet100-arcface](./face-recognition-resnet100-arcface/README.md) | 99.0218%| 24.209 | 65.131 |
 | MobileFaceNet,ArcFace@ms1m-refine-v1 | MXNet\*        | [face-recognition-mobilefacenet-arcface](./face-recognition-mobilefacenet-arcface/README.md) | 98.8695% | 0.449 | 0.993 |
 | SphereFace                           | Caffe\*        | [Sphereface](./Sphereface/README.md) | 98.8321% | 3.504 | 22.671 |
-
-## Gesture Recognition
-
-| Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
-| ------------------------------------ | -------------- | -------------- | -------- |------ | ------- |
-| common-sign-language-0001            | PyTorch\*      | [common-sign-language-0001](./common-sign-language-0001/README.md) | 93.58% | 4.2269 | 4.1128 |
 
 ## Human Pose Estimation
 
@@ -228,6 +218,7 @@ The task of action recognition is to predict action that is being performed on a
 | Model Name                        | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | RGB-I3D, pretrained on ImageNet\* | TensorFlow\*   | [i3d-rgb-tf](./i3d-rgb-tf/README.md) | 65.96%/86.01% | 278.9815 | 12.6900|
+| common-sign-language-0001         | PyTorch\*      | [common-sign-language-0001](./common-sign-language-0001/README.md) | 93.58% | 4.2269 | 4.1128 |
 
 ## Colorization
 
@@ -265,14 +256,7 @@ The task of image translation is to generate the output based on exemplar.
 | -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
 | CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/README.md) | 12.93dB  | 1080.7032 | 167.9141 |
 
-
-## License Plates Detection
-
-| Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops    | mParams  |
-| -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
-| vehicle-license-plate-detection-barrier-0123 | TensorFlow\* | [vehicle-license-plate-detection-barrier-0123](./vehicle-license-plate-detection-barrier-0123/README.md) | 	99.52% | 0.271 | 0.547 |
-
-## License Plates Recognition
+## Optical Character Recognition
 
 | Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops    | mParams  |
 | -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
@@ -318,8 +302,8 @@ The reported metric is collected over the alphanumeric subset of icdar 13 (1015 
 
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
-| ForwardTacotron | PyTorch\* | [forward-tacotron](./forward-tacotron/README.md) |  | 6.66 | 13.81 |
-| WaveRNN        | PyTorch\*      | [wavernn](./wavernn/README.md) |  | 0.37 | 0.4 |
+| ForwardTacotron | PyTorch\* | [forward-tacotron](./forward-tacotron/README.md):<br>forward-tacotron-duration-prediction <br>forward-tacotron-regression |  | <br>6.66 <br>4.91 | <br>13.81 <br>3.05 |
+| WaveRNN        | PyTorch\*      | [wavernn](./wavernn/README.md):<br>wavernn-upsampler <br>wavernn-rnn |  | <br>0.37 <br>0.06 | <br>0.4 <br>3.83 |
 
 ## Named Entity Recognition
 
