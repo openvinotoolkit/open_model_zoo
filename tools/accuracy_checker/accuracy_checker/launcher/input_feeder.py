@@ -103,7 +103,7 @@ class InputFeeder:
                 image_info.append([height, width, 1] if not omit_scale else [height, width])
 
             return image_info
-        _, meta_batch = extract_image_representations(data_representation_batch)
+        meta_batch = extract_image_representations(data_representation_batch, meta_only=True)
         image_infos = {}
         im_info_resolved = False
         if 'image_info' in meta_batch[0]:
@@ -170,7 +170,7 @@ class InputFeeder:
 
             filled_inputs[input_layer] = input_batch
 
-        return self._transform_batch(filled_inputs, extract_image_representations(data_representation_batch)[1])
+        return self._transform_batch(filled_inputs, extract_image_representations(data_representation_batch, meta_only=True))
 
     def fill_inputs(self, data_representation_batch):
         if self.dummy:
