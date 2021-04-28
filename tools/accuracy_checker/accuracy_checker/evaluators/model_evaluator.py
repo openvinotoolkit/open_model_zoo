@@ -31,6 +31,7 @@ from ..data_readers import BaseReader, DataRepresentation
 from .base_evaluator import BaseEvaluator
 from .quantization_model_evaluator import create_dataset_attributes
 
+
 # pylint: disable=W0223
 class ModelEvaluator(BaseEvaluator):
     def __init__(
@@ -554,7 +555,11 @@ class ModelEvaluator(BaseEvaluator):
         self._predictions = []
         self._metrics_results = []
         self.dataset.reset(self.postprocessor.has_processors)
+        if self.adapter:
+            self.adapter.reset()
 
     def release(self):
         self.input_feeder.release()
         self.launcher.release()
+        if self.adapter:
+            self.adapter.release()

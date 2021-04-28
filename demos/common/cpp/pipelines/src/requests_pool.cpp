@@ -19,7 +19,7 @@
 RequestsPool::RequestsPool(InferenceEngine::ExecutableNetwork& execNetwork, unsigned int size) :
     numRequestsInUse(0) {
     for (unsigned int infReqId = 0; infReqId < size; ++infReqId) {
-        requests.emplace(execNetwork.CreateInferRequestPtr(), false);
+        requests.emplace(std::make_shared<InferenceEngine::InferRequest>(execNetwork.CreateInferRequest()), false);
     }
 }
 

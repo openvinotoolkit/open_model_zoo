@@ -49,7 +49,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_GPU_THROUGHPUT_STREAMS, InferenceEngine::PluginConfigParams::GPU_THROUGHPUT_AUTO}}, "GPU");
     }
     if (!cpuExtensionPath.empty()) {
-        auto extension_ptr = InferenceEngine::make_so_pointer<InferenceEngine::IExtension>(cpuExtensionPath);
+        auto extension_ptr = std::make_shared<InferenceEngine::Extension>(cpuExtensionPath);
         ie.AddExtension(extension_ptr, "CPU");
     }
     if (!cldnnConfigPath.empty()) {
@@ -88,7 +88,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     }
 
     for (size_t i = 0; i < maxRequests; ++i) {
-        auto req = network.CreateInferRequestPtr();
+        auto req = std::make_shared<InferenceEngine::InferRequest>(network.CreateInferRequest());
         availableRequests.push(req);
     }
 

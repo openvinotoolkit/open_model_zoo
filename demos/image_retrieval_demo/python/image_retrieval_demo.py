@@ -114,8 +114,6 @@ def time_elapsed(func, *args):
 
 
 def main():
-    """ Main function. """
-
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 

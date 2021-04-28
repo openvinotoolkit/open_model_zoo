@@ -31,7 +31,7 @@ InferenceEngine::CNNNetwork ModelBase::prepareNetwork(InferenceEngine::Core& cor
     /** Load extensions for the plugin **/
     if (!cnnConfig.cpuExtensionsPath.empty()) {
         // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-        IExtensionPtr extension_ptr = make_so_pointer<IExtension>(cnnConfig.cpuExtensionsPath.c_str());
+        IExtensionPtr extension_ptr = std::make_shared<Extension>(cnnConfig.cpuExtensionsPath);
         core.AddExtension(extension_ptr, "CPU");
     }
     if (!cnnConfig.clKernelsConfigPath.empty()) {

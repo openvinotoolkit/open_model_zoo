@@ -122,7 +122,7 @@ More detailed information about calculation segmentation metrics you can find [h
 * `psnr` - [Peak signal to noise ratio](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
   * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
   * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
-* `psnr-b` - [Peak signal to noise ratio with blocked effect factor](https://link.springer.com/content/pdf/10.1007%2F978-3-642-34595-1_16.pdf). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
+* `psnr-b` - [Peak signal to noise ratio with blocked effect factor](https://doi.org/10.1007/978-3-642-34595-1_16). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
   * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
   * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
   * `block_size` - block size for blocked effect factor. Optional, default `8`.
@@ -258,6 +258,7 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
   * `calculate_average` - allows calculation of average precision (default value: `True`).
 * `wer` - Word error rate ([WER](https://en.wikipedia.org/wiki/Word_error_rate)). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
 * `cer` - Character error rate, character-level counterpart of [WER](https://en.wikipedia.org/wiki/Word_error_rate). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
+* `ser` - Sentence error rate (SER), which indicates the percentage of sentences, whose translations have not matched in an exact manner those of reference. Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
 * `score_class_comparison` - allows calculate an accuracy of quality score class(low/normal/good). It sorts all quality scores from annotations and predictions and set the k1 highest scores as high class and the k2 lowest scores as low class where k1 is `num_high_quality` and k2 is `num_low_quality`. Supported representations: `QualityAssessmentAnnotation`, `QualityAssessmentPrediction`.
   * `num_high_quality` - the number of high class in total (default value: `1`).
   * `num_low_quality` - the number of low class in total (default value: `1`).

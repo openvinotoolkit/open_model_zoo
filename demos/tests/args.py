@@ -20,6 +20,8 @@ from pathlib import Path
 ArgContext = collections.namedtuple('ArgContext',
     ['test_data_dir', 'dl_dir', 'model_info', 'data_sequences', 'data_sequence_dir'])
 
+RequestedModel = collections.namedtuple('RequestedModel', ['name', 'precisions'])
+
 OMZ_DIR = Path(__file__).parents[2].resolve()
 
 
@@ -43,7 +45,16 @@ def image_retrieval_arg(id):
     return TestDataArg('Image_Retrieval/{}'.format(id))
 
 
-class ModelArg:
+class Arg:
+    @property
+    def required_models(self):
+        return []
+
+    def resolve(self, context):
+        raise NotImplementedError
+
+
+class ModelArg(Arg):
     def __init__(self, name, precision='FP32'):
         self.name = name
         self.precision = precision
@@ -51,8 +62,25 @@ class ModelArg:
     def resolve(self, context):
         return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))
 
+    @property
+    def required_models(self):
+        return [RequestedModel(self.name, [self.precision])]
 
-class DataPatternArg:
+
+class ModelFileArg(Arg):
+    def __init__(self, model_name, file_name):
+        self.model_name = model_name
+        self.file_name = file_name
+
+    def resolve(self, context):
+        return str(context.dl_dir / context.model_info[self.model_name]["subdirectory"] / self.file_name)
+
+    @property
+    def required_models(self):
+        return [RequestedModel(self.model_name, [])]
+
+
+class DataPatternArg(Arg):
     def __init__(self, sequence_name):
         self.sequence_name = sequence_name
 
@@ -75,7 +103,7 @@ class DataPatternArg:
         return str(seq_dir / name_format)
 
 
-class DataDirectoryArg:
+class DataDirectoryArg(Arg):
     def __init__(self, sequence_name):
         self.backend = DataPatternArg(sequence_name)
 
@@ -84,7 +112,7 @@ class DataDirectoryArg:
         return str(Path(pattern).parent)
 
 
-class DataDirectoryOrigFileNamesArg:
+class DataDirectoryOrigFileNamesArg(Arg):
     def __init__(self, sequence_name):
         self.sequence_name = sequence_name
 

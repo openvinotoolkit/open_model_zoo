@@ -34,11 +34,9 @@
 /ci/requirements-quantization.txt omz.ci.job-for-change.downloader
 
 /demos/** omz.ci.job-for-change.demos
-/demos/**/*.md -omz.ci.job-for-change.demos
-
-/models/**/*.md omz.ci.job-for-change.documentation
 
 /tools/accuracy_checker/** omz.ci.job-for-change.ac
 /tools/accuracy_checker/configs/*.yml -omz.ci.job-for-change.ac
 /tools/downloader/** omz.ci.job-for-change.downloader
-/tools/**/*.md -omz.ci.job-for-change.ac -omz.ci.job-for-change.downloader
+
+*.md omz.ci.job-for-change.documentation -omz.ci.job-for-change.ac -omz.ci.job-for-change.demos -omz.ci.job-for-change.downloader

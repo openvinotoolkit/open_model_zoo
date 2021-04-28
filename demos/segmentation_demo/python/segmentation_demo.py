@@ -29,7 +29,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from models import OutputTransform, SegmentationModel, SalientObjectDetectionModel
 import monitors
-from pipelines import get_user_configs, AsyncPipeline
+from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
 from helpers import resolution
@@ -164,7 +164,7 @@ def main():
     log.info('Initializing Inference Engine...')
     ie = IECore()
 
-    plugin_config = get_user_configs(args.device, args.num_streams, args.num_threads)
+    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
     log.info('Loading network...')
 
@@ -225,6 +225,7 @@ def main():
 
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
+            next_frame_id_to_show += 1
 
             if not args.no_show:
                 cv2.imshow('Segmentation Results', frame)
@@ -232,7 +233,6 @@ def main():
                 if key == 27 or key == 'q' or key == 'Q':
                     break
                 presenter.handleKey(key)
-            next_frame_id_to_show += 1
 
     pipeline.await_all()
     # Process completed requests

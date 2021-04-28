@@ -9,3 +9,4 @@
 
 std::string CTCGreedyDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, double *conf);
 std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, double *conf, int bandwidth);
+std::string SimpleDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, double *conf);
