@@ -198,7 +198,7 @@ class ModelEvaluator(BaseEvaluator):
 
     def _get_batch_input(self, batch_annotation, batch_input):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
-        _, batch_meta = extract_image_representations(batch_input)
+        batch_meta = extract_image_representations(batch_input, meta_only=True)
         filled_inputs = self.input_feeder.fill_inputs(batch_input)
 
         return filled_inputs, batch_meta
@@ -399,7 +399,7 @@ class ModelEvaluator(BaseEvaluator):
             self._reader = self.dataset.data_provider.data_reader
         input_data = self._prepare_data_for_single_inference(image)
         batch_input = self.preprocessor.process(input_data)
-        _, batch_meta = extract_image_representations(batch_input)
+        batch_meta = extract_image_representations(batch_input, meta_only=True)
         filled_inputs = self.input_feeder.fill_inputs(batch_input)
         batch_predictions = self.launcher.predict(filled_inputs, batch_meta)
 

@@ -76,7 +76,7 @@ class ModelEvaluator:
 
     def _get_batch_input(self, batch_input, batch_annotation):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
-        _, batch_meta = extract_image_representations(batch_input)
+        batch_meta = extract_image_representations(batch_input, meta_only=True)
         filled_inputs = self.input_feeder.fill_inputs(batch_input)
 
         return filled_inputs, batch_meta
@@ -485,7 +485,6 @@ def create_dataset_attributes(config, tag, dumped_annotations=None):
     data_source = dataset_config.get('data_source')
     annotation_reader = None
     dataset_meta = {}
-    annotation = None
     if contains_any(dataset_config, ['annotation', 'annotation_conversion']) or dumped_annotations:
         annotation, meta = Dataset.load_annotation(dataset_config)
         annotation_reader = AnnotationProvider(
@@ -502,7 +501,7 @@ def create_dataset_attributes(config, tag, dumped_annotations=None):
     if data_reader_type in REQUIRES_ANNOTATIONS:
         if annotation_reader is None:
             raise ConfigError('data reader *{}* requires annotation'.format(data_reader_type))
-        data_source = annotation if not dumped_annotations else dumped_annotations
+        data_source = annotation_reader
     data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
 
     metric_dispatcher = None
