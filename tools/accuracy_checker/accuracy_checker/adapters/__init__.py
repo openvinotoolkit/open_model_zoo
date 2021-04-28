@@ -28,7 +28,8 @@ from .text_recognition import (
     BeamSearchDecoder,
     CTCGreedySearchDecoder,
     LPRAdapter,
-    AttentionOCRAdapter
+    AttentionOCRAdapter,
+    SimpleDecoder,
 )
 
 from .image_processing import (
@@ -103,7 +104,7 @@ from .audio_recognition import (
     CTCBeamSearchDecoderWithLm,
     FastCTCBeamSearchDecoderWithLm
 )
-
+from .kaldi_asr_decoder import KaldiLatGenDecoder
 from .regression import RegressionAdapter, MultiOutputRegression
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
@@ -188,6 +189,7 @@ __all__ = [
     'LPRAdapter',
     'CTCGreedySearchDecoder',
     'AttentionOCRAdapter',
+    'SimpleDecoder',
 
     'AssociativeEmbeddingAdapter',
     'HumanPoseAdapter',
@@ -226,6 +228,7 @@ __all__ = [
     'CTCGreedyDecoder',
     'CTCBeamSearchDecoderWithLm',
     'FastCTCBeamSearchDecoderWithLm',
+    'KaldiLatGenDecoder',
 
     'QualityAssessmentAdapter',
 

@@ -525,8 +525,8 @@ def color_format(s, color=Color.PASSED):
     return "\x1b[0;31m{}\x1b[0m".format(s)
 
 
-def softmax(x):
-    return np.exp(x) / sum(np.exp(x))
+def softmax(x, axis=0):
+    return np.exp(x) / np.sum(np.exp(x), axis=axis, keepdims=True)
 
 
 def is_iterable(maybe_iterable):

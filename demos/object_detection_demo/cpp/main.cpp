@@ -14,12 +14,6 @@
 // limitations under the License.
 */
 
-/**
-* \brief The entry point for the Inference Engine object_detection_demo demo application
-* \file object_detection_demo/cpp/main.cpp
-* \example object_detection_demo/cpp/main.cpp
-*/
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -367,6 +361,7 @@ int main(int argc, char *argv[]) {
                 if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
                     videoWriter.write(outFrame);
                 }
+                framesProcessed++;
                 if (!FLAGS_no_show) {
                     cv::imshow("Detection Results", outFrame);
                     //--- Processing keyboard events
@@ -378,7 +373,6 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
-                framesProcessed++;
             }
         }
 

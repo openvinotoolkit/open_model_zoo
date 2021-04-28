@@ -120,7 +120,7 @@ std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>&
             }
         } else if (device_value_vec.size() == 1) {
             uint32_t value = std::stoi(device_value_vec.at(0));
-            for (auto& device : devices) {
+            for (const auto& device : devices) {
                 result[device] = value;
             }
         } else if (device_value_vec.size() != 0) {

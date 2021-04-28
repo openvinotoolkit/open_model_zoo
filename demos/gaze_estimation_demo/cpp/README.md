@@ -64,7 +64,7 @@ Options:
 
 Running the application with an empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained and optimized `gaze-estimation-adas-0002` model, and the auxiliary models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained and optimized `gaze-estimation-adas-0002` model, and the auxiliary models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/gaze_estimation_demo/cpp/models.lst`.
 
 > **NOTE**: Before running the demo with another trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

@@ -1,0 +1,299 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  "text-recognition-resnet-fc" is a simple and preformant scene text recognition model
+  based on ResNet with Fully Connected text recognition head. Source implementation
+  on a PyTorch* framework could be found here <https://github.com/Media-Smart/vedastr>.
+  Model is able to recognize alphanumeric text.
+task_type: optical_character_recognition
+files:
+  - name: vedastr/models/__init__.py
+    size: 88
+    sha256: 10f9fb1203ffcae15aa44c200e23bac060b72da385a148fc77a9d3f0b223caf9
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/__init__.py
+  - name: vedastr/models/builder.py
+    size: 179
+    sha256: 6363f67b2277be15bb788968e81fcb011fe604dcc7d1972e8f51147e54016f99
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/builder.py
+  - name: vedastr/models/model.py
+    size: 644
+    sha256: 8ccf6696d4c7f3e7a2e6e4899a69f38a379a75adfa22fb0122a7dee5a678c820
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/model.py
+  - name: vedastr/models/weight_init.py
+    size: 3445
+    sha256: e73e87b39a492cb577d21a381a8f272fea032238a7348759ae95589353cac0bd
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/weight_init.py
+  - name: vedastr/models/registry.py
+    size: 57
+    sha256: 774fe640214e92913f401eaff3864a6f5b1cb0abdad09298918bf4c3eae49a0d
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/registry.py
+  - name: vedastr/models/heads/__init__.py
+    size: 189
+    sha256: 363939c2cdf06bcbeccc02d135afb032f014568cb399b562379ed5ade6ee38cd
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/heads/__init__.py
+  - name: vedastr/models/heads/builder.py
+    size: 179
+    sha256: a87f40273929bc21759ed31589a23eaf48a26ad26e1d26693cfda8c4c767a2b7
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/heads/builder.py
+  - name: vedastr/models/heads/fc_head.py
+    size: 1801
+    sha256: c77276a7313b71cab95542ce40bff750226f2af4a1386082376952a5828f7adb
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/heads/fc_head.py
+  - name: vedastr/models/heads/registry.py
+    size: 70
+    sha256: 2eff1459b0b012fdc0b1dc94b3af64d71ed4c144e7d84ad3c77723862892357c
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/heads/registry.py
+  - name: vedastr/models/bodies/__init__.py
+    size: 357
+    sha256: 11b13a0dd04d48b6a1676064ee1a8ff366db3c9cf5cf4ffb53acf17f88b46ac4
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/__init__.py
+  - name: vedastr/models/bodies/builder.py
+    size: 324
+    sha256: 66c480109d69796d6ae2fda1c5846940ea66036c6c7c00950710c915834497da
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/builder.py
+  - name: vedastr/models/bodies/registry.py
+    size: 96
+    sha256: 017db0e0859185b8952e02d5a081c5da06188dc84a738039df73022b0a074b6e
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/registry.py
+  - name: vedastr/models/bodies/body.py
+    size: 1207
+    sha256: 31663127c4048cf1a5629fee4ed1b858d831bc873a05576ae3377919fc300f97
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/body.py
+  - name: vedastr/models/bodies/component.py
+    size: 1421
+    sha256: d4616cbee25677fe8da35a46f6db0bf767d89bbd297c3ead72c312adb65f1f53
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/component.py
+  - name: vedastr/models/bodies/sequences/__init__.py
+    size: 142
+    sha256: d26166700f80fc9f1afc3cfdc28aec046670718150c9b74bdb357a365b9b0c0b
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/sequences/__init__.py
+  - name: vedastr/models/bodies/sequences/builder.py
+    size: 418
+    sha256: b352eaaebdeb8a74e047b9cb3b32ca4a5b2f9b7327061d0c88ae0f0757b14f61
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/sequences/builder.py
+  - name: vedastr/models/bodies/sequences/registry.py
+    size: 134
+    sha256: 20cfe613351986b742fa8a3ee413cde2a2df1322a598a9c247d08048cb9ce3af
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/sequences/registry.py
+  - name: vedastr/models/bodies/feature_extractors/__init__.py
+    size: 182
+    sha256: 03bcf0d49385de5eb3bab3c821585c9f466a6c921165752ac2cb2b3eb53a1f43
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/__init__.py
+  - name: vedastr/models/bodies/feature_extractors/builder.py
+    size: 717
+    sha256: 61ce84fa879b5a17c6b9389848e7b6123e38a38a49b181e3ab10c1e83442306c
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/builder.py
+  - name: vedastr/models/bodies/feature_extractors/decoders/__init__.py
+    size: 104
+    sha256: 35f48af973d9c7bd90ab12b38d8fa23953380e673dfed01dfb86a5bbe57bd97d
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/decoders/__init__.py
+  - name: vedastr/models/bodies/feature_extractors/decoders/builder.py
+    size: 194
+    sha256: d6be419533d8bb610e06ed6185cfd5b7ff689410cb7f6dbe518e466f794805cc
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/decoders/builder.py
+  - name: vedastr/models/bodies/feature_extractors/decoders/registry.py
+    size: 67
+    sha256: dac5681aa9fab180b89fd8a908b90d61b70509144a94f6f4b310e5635d11ec3f
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/decoders/registry.py
+  - name: vedastr/models/bodies/feature_extractors/decoders/bricks/__init__.py
+    size: 154
+    sha256: a56ec8f9286616eaef664a02e08d0920a086a73ec62f44bdf432a9133c0c2fac
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/decoders/bricks/__init__.py
+  - name: vedastr/models/bodies/feature_extractors/decoders/bricks/bricks.py
+    size: 6933
+    sha256: 57ceaf2b71a29a7ba6acd468d361ab379e38552dc4eb242e62b2e7ff9c1eeaad
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/decoders/bricks/bricks.py
+  - name: vedastr/models/bodies/feature_extractors/decoders/bricks/builder.py
+    size: 353
+    sha256: 4fa170e81acbce61d37339cdb0b960cb49f34ec21451ee3358799f20a358f123
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/decoders/bricks/builder.py
+  - name: vedastr/models/bodies/feature_extractors/decoders/bricks/registry.py
+    size: 63
+    sha256: d582690f5bd56e4e1b06ff4928ab03571976ba217e02918dcdaa75af46830d30
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/decoders/bricks/registry.py
+  - name: vedastr/models/bodies/feature_extractors/encoders/__init__.py
+    size: 123
+    sha256: ffad6a4bc0d1dfa307045876aab5a2b932ba63529de8a2b0473675b9c7ce07bd
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/encoders/__init__.py
+  - name: vedastr/models/bodies/feature_extractors/encoders/builder.py
+    size: 435
+    sha256: 092c32f6735e93efd4fa405ed8d5ff6e5abcdf0967ae223e7ad6d2654598e3b3
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/encoders/builder.py
+  - name: vedastr/models/bodies/feature_extractors/encoders/backbones/__init__.py
+    size: 94
+    sha256: 049f37e63986f0aa10d89663bf001fb1b4ce389bcd6c3b301b8a791cc3736b26
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/encoders/backbones/__init__.py
+  - name: vedastr/models/bodies/feature_extractors/encoders/backbones/builder.py
+    size: 200
+    sha256: 376fc32fd5571dab6889e47dbf6035e89179d95a229891855198f98fe664399e
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/encoders/backbones/builder.py
+  - name: vedastr/models/bodies/feature_extractors/encoders/backbones/registry.py
+    size: 69
+    sha256: 4600194f8acccc2445fa49b0397e88d5af333142e4deddca802d865af05bec67
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/encoders/backbones/registry.py
+  - name: vedastr/models/bodies/feature_extractors/encoders/backbones/resnet.py
+    size: 9147
+    sha256: 49f68e5d22ebd3964cc9b0cd02ee103d6e25d01816f1e0812ff271bb4e598c85
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/encoders/backbones/resnet.py
+  - name: vedastr/models/bodies/feature_extractors/encoders/enhance_modules/__init__.py
+    size: 86
+    sha256: eb65f9be2aa9399c401fe688b6571a0504fcc2678d1e07fdf4f0ace0e3276828
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/encoders/enhance_modules/__init__.py
+  - name: vedastr/models/bodies/feature_extractors/encoders/enhance_modules/builder.py
+    size: 230
+    sha256: 94761fa992c375b027884c6b93626cc4edb32e9dbcac542381aefff9c2adbf4c
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/encoders/enhance_modules/builder.py
+  - name: vedastr/models/bodies/feature_extractors/encoders/enhance_modules/registry.py
+    size: 81
+    sha256: fb9e4b4c2f45a31e1ba0ac010c79d5e766bfd98b9e03df15f87d729f90d801a4
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/bodies/feature_extractors/encoders/enhance_modules/registry.py
+  - name: vedastr/models/utils/__init__.py
+    size: 208
+    sha256: d6dfeefc0abf7313ff56682bffacb65f997608c9563e6075264502294a5cec64
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/utils/__init__.py
+  - name: vedastr/models/utils/builder.py
+    size: 329
+    sha256: 58639f420f133679db0418ac87c0625200072a9b26bed561c725a80006d0ab94
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/utils/builder.py
+  - name: vedastr/models/utils/conv_module.py
+    size: 7325
+    sha256: 91b6a18682905c7b1ed677e87ef97d0584761d8ea3abc93aa28aefbc5978a779
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/utils/conv_module.py
+  - name: vedastr/models/utils/fc_module.py
+    size: 2650
+    sha256: 372f45f7ef3be7fe93215675ea16afab33406555688b7f0461af4bc2d1431be2
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/utils/fc_module.py
+  - name: vedastr/models/utils/norm.py
+    size: 1688
+    sha256: 550aec86a72ba818d160d882b82d90790511496d3409b888dad4fa5326eee0d3
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/utils/norm.py
+  - name: vedastr/models/utils/registry.py
+    size: 62
+    sha256: df49a5d64a8312fc995f04c029d6ffd28c1ee6d1c1516833da5e44bd5b36e0c4
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/models/utils/registry.py
+  - name: vedastr/utils/__init__.py
+    size: 255
+    sha256: 8d900ac9b39d9a4fe3a98a6cb035276501d5030fa655c73f0eccb174cd43b14b
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/utils/__init__.py
+  - name: vedastr/utils/common.py
+    size: 3255
+    sha256: e539de533549841e63c75fa71c18ac36051717e61636c67bbfa3013a4979e976
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/utils/common.py
+  - name: vedastr/utils/registry.py
+    size: 1226
+    sha256: 991e2c92a2b382ab331c6381ac8cd983a597c85c3c6a9c986931fd191e2f5a61
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/utils/registry.py
+  - name: vedastr/utils/config.py
+    size: 5232
+    sha256: 03bf002f59877a92624bb1deb0ce3529ebed58f8a476256f2a4561196d1e5594
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/vedastr/utils/config.py
+  - name: vedastr/configs/resnet_fc.py
+    size: 8247
+    sha256: a218461bff427aeedf8bf93d2099947361a62ffc5c66e245a19a63e10ac14a77
+    source: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/configs/resnet_fc.py
+  - name: vedastr/ckpt/resnet_fc.pth
+    size: 712199075
+    sha256: 4c78128cb1aae415cf17c51aab3d6047f6fd3756cc9e9b25ee110cdda0fa0c52
+    source:
+      $type: google_drive
+      id: 1OnUGdv9RFhFbQGXUUkWMcxUZg0mPV0kK
+  - name: vedastr/addict-2.4.0-py3-none-any.whl
+    size: 3832
+    sha256: 249bb56bbfd3cdc2a004ea0ff4c2b6ddc84d53bc2194761636eb314d5cfa5dfc
+    source: https://files.pythonhosted.org/packages/6a/00/b08f23b7d7e1e14ce01419a467b583edbb93c6cdb8654e54a9cc579cd61f/addict-2.4.0-py3-none-any.whl
+postprocessing:
+  - $type: regex_replace
+    file: vedastr/models/heads/__init__.py
+    pattern: 'from \.(att_head|ctc_head|head import|transformer_head import) '
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: vedastr/models/bodies/__init__.py
+    pattern: 'from \.rectificators import build_rectificator| RectificatorComponent,'
+    replacement: ''
+  - $type: regex_replace
+    file: vedastr/models/bodies/sequences/__init__.py
+    pattern: 'from \.(rnn|transformer) '
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: vedastr/models/bodies/component.py
+    pattern: 'from \.(rectificators)|super\((RectificatorComponent), self\)'
+    replacement: 'pass # \g<0>'
+  - $type: regex_replace
+    file: vedastr/models/bodies/feature_extractors/decoders/__init__.py
+    pattern: 'from \.(gfpn) '
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: vedastr/models/bodies/feature_extractors/decoders/bricks/__init__.py
+    pattern: 'from \.(pva) '
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file:  vedastr/models/bodies/feature_extractors/encoders/backbones/__init__.py
+    pattern: 'from \.(vgg) '
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file:  vedastr/models/bodies/feature_extractors/encoders/enhance_modules/__init__.py
+    pattern: 'from \.(aspp|ppm) '
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file:  vedastr/models/utils/__init__.py
+    pattern: 'from \.(upsample) '
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file:  vedastr/utils/__init__.py
+    pattern: 'from \.(checkpoint) | load_url'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file:  vedastr/utils/config.py
+    pattern: 'from .misc import collections_abc'
+    replacement: 'import collections.abc'
+  - $type: regex_replace
+    file:  vedastr/utils/config.py
+    pattern: 'collections_abc'
+    replacement: 'collections.abc'
+  - $type: regex_replace
+    file:  vedastr/utils/config.py
+    pattern: 'from \.(path)'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file:  vedastr/utils/config.py
+    pattern: 'check_file_exist\(.*\)'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file:  vedastr/utils/config.py
+    pattern: 'addict'
+    replacement: 'vedastr.addict'
+  - $type: unpack_archive
+    format: zip
+    file:  vedastr/addict-2.4.0-py3-none-any.whl
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir
+  - --model-name=get_model
+  - --import-module=model
+  - --model-param=file_config=r"$dl_dir/vedastr/configs/resnet_fc.py"
+  - --model-param=weights=r"$dl_dir/vedastr/ckpt/resnet_fc.pth"
+  - --input-shape=1,1,32,100
+  - --input-names=input
+  - --output-names=output
+  - --output-file=$conv_dir/resnet_fc.onnx
+model_optimizer_args:
+  - --input_shape=[1,1,32,100]
+  - --input=input
+  - --mean_values=input[127.5]
+  - --scale_values=input[127.5]
+  - --output=output
+  - --input_model=$conv_dir/resnet_fc.onnx
+framework: pytorch
+license: https://raw.githubusercontent.com/Media-Smart/vedastr/0fd2a0bd7819ae4daa2a161501e9f1c2ac67e96a/LICENSE
