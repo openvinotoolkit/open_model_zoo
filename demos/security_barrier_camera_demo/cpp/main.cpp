@@ -855,7 +855,7 @@ int main(int argc, char* argv[]) {
                 std::make_pair(context.attributesInfers.getActualInferRequests(), FLAGS_d_va),
                 std::make_pair(context.platesInfers.getActualInferRequests(), FLAGS_d_lpr)}) {
             for (InferRequest& ir : net.first) {
-                ir.Wait(IInferRequest::WaitMode::RESULT_READY);
+                ir.Wait(InferRequest::WaitMode::RESULT_READY);
                 if (FLAGS_pc) {  // Show performance results
                     printPerformanceCounts(ir, std::cout, std::string::npos == net.second.find("MULTI") ? getFullDeviceName(mapDevices, net.second)
                                                                                                         : net.second);

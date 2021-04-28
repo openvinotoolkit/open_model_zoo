@@ -57,7 +57,7 @@ void BaseDetection::submitRequest() {
 void BaseDetection::wait() {
     if (!enabled()|| !request || !isAsync)
         return;
-    request->Wait(IInferRequest::WaitMode::RESULT_READY);
+    request->Wait(InferRequest::WaitMode::RESULT_READY);
 }
 
 bool BaseDetection::enabled() const  {
