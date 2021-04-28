@@ -318,8 +318,8 @@ The reported metric is collected over the alphanumeric subset of icdar 13 (1015 
 
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
-| ForwardTacotron | PyTorch\* | [forward-tacotron](./forward-tacotron/README.md) | - | 6.66 | 13.81 |
-| WaveRNN        | PyTorch\*      | [wavernn](./wavernn/README.md) | - | 0.37 | 0.4 |
+| ForwardTacotron | PyTorch\* | [forward-tacotron](./forward-tacotron/README.md) |  | 6.66 | 13.81 |
+| WaveRNN        | PyTorch\*      | [wavernn](./wavernn/README.md) |  | 0.37 | 0.4 |
 
 ## Named Entity Recognition
 
