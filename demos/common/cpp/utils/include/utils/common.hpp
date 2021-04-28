@@ -359,3 +359,9 @@ inline void showAvailableDevices() {
     }
     std::cout << std::endl;
 }
+
+inline std::string fileNameNoExt(const std::string &filepath) {
+    auto pos = filepath.rfind('.');
+    if (pos == std::string::npos) return filepath;
+    return filepath.substr(0, pos);
+}

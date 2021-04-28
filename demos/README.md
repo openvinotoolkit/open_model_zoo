@@ -21,6 +21,7 @@ The Open Model Zoo includes the following demos:
 - [Face Detection MTCNN Python\* Demo](./face_detection_mtcnn_demo/python/README.md) - The demo demonstrates how to run MTCNN face detection model to detect faces on images.
 - [Formula Recognition Python\* Demo](./formula_recognition_demo/python/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/cpp/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
+- [Gaze Estimation C++ Demo](./gaze_estimation_demo/cpp_gapi/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression. G-API version.
 - [Gesture Recognition Python\* Demo](./gesture_recognition_demo/python/README.md) - Demo application for Gesture Recognition algorithm (e.g. American Sign Language gestures), which classifies gesture actions that are being performed on input video.
 - [Handwritten Text Recognition Python\* Demo](./handwritten_text_recognition_demo/python/README.md) - The demo demonstrates how to run Handwritten Japanese Recognition models and Handwritten Simplified Chinese Recognition models.
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/cpp/README.md) - Human pose estimation demo.
