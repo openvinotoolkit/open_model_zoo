@@ -61,7 +61,7 @@ def main():
             md_paths = tuple(Path(path_folder).glob('*/*/README.md')) + \
                        tuple(Path(path_folder).glob('*/README.md'))
 
-            # transforming to url format
+            # transforming paths to url format
             md_files = [os.path.relpath(md_link, md_path).replace(os.sep, '/')[1:]
                        for md_link in md_paths if thirdparty_dir not in md_link.parents]
 
@@ -105,8 +105,9 @@ def main():
         if check_md_links:
             for md_file in md_files:
                 # glob uses lowercase filenames on Windows
-                if md_file.replace("readme.md", "README.md") not in readme_files:
-                    complain(f"{md_file} not in {os.path.basename(md_path)} file")
+                fixed_md_file = md_file.replace("readme.md", "README.md")
+                if fixed_md_file not in readme_files:
+                    complain(f"{fixed_md_file} not in {os.path.basename(md_path)} file")
                     continue
 
         # check for HTML fragments that are unsupported by Doxygen
