@@ -266,8 +266,7 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
     transform(bboxes, sz, scale, centerX, centerY);
 
     // --------------------------- Create detection result objects ------------------------------------
-    DetectionResult* result = new DetectionResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
 
     result->objects.reserve(scores.size());
     for (size_t i = 0; i < scores.size(); ++i) {
