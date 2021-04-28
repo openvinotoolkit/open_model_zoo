@@ -15,7 +15,16 @@
  limitations under the License.
 """
 
-import librosa
+# Workaround to import librosa on Linux without installed libsndfile.so
+try:
+    import librosa
+except OSError:
+    import sys
+    import types
+    sys.modules['soundfile'] = types.ModuleType('fake_soundfile')
+    import librosa
+    del sys.modules['soundfile']
+
 import numpy as np
 import scipy
 import wave
