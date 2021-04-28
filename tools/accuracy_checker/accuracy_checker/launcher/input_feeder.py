@@ -170,7 +170,9 @@ class InputFeeder:
 
             filled_inputs[input_layer] = input_batch
 
-        return self._transform_batch(filled_inputs, extract_image_representations(data_representation_batch, meta_only=True))
+        return self._transform_batch(
+            filled_inputs, extract_image_representations(data_representation_batch, meta_only=True)
+        )
 
     def fill_inputs(self, data_representation_batch):
         if self.dummy:

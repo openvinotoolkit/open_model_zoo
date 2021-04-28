@@ -709,18 +709,15 @@ class AnnotationFeaturesReader(BaseReader):
 
     def configure(self):
         self.feature_list = self.get_value_from_config('features')
-        if not contains_all(self.data_source[0].__dict__, self.feature_list):
-            raise ConfigError(
-                'annotation_class prototype does not contain provided features {}'.format(', '.join(self.feature_list))
-            )
         self.single = len(self.feature_list) == 1
-        self.counter = 0
-        self.subset = range(len(self.data_source))
         self.multi_infer = self.get_value_from_config('multi_infer')
 
     def read(self, data_id):
-        relevant_annotation = self.data_source[self.subset[self.counter]]
-        self.counter += 1
+        relevant_annotation = self.data_source[create_identifier_key(data_id)]
+        if not contains_all(relevant_annotation.__dict__, self.feature_list):
+            raise ConfigError(
+                'annotation_class prototype does not contain provided features {}'.format(', '.join(self.feature_list))
+            )
         features = [getattr(relevant_annotation, feature) for feature in self.feature_list]
         if self.single:
             return features[0]
