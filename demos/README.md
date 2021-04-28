@@ -9,7 +9,9 @@ C++, C++ G-API and Python versions are located in the `cpp`, `cpp_gapi` and `pyt
 The Open Model Zoo includes the following demos:
 
 - [3D Human Pose Estimation Python\* Demo](./human_pose_estimation_3d_demo/python/README.md) - 3D human pose estimation demo.
+- [3D Segmentation Python\* Demo](./3d_segmentation_demo/python/README.md) - Segmentation demo segments 3D images using 3D convolutional networks.
 - [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
+- [BERT Named Entity Recognition Python\* Demo](./bert_named_entity_recognition_demo/python/README.md) - NER Demo application that uses a CONLL2003-tuned BERT model for inference.
 - [BERT Question Answering Python\* Demo](./bert_question_answering_demo/python/README.md)
 - [BERT Question Answering Embedding Python\* Demo](./bert_question_answering_embedding_demo/python/README.md) - The demo demonstrates how to run BERT based models for question answering task.
 - [Classification C++ Demo](./classification_demo/cpp/README.md) - Shows an example of using neural networks for image classification.
@@ -41,6 +43,7 @@ The Open Model Zoo includes the following demos:
 - [Object Detection Python\* Demo](./object_detection_demo/python/README.md) - Demo application for several object detection model types (like SSD, Yolo, etc).
 - [Object Detection C++ Demo](./object_detection_demo/cpp/README.md) - Demo application for Object Detection networks (different models architectures are supported), async API showcase, simple OpenCV interoperability (supports video and camera inputs).
 - [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/cpp/README.md) - Demo application for pedestrian tracking scenario.
+- [Place Recognition Python\* Demo](./place_recognition_demo/python/README.md) - This demo demonstrates how to run Place Recognition models using OpenVINO™.
 - [Security Barrier Camera C++ Demo](./security_barrier_camera_demo/cpp/README.md) - Vehicle Detection followed by the Vehicle Attributes and License-Plate Recognition, supports images/video and camera inputs.
 - [Speech Recognition Python\* Demo](./speech_recognition_demo/python/README.md) - Speech recognition demo: takes audio file with an English phrase on input, and converts it into text.
 - [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md) - 2D human pose estimation demo.
@@ -50,6 +53,7 @@ The Open Model Zoo includes the following demos:
 - [Text Detection C++ Demo](./text_detection_demo/cpp/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
 - [Text Spotting Python\* Demo](./text_spotting_demo/python/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Text-to-speech Python\* Demo](./text_to_speech_demo/python/README.md) - Shows an example of using Forward Tacotron and WaveRNN neural networks for text to speech task.
+- [Whiteboard Inpainting Python\* Demo](./whiteboard_inpainting_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to detect and hide a person on a video so that all text on a whiteboard is visible.
 
 ## Media Files Available for Demos
 
