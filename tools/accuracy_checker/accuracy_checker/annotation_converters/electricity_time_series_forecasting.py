@@ -323,8 +323,6 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
             samples.append(
                 ElectricityTimeSeriesForecastingAnnotation(f"inputs_{idx}", *self.get_sample(data, data_index, col_mappings, idx))
             )
-            if idx > 1000:
-                break
 
         return ConverterReturn(samples, None, None)
 
