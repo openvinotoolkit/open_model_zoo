@@ -285,6 +285,10 @@ class ElectricityFormatter:
 
 
 class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
+    """ Annotation converter for electricity dataset.
+    """
+    URL = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00321/LD2011_2014.txt.zip'
+
     __provider__ = "electricity"
     annotation_types = (ElectricityTimeSeriesForecastingAnnotation, )
 
