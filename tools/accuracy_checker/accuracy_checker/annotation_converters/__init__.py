@@ -201,7 +201,7 @@ __all__ = [
     'NoiseSuppressionDatasetConverter',
     'Vimeo90KSuperResolutionDatasetConverter',
     'LMDBConverter',
-    'ElectricityTimeSeriesForecastingConverter'
+    'ElectricityTimeSeriesForecastingConverter',
     'KaldiSpeechRecognitionDataConverter',
     'KaldiFeatureRegressionConverter',
 ]

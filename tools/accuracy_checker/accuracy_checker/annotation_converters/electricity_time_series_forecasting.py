@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import abc
 import enum
 
 import pandas as pd
@@ -22,7 +21,7 @@ import numpy as np
 import sklearn.preprocessing
 
 from ..representation import ElectricityTimeSeriesForecastingAnnotation
-from ..config import PathField, NumberField, BoolField
+from ..config import PathField, NumberField
 from .format_converter import BaseFormatConverter, ConverterReturn
 
 from tqdm import tqdm
@@ -37,12 +36,12 @@ def get_single_col_by_input_type(input_type, column_definition):
     column_definition: Column definition list for experiment
     """
 
-    l = [tup[0] for tup in column_definition if tup[2] == input_type]
+    cols = [tup[0] for tup in column_definition if tup[2] == input_type]
 
-    if len(l) != 1:
+    if len(cols) != 1:
         raise ValueError('Invalid number of columns for {}'.format(input_type))
 
-    return l[0]
+    return cols[0]
 
 
 def extract_cols_from_data_type(data_type, column_definition,
@@ -224,10 +223,10 @@ class ElectricityFormatter:
 
           # Filter out any trajectories that are too short
           if len(sliced) >= self._time_steps:
-            sliced_copy = sliced.copy()
-            sliced_copy[real_inputs] = self._real_scalers[identifier].transform(
-                sliced_copy[real_inputs].values)
-            df_list.append(sliced_copy)
+              sliced_copy = sliced.copy()
+              sliced_copy[real_inputs] = self._real_scalers[identifier].transform(
+                  sliced_copy[real_inputs].values)
+              df_list.append(sliced_copy)
 
         output = pd.concat(df_list, axis=0)
 
@@ -345,13 +344,13 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
 
         df_index_abs = g[target_col].transform(lambda x: x.index+lookback) \
                         .reset_index() \
-                        .rename(columns={'index':'init_abs', target_col[0]:'end_abs'})
+                        .rename(columns={'index': 'init_abs', target_col[0]: 'end_abs'})
         df_index_rel_init = g[target_col].transform(lambda x: x.reset_index(drop=True).index) \
-                        .rename(columns={target_col[0]:'init_rel'})
+                        .rename(columns={target_col[0]: 'init_rel'})
         df_index_rel_end = g[target_col].transform(lambda x: x.reset_index(drop=True).index+lookback) \
-                        .rename(columns={target_col[0]:'end_rel'})
+                        .rename(columns={target_col[0]: 'end_rel'})
         df_total_count = g[target_col].transform(lambda x: x.shape[0] - lookback + 1) \
-                        .rename(columns = {target_col[0]:'group_count'})
+                        .rename(columns = {target_col[0]: 'group_count'})
 
         return pd.concat([df_index_abs,
                           df_index_rel_init,

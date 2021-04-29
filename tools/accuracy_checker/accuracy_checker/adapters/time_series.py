@@ -14,10 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import numpy as np
 from .adapter import Adapter
 from ..representation import ElectricityTimeSeriesForecastingPrediction
-from ..config import PathField, NumberField, StringField, BoolField, DictField
+from ..config import StringField, DictField
 
 
 class TemporalFusionTransformerAdapter(Adapter):

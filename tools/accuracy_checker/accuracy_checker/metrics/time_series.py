@@ -16,8 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from .metric import PerImageEvaluationMetric, FullDatasetEvaluationMetric
-from ..config import NumberField, StringField, BoolField, ConfigError
+from .metric import FullDatasetEvaluationMetric
 from ..representation import (
     ElectricityTimeSeriesForecastingAnnotation,
     ElectricityTimeSeriesForecastingPrediction
