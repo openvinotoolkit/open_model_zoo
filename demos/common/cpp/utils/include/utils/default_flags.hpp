@@ -21,4 +21,4 @@ static const char loop_message[] = "Optional. Enable reading the input in a loop
 static const char output_message[] = "Optional. Name of output to save.";
 static const char limit_message[] = "Optional. Number of frames to store in output. If 0 is set, all frames are stored.";
 static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
-    "in (width x height) format. Example: 1280x720. Using the input frame size by default.";
+    "in (width x height) format. Example: 1280x720. Input frame size used by default.";
