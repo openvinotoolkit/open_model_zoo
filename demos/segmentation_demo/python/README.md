@@ -77,7 +77,7 @@ Input/output options:
   --output_resolution OUTPUT_RESOLUTION
                         Optional. Specify the maximum output window resolution
                         in (width x height) format. Example: 1280x720.
-                        Using the input frame size by default.
+                        Input frame size used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```
