@@ -89,7 +89,7 @@ def build_argparser():
     io_args.add_argument('--output_resolution', default=None, type=resolution,
                          help='Optional. Specify the maximum output window resolution '
                               'in (width x height) format. Example: 1280x720. '
-                              'Using the input frame size by default.')
+                              'Input frame size used by default.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
