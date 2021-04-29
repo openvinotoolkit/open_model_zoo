@@ -28,8 +28,9 @@ import numpy as np
 
 from .. import __version__
 from ..representation import (
-    ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
+    ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation,
 )
+from ..data_readers import KaldiFrameIdentifier, KaldiMatrixIdentifier
 from ..utils import get_path, OrderedSet
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
@@ -90,6 +91,8 @@ def make_subset(annotation, size, seed=666, shuffle=True):
         return make_subset_reid(annotation, size, shuffle)
     if isinstance(annotation[-1], PlaceRecognitionAnnotation):
         return make_subset_place_recognition(annotation, size, shuffle)
+    if isinstance(annotation[-1].identifier, (KaldiMatrixIdentifier, KaldiFrameIdentifier)):
+        return make_subset_kaldi(annotation, size, shuffle)
 
     result_annotation = list(np.random.choice(annotation, size=size, replace=False)) if shuffle else annotation[:size]
     return result_annotation
@@ -190,6 +193,30 @@ def make_subset_place_recognition(annotation, size, shuffle=True):
         if len(subsample_set) > size:
             subsample_set -= addition
     return [annotation[ind] for ind in subsample_set]
+
+
+def make_subset_kaldi(annotation, size, shuffle=True):
+    file_to_num_utterances = {}
+    for ind, ann in enumerate(annotation):
+        if ann.identifier.file not in file_to_num_utterances:
+            file_to_num_utterances[ann.identifier.file] = []
+        file_to_num_utterances[ann.identifier.file].append(ind)
+
+    subset = []
+    for _, indices in file_to_num_utterances.items():
+        if len(subset) + len(indices) > size:
+            num_elem_to_add = size - len(subset)
+            if shuffle:
+                indices = np.random.choice(indices, num_elem_to_add)
+            else:
+                indices = indices[:num_elem_to_add]
+        else:
+            if shuffle:
+                indices = np.random.shuffle(indices)
+        subset.extend([annotation[idx] for idx in indices])
+        if len(subset) == size:
+            break
+    return subset
 
 
 def main():

@@ -19,11 +19,11 @@ Alphanumeric subset of common scene text recognition benchmarks are used. For yo
 
 | Dataset  | Accuracy | Dataset size |
 | -------- | -------- | ------------ |
-| ICDAR-03 | 92.85%   | 867          |
-| ICDAR-13 | 90.94%   | 1015         |
-| ICDAR-15 | 77.80%   | 1811         |
-| SVT      | 88.41%   | 647          |
-| IIIT5K   | 87.77%   | 3000         |
+| ICDAR-03 | 92.96%   | 867          |
+| ICDAR-13 | 90.44%   | 1015         |
+| ICDAR-15 | 77.58%   | 1811         |
+| SVT      | 88.56%   | 647          |
+| IIIT5K   | 88.83%   | 3000         |
 
 ## Input
 
@@ -34,9 +34,10 @@ Image, name: `input`, shape: `1, 1, 32, 100` in the format `B, C, H, W`, where:
 - `H` - image height
 - `W` - image width
 
-Note that the source image should be tight aligned crop with detected text converted to grayscale.
+Note that the source image should be tight aligned crop with detected text converted to grayscale. Mean values: [127.5, 127.5, 127.5], scale factor for each channel: 127.5.
 
 ## Outputs
+
 Output tensor, name: `output`, shape: `1, 26, 37` in the format `B, W, L`, where:
 
 - `W` - output sequence length
@@ -45,6 +46,16 @@ Output tensor, name: `output`, shape: `1, 26, 37` in the format `B, W, L`, where
   `[s]0123456789abcdefghijklmnopqrstuvwxyz`, where [s] - special end of sequence character for decoder.
 
 The network output decoding process is pretty easy: get the argmax on `L` dimension, transform indices to letters and slice the resulting phrase on the first entry of `end-of-sequence` symbol.
+
+## Use text-detection demo
+
+Model is supported by [text-detection c++ demo](../../../demos/text_detection_demo/cpp/main.cpp). In order to use this model in the demo, user should pass the following options:
+```
+  -tr_pt_first
+  -dt "simple"
+```
+
+For more information, please, see documentation of the demo.
 
 ## Legal Information
 

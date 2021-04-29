@@ -14,12 +14,6 @@
 // limitations under the License.
 */
 
-/**
-* \brief The entry point for the Inference Engine object_detection_demo demo application
-* \file object_detection_demo/cpp/main.cpp
-* \example object_detection_demo/cpp/main.cpp
-*/
-
 #include <iostream>
 #include <vector>
 #include <string>

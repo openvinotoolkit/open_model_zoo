@@ -108,8 +108,9 @@ from .attribute_classification import (
 )
 from .im2latex_images_match import Im2latexRenderBasedMetric
 
-from .speech_recognition import SpeechRecognitionWER, SpeechRecognitionCER
 from .audio_processing import SISDRMetric
+from .speech_recognition import SpeechRecognitionWER, SpeechRecognitionCER, SpeechRecognitionSER
+
 from .score_class_comparison import ScoreClassComparisonMetric
 from .dna_seq_accuracy import DNASequenceAccuracy
 
@@ -213,6 +214,7 @@ __all__ = [
 
     'SpeechRecognitionWER',
     'SpeechRecognitionCER',
+    'SpeechRecognitionSER',
 
     'SISDRMetric',
 
