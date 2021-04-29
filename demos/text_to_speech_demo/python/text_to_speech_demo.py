@@ -18,7 +18,6 @@
 
 import sys
 import time
-import tkinter as tk
 from argparse import ArgumentParser, SUPPRESS
 
 from tqdm import tqdm
@@ -28,7 +27,6 @@ from openvino.inference_engine import IECore
 
 from models.forward_tacotron_ie import ForwardTacotronIE
 from models.mel2wave_ie import WaveRNNIE, MelGANIE
-from utils.embeddings_processing import PCA
 from utils.gui import init_parameters_interactive
 
 
@@ -117,7 +115,6 @@ def main():
     if args.model_melgan is not None:
         vocoder = MelGANIE(args.model_melgan, ie, device=args.device)
     else:
-
         vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, ie, device=args.device,
                             upsampler_width=args.upsampler_width)
 
