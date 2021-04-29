@@ -76,7 +76,7 @@ from .inpainting import InpaintingConverter
 from .style_transfer import StyleTransferConverter
 from .wikitext2raw import Wikitext2RawConverter
 
-from .image_processing import ImageProcessingConverter
+from .image_processing import ImageProcessingConverter, ParametricImageProcessing
 
 from .aflw2000_3d import AFLW20003DConverter
 from .ade20k_dataset_converter import ADE20kConverter
@@ -202,4 +202,5 @@ __all__ = [
     'LMDBConverter',
     'KaldiSpeechRecognitionDataConverter',
     'KaldiFeatureRegressionConverter',
+    'ParametricImageProcessing',
 ]
