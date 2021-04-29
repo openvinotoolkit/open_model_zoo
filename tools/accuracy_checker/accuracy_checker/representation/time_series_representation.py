@@ -23,12 +23,12 @@ class TimeSeriesRepresentation(BaseRepresentation):
 
 
 class ElectricityTimeSeriesForecastingAnnotation(TimeSeriesRepresentation):
-    def __init__(self, identifier, inputs, outputs, seq_id, scaler):
+    def __init__(self, identifier, inputs, outputs, mean, scale):
         super().__init__(identifier)
         self.inputs = inputs
         self.outputs = outputs
-        self.seq_id = seq_id
-        self.scaler = scaler
+        self.mean = mean
+        self.scale = scale
 
 
 class ElectricityTimeSeriesForecastingPrediction(TimeSeriesRepresentation):

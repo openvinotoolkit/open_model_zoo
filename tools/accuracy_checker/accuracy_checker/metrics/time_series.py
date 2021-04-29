@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from .metric import PerImageEvaluationMetric
+from .metric import PerImageEvaluationMetric, FullDatasetEvaluationMetric
 from ..config import NumberField, StringField, BoolField, ConfigError
 from ..representation import (
     ElectricityTimeSeriesForecastingAnnotation,
@@ -35,7 +35,7 @@ def normalised_quantile_loss(gt, pred, quantile):
     return 2 * quantile_loss / normaliser
 
 
-class NormalisedQuantileLoss(PerImageEvaluationMetric):
+class NormalisedQuantileLoss(FullDatasetEvaluationMetric):
     """
     Class for evaluating accuracy metric of normalised quantile loss.
     """
@@ -48,45 +48,28 @@ class NormalisedQuantileLoss(PerImageEvaluationMetric):
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
-        parameters.update({
-            "quantile": NumberField(
-                description='Quantile for evaluation.', value_type=float
-            )
-        })
         return parameters
 
     def configure(self):
-        self.quantile = float(self.get_value_from_config('quantile'))
-        self.reset()
         self.meta.update({
             'scale': 1, 'postfix': ' '
         })
         super().configure()
 
-    def update(self, annotation, prediction):
-        self.annotations.append(annotation)
-        self.predictions.append(prediction)
-
     def evaluate(self, annotations, predictions):
-        preds, gt = [], []
-        for i in range(len(self.annotations)):
-            scaler = self.annotations[i].scaler
-            gt.append(
-                scaler.inverse_transform(
-                    self.annotations[i].outputs[:, :, 0]
-                )
-            )
-            preds.append(
-                scaler.inverse_transform(
-                    self.predictions[i].preds[self.quantile]
-                )
-            )
+        quantiles = list(predictions[0].preds.keys())
+        quantiles.sort()
+        self.meta.update({"names": quantiles, "compute_mean": False})
+        gt = []
+        for i in range(len(annotations)):
+            gt.append(annotations[i].outputs)
         gt = np.concatenate(gt, axis=0)
-        preds = np.concatenate(preds, axis=0)
-        loss = normalised_quantile_loss(gt, preds, self.quantile)
-        print(f"loss: {loss}")
-        return loss
-
-    def reset(self):
-        self.annotations = []
-        self.predictions = []
+        values = []
+        for q in quantiles:
+            preds = []
+            for i in range(len(annotations)):
+                preds.append(predictions[i].preds[q])
+            preds = np.concatenate(preds, axis=0)
+            loss = normalised_quantile_loss(gt, preds, q)
+            values.append(loss)
+        return values

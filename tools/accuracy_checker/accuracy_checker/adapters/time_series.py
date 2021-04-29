@@ -40,7 +40,6 @@ class TemporalFusionTransformerAdapter(Adapter):
         self.output_name = str(self.get_value_from_config('output_name'))
 
     def process(self, raw, identifiers, frame_meta):
-        # print(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
         output = raw_outputs[self.output_name]
         preds = ElectricityTimeSeriesForecastingPrediction(identifiers[0])

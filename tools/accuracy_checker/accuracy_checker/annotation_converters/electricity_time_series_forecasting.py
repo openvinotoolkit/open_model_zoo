@@ -317,14 +317,8 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
             samples.append(
                 ElectricityTimeSeriesForecastingAnnotation(f"inputs_{idx}", *self.get_sample(data, data_index, col_mappings, idx))
             )
-            if idx > 1000:
-                break
 
-        meta = {
-            "scaler": self.formatter._target_scaler
-        }
-
-        return ConverterReturn(samples, meta, None)
+        return ConverterReturn(samples, None, None)
 
     def build_data_index(self, data):
         column_definition = self.formatter._column_definition
@@ -377,7 +371,5 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
 
         # prepare outputs
         scaler = self.formatter._target_scaler[data_map["identifier"][0][0]]
-        outputs = data_map['outputs'][self.num_encoder_steps:, :]
-        # outputs = scaler.inverse_transform(outputs[:, 0])
-        # return expand(data_map['inputs']), expand(data_map['outputs']), data_map["identifier"][0][0], scaler
-        return expand(data_map['inputs']), expand(outputs), data_map["identifier"][0][0], scaler
+        outputs = data_map['outputs'][self.num_encoder_steps:, 0]
+        return expand(data_map['inputs']), expand(outputs), scaler.mean_, scaler.scale_
