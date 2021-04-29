@@ -296,7 +296,7 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
     def parameters(cls):
         configuration_parameters = super().parameters()
         configuration_parameters.update({
-            "data_path": PathField(description="Path to dataset file in .csv format."),
+            "data_path_file": PathField(description="Path to dataset file in .csv format."),
             "num_encoder_steps": NumberField(
                 description='The maximum number of timestamps that model use.',
                 optional=True, default=7 * 24, value_type=int
@@ -306,14 +306,14 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
         return configuration_parameters
 
     def configure(self):
-        self.data_path = self.get_value_from_config('data_path')
+        self.data_path_file = self.get_value_from_config('data_path_file')
         self.num_encoder_steps = int(self.get_value_from_config('num_encoder_steps'))
         self.formatter = ElectricityFormatter()
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         _, _, data = self.formatter.split_data(
             self.aggregating_to_hourly_data(
-                pd.read_csv(self.data_path, index_col=0, sep=';', decimal=',')
+                pd.read_csv(self.data_path_file, index_col=0, sep=';', decimal=',')
             )
         )
         data = data.reset_index(drop=True)

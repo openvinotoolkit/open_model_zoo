@@ -45,5 +45,4 @@ class TemporalFusionTransformerAdapter(Adapter):
         preds = ElectricityTimeSeriesForecastingPrediction(identifiers[0])
         for k, v in self.quantiles.items():
             preds[k] = output[:, :, v]
-        results = [preds]
-        return results
+        return [preds]

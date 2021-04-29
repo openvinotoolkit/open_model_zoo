@@ -37,3 +37,6 @@ rawpy
 
 # lmdb dataset support
 lmdb
+
+# pandas datasets support
+pandas

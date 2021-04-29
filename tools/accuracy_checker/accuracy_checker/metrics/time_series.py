@@ -52,23 +52,19 @@ class NormalisedQuantileLoss(FullDatasetEvaluationMetric):
 
     def configure(self):
         self.meta.update({
-            'scale': 1, 'postfix': ' '
+            'scale': 1, 'postfix': ' ', 'target': 'higher-worse'
         })
         super().configure()
 
     def evaluate(self, annotations, predictions):
         quantiles = list(predictions[0].preds.keys())
         quantiles.sort()
-        self.meta.update({"names": quantiles, "compute_mean": False})
-        gt = []
-        for i in range(len(annotations)):
-            gt.append(annotations[i].outputs)
+        self.meta.update({"names": quantiles, "calculate_mean": False})
+        gt = [annotation.outputs for annotation in annotations]
         gt = np.concatenate(gt, axis=0)
         values = []
         for q in quantiles:
-            preds = []
-            for i in range(len(annotations)):
-                preds.append(predictions[i].preds[q])
+            preds = [prediction.preds[q] for prediction in predictions]
             preds = np.concatenate(preds, axis=0)
             loss = normalised_quantile_loss(gt, preds, q)
             values.append(loss)
