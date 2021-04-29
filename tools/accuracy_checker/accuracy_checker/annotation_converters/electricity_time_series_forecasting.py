@@ -308,7 +308,9 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         _, _, data = self.formatter.split_data(
-            pd.read_csv(self.data_path, index_col=0)
+            self.aggregating_to_hourly_data(
+                pd.read_csv(self.data_path, index_col=0, sep=';', decimal=',')
+            )
         )
         data = data.reset_index(drop=True)
         data_index, col_mappings = self.build_data_index(data)
@@ -317,6 +319,8 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
             samples.append(
                 ElectricityTimeSeriesForecastingAnnotation(f"inputs_{idx}", *self.get_sample(data, data_index, col_mappings, idx))
             )
+            if idx > 1000:
+                break
 
         return ConverterReturn(samples, None, None)
 
@@ -373,3 +377,50 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
         scaler = self.formatter._target_scaler[data_map["identifier"][0][0]]
         outputs = data_map['outputs'][self.num_encoder_steps:, 0]
         return expand(data_map['inputs']), expand(outputs), scaler.mean_, scaler.scale_
+
+    def aggregating_to_hourly_data(self, df):
+        df.index = pd.to_datetime(df.index)
+        df.sort_index(inplace=True)
+
+        # Used to determine the start and end dates of a series
+        output = df.resample('1h').mean().replace(0., np.nan)
+
+        earliest_time = output.index.min()
+
+        df_list = []
+        for label in output:
+            print('Processing {}'.format(label))
+            srs = output[label]
+
+            start_date = min(srs.fillna(method='ffill').dropna().index)
+            end_date = max(srs.fillna(method='bfill').dropna().index)
+
+            active_range = (srs.index >= start_date) & (srs.index <= end_date)
+            srs = srs[active_range].fillna(0.)
+
+            tmp = pd.DataFrame({'power_usage': srs})
+            date = tmp.index
+            tmp['t'] = (date - earliest_time).seconds / 60 / 60 + (
+                date - earliest_time).days * 24
+            tmp['days_from_start'] = (date - earliest_time).days
+            tmp['categorical_id'] = label
+            tmp['date'] = date
+            tmp['id'] = label
+            tmp['hour'] = date.hour
+            tmp['day'] = date.day
+            tmp['day_of_week'] = date.dayofweek
+            tmp['month'] = date.month
+
+            df_list.append(tmp)
+
+        output = pd.concat(df_list, axis=0, join='outer').reset_index(drop=True)
+
+        output['categorical_id'] = output['id'].copy()
+        output['hours_from_start'] = output['t']
+        output['categorical_day_of_week'] = output['day_of_week'].copy()
+        output['categorical_hour'] = output['hour'].copy()
+
+        # Filter to match range used by other academic papers
+        output = output[(output['days_from_start'] >= 1096)
+                        & (output['days_from_start'] < 1346)].copy()
+        return output
