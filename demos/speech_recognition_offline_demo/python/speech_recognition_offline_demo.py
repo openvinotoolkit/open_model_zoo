@@ -23,7 +23,6 @@ except OSError:
     import types
     sys.modules['soundfile'] = types.ModuleType('fake_soundfile')
     import librosa
-    del sys.modules['soundfile']
 
 import numpy as np
 import scipy
