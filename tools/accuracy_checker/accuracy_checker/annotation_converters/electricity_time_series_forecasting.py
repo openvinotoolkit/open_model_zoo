@@ -208,8 +208,7 @@ class ElectricityFormatter:
 
         # Extract relevant columns
         column_definitions = self.get_column_definition()
-        id_col = get_single_col_by_input_type(InputTypes.ID,
-                                                    column_definitions)
+        id_col = get_single_col_by_input_type(InputTypes.ID, column_definitions)
         real_inputs = extract_cols_from_data_type(
             DataTypes.REAL_VALUED, column_definitions,
             {InputTypes.ID, InputTypes.TIME})
@@ -220,13 +219,11 @@ class ElectricityFormatter:
         # Transform real inputs per entity
         df_list = []
         for identifier, sliced in df.groupby(id_col):
-
-          # Filter out any trajectories that are too short
-          if len(sliced) >= self._time_steps:
-              sliced_copy = sliced.copy()
-              sliced_copy[real_inputs] = self._real_scalers[identifier].transform(
-                  sliced_copy[real_inputs].values)
-              df_list.append(sliced_copy)
+            # Filter out any trajectories that are too short
+            if len(sliced) >= self._time_steps:
+                sliced_copy = sliced.copy()
+                sliced_copy[real_inputs] = self._real_scalers[identifier].transform(sliced_copy[real_inputs].values)
+                df_list.append(sliced_copy)
 
         output = pd.concat(df_list, axis=0)
 
