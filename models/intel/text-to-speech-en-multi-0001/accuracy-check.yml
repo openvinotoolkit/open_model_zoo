@@ -1,5 +1,5 @@
 evaluations:
-  - name: text-to-speech-en-multi-speaker-0001
+  - name: text-to-speech-en-multi-0001
     module: custom_evaluators.text_to_speech_evaluator.TextToSpeechEvaluator
     module_config:
       network_info:

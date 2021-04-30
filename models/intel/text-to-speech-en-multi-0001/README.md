@@ -1,4 +1,4 @@
-# text-to-speech-en-multi-speaker-0001 (composite)
+# text-to-speech-en-multi-0001 (composite)
 
 ## Use Case and High-Level Description
 
