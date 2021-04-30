@@ -26,6 +26,7 @@ try:
 except ImportError as import_error:
     editdistance = UnsupportedPackage("editdistance", import_error.msg)
 
+
 class SpeechRecognitionWER(PerImageEvaluationMetric):
     __provider__ = 'wer'
     annotation_types = (CharacterRecognitionAnnotation,)
@@ -70,6 +71,30 @@ class SpeechRecognitionCER(PerImageEvaluationMetric):
         self.score += cur_score
         self.length += cur_length
         return cur_score / cur_length
+
+    def evaluate(self, annotations, predictions):
+        return self.score / self.length if self.length != 0 else 0
+
+    def reset(self):
+        self.length, self.score = 0, 0
+
+
+class SpeechRecognitionSER(PerImageEvaluationMetric):
+    __provider__ = 'ser'
+
+    annotation_types = (CharacterRecognitionAnnotation,)
+    prediction_types = (CharacterRecognitionPrediction,)
+
+    def configure(self):
+        self.length = 0
+        self.score = 0
+        self.meta['target'] = 'higher-worse'
+
+    def update(self, annotation, prediction):
+        ser = int(annotation.label != prediction.label)
+        self.score += ser
+        self.length += 1
+        return ser
 
     def evaluate(self, annotations, predictions):
         return self.score / self.length if self.length != 0 else 0

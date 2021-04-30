@@ -352,7 +352,8 @@ NATIVE_DEMOS = [
                     ModelArg('fastseg-large'),
                     ModelArg('fastseg-small'),
                     ModelArg('hrnet-v2-c1-segmentation'),
-                    ModelArg('deeplabv3'))),
+                    ModelArg('deeplabv3'),
+                    ModelArg('pspnet-pytorch'))),
         ],
     )),
 
@@ -399,10 +400,17 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('text-detection')}),
         single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
         [
-            *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
-            TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
+            *combine_cases(
+                TestCase(options={'-dt': 'ctc'}),
+                [
+                    *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
+                                      '-tr_pt_first': None,
+                                      '-tr_o_blb_nm': 'logits'})
+                ]),
+            TestCase(options={'-m_tr': ModelArg('text-recognition-resnet-fc'),
                               '-tr_pt_first': None,
-                              '-tr_o_blb_nm': 'logits'}),
+                              '-dt': 'simple'}),
         ]
     )),
 
@@ -774,7 +782,8 @@ PYTHON_DEMOS = [
                     ModelArg('icnet-camvid-ava-sparse-30-0001'),
                     ModelArg('icnet-camvid-ava-sparse-60-0001'),
                     ModelArg('unet-camvid-onnx-0001'),
-                    ModelArg('deeplabv3'))),
+                    ModelArg('deeplabv3'),
+                    ModelArg('pspnet-pytorch'))),
             TestCase(options={
                 '-m': ModelArg('f3net'),
                 '-i': DataPatternArg('road-segmentation-adas'),
@@ -795,6 +804,13 @@ PYTHON_DEMOS = [
                     ModelArg('person-detection-retail-0013'),
                     ModelArg('ssd_mobilenet_v1_coco'))),
         ]
+    )),
+
+    PythonDemo(name='speech_recognition_offline_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        single_option_cases('-m',
+            ModelArg('quartznet-15x5-en'),
+            ModelFileArg('quartznet-15x5-en', 'quartznet.onnx'))
     )),
 
     PythonDemo(name='text_spotting_demo', device_keys=[], test_cases=combine_cases(
