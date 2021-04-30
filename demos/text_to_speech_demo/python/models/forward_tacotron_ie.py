@@ -306,7 +306,3 @@ class ForwardTacotronIE:
         self.male_embeddings = self.speaker_embeddings[mask, :]
         mask = np.array([True if i in self.female_idx else False for i in range(self.speaker_embeddings.shape[0])])
         self.female_embeddings = self.speaker_embeddings[mask, :]
-
-
-
-
