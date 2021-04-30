@@ -5,7 +5,6 @@ This script is like check-basics.py, but specific to the documentation.
 It's split off into a separate script, so that it can be easily run on its own.
 """
 
-import os
 import re
 import sys
 import urllib.parse
@@ -30,10 +29,9 @@ ALLOWED_HTML_ELEMENTS = frozenset([
     'tt', 'u', 'ul', 'var',
 ])
 
-thirdparty_dir = OMZ_ROOT / 'demos' / 'thirdparty'
-
-
 def find_md_files():
+    thirdparty_dir = OMZ_ROOT / 'demos' / 'thirdparty'
+
     for path in OMZ_ROOT.glob('**/*.md'):
         if thirdparty_dir in path.parents: continue
         yield path
@@ -41,29 +39,30 @@ def find_md_files():
 def main():
     all_passed = True
     
-    md_check_cases = (f'{OMZ_ROOT}{os.sep}models{os.sep}intel{os.sep}index.md', 
-                     f'{OMZ_ROOT}{os.sep}models{os.sep}public{os.sep}index.md', 
-                     f'{OMZ_ROOT}{os.sep}demos{os.sep}README.md')
+    md_check_cases = (OMZ_ROOT / 'models' / 'intel' / 'index.md', 
+                     OMZ_ROOT / 'models' / 'public' / 'index.md', 
+                     OMZ_ROOT / 'demos' / 'README.md')
+
+    all_md_files = tuple(find_md_files())
 
     def complain(message):
         nonlocal all_passed
         all_passed = False
         print(message, file=sys.stderr)
 
+    md_dict = dict()
+    for check_case_path in md_check_cases:
+        valid_md_links = set()
+        for md_file in all_md_files:
+            md_file_parents = [parent_dir for parent_dir in md_file.parents][1:]
+            if check_case_path.parent in md_file_parents:
+                md_index = md_file_parents.index(check_case_path.parent)
+                if not any((parent_dir / 'README.md').exists() for parent_dir in md_file_parents[:md_index]):
+                    valid_md_links.add(md_file)
+        md_dict[check_case_path] = sorted(valid_md_links)
+
     for md_path in sorted(find_md_files()):
-        check_md_links = False
-        readme_files = list()
-
-        if os.path.normpath(md_path) in md_check_cases:
-            check_md_links = True
-            path_folder = os.path.dirname(md_path)
-
-            md_paths = tuple(Path(path_folder).glob('*/*/README.md')) + \
-                       tuple(Path(path_folder).glob('*/README.md'))
-
-            # transforming paths to url format
-            md_files = [os.path.relpath(md_link, md_path).replace(os.sep, '/')[1:]
-                       for md_link in md_paths if thirdparty_dir not in md_link.parents]
+        readme_files = set()
 
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
@@ -99,16 +98,13 @@ def main():
                     ' does not exist or is not a file')
                 continue
 
-            if check_md_links and url not in readme_files:
-                readme_files.append(url)
+            if md_path in md_dict:
+                readme_files.add(target_path)
 
-        if check_md_links:
-            for md_file in md_files:
-                # glob uses lowercase filenames on Windows
-                fixed_md_file = md_file.replace("readme.md", "README.md")
-                if fixed_md_file not in readme_files:
-                    complain(f"{fixed_md_file} not in {os.path.basename(md_path)} file")
-                    continue
+        if md_path in md_dict:
+            for link in md_dict[md_path]:
+                if link not in readme_files:
+                    complain(f"{link.relative_to(OMZ_ROOT)}: file is not referenced in {md_path.name}")
 
         # check for HTML fragments that are unsupported by Doxygen
 
