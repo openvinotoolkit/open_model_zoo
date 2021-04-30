@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..config import PathField, StringField, ConfigError, BoolField
+from ..config import PathField, StringField, ConfigError, BoolField, NumberField
 from ..representation import ImageProcessingAnnotation
 from ..representation.image_processing import GTLoader
 from ..utils import check_file_existence
@@ -108,7 +108,8 @@ class ParametricImageProcessing(BaseFormatConverter):
                 optional=True, choices=LOADERS_MAPPING.keys(), default='pillow',
                 description="Which library will be used for ground truth image reading. "
                             "Supported: {}".format(', '.join(LOADERS_MAPPING.keys()))
-            )
+            ),
+            'param_scale': NumberField(value_type=float, optional=True, default=0.001)
         })
         return configuration_parameters
 
@@ -118,6 +119,7 @@ class ParametricImageProcessing(BaseFormatConverter):
         self.annotation_loader = LOADERS_MAPPING.get(self.get_value_from_config('annotation_loader'))
         if not self.annotation_loader:
             raise ConfigError('provided not existing loader')
+        self.param_scale = self.get_value_from_config('param_scale')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         image_pairs = self.get_image_pairs()
@@ -133,7 +135,7 @@ class ParametricImageProcessing(BaseFormatConverter):
         for ref_img in self.reference_dir.glob('*.png'):
             params = ref_img.stem.split('_')
             name = params[0]
-            parameters = [float(param) for param in params[1:]]
+            parameters = [float(param) * self.param_scale for param in params[1:]]
             source_img = name + '.png'
             data.append((source_img, parameters, ref_img.name))
         return data
