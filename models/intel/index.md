@@ -1,8 +1,9 @@
 # Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models
 
-OpenVINO&trade; toolkit provides a set of pre-trained models
+OpenVINO&trade; toolkit provides a set of Intel pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on GitHub](https://github.com/openvinotoolkit/open_model_zoo).
+The [table](./device_support.md) summarizes devices supported by each model.
 
 The models can be downloaded via [Model Downloader](../../tools/downloader/README.md).
 
@@ -295,4 +296,5 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 |   text-to-speech-en-multi-0001-generation                          | 48.38 | 12.77 |
 
 ## Legal Information
+
 [*] Other names and brands may be claimed as the property of others.
