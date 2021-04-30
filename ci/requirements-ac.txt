@@ -71,7 +71,7 @@ rawpy==0.16.0
     # via -r tools/accuracy_checker/requirements.in
 regex==2021.3.17
     # via nltk
-scikit-image==0.17.2 ; python_version == "3.6"
+scikit-image==0.17.2
     # via -r tools/accuracy_checker/requirements.in
 scikit-learn==0.24.1
     # via -r tools/accuracy_checker/requirements.in

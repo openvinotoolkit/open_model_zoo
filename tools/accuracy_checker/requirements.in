@@ -2,8 +2,9 @@
 tqdm>=4.54.1
 
 # image reading and preprocessing
-scikit-image~=0.17.2 ; python_version == '3.6'
-scikit-image~=0.18.1 ; python_version > '3.6'
+# scikit-image version will be changed to 0.18 after fixing tests (compare_ssim method has been removed in this version)
+# note: python 3.6 wheels is not available since 0.18
+scikit-image~=0.17.2
 
 # reid
 scikit-learn>=0.24.1
