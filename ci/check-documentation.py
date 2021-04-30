@@ -63,7 +63,7 @@ def main():
 
             md_file_parents = list(md_rel_path.parents)
 
-            if md_file.name == "README.md" \
+            if md_file.name == "README.md" \ # refactoring in progress
             and md_file != check_case_path \
             and not any((check_case_path.parent / parent_dir / 'README.md').exists() for parent_dir in md_file_parents[1:-1]):
                 models_and_demos_links.append(md_file)
