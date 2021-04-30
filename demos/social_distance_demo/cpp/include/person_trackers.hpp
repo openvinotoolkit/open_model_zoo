@@ -41,8 +41,6 @@ public:
 
                 if (!sim.empty()) {
                     int maxSimilarity = getMaxSimilarity(sim);
-                    if (maxSimilarity < 0)
-                        continue;
                     trackables.at(maxSimilarity) = to;
                     trackables.at(maxSimilarity).updated = true;
                     trackables.at(maxSimilarity).disappeared = 0;
