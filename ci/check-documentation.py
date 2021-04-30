@@ -38,9 +38,9 @@ def find_md_files():
 
 def main():
     all_passed = True
-    
-    md_check_cases = (OMZ_ROOT / 'models' / 'intel' / 'index.md', 
-                     OMZ_ROOT / 'models' / 'public' / 'index.md', 
+
+    md_check_cases = (OMZ_ROOT / 'models' / 'intel' / 'index.md',
+                     OMZ_ROOT / 'models' / 'public' / 'index.md',
                      OMZ_ROOT / 'demos' / 'README.md')
 
     all_md_files = tuple(find_md_files())
@@ -54,7 +54,7 @@ def main():
     for check_case_path in md_check_cases:
         valid_md_links = set()
         for md_file in all_md_files:
-            md_file_parents = [parent_dir for parent_dir in md_file.parents][1:]
+            md_file_parents = tuple(md_file.parents)[1:]
             if check_case_path.parent in md_file_parents:
                 md_index = md_file_parents.index(check_case_path.parent)
                 if not any((parent_dir / 'README.md').exists() for parent_dir in md_file_parents[:md_index]):
