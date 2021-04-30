@@ -20,7 +20,8 @@ usage: text_to_speech_demo.py [-h] -m_duration MODEL_DURATION -m_forward
                               MODEL_FORWARD -i INPUT [-o OUT] [-d DEVICE]
                               [-m_upsample MODEL_UPSAMPLE] [-m_rnn MODEL_RNN]
                               [--upsampler_width UPSAMPLER_WIDTH]
-                              [-m_melgan MODEL_MELGAN]
+                              [-m_melgan MODEL_MELGAN] [-s_id SPEAKER_ID]
+                              [-a ALPHA]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -50,6 +51,13 @@ Options:
                         model.
   -m_melgan MODEL_MELGAN, --model_melgan MODEL_MELGAN
                         Path to model of the MelGAN (*.xml format).
+  -s_id SPEAKER_ID, --speaker_id SPEAKER_ID
+                        Ordinal number of the speaker in embeddings array for
+                        multi-speaker model.If -1 then activates the multi-
+                        speaker TTS model parameters selection window.
+  -a ALPHA, --alpha ALPHA
+                        Coefficient for controlling of the speech time
+                        (inversely proportional to speed).
 ```
 
 Running the application with the empty list of options yields the usage message and an error message.
