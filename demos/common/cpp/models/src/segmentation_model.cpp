@@ -22,9 +22,9 @@ SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useA
 }
 
 template<class InputsDataMap, class OutputsDataMap>
-void SegmentationModel::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo) {
+void SegmentationModel::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
     // --------------------------- Check input blobs -----------------------------------------
-    auto& input = inputInfo.begin()->second;
+    const auto& input = inputInfo.begin()->second;
     if (inputInfo.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 input");
 
@@ -45,7 +45,7 @@ void SegmentationModel::checkInputsOutputs(InputsDataMap& inputInfo, OutputsData
         throw std::runtime_error("Demo supports topologies only with 1 output");
     }
 
-    auto& output = outputInfo.begin()->second;
+    const auto& output = outputInfo.begin()->second;
     outputsNames.push_back(outputInfo.begin()->first);
 
     if (isNetworkCompiled && (output->getPrecision() != InferenceEngine::Precision::FP32 || output->getPrecision() != InferenceEngine::Precision::I32)) {
@@ -72,10 +72,10 @@ void SegmentationModel::checkInputsOutputs(InputsDataMap& inputInfo, OutputsData
 
 void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output ---------------------------------------------
-    auto& inputInfo = cnnNetwork.getInputsInfo();
-    auto& outputInfo = cnnNetwork.getOutputsInfo();
+    const auto& inputInfo = cnnNetwork.getInputsInfo();
+    const auto& outputInfo = cnnNetwork.getOutputsInfo();
 
-    for (auto& input : inputInfo) {
+    for (const auto& input : inputInfo) {
         if (useAutoResize) {
             input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
             input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
@@ -85,13 +85,6 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
         }
         input.second->setPrecision(InferenceEngine::Precision::U8);
     }
-
-    //for (auto& output : outputInfo) {
-    //    // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
-    //    // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
-    //    // postprocessing
-    //    output.second->setPrecision(InferenceEngine::Precision::FP32);
-    //}
 
     // --------------------------- Check input & output ----------------------------------------------------
     checkInputsOutputs(inputInfo, outputInfo);

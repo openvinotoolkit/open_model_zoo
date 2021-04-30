@@ -28,14 +28,14 @@ ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
 }
 
 template<class InputsDataMap, class OutputsDataMap>
-void ModelCenterNet::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo) {
+void ModelCenterNet::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
     // --------------------------- Prepare input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts CenterNet networks that have only one input");
     }
 
-    auto& input = inputInfo.begin()->second;
+    const auto& input = inputInfo.begin()->second;
     const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
 
     if (inputDesc.getDims()[1] != 3) {
@@ -59,7 +59,7 @@ void ModelCenterNet::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap
         throw std::logic_error("This demo expect CenterNet networks that have 3 outputs blobs");
     }
 
-    for (auto& output : outputInfo) {
+    for (const auto& output : outputInfo) {
         if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
             throw std::logic_error("This demo accepts networks with FP32 output precision");
         }
@@ -69,15 +69,15 @@ void ModelCenterNet::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap
 
 void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
-    auto& inputInfo = cnnNetwork.getInputsInfo();
-    auto& outputInfo = cnnNetwork.getOutputsInfo();
+    const auto& inputInfo = cnnNetwork.getInputsInfo();
+    const auto& outputInfo = cnnNetwork.getOutputsInfo();
 
-    for(auto& input : inputInfo) {
+    for(const auto& input : inputInfo) {
         input.second->setPrecision(InferenceEngine::Precision::U8);
         input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
     }
 
-    for (auto& output : outputInfo) {
+    for (const auto& output : outputInfo) {
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(InferenceEngine::Layout::NCHW);
     }

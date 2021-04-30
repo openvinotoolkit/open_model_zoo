@@ -28,7 +28,7 @@ ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
 }
 
 template<class InputsDataMap, class OutputsDataMap>
-void  ModelFaceBoxes::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo) {
+void  ModelFaceBoxes::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
     // --------------------------- Check input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
 
@@ -36,7 +36,7 @@ void  ModelFaceBoxes::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMa
         throw std::logic_error("This demo accepts networks that have only one input");
     }
 
-    auto& input = inputInfo.begin()->second;
+    const auto& input = inputInfo.begin()->second;
     const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
 
     if (inputDesc.getDims()[1] != 3) {
@@ -63,7 +63,7 @@ void  ModelFaceBoxes::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMa
     const InferenceEngine::TensorDesc& outputDesc = outputInfo.begin()->second->getTensorDesc();
     maxProposalsCount = outputDesc.getDims()[1];
 
-    for (auto& output : outputInfo) {
+    for (const auto& output : outputInfo) {
         if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
             throw std::logic_error("This demo accepts networks with FP32 output precision");
         }
@@ -81,10 +81,10 @@ void  ModelFaceBoxes::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMa
 
 void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
-    auto& inputInfo = cnnNetwork.getInputsInfo();
-    auto& outputInfo = cnnNetwork.getOutputsInfo();
+    const auto& inputInfo = cnnNetwork.getInputsInfo();
+    const auto& outputInfo = cnnNetwork.getOutputsInfo();
 
-    for (auto& input : inputInfo) {
+    for (const auto& input : inputInfo) {
         if (useAutoResize) {
             input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
             input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
@@ -94,7 +94,7 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
         }
     }
 
-    for (auto& output : outputInfo) {
+    for (const auto& output : outputInfo) {
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(InferenceEngine::Layout::CHW);
     }

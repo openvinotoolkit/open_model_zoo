@@ -39,6 +39,7 @@ public:
 protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override;
+
     template<class InputsDataMap, class OutputsDataMap>
-    void checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo);
+    void checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo);
 };

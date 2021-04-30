@@ -29,14 +29,14 @@ ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confide
 }
 
 template<class InputsDataMap, class OutputsDataMap>
-void  ModelRetinaFace::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo) {
+void  ModelRetinaFace::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
     // --------------------------- Check input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts RetinaFace networks that have only one input");
     }
 
-    auto& input = inputInfo.begin()->second;
+    const auto& input = inputInfo.begin()->second;
     if (input->getPrecision() != InferenceEngine::Precision::U8) {
         throw std::logic_error("This demo accepts networks with U8 input precision");
     }
@@ -52,7 +52,7 @@ void  ModelRetinaFace::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataM
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
 
     std::vector<size_t> outputsSizes[OT_MAX];
-    for (auto& output : outputInfo) {
+    for (const auto& output : outputInfo) {
         if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
             throw std::logic_error("This demo accepts networks with FP32 output precision");
         }
@@ -102,9 +102,9 @@ void  ModelRetinaFace::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataM
 
 void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
-    auto& inputInfo = cnnNetwork.getInputsInfo();
-    auto& outputInfo = cnnNetwork.getOutputsInfo();
-    for (auto& input : inputInfo) {
+    const auto& inputInfo = cnnNetwork.getInputsInfo();
+    const auto& outputInfo = cnnNetwork.getOutputsInfo();
+    for (const auto& input : inputInfo) {
         if (useAutoResize) {
             input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
             input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
@@ -114,7 +114,7 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
         }
     }
 
-    for (auto& output : outputInfo) {
+    for (const auto& output : outputInfo) {
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(InferenceEngine::Layout::NCHW);
     }

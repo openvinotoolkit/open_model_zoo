@@ -81,7 +81,8 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                     result.metaData = std::move(metaData);
                     result.internalModelData = std::move(internalModelData);
 
-                    for (const auto& outName : model->getOutputsNames()) {
+                    for (const auto& outName : model->getOutputsNames())
+                    {
                         auto blobPtr = request->GetBlob(outName);
 
                         if(Precision::I32 == blobPtr->getTensorDesc().getPrecision())
@@ -90,7 +91,6 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                             result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(blobPtr)));
                     }
 
-                    }
                     completedInferenceResults.emplace(frameID, result);
                     this->requestsPool->setRequestIdle(request);
                 }

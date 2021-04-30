@@ -47,7 +47,7 @@ protected:
     void checkCompiledNetworkInputsOutputs() override;
 
     template<class InputsDataMap, class OutputsDataMap>
-    void checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo);
+    void checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo);
     void priorBoxes(const std::vector<std::pair<size_t, size_t>>& featureMaps);
 
 };

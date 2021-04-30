@@ -30,13 +30,13 @@ ModelYolo3::ModelYolo3(const std::string& modelFileName, float confidenceThresho
 }
 
 template<class InputsDataMap, class OutputsDataMap>
-void ModelYolo3::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo) {
+void ModelYolo3::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
     // --------------------------- Check input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts YOLO networks that have only one input");
     }
-    auto& input = inputInfo.begin()->second;
+    const auto& input = inputInfo.begin()->second;
     if (input->getPrecision() != InferenceEngine::Precision::U8) {
         throw std::logic_error("This demo accepts networks with U8 input precision");
     }
@@ -49,7 +49,7 @@ void ModelYolo3::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& ou
 
     // --------------------------- Check output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-    for (auto& output : outputInfo) {
+    for (const auto& output : outputInfo) {
         outputsNames.push_back(output.first);
         if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
             throw std::logic_error("This demo accepts networks with FP32 output precision");
@@ -59,9 +59,9 @@ void ModelYolo3::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& ou
 
 void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -----------------------------------------------
-    auto& inputInfo = cnnNetwork.getInputsInfo();
-    auto& outputInfo = cnnNetwork.getOutputsInfo();
-    for (auto& input : inputInfo) {
+    const auto& inputInfo = cnnNetwork.getInputsInfo();
+    const auto& outputInfo = cnnNetwork.getOutputsInfo();
+    for (const auto& input : inputInfo) {
         if (input.second->getTensorDesc().getDims().size() == 4) {
             if (useAutoResize) {
                 input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
@@ -77,7 +77,7 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
         }
     }
 
-    for (auto& output : outputInfo) {
+    for (const auto& output : outputInfo) {
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(InferenceEngine::Layout::NCHW);
     }

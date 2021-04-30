@@ -42,13 +42,13 @@ protected:
     void checkCompiledNetworkInputsOutputs() override;
 
     template<class InputsDataMap, class OutputsDataMap>
-    void checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo);
+    void checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo);
 
     template<class OutputsDataMap>
-    void checkSingleOutput(OutputsDataMap& outputInfo);
+    void checkSingleOutput(const OutputsDataMap& outputInfo);
 
     template<class OutputsDataMap>
-    void checkMultipleOutputs(OutputsDataMap& outputInfo);
+    void checkMultipleOutputs(const OutputsDataMap& outputInfo);
     size_t maxProposalCount = 0;
     size_t objectSize = 0;
 };

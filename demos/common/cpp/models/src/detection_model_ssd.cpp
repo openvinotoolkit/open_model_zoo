@@ -123,11 +123,11 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
 }
 
 template<class InputsDataMap, class OutputsDataMap>
-void ModelSSD::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo) {
+void ModelSSD::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
     // --------------------------- Check input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
 
-    for (auto& input : inputInfo) {
+    for (const auto& input : inputInfo) {
         if (input.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains
             if (input.second->getPrecision() != InferenceEngine::Precision::U8) {
                 throw std::logic_error("This demo accepts networks with U8 input precision");
@@ -172,9 +172,9 @@ void ModelSSD::checkCompiledNetworkInputsOutputs() {
 
 void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
-    auto& inputInfo = cnnNetwork.getInputsInfo();
-    auto& outputInfo = cnnNetwork.getOutputsInfo();
-    for (auto& input : inputInfo) {
+    const auto& inputInfo = cnnNetwork.getInputsInfo();
+    const auto& outputInfo = cnnNetwork.getOutputsInfo();
+    for (const auto& input : inputInfo) {
         if (input.second->getTensorDesc().getDims().size() == 4) {
             if (useAutoResize) {
                 input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
@@ -190,7 +190,7 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
         }
     }
 
-    for (auto& output : outputInfo) {
+    for (const auto& output : outputInfo) {
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(InferenceEngine::Layout::NCHW);
     }
@@ -200,8 +200,8 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 }
 
 template<class OutputsDataMap>
-void ModelSSD::checkSingleOutput(OutputsDataMap& outputInfo) {
-    auto& output = outputInfo.begin()->second;
+void ModelSSD::checkSingleOutput(const OutputsDataMap& outputInfo) {
+    const auto& output = outputInfo.begin()->second;
     const InferenceEngine::SizeVector outputDims = output->getTensorDesc().getDims();
 
     if (outputDims.size() != 4) {
@@ -221,7 +221,7 @@ void ModelSSD::checkSingleOutput(OutputsDataMap& outputInfo) {
     outputsNames.push_back(outputInfo.begin()->first);
 }
 template<class OutputsDataMap>
-void ModelSSD::checkMultipleOutputs(OutputsDataMap& outputInfo) {
+void ModelSSD::checkMultipleOutputs(const OutputsDataMap& outputInfo) {
     if (outputInfo.find("bboxes") != outputInfo.end() && outputInfo.find("labels") != outputInfo.end() &&
         outputInfo.find("scores") != outputInfo.end()) {
         outputsNames.push_back("bboxes");
@@ -236,7 +236,7 @@ void ModelSSD::checkMultipleOutputs(OutputsDataMap& outputInfo) {
         throw std::logic_error("Non-supported model architecutre (wrong number of outputs or wrong outputs names)");
     }
 
-    const InferenceEngine::SizeVector outputDims = outputInfo[outputsNames[0]]->getTensorDesc().getDims();
+    const InferenceEngine::SizeVector outputDims = outputInfo.begin()->second->getTensorDesc().getDims();
 
     if (outputDims.size() == 2) {
         maxProposalCount = outputDims[0];
@@ -258,8 +258,8 @@ void ModelSSD::checkMultipleOutputs(OutputsDataMap& outputInfo) {
         throw std::logic_error("Incorrect number of 'boxes' output dimensions for SSD model");
     }
 
-    for(auto& name : outputsNames) {
-        if (outputInfo[name]->getPrecision() != InferenceEngine::Precision::FP32) {
+    for(const auto& output : outputInfo) {
+        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
             throw std::logic_error("This demo accepts networks with FP32 output precision");
         }
     }
