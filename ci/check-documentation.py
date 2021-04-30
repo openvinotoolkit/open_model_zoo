@@ -39,9 +39,11 @@ def find_md_files():
 def main():
     all_passed = True
 
-    md_check_cases = (OMZ_ROOT / 'models' / 'intel' / 'index.md',
-                     OMZ_ROOT / 'models' / 'public' / 'index.md',
-                     OMZ_ROOT / 'demos' / 'README.md')
+    index_file_paths = (
+        OMZ_ROOT / 'models/intel/index.md',
+        OMZ_ROOT / 'models/public/index.md',
+        OMZ_ROOT / 'demos/README.md',
+    )
 
     all_md_files = tuple(find_md_files())
 
@@ -50,19 +52,25 @@ def main():
         all_passed = False
         print(message, file=sys.stderr)
 
-    md_dict = dict()
-    for check_case_path in md_check_cases:
-        valid_md_links = set()
+    index_child_md_links = dict()
+    for check_case_path in index_file_paths:
+        models_and_demos_links = list()
         for md_file in all_md_files:
-            md_file_parents = tuple(md_file.parents)[1:]
-            if check_case_path.parent in md_file_parents:
-                md_index = md_file_parents.index(check_case_path.parent)
-                if not any((parent_dir / 'README.md').exists() for parent_dir in md_file_parents[:md_index]):
-                    valid_md_links.add(md_file)
-        md_dict[check_case_path] = sorted(valid_md_links)
+            try:
+                md_rel_path = md_file.relative_to(check_case_path.parent)
+            except ValueError:
+                continue
 
-    for md_path in sorted(find_md_files()):
-        readme_files = set()
+            md_file_parents = list(md_rel_path.parents)
+
+            if md_file.name == "README.md" \
+            and md_file != check_case_path \
+            and not any((check_case_path.parent / parent_dir / 'README.md').exists() for parent_dir in md_file_parents[1:-1]):
+                models_and_demos_links.append(md_file)
+        index_child_md_links[check_case_path] = sorted(models_and_demos_links)
+
+    for md_path in sorted(all_md_files):
+        models_and_demos_md_files = set()
 
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
@@ -98,13 +106,13 @@ def main():
                     ' does not exist or is not a file')
                 continue
 
-            if md_path in md_dict:
-                readme_files.add(target_path)
+            if md_path in index_child_md_links:
+                models_and_demos_md_files.add(target_path)
 
-        if md_path in md_dict:
-            for link in md_dict[md_path]:
-                if link not in readme_files:
-                    complain(f"{link.relative_to(OMZ_ROOT)}: file is not referenced in {md_path.name}")
+        if md_path in index_child_md_links:
+            for link in index_child_md_links[md_path]:
+                if link not in models_and_demos_md_files:
+                    complain(f"{md_path.relative_to(OMZ_ROOT)}: {link.relative_to(OMZ_ROOT)} is not referenced")
 
         # check for HTML fragments that are unsupported by Doxygen
 
