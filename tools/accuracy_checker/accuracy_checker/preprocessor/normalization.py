@@ -66,8 +66,8 @@ class Normalize(Preprocessor):
     def process(self, image, annotation_meta=None):
         def process_data(data, mean, std):
             if (
-                    self.images_only and len(data.shape) not in [2, 3] or
-                    (len(data.shape) == 3 and data.shape[-1] not in [1, 3, 4])
+                    self.images_only and np.isscalar(data) or (len(data.shape) not in [2, 3] or
+                    (len(data.shape) == 3 and data.shape[-1] not in [1, 3, 4]))
             ):
                 return data
             if self.mean:

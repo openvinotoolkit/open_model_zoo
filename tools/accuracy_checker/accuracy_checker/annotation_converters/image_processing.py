@@ -122,7 +122,7 @@ class ParametricImageProcessing(BaseFormatConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         image_pairs = self.get_image_pairs()
         annotations = []
-        for image, params, gt in zip(image_pairs):
+        for image, params, gt in image_pairs:
             identifier = ParametricImageIdentifier(image, params)
             annotations.append(ImageProcessingAnnotation(identifier, gt, gt_loader=self.annotation_loader))
 

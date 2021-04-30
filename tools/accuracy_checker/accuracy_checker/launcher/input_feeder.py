@@ -143,6 +143,10 @@ class InputFeeder:
             for data_representation in data_representation_batch:
                 identifiers = data_representation.identifier
                 data = data_representation.data
+                if isinstance(identifiers, ParametricImageIdentifier):
+                    input_batch.append(data[idx])
+                    continue
+
                 if not isinstance(identifiers, list) and input_regex is None:
                     input_data = data
                     input_batch.append(input_data)
@@ -157,9 +161,6 @@ class InputFeeder:
                 if input_regex is None and check_regex:
                     raise ConfigError('Impossible to choose correct data for layer {}.'
                                       'Please provide regular expression for matching in config.'.format(input_layer))
-                if isinstance(identifiers, ParametricImageIdentifier):
-                    input_batch.append(data[idx])
-                    continue
 
                 if isinstance(identifiers, MultiFramesInputIdentifier):
                     input_id_order = {
