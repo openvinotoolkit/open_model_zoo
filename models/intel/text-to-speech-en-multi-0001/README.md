@@ -20,7 +20,7 @@ The text-to-speech-en-multi-0001-duration-prediction model is a ForwardTacotron-
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
 | GFlops                                        | 28.75     |
-| MParams                                       | 26.18    |
+| MParams                                       | 26.18     |
 
 ### Inputs
 
