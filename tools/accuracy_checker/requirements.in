@@ -34,3 +34,6 @@ fast-ctc-decode
 
 # raw image formats processing
 rawpy
+
+# lmdb dataset support
+lmdb

@@ -13,16 +13,26 @@
 # limitations under the License.
 
 description: >-
-  The "ssd512" model is a Single-Shot multibox Detection <SSD> <https://arxiv.org/abs/1512.02325>
-  network intended to perform detection. This model is implemented using the
-  Caffe*framework. For details about this model, check out the repository <https://github.com/weiliu89/caffe/tree/ssd>.
+  The "ssd512" model is the Caffe* framework implementation of Single-Shot multibox
+  Detection (SSD) <https://arxiv.org/abs/1512.02325> algorithm with 512x512 input
+  resolution and "VGG-16" backbone. The network intended to perform visual object
+  detection. This model is pretrained on VOC2007 + VOC2012 + COCO dataset and is able
+  to detect 20 PASCAL VOC2007 <http://host.robots.ox.ac.uk/pascal/VOC/voc2007/> object
+  classes:
 
-  The model input is a blob that consists of a single image of 1x3x512x512 in BGR
-  order. The BGR mean values need to be subtracted as follows: [104.0,117.0,123.0]
-  before passing the image blob into the network.
 
-  The model output is a typical vector containing the tracked object data, as previously
-  described.
+  - Person: person
+
+  - Animal: bird, cat, cow, dog, horse, sheep
+
+  - Vehicle: aeroplane, bicycle, boat, bus, car, motorbike, train
+
+  - Indoor: bottle, chair, dining table, potted plant, sofa, tv/monitor
+
+  Mapping model labels to class names provided in "<omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt"
+  file.
+
+  For details about this model, check out the repository <https://github.com/weiliu89/caffe/tree/ssd>.
 task_type: detection
 files:
   - name: ssd512.tar.gz

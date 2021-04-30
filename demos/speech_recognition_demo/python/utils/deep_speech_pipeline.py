@@ -17,34 +17,34 @@ from utils.ctcnumpy_beam_search_decoder import CtcnumpyBeamSearchDecoder
 
 
 PROFILES = {
-    'mds06x_en': dict(
-        alphabet = None,  # the default alphabet
+    'mds06x_en': {
+        'alphabet': None,  # the default alphabet
         # alpha: Language model weight
-        alpha = 0.75,
+        'alpha': 0.75,
         # beta: Word insertion bonus (ignored without LM)
-        beta = 1.85,
-        model_sampling_rate = 16000,
-        frame_window_size_seconds = 32e-3,
-        frame_stride_seconds = 20e-3,
-        mel_num = 40,
-        mel_fmin = 20.,
-        mel_fmax = 4000.,
-        num_mfcc_dct_coefs = 26,
-        num_context_frames = 19,
-    ),
-    'mds07x_en': dict(
-        alphabet = None,  # the default alphabet
-        alpha = 0.93128901720047,
-        beta = 1.1834137439727783,
-        model_sampling_rate = 16000,
-        frame_window_size_seconds = 32e-3,
-        frame_stride_seconds = 20e-3,
-        mel_num = 40,
-        mel_fmin = 20.,
-        mel_fmax = 8000.,
-        num_mfcc_dct_coefs = 26,
-        num_context_frames = 19,
-    ),
+        'beta': 1.85,
+        'model_sampling_rate': 16000,
+        'frame_window_size_seconds': 32e-3,
+        'frame_stride_seconds': 20e-3,
+        'mel_num': 40,
+        'mel_fmin': 20.,
+        'mel_fmax': 4000.,
+        'num_mfcc_dct_coefs': 26,
+        'num_context_frames': 19,
+    },
+    'mds07x_en': {
+        'alphabet': None,  # the default alphabet
+        'alpha': 0.93128901720047,
+        'beta': 1.1834137439727783,
+        'model_sampling_rate': 16000,
+        'frame_window_size_seconds': 32e-3,
+        'frame_stride_seconds': 20e-3,
+        'mel_num': 40,
+        'mel_fmin': 20.,
+        'mel_fmax': 8000.,
+        'num_mfcc_dct_coefs': 26,
+        'num_context_frames': 19,
+    },
 }
 PROFILES['mds08x_en'] = PROFILES['mds07x_en']
 

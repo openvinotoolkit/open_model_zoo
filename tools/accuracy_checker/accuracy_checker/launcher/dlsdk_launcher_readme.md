@@ -43,7 +43,7 @@ Additionally you can provide device specific parameters:
 * `gpu_extensions` (path to extension *.xml file with OpenCL kernel description for gpu).
 * `bitstream` for running on FPGA.
 
-Device config contains device specific options which should be set to Inference Engine. For setting device specific flags, you are able to use `-dc` or `--device_config` command line option. Device config should be represented as YML file with dictionary of one of two types:
+Device config contains device specific options which should be set to Inference Engine. For setting device specific flags, you are able to use `-dc` or `--device_config` command line option and provide path to YML file or specify device config directly to Accuracy Checker config file with key `device_config` in the launchers section. Device config should be represented as dictionary of one of two types:
 1. keys are plugin configuration keys and values are their values respectively. In this way configuration will be applied to current running device.
 2. keys are supported devices and values are plugin configuration for each device. Plugin configuration represented as dictionary where keys are plugin specific configuration keys and values are their values respectively.
 

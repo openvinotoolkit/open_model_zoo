@@ -2,7 +2,10 @@
 
 ![](./instance_segmentation.gif)
 
-This demo shows how to run Instance Segmentation models from [OpenVINO&trade; Training Extensions (OTE)](https://github.com/openvinotoolkit/training_extensions/tree/develop/pytorch_toolkit/instance_segmentation#get-pretrained-models) and `yolact` models family.
+This demo shows how to perform instance segmentation with one of the following Open Model Zoo models:
+
+* `instance-segmentation-security-????`
+* `yolact-resnet50-fpn-pytorch`
 
 > **NOTE**: Only batch size of 1 is supported.
 
@@ -93,7 +96,7 @@ Options:
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/instance_segmentation_demo/python/models.lst`.
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

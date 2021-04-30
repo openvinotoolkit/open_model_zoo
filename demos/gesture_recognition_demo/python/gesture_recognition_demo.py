@@ -109,8 +109,6 @@ def load_class_map(file_path):
 
 
 def main():
-    """ Main function. """
-
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
@@ -147,7 +145,7 @@ def main():
 
     last_caption = None
     active_object_id = -1
-    tracker_labels_map = dict()
+    tracker_labels_map = {}
     tracker_labels = set()
 
     frames_processed = 0
@@ -200,7 +198,7 @@ def main():
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
         if detections is not None:
-            tracker_labels = set(det.id for det in detections)
+            tracker_labels = {det.id for det in detections}
 
             for det in detections:
                 roi_color = (0, 255, 0) if active_object_id == det.id else (128, 128, 128)

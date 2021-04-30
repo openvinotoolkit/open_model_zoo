@@ -28,10 +28,8 @@ std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& in
     InferenceEngine::LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
     const float *classificationData = outputMapped.as<float*>();
 
-    ClassificationResult* result = new ClassificationResult;
+    ClassificationResult* result = new ClassificationResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
-
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     std::vector<unsigned> indices(infResult.getFirstOutputBlob()->size());
     std::iota(std::begin(indices), std::end(indices), 0);

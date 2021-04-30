@@ -53,7 +53,7 @@ def add_common_args(parser):
     common_args.add_argument(
         '-m', '--models',
         help='prefix path to the models and weights',
-        type=partial(get_path, is_directory=True),
+        type=partial(get_path, file_or_directory=True),
         required=False,
         nargs='+'
     )
@@ -335,6 +335,10 @@ def add_openvino_specific_args(parser):
         '--num_requests',
         help='the number of infer requests',
         required=False
+    )
+    openvino_specific_args.add_argument(
+        '--kaldi_bin_dir', help='directory with Kaldi utility binaries. Required only for Kaldi models decoding.',
+        required=False, type=partial(get_path, is_directory=True)
     )
 
 

@@ -92,22 +92,27 @@ More detailed information about calculation segmentation metrics you can find [h
   * `top_k` - number of k highest ranked samples to consider when matching.
   * `distance_threshold` - distance threshold for search positive matching pairs between query and gallery (Optional, default 25).
 * `mae` - [Mean Absolute Error](https://en.wikipedia.org/wiki/Mean_absolute_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
+  * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
 * `mae_on_intervals` - Mean Absolute Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start` , `step`, `end` - way to generate range of intervals from `start` to `end` with length `step`.
 * `mse` - [Mean Squared Error](https://en.wikipedia.org/wiki/Mean_squared_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
+  * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
 * `mse_on_intervals` - Mean Squared Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start`, `step`, `end` - generate range of intervals from `start` to `end` with length `step`.
 * `rmse` - [Root Mean Squared Error](https://en.wikipedia.org/wiki/Root-mean-square_deviation). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
+  * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
 * `rmse_on_intervals` - Root Mean Squared Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start`, `step`, `end` - generate range of intervals from `start` to `end` with length `step`.
 * `mape` - [Mean Absolute Percentage Error](https://en.wikipedia.org/wiki/Mean_absolute_percentage_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
+  * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
 * `log10_error` - Logarithmic mean absolute error. Supported representations: Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `FeatureRegressionAnnotation`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
+  * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
 * `per_point_normed_error` - Normed Error for measurement the quality of landmarks' positions. Estimated results for each point independently. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`, `FacialLandmarks3DAnnotation`, `FacialLandmarks3DPrediction`.
 * `normed_error` - Normed Error for measurement the quality of landmarks' positions. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`, `FacialLandmarks3DAnnotation`, `FacialLandmarks3DPrediction`.
   * `calculate_std` - allows calculation of standard deviation (default value: `False`)
@@ -117,10 +122,28 @@ More detailed information about calculation segmentation metrics you can find [h
 * `psnr` - [Peak signal to noise ratio](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
   * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
   * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
+* `psnr-b` - [Peak signal to noise ratio with blocked effect factor](https://doi.org/10.1007/978-3-642-34595-1_16). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
+  * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
+  * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
+  * `block_size` - block size for blocked effect factor. Optional, default `8`.
+  * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
+* `vif` - [Visual Information Fidelity](https://en.wikipedia.org/wiki/Visual_Information_Fidelity).
+  * `sigma_nsq` - variance of the visual noise (default = 2).
+  * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
+* `lpips` - [Learned Perceptual Image Patch Similarity](https://richzhang.github.io/PerceptualSimilarity/).  Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`.
+** Metric calculation requires `lpips` package installation.**
+  * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB), used only if you have 3-channel images.
+  * `normalized_images` - whether the images are normalized in [0, 1] range or not. Optional, default `False`.
+  * `net` - network for perceptual loss calculation. Supported models: `alex` - for AlexNet, `vgg` - for VGG16, `squeeze` - for SqueezeNet1.1. Optional, default `alex`
+  * `distance_threshold` - distance threshold for getting images ratio with greater distance. Optional, if not provided, this coefficient will not be calculated.
+  * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
 * `ssim` - [Structural similarity](https://en.wikipedia.org/wiki/Structural_similarity). Supported representations: `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `ImageInpaintingAnnotation`, `ImageInpaintingPrediction`, `SuperResolutionAnnotation`, `SuperResolutionPrediction`.
+  * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
 * `angle_error` - Mean angle error and Standard deviation of angle error for gaze estimation. Supported representations: `GazeVectorAnnotation`, `GazeVectorPrediction`.
+  * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
 * `relative_l2_error` - Mean relative error defined like L2 norm for difference between annotation and prediction normalized by L2 norm for annotation value. Supported representations:
   `FeatureRegressionAnnotation`, `RegressionPrediction`.
+  * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
 * `multi_accuracy` - accuracy for multilabel recognition task. Supported representations: `MultiLabelRecognitionAnnotation`, `MultiLabelRecognitionPrediction`.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
   * `calculate_average` - allows calculation of average accuracy (default value: `True`).
@@ -181,6 +204,12 @@ More detailed information about calculation segmentation metrics you can find [h
 * `coco_keypoints_recall` - MS COCO Average Recall metric for keypoints recognition task. Supported representations: `PoseEstimationAnnotation`, `PoseEstimationPrediction`.
   * `max_detections` - max number of predicted results per image. If you have more predictions,the results with minimal confidence will be ignored.
   * `threshold` - intersection over union threshold. You can specify one value or comma separated range of values. This parameter supports precomputed values for standard COCO thresholds (`.5`, `.75`, `.5:.05:.95`).
+* `coco_segm_precision` - MS COCO Average Precision metric for instance segmentation task. Supported representations: `CoCoInstanceSegmentationAnnotation`, `CoCoInstanceSegmentationPrediction`.
+  * `max_detections` - max number of predicted results per image. If you have more predictions,the results with minimal confidence will be ignored.
+  * `threshold` - intersection over union threshold. You can specify one value or comma separated range of values. This parameter supports precomputed values for standard COCO thresholds (`.5`, `.75`, `.5:.05:.95`).
+* `coco_segm_recall` - MS COCO Average Recall metric for instance segmentation task. Supported representations: `CoCoInstanceSegmentationAnnotation`, `CoCoInstanceSegmentationPrediction`.
+  * `max_detections` - max number of predicted results per image. If you have more predictions,the results with minimal confidence will be ignored.
+  * `threshold` - intersection over union threshold. You can specify one value or comma separated range of values. This parameter supports precomputed values for standard COCO thresholds (`.5`, `.75`, `.5:.05:.95`).
 * `hit_ratio` - metric for recommendation system evaluation. Supported representations: `HitRatioAnnotation`, `HitRatioPrediction`.
   * `top_k` - definition of number elements in rank list (optional, default 10).
 * `ndcg` - [Normalized Discounted Cumulative Gain](https://en.wikipedia.org/wiki/Discounted_cumulative_gain). Supported representations: `HitRatioAnnotation`, `HitRatioPrediction`.
@@ -229,6 +258,7 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
   * `calculate_average` - allows calculation of average precision (default value: `True`).
 * `wer` - Word error rate ([WER](https://en.wikipedia.org/wiki/Word_error_rate)). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
 * `cer` - Character error rate, character-level counterpart of [WER](https://en.wikipedia.org/wiki/Word_error_rate). Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
+* `ser` - Sentence error rate (SER), which indicates the percentage of sentences, whose translations have not matched in an exact manner those of reference. Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
 * `score_class_comparison` - allows calculate an accuracy of quality score class(low/normal/good). It sorts all quality scores from annotations and predictions and set the k1 highest scores as high class and the k2 lowest scores as low class where k1 is `num_high_quality` and k2 is `num_low_quality`. Supported representations: `QualityAssessmentAnnotation`, `QualityAssessmentPrediction`.
   * `num_high_quality` - the number of high class in total (default value: `1`).
   * `num_low_quality` - the number of low class in total (default value: `1`).
@@ -248,11 +278,13 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
   * `eps` - epsilon to avoid nan during calculate sqrtm for metric.
   * `length` - length of input feature vector for metric.
 * `epe` - Average End Point Error (EPE) metric for optical flow estimation task, defined as Euclidean distance between ground truth and predicted flow. Supported representations: `OpticalFlowAnnotation`, `OpticalFlowPrediction`.
+  * `max_error` - allow to calculate maximal error in range. Optional, default `False`.
 * `salience_mae` - Mean Absolute Error for salient object detection task. Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
 * `salience_f-measure` - f-measure metric for salient object detection task. Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
 * `salience_e-measure` - enhanced alignment measure for salient object detection task, defined in following [paper](https://arxiv.org/abs/1805.10421). Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
 * `salience_s-measure` - simularity measure for salient object detection task, defined in following [paper](https://arxiv.org/abs/1708.00786). Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
-
+* `sisdr` - Scale-invariant signal-to-distortion ratio described in [paper](https://arxiv.org/pdf/1811.02508.pdf). Supported representations: `NoiseSuppressionAnnotation`, `NoiseSuppressionPrediction`.
+  * `delay` - shift output by delay for alignment with reference (Optional, default 0).
 ## Metrics profiling
 Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.
 This feature can be useful for debug purposes. For enabling this behaviour you need to provide `--profile True` in accuracy checker command line.

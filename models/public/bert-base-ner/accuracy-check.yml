@@ -1,0 +1,27 @@
+models:
+  - name: bert-base-ner
+    launchers:
+      - framework: dlsdk
+        adapter: bert_ner
+        inputs:
+          - name: "input_ids"
+            type: INPUT
+            value: "input_ids"
+          - name: "attention_mask"
+            type: INPUT
+            value: 'input_mask'
+          - name: 'token_type_ids'
+            type: INPUT
+            value: 'segment_ids'
+    datasets:
+      - name: CONLL2003_bert_cased
+        reader:
+          type: annotation_features_extractor
+          features:
+            - input_ids
+            - input_mask
+            - segment_ids
+        metrics:
+          - type: ner_accuracy
+          - type: ner_f_score
+            presenter: print_vector

@@ -1,2 +1,2 @@
-tokenizers>=0.8.1rc1
+tokenizers>=0.9.3
 numpy>=1.11.0

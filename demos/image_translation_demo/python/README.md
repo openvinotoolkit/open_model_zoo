@@ -63,13 +63,13 @@ Options:
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/image_translation_demo/python/models.lst`.
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 There are two ways to use this demo:
 
-1. Run with segmentation model in addition to translation model. You should use only models trained on ADE20k dataset.     Example: [hrnet-v2-c1-segmentation](../../../models/public/hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md).
+1. Run with segmentation model in addition to translation model. You should use only models trained on ADE20k dataset.     Example: [hrnet-v2-c1-segmentation](../../../models/public/hrnet-v2-c1-segmentation/README.md).
    In this case only input and reference images are required without any masks.
    Segmentation masks will be generated via segmentation model.
 

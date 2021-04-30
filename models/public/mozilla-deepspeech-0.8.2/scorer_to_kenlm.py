@@ -33,8 +33,8 @@ def main():
 
     # pylint: disable=bad-function-call
     print('# Language model parameters:')
-    print('lm_alpha:', metadata['alpha'])
-    print('lm_beta:', metadata['beta'])
+    print('lm_alpha:', metadata.alpha)
+    print('lm_beta:', metadata.beta)
     if vocab_offset is not None:
         print('lm_vocabulary_offset:', vocab_offset)
     # pylint: enable=bad-function-call

@@ -15,7 +15,8 @@
 description: >-
   YOLO v2 Tiny is a real-time object detection model implemented with Keras* from
   this repository <https://github.com/david8862/keras-YOLOv3-model-set> and converted
-  to TensorFlow* framework. This model was pretrained on COCO* dataset with 80 classes.
+  to TensorFlow* framework. This model was pre-trained on Common Objects in Context
+  (COCO) <https://cocodataset.org/#home> dataset with 80 classes.
 task_type: detection
 files:
   - name: yolov2-tiny.weights

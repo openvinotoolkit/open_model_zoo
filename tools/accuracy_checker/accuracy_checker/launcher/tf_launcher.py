@@ -92,7 +92,7 @@ class TFLauncher(Launcher):
                 self._outputs_tensors.append(tensor)
 
         self.device = '/{}:0'.format(self.get_value_from_config('device').lower())
-        self._output_layouts = dict()
+        self._output_layouts = {}
         self._lstm_inputs = None
         if '_list_lstm_inputs' in self.config:
             self._configure_lstm_inputs()
@@ -111,7 +111,7 @@ class TFLauncher(Launcher):
             if len(data_shape) == 1:
                 return np.transpose([data])
             if len(data_shape) > 2:
-                if all([dim == 1 for dim in layer_shape]) and all([dim == 1 for dim in data_shape]):
+                if all(dim == 1 for dim in layer_shape) and all(dim == 1 for dim in data_shape):
                     return np.resize(data, layer_shape)
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)

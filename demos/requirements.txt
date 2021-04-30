@@ -1,10 +1,10 @@
+librosa
 matplotlib
 motmetrics
 nibabel
 numpy
 scikit-learn
 scipy
-tokenizers
-tensorboard
+tokenizers>=0.9.3
 tensorboardX
 tqdm

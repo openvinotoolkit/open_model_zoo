@@ -14,14 +14,14 @@
 
 description: >-
   This model was created for participation in the Brain Tumor Segmentation Challenge
-  <https://www.med.upenn.edu/sbia/brats2018.html> (BraTS) 2018.   The model is
-  based on the corresponding paper <https://arxiv.org/abs/1810.04008>, where authors
-  present deep cascaded approach for automatic brain tumor segmentation. The paper
-  describes modifications to 3D UNet architecture and specific augmentation strategy
-  to efficiently handle multimodal MRI input. Besides this, the approach to enhance
-  segmentation quality with context obtained from models of the same topology
-  operating on downscaled data is introduced.   Each input modality has its own
-  encoder which are later fused together to produce single output segmentation.
+  <https://www.med.upenn.edu/sbia/brats2018.html> (BraTS) 2018. The model is based
+  on the corresponding paper <https://arxiv.org/abs/1810.04008>, where authors present
+  deep cascaded approach for automatic brain tumor segmentation. The paper describes
+  modifications to 3D UNet architecture and specific augmentation strategy to efficiently
+  handle multimodal MRI input. Besides this, the approach to enhance segmentation
+  quality with context obtained from models of the same topology operating on downscaled
+  data is introduced. Each input modality has its own encoder which are later fused
+  together to produce single output segmentation.
 task_type: semantic_segmentation
 files:
   - name: brain-tumor-segmentation-0001-symbol.json

@@ -59,7 +59,11 @@ usage: object_detection_demo.py [-h] -m MODEL -at
                                 [-nstreams NUM_STREAMS]
                                 [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
                                 [-limit OUTPUT_LIMIT] [--no_show]
+                                [--output_resolution OUTPUT_RESOLUTION]
                                 [-u UTILIZATION_MONITORS] [-r]
+                                [--reverse_input_channels REVERSE_CHANNELS]
+                                [--mean_values MEAN_VALUES]
+                                [--scale_values SCALE_VALUES]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -109,8 +113,24 @@ Input/output options:
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
   --no_show             Optional. Don't show output.
+  --output_resolution OUTPUT_RESOLUTION
+                        Optional. Specify the maximum output window resolution
+                        in (width x height) format. Example: 1280x720.
+                        Input frame size used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+
+Input transform options:
+  --reverse_input_channels REVERSE_CHANNELS
+                        Optional. Switch the input channels order from
+                        BGR to RGB.
+  --mean_values MEAN_VALUES
+                        Optional. Normalize input by subtracting the mean
+                        values per channel. Example: 255 255 255
+  --scale_values SCALE_VALUES
+                        Optional. Divide input by scale values per channel
+                        Division is applied after mean values subtraction.
+                        Example: 255 255 255
 
 Debug options:
   -r, --raw_output_message

@@ -101,8 +101,8 @@ def main():
     for candidate in transcription:
         print(
             "{}\t{}".format(
-                candidate['conf'],
-                candidate['text'],
+                candidate.conf,
+                candidate.text,
             )
         )
 

@@ -1,0 +1,79 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "HigherHRNet-W32" model is one of the HigherHRNet <https://arxiv.org/pdf/1908.10357>.
+  "HigherHRNet" is a novel bottom-up human pose estimation method for learning scale-aware
+  representations using high-resolution feature pyramids. The network uses HRNet as
+  backbone, followed by one or more deconvolution modules to generate multi-resolution
+  and high-resolution heatmaps. For every person in an image, the network detects
+  a human pose: a body skeleton consisting of keypoints and connections between them.
+  The pose may contain up to 17 keypoints: ears, eyes, nose, shoulders, elbows, wrists,
+  hips, knees, and ankles. This is PyTorch* implementation pre-trained on COCO dataset.
+  For details about implementation of model, check out the HigherHRNet: Scale-Aware
+  Representation Learning for Bottom-Up Human Pose Estimation <https://github.com/HRNet/HigherHRNet-Human-Pose-Estimation>
+  repository.
+task_type: human_pose_estimation
+files:
+  - name: models/__init__.py
+    size: 412
+    sha256: 36696727c5c12c5e7c1da7f55fd3db6c0baf07c3c5e8ee6ea4f784422ccc49ce
+    source: https://raw.githubusercontent.com/HRNet/HigherHRNet-Human-Pose-Estimation/f97496fdaa5365ee33d44c7872da21375fb1a39c/lib/models/__init__.py
+  - name: models/pose_higher_hrnet.py
+    size: 21313
+    sha256: d70a711df60f4faca7ff16540d532f54579a7ac9fea26ea745dcfff7fe49bd57
+    source: https://raw.githubusercontent.com/HRNet/HigherHRNet-Human-Pose-Estimation/f97496fdaa5365ee33d44c7872da21375fb1a39c/lib/models/pose_higher_hrnet.py
+  - name: config/__init__.py
+    size: 370
+    sha256: 33aae6902c6cff66d4e687f3503bbcb0fe1d9537b8cd0b2476d07ad9fa82ed3e
+    source: https://raw.githubusercontent.com/HRNet/HigherHRNet-Human-Pose-Estimation/f97496fdaa5365ee33d44c7872da21375fb1a39c/lib/config/__init__.py
+  - name: config/default.py
+    size: 6075
+    sha256: ef62dcabd4c3ef40b8634e8b1735b2c09d8b231b89d84a52d96b374f8db9c737
+    source: https://raw.githubusercontent.com/HRNet/HigherHRNet-Human-Pose-Estimation/f97496fdaa5365ee33d44c7872da21375fb1a39c/lib/config/default.py
+  - name: config/models.py
+    size: 2518
+    sha256: 960e26c10b96d8c1648f4db81870e47b69ea727bdc51a98fdd449087f70f9c5e
+    source: https://raw.githubusercontent.com/HRNet/HigherHRNet-Human-Pose-Estimation/f97496fdaa5365ee33d44c7872da21375fb1a39c/lib/config/models.py
+  - name: experiments/higher_hrnet.yaml
+    size: 2326
+    sha256: ec602f3383fa355834c82a229a68cbfb70b1a2a9b0ce607c05b34e0e8d6dbe40
+    source: https://raw.githubusercontent.com/HRNet/HigherHRNet-Human-Pose-Estimation/f97496fdaa5365ee33d44c7872da21375fb1a39c/experiments/coco/higher_hrnet/w32_512_adam_lr1e-3.yaml
+  - name: ckpt/pose_higher_hrnet_w32_512.pth
+    size: 115172215
+    sha256: ef4c99ab8341b5d8c0437b3ea44aec6bd13b82f49b3b2c5e7696ce06c04777f5
+    source:
+      $type: google_drive
+      id: 1V9Iz0ZYy9m8VeaspfKECDW0NKlGsYmO1
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir
+  - --model-name=get_net
+  - --import-module=model
+  - --model-param=file_config=r"$dl_dir/experiments/higher_hrnet.yaml"
+  - --model-param=weights=r"$dl_dir/ckpt/pose_higher_hrnet_w32_512.pth"
+  - --input-shape=1,3,512,512
+  - --input-names=image
+  - --output-names=embeddings,heatmaps
+  - --output-file=$conv_dir/higher-hrnet-w32-human-pose-estimation.onnx
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,3,512,512]
+  - --input=image
+  - --mean_values=image[123.675,116.28,103.53]
+  - --scale_values=image[58.395,57.12,57.375]
+  - --output=embeddings,heatmaps
+  - --input_model=$conv_dir/higher-hrnet-w32-human-pose-estimation.onnx
+framework: pytorch
+license: https://raw.githubusercontent.com/CSAILVision/semantic-segmentation-pytorch/9aff40de31ee4b21f18514d31e5d6e4ba056924d/LICENSE

@@ -4,6 +4,11 @@
 
 # pragma once
 
+#include <chrono>
+#include <map>
+#include <stdexcept>
+#include <string>
+
 class CallStat {
 public:
     typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;

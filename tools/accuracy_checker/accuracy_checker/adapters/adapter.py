@@ -100,6 +100,11 @@ class Adapter(ClassProvider):
             return full_scheme
         return cls.parameters()
 
+    def reset(self):
+        pass
+
+    def release(self):
+        pass
 
 class AdapterField(BaseField):
     def validate(self, entry, field_uri_=None, fetch_only=False, validation_scheme=None):
@@ -118,6 +123,7 @@ class AdapterField(BaseField):
         elif isinstance(entry, dict):
             class DictAdapterValidator(ConfigValidator):
                 type = StringField(choices=Adapter.providers)
+
             dict_adapter_validator = DictAdapterValidator(
                 field_uri_ or 'adapter', on_extra_argument=DictAdapterValidator.IGNORE_ON_EXTRA_ARGUMENT
             )
@@ -135,19 +141,28 @@ class AdapterField(BaseField):
         return errors_stack
 
 
-def create_adapter(adapter_config, launcher=None, dataset=None):
+REQUIRES_KALDI = ['kaldi_latgen_faster_mapped']
+
+
+def create_adapter(adapter_config, launcher=None, dataset=None, delayed_model_loading=False):
     label_map = None
     if dataset:
         metadata = dataset.metadata
         if metadata:
             label_map = metadata.get('label_map')
-    if isinstance(adapter_config, str):
-        adapter = Adapter.provide(adapter_config, {'type': adapter_config}, label_map=label_map)
-    elif isinstance(adapter_config, dict):
-        adapter = Adapter.provide(adapter_config['type'], adapter_config, label_map=label_map)
-    else:
+
+    if not isinstance(adapter_config, (str, dict)):
         raise ConfigError('Unknown type for adapter configuration')
 
-    if launcher:
+    adapter_type = adapter_config if isinstance(adapter_config, str) else adapter_config['type']
+    adapter_config = adapter_config if isinstance(adapter_config, dict) else {}
+    if adapter_type in REQUIRES_KALDI and launcher:
+        kaldi_bin_dir = launcher.config.get('_kaldi_bin_dir')
+        if kaldi_bin_dir:
+            adapter_config['_kaldi_bin_dir'] = kaldi_bin_dir
+
+    adapter = Adapter.provide(adapter_type, adapter_config, label_map=label_map)
+
+    if launcher and not delayed_model_loading and adapter.output_blob is None:
         adapter.output_blob = launcher.output_blob
     return adapter

@@ -1,12 +1,5 @@
 onnx
 scipy           # via torchvision
-# In PyTorch 1.7.0, torch.squeeze emits an If operation into the ONNX graph,
-# which breaks the conversion of the midasnet model to IR. This change was made
-# in <https://github.com/pytorch/pytorch/pull/38476>.
-# Later on, another change was made in <https://github.com/pytorch/pytorch/pull/45369>,
-# which might undo the effects of the first change. It's not yet been included in any
-# release at the time of writing, so whether it helps, remains to be seen.
-# For now, just cap the PyTorch version at 1.6.x.
-torch>=1.5,!=1.7.*
+torch>=1.8
 torchvision
 yacs

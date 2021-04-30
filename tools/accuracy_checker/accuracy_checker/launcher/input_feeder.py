@@ -20,7 +20,7 @@ import numpy as np
 
 from ..config import ConfigError
 from ..utils import extract_image_representations
-from ..data_readers import MultiFramesInputIdentifier
+from ..data_readers import MultiFramesInputIdentifier, KaldiFrameIdentifier, KaldiMatrixIdentifier
 
 LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
     'NCHW': [0, 3, 1, 2],
@@ -103,7 +103,7 @@ class InputFeeder:
                 image_info.append([height, width, 1] if not omit_scale else [height, width])
 
             return image_info
-        _, meta_batch = extract_image_representations(data_representation_batch)
+        meta_batch = extract_image_representations(data_representation_batch, meta_only=True)
         image_infos = {}
         im_info_resolved = False
         if 'image_info' in meta_batch[0]:
@@ -123,14 +123,13 @@ class InputFeeder:
 
     def fill_non_constant_inputs(self, data_representation_batch):
         filled_inputs = {}
+        check_regex = True
         if self.image_info_inputs or self.orig_image_info_inputs:
             image_info_inputs = self._fill_image_info_inputs(data_representation_batch)
             filled_inputs = {**image_info_inputs}
         for idx, input_layer in enumerate(self.non_constant_inputs):
-            input_regex = None
             input_batch = []
-            if self.inputs_mapping:
-                input_regex = self.inputs_mapping[input_layer]
+            input_regex = (self.inputs_mapping or {}).get(input_layer)
             for data_representation in data_representation_batch:
                 input_data = None
                 identifiers = data_representation.identifier
@@ -139,8 +138,14 @@ class InputFeeder:
                     input_data = data
                     input_batch.append(input_data)
                     continue
+                if (
+                        isinstance(identifiers, list) and
+                        isinstance(identifiers[0], (KaldiFrameIdentifier, KaldiMatrixIdentifier))
+                ):
+                    check_regex = False
+                    self.ordered_inputs = True
 
-                if input_regex is None:
+                if input_regex is None and check_regex:
                     raise ConfigError('Impossible to choose correct data for layer {}.'
                                       'Please provide regular expression for matching in config.'.format(input_layer))
                 if isinstance(identifiers, MultiFramesInputIdentifier):
@@ -150,7 +155,6 @@ class InputFeeder:
                     input_data = data[input_id_order[input_regex]]
                 else:
                     data = [data] if np.isscalar(identifiers) else data
-                    identifiers = [identifiers] if np.isscalar(identifiers) else identifiers
                     if self.ordered_inputs:
                         assert idx < len(identifiers), 'number input layers and data is not matched'
                         input_batch.append(data[idx])
@@ -159,13 +163,16 @@ class InputFeeder:
                         if input_regex.match(identifier):
                             input_data = data_value
                             break
+
                 if input_data is None:
                     raise ConfigError('Suitable data for filling layer {} not found'.format(input_layer))
                 input_batch.append(input_data)
 
             filled_inputs[input_layer] = input_batch
 
-        return self._transform_batch(filled_inputs, extract_image_representations(data_representation_batch)[1])
+        return self._transform_batch(
+            filled_inputs, extract_image_representations(data_representation_batch, meta_only=True)
+        )
 
     def fill_inputs(self, data_representation_batch):
         if self.dummy:

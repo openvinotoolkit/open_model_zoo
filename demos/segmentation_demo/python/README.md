@@ -24,17 +24,21 @@ The command yields the following usage message:
 
 ```
 usage: segmentation_demo.py [-h] -m MODEL -i INPUT
+                            [-at {segmentation,salient_object_detection}
                             [-d DEVICE] [-c COLORS]
                             [-nireq NUM_INFER_REQUESTS]
                             [-nstreams NUM_STREAMS]
                             [-nthreads NUM_THREADS]
                             [--loop] [-o OUTPUT]
                             [-limit OUTPUT_LIMIT] [--no_show]
+                            [--output_resolution OUTPUT_RESOLUTION]
                             [-u UTILIZATION_MONITORS]
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
+  -at {segmentation, salient_object_detection}, --architecture_type {segmentation, salient_object_detection}
+                        Optional. Default value is segmentation. Specify model's architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
@@ -70,6 +74,10 @@ Input/output options:
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
   --no_show             Optional. Don't show output.
+  --output_resolution OUTPUT_RESOLUTION
+                        Optional. Specify the maximum output window resolution
+                        in (width x height) format. Example: 1280x720.
+                        Input frame size used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```

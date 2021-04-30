@@ -40,7 +40,7 @@ def trie_v6_extract_vocabulary(data, alphabet=None, base_offset=0, max_num_words
         alphabet = DEFAULT_ALPHABET
     fst, _ = parse_trie_v6(data, pos=0, base_offset=base_offset)
     vocabulary = traverse_fst(fst, alphabet, max_num_words=max_num_words)
-    return vocabulary, fst['meta']
+    return vocabulary, fst.meta
 
 
 def parse_trie_v6(data, pos=0, base_offset=0):
@@ -52,15 +52,16 @@ def parse_trie_v6(data, pos=0, base_offset=0):
     if is_utf8_mode:
         raise ValueError("UTF-8 mode language model: UTF-8 mode was not tested, stopping")
     fst, pos = parse_openfst(data, pos, base_offset=base_offset)
-    fst['meta'].update(alpha=alpha, beta=beta)
+    fst.meta.alpha = alpha
+    fst.meta.beta = beta
     return fst, pos
 
 
 def traverse_fst(fst, alphabet, max_num_words):
-    graph = states_arcs_to_arc_dict(fst['states'], fst['arcs'])
+    graph = states_arcs_to_arc_dict(fst.states, fst.arcs)
     vocabulary = []
 
-    init_state = fst['meta']['start_state']
+    init_state = fst.meta.start_state
     cur_prefix = []
     def process_words(state, prefix):
         out_arcs = graph[state].items()

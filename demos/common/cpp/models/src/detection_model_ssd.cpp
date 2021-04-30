@@ -48,10 +48,8 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& i
     InferenceEngine::LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
     const float *detections = outputMapped.as<float*>();
 
-    DetectionResult* result = new DetectionResult;
+    DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
-
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
@@ -92,10 +90,8 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
     const float *labels = mappedMemoryAreas[1].as<float*>();
     const float *scores = mappedMemoryAreas.size() > 2 ? mappedMemoryAreas[2].as<float*>() : nullptr;
 
-    DetectionResult* result = new DetectionResult;
+    DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
-
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 

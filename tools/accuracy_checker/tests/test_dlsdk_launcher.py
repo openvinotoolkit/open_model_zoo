@@ -93,7 +93,7 @@ def get_dlsdk_test_model(models_dir, config_update=None):
     if config_update:
         config.update(config_update)
 
-    return create_launcher(config)
+    return create_launcher(config, model_name='SampLeNet')
 
 
 def get_dlsdk_test_blob(models_dir, config_update=None):
@@ -181,9 +181,9 @@ class TestDLSDKLauncherInfer:
         dlsdk_test_model.predict([{'data': input_blob.astype(np.float32)}], [image.metadata])
         assert dlsdk_test_model.output_blob == 'fc3'
 
+
 @pytest.mark.skipif(ng is None and not has_layers(), reason='no functionality to set affinity')
 class TestDLSDKLauncherAffinity:
-    @pytest.mark.skip(reason='runtime issue with affinity setting')
     @pytest.mark.usefixtures('mock_affinity_map_exists')
     def test_dlsdk_launcher_valid_affinity_map(self, mocker, models_dir):
         affinity_map = {'conv1': 'GPU'}
@@ -249,7 +249,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_aocl': Path('aocl')
         }
-        launcher = create_launcher(config)
+        launcher = create_launcher(config, model_name='custom')
         subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
         launcher.release()
 
@@ -264,7 +264,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_aocl': Path('aocl')
         }
-        launcher = create_launcher(config)
+        launcher = create_launcher(config, model_name='custom')
         subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
         launcher.release()
 
@@ -279,7 +279,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
         subprocess_mock.assert_not_called()
 
     def test_does_not_program_bitstream_when_hetero_without_fpga(self, mocker):
@@ -294,7 +294,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
         subprocess_mock.assert_not_called()
 
     def test_does_not_program_bitstream_if_compiler_mode_3_in_env_when_fpga_in_hetero_device(self, mocker):
@@ -310,7 +310,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         subprocess_mock.assert_not_called()
 
@@ -327,7 +327,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         subprocess_mock.assert_not_called()
 
@@ -342,7 +342,7 @@ class TestDLSDKLauncher:
             'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
 
@@ -357,7 +357,7 @@ class TestDLSDKLauncher:
             'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
         os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
 
     def test_does_not_set_dla_aocx_when_device_is_not_fpga(self, mocker):
@@ -371,7 +371,7 @@ class TestDLSDKLauncher:
             'bitstream': 'custom_bitstream',
             'adapter': 'classification',
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         os.environ.__setitem__.assert_not_called()
 
@@ -386,7 +386,7 @@ class TestDLSDKLauncher:
             'bitstream': 'custom_bitstream',
             'adapter': 'classification',
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         os.environ.__setitem__.assert_not_called()
 
@@ -402,7 +402,7 @@ class TestDLSDKLauncher:
             'bitstream': 'custom_bitstream',
             'adapter': 'classification',
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         os.environ.__setitem__.assert_not_called()
 
@@ -418,7 +418,7 @@ class TestDLSDKLauncher:
             'bitstream': 'custom_bitstream',
             'adapter': 'classification',
         }
-        create_launcher(config)
+        create_launcher(config, model_name='custom')
 
         os.environ.__setitem__.assert_not_called()
 
@@ -1131,49 +1131,29 @@ class TestDLSDKLauncher:
         with pytest.raises(ConfigError):
             DLSDKLauncher(config)
 
-    @pytest.mark.usefixtures('mock_file_exists')
-    def test_dlsdk_launcher_device_config_config_not_dict_like(self, mocker, models_dir):
+    def test_dlsdk_launcher_device_config_config_not_dict_like(self, models_dir):
         device_config = 'ENFORCE_BF16'
 
-        mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
-        )
-
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+            get_dlsdk_test_model(models_dir, {'device_config': device_config})
 
-    @pytest.mark.usefixtures('mock_file_exists')
-    def test_dlsdk_launcher_device_config_device_unknown(self, mocker, models_dir):
+    def test_dlsdk_launcher_device_config_device_unknown(self, models_dir):
         device_config = {'device': {'ENFORCE_BF16': 'NO'}}
 
-        mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
-        )
-
         with pytest.warns(Warning):
-            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+            get_dlsdk_test_model(models_dir, {'device_config': device_config})
 
-    @pytest.mark.usefixtures('mock_file_exists')
-    def test_dlsdk_launcher_device_config_one_option_for_device_is_not_dict(self, mocker, models_dir):
+    def test_dlsdk_launcher_device_config_one_option_for_device_is_not_dict(self, models_dir):
         device_config = {'CPU': {'ENFORCE_BF16': 'NO'}, 'GPU': 'ENFORCE_BF16'}
 
-        mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
-        )
-
         with pytest.warns(Warning):
-            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+            get_dlsdk_test_model(models_dir, {'device_config': device_config})
 
-    @pytest.mark.usefixtures('mock_file_exists')
-    def test_dlsdk_launcher_device_config_one_option_is_not_binding_to_device(self, mocker, models_dir):
+    def test_dlsdk_launcher_device_config_one_option_is_not_binding_to_device(self, models_dir):
         device_config = {'CPU': {'ENFORCE_BF16': 'NO'}, 'ENFORCE_BF16': 'NO'}
 
-        mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=device_config
-        )
-
         with pytest.warns(Warning):
-            get_dlsdk_test_model(models_dir, {'_device_config': './device_config.yml'})
+            get_dlsdk_test_model(models_dir, {'device_config': device_config})
 
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inputs', 'mock_inference_engine')
@@ -1252,7 +1232,7 @@ class TestDLSDKLauncherConfig:
         launcher = {
             'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': 'ssd', 'device': 'cpu'
         }
-        create_launcher(launcher)
+        create_launcher(launcher, model_name='custom')
 
     def test_dlsdk_launcher_model_with_several_image_inputs_raise_value_error(self, mocker):
         launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': {'key': 'val'}}

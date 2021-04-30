@@ -30,7 +30,6 @@ After that, the application displays the tracks and the latest detections on the
 
 Running the application with the `-h` option yields the following usage message:
 ```
-./pedestrian_tracker_demo -h
 InferenceEngine:
     API version ............ <version>
     Build .................. <number>
@@ -54,13 +53,13 @@ Options:
     -d_reid "<device>"           Optional. Specify the target device for pedestrian reidentification (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin.
     -r                           Optional. Output pedestrian tracking results in a raw format (compatible with MOTChallenge format).
     -pc                          Optional. Enable per-layer performance statistics.
-    -no_show                     Optional. Do not show processed video.
+    -no_show                     Optional. Don't show output.
     -delay                       Optional. Delay between frames used for visualization. If negative, the visualization is turned off (like with the option 'no_show'). If zero, the visualization is made frame-by-frame.
     -out "<path>"                Optional. The file name to write output log file with results of pedestrian tracking. The format of the log file is compatible with MOTChallenge format.
     -u                           Optional. List of monitors to show initially.
 ```
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/pedestrian_tracker_demo/cpp/models.lst`.
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

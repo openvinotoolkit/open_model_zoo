@@ -48,8 +48,8 @@ void SegmentationModel::checkInputsOutputs(InputsDataMap& inputInfo, OutputsData
     auto& output = outputInfo.begin()->second;
     outputsNames.push_back(outputInfo.begin()->first);
 
-    if (output->getPrecision() != InferenceEngine::Precision::FP32) {
-        throw std::logic_error("This demo accepts networks with FP32 output precision");
+    if (isNetworkCompiled && (output->getPrecision() != InferenceEngine::Precision::FP32 || output->getPrecision() != InferenceEngine::Precision::I32)) {
+        throw std::logic_error("This demo accepts networks with FP32 or I32 output precision");
     }
 
     const InferenceEngine::SizeVector& outSizeVector = output->getTensorDesc().getDims();
@@ -86,12 +86,12 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
         input.second->setPrecision(InferenceEngine::Precision::U8);
     }
 
-    for (auto& output : outputInfo) {
-        // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
-        // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
-        // postprocessing
-        output.second->setPrecision(InferenceEngine::Precision::FP32);
-    }
+    //for (auto& output : outputInfo) {
+    //    // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
+    //    // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
+    //    // postprocessing
+    //    output.second->setPrecision(InferenceEngine::Precision::FP32);
+    //}
 
     // --------------------------- Check input & output ----------------------------------------------------
     checkInputsOutputs(inputInfo, outputInfo);
@@ -118,36 +118,42 @@ std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData
 }
 
 std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult) {
-    SegmentationResult* result = new SegmentationResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    SegmentationResult* result = new SegmentationResult(infResult.frameId, infResult.metaData);
 
     const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
 
-    InferenceEngine::LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
-    const float * const predictions = outMapped.as<float*>();
+    InferenceEngine::MemoryBlob::Ptr blobPtr = infResult.getFirstOutputBlob();
+
+    void* pData = blobPtr->rmap().as<void*>();
 
     result->mask = cv::Mat(outHeight, outWidth, CV_8UC1);
-    for (int rowId = 0; rowId < outHeight; ++rowId) {
-        for (int colId = 0; colId < outWidth; ++colId) {
-            std::size_t classId = 0;
-            if (outChannels < 2) {  // assume the output is already ArgMax'ed
-                classId = static_cast<std::size_t>(predictions[rowId * outWidth + colId]);
-            }
-            else {
+
+    if (outChannels == 1 && blobPtr->getTensorDesc().getPrecision() == InferenceEngine::Precision::I32) {
+        cv::Mat predictions(outHeight, outWidth, CV_32SC1, pData);
+        predictions.convertTo(result->mask, CV_8UC1);
+    }
+    else if (blobPtr->getTensorDesc().getPrecision() == InferenceEngine::Precision::FP32) {
+        float* ptr = reinterpret_cast<float*>(pData);
+        for (int rowId = 0; rowId < outHeight; ++rowId) {
+            for (int colId = 0; colId < outWidth; ++colId) {
+                int classId = 0;
                 float maxProb = -1.0f;
                 for (int chId = 0; chId < outChannels; ++chId) {
-                    float prob = predictions[chId * outHeight * outWidth + rowId * outWidth + colId];
+                    float prob = ptr[chId * outHeight * outWidth + rowId * outWidth + colId];
                     if (prob > maxProb) {
                         classId = chId;
                         maxProb = prob;
                     }
-                }
-            }
+                } // nChannels
 
-            result->mask.at<uint8_t>(rowId, colId) = classId;
-        }
+                result->mask.at<uint8_t>(rowId, colId) = classId;
+            } // width
+        } // height
     }
-    cv::resize(result->mask, result->mask, cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight),0,0,cv::INTER_NEAREST);
+
+    cv::resize(result->mask, result->mask,
+        cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight),
+        0, 0, cv::INTER_NEAREST);
 
     return std::unique_ptr<ResultBase>(result);
 }
