@@ -691,7 +691,7 @@ int main(int argc, char* argv[]) {
             if ("CPU" == device) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extensionPtr = make_so_pointer<IExtension>(FLAGS_l);
+                    auto extensionPtr = std::make_shared<Extension>(FLAGS_l);
                     ie.AddExtension(extensionPtr, "CPU");
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
