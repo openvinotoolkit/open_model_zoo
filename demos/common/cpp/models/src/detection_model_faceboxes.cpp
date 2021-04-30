@@ -92,6 +92,7 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
         else {
             input.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
         }
+        input.second->setPrecision(InferenceEngine::Precision::U8);
     }
 
     for (const auto& output : outputInfo) {

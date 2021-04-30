@@ -132,9 +132,6 @@ void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnN
     }
 
     for (const auto& output : outputInfo) {
-        // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
-        // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
-        // postprocessing
         output.second->setPrecision(InferenceEngine::Precision::FP32);
     }
 
