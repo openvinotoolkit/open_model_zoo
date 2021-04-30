@@ -45,6 +45,9 @@ protected:
     std::vector<Anchor> anchors;
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override;
+
+    template<class InputsDataMap, class OutputsDataMap>
+    void checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo);
     void priorBoxes(const std::vector<std::pair<size_t, size_t>>& featureMaps);
 
 };

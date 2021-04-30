@@ -24,7 +24,6 @@ public:
     ImageModel(const std::string& modelFileName, bool useAutoResize);
 
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
-    void checkCompiledNetworkInputsOutputs() override { throw std::logic_error("Compiled networks aren't supported in this demo"); };
 protected:
     bool useAutoResize;
 

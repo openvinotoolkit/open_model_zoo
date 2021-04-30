@@ -53,4 +53,5 @@ protected:
     void resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const;
 
     void changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork);
+    void checkCompiledNetworkInputsOutputs() override { throw std::logic_error("Compiled networks aren't supported in this demo"); };
 };

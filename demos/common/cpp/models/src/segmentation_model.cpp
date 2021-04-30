@@ -17,37 +17,42 @@
 #include "models/segmentation_model.h"
 #include "utils/ocv_common.hpp"
 
-using namespace InferenceEngine;
-
 SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useAutoResize) :
     ImageModel(modelFileName, useAutoResize) {
 }
 
-void SegmentationModel::checkCompiledNetworkInputsOutputs() {
-    // --------------------------- Check input ---------------------------------------------
-    ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
+template<class InputsDataMap, class OutputsDataMap>
+void SegmentationModel::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo) {
+    // --------------------------- Check input blobs -----------------------------------------
+    auto& input = inputInfo.begin()->second;
     if (inputInfo.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 input");
-    inputsNames.push_back(inputInfo.begin()->first);
-    const SizeVector& inSizeVector = inputInfo.begin()->second->getTensorDesc().getDims();
+
+    if (input->getPrecision() != InferenceEngine::Precision::U8) {
+        throw std::logic_error("This demo accepts networks with U8 input precision");
+    }
+    std::string imageInputName = inputInfo.begin()->first;
+    inputsNames.push_back(imageInputName);
+
+    const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
+
+    const InferenceEngine::SizeVector& inSizeVector = inputDesc.getDims();
     if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
 
-    if (inputInfo.begin()->second->getPrecision() != InferenceEngine::Precision::U8) {
-        throw std::logic_error("This demo accepts compiled networks with U8 input precision");
+    // --------------------------- Check output blobs -----------------------------------------------------
+    if (outputInfo.size() != 1) {
+        throw std::runtime_error("Demo supports topologies only with 1 output");
     }
-    // --------------------------- Check output -----------------------------------------------------
-    ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
-    if (outputInfo.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
 
+    auto& output = outputInfo.begin()->second;
     outputsNames.push_back(outputInfo.begin()->first);
-    CDataPtr& data = outputInfo.begin()->second;
 
-    if (data->getPrecision() != InferenceEngine::Precision::FP32) {
-        throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
+    if (output->getPrecision() != InferenceEngine::Precision::FP32) {
+        throw std::logic_error("This demo accepts networks with FP32 output precision");
     }
 
-    const SizeVector& outSizeVector = data->getTensorDesc().getDims();
+    const InferenceEngine::SizeVector& outSizeVector = output->getTensorDesc().getDims();
     switch (outSizeVector.size()) {
     case 3:
         outChannels = 0;
@@ -67,50 +72,33 @@ void SegmentationModel::checkCompiledNetworkInputsOutputs() {
 
 void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output ---------------------------------------------
-    // --------------------------- Prepare input blobs -----------------------------------------------------
-    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    if (inputShapes.size() != 1)
-        throw std::runtime_error("Demo supports topologies only with 1 input");
-    inputsNames.push_back(inputShapes.begin()->first);
-    SizeVector& inSizeVector = inputShapes.begin()->second;
-    if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
+    auto& inputInfo = cnnNetwork.getInputsInfo();
+    auto& outputInfo = cnnNetwork.getOutputsInfo();
 
-    InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.setPrecision(Precision::U8);
-    if (useAutoResize) {
-        inputInfo.getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-        inputInfo.setLayout(Layout::NHWC);
+    for (auto& input : inputInfo) {
+        if (useAutoResize) {
+            input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+            input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
+        }
+        else {
+            input.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
+        }
+        input.second->setPrecision(InferenceEngine::Precision::U8);
     }
-    else {
-        inputInfo.setLayout(Layout::NCHW);
-    }
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    const OutputsDataMap& outputsDataMap = cnnNetwork.getOutputsInfo();
-    if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
 
-    outputsNames.push_back(outputsDataMap.begin()->first);
-    Data& data = *outputsDataMap.begin()->second;
-    // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
-    // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
-    // postprocessing
-    data.setPrecision(Precision::FP32);
-    const SizeVector& outSizeVector = data.getTensorDesc().getDims();
-    switch (outSizeVector.size()) {
-    case 3:
-        outChannels = 0;
-        outHeight = (int)(outSizeVector[1]);
-        outWidth = (int)(outSizeVector[2]);
-        break;
-    case 4:
-        outChannels = (int)(outSizeVector[1]);
-        outHeight = (int)(outSizeVector[2]);
-        outWidth = (int)(outSizeVector[3]);
-        break;
-    default:
-        throw std::runtime_error("Unexpected output blob shape. Only 4D and 3D output blobs are"
-            "supported.");
+    for (auto& output : outputInfo) {
+        // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
+        // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
+        // postprocessing
+        output.second->setPrecision(InferenceEngine::Precision::FP32);
     }
+
+    // --------------------------- Check input & output ----------------------------------------------------
+    checkInputsOutputs(inputInfo, outputInfo);
+}
+
+void SegmentationModel::checkCompiledNetworkInputsOutputs() {
+    checkInputsOutputs(execNetwork.GetInputsInfo(), execNetwork.GetOutputsInfo());
 }
 
 std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
@@ -124,7 +112,7 @@ std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData
         return std::make_shared<InternalImageMatModelData>(img);
     }
     /* Resize and copy data from the image to the input blob */
-    Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
+    InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
     matU8ToBlob<uint8_t>(img, frameBlob);
     return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
@@ -135,7 +123,7 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
 
     const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
 
-    LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
+    InferenceEngine::LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
     const float * const predictions = outMapped.as<float*>();
 
     result->mask = cv::Mat(outHeight, outWidth, CV_8UC1);

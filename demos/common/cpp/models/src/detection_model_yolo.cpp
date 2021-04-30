@@ -29,40 +29,63 @@ ModelYolo3::ModelYolo3(const std::string& modelFileName, float confidenceThresho
     useAdvancedPostprocessing(useAdvancedPostprocessing), regionsFile(regionsFile) {
 }
 
-void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
-    // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
+template<class InputsDataMap, class OutputsDataMap>
+void ModelYolo3::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo) {
+    // --------------------------- Check input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
-        throw std::logic_error("This demo accepts networks that have only one input");
+        throw std::logic_error("This demo accepts YOLO networks that have only one input");
+    }
+    auto& input = inputInfo.begin()->second;
+    if (input->getPrecision() != InferenceEngine::Precision::U8) {
+        throw std::logic_error("This demo accepts networks with U8 input precision");
     }
 
-    InputInfo::Ptr& input = inputInfo.begin()->second;
+    // -------------------Reading image input parameters----------------------------------------------------
     inputsNames.push_back(inputInfo.begin()->first);
-    input->setPrecision(Precision::U8);
-    if (useAutoResize) {
-        input->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-        input->getInputData()->setLayout(Layout::NHWC);
-    }
-    else {
-        input->getInputData()->setLayout(Layout::NCHW);
-    }
-
-    //--- Reading image input parameters
     const TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
+    // --------------------------- Check output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-    OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     for (auto& output : outputInfo) {
-        output.second->setPrecision(Precision::FP32);
-        output.second->setLayout(Layout::NCHW);
         outputsNames.push_back(output.first);
+        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
+            throw std::logic_error("This demo accepts networks with FP32 output precision");
+        }
+    }
+}
+
+void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+    // --------------------------- Configure input & output -----------------------------------------------
+    auto& inputInfo = cnnNetwork.getInputsInfo();
+    auto& outputInfo = cnnNetwork.getOutputsInfo();
+    for (auto& input : inputInfo) {
+        if (input.second->getTensorDesc().getDims().size() == 4) {
+            if (useAutoResize) {
+                input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+                input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
+            }
+            else {
+                input.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
+            }
+            input.second->setPrecision(InferenceEngine::Precision::U8);
+        }
+        else if (input.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
+            input.second->setPrecision(InferenceEngine::Precision::FP32);
+        }
     }
 
+    for (auto& output : outputInfo) {
+        output.second->setPrecision(InferenceEngine::Precision::FP32);
+        output.second->setLayout(InferenceEngine::Layout::NCHW);
+    }
+
+    // --------------------------- Check input & output ----------------------------------------------------
+    checkInputsOutputs(inputInfo, outputInfo);
+
+    //---------------------------- Read yolo regions from IR -----------------------------------------------
     if (auto ngraphFunction = (cnnNetwork).getFunction()) {
         for (const auto op : ngraphFunction->get_ops()) {
             auto outputLayer = outputInfo.find(op->get_friendly_name());
@@ -82,37 +105,12 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 }
 
 void ModelYolo3::checkCompiledNetworkInputsOutputs() {
-    // --------------------------- Check input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
-    if (inputInfo.size() != 1) {
-        throw std::logic_error("This demo accepts networks that have only one input");
-    }
+    checkInputsOutputs(execNetwork.GetInputsInfo(), execNetwork.GetOutputsInfo());
 
-    InputInfo::CPtr& input = inputInfo.begin()->second;
-    inputsNames.push_back(inputInfo.begin()->first);
-    if (input->getPrecision() != InferenceEngine::Precision::U8) {
-        throw std::logic_error("This demo accepts compiled networks with U8 input precision");
-    }
-
-    //--- Reading image input parameters
-    const TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
-    netInputHeight = getTensorHeight(inputDesc);
-    netInputWidth = getTensorWidth(inputDesc);
-
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-    ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
-    for (auto& output : outputInfo) {
-        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
-            throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
-        }
-        outputsNames.push_back(output.first);
-    }
-    // ------------------------- Read yolo regions from file -----------------------------------------------
+    //------------------------- Read yolo regions from file -----------------------------------------------
     cv::FileStorage fs(regionsFile, cv::FileStorage::READ);
     cv::FileNode regionsYolo = fs["Regions"];
-    cv::FileNodeIterator it = regionsYolo.begin(),  endIt = regionsYolo.end();
+    cv::FileNodeIterator it = regionsYolo.begin(), endIt = regionsYolo.end();
 
     for (; it != endIt; ++it) {
         std::vector<float> anchors;

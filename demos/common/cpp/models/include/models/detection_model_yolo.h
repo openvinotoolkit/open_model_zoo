@@ -60,6 +60,10 @@ public:
 protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override;
+
+    template<class InputsDataMap, class OutputsDataMap>
+    void checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo);
+
     void parseYOLOV3Output(const std::string& output_name, const InferenceEngine::Blob::Ptr& blob,
         const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,
         const unsigned long original_im_w, std::vector<DetectedObject>& objects);

@@ -18,8 +18,6 @@
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 
-using namespace InferenceEngine;
-
 ClassificationModel::ClassificationModel(const std::string& modelFileName, size_t nTop, bool useAutoResize, const std::vector<std::string>& labels) :
     ImageModel(modelFileName, useAutoResize),
     nTop(nTop),
@@ -70,79 +68,36 @@ std::vector<std::string> ClassificationModel::loadLabels(const std::string& labe
     return labels;
 }
 
-void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
-    // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
-    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    if (inputShapes.size() != 1)
+template<class InputsDataMap, class OutputsDataMap>
+void ClassificationModel::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo) {
+    // --------------------------- Check input blobs ------------------------------------------------------
+    auto& input = inputInfo.begin()->second;
+    if (inputInfo.size() != 1) {
         throw std::runtime_error("Demo supports topologies only with 1 input");
-    inputsNames.push_back(inputShapes.begin()->first);
-    SizeVector& inSizeVector = inputShapes.begin()->second;
-    if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
-        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-    if (inSizeVector[2] != inSizeVector[3])
-        throw std::logic_error("Model input has incorrect image shape. Must be NxN square."
-                                " Got " + std::to_string(inSizeVector[2]) +
-                                "x" + std::to_string(inSizeVector[3]) + ".");
-
-    InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.setPrecision(Precision::U8);
-    if (useAutoResize) {
-        inputInfo.getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-        inputInfo.getInputData()->setLayout(Layout::NHWC);
     }
-    else
-        inputInfo.getInputData()->setLayout(Layout::NCHW);
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    const OutputsDataMap& outputsDataMap = cnnNetwork.getOutputsInfo();
-    if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
-
-    outputsNames.push_back(outputsDataMap.begin()->first);
-    Data& data = *outputsDataMap.begin()->second;
-    const SizeVector& outSizeVector = data.getTensorDesc().getDims();
-    if (outSizeVector.size() != 2 && outSizeVector.size() != 4)
-        throw std::runtime_error("Demo supports topologies only with 2-dimensional or 4-dimensional output");
-    if (outSizeVector.size() == 4 && outSizeVector[2] != 1 && outSizeVector[3] != 1)
-        throw std::runtime_error("Demo supports topologies only with 4-dimensional output which has last two dimensions of size 1");
-    if (nTop > outSizeVector[1])
-        throw std::runtime_error("The model provides " + std::to_string(outSizeVector[1]) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
-    if (outSizeVector[1] == labels.size() + 1) {
-        labels.insert(labels.begin(), "other");
-        slog::warn << "Inserted 'other' label as first.\n";
+    if (input->getPrecision() != InferenceEngine::Precision::U8) {
+        throw std::logic_error("This demo accepts compiled networks with U8 input precision");
     }
-    else if (outSizeVector[1] != labels.size())
-        throw std::logic_error("Model's number of classes and parsed labels must match (" + std::to_string(outSizeVector[1]) + " and " + std::to_string(labels.size()) + ')');
-
-    data.setPrecision(Precision::FP32);
-}
-
-void ClassificationModel::checkCompiledNetworkInputsOutputs() {
-    // --------------------------- Check input & output -------------------------------------------------
-    InferenceEngine::ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
-    if (inputInfo.size() != 1)
-        throw std::runtime_error("Demo supports topologies only with 1 input");
     inputsNames.push_back(inputInfo.begin()->first);
-    const InferenceEngine::TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
-    const SizeVector& inSizeVector = inputDesc.getDims();
+
+    const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
+    const InferenceEngine::SizeVector& inSizeVector = inputDesc.getDims();
     if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
     if (inSizeVector[2] != inSizeVector[3])
         throw std::logic_error("Model input has incorrect image shape. Must be NxN square."
             " Got " + std::to_string(inSizeVector[2]) +
-            "x" + std::to_string(inSizeVector[3]) + ".");
-
-    if (inputInfo.begin()->second->getPrecision() != InferenceEngine::Precision::U8) {
-        throw std::logic_error("This demo accepts compiled networks with U8 input precision");
-    }
+            "x" + std::to_string(inSizeVector[3]) + ".");;
 
     // --------------------------- Check output blobs -----------------------------------------------------
-    InferenceEngine::ConstOutputsDataMap outputsDataMap(execNetwork.GetOutputsInfo());
-    if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
+    if (outputInfo.size() != 1) {
+        throw std::runtime_error("Demo supports topologies only with 1 output");
+    }
+    auto& output = outputInfo.begin()->second;
+    outputsNames.push_back(outputInfo.begin()->first);
 
-    outputsNames.push_back(outputsDataMap.begin()->first);
-    InferenceEngine::CDataPtr& data = outputsDataMap.begin()->second;
-    const SizeVector& outSizeVector = data->getTensorDesc().getDims();
+    const InferenceEngine::SizeVector& outSizeVector = output->getTensorDesc().getDims();
     if (outSizeVector.size() != 2 && outSizeVector.size() != 4)
         throw std::runtime_error("Demo supports topologies only with 2-dimensional or 4-dimensional output");
     if (outSizeVector.size() == 4 && outSizeVector[2] != 1 && outSizeVector[3] != 1)
@@ -153,10 +108,42 @@ void ClassificationModel::checkCompiledNetworkInputsOutputs() {
         labels.insert(labels.begin(), "other");
         slog::warn << "Inserted 'other' label as first.\n";
     }
-    else if (outSizeVector[1] != labels.size())
+    else if (outSizeVector[1] != labels.size()) {
         throw std::logic_error("Model's number of classes and parsed labels must match (" + std::to_string(outSizeVector[1]) + " and " + std::to_string(labels.size()) + ')');
+    }
 
-    if (data->getPrecision() != InferenceEngine::Precision::FP32) {
+    if (output->getPrecision() != InferenceEngine::Precision::FP32) {
         throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
     }
+}
+
+void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+    // --------------------------- Configure input & output ---------------------------------------------
+    auto& inputInfo = cnnNetwork.getInputsInfo();
+    auto& outputInfo = cnnNetwork.getOutputsInfo();
+
+    for (auto& input : inputInfo) {
+        if (useAutoResize) {
+            input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+            input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
+        }
+        else {
+            input.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
+        }
+        input.second->setPrecision(InferenceEngine::Precision::U8);
+    }
+
+    for (auto& output : outputInfo) {
+        // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
+        // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
+        // postprocessing
+        output.second->setPrecision(InferenceEngine::Precision::FP32);
+    }
+
+    // --------------------------- Check input & output ----------------------------------------------------
+    checkInputsOutputs(inputInfo, outputInfo);
+}
+
+void ClassificationModel::checkCompiledNetworkInputsOutputs() {
+    checkInputsOutputs(execNetwork.GetInputsInfo(), execNetwork.GetOutputsInfo());
 }

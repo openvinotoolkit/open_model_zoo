@@ -19,8 +19,6 @@
 #include <utils/common.hpp>
 #include <ngraph/ngraph.hpp>
 
-using namespace InferenceEngine;
-
 ModelSSD::ModelSSD(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize,
     const std::vector<std::string>& labels) :
@@ -30,7 +28,7 @@ ModelSSD::ModelSSD(const std::string& modelFileName,
 std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     if (inputsNames.size() > 1) {
         auto blob = request->GetBlob(inputsNames[1]);
-        LockedMemory<void> blobMapped = as<MemoryBlob>(blob)->wmap();
+        InferenceEngine::LockedMemory<void> blobMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(blob)->wmap();
         auto data = blobMapped.as<float*>();
         data[0] = static_cast<float>(netInputHeight);
         data[1] = static_cast<float>(netInputWidth);
@@ -47,7 +45,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
 }
 
 std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& infResult) {
-    LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
+    InferenceEngine::LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
     const float *detections = outputMapped.as<float*>();
 
     DetectionResult* result = new DetectionResult;
@@ -85,7 +83,7 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& i
 }
 
 std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult& infResult) {
-    std::vector<LockedMemory<const void>> mappedMemoryAreas;
+    std::vector<InferenceEngine::LockedMemory<const void>> mappedMemoryAreas;
     for (const auto& name : outputsNames) {
         mappedMemoryAreas.push_back(infResult.outputsData[name]->rmap());
     }
@@ -128,163 +126,87 @@ std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult
     return retVal;
 }
 
-void ModelSSD::checkCompiledNetworkInputsOutputs() {
-    ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
+template<class InputsDataMap, class OutputsDataMap>
+void ModelSSD::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo) {
+    // --------------------------- Check input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    // --------------------------- Check input -------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    for (const auto& inputInfoItem : inputInfo) {
-        if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
+
+    for (auto& input : inputInfo) {
+        if (input.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains
+            if (input.second->getPrecision() != InferenceEngine::Precision::U8) {
+                throw std::logic_error("This demo accepts networks with U8 input precision");
+            }
+
             if (inputsNames.empty()) {
-                inputsNames.push_back(inputInfoItem.first);
+                inputsNames.push_back(input.first);
             }
             else {
-                inputsNames[0] = inputInfoItem.first;
+                inputsNames[0] = input.first;
             }
-            if (inputInfoItem.second->getPrecision() != InferenceEngine::Precision::U8) {
-                throw std::logic_error("This demo accepts compiled networks with U8 input precision for 1st input");
-            }
-            const TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
+            //-------------------Reading image input parameters-------------------------
+            const InferenceEngine::TensorDesc& inputDesc = input.second->getTensorDesc();
             netInputHeight = getTensorHeight(inputDesc);
             netInputWidth = getTensorWidth(inputDesc);
         }
-        else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
-            if (inputInfoItem.second->getPrecision() != InferenceEngine::Precision::FP32) {
-                throw std::logic_error("This demo accepts compiled networks with FP32 input precision for 2nd input");
-            }
+        else if (input.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
             inputsNames.resize(2);
-            inputsNames[1] = inputInfoItem.first;
+            inputsNames[1] = input.first;
         }
         else {
             throw std::logic_error("Unsupported " +
-                std::to_string(inputInfoItem.second->getTensorDesc().getDims().size()) + "D "
-                "input layer '" + inputInfoItem.first + "'. "
+                std::to_string(input.second->getTensorDesc().getDims().size()) + "D "
+                "input layer '" + input.first + "'. "
                 "Only 2D and 4D input layers are supported");
         }
     }
 
-    // --------------------------- Check output -----------------------------------------------------
+    // --------------------------- Check output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-    ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
     if (outputInfo.size() == 1) {
-        CDataPtr& output = outputInfo.begin()->second;
-        outputsNames.push_back(outputInfo.begin()->first);
-
-        const SizeVector outputDims = output->getTensorDesc().getDims();
-
-        if (outputDims.size() != 4) {
-            throw std::logic_error("Incorrect output dimensions for SSD");
-        }
-
-        maxProposalCount = outputDims[2];
-        objectSize = outputDims[3];
-        if (objectSize != 7) {
-            throw std::logic_error("Output should have 7 as a last dimension");
-        }
-        if (output->getPrecision() != InferenceEngine::Precision::FP32) {
-            throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
-        }
+        checkSingleOutput(outputInfo);
     }
     else {
-        if (outputInfo.find("bboxes") != outputInfo.end() && outputInfo.find("labels") != outputInfo.end() &&
-            outputInfo.find("scores") != outputInfo.end()) {
-            outputsNames.push_back("bboxes");
-            outputsNames.push_back("labels");
-            outputsNames.push_back("scores");
-        }
-        else if (outputInfo.find("boxes") != outputInfo.end() && outputInfo.find("labels") != outputInfo.end()) {
-            outputsNames.push_back("boxes");
-            outputsNames.push_back("labels");
-        }
-        else {
-            throw std::logic_error("Non-supported model architecutre (wrong number of outputs or wrong outputs names)");
-        }
-
-        const SizeVector outputDims = outputInfo[outputsNames[0]]->getTensorDesc().getDims();
-
-        if (outputDims.size() == 2) {
-            maxProposalCount = outputDims[0];
-            objectSize = outputDims[1];
-
-            if (objectSize != 5) {
-                throw std::logic_error("Incorrect 'boxes' output shape, [n][5] shape is required");
-            }
-        }
-        else if (outputDims.size() == 3) {
-            maxProposalCount = outputDims[1];
-            objectSize = outputDims[2];
-
-            if (objectSize != 4) {
-                throw std::logic_error("Incorrect 'bboxes' output shape, [b][n][4] shape is required");
-            }
-        }
-        else {
-            throw std::logic_error("Incorrect number of 'boxes' output dimensions");
-        }
-        for (auto name : outputsNames) {
-            if (outputInfo[name]->getPrecision() != InferenceEngine::Precision::FP32) {
-                throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
-            }
-        }
+        checkMultipleOutputs(outputInfo);
     }
+}
+
+void ModelSSD::checkCompiledNetworkInputsOutputs() {
+    checkInputsOutputs(execNetwork.GetInputsInfo(), execNetwork.GetOutputsInfo());
 }
 
 void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
-
-    for (const auto& inputInfoItem : inputInfo) {
-        if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // 1st input contains images
-            if (inputsNames.empty()) {
-                inputsNames.push_back(inputInfoItem.first);
-            }
-            else {
-                inputsNames[0] = inputInfoItem.first;
-            }
-
-            inputInfoItem.second->setPrecision(Precision::U8);
+    auto& inputInfo = cnnNetwork.getInputsInfo();
+    auto& outputInfo = cnnNetwork.getOutputsInfo();
+    for (auto& input : inputInfo) {
+        if (input.second->getTensorDesc().getDims().size() == 4) {
             if (useAutoResize) {
-                inputInfoItem.second->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-                inputInfoItem.second->getInputData()->setLayout(Layout::NHWC);
+                input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+                input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
             }
             else {
-                inputInfoItem.second->getInputData()->setLayout(Layout::NCHW);
+                input.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
             }
-            const TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
-            netInputHeight = getTensorHeight(inputDesc);
-            netInputWidth = getTensorWidth(inputDesc);
+            input.second->setPrecision(InferenceEngine::Precision::U8);
         }
-        else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
-            inputsNames.resize(2);
-            inputsNames[1] = inputInfoItem.first;
-            inputInfoItem.second->setPrecision(Precision::FP32);
-        }
-        else {
-            throw std::logic_error("Unsupported " +
-                std::to_string(inputInfoItem.second->getTensorDesc().getDims().size()) + "D "
-                "input layer '" + inputInfoItem.first + "'. "
-                "Only 2D and 4D input layers are supported");
+        else if (input.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
+            input.second->setPrecision(InferenceEngine::Precision::FP32);
         }
     }
 
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-    OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
-    if (outputInfo.size() == 1) {
-        prepareSingleOutput(outputInfo);
+    for (auto& output : outputInfo) {
+        output.second->setPrecision(InferenceEngine::Precision::FP32);
+        output.second->setLayout(InferenceEngine::Layout::NCHW);
     }
-    else {
-        prepareMultipleOutputs(outputInfo);
-    }
+
+    // --------------------------- Check input & output ----------------------------------------------------
+    checkInputsOutputs(inputInfo, outputInfo);
 }
 
-void ModelSSD::prepareSingleOutput(OutputsDataMap& outputInfo) {
-    DataPtr& output = outputInfo.begin()->second;
-    outputsNames.push_back(outputInfo.begin()->first);
-
-    const SizeVector outputDims = output->getTensorDesc().getDims();
+template<class OutputsDataMap>
+void ModelSSD::checkSingleOutput(OutputsDataMap& outputInfo) {
+    auto& output = outputInfo.begin()->second;
+    const InferenceEngine::SizeVector outputDims = output->getTensorDesc().getDims();
 
     if (outputDims.size() != 4) {
         throw std::logic_error("Incorrect output dimensions for SSD");
@@ -293,14 +215,17 @@ void ModelSSD::prepareSingleOutput(OutputsDataMap& outputInfo) {
     maxProposalCount = outputDims[2];
     objectSize = outputDims[3];
     if (objectSize != 7) {
-        throw std::logic_error("Output should have 7 as a last dimension");
+        throw std::logic_error("SSD model's output should have 7 as a last dimension");
     }
 
-    output->setPrecision(Precision::FP32);
-    output->setLayout(Layout::NCHW);
-}
+    if (output->getPrecision() != InferenceEngine::Precision::FP32) {
+        throw std::logic_error("This demo accepts networks with FP32 output precision");
+    }
 
-void ModelSSD::prepareMultipleOutputs(OutputsDataMap& outputInfo) {
+    outputsNames.push_back(outputInfo.begin()->first);
+}
+template<class OutputsDataMap>
+void ModelSSD::checkMultipleOutputs(OutputsDataMap& outputInfo) {
     if (outputInfo.find("bboxes") != outputInfo.end() && outputInfo.find("labels") != outputInfo.end() &&
         outputInfo.find("scores") != outputInfo.end()) {
         outputsNames.push_back("bboxes");
@@ -315,14 +240,14 @@ void ModelSSD::prepareMultipleOutputs(OutputsDataMap& outputInfo) {
         throw std::logic_error("Non-supported model architecutre (wrong number of outputs or wrong outputs names)");
     }
 
-    const SizeVector outputDims = outputInfo[outputsNames[0]]->getTensorDesc().getDims();
+    const InferenceEngine::SizeVector outputDims = outputInfo[outputsNames[0]]->getTensorDesc().getDims();
 
     if (outputDims.size() == 2) {
         maxProposalCount = outputDims[0];
         objectSize = outputDims[1];
 
         if (objectSize != 5) {
-            throw std::logic_error("Incorrect 'boxes' output shape, [n][5] shape is required");
+            throw std::logic_error("Incorrect 'boxes' output shape, [n][5] shape is required for SSD model");
         }
     }
     else if (outputDims.size() == 3) {
@@ -330,14 +255,16 @@ void ModelSSD::prepareMultipleOutputs(OutputsDataMap& outputInfo) {
         objectSize = outputDims[2];
 
         if (objectSize != 4) {
-            throw std::logic_error("Incorrect 'bboxes' output shape, [b][n][4] shape is required");
+            throw std::logic_error("Incorrect 'bboxes' output shape, [b][n][4] shape is required for SSD model");
         }
     }
     else {
-        throw std::logic_error("Incorrect number of 'boxes' output dimensions");
+        throw std::logic_error("Incorrect number of 'boxes' output dimensions for SSD model");
     }
 
-    for(auto name : outputsNames) {
-        outputInfo[name]->setPrecision(Precision::FP32);
+    for(auto& name : outputsNames) {
+        if (outputInfo[name]->getPrecision() != InferenceEngine::Precision::FP32) {
+            throw std::logic_error("This demo accepts networks with FP32 output precision");
+        }
     }
 }

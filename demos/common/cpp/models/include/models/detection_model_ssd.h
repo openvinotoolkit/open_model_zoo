@@ -37,10 +37,18 @@ public:
 protected:
     std::unique_ptr<ResultBase> postprocessSingleOutput(InferenceResult& infResult);
     std::unique_ptr<ResultBase> postprocessMultipleOutputs(InferenceResult& infResult);
+
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override;
-    void prepareSingleOutput(InferenceEngine::OutputsDataMap& outputInfo);
-    void prepareMultipleOutputs(InferenceEngine::OutputsDataMap& outputInfo);
+
+    template<class InputsDataMap, class OutputsDataMap>
+    void checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo);
+
+    template<class OutputsDataMap>
+    void checkSingleOutput(OutputsDataMap& outputInfo);
+
+    template<class OutputsDataMap>
+    void checkMultipleOutputs(OutputsDataMap& outputInfo);
     size_t maxProposalCount = 0;
     size_t objectSize = 0;
 };

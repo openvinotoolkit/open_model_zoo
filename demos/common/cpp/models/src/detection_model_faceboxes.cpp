@@ -27,83 +27,24 @@ ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
       steps({32, 64, 128}), minSizes({ {32, 64, 128}, {256}, {512} }) {
 }
 
-void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
-    // --------------------------- Configure input & output -------------------------------------------------
-    // --------------------------- Prepare input blobs ------------------------------------------------------
+template<class InputsDataMap, class OutputsDataMap>
+void  ModelFaceBoxes::checkInputsOutputs(InputsDataMap& inputInfo, OutputsDataMap& outputInfo) {
+    // --------------------------- Check input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
 
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
     }
 
-    InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
+    auto& input = inputInfo.begin()->second;
     const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
-    input->setPrecision(InferenceEngine::Precision::U8);
 
     if (inputDesc.getDims()[1] != 3) {
-         throw std::logic_error("Expected 3-channel input");
-     }
-
-    if (useAutoResize) {
-        input->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
-        input->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
-    }
-    else {
-        input->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
+        throw std::logic_error("Expected 3-channel input in FaceBoxes network");
     }
 
-    // --------------------------- Reading image input parameters -------------------------------------------
-    std::string imageInputName = inputInfo.begin()->first;
-    inputsNames.push_back(imageInputName);
-    netInputHeight = getTensorHeight(inputDesc);
-    netInputWidth = getTensorWidth(inputDesc);
-
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-
-    InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
-
-    if (outputInfo.size() != 2) {
-        throw std::logic_error("This demo expect networks that have 2 outputs blobs");
-    }
-
-    const InferenceEngine::TensorDesc& outputDesc = outputInfo.begin()->second->getTensorDesc();
-    maxProposalsCount = outputDesc.getDims()[1];
-
-    for (auto& output : outputInfo) {
-        output.second->setPrecision(InferenceEngine::Precision::FP32);
-        output.second->setLayout(InferenceEngine::Layout::CHW);
-        outputsNames.push_back(output.first);
-    }
-
-    // --------------------------- Calculating anchors ----------------------------------------------------
-    std::vector<std::pair<size_t, size_t>> featureMaps;
-    for (auto s : steps) {
-        featureMaps.push_back({ netInputHeight / s, netInputWidth / s });
-    }
-
-    priorBoxes(featureMaps);
-
-}
-
-void ModelFaceBoxes::checkCompiledNetworkInputsOutputs() {
-    // --------------------------- Check input  -------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    InferenceEngine::ConstInputsDataMap inputInfo(execNetwork.GetInputsInfo());
-
-    if (inputInfo.size() != 1) {
-        throw std::logic_error("This demo accepts networks that have only one input");
-    }
-
-    InferenceEngine::InputInfo::CPtr& input = inputInfo.begin()->second;
-    const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
     if (input->getPrecision() != InferenceEngine::Precision::U8) {
-        throw std::logic_error("This demo accepts compiled networks with U8 input precision");
-    }
-
-    if (inputDesc.getDims()[1] != 3) {
-        throw std::logic_error("Expected 3-channel input");
+        throw std::logic_error("This demo accepts networks with U8 input precision");
     }
 
     // --------------------------- Reading image input parameters -------------------------------------------
@@ -112,13 +53,11 @@ void ModelFaceBoxes::checkCompiledNetworkInputsOutputs() {
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
 
-    // --------------------------- Check output  -----------------------------------------------------
+    // --------------------------- Check output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
 
-    InferenceEngine::ConstOutputsDataMap outputInfo(execNetwork.GetOutputsInfo());
-
     if (outputInfo.size() != 2) {
-        throw std::logic_error("This demo expect networks that have 2 outputs blobs");
+        throw std::logic_error("This demo expect FaceBoxes networks that have 2 outputs blobs");
     }
 
     const InferenceEngine::TensorDesc& outputDesc = outputInfo.begin()->second->getTensorDesc();
@@ -126,7 +65,7 @@ void ModelFaceBoxes::checkCompiledNetworkInputsOutputs() {
 
     for (auto& output : outputInfo) {
         if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
-            throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
+            throw std::logic_error("This demo accepts networks with FP32 output precision");
         }
         outputsNames.push_back(output.first);
     }
@@ -138,6 +77,33 @@ void ModelFaceBoxes::checkCompiledNetworkInputsOutputs() {
     }
 
     priorBoxes(featureMaps);
+}
+
+void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+    // --------------------------- Configure input & output -------------------------------------------------
+    auto& inputInfo = cnnNetwork.getInputsInfo();
+    auto& outputInfo = cnnNetwork.getOutputsInfo();
+
+    for (auto& input : inputInfo) {
+        if (useAutoResize) {
+            input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+            input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
+        }
+        else {
+            input.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
+        }
+    }
+
+    for (auto& output : outputInfo) {
+        output.second->setPrecision(InferenceEngine::Precision::FP32);
+        output.second->setLayout(InferenceEngine::Layout::CHW);
+    }
+    // --------------------------- Check input & output ----------------------------------------------------
+    checkInputsOutputs(inputInfo, outputInfo);
+}
+
+void ModelFaceBoxes::checkCompiledNetworkInputsOutputs() {
+    checkInputsOutputs(execNetwork.GetInputsInfo(), execNetwork.GetOutputsInfo());
 }
 
 void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>& anchors, const std::vector<float>& vx, const std::vector<float>& vy,
