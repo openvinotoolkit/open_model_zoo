@@ -30,7 +30,7 @@ from face_detector import FaceDetector
 from faces_database import FacesDatabase
 from face_identifier import FaceIdentifier
 
-sys.path.append(osp.join(osp.dirname(osp.dirname(osp.abspath(__file__))), 'common'))
+sys.path.append(osp.join(osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__)))), 'common/python'))
 import monitors
 
 
@@ -128,7 +128,7 @@ class FrameProcessor:
     QUEUE_SIZE = 16
 
     def __init__(self, args):
-        used_devices = set(args.d_fd, args.d_lm, args.d_reid)
+        used_devices = {args.d_fd, args.d_lm, args.d_reid}
         self.context = InferenceContext(used_devices, args.cpu_lib, args.gpu_lib, args.perf_stats)
         context = self.context
 
