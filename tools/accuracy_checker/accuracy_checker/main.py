@@ -340,6 +340,10 @@ def add_openvino_specific_args(parser):
         '--kaldi_bin_dir', help='directory with Kaldi utility binaries. Required only for Kaldi models decoding.',
         required=False, type=partial(get_path, is_directory=True)
     )
+    openvino_specific_args.add_argument(
+        '--kaldi_log_file', help='path for saving logs from Kaldi tools', type=partial(get_path, check_exists=False),
+        required=False
+    )
 
 
 def build_arguments_parser():
