@@ -29,6 +29,9 @@ class ElectricityTimeSeriesForecastingAnnotation(TimeSeriesRepresentation):
         self.mean = mean
         self.scale = scale
 
+    def inverse_transform(self, var):
+        return var * self.scale + self.mean
+
 
 class ElectricityTimeSeriesForecastingPrediction(TimeSeriesRepresentation):
     def __init__(self, identifier):

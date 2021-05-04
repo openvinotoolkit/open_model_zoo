@@ -25,11 +25,7 @@ class ElectricityTimeSeriesDenormalize(Postprocessor):
 
     def process_image(self, annotation, prediction):
         for i in range(len(annotation)):
-            mean, scale = annotation[i].mean, annotation[i].scale
-            annotation[i].outputs = self._denorm(annotation[i].outputs, mean, scale)
+            annotation[i].outputs = annotation[i].inverse_transform(annotation[i].outputs)
             for k in prediction[i].preds.keys():
-                prediction[i].preds[k] = self._denorm(prediction[i].preds[k], mean, scale)
+                prediction[i].preds[k] = annotation[i].inverse_transform(prediction[i].preds[k])
         return annotation, prediction
-
-    def _denorm(self, x, mean, scale):
-        return x * scale + mean
