@@ -29,7 +29,7 @@ class ElectricityTimeSeriesForecastingAnnotation(TimeSeriesRepresentation):
         self.mean = mean
         self.scale = scale
 
-    def inverse_transform(self, var):
+    def inorm(self, var):
         return var * self.scale + self.mean
 
 
