@@ -140,7 +140,7 @@ class FrameProcessor:
             "Both -fd_iw and -fd_ih parameters should be specified for reshape"
 
         if args.fd_input_height and args.fd_input_width :
-            face_detector_net.reshape({"data": [1, 3, args.fd_input_height,args.fd_input_width]})
+            face_detector_net.reshape({"data": [1, 3, args.fd_input_height, args.fd_input_width]})
         landmarks_net = self.load_model(args.m_lm)
         face_reid_net = self.load_model(args.m_reid)
 
@@ -397,7 +397,7 @@ class Visualizer:
         if args.crop_width and args.crop_height:
             crop_size = (args.crop_width, args.crop_height)
             frame_size = tuple(np.minimum(frame_size, crop_size))
-        log.info("Input stream info: %d x %d @ %.2f FPS" % 
+        log.info("Input stream info: %d x %d @ %.2f FPS" %
             (frame_size[0], frame_size[1], fps))
         output_stream = Visualizer.open_output_stream(args.output, fps, frame_size)
 
