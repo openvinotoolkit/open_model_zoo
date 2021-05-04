@@ -53,7 +53,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 * person-vehicle-bike-detection-crossroad-0078
 * person-vehicle-bike-detection-crossroad-1016
 
-> **NOTE**: Refer to tables for [Intel](../../../intel/device_support.md) and [public](../../../public/device_support.md) models which summarize models support at different devices to select target inference device.
+> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
 
 ## Running
 
