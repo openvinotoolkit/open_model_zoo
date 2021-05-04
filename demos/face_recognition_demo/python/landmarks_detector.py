@@ -26,15 +26,11 @@ class LandmarksDetector(Module):
         def __init__(self, outputs):
             self.points = outputs
 
-            p = lambda i: self[i]
-            self.left_eye = p(0)
-            self.right_eye = p(1)
-            self.nose_tip = p(2)
-            self.left_lip_corner = p(3)
-            self.right_lip_corner = p(4)
-
-        def __getitem__(self, idx):
-            return self.points[idx]
+            self.left_eye = self.points[0]
+            self.right_eye = self.points[1]
+            self.nose_tip = self.points[2]
+            self.left_lip_corner = self.points[3]
+            self.right_lip_corner = self.points[4]
 
         def get_array(self):
             return np.array(self.points, dtype=np.float64)
