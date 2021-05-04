@@ -21,7 +21,6 @@
 #include <utils/args_helper.hpp>
 #include <utils/common.hpp>
 #include <cldnn/cldnn_config.hpp>
-#include <gpu/gpu_context_api_va.hpp>
 
 using namespace InferenceEngine;
 

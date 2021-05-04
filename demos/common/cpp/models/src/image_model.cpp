@@ -18,11 +18,11 @@
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 #include <utils/uni_image.h>
+#include <cldnn/cldnn_config.hpp>
 
 #ifdef USE_VA
 #include <gpu/gpu_context_api_va.hpp>
 #include <ie_compound_blob.h>
-#include <cldnn/cldnn_config.hpp>
 
 #include "gst_vaapi_decoder.h"
 #endif
@@ -38,7 +38,7 @@ InferenceEngine::ExecutableNetwork ImageModel::loadExecutableNetwork(const CnnCo
     this->cnnConfig = cnnConfig;
     auto cnnNetwork = prepareNetwork(core);
 
-    if(cnnConfig.remoteContext->is<InferenceEngine::gpu::VAContext>())
+    if(cnnConfig.remoteContext)
     {
         // Here we adjust configuration and loading the networkwith respect to provided remote context
         // Setting image input (0-index input is image input) to use NV12

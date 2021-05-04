@@ -2,7 +2,6 @@
 #include "opencv2/core.hpp"
 #include "inference_engine.hpp"
 #include "utils/uni_image_defs.h"
-#include "vaapi_context.h"
 
 class UniImage {
 public:
@@ -37,6 +36,8 @@ inline UniImage::Ptr mat2Img(const cv::Mat& mat) {
 
 #ifdef USE_VA
 #include "vaapi_images.h"
+#include "vaapi_context.h"
+
 class UniImageVA : public UniImage {
 public:
     UniImageVA(const InferenceBackend::VaApiImage::Ptr& vaImg, InferenceBackend::VaApiContext::Ptr context = nullptr);
