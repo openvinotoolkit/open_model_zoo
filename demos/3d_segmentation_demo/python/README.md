@@ -76,26 +76,26 @@ Running the application with the empty list of options yields the usage message 
 For example, to do inference on a 3D TIFF image using a trained network with multiple outputs on CPU, run the following
 command:
 
-```python
+```sh
 python3 3d_segmentation_demo.py -i <path_to_image>/inputImage.tiff -m <path_to_model>/brain-tumor-segmentation-0001.xml -d CPU -o <path_to_output>
 ```
 
 For example, to do inference on 3D NIfTI images using a trained network with multiple outputs on CPU and save
 output TIFF and NIFTI images, run the following command:
 
-```python
+```sh
 python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output> -nii -ms 2,0,3,1
 ```
 
 For example, to do inference on a single 3D NIfTI image and save an output TIFF image, run the following command:
 
-```python
+```sh
 python3 3d_segmentation_demo.py -i <path_to_nifti_image>/PackedImage.nii -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output> -ms 2,0,3,1
 ```
 
 `-ms` option aligns input modalities that depend on a dataset. For example, [Medical Decathlon](http://medicaldecathlon.com/) brain tumor segmentation data modalities follow in different order than it's required by nets. To make a correct order using Medical Decathlon brain tumor data the correct option is `2,0,3,1` for `brain-tumor-segmentation-0001` and `1,2,3,0` for `brain-tumor-segmentation-0002`.
 
-```python
+```sh
 python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/brain-tumor-segmentation-0002 -d CPU -o <path_to_output> -nii -ms 1,2,3,0 --full_intensities_range
 ```
 
