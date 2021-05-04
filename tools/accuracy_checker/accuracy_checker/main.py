@@ -432,7 +432,7 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
     field_names = [
         'model', 'launcher', 'device', 'dataset',
         'tags', 'metric_name', 'metric_type', 'metric_value', 'metric_target', 'metric_scale', 'metric_postfix',
-        'dataset_size']
+        'dataset_size', 'ref', 'abs_threshold', 'rel_threshold']
     model, launcher, device, tags, dataset = processing_info
     main_info = {
         'model': model,
@@ -455,7 +455,10 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
                 'metric_value': metric_result['value'],
                 'metric_target': metric_meta.get('target', 'higher-better'),
                 'metric_scale': metric_meta.get('scale', 100),
-                'metric_postfix': metric_meta.get('postfix', '%')
+                'metric_postfix': metric_meta.get('postfix', '%'),
+                'ref': metric_result['ref'],
+                'abs_threshold': metric_result['abs_threshold'],
+                'rel_threshold': metric_result['rel_threshold']
             })
 
 
