@@ -128,7 +128,7 @@ macro(add_demo)
 endmacro()
 
 find_package(OpenCV REQUIRED COMPONENTS core highgui videoio imgproc imgcodecs gapi)
-find_package(InferenceEngine 2.0 REQUIRED)
+find_package(InferenceEngine REQUIRED)
 find_package(ngraph REQUIRED)
 
 add_subdirectory(thirdparty/gflags)
