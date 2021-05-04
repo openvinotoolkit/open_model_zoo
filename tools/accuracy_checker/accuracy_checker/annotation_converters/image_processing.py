@@ -102,14 +102,16 @@ class ParametricImageProcessing(BaseFormatConverter):
     def parameters(cls):
         configuration_parameters = super().parameters()
         configuration_parameters.update({
-            'input_dir': PathField(is_directory=True),
-            'reference_dir': PathField(is_directory=True),
+            'input_dir': PathField(is_directory=True, description='input data directory'),
+            'reference_dir': PathField(is_directory=True, description='reference data directory'),
             'annotation_loader': StringField(
                 optional=True, choices=LOADERS_MAPPING.keys(), default='pillow',
                 description="Which library will be used for ground truth image reading. "
                             "Supported: {}".format(', '.join(LOADERS_MAPPING.keys()))
             ),
-            'param_scale': NumberField(value_type=float, optional=True, default=0.001)
+            'param_scale': NumberField(
+                value_type=float, optional=True, default=0.001, description='multiplayer for parameters'
+            )
         })
         return configuration_parameters
 
