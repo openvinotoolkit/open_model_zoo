@@ -20,6 +20,16 @@ from ..config import NormalizationArgsField, ConfigError, BoolField
 from ..preprocessor import Preprocessor
 
 
+def is_image_input(data):
+    if np.isscalar(data):
+        return False
+    if len(np.shape(data)) not in [2, 3]:
+        return False
+    if len(np.shape(data)) == 3 and np.shape(data)[-1] not in [1, 3, 4]:
+        return False
+    return True
+
+
 class Normalize(Preprocessor):
     __provider__ = 'normalization'
 
@@ -66,8 +76,7 @@ class Normalize(Preprocessor):
     def process(self, image, annotation_meta=None):
         def process_data(data, mean, std):
             if (
-                    self.images_only and np.isscalar(data) or (len(data.shape) not in [2, 3] or
-                    (len(data.shape) == 3 and data.shape[-1] not in [1, 3, 4]))
+                    self.images_only and not is_image_input(data)
             ):
                 return data
             if self.mean:
