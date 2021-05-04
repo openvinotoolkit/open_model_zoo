@@ -139,7 +139,7 @@ Models:
                         for reshape.
   -fd_ih FD_INPUT_HEIGHT, --fd_input_height FD_INPUT_HEIGHT
                         (optional) specify the input height of detection model
-                        (default: use default input height of model). 
+                        (default: use default input height of model).
                         Both -fd_iw and -fd_ih parameters should be specified
                         for reshape.
 

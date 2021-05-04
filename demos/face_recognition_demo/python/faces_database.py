@@ -1,5 +1,5 @@
 """
- Copyright (c) 2018 Intel Corporation
+ Copyright (c) 2018-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -42,12 +42,12 @@ class FacesDatabase:
         self.no_show = no_show
         paths = []
         if osp.isdir(path):
-            paths = [osp.join(path, f) for f in os.listdir(path) \
+            paths = [osp.join(path, f) for f in os.listdir(path)
                       if f.split('.')[-1] in self.IMAGE_EXTENSIONS]
         else:
-            log.error("Wrong face images database path. Expected a " \
-                      "path to the directory containing %s files, " \
-                      "but got '%s'" % \
+            log.error("Wrong face images database path. Expected a "
+                      "path to the directory containing %s files, "
+                      "but got '%s'" %
                       (" or ".join(self.IMAGE_EXTENSIONS), path))
 
         if len(paths) == 0:
@@ -87,7 +87,7 @@ class FacesDatabase:
                 if face_detector:
                     mm = self.check_if_face_exist(descriptor, face_identifier.get_threshold())
                     if mm < 0:
-                        crop = orig_image[int(roi.position[1]):int(roi.position[1]+roi.size[1]), \
+                        crop = orig_image[int(roi.position[1]):int(roi.position[1]+roi.size[1]),
                                int(roi.position[0]):int(roi.position[0]+roi.size[0])]
                         name = self.ask_to_save(crop)
                         self.dump_faces(crop, descriptor, name)

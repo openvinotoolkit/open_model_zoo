@@ -1,5 +1,5 @@
 """
- Copyright (c) 2018 Intel Corporation
+ Copyright (c) 2018-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ class LandmarksDetector(Module):
             self.nose_tip = p(2)
             self.left_lip_corner = p(3)
             self.right_lip_corner = p(4)
+
         def __getitem__(self, idx):
             return self.points[idx]
 
@@ -69,6 +70,6 @@ class LandmarksDetector(Module):
 
     def get_landmarks(self):
         outputs = self.get_outputs()
-        results = [LandmarksDetector.Result(out[self.output_blob].buffer.reshape((-1, 2))) \
+        results = [LandmarksDetector.Result(out[self.output_blob].buffer.reshape((-1, 2)))
                       for out in outputs]
         return results

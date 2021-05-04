@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- Copyright (c) 2018 Intel Corporation
+ Copyright (c) 2018-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ def build_argparser():
 
     general = parser.add_argument_group('General')
     general.add_argument('-i', '--input', metavar="PATH", default='0',
-                         help="(optional) Path to the input video " \
+                         help="(optional) Path to the input video "
                          "('0' for the camera, default)")
     general.add_argument('-o', '--output', metavar="PATH", default="",
                          help="(optional) Path to save the output video to")
@@ -52,12 +52,12 @@ def build_argparser():
     general.add_argument('-tl', '--timelapse', action='store_true',
                          help="(optional) Auto-pause after each frame")
     general.add_argument('-cw', '--crop_width', default=0, type=int,
-                         help="(optional) Crop the input stream to this width " \
-                         "(default: no crop). Both -cw and -ch parameters " \
+                         help="(optional) Crop the input stream to this width "
+                         "(default: no crop). Both -cw and -ch parameters "
                          "should be specified to use crop.")
     general.add_argument('-ch', '--crop_height', default=0, type=int,
-                         help="(optional) Crop the input stream to this height " \
-                         "(default: no crop). Both -cw and -ch parameters " \
+                         help="(optional) Crop the input stream to this height "
+                         "(default: no crop). Both -cw and -ch parameters "
                          "should be specified to use crop.")
     general.add_argument('--match_algo', default='HUNGARIAN', choices=MATCH_ALGO,
                          help="(optional)algorithm for face matching(default: %(default)s)")
@@ -68,7 +68,7 @@ def build_argparser():
     gallery.add_argument('-fg', metavar="PATH", required=True,
                          help="Path to the face images directory")
     gallery.add_argument('--run_detector', action='store_true',
-                         help="(optional) Use Face Detection model to find faces" \
+                         help="(optional) Use Face Detection model to find faces"
                          " on the face images, otherwise use full images.")
 
     models = parser.add_argument_group('Models')
@@ -79,45 +79,45 @@ def build_argparser():
     models.add_argument('-m_reid', metavar="PATH", default="", required=True,
                         help="Path to the Face Reidentification model XML file")
     models.add_argument('-fd_iw', '--fd_input_width', default=0, type=int,
-                         help="(optional) specify the input width of detection model " \
-                         "(default: use default input width of model). Both -fd_iw and -fd_ih parameters " \
+                         help="(optional) specify the input width of detection model "
+                         "(default: use default input width of model). Both -fd_iw and -fd_ih parameters "
                          "should be specified for reshape.")
     models.add_argument('-fd_ih', '--fd_input_height', default=0, type=int,
-                         help="(optional) specify the input height of detection model " \
-                         "(default: use default input height of model). Both -fd_iw and -fd_ih parameters " \
+                         help="(optional) specify the input height of detection model "
+                         "(default: use default input height of model). Both -fd_iw and -fd_ih parameters "
                          "should be specified for reshape.")
-    
+
     infer = parser.add_argument_group('Inference options')
     infer.add_argument('-d_fd', default='CPU', choices=DEVICE_KINDS,
-                       help="(optional) Target device for the " \
+                       help="(optional) Target device for the "
                        "Face Detection model (default: %(default)s)")
     infer.add_argument('-d_lm', default='CPU', choices=DEVICE_KINDS,
-                       help="(optional) Target device for the " \
+                       help="(optional) Target device for the "
                        "Facial Landmarks Regression model (default: %(default)s)")
     infer.add_argument('-d_reid', default='CPU', choices=DEVICE_KINDS,
-                       help="(optional) Target device for the " \
+                       help="(optional) Target device for the "
                        "Face Reidentification model (default: %(default)s)")
     infer.add_argument('-l', '--cpu_lib', metavar="PATH", default="",
-                       help="(optional) For MKLDNN (CPU)-targeted custom layers, if any. " \
+                       help="(optional) For MKLDNN (CPU)-targeted custom layers, if any. "
                        "Path to a shared library with custom layers implementations")
     infer.add_argument('-c', '--gpu_lib', metavar="PATH", default="",
-                       help="(optional) For clDNN (GPU)-targeted custom layers, if any. " \
+                       help="(optional) For clDNN (GPU)-targeted custom layers, if any. "
                        "Path to the XML file with descriptions of the kernels")
     infer.add_argument('-v', '--verbose', action='store_true',
                        help="(optional) Be more verbose")
     infer.add_argument('-pc', '--perf_stats', action='store_true',
                        help="(optional) Output detailed per-layer performance stats")
     infer.add_argument('-t_fd', metavar='[0..1]', type=float, default=0.6,
-                       help="(optional) Probability threshold for face detections" \
+                       help="(optional) Probability threshold for face detections"
                        "(default: %(default)s)")
     infer.add_argument('-t_id', metavar='[0..1]', type=float, default=0.3,
-                       help="(optional) Cosine distance threshold between two vectors " \
+                       help="(optional) Cosine distance threshold between two vectors "
                        "for face identification (default: %(default)s)")
     infer.add_argument('-exp_r_fd', metavar='NUMBER', type=float, default=1.15,
-                       help="(optional) Scaling ratio for bboxes passed to face recognition " \
+                       help="(optional) Scaling ratio for bboxes passed to face recognition "
                        "(default: %(default)s)")
     infer.add_argument('--allow_grow', action='store_true',
-                       help="(optional) Allow to grow faces gallery and to dump on disk. " \
+                       help="(optional) Allow to grow faces gallery and to dump on disk. "
                        "Available only if --no_show option is off.")
 
     return parser
@@ -128,17 +128,17 @@ class FrameProcessor:
     QUEUE_SIZE = 16
 
     def __init__(self, args):
-        used_devices = set([args.d_fd, args.d_lm, args.d_reid])
+        used_devices = set(args.d_fd, args.d_lm, args.d_reid)
         self.context = InferenceContext(used_devices, args.cpu_lib, args.gpu_lib, args.perf_stats)
         context = self.context
 
         log.info("Loading models")
         face_detector_net = self.load_model(args.m_fd)
-        
+
         assert (args.fd_input_height and args.fd_input_width) or \
                (args.fd_input_height==0 and args.fd_input_width==0), \
             "Both -fd_iw and -fd_ih parameters should be specified for reshape"
-        
+
         if args.fd_input_height and args.fd_input_width :
             face_detector_net.reshape({"data": [1, 3, args.fd_input_height,args.fd_input_width]})
         landmarks_net = self.load_model(args.m_lm)
@@ -165,8 +165,7 @@ class FrameProcessor:
                                             self.landmarks_detector,
                                             self.face_detector if args.run_detector else None, args.no_show)
         self.face_identifier.set_faces_database(self.faces_database)
-        log.info("Database is built, registered %s identities" % \
-            (len(self.faces_database)))
+        log.info("Database is built, registered %s identities" % (len(self.faces_database)))
 
         self.allow_grow = args.allow_grow and not args.no_show
 
@@ -199,9 +198,8 @@ class FrameProcessor:
         self.face_detector.start_async(frame)
         rois = self.face_detector.get_roi_proposals(frame)
         if self.QUEUE_SIZE < len(rois):
-            log.warning("Too many faces for processing." \
-                    " Will be processed only %s of %s." % \
-                    (self.QUEUE_SIZE, len(rois)))
+            log.warning("Too many faces for processing. Will be processed only %s of %s." %
+                (self.QUEUE_SIZE, len(rois)))
             rois = rois[:self.QUEUE_SIZE]
         self.landmarks_detector.start_async(frame, rois)
         landmarks = self.landmarks_detector.get_landmarks()
@@ -326,8 +324,8 @@ class Visualizer:
                                        "FPS: %.1f" % (self.fps),
                                        (origin + (0, text_size[1] * 1.5)), font, text_scale, color)
 
-        log.debug('Frame: %s/%s, detections: %s, ' \
-                  'frame time: %.3fs, fps: %.1f' % \
+        log.debug('Frame: %s/%s, detections: %s, '
+                  'frame time: %.3fs, fps: %.1f' %
                      (self.frame_num, self.frame_count, len(detections[-1]), self.frame_time, self.fps))
 
         if self.print_perf_stats:
@@ -342,7 +340,6 @@ class Visualizer:
         thickness = 2
         text_size = cv2.getTextSize(text, font, text_scale, thickness)
         origin = np.array([frame.shape[-2] - text_size[0][0] - 10, 10])
-        line_height = np.array([0, text_size[0][1]]) * 1.5
         cv2.putText(frame, text,
                     tuple(origin.astype(int)), font, text_scale, color, thickness)
 
@@ -400,7 +397,7 @@ class Visualizer:
         if args.crop_width and args.crop_height:
             crop_size = (args.crop_width, args.crop_height)
             frame_size = tuple(np.minimum(frame_size, crop_size))
-        log.info("Input stream info: %d x %d @ %.2f FPS" % \
+        log.info("Input stream info: %d x %d @ %.2f FPS" % 
             (frame_size[0], frame_size[1], fps))
         output_stream = Visualizer.open_output_stream(args.output, fps, frame_size)
 
@@ -433,7 +430,7 @@ class Visualizer:
         output_stream = None
         if path != "":
             if not path.endswith('.avi'):
-                log.warning("Output file extension is not 'avi'. " \
+                log.warning("Output file extension is not 'avi'. "
                         "Some issues with output can occur, check logs.")
             log.info("Writing output to '%s'" % (path))
             output_stream = cv2.VideoWriter(path,

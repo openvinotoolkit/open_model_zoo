@@ -1,5 +1,5 @@
 """
- Copyright (c) 2018 Intel Corporation
+ Copyright (c) 2018-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 """
 
 import logging as log
-import os.path as osp
 
 from openvino.inference_engine import IECore
 
@@ -32,14 +31,14 @@ class InferenceContext:
     def check_model_support(self, net, device):
         if device == "CPU":
             supported_layers = self.ie_core.query_network(net, device)
-            not_supported_layers = [l for l in net.layers.keys() \
-                                    if l not in supported_layers]
+            not_supported_layers = [layer for layer in net.layers.keys()
+                                    if layer not in supported_layers]
             if len(not_supported_layers) != 0:
-                log.error("The following layers are not supported " \
-                    "by the plugin for the specified device {}:\n {}" \
-                    .format(plugin.device, ', '.join(not_supported_layers)))
-                log.error("Please try to specify cpu extensions " \
-                    "library path in the command line parameters using " \
+                log.error("The following layers are not supported "
+                    "by the plugin for the specified device {}:\n {}"
+                    .format(device, ', '.join(not_supported_layers)))
+                log.error("Please try to specify cpu extensions "
+                    "library path in the command line parameters using "
                     "the '-l' parameter")
                 raise NotImplementedError(
                     "Some layers are not supported on the device")
