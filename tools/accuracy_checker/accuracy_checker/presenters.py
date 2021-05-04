@@ -72,7 +72,7 @@ class VectorPrintPresenter(BasePresenter):
     __provider__ = "print_vector"
 
     def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False):
-        value, reference, name, _, abs_threshold, rel_threshold,  meta = evaluation_result
+        value, reference, name, _, abs_threshold, rel_threshold, meta = evaluation_result
         if abs_threshold:
             abs_threshold = float(abs_threshold)
         if rel_threshold:
@@ -112,7 +112,7 @@ class VectorPrintPresenter(BasePresenter):
                 original_scale = get_result_format_parameters(meta, False)[1] if ignore_results_formatting else 1
                 difference = compare_with_ref(reference, mean_value, original_scale)
             write_scalar_result(
-                mean_value, name, threshold, difference, value_name='mean',
+                mean_value, name, abs_threshold, rel_threshold, difference, value_name='mean',
                 postfix=postfix[-1] if not np.isscalar(postfix) else postfix, scale=1,
                 result_format=result_format
             )
