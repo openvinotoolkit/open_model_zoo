@@ -6,7 +6,7 @@ models:
           type: narnmt
           vocabulary_file: machine-translation-nar-de-en-0002/tokenizer_tgt/vocab.json
           merges_file: machine-translation-nar-de-en-0002/tokenizer_tgt/merges.txt
-          output_name: preds
+          output_name: pred
         inputs:
           - name: "tokens"
             value: 'tokens'
