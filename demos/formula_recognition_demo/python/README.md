@@ -1,13 +1,14 @@
 # Formula Recognition Python\* Demo
-![](./demo_intro.gif)
 
-This demo shows how to run Im2LaTeX models. Im2LaTeX models allow to get a LaTeX formula markup from the image.
+![example](./demo_intro.gif)
+
+This demo shows how to run LaTeX formula recognition models. These models allow to get a LaTeX formula markup from the image.
 
 > **NOTE**: Only batch size of 1 is supported.
 
 ## How It Works
 
-The demo application expects an im2latex model that is split into two parts. Every model part must be in the Intermediate Representation (IR) format.
+The demo application expects a formula recognition model that is split into two parts. Every model part must be in the Intermediate Representation (IR) format.
 
 The First model is Encoder which extracts features from an image and prepares first steps of the decoder.
 
@@ -19,6 +20,7 @@ The First model is Encoder which extracts features from an image and prepares fi
     * `init_0` - first state of the encoder
 
 Second model is Decoder that takes as input:
+
 * `row_enc_out` - extracted images features from the encoder
 * Decoding state context (`dec_st_c`) and
 * Decoding state hidden (`dec_st_h`) - current states of the LSTM
@@ -38,6 +40,7 @@ The demo application takes an input with the help of the `-i` argument. This cou
 Vocabulary files are provided under corresponding model configuration directory.
 
 ### Non-interactive mode
+
 Non-interactive mode assumes that demo processes inputs sequentially.
 The demo workflow in non-interactive mode is the following:
 
@@ -47,9 +50,12 @@ The demo workflow in non-interactive mode is the following:
 4. The demo prints the decoded text to a file if `-o` parameter specified or into the console and (optionally) renders predicted formula into image.
 
 #### Rendering of the LaTeX formula into image
+
 User has an option to render the LaTeX formula predicted by the demo application into an image.
 Regardless of what mode is selected (interactive or non-interactive) the process of the rendering of the formula is the same.
+
 ##### Requirements for rendering
+
 Sympy python package is used for rendering. To install it, please, run:
 `pip install -r requirements.txt`
 Sympy package needs LaTeX system installed in the operating system.
@@ -60,33 +66,36 @@ MacOS:
 `brew install texlive`
 > Note: Other LaTeX systems should also work.
 
-
-
 ### Interactive mode
+
 The example of the interface:
-![](./interactive_interface.png)
+![interactive example](./interactive_interface.png)
 When User runs demo application with the `-i` option and passes video or number of the web-camera device as an argument (typically 0), window with the image simillar to above should pop up.
 
 Example of usage of the interactive mode:
-```
+
+```sh
 python formula_recognition_demo.py <required args> -i 0
 ```
+
 or
-```
+
+```sh
 python formula_recognition_demo.py <required args> -i input_video.mp4
 ```
 
-
 The window has four main sections:
+
 1. A red rectangle is placed on the center of this window. This is input "target", with the help of which User, moving the camera, can capture formula.
 2. Image from the input target will be binarized, preprocessed and fed to the network. Preprocessed and binarized image is placed on the top of the window (near `Model input` label)
 3. If the formula will be predicted with sufficient confidence score, it will be placed right under preprocessed image (near `Predicted` label)
 4. If rendering is available (see the previous Paragraph for details) and predicted formula does not contain LaTeX grammar errors, it will be rendered and placed near `Rendered` label.
 
 Navigation keys:
-  * Use `q` button to quit from program
-  * Use `o` to decrease the size of the input (red) window
-  * Use `p` to increase the size of the input window
+
+* Use `q` button to quit from program
+* Use `o` to decrease the size of the input (red) window
+* Use `p` to increase the size of the input window
 
 The overall process is simillar to the Non-interactive mode with the exception that it runs asynchronously.
 This means model inference and rendering of the formula do not block main thread, so the image from the web camera can move smoothly.
@@ -94,7 +103,21 @@ This means model inference and rendering of the formula do not block main thread
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 The demo has two preprocessing types: Crop and Pad to target shape and Resize and pad to target shape. Two preprocessing types are used for two different datasets as model trained with concrete font size, so if one wants to run the model on inputs with bigger font size (e.g. if input is photographed in 12Mpx, while model trained to imitate scans in ~3Mpx) they should first resize the input to make font size like in train set. Example of the target font size:
-![](./sample.png)
+![font_size](./sample.png)
+
+## Preparing to run
+
+Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported models
+
+* formula-recognition-medium-scan-0001-im2latex-decoder
+* formula-recognition-medium-scan-0001-im2latex-encoder
+* formula-recognition-polynomials-handwritten-0001-decoder
+* formula-recognition-polynomials-handwritten-0001-encoder
+
+> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
 
 ## Running
 
@@ -200,11 +223,8 @@ Options:
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/formula_recognition_demo/python/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 To run the demo, please provide paths to the model in the IR format and to an input video or folder with images:
+
 ```bash
 python formula_recognition_demo.py \
         -m_encoder <path_to_models>/encoder.xml \
@@ -219,6 +239,7 @@ python formula_recognition_demo.py \
 The application outputs recognized formula into the console or into the file.
 
 ## See Also
+
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
