@@ -429,7 +429,7 @@ int main(int argc, char *argv[]) {
                 cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
-                renderMetrics.update(stRen);                
+                renderMetrics.update(stRen);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {

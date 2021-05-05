@@ -6,7 +6,7 @@ enum IMG_RESIZE_MODE {
 };
 
 enum IMG_CONVERSION_TYPE {
-    CONVERT_NONE,      
+    CONVERT_NONE,
     CONVERT_TO_RGB,
     CONVERT_TO_BGR,
 };

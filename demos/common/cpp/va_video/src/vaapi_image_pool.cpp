@@ -29,7 +29,7 @@ VASurfaceID VaSurfacesPool::acquire(uint16_t width, uint16_t height, FourCC four
 
 void VaSurfacesPool::release(const InferenceBackend::VaApiImage& img) {
     std::unique_lock<std::mutex> lock(mtx);
-    auto its = images.equal_range(calcKey(img.width, img.height, img.format));    
+    auto its = images.equal_range(calcKey(img.width, img.height, img.format));
 
     for (auto it = its.first; it != its.second; ++it) {
         auto& foundElement = it->second;

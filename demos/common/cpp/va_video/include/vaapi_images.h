@@ -23,7 +23,7 @@ class VaApiImage{
   public:
     VaApiImage() {};
     VaApiImage(const std::shared_ptr<VaApiContext>& context, uint32_t width, uint32_t height, FourCC format, uint32_t va_surface = VA_INVALID_ID, bool autoDestroySurface=true);
-    virtual ~VaApiImage() { if(autoDestroySurface) destroyImage(); }    
+    virtual ~VaApiImage() { if(autoDestroySurface) destroyImage(); }
 
     using Ptr = std::shared_ptr<VaApiImage>;
 
@@ -42,7 +42,7 @@ class VaApiImage{
 
   protected:
     bool autoDestroySurface;
- 
+
     VaApiImage(const VaApiImage& other) = delete;
     void destroyImage();
 

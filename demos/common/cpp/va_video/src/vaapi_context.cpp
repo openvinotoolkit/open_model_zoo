@@ -20,7 +20,7 @@ int fourCCToVART(FourCC fourcc)
             return VA_RT_FORMAT_YUV420;
         case FOURCC_BGRA:
         case FOURCC_BGRX:
-        case FOURCC_BGR:    
+        case FOURCC_BGR:
         case FOURCC_RGBA:
         case FOURCC_RGBX:
         case FOURCC_RGB:

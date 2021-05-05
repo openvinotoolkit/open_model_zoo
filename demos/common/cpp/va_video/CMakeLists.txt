@@ -17,7 +17,7 @@ source_group("src" FILES ${SOURCES})
 source_group("include" FILES ${HEADERS})
 
 add_library(va_video STATIC ${SOURCES} ${HEADERS})
-target_include_directories(va_video PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"        
+target_include_directories(va_video PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
 ${VA_INCLUDE_DIRS}
 ${GSTREAMER_INCLUDE_DIRS}
 ${VA_INCLUDE_DIRS}

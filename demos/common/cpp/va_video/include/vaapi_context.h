@@ -55,10 +55,10 @@ class VaApiContext
     }
 
     VaSurfacesPool& getSurfacesPool(){ return *surfacesPool;}
-    
+
     static VASurfaceID createSurface(VADisplay display, uint16_t width, uint16_t height, FourCC format);
 
-  private: 
+  private:
     void create(VADisplay display);
     void close();
     std::unique_ptr<VaSurfacesPool> surfacesPool;

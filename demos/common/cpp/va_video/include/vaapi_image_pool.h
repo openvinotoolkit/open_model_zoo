@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include "utils/uni_image_defs.h"
 #include <unordered_map>
@@ -18,7 +18,7 @@ class VaSurfacesPool {
     void waitForCompletion();
     VaSurfacesPool() : display(nullptr) {}
     VaSurfacesPool(VADisplay display) : display(display) {}
-    ~VaSurfacesPool();   
+    ~VaSurfacesPool();
   private:
     using Element = std::pair<VASurfaceID, bool>; // second is true if image is in use
     std::unordered_multimap<uint64_t, Element> images;
