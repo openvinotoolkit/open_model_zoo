@@ -287,6 +287,7 @@ class VisionInformationFidelity(BaseRegressionMetric):
             convolve2d.raise_error(self.__provider__)
 
     def configure(self):
+        super().configure()
         self.sigma_nsq = self.get_value_from_config('sigma_nsq')
 
     def _vif_diff(self, annotation_image, prediction_image):

@@ -232,7 +232,7 @@ class TestNormalization:
 
     def test_custom_normalization_with_mean(self):
         normalization = Preprocessor.provide('normalization', {'type': 'normalization', 'mean': '(1, 2, 3)'})
-        source = np.full_like((3, 300, 300), 100)
+        source = np.full_like((300, 300, 3), 100)
         input_ref = source.copy() - (1, 2, 3)
         result = normalization(DataRepresentation(source))
 
@@ -241,10 +241,47 @@ class TestNormalization:
         assert np.all(input_ref == result.data)
         assert result.metadata == {'image_size': (3,)}
 
+    def test_custom_normalization_single_channel(self):
+        normalization = Preprocessor.provide('normalization', {'type': 'normalization', 'mean': '1)'})
+        source = np.full_like((300, 300), 100)
+        input_ref = source.copy() - 1
+        result = normalization(DataRepresentation(source))
+
+        assert normalization.mean == (1, )
+        assert normalization.std is None
+        assert np.all(input_ref == result.data)
+        assert result.metadata == {'image_size': (2,)}
+
+    def test_custom_normalization_multi_input(self):
+        normalization = Preprocessor.provide('normalization', {'type': 'normalization', 'mean': '2', 'std': '2'})
+        source = np.full_like((300, 300, 3), 100)
+        input_ref = (source.copy() - 2) / 2
+        result = normalization(DataRepresentation([source, source]))
+
+        assert normalization.mean == (2, )
+        assert normalization.std == (2, )
+        assert len(result.data) == 2
+        assert np.all(input_ref == result.data[0])
+        assert np.all(input_ref == result.data[1])
+        assert result.metadata == {'image_size': (3,)}
+
+    def test_custom_normalization_multi_input_images_only(self):
+        normalization = Preprocessor.provide('normalization', {'type': 'normalization', 'mean': '2', 'std': '2', 'images_only': True})
+        source = np.full((300, 300, 3), 100)
+        input_ref = (source.copy() - 2) / 2
+        result = normalization(DataRepresentation([source, 2]))
+
+        assert normalization.mean == (2, )
+        assert normalization.std == (2, )
+        assert len(result.data) == 2
+        assert np.all(input_ref == result.data[0])
+        assert result.data[1] == 2
+        assert result.metadata == {'image_size': (300, 300, 3)}
+
     def test_custom_normalization_with_precomputed_mean(self):
         normalization = Preprocessor.provide('normalization', {'type': 'normalization', 'mean': 'cifar10'})
 
-        source = np.full_like((3, 300, 300), 100)
+        source = np.full_like((300, 300, 3), 100)
         input_ref = source.copy() - normalization.PRECOMPUTED_MEANS['cifar10']
         result = normalization(DataRepresentation(source))
 
@@ -256,7 +293,7 @@ class TestNormalization:
     def test_custom_normalization_with_mean_as_scalar(self):
         normalization = Preprocessor.provide('normalization', {'type': 'normalization', 'mean': '1'})
 
-        source = np.full_like((3, 300, 300), 100)
+        source = np.full_like((300, 300, 3), 100)
         input_ref = source.copy() - 1
         result = normalization(DataRepresentation(source))
 
@@ -268,7 +305,7 @@ class TestNormalization:
     def test_custom_normalization_with_std(self):
         normalization = Preprocessor.provide('normalization', {'type': 'normalization', 'std': '(1, 2, 3)'})
 
-        source = np.full_like((3, 300, 300), 100)
+        source = np.full_like((300, 300, 3), 100)
         input_ref = source.copy() / (1, 2, 3)
         result = normalization(DataRepresentation(source))
 
@@ -280,7 +317,7 @@ class TestNormalization:
     def test_custom_normalization_with_precomputed_std(self):
         normalization = Preprocessor.provide('normalization', {'type': 'normalization', 'std': 'cifar10'})
 
-        source = np.full_like((3, 300, 300), 100)
+        source = np.full_like((300, 300, 3), 100)
         input_ref = source.copy() / normalization.PRECOMPUTED_STDS['cifar10']
         result = normalization(DataRepresentation(source))
 
@@ -291,7 +328,7 @@ class TestNormalization:
 
     def test_custom_normalization_with_std_as_scalar(self):
         normalization = Preprocessor.provide('normalization', {'type': 'normalization', 'std': '2'})
-        source = np.full_like((3, 300, 300), 100)
+        source = np.full_like((300, 300, 3), 100)
         input_ref = source.copy() / 2
         result = normalization(DataRepresentation(source))
 
@@ -305,7 +342,7 @@ class TestNormalization:
             'normalization', {'type': 'normalization', 'mean': '(1, 2, 3)', 'std': '(4, 5, 6)'}
         )
 
-        input_ = np.full_like((3, 300, 300), 100)
+        input_ = np.full_like((300, 300, 3), 100)
         input_ref = (input_ - (1, 2, 3)) / (4, 5, 6)
         result = normalization(DataRepresentation(input_))
 
@@ -317,7 +354,7 @@ class TestNormalization:
     def test_custom_normalization_with_mean_and_std_as_scalars(self):
         normalization = Preprocessor.provide('normalization', {'type': 'normalization', 'mean': '2', 'std': '5'})
 
-        input_ = np.full_like((3, 300, 300), 100)
+        input_ = np.full_like((300, 300, 3), 100)
         input_ref = (input_ - (2, )) / (5, )
         result = normalization(DataRepresentation(input_))
 

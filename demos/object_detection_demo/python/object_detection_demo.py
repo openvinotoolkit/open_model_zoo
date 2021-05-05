@@ -35,6 +35,7 @@ import monitors
 from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
+from helpers import resolution
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
 log = logging.getLogger()
@@ -88,6 +89,10 @@ def build_argparser():
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')
     io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
+    io_args.add_argument('--output_resolution', default=None, type=resolution,
+                         help='Optional. Specify the maximum output window resolution '
+                              'in (width x height) format. Example: 1280x720. '
+                              'Input frame size used by default.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
@@ -178,22 +183,25 @@ def get_model(ie, args):
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
 
-def draw_detections(frame, detections, palette, labels, threshold):
+def draw_detections(frame, detections, palette, labels, threshold, output_transform):
     size = frame.shape[:2]
+    frame = output_transform.resize(frame)
     for detection in detections:
         if detection.score > threshold:
+            class_id = int(detection.id)
+            color = palette[class_id]
+            det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
             xmin = max(int(detection.xmin), 0)
             ymin = max(int(detection.ymin), 0)
             xmax = min(int(detection.xmax), size[1])
             ymax = min(int(detection.ymax), size[0])
-            class_id = int(detection.id)
-            color = palette[class_id]
-            det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
+            xmin, ymin, xmax, ymax = output_transform.scale([xmin, ymin, xmax, ymax])
             cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
             cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
                         (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
             if isinstance(detection, models.DetectionWithLandmarks):
                 for landmark in detection.landmarks:
+                    landmark = output_transform.scale(landmark)
                     cv2.circle(frame, (int(landmark[0]), int(landmark[1])), 2, (0, 255, 255), 2)
     return frame
 
@@ -238,6 +246,7 @@ def main():
     palette = ColorPalette(len(model.labels) if model.labels else 100)
     metrics = PerformanceMetrics()
     presenter = None
+    output_transform = None
     video_writer = cv2.VideoWriter()
 
     while True:
@@ -254,7 +263,7 @@ def main():
                 print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
 
             presenter.drawGraphs(frame)
-            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
+            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, output_transform)
             metrics.update(start_time, frame)
 
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
@@ -281,10 +290,15 @@ def main():
                     raise ValueError("Can't read an image from the input")
                 break
             if next_frame_id == 0:
+                output_transform = models.OutputTransform(frame.shape[:2], args.output_resolution)
+                if args.output_resolution:
+                    output_resolution = output_transform.new_resolution
+                else:
+                    output_resolution = (frame.shape[1], frame.shape[0])
                 presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                               (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
+                                               (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
                 if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                                         cap.fps(), (frame.shape[1], frame.shape[0])):
+                                                         cap.fps(), output_resolution):
                     raise RuntimeError("Can't open video writer")
             # Submit for inference
             detector_pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
@@ -308,7 +322,7 @@ def main():
             print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
 
         presenter.drawGraphs(frame)
-        frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold)
+        frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, output_transform)
         metrics.update(start_time, frame)
 
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
