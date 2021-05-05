@@ -32,6 +32,7 @@
 #include <utils/performance_metrics.hpp>
 #include <unordered_map>
 #include <gflags/gflags.h>
+#include <sys/stat.h>
 
 #include <pipelines/async_pipeline.h>
 #include <models/super_resolution_model.h>
@@ -44,11 +45,9 @@ DEFINE_OUTPUT_FLAGS
 static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Type of the network, either 'sr' for Super Resolution task or 'deblur' for Deblurring";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-static const char mode_message[] = "Optional. Result display mode: 'orig' - display the original image together with the resulting image. "
-"'mixed' - display the mixed image: left half for original image, right half for result of model. "
+static const char mode_message[] = "Optional. Result display mode: 'orig' - display the original image together with the resulting image."
+"'mixed' - display the mixed image: left half for original image, right half for result of model."
 "'diff' - display the resulting image together with difference image (|processed-original|).";
-static const char vheight_message[] = "Optional. Height of view for result.";
-static const char vwidth_message[] = "Optional. Width of view for result.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
@@ -69,8 +68,6 @@ DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(mode, "", mode_message);
-DEFINE_uint32(vheight, 0, vheight_message);
-DEFINE_uint32(vwidth, 0, vwidth_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
@@ -94,8 +91,6 @@ static void showUsage() {
     std::cout << "    -i \"<path>\"               " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "    -mode \"<type>\"            " << mode_message << std::endl;
-    std::cout << "    -vheight \"<integer>\"      " << vheight_message << std::endl;
-    std::cout << "    -vwidth \"<integer>\"       " << vwidth_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
@@ -108,6 +103,7 @@ static void showUsage() {
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
     std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
+    std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
 
@@ -135,6 +131,9 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -at is not set");
     }
 
+    if (!FLAGS_output_resolution.empty() && FLAGS_output_resolution.find("x") == std::string::npos) {
+        throw std::logic_error("Correct format of -output_resolution parameter is \"width\"x\"height\".");
+    }
     return true;
 }
 
@@ -148,61 +147,125 @@ std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::strin
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
 
-void markImage(cv::Mat& image, const std::vector<std::string>& parts){
-    float delta = static_cast<float>(image.cols) / parts.size() * 0.5f;
-    for (size_t i = 0; i < parts.size(); ++i) {
-        cv::putText(image, parts[i], cv::Point(static_cast<int>(delta * (2 * i + 1)), 25),
+namespace visualize {
+    std::string winName = "Image Processing Results";
+    std::string trackbarName = "Processing";
+    cv::TrackbarCallback function;
+    cv::Mat inputImg;
+    cv::Mat resultImg;
+    std::string mode;
+    cv::Size maxSize(960, 540);
+    int scrollWidth = 0;
+    int slider = 0;
+
+    void markImage(cv::Mat& image, const std::pair<std::string, std::string>& marks, float alpha){
+        std::pair<float, float> positions(static_cast<float>(image.cols) * alpha / 2.0,
+                                                 static_cast<float>(image.cols) * (1 + alpha) / 2.0);
+        cv::putText(image, marks.first, cv::Point(static_cast<int>(positions.first), 25),
+                    cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
+        cv::putText(image, marks.second, cv::Point(static_cast<int>(positions.second), 25),
                     cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
     }
-}
 
-cv::Mat renderResultData(ImageResult result, std::string& mode, cv::Size& view) {
-    if (!result.metaData) {
-        throw std::invalid_argument("Renderer: metadata is null");
+    void onTrackbarMixed(int pos, void* userdata) {
+        cv::Mat mixedImg = inputImg.clone();
+        resultImg(cv::Rect(0, 0, pos, inputImg.rows)).copyTo(mixedImg(cv::Rect(0, 0, pos, resultImg.rows)));
+        cv::imshow(winName, mixedImg);
     }
 
-    // Input image is stored inside metadata, as we put it there during submission stage
-    auto inputImg = result.metaData->asRef<ImageMetaData>().img;
-
-    if (inputImg.empty()) {
-        throw std::invalid_argument("Renderer: image provided in metadata is empty");
-    }
-
-    if (inputImg.rows != view.height || inputImg.cols != view.width)
-        cv::resize(inputImg, inputImg, view, 0, 0, cv::INTER_CUBIC);
-
-    if (result.resultImage.rows != view.height || result.resultImage.cols != view.width)
-        cv::resize(result.resultImage, result.resultImage, view, 0, 0, cv::INTER_CUBIC);
-
-    cv::Mat resultImg;
-    if (inputImg.channels() != result.resultImage.channels())
-        cv::cvtColor(result.resultImage, resultImg, cv::COLOR_GRAY2BGR);
-    else
-        resultImg = result.resultImage;
-
-    if (mode == "orig") {
-        markImage(inputImg, std::vector<std::string>{"O"});
-        markImage(resultImg, std::vector<std::string>{"R"});
+    void onTrackbarScrollOrig(int pos, void* userdata) {
         cv::Mat concat;
         cv::hconcat(inputImg, resultImg, concat);
-        return concat;
+        markImage(concat, {"O", "R"}, 0.5);
+        cv::Rect roi = cv::Rect(slider, 0, maxSize.width, maxSize.height);
+        cv::imshow(winName, concat(roi));
     }
-    else if (mode == "mixed") {
-        inputImg(cv::Rect(0, 0, inputImg.cols / 2, inputImg.rows)).copyTo(resultImg(cv::Rect(0, 0, resultImg.cols / 2, resultImg.rows)));
-        markImage(resultImg, std::vector<std::string>{"O", "R"});
-        return resultImg;
-    }
-    else if (mode == "diff") {
+
+    void onTrackbarScrollDiff(int pos, void* userdata) {
         cv::Mat concat;
         cv::Mat diffImg;
         cv::absdiff(inputImg, resultImg, diffImg);
-        markImage(resultImg, std::vector<std::string>{"R"});
-        markImage(diffImg, std::vector<std::string>{"D"});
         cv::hconcat(resultImg, diffImg, concat);
-        return concat;
+        markImage(concat, {"R", "D"}, 0.5);
+        cv::Rect roi = cv::Rect(slider, 0, maxSize.width, maxSize.height);
+        cv::imshow(winName, concat(roi));
     }
 
-    return resultImg;
+    void init(const std::string& _mode, cv::Size resolution) {
+        cv::namedWindow(winName);
+        scrollWidth = resolution.width;
+        mode = _mode;
+        maxSize = resolution;
+        if (mode == "mixed") {
+            cv::createTrackbar(trackbarName, winName, &slider, maxSize.width, onTrackbarMixed);
+            function = onTrackbarMixed;
+        } else if (mode == "orig") {
+            cv::createTrackbar(trackbarName, winName, &slider, maxSize.width, onTrackbarScrollOrig);
+            function = onTrackbarScrollOrig;
+        } else if (mode == "diff") {
+            cv::createTrackbar(trackbarName, winName, &slider, maxSize.width, onTrackbarScrollDiff);
+            function = onTrackbarScrollDiff;
+        }
+        cv::setTrackbarMin(trackbarName, winName, 1);
+    }
+
+    cv::Mat renderResultData(ImageResult result, std::string& mode, OutputTransform& outputTransform) {
+        if (!result.metaData) {
+            throw std::invalid_argument("Renderer: metadata is null");
+        }
+
+        // Input image is stored inside metadata, as we put it there during submission stage
+        inputImg = result.metaData->asRef<ImageMetaData>().img;
+
+        if (inputImg.empty()) {
+            throw std::invalid_argument("Renderer: image provided in metadata is empty");
+        }
+
+        outputTransform.resize(result.resultImage);
+        cv::resize(inputImg, inputImg, result.resultImage.size());
+        scrollWidth = result.resultImage.cols;
+
+        if (inputImg.channels() != result.resultImage.channels())
+            cv::cvtColor(result.resultImage, resultImg, cv::COLOR_GRAY2BGR);
+        else
+            resultImg = result.resultImage;
+
+        if (mode == "orig") {
+            cv::Mat concat;
+            cv::hconcat(inputImg, resultImg, concat);
+            markImage(concat, {"O", "R"}, 0.5);
+            return concat;
+        }
+        else if (mode == "mixed") {
+            cv::Mat resCopy = resultImg.clone();
+            inputImg(cv::Rect(0, 0, inputImg.cols / 2, inputImg.rows)).copyTo(resCopy(cv::Rect(0, 0, resultImg.cols / 2, resultImg.rows)));
+            markImage(resCopy, {"O", "R"}, 0.5);
+            return resCopy;
+        }
+        else if (mode == "diff") {
+            cv::Mat concat;
+            cv::Mat diffImg;
+            cv::absdiff(inputImg, resultImg, diffImg);
+            cv::hconcat(resultImg, diffImg, concat);
+            markImage(concat, {"R", "D"}, 0.5);
+            return concat;
+        }
+
+        return resultImg;
+    }
+
+    void show(const cv::Mat& image) {
+        function(1, 0);
+        cv::waitKey(0);
+    }
+}
+
+bool checkFile(const std::string& filename) {
+    std::ifstream file(filename.c_str());
+    cv::Mat img = cv::imread(filename);
+    if (file.good() && img.data)
+        return true;
+    return false;
 }
 
 int main(int argc, char *argv[]) {
@@ -235,21 +298,48 @@ int main(int argc, char *argv[]) {
             core);
         Presenter presenter(FLAGS_u);
 
-        bool keepRunning = true;
         pipeline.submitData(ImageInputData(curr_frame),
             std::make_shared<ImageMetaData>(curr_frame, startTime));;
+
+        bool keepRunning = true;
         std::unique_ptr<ResultBase> result;
         uint32_t framesProcessed = 0;
-
+        int64_t frameNum = -1;
         cv::VideoWriter videoWriter;
-        cv::Size viewResult(0, 0);
-        auto mode = FLAGS_mode;
-        int k = (mode == "orig" || mode == "diff") ? 2 : 1;
-        if (FLAGS_vheight)
-            viewResult.height = FLAGS_vheight;
-        if (FLAGS_vwidth)
-            viewResult.width = FLAGS_vwidth;
 
+        auto mode = FLAGS_mode;
+        if (mode != "" && mode != "orig" && mode != "diff" && mode != "mixed")
+            throw std::invalid_argument("Uncorrect mode. Mode can be equals: 'orig', 'mixed' or 'diff', but no: " + mode);
+        int coeff = (mode == "orig" || mode == "diff") ? 2 : 1;
+
+        cv::Size outputResolution;
+        OutputTransform outputTransform = OutputTransform();
+        size_t found = FLAGS_output_resolution.find("x");
+
+        // interactive mode for single image
+        if (checkFile(FLAGS_i) && mode != "" && !FLAGS_loop) {
+            pipeline.waitForTotalCompletion();
+            result = pipeline.getResult();
+            if (found == std::string::npos) {
+                outputResolution = result->asRef<ImageResult>().resultImage.size();
+                if (outputResolution.height > visualize::maxSize.height &&  outputResolution.width > visualize::maxSize.width)
+                    outputResolution = visualize::maxSize;
+            }
+            else {
+                outputResolution = cv::Size{
+                    std::stoi(FLAGS_output_resolution.substr(0, found)),
+                    std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
+                };
+            }
+            outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
+            outputResolution = outputTransform.computeResolution();
+            visualize::renderResultData(result->asRef<ImageResult>(), mode, outputTransform);
+            visualize::init(mode, outputResolution);
+            visualize::show(curr_frame);
+            return 0;
+        }
+
+        // for stream of images
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame
@@ -260,7 +350,7 @@ int main(int argc, char *argv[]) {
                     break;
                 }
 
-                pipeline.submitData(ImageInputData(curr_frame),
+                frameNum = pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 
@@ -271,17 +361,31 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to ImageResult*
             //    and use your own processing instead of calling renderResultData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                if (!FLAGS_vheight)
-                    viewResult.height = result->asRef<ImageResult>().resultImage.rows;
-                if (!FLAGS_vwidth)
-                    viewResult.width = result->asRef<ImageResult>().resultImage.cols;
-
-                if (!FLAGS_o.empty() && !videoWriter.isOpened() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                                                     cap->fps(),
-                                                                                     cv::Size(k * viewResult.width, viewResult.height))) {
-                    throw std::runtime_error("Can't open video writer");
+                if (framesProcessed == 0) {
+                    if (found == std::string::npos) {
+                        outputResolution = result->asRef<ImageResult>().resultImage.size();
+                        if (outputResolution.height > visualize::maxSize.height &&  outputResolution.width > visualize::maxSize.width)
+                            outputResolution = visualize::maxSize;
+                    }
+                    else {
+                        outputResolution = cv::Size{
+                            std::stoi(FLAGS_output_resolution.substr(0, found)),
+                            std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
+                        };
+                    }
+                    outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
+                    outputResolution = outputTransform.computeResolution();
                 }
-                cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), mode, viewResult);
+
+                // Preparing video writer if needed
+                if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
+                    if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                        cap->fps(), cv::Size(coeff * outputResolution.width, outputResolution.height))) {
+                        throw std::runtime_error("Can't open video writer");
+                    }
+                }
+
+                cv::Mat outFrame = visualize::renderResultData(result->asRef<ImageResult>(), mode, outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -290,7 +394,7 @@ int main(int argc, char *argv[]) {
                     videoWriter.write(outFrame);
                 }
                 if (!FLAGS_no_show) {
-                    cv::imshow("Image Processing Results", outFrame);
+                    cv::imshow(visualize::winName, outFrame);
 
                     //--- Processing keyboard events
                     auto key = cv::waitKey(1);
@@ -302,36 +406,30 @@ int main(int argc, char *argv[]) {
                 }
                 framesProcessed++;
             }
-        }
+        } // while(keepRunning)
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
-        while (result = pipeline.getResult()) {
-            if (!FLAGS_vheight)
-                viewResult.height = result->asRef<ImageResult>().resultImage.rows;
-            if (!FLAGS_vwidth)
-                viewResult.width = result->asRef<ImageResult>().resultImage.cols;
 
-            if (!FLAGS_o.empty() && !videoWriter.isOpened() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                                                 cap->fps(),
-                                                                                 cv::Size(k * viewResult.width, viewResult.height))) {
-                throw std::runtime_error("Can't open video writer");
+        for (; framesProcessed <= frameNum; framesProcessed++)
+        {
+            result = pipeline.getResult();
+            if (result != nullptr)
+            {
+                cv::Mat outFrame = visualize::renderResultData(result->asRef<ImageResult>(), mode, outputTransform);
+                //--- Showing results and device information
+                presenter.drawGraphs(outFrame);
+                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
+                    videoWriter.write(outFrame);
+                }
+                if (!FLAGS_no_show) {
+                    cv::imshow(visualize::winName, outFrame);
+                    //--- Updating output window
+                    cv::waitKey(1);
+                }
             }
-            cv::Mat outFrame = renderResultData(result->asRef<ImageResult>(), mode, viewResult);
-            //--- Showing results and device information
-            presenter.drawGraphs(outFrame);
-            metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                videoWriter.write(outFrame);
-            }
-            if (!FLAGS_no_show) {
-                cv::imshow("Image Processing Results", outFrame);
-
-                //--- Updating output window
-                cv::waitKey(1);
-            }
-            framesProcessed++;
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
