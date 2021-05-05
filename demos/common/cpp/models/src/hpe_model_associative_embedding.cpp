@@ -35,13 +35,17 @@ const float HpeAssociativeEmbedding::detectionThreshold = 0.1f;
 const float HpeAssociativeEmbedding::tagThreshold = 1.0f;
 
 HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio,
-    int targetSize, float confidenceThreshold, float delta, UniImage::RESIZE_MODE resizeMode) :
+    int targetSize, float confidenceThreshold, float delta, IMG_RESIZE_MODE resizeMode) :
     ModelBase(modelFileName),
     aspectRatio(aspectRatio),
     targetSize(targetSize),
     confidenceThreshold(confidenceThreshold),
     delta(delta),
-    paddingMode(paddingMode) {
+    resizeMode(resizeMode) {
+
+    if(resizeMode != RESIZE_KEEP_ASPECT && resizeMode != RESIZE_KEEP_ASPECT_LETTERBOX) {
+        throw std::runtime_error("HpeAssociativeEmbedding supports only KEEP_ASPECT or KEEP_ASPECT_LETTERBOX input image resizing modes.");
+    }
 }
 
 void HpeAssociativeEmbedding::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
@@ -102,10 +106,9 @@ void HpeAssociativeEmbedding::changeInputSize(CNNNetwork& cnnNetwork) {
 
 std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
-    cv::Rect dataRect;
-    auto paddedImage = image->resize(inputLayerSize.width, inputLayerSize.height, resizeMode,true,&dataRect);
-    if (inputLayerSize.height - stride >= dataRect.height
-        || inputLayerSize.width - stride >= dataRect.width) {
+    auto paddedImage = image->resize(inputLayerSize.width, inputLayerSize.height, resizeMode, true);
+    if (inputLayerSize.height - stride >= paddedImage->getRoi().height
+        || inputLayerSize.width - stride >= paddedImage->getRoi().width) {
         slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
     }
     request->SetBlob(inputsNames[0], paddedImage->toBlob());
@@ -143,12 +146,12 @@ std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult
     float shiftX = 0.0, shiftY = 0.0;
     float scaleX = 1.0, scaleY = 1.0;
 
-    if (paddingMode == "center") {
+    if (resizeMode == RESIZE_KEEP_ASPECT_LETTERBOX) {
         scaleX = scaleY = std::min(scale.x, scale.y);
         if (aspectRatio >= 1.0)
-            shiftX = static_cast<float>((targetSize * scaleX * aspectRatio - scale.mat.cols * scaleX) / 2);
+            shiftX = static_cast<float>((targetSize * scaleX * aspectRatio - scale.img->size().width * scaleX) / 2);
         else
-            shiftY = static_cast<float>((targetSize * scaleY / aspectRatio - scale.mat.rows * scaleY) / 2);
+            shiftY = static_cast<float>((targetSize * scaleY / aspectRatio - scale.img->size().height * scaleY) / 2);
         scaleX = scaleY *= outputScale;
     } else {
         scaleX = scale.x * outputScale;

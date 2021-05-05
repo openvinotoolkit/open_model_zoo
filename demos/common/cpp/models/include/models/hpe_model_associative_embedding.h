@@ -25,7 +25,7 @@ public:
     /// @param confidenceThreshold - threshold to eliminate low-confidence poses.
     /// Any pose with confidence lower than this threshold will be ignored.
     HpeAssociativeEmbedding(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold,
-                            float delta = 0.0, UniImage::RESIZE_MODE resizeMode = UniImage::RESIZE_KEEP_ASPECT);
+                            float delta = 0.0, IMG_RESIZE_MODE resizeMode = RESIZE_KEEP_ASPECT);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
@@ -40,7 +40,7 @@ protected:
     int targetSize;
     float confidenceThreshold;
     float delta;
-    UniImage::RESIZE_MODE resizeMode;
+    IMG_RESIZE_MODE resizeMode;
 
     std::string embeddingsBlobName;
     std::string heatmapsBlobName;

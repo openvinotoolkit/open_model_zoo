@@ -426,7 +426,7 @@ int main(int argc, char *argv[]) {
             //    and use your own processing instead of calling renderDetectionData().
             while ((result = pipeline.getResult()) && keepRunning) {
                 auto stRen = std::chrono::steady_clock::now();
-                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
+                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 renderMetrics.update(stRen);                
