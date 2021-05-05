@@ -27,8 +27,9 @@ from .config import ConfigReader
 from .logging import print_info, add_file_handler, exception
 from .evaluators import ModelEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
-from .utils import get_path, cast_to_bool, check_file_existence, validate_print_interval
+from .utils import get_path, cast_to_bool, check_file_existence, validate_print_interval, init_telemetry
 from . import __version__
+
 
 EVALUATION_MODE = {
     'models': ModelEvaluator,
@@ -368,6 +369,12 @@ def build_arguments_parser():
 def main():
     return_code = 0
     args = build_arguments_parser().parse_args()
+    tm = init_telemetry()
+    if tm:
+        try:
+            tm.start_session('ac')
+        except Exception: # pylint:disable=W0703
+            pass
     progress_bar_provider = args.progress if ':' not in args.progress else args.progress.split(':')[0]
     progress_reporter = ProgressReporter.provide(progress_bar_provider, None, print_interval=args.progress_interval)
     if args.log_file:
@@ -380,10 +387,18 @@ def main():
         evaluator_kwargs['metrics_interval'] = args.metrics_interval
         evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
     evaluator_kwargs['store_only'] = args.store_only
+    tm.send_event("ac", "mode", "online" if not args.store_only else "offline")
 
     config, mode = ConfigReader.merge(args)
     evaluator_class = EVALUATION_MODE.get(mode)
     if not evaluator_class:
+        if tm:
+            try:
+                tm.send_event('ac', 'error', 'Unknown evaluation mode')
+                tm.end_session()
+                tm.force_shutdown(1.0)
+            except Exception: # pylint:disable=W0703
+                pass
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
         config_entry['_store_only'] = args.store_only
@@ -392,11 +407,22 @@ def main():
             processing_info = evaluator_class.get_processing_info(config_entry)
             print_processing_info(*processing_info)
             evaluator = evaluator_class.from_configs(config_entry)
+            evaluator_class.send_processing_info(tm)
             if args.profile:
                 _timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
                 profiler_dir = args.profiler_logs_dir / _timestamp
                 print_info('Metric profiling activated. Profiler output will be stored in {}'.format(profiler_dir))
                 evaluator.set_profiling_dir(profiler_dir)
+                if tm:
+                    try:
+                        tm.send_event('ac', 'metric_profiling', 'activated')
+                    except Exception: # pylint:disable=W0703
+                        pass
+            if tm:
+                try:
+                    tm.send_event('ac', 'model_run', 'started')
+                except Exception: # pylint:disable=W0703
+                    pass
             evaluator.process_dataset(
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
             )
@@ -409,10 +435,28 @@ def main():
                         args.csv_result, processing_info, metrics_results, evaluator.dataset_size, metrics_meta
                     )
             evaluator.release()
+            if tm:
+                try:
+                    tm.send_event('ac', 'model_run', 'finished')
+                except Exception:
+                    pass
+
         except Exception as e:  # pylint:disable=W0703
+            if tm:
+                try:
+                    tm.send_event('ac', 'error', str(type(e)))
+                except Exception: # pylint:disable=W0703
+                    pass
             exception(e)
             return_code = 1
             continue
+    if tm:
+        try:
+            tm.send_event('ac', 'status', 'success' if not return_code else 'fail')
+            tm.end_session('ac')
+            tm.force_shutdown(1.0)
+        except Exception: # pylint:disable=W0703
+            pass
     sys.exit(return_code)
 
 

@@ -16,6 +16,7 @@ limitations under the License.
 
 import copy
 import pickle
+import platform
 
 from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
@@ -195,6 +196,33 @@ class ModelEvaluator(BaseEvaluator):
             launcher_config['framework'], launcher_config.get('device', ''), launcher_config.get('tags'),
             dataset_config['name']
         )
+
+    def send_processing_info(self, sender):
+        if not sender:
+            return
+        launcher_config = self.config['launchers'][0]
+        dataset_config = self.config['datasets'][0]
+        sender.send_event('ac', 'platform', platform.system)
+        framework = launcher_config['framework']
+        device = launcher_config.get('device', 'CPU')
+        try:
+            sender.send_event('ac', 'framework_and_device',
+            {'framework': framework if framework != 'dlsdk' else 'openvino', 'device': device}
+            )
+            sender.send_event('ac', 'inference_mode', 'sync' if self.process_dataset == self.process_dataset_sync else 'async')
+            if hasattr(self.launcher, 'get_model_file_type'):
+                sender.send_event('ac', 'model_file_type', self.launcher.get_model_file_type())
+            adapter = launcher_config.get('adapter')
+            if adapter:
+                adapter_type = adapter if isinstance(adapter, str) else adapter.get('type')
+                sender.send_event('ac', 'adapter_type', adapter_type)
+            metrics = dataset_config.get('metrics', [])
+            if metrics:
+                for metric in metrics:
+                    sender.send_event('ac', 'metric', metric['type'])
+        except Exception: # pylint:disable=W0703
+            pass
+
 
     def _get_batch_input(self, batch_annotation, batch_input):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)

@@ -847,3 +847,15 @@ def convert_xctr_yctr_w_h_to_x1y1x2y2(x, y, width, height):
     x1, y1 = (x - width / 2), (y - height / 2)
     x2, y2 = (x + width / 2), (y + height / 2)
     return x1, y1, x2, y2
+
+
+def init_telemetry():
+    try:
+        import openvino_telemetry as tm
+    except ImportError:
+        return None
+    try:
+        telemetry = tm.Telemetry('Accuracy Checker', tid='UA-194864834-1')
+        return telemetry
+    except Exception: # pylint:disable=W0703
+        return None
