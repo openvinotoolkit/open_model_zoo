@@ -1,28 +1,43 @@
 # Human Pose Estimation C++ Demo
 
-![](../human_pose_estimation.gif)
+![example](../human_pose_estimation.gif)
 
-This demo showcases the work of multi-person 2D pose estimation algorithm. The task is to predict a pose: body skeleton, which consists of keypoints and connections between them, for every person in an input video. The pose may contain up to 18 keypoints: *ears, eyes, nose, neck, shoulders, elbows, wrists, hips, knees*, and *ankles*. Some of potential use cases of the algorithm are action recognition and behavior understanding. You can use the following pre-trained model with the demo:
-
-* `human-pose-estimation-0001`, which is a human pose estimation network, that produces two feature vectors. The algorithm uses these feature vectors to predict human poses.
-
-For more information about the pre-trained model, refer to the [model documentation](../../../models/intel/index.md).
-
-The input frame height is scaled to model height, frame width is scaled to preserve initial aspect ratio and padded to multiple of 8.
+This demo showcases the work of multi-person 2D pose estimation algorithm. The task is to predict a pose: body skeleton, which consists of keypoints and connections between them, for every person in an input video. The pose may contain up to 18 keypoints: *ears, eyes, nose, neck, shoulders, elbows, wrists, hips, knees*, and *ankles*. Some of potential use cases of the algorithm are action recognition and behavior understanding.
 
 Other demo objectives are:
+
 * Video/Camera as inputs, via OpenCV*
 * Visualization of all estimated poses
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads human pose estimation model. Upon getting a frame from the OpenCV VideoCapture, the application executes human pose estimation algorithm and displays the results.
+On the start-up, the application reads command line parameters and loads human pose estimation model. Upon getting a frame from the OpenCV VideoCapture, input frame height is scaled to model height, frame width is scaled to preserve initial aspect ratio and padded to multiple of 8, then application executes human pose estimation algorithm and displays the results.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+
+## Preparing to run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported models
+
+* architecture_type = openpose
+    - human-pose-estimation-0001
+* architecture_type = ae
+    - human-pose-estimation-0005
+    - human-pose-estimation-0006
+    - human-pose-estimation-0007
+* architecture_type = higherhrnet
+    - higher-hrnet-w32-human-pose-estimation
+
+> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
 
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
 InferenceEngine:
     API version ............ <version>
@@ -55,10 +70,6 @@ Options:
 
 Running the application with an empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/human_pose_estimation_demo/cpp/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 For example, to do inference on a CPU, run the following command:
 
 ```sh
@@ -68,11 +79,9 @@ For example, to do inference on a CPU, run the following command:
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with estimated poses and text report of **FPS** - frames per second performance for the human pose estimation demo.
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
->* `human-pose-estimation-0001`
-> Other models may produce unexpected results on these devices.
 
 ## See Also
+
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
