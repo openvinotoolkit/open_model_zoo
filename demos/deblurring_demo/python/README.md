@@ -17,15 +17,21 @@ For each image demo performs the following steps:
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
+## Preparing to run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported models
+
+* deblurgan-v2
+
+> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-
-```
-python3 deblurring_demo.py -h
-```
-
-The command yields the following usage message:
 
 ```
 usage: deblurring_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
@@ -71,18 +77,14 @@ Input/output options:
   --no_show             Optional. Don't show output.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
-
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 You can use the following command to do inference on CPU on images captured by a camera using a pre-trained deblurgan-v2 network:
-```
-    python3 deblurring_demo.py -i 0 -m <path_to_model>/deblurgan-v2.xml
+
+```sh
+    python3 deblurring_demo.py -i 0 -d CPU -m <path_to_model>/deblurgan-v2.xml
 ```
 
 ## Demo Output
