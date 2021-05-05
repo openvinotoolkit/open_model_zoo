@@ -171,7 +171,7 @@ def write_scalar_result(
     display_result = result_format.format(res_value * scale)
     message = '{}: {}{}'.format(display_name, display_result, postfix)
 
-    if diff_with_ref[0] or diff_with_ref[1]:
+    if diff_with_ref and (diff_with_ref[0] or diff_with_ref[1]):
         abs_threshold = abs_threshold or 0
         rel_threshold = rel_threshold or 0
         if abs_threshold <= diff_with_ref[0] or rel_threshold <= diff_with_ref[1]:

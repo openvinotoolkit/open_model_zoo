@@ -932,7 +932,7 @@ class KaldiARKReader(BaseReader):
         key = ''
         while True:
             c = bytes.decode(fd.read(1))
-            if c in [' ', '']:
+            if c in [' ', '', '\0', '\4']:
                 break
             key += c
         return None if key == '' else key.strip()
@@ -948,7 +948,7 @@ class KaldiARKReader(BaseReader):
             return self.read_frame(data_id.file, data_id.key, data_id.id)
         matrix = self.read_utterance(data_id.file, data_id.key)
         if self.multi_infer:
-            matrix = matrix.tolist()
+            matrix = list(matrix)
         return matrix
 
     def _read_list(self, data_id):
