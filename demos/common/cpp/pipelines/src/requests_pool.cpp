@@ -23,13 +23,6 @@ RequestsPool::RequestsPool(InferenceEngine::ExecutableNetwork& execNetwork, unsi
     }
 }
 
-RequestsPool::~RequestsPool() {
-    // Setting empty callback to free resources allocated for previously assigned lambdas
-    for (auto& pair : requests) {
-        pair.first->SetCompletionCallback([]{});
-    }
-}
-
 InferenceEngine::InferRequest::Ptr RequestsPool::getIdleRequest() {
     std::lock_guard<std::mutex> lock(mtx);
 
