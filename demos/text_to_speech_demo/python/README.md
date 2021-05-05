@@ -53,7 +53,7 @@ Options:
                         Path to model of the MelGAN (*.xml format).
   -s_id SPEAKER_ID, --speaker_id SPEAKER_ID
                         Ordinal number of the speaker in embeddings array for
-                        multi-speaker model.If -1 then activates the multi-
+                        multi-speaker model. If -1 then activates the multi-
                         speaker TTS model parameters selection window.
   -a ALPHA, --alpha ALPHA
                         Coefficient for controlling of the speech time

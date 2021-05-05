@@ -80,7 +80,7 @@ def build_argparser():
                       type=str)
 
     args.add_argument("-s_id", "--speaker_id",
-                      help="Ordinal number of the speaker in embeddings array for multi-speaker model."
+                      help="Ordinal number of the speaker in embeddings array for multi-speaker model. "
                            "If -1 then activates the multi-speaker TTS model parameters selection window.",
                       default=19, required=False,
                       type=int)
