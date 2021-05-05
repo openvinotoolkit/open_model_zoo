@@ -16,7 +16,9 @@ limitations under the License.
 
 import numpy as np
 from ..adapters import AdapterField, Adapter
-from ..config import ConfigValidator, StringField, ListField, ConfigError, InputField, ListInputsField
+from ..config import (
+    ConfigValidator, StringField, ListField, ConfigError, InputField, ListInputsField, PathField
+)
 from ..dependency import ClassProvider, UnregisteredProviderException
 from ..utils import get_parameter_value_from_config
 
@@ -154,6 +156,10 @@ class Launcher(ClassProvider):
             ),
             '_input_precision': ListField(
                 allow_empty=True, optional=True, default=[], description='Input precision list from command line.'
+            ),
+            '_kaldi_bin_dir': PathField(is_directory=True, optional=True, description='directory with Kaldi binaries'),
+            '_kaldi_log_file': PathField(
+                optional=True, description='File for saving Kaldi tools logs', check_exists=False
             )
         }
 
