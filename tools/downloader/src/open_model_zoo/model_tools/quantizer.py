@@ -175,8 +175,15 @@ def main():
         }
 
         for model in models:
-            if not model.quantizable:
+            if not model.quantization_output_precisions:
                 reporter.print_section_heading('Skipping {} (quantization not supported)', model.name)
+                reporter.print()
+                continue
+
+            model_precisions = requested_precisions & model.quantization_output_precisions
+
+            if not model_precisions:
+                reporter.print_section_heading('Skipping {} (all precisions skipped)', model.name)
                 reporter.print()
                 continue
 
@@ -184,7 +191,7 @@ def main():
                 'MODELS_DIR': str(args.model_dir / model.subdirectory)
             })
 
-            for precision in sorted(requested_precisions):
+            for precision in sorted(model_precisions):
                 if not quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
                     failed_models.append(model.name)
                     break
