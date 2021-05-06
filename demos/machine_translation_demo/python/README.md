@@ -8,6 +8,20 @@ Upon the start-up the demo application reads command line parameters and loads a
 
 The program provides an interactive CLI interface that gets a sentence in the source language as an input and returns its translation to the target language.
 
+## Preparing to run
+
+Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported models
+
+* machine-translation-nar-de-en-0001
+* machine-translation-nar-en-de-0001
+* machine-translation-nar-en-ru-0001
+* machine-translation-nar-ru-en-0001
+
+> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+
 ### Running the Demo
 
 Running the application with the `-h` option yields the following usage message:
@@ -34,9 +48,12 @@ optional arguments:
                         Optional. Name of the models output node.
 ```
 
-To run the demo, you can use Intel's pretrained model. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/machine_translation_demo/python/models.lst`.
+Required source and target tokenizer files located under `tokenizer_src` and `tokenizer_tgt` subfolders of corresponding model description folder.
+For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
+```sh
+python3 ./machine_translation_demo -i "a sample english text" -m <path_to_model>/machine-translation-nar-en-de-0001.xml --tokenizer-src <omz_root>/models/intel/machine-translation-nar-en-de-0001/tokenizer_src --tokenizer-tgt <omz_root>/models/intel/machine-translation-nar-en-de-0001/tokenizer_tgt
+```
 
 ## See Also
 
