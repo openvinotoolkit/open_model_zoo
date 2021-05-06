@@ -1,5 +1,7 @@
 # Text Detection C++ Demo
 
+![example](./text_detection_demo.jpg)
+
 The demo shows an example of using neural networks to detect and recognize printed text rotated at any angle in various environment. You can use the following pre-trained models with the demo:
 
 * `text-detection-0003`, which is a detection network for finding text.
@@ -10,8 +12,6 @@ The demo shows an example of using neural networks to detect and recognize print
 * `text-recognition-resnet-fc`, which is a recognition network for recognizing text. You should add option `-tr_pt_first`.
 * `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
-
 ## How It Works
 
 On the start-up, the application reads command line parameters and loads one network to the Inference Engine for execution. Upon getting an image, it performs inference of text detection and prints the result as four points (`x1`, `y1`), (`x2`, `y2`), (`x3`, `y3`), (`x4`, `y4`) for each text bounding box.
@@ -20,9 +20,31 @@ If text recognition model is provided, the demo prints recognized text as well.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
+## Preparing to run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported models
+
+* handwritten-score-recognition-0003
+* horizontal-text-detection-0001
+* text-detection-0003
+* text-detection-0004
+
+* decoder_type = ctc
+  * text-recognition-0012
+  * text-recognition-0013
+* decoder_type = simple
+  * text-recognition-resnet-fc
+
+> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
 text_detection_demo [OPTION]
 Options:
@@ -57,17 +79,16 @@ Options:
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/text_detection_demo/cpp/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 For example, use the following command line command to run the application:
+
 ```sh
-./text_detection_demo -m_td <path_to_model>/text-detection-0004.xml \
-                      -m_tr <path_to_model>/text-recognition-0013.xml \
-                      -i <path_to_image>/sample.jpg \
-                      -tr_pt_first \
-                      -tr_o_blb_nm "logits"
+./text_detection_demo \
+  -i <path_to_image>/sample.jpg \
+  -m_td <path_to_model>/text-detection-0004.xml \
+  -m_tr <path_to_model>/text-recognition-0013.xml \
+  -dt ctc \
+  -tr_pt_first \
+  -tr_o_blb_nm "logits"
 ```
 
 For `text-recognition-resnet-fc` you should use `simple` decoder for `-dt` option. For other models use `ctc` decoder (default decoder).
@@ -76,9 +97,8 @@ For `text-recognition-resnet-fc` you should use `simple` decoder for `-dt` optio
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo is not supported with any of the Model Downloader available topologies. Other models may work incorrectly on these devices as well.
-
 ## See Also
+
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
