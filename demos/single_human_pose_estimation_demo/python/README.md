@@ -1,6 +1,6 @@
 # Single Human Pose Estimation Demo (top-down pipeline)
 
-![](./single_human_pose_estimation.gif)
+![example](./single_human_pose_estimation.gif)
 
 This demo showcases top-down pipeline for human pose estimation on video or image. The task is to predict bboxes for every person on frame and then to predict a pose for every detected person. The pose may contain up to 17 keypoints: ears, eyes, nose, shoulders, elbows, wrists, hips, knees, and ankles.
 
@@ -8,9 +8,34 @@ This demo showcases top-down pipeline for human pose estimation on video or imag
 
 On the start-up, the application reads command line parameters and loads detection person model and single human pose estimation model. Upon getting a frame from the OpenCV VideoCapture, the demo executes top-down pipeline for this frame and displays the results.
 
+## Preparing to run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported models
+
+* mobilenet-ssd
+* pedestrian-and-vehicle-detector-adas-0001
+* pedestrian-detection-adas-0002
+* person-detection-retail-0013
+* person-vehicle-bike-detection-crossroad-0078
+* person-vehicle-bike-detection-crossroad-1016
+* ssd300
+* ssd512
+* ssd_mobilenet_v1_coco
+* ssd_mobilenet_v1_fpn_coco
+* ssd_mobilenet_v2_coco
+* ssdlite_mobilenet_v2
+* single-human-pose-estimation-0001
+
+> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+
 # Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
 usage: single_human_pose_estimation_demo.py [-h] -m_od MODEL_OD -m_hpe MODEL_HPE
                                             -i INPUT [--loop] [-o OUTPUT]
@@ -42,17 +67,17 @@ optional arguments:
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/single_human_pose_estimation_demo/python/models.lst`.
 
 For example, to do inference on a CPU, run the following command:
 
 ```sh
-python single_human_pose_estimation_demo.py --model_od <path_to_model>/mobilenet-ssd.xml --model_hpe <path_to_model>/single-human-pose-estimation-0001.xml --input <path_to_video>/back-passengers.avi
+python3 single_human_pose_estimation_demo.py -d CPU --model_od <path_to_model>/mobilenet-ssd.xml --model_hpe <path_to_model>/single-human-pose-estimation-0001.xml --input <path_to_video>/back-passengers.avi
 ```
 
 The demo uses OpenCV to display the resulting frame with estimated poses and reports performance in the following format: summary inference FPS (single human pose inference FPS / detector inference FPS).
 
 ## See Also
+
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
