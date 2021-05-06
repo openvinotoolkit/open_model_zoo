@@ -1,6 +1,6 @@
 # Image Segmentation Python\* Demo
 
-![](../segmentation.gif)
+![example](../segmentation.gif)
 
 This topic demonstrates how to run the Image Segmentation demo application, which does inference using semantic segmentation networks.
 
@@ -12,15 +12,34 @@ Upon the start-up the demo application reads command line parameters and loads a
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
+## Preparing to run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported models
+
+* architecture_type = segmentation
+  - deeplabv3
+  - fastseg-large
+  - fastseg-small
+  - hrnet-v2-c1-segmentation
+  - icnet-camvid-ava-0001
+  - icnet-camvid-ava-sparse-30-0001
+  - icnet-camvid-ava-sparse-60-0001
+  - pspnet-pytorch
+  - road-segmentation-adas-0001
+  - semantic-segmentation-adas-0001
+  - unet-camvid-onnx-0001
+* architecture_type = salient_object_detection
+  - f3net
+
+> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-
-```
-python3 segmentation_demo.py -h
-```
-
-The command yields the following usage message:
 
 ```
 usage: segmentation_demo.py [-h] -m MODEL -i INPUT
@@ -84,30 +103,24 @@ Input/output options:
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+You can use the following command to do inference on CPU on images captured by a camera using a pre-trained network:
 
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
-
-You can use the following command to do inference on CPU on images captured by a camera using a pre-trained semantic-segmentation-adas-0001 network:
-```
-    python3 segmentation_demo.py -i 0 -m <path_to_model>/semantic-segmentation-adas-0001.xml
+```sh
+    python3 segmentation_demo.py -d CPU -i 0 -m <path_to_model>/semantic-segmentation-adas-0001.xml
 ```
 
 ## Color palettes
 
-The color palette is used to visualize predicted classes. By default, the colors from PASCAL VOC dataset are applied. In case then the number of output classes is larger than number of classes provided by PASCAL VOC dataset, the rest classes are randomly colorized.
-Also, one can use predefined colors from other datasets, like CAMVID.
+The color palette is used to visualize predicted classes. By default, the colors from PASCAL VOC dataset are applied. In case then the number of output classes is larger than number of classes provided by PASCAL VOC dataset, the rest classes are randomly colorized. Also, one can use predefined colors from other datasets, like CAMVID.
 
-Available colors files are in `<omz_dir>/data/palettes`.
-If you want to assign custom colors for classes, you should create a `.txt` file, where the each line contains colors in `(R, G, B)` format.
+Available colors files located at `<omz_dir>/data/palettes` folder. If you want to assign custom colors for classes, you should create a `.txt` file, where the each line contains colors in `(R, G, B)` format. The demo application treat the number of each line as a dataset class identificator and apply specified color to pixels belonging to this class.
 
 ## Demo Output
 
 The demo uses OpenCV to display the resulting images with blended segmentation mask.
 
-
 ## See Also
+
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
