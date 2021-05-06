@@ -1,11 +1,12 @@
 # Interactive Face Detection C++ Demo
 
-![](../interactive_face_detection.gif)
+![example](../interactive_face_detection.gif)
 
 This demo showcases Object Detection task applied for face recognition using sequence of neural networks.
 Async API can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the application can continue operating on the host while accelerator is busy.
 This demo executes five parallel infer requests for the Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, Facial Landmarks Detection and Antispoofing Classifier networks that run simultaneously. You can use a set of the following pre-trained models with the demo:
+
 * `face-detection-adas-0001`, which is a primary detection network for finding faces
 * `age-gender-recognition-retail-0013`, which is executed on top of the results of the first model and reports estimated age and gender for each detected face
 * `head-pose-estimation-adas-0001`, which is executed on top of the results of the first model and reports estimated head pose in Tait-Bryan angles
@@ -13,28 +14,58 @@ This demo executes five parallel infer requests for the Age/Gender Recognition, 
 * `facial-landmarks-35-adas-0002`, which is executed on top of the results of the first model and reports normed coordinates of estimated facial landmarks
 * `anti-spoof-mn3`, which is executed on top of the results of the first model and reports estimated probability whether spoof or real face is shown
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
-
 Other demo objectives are:
 
-*	Video as input support via OpenCV\*
-*	Visualization of the resulting face bounding boxes from Face Detection network
-*	Visualization of age/gender, spoof/real, head pose, emotion information, and facial landmarks positions for each detected face
+* Video as input support via OpenCV\*
+* Visualization of the resulting face bounding boxes from Face Detection network
+* Visualization of age/gender, spoof/real, head pose, emotion information, and facial landmarks positions for each detected face
 
 OpenCV is used to draw resulting bounding boxes, labels, and other information. You can copy and paste this code without pulling Inference Engine demo helpers into your application.
 
 ## How It Works
 
-1.	The application reads command-line parameters and loads up to five networks depending on `-m...` options family to the Inference
+1. The application reads command-line parameters and loads up to five networks depending on `-m...` options family to the Inference
 Engine.
-2.	The application gets a frame from the OpenCV VideoCapture.
-3.	The application performs inference on the Face Detection network.
-4.	The application performs up to five simultaneous inferences, using the Age/Gender, Head Pose, Emotions, Facial Landmarks and Anti-spoof detection networks if they are specified in the command line.
-5.	The application displays the results.
+2. The application gets a frame from the OpenCV VideoCapture.
+3. The application performs inference on the Face Detection network.
+4. The application performs up to five simultaneous inferences, using the Age/Gender, Head Pose, Emotions, Facial Landmarks and Anti-spoof detection networks if they are specified in the command line.
+5. The application displays the results.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
-The new Async API operates with a new notion of the Infer Request that encapsulates the inputs/outputs and separates scheduling and waiting for result.
+The Async API operates with a notion of the Infer Request that encapsulates the inputs/outputs and separates scheduling and waiting for result.
+
+## Preparing to run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
+### Supported models
+
+* age-gender-recognition-retail-0013
+* anti-spoof-mn3
+* emotions-recognition-retail-0003
+* face-detection-adas-0001
+* face-detection-retail-0004
+* face-detection-retail-0005
+* face-detection-retail-0044
+* facial-landmarks-35-adas-0002
+* head-pose-estimation-adas-0001
+
+> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
 
 ## Running
 
@@ -94,18 +125,6 @@ Options:
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or Intel pre-trained models. You can download models and, if necessary, convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below. The models which are supported by the demo are listed in `<omz_dir>/demos/interactive_face_detection_demo/cpp/models.lst`.
-
-An example of using the Model Downloader:
-```
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
-```
-
-An example of using the Model Converter:
-```
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
-```
-
 For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
 ```sh
@@ -117,16 +136,8 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
 The demo reports total image throughput which includes frame decoding time, inference time, time to render bounding boxes and labels, and time to display the results.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
->* `age-gender-recognition-retail-0013`
->* `emotions-recognition-retail-0003`
->* `face-detection-adas-0001`
->* `facial-landmarks-35-adas-0002`
->* `head-pose-estimation-adas-0001`
->* `anti-spoof-mn3`
-> Other models may produce unexpected results on these devices.
-
 ## See Also
+
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
