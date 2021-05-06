@@ -6,13 +6,23 @@ Demo application for sound classification algorithm.
 
 Upon the start-up the demo application reads command line parameters and loads a network to Inference engine. It uses only audio files in `wav` format. Audio should be converted to model's sample rate using `-sr/--samplerate` option, if sample rate of audio differs from sample rate of model (e.g. [AclNet](../../../models/public/aclnet/README.md) expected 16kHz audio). After reading the audio, it is sliced into clips to fit model input (clips are allowed to overlap with `-ol/--overlap` option) and each clip is processed separately with its own prediction.
 
+## Preparing to run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported models
+
+* aclnet
+* aclnet-int8
+
+> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+
 ## Running
 
 Run the application with the `-h` option to see the usage message:
-```
-python3 sound_classification_demo.py -h
-```
-The command yields the following usage message:
+
 ```
 usage: sound_classification_demo.py [-h] -i INPUT -m MODEL [-l CPU_EXTENSION]
                                     [-d DEVICE] [--labels LABELS]
@@ -40,21 +50,21 @@ Options:
                         Optional. Set the overlapping between audio clip in
                         samples or percent
 ```
+
 Running the application with the empty list of options yields the usage message given above and an error message.
+
 You can use the following command to do inference on GPU with a pre-trained sound classification model and conversion of input audio to samplerate of 16000:
-```
+
+```sh
 python3 sound_classification_demo.py -i <path_to_wav>/input_audio.wav -m <path_to_model>/aclnet.xml -d GPU --samplerate 16000
 ```
-
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/sound_classification_demo/python/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 ## Demo Output
 
 The demo uses console to display the predictions. It shows classification of each clip with timing of it and total prediction of whole audio.
 
 ## See Also
+
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
