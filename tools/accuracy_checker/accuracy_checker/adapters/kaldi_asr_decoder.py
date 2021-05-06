@@ -60,7 +60,10 @@ class KaldiLatGenDecoder(Adapter):
                 description='add word insertion penalty to the lattice. Penalties are negative log-probs, '
                             "base e, and are added to the language model' part of the cost"
             ),
-            '_kaldi_bin_dir': PathField(is_directory=True, optional=True, description='directory with Kaldi binaries')
+            '_kaldi_bin_dir': PathField(is_directory=True, optional=True, description='directory with Kaldi binaries'),
+            '_kaldi_log_file': PathField(
+                optional=True, description='File for saving Kaldi tools logs', check_exists=False
+            )
         })
         return params
 
@@ -79,6 +82,7 @@ class KaldiLatGenDecoder(Adapter):
         self.allow_partial = self.get_value_from_config('allow_partial')
         self.decoder_cmd = None
         self._temp_dir = None
+        self._kaldi_log_file = self.get_value_from_config('_kaldi_log_file')
 
     def read_words_table(self):
         words_table = {}
@@ -97,11 +101,11 @@ class KaldiLatGenDecoder(Adapter):
         if not latgen_path.exists():
             raise ConfigError(error_msg.format(latgen_path))
         latgen_cmd = ' '.join([str(latgen_path),
-                               "--min-active={}".format(self.min_active),
-                               "--max-active={}".format(self.max_active),
+                               "--min-active={}".format(str(self.min_active)),
+                               "--max-active={}".format(str(self.max_active)),
                                "--max-mem=50000000",
-                               "--beam={}".format(str(self.beam)),
-                               "--lattice-beam={}".format(str(self.lattice_beam)),
+                               "--beam={}".format(str(float(self.beam))),
+                               "--lattice-beam={}".format(str(float(self.lattice_beam))),
                                "--acoustic-scale={}".format(str(self.acoustic_scale)),
                                "--allow-partial={}".format(str(self.allow_partial).lower()),
                                "--word-symbol-table={}".format(self.words_file),
@@ -188,7 +192,11 @@ class KaldiLatGenDecoder(Adapter):
 
         def get_cmd_result(process):
             _, stderr = process.communicate()
-            stderr = stderr.decode('utf-8') if stderr else None
+            stderr = stderr.decode('utf-8') if stderr else ''
+            if self._kaldi_log_file:
+                with self._kaldi_log_file.open('a') as logfile:
+                    cmd_args = ' '.join(process.args)
+                    logfile.write(cmd_args + '\n'+stderr)
             if process.returncode != 0:
                 raise RuntimeError("\nAn error occurred!\n Return code: {}\n Error output:\n{}"
                                    .format(str(process.returncode), stderr))
@@ -205,6 +213,7 @@ class KaldiLatGenDecoder(Adapter):
             result = line.split(' ')
             utt = result[0]
             decoded = ' '.join([self.words_table[int(idx)] for idx in result[1:]])
+            decoded.replace('<UNK>', '')
             transcripts[utt] = decoded
         return transcripts
 

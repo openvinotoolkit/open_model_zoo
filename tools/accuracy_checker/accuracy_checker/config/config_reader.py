@@ -851,8 +851,10 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
         return launcher_entry
 
     kaldi_binaries = arguments.kaldi_bin_dir if 'kaldi_bin_dir' in arguments else None
+    kaldi_logs = arguments.kaldi_log_file if 'kaldi_log_file' in arguments else None
     if kaldi_binaries:
         launcher_entry['_kaldi_bin_dir'] = kaldi_binaries
+        launcher_entry['_kaldi_log_file'] = kaldi_logs
 
     if launcher_entry['framework'].lower() != 'dlsdk':
         return launcher_entry
