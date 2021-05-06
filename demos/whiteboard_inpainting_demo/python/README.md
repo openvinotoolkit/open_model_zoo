@@ -1,6 +1,6 @@
-# Whiteboard Inpainting Demo
+# Whiteboard Inpainting Python\* Demo
 
-![](./whiteboard_inpainting.gif)
+![example](./whiteboard_inpainting.gif)
 
 This demo focuses on a whiteboard text overlapped by a person. The demo shows
 how to use the OpenVINO™ toolkit to detect and hide a person on a
@@ -13,16 +13,27 @@ The demo expects one of the following models in the Intermediate Representation 
 * Instance segmentation model
 * Semantic segmentation model
 
-Use your own model or a pretrained model from the OpenVINO™ Open Model Zoo.
-Find the list of models suitable for this demo in `models.lst`. Use the
-[Model Downloader](../../../tools/downloader/README.md) to obtain the models.
-
 As an input, the demo application takes:
 
 * Path to a video file
 * Index of a web camera
 
-## Running
+## Preparing to run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported models
+
+* instance-segmentation-security-0002
+* instance-segmentation-security-0091
+* instance-segmentation-security-0228
+* instance-segmentation-security-1039
+* instance-segmentation-security-1040
+* semantic-segmentation-adas-0001
+
+> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
 
 ### Install Dependencies
 
@@ -32,7 +43,7 @@ To install required dependencies, open a terminal and run the following:
 pip3 install -r requirements.txt
 ```
 
-### Command-Line Arguments
+## Running
 
 Run the application with the `-h` option to see the following usage message:
 
@@ -78,8 +89,8 @@ optional arguments:
 
 Example of a command:
 
-```
-python whiteboard_inpainting_demo.py \
+```sh
+python3 whiteboard_inpainting_demo.py \
     -i <path_to_video>/video.avi \
     -m_i <path_to_model>/instance-segmentation-security-0228.xml
 ```
@@ -91,3 +102,9 @@ The demo outputs original video with the processed one. Usage:
 * Invert colors on the resulting frame by pressing the `i` key.
 * Select a part of the frame to be shown in a separate window by using your left mouse button.
 * Exit the demo by pressing `Esc`.
+
+## See Also
+
+* [Using Open Model Zoo demos](../../README.md)
+* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/downloader/README.md)
