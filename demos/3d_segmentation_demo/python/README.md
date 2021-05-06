@@ -25,12 +25,6 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 
 Run the application with the `-h` or `--help` option to see the usage message:
 
-```python
-python3 3d_segmentation_demo.py -h
-```
-
-The command yields the following usage message:
-
 ```
 usage: 3d_segmentation_demo.py [-h] -i PATH_TO_INPUT_DATA -m PATH_TO_MODEL -o
                                PATH_TO_OUTPUT [-d TARGET_DEVICE]
