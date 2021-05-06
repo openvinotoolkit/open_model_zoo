@@ -7,7 +7,7 @@ Async API usage can improve overall frame-rate of the application, because rathe
 the app can continue doing things on the host, while accelerator is busy.
 Specifically, this demo keeps the number of Infer Requests that you have set using `nireq` flag. While some of the Infer Requests are processed by Inference Engine, the other ones can be filled with new frame data and asynchronously started or the next output can be taken from the Infer Request and displayed.
 
-This technique can be generalized to any available parallel slack, for example, doing inference and simultaneously encoding the rendering
+This technique can be generalized to any available parallel slack, for example, doing inference and simultaneously encoding the resulting
 (previous) frames or running further inference, like some emotion detection on top of the face detection results.
 There are important performance caveats though, for example the tasks that run in parallel should try to avoid oversubscribing the shared compute resources.
 For example, if the inference is performed on the HDDL, and the CPU is essentially idle, than it makes sense to do things on the CPU
