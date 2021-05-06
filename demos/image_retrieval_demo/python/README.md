@@ -1,6 +1,6 @@
 # Image Retrieval Python\* Demo
 
-![](./image_retrieval.gif)
+![example](./image_retrieval.gif)
 
 This demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 
@@ -11,8 +11,9 @@ This demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 The demo application expects an image retrieval model in the Intermediate Representation (IR) format.
 
 As input, the demo application takes:
-* a path to a list of images represented by textfile with following format 'path_to_image' 'ID' `--images`
-* a path to a video file or a device node of a web-camera specified with a command line argument `--video`
+
+* a path to a list of images represented by textfile with following format: 'path_to_image' 'ID'
+* a path to a video file or a device node of a web-camera
 
 The demo workflow is the following:
 
@@ -25,6 +26,19 @@ The demo workflow is the following:
     - Performance characteristics.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+
+## Preparing to run
+
+The demo sample input videos can be found in this [repository](https://github.com/19900531/test). An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
+
+Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported models
+
+* image-retrieval-0001
+
+> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
 
 ## Running
 
@@ -70,11 +84,8 @@ Options:
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/image_retrieval_demo/python/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 To run the demo, please provide paths to the model in the IR format, to a file with class labels, and to an input video, image, or folder with images:
+
 ```bash
 python image_retrieval_demo.py \
 -m <path_to_model>/image-retrieval-0001.xml \
@@ -83,15 +94,12 @@ python image_retrieval_demo.py \
 --ground_truth text_label
 ```
 
-An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
-
-Examples of videos can be found [here](https://github.com/19900531/test).
-
 ## Demo Output
 
 The application uses OpenCV to display gallery searching result and current inference performance.
 
 ## See Also
+
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
