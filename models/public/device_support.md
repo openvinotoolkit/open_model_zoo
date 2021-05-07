@@ -1,4 +1,4 @@
-# Public Pre-Trained Models device support
+# Public Pre-Trained Models Device Support
 
 | Model Name | CPU | GPU | MYRIAD |
 |------------|-----|-----|--------|

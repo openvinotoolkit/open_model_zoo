@@ -1,4 +1,4 @@
-# Intel's Pre-Trained Models device support
+# Intel's Pre-Trained Models Device Support
 
 | Model Name | CPU | GPU | MYRIAD |
 |------------|-----|-----|--------|
