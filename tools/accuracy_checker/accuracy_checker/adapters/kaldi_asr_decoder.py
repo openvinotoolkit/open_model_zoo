@@ -86,7 +86,7 @@ class KaldiLatGenDecoder(Adapter):
 
     def read_words_table(self):
         words_table = {}
-        for line in read_txt(words_file):
+        for line in read_txt(self.words_file):
             word, idx = line.split()
             words_table[int(idx)] = word
         return words_table
