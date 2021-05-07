@@ -456,9 +456,9 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
                 'metric_target': metric_meta.get('target', 'higher-better'),
                 'metric_scale': metric_meta.get('scale', 100),
                 'metric_postfix': metric_meta.get('postfix', '%'),
-                'ref': metric_result['ref'],
-                'abs_threshold': metric_result['abs_threshold'],
-                'rel_threshold': metric_result['rel_threshold']
+                'ref': metric_result.get('ref', ''),
+                'abs_threshold': metric_result.get('abs_threshold', ''),
+                'rel_threshold': metric_result.get('rel_threshold', '')
             })
 
 
