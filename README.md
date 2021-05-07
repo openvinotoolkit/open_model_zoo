@@ -8,8 +8,8 @@ This repository includes optimized deep learning models and a set of demos to ex
 Intel is committed to the respect of human rights and avoiding complicity in human rights abuses, a policy reflected in the [Intel Global Human Rights Principles](https://www.intel.com/content/www/us/en/policy/policy-human-rights.html). Accordingly, by accessing the Intel material on this platform you agree that you will not use the material in a product or application that causes or contributes to a violation of an internationally recognized human right.
 
 ## Repository Components:
-* [Intel pre-trained models](models/intel/index.md)
-* [Public pre-trained models](models/public/index.md)
+* [Intel Pre-Trained Models](models/intel/index.md)
+* [Public Pre-Trained Models](models/public/index.md)
 * [Model Downloader](tools/downloader/README.md) and other automation tools
 * [Demos](demos/README.md) that demonstrate models usage with Deep Learning Deployment Toolkit
 * [Accuracy Checker](tools/accuracy_checker/README.md) tool for models accuracy validation
