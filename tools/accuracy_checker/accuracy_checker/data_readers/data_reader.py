@@ -86,6 +86,7 @@ ListIdentifier = namedtuple('ListIdentifier', ['values'])
 MultiInstanceIdentifier = namedtuple('MultiInstanceIdentifier', ['identifier', 'object_id'])
 KaldiMatrixIdentifier = namedtuple('KaldiMatrixIdentifier', ['file', 'key'])
 KaldiFrameIdentifier = namedtuple('KaldiFrameIdentifier', ['file', 'key', 'id'])
+ParametricImageIdentifier = namedtuple('ParametricImageIdentifier', ['identifier', 'parameters'])
 
 IdentifierSerializationOptions = namedtuple(
     "identifierSerializationOptions", ['type', 'fields', 'class_id', 'recursive', 'to_tuple']
@@ -104,7 +105,10 @@ identifier_serialization = {
     'KaldiMatrixIdentifier': IdentifierSerializationOptions(
         'kaldi_matrix', ['file', 'key'], KaldiMatrixIdentifier, [False, False], [False, False]),
     'KaldiFrameIdentifier': IdentifierSerializationOptions(
-        'kaldi_frame', ['file', 'key', 'id'], KaldiFrameIdentifier, [False, False, False], [False, False, False])
+        'kaldi_frame', ['file', 'key', 'id'], KaldiFrameIdentifier, [False, False, False], [False, False, False]),
+    'ParametricImageIdentifier': IdentifierSerializationOptions(
+        'parametric_image_identifier', ['identifier', 'parameters'], ParametricImageIdentifier, False, [False, True]
+    )
 }
 
 identifier_deserialization = {option.type: option for option in identifier_serialization.values()}
@@ -150,6 +154,8 @@ def create_identifier_key(identifier):
         return ClipIdentifier(identifier.video, identifier.clip_id, tuple(identifier.frames))
     if isinstance(identifier, MultiFramesInputIdentifier):
         return MultiFramesInputIdentifier(tuple(identifier.input_id), tuple(identifier.frames))
+    if isinstance(identifier, ParametricImageIdentifier):
+        return ParametricImageIdentifier(identifier.identifier, tuple(identifier.parameters))
     return identifier
 
 
@@ -204,6 +210,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(ImagePairIdentifier, self._read_pair)
         self.read_dispatcher.register(ListIdentifier, self._read_list_ids)
         self.read_dispatcher.register(MultiInstanceIdentifier, self._read_multi_instance_single_object)
+        self.read_dispatcher.register(ParametricImageIdentifier, self._read_parametric_input)
         self.multi_infer = False
 
         self.validate_config(config, data_source)
@@ -301,6 +308,10 @@ class BaseReader(ClassProvider):
 
     def _read_multi_instance_single_object(self, data_id):
         return self.read_dispatcher(data_id.identifier)
+
+    def _read_parametric_input(self, data_id):
+        data = self.read_dispatcher(data_id.identifier)
+        return [data, *data_id.parameters]
 
     def read_item(self, data_id):
         data_rep = DataRepresentation(

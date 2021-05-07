@@ -46,6 +46,7 @@ from .data_reader import (
     MultiInstanceIdentifier,
     KaldiFrameIdentifier,
     KaldiMatrixIdentifier,
+    ParametricImageIdentifier,
 
     serialize_identifier,
     deserialize_identifier,
@@ -88,6 +89,7 @@ __all__ = [
     'MultiInstanceIdentifier',
     'KaldiMatrixIdentifier',
     'KaldiFrameIdentifier',
+    'ParametricImageIdentifier',
 
     'create_reader',
     'REQUIRES_ANNOTATIONS',
