@@ -19,7 +19,7 @@ import sys
 
 from pathlib import Path
 
-from open_model_zoo.model_tools import _common
+from open_model_zoo.model_tools import _common, _concurrency
 
 
 def run_pre_convert(reporter, model, output_dir, args):
@@ -190,7 +190,7 @@ def main():
     if args.jobs == 1 or args.dry_run:
         results = [convert(reporter, model) for model in models]
     else:
-        results = _common.run_in_parallel(args.jobs,
+        results = _concurrency.run_in_parallel(args.jobs,
             lambda context, model: convert(_common.Reporter(context), model),
             models)
 

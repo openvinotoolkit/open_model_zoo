@@ -30,7 +30,7 @@ import types
 
 from pathlib import Path
 
-from open_model_zoo.model_tools import _common
+from open_model_zoo.model_tools import _common, _concurrency
 
 CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 
@@ -367,7 +367,7 @@ def main():
             results = [download_model(reporter, args, cache, session_factory, requested_precisions, model)
                 for model in models]
         else:
-            results = _common.run_in_parallel(args.jobs,
+            results = _concurrency.run_in_parallel(args.jobs,
                 lambda context, model: download_model(
                     make_reporter(context), args, cache, session_factory, requested_precisions, model),
                 models)

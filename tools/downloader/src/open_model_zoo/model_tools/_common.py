@@ -13,12 +13,10 @@
 # limitations under the License.
 
 import collections
-import concurrent.futures
 import contextlib
 import fnmatch
 import json
 import platform
-import queue
 import re
 import shlex
 import shutil
@@ -141,60 +139,6 @@ class DirectOutputContext(JobContext):
 
         return return_code == 0
 
-
-class QueuedOutputContext(JobContext):
-    def __init__(self, output_queue):
-        super().__init__()
-        self._output_queue = output_queue
-
-    def print(self, value, *, end='\n', file=sys.stdout, flush=False):
-        self._output_queue.put((file, value + end))
-
-    def subprocess(self, args, **kwargs):
-        with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                universal_newlines=True, **kwargs) as p:
-            for line in p.stdout:
-                self._output_queue.put((sys.stdout, line))
-            return_code = p.wait()
-
-        if return_code < 0:
-            self._output_queue.put((sys.stderr, self._signal_message(-return_code)))
-
-        return return_code == 0
-
-class JobWithQueuedOutput():
-    def __init__(self, context, output_queue, future):
-        self._context = context
-        self._output_queue = output_queue
-        self._future = future
-        self._future.add_done_callback(lambda future: self._output_queue.put(None))
-
-    def complete(self):
-        for file, fragment in iter(self._output_queue.get, None):
-            print(fragment, end='', file=file, flush=True) # for simplicity, flush every fragment
-
-        return self._future.result()
-
-    def cancel(self):
-        self._context.interrupt()
-        self._future.cancel()
-
-
-def run_in_parallel(num_jobs, f, work_items):
-    with concurrent.futures.ThreadPoolExecutor(num_jobs) as executor:
-        def start(work_item):
-            output_queue = queue.Queue()
-            context = QueuedOutputContext(output_queue)
-            return JobWithQueuedOutput(
-                context, output_queue, executor.submit(f, context, work_item))
-
-        jobs = list(map(start, work_items))
-
-        try:
-            return [job.complete() for job in jobs]
-        except BaseException:
-            for job in jobs: job.cancel()
-            raise
 
 EVENT_EMISSION_LOCK = threading.Lock()
 
