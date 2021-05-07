@@ -43,9 +43,7 @@ grpcio==1.32.0
     #   tensorboard
     #   tensorflow
 h5py==2.10.0
-    # via
-    #   -r tools/downloader/requirements-tensorflow.in
-    #   tensorflow
+    # via tensorflow
 idna==2.10
     # via requests
 importlib-metadata==3.7.3
@@ -54,7 +52,7 @@ keras-preprocessing==1.1.2
     # via tensorflow
 markdown==3.3.4
     # via tensorboard
-mxnet==1.7.0.post2 ; sys_platform == "linux"
+mxnet==1.7.0.post2 ; sys_platform != "win32"
     # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_mxnet.txt
 networkx==2.5
     # via
