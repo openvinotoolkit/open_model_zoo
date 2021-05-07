@@ -8,19 +8,19 @@ Upon the start-up the demo application reads command line parameters and loads a
 
 The program provides an interactive CLI interface that gets a sentence in the source language as an input and returns its translation to the target language.
 
-## Preparing to run
+## Preparing to Run
 
-Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+The list of models supported by the demo is in <omz_dir>/demos/machine_translation_demo/python/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
-### Supported models
+### Supported Models
 
 * machine-translation-nar-de-en-0001
 * machine-translation-nar-en-de-0001
 * machine-translation-nar-en-ru-0001
 * machine-translation-nar-ru-en-0001
 
-> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ### Running the Demo
 
@@ -57,6 +57,6 @@ python3 ./machine_translation_demo -i "a sample english text" -m <path_to_model>
 
 ## See Also
 
-* [Using Open Model Zoo demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

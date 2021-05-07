@@ -14,9 +14,9 @@ The application accepts
 
 After computing audio features, running a neural network to get per-frame character probabilities, and CTC decoding, the demo prints the decoded text together with the timings of the processing stages.
 
-## Preparing to run
+## Preparing to Run
 
-Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+The list of models supported by the demo is in <omz_dir>/demos/speech_recognition_demo/python/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
@@ -38,14 +38,14 @@ Please refer to [Open Model Zoo demos](../../README.md) for instructions
 on how to build the extension module and prepare the environment for running the demo.
 Alternatively, instead of using `cmake` you can run `python -m pip install .` inside `ctcdecode-numpy` directory to build and install `ctcdecode-numpy`.
 
-### Supported models
+### Supported Models
 
 * mozilla-deepspeech-0.6.1
 * mozilla-deepspeech-0.8.2
 
 Please pay attention to the model license, **Mozilla Public License 2.0**.
 
-> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running Demo
 
@@ -110,7 +110,7 @@ python3 speech_recognition_demo.py \
     -i <path_to_audio>/audio.wav
 ```
 
-**Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.**
+> **NOTE**: Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.
 
 Optional language model files, `deepspeech-0.8.2-models.kenlm` or `lm.binary` are part of corresponding model downloaded content and will be located at Model Downloader output folder after model downloading. An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/how_are_you_doing.wav`.
 
@@ -120,6 +120,6 @@ The application shows time taken by the initialization and processing stages, an
 
 ## See Also
 
-* [Using Open Model Zoo demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

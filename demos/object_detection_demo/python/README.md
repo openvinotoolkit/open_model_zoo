@@ -43,13 +43,13 @@ model using the Model Optimizer tool with `--reverse_input_channels` argument sp
 the argument, refer to **When to Reverse Input Channels** section of
 [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
-## Preparing to run
+## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
-Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+The list of models supported by the demo is in <omz_dir>/demos/object_detection_demo/python/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
-### Supported models
+### Supported Models
 
 * architecture_type = centernet
   - ctdet_coco_dlav0_384
@@ -128,7 +128,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
   - yolo-v4-tf
   - yolo-v4-tiny-tf
 
-> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -254,6 +254,6 @@ You can use both of these metrics to measure application-level performance.
 
 ## See Also
 
-* [Using Open Model Zoo demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

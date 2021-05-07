@@ -8,16 +8,16 @@ Upon the start-up the demo application reads command line parameters and loads a
 It also fetch data from the user-provided url to populate the "context" text.
 The text is then used to search named entities.
 
-## Preparing to run
+## Preparing to Run
 
-Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+The list of models supported by the demo is in <omz_dir>/demos/bert_named_entity_recognition_demo/python/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
-### Supported models
+### Supported Models
 
 * bert-base-ner
 
-> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -85,7 +85,7 @@ for any actual performance measurements.
 
 ## See Also
 
-* [Using Open Model Zoo demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
 * [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)

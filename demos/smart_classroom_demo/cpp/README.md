@@ -25,13 +25,13 @@ To recognize faces on a frame, the demo needs a gallery of reference images. Eac
 1. Put images containing tight crops of frontal-oriented faces (or use `-crop_gallery` key for the demo) to a separate empty folder. Each identity must have only one image. Name images as `id_name0.png, id_name1.png, ...`.
 2. Run the `create_list.py <path_to_folder_with_images>` command to get a list of files and identities in `.json` format.
 
-## Preparing to run
+## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
-Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+The list of models supported by the demo is in <omz_dir>/demos/smart_classroom_demo/cpp/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
-### Supported models
+### Supported Models
 
 * face-detection-adas-0001
 * face-recognition-mobilefacenet-arcface
@@ -44,7 +44,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 * person-detection-action-recognition-teacher-0002
 * person-detection-raisinghand-recognition-0001
 
-> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -132,6 +132,6 @@ The demo uses OpenCV to display the resulting frame with labeled actions and fac
 
 ## See Also
 
-* [Using Open Model Zoo demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

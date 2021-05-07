@@ -17,12 +17,12 @@ Notice that question is usually much shorter than the contexts, so calculating t
 
 If second (conventional SQuAD-tuned) Bert model is provided as well, it is used to further search for the exact answer in the best contexts found in the first step, and the result then also displayed to the user.
 
-## Preparing to run
+## Preparing to Run
 
-Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+The list of models supported by the demo is in <omz_dir>/demos/bert_question_answering_embedding_demo/python/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
-### Supported models
+### Supported Models
 
 * bert-large-uncased-whole-word-masking-squad-0001
 * bert-large-uncased-whole-word-masking-squad-emb-0001
@@ -34,7 +34,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 * bert-large-uncased-whole-word-masking-squad-emb-0001
 * bert-small-uncased-whole-word-masking-squad-emb-int8-0001
 
-> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -138,7 +138,7 @@ for any actual performance measurements.
 
 ## See Also
 
-* [Using Open Model Zoo demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
 * [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)

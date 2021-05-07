@@ -6,16 +6,16 @@ This demo demonstrates Automatic Speech Recognition (ASR) with pretrained Quartz
 
 After computing audio features, running a neural network to get character probabilities, and CTC greedy decoding, the demo prints the decoded text.
 
-## Preparing to run
+## Preparing to Run
 
-Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+The list of models supported by the demo is in <omz_dir>/demos/speech_recognition_offline_demo/python/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
-### Supported models
+### Supported Models
 
 * quartznet-15x5-en
 
-> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running Demo
 
@@ -43,7 +43,7 @@ The typical command line is:
 python3 speech_recognition_offline_demo.py -m quartznet-15x5-en.xml -i audio.wav
 ```
 
-**Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.**
+> **NOTE**: Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.
 
 An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/how_are_you_doing.wav`.
 
@@ -53,6 +53,6 @@ The application prints the decoded text for the audio file.
 
 ## See Also
 
-* [Using Open Model Zoo demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

@@ -10,19 +10,19 @@ Inference Engine plugin. The demo pipeline reads text file by lines and divides 
 The heuristic algorithm chooses punctuation near to the some threshold by sentence length.
 When inference is done, the application outputs the audio to the WAV file with 22050 Hz sample rate.
 
-## Preparing to run
+## Preparing to Run
 
-Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+The list of models supported by the demo is in <omz_dir>/demos/text_to_speech_demo/python/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
-### Supported models
+### Supported Models
 
 * forward-tacotron-duration-prediction
 * forward-tacotron-regression
 * wavernn-rnn
 * wavernn-upsampler
 
-> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -75,7 +75,7 @@ Options:
 
 Running the application with the empty list of options yields the usage message and an error message.
 
-## Example for running with arguments
+## Example for Running with Arguments
 
 ### ForwardTacotron with WaveRNN
 
@@ -106,6 +106,6 @@ The application outputs is WAV file with generated audio.
 
 ## See Also
 
-* [Using Open Model Zoo Demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

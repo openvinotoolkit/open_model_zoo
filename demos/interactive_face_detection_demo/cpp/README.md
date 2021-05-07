@@ -35,10 +35,10 @@ Engine.
 
 The Async API operates with a notion of the Infer Request that encapsulates the inputs/outputs and separates scheduling and waiting for result.
 
-## Preparing to run
+## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
-Pre-trained models, supported by demo listed in [models.lst](./models.lst) file, located at each demo folder.
+The list of models supported by the demo is in <omz_dir>/demos/interactive_face_detection_demo/cpp/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
@@ -53,7 +53,7 @@ An example of using the Model Converter:
 python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 ```
 
-### Supported models
+### Supported Models
 
 * age-gender-recognition-retail-0013
 * anti-spoof-mn3
@@ -65,7 +65,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * facial-landmarks-35-adas-0002
 * head-pose-estimation-adas-0001
 
-> **NOTE**: Refer to tables for [Intel](../../../models/intel/device_support.md) and [public](../../../models/public/device_support.md) models which summarize models support at different devices to select target inference device.
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -138,6 +138,6 @@ The demo reports total image throughput which includes frame decoding time, infe
 
 ## See Also
 
-* [Using Open Model Zoo demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
