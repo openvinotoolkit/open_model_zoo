@@ -97,7 +97,7 @@ regex==2021.3.17
     # via nltk
 requests==2.25.1
     # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_kaldi.txt
-scikit-image==0.17.2 ; python_version == "3.6"
+scikit-image==0.17.2
     # via -r tools/accuracy_checker/requirements.in
 scikit-learn==0.24.1
     # via -r tools/accuracy_checker/requirements.in
