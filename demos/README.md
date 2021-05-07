@@ -182,9 +182,9 @@ cd build
   ```sh
   cmake -DCMAKE_BUILD_TYPE=Debug <open_model_zoo>/demos
   ```
-4. Run `make` to build the demos:
+4. Run `cmake --build` tool to build the demos:
 ```sh
-make
+cmake --build .
 ```
 
 For the release configuration, the demo application binaries are in `<path_to_build_directory>/intel64/Release/`;
@@ -222,6 +222,29 @@ build binaries in Debug configuration. Run the appropriate version of the
 Microsoft Visual Studio and open the generated solution file from the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\Demos.sln`
 directory.
 
+You can also build the demo applications using `cmake --build` tool:
+1. Navigate to a directory that you have write access to and create a demos build directory. This example uses a directory named `build`:
+```
+md build
+```
+2. Go to the created directory:
+```
+cd build
+```
+3. Run CMake to generate project files:
+```
+cmake -A x64 <open_model_zoo>/demos
+```
+4. Run `cmake --build` tool to  build the demos:
+  - For release configuration
+  ```
+  cmake --build . --config Release
+  ```
+  - For debug configuration:
+  ```
+  cmake --build . --config Debug
+  ```
+
 ### <a name="build_python_extensions"></a>Build the Native Python\* Extension Modules
 
 Some of the Python demo applications require native Python extension modules to be built before they can be run.
@@ -232,6 +255,33 @@ For example:
 
 ```sh
 cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON=ON <open_model_zoo>/demos
+```
+
+### <a name="build_specific_demos"></a>Build Specific Demos
+
+To build specific demos, follow the instructions for building the demo applications above,
+but add `--target <demo1> <demo2> ...` to the `cmake --build` command or `--target="<demo1> <demo2> ..."` to the `build_demos*` command.
+Note, `cmake --build` tool supports multiple targets starting with version 3.15, with lower versions you can specify only one target.
+
+For Linux*:
+```sh
+cmake -DCMAKE_BUILD_TYPE=Release <open_model_zoo>/demos
+cmake --build . --target classification_demo segmentation_demo
+```
+or
+```sh
+build_demos.sh --target="classification_demo segmentation_demo"
+```
+For Microsoft Windows* OS:
+
+```
+cmake -A x64 <open_model_zoo>/demos
+cmake --build . --config Release --target classification_demo segmentation_demo
+```
+or
+
+```bat
+build_demos_msvc.bat --target="classification_demo segmentation_demo"
 ```
 
 ## Get Ready for Running the Demo Applications
