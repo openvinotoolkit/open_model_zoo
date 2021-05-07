@@ -86,7 +86,7 @@ class KaldiLatGenDecoder(Adapter):
 
     def read_words_table(self):
         words_table = {}
-        for line in read_txt(self.words_file):
+        for line in read_txt(words_file):
             word, idx = line.split()
             words_table[int(idx)] = word
         return words_table
@@ -110,7 +110,7 @@ class KaldiLatGenDecoder(Adapter):
                                "--allow-partial={}".format(str(self.allow_partial).lower()),
                                "--word-symbol-table={}".format(self.words_file),
                                str(self.transition_model), str(self.fst_file),
-                               "ark:{}", "ark:-"])
+                               "ark,t:{}", "ark:-"])
 
         lattice_scale_path = self.kaldi_bin_dir / executable.format('lattice-scale')
         if not lattice_scale_path.exists():
@@ -171,21 +171,29 @@ class KaldiLatGenDecoder(Adapter):
 
     def dump_scores(self, utterance_key, mat):
         out_file = Path(self._temp_dir.name) / '{}_scores.ark'.format(utterance_key)
-        with out_file.open('wb') as fd:
-            fd.write(str.encode(utterance_key + " "))
-            fd.write(str.encode('\0B'))
-            if mat.dtype not in [np.float32, np.float64]:
-                raise RuntimeError("Unsupported numpy dtype: {}".format(mat.dtype))
-            mat_type = 'FM' if mat.dtype == np.float32 else 'DM'
-            fd.write(str.encode(mat_type + " "))
-            num_rows, num_cols = mat.shape
-            fd.write(str.encode('\04'))
-            int_pack = struct.pack('i', num_rows)
-            fd.write(int_pack)
-            fd.write(str.encode('\04'))
-            int_pack = struct.pack('i', num_cols)
-            fd.write(int_pack)
-            fd.write(mat.tobytes())
+        with out_file.open('w') as fd:
+            fd.write(utterance_key+' [\n')
+            lines = []
+            for line in mat:
+                lines.append(' '.join([str(i) for i in line]) + '\n')
+            fd.writelines(lines)
+            fd.write(']\n')
+
+        # with out_file.open('wb') as fd:
+        #     fd.write(str.encode(utterance_key + " "))
+        #     fd.write(str.encode('\0B'))
+        #     if mat.dtype not in [np.float32, np.float64]:
+        #         raise RuntimeError("Unsupported numpy dtype: {}".format(mat.dtype))
+        #     mat_type = 'FM' if mat.dtype == np.float32 else 'DM'
+        #     fd.write(str.encode(mat_type + " "))
+        #     num_rows, num_cols = mat.shape
+        #     fd.write(str.encode('\04'))
+        #     int_pack = struct.pack('i', num_rows)
+        #     fd.write(int_pack)
+        #     fd.write(str.encode('\04'))
+        #     int_pack = struct.pack('i', num_cols)
+        #     fd.write(int_pack)
+        #     fd.write(mat.tobytes())
         return out_file
 
     def run_decoder(self, scores_file):
