@@ -284,5 +284,13 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 |   text-to-speech-en-0001-regression                          | 7.65  | 4.96   |
 |   text-to-speech-en-0001-generation                          | 48.38 | 12.77  |
 
+## Time Series
+
+Deep Learning models for time series forecasting.
+
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [time-series-forecasting-electricity-0001](./time-series-forecasting-electricity-0001/README.md) | 0.40 | 2.26 |
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
