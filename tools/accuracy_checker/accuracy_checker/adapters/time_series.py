@@ -19,8 +19,8 @@ from ..representation import ElectricityTimeSeriesForecastingPrediction
 from ..config import StringField, DictField
 
 
-class TemporalFusionTransformerAdapter(Adapter):
-    __provider__ = 'temporal_fusion_transformer'
+class QuantilesPredictorAdapter(Adapter):
+    __provider__ = 'quantiles_predictor'
 
     @classmethod
     def parameters(cls):
