@@ -180,6 +180,10 @@ def main():
                 reporter.print()
                 continue
 
+            pot_env.update({
+                'MODELS_DIR': str(args.model_dir / model.subdirectory)
+            })
+
             for precision in sorted(requested_precisions):
                 if not quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
                     failed_models.append(model.name)
