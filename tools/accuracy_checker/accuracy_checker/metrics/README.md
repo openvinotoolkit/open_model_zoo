@@ -285,6 +285,7 @@ Applied for models trained on brats data with labels in range (0, 1, 2, 3). The 
 * `salience_s-measure` - simularity measure for salient object detection task, defined in following [paper](https://arxiv.org/abs/1708.00786). Supported representations: `SalientRegionAnnotation`, `SalientRegionPrediction`.
 * `sisdr` - Scale-invariant signal-to-distortion ratio described in [paper](https://arxiv.org/pdf/1811.02508.pdf). Supported representations: `NoiseSuppressionAnnotation`, `NoiseSuppressionPrediction`.
   * `delay` - shift output by delay for alignment with reference (Optional, default 0).
+* `normalised_quantile_loss` - q-risk normalized quantile loss for evaluation of time series forecasting models. Supported representations: `TimeSeriesForecastingAnnotation`, `TimeSeriesForecastingQuantilesPrediction`.
 ## Metrics profiling
 Accuracy Checker supports providing detailed information necessary for understanding metric calculation for each data object.
 This feature can be useful for debug purposes. For enabling this behaviour you need to provide `--profile True` in accuracy checker command line.

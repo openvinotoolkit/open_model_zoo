@@ -114,3 +114,4 @@ Accuracy Checker supports following set of postprocessors:
   * `max`- maximal value in range.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
 * `pad_signal` - add left padding to reference signal if it was done for input data. Supported representations: `NoiseSuppressionAnnotation`, `NoiseSuppressionPrediction`.
+* `electricity_time_series_denormalize` - apply denormalization to predicted and ground truth curves. Supported representations: `TimeSeriesForecastingAnnotation`, `TimeSeriesForecastingQuantilesPrediction`.

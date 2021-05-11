@@ -514,6 +514,9 @@ The main difference between this converter and `super_resolution` in data organi
   * `ref_data_dir` - directory with reference ark files (Optional, if not provided `data_dir` will be used instead).
   * `vectors_mode` - allow usage each vector in utterance as independent data.
   * `ref_file_suffix` - suffix for search reference files (Optional, default `_kaldi_score`).
+* `electricity` - converts Electricity dataset to `TimeSeriesForecastingAnnotation`.
+  * `data_path_file` - Path to dataset file in .csv format.
+  * `num_encoder_steps` - The maximum number of historical timestamps that model use.
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

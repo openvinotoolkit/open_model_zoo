@@ -294,7 +294,7 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
         configuration_parameters.update({
             "data_path_file": PathField(description="Path to dataset file in .csv format."),
             "num_encoder_steps": NumberField(
-                description='The maximum number of timestamps that model use.',
+                description='The maximum number of historical timestamps that model use.',
                 optional=True, default=7 * 24, value_type=int
             )
         })
