@@ -1,0 +1,20 @@
+
+
+description: >-
+  In this work, we propose a fast simulation approach using Convolutional Neural Network (CNN) to model the non-linearity of signal interaction with ultrasound image formation. 
+  The network is trained in an adversarial manner using a Turing test discriminator. The simulation process consists of two stages; Stage 0 is a pseudo-B-mode simulator that provides an initial estimate of the speckle map, 
+  Stage 1 is a multi-linear separable CNN which further refines the speckle map to give the final output. 
+  We further derive the relationship between the frequency of the transducer and the resolution of the ultrasound image to be able to simulate and form images at frequencies other than at which the model is trained.  
+task_type: simulation
+files:
+  - name: ultrasound-simulation.onnx
+    size: 147422
+    sha256: be5e73e17bc8362584a7dbe04cfc9deba14c32f82ca68428ee532a5bc9ab8e03
+    source:
+      $type: google_drive
+      id: 1CxXbNnVSainRBZtX4TZmoIzOgCXhCrnZ
+model_optimizer_args:
+  - --input_shape=[1,128,128]
+  - --input_model=$dl_dir/ultrasound-simulation.onnx
+framework: onnx
+license: http://www.cvc.uab.es/IVUSchallenge2011/dataset.html
