@@ -122,5 +122,5 @@ wcwidth==0.2.5
     # via pytest
 zipp==3.4.1
     # via importlib-metadata
-pandas
+pandas==1.2.3
     # via -r tools/accuracy_checker/requirements.in

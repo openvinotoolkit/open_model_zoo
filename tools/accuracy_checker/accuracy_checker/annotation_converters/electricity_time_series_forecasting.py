@@ -20,7 +20,7 @@ import pandas as pd
 import numpy as np
 import sklearn.preprocessing
 
-from ..representation import ElectricityTimeSeriesForecastingAnnotation
+from ..representation import TimeSeriesForecastingAnnotation
 from ..config import PathField, NumberField
 from .format_converter import BaseFormatConverter, ConverterReturn
 
@@ -286,7 +286,7 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
     URL = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00321/LD2011_2014.txt.zip'
 
     __provider__ = "electricity"
-    annotation_types = (ElectricityTimeSeriesForecastingAnnotation, )
+    annotation_types = (TimeSeriesForecastingAnnotation, )
 
     @classmethod
     def parameters(cls):
@@ -317,7 +317,7 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
         samples = []
         for idx in tqdm(range(int(data_index.shape[0]))):
             samples.append(
-                ElectricityTimeSeriesForecastingAnnotation(f"inputs_{idx}", *self.get_sample(data, data_index, col_mappings, idx))
+                TimeSeriesForecastingAnnotation(f"inputs_{idx}", *self.get_sample(data, data_index, col_mappings, idx))
             )
 
         return ConverterReturn(samples, None, None)

@@ -104,8 +104,8 @@ from .optical_flow import OpticalFlowAnnotation, OpticalFlowPrediction
 from .noise_suppression import NoiseSuppressionAnnotation, NoiseSuppressionPrediction
 
 from .time_series_representation import (
-    ElectricityTimeSeriesForecastingAnnotation,
-    ElectricityTimeSeriesForecastingPrediction
+    TimeSeriesForecastingAnnotation,
+    TimeSeriesForecastingQuantilesPrediction
 )
 
 __all__ = [
@@ -223,6 +223,6 @@ __all__ = [
     'NoiseSuppressionAnnotation',
     'NoiseSuppressionPrediction',
 
-    'ElectricityTimeSeriesForecastingAnnotation',
-    'ElectricityTimeSeriesForecastingPrediction'
+    'TimeSeriesForecastingAnnotation',
+    'TimeSeriesForecastingQuantilesPrediction'
 ]

@@ -21,7 +21,7 @@ class TimeSeriesRepresentation(BaseRepresentation):
     pass
 
 
-class ElectricityTimeSeriesForecastingAnnotation(TimeSeriesRepresentation):
+class TimeSeriesForecastingAnnotation(TimeSeriesRepresentation):
     def __init__(self, identifier, inputs, outputs, mean, scale):
         super().__init__(identifier)
         self.inputs = inputs
@@ -33,7 +33,7 @@ class ElectricityTimeSeriesForecastingAnnotation(TimeSeriesRepresentation):
         return var * self.scale + self.mean
 
 
-class ElectricityTimeSeriesForecastingPrediction(TimeSeriesRepresentation):
+class TimeSeriesForecastingQuantilesPrediction(TimeSeriesRepresentation):
     def __init__(self, identifier):
         super().__init__(identifier)
         self.preds = {}

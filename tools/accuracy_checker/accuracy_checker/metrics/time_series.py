@@ -18,8 +18,8 @@ import numpy as np
 
 from .metric import FullDatasetEvaluationMetric
 from ..representation import (
-    ElectricityTimeSeriesForecastingAnnotation,
-    ElectricityTimeSeriesForecastingPrediction
+    TimeSeriesForecastingAnnotation,
+    TimeSeriesForecastingQuantilesPrediction
 )
 
 
@@ -41,8 +41,8 @@ class NormalisedQuantileLoss(FullDatasetEvaluationMetric):
 
     __provider__ = 'normalised_quantile_loss'
 
-    annotation_types = (ElectricityTimeSeriesForecastingAnnotation, )
-    prediction_types = (ElectricityTimeSeriesForecastingPrediction, )
+    annotation_types = (TimeSeriesForecastingAnnotation, )
+    prediction_types = (TimeSeriesForecastingQuantilesPrediction, )
 
     @classmethod
     def parameters(cls):

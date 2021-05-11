@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from .adapter import Adapter
-from ..representation import ElectricityTimeSeriesForecastingPrediction
+from ..representation import TimeSeriesForecastingQuantilesPrediction
 from ..config import StringField, DictField
 
 
@@ -41,7 +41,7 @@ class QuantilesPredictorAdapter(Adapter):
     def process(self, raw, identifiers, frame_meta):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         output = raw_outputs[self.output_name]
-        preds = ElectricityTimeSeriesForecastingPrediction(identifiers[0])
+        preds = TimeSeriesForecastingQuantilesPrediction(identifiers[0])
         for k, v in self.quantiles.items():
             preds[k] = output[:, :, v]
         return [preds]

@@ -96,5 +96,5 @@ tqdm==4.59.0
     # via
     #   -r tools/accuracy_checker/requirements.in
     #   nltk
-pandas
+pandas==1.2.3
     # via -r tools/accuracy_checker/requirements.in
