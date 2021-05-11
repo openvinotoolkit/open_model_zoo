@@ -36,4 +36,5 @@ model_optimizer_args:
   - --input_shape=[1,228,304,3]
   - --output=ConvPred/ConvPred
   - --input_meta=$dl_dir/NYU_FCRN.ckpt.meta
+quantizable: yes
 license: https://raw.githubusercontent.com/iro-cp/FCRN-DepthPrediction/master/LICENSE

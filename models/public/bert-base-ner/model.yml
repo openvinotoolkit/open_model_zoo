@@ -89,4 +89,5 @@ model_optimizer_args:
   - --input_model=$conv_dir/bert-base-ner.onnx
   - --output=output
 framework: pytorch
+quantizable: yes
 license: https://raw.githubusercontent.com/huggingface/transformers/master/LICENSE

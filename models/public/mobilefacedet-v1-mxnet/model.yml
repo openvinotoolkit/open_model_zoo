@@ -33,4 +33,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/mobilefacedet_v1_mxnet-0000.params
   - --transformations_config=$config_dir/mobileface_det.json
 framework: mxnet
+quantizable: yes
 license: https://raw.githubusercontent.com/becauseofAI/MobileFace/master/LICENSE

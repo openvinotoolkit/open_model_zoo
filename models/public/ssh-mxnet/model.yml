@@ -32,4 +32,5 @@ model_optimizer_args:
   - --mean_values=data[123.68,116.779,103.939]
   - --reverse_input_channels
 framework: mxnet
+quantizable: yes
 license: https://raw.githubusercontent.com/deepinsight/mxnet-SSH/master/LICENSE
