@@ -679,6 +679,7 @@ class CtcBeamSearchCandidate:
     def logp_total(self):
         return log_sum_exp(self.logp_blank, self.logp_non_blank)
 
+
 class DumbDecoder(Adapter):
     __provider__ = 'dumb_decoder'
     prediction_types = (CharacterRecognitionPrediction, )
@@ -705,6 +706,7 @@ class DumbDecoder(Adapter):
         if self.uppercase:
             decoded = decoded.upper()
         return [CharacterRecognitionPrediction(identifiers[0], decoded.upper())]
+
 
 class TextState:
     __slots__ = ('text', 'last_word', 'last_char_index')

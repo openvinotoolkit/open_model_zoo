@@ -24,7 +24,7 @@ from .logging import print_info
 
 EvaluationResult = namedtuple(
     'EvaluationResult', [
-        'evaluated_value', 'reference_value', 'name', 'metric_type', 'threshold', 'meta'
+        'evaluated_value', 'reference_value', 'name', 'metric_type', 'abs_threshold', 'rel_threshold', 'meta'
     ]
 )
 
@@ -43,7 +43,7 @@ class ScalarPrintPresenter(BasePresenter):
     __provider__ = "print_scalar"
 
     def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False):
-        value, reference, name, _, threshold, meta = evaluation_result
+        value, reference, name, _, abs_threshold, rel_threshold, meta = evaluation_result
         value = np.mean(value)
         postfix, scale, result_format = get_result_format_parameters(meta, ignore_results_formatting)
         difference = None
@@ -51,16 +51,19 @@ class ScalarPrintPresenter(BasePresenter):
             _, original_scale, _ = get_result_format_parameters(meta, False)
             difference = compare_with_ref(reference, value, original_scale)
         write_scalar_result(
-            value, name, threshold, difference, postfix=postfix, scale=scale, result_format=result_format
+            value, name, abs_threshold, rel_threshold, difference,
+            postfix=postfix, scale=scale, result_format=result_format
         )
 
     def extract_result(self, evaluation_result):
-        value, ref, name, metric_type, _, meta = evaluation_result
+        value, ref, name, metric_type, abs_threshold, rel_threshold, meta = evaluation_result
         result_dict = {
             'name': name,
             'value': np.mean(value),
             'type': metric_type,
-            'ref': ref or ''
+            'ref': ref or '',
+            'abs_threshold': abs_threshold or '',
+            'ref_threshold': rel_threshold or ''
         }
         return result_dict, meta
 
@@ -69,21 +72,26 @@ class VectorPrintPresenter(BasePresenter):
     __provider__ = "print_vector"
 
     def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False):
-        value, reference, name, _, threshold, meta = evaluation_result
-        if threshold:
-            threshold = float(threshold)
+        value, reference, name, _, abs_threshold, rel_threshold, meta = evaluation_result
+        if abs_threshold:
+            abs_threshold = float(abs_threshold)
+        if rel_threshold:
+            rel_threshold = float(rel_threshold)
 
         value_names = meta.get('names')
         postfix, scale, result_format = get_result_format_parameters(meta, ignore_results_formatting)
         if np.isscalar(value) or np.size(value) == 1:
             if not np.isscalar(value):
-                value = value[0]
+                if np.ndim(value) == 0:
+                    value = value.tolist()
+                else:
+                    value = value[0]
             difference = None
             if reference:
                 _, original_scale, _ = get_result_format_parameters(meta, False)
                 difference = compare_with_ref(reference, value, original_scale)
             write_scalar_result(
-                value, name, threshold, difference,
+                value, name, abs_threshold, rel_threshold, difference,
                 value_name=value_names[0] if value_names else None,
                 postfix=postfix[0] if not np.isscalar(postfix) else postfix,
                 scale=scale[0] if not np.isscalar(scale) else scale,
@@ -107,25 +115,31 @@ class VectorPrintPresenter(BasePresenter):
                 original_scale = get_result_format_parameters(meta, False)[1] if ignore_results_formatting else 1
                 difference = compare_with_ref(reference, mean_value, original_scale)
             write_scalar_result(
-                mean_value, name, threshold, difference, value_name='mean',
+                mean_value, name, abs_threshold, rel_threshold, difference, value_name='mean',
                 postfix=postfix[-1] if not np.isscalar(postfix) else postfix, scale=1,
                 result_format=result_format
             )
 
     def extract_result(self, evaluation_result):
-        value, reference, name, metric_type, _, meta = evaluation_result
-        len_value = len(value) if not np.isscalar(value) else 1
+        value, reference, name, metric_type, abs_threshold, rel_threshold, meta = evaluation_result
+        len_value = len(value) if not np.isscalar(value) and np.ndim(value) > 0 else 1
         value_names = ['{}@{}'.format(name, value_name) for value_name in meta.get('names', range(0, len_value))]
-        if np.isscalar(value) or np.size(value) == 1:
+        if np.isscalar(value) or np.size(value) == 0:
             if not np.isscalar(value):
-                value = value[0]
+                if np.ndim(value) == 0:
+                    value = value.tolist()
+                else:
+                    value = value[0]
             result_dict = {
                 'name': value_names[0] if 'names' in meta else name,
                 'value': value,
                 'type': metric_type,
-                'ref': reference or ''
+                'ref': reference or '',
+                'abs_threshold': abs_threshold or '',
+                'rel_threshold': rel_threshold or ''
             }
             return result_dict, meta
+
         if meta.get('calculate_mean', True):
             value_names.append('{}@mean'.format(name))
             mean_value = np.mean(value)
@@ -147,24 +161,29 @@ class VectorPrintPresenter(BasePresenter):
                     'name': value_names[idx],
                     'value': value_item,
                     'type': metric_type,
-                    'ref': ''
+                    'ref': '',
+                    'abs_threshold': '',
+                    'rel_threshold': ''
                 }
             )
         return results, per_value_meta
 
 
 def write_scalar_result(
-        res_value, name, threshold=None, diff_with_ref=None, value_name=None,
+        res_value, name, abs_threshold=None, rel_threshold=None, diff_with_ref=None, value_name=None,
         postfix='%', scale=100, result_format='{:.2f}'
 ):
     display_name = "{}@{}".format(name, value_name) if value_name else name
     display_result = result_format.format(res_value * scale)
     message = '{}: {}{}'.format(display_name, display_result, postfix)
 
-    if diff_with_ref:
-        threshold = threshold or 0
-        if threshold <= diff_with_ref:
-            fail_message = "[FAILED: error = {:.4}]".format(diff_with_ref)
+    if diff_with_ref and (diff_with_ref[0] or diff_with_ref[1]):
+        abs_threshold = abs_threshold or 0
+        rel_threshold = rel_threshold or 0
+        if abs_threshold <= diff_with_ref[0] or rel_threshold <= diff_with_ref[1]:
+            fail_message = "[FAILED:  abs error = {:.4} | relative error = {:.4}]".format(
+                diff_with_ref[0], diff_with_ref[1]
+            )
             message = "{} {}".format(message, color_format(fail_message, Color.FAILED))
         else:
             message = "{} {}".format(message, color_format("[OK]", Color.PASSED))
@@ -173,7 +192,7 @@ def write_scalar_result(
 
 
 def compare_with_ref(reference, res_value, scale):
-    return abs(reference - (res_value * scale))
+    return abs(reference - (res_value * scale)), abs(reference - (res_value * scale)) / reference
 
 
 def get_result_format_parameters(meta, use_default_formatting):

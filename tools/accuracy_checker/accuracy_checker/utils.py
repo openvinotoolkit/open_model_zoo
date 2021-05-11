@@ -309,9 +309,11 @@ def read_csv(file: Union[str, Path], *args, **kwargs):
         return list(csv.DictReader(content, *args, **kwargs))
 
 
-def extract_image_representations(image_representations):
-    images = [rep.data for rep in image_representations]
+def extract_image_representations(image_representations, meta_only=False):
     meta = [rep.metadata for rep in image_representations]
+    if meta_only:
+        return meta
+    images = [rep.data for rep in image_representations]
 
     return images, meta
 

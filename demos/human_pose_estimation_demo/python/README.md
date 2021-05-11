@@ -26,6 +26,7 @@ usage: human_pose_estimation_demo.py [-h] -m MODEL -at {ae,hrnet,openpose} -i
                                      [-nireq NUM_INFER_REQUESTS]
                                      [-nstreams NUM_STREAMS]
                                      [-nthreads NUM_THREADS] [-no_show]
+                                     [--output_resolution OUTPUT_RESOLUTION]
                                      [-u UTILIZATION_MONITORS] [-r]
 
 Options:
@@ -80,6 +81,10 @@ Inference options:
 
 Input/output options:
   -no_show, --no_show   Optional. Don't show output.
+  --output_resolution OUTPUT_RESOLUTION
+                        Optional. Specify the maximum output window resolution
+                        in (width x height) format. Example: 1280x720.
+                        Input frame used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 

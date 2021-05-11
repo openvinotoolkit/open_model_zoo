@@ -14,12 +14,6 @@
 // limitations under the License.
 */
 
-/**
-* \brief The entry point for the Inference Engine Human Pose Estimation demo application
-* \file human_pose_estimation_demo/main.cpp
-* \example human_pose_estimation_demo/main.cpp
-*/
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -107,6 +101,7 @@ static void showUsage() {
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
     std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_message << std::endl;
+    std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
 
@@ -132,20 +127,24 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -at is not set");
     }
 
+    if (!FLAGS_output_resolution.empty() && FLAGS_output_resolution.find("x") == std::string::npos) {
+        throw std::logic_error("Correct format of -output_resolution parameter is \"width\"x\"height\".");
+    }
     return true;
 }
 
 
-cv::Mat renderHumanPose(const HumanPoseResult& result) {
+cv::Mat renderHumanPose(HumanPoseResult& result, OutputTransform& outputTransform) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
-        }
+    }
 
     auto outputImg = result.metaData->asRef<ImageMetaData>().img;
 
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
-   }
+    }
+    outputTransform.resize(outputImg);
     static const cv::Scalar colors[HPEOpenPose::keypointsNumber] = {
         cv::Scalar(255, 0, 0), cv::Scalar(255, 85, 0), cv::Scalar(255, 170, 0),
         cv::Scalar(255, 255, 0), cv::Scalar(170, 255, 0), cv::Scalar(85, 255, 0),
@@ -166,9 +165,10 @@ cv::Mat renderHumanPose(const HumanPoseResult& result) {
     };
     const int stickWidth = 4;
     const cv::Point2f absentKeypoint(-1.0f, -1.0f);
-    for (auto pose : result.poses) {
+    for (auto& pose : result.poses) {
         for (size_t keypointIdx = 0; keypointIdx < pose.keypoints.size(); keypointIdx++) {
             if (pose.keypoints[keypointIdx] != absentKeypoint) {
+                outputTransform.scaleCoord(pose.keypoints[keypointIdx]);
                 cv::circle(outputImg, pose.keypoints[keypointIdx], 4, colors[keypointIdx], -1);
             }
         }
@@ -228,8 +228,20 @@ int main(int argc, char *argv[]) {
         }
 
         cv::VideoWriter videoWriter;
+
+        OutputTransform outputTransform = OutputTransform();
+        cv::Size outputResolution = curr_frame.size();
+        size_t found = FLAGS_output_resolution.find("x");
+        if (found != std::string::npos) {
+            outputResolution = cv::Size{
+                std::stoi(FLAGS_output_resolution.substr(0, found)),
+                std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
+            };
+            outputTransform = OutputTransform(curr_frame.size(), outputResolution);
+            outputResolution = outputTransform.computeResolution();
+        }
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  cap->fps(), curr_frame.size())) {
+                                                  cap->fps(), outputResolution)) {
             throw std::runtime_error("Can't open video writer");
         }
 
@@ -287,7 +299,7 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to HumanPoseResult*
             //    and use your own processing instead of calling renderHumanPose().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
+                cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -314,7 +326,7 @@ int main(int argc, char *argv[]) {
         pipeline.waitForTotalCompletion();
         for (; framesProcessed <= frameNum; framesProcessed++) {
             while (!(result = pipeline.getResult())) {}
-            cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>());
+            cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), outputTransform);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,

@@ -349,7 +349,8 @@ class SequentialModel:
     def predict(self, identifiers, input_data, input_meta, input_names, callback=None):
         assert len(identifiers) == 1
 
-        duration_output = self.forward_tacotron_duration.predict(dict(zip(input_names, input_data[0])))
+        duration_input = dict(zip(input_names, input_data[0]))
+        duration_output = self.forward_tacotron_duration.predict(duration_input)
         if callback:
             callback(duration_output)
 
@@ -368,6 +369,8 @@ class SequentialModel:
                 self.forward_tacotron_regression_input['data']: processed_emb,
                 self.forward_tacotron_regression_input['data_mask']: input_mask,
                 self.forward_tacotron_regression_input['pos_mask']: pos_mask}
+            if 'speaker_embedding' in self.forward_tacotron_regression_input:
+                input_to_regression['speaker_embedding'] = duration_input['speaker_embedding']
             mels = self.forward_tacotron_regression.predict(input_to_regression)
         else:
             mels = self.forward_tacotron_regression.predict({self.forward_tacotron_regression_input: processed_emb})

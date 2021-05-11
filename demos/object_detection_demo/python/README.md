@@ -59,6 +59,7 @@ usage: object_detection_demo.py [-h] -m MODEL -at
                                 [-nstreams NUM_STREAMS]
                                 [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
                                 [-limit OUTPUT_LIMIT] [--no_show]
+                                [--output_resolution OUTPUT_RESOLUTION]
                                 [-u UTILIZATION_MONITORS] [-r]
                                 [--reverse_input_channels REVERSE_CHANNELS]
                                 [--mean_values MEAN_VALUES]
@@ -112,6 +113,10 @@ Input/output options:
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
   --no_show             Optional. Don't show output.
+  --output_resolution OUTPUT_RESOLUTION
+                        Optional. Specify the maximum output window resolution
+                        in (width x height) format. Example: 1280x720.
+                        Input frame size used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 

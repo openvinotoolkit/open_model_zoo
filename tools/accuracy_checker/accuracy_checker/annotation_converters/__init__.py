@@ -76,7 +76,7 @@ from .inpainting import InpaintingConverter
 from .style_transfer import StyleTransferConverter
 from .wikitext2raw import Wikitext2RawConverter
 
-from .image_processing import ImageProcessingConverter
+from .image_processing import ImageProcessingConverter, ParametricImageProcessing
 
 from .aflw2000_3d import AFLW20003DConverter
 from .ade20k_dataset_converter import ADE20kConverter
@@ -103,6 +103,7 @@ from .tacotron2_test_data_converter import TacotronDataConverter
 from .noise_suppression_dataset import NoiseSuppressionDatasetConverter
 from .vimeo90k_sr import Vimeo90KSuperResolutionDatasetConverter
 from .lmdb import LMDBConverter
+from .kaldi_speech_recognition_pipeline import KaldiSpeechRecognitionDataConverter, KaldiFeatureRegressionConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -199,4 +200,7 @@ __all__ = [
     'NoiseSuppressionDatasetConverter',
     'Vimeo90KSuperResolutionDatasetConverter',
     'LMDBConverter',
+    'KaldiSpeechRecognitionDataConverter',
+    'KaldiFeatureRegressionConverter',
+    'ParametricImageProcessing',
 ]
