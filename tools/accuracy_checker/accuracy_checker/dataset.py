@@ -146,6 +146,7 @@ class Dataset:
                 annotation = read_annotation(get_path(annotation_file))
                 meta = Dataset.load_meta(config)
                 use_converted_annotation = False
+
         if not annotation and 'annotation_conversion' in config:
             tm = init_telemetry()
             print_info("Annotation conversion for {dataset_name} dataset has been started".format(
@@ -187,7 +188,7 @@ class Dataset:
             print_info('Converted annotation for {dataset_name} dataset will be saved to {file}'.format(
                 dataset_name=config['name'], file=Path(annotation_name)))
             save_annotation(annotation, meta, Path(annotation_name), meta_name, config)
-        send_telemetry_event(tm, 'annotation_saving', annotation_saving)
+            send_telemetry_event(tm, 'annotation_saving', annotation_saving)
 
         return annotation, meta
 
