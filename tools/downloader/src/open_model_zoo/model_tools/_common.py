@@ -34,8 +34,16 @@ import requests
 import yaml
 
 DOWNLOAD_TIMEOUT = 5 * 60
-OMZ_ROOT = Path(__file__).resolve().parents[2]
-MODEL_ROOT = OMZ_ROOT / 'models'
+
+PACKAGE_DIR = Path(__file__).resolve().parent
+MODEL_ROOT = PACKAGE_DIR / 'models'
+DATASET_DEFINITIONS = PACKAGE_DIR / 'data/dataset_definitions.yml'
+
+if not MODEL_ROOT.exists() or not DATASET_DEFINITIONS.exists():
+    # We are run directly from OMZ rather than from an installed environment.
+    _OMZ_ROOT = PACKAGE_DIR.parents[4]
+    MODEL_ROOT = _OMZ_ROOT / 'models'
+    DATASET_DEFINITIONS = _OMZ_ROOT / 'data/dataset_definitions.yml'
 
 # make sure to update the documentation if you modify these
 KNOWN_FRAMEWORKS = {
