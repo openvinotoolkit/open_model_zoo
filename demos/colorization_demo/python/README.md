@@ -1,6 +1,6 @@
 # Colorization Demo
 
-This demo demonstrates an example of using neural networks to colorize a greyscale image or video.
+This demo demonstrates an example of using neural networks to colorize a grayscale image or video.
 
 ## How It Works
 

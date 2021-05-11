@@ -27,7 +27,7 @@ need to pull Inference Engine demos helpers to your app
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads a network to the Inference Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference and displays the results.
+On the start-up, the application reads command-line parameters and loads a network to the Inference Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference and displays the results.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
@@ -157,7 +157,7 @@ Options:
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-If labels file is used, it should correspond to model output. Demo treat labels, listed in the file, to be indexed from 0, one line - one label (i.e. very first line contains label for ID 0). Note that some models may return labels IDs in range 1..N, in this case label file should contain "background" label at the very first line.
+If labels file is used, it should correspond to model output. Demo treat labels, listed in the file, to be indexed from 0, one line - one label (that is very first line contains label for ID 0). Note that some models may return labels IDs in range 1..N, in this case label file should contain "background" label at the very first line.
 
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 

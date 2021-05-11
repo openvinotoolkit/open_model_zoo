@@ -25,7 +25,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 
 ## Running
 
-Run the application with the `-h` option to see available command line parameters:
+Run the application with the `-h` option to see available command-line parameters:
 
 ```
 usage: face_detection_mtcnn_demo.py [-h] -i INPUT -m_p "<path>" -m_r "<path>"

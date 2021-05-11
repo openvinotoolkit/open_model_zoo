@@ -160,9 +160,9 @@ Running the application with the empty list of options yields an error message.
 
 The number of `InferRequest`s is specified by -nireq flag. Each `InferRequest` acts as a "buffer": it waits in queue before being filled with images and sent for inference, then after the inference completes, it waits in queue until its results are processed. Increasing the number of `InferRequest`s usually increases performance, because in that case multiple `InferRequest`s can be processed simultaneously if the device supports parallelization. However, big number of `InferRequest`s increases latency because each image still needs to wait in queue.
 
-For higher FPS, using `-nireq` which slightly exceeds `-nstreams` value summed over all used devices is recommended.
+For higher FPS, it is recommended to use -nireq which slightly exceeds -nstreams value summed over all used devices.
 
-For example, use the following command line command to run the application:
+For example, use the following command-line command to run the application:
 
 ```sh
 ./classification_demo -m <path_to_classification_model> \

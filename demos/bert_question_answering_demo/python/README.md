@@ -23,7 +23,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 * bert-small-uncased-whole-word-masking-squad-emb-int8-0001
 * bert-small-uncased-whole-word-masking-squad-int8-0002
 
-The "small" variants of these are so called "distilled" models, which originated from the BERT Large but substantially smaller and faster.
+The "small" variants of these are so-called "distilled" models, which originated from the BERT Large but substantially smaller and faster.
 The demo also works fine with [official MLPerf* BERT ONNX models fine-tuned on the Squad dataset](https://github.com/mlcommons/inference/tree/master/language/bert). This model should be converted to OpenVINO Inference Engine format using command like example below:
 
 ```sh

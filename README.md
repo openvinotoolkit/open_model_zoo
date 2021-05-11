@@ -20,9 +20,9 @@ Open Model Zoo is licensed under [Apache License Version 2.0](LICENSE).
 ## Online Documentation
 * [OpenVINO™ Release Notes](https://software.intel.com/en-us/articles/OpenVINO-RelNotes)
 * [Pre-Trained Models](https://docs.openvinotoolkit.org/latest/trained_models.html)
-* [Demos and samples](https://docs.openvinotoolkit.org/latest/omz_demos.html)
+* [Demos and Samples](https://docs.openvinotoolkit.org/latest/omz_demos.html)
 
-## Other usage examples
+## Other Usage Examples
 * [Open Visual Cloud](https://01.org/openvisualcloud)
   * [Tutorial: Build and Run the AD Insertion Sample on public cloud or local machine](https://01.org/openvisualcloud/documents/tutorial-build-and-run-ad-insertion-sample-public-cloud-or-local-machine)
   * [GitHub Repo for Ad Insertion Sample](https://github.com/OpenVisualCloud/Ad-Insertion-Sample)

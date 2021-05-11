@@ -104,7 +104,7 @@ The demo starts in person tracking mode and to switch it in the action recogniti
 
 An example of file with class names can be found within the OMZ directory at `<omz_dir>/data/dataset_classes/msasl100.json`.
 
-> **NOTE**: To run the demo application with video examples of gestures specify the `-s` key with valid path to the directory with video samples. The name of each video sample should be the valid name of gesture from `<omz_dir>/data/dataset_classes/msasl100.json` file. To navigate between samples use 'f' and 'b' keys for iterating next and previous respectively video sample.
+> **NOTE**: To run the demo application with video examples of gestures specify the `-s` key with valid path to the directory with video samples. The name of each video sample should be the valid name of gesture from `<omz_dir>/data/dataset_classes/msasl100.json` file. To navigate between samples use 'f' and 'b' keys for iterating next and previous video sample, respectively.
 
 ## Demo Output
 

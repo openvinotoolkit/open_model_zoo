@@ -62,7 +62,7 @@ To run the demo applications, you can use images and videos from the media files
 
 ## Demos that Support Pre-Trained Models
 
-> **NOTE:** Inference Engine HDDL plugin are available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
+> **NOTE:** Inference Engine HDDL plugin is available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
 
 You can download the [Intel pre-trained models](../models/intel/index.md) or [public pre-trained models](../models/public/index.md) using the OpenVINO [Model Downloader](../tools/downloader/README.md).
 

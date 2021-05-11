@@ -1,6 +1,6 @@
 # Multi-Channel Object Detection Yolov3 C++ Demo
 
-This demo provides an multi channel inference pipeline for YOLO v3 Object Detection network.
+This demo provides an multi-channel inference pipeline for YOLO v3 Object Detection network.
 
 Other demo objectives are:
 

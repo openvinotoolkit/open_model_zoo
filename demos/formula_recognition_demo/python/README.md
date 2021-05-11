@@ -93,7 +93,7 @@ The window has four main sections:
 
 Navigation keys:
 
-* Use `q` button to quit from program
+* Use `q` button to quit the program
 * Use `o` to decrease the size of the input (red) window
 * Use `p` to increase the size of the input window
 

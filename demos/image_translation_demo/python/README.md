@@ -1,6 +1,6 @@
 # Image Translation Demo
 
-This demo application demonstrates an example of using neural networks to synthesize a photo-realistic image based on exemplar image.
+This demo application demonstrates an example of using neural networks to synthesize a photo-realistic image based on an exemplar image.
 
 ## How It Works
 

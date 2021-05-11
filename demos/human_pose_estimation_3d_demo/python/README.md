@@ -38,7 +38,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 ### Prerequisites
 
 This demo application requires a native Python extension module to be built before you can run it.
-Refer to [Open Model Zoo Demos](../../README.md), for instructions on how to build it and prepare the environment for running the demo.
+Refer to [Open Model Zoo Demos](../../README.md) for instructions on how to build it and prepare the environment for running the demo.
 
 ## Running
 

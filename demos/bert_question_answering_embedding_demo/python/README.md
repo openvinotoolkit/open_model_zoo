@@ -113,9 +113,9 @@ The demo will use the Wikipedia articles about the Bert character and the speed 
 The application reads text from the HTML pages at the given urls and then answers questions typed from the console.
 The models and its parameters (inputs and outputs) are also important demo arguments.
 Notice that since order of inputs for the model does matter, the demo script checks that the inputs specified
-from the command-line match the actual network inputs.
+from the command line match the actual network inputs.
 The embedding model is reshaped by the demo to infer embedding vectors for long contexts and short question.
-Be sure that the original model converted by Model Optimizer with reshape option.
+Make sure that the original model converted by Model Optimizer with reshape option.
 Please see general [reshape intro and limitations](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_ShapeInference.html)
 
 ## Demo Outputs
