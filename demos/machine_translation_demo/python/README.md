@@ -15,8 +15,8 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: machine_translation_demo.py [-h] -m MODEL --tokenizer-src TOKENIZER_SRC
                                    --tokenizer-tgt TOKENIZER_TGT
-                                   [-i [INPUT [INPUT ...]]]
-                                   [--output-name OUTPUT_NAME]
+                                   [-i [INPUT [INPUT ...]]] [-d DEVICE]
+                                   [-o OUTPUT] [--output-name OUTPUT_NAME]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -29,7 +29,15 @@ optional arguments:
                         Required. Path to the folder with tgt tokenizer that
                         contains vocab.json and merges.txt.
   -i [INPUT [INPUT ...]], --input [INPUT [INPUT ...]]
-                        Optional. Text for translation. Replaces console input.
+                        Optional. Text for translation or path to the input
+                        .txt file. Replaces console input.
+  -d DEVICE, --device DEVICE
+                        Optional. Specify the target device to infer on; CPU,
+                        GPU, FPGA, HDDL or MYRIAD is acceptable. The demo
+                        will look for a suitable plugin for device specified.
+                        Default value is CPU.
+   -o OUTPUT, --output OUTPUT
+                        Optional. Path to the output .txt file.
   --output-name OUTPUT_NAME
                         Optional. Name of the models output node.
 ```
