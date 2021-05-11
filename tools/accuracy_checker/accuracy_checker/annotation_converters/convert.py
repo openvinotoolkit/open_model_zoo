@@ -279,6 +279,12 @@ def main():
 
     save_annotation(converted_annotation, meta, annotation_file, meta_file, dataset_config)
     send_telemetry_event(tm, 'annotation_saving', True)
+    if tm:
+        try:
+            tm.end_session('ac')
+            tm.force_shutdown(1.0)
+        except Exception: # pylint:disable=W0703
+            pass
 
 
 def save_annotation(annotation, meta, annotation_file, meta_file, dataset_config=None):
