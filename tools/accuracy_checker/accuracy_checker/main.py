@@ -27,7 +27,7 @@ from .config import ConfigReader
 from .logging import print_info, add_file_handler, exception
 from .evaluators import ModelEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
-from .utils import get_path, cast_to_bool, check_file_existence, validate_print_interval, init_telemetry
+from .utils import get_path, cast_to_bool, check_file_existence, validate_print_interval, init_telemetry, send_telemetry_event
 from . import __version__
 
 
@@ -387,14 +387,14 @@ def main():
         evaluator_kwargs['metrics_interval'] = args.metrics_interval
         evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
     evaluator_kwargs['store_only'] = args.store_only
-    tm.send_event("ac", "mode", "online" if not args.store_only else "offline")
+    send_telemetry_event("mode", "online" if not args.store_only else "offline")
 
     config, mode = ConfigReader.merge(args)
     evaluator_class = EVALUATION_MODE.get(mode)
     if not evaluator_class:
         if tm:
             try:
-                tm.send_event('ac', 'error', 'Unknown evaluation mode')
+                send_telemetry_event(tm, 'error', 'Unknown evaluation mode')
                 tm.end_session()
                 tm.force_shutdown(1.0)
             except Exception: # pylint:disable=W0703
@@ -413,16 +413,8 @@ def main():
                 profiler_dir = args.profiler_logs_dir / _timestamp
                 print_info('Metric profiling activated. Profiler output will be stored in {}'.format(profiler_dir))
                 evaluator.set_profiling_dir(profiler_dir)
-                if tm:
-                    try:
-                        tm.send_event('ac', 'metric_profiling', 'activated')
-                    except Exception: # pylint:disable=W0703
-                        pass
-            if tm:
-                try:
-                    tm.send_event('ac', 'model_run', 'started')
-                except Exception: # pylint:disable=W0703
-                    pass
+                send_telemetry_event('metric_profiling', 'activated')
+            send_telemetry_event(tm, 'model_run', 'started')
             evaluator.process_dataset(
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
             )
@@ -435,24 +427,16 @@ def main():
                         args.csv_result, processing_info, metrics_results, evaluator.dataset_size, metrics_meta
                     )
             evaluator.release()
-            if tm:
-                try:
-                    tm.send_event('ac', 'model_run', 'finished')
-                except Exception:
-                    pass
+            send_telemetry_event(tm, 'model_run', 'finished')
 
         except Exception as e:  # pylint:disable=W0703
-            if tm:
-                try:
-                    tm.send_event('ac', 'error', str(type(e)))
-                except Exception: # pylint:disable=W0703
-                    pass
+            send_telemetry_event(tm, 'error', str(type(e)))
             exception(e)
             return_code = 1
             continue
     if tm:
         try:
-            tm.send_event('ac', 'status', 'success' if not return_code else 'fail')
+            send_telemetry_event(tm, 'status', 'success' if not return_code else 'fail')
             tm.end_session('ac')
             tm.force_shutdown(1.0)
         except Exception: # pylint:disable=W0703

@@ -43,7 +43,8 @@ from .dependency import UnregisteredProviderException
 from .utils import (
     JSONDecoderWithAutoConversion,
     read_json, read_yaml,
-    get_path, contains_all, set_image_metadata, OrderedSet, contains_any
+    get_path, contains_all, set_image_metadata, OrderedSet, contains_any,
+    init_telemetry, send_telemetry_event
 )
 
 from .representation import (
@@ -115,18 +116,25 @@ class Dataset:
 
         def _create_subset(annotation, config):
             subsample_size = config.get('subsample_size')
+            subsample_meta = {'subset': False, 'shuffle': False}
             if not ignore_subset_settings(config):
 
                 if subsample_size is not None:
                     subsample_seed = config.get('subsample_seed', 666)
                     shuffle = config.get('shuffle', True)
                     annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
+                    subsample_meta = {
+                        'shuffle': shuffle,
+                        'subset': True
+                    }
+                
             elif subsample_size is not None:
                 warnings.warn("Subset selection parameters will be ignored")
                 config.pop('subsample_size', None)
                 config.pop('subsample_seed', None)
                 config.pop('shuffle', None)
-            return annotation
+        
+            return annotation, subsample_meta
 
         annotation, meta = None, None
         use_converted_annotation = True
@@ -139,28 +147,37 @@ class Dataset:
                 meta = Dataset.load_meta(config)
                 use_converted_annotation = False
         if not annotation and 'annotation_conversion' in config:
+            tm = init_telemetry()
             print_info("Annotation conversion for {dataset_name} dataset has been started".format(
                 dataset_name=config['name']))
+            send_telemetry_event(tm, 'annotation_converter', config['annotation_conversion'].get('converter'))
+            send_telemetry_event(tm, 'annotation_conversion', 'started')
             print_info("Parameters to be used for conversion:")
             for key, value in config['annotation_conversion'].items():
                 print_info('{key}: {value}'.format(key=key, value=value))
             annotation, meta = Dataset.convert_annotation(config)
-            if annotation:
+            if annotation is not None:
                 print_info("Annotation conversion for {dataset_name} dataset has been finished".format(
                     dataset_name=config['name']))
+                send_telemetry_event(tm, 'annotation_conversion', 'finished')
 
         if not annotation:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
-        annotation = _create_subset(annotation, config)
+        annotation, subset_meta = _create_subset(annotation, config)
+        send_telemetry_event(tm, 'subset_selection', subset_meta)
+        dataset_analysis = config.get('analyze_datase', False)
+        send_telemetry_event(tm, 'dataset_analysis', 'enabled' if dataset_analysis else 'disabled')
 
-        if config.get('analyze_dataset', False):
+        if dataset_analysis:
             if config.get('segmentation_masks_source'):
                 meta['segmentation_masks_source'] = config.get('segmentation_masks_source')
             meta = analyze_dataset(annotation, meta)
             if meta.get('segmentation_masks_source'):
                 del meta['segmentation_masks_source']
 
+        annotation_saving = False
         if use_converted_annotation and contains_all(config, ['annotation', 'annotation_conversion']):
+            annotation_saving = True
             annotation_name = config['annotation']
             meta_name = config.get('dataset_meta')
             if meta_name:
@@ -170,6 +187,7 @@ class Dataset:
             print_info('Converted annotation for {dataset_name} dataset will be saved to {file}'.format(
                 dataset_name=config['name'], file=Path(annotation_name)))
             save_annotation(annotation, meta, Path(annotation_name), meta_name, config)
+        send_telemetry_event(tm, 'annotation_saving', annotation_saving)
 
         return annotation, meta
 

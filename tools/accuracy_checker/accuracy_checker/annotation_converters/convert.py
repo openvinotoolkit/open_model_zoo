@@ -31,7 +31,7 @@ from ..representation import (
     ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation,
 )
 from ..data_readers import KaldiFrameIdentifier, KaldiMatrixIdentifier
-from ..utils import get_path, OrderedSet
+from ..utils import get_path, OrderedSet, init_telemetry, send_telemetry_event
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
 from ..utils import cast_to_bool, is_relative_to
@@ -221,8 +221,17 @@ def make_subset_kaldi(annotation, size, shuffle=True):
 
 def main():
     main_argparser = build_argparser()
+    tm = init_telemetry()
+    if tm:
+        try:
+            tm.start_session('ac')
+        except Exception: # pylint:disable=W0703
+            pass
+
     args, _ = main_argparser.parse_known_args()
     converter, converter_argparser, converter_args = get_converter_arguments(args)
+    send_telemetry_event(tm, 'annotation_converter', converter.get_name())
+    send_telemetry_event(tm, 'annotation_conversion', 'started')
 
     main_argparser = ArgumentParser(parents=[main_argparser, converter_argparser])
     args = main_argparser.parse_args()
@@ -231,12 +240,14 @@ def main():
     out_dir = args.output_dir or Path.cwd()
 
     results = converter.convert()
+    send_telemetry_event(tm, 'annotation_conversion', 'finished')
     converted_annotation = results.annotations
     meta = results.meta
     errors = results.content_check_errors
     if errors:
         warnings.warn('Following problems were found during conversion:'
                       '\n{}'.format('\n'.join(errors)))
+        send_telemetry_event(tm, 'conversion_errors', len(errors))
 
     subsample = args.subsample
     if subsample:
@@ -247,6 +258,7 @@ def main():
             subsample_size = int(args.subsample)
 
         converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed, args.shuffle)
+    send_telemetry_event(tm, 'dataset_analysis',  'enabled' if dataset_analysis else 'disabled')
     if args.analyze_dataset:
         analyze_dataset(converted_annotation, meta)
 
@@ -263,8 +275,10 @@ def main():
         'subsample_seed': args.subsample_seed,
         'shuffle': args.shuffle
     }
+    send_telemetry_event(tm, 'subset_selection', {'subset': bool(args.subsample), 'suffle': args.shuffle})
 
     save_annotation(converted_annotation, meta, annotation_file, meta_file, dataset_config)
+    send_telemetry_event(tm, 'annotation_saving', True)
 
 
 def save_annotation(annotation, meta, annotation_file, meta_file, dataset_config=None):

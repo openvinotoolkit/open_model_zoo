@@ -859,3 +859,13 @@ def init_telemetry():
         return telemetry
     except Exception: # pylint:disable=W0703
         return None
+
+
+def send_telemetry_event(tm, *args, **kwargs):
+    if tm is None:
+        return
+    try:
+        tm.send_event('ac', *args, **kwargs)
+    except Exception: # pylint:disable=W0703
+        pass
+    return
