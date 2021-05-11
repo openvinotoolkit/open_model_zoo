@@ -18,8 +18,8 @@ from .postprocessor import Postprocessor
 from ..representation import TimeSeriesForecastingQuantilesPrediction, TimeSeriesForecastingAnnotation
 
 
-class ElectricityTimeSeriesDenormalize(Postprocessor):
-    __provider__ = 'electricity_time_series_denormalize'
+class TimeSeriesDenormalize(Postprocessor):
+    __provider__ = 'time_series_denormalize'
     annotation_types = (TimeSeriesForecastingAnnotation, )
     prediction_types = (TimeSeriesForecastingQuantilesPrediction, )
 
