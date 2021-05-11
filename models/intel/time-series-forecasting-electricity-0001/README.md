@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a Time Series Forecasting model based on the Temporal Fusion Transformer model trained on the Electricity dataset.
+This is a Time Series Forecasting model based on the Temporal Fusion Transformer\* model trained on the Electricity dataset.
 
 ## Specification
 
@@ -25,7 +25,7 @@ The quality metrics were calculated on the Electricity dataset (`test` split).
 
 ## Input
 
-name: `inputs`
+name: `timestamps`
 shape: `1, 192, 5`
 format: `B, T, N`
 B - batch size.
@@ -34,11 +34,12 @@ N - number of input features.
 
 ## Output
 
-ppname: `outputs`
-shape: `1, 24`
-format: `B, T`
+name: `quantiles`
+shape: `1, 24, 3`
+format: `B, T, Q`
 B - batch size.
 T - number of output timestamps.
+Q - number of output quantiles (0.1, 0.5, 0.9).
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

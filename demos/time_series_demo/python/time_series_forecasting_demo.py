@@ -151,9 +151,9 @@ def build_argparser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model", required=True, type=Path,
                         help="Required. Path to an .xml file with a trained model")
-    parser.add_argument('--input-name', type=str, default='inputs',
+    parser.add_argument('--input-name', type=str, default='timestamps',
                         help='Optional. Name of the models input node.')
-    parser.add_argument('--output-name', type=str, default='outputs',
+    parser.add_argument('--output-name', type=str, default='quantiles',
                         help='Optional. Name of the models output node.')
     parser.add_argument('--data-path', type=str,
                         help='Required. Path to the dataset file in .pickle format.')

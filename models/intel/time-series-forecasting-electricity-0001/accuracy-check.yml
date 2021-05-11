@@ -3,26 +3,22 @@ models:
     launchers:
       - framework: dlsdk
         device: CPU
-        model: model.xml
-        weights: model.bin
         inputs:
-          - name: inputs
+          - name: timestamps
             type: INPUT
-            value: inputs
             layout: NHWC
         adapter:
           type: quantiles_predictor
-          output_name: outputs
+          output_name: quantiles
           quantiles:
             0.5: 1
             0.9: 2
 
     datasets:
       - name: Electricity
-        data_sourse: Electricity.txt
         annotation_conversion:
           converter: electricity
-          data_path_file: Electricity.txt
+          data_path_file: LD2011_2014.txt
         reader:
           type: annotation_features_extractor
           features:
@@ -31,4 +27,4 @@ models:
           - type: normalised_quantile_loss
             presenter: print_vector
         postprocessing:
-          - type: electricity_time_series_denormalize
+          - type: time_series_denormalize
