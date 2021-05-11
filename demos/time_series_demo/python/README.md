@@ -1,12 +1,12 @@
 # Time Series Forecastin Python\* Demo
 
-This README describes the Time Series Forecastin demo application.
+This README describes the Time Series Forecasting demo application.
 
 ## How It Works
 
 Upon the start-up the demo application reads command line parameters and loads a network to Inference Engine.
 
-The program provides an interactive CLI interface that gets a sentence in the source language as an input and returns its translation to the target language.
+The program provides an interactive CLI interface that gets a test dataset in .pickle format as input and draws predicted quantiles and ground truth curves.
 
 ## Supported datasets
 
@@ -48,6 +48,12 @@ optional arguments:
 To run the demo, you can use Intel's pretrained model. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/machine_translation_demo/python/models.lst`.
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
+
+
+## Demo Output
+
+The application draws predicted quantiles and ground truth curves.
+
 
 ## See Also
 

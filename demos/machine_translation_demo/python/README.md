@@ -38,6 +38,10 @@ To run the demo, you can use Intel's pretrained model. To download pretrained mo
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
+## Demo Output
+
+The application outputs translated sentences from source to target language.
+
 ## See Also
 
 * [Using Open Model Zoo demos](../../README.md)
