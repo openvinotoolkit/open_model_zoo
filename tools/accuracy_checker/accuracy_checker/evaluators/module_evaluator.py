@@ -19,12 +19,14 @@ import sys
 import importlib
 from pathlib import Path
 from .base_evaluator import BaseEvaluator
+from ..utils import send_telemetry_event
 
 
 class ModuleEvaluator(BaseEvaluator):
-    def __init__(self, internal_module):
+    def __init__(self, internal_module, config):
         super().__init__()
         self._internal_module = internal_module
+        self._config = config
 
     @classmethod
     def from_configs(cls, config, *args, **kwargs):
@@ -32,7 +34,7 @@ class ModuleEvaluator(BaseEvaluator):
         module_config = config.get('module_config')
         python_path = config.get('python_path')
 
-        return cls(load_module(module, python_path).from_configs(module_config, *args, **kwargs))
+        return cls(load_module(module, python_path).from_configs(module_config, *args, **kwargs)), config
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         self._internal_module.process_dataset(
@@ -111,6 +113,11 @@ class ModuleEvaluator(BaseEvaluator):
         module = config['module']
         python_path = config.get('python_path')
         return load_module(module, python_path).get_processing_info(config)
+
+    def send_processing_info(self, sender):
+        if sender is None:
+            return
+        send_telemetry_event(sender, 'custom_evaluator', self._config['module'])
 
     def set_profiling_dir(self, profiler_dir):
         self._internal_module.set_profiling_dir(profiler_dir)
