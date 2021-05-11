@@ -54,23 +54,28 @@ def main():
 
     index_child_md_links = dict()
     for check_case_path in index_file_paths:
-        models_and_demos_links = list()
+        if not check_case_path.exists():
+            complain(f'{check_case_path}: file not found')
+            continue
+
+        required_md_links = list()
         for md_file in all_md_files:
-            try:
-                md_rel_path = md_file.relative_to(check_case_path.parent)
-            except ValueError:
-                continue
+            if md_file.name == "README.md":
+                try:
+                    md_rel_path = md_file.relative_to(check_case_path.parent)
+                except ValueError:
+                    continue
 
-            md_file_parents = list(md_rel_path.parents)
+                md_intermediate_parents = list(md_rel_path.parents)[1:-1] # removed root and first parent dirs
 
-            if md_file.name == "README.md" \ # refactoring in progress
-            and md_file != check_case_path \
-            and not any((check_case_path.parent / parent_dir / 'README.md').exists() for parent_dir in md_file_parents[1:-1]):
-                models_and_demos_links.append(md_file)
-        index_child_md_links[check_case_path] = sorted(models_and_demos_links)
+                if not any((check_case_path.parent / parent_dir / 'README.md').exists() 
+                for parent_dir in md_intermediate_parents) and md_file != check_case_path:
+                    required_md_links.append(md_file)
+
+        index_child_md_links[check_case_path] = sorted(required_md_links)
 
     for md_path in sorted(all_md_files):
-        models_and_demos_md_files = set()
+        referenced_md_files = set()
 
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
@@ -107,12 +112,12 @@ def main():
                 continue
 
             if md_path in index_child_md_links:
-                models_and_demos_md_files.add(target_path)
+                referenced_md_files.add(target_path)
 
         if md_path in index_child_md_links:
-            for link in index_child_md_links[md_path]:
-                if link not in models_and_demos_md_files:
-                    complain(f"{md_path.relative_to(OMZ_ROOT)}: {link.relative_to(OMZ_ROOT)} is not referenced")
+            for md_file in index_child_md_links[md_path]:
+                if md_file not in referenced_md_files:
+                    complain(f"{md_path_rel}: {md_file.relative_to(OMZ_ROOT)} is not referenced")
 
         # check for HTML fragments that are unsupported by Doxygen
 
