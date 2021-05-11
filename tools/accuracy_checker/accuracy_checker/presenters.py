@@ -62,8 +62,8 @@ class ScalarPrintPresenter(BasePresenter):
             'value': np.mean(value),
             'type': metric_type,
             'ref': ref or '',
-            'abs_threshold': abs_threshold or '',
-            'ref_threshold': rel_threshold or ''
+            'abs_threshold': abs_threshold or 0,
+            'ref_threshold': rel_threshold or 0
         }
         return result_dict, meta
 
@@ -135,8 +135,8 @@ class VectorPrintPresenter(BasePresenter):
                 'value': value,
                 'type': metric_type,
                 'ref': reference or '',
-                'abs_threshold': abs_threshold or '',
-                'rel_threshold': rel_threshold or ''
+                'abs_threshold': abs_threshold or 0,
+                'rel_threshold': rel_threshold or 0
             }
             return result_dict, meta
 
@@ -162,8 +162,8 @@ class VectorPrintPresenter(BasePresenter):
                     'value': value_item,
                     'type': metric_type,
                     'ref': '',
-                    'abs_threshold': '',
-                    'rel_threshold': ''
+                    'abs_threshold': 0,
+                    'rel_threshold': 0
                 }
             )
         return results, per_value_meta
