@@ -40,7 +40,8 @@ Options:
 
     -h                         Print a usage message
     -i "<path>"                Required. Path to a video file (specify "cam" to work with camera).
-    -o "<path>"                Optional. Path to an output video file.
+    -o "<path>"                Optional. Name of output to save.
+    -limit "<num>"             Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m "<path>"                Required. Path to an .xml file with a trained Face Detection model.
     -m_ag "<path>"             Optional. Path to an .xml file with a trained Age/Gender Recognition model.
     -m_hp "<path>"             Optional. Path to an .xml file with a trained Head Pose Estimation model.
