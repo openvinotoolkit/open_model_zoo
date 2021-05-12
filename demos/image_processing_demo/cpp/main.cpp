@@ -39,6 +39,7 @@
 #include <models/super_resolution_model.h>
 #include <models/deblurring_model.h>
 #include <pipelines/metadata.h>
+#include "visualizer.hpp"
 
 DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
@@ -106,121 +107,6 @@ static void showUsage() {
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
     std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
-}
-
-namespace visualize {
-    // names of window and trackbar
-    std::string winName = "Image Processing Results";
-    std::string trackbarName = "Processing";
-
-    // images info
-    cv::Mat inputImg;
-    cv::Mat resultImg;
-    cv::Size maxSize(960, 540);
-
-    // Trackbar info
-    std::string mode;
-    cv::TrackbarCallback function;
-    void onTrackbarMixed(int, void*);
-    void onTrackbarScrollOrig(int, void*);
-    void onTrackbarScrollDiff(int, void*);
-    std::map<std::string, cv::TrackbarCallback> trackbarFunctions = {{"mixed", onTrackbarMixed},
-                                                                     {"orig", onTrackbarScrollOrig},
-                                                                     {"diff", onTrackbarScrollDiff}};
-    int scrollWidth = 0;
-    int slider = 0;
-
-    void markImage(cv::Mat& image, const std::pair<std::string, std::string>& marks, float alpha){
-        std::pair<float, float> positions(static_cast<float>(image.cols) * alpha / 2.0f,
-                                                 static_cast<float>(image.cols) * (1 + alpha) / 2.0f);
-        cv::putText(image, marks.first, cv::Point(static_cast<int>(positions.first), 25),
-                    cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
-        cv::putText(image, marks.second, cv::Point(static_cast<int>(positions.second), 25),
-                    cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
-    }
-
-    void init(const std::string& _mode, cv::Size resolution) {
-        cv::namedWindow(winName);
-        scrollWidth = resolution.width;
-        mode = _mode;
-        maxSize = resolution;
-        function = trackbarFunctions[mode];
-        cv::createTrackbar(trackbarName, winName, &slider, maxSize.width, function);
-        cv::setTrackbarMin(trackbarName, winName, 1);
-    }
-
-    cv::Mat renderResultData(ImageResult result, std::string& mode, OutputTransform& outputTransform) {
-        if (!result.metaData) {
-            throw std::invalid_argument("Renderer: metadata is null");
-        }
-
-        // Input image is stored inside metadata, as we put it there during submission stage
-        inputImg = result.metaData->asRef<ImageMetaData>().img;
-
-        if (inputImg.empty()) {
-            throw std::invalid_argument("Renderer: image provided in metadata is empty");
-        }
-
-        outputTransform.resize(result.resultImage);
-        cv::resize(inputImg, inputImg, result.resultImage.size());
-
-        if (inputImg.channels() != result.resultImage.channels())
-            cv::cvtColor(result.resultImage, resultImg, cv::COLOR_GRAY2BGR);
-        else
-            resultImg = result.resultImage;
-
-        if (mode == "orig") {
-            cv::Mat concat;
-            cv::hconcat(inputImg, resultImg, concat);
-            markImage(concat, {"O", "R"}, 0.5f);
-            return concat;
-        }
-        else if (mode == "mixed") {
-            cv::Mat resCopy = resultImg.clone();
-            inputImg(cv::Rect(0, 0, inputImg.cols / 2, inputImg.rows)).copyTo(resCopy(cv::Rect(0, 0, resultImg.cols / 2, resultImg.rows)));
-            markImage(resCopy, {"O", "R"}, 0.5f);
-            return resCopy;
-        }
-        else if (mode == "diff") {
-            cv::Mat concat;
-            cv::Mat diffImg;
-            cv::absdiff(inputImg, resultImg, diffImg);
-            cv::hconcat(resultImg, diffImg, concat);
-            markImage(concat, {"R", "D"}, 0.5f);
-            return concat;
-        }
-
-        return resultImg;
-    }
-
-    void show(const cv::Mat& image) {
-        function(1, 0);
-        cv::waitKey(0);
-    }
-
-    void onTrackbarMixed(int pos, void* userdata) {
-        cv::Mat mixedImg = inputImg.clone();
-        resultImg(cv::Rect(0, 0, pos, inputImg.rows)).copyTo(mixedImg(cv::Rect(0, 0, pos, resultImg.rows)));
-        cv::imshow(winName, mixedImg);
-    }
-
-    void onTrackbarScrollOrig(int pos, void* userdata) {
-        cv::Mat concat;
-        cv::hconcat(inputImg, resultImg, concat);
-        markImage(concat, {"O", "R"}, 0.5f);
-        cv::Rect roi = cv::Rect(slider, 0, maxSize.width, maxSize.height);
-        cv::imshow(winName, concat(roi));
-    }
-
-    void onTrackbarScrollDiff(int pos, void* userdata) {
-        cv::Mat concat;
-        cv::Mat diffImg;
-        cv::absdiff(inputImg, resultImg, diffImg);
-        cv::hconcat(resultImg, diffImg, concat);
-        markImage(concat, {"R", "D"}, 0.5f);
-        cv::Rect roi = cv::Rect(slider, 0, maxSize.width, maxSize.height);
-        cv::imshow(winName, concat(roi));
-    }
 }
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -309,16 +195,16 @@ int main(int argc, char *argv[]) {
         cv::VideoWriter videoWriter;
 
         auto mode = FLAGS_mode;
-        if (mode != "" && visualize::trackbarFunctions.find(mode) == visualize::trackbarFunctions.end())
+        if (visualize::modes.find(mode) == visualize::modes.end())
             throw std::invalid_argument("Uncorrect mode. Mode can be equals: 'orig', 'mixed' or 'diff', but no: " + mode);
-        int coeff = (mode == "orig" || mode == "diff") ? 2 : 1;
+        int coeff = 1;
 
         cv::Size outputResolution;
         OutputTransform outputTransform = OutputTransform();
         size_t found = FLAGS_output_resolution.find("x");
 
         // interactive mode for single image
-        if (checkFile(FLAGS_i) && mode != "" && !FLAGS_loop) {
+        if (checkFile(FLAGS_i) && !FLAGS_loop) {
             pipeline.waitForTotalCompletion();
             result = pipeline.getResult();
             if (found == std::string::npos) {
@@ -334,9 +220,16 @@ int main(int argc, char *argv[]) {
             }
             outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
             outputResolution = outputTransform.computeResolution();
-            visualize::renderResultData(result->asRef<ImageResult>(), mode, outputTransform);
             visualize::init(mode, outputResolution);
-            visualize::show(curr_frame);
+            visualize::renderResultData(result->asRef<ImageResult>());
+            auto key = 1;
+            cv::Mat displayImg;
+            while (!(27 == key || 'q' == key || 'Q' == key)) {
+                displayImg = visualize::getDisplayImg();
+                visualize::show(displayImg);
+                key = cv::waitKey(1);
+                visualize::handleKey(key);
+            }
             return 0;
         }
 
@@ -376,6 +269,7 @@ int main(int argc, char *argv[]) {
                     }
                     outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
                     outputResolution = outputTransform.computeResolution();
+                    visualize::init(mode, outputResolution);
 
                     // Preparing video writer if needed
                     if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
@@ -386,7 +280,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                cv::Mat outFrame = visualize::renderResultData(result->asRef<ImageResult>(), mode, outputTransform);
+                cv::Mat outFrame = visualize::renderResultData(result->asRef<ImageResult>());
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -395,13 +289,14 @@ int main(int argc, char *argv[]) {
                     videoWriter.write(outFrame);
                 }
                 if (!FLAGS_no_show) {
-                    cv::imshow(visualize::winName, outFrame);
+                    visualize::show(outFrame);
 
                     //--- Processing keyboard events
-                    auto key = cv::waitKey(1);
+                    auto key = cv::waitKey(5);
                     if (27 == key || 'q' == key || 'Q' == key) { // Esc
                         keepRunning = false;
                     } else {
+                        visualize::handleKey(key);
                         presenter.handleKey(key);
                     }
                 }
@@ -441,7 +336,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                cv::Mat outFrame = visualize::renderResultData(result->asRef<ImageResult>(), mode, outputTransform);
+                cv::Mat outFrame = visualize::renderResultData(result->asRef<ImageResult>());
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -450,7 +345,8 @@ int main(int argc, char *argv[]) {
                     videoWriter.write(outFrame);
                 }
                 if (!FLAGS_no_show) {
-                    cv::imshow(visualize::winName, outFrame);
+                    visualize::show(outFrame);
+
                     //--- Updating output window
                     cv::waitKey(1);
                 }

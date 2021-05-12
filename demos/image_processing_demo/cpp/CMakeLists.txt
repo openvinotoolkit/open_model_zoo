@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-file(GLOB SRC_FILES ./*.cpp)
-file(GLOB H_FILES ./*.h)
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 add_demo(NAME image_processing_demo
-    SOURCES ${SRC_FILES}
-    HEADERS ${H_FILES}
+    SOURCES ${SOURCES}
+    HEADERS ${HEADERS}
     DEPENDENCIES monitors models pipelines)
