@@ -52,13 +52,13 @@ def main():
         all_passed = False
         print(message, file=sys.stderr)
 
-    index_child_md_links = dict()
+    index_child_md_links = {}
     for check_case_path in index_file_paths:
         if not check_case_path.exists():
             complain(f'{check_case_path}: file not found')
             continue
 
-        required_md_links = list()
+        required_md_links = []
         for md_file in all_md_files:
             if md_file.name == "README.md":
                 try:
