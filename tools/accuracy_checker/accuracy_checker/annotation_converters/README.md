@@ -519,6 +519,9 @@ The main difference between this converter and `super_resolution` in data organi
   * `ref_data_dir` - directory with reference ark files (Optional, if not provided `data_dir` will be used instead).
   * `vectors_mode` - allow usage each vector in utterance as independent data.
   * `ref_file_suffix` - suffix for search reference files (Optional, default `_kaldi_score`).
+* `yolo_labeling` - converts object detection dataset with annotation in YOLO labeling format to `DetectionAnnotation`.
+  * `data_dir` - path to directory with annotation files in txt format and images.
+  * `labels_file` - path to file with labels in txt format (optional).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

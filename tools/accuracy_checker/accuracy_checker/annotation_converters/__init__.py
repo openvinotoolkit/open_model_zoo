@@ -104,6 +104,7 @@ from .noise_suppression_dataset import NoiseSuppressionDatasetConverter
 from .vimeo90k_sr import Vimeo90KSuperResolutionDatasetConverter
 from .lmdb import LMDBConverter
 from .kaldi_speech_recognition_pipeline import KaldiSpeechRecognitionDataConverter, KaldiFeatureRegressionConverter
+from .yolo_labeling_converter import YOLOLabelingConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -203,4 +204,5 @@ __all__ = [
     'KaldiSpeechRecognitionDataConverter',
     'KaldiFeatureRegressionConverter',
     'ParametricImageProcessing',
+    'YOLOLabelingConverter'
 ]
