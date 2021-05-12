@@ -378,7 +378,6 @@ void Drawer::drawDetections(Context& context, cv::Mat& frame) {
                 context.trackersContext.maxW[sourceID]);
 
             if (std::get<1>(result)) {
-                cv::Rect2d inter = l1 | l2;
                 cv::rectangle(frame, l1, { 0, 255, 255 }, 2);
                 cv::rectangle(frame, l2, { 0, 255, 255 }, 2);
                 cv::Point2d rect1center = { l1.x + l1.width / 2, l1.y + l1.height / 2 };
