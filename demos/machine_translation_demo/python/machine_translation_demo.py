@@ -218,6 +218,9 @@ def main(args):
     input_data = args.input
     if input_data and len(input_data) == 1 and input_data[0].endswith('.txt'):
         input_data = open(input_data[0], 'r', encoding='utf8')
+    if args.output:
+        with open(args.output, 'w') as f:
+            f.truncate()
 
     def sentences():
         if input_data:
@@ -240,7 +243,7 @@ def main(args):
             print(translation)
             logger.info(f"time: {stop - start} s.")
             if args.output:
-                with open(args.output, 'a') as f:
+                with open(args.output, 'a', encoding='utf8') as f:
                     f.write(translation + '\n')
         except Exception:
             log.error("an error occurred", exc_info=True)
