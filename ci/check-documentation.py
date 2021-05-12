@@ -68,7 +68,7 @@ def main():
 
                 md_intermediate_parents = list(md_rel_path.parents)[1:-1] # removed root and first parent dirs
 
-                if not any((check_case_path.parent / parent_dir / 'README.md').exists() 
+                if not any((check_case_path.parent / parent_dir / 'README.md').exists()
                 for parent_dir in md_intermediate_parents) and md_file != check_case_path:
                     required_md_links.append(md_file)
 
