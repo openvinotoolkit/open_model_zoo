@@ -153,7 +153,7 @@ summed across all devices used.
 Running the application with the empty list of options yields the usage message given above and an error message.
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 ```
-python3 object_detection_demo_ssd_async.py -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd.xml -d GPU
+python3 object_detection_demo.py -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd.xml -d GPU
 ```
 
 To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO
