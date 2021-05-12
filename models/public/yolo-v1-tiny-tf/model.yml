@@ -28,5 +28,6 @@ model_optimizer_args:
   - --reverse_input_channels
   - --transformations_config=$mo_dir/extensions/front/tf/yolo_v2_tiny_voc.json
   - --input_model=$dl_dir/yolo-v1-tiny.pb
+quantizable: yes
 framework: tf
 license: https://raw.githubusercontent.com/shaqian/tfjs-yolo/master/LICENSE
