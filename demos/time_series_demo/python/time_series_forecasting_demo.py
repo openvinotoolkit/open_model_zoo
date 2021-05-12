@@ -133,10 +133,9 @@ class ForecastingActors:
             gt (Annotation): annotation object.
         """
         self.curves["gt"].set_ydata(gt.inorm(gt.outputs.flatten()))
-        for q in self.quantiles:
-            self.curves[q].set_ydata(gt.inorm(preds[q].flatten()))
-        out = list(self.curves.values())
-        return out
+        for key, val in preds.items():
+            self.curves[key].set_ydata(gt.inorm(val.flatten()))
+        return self.curves.values()
 
     def _init_curves(self):
         self.curves = OrderedDict()
