@@ -2,7 +2,6 @@ models:
   - name: time-series-forecasting-electricity-0001
     launchers:
       - framework: dlsdk
-        device: CPU
         inputs:
           - name: timestamps
             type: INPUT
@@ -15,10 +14,7 @@ models:
             0.9: 2
 
     datasets:
-      - name: Electricity
-        annotation_conversion:
-          converter: electricity
-          data_path_file: LD2011_2014.txt
+      - name: electricity
         reader:
           type: annotation_features_extractor
           features:
