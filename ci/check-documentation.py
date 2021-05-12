@@ -53,26 +53,26 @@ def main():
         print(message, file=sys.stderr)
 
     index_child_md_links = {}
-    for check_case_path in index_file_paths:
-        if not check_case_path.exists():
-            complain(f'{check_case_path}: file not found')
+    for index_file_path in index_file_paths:
+        if not index_file_path.exists():
+            complain(f'{index_file_path}: file not found')
             continue
 
         required_md_links = []
         for md_file in all_md_files:
-            if md_file.name == "README.md":
+            if md_file.name == "README.md" and md_file.parent != index_file_path.parent:
                 try:
-                    md_rel_path = md_file.relative_to(check_case_path.parent)
+                    md_rel_path = md_file.relative_to(index_file_path.parent)
                 except ValueError:
                     continue
 
                 md_intermediate_parents = list(md_rel_path.parents)[1:-1] # removed root and first parent dirs
 
-                if not any((check_case_path.parent / parent_dir / 'README.md').exists()
-                for parent_dir in md_intermediate_parents) and md_file != check_case_path:
+                if not any((index_file_path.parent / parent_dir / 'README.md').exists()
+                    for parent_dir in md_intermediate_parents):
                     required_md_links.append(md_file)
 
-        index_child_md_links[check_case_path] = sorted(required_md_links)
+        index_child_md_links[index_file_path] = sorted(required_md_links)
 
     for md_path in sorted(all_md_files):
         referenced_md_files = set()
@@ -113,6 +113,8 @@ def main():
 
             if md_path in index_child_md_links:
                 referenced_md_files.add(target_path)
+
+        # check for existence of links to README.md files of models and demos
 
         if md_path in index_child_md_links:
             for md_file in index_child_md_links[md_path]:
