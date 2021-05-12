@@ -302,6 +302,8 @@ def get_conversion_attributes(config, dataset_size):
                     if is_relative_to(value, m_path):
                         break
             conversion_parameters[key] = str(value.relative_to(m_path))
+        if isinstance(value, Path):
+            conversion_parameters[key] = 'PATH/{}'.format(value.name)
 
     subset_size = config.get('subsample_size')
     subset_parameters = {}

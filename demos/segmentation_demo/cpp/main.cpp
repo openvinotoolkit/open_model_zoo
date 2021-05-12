@@ -91,6 +91,7 @@ static void showUsage() {
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
     std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_message << std::endl;
+    std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
 
@@ -113,6 +114,9 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -m is not set");
     }
 
+    if (!FLAGS_output_resolution.empty() && FLAGS_output_resolution.find("x") == std::string::npos) {
+        throw std::logic_error("Correct format of -output_resolution parameter is \"width\"x\"height\".");
+    }
     return true;
 }
 
@@ -163,7 +167,7 @@ cv::Mat applyColorMap(cv::Mat input) {
     return out;
 }
 
-cv::Mat renderSegmentationData(const SegmentationResult& result) {
+cv::Mat renderSegmentationData(const SegmentationResult& result, OutputTransform& outputTransform) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -176,7 +180,9 @@ cv::Mat renderSegmentationData(const SegmentationResult& result) {
     }
 
     // Visualizing result data over source image
-    return inputImg / 2 + applyColorMap(result.mask) / 2;
+    cv::Mat output = inputImg / 2 + applyColorMap(result.mask) / 2;
+    outputTransform.resize(output);
+    return output;
 }
 
 int main(int argc, char* argv[])
@@ -211,17 +217,17 @@ int main(int argc, char* argv[])
         uint32_t framesProcessed = 0;
         cv::VideoWriter videoWriter;
 
+        cv::Size outputResolution;
+        OutputTransform outputTransform = OutputTransform();
+        size_t found = FLAGS_output_resolution.find("x");
+
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
-                //--- Capturing frame
                 auto startTime = std::chrono::steady_clock::now();
+
+                //--- Capturing frame
                 curr_frame = cap->read();
-                if (frameNum == -1) {
-                    if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                              cap->fps(), curr_frame.size())) {
-                        throw std::runtime_error("Can't open video writer");
-                    }
-                }
+
                 if (curr_frame.empty()) {
                     if (frameNum == -1) {
                         throw std::logic_error("Can't read an image from the input");
@@ -235,6 +241,28 @@ int main(int argc, char* argv[])
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 
+            if (frameNum == 0) {
+                if (found == std::string::npos) {
+                    outputResolution = curr_frame.size();
+                }
+                else {
+                    outputResolution = cv::Size{
+                        std::stoi(FLAGS_output_resolution.substr(0, found)),
+                        std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
+                    };
+                    outputTransform = OutputTransform(curr_frame.size(), outputResolution);
+                    outputResolution = outputTransform.computeResolution();
+                }
+            }
+
+            // Preparing video writer if needed
+            if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
+                if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                    cap->fps(), outputResolution)) {
+                    throw std::runtime_error("Can't open video writer");
+                }
+            }
+
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
             pipeline.waitForData();
 
@@ -242,7 +270,7 @@ int main(int argc, char* argv[])
             //--- If you need just plain data without rendering - cast result's underlying pointer to SegmentationResult*
             //    and use your own processing instead of calling renderSegmentationData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>());
+                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -273,7 +301,7 @@ int main(int argc, char* argv[])
             result = pipeline.getResult();
             if (result != nullptr)
             {
-                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>());
+                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,

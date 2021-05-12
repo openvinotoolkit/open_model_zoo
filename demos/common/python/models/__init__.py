@@ -25,7 +25,7 @@ from .retinaface import RetinaFace
 from .segmentation import SegmentationModel, SalientObjectDetectionModel
 from .ssd import SSD
 from .ultra_lightweight_face_detection import UltraLightweightFaceDetection
-from .utils import DetectionWithLandmarks, InputTransform
+from .utils import DetectionWithLandmarks, InputTransform, OutputTransform
 from .yolo import YOLO, YoloV4
 
 __all__ = [
@@ -37,6 +37,7 @@ __all__ = [
     'HpeAssociativeEmbedding',
     'InputTransform',
     'OpenPose',
+    'OutputTransform',
     'RetinaFace',
     'SalientObjectDetectionModel',
     'SegmentationModel',

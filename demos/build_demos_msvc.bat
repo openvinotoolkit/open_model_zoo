@@ -84,7 +84,8 @@ if "%VS_VERSION%" == "" (
         echo vswhere.exe was not found.
         echo To use Visual Studio autodetection, make sure Visual Studio 2017 version 15.2
         echo or a newer version of Visual Studio is installed. If you'd like to use Visual
-        echo Studio 2015, request it explicitly by running "%0 VS2015".
+        echo Studio 2015, request it explicitly by running:
+        echo     "%~0" VS2015
         goto errorHandling
     )
 

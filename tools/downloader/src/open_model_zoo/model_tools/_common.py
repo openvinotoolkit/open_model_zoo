@@ -34,7 +34,7 @@ import requests
 import yaml
 
 DOWNLOAD_TIMEOUT = 5 * 60
-OMZ_ROOT = Path(__file__).resolve().parents[2]
+OMZ_ROOT = Path(__file__).resolve().parents[5]
 MODEL_ROOT = OMZ_ROOT / 'models'
 
 # make sure to update the documentation if you modify these

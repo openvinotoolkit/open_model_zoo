@@ -109,3 +109,54 @@ inline void putHighlightedText(cv::Mat& frame,
     cv::putText(frame, message, position, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness + 1);
     cv::putText(frame, message, position, fontFace, fontScale, color, thickness);
 }
+
+
+class OutputTransform {
+    public:
+        OutputTransform() : doResize(false) {}
+
+        OutputTransform(cv::Size inputSize, cv::Size outputResolution) :
+            doResize(true), inputSize(inputSize), outputResolution(outputResolution) {}
+
+        cv::Size computeResolution() {
+            float inputWidth = static_cast<float>(inputSize.width);
+            float inputHeight = static_cast<float>(inputSize.height);
+            scaleFactor = std::min(outputResolution.height / inputHeight, outputResolution.width / inputWidth);
+            newResolution = cv::Size{static_cast<int>(inputWidth * scaleFactor), static_cast<int>(inputHeight * scaleFactor)};
+            return newResolution;
+        }
+
+        void resize(cv::Mat& image) {
+            if (!doResize) { return; }
+            cv::Size currSize = image.size();
+            if (currSize != inputSize) {
+                inputSize = currSize;
+                computeResolution();
+            }
+            if (scaleFactor == 1) { return; }
+            cv::resize(image, image, newResolution);
+        }
+
+        template<typename T>
+        void scaleCoord(T& coord) {
+            if (!doResize || scaleFactor == 1) { return; }
+            coord.x = std::floor(coord.x * scaleFactor);
+            coord.y = std::floor(coord.y * scaleFactor);
+        }
+
+        template<typename T>
+        void scaleRect(T& rect) {
+            if (!doResize || scaleFactor == 1) { return; }
+            scaleCoord(rect);
+            rect.width = std::floor(rect.width * scaleFactor);
+            rect.height = std::floor(rect.height * scaleFactor);
+        }
+
+        bool doResize;
+
+    private:
+        float scaleFactor;
+        cv::Size inputSize;
+        cv::Size outputResolution;
+        cv::Size newResolution;
+};
