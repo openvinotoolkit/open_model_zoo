@@ -47,9 +47,6 @@ DEFINE_OUTPUT_FLAGS
 static const char help_message[] = "Print a usage message.";
 static const char at_message[] = "Required. Type of the network, either 'sr' for Super Resolution task or 'deblur' for Deblurring";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-static const char mode_message[] = "Optional. Result display mode: 'orig' - display the original image together with the resulting image."
-"'mixed' - display the mixed image: left half for original image, right half for result of model."
-"'diff' - display the resulting image together with difference image (|processed-original|).";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
@@ -69,7 +66,6 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
-DEFINE_string(mode, "", mode_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
@@ -92,7 +88,6 @@ static void showUsage() {
     std::cout << "    -at \"<type>\"              " << at_message << std::endl;
     std::cout << "    -i \"<path>\"               " << input_message << std::endl;
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
-    std::cout << "    -mode \"<type>\"            " << mode_message << std::endl;
     std::cout << "    -o \"<path>\"               " << output_message << std::endl;
     std::cout << "    -limit \"<num>\"            " << limit_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
@@ -194,14 +189,10 @@ int main(int argc, char *argv[]) {
         uint32_t framesProcessed = 0;
         cv::VideoWriter videoWriter;
 
-        auto mode = FLAGS_mode;
-        if (visualize::modes.find(mode) == visualize::modes.end())
-            throw std::invalid_argument("Uncorrect mode. Mode can be equals: 'orig', 'mixed' or 'diff', but no: " + mode);
-        int coeff = 1;
-
         cv::Size outputResolution;
         OutputTransform outputTransform = OutputTransform();
         size_t found = FLAGS_output_resolution.find("x");
+        Visualizer view;
 
         // interactive mode for single image
         if (checkFile(FLAGS_i) && !FLAGS_loop) {
@@ -209,8 +200,9 @@ int main(int argc, char *argv[]) {
             result = pipeline.getResult();
             if (found == std::string::npos) {
                 outputResolution = result->asRef<ImageResult>().resultImage.size();
-                if (outputResolution.height > visualize::maxSize.height || outputResolution.width > visualize::maxSize.width)
-                    outputResolution = visualize::maxSize;
+                cv::Size viewSize = view.getSize();
+                if (outputResolution.height > viewSize.height || outputResolution.width > viewSize.width)
+                    outputResolution = viewSize;
             }
             else {
                 outputResolution = cv::Size{
@@ -220,15 +212,13 @@ int main(int argc, char *argv[]) {
             }
             outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
             outputResolution = outputTransform.computeResolution();
-            visualize::init(mode, outputResolution);
-            visualize::renderResultData(result->asRef<ImageResult>());
+
+            view.renderResultData(result->asRef<ImageResult>(), outputTransform);
             auto key = 1;
-            cv::Mat displayImg;
             while (!(27 == key || 'q' == key || 'Q' == key)) {
-                displayImg = visualize::getDisplayImg();
-                visualize::show(displayImg);
+                view.show();
                 key = cv::waitKey(1);
-                visualize::handleKey(key);
+                view.handleKey(key);
             }
             return 0;
         }
@@ -258,8 +248,9 @@ int main(int argc, char *argv[]) {
                 if (framesProcessed == 0) {
                     if (found == std::string::npos) {
                         outputResolution = result->asRef<ImageResult>().resultImage.size();
-                        if (outputResolution.height > visualize::maxSize.height &&  outputResolution.width > visualize::maxSize.width)
-                            outputResolution = visualize::maxSize;
+                        cv::Size viewSize = view.getSize();
+                        if (outputResolution.height > viewSize.height || outputResolution.width > viewSize.width)
+                            outputResolution = viewSize;
                     }
                     else {
                         outputResolution = cv::Size{
@@ -269,18 +260,17 @@ int main(int argc, char *argv[]) {
                     }
                     outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
                     outputResolution = outputTransform.computeResolution();
-                    visualize::init(mode, outputResolution);
 
                     // Preparing video writer if needed
                     if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
                         if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                            cap->fps(), cv::Size(coeff * outputResolution.width, outputResolution.height))) {
+                            cap->fps(), cv::Size(outputResolution.width, outputResolution.height))) {
                             throw std::runtime_error("Can't open video writer");
                         }
                     }
                 }
 
-                cv::Mat outFrame = visualize::renderResultData(result->asRef<ImageResult>());
+                cv::Mat outFrame = view.renderResultData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -289,14 +279,14 @@ int main(int argc, char *argv[]) {
                     videoWriter.write(outFrame);
                 }
                 if (!FLAGS_no_show) {
-                    visualize::show(outFrame);
+                    view.show(outFrame);
 
                     //--- Processing keyboard events
                     auto key = cv::waitKey(5);
                     if (27 == key || 'q' == key || 'Q' == key) { // Esc
                         keepRunning = false;
                     } else {
-                        visualize::handleKey(key);
+                        view.handleKey(key);
                         presenter.handleKey(key);
                     }
                 }
@@ -315,8 +305,9 @@ int main(int argc, char *argv[]) {
                 if (framesProcessed == 0) {
                     if (found == std::string::npos) {
                         outputResolution = result->asRef<ImageResult>().resultImage.size();
-                        if (outputResolution.height > visualize::maxSize.height &&  outputResolution.width > visualize::maxSize.width)
-                            outputResolution = visualize::maxSize;
+                        cv::Size viewSize = view.getSize();
+                        if (outputResolution.height > viewSize.height || outputResolution.width > viewSize.width)
+                            outputResolution = viewSize;
                     }
                     else {
                         outputResolution = cv::Size{
@@ -330,13 +321,13 @@ int main(int argc, char *argv[]) {
                     // Preparing video writer if needed
                     if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
                         if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                            cap->fps(), cv::Size(coeff * outputResolution.width, outputResolution.height))) {
+                            cap->fps(), cv::Size(outputResolution.width, outputResolution.height))) {
                             throw std::runtime_error("Can't open video writer");
                         }
                     }
                 }
 
-                cv::Mat outFrame = visualize::renderResultData(result->asRef<ImageResult>());
+                cv::Mat outFrame = view.renderResultData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -345,7 +336,7 @@ int main(int argc, char *argv[]) {
                     videoWriter.write(outFrame);
                 }
                 if (!FLAGS_no_show) {
-                    visualize::show(outFrame);
+                    view.show(outFrame);
 
                     //--- Updating output window
                     cv::waitKey(1);
