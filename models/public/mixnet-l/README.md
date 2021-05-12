@@ -10,8 +10,6 @@ Use this [link](https://arxiv.org/abs/1907.09595) to learn more about MixNet arc
 All the MixNet models have been pretrained on the ImageNet\* image database.
 For details about this family of models, check out the [TensorFlow Cloud TPU repository](https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet/mixnet).
 
-## Example
-
 ## Specification
 
 | Metric            | Value         |
@@ -25,10 +23,8 @@ For details about this family of models, check out the [TensorFlow Cloud TPU rep
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 78.30%          | 78.90%           |
-| Top 5  | 93.91%          | 94.20%           |
-
-## Performance
+| Top 1  | 78.30%         | 78.30%          |
+| Top 5  | 93.91%         | 93.91%          |
 
 ## Input
 

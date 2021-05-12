@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: tf
-        model: public/mixnet-l/mixnet-l/model.ckpt.meta
+        model: mixnet-l/model.ckpt.meta
         adapter: classification
         output_names:
           - logits
@@ -11,7 +11,7 @@ models:
           - name: IteratorGetNext
             type: INPUT
 
-    datasets:  
+    datasets:
       - name: imagenet_1000_classes
         preprocessing:
           - type: bgr_to_rgb
@@ -23,29 +23,10 @@ models:
             use_pillow: True
             interpolation: BICUBIC
 
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-          - name: accuracy@top5
-            type: accuracy
-            top_k: 5
-
   - name: mixnet-l
 
     launchers:
       - framework: dlsdk
-        tags:
-          - FP32
-        model:   public/mixnet-l/FP32/mixnet-l.xml
-        weights: public/mixnet-l/FP32/mixnet-l.bin
-        adapter: classification
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/mixnet-l/FP16/mixnet-l.xml
-        weights: public/mixnet-l/FP16/mixnet-l.bin
         adapter: classification
 
     datasets:
@@ -58,11 +39,3 @@ models:
             size: 224
             use_pillow: True
             interpolation: BICUBIC
-
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-          - name: accuracy@top5
-            type: accuracy
-            top_k: 5
