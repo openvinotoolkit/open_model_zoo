@@ -21,7 +21,7 @@ Our demo works with the test dataset in the .pickle format provided by accuracy_
 ```
 wget https://archive.ics.uci.edu/ml/machine-learning-databases/00321/LD2011_2014.txt.zip
 unzip LD2011_2014.txt.zip
-convert_annotation electricity LD2011_2014.txt
+convert_annotation electricity --data_path_file LD2011_2014.txt
 ```
 
 ### Running the Demo
