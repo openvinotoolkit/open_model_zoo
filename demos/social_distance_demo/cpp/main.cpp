@@ -381,7 +381,9 @@ void Drawer::drawDetections(Context& context, cv::Mat& frame) {
                 cv::Rect2d inter = l1 | l2;
                 cv::rectangle(frame, l1, { 0, 255, 255 }, 2);
                 cv::rectangle(frame, l2, { 0, 255, 255 }, 2);
-                cv::rectangle(frame, inter, { 0, 0, 255 }, 3);
+                cv::Point2d rect1center = { l1.x + l1.width / 2, l1.y + l1.height / 2 };
+                cv::Point2d rect2center = { l2.x + l2.width / 2, l2.y + l2.height / 2 };
+                cv::line(frame, rect1center, rect2center, { 0, 0, 255 }, 3);
             }
         }
     }
