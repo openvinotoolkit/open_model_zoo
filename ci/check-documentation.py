@@ -69,7 +69,7 @@ def main():
                 md_intermediate_parents = list(md_rel_path.parents)[1:-1] # removed root and first parent dirs
 
                 if not any((index_file_path.parent / parent_dir / 'README.md').exists()
-                    for parent_dir in md_intermediate_parents):
+                        for parent_dir in md_intermediate_parents):
                     required_md_links.append(md_file)
 
         index_child_md_links[index_file_path] = sorted(required_md_links)
