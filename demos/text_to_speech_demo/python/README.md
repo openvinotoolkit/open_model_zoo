@@ -1,6 +1,5 @@
 # Text-to-speech Python\* Demo
 
-## Description
 The text to speech demo show how to run the ForwardTacotron and WaveRNN models or modified ForwardTacotron and MelGAN models to produce an audio file for a given input text file.
 The demo is based on https://github.com/seungwonpark/melgan, https://github.com/as-ideas/ForwardTacotron and https://github.com/fatchord/WaveRNN repositories.
 
@@ -10,6 +9,20 @@ Upon the start-up, the demo application reads command-line parameters and loads 
 Inference Engine plugin. The demo pipeline reads text file by lines and divides every line to parts by punctuation marks.
 The heuristic algorithm chooses punctuation near to the some threshold by sentence length.
 When inference is done, the application outputs the audio to the WAV file with 22050 Hz sample rate.
+
+## Preparing to Run
+
+The list of models supported by the demo is in <omz_dir>/demos/text_to_speech_demo/python/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* forward-tacotron-duration-prediction
+* forward-tacotron-regression
+* wavernn-rnn
+* wavernn-upsampler
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -62,10 +75,11 @@ Options:
 
 Running the application with the empty list of options yields the usage message and an error message.
 
-## Example for running with arguments
+## Example for Running with Arguments
 
 ### ForwardTacotron with WaveRNN
-```
+
+```sh
 python3 text_to_speech_demo.py \
     --input <path_to_file>/text.txt \
     -o <path_to_audio>/audio.wav \
@@ -74,8 +88,10 @@ python3 text_to_speech_demo.py \
     --model_upsample <path_to_model>/wavernn_upsampler.xml \
     --model_rnn <path_to_model>/wavernn_rnn.xml
 ```
+
 ### Modified ForwardTacotron with MelGAN
-```
+
+```sh
 python3 text_to_speech_demo.py \
     -i <path_to_file>/text.txt \
     -o <path_to_audio>/audio.wav \
@@ -83,12 +99,6 @@ python3 text_to_speech_demo.py \
     -m_forward <path_to_model>/forward_tacotron_regression_att.xml \
     -m_melgan <path_to_model>/melganupsample.xml
 ```
-To run the demo, you can use public pre-trained models. You can download the pre-trained models with the OpenVINO
-[Model Downloader](../../../tools/downloader/README.md).
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine
-format (\*.xml + \*.bin) using the
-[Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 ## Demo Output
 
@@ -96,6 +106,6 @@ The application outputs is WAV file with generated audio.
 
 ## See Also
 
-* [Using Open Model Zoo Demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

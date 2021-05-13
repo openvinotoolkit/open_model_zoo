@@ -8,8 +8,8 @@ This repository includes optimized deep learning models and a set of demos to ex
 Intel is committed to the respect of human rights and avoiding complicity in human rights abuses, a policy reflected in the [Intel Global Human Rights Principles](https://www.intel.com/content/www/us/en/policy/policy-human-rights.html). Accordingly, by accessing the Intel material on this platform you agree that you will not use the material in a product or application that causes or contributes to a violation of an internationally recognized human right.
 
 ## Repository Components:
-* [Pre-Trained Models](models/intel/index.md)
-* [Public Models Description](models/public/index.md)
+* [Intel Pre-Trained Models](models/intel/index.md)
+* [Public Pre-Trained Models](models/public/index.md)
 * [Model Downloader](tools/downloader/README.md) and other automation tools
 * [Demos](demos/README.md) that demonstrate models usage with Deep Learning Deployment Toolkit
 * [Accuracy Checker](tools/accuracy_checker/README.md) tool for models accuracy validation
@@ -17,20 +17,22 @@ Intel is committed to the respect of human rights and avoiding complicity in hum
 ## License
 Open Model Zoo is licensed under [Apache License Version 2.0](LICENSE).
 
-## Documentation
+## Online Documentation
 * [OpenVINO™ Release Notes](https://software.intel.com/en-us/articles/OpenVINO-RelNotes)
-* [Pre-Trained Models](https://software.intel.com/en-us/openvino-toolkit/documentation/pretrained-models)
-* [Demos and samples](https://software.intel.com/en-us/articles/OpenVINO-IE-Samples)
+* [Pre-Trained Models](https://docs.openvinotoolkit.org/latest/trained_models.html)
+* [Demos and Samples](https://docs.openvinotoolkit.org/latest/omz_demos.html)
 
-## Other usage examples
+## Other Usage Examples
 * [Open Visual Cloud](https://01.org/openvisualcloud)
   * [Tutorial: Build and Run the AD Insertion Sample on public cloud or local machine](https://01.org/openvisualcloud/documents/tutorial-build-and-run-ad-insertion-sample-public-cloud-or-local-machine)
   * [GitHub Repo for Ad Insertion Sample](https://github.com/OpenVisualCloud/Ad-Insertion-Sample)
 * [OpenVINO for Smart City](https://github.com/incluit/OpenVino-For-SmartCity)
 * [OpenVINO Driver Behavior](https://github.com/incluit/OpenVino-Driver-Behaviour)
+* [OpenVINO Python\* Notebooks](https://github.com/openvinotoolkit/openvino_notebooks/blob/main/README.md)
 
 ## How to Contribute
 We welcome community contributions to the Open Model Zoo repository. If you have an idea how to improve the product, please share it with us doing the following steps:
+
 * Make sure you can build the product and run all the demos with your patch.
 * In case of a larger feature, provide a relevant demo.
 * Submit a pull request at https://github.com/openvinotoolkit/open_model_zoo/pulls

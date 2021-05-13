@@ -4,23 +4,24 @@
 
 This is the demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
 The following pre-trained models are delivered with the product:
+
 * `driver-action-recognition-adas-0002-encoder` + `driver-action-recognition-adas-0002-decoder`, which are models for driver monitoring scenario. They recognize actions like safe driving, talking to the phone and others
 * `action-recognition-0001-encoder` + `action-recognition-0001-decoder` and `i3d-rgb-tf`, which are general-purpose action recognition (400 actions) models for Kinetics-400 dataset.
 
-For more information about the pre-trained models, refer to the [Intel model documentation](../../../models/intel/index.md) and [public model documentation](../../../models/public/index.md).
+For more information about the pre-trained models, refer to the [Intel](../../../models/intel/index.md) and [public](../../../models/public/index.md) models documentation.
 
 ## How It Works
 
-The demo pipeline consists of several frames, namely `Data`, `Model` and `Render`.
+The demo pipeline consists of several steps, namely `Data`, `Model` and `Render`.
 Every step implements `PipelineStep` interface by creating a class derived from `PipelineStep` base class. See `steps.py` for implementation details.
 
-- `DataStep` reads frames from the input video.
--  Model step depends on architecture type:
+* `DataStep` reads frames from the input video.
+*  Model step depends on architecture type:
     - For encder-decoder models there are two steps:
       -  `EncoderStep` preprocesses a frame and feeds it to the encoder model to produce a frame embedding. simple averaging of encoder's outputs over a time window is applied.
       -  `DecoderStep` feeds embeddings produced by the `EncoderStep` to the decoder model and produces predictions. For models that use `DummyDecoder` simple averaging of encoder's outputs over a time window is applied.
     - For specific single models implemented corresponding `<ModelNameStep>` which does preprocess and produce predictions.
-- `RenderStep` renders prediction results.
+* `RenderStep` renders prediction results.
 
 Pipeline steps are composed in `AsyncPipeline`. Every step can be run in separate thread by adding it to the pipeline with `parallel=True` option.
 When two consequent steps occur in separate threads, they communicate via message queue (for example, deliver step result or stop signal).
@@ -32,6 +33,26 @@ You can change the value of `num_requests` in `action_recognition_demo.py` to fi
 (Compute Sticks and GPUs benefit from higher number of infer requests).
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in <omz_dir>/demos/action_recognition_demo/python/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* architecture_type = en-de
+    - action-recognition-0001-decoder
+    - action-recognition-0001-encoder
+    - driver-action-recognition-adas-0002-decoder
+    - driver-action-recognition-adas-0002-encoder
+* architecture_type = en-mean
+    - weld-porosity-detection-0001
+* architecture_type = i3d-rgb
+    - i3d-rgb-tf
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -59,7 +80,7 @@ Options:
                         Optional. Number of frames to store in output. If 0 is
                         set, all frames are stored.
   -at {en-de,en-mean,i3d-rgb}, --architecture_type {en-de,en-mean,i3d-rgb}
-                        Required. Specify architecture type.
+                        Required. Specify model architecture type.
   -m_en M_ENCODER, --m_encoder M_ENCODER
                         Required. Path to encoder model.
   -m_de M_DECODER, --m_decoder M_DECODER
@@ -86,12 +107,9 @@ Options:
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/action_recognition_demo/python/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 **For example**, to run the demo for in-cabin driver monitoring scenario, please provide a path to the encoder and decoder models, an input video and a file with [label names](./driver_actions.txt):
-```bash
+
+```sh
 python3 action_recognition_demo.py \
     -m_en <path_to_model>/driver-action-recognition-adas-0002_encoder.xml \
     -m_de <path_to_model>/driver-action-recognition-adas-0002_decoder.xml \
@@ -101,9 +119,10 @@ python3 action_recognition_demo.py \
 
 ## Demo Output
 
-The application uses OpenCV to display the real-time results and current inference performance (in FPS).
+The application uses OpenCV to display the real-time action recognition results and current inference performance (in FPS).
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

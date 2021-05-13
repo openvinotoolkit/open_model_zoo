@@ -1,11 +1,11 @@
-# Overview of OpenVINO&trade; Toolkit Public Models
+# Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models
 
-OpenVINO&trade; toolkit provides a set of public models
+OpenVINO&trade; toolkit provides a set of public pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
+The table [Public Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
 
-You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ Model Downloader and other automation tools.
-Review the tools description in the file `<OPENVINO_INSTALL_DIR>/deployment_tools/open_model_zoo/tools/downloader/README.md` for details.
+You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/downloader/README.md) and other automation tools.
 
 ## Classification
 
@@ -319,6 +319,12 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | vehicle-reid-0001 | PyTorch\* | [vehicle-reid-0001](./vehicle-reid-0001/README.md) | 96.31%/85.15 % | 2.643 | 2.183 |
+
+## See Also
+
+* [Open Model Zoo Demos](../../demos/README.md)
+* [Model Downloader](../../tools/downloader/README.md)
+* [Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models](../intel/index.md)
 
 ## Legal Information
 

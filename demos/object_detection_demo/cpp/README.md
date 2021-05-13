@@ -1,19 +1,17 @@
 # Object Detection C++ Demo
 
-![](../object_detection.gif)
+![example](../object_detection.gif)
 
-This demo showcases Object Detection and Async API.
+This demo showcases inference of Object Detection networks using Async API.
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the app can continue doing things on the host, while accelerator is busy.
-Specifically, this demo keeps the number of Infer Requests that you have set using `nireq` flag. While some of the Infer Requests are processed by IE, the other ones can be filled with new frame data and asynchronously started or the next output can be taken from the Infer Request and displayed.
+Specifically, this demo keeps the number of Infer Requests that you have set using `nireq` flag. While some of the Infer Requests are processed by Inference Engine, the other ones can be filled with new frame data and asynchronously started or the next output can be taken from the Infer Request and displayed.
 
-> **NOTE:** This topic describes usage of C++ implementation of the Object Detection Demo Async API.
-
-The technique can be generalized to any available parallel slack, for example, doing inference and simultaneously encoding the resulting
+This technique can be generalized to any available parallel slack, for example, doing inference and simultaneously encoding the resulting
 (previous) frames or running further inference, like some emotion detection on top of the face detection results.
 There are important performance caveats though, for example the tasks that run in parallel should try to avoid oversubscribing the shared compute resources.
-For example, if the inference is performed on the FPGA, and the CPU is essentially idle, than it makes sense to do things on the CPU
-in parallel. But if the inference is performed say on the GPU, than it can take little gain to do the (resulting video) encoding
+For example, if the inference is performed on the HDDL, and the CPU is essentially idle, than it makes sense to do things on the CPU
+in parallel. But if the inference is performed, say on the GPU, than it can take little gain to do the (resulting video) encoding
 on the same GPU in parallel, because the device is already busy.
 
 This and other performance implications and tips for the Async API are covered in the [Optimization Guide](https://docs.openvinotoolkit.org/latest/_docs_optimization_guide_dldt_optimization_guide.html)
@@ -29,8 +27,7 @@ need to pull Inference Engine demos helpers to your app
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads a network to the Inference
-Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference and displays the results.
+On the start-up, the application reads command-line parameters and loads a network to the Inference Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference and displays the results.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
@@ -55,12 +52,75 @@ as shown in code mockup below:
     }
 ```
 
-For more details on the requests-based Inference Engine API, including the Async execution, refer to [Integrate the Inference Engine New Request API with Your Application](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
+For more details on the requests-based Inference Engine API, including the Async execution, refer to [Integrate the Inference Engine with Your Application](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
 
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in <omz_dir>/demos/object_detection_demo/cpp/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* architecture_type = centernet
+  - ctdet_coco_dlav0_384
+  - ctdet_coco_dlav0_512
+* architecture_type = faceboxes
+  - faceboxes-pytorch
+* architecture_type = retinaface
+  - retinaface-anti-cov
+  - retinaface-resnet50
+  - ssh-mxnet
+* architecture_type = ssd
+  - efficientdet-d0-tf
+  - efficientdet-d1-tf
+  - face-detection-adas-0001
+  - face-detection-retail-0004
+  - face-detection-retail-0005
+  - face-detection-retail-0044
+  - faster-rcnn-resnet101-coco-sparse-60-0001
+  - pedestrian-and-vehicle-detector-adas-0001
+  - pedestrian-detection-adas-0002
+  - pelee-coco
+  - person-detection-0106
+  - person-detection-0200
+  - person-detection-0201
+  - person-detection-0202
+  - person-detection-0203
+  - person-detection-retail-0013
+  - person-vehicle-bike-detection-2000
+  - person-vehicle-bike-detection-2001
+  - person-vehicle-bike-detection-2002
+  - person-vehicle-bike-detection-2003
+  - person-vehicle-bike-detection-2004
+  - product-detection-0001
+  - rfcn-resnet101-coco-tf
+  - retinanet-tf
+  - ssd300
+  - ssd512
+  - ssd-resnet34-1200-onnx
+  - ssd_mobilenet_v1_coco
+  - ssd_mobilenet_v1_fpn_coco
+  - ssd_mobilenet_v2_coco
+  - ssd_resnet50_v1_fpn_coco
+  - ssdlite_mobilenet_v2
+  - vehicle-detection-0200
+  - vehicle-detection-0201
+  - vehicle-detection-0202
+  - vehicle-detection-adas-0002
+  - vehicle-license-plate-detection-barrier-0106
+  - vehicle-license-plate-detection-barrier-0123
+* architecture_type = yolo
+  - person-vehicle-bike-detection-crossroad-yolov3-1020
+  - yolo-v3-tf
+  - yolo-v3-tiny-tf
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
 InferenceEngine:
     API version ............ <version>
@@ -97,15 +157,12 @@ Options:
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/object_detection_demo/cpp/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
-If labels file is used, it should correspond to model output. Demo suggests labels listed in the file to be indexed from 0, one line - one label (i.e. very first line contains label for ID 0). Note that some models may return labels IDs in range 1..N, in this case label file should contain "background" label at the very first line.
+If labels file is used, it should correspond to model output. Demo treat labels, listed in the file, to be indexed from 0, one line - one label (that is very first line contains label for ID 0). Note that some models may return labels IDs in range 1..N, in this case label file should contain "background" label at the very first line.
 
 You can use the following command to do inference on GPU with a pre-trained object detection model:
+
 ```sh
-./object_detection_demo -i <path_to_video>/inputVideo.mp4 -at ssd -m <path_to_model>/ssd.xml -d GPU
+./object_detection_demo -i <path_to_video>/inputVideo.mp4 -at ssd -m <path_to_model>/ssd300.xml -d GPU -labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt
 ```
 
 ## Demo Output
@@ -117,8 +174,8 @@ The demo reports:
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results).
 You can use both of these metrics to measure application-level performance.
 
-
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
