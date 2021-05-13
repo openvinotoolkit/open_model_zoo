@@ -22,7 +22,7 @@ from pathlib import Path
 
 import yaml
 
-from open_model_zoo.model_tools import _common
+from open_model_zoo.model_tools import _common, _reporting
 
 DEFAULT_POT_CONFIG_BASE = {
     'compression': {
@@ -156,7 +156,7 @@ def main():
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    reporter = _common.Reporter(_common.DirectOutputContext())
+    reporter = _reporting.Reporter(_reporting.DirectOutputContext())
 
     output_dir = args.output_dir or args.model_dir
 

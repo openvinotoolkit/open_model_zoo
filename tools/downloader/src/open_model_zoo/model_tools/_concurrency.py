@@ -17,10 +17,10 @@ import queue
 import subprocess
 import sys
 
-from open_model_zoo.model_tools import _common
+from open_model_zoo.model_tools import _reporting
 
 
-class _QueuedOutputContext(_common.JobContext):
+class _QueuedOutputContext(_reporting.JobContext):
     def __init__(self, output_queue):
         super().__init__()
         self._output_queue = output_queue
