@@ -19,7 +19,9 @@ import sys
 
 from pathlib import Path
 
-from open_model_zoo.model_tools import _common, _concurrency, _reporting
+from open_model_zoo.model_tools import (
+    _configuration, _common, _concurrency, _reporting,
+)
 
 
 def run_pre_convert(reporter, model, output_dir, args):
@@ -122,7 +124,7 @@ def main():
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    models = _common.load_models_from_args(parser, args)
+    models = _configuration.load_models_from_args(parser, args)
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
