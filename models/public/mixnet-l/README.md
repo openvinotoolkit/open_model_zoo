@@ -5,7 +5,7 @@ MixNets are a family of mobile-sizes image classification models equipped with M
 a new type of mixed depthwise convolutions. There are three MixNet architectures -
 `MixNet-S` (Small), `MixNet-M` (Middle), `MixNet-L` (Large). The main differences are using
 MixConv with different kernel sizes and number of layers. Using `MixNet-L` allows to achieve greater accuracy.
-All the MixNet models have been pretrained on the ImageNet image database.
+All the MixNet models have been pretrained on the ImageNet dataset.
 For details about this family of models, check out the [TensorFlow Cloud TPU repository](https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet/mixnet) and [paper](https://arxiv.org/abs/1907.09595).
 
 ## Specification
