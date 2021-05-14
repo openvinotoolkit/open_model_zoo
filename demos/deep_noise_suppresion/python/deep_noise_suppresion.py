@@ -85,7 +85,7 @@ def main():
 
     samples_out = []
     samples_times = []
-    while sample_inp is not None and sample_inp.shape[0]>0:
+    while sample_inp is not None and sample_inp.shape[0] > 0:
         if sample_inp.shape[0] > input_size:
             input = sample_inp[:input_size]
             sample_inp = sample_inp[input_size:]
