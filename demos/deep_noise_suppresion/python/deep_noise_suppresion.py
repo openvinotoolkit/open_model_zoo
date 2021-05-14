@@ -57,8 +57,6 @@ def main():
     model_bin = model_xml.with_suffix(".bin")
     log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
     ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
-    print(ie_encoder.inputs)
-
 
     # check input and output names
     input_names = list(i.strip() for i in ie_encoder.inputs.keys())
@@ -75,12 +73,11 @@ def main():
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
 
     sample_inp, freq = soundfile.read(args.input, start=0, stop=None, dtype='float32')
-    assert freq == 16000
+    assert freq == 16000, "Only 16kHz sampling rate is supported for input audio"
     if sample_inp.ndim == 2:
         sample_inp = sample_inp.mean(0)
 
     input_size = ie_encoder.inputs["input"].shape[1]
-    print("input_size", input_size)
     res = None
 
     samples_out = []
