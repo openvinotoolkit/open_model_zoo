@@ -84,7 +84,13 @@ InferenceEngine::Blob::Ptr UniImageVA::toBlob(bool isNHWCModelInput) {
 }
 
 UniImage::Ptr UniImageVA::resize(int width, int height, IMG_RESIZE_MODE resizeMode, bool hqResize) {
-    // TODO: this is dumy code, image should be taken from pool
+    // IMPORTANT: This resized image will be passed to make_shared_blob_nv12. VA SurfaceIDs passed to that function are used as keys,
+    // so we cannot destroy such surface as surfaceIDs of destroyed surfaces may be reused by VA API's vaCreateSurfaces function and
+    // such reused IDs will create mess inside IE GPU plugin internal cache.
+    // That's why we use pool of surfaces and resized surface will not be destroyed until the end of
+    // application work (but it will be reused in latter interations).
+    // Besides that, using surfaces from pool will speed up application a little.
+
     return std::make_shared<UniImageVA>(img->resizeUsingPooledSurface((uint16_t)width, (uint16_t)height, resizeMode, hqResize));
 }
 #endif

@@ -65,30 +65,6 @@ InferenceEngine::ExecutableNetwork ImageModel::loadExecutableNetwork(const CnnCo
 
 std::shared_ptr<InternalModelData> ImageModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& data = inputData.asRef<ImageInputData>();
-#if 0
-        if(!cnnConfig.useGPURemoteContext)
-        {
-            throw std::runtime_error("Direct GPU copy was not initialized, but input data containing VA surface is received");
-        }
-
-        auto& vaImg = data.vaImage;
-
-        // IMPORTANT: This resizedImg will be passed to make_shared_blob_nv12. VA SurfaceIDs passed to that function are used as keys,
-        // so we cannot destroy such surface as surfaceIDs of destroyed surfaces may be reused by VA API's vaCreateSurfaces function and
-        // such reused IDs will create mess inside IE GPU plugin internal cache
-        // That's why we take resizedImg surface from precreated pool of surfaces and such surface will not be destroyed until the end of
-        // application work. Besides that, using surfaces from pool will speed up application a little.
-        auto resizedImg = resizedSurfacesPool->Acquire();
-
-        (auto resizedImg = ()vaImg->context->display() != va_context->display() ?
-            vaImg->cloneToAnotherContext(va_context) : vaImg)->resizeTo(resizedImg);
-
-        auto nv12_blob = InferenceEngine::gpu::make_shared_blob_nv12(resizedImg->height, resizedImg->width, sharedVAContext, resizedImg->va_surface_id);
-
-        request->SetBlob(inputsNames[0],nv12_blob);
-
-        return std::shared_ptr<InternalModelData>(new InternalImageModelData(resizedImg->width, resizedImg->height, resizedImg));
-#endif
     auto& img = useAutoResize ? data.inputImage :
             data.inputImage->resize(netInputWidth, netInputHeight);
 
