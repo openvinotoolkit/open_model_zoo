@@ -1,11 +1,11 @@
 models:
     - name: dns-poconet-like-0001
       launchers:
-        - framework: dlsdk
-          adapter:
-            type: noise_suppression
-            output_blob: output
-          inputs:
+          - framework: dlsdk
+            adapter:
+                type: noise_suppression
+                output_blob: output
+            inputs:
               - name: inp_state_000
                 type: LSTM_INPUT
                 value: out_state_000
