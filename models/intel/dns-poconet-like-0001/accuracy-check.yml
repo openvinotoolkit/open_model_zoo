@@ -163,15 +163,7 @@ models:
                 type: LSTM_INPUT
                 value: out_state_051
       datasets:
-          - name: dns dataset
-            data_source: ICASSP_dev_test_set/track_1/synthetic
-            reader:
-              type: wav_reader
-              mono: True
-              to_float: True
-            annotation_conversion:
-              converter: noise_suppression_dataset
-              annotation_file: ICASSP_dev_test_set/track_1/synthetic/eval_speech.txt
+          - name: speech_denoising_dataset
             preprocessing:
               - type: audio_patches
                 size: 2048
