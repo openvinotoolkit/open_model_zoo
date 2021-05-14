@@ -203,13 +203,19 @@ def build_argparser():
     return parser
 
 def parse_input(input):
-    if input and input[0].endswith('.txt'):
-        try:
-            with open(input[0], 'r', encoding='utf8') as f:
-                input = f.readlines()
-        except OSError:
-            pass
-    return input
+    if not input:
+        return
+    sentences = []
+    for text in input:
+        if text.endswith('.txt'):
+            try:
+                with open(text, 'r', encoding='utf8') as f:
+                    sentences += f.readlines()
+                continue
+            except OSError:
+                pass
+        sentences.append(text)
+    return sentences
 
 def main(args):
     log.basicConfig(format="[ %(levelname)s ] [ %(name)s ] %(message)s", level=log.INFO, stream=sys.stdout)
