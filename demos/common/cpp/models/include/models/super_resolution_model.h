@@ -22,7 +22,6 @@ class SuperResolutionModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
     SuperResolutionModel(const std::string& modelFileName, bool useAutoResize);
 

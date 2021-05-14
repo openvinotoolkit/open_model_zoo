@@ -88,7 +88,7 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
         matU8ToBlob<float_t>(resized, bicInputBlob);
     }
 
-    return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
+    return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
 
 std::unique_ptr<ResultBase> SuperResolutionModel::postprocess(InferenceResult& infResult) {

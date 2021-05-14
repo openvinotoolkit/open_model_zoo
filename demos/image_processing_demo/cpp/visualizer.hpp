@@ -19,6 +19,7 @@
 #include <string>
 #include <pipelines/metadata.h>
 #include <models/results.h>
+#include <utils/ocv_common.hpp>
 
 class Visualizer {
 private:
@@ -30,21 +31,21 @@ private:
     cv::Mat inputImg;
     cv::Mat resultImg;
     cv::Mat displayImg;
-    bool isSetResolution;
+    bool isResolutionSet = false;
     cv::Size resolution = cv::Size(960, 540);
 
     // trackbar info
-    std::string mode;
-    bool trShown;
+    std::string mode = "result";
+    bool isTrackbarShown = false;
     int slider = 0;
 
     // help message
-    bool helpShown = false;
-    std::string helpMessage = "Use mouse with LMB to change slider position\n"
-                              "Use R to display the result\n"
-                              "Use O to display the orig with result\n"
-                              "Use V to display the diff with result\n"
-                              "Esc or Q to quit\n";
+    bool isHelpShown = false;
+    std::string helpMessage[5] = {"Use mouse with LMB to change slider position",
+                                  "Use R to display the result",
+                                  "Use O to display the orig with result",
+                                  "Use V to display the diff with result",
+                                  "Esc or Q to quit"};
     void addTrackbar();
     void disableTrackbar();
     void setResolution(OutputTransform& transform);

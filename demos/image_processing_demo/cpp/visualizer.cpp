@@ -20,13 +20,10 @@
 #include "visualizer.hpp"
 
 Visualizer::Visualizer() {
-    cv::namedWindow(winName, cv::WINDOW_AUTOSIZE);
-    mode = "result";
+    cv::namedWindow(winName);
     inputImg = cv::Mat(resolution, CV_32FC3, 0.);
     resultImg = cv::Mat(resolution, CV_32FC3, 0.);
     displayImg = cv::Mat(resolution, CV_32FC3, 0.);
-    trShown = false;
-    isSetResolution = false;
 }
 
 cv::Size Visualizer::getSize() {
@@ -36,7 +33,7 @@ cv::Size Visualizer::getSize() {
 void Visualizer::handleKey(int key) {
     key = std::tolower(key);
     if (key == 'a') {
-        helpShown = 1 - helpShown;
+        isHelpShown = !isHelpShown;
     }
     if (key == 'o') {
         mode = "orig";
@@ -62,7 +59,7 @@ cv::Mat Visualizer::renderResultData(ImageResult result, OutputTransform& transf
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
     }
 
-    if (!isSetResolution) {
+    if (!isResolutionSet) {
         transform.resize(result.resultImage);
         setResolution(transform);
     }
@@ -85,18 +82,13 @@ void Visualizer::show(cv::Mat img) {
         img = displayImg;
     }
 
-    if (helpShown) {
-        float pad = 10;
-        float margin = 40;
-        std::vector<std::string> lines;
-        std::string line;
-        std::istringstream textStream(helpMessage);
-        while (std::getline(textStream, line, '\n'))
-           lines.push_back(line);
+    if (isHelpShown) {
+        int pad = 10;
+        int margin = 40;
         int baseline = 0;
-        int lineH = cv::getTextSize(lines[0], cv::FONT_HERSHEY_COMPLEX, 0.75, 1, &baseline).height + pad;
-        for (size_t i = 0; i < lines.size(); ++i) {
-            cv::putText(img, lines[i], cv::Point(pad, margin + baseline + (i + 1)*lineH),  cv::FONT_HERSHEY_COMPLEX,
+        int lineH = cv::getTextSize(helpMessage[0], cv::FONT_HERSHEY_COMPLEX, 0.75, 1, &baseline).height + pad;
+        for (size_t i = 0; i < 5; ++i) {
+            cv::putText(img, helpMessage[i], cv::Point(pad, margin + baseline + (i + 1)*lineH),  cv::FONT_HERSHEY_COMPLEX,
                         0.75, cv::Scalar(255, 0, 255));
         }
     }
@@ -130,23 +122,23 @@ void Visualizer::markImage(cv::Mat& image, const std::pair<std::string, std::str
 
 void Visualizer::setResolution(OutputTransform& transform) {
     resolution = transform.computeResolution();
-    isSetResolution = true;
+    isResolutionSet = true;
     cv::setTrackbarMax(trackbarName, winName, resolution.width);
 }
 
 void Visualizer::addTrackbar() {
-    if (!trShown) {
+    if (!isTrackbarShown) {
         cv::createTrackbar(trackbarName, winName, &slider, resolution.width);
         cv::setTrackbarMin(trackbarName, winName, 1);
-        trShown = true;
+        isTrackbarShown = true;
     }
 }
 
 void Visualizer::disableTrackbar() {
-    if (trShown) {
+    if (isTrackbarShown) {
         cv::destroyWindow(winName);
-        trShown = false;
-        cv::namedWindow(winName, cv::WINDOW_AUTOSIZE);
+        isTrackbarShown = false;
+        cv::namedWindow(winName);
         show();
     }
 }

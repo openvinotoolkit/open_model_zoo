@@ -143,14 +143,6 @@ std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::strin
     throw std::invalid_argument("No model type or invalid model type (-at) provided: " + FLAGS_at);
 }
 
-bool checkFile(const std::string& filename) {
-    std::ifstream file(filename.c_str());
-    cv::Mat img = cv::imread(filename);
-    if (file.good() && img.data)
-        return true;
-    return false;
-}
-
 int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
@@ -195,7 +187,7 @@ int main(int argc, char *argv[]) {
         Visualizer view;
 
         // interactive mode for single image
-        if (checkFile(FLAGS_i) && !FLAGS_loop) {
+        if (cap->getType() == "IMAGE" && !FLAGS_loop) {
             pipeline.waitForTotalCompletion();
             result = pipeline.getResult();
             if (found == std::string::npos) {
@@ -282,7 +274,7 @@ int main(int argc, char *argv[]) {
                     view.show(outFrame);
 
                     //--- Processing keyboard events
-                    auto key = cv::waitKey(5);
+                    auto key = cv::waitKey(1);
                     if (27 == key || 'q' == key || 'Q' == key) { // Esc
                         keepRunning = false;
                     } else {

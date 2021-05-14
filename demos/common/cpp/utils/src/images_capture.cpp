@@ -45,6 +45,8 @@ public:
 
     double fps() const override {return 1.0;}
 
+    std::string getType() const override {return "IMAGE";}
+
     cv::Mat read() override {
         if (loop) return img.clone();
         if (canRead) {
@@ -89,6 +91,8 @@ public:
     }
 
     double fps() const override {return 1.0;}
+
+    std::string getType() const override {return "DIR";}
 
     cv::Mat read() override {
         while (fileId < names.size() && nextImgId < readLengthLimit) {
@@ -139,6 +143,8 @@ public:
 
     double fps() const override {return cap.get(cv::CAP_PROP_FPS);}
 
+    std::string getType() const override {return "VIDEO";}
+
     cv::Mat read() override {
         if (nextImgId >= readLengthLimit) {
             if (loop && cap.set(cv::CAP_PROP_POS_FRAMES, initialImageId)) {
@@ -188,6 +194,8 @@ public:
     }
 
     double fps() const override {return cap.get(cv::CAP_PROP_FPS) > 0 ? cap.get(cv::CAP_PROP_FPS) : 30;}
+
+    std::string getType() const override {return "CAMERA";}
 
     cv::Mat read() override {
         if (nextImgId >= readLengthLimit) {
