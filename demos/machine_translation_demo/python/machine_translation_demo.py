@@ -202,6 +202,14 @@ def build_argparser():
                         help='Optional. Name of the models output node.')
     return parser
 
+def parse_input(input):
+    if input and input[0].endswith('.txt'):
+        try:
+            with open(input[0], 'r', encoding='utf8') as f:
+                input = f.readlines()
+        except OSError:
+            pass
+    return input
 
 def main(args):
     log.basicConfig(format="[ %(levelname)s ] [ %(name)s ] %(message)s", level=log.INFO, stream=sys.stdout)
@@ -215,18 +223,17 @@ def main(args):
         tokenizer_tgt=args.tokenizer_tgt,
         output_name=args.output_name
     )
-    input_data = args.input
-    if input_data and len(input_data) == 1 and input_data[0].endswith('.txt'):
-        input_data = open(input_data[0], 'r', encoding='utf8')
+    input_data = parse_input(args.input)
     if args.output:
-        with open(args.output, 'w') as f:
-            f.truncate()
+        open(args.output, 'w').close()
 
     def sentences():
         if input_data:
             for sentence in input_data:
-                print("> {}".format(sentence))
-                yield sentence
+                sentence = sentence.strip()
+                if sentence:
+                    print("> {}".format(sentence))
+                    yield sentence
         else:
             while True:
                 yield input("> ")
@@ -244,7 +251,7 @@ def main(args):
             logger.info(f"time: {stop - start} s.")
             if args.output:
                 with open(args.output, 'a', encoding='utf8') as f:
-                    f.write(translation + '\n')
+                    print(translation, file=f)
         except Exception:
             log.error("an error occurred", exc_info=True)
 
