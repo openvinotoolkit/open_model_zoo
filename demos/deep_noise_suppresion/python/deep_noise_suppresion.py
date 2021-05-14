@@ -75,7 +75,7 @@ def main():
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
 
     sample_inp, freq = soundfile.read(args.input, start=0, stop=None, dtype='float32')
-    assert freq==16000
+    assert freq == 16000
     if len(sample_inp.shape)==2:
         sample_inp = sample_inp.mean(0)
 
