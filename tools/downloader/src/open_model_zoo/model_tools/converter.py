@@ -19,7 +19,9 @@ import sys
 
 from pathlib import Path
 
-from open_model_zoo.model_tools import _common
+from open_model_zoo.model_tools import (
+    _configuration, _common, _concurrency, _reporting,
+)
 
 
 def run_pre_convert(reporter, model, output_dir, args):
@@ -122,7 +124,7 @@ def main():
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    models = _common.load_models_from_args(parser, args)
+    models = _configuration.load_models_from_args(parser, args)
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
@@ -185,13 +187,13 @@ def main():
 
         return True
 
-    reporter = _common.Reporter(_common.DirectOutputContext())
+    reporter = _reporting.Reporter(_reporting.DirectOutputContext())
 
     if args.jobs == 1 or args.dry_run:
         results = [convert(reporter, model) for model in models]
     else:
-        results = _common.run_in_parallel(args.jobs,
-            lambda context, model: convert(_common.Reporter(context), model),
+        results = _concurrency.run_in_parallel(args.jobs,
+            lambda context, model: convert(_reporting.Reporter(context), model),
             models)
 
     failed_models = [model.name for model, successful in zip(models, results) if not successful]

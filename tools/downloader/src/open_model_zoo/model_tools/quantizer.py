@@ -22,7 +22,9 @@ from pathlib import Path
 
 import yaml
 
-from open_model_zoo.model_tools import _common
+from open_model_zoo.model_tools import (
+    _configuration, _common, _reporting,
+)
 
 DEFAULT_POT_CONFIG_BASE = {
     'compression': {
@@ -141,7 +143,7 @@ def main():
             sys.exit('Unable to locate Post-Training Optimization Toolkit. '
                 + 'Use --pot or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
-    models = _common.load_models_from_args(parser, args)
+    models = _configuration.load_models_from_args(parser, args)
 
     # We can't mark it as required, because it's not required when --print_all is specified.
     # So we have to check it manually.
@@ -156,7 +158,7 @@ def main():
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    reporter = _common.Reporter(_common.DirectOutputContext())
+    reporter = _reporting.Reporter(_reporting.DirectOutputContext())
 
     output_dir = args.output_dir or args.model_dir
 
