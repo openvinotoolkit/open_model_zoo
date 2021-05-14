@@ -44,7 +44,7 @@ class InferenceContext:
                     "Some layers are not supported on the device")
 
     def deploy_model(self, model, device, max_requests=1):
-        self.check_model_support(model, device)
+        #self.check_model_support(model, device)
 
         config = {
             "PERF_COUNT": "YES" if self.perf_count else "NO",

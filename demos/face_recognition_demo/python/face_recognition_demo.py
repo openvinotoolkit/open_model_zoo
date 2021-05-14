@@ -280,6 +280,8 @@ class Visualizer:
             .face_identifier.get_identity_label(identity.id)
 
         # Draw face ROI border
+        roi.position = np.array(roi.position, dtype=np.int32)
+        roi.size = np.array(roi.size, dtype=np.int32)
         cv2.rectangle(frame,
                       tuple(roi.position), tuple(roi.position + roi.size),
                       (0, 220, 0), 2)
