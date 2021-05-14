@@ -37,7 +37,7 @@ The SISDR [5] quality metric was calculated on the 100 dev test synthetic speech
 
 ## Input
 
-Sequence patch, name: `input`, shape: [1, 2048], format: [B, T]
+Sequence patch, name: `input`, shape: `1, 2048`, format: `B, T`
 where:
    - B - batch size
    - T - number of samples in patch
