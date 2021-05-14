@@ -76,7 +76,7 @@ def main():
 
     sample_inp, freq = soundfile.read(args.input, start=0, stop=None, dtype='float32')
     assert freq == 16000
-    if len(sample_inp.shape)==2:
+    if sample_inp.ndim == 2:
         sample_inp = sample_inp.mean(0)
 
     input_size = ie_encoder.inputs["input"].shape[1]
