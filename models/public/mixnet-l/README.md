@@ -5,10 +5,8 @@ MixNets are a family of mobile-sizes image classification models equipped with M
 a new type of mixed depthwise convolutions. There are three MixNet architectures -
 `MixNet-S` (Small), `MixNet-M` (Middle), `MixNet-L` (Large). The main differences are using
 MixConv with different kernel sizes and number of layers. Using `MixNet-L` allows to achieve greater accuracy.
-Use this [link](https://arxiv.org/abs/1907.09595) to learn more about MixNet architectures.
-`MixNet-L` was pretrained in TensorFlow\*.
-All the MixNet models have been pretrained on the ImageNet\* image database.
-For details about this family of models, check out the [TensorFlow Cloud TPU repository](https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet/mixnet).
+All the MixNet models have been pretrained on the ImageNet image database.
+For details about this family of models, check out the [TensorFlow Cloud TPU repository](https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet/mixnet) and [paper](https://arxiv.org/abs/1907.09595).
 
 ## Specification
 
@@ -30,7 +28,7 @@ For details about this family of models, check out the [TensorFlow Cloud TPU rep
 
 ### Original Model
 
-Image, name - `image`,  shape - `[1x224x224x3]`, format is `[BxHxWxC]`, where:
+Image, name - `image`,  shape - `1, 224, 224, 3`, format is `B, H, W, C`, where:
 
 - `B` - batch size
 - `H` - height
@@ -41,7 +39,7 @@ Channel order is `RGB`.
 
 ### Converted Model
 
-Image, name - `IteratorGetNext/placeholder_out_port_0`,  shape - `[1x3x224x224]`, format is `[BxCxHxW]`, where:
+Image, name - `IteratorGetNext/placeholder_out_port_0`,  shape - `1, 3, 224, 224`, format is `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -65,6 +63,20 @@ Object classifier according to ImageNet classes, name - `logits`,  shape - `1,10
 
 - `B` - batch size
 - `C` - predicted logits for each class
+
+## Download a Model and Convert it into Inference Engine Format
+
+You can download models and if necessary convert them into Inference Engine format using the [Model Downloader and other automation tools](../../../tools/downloader/README.md) as shown in the examples below.
+
+An example of using the Model Downloader:
+```
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+```
+
+An example of using the Model Converter:
+```
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+```
 
 ## Legal Information
 

@@ -149,6 +149,7 @@ NATIVE_DEMOS = [
             ModelArg('alexnet'),
             ModelArg('densenet-121-tf'),
             ModelArg('densenet-169'),
+            ModelArg('mixnet-l'),
             ModelArg('mobilenet-v2-pytorch'),
             ModelArg('repvgg-a0'),
             ModelArg('repvgg-b1'),
