@@ -47,4 +47,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=output
   - --input_model=$conv_dir/shufflenet-v2-x1.0.onnx
+quantizable: yes
 license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE

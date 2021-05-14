@@ -17,9 +17,29 @@ Notice that question is usually much shorter than the contexts, so calculating t
 
 If second (conventional SQuAD-tuned) Bert model is provided as well, it is used to further search for the exact answer in the best contexts found in the first step, and the result then also displayed to the user.
 
+## Preparing to Run
+
+The list of models supported by the demo is in <omz_dir>/demos/bert_question_answering_embedding_demo/python/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* bert-large-uncased-whole-word-masking-squad-0001
+* bert-large-uncased-whole-word-masking-squad-emb-0001
+* bert-large-uncased-whole-word-masking-squad-int8-0001
+* bert-small-uncased-whole-word-masking-squad-0001
+* bert-small-uncased-whole-word-masking-squad-0002
+* bert-small-uncased-whole-word-masking-squad-emb-int8-0001
+* bert-small-uncased-whole-word-masking-squad-int8-0002
+* bert-large-uncased-whole-word-masking-squad-emb-0001
+* bert-small-uncased-whole-word-masking-squad-emb-int8-0001
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
 usage: bert_question_answering_embedding_demo.py [-h] -i INPUT
                                                  [--questions QUESTION [QUESTION ...]]
@@ -69,34 +89,10 @@ Options:
                         console)
 ```
 
-> **NOTE**: Before running the demo with a trained model, make sure to convert the model to the Inference Engine's
-> Intermediate Representation format (\*.xml + \*.bin)
-> using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-> When using the pre-trained BERT from the model zoo (please see [Model Downloader](../../../tools/downloader/README.md)),
-> the model is already converted to the IR.
-
-## Demo Inputs
-
-The application reads text from the HTML pages at the given urls and then answers questions typed from the console.
-The models and its parameters (inputs and outputs) are also important demo arguments.
-Notice that since order of inputs for the model does matter, the demo script checks that the inputs specified
-from the command-line match the actual network inputs.
-The embedding model is reshaped by the demo to infer embedding vectors for long contexts and short question.
-Be sure that the original model converted by Model Optimizer with reshape option.
-Please see general [reshape intro and limitations](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_ShapeInference.html)
-
-## Demo Outputs
-The application outputs contexts with answers to the same console.
-
-## Supported Models
-[Open Model Zoo Models](../../../models/intel/index.md) feature
-example BERT-large tuned on the Squad* for embedding calculation. It comes with "embedding" in its name.
-For second stage to find exact answer in filtered context the same models as for `bert_question_answering_demo` can be used.
-
 ## Example Demo Cmd-Line
-You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
-[Model Downloader](../../../tools/downloader/README.md) executed with "--name bert*"):
-```
+You can use the following command to try the demo:
+
+```sh
     python3 bert_question_answering_embedding_demo.py
             --vocab=<omz_dir>/models/intel/<model_name>/vocab.txt
             --model_emb=<path_to_model>/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
@@ -108,15 +104,32 @@ You can use the following command to try the demo (assuming the model from the O
             --input="https://en.wikipedia.org/wiki/Speed_of_light"
             -c
 ```
+
 The demo will use the Wikipedia articles about the Bert character and the speed of light to answer your questions like
 "what is the speed of light", "how to measure the speed of light", "who is Bert", "how old is Bert", etc.
 
+## Demo Inputs
+
+The application reads text from the HTML pages at the given urls and then answers questions typed from the console.
+The models and its parameters (inputs and outputs) are also important demo arguments.
+Notice that since order of inputs for the model does matter, the demo script checks that the inputs specified
+from the command line match the actual network inputs.
+The embedding model is reshaped by the demo to infer embedding vectors for long contexts and short question.
+Make sure that the original model converted by Model Optimizer with reshape option.
+Please see general [reshape intro and limitations](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_ShapeInference.html)
+
+## Demo Outputs
+
+The application outputs contexts with answers to the same console.
+
 ## Classifying Documents with Long Texts
+
 Notice that when the original "context" (paragraph text from the url) alone or together with the question do not fit the model input
 (usually 384 tokens for the Bert-Large, or 128 for the Bert-Base), the demo splits the paragraph into overlapping segments.
 Thus, for the long paragraph texts, the network is called multiple times as for separate contexts.
 
 ## Demo Performance
+
 Even though the demo reports inference performance (by measuring wall-clock time for individual inference calls),
 it is only baseline performance, as certain tricks like batching,
 [throughput mode](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Intro_to_Performance.html) can be applied.
@@ -124,7 +137,8 @@ Please use the full-blown [Benchmark C++ Sample](https://docs.openvinotoolkit.or
 for any actual performance measurements.
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
 * [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)

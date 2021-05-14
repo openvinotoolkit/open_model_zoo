@@ -1,14 +1,8 @@
 # Pedestrian Tracker C++ Demo
 
-![](./pedestrian_tracker.gif)
+![example](./pedestrian_tracker.gif)
 
-This demo showcases Pedestrian Tracking scenario: it reads frames from an input video sequence, detects pedestrians in the frames, and builds trajectories of movement of the pedestrians in
-a frame-by-frame manner.
-You can use a set of the following pre-trained models with the demo:
-* _person-detection-retail-0013_, which is the primary detection network for finding pedestrians
-* _person-reidentification-retail-0031_, which is the network that is executed on top of the results from inference of the first network and makes reidentification of the pedestrians
-
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
+This demo showcases Pedestrian Tracking scenario: it reads frames from an input video sequence, detects pedestrians in the frames, and builds trajectories of movement of the pedestrians in a frame-by-frame manner.
 
 ## How It Works
 
@@ -26,9 +20,27 @@ After that, the application displays the tracks and the latest detections on the
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in <omz_dir>/demos/pedestrian_tracker_demo/cpp/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* person-detection-retail-0002
+* person-detection-retail-0013
+* person-reidentification-retail-0277
+* person-reidentification-retail-0286
+* person-reidentification-retail-0287
+* person-reidentification-retail-0288
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
 InferenceEngine:
     API version ............ <version>
@@ -59,16 +71,12 @@ Options:
     -u                           Optional. List of monitors to show initially.
 ```
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 For example, to run the application with the OpenVINO&trade; toolkit pre-trained models with inferencing pedestrian detector on a GPU and pedestrian reidentification on a CPU, run the following command:
 
 ```sh
 ./pedestrian_tracker_demo -i <path_video_file> \
                           -m_det <path_to_model>/person-detection-retail-0013.xml \
-                          -m_reid <path_to_model>/person-reidentification-retail-0031.xml \
+                          -m_reid <path_to_model>/person-reidentification-retail-0277.xml \
                           -d_det GPU
 ```
 
@@ -76,11 +84,8 @@ For example, to run the application with the OpenVINO&trade; toolkit pre-trained
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes, curves (for trajectories displaying), and text.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
->* `person-detection-retail-0013`
->* `person-reidentification-retail-0031`
-> Other models may produce unexpected results on these devices.
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

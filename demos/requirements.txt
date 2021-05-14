@@ -1,3 +1,4 @@
+librosa>=0.8.0
 matplotlib>=3.3.4
 motmetrics>=1.2.0
 nibabel>=3.2.1

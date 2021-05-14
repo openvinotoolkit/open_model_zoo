@@ -10,24 +10,23 @@ converted to TensorFlow\* protobuf format. For details, see [paper](https://arxi
 
 1. Clone the original [repository](https://github.com/fizyr/keras-retinanet)(tested on `47fdf189` commit)
 2. Download the original model from [here](https://github.com/fizyr/keras-retinanet/releases/download/0.5.1/resnet50_coco_best_v2.1.0.h5)
-4. Get conversion script:
-
-    1. Get conversion script from [repository](https://github.com/amir-abdi/keras_to_tensorflow):
-        ```sh
-        git clone https://github.com/amir-abdi/keras_to_tensorflow.git
-        ```
-    1. (Optional) Checkout the commit that the conversion was tested on:
-        ```
-        git checkout c841508a88faa5aa1ffc7a4947c3809ea4ec1228
-        ```
-    1. Apply `keras_to_tensorflow.patch`:
-        ```
-        git apply keras_to_tensorflow.patch
-        ```
-    1. Run script:
-        ```
-        python keras_to_tensorflow.py --input_model=<model_in>.h5 --output_model=<model_out>.pb
-        ```
+3. Get conversion script:
+   1. Get conversion script from [repository](https://github.com/amir-abdi/keras_to_tensorflow):
+   ```sh
+   git clone https://github.com/amir-abdi/keras_to_tensorflow.git
+   ```
+   2. (Optional) Checkout the commit that the conversion was tested on:
+   ```
+   git checkout c841508a88faa5aa1ffc7a4947c3809ea4ec1228
+   ```
+   3. Apply `keras_to_tensorflow.patch`:
+   ```
+   git apply keras_to_tensorflow.patch
+   ```
+   4. Run script:
+   ```
+   python keras_to_tensorflow.py --input_model=<model_in>.h5 --output_model=<model_out>.pb
+   ```
 
 ## Specification
 

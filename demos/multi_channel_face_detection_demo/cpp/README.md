@@ -1,27 +1,37 @@
 # Multi-Channel Face Detection C++ Demo
 
-This demo provides an inference pipeline for multi-channel face detection. The demo uses Face Detection network. You can use the following pre-trained model with the demo:
-* `face-detection-retail-0004`, which is a primary detection network for finding faces
-
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
+This demo provides an inference pipeline for multi-channel face detection. The demo uses Face Detection network.
 
 Other demo objectives are:
 
 * Up to 16 cameras as inputs, via OpenCV*
 * Visualization of detected faces from all channels on a single screen
 
-
 ## How It Works
 
 On the start-up, the application reads command line parameters and loads the specified networks. The Face Detection network is required.
 
-> **NOTES**:
-> * Running the demo requires using at least one web camera attached to your machine.
-> * By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in <omz_dir>/demos/multi_channel_face_detection_demo/cpp/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* face-detection-adas-0001
+* face-detection-retail-0004
+* face-detection-retail-0005
+* face-detection-retail-0044
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
 multi_channel_face_detection_demo [OPTION]
 Options:
@@ -48,34 +58,28 @@ Options:
     -u                           Optional. List of monitors to show initially.
 ```
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](models.lst).
+For example, to run the demo with the pre-trained face detection model on CPU, with one single camera, use the following command:
 
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
-For example, to run the demo with the pre-trained face detection model on FPGA with fallback on CPU, with one single camera, use the following command:
 ```sh
-./multi_channel_face_detection_demo -m <path_to_model>/face-detection-retail-0004.xml -d HETERO:FPGA,CPU -nc 1
+./multi_channel_face_detection_demo -m <path_to_model>/face-detection-retail-0004.xml -d CPU -nc 1
 ```
 
 To run the demo using two recorded video files, use the following command:
+
 ```sh
-./multi_channel_face_detection_demo -m <path_to_model>/face-detection-retail-0004.xml -d HETERO:FPGA,CPU -i <path_to_file>/file1 <path_to_file>/file2
+./multi_channel_face_detection_demo -m <path_to_model>/face-detection-retail-0004.xml -d CPU -i <path_to_file>/file1 <path_to_file>/file2
 ```
+
 Video files will be processed repeatedly.
+
+### Input Video Sources
 
 You can also run the demo on web cameras and video files simultaneously by specifying both parameters: `-nc <number_of_cams> -i <video_file1> <video_file2>` with paths to video files separated by a space.
 To run the demo with a single input source (a web camera or a video file), but several channels, specify an additional parameter: `-duplicate_num 3`. You will see four channels: one real and three duplicated. With several input sources, the `-duplicate_num` parameter will duplicate each of them.
 
-## Demo Output
-
-The demo uses OpenCV to display the resulting frames with detections rendered as bounding boxes.
-On the top of the screen, the demo reports throughput in frames per second. You can also enable more detailed statistics in the output using the `-show_stats` option while running the demos.
-
-
-## Input Video Sources
-
 General parameter for input video source is `-i`. Use it to specify video files or web cameras as input video sources. You can add the parameter to a sample command line as follows:
-```
+
+```sh
 -i <file1> <file2>
 ```
 
@@ -83,14 +87,14 @@ General parameter for input video source is `-i`. Use it to specify video files 
 
 To see all available web cameras, run the `ls /dev/video*` command. You will get output similar to the following:
 
-```
+```sh
 user@user-PC:~ $ ls /dev/video*
 /dev/video0  /dev/video1  /dev/video2
 ```
 
 You can use `-i` option to connect all the three web cameras:
 
-```
+```sh
 -i /dev/video0  /dev/video1  /dev/video2
 ```
 
@@ -99,11 +103,18 @@ Alternatively, you can just set `-nc 3`, which simplifies application usage.
 If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use the `-i` parameter.
 
 To connect to IP cameras, use RTSP URIs:
-```
+
+```sh
 -i rtsp://camera_address_1/ rtsp://camera_address_2/
 ```
 
+## Demo Output
+
+The demo uses OpenCV to display the resulting frames with detections rendered as bounding boxes.
+On the top of the screen, the demo reports throughput in frames per second. You can also enable more detailed statistics in the output using the `-show_stats` option while running the demos.
+
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

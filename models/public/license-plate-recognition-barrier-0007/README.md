@@ -13,7 +13,7 @@ Chinese license plates in traffic.
 
 **Note:** The license plates on the image were modified to protect the owners' privacy.
 
-![](./license-plate-recognition-barrier-0007.png)
+![](./assets/license-plate-recognition-barrier-0007.png)
 
 ## Specification
 

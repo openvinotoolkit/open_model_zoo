@@ -174,6 +174,11 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `target_suffix` - target ground truth file name's suffix (default `out`).
   * `recursive` - enables acquiring of dataset files from `data_dir` subcatalogs (default False).
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+* `parametric_image_processing` - converts dataset for image processing which required variable conditions for getting result, to `ImageProcessingAnnotation. Parameters provided as float value in reference image name using `_` as delimeter.
+  * `input_dir` - directory with input images.
+  * `reference_dir` - directory with reference images.
+  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+  * `param_scale` - multiplayer for parameters (Optional, default `0.001`).
 * `super_resolution` - converts dataset for single image super resolution task to `SuperResolutionAnnotation`.
   * `data_dir` - path to folder, where images in low and high resolution are located.
   * `lr_dir` - path to directory, where images in low resolution are located.
@@ -190,8 +195,8 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `dicom`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
   * `two_streams` - enable 2 input streams where usually first for original image and second for upsampled image. (Optional, default False).
   * `images_dir` - path to dataset root, where directories with low and high resolutions are located.
-  *  `lr_dir` - path to directory, where images in low resolution are located (Optional, default <images_dir>/LR).
-  * `hr_dir` - path to directory, where images in high resolution are located (Optional, default <images_dir>/HR). **Note:** inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.
+  * `lr_dir` - path to directory, where images in low resolution are located (Optional, default `<images_dir>/LR`).
+  * `hr_dir` - path to directory, where images in high resolution are located (Optional, default `<images_dir>/HR`). **Note:** inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.
   * `upsampled_dir` - path to directory, where upsampled images are located, if 2 streams used (Optional, default <images_dir>/upsample).
   * `relaxed_names` - allow to use more relaxed search of high resolution or/and upsampled images matching only numeric ids. Optional, by default full name matching required.
   * `hr_prefixed` - allow to use partial name matching  when low resolution filename is a part of high resolution filename. Not applicable when `relaxed_names` is set. Optional, by default full name matching required.
@@ -268,7 +273,7 @@ The main difference between this converter and `super_resolution` in data organi
 * `camvid_32` - converts CamVid dataset with 32 classes to `SegmentationAnnotation`. Dataset can be found [here](http://mi.eng.cam.ac.uk/research/projects/VideoRec/CamVid/).
   * `labels_dir` - directory with labeled ground truth images.
   * `images_dir` - directory with input data.
-  * `val_subset_ratio` - ratio of subset, which should be used for validation. It is the float value in (0, 1] range for definition subset size as <total_dataset_size> * <subset_ratio>. Optional, default 1 (it means full dataset used for validation).
+  * `val_subset_ratio` - ratio of subset, which should be used for validation. It is the float value in (0, 1] range for definition subset size as `<total_dataset_size> * <subset_ratio>`. Optional, default 1 (it means full dataset used for validation).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `image_retrieval` - converts dataset for image retrieval task to `ReidentificationAnnotation`. Dataset should have following structure:
    1. the dataset root directory contains 2 subdirectory named `gallery` and `queries` for gallery images and query images respectively.
@@ -502,6 +507,21 @@ The main difference between this converter and `super_resolution` in data organi
 * `vimeo90k` - converts Vimeo-90K dataset for a systematic evaluation of video processing algorithms to `SuperResolutionAnnotation`.
   * `annotation_file` - path to text file with list of dataset setuplets included in test.
   * `add_flow` - allows annotation of flow data (optional, default `False`).
+* `kaldi_asr_data` - converts preprocessed Kaldi\* features dataset to `CharacterRecognitionAnnotation`.
+   * `annotation_file` - file with gt transcription table.
+   * `data_dir` - directory with ark files.
+   * `features_subset_file` - file with list testing ark files, Optional, if not provided, all found in `data_dir` files will be used.
+   * `ivectors` - include ivectors features to input, Optional, default `False`.
+* `kaldi_feat_regression` - converts preprocessed Kaldi\* features to `RegressionAnnotation`.
+  * `data_dir` - directory with input ark files.
+  * `features_subset_file` - file with list testing ark files, Optional, if not provided, all found in `data_dir` files will be used.
+  * `ivectors` - include ivectors features to input, Optional, default `False`.
+  * `ref_data_dir` - directory with reference ark files (Optional, if not provided `data_dir` will be used instead).
+  * `vectors_mode` - allow usage each vector in utterance as independent data.
+  * `ref_file_suffix` - suffix for search reference files (Optional, default `_kaldi_score`).
+* `yolo_labeling` - converts object detection dataset with annotation in YOLO labeling format to `DetectionAnnotation`.
+  * `data_dir` - path to directory with annotation files in txt format and images.
+  * `labels_file` - path to file with labels in txt format (optional).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

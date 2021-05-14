@@ -9,8 +9,6 @@ The demo expects the following models in the Intermediate Representation (IR) fo
 * either object detection model or object instance segmentation model
 * object re-identification model
 
-To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
-
 As input, the demo application takes:
 
 * paths to one or several video files
@@ -24,9 +22,9 @@ and then for each detected object it extracts embeddings using re-identification
 2. All embeddings are passed to tracker which assigns an ID to each object.
 3. The demo visualizes the resulting bounding boxes and unique object IDs assigned during tracking.
 
-## Running
+## Preparing to Run
 
-### Installation of dependencies
+### Installation of Dependencies
 
 To install required dependencies run
 
@@ -34,7 +32,29 @@ To install required dependencies run
 pip3 install -r requirements.txt
 ```
 
-### Command line arguments
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in <omz_dir>/demos/multi_camera_multi_target_tracking_demo/python/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* instance-segmentation-security-0002
+* instance-segmentation-security-0091
+* instance-segmentation-security-0228
+* instance-segmentation-security-1039
+* instance-segmentation-security-1040
+* person-detection-retail-0013
+* person-reidentification-retail-0277
+* person-reidentification-retail-0286
+* person-reidentification-retail-0287
+* person-reidentification-retail-0288
+* vehicle-reid-0001
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
+## Running
+
+### Command Line Arguments
 
 Run the application with the `-h` option to see the following usage message:
 
@@ -90,9 +110,10 @@ optional arguments:
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```
+
 Minimum command examples to run the demo for person tracking (for vehicle tracking the commands are the same with appropriate vehicle detection/re-identification models):
 
-```
+```sh
 # videos
 python multi_camera_multi_target_tracking_demo.py \
     -i <path_to_video>/video_1.avi <path_to_video>/video_2.avi \
@@ -149,8 +170,7 @@ The structure of this file should be as follows:
 ]
 ```
 
-Such file with detections can be saved from the demo. Specify the argument
-`--save_detections` with path to an output file.
+Such file with detections can be saved from the demo. Specify the argument `--save_detections` with path to an output file.
 
 ## Demo Output
 
@@ -167,7 +187,7 @@ Visualization can be controlled using the following keys:
 Also demo can dump resulting tracks to a json file. To specify the file use the
 `--history_file` argument.
 
-## Quality measuring
+## Quality Measuring
 
 The demo provides tools for measure quality of the multi camera multi target tracker:
 
@@ -212,16 +232,16 @@ python run_evaluate.py \
 Number of ground truth files depends on the number of used video sources.
 
 For the visualization of the demo results please use the next command:
-```
+
+```sh
 python run_history_visualize.py \
     -i <path_to_video>/video_1.avi <path_to_video>/video_2.avi \
     --history_file <path_to_file>/file.json \
 ```
 
-This a minimum arguments set for the script. To show all available arguments
-run the command:
+This a minimum arguments set for the script. To show all available arguments run the command with `-h` option:
+
 ```
-python3 run_history_visualize.py -h
 usage: run_history_visualize.py [-h] [-i I [I ...]] --history_file
                                 HISTORY_FILE [--output_video OUTPUT_VIDEO]
                                 [--gt_files GT_FILES [GT_FILES ...]]
@@ -246,7 +266,7 @@ optional arguments:
 
 Ground truth files have the same format that was described in the MOT metrics evaluation part.
 
-## Process analysis
+## Process Analysis
 
 Two options are available during the demo execution:
 
@@ -262,3 +282,9 @@ Then, for `embeddings` specify parameter `save_path`
 that is a directory where data related to embeddings will be saved
 (if it is an empty string the option is disabled). There is paramater `use_images` in `embeddings`.
 If it is `True` an image with object will be drawn for every embedding instead of point.
+
+## See Also
+
+* [Open Model Zoo Demos](../../README.md)
+* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/downloader/README.md)

@@ -352,7 +352,8 @@ NATIVE_DEMOS = [
                     ModelArg('fastseg-large'),
                     ModelArg('fastseg-small'),
                     ModelArg('hrnet-v2-c1-segmentation'),
-                    ModelArg('deeplabv3'))),
+                    ModelArg('deeplabv3'),
+                    ModelArg('pspnet-pytorch'))),
         ],
     )),
 
@@ -399,10 +400,17 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('text-detection')}),
         single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
         [
-            *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
-            TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
+            *combine_cases(
+                TestCase(options={'-dt': 'ctc'}),
+                [
+                    *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
+                                      '-tr_pt_first': None,
+                                      '-tr_o_blb_nm': 'logits'})
+                ]),
+            TestCase(options={'-m_tr': ModelArg('text-recognition-resnet-fc'),
                               '-tr_pt_first': None,
-                              '-tr_o_blb_nm': 'logits'}),
+                              '-dt': 'simple'}),
         ]
     )),
 ]
@@ -612,12 +620,30 @@ PYTHON_DEMOS = [
         [
             *combine_cases(
                 TestCase(options={'--architecture_type': 'centernet'}),
-                single_option_cases('-m',
-                    ModelArg('ctdet_coco_dlav0_384'),
-                    ModelArg('ctdet_coco_dlav0_512')),
+                [
+                    *single_option_cases('-m',
+                        ModelArg('ctdet_coco_dlav0_384'),
+                        ModelArg('ctdet_coco_dlav0_512'),
+                    ),
+                    *combine_cases(
+                        TestCase(options={
+                            '--mean_values': ['104.04', '113.985', '119.85'],
+                            '--scale_values': ['73.695', '69.87', '70.89']
+                        }),
+                        single_option_cases('-m',
+                            ModelFileArg('ctdet_coco_dlav0_384', 'ctdet_coco_dlav0_384.onnx'),
+                            ModelFileArg('ctdet_coco_dlav0_512', 'ctdet_coco_dlav0_512.onnx'),
+                        ),
+                    ),
+                ]
             ),
-            TestCase(options={'--architecture_type': 'faceboxes',
-                              '-m': ModelArg('faceboxes-pytorch')}
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'faceboxes'}),
+                [
+                    TestCase(options={'-m': ModelArg('faceboxes-pytorch')}),
+                    TestCase(options={'-m': ModelFileArg('faceboxes-pytorch', 'faceboxes-pytorch.onnx'),
+                                      '--mean_values': ['104.0', '117.0', '123.0']}),
+                ]
             ),
             TestCase(options={'--architecture_type': 'ctpn',
                               '-m': ModelArg('ctpn')}
@@ -673,13 +699,30 @@ PYTHON_DEMOS = [
                         ModelArg('vehicle-detection-adas-0002'),
                         ModelArg('vehicle-license-plate-detection-barrier-0106')),
                     TestCase(options={'-d': 'CPU', '-m': ModelArg('person-detection-0106')}),  # GPU is not supported
+                    TestCase(options={'-m': ModelFileArg('ssd-resnet34-1200-onnx', 'resnet34-ssd1200.onnx'),
+                                      '--reverse_input_channels': None,
+                                      '--mean_values': ['123.675', '116.28', '103.53'],
+                                      '--scale_values': ['58.395', '57.12', '57.375']}),
                 ]
             ),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'ultra_lightweight_face_detection'}),
-                single_option_cases('-m',
-                    ModelArg('ultra-lightweight-face-detection-rfb-320'),
-                    ModelArg('ultra-lightweight-face-detection-slim-320')),
+                [
+                    *single_option_cases('-m',
+                        ModelArg('ultra-lightweight-face-detection-rfb-320'),
+                        ModelArg('ultra-lightweight-face-detection-slim-320'),
+                    ),
+                    *combine_cases(
+                        TestCase(options={
+                            '--mean_values': ['127.0', '127.0', '127.0'],
+                            '--scale_values': ['128.0', '128.0', '128.0']
+                        }),
+                        single_option_cases('-m',
+                            ModelFileArg('ultra-lightweight-face-detection-rfb-320', 'ultra-lightweight-face-detection-rfb-320.onnx'),
+                            ModelFileArg('ultra-lightweight-face-detection-slim-320', 'ultra-lightweight-face-detection-slim-320.onnx'),
+                        ),
+                    ),
+                ]
             ),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'yolo'}),
@@ -722,7 +765,8 @@ PYTHON_DEMOS = [
                     ModelArg('icnet-camvid-ava-sparse-30-0001'),
                     ModelArg('icnet-camvid-ava-sparse-60-0001'),
                     ModelArg('unet-camvid-onnx-0001'),
-                    ModelArg('deeplabv3'))),
+                    ModelArg('deeplabv3'),
+                    ModelArg('pspnet-pytorch'))),
             TestCase(options={
                 '-m': ModelArg('f3net'),
                 '-i': DataPatternArg('road-segmentation-adas'),
@@ -743,6 +787,13 @@ PYTHON_DEMOS = [
                     ModelArg('person-detection-retail-0013'),
                     ModelArg('ssd_mobilenet_v1_coco'))),
         ]
+    )),
+
+    PythonDemo(name='speech_recognition_offline_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        single_option_cases('-m',
+            ModelArg('quartznet-15x5-en'),
+            ModelFileArg('quartznet-15x5-en', 'quartznet.onnx'))
     )),
 
     PythonDemo(name='text_spotting_demo', device_keys=[], test_cases=combine_cases(

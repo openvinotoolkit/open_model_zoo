@@ -6,35 +6,35 @@ YOLO v1 Tiny is a real-time object detection model from TensorFlow.js\* framewor
 
 ## Conversion
 
-0. Install additional dependencies:
-    ```
-    h5py
-    keras
-    tensorflowjs
-    ```
-1. Download model from [here](https://github.com/shaqian/tfjs-yolo-demo/tree/master/dist/model/v1tiny) (tested on `aa4354c` commit).
-2. Convert model to Keras\* format using `tensorflowjs_converter` script, e.g.:
-    ```
-    tensorflowjs_converter --input_format tfjs_layers_model --output_format keras <model_in>.json <model_out>.h5
-    ```
-3. Convert the produced model to protobuf format.
+1. Install additional dependencies:
+   ```
+   h5py
+   keras
+   tensorflowjs
+   ```
+2. Download model from [here](https://github.com/shaqian/tfjs-yolo-demo/tree/master/dist/model/v1tiny) (tested on `aa4354c` commit).
+3. Convert model to Keras\* format using `tensorflowjs_converter` script, e.g.:
+   ```
+   tensorflowjs_converter --input_format tfjs_layers_model --output_format keras <model_in>.json <model_out>.h5
+   ```
+4. Convert the produced model to protobuf format.
 
-    1. Get conversion script from [repository](https://github.com/amir-abdi/keras_to_tensorflow):
-        ```buildoutcfg
-        git clone https://github.com/amir-abdi/keras_to_tensorflow
-        ```
-    1. (Optional) Checkout the commit that the conversion was tested on:
-        ```
-        git checkout c841508a88faa5aa1ffc7a4947c3809ea4ec1228
-        ```
-    1. Apply `keras_to_tensorflow.py.patch`:
-        ```
-        git apply keras_to_tensorflow.py.patch
-        ```
-    1. Run script:
-        ```
-        python keras_to_tensorflow.py --input_model=<model_in>.h5 --output_model=<model_out>.pb
-        ```
+   1. Get conversion script from [repository](https://github.com/amir-abdi/keras_to_tensorflow):
+   ```
+   git clone https://github.com/amir-abdi/keras_to_tensorflow
+   ```
+   2. (Optional) Checkout the commit that the conversion was tested on:
+   ```
+   git checkout c841508a88faa5aa1ffc7a4947c3809ea4ec1228
+   ```
+   3. Apply `keras_to_tensorflow.py.patch`:
+   ```
+   git apply keras_to_tensorflow.py.patch
+   ```
+   4. Run script:
+   ```
+   python keras_to_tensorflow.py --input_model=<model_in>.h5 --output_model=<model_out>.pb
+   ```
 
 ## Specification
 
