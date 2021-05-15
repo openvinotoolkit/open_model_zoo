@@ -1,5 +1,5 @@
 models:
-    - name: dns-poconet-like-0001
+    - name: noise-suppression-poconetlike-0001
       launchers:
           - framework: dlsdk
             adapter:
