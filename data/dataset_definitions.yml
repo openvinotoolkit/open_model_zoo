@@ -1275,7 +1275,6 @@ datasets:
       target_suffix: sharp.png
     annotation: GOPRO.pickle
 
-          
   - name: speech_denoising_dataset
     data_source: ICASSP_dev_test_set/track_1/synthetic
     reader:
@@ -1342,4 +1341,3 @@ datasets:
       data_dir: forward_tacotron_melgan_multispeaker_io
       input_suffix: duration_prediction_in_
       reference_suffix: melgan_out_
-
