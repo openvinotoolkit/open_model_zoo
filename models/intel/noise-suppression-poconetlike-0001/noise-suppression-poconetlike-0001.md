@@ -10,7 +10,7 @@ On each iteration it takes 2048 (128ms) samples as input and returns 2048 (128ms
 In addition the network required 52 state tensors to make processing seamless.
 On the first iteration these state tensors have to be filled by 0.
 On the consequences iterations theses tensors have to be taken from corresponding outputs of previous iteration.
-You can try [demo](../../../demos/noise_suppression/python) to see how it works.
+You can try [demo](../../../demos/noise_suppression/python/README.md) to see how it works.
 
 ## Specification
 
