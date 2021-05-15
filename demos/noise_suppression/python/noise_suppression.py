@@ -115,7 +115,7 @@ def main():
         sum(s.shape[0] for s in samples_out)/freq,
         sum(samples_times)
     ))
-    sample_out = np.concatenate(samples_out,0)
+    sample_out = np.concatenate(samples_out, 0)
     soundfile.write(args.output, sample_out, freq)
 
 
