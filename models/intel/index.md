@@ -302,9 +302,9 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 
 Deep Learning models for noise suppression.
 
-| Model Name                                                                                | Complexity (GFLOPs)  | Size (Mp)  |
-|-------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [dns-poconet-like-0001](./dns-poconet-like-0001/dns-poconet-like-0001.md)                 | 1.2                  | 7.22       |
+| Model Name                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
+|----------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [noise-suppression-poconetlike-0001](./noise-suppression-poconetlike-0001/noise-suppresion-poconetlike-0001.md)| 1.2                  | 7.22       |
 
 
 ## Legal Information
