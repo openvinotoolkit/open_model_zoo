@@ -55,6 +55,7 @@ The Open Model Zoo includes the following demos:
 - [Text Spotting Python\* Demo](./text_spotting_demo/python/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Text-to-speech Python\* Demo](./text_to_speech_demo/python/README.md) - Shows an example of using Forward Tacotron and WaveRNN neural networks for text to speech task.
 - [Whiteboard Inpainting Python\* Demo](./whiteboard_inpainting_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to detect and hide a person on a video so that all text on a whiteboard is visible.
+- [Noise Suppression Python\* Demo](./noise_suppression/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to reduce noise in speech audio.
 
 ## Media Files Available for Demos
 
