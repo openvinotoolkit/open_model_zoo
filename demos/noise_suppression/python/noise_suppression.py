@@ -59,12 +59,12 @@ def main():
     ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
 
     # check input and output names
-    input_names = list(i.strip() for i in ie_encoder.inputs.keys())
-    output_names = list(o.strip() for o in ie_encoder.outputs.keys())
+    input_names = [i.strip() for i in ie_encoder.inputs.keys()]
+    output_names = [o.strip() for o in ie_encoder.outputs.keys()]
 
     assert "input" in input_names, "'input' is not presented in model"
     assert "output" in output_names, "'output' is not presented in model"
-    state_inp_names = list(sorted([n for n in input_names if "state" in n]))
+    state_inp_names = [n for n in input_names if "state" in n]
     state_param_num = sum(np.prod(ie_encoder.inputs[n].shape) for n in state_inp_names)
     log.info("state_param_num = {} ({:.1f}Mb)".format(state_param_num, state_param_num*4e-6))
 
@@ -87,11 +87,11 @@ def main():
             input = sample_inp[:input_size]
             sample_inp = sample_inp[input_size:]
         else:
-            input = np.pad(sample_inp, ((0,input_size - sample_inp.shape[0]),), mode='constant')
+            input = np.pad(sample_inp, ((0, input_size - sample_inp.shape[0]), ), mode='constant')
             sample_inp = None
 
         #forms input
-        inputs = {"input": input[None,:]}
+        inputs = {"input": input[None, :]}
 
         #add states to input
         for n in state_inp_names:
