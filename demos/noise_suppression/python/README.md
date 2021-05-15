@@ -1,6 +1,6 @@
-# Deep Noise Suppresion Python\* Demo
+# Noise Suppression Python\* Demo
 
-This README describes the Deep Noise Suppresion demo application.
+This README describes the Noise Suppresion demo application.
 
 ## How It Works
 
@@ -13,11 +13,11 @@ The output of network is also sequence of audio patches with clean speech. The p
 
 Running the application with the `-h` option yields the following usage message:
 ```
-python3 deep_noise_suppresion.py -h
+python3 noise_suppression.py -h
 ```
 The command yields the following usage message:
 ```
-usage: deep_noise_suppresion.py [-h] -m MODEL -i INPUT -o OUTPUT
+usage: noise_suppression.py [-h] -m MODEL -i INPUT -o OUTPUT
 
 Options:
   -h, --help            Show this help message and exit.
@@ -49,22 +49,22 @@ The application outputs cleaned wave to output file.
 
 ## Supported Models
 [Open Model Zoo Models](../../../models/intel/index.md) feature
-example dns-poconet-like-*.
+example noise-suppression-*.
 
 [OpenVINO Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 Specifically the example command-line is as follows:
 ```
-    python3 mo.py -m <path_to_model>/dns-poconet-like-0001.onnx
+    python3 mo.py -m <path_to_model>/noise-suppression-poconetlike-0001.onnx
 ```
 
 ## Example Demo Cmd-Line
 You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
 [Model Downloader](../../../tools/downloader/README.md) executed with "--name dns*"):
 ```
-    python3 deep_noise_suppresion.py
-            --model=<path_to_model>/dns-poconet-like-0001.xml
-            --input=noisy.flac
-            --output=cleaned.flac
+    python3 noise_suppression.py
+            --model=<path_to_model>/noise-suppression-poconetlike-0001.xml
+            --input=noisy.wav
+            --output=cleaned.wav
 ```
 
 ## Demo Performance
