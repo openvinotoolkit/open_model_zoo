@@ -27,17 +27,18 @@ from openvino.inference_engine import IECore
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
-from models import SegmentationModel
+from models import OutputTransform, SegmentationModel, SalientObjectDetectionModel
 import monitors
-from pipelines import AsyncPipeline
+from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
+from helpers import resolution
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
 log = logging.getLogger()
 
 
-class Visualizer(object):
+class SegmentationVisualizer:
     pascal_voc_palette = [
         (0,   0,   0),
         (128, 0,   0),
@@ -89,10 +90,16 @@ class Visualizer(object):
         input_3d = cv2.merge([input, input, input])
         return cv2.LUT(input_3d, self.color_map)
 
-    def overlay_masks(self, frame, objects):
+    def overlay_masks(self, frame, objects, output_transform):
         # Visualizing result data over source image
-        return np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2)
+        return output_transform.resize(np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2))
 
+
+class SaliencyMapVisualizer:
+    def overlay_masks(self, frame, objects, output_transform):
+        saliency_map = (objects * 255).astype(np.uint8)
+        saliency_map = cv2.merge([saliency_map, saliency_map, saliency_map])
+        return output_transform.resize(np.floor_divide(frame, 2) + np.floor_divide(saliency_map, 2))
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -100,6 +107,8 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
+    args.add_argument('-at', '--architecture_type', help='Required. Specify the model\'s architecture type.',
+                      type=str, required=False, default='segmentation', choices=('segmentation', 'salient_object_detection'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -132,35 +141,20 @@ def build_argparser():
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')
     io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
+    io_args.add_argument('--output_resolution', default=None, type=resolution,
+                         help='Optional. Specify the maximum output window resolution '
+                              'in (width x height) format. Example: 1280x720. '
+                              'Input frame size used by default.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
     return parser
 
 
-def get_plugin_configs(device, num_streams, num_threads):
-    config_user_specified = {}
-
-    devices_nstreams = {}
-    if num_streams:
-        devices_nstreams = {device: num_streams for device in ['CPU', 'GPU'] if device in device} \
-            if num_streams.isdigit() \
-            else dict(device.split(':', 1) for device in num_streams.split(','))
-
-    if 'CPU' in device:
-        if num_threads is not None:
-            config_user_specified['CPU_THREADS_NUM'] = str(num_threads)
-        if 'CPU' in devices_nstreams:
-            config_user_specified['CPU_THROUGHPUT_STREAMS'] = devices_nstreams['CPU'] \
-                if int(devices_nstreams['CPU']) > 0 \
-                else 'CPU_THROUGHPUT_AUTO'
-
-    if 'GPU' in device:
-        if 'GPU' in devices_nstreams:
-            config_user_specified['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] \
-                if int(devices_nstreams['GPU']) > 0 \
-                else 'GPU_THROUGHPUT_AUTO'
-
-    return config_user_specified
+def get_model(ie, args):
+    if args.architecture_type == 'segmentation':
+        return SegmentationModel(ie, args.model), SegmentationVisualizer(args.colors)
+    if args.architecture_type == 'salient_object_detection':
+        return SalientObjectDetectionModel(ie, args.model), SaliencyMapVisualizer()
 
 
 def main():
@@ -170,11 +164,11 @@ def main():
     log.info('Initializing Inference Engine...')
     ie = IECore()
 
-    plugin_config = get_plugin_configs(args.device, args.num_streams, args.num_threads)
+    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
     log.info('Loading network...')
 
-    model = SegmentationModel(ie, args.model)
+    model, visualizer = get_model(ie, args)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
@@ -186,8 +180,8 @@ def main():
     log.info('Starting inference...')
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
-    visualizer = Visualizer(args.colors)
     presenter = None
+    output_transform = None
     video_writer = cv2.VideoWriter()
 
     while True:
@@ -200,10 +194,15 @@ def main():
                     raise ValueError("Can't read an image from the input")
                 break
             if next_frame_id == 0:
+                output_transform = OutputTransform(frame.shape[:2], args.output_resolution)
+                if args.output_resolution:
+                    output_resolution = output_transform.new_resolution
+                else:
+                    output_resolution = (frame.shape[1], frame.shape[0])
                 presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                               (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
+                                               (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
                 if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                                         cap.fps(), (frame.shape[1], frame.shape[0])):
+                                                         cap.fps(), output_resolution):
                     raise RuntimeError("Can't open video writer")
             # Submit for inference
             pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
@@ -220,13 +219,13 @@ def main():
             objects, frame_meta = results
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
-
-            frame = visualizer.overlay_masks(frame, objects)
+            frame = visualizer.overlay_masks(frame, objects, output_transform)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
 
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
+            next_frame_id_to_show += 1
 
             if not args.no_show:
                 cv2.imshow('Segmentation Results', frame)
@@ -234,30 +233,27 @@ def main():
                 if key == 27 or key == 'q' or key == 'Q':
                     break
                 presenter.handleKey(key)
-            next_frame_id_to_show += 1
 
     pipeline.await_all()
     # Process completed requests
-    while pipeline.has_completed_request():
+    for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = pipeline.get_result(next_frame_id_to_show)
-        if results:
-            objects, frame_meta = results
-            frame = frame_meta['frame']
-            start_time = frame_meta['start_time']
+        while results is None:
+            results = pipeline.get_result(next_frame_id_to_show)
+        objects, frame_meta = results
+        frame = frame_meta['frame']
+        start_time = frame_meta['start_time']
 
-            frame = visualizer.overlay_masks(frame, objects)
-            presenter.drawGraphs(frame)
-            metrics.update(start_time, frame)
+        frame = visualizer.overlay_masks(frame, objects, output_transform)
+        presenter.drawGraphs(frame)
+        metrics.update(start_time, frame)
 
-            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
-                video_writer.write(frame)
+        if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
+            video_writer.write(frame)
 
-            if not args.no_show:
-                cv2.imshow('Segmentation Results', frame)
-                key = cv2.waitKey(1)
-            next_frame_id_to_show += 1
-        else:
-            break
+        if not args.no_show:
+            cv2.imshow('Segmentation Results', frame)
+            key = cv2.waitKey(1)
 
     metrics.print_total()
     print(presenter.reportMeans())

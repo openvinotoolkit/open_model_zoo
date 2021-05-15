@@ -20,6 +20,13 @@ Please use these tools instead of attempting to parse the configuration files
 directly. Their format is undocumented and may change in incompatible ways in
 future releases.
 
+> **TIP**: You also can work with the Model Downloader inside the OpenVINO™ [Deep Learning Workbench](@ref workbench_docs_Workbench_DG_Introduction) (DL Workbench).
+> [DL Workbench](@ref workbench_docs_Workbench_DG_Introduction) is a platform built upon OpenVINO™ and provides a web-based graphical environment that enables you to optimize, fine-tune, analyze, visualize, and compare
+> performance of deep learning models on various Intel® architecture
+> configurations. In the DL Workbench, you can use most of OpenVINO™ toolkit components.
+> <br>
+> Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Install_from_Docker_Hub) to get started.
+
 ## Prerequisites
 
 1. Install Python (version 3.6 or higher)
@@ -303,7 +310,7 @@ the script.
 Before you run the model quantizer, you must prepare a directory with
 the datasets required for the quantization process. This directory will be
 referred to as `<DATASET_DIR>` below. You can find more detailed information
-about dataset preparation in the [Dataset Preparation Guide](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md).
+about dataset preparation in the [Dataset Preparation Guide](../../data/datasets.md).
 
 The basic usage is to run the script like this:
 
@@ -438,10 +445,12 @@ describing a single model. Each such object has the following keys:
   * `instance_segmentation`
   * `machine_translation`
   * `monocular_depth_estimation`
+  * `named_entity_recognition`
   * `object_attributes`
   * `optical_character_recognition`
   * `place_recognition`
   * `question_answering`
+  * `salient_object_detection`
   * `semantic_segmentation`
   * `sound_classification`
   * `speech_recognition`

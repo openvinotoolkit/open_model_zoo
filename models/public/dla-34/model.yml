@@ -14,8 +14,8 @@
 
 description: >-
   The "dla-34" model is one of the DLA <https://arxiv.org/pdf/1707.06484> models designed
-  to perform image classification. This model was pretrained in PyTorch*. All DLA
-  (Deep Layer Aggregation) classification models have been pretrained on the ImageNet*
+  to perform image classification. This model was pre-trained in PyTorch*. All DLA
+  (Deep Layer Aggregation) classification models have been pre-trained on the ImageNet
   dataset. For details about this family of models, check out the Code for the CVPR
   Paper "Deep Layer Aggregation" <https://github.com/ucbdrive/dla>.
 task_type: classification
@@ -50,4 +50,5 @@ model_optimizer_args:
   - --output=prob
   - --input_model=$conv_dir/dla-34.onnx
 framework: pytorch
+quantizable: yes
 license: https://raw.githubusercontent.com/ucbdrive/dla/master/LICENSE

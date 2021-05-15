@@ -39,6 +39,3 @@ ignore=
     # ignored because putting a statement after a colon is harmless and
     # sometimes results in more compact code
     E701,E704,
-    # unnecessary <dict/list/tuple> call
-    # TODO: consider enabling this later
-    C408,

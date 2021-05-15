@@ -320,7 +320,7 @@ class CoCoInstanceSegmentationAnnotation(CoCoInstanceSegmentationRepresentation)
     pass
 
 
-class CoCocInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation):
+class CoCoInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation):
 
     def __init__(self, identifier, mask, labels, scores):
         super().__init__(identifier, mask, labels)

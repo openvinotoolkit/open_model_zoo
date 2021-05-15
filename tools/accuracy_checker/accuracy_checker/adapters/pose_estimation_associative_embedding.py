@@ -19,16 +19,12 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, ConfigError
 from ..representation import PoseEstimationPrediction
-from ..utils import UnsupportedPackage
+from ..utils import UnsupportedPackage, contains_all
 
 try:
     from scipy.optimize import linear_sum_assignment
 except ImportError as error:
     linear_sum_assignment = UnsupportedPackage('scipy.optimize', error.msg)
-
-
-def contains_all(container, args):
-    return set(container).intersection(args) == set(args)
 
 
 class AssociativeEmbeddingAdapter(Adapter):

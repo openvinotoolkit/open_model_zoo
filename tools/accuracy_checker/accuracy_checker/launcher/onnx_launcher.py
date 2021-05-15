@@ -87,7 +87,10 @@ class ONNXLauncher(Launcher):
             if len(model_list) != 1:
                 raise ConfigError('Several suitable models found, please specify explicitly')
             model = model_list[0]
-            print_info('Found model: {}'.format(model))
+        accepted_suffixes = ['.onnx']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('Found model {}'.format(model))
 
         return model
 

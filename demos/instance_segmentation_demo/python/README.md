@@ -1,8 +1,8 @@
 # Instance Segmentation Python\* Demo
 
-![](./instance_segmentation.gif)
+![example](./instance_segmentation.gif)
 
-This demo shows how to run Instance Segmentation models from [OpenVINO&trade; Training Extensions (OTE)](https://github.com/openvinotoolkit/training_extensions/tree/develop/pytorch_toolkit/instance_segmentation#get-pretrained-models) and `yolact` models family.
+This demo shows how to perform instance segmentation using OpenVINO.
 
 > **NOTE**: Only batch size of 1 is supported.
 
@@ -24,8 +24,7 @@ The demo application expects an instance segmentation model in the Intermediate 
         * `mask` with fixed-size mask channels for all boxes.
         * `proto` with fixed-size segmentation heat maps prototypes for all boxes.
 
-As input, the demo application takes:
-* a path to a single image file, a video file or a numeric ID of a web camera specified with a command-line argument `-i`
+As input, the demo application accepts a path to a single image file, a video file or a numeric ID of a web camera specified with a command-line argument `-i`
 
 The demo workflow is the following:
 
@@ -37,6 +36,23 @@ The demo workflow is the following:
       It assumes more or less static scene with instances in two frames being a part of the same track if intersection over union of the masks is greater than the 0.5 threshold. To disable tracking, specify the `--no_track` argument.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in <omz_dir>/demos/instance_segmentation_demo/python/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* instance-segmentation-security-0002
+* instance-segmentation-security-0091
+* instance-segmentation-security-0228
+* instance-segmentation-security-1039
+* instance-segmentation-security-1040
+* yolact-resnet50-fpn-pytorch
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -93,11 +109,8 @@ Options:
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 To run the demo, please provide paths to the model in the IR format, to a file with class labels, and to an input video, image, or folder with images:
+
 ```bash
 python3 instance_segmentation_demo/instance_segmentation_demo.py \
     -m <path_to_model>/instance-segmentation-security-0228.xml \
@@ -112,6 +125,7 @@ python3 instance_segmentation_demo/instance_segmentation_demo.py \
 The application uses OpenCV to display resulting instance segmentation masks and current inference performance.
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

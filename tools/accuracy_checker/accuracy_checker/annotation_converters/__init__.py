@@ -76,7 +76,7 @@ from .inpainting import InpaintingConverter
 from .style_transfer import StyleTransferConverter
 from .wikitext2raw import Wikitext2RawConverter
 
-from .image_processing import ImageProcessingConverter
+from .image_processing import ImageProcessingConverter, ParametricImageProcessing
 
 from .aflw2000_3d import AFLW20003DConverter
 from .ade20k_dataset_converter import ADE20kConverter
@@ -99,6 +99,12 @@ from .wflw import WFLWConverter
 from .see_in_the_dark import SeeInTheDarkDatasetConverter
 from .conll_ner import CONLLDatasetConverter
 from .background_matting import BackgroundMattingConverter
+from .tacotron2_test_data_converter import TacotronDataConverter
+from .noise_suppression_dataset import NoiseSuppressionDatasetConverter
+from .vimeo90k_sr import Vimeo90KSuperResolutionDatasetConverter
+from .lmdb import LMDBConverter
+from .kaldi_speech_recognition_pipeline import KaldiSpeechRecognitionDataConverter, KaldiFeatureRegressionConverter
+from .yolo_labeling_converter import YOLOLabelingConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -190,5 +196,13 @@ __all__ = [
     'WFLWConverter',
     'SeeInTheDarkDatasetConverter',
     'CONLLDatasetConverter',
-    'BackgroundMattingConverter'
+    'BackgroundMattingConverter',
+    'TacotronDataConverter',
+    'NoiseSuppressionDatasetConverter',
+    'Vimeo90KSuperResolutionDatasetConverter',
+    'LMDBConverter',
+    'KaldiSpeechRecognitionDataConverter',
+    'KaldiFeatureRegressionConverter',
+    'ParametricImageProcessing',
+    'YOLOLabelingConverter'
 ]

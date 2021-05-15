@@ -60,12 +60,13 @@ from .regression import (
     FacialLandmarksPerPointNormedError,
     FacialLandmarksNormedError,
 
-    PeakSignalToNoiseRatio,
-    StructuralSimilarity,
-
     AngleError,
 
     PercentageCorrectKeypoints
+)
+from .image_quality_assessment import (
+    StructuralSimilarity, PeakSignalToNoiseRatio, VisionInformationFidelity, LPIPS,
+    PeakSignalToNoiseRatioWithBlockingEffectFactor
 )
 from .multilabel_recognition import MultiLabelRecall, MultiLabelPrecision, MultiLabelAccuracy, F1Score
 from .text_detection import (
@@ -76,7 +77,14 @@ from .text_detection import (
     IncidentalSceneTextLocalizationRecall,
     IncidentalSceneTextLocalizationHMean
 )
-from .coco_metrics import MSCOCOAveragePrecision, MSCOCORecall, MSCOCOKeypointsPrecision, MSCOCOKeypointsRecall
+from .coco_metrics import (
+    MSCOCOAveragePrecision,
+    MSCOCORecall,
+    MSCOCOKeypointsPrecision,
+    MSCOCOKeypointsRecall,
+    MSCOCOSegmAveragePrecision,
+    MSCOCOSegmRecall
+)
 from .coco_orig_metrics import (
     MSCOCOorigAveragePrecision,
     MSCOCOorigRecall,
@@ -100,7 +108,9 @@ from .attribute_classification import (
 )
 from .im2latex_images_match import Im2latexRenderBasedMetric
 
-from .speech_recognition import SpeechRecognitionWER, SpeechRecognitionCER
+from .audio_processing import SISDRMetric
+from .speech_recognition import SpeechRecognitionWER, SpeechRecognitionCER, SpeechRecognitionSER
+
 from .score_class_comparison import ScoreClassComparisonMetric
 from .dna_seq_accuracy import DNASequenceAccuracy
 
@@ -149,8 +159,6 @@ __all__ = [
     'RootMeanSquaredErrorOnInterval',
     'FacialLandmarksPerPointNormedError',
     'FacialLandmarksNormedError',
-    'PeakSignalToNoiseRatio',
-    'StructuralSimilarity',
     'AngleError',
     'MeanAbsolutePercentageError',
     'Log10Error',
@@ -172,6 +180,8 @@ __all__ = [
     'MSCOCORecall',
     'MSCOCOKeypointsPrecision',
     'MSCOCOKeypointsRecall',
+    'MSCOCOSegmAveragePrecision',
+    'MSCOCOSegmRecall',
     'MSCOCOorigAveragePrecision',
     'MSCOCOorigRecall',
     'MSCOCOOrigSegmAveragePrecision',
@@ -202,6 +212,9 @@ __all__ = [
 
     'SpeechRecognitionWER',
     'SpeechRecognitionCER',
+    'SpeechRecognitionSER',
+
+    'SISDRMetric',
 
     'ScoreClassComparisonMetric',
 
@@ -221,5 +234,11 @@ __all__ = [
     'SalienceMapMAE',
     'SalienceMapFMeasure',
     'SalienceSMeasure',
-    'SalienceEMeasure'
+    'SalienceEMeasure',
+
+    'LPIPS',
+    'VisionInformationFidelity',
+    'PeakSignalToNoiseRatio',
+    'StructuralSimilarity',
+    'PeakSignalToNoiseRatioWithBlockingEffectFactor',
 ]

@@ -53,7 +53,7 @@ def add_common_args(parser):
     common_args.add_argument(
         '-m', '--models',
         help='prefix path to the models and weights',
-        type=partial(get_path, is_directory=True),
+        type=partial(get_path, file_or_directory=True),
         required=False,
         nargs='+'
     )
@@ -336,6 +336,14 @@ def add_openvino_specific_args(parser):
         help='the number of infer requests',
         required=False
     )
+    openvino_specific_args.add_argument(
+        '--kaldi_bin_dir', help='directory with Kaldi utility binaries. Required only for Kaldi models decoding.',
+        required=False, type=partial(get_path, is_directory=True)
+    )
+    openvino_specific_args.add_argument(
+        '--kaldi_log_file', help='path for saving logs from Kaldi tools', type=partial(get_path, check_exists=False),
+        required=False
+    )
 
 
 def build_arguments_parser():
@@ -424,7 +432,7 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
     field_names = [
         'model', 'launcher', 'device', 'dataset',
         'tags', 'metric_name', 'metric_type', 'metric_value', 'metric_target', 'metric_scale', 'metric_postfix',
-        'dataset_size']
+        'dataset_size', 'ref', 'abs_threshold', 'rel_threshold']
     model, launcher, device, tags, dataset = processing_info
     main_info = {
         'model': model,
@@ -447,7 +455,10 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
                 'metric_value': metric_result['value'],
                 'metric_target': metric_meta.get('target', 'higher-better'),
                 'metric_scale': metric_meta.get('scale', 100),
-                'metric_postfix': metric_meta.get('postfix', '%')
+                'metric_postfix': metric_meta.get('postfix', '%'),
+                'ref': metric_result.get('ref', ''),
+                'abs_threshold': metric_result.get('abs_threshold', 0),
+                'rel_threshold': metric_result.get('rel_threshold', 0)
             })
 
 

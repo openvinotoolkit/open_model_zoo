@@ -60,6 +60,7 @@ from .argmax_segmentation_mask import ArgMaxSegmentationMask
 from .normalize_salient_map import SalientMapNormalizer
 from .min_max_normalization import MinMaxRegressionNormalization
 from .crop_image import CropImage, CornerCropImage
+from .pad_signal import PadSignal
 
 
 __all__ = [
@@ -134,4 +135,6 @@ __all__ = [
 
     'CropImage',
     'CornerCropImage',
+
+    'PadSignal'
 ]

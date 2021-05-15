@@ -238,6 +238,9 @@ AccuracyChecker supports following set of adapters:
   * `custom_label_map` - Alphabet as a dict of strings. Must include blank symbol for CTC algorithm.
 * `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
   * `blank_label` - index of the CTC blank label (default 0).
+* `simple_decoder` - easiest decoder for text recognition models, convers indices of classes to given letters, slices output on the first entry of `eos_label`
+  * `eos_label` - label which should finish decoding
+  * `custom_label_map` - label map (if not provided by the dataset meta)
 * `ctc_beam_search_decoder` - Python implementation of CTC beam search decoder without LM for speech recognition.
 * `ctc_greedy_decoder` - CTC greedy decoder for speech recognition.
 * `ctc_beam_search_decoder_with_lm` - Python implementation of CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition.
@@ -252,7 +255,7 @@ AccuracyChecker supports following set of adapters:
   * `lm_oov_score` - Replace LM score for out-of-vocabulary words with this value (default -1000, ignored without LM)
   * `lm_vocabulary_offset` - Start of vocabulary strings section in the LM file.  Default is to not filter candidate words using vocabulary (ignored without LM)
   * `lm_vocabulary_length` - Size in bytes of vocabulary strings section in the LM file (ignored without LM)
-* `fast_ctc_beam_search_decoder_with_lm` - CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition, depends on [`ctcdecode_numpy` Python module](../../../../demos/speech_recognition_demo/python/ctcdecode-numpy/README.md).
+* `fast_ctc_beam_search_decoder_with_lm` - CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition, depends on `ctcdecode_numpy` Python module located in the `<omz_dir>/demos/speech_recognition_demo/python/ctcdecode-numpy/` directory.
   * `beam_size` - Size of the beam to use during decoding (default 10).
   * `logarithmic_prob` - Set to "True" to indicate that network gives natural-logarithmic probabilities. Default is False for plain probabilities (after softmax).
   * `probability_out` - Name of the network's output with character probabilities (required)
@@ -296,7 +299,7 @@ AccuracyChecker supports following set of adapters:
   * `center_heatmap_out` - name of output layer with center points heatmaps.
   * `width_height_out` - name of the output layer with object sizes.
   * `regression_out` - name of the regression output with the offset prediction.
-* `mask_rcnn` - converting raw outputs of Mask-RCNN to combination of `DetectionPrediction` and `CoCocInstanceSegmentationPrediction`.
+* `mask_rcnn` - converting raw outputs of Mask-RCNN to combination of `DetectionPrediction` and `CoCoInstanceSegmentationPrediction`.
   * `classes_out` - name of output layer with information about classes (optional, if your model has detection_output layer as output).
   * `scores_out` - name of output layer with bbox scores (optional, if your model has detection_output layer as output).
   * `boxes_out` - name of output layer with bboxes (optional, if your model has detection_output layer as output).
@@ -310,7 +313,7 @@ AccuracyChecker supports following set of adapters:
   * `raw_masks_out` - name of output layer with raw instances masks.
   * `texts_out` - name of output layer with texts.
   * `confidence_threshold` - confidence threshold that is used to filter out detected instances.
-* `yolact` - converting raw outputs of Yolact model to to combination of `DetectionPrediction` and `CoCocInstanceSegmentationPrediction`.
+* `yolact` - converting raw outputs of Yolact model to to combination of `DetectionPrediction` and `CoCoInstanceSegmentationPrediction`.
   * `loc_out` - name of output layer which contains box locations, optional if boxes decoding embedded into model.
   * `prior_out` - name of output layer which contains prior boxes, optional if boxes decoding embedded into model.
   * `boxes_out` - name of output layer which contains decoded output boxes, optional if model has `prior` a `loc` outputs for boxes decoding.
@@ -392,3 +395,20 @@ AccuracyChecker supports following set of adapters:
   * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0.7).
 * `trimap` - converts greyscale model output to `ImageProcessingPrediction`. Replaces pixel values in cut and keep zones with 0 and 1 respectively. All other postprocessing inherited from `image_processing` adapter.
 * `background_matting` - converts output of background matting model to `BackgroundMattingPrediction`.
+* `noise_suppression` - converts output of audio denoising model to `NoiseSuppressionPrediction`.
+  * `output_blob` - name of output layer with processed signal (Optional, if not provided, first found output from model will be used).
+* `kaldi_latgen_faster_mapped` - decodes output Kaldi\* automatic speech recognition model using lattice generation approach with transition model to `CharcterRecognitionPrediction`.
+  **Important note** This adapter requires [Kaldi\* installation](https://kaldi-asr.org/doc/install.html)(we recommend to use `67db30cc` commit)
+  and providing path to directory with compiled executable apps: `latgen-faster-mapped`, `lattice-scale`, `lattice-add-penalty`, `lattice-best-path`.
+  Path directory can be provided using `--kaldi_bin_dir` commandline argument or `KALDI_BIN_DIR` environment variable.
+  * `fst_file` - Weighted Finite-State Transducers (WFST) state graph file.
+  *`words_file` - words table file.
+  * `transition_model_file` - transition model file.
+  * `beam` - beam size (Optional, default `1`).
+  * `lattice_beam` - lattice beam size (Optional, default `1`).
+  * `allow_partial` - allow partial decoding (Optional, default `False`).
+  * `acoustic_scale` - acoustic scale for decoding (Optional, default `0.1`).
+  * `min_active` - min active paths for decoding (Optional, default `200`).
+  * `max_active` - max active paths for decoding (Optional, default `7000`).
+  * `inverse_acoustic_scale` - inverse acoustic scale for lattice scaling (Optional, default `0`).
+  * `word_insertion_penalty` - add word insertion penalty to the lattice. Penalties are negative log-probs, base e, and are added to the language model' part of the cost (Optional, `0`).

@@ -13,10 +13,13 @@
 # limitations under the License.
 
 description: >-
-  This is a common sign language recognition model. It uses a sequence of images of
-  person as an input and outputs logits of predicted classes. The model is based on
-  the S3D-Mobilet-V3 backbone developed for fast inference and outputs an logits
-  vector of 27 floats.
+  A human gesture recognition model for the Jester dataset recognition scenario (gesture-level
+  recognition). The model uses an S3D framework with MobileNet V3 backbone. Please
+  refer to the Jester <https://20bn.com/datasets/jester> dataset specification to
+  see the list of gestures that are recognized by this model.
+
+  The model accepts a stack of frames (8 frames) sampled with a constant frame rate
+  (15 FPS) and produces a prediction on the input clip.
 task_type: action_recognition
 files:
   - name: s3d-rgb-mobilenet-v3-large-stream-jester.onnx

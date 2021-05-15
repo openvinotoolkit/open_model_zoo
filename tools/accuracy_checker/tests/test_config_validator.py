@@ -451,6 +451,14 @@ class TestConfigValidationAPI:
         assert config_errors[0].field_uri == 'models.datasets'
 
     @pytest.mark.usefixtures('mock_file_exists')
+    def test_ignore_dataset_config(self):
+        launcher_config = {'model': 'foo', 'framework': 'dlsdk', 'device': 'cpu'}
+        config_errors = ModelEvaluator.validate_config(
+            {'models': [{'launchers': [launcher_config], 'datasets': []}]}, delayed_annotation_loading=True
+        )
+        assert not config_errors
+
+    @pytest.mark.usefixtures('mock_file_exists')
     def test_input_without_type(self):
         launcher_config = {'model': 'foo', 'framework': 'dlsdk', 'device': 'cpu', 'inputs': [{"name": 'input'}]}
         config_errors = ModelEvaluator.validate_config({'models': [{'launchers': [launcher_config], 'datasets': []}]})
@@ -526,7 +534,30 @@ class TestConfigValidationAPI:
         assert config_errors[1].field_uri == 'models.datasets.0'
 
     @pytest.mark.usefixtures('mock_path_exists')
+    def test_dataset_config_ignore_without_metrics(self):
+        dataset_config = {'name': 'dataset', 'data_source': 'data', 'annotation': 'annotation'}
+        config_errors = ModelEvaluator.validate_config(
+            {'models': [{'datasets': [dataset_config]}]}, delayed_annotation_loading=True
+        )
+        assert len(config_errors) == 1
+        assert config_errors[0].message == 'launchers section is not provided'
+        assert not config_errors[0].entry
+        assert config_errors[0].field_uri == 'models.launchers'
+
+    @pytest.mark.usefixtures('mock_path_exists')
     def test_data_reader_without_data_source(self):
+        dataset_config = {'name': 'dataset', 'annotation': 'annotation', 'metrics': [{'type': 'accuracy'}]}
+        config_errors = ModelEvaluator.validate_config({'models': [{'datasets': [dataset_config]}]})
+        assert len(config_errors) == 2
+        assert config_errors[0].message == 'launchers section is not provided'
+        assert not config_errors[0].entry
+        assert config_errors[0].field_uri == 'models.launchers'
+        assert config_errors[1].message == 'Invalid value "None" for models.datasets.0.data_source: models.datasets.0.data_source is not allowed to be None'
+        assert not config_errors[1].entry
+        assert config_errors[1].field_uri == 'models.datasets.0.data_source'
+
+    @pytest.mark.usefixtures('mock_path_exists')
+    def test_data_reader_ignore_without_data_source(self):
         dataset_config = {'name': 'dataset', 'annotation': 'annotation', 'metrics': [{'type': 'accuracy'}]}
         config_errors = ModelEvaluator.validate_config({'models': [{'datasets': [dataset_config]}]})
         assert len(config_errors) == 2
@@ -543,6 +574,22 @@ class TestConfigValidationAPI:
             'name': 'dataset', 'annotation': 'annotation', 'metrics': [{'type': 'accuracy'}], 'reader': 'unknown'
         }
         config_errors = ModelEvaluator.validate_config({'models': [{'datasets': [dataset_config]}]})
+        assert len(config_errors) == 2
+        assert config_errors[0].message == 'launchers section is not provided'
+        assert not config_errors[0].entry
+        assert config_errors[0].field_uri == 'models.launchers'
+        assert config_errors[1].message.startswith('Invalid value "unknown" for models.datasets.0.reader')
+        assert config_errors[-1].entry == 'unknown'
+        assert config_errors[-1].field_uri == 'models.datasets.0.reader'
+
+    @pytest.mark.usefixtures('mock_path_exists')
+    def test_unregistered_data_reader_with_postpone_data_loading(self):
+        dataset_config = {
+            'name': 'dataset', 'annotation': 'annotation', 'metrics': [{'type': 'accuracy'}], 'reader': 'unknown'
+        }
+        config_errors = ModelEvaluator.validate_config(
+            {'models': [{'datasets': [dataset_config]}]}, delayed_annotation_loading=True
+        )
         assert len(config_errors) == 2
         assert config_errors[0].message == 'launchers section is not provided'
         assert not config_errors[0].entry
@@ -703,6 +750,24 @@ class TestConfigValidationAPI:
         assert config_errors[1].field_uri == 'datasets.0.preprocessing.1'
 
     @pytest.mark.usefixtures('mock_path_exists')
+    def test_preprocessing_config_unknown_type_with_postponed_annotation(self):
+        preprocessing_config = [{'type': 'bgr_to_rgb'}, {'type': 'unknown', 'size': 224}]
+        dataset_config = {
+            'name': 'dataset', 'metrics': [{'type': 'accuracy'}], 'data_source': 'data',
+            'annotation': 'annotation', 'preprocessing': preprocessing_config
+        }
+        config_errors = ModelEvaluator.validate_config(
+            {'datasets': [dataset_config]}, delayed_annotation_loading=True
+        )
+        assert len(config_errors) == 2
+        assert config_errors[0].message == 'launchers section is not provided'
+        assert not config_errors[0].entry
+        assert config_errors[0].field_uri == 'launchers'
+        assert config_errors[1].message == 'preprocessor unknown unregistered'
+        assert config_errors[1].entry == preprocessing_config[1]
+        assert config_errors[1].field_uri == 'datasets.0.preprocessing.1'
+
+    @pytest.mark.usefixtures('mock_path_exists')
     def test_preprocessing_config_extra_parameter(self):
         preprocessing_config = [{'type': 'bgr_to_rgb'}, {'type': 'resize', 'size': 224, 'something_extra': True}]
         dataset_config = {
@@ -770,6 +835,24 @@ class TestConfigValidationAPI:
             'annotation': 'annotation', 'postprocessing': postprocessing_config
         }
         config_errors = ModelEvaluator.validate_config({'datasets': [dataset_config]})
+        assert len(config_errors) == 2
+        assert config_errors[0].message == 'launchers section is not provided'
+        assert not config_errors[0].entry
+        assert config_errors[0].field_uri == 'launchers'
+        assert config_errors[1].message == "datasets.0.postprocessing.0 specifies unknown options: ['something_extra']"
+        assert config_errors[1].entry == postprocessing_config[0]
+        assert config_errors[1].field_uri == 'datasets.0.postprocessing.0'
+
+    @pytest.mark.usefixtures('mock_path_exists')
+    def test_postprocessing_config_extra_parameter_with_postponed_annotation(self):
+        postprocessing_config = [{'type': 'resize_prediction_boxes', 'something_extra': True}]
+        dataset_config = {
+            'name': 'dataset', 'metrics': [{'type': 'accuracy'}], 'data_source': 'data',
+            'annotation': 'annotation', 'postprocessing': postprocessing_config
+        }
+        config_errors = ModelEvaluator.validate_config(
+            {'datasets': [dataset_config]}, delayed_annotation_loading=True
+        )
         assert len(config_errors) == 2
         assert config_errors[0].message == 'launchers section is not provided'
         assert not config_errors[0].entry

@@ -44,7 +44,9 @@ from .audio_preprocessing_ext import (
     SpliceFrame,
     DitherFrame,
     DitherSpectrum,
-    PreemphFrame
+    PreemphFrame,
+    SignalPatching,
+    ContextWindow
 )
 
 from .normalization import Normalize, Normalize3d
@@ -91,6 +93,8 @@ __all__ = [
     'DitherFrame',
     'DitherSpectrum',
     'PreemphFrame',
+    'SignalPatching',
+    'ContextWindow',
 
     'Resize',
     'Resize3D',

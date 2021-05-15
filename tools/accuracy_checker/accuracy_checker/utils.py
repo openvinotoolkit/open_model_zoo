@@ -73,7 +73,7 @@ def contains_all(container, *args):
     sequence = set(container)
 
     for arg in args:
-        if len(sequence.intersection(arg)) != len(arg):
+        if sequence.intersection(arg) != set(arg):
             return False
 
     return True
@@ -305,13 +305,15 @@ def read_yaml(file: Union[str, Path], *args, **kwargs):
 
 
 def read_csv(file: Union[str, Path], *args, **kwargs):
-    with get_path(file).open() as content:
+    with get_path(file).open(encoding='utf-8') as content:
         return list(csv.DictReader(content, *args, **kwargs))
 
 
-def extract_image_representations(image_representations):
-    images = [rep.data for rep in image_representations]
+def extract_image_representations(image_representations, meta_only=False):
     meta = [rep.metadata for rep in image_representations]
+    if meta_only:
+        return meta
+    images = [rep.data for rep in image_representations]
 
     return images, meta
 
@@ -525,8 +527,8 @@ def color_format(s, color=Color.PASSED):
     return "\x1b[0;31m{}\x1b[0m".format(s)
 
 
-def softmax(x):
-    return np.exp(x) / sum(np.exp(x))
+def softmax(x, axis=0):
+    return np.exp(x) / np.sum(np.exp(x), axis=axis, keepdims=True)
 
 
 def is_iterable(maybe_iterable):
@@ -829,3 +831,17 @@ class UnsupportedPackage:
 
     def __call__(self, *args, **kwargs):
         self.raise_error('')
+
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+
+def generate_layer_name(layer_name, prefix, with_prefix):
+    return prefix + layer_name if with_prefix else layer_name.split(prefix, 1)[-1]
+
+
+def convert_xctr_yctr_w_h_to_x1y1x2y2(x, y, width, height):
+    x1, y1 = (x - width / 2), (y - height / 2)
+    x2, y2 = (x + width / 2), (y + height / 2)
+    return x1, y1, x2, y2

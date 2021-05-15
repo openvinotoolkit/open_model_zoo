@@ -45,7 +45,7 @@ from .segmentation_representation import (
     BrainTumorSegmentationAnnotation,
     BrainTumorSegmentationPrediction,
     CoCoInstanceSegmentationAnnotation,
-    CoCocInstanceSegmentationPrediction,
+    CoCoInstanceSegmentationPrediction,
     OAR3DTilingSegmentationAnnotation,
     SalientRegionAnnotation,
     SalientRegionPrediction,
@@ -67,7 +67,8 @@ from .regression_representation import (
     FacialLandmarks3DPrediction,
     GazeVectorAnnotation,
     GazeVectorPrediction,
-    FeaturesRegressionAnnotation
+    FeaturesRegressionAnnotation,
+    NiftiRegressionAnnotation,
 )
 from .multilabel_recognition import MultiLabelRecognitionAnnotation, MultiLabelRecognitionPrediction
 from .super_resolution_representation import SuperResolutionAnnotation, SuperResolutionPrediction
@@ -99,6 +100,8 @@ from .dna_sequence import DNASequenceAnnotation, DNASequencePrediction
 from .raw_representation import RawTensorAnnotation, RawTensorPrediction
 
 from .optical_flow import OpticalFlowAnnotation, OpticalFlowPrediction
+
+from .noise_suppression import NoiseSuppressionAnnotation, NoiseSuppressionPrediction
 
 __all__ = [
     'BaseRepresentation',
@@ -139,7 +142,7 @@ __all__ = [
     'OAR3DTilingSegmentationAnnotation',
 
     'CoCoInstanceSegmentationAnnotation',
-    'CoCocInstanceSegmentationPrediction',
+    'CoCoInstanceSegmentationPrediction',
 
     'CharacterRecognition',
     'CharacterRecognitionAnnotation',
@@ -209,4 +212,9 @@ __all__ = [
 
     'OpticalFlowAnnotation',
     'OpticalFlowPrediction',
+
+    'NiftiRegressionAnnotation',
+
+    'NoiseSuppressionAnnotation',
+    'NoiseSuppressionPrediction'
 ]

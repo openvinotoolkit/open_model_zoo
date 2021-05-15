@@ -1,8 +1,8 @@
 # Object Detection Python\* Demo
 
-![](../object_detection.gif)
+![example](../object_detection.gif)
 
-This demo showcases Object Detection with Sync and Async API.
+This demo showcases inference of Object Detection networks using Sync and Async API.
 
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
 the app can continue doing things on the host, while accelerator is busy.
@@ -10,12 +10,12 @@ Specifically, this demo keeps the number of Infer Requests that you have set usi
 While some of the Infer Requests are processed by IE, the other ones can be filled with new frame data
 and asynchronously started or the next output can be taken from the Infer Request and displayed.
 
-The technique can be generalized to any available parallel slack, for example, doing inference and simultaneously
+This technique can be generalized to any available parallel slack, for example, doing inference and simultaneously
 encoding the resulting (previous) frames or running further inference, like some emotion detection on top of
 the face detection results.
 There are important performance caveats though, for example the tasks that run in parallel should try to avoid
 oversubscribing the shared compute resources.
-For example, if the inference is performed on the FPGA, and the CPU is essentially idle,
+For example, if the inference is performed on the HDDL, and the CPU is essentially idle,
 than it makes sense to do things on the CPU in parallel. But if the inference is performed say on the GPU,
 than it can take little gain to do the (resulting video) encoding on the same GPU in parallel,
 because the device is already busy.
@@ -24,6 +24,7 @@ This and other performance implications and tips for the Async API are covered i
 [Optimization Guide](https://docs.openvinotoolkit.org/latest/_docs_optimization_guide_dldt_optimization_guide.html).
 
 Other demo objectives are:
+
 * Video as input support via OpenCV\*
 * Visualization of the resulting bounding boxes and text labels (from the `.labels` file)
   or class number (if no file is provided)
@@ -42,13 +43,97 @@ model using the Model Optimizer tool with `--reverse_input_channels` argument sp
 the argument, refer to **When to Reverse Input Channels** section of
 [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in <omz_dir>/demos/object_detection_demo/python/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* architecture_type = centernet
+  - ctdet_coco_dlav0_384
+  - ctdet_coco_dlav0_512
+* architecture_type = ctpn
+  - ctpn
+* architecture_type = faceboxes
+  - faceboxes-pytorch
+* architecture_type = ssd
+  - efficientdet-d0-tf
+  - efficientdet-d1-tf
+  - face-detection-0200
+  - face-detection-0202
+  - face-detection-0204
+  - face-detection-0205
+  - face-detection-0206
+  - face-detection-adas-0001
+  - face-detection-retail-0004
+  - face-detection-retail-0005
+  - face-detection-retail-0044
+  - faster-rcnn-resnet101-coco-sparse-60-0001
+  - pedestrian-and-vehicle-detector-adas-0001
+  - pedestrian-detection-adas-0002
+  - pelee-coco
+  - person-detection-0106
+  - person-detection-0200
+  - person-detection-0201
+  - person-detection-0202
+  - person-detection-0203
+  - person-detection-retail-0013
+  - person-vehicle-bike-detection-2000
+  - person-vehicle-bike-detection-2001
+  - person-vehicle-bike-detection-2002
+  - person-vehicle-bike-detection-2003
+  - person-vehicle-bike-detection-2004
+  - product-detection-0001
+  - retinanet-tf
+  - rfcn-resnet101-coco-tf
+  - ssd300
+  - ssd512
+  - ssd_mobilenet_v1_coco
+  - ssd_mobilenet_v1_fpn_coco
+  - ssd_mobilenet_v2_coco
+  - ssd_resnet50_v1_fpn_coco
+  - ssd-resnet34-1200-onnx
+  - ssdlite_mobilenet_v2
+  - vehicle-detection-0200
+  - vehicle-detection-0201
+  - vehicle-detection-0202
+  - vehicle-detection-adas-0002
+  - vehicle-license-plate-detection-barrier-0106
+  - vehicle-license-plate-detection-barrier-0123
+* architecture_type = retinaface
+  - retinaface-anti-cov
+  - retinaface-resnet50
+  - ssh-mxnet
+* architecture_type = ultra_lightweight_face_detection
+  - ultra-lightweight-face-detection-rfb-320
+  - ultra-lightweight-face-detection-slim-320
+* architecture_type = yolo
+  - mobilefacedet-v1-mxnet
+  - person-vehicle-bike-detection-crossroad-yolov3-1020
+  - yolo-v1-tiny-tf
+  - yolo-v2-ava-0001
+  - yolo-v2-ava-sparse-35-0001
+  - yolo-v2-ava-sparse-70-0001
+  - yolo-v2-tf
+  - yolo-v2-tiny-ava-0001
+  - yolo-v2-tiny-ava-sparse-30-0001
+  - yolo-v2-tiny-ava-sparse-60-0001
+  - yolo-v2-tiny-tf
+  - yolo-v2-tiny-vehicle-detection-0001
+  - yolo-v3-tf
+  - yolo-v3-tiny-tf
+* architecture_type = yolov4
+  - yolo-v4-tf
+  - yolo-v4-tiny-tf
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```
-python3 object_detection_demo.py -h
-```
-The command yields the following usage message:
+
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
                                 {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection}
@@ -59,7 +144,11 @@ usage: object_detection_demo.py [-h] -m MODEL -at
                                 [-nstreams NUM_STREAMS]
                                 [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
                                 [-limit OUTPUT_LIMIT] [--no_show]
+                                [--output_resolution OUTPUT_RESOLUTION]
                                 [-u UTILIZATION_MONITORS] [-r]
+                                [--reverse_input_channels REVERSE_CHANNELS]
+                                [--mean_values MEAN_VALUES]
+                                [--scale_values SCALE_VALUES]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -109,12 +198,36 @@ Input/output options:
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
   --no_show             Optional. Don't show output.
+  --output_resolution OUTPUT_RESOLUTION
+                        Optional. Specify the maximum output window resolution
+                        in (width x height) format. Example: 1280x720.
+                        Input frame size used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+
+Input transform options:
+  --reverse_input_channels REVERSE_CHANNELS
+                        Optional. Switch the input channels order from
+                        BGR to RGB.
+  --mean_values MEAN_VALUES
+                        Optional. Normalize input by subtracting the mean
+                        values per channel. Example: 255 255 255
+  --scale_values SCALE_VALUES
+                        Optional. Divide input by scale values per channel
+                        Division is applied after mean values subtraction.
+                        Example: 255 255 255
 
 Debug options:
   -r, --raw_output_message
                         Optional. Output inference results raw values showing.
+```
+
+Running the application with the empty list of options yields the usage message given above and an error message.
+
+You can use the following command to do inference on GPU with a pre-trained object detection model:
+
+```sh
+python3 object_detection_demo.py -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd300.xml -d GPU --labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt
 ```
 
 The number of Infer Requests is specified by `-nireq` flag. An increase of this number usually leads to an increase
@@ -130,28 +243,17 @@ summed across all devices used.
   the differences in device performance. However, the internal organization of the callback mechanism in Python API
   leads to FPS decrease. Please, keep it in mind and use the C++ version of this demo for performance-critical cases.
 
-Running the application with the empty list of options yields the usage message given above and an error message.
-You can use the following command to do inference on GPU with a pre-trained object detection model:
-```
-python3 object_detection_demo_ssd_async.py -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd.xml -d GPU
-```
-
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO
-[Model Downloader](../../../tools/downloader/README.md).
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine
-format (\*.xml + \*.bin) using the
-[Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
 The demo reports
+
 * **FPS**: average rate of video frame processing (frames per second)
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results)
 You can use both of these metrics to measure application-level performance.
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

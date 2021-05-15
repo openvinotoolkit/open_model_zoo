@@ -14,6 +14,8 @@
 import cv2
 import numpy as np
 
+from types import SimpleNamespace as namespace
+
 from .ie_tools import IEModel
 from .segm_postprocess import postprocess
 
@@ -57,8 +59,10 @@ class MaskRCNN(IEModel):
         processed_image = processed_image.astype('float32').transpose(2, 0, 1)
         height, width = processed_image.shape[1], processed_image.shape[2]
         im_info = np.array([height, width, 1.0], dtype='float32') if self.segmentoly_type else None
-        meta=dict(original_size=frame.shape[:2],
-                  processed_size=processed_image.shape[1:3])
+        meta=namespace(
+            original_size=frame.shape[:2],
+            processed_size=processed_image.shape[1:3],
+        )
         return processed_image, im_info, meta
 
     def forward(self, im_data, im_info):
@@ -97,10 +101,10 @@ class MaskRCNN(IEModel):
 
             boxes, classes, scores, _, masks = self.forward(im_data, im_info)
             scores, classes, boxes, masks = postprocess(scores, classes, boxes, masks,
-                                                        im_h=meta['original_size'][0],
-                                                        im_w=meta['original_size'][1],
-                                                        im_scale_y=meta['processed_size'][0] / meta['original_size'][0],
-                                                        im_scale_x=meta['processed_size'][1] / meta['original_size'][1],
+                                                        im_h=meta.original_size[0],
+                                                        im_w=meta.original_size[1],
+                                                        im_scale_y=meta.processed_size[0] / meta.original_size[0],
+                                                        im_scale_x=meta.processed_size[1] / meta.original_size[1],
                                                         full_image_masks=True, encode_masks=False,
                                                         confidence_threshold=self.confidence,
                                                         segmentoly_postprocess=self.segmentoly_type)

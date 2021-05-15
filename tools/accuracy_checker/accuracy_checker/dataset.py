@@ -184,11 +184,12 @@ class Dataset:
             data_reader_type = data_reader_config['type']
         else:
             raise ConfigError('reader should be dict or string')
+        annotation_provider = AnnotationProvider(annotation, meta)
         if data_reader_type in REQUIRES_ANNOTATIONS:
-            data_source = annotation
+            data_source = annotation_provider
         data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
         self.data_provider = DataProvider(
-            data_reader, AnnotationProvider(annotation, meta), dataset_config=self.config, batch=self.batch
+            data_reader, annotation_provider, dataset_config=self.config, batch=self.batch
         )
 
     @property
@@ -314,9 +315,11 @@ class Dataset:
     def metadata(self):
         return self.data_provider.metadata
 
+    @property
     def identifiers(self):
         return self.data_provider.identifiers
 
+    @property
     def multi_infer(self):
         return self.data_provider.multi_infer
 
@@ -508,7 +511,7 @@ class DataProvider:
         self.data_reader = data_reader
         self.annotation_provider = annotation_provider
         self.dataset_config = dataset_config or {}
-        self.batch = batch
+        self.batch = batch if batch is not None else dataset_config.get('batch')
         self.subset = subset
         self.create_data_list(data_list)
         if self.store_subset:
@@ -627,7 +630,7 @@ class DataProvider:
 
     def set_annotation_metadata(self, annotation, image, data_source):
         set_image_metadata(annotation, image)
-        annotation.set_data_source(data_source)
+        annotation.set_data_source(data_source if not isinstance(data_source, (list, AnnotationProvider)) else [])
         segmentation_mask_source = self.dataset_config.get('segmentation_masks_source')
         annotation.set_segmentation_mask_source(segmentation_mask_source)
         annotation.set_additional_data_source(self.dataset_config.get('additional_data_source'))
