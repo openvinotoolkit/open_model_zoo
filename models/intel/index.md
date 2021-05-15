@@ -294,17 +294,18 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 |   text-to-speech-en-multi-0001-regression                          | 7.81  | 5.12  |
 |   text-to-speech-en-multi-0001-generation                          | 48.38 | 12.77 |
 
+Deep Learning models for noise suppression.
+
+| Model Name                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
+|----------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [noise-suppression-poconetlike-0001](./noise-suppression-poconetlike-0001/noise-suppression-poconetlike-0001.md)| 1.2                  | 7.22       |
+
 ## See Also
 
 * [Open Model Zoo Demos](../../demos/README.md)
 * [Model Downloader](../../tools/downloader/README.md)
 * [Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models](../public/index.md)
 
-Deep Learning models for noise suppression.
-
-| Model Name                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
-|----------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [noise-suppression-poconetlike-0001](./noise-suppression-poconetlike-0001/noise-suppresion-poconetlike-0001.md)| 1.2                  | 7.22       |
 
 
 ## Legal Information
