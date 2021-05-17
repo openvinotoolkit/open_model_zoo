@@ -15,6 +15,7 @@
 import platform
 import re
 import shlex
+import subprocess
 
 from pathlib import Path
 
@@ -87,3 +88,25 @@ else:
 
 def command_string(args):
     return ' '.join(map(quote_arg, args))
+
+def get_package_path(python_executable, package_name):
+    completed_process = subprocess.run(
+        [str(python_executable), '-c',
+            'import inspect, importlib, sys;'
+                'print(importlib.import_module(sys.argv[1]).__file__)',
+            package_name,
+        ],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        universal_newlines=True,
+    )
+
+    if completed_process.returncode != 0:
+        return None
+
+    file_path = Path(completed_process.stdout.rstrip('\n'))
+
+    # For a package, the file is __init__.py, so to get the package path,
+    # take its parent directory.
+    return file_path.parent
