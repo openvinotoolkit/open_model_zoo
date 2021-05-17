@@ -50,7 +50,7 @@ Options:
 
 ## Demo Inputs
 
-The application reads audio wave from the input file with given name. The input file has to have 16kHZ discritization frequency
+The application reads audio wave from the input file with given name. The input file has to have 16kHZ discretization frequency
 The model is also important demo arguments.
 
 ## Demo Outputs
