@@ -427,7 +427,7 @@ PYTHON_DEMOS = [
             TestCase(options={'-p': 'mds06x_en',
                               '-m': ModelArg('mozilla-deepspeech-0.6.1'),
                               # lm.binary is really in dl_dir
-                              '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'lm.binary')}),
+                              '-L': ModelFileArg('mozilla-deepspeech-0.6.1', 'deepspeech-0.6.1-models/lm.binary')}),
             TestCase(options={'-p': 'mds08x_en',  # test online mode
                               '-m': ModelArg('mozilla-deepspeech-0.8.2'),
                               # run_tests.py puts pre-converted files into dl_dir as
