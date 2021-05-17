@@ -74,50 +74,58 @@ any arguments yields the following message:
 ```
 python ./face_recognition_demo.py -h
 
-usage: face_recognition_demo.py [-h] [-i PATH] [-o PATH] [--no_show] [-tl]
+usage: face_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
+                                [-limit OUTPUT_LIMIT] [--no_show]
+                                [--output_resolution OUTPUT_RESOLUTION]
                                 [-cw CROP_WIDTH] [-ch CROP_HEIGHT]
                                 [--match_algo {HUNGARIAN,MIN_DIST}]
-                                [-u UTILIZATION_MONITORS] -fg PATH
-                                [--run_detector] -m_fd PATH -m_lm PATH -m_reid
-                                PATH [-fd_iw FD_INPUT_WIDTH]
-                                [-fd_ih FD_INPUT_HEIGHT]
+                                [-u UTILIZATION_MONITORS]
+                                -fg PATH [--run_detector] [--allow_grow]
+                                -m_fd PATH -m_lm PATH -m_reid PATH
+                                [-fd_iw FD_INPUT_WIDTH] [-fd_ih FD_INPUT_HEIGHT]
                                 [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
                                 [-d_lm {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
                                 [-d_reid {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
                                 [-l PATH] [-c PATH] [-v] [-pc] [-t_fd [0..1]]
                                 [-t_id [0..1]] [-exp_r_fd NUMBER]
-                                [--allow_grow]
 
-optional arguments:
-  -h, --help            show this help message and exit
+Optional arguments:
+  -h, --help            Show this help message and exit.
 
 General:
-  -i PATH, --input PATH
-                        (optional) Path to the input video ('0' for the
-                        camera, default)
-  -o PATH, --output PATH
-                        (optional) Path to save the output video to
-  --no_show             (optional) Do not display output
-  -tl, --timelapse      (optional) Auto-pause after each frame
+  -i INPUT, --input INPUT
+                        Required. An input to process. The input must be a
+                        single image, a folder of images, video file or camera id.
+  --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of output to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output.
+                        If 0 is set, all frames are stored.
+  --output_resolution OUTPUT_RESOLUTION
+                        Optional. Specify the maximum output window resolution
+                        in (width x height) format. Example: 1280x720.
+                        Input frame size used by default.
+  --no_show             Optional. Don't show output.
   -cw CROP_WIDTH, --crop_width CROP_WIDTH
-                        (optional) Crop the input stream to this width
-                        (default: no crop). Both -cw and -ch parameters should
-                        be specified to use crop.
+                        Optional. Crop the input stream to this width.
+                        Both -cw and -ch parameters should be specified
+                        to use crop.
   -ch CROP_HEIGHT, --crop_height CROP_HEIGHT
-                        (optional) Crop the input stream to this height
-                        (default: no crop). Both -cw and -ch parameters should
-                        be specified to use crop.
+                        Optional. Crop the input stream to this height.
+                        Both -cw and -ch parameters should be specified
+                        to use crop.
   --match_algo {HUNGARIAN,MIN_DIST}
-                        (optional)algorithm for face matching(default:
-                        HUNGARIAN)
+                        Optional. Algorithm for face matching.
+                        Default: HUNGARIAN.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 
 Faces database:
-  -fg PATH              Path to the face images directory
-  --run_detector        (optional) Use Face Detection model to find faces on
-                        the face images, otherwise use full images.
-  --allow_grow          (optional) Flag to allow growing the face database,
+  -fg                   Required. Path to the face images directory.
+  --run_detector        Optional. Use Face Detection model to find faces
+                        on the face images, otherwise use full images.
+  --allow_grow          Optional. Flag to allow growing the face database,
                         in addition allow dumping new faces on disk. In that
                         case the user will be asked if he wants to add a
                         specific image to the images gallery (and it leads to
@@ -129,46 +137,45 @@ Faces database:
                         name in the open window.
 
 Models:
-  -m_fd PATH            Path to the Face Detection model XML file
-  -m_lm PATH            Path to the Facial Landmarks Regression model XML file
-  -m_reid PATH          Path to the Face Reidentification model XML file
+  -m_fd PATH            Required. Path to an .xml file with Face Detection model.
+  -m_lm PATH            Required. Path to an .xml file with Facial Landmarks Detection
+                        model.
+  -m_reid PATH          Required. Path to an .xml file with Face Reidentification
+                        model.
   -fd_iw FD_INPUT_WIDTH, --fd_input_width FD_INPUT_WIDTH
-                        (optional) specify the input width of detection model
-                        (default: use default input width of model).
+                        Optional. Specify the input width of detection model.
                         Both -fd_iw and -fd_ih parameters should be specified
                         for reshape.
   -fd_ih FD_INPUT_HEIGHT, --fd_input_height FD_INPUT_HEIGHT
-                        (optional) specify the input height of detection model
-                        (default: use default input height of model).
+                        Optional. Specify the input height of detection model.
                         Both -fd_iw and -fd_ih parameters should be specified
                         for reshape.
 
 Inference options:
-  -d_fd {CPU,GPU,FPGA,MYRIAD,HETERO}
-                        (optional) Target device for the Face Detection model
-                        (default: CPU)
-  -d_lm {CPU,GPU,FPGA,MYRIAD,HETERO}
-                        (optional) Target device for the Facial Landmarks
-                        Regression model (default: CPU)
-  -d_reid {CPU,GPU,FPGA,MYRIAD,HETERO}
-                        (optional) Target device for the Face Reidentification
-                        model (default: CPU)
+  -d_fd {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}
+                        Optional. Target device for Face Detection model.
+                        Default value is CPU.
+  -d_lm {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}
+                        Optional. Target device for Facial Landmarks Detection
+                        model. Default value is CPU.
+  -d_reid {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}
+                        Optional. Target device for Face Reidentification
+                        model. Default value is CPU.
   -l PATH, --cpu_lib PATH
-                        (optional) For MKLDNN (CPU)-targeted custom layers, if
-                        any. Path to a shared library with custom layers
-                        implementations
+                        Optional. For MKLDNN (CPU)-targeted custom layers,
+                        if any. Path to a shared library with custom
+                        layers implementations.
   -c PATH, --gpu_lib PATH
-                        (optional) For clDNN (GPU)-targeted custom layers, if
-                        any. Path to the XML file with descriptions of the
-                        kernels
-  -v, --verbose         (optional) Be more verbose
-  -pc, --perf_stats     (optional) Output detailed per-layer performance stats
-  -t_fd [0..1]          (optional) Probability threshold for face
-                        detections(default: 0.6)
-  -t_id [0..1]          (optional) Cosine distance threshold between two
-                        vectors for face identification (default: 0.3)
-  -exp_r_fd NUMBER      (optional) Scaling ratio for bboxes passed to face
-                        recognition (default: 1.15)
+                        Optional. For clDNN (GPU)-targeted custom layers,
+                        if any. Path to the XML file with descriptions
+                        of the kernels.
+  -v, --verbose         Optional. Be more verbose.
+  -pc, --perf_stats     Optional. Output detailed per-layer performance stats.
+  -t_fd [0..1]          Optional. Probability threshold for face detections.
+  -t_id [0..1]          Optional. Cosine distance threshold between two vectors
+                        for face identification.
+  -exp_r_fd NUMBER      Optional. Scaling ratio for bboxes passed to face
+                        recognition.
 ```
 
 Example of a valid command line to run the application:
