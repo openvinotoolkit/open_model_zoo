@@ -9,26 +9,22 @@ import os.path
 from copy import deepcopy
 
 import numpy as np
-from openvino.inference_engine import IECore
 
 from utils.pipelines import BlockedSeqPipelineStage
 
 
 class RnnSeqPipelineStage(BlockedSeqPipelineStage):
-    def __init__(self, model, profile=None, ie=None, device='CPU'):
+    def __init__(self, profile, ie, model, device='CPU'):
         """
-        In addition to initialization of the pipeline stage: load IE IR file with the network
-        and compile it for the target device into an ExecutableNetwork.
+        Load/compile to the target device the IE IR file with the network and initialize the pipeline stage.
 
+        profile (dict), a dict with pre/post-processing parameters, see profiles.py
+        ie (IECore), IECore object for model loading/compilation/inference
         model (str), filename of .xml IR file
-        profile (dict)
-        ie (IECore or None), IECore object for compilation of the model
-        device (str), check supported node types with this device; None = do not check (default 'CPU')
+        device (str), inferemnce device
         """
-        assert profile is not None, "profile argument must be provided"
         self.p = deepcopy(profile)
         assert self.p['num_context_frames'] % 2 == 1, "num_context_frames must be odd"
-        ie = ie or IECore()
 
         padding_len = self.p['num_context_frames'] // 2
         super().__init__(
@@ -72,8 +68,8 @@ class RnnSeqPipelineStage(BlockedSeqPipelineStage):
         )
 
         if self._rnn_state is None:
-            state_h = np.zeros(self.exec_net.get_exec_graph_info().input_info[self.p['in_state_h']].input_data.shape)
-            state_c = np.zeros(self.exec_net.get_exec_graph_info().input_info[self.p['in_state_c']].input_data.shape)
+            state_h = np.zeros(self.exec_net.input_info[self.p['in_state_h']].input_data.shape)
+            state_c = np.zeros(self.exec_net.input_info[self.p['in_state_c']].input_data.shape)
         else:
             state_h, state_c = self._rnn_state
 

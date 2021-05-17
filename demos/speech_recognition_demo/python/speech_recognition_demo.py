@@ -14,6 +14,7 @@ import argparse
 import yaml
 import numpy as np
 from tqdm import tqdm
+from openvino.inference_engine import IECore
 
 from utils.profiles import PROFILES
 from utils.deep_speech_seq_pipeline import DeepSpeechSeqPipeline
@@ -67,6 +68,7 @@ def main():
 
     start_load_time = timeit.default_timer()
     stt = DeepSpeechSeqPipeline(
+        ie = IECore(),
         model = args.model,
         lm = args.lm,
         beam_width = args.beam_width,
