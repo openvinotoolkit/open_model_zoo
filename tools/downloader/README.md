@@ -435,6 +435,10 @@ describing a single model. Each such object has the following keys:
 
   Additional possible values might be added in the future.
 
+* `quantization_output_precisions`: the list of precisions that the model can be quantized to by
+  the model quantizer. Current possible values are `FP16-INT8` and `FP32-INT8`; additional
+  possible values might be added in the future.
+
 * `subdirectory`: the subdirectory of the output tree into which the downloaded or converted files
   will be placed by the downloader or the converter, respectively.
 

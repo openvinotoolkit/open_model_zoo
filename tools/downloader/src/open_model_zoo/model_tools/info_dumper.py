@@ -28,6 +28,7 @@ def to_info(model):
         'framework': model.framework,
         'license_url': model.license_url,
         'precisions': sorted(model.precisions),
+        'quantization_output_precisions': sorted(model.quantization_output_precisions),
         'subdirectory': str(model.subdirectory),
         'task_type': str(model.task_type),
     }
