@@ -25,16 +25,17 @@ from ...dataset import Dataset
 from ...logging import print_info
 from ...metrics import MetricsExecutor
 from ...preprocessor import PreprocessingExecutor
-from ...representation import CharacterRecognitionPrediction
+from ...representation import CharacterRecognitionPrediction, CharacterRecognitionAnnotation
 
 
-class Im2latexEvaluator(BaseEvaluator):
-    def __init__(self, dataset, preprocessing, metric_executor, launcher, model):
+class TextRecognitionWithAttentionEvaluator(BaseEvaluator):
+    def __init__(self, dataset, preprocessing, metric_executor, launcher, model, lowercase):
         self.dataset = dataset
         self.preprocessing_executor = preprocessing
         self.metric_executor = metric_executor
         self.launcher = launcher
         self.model = model
+        self.lowercase = lowercase
         self._metrics_results = []
 
     @classmethod
@@ -44,15 +45,17 @@ class Im2latexEvaluator(BaseEvaluator):
         preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
+        lowercase = dataset_config.get('lowercase', False)
         meta = dataset.metadata
-        model = SequentialModel(
+        model_type = config.get('model_type', 'SequentialFormulaRecognitionModel')
+        model = MODEL_TYPES[model_type](
             config.get('network_info', {}),
             launcher,
             config.get('_models', []),
             meta,
             config.get('_model_is_blob'),
         )
-        return cls(dataset, preprocessing, metrics_executor, launcher, model)
+        return cls(dataset, preprocessing, metrics_executor, launcher, model, lowercase)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         self._annotations, self._predictions = [], []
@@ -69,8 +72,13 @@ class Im2latexEvaluator(BaseEvaluator):
             batch_inputs = self.preprocessing_executor.process(batch_inputs, batch_annotation)
             batch_inputs, _ = extract_image_representations(batch_inputs)
             batch_prediction = self.model.predict(batch_identifiers, batch_inputs)
+            if self.lowercase:
+                batch_prediction = batch_prediction.lower()
+                batch_annotation = [CharacterRecognitionAnnotation(
+                    label=ann.label.lower(), identifier=ann.identifier) for ann in batch_annotation]
             batch_prediction = [CharacterRecognitionPrediction(
                 label=batch_prediction, identifier=batch_annotation[0].identifier)]
+            _ = self.metric_executor.update_metrics_on_batch(range(len(batch_annotation)), batch_annotation, batch_prediction)
             self._annotations.extend(batch_annotation)
             self._predictions.extend(batch_prediction)
 
@@ -122,7 +130,7 @@ class Im2latexEvaluator(BaseEvaluator):
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
             presenter.write_result(metric_result, ignore_results_formatting)
 
-    @property
+    @ property
     def dataset_size(self):
         return self.dataset.size
 
@@ -134,7 +142,7 @@ class Im2latexEvaluator(BaseEvaluator):
         self.metric_executor.reset()
         self.model.reset()
 
-    @staticmethod
+    @ staticmethod
     def get_processing_info(config):
         module_specific_params = config.get('module_config')
         model_name = config['name']
@@ -223,7 +231,6 @@ class BaseModel:
             print_info('\tshape: {}\n'.format(output_info.shape))
 
 
-
 def create_recognizer(model_config, launcher, suffix):
     """Creates encoder and decoder element for Im2LaTeX model
 
@@ -248,8 +255,80 @@ def create_recognizer(model_config, launcher, suffix):
     return model_class(model_config, launcher, suffix)
 
 
-class SequentialModel:
+class SequentialTextRecognitionModel:
     def __init__(self, network_info, launcher, models_args, meta, is_blob=None):
+        recognizer_encoder = network_info.get('recognizer_encoder', {})
+        recognizer_decoder = network_info.get('recognizer_decoder', {})
+        if 'model' not in recognizer_encoder:
+            recognizer_encoder['model'] = models_args[0]
+            recognizer_encoder['_model_is_blob'] = is_blob
+        if 'model' not in recognizer_decoder:
+            recognizer_decoder['model'] = models_args[len(models_args) == 2]
+            recognizer_decoder['_model_is_blob'] = is_blob
+        network_info.update({
+            'recognizer_encoder': recognizer_encoder,
+            'recognizer_decoder': recognizer_decoder
+        })
+        if not contains_all(network_info, ['recognizer_encoder', 'recognizer_decoder']):
+            raise ConfigError('network_info should contain encoder and decoder fields')
+        self.vocab = network_info['custom_label_map']
+        self.recognizer_encoder = create_recognizer(network_info['recognizer_encoder'], launcher, 'encoder')
+        self.recognizer_decoder = create_recognizer(network_info['recognizer_decoder'], launcher, 'decoder')
+        self.sos_index = 0
+        self.eos_index = 2
+        self.max_seq_len = int(network_info['max_seq_len'])
+
+    def get_phrase(self, indices):
+        res = ''
+        for idx in indices:
+            if idx != self.eos_index:
+                res += str(self.vocab.get(idx, '?'))
+            else:
+                return res
+
+    def predict(self, identifiers, input_data):
+        assert len(identifiers) == 1
+        input_data = np.array(input_data)
+        input_data = np.transpose(input_data, (0, 3, 1, 2))
+        enc_res = self.recognizer_encoder.predict(
+            inputs={'imgs': input_data})
+        features = enc_res['features']
+        dec_state = enc_res['decoder_hidden']
+
+        tgt = np.array([[self.sos_index]])
+        logits = []
+        for _ in range(self.max_seq_len):
+
+            dec_res = self.recognizer_decoder.predict(inputs={'features': features,
+                                                              'hidden': dec_state,
+                                                              'decoder_input': tgt,
+                                                              })
+
+            dec_state = dec_res['decoder_hidden']
+            logit = dec_res['decoder_output']
+            logits.append(logit)
+            tgt = np.array([[np.argmax(np.array(logit), axis=1)]])
+
+            if tgt[0][0] == self.eos_index:
+                break
+
+        logits = np.array(logits)
+        logits = logits.squeeze(axis=1)
+        targets = np.argmax(logits, axis=1)
+        result_phrase = self.get_phrase(targets)
+        return result_phrase
+
+    def reset(self):
+        pass
+
+    def release(self):
+        self.recognizer_encoder.release()
+        self.recognizer_decoder.release()
+
+
+class SequentialFormulaRecognitionModel(SequentialTextRecognitionModel):
+    def __init__(self, network_info, launcher, models_args, meta, is_blob=None):
+        super().__init__(network_info, launcher, models_args, meta, is_blob)
         recognizer_encoder = network_info.get('recognizer_encoder', {})
         recognizer_decoder = network_info.get('recognizer_decoder', {})
         if 'model' not in recognizer_encoder:
@@ -316,13 +395,6 @@ class SequentialModel:
         result_phrase = self.get_phrase(targets)
         return result_phrase
 
-    def reset(self):
-        pass
-
-    def release(self):
-        self.recognizer_encoder.release()
-        self.recognizer_decoder.release()
-
 
 class RecognizerDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher, suffix):
@@ -340,3 +412,9 @@ class RecognizerDLSDKModel(BaseModel):
 
     def release(self):
         del self.exec_network
+
+
+MODEL_TYPES = {
+    'SequentialTextRecognitionModel': SequentialTextRecognitionModel,
+    'SequentialFormulaRecognitionModel': SequentialFormulaRecognitionModel,
+}
