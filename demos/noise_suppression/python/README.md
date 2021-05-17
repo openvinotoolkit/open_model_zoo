@@ -8,7 +8,16 @@ Upon the start-up the demo application reads command line parameters and loads a
 It also read user-provided sound file with mix of speech and some noise to feed it into the network by small sequential patches.
 The output of network is also sequence of audio patches with clean speech. The patches collected together and save into ouput audio file.
 
+## Preparing to Run
 
+The list of models supported by the demo is in <omz_dir>/demos/noise_suppression_demo/python/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* noise-suppression-poconetlike-0001
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
