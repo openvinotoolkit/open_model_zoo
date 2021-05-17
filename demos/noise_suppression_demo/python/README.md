@@ -51,16 +51,6 @@ The model is also required demo arguments.
 ## Demo Outputs
 The application outputs cleaned wave to output file.
 
-## Supported Models
-[Open Model Zoo Models](../../../models/intel/index.md) feature
-example noise-suppression-*.
-
-[OpenVINO Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-Specifically the example command-line is as follows:
-```
-    python3 mo.py -m <path_to_model>/noise-suppression-poconetlike-0001.onnx
-```
-
 ## Example Demo Cmd-Line
 You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
 [Model Downloader](../../../tools/downloader/README.md) executed with "--name dns*"):
