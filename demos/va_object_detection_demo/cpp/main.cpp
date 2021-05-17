@@ -281,7 +281,12 @@ std::vector<DetectedObject> postprocess(const InferenceEngine::Blob::Ptr& outBlo
 
 int main(int argc, char *argv[]) {
     try {
-        PerformanceMetrics metrics;
+        PerformanceMetrics fullMetrics;
+        PerformanceMetrics decodingMetrics;
+        PerformanceMetrics preprocessingMetrics;
+        PerformanceMetrics inferenceMetrics;
+        PerformanceMetrics postprocessingMetrics;
+        PerformanceMetrics renderingMetrics;
         InferenceEngine::Core core;
 
         slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
@@ -324,17 +329,25 @@ int main(int argc, char *argv[]) {
                 // Input stream is over
                 break;
             }
+            decodingMetrics.update(startTime);
 
             // Resizing image to network's input size and putting it into blob
+            auto preprocessingStartTime = std::chrono::steady_clock::now();
             auto resizedImg = srcImage->cloneToAnotherContext(vaContext)->
                 resizeUsingPooledSurface(cnnDesc.netInputWidth, cnnDesc.netInputHeight, RESIZE_FILL,false);
             inferRequest.SetBlob(cnnDesc.imgInputName,
                 InferenceEngine::gpu::make_shared_blob_nv12(cnnDesc.netInputHeight, cnnDesc.netInputWidth,
                 sharedContext, resizedImg->va_surface_id));
+            preprocessingMetrics.update(preprocessingStartTime);
 
             // Inferring and postprocessing the result
+            auto inferenceStartTime = std::chrono::steady_clock::now();
             inferRequest.Infer();
+            inferenceMetrics.update(inferenceStartTime);
+
+            auto postprocessStartTime = std::chrono::steady_clock::now();
             auto result = postprocess(inferRequest.GetBlob(cnnDesc.outputName),cnnDesc,srcImage->width,srcImage->height,FLAGS_t);
+            postprocessingMetrics.update(postprocessStartTime);
 
             videoFps = decoder.getFPS();
 
@@ -349,11 +362,14 @@ int main(int argc, char *argv[]) {
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - cast result's underlying pointer to DetectionResult*
             //    and use your own processing instead of calling renderDetectionData().
+            auto renderingStartTime = std::chrono::steady_clock::now();
             cv::Mat outFrame = renderDetectionData(result, srcImage->copyToMat());
+            renderingMetrics.update(renderingStartTime);
+
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
 
-            metrics.update(startTime,
+            fullMetrics.update(startTime,
                 outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
                 videoWriter.write(outFrame);
@@ -375,17 +391,19 @@ int main(int argc, char *argv[]) {
 
         //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << slog::endl << "Metric reports:" << slog::endl;
-        metrics.printTotal();
-        slog::info << slog::endl << "Latencies:\n";
-        slog::info << "  * Decoding only: \t" << std::fixed << std::setprecision(2) <<
-            decoder.getMetrics().getTotal().latency
+        fullMetrics.printTotal();
+        slog::info << slog::endl << "Avg time:\n";
+        slog::info << "  * Decoding : \t\t" << std::fixed << std::setprecision(2) <<
+            decodingMetrics.getTotal().latency
             << " ms\n";
-        // slog::info << "  * Preprocessing only:\t" << std::fixed << std::setprecision(2) <<
-        //     pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
-        // slog::info << "  * Inference only: \t" << std::fixed << std::setprecision(2) <<
-        //     pipeline.getInferenceMetircs().getTotal().latency << " ms\n";
-        // slog::info << "  * Rendering only: \t" << std::fixed << std::setprecision(2) <<
-        //     renderMetrics.getTotal().latency << " ms" << slog::endl;
+         slog::info << "  * Preprocessing :\t" << std::fixed << std::setprecision(2) <<
+            preprocessingMetrics.getTotal().latency << " ms\n";
+        slog::info << "  * Inference :\t\t" << std::fixed << std::setprecision(2) <<
+            inferenceMetrics.getTotal().latency << " ms\n";
+        slog::info << "  * Postprocessing :\t" << std::fixed << std::setprecision(2) <<
+            postprocessingMetrics.getTotal().latency << " ms\n";
+        slog::info << "  * Rendering :\t\t" << std::fixed << std::setprecision(2) <<
+            renderingMetrics.getTotal().latency << " ms" << slog::endl;
 
         slog::info << presenter.reportMeans() << slog::endl;
     }
