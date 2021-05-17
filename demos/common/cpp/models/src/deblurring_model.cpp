@@ -58,6 +58,9 @@ void DeblurringModel::changeInputSize(CNNNetwork& cnnNetwork) {
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     SizeVector& inputDims = inputShapes.begin()->second;
 
+    if (inputDims[2] % stride || inputDims[3] % stride)
+        throw std::runtime_error("The shape of the model input must be divisible by stride");
+
     netInputHeight = static_cast<int>((netInputHeight + stride - 1) / stride) * stride;
     netInputWidth = static_cast<int>((netInputWidth + stride - 1) / stride) * stride;
 

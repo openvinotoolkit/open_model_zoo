@@ -60,9 +60,6 @@ Options:
     -at "<type>"              Required. Type of the network, either 'sr' for Super Resolution task or 'deblur' for Deblurring
     -i "<path>"               Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -m "<path>"               Required. Path to an .xml file with a trained model.
-    -mode "<type>"            Optional. Result display mode: 'orig' - display the original image together with the resulting image. 'mixed' - display the mixed image: left half for original image, right half for result of model. 'diff' - display the resulting image together with difference image (|processed-original|).
-    -vheight "<integer>"      Optional. Height of view for result.
-    -vwidth "<integer>"       Optional. Width of view for result.
     -o "<path>"               Optional. Name of output to save.
     -limit "<num>"            Optional. Number of frames to store in output. If 0 is set, all frames are stored.
       -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
@@ -75,6 +72,7 @@ Options:
     -nstreams                 Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
     -loop                     Optional. Enable reading the input in a loop.
     -no_show                  Optional. Do not show processed video.
+    -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
     -u                        Optional. List of monitors to show initially.
 ```
 
@@ -90,9 +88,24 @@ You can use the following command to enhance the resolution of the images captur
 ./image_processing_demo -i 0 -m single-image-super-resolution-1033.xml -at sr
 ```
 
+## Modes
+
+Demo application supports 3 modes:
+
+1. to display the result image.
+2. to display the original image with result together (left part is result, right part is original). Position of separator is specified be slider of trackbar.
+3. to display the difference image with result together. By analogy with second mode.
+
+User is able to change mode in run time using the next keys:
+
+* **R** to display the result.
+* **O** to display the original image with result.
+* **V** to display the difference image with result.
+* **Esc or Q** to quit
+
 ## Demo Output
 
-The demo uses OpenCV to display the resulting images.
+The demo uses OpenCV to display and writing the resulting images.
 
 > **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo is not supported with any of the Model Downloader available topologies. Other models may produce unexpected results on these devices as well.
 

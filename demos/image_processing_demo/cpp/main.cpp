@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
         Visualizer view;
 
         // interactive mode for single image
-        if (cap->getType() == "IMAGE" && !FLAGS_loop) {
+        if (cap->getType() == "IMAGE" && !FLAGS_loop && !FLAGS_no_show) {
             pipeline.waitForTotalCompletion();
             result = pipeline.getResult();
             if (found == std::string::npos) {

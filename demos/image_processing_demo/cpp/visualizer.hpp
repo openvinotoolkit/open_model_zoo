@@ -28,21 +28,20 @@ private:
     std::string trackbarName = "Processing";
 
     // images info
-    cv::Mat inputImg;
-    cv::Mat resultImg;
-    cv::Mat displayImg;
-    bool isResolutionSet = false;
     cv::Size resolution = cv::Size(960, 540);
+    bool isResolutionSet = false;
+    cv::Mat inputImg = cv::Mat(resolution, CV_32FC3, 0.);;
+    cv::Mat resultImg = cv::Mat(resolution, CV_32FC3, 0.);;
+    cv::Mat displayImg = cv::Mat(resolution, CV_32FC3, 0.);;
 
     // trackbar info
     std::string mode = "result";
     bool isTrackbarShown = false;
-    int slider = 0;
+    int slider = 1;
 
     // help message
     bool isHelpShown = false;
-    std::string helpMessage[5] = {"Use mouse with LMB to change slider position",
-                                  "Use R to display the result",
+    std::string helpMessage[4] = {"Use R to display the result",
                                   "Use O to display the orig with result",
                                   "Use V to display the diff with result",
                                   "Esc or Q to quit"};
@@ -52,7 +51,7 @@ private:
     void markImage(cv::Mat& image, const std::pair<std::string, std::string>& marks, float alpha);
     void changeDisplayImg();
 public:
-    Visualizer();
+    Visualizer() = default;
 
     cv::Size getSize();
 

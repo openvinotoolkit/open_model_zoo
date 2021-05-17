@@ -19,12 +19,6 @@
 #include <string>
 #include "visualizer.hpp"
 
-Visualizer::Visualizer() {
-    cv::namedWindow(winName);
-    inputImg = cv::Mat(resolution, CV_32FC3, 0.);
-    resultImg = cv::Mat(resolution, CV_32FC3, 0.);
-    displayImg = cv::Mat(resolution, CV_32FC3, 0.);
-}
 
 cv::Size Visualizer::getSize() {
     return resolution;
@@ -87,7 +81,7 @@ void Visualizer::show(cv::Mat img) {
         int margin = 40;
         int baseline = 0;
         int lineH = cv::getTextSize(helpMessage[0], cv::FONT_HERSHEY_COMPLEX, 0.75, 1, &baseline).height + pad;
-        for (size_t i = 0; i < 5; ++i) {
+        for (size_t i = 0; i < 4; ++i) {
             cv::putText(img, helpMessage[i], cv::Point(pad, margin + baseline + (i + 1)*lineH),  cv::FONT_HERSHEY_COMPLEX,
                         0.75, cv::Scalar(255, 0, 255));
         }
