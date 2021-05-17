@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a PoCoNet like model for noise suppression.
+This is a PoCoNet like model for noise suppression to make speech cleaner.
 The model is based on [PoCoNet](https://arxiv.org/abs/2008.04470) architecure and trained on clean and noise samples from DNS-chalange dataset [github](https://github.com/microsoft/DNS-Challenge/blob/master/README.md) [paper](https://arxiv.org/abs/2101.01902).
 The network works with mono audio sampled on 16kHz.
 The audio processed iterative by patches with 2048 size.
