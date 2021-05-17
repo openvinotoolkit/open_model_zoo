@@ -11,9 +11,8 @@ from utils.pipelines import BlockedSeqPipelineStage
 
 
 class CtcDecoderSeqPipelineStage(BlockedSeqPipelineStage):
-    def __init__(self, lm=None, profile=None, beam_width=500, max_candidates=None,
+    def __init__(self, profile, lm=None, beam_width=500, max_candidates=None,
             online=False):
-        assert profile is not None, "profile argument must be provided"
         self.p = deepcopy(profile)
         self.online = online
 

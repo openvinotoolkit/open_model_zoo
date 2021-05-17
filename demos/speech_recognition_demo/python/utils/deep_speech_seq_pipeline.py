@@ -13,26 +13,23 @@ from utils.ctc_decoder_seq_pipeline import CtcDecoderSeqPipelineStage
 
 
 class DeepSpeechSeqPipeline:
-    def __init__(self, model, lm=None, beam_width=500, max_candidates=None,
-            profile=None, ie=None, device='CPU', online_decoding=False):
+    def __init__(self, profile, ie, model, lm=None, beam_width=500, max_candidates=None,
+            device='CPU', online_decoding=False):
         """
             Args:
+        profile (dict), a dict with pre/post-processing parameters, see profiles.py
+        ie (IECore or None), IECore object for model loading/compilation/inference
         model (str), filename of IE IR .xml file of the network
         lm (str), filename of LM (language model)
         beam_width (int), the number of prefix candidates to retain during decoding in beam search (default 500)
         max_candidates (int), limit the number of returned candidates; None = do not limit (default None)
-        profile (dict): a dict with pre/post-processing parameters, see profiles.py
-        ie (IECore or None), IECore object to run NN inference with.  Default is to use ie_core_singleton module.
-            (default None)
-        device (str), inference device for IE, passed here to 1. set default device, and 2. check supported node types
-            in the model load; None = do not check (default 'CPU')
+        device (str), inference device
         online_decoding (bool), set to True to return partial decoded text after every input data piece (default False)
         """
-        assert profile is not None, "profile argument must be provided"
         self.p = deepcopy(profile)
         self.mfcc_stage = AudioFeaturesSeqPipelineStage(profile)
-        self.rnn_stage = RnnSeqPipelineStage(model, profile=profile, ie=ie, device=device)
-        self.ctc_stage = CtcDecoderSeqPipelineStage(lm=lm, profile=profile, beam_width=beam_width,
+        self.rnn_stage = RnnSeqPipelineStage(profile, ie, model, device=device)
+        self.ctc_stage = CtcDecoderSeqPipelineStage(profile, lm=lm, beam_width=beam_width,
                 max_candidates=max_candidates, online=online_decoding)
 
     def recognize_audio(self, audio, sampling_rate, finish=True):
