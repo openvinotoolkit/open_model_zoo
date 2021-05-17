@@ -33,6 +33,7 @@ from open_model_zoo.model_tools import (
     _configuration, _common, _concurrency, _reporting,
 )
 
+
 CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 
 def process_download(reporter, chunk_iterable, size, progress, file):
@@ -232,6 +233,7 @@ def try_retrieve(reporter, destination, model_file, cache, num_attempts, start_d
     return success
 
 def download_model(reporter, args, cache, session_factory, requested_precisions, model):
+    telemetry = _common.Telemetry()
     session = session_factory()
 
     reporter.print_group_heading('Downloading {}', model.name)
@@ -261,6 +263,7 @@ def download_model(reporter, args, cache, session_factory, requested_precisions,
 
             model_file_reporter.emit_event('model_file_download_end', successful=False)
             reporter.emit_event('model_download_end', model=model.name, successful=False)
+            telemetry.send_event('md', 'downloader_failed_models', model.name)
             return False
 
         model_file_reporter.emit_event('model_file_download_end', successful=True)
@@ -347,38 +350,50 @@ def main():
             enable_json_output=args.progress_format == 'json')
 
     reporter = make_reporter(_reporting.DirectOutputContext())
-
     cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
-    models = _configuration.load_models_from_args(parser, args)
 
-    failed_models = set()
+    with _common.telemetry_session('Model Downloader', 'downloader') as telemetry:
+        models = _configuration.load_models_from_args(parser, args)
+        for mode in ['all', 'list', 'name']:
+            if getattr(args, mode):
+                telemetry.send_event('md', 'downloader_selection_mode', mode)
 
-    if args.precisions is None:
-        requested_precisions = _common.KNOWN_PRECISIONS
-    else:
-        requested_precisions = set(args.precisions.split(','))
+        for model in models:
+            telemetry.send_event('md', 'downloader_model_name', model.name)
+            telemetry.send_event('md', 'downloader_framework', model.framework)
+
+        failed_models = set()
+
+        if args.precisions is None:
+            requested_precisions = _common.KNOWN_PRECISIONS
+        else:
+            requested_precisions = set(args.precisions.split(','))
+
+        for precision in requested_precisions:
+            telemetry.send_event('md', 'downloader_precision', precision)
+
         unknown_precisions = requested_precisions - _common.KNOWN_PRECISIONS
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    with contextlib.ExitStack() as exit_stack:
-        session_factory = ThreadSessionFactory(exit_stack)
-        if args.jobs == 1:
-            results = [download_model(reporter, args, cache, session_factory, requested_precisions, model)
-                for model in models]
-        else:
-            results = _concurrency.run_in_parallel(args.jobs,
-                lambda context, model: download_model(
-                    make_reporter(context), args, cache, session_factory, requested_precisions, model),
-                models)
+        with contextlib.ExitStack() as exit_stack:
+            session_factory = ThreadSessionFactory(exit_stack)
+            if args.jobs == 1:
+                results = [download_model(reporter, args, cache, session_factory, requested_precisions, model)
+                    for model in models]
+            else:
+                results = _concurrency.run_in_parallel(args.jobs,
+                    lambda context, model: download_model(
+                        make_reporter(context), args, cache, session_factory, requested_precisions, model),
+                    models)
 
-    failed_models = {model.name for model, successful in zip(models, results) if not successful}
+        failed_models = {model.name for model, successful in zip(models, results) if not successful}
 
-    if failed_models:
-        reporter.print('FAILED:')
-        for failed_model_name in failed_models:
-            reporter.print(failed_model_name)
-        sys.exit(1)
+        if failed_models:
+            reporter.print('FAILED:')
+            for failed_model_name in failed_models:
+                reporter.print(failed_model_name)
+            sys.exit(1)
 
 if __name__ == '__main__':
     main()

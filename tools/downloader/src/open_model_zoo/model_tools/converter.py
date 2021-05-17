@@ -67,6 +67,7 @@ def convert_to_onnx(reporter, model, output_dir, args, template_variables):
     return success
 
 def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
+    telemetry = _common.Telemetry()
     if model.mo_args is None:
         reporter.print_section_heading('Skipping {} (no conversions defined)', model.name)
         reporter.print()
@@ -81,6 +82,9 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
     (output_dir / model.subdirectory).mkdir(parents=True, exist_ok=True)
 
     if not run_pre_convert(reporter, model, output_dir, args):
+        telemetry.send_event('md', 'converter_failed_models', model.name)
+        telemetry.send_event('md', 'converter_error',
+            str({'error': 'pre-convert-script-failed', 'model': model.name, 'precision': None}))
         return False
 
     model_format = model.framework
@@ -94,6 +98,9 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
 
     if model.conversion_to_onnx_args:
         if not convert_to_onnx(reporter, model, output_dir, args, template_variables):
+            telemetry.send_event('md', 'converter_failed_models', model.name)
+            telemetry.send_event('md', 'converter_error',
+                str({'error': 'convert_to_onnx-failed', 'model': model.name, 'precision': None}))
             return False
         model_format = 'onnx'
 
@@ -119,6 +126,9 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
             reporter.print(flush=True)
 
             if not reporter.job_context.subprocess(mo_cmd):
+                telemetry.send_event('md', 'converter_failed_models', model.name)
+                telemetry.send_event('md', 'converter_error',
+                    str({'error': 'mo-failed', 'model': model.name, 'precision': model_precision}))
                 return False
 
         reporter.print()
@@ -168,62 +178,74 @@ def main():
 
     args = parser.parse_args()
 
-    mo_path = args.mo
+    with _common.telemetry_session('Model Converter', 'converter') as telemetry:
+        models = _configuration.load_models_from_args(parser, args)
+        for mode in ['all', 'list', 'name']:
+            if getattr(args, mode):
+                telemetry.send_event('md', 'converter_selection_mode', mode)
 
-    if mo_path is None:
-        mo_package_path = _common.get_package_path(args.python, 'mo')
+        for model in models:
+            telemetry.send_event('md', 'converter_model_name', model.name)
+            telemetry.send_event('md', 'converter_framework', model.framework)
 
-        if mo_package_path:
-            # run MO as a module
-            mo_cmd_prefix = [str(args.python), '-m', 'mo']
-            mo_dir = mo_package_path.parent
+        if args.precisions is None:
+            requested_precisions = _common.KNOWN_PRECISIONS
         else:
-            try:
-                mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/model_optimizer/mo.py'
-            except KeyError:
-                sys.exit('Unable to locate Model Optimizer. '
-                    + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
+            requested_precisions = set(args.precisions.split(','))
 
-    if mo_path is not None:
-        # run MO as a script
-        mo_cmd_prefix = [str(args.python), '--', str(mo_path)]
-        mo_dir = mo_path.parent
+        for precision in requested_precisions:
+            telemetry.send_event('md', 'converter_precision', precision)
 
-    if args.precisions is None:
-        requested_precisions = _common.KNOWN_PRECISIONS
-    else:
-        requested_precisions = set(args.precisions.split(','))
         unknown_precisions = requested_precisions - _common.KNOWN_PRECISIONS
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    models = _configuration.load_models_from_args(parser, args)
+        mo_path = args.mo
 
-    output_dir = args.download_dir if args.output_dir is None else args.output_dir
+        if mo_path is None:
+            mo_package_path = _common.get_package_path(args.python, 'mo')
 
-    reporter = _reporting.Reporter(_reporting.DirectOutputContext())
-    mo_props = ModelOptimizerProperties(
-        cmd_prefix=mo_cmd_prefix,
-        extra_args=args.extra_mo_args or [],
-        base_dir=mo_dir,
-    )
-    shared_convert_args = (output_dir, args, mo_props, requested_precisions)
+            if mo_package_path:
+                # run MO as a module
+                mo_cmd_prefix = [str(args.python), '-m', 'mo']
+                mo_dir = mo_package_path.parent
+            else:
+                try:
+                    mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/model_optimizer/mo.py'
+                except KeyError:
+                    sys.exit('Unable to locate Model Optimizer. '
+                        + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
-    if args.jobs == 1 or args.dry_run:
-        results = [convert(reporter, model, *shared_convert_args) for model in models]
-    else:
-        results = _concurrency.run_in_parallel(args.jobs,
-            lambda context, model:
-                convert(_reporting.Reporter(context), model, *shared_convert_args),
-            models)
+        if mo_path is not None:
+            # run MO as a script
+            mo_cmd_prefix = [str(args.python), '--', str(mo_path)]
+            mo_dir = mo_path.parent
 
-    failed_models = [model.name for model, successful in zip(models, results) if not successful]
+        output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
-    if failed_models:
-        reporter.print('FAILED:')
-        for failed_model_name in failed_models:
-            reporter.print(failed_model_name)
-        sys.exit(1)
+        reporter = _reporting.Reporter(_reporting.DirectOutputContext())
+        mo_props = ModelOptimizerProperties(
+            cmd_prefix=mo_cmd_prefix,
+            extra_args=args.extra_mo_args or [],
+            base_dir=mo_dir,
+        )
+        shared_convert_args = (output_dir, args, mo_props, requested_precisions)
+
+        if args.jobs == 1 or args.dry_run:
+            results = [convert(reporter, model, *shared_convert_args) for model in models]
+        else:
+            results = _concurrency.run_in_parallel(args.jobs,
+                lambda context, model:
+                    convert(_reporting.Reporter(context), model, *shared_convert_args),
+                models)
+
+        failed_models = [model.name for model, successful in zip(models, results) if not successful]
+
+        if failed_models:
+            reporter.print('FAILED:')
+            for failed_model_name in failed_models:
+                reporter.print(failed_model_name)
+            sys.exit(1)
 
 if __name__ == '__main__':
     main()
