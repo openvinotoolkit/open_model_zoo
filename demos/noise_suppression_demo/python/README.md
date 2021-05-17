@@ -42,11 +42,6 @@ Options:
                         for device specified. Default value is CPU
 ```
 
-> **NOTE**: Before running the demo with a trained model, make sure to convert the model to the Inference Engine's
-> Intermediate Representation format (\*.xml + \*.bin)
-> using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-> When using the pre-trained model from the model zoo (please see [Model Downloader](../../../tools/downloader/README.md)),
-> the model is already converted to the IR.
 
 ## Demo Inputs
 
