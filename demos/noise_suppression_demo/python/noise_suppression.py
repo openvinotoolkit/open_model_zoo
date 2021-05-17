@@ -34,10 +34,10 @@ def build_argparser():
                       required=True, type=Path)
     args.add_argument("-i", "--input", help="Required. Path to a 16kHz sound file with speech+noise",
                       required=True, type=str)
-    args.add_argument("-o", "--output", help="Required. Path to output sound file with speech",
-                      required=True, type=str)
+    args.add_argument("-o", "--output", help="Optional. Path to output sound file with speech",
+                      required=False, type=str, default="noise_suppression_demo_out.wav")
     args.add_argument("-d", "--device",
-                      help="Optional. Target device to perform inference on."
+                      help="Optional. Target device to perform inference on. "
                            "Default value is CPU",
                       default="CPU", type=str)
     return parser
