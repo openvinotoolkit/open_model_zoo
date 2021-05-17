@@ -42,16 +42,6 @@ Options:
                         for device specified. Default value is CPU
 ```
 
-
-## Demo Inputs
-
-The application reads audio wave from the input file with given name. The input file has to have 16kHZ discretization frequency
-The model is also required demo arguments.
-
-## Demo Outputs
-The application outputs cleaned wave to output file.
-
-## Example Demo Cmd-Line
 You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
 [Model Downloader](../../../tools/downloader/README.md) executed with "--name dns*"):
 ```
@@ -60,6 +50,14 @@ You can use the following command to try the demo (assuming the model from the O
             --input=noisy.wav
             --output=cleaned.wav
 ```
+
+## Demo Inputs
+
+The application reads audio wave from the input file with given name. The input file has to have 16kHZ discretization frequency
+The model is also required demo arguments.
+
+## Demo Outputs
+The application outputs cleaned wave to output file.
 
 ## Demo Performance
 Even though the demo reports inference performance (by measuring wall-clock time for individual inference calls),
