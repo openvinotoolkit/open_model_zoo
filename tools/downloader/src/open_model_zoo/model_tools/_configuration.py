@@ -176,11 +176,13 @@ class ModelFile:
         with deserialization_context('In file "{}"'.format(name)):
             size = validate_nonnegative_int('"size"', file['size'])
 
-            sha256 = validate_string('"sha256"', file['sha256'])
+            sha256_str = validate_string('"sha256"', file['sha256'])
 
-            if not RE_SHA256SUM.fullmatch(sha256):
+            if not RE_SHA256SUM.fullmatch(sha256_str):
                 raise DeserializationError(
-                    '"sha256": got invalid hash {!r}'.format(sha256))
+                    '"sha256": got invalid hash {!r}'.format(sha256_str))
+
+            sha256 = bytes.fromhex(sha256_str)
 
             with deserialization_context('"source"'):
                 source = FileSource.deserialize(file['source'])
