@@ -44,11 +44,11 @@ input states, names: `inp_state_*`, should be filled by corresponding `out_state
 
 ## Output
 
-Sequence patch, name: `output`, shape: `1, 2048`, format: `B, T`
-where:
-   - B - batch size
-   - T - number of samples in patch
-Note: The ouput patch is "shifted" by 640 (40ms) samples in time. So output[0,i] sample is synced with input[0,i-640] sample
+Sequence patch, name: `output`, shape: `1, 2048`, format: `B, T`, where:
+
+ - `B` - batch size
+ - `T` - number of samples in patch
+Note: The output patch is "shifted" by 640 (40ms) samples in time. So output[0,i] sample is synced with input[0,i-640] sample
 
 output states, names: `out_state_*`, should be used to fill corresponding `inp_state_*` on next step
 
