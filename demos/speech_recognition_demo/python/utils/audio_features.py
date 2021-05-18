@@ -14,7 +14,6 @@ except OSError:
     import types
     sys.modules['soundfile'] = types.ModuleType('fake_soundfile')
     import librosa
-    del sys.modules['soundfile']
 
 from utils.pipelines import BlockedSeqPipelineStage
 
