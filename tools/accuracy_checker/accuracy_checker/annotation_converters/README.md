@@ -380,6 +380,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `data_dir` - dataset root directory, which contains subdirectories with extracted video frames.
   * `out_fps` - output frame rate of generated video clips.
   * `clip_length` - number of frames of generated video clips.
+  * `img_prefix` - prefix for used images. (Optional, default - `img_`).
 * `redweb` - converts [ReDWeb](https://sites.google.com/site/redwebcvpr18) dataset for monocular relative depth perception to `DepthEstimationAnnotation`
   * `data_dir` - the dataset root directory, where `imgs` - directory with RGB images and `RD` - directory with relative depth maps are located (Optional, if you want to provide `annotation_file`)
   * `annotation_file`- the file in txt format which contains pairs of image and depth map files. (Optional, if not provided full content of `data_dir` will be considered as dataset.)
