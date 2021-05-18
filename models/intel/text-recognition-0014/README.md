@@ -1,8 +1,8 @@
-# text-recognition-0013
+# text-recognition-0014
 
 ## Use Case and High-Level Description
 
-This is a network for text recognition scenario. It consists of ResNext50-like backbone (stage-1-2) and bidirectional LSTM encoder-decoder.
+This is a network for text recognition scenario. It consists of ResNext101-like backbone (stage-1-2) and bidirectional LSTM encoder-decoder.
 The network is able to recognize case-insensitive alphanumeric text (36 unique symbols).
 
 ## Example
@@ -13,7 +13,11 @@ The network is able to recognize case-insensitive alphanumeric text (36 unique s
 
 | Metric                                         | Value              |
 | ---------------------------------------------- | ------------------ |
-| Accuracy on the alphanumeric subset of ICDAR13 | 0.8828             |
+| Accuracy on the alphanumeric subset of ICDAR13 | 88.87              |
+| Accuracy on the alphanumeric subset of ICDAR03 | 90.77              |
+| Accuracy on the alphanumeric subset of ICDAR15 | 69.08              |
+| Accuracy on the alphanumeric subset of SVT     | 83.00              |
+| Accuracy on the alphanumeric subset of IIIT5K  | 81.57              |
 | Text location requirements                     | Tight aligned crop |
 | GFlops                                         | 0.2726             |
 | MParams                                        | 1.4187             |
@@ -21,7 +25,7 @@ The network is able to recognize case-insensitive alphanumeric text (36 unique s
 
 ## Inputs
 
-Image, name: `imgs`, shape: `1, 1, 32, 120` in the format `B, C, H, W`, where:
+Image, name: `imgs`, shape: `1, 1, 32, 128` in the format `B, C, H, W`, where:
 
 - `B` - batch size
 - `C` - number of channels
@@ -32,7 +36,7 @@ Note that the source image should be tight aligned crop with detected text conve
 
 ## Outputs
 
-The net output is a blob with name `logits` and the shape `30, 1, 37` in the format `W, B, L`, where:
+The net output is a blob with name `logits` and the shape `16, 1, 37` in the format `W, B, L`, where:
 
 - `W` - output sequence length
 - `B` - batch size

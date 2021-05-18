@@ -196,6 +196,10 @@ Deep Learning models for text recognition in various applications.
 |------------|---------------------|-----------|
 | [text-recognition-0012](./text-recognition-0012/README.md)                                 | 1.485   | 5.568 |
 | [text-recognition-0013](./text-recognition-0013/README.md)                                 | 1.488   | 5.567 |
+| [text-recognition-0014](./text-recognition-0014/README.md)                                 | 0.5442  | 2.839 |
+| [text-recognition-0015](./text-recognition-0015/README.md)                                 |         |       |
+| encoder | 12.4 | 398 |
+| decoder | 0.03 | 4.33 |
 | [handwritten-score-recognition-0003](./handwritten-score-recognition-0003/README.md)       | 0.792   | 5.555 |
 | [handwritten-japanese-recognition-0001](./handwritten-japanese-recognition-0001/README.md) | 117.136 | 15.31 |
 | [handwritten-simplified-chinese-recognition-0001](./handwritten-simplified-chinese-recognition-0001/README.md) | 134.513 | 17.270 |
