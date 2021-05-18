@@ -13,7 +13,7 @@ Upon the start-up, the demo reads command-line parameters and loads a network an
 The demo dependencies should be installed before run. That can be achieved with the following command:
 
 ```sh
-python3 -m pip install -r <omz_dir>/demos/3d_segmentation_demo/python/requirements.txt
+python3 -mpip install --user -r <omz_dir>/demos/3d_segmentation_demo/python/requirements.txt
 ```
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
