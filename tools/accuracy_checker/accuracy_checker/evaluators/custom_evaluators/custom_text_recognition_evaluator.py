@@ -48,6 +48,8 @@ class TextRecognitionWithAttentionEvaluator(BaseEvaluator):
         lowercase = config.get('lowercase', False)
         meta = dataset.metadata
         model_type = config.get('model_type', 'SequentialFormulaRecognitionModel')
+        if not model_type in MODEL_TYPES.keys():
+            raise ValueError(f'Model type {model_type} is not supported')
         model = MODEL_TYPES[model_type](
             config.get('network_info', {}),
             launcher,
