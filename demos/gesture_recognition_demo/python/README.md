@@ -107,7 +107,7 @@ An example of file with class names can be found within the OMZ directory:
 
 * MS-ASL-100: `<omz_dir>/data/dataset_classes/msasl100.json`
 * Jester-27: `<omz_dir>/data/dataset_classes/jester27.json`
-* Common-Sign-Language-12: `<omz_dir>/data/dataset_classes/common_sign_language.json`
+* Common-Sign-Language-12: `<omz_dir>/data/dataset_classes/common_sign_language12.json`
 
 > **NOTE**: To run the demo application with video examples of gestures specify the `-s` key with valid path to the directory with video samples. The name of each video sample should be the valid name of gesture from `<omz_dir>/data/dataset_classes/msasl100.json` file. To navigate between samples use 'f' and 'b' keys for iterating next and previous video sample, respectively.
 
