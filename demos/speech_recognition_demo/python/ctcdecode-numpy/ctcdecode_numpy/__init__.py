@@ -18,13 +18,8 @@ class SeqCtcLmDecoder:
     """
     def __init__(self, alphabet, beam_size, max_candidates=None,
             cutoff_prob=1.0, cutoff_top_n=40,
-            scorer_lm_fname=None, alpha=None, beta=None,
-            text_decoder=None):
+            scorer_lm_fname=None, alpha=None, beta=None):
         self.alphabet = alphabet
-        if text_decoder is None:
-            text_decoder = lambda x: x  # noqa: E731
-        self.text_decoder = text_decoder
-
         self.beam_size = beam_size
         self.max_candidates = max_candidates or 0
         self.cutoff_prob = cutoff_prob
@@ -65,10 +60,12 @@ class SeqCtcLmDecoder:
         cand_starts[0] = 0
         cand_lengths.cumsum(out=cand_starts[1:])
 
+        def text_decoder(symbol_idxs):
+            return ''.join(self.alphabet[idx] for idx in symbol_idxs)
         candidates = [
             namespace(
                 conf=scores[res_idx],
-                text=self.text_decoder(symbols[cand_starts[res_idx]:cand_starts[res_idx+1]]),
+                text=text_decoder(symbols[cand_starts[res_idx]:cand_starts[res_idx+1]]),
                 ts=list(timesteps[cand_starts[res_idx]:cand_starts[res_idx+1]]),
             )
             for res_idx in range(cand_lengths.shape[0])
