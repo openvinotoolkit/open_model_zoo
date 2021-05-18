@@ -174,7 +174,7 @@ def main(args):
         output_name=args.output_name,
         quantiles=quantiles
     )
-    dataset = ForecastingDataset(args.data_path)
+    dataset = ForecastingDataset(args.input)
 
     fig, ax = plt.subplots()
     fig.canvas.manager.set_window_title('time_series_forecasting')

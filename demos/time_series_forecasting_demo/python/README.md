@@ -16,7 +16,7 @@ The program provides an interactive CLI interface that gets a test dataset in .p
 
 Our demo works with the test dataset in the .pickle format provided by accuracy_checker.
 
-* Install accuracy_checker following [instruction](https://github.com/openvinotoolkit/open_model_zoo/blob/master/tools/accuracy_checker/README.md).
+* Install accuracy_checker following [instruction](../../../tools/accuracy_checker/README.md).
 * Convert test dataset:
 ```
 wget https://archive.ics.uci.edu/ml/machine-learning-databases/00321/LD2011_2014.txt.zip
