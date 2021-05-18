@@ -329,26 +329,7 @@ class SequentialTextRecognitionModel:
 class SequentialFormulaRecognitionModel(SequentialTextRecognitionModel):
     def __init__(self, network_info, launcher, models_args, meta, is_blob=None):
         super().__init__(network_info, launcher, models_args, meta, is_blob)
-        recognizer_encoder = network_info.get('recognizer_encoder', {})
-        recognizer_decoder = network_info.get('recognizer_decoder', {})
-        if 'model' not in recognizer_encoder:
-            recognizer_encoder['model'] = models_args[0]
-            recognizer_encoder['_model_is_blob'] = is_blob
-        if 'model' not in recognizer_decoder:
-            recognizer_decoder['model'] = models_args[len(models_args) == 2]
-            recognizer_decoder['_model_is_blob'] = is_blob
-        network_info.update({
-            'recognizer_encoder': recognizer_encoder,
-            'recognizer_decoder': recognizer_decoder
-        })
-        if not contains_all(network_info, ['recognizer_encoder', 'recognizer_decoder']):
-            raise ConfigError('network_info should contain encoder and decoder fields')
         self.vocab = meta['vocab']
-        self.recognizer_encoder = create_recognizer(network_info['recognizer_encoder'], launcher, 'encoder')
-        self.recognizer_decoder = create_recognizer(network_info['recognizer_decoder'], launcher, 'decoder')
-        self.sos_index = 0
-        self.eos_index = 2
-        self.max_seq_len = int(network_info['max_seq_len'])
 
     def get_phrase(self, indices):
         res = ''

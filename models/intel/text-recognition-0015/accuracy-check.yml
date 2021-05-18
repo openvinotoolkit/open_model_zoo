@@ -1,6 +1,6 @@
 evaluations:
   - name: text-recognition-0015
-    module: custom_evaluators.im2latex_evaluator.TextRecognitionWithAttentionEvaluator
+    module: custom_evaluators.custom_text_recognition_evaluator.TextRecognitionWithAttentionEvaluator
     module_config:
       model_type: SequentialTextRecognitionModel
       network_info:
