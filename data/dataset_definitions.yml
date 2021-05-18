@@ -989,6 +989,7 @@ datasets:
       data_dir: common_sign_language_gestures/global_crops
       out_fps: 15
       clip_length: 8
+      img_prefix: ''
     annotation: common_sign_language_recognition.pickle
 
   - name: ReDWeb_V1
