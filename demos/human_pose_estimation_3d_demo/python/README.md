@@ -13,7 +13,7 @@ The demo application expects a 3D human pose estimation model in the Intermediat
 
 As input, the demo application can take:
 
-* a path to a video file or a device node of a web-camera.
+* a path to a video file or a device node of a webcam.
 * a list of image paths.
 
 The demo workflow is the following:
