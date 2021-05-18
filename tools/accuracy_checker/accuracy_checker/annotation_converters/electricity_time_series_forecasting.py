@@ -306,8 +306,8 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
         return configuration_parameters
 
     def configure(self):
-       if isinstance(pd, UnsupportedPackage):
-           pd.raise_error(self.__provider__)
+        if isinstance(pd, UnsupportedPackage):
+            pd.raise_error(self.__provider__)
         self.data_path_file = self.get_value_from_config('data_path_file')
         self.num_encoder_steps = int(self.get_value_from_config('num_encoder_steps'))
         self.formatter = ElectricityFormatter()
