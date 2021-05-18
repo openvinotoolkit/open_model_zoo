@@ -19,8 +19,8 @@
 
 using namespace InferenceEngine;
 
-SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, bool useAutoResize) :
-    ImageModel(modelFileName, useAutoResize) {
+SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName) :
+    ImageModel(modelFileName, false) {
 }
 
 void SuperResolutionModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {

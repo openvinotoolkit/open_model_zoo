@@ -22,8 +22,8 @@ class DeblurringModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    /// Otherwise, image will be preprocessed and resized using OpenCV routines.
-    DeblurringModel(const std::string& modelFileName, bool useAutoResize, const cv::Size& inputImgSize);
+    /// @param inputImgSize size of image to set model input shape
+    DeblurringModel(const std::string& modelFileName, const cv::Size& inputImgSize);
 
     std::shared_ptr<InternalModelData> preprocess(
         const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;

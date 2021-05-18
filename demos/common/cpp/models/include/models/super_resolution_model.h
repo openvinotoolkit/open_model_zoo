@@ -22,8 +22,7 @@ class SuperResolutionModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    /// Otherwise, image will be preprocessed and resized using OpenCV routines.
-    SuperResolutionModel(const std::string& modelFileName, bool useAutoResize);
+    SuperResolutionModel(const std::string& modelFileName);
 
     std::shared_ptr<InternalModelData> preprocess(
         const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;

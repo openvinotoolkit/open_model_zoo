@@ -20,8 +20,8 @@
 
 using namespace InferenceEngine;
 
-DeblurringModel::DeblurringModel(const std::string& modelFileName,  bool useAutoResize, const cv::Size& inputImgSize) :
-    ImageModel(modelFileName, useAutoResize) {
+DeblurringModel::DeblurringModel(const std::string& modelFileName, const cv::Size& inputImgSize) :
+    ImageModel(modelFileName, false) {
         netInputHeight = inputImgSize.height;
         netInputWidth = inputImgSize.width;
 }
