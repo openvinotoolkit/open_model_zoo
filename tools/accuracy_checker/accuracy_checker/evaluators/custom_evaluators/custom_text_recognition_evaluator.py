@@ -294,7 +294,7 @@ class BaseSequentialModel:
 
 class SequentialTextRecognitionModel(BaseSequentialModel):
     def __init__(self, network_info, launcher, models_args, meta, is_blob=None):
-        super().__init__(network_info, launcher, models_args, meta, is_blob=None)
+        super().__init__(network_info, launcher, models_args, meta, is_blob=is_blob)
         self.vocab = network_info['custom_label_map']
 
     def get_phrase(self, indices):
@@ -303,7 +303,8 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
             if idx != self.eos_index:
                 res += str(self.vocab.get(idx, '?'))
             else:
-                return res
+                break
+        return res
 
     def predict(self, identifiers, input_data):
         assert len(identifiers) == 1
