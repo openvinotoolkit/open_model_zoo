@@ -30,7 +30,7 @@ The above accuracies are calculated for case-insensitive mode (i.e. GT text and 
 
 ## Encoder model specification
 
-The formula-recognition-medium-scan-0001-encoder model is a ResNeXt-50 like backbone with some initialization layers for decoder
+The text-recognition-0015-encoder model is a ResNeXt-101 like backbone with convolutional encoder part of the text recognition.
 
 | Metric  | Value |
 | ------- | ----- |
