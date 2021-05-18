@@ -29,7 +29,7 @@ convert_annotation electricity --data_path_file LD2011_2014.txt
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: time_series_forecastin_demo.py [-h] -m MODEL [--input-name INPUT_NAME] [--output-name OUTPUT_NAME] [--data-path DATA_PATH] [--quantiles QUANTILES]
+usage: time_series_forecasting_demo.py [-h] -m MODEL [--input-name INPUT_NAME] [--output-name OUTPUT_NAME] [--data-path DATA_PATH] [--quantiles QUANTILES]
 
 optional arguments:
   -h, --help            show this help message and exit
