@@ -16,7 +16,11 @@ limitations under the License.
 
 import enum
 
-import pandas as pd
+from ..utils import UnsupportedPackage
+try:
+    import pandas as pd
+except ImportError as import_error:
+    editdistance = UnsupportedPackage("pandas", import_error.msg)
 import numpy as np
 import sklearn.preprocessing
 
