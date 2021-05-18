@@ -45,7 +45,7 @@ class TextRecognitionWithAttentionEvaluator(BaseEvaluator):
         preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
-        lowercase = dataset_config.get('lowercase', False)
+        lowercase = config.get('lowercase', False)
         meta = dataset.metadata
         model_type = config.get('model_type', 'SequentialFormulaRecognitionModel')
         model = MODEL_TYPES[model_type](

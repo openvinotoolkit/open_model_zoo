@@ -3,6 +3,7 @@ evaluations:
     module: custom_evaluators.custom_text_recognition_evaluator.TextRecognitionWithAttentionEvaluator
     module_config:
       model_type: SequentialTextRecognitionModel
+      lowercase: true
       network_info:
         max_seq_len: "24"
         custom_label_map:
@@ -84,7 +85,6 @@ evaluations:
             - type: resize
               dst_width: 256
               dst_height: 64
-          lowercase: true
           metrics:
             - type: character_recognition_accuracy
 
@@ -95,7 +95,6 @@ evaluations:
             - type: resize
               dst_width: 256
               dst_height: 64
-          lowercase: true
           metrics:
             - type: character_recognition_accuracy
 
@@ -106,7 +105,6 @@ evaluations:
             - type: resize
               dst_width: 256
               dst_height: 64
-          lowercase: true
           metrics:
             - type: character_recognition_accuracy
 
@@ -117,7 +115,6 @@ evaluations:
             - type: resize
               dst_width: 256
               dst_height: 64
-          lowercase: true
           metrics:
             - type: character_recognition_accuracy
 
@@ -128,6 +125,5 @@ evaluations:
             - type: resize
               dst_width: 256
               dst_height: 64
-          lowercase: true
           metrics:
             - type: character_recognition_accuracy
