@@ -372,8 +372,6 @@ class LPIPS(BaseRegressionMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(self.lpips_differ, *args, **kwargs)
-        if isinstance(lpips, UnsupportedPackage):
-            lpips.raise_error(self.__provider__)
 
     @classmethod
     def parameters(cls):
@@ -401,6 +399,8 @@ class LPIPS(BaseRegressionMetric):
         self.color_order = self.get_value_from_config('color_order')
         self.normalized_images = self.get_value_from_config('normalized_images')
         self.color_scale = 255 if not self.normalized_images else 1
+        if isinstance(lpips, UnsupportedPackage):
+            lpips.raise_error(self.__provider__)
         self.loss = lpips.LPIPS(net=self.get_value_from_config('net'))
         self.dist_threshold = self.get_value_from_config('distance_threshold')
 
