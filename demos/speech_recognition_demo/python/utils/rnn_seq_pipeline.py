@@ -5,7 +5,6 @@
 # This file is based in part on deepspeech_openvino_0.5.py by Feng Yen-Chang at
 # https://github.com/openvinotoolkit/open_model_zoo/pull/419, commit 529805d011d9b405f142b2b40f4d202bd403a4f1 on Sep 19, 2019.
 #
-import os.path
 from copy import deepcopy
 
 import numpy as np

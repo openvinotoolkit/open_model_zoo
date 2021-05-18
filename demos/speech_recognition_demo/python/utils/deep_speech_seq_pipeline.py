@@ -40,8 +40,9 @@ class DeepSpeechSeqPipeline:
         result after each segment. Set finish=True for the last segment to get the final result and reset pipeline state.
         """
         if audio is not None:
-            if abs(sampling_rate - self.p['model_sampling_rate']) > self.p['model_sampling_rate'] * 0.1  or  (audio.shape + (1,))[1] != 1:
-                raise ValueError("Input audio file should be {} kHz mono".format(self.p['model_sampling_rate']/1e3))
+            # Double-check sampling rate to avoid a possibly hard-to-debug error
+            if abs(sampling_rate / self.p['model_sampling_rate'] - 1) > 0.1  or  (audio.shape + (1,))[1] != 1:
+                raise ValueError("Input audio should be {} kHz mono".format(self.p['model_sampling_rate']/1e3))
         audio_features = self.mfcc_stage.process_data(audio, finish=finish)
         probs = self.rnn_stage.process_data(audio_features, finish=finish)
         return self.ctc_stage.process_data(probs, finish=finish)

@@ -85,6 +85,7 @@ def main():
         assert sample_width == 2, "Only 16-bit WAV PCM supported"
         assert compression_type == 'NONE', "Only linear PCM WAV files supported"
         assert channel_num == 1, "Only mono WAV PCM supported"
+        assert abs(sampling_rate / profile['model_sampling_rate'] - 1) < 0.1, "Only {} kHz WAV PCM supported".format(profile['model_sampling_rate'] / 1e3)
         print("Audio file length: {} s".format(pcm_length / sampling_rate))
         print("")
 
