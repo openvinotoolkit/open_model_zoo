@@ -1,4 +1,4 @@
-# Time Series Forecastin Python\* Demo
+# Time Series Forecasting Python\* Demo
 
 This README describes the Time Series Forecasting demo application.
 
