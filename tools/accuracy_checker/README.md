@@ -51,7 +51,7 @@ The next step is installing backend frameworks for Accuracy Checker.
 In order to evaluate some models required frameworks have to be installed. Accuracy-Checker supports these frameworks:
 
 - [OpenVINO](https://software.intel.com/en-us/openvino-toolkit/documentation/get-started).
-- [Caffe](accuracy_checker/launcher/caffe_installation_readme.md).
+- [Caffe](https://caffe.berkeleyvision.org/installation.html).
 - [MXNet](https://mxnet.apache.org/).
 - [OpenCV DNN](https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html).
 - [TensorFlow](https://www.tensorflow.org/).

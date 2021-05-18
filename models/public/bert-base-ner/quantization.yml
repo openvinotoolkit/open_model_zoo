@@ -1,0 +1,16 @@
+compression:
+  model_type: transformer
+  algorithms:
+    - name: DefaultQuantization
+      params:
+        preset: mixed
+        stat_subset_size: 300
+        use_fast_bias: False
+        activations:
+          range_estimator:
+            max:
+              aggregator: max
+              type: abs_max
+            min:
+              aggregator: min
+              type: min

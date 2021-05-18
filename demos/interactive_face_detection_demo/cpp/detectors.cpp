@@ -716,7 +716,7 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
         std::cout << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << std::endl;
     }
 
-    auto begin = n_lm * idx;
+    auto begin = n_lm / 2 * idx;
     auto end = begin + n_lm / 2;
     for (auto i_lm = begin; i_lm < end; ++i_lm) {
         float normed_x = normed_coordinates[2 * i_lm];

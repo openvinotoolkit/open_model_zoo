@@ -31,14 +31,8 @@ def main():
         str(args.input_dir / 'keras-YOLOv3-model-set/tools/model_converter/convert.py'),
         str(args.input_dir / 'keras-YOLOv3-model-set/cfg/yolov4.cfg'),
         str(args.input_dir / 'yolov4.weights'),
-        str(args.output_dir / 'yolo-v4.h5'),
+        str(args.output_dir / 'yolo-v4.savedmodel'),
         '--yolo4_reorder',
-    ], check=True)
-
-    subprocess.run([sys.executable, '--',
-        str(args.input_dir / 'keras-YOLOv3-model-set/tools/model_converter/keras_to_tensorflow.py'),
-        '--input_model={}'.format(args.output_dir / 'yolo-v4.h5'),
-        '--output_model={}'.format(args.output_dir / 'yolo-v4.pb'),
     ], check=True)
 
 

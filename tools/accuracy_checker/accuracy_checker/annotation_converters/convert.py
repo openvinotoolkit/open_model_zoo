@@ -298,10 +298,19 @@ def get_conversion_attributes(config, dataset_size):
                 continue
 
             if isinstance(m_path, list):
-                for m_path in config['_command_line_mapping'][key]:
+                path_list = []
+                for path in m_path:
+                    if isinstance(path, list):
+                        path_list.extend(path)
+                    else:
+                        path_list.append(path)
+
+                for m_path in path_list:
                     if is_relative_to(value, m_path):
                         break
             conversion_parameters[key] = str(value.relative_to(m_path))
+        if isinstance(value, Path):
+            conversion_parameters[key] = 'PATH/{}'.format(value.name)
 
     subset_size = config.get('subsample_size')
     subset_parameters = {}

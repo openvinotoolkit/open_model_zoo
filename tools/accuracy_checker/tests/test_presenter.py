@@ -65,7 +65,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=0.1,
             reference_value=None,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={},
         )
         presenter = ScalarPrintPresenter()
@@ -73,7 +74,8 @@ class TestPresenter:
         mock_write_scalar_result.assert_called_once_with(
             result.evaluated_value,
             result.name,
-            result.threshold,
+            result.abs_threshold,
+            result.rel_threshold,
             None,
             postfix='%',
             scale=100,
@@ -87,7 +89,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.4, 0.6],
             reference_value=None,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={},
         )
         presenter = ScalarPrintPresenter()
@@ -95,7 +98,8 @@ class TestPresenter:
         mock_write_scalar_res.assert_called_once_with(
             np.mean(result.evaluated_value),
             result.name,
-            result.threshold,
+            result.abs_threshold,
+            result.rel_threshold,
             None,
             postfix='%',
             scale=100,
@@ -109,7 +113,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.456],
             reference_value=None,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={},
         )
         presenter = ScalarPrintPresenter()
@@ -117,7 +122,8 @@ class TestPresenter:
         mock_write_scalar_res.assert_called_once_with(
             np.mean(result.evaluated_value),
             result.name,
-            result.threshold,
+            result.abs_threshold,
+            result.rel_threshold,
             None,
             postfix=' ',
             scale=1,
@@ -131,7 +137,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.456],
             reference_value=45.6,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={},
         )
         presenter = ScalarPrintPresenter()
@@ -139,8 +146,9 @@ class TestPresenter:
         mock_write_scalar_res.assert_called_once_with(
             np.mean(result.evaluated_value),
             result.name,
-            result.threshold,
-            0.0,
+            result.abs_threshold,
+            result.rel_threshold,
+            (0.0, 0.0),
             postfix='%',
             scale=100,
             result_format='{:.2f}'
@@ -153,7 +161,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.456],
             reference_value=45.6,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={},
         )
         presenter = ScalarPrintPresenter()
@@ -161,8 +170,9 @@ class TestPresenter:
         mock_write_scalar_res.assert_called_once_with(
             np.mean(result.evaluated_value),
             result.name,
-            result.threshold,
-            0.0,
+            result.abs_threshold,
+            result.rel_threshold,
+            (0.0, 0.0),
             postfix=' ',
             scale=1,
             result_format='{}'
@@ -175,7 +185,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.456],
             reference_value=None,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={'scale': 0.5, 'postfix': 'km/h', 'data_format': '{:.4f}'},
         )
         presenter = ScalarPrintPresenter()
@@ -184,7 +195,8 @@ class TestPresenter:
             np.mean(result.evaluated_value),
             result.name,
             result.reference_value,
-            result.threshold,
+            result.abs_threshold,
+            result.rel_threshold,
             postfix=' ',
             scale=1,
             result_format='{}'
@@ -197,7 +209,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=0.4,
             reference_value=None,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={},
         )
         presenter = VectorPrintPresenter()
@@ -206,7 +219,8 @@ class TestPresenter:
             result.evaluated_value,
             result.name,
             None,
-            result.threshold,
+            result.abs_threshold,
+            result.rel_threshold,
             postfix='%',
             scale=100,
             value_name=None,
@@ -220,7 +234,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=0.4,
             reference_value=42,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={},
         )
         presenter = VectorPrintPresenter()
@@ -228,8 +243,9 @@ class TestPresenter:
         mock_write_scalar_res.assert_called_once_with(
             result.evaluated_value,
             result.name,
-            result.threshold,
-            2,
+            result.abs_threshold,
+            result.rel_threshold,
+            (2.0, 0.047619047619047616),
             postfix='%',
             scale=100,
             value_name=None,
@@ -243,7 +259,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=0.4,
             reference_value=42,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={},
         )
         presenter = VectorPrintPresenter()
@@ -251,8 +268,9 @@ class TestPresenter:
         mock_write_scalar_res.assert_called_once_with(
             result.evaluated_value,
             result.name,
-            result.threshold,
-            2,
+            result.abs_threshold,
+            result.rel_threshold,
+            (2.0, 0.047619047619047616),
             postfix=' ',
             scale=1,
             value_name=None,
@@ -266,7 +284,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.4],
             reference_value=None,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={'names': ['prediction']}
         )
         presenter = VectorPrintPresenter()
@@ -275,7 +294,8 @@ class TestPresenter:
             result.evaluated_value[0],
             result.name,
             None,
-            result.threshold,
+            result.abs_threshold,
+            result.rel_threshold,
             postfix='%',
             scale=100,
             value_name=result.meta['names'][0],
@@ -289,7 +309,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.4],
             reference_value=42,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={},
         )
         presenter = VectorPrintPresenter()
@@ -297,22 +318,24 @@ class TestPresenter:
         mock_write_scalar_res.assert_called_once_with(
             result.evaluated_value[0],
             result.name,
-            result.threshold,
-            2,
+            result.abs_threshold,
+            result.rel_threshold,
+            (2.0, 0.047619047619047616),
             postfix='%',
             scale=100,
             value_name=None,
             result_format='{:.2f}'
         )
 
-    def test_vector_presenter__with_vector_data_contain_one_element_compare_with_reference_ignore_formatting(self, mocker):
+    def test_vector_presenter_with_vector_data_contain_one_element_compare_with_reference_ignore_formatting(self, mocker):
         mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
             name='vector_metric',
             metric_type='metric',
             evaluated_value=[0.4],
             reference_value=42,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={},
         )
         presenter = VectorPrintPresenter()
@@ -320,8 +343,9 @@ class TestPresenter:
         mock_write_scalar_res.assert_called_once_with(
             result.evaluated_value[0],
             result.name,
-            result.threshold,
-            2,
+            result.abs_threshold,
+            result.rel_threshold,
+            (2.0, 0.047619047619047616),
             postfix=' ',
             scale=1,
             value_name=None,
@@ -335,7 +359,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.4, 0.6],
             reference_value=None,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={'names': ['class1', 'class2']}
         )
         presenter = VectorPrintPresenter()
@@ -350,7 +375,7 @@ class TestPresenter:
                 postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 100)), result.name, result.threshold,
+                np.mean(np.multiply(result.evaluated_value, 100)), result.name, result.abs_threshold, result.rel_threshold,
                 None, value_name='mean', postfix='%', scale=1, result_format='{:.2f}'
             )
         ]
@@ -363,7 +388,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.4, 0.6],
             reference_value=None,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={'names': ['class1', 'class2']}
         )
         presenter = VectorPrintPresenter()
@@ -378,7 +404,7 @@ class TestPresenter:
                 postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 1)), result.name, result.threshold, None,
+                np.mean(np.multiply(result.evaluated_value, 1)), result.name, result.abs_threshold, result.rel_threshold, None,
                 value_name='mean', postfix=' ', scale=1, result_format='{}'
             )
         ]
@@ -391,7 +417,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.4, 0.6],
             reference_value=49,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={'names': ['class1', 'class2']}
         )
         presenter = VectorPrintPresenter()
@@ -406,8 +433,8 @@ class TestPresenter:
                 postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 100)), result.name, result.threshold,
-                1, value_name='mean', postfix='%', scale=1, result_format='{:.2f}'
+                np.mean(np.multiply(result.evaluated_value, 100)), result.name, result.abs_threshold, result.rel_threshold,
+                (1.0, 0.02040816326530612), value_name='mean', postfix='%', scale=1, result_format='{:.2f}'
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
@@ -419,7 +446,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.4, 0.6],
             reference_value=49,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={'names': ['class1', 'class2']}
         )
         presenter = VectorPrintPresenter()
@@ -434,7 +462,8 @@ class TestPresenter:
                 postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 1)), result.name, result.threshold, 1,
+                np.mean(np.multiply(result.evaluated_value, 1)), result.name, result.abs_threshold, result.rel_threshold,
+                (1.0, 0.02040816326530612),
                 value_name='mean', postfix=' ', scale=1, result_format='{}'
             )
         ]
@@ -447,7 +476,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.4, 0.6],
             reference_value=None,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={'names': ['class1', 'class2'], 'scale': 0.5, 'postfix': 'km/h', 'data_format': '{:.4f}'}
         )
         presenter = VectorPrintPresenter()
@@ -462,7 +492,8 @@ class TestPresenter:
                 postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, 1)), result.name, result.reference_value, result.threshold,
+                np.mean(np.multiply(result.evaluated_value, 1)), result.name, result.reference_value,
+                result.abs_threshold, result.rel_threshold,
                 value_name='mean', postfix=' ', scale=1, result_format='{}'
             )
         ]
@@ -475,7 +506,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.4, 0.6],
             reference_value=None,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={'names': ['class1', 'class2'], 'postfix': '_'}
         )
         presenter = VectorPrintPresenter()
@@ -490,7 +522,7 @@ class TestPresenter:
             ),
             call(
                 np.mean(np.multiply(result.evaluated_value, 100)), result.name,
-                result.threshold, None, value_name='mean', postfix=result.meta['postfix'], scale=1, result_format='{:.2f}'
+                result.abs_threshold, result.rel_threshold, None, value_name='mean', postfix=result.meta['postfix'], scale=1, result_format='{:.2f}'
             )
         ]
         mock_write_scalar_res.assert_has_calls(calls)
@@ -502,7 +534,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.4, 0.6],
             reference_value=None,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={'names': ['class1', 'class2'], 'scale': 10}
         )
         presenter = VectorPrintPresenter()
@@ -517,7 +550,8 @@ class TestPresenter:
                 postfix='%', scale=result.meta['scale'], value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, result.meta['scale'])), result.name, None, result.threshold,
+                np.mean(np.multiply(result.evaluated_value, result.meta['scale'])), result.name, None,
+                result.abs_threshold, result.rel_threshold,
                 value_name='mean', postfix='%', scale=1, result_format='{:.2f}'
             )
         ]
@@ -530,7 +564,8 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.4, 0.6],
             reference_value=None,
-            threshold=None,
+            abs_threshold=None,
+            rel_threshold=None,
             meta={'names': ['class1', 'class2'], 'scale': [1, 2]}
         )
         presenter = VectorPrintPresenter()
@@ -545,7 +580,8 @@ class TestPresenter:
                 scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1]
             ),
             call(
-                np.mean(np.multiply(result.evaluated_value, result.meta['scale'])), result.name, result.threshold,
+                np.mean(np.multiply(result.evaluated_value, result.meta['scale'])), result.name,
+                result.abs_threshold, result.rel_threshold,
                 None, result_format='{:.2f}', value_name='mean', postfix='%', scale=1
             )
         ]

@@ -1167,6 +1167,7 @@ datasets:
       images_dir: nyudepthv2/val/converted/images
       depth_map_dir: nyudepthv2/val/converted/depth
       data_dir: nyudepthv2/val/official
+      allow_convert_data: False
 
   - name: SCUT_EPT
     data_source: SCUT_EPT/test
@@ -1321,3 +1322,12 @@ datasets:
       max_len: 128
     annotation: bert_ner.pickle
     dataset_meta: bert_ner.json
+
+  - name: forward_tacotron_melgan_multispeaker_io
+    data_source: forward_tacotron_melgan_multispeaker_io
+    reader: numpy_dict_reader
+    annotation_conversion:
+      converter: multi_feature_regression
+      data_dir: forward_tacotron_melgan_multispeaker_io
+      input_suffix: duration_prediction_in_
+      reference_suffix: melgan_out_

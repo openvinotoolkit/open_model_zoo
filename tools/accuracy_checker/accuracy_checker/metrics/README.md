@@ -6,7 +6,7 @@ For correct work metrics require specific representation format.
 In case when you use complicated representation located in representation container, you need to add options `annotation_source` and `prediction_source` in configuration file to
 select specific representation, another way metric calculation possible only if container has only one suitable representation and will be resolved automatically.
 `annotation_source` and `prediction_source` should contain only one annotation identifier and output layer name respectively.
-You may optionally provide `reference` field for metric, if you want calculated metric tested against specific value (i.e. reported in canonical paper) and acceptable `threshold` for metric deviation from reference value.
+You may optionally provide `reference` field for metric, if you want calculated metric tested against specific value (i.e. reported in canonical paper) and acceptable `abs_threshold` and `rel_threshold` for absolute and relative metric deviation from reference value respectively.
 
 Every metric has parameters available for configuration.
 
