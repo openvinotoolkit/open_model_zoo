@@ -1,12 +1,12 @@
 models:
-  - name: yolo-v4-tf
+  - name: yolo-v4-tf2
     launchers:
-      - framework: tf
-        model:   yolo-v4.pb
+      - framework: tf2
+        saved_model_dir: yolo-v4.savedmodel
         adapter:
           type: yolo_v3
           anchors: 12,16,19,36,40,28,36,75,76,55,72,146,142,110,192,243,459,401
-          num: 9
+          num: 3
           coords: 4
           classes: 80
           threshold: 0.001
@@ -16,17 +16,17 @@ models:
           do_reshape: True
           cells: [76, 38, 19]
           outputs:
-            - conv2d_93/BiasAdd
-            - conv2d_101/BiasAdd
-            - conv2d_109/BiasAdd
+            - conv2d_93
+            - conv2d_101
+            - conv2d_109
         inputs:
           - name: 'image_input'
             type: INPUT
             shape: [1, 608, 608, 3]
         outputs:
-          - conv2d_93/BiasAdd
-          - conv2d_101/BiasAdd
-          - conv2d_109/BiasAdd
+          - StatefulPartitionedCall/model/conv2d_93/BiasAdd
+          - StatefulPartitionedCall/model/conv2d_101/BiasAdd
+          - StatefulPartitionedCall/model/conv2d_109/BiasAdd
     datasets:
       - name: ms_coco_detection_80_class_without_background
         preprocessing:
@@ -72,9 +72,9 @@ models:
           anchor_masks: [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
           raw_output: True
           outputs:
-            - conv2d_93/BiasAdd/Add
-            - conv2d_101/BiasAdd/Add
-            - conv2d_109/BiasAdd/Add
+            - StatefulPartitionedCall/model/conv2d_93/BiasAdd/Add
+            - StatefulPartitionedCall/model/conv2d_101/BiasAdd/Add
+            - StatefulPartitionedCall/model/conv2d_109/BiasAdd/Add
     datasets:
       - name: ms_coco_detection_80_class_without_background
         preprocessing:

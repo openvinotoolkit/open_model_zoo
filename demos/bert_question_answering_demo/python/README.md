@@ -8,14 +8,38 @@ Upon the start-up the demo application reads command line parameters and loads a
 It also fetch data from the user-provided url to populate the "context" text.
 The text is then used to search answers for user-provided questions.
 
+## Preparing to Run
+
+The list of models supported by the demo is in <omz_dir>/demos/bert_question_answering_demo/python/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* bert-large-uncased-whole-word-masking-squad-0001
+* bert-large-uncased-whole-word-masking-squad-emb-0001
+* bert-large-uncased-whole-word-masking-squad-int8-0001
+* bert-small-uncased-whole-word-masking-squad-0001
+* bert-small-uncased-whole-word-masking-squad-0002
+* bert-small-uncased-whole-word-masking-squad-emb-int8-0001
+* bert-small-uncased-whole-word-masking-squad-int8-0002
+
+The "small" variants of these are so-called "distilled" models, which originated from the BERT Large but substantially smaller and faster.
+The demo also works fine with [official MLPerf* BERT ONNX models fine-tuned on the Squad dataset](https://github.com/mlcommons/inference/tree/master/language/bert). This model should be converted to OpenVINO Inference Engine format using command like example below:
+
+```sh
+    python3 mo.py
+            -m <path_to_model>/bert_large_v1_1_fake_quant.onnx
+            --input "input_ids,attention_mask,token_type_ids"
+            --input_shape "[1,384],[1,384],[1,384]"
+            --keep_shape_ops
+```
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```
-python3 question_answering_demo.py -h
-```
-The command yields the following usage message:
+
 ```
 usage: bert_question_answering_demo.py [-h] -v VOCAB -m MODEL -i INPUT
                                        [--questions QUESTION [QUESTION ...]]
@@ -61,11 +85,19 @@ Options:
 
 ```
 
-> **NOTE**: Before running the demo with a trained model, make sure to convert the model to the Inference Engine's
-> Intermediate Representation format (\*.xml + \*.bin)
-> using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-> When using the pre-trained BERT from the model zoo (please see [Model Downloader](../../../tools/downloader/README.md)),
-> the model is already converted to the IR.
+## Example Demo Cmd-Line
+
+```sh
+    python3 bert_question_answering_demo.py
+            --vocab=<omz_dir>/models/intel/<model_name>/vocab.txt
+            --model=<path_to_model>/bert-small-uncased-whole-word-masking-squad-0001.xml
+            --input_names="input_ids,attention_mask,token_type_ids"
+            --output_names="output_s,output_e"
+            --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street)"
+            -c
+```
+
+The demo will use a wiki-page about the Bert character to answer your questions like "who is Bert", "how old is Bert", etc.
 
 ## Demo Inputs
 
@@ -81,57 +113,26 @@ so you will need to run the demo without it.
 Please see general [reshape intro and limitations](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_ShapeInference.html)
 
 ## Demo Outputs
+
 The application outputs found answers to the same console.
 
-## Supported Models
-[Open Model Zoo Models](../../../models/intel/index.md) feature
-example BERT-large trained on the Squad*.
-One specific flavor of that is so called "distilled" model (for that reason it comes with "small" in its name,
-but don't get confused as it is still originated from the BERT Large) that is indeed substantially smaller and faster.
-
-The demo also works fine with [official MLPerf* BERT ONNX models fine-tuned on the Squad dataset](
-https://github.com/mlcommons/inference/tree/master/language/bert).
-Unlike [[Open Model Zoo Models](../../../models/intel/index.md) that come directly as the
-Intermediate Representation (IR), the MLPerf models should be explicitly converted with
-[OpenVINO Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-Specifically the example command-line (for the int8 model) is as follows:
-```
-    python3 mo.py
-            -m <path_to_model>/bert_large_v1_1_fake_quant.onnx
-            --input "input_ids,attention_mask,token_type_ids"
-            --input_shape "[1,384],[1,384],[1,384]"
-            --keep_shape_ops
-```
-
-## Example Demo Cmd-Line
-You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
-[Model Downloader](../../../tools/downloader/README.md) executed with "--name bert*"):
-```
-    python3 bert_question_answering_demo.py
-            --vocab=<omz_dir>/models/intel/<model_name>/vocab.txt
-            --model=<path_to_model>/bert-small-uncased-whole-word-masking-squad-0001.xml
-            --input_names="input_ids,attention_mask,token_type_ids"
-            --output_names="output_s,output_e"
-            --input="https://en.wikipedia.org/wiki/Bert_(Sesame_Street)"
-            -c
-```
-The demo will use a wiki-page about the Bert character to answer your questions like "who is Bert", "how old is Bert", etc.
-
 ## Classifying Documents with Long Texts
+
 Notice that when the original "context" (text from the url) together with the question do not fit the model input
 (usually 384 tokens for the Bert-Large, or 128 for the Bert-Base), the demo splits the context into overlapping segments.
 Thus, for the long texts, the network is called multiple times. The results are then sorted by the probabilities.
 
 ## Demo Performance
+
 Even though the demo reports inference performance (by measuring wall-clock time for individual inference calls),
 it is only baseline performance, as certain tricks like batching,
 [throughput mode](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Intro_to_Performance.html) can be applied.
 Please use the full-blown [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
 for any actual performance measurements.
 
-
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
 * [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)

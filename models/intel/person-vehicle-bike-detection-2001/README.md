@@ -45,5 +45,10 @@ bounding boxes. Each detection has the format [`image_id`, `label`, `conf`, `x_m
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
 
+## Training Pipeline
+
+The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/develop/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/develop/models/object_detection/model_templates/person-vehicle-bike-detection/readme.md), allowing to fine-tune the model on custom dataset.
+
 ## Legal Information
+
 [*] Other names and brands may be claimed as the property of others.

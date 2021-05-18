@@ -69,4 +69,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output="saliency_map"
 framework: pytorch
+quantizable: yes
 license: https://github.com/weijun88/F3Net/blob/master/LICENSE

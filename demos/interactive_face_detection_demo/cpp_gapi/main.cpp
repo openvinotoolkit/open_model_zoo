@@ -532,11 +532,11 @@ int main(int argc, char *argv[]) {
                         presenter->handleKey(key);
                     }
                 }
-
-                if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
-                    videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'), 25, cv::Size(frame.size()));
+                if (!FLAGS_o.empty() && framesCounter == 0 &&
+                    !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 25, frame.size())) {
+                    throw std::runtime_error("Can't open video writer");
                 }
-                if (!FLAGS_o.empty()) {
+                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesCounter <= FLAGS_limit - 1)) {
                     videoWriter.write(frame);
                 }
 
@@ -552,10 +552,6 @@ int main(int argc, char *argv[]) {
         } while (FLAGS_loop);
 
         slog::info << "No more frames to process!" << slog::endl;
-
-        if (!FLAGS_o.empty()) {
-            videoWriter.release();
-        }
 
         cv::destroyAllWindows();
     }

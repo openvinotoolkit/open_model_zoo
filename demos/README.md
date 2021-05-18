@@ -4,7 +4,7 @@ The Open Model Zoo demo applications are console applications that provide robus
 
 For the Intel® Distribution of OpenVINO™ toolkit, the demos are available after installation in the following directory: `<INSTALL_DIR>/deployment_tools/open_model_zoo/demos`.
 The demos can also be obtained from the Open Model Zoo [GitHub repository](https://github.com/openvinotoolkit/open_model_zoo/).
-C++, C++ G-API and Python versions are located in the `cpp`, `cpp_gapi` and `python` subdirectories respectively.
+C++, C++ G-API and Python\* versions are located in the `cpp`, `cpp_gapi` and `python` subdirectories respectively.
 
 The Open Model Zoo includes the following demos:
 
@@ -62,77 +62,9 @@ To run the demo applications, you can use images and videos from the media files
 
 ## Demos that Support Pre-Trained Models
 
-> **NOTE:** Inference Engine HDDL and FPGA plugins are available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
+> **NOTE:** Inference Engine HDDL plugin is available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
 
 You can download the [Intel pre-trained models](../models/intel/index.md) or [public pre-trained models](../models/public/index.md) using the OpenVINO [Model Downloader](../tools/downloader/README.md).
-The table below shows the correlation between models, demos, and supported plugins. The plugins names are exactly as they are passed to the demos with `-d` option. The correlation between the plugins and supported devices see in the [Supported Devices](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_Supported_Devices.html) section.
-
-> **NOTE:** **MYRIAD** below stands for Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ Vision Processing Units.
-
-| Model                                            | Demos supported on the model                                                                                 | CPU       | GPU       | MYRIAD/HDDL |
-|--------------------------------------------------|--------------------------------------------------------------------------------------------------------------|-----------|-----------|-------------|
-| action-recognition-0001-decoder                  | [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md)                              | Supported | Supported | Supported   |
-| action-recognition-0001-encoder                  | [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md)                              | Supported | Supported | Supported   |
-| age-gender-recognition-retail-0013               | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   |
-| asl-recognition-0004                             | [Gesture Recognition Python\* Demo](./gesture_recognition_demo/python/README.md)                       | Supported | Supported |             |
-| driver-action-recognition-adas-0002-decoder      | [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md)                              | Supported | Supported | Supported   |
-| driver-action-recognition-adas-0002-encoder      | [Action Recognition Python\* Demo](./action_recognition_demo/python/README.md)                              | Supported | Supported | Supported   |
-| emotions-recognition-retail-0003                 | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   |
-| face-detection-adas-0001                         | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   |
-| face-detection-retail-0004                       | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   |
-| facial-landmarks-35-adas-0002                    | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   |
-| facial-landmarks-35-adas-0002                    | [Gaze Estimation Demo](./gaze_estimation_demo/cpp/README.md)                                                     | Supported | Supported | Supported   |
-| gaze-estimation-adas-0002                        | [Gaze Estimation Demo](./gaze_estimation_demo/cpp/README.md)                                                     | Supported | Supported | Supported   |
-| handwritten-japanese-recognition-0001            | [Handwritten Text Recognition Python\* Demo](./handwritten_text_recognition_demo/python/README.md)     | Supported | Supported | Supported   |
-| handwritten-simplified-chinese-recognition-0001  | [Handwritten Text Recognition Python\* Demo](./handwritten_text_recognition_demo/python/README.md)     | Supported | Supported | Supported   |
-| head-pose-estimation-adas-0001                   | [Interactive Face Detection Demo](./interactive_face_detection_demo/cpp/README.md)                               | Supported | Supported | Supported   |
-| head-pose-estimation-adas-0001                   | [Gaze Estimation Demo](./gaze_estimation_demo/cpp/README.md)                                                     | Supported | Supported | Supported   |
-| human-pose-estimation-0001                       | [Human Pose Estimation Demo](./human_pose_estimation_demo/cpp/README.md)<br>[Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)      | Supported | Supported | Supported   |
-| human-pose-estimation-0005                       | [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)                   | Supported | Supported | Supported   |
-| human-pose-estimation-0006                       | [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)                   | Supported | Supported | Supported   |
-| human-pose-estimation-0007                       | [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md)                   | Supported | Supported | Supported   |
-| human-pose-estimation-3d-0001                    | [3D Human Pose Estimation Python\* Demo](./human_pose_estimation_3d_demo/python/README.md)             | Supported | Supported |             |
-| image-retrieval-0001                             | [Image Retrieval Python\* Demo](./image_retrieval_demo/python/README.md)                               | Supported | Supported | Supported   |
-| instance-segmentation-security-0002              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             |
-| instance-segmentation-security-0091              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             |
-| instance-segmentation-security-0228              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             |
-| instance-segmentation-security-1039              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             |
-| instance-segmentation-security-1040              | [Instance Segmentation Python\* Demo](./instance_segmentation_demo/python/README.md)                   | Supported |           |             |
-| landmarks-regression-retail-0009                 | [Smart Classroom Demo](./smart_classroom_demo/cpp/README.md)                                                     | Supported | Supported | Supported   |
-| license-plate-recognition-barrier-0001           | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   |
-| pedestrian-and-vehicle-detector-adas-0001        | any demo that supports SSD\*-based models                                                                    | Supported | Supported | Supported   |
-| pedestrian-detection-adas-0002                   | any demo that supports SSD\*-based models                                                                    | Supported | Supported | Supported   |
-| person-attributes-recognition-crossroad-0230     | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported | Supported   |
-| person-attributes-recognition-crossroad-0234     | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported | Supported   |
-| person-attributes-recognition-crossroad-0238     | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported | Supported   |
-| person-detection-retail-0002                     | [Pedestrian Tracker Demo](./pedestrian_tracker_demo/cpp/README.md)                                               | Supported | Supported | Supported   |
-| person-detection-retail-0013                     | [Object Detection Demo](./object_detection_demo/cpp/README.md)                                                   | Supported | Supported | Supported   |
-| person-reidentification-retail-0277              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported |             |
-| person-reidentification-retail-0286              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./multi_camera_multi_target_tracking_demo/python/README.md)    | Supported | Supported |       |
-| person-reidentification-retail-0287              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./multi_camera_multi_target_tracking_demo/python/README.md)    | Supported | Supported |       |
-| person-reidentification-retail-0288              | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)<br>[Multi-Camera Multi-Target Tracking Demo](./multi_camera_multi_target_tracking_demo/python/README.md)    | Supported | Supported |       |
-| person-vehicle-bike-detection-crossroad-0078     | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported | Supported   |
-| person-vehicle-bike-detection-crossroad-1016     | [Crossroad Camera Demo](./crossroad_camera_demo/cpp/README.md)                                                   | Supported | Supported | Supported   |
-| person-vehicle-bike-detection-crossroad-yolov3-1020 | [Object Detection Python\* Demo](./object_detection_demo/python/README.md)                          | Supported | Supported | Supported   |
-| person-detection-action-recognition-0005         | [Smart Classroom Demo](./smart_classroom_demo/cpp/README.md)                                                     | Supported | Supported | Supported   |
-| person-detection-action-recognition-teacher-0002 | [Smart Classroom Demo](./smart_classroom_demo/cpp/README.md)                                                     | Supported | Supported | Supported   |
-| road-segmentation-adas-0001                      | [Segmentation Demo](./segmentation_demo/cpp/README.md)                                                           | Supported | Supported | Supported   |
-| semantic-segmentation-adas-0001                  | [Image Segmentation Demo](./segmentation_demo/cpp/README.md)                                                     | Supported | Supported | Supported   |
-| single-human-pose-estimation-0001                | [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md)     | Supported | Supported | Supported   |
-| single-image-super-resolution-1032               | [Super Resolution Demo](./super_resolution_demo/cpp/README.md)                                                   | Supported | Supported | Supported   |
-| single-image-super-resolution-1033               | [Super Resolution Demo](./super_resolution_demo/cpp/README.md)                                                   | Supported | Supported | Supported   |
-| text-detection-0003                              | [Text Detection Demo](./text_detection_demo/cpp/README.md)                                                       | Supported | Supported | Supported   |
-| text-detection-0004                              | [Text Detection Demo](./text_detection_demo/cpp/README.md)                                                       | Supported | Supported | Supported   |
-| text-recognition-0012                            | [Text Detection Demo](./text_detection_demo/cpp/README.md)                                                       | Supported | Supported | Supported   |
-| text-recognition-0013                            | [Text Detection Demo](./text_detection_demo/cpp/README.md)                                                       | Supported | Supported |             |
-| vehicle-attributes-recognition-barrier-0039      | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   |
-| vehicle-attributes-recognition-barrier-0042      | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   |
-| vehicle-license-plate-detection-barrier-0106     | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   |
-| vehicle-license-plate-detection-barrier-0123     | [Security Barrier Camera Demo](./security_barrier_camera_demo/cpp/README.md)                                     | Supported | Supported | Supported   |
-| vehicle-detection-adas-0002                      | any demo that supports SSD\*-based models                                                                    | Supported | Supported | Supported   |
-| yolo-v2-tiny-vehicle-detection-0001              | [Object Detection Python\* Demo](./object_detection_demo/python/README.md)                             | Supported | Supported | Supported   |
-
-Notice that the FPGA support comes through a [heterogeneous execution](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_HETERO.html), for example, when the post-processing is happening on the CPU.
 
 ## Build the Demo Applications
 
@@ -370,4 +302,10 @@ demo, read the demo documentation by clicking the demo name in the demos
 list above.
 
 ## See Also
-* [Introduction to Intel's Deep Learning Inference Engine](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Introduction.html)
+
+* [Intel OpenVINO Documentation](https://docs.openvinotoolkit.org/latest/documentation.html)
+* [Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models](../models/intel/index.md)
+* [Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models](../models/public/index.md)
+
+---
+\* Other names and brands may be claimed as the property of others.
