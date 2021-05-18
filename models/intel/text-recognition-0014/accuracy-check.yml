@@ -1,5 +1,5 @@
 models:
-  - name: text-recognition-0013
+  - name: text-recognition-0014
 
     launchers:
       - framework: dlsdk
@@ -47,14 +47,52 @@ models:
             36: "z"
 
     datasets:
-      - name: ICDAR2013
-
+      - name: SVT_recognition
         preprocessing:
           - type: bgr_to_gray
             cast_to_float: false
           - type: resize
-            dst_width: 120
+            dst_width: 128
             dst_height: 32
+        metrics:
+          - type: character_recognition_accuracy
 
+      - name: IIIT5K
+        preprocessing:
+          - type: bgr_to_gray
+            cast_to_float: false
+          - type: resize
+            dst_width: 128
+            dst_height: 32
+        metrics:
+          - type: character_recognition_accuracy
+
+      - name: ICDAR2015_recognition
+        preprocessing:
+          - type: bgr_to_gray
+            cast_to_float: false
+          - type: resize
+            dst_width: 128
+            dst_height: 32
+        metrics:
+          - type: character_recognition_accuracy
+
+      - name: ICDAR03_recognition
+        preprocessing:
+          - type: bgr_to_gray
+            cast_to_float: false
+          - type: resize
+            dst_width: 128
+            dst_height: 32
+        metrics:
+          - type: character_recognition_accuracy
+
+      - name: ICDAR2013
+        preprocessing:
+          - type: bgr_to_gray
+            cast_to_float: false
+          - type: resize
+            dst_width: 128
+            dst_height: 32
         metrics:
           - type: character_recognition_accuracy
