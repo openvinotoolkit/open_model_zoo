@@ -35,10 +35,10 @@ The [SISDR](https://arxiv.org/abs/1811.02508) quality metric was calculated on t
 
 ## Input
 
-Sequence patch, name: `input`, shape: `1, 2048`, format: `B, T`
-where:
-   - B - batch size
-   - T - number of samples in patch
+Sequence patch, name: `input`, shape: `1, 2048`, format: `B, T`, where:
+
+ - `B` - batch size
+ - `T` - number of samples in patch
 
 input states, names: `inp_state_*`, should be filled by corresponding `out_state_*` from previous step
 
