@@ -78,7 +78,8 @@ class TextRecognitionWithAttentionEvaluator(BaseEvaluator):
                     label=ann.label.lower(), identifier=ann.identifier) for ann in batch_annotation]
             batch_prediction = [CharacterRecognitionPrediction(
                 label=batch_prediction, identifier=batch_annotation[0].identifier)]
-            _ = self.metric_executor.update_metrics_on_batch(range(len(batch_annotation)), batch_annotation, batch_prediction)
+            _ = self.metric_executor.update_metrics_on_batch(
+                range(len(batch_annotation)), batch_annotation, batch_prediction)
             self._annotations.extend(batch_annotation)
             self._predictions.extend(batch_prediction)
 
@@ -255,7 +256,7 @@ def create_recognizer(model_config, launcher, suffix):
     return model_class(model_config, launcher, suffix)
 
 
-class SequentialTextRecognitionModel:
+class BaseSequentialModel:
     def __init__(self, network_info, launcher, models_args, meta, is_blob=None):
         recognizer_encoder = network_info.get('recognizer_encoder', {})
         recognizer_decoder = network_info.get('recognizer_decoder', {})
@@ -271,12 +272,30 @@ class SequentialTextRecognitionModel:
         })
         if not contains_all(network_info, ['recognizer_encoder', 'recognizer_decoder']):
             raise ConfigError('network_info should contain encoder and decoder fields')
-        self.vocab = network_info['custom_label_map']
         self.recognizer_encoder = create_recognizer(network_info['recognizer_encoder'], launcher, 'encoder')
         self.recognizer_decoder = create_recognizer(network_info['recognizer_decoder'], launcher, 'decoder')
         self.sos_index = 0
         self.eos_index = 2
         self.max_seq_len = int(network_info['max_seq_len'])
+
+    def get_phrase(self, indices):
+        raise NotImplementedError()
+
+    def predict(self, identifiers, input_data):
+        raise NotImplementedError()
+
+    def reset(self):
+        pass
+
+    def release(self):
+        self.recognizer_encoder.release()
+        self.recognizer_decoder.release()
+
+
+class SequentialTextRecognitionModel(BaseSequentialModel):
+    def __init__(self, network_info, launcher, models_args, meta, is_blob=None):
+        super().__init__(network_info, launcher, models_args, meta, is_blob=None)
+        self.vocab = network_info['custom_label_map']
 
     def get_phrase(self, indices):
         res = ''
@@ -318,15 +337,8 @@ class SequentialTextRecognitionModel:
         result_phrase = self.get_phrase(targets)
         return result_phrase
 
-    def reset(self):
-        pass
 
-    def release(self):
-        self.recognizer_encoder.release()
-        self.recognizer_decoder.release()
-
-
-class SequentialFormulaRecognitionModel(SequentialTextRecognitionModel):
+class SequentialFormulaRecognitionModel(BaseSequentialModel):
     def __init__(self, network_info, launcher, models_args, meta, is_blob=None):
         super().__init__(network_info, launcher, models_args, meta, is_blob)
         self.vocab = meta['vocab']
