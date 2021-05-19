@@ -300,12 +300,7 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
         self.vocab = network_info['custom_label_map']
 
     def get_phrase(self, indices):
-        res = ''
-        for idx in indices:
-            if idx != self.eos_index:
-                res += str(self.vocab.get(idx, '?'))
-            else:
-                break
+        res = ''.join(self.vocab.get(idx, '?') for idx in indices)
         return res
 
     def predict(self, identifiers, input_data):
@@ -328,11 +323,10 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
 
             dec_state = dec_res['decoder_hidden']
             logit = dec_res['decoder_output']
-            logits.append(logit)
-            tgt = np.array([[np.argmax(np.array(logit), axis=1)]])
-
-            if tgt[0][0] == self.eos_index:
+            tgt = np.argmax(logit, axis=1)
+            if np.squeeze(tgt[0]) == self.eos_index:
                 break
+            logits.append(logit)
 
         logits = np.array(logits)
         logits = logits.squeeze(axis=1)
