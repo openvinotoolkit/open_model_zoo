@@ -324,7 +324,7 @@ class SequentialTextRecognitionModel(BaseSequentialModel):
             dec_state = dec_res['decoder_hidden']
             logit = dec_res['decoder_output']
             tgt = np.argmax(logit, axis=1)
-            if np.squeeze(tgt[0]) == self.eos_index:
+            if self.eos_index in tgt[0]:
                 break
             logits.append(logit)
 
