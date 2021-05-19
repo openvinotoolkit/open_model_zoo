@@ -25,7 +25,8 @@ from ..representation import (
 
 def normalised_quantile_loss(gt, pred, quantile):
     prediction_underflow = gt - pred
-    weighted_errors = quantile * np.maximum(prediction_underflow, 0.) + (1. - quantile) * np.maximum(-prediction_underflow, 0.)
+    weighted_errors = quantile * np.maximum(prediction_underflow, 0.)\
+        + (1. - quantile) * np.maximum(-prediction_underflow, 0.)
 
     quantile_loss = weighted_errors.mean()
     normaliser = np.abs(gt).mean()

@@ -28,6 +28,7 @@ except ImportError as import_error:
 from ..representation import TimeSeriesForecastingAnnotation
 from ..config import PathField, NumberField
 from .format_converter import BaseFormatConverter, ConverterReturn
+from ..logging import print_info
 
 def expand(x, axis=0):
     return np.expand_dims(x, axis=axis)
@@ -75,7 +76,7 @@ def aggregating_to_hourly_data(df):
 
     df_list = []
     for label in output:
-        print('Processing {}'.format(label))
+        print_info('Processing {}'.format(label))
         srs = output[label]
 
         start_date = min(srs.fillna(method='ffill').dropna().index)
@@ -113,16 +114,27 @@ def aggregating_to_hourly_data(df):
 def get_index_filtering(data, id_col, target_col, lookback):
     g = data.groupby(id_col)
 
-    df_index_abs = g[target_col].transform(lambda x: x.index+lookback).reset_index().rename(columns={'index': 'init_abs', target_col[0]: 'end_abs'})
-    df_index_rel_init = g[target_col].transform(lambda x: x.reset_index(drop=True).index).rename(columns={target_col[0]: 'init_rel'})
-    df_index_rel_end = g[target_col].transform(lambda x: x.reset_index(drop=True).index+lookback).rename(columns={target_col[0]: 'end_rel'})
-    df_total_count = g[target_col].transform(lambda x: x.shape[0] - lookback + 1).rename(columns={target_col[0]: 'group_count'})
+    df_index_abs = g[target_col].transform(lambda x: x.index+lookback).reset_index().rename(
+        columns={'index': 'init_abs', target_col[0]: 'end_abs'})
+    df_index_rel_init = g[target_col].transform(lambda x: x.reset_index(drop=True).index).rename(
+        columns={target_col[0]: 'init_rel'})
+    df_index_rel_end = g[target_col].transform(lambda x: x.reset_index(drop=True).index+lookback).rename(
+        columns={target_col[0]: 'end_rel'})
+    df_total_count = g[target_col].transform(lambda x: x.shape[0] - lookback + 1).rename(
+        columns={target_col[0]: 'group_count'})
 
     return pd.concat([df_index_abs,
                       df_index_rel_init,
                       df_index_rel_end,
                       data[id_col],
                       df_total_count], axis=1).reset_index(drop=True)
+
+def get_time_steps():
+    return get_fixed_params()['total_time_steps']
+
+def get_num_encoder_steps():
+    return get_fixed_params()['num_encoder_steps']
+
 
 # Default params
 def get_fixed_params():
@@ -185,12 +197,6 @@ class ElectricityFormatter:
         self._time_steps = get_fixed_params()['total_time_steps']
         self._num_encoder_steps = get_fixed_params()['num_encoder_steps']
 
-    def get_time_steps(self):
-        return get_fixed_params()['total_time_steps']
-
-    def get_num_encoder_steps(self):
-        return get_fixed_params()['num_encoder_steps']
-
     def split_data(self, df, valid_boundary=1315, test_boundary=1339):
         """Splits data frame into training-validation-test data frames.
         This also calibrates scaling object, and transforms data for each split.
@@ -202,7 +208,7 @@ class ElectricityFormatter:
           Tuple of transformed (train, valid, test) data.
         """
 
-        print('Formatting train-valid-test splits.')
+        print_info('Formatting train-valid-test splits.')
 
         index = df['days_from_start']
         train = df.loc[index < valid_boundary]
@@ -218,7 +224,7 @@ class ElectricityFormatter:
             Args:
               df: Data to use to calibrate scalers.
         """
-        print('Setting scalers with training data...')
+        print_info('Setting scalers with training data...')
 
         column_definitions = self.getcolumn_definition()
         id_column = get_single_col_by_input_type(InputTypes.ID, column_definitions)
@@ -385,7 +391,7 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
             'outputs': [get_single_col_by_input_type(InputTypes.TARGET, column_definition)],
             'inputs': [tup[0] for tup in column_definition if tup[2] not in {InputTypes.ID, InputTypes.TIME}]
         }
-        lookback = self.formatter.get_time_steps()
+        lookback = get_time_steps()
         data_index = get_index_filtering(data, col_mappings["identifier"], col_mappings["outputs"], lookback)
         group_size = data.groupby(col_mappings["identifier"]).apply(lambda x: x.shape[0]).mean()
         data_index = data_index[data_index.end_rel < group_size].reset_index()
