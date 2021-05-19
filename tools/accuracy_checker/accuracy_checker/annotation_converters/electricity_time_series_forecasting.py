@@ -15,20 +15,19 @@ limitations under the License.
 """
 
 import enum
+import numpy as np
+import sklearn.preprocessing
+from tqdm import tqdm
 
 from ..utils import UnsupportedPackage
 try:
     import pandas as pd
 except ImportError as import_error:
     editdistance = UnsupportedPackage("pandas", import_error.msg)
-import numpy as np
-import sklearn.preprocessing
 
 from ..representation import TimeSeriesForecastingAnnotation
 from ..config import PathField, NumberField
 from .format_converter import BaseFormatConverter, ConverterReturn
-
-from tqdm import tqdm
 
 def expand(x, axis=0):
     return np.expand_dims(x, axis=axis)
@@ -59,11 +58,83 @@ def extract_cols_from_data_type(data_type, column_definition,
     List of names for columns with data type specified.
     """
     return [
-      tup[0]
-      for tup in column_definition
-      if tup[1] == data_type and tup[2] not in excluded_input_types
+        tup[0]
+        for tup in column_definition
+        if tup[1] == data_type and tup[2] not in excluded_input_types
     ]
 
+
+def aggregating_to_hourly_data(df):
+    df.index = pd.to_datetime(df.index)
+    df.sort_index(inplace=True)
+
+    # Used to determine the start and end dates of a series
+    output = df.resample('1h').mean().replace(0., np.nan)
+
+    earliest_time = output.index.min()
+
+    df_list = []
+    for label in output:
+        print('Processing {}'.format(label))
+        srs = output[label]
+
+        start_date = min(srs.fillna(method='ffill').dropna().index)
+        end_date = max(srs.fillna(method='bfill').dropna().index)
+
+        active_range = (srs.index >= start_date) & (srs.index <= end_date)
+        srs = srs[active_range].fillna(0.)
+
+        tmp = pd.DataFrame({'power_usage': srs})
+        date = tmp.index
+        tmp['t'] = (date - earliest_time).seconds / 60 / 60 + (date - earliest_time).days * 24
+        tmp['days_from_start'] = (date - earliest_time).days
+        tmp['categorical_id'] = label
+        tmp['date'] = date
+        tmp['id'] = label
+        tmp['hour'] = date.hour
+        tmp['day'] = date.day
+        tmp['day_of_week'] = date.dayofweek
+        tmp['month'] = date.month
+
+        df_list.append(tmp)
+
+    output = pd.concat(df_list, axis=0, join='outer').reset_index(drop=True)
+
+    output['categorical_id'] = output['id'].copy()
+    output['hours_from_start'] = output['t']
+    output['categorical_day_of_week'] = output['day_of_week'].copy()
+    output['categorical_hour'] = output['hour'].copy()
+
+    # Filter to match range used by other academic papers
+    output = output[(output['days_from_start'] >= 1096) & (output['days_from_start'] < 1346)].copy()
+    return output
+
+
+def get_index_filtering(data, id_col, target_col, lookback):
+    g = data.groupby(id_col)
+
+    df_index_abs = g[target_col].transform(lambda x: x.index+lookback).reset_index().rename(columns={'index': 'init_abs', target_col[0]: 'end_abs'})
+    df_index_rel_init = g[target_col].transform(lambda x: x.reset_index(drop=True).index).rename(columns={target_col[0]: 'init_rel'})
+    df_index_rel_end = g[target_col].transform(lambda x: x.reset_index(drop=True).index+lookback).rename(columns={target_col[0]: 'end_rel'})
+    df_total_count = g[target_col].transform(lambda x: x.shape[0] - lookback + 1).rename(columns={target_col[0]: 'group_count'})
+
+    return pd.concat([df_index_abs,
+                      df_index_rel_init,
+                      df_index_rel_end,
+                      data[id_col],
+                      df_total_count], axis=1).reset_index(drop=True)
+
+# Default params
+def get_fixed_params():
+    """Returns fixed model parameters for experiments."""
+    fixed_params = {
+        'total_time_steps': 8 * 24,
+        'num_encoder_steps': 7 * 24,
+        'num_epochs': 100,
+        'early_stopping_patience': 5,
+        'multiprocessing_workers': 5
+    }
+    return fixed_params
 
 # Type defintions
 class DataTypes(enum.IntEnum):
@@ -93,14 +164,14 @@ class ElectricityFormatter:
     identifiers: Entity identifiers used in experiments.
     """
 
-    _column_definition = [
-      ('id', DataTypes.REAL_VALUED, InputTypes.ID),
-      ('hours_from_start', DataTypes.REAL_VALUED, InputTypes.TIME),
-      ('power_usage', DataTypes.REAL_VALUED, InputTypes.TARGET),
-      ('hour', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
-      ('day_of_week', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
-      ('hours_from_start', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
-      ('categorical_id', DataTypes.CATEGORICAL, InputTypes.STATIC_INPUT),
+    column_definition = [
+        ('id', DataTypes.REAL_VALUED, InputTypes.ID),
+        ('hours_from_start', DataTypes.REAL_VALUED, InputTypes.TIME),
+        ('power_usage', DataTypes.REAL_VALUED, InputTypes.TARGET),
+        ('hour', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+        ('day_of_week', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+        ('hours_from_start', DataTypes.REAL_VALUED, InputTypes.KNOWN_INPUT),
+        ('categorical_id', DataTypes.CATEGORICAL, InputTypes.STATIC_INPUT),
     ]
 
     def __init__(self):
@@ -111,14 +182,14 @@ class ElectricityFormatter:
         self._cat_scalers = None
         self._target_scaler = None
         self._num_classes_per_cat_input = None
-        self._time_steps = self.get_fixed_params()['total_time_steps']
-        self._num_encoder_steps = self.get_fixed_params()['num_encoder_steps']
+        self._time_steps = get_fixed_params()['total_time_steps']
+        self._num_encoder_steps = get_fixed_params()['num_encoder_steps']
 
     def get_time_steps(self):
-        return self.get_fixed_params()['total_time_steps']
+        return get_fixed_params()['total_time_steps']
 
     def get_num_encoder_steps(self):
-        return self.get_fixed_params()['num_encoder_steps']
+        return get_fixed_params()['num_encoder_steps']
 
     def split_data(self, df, valid_boundary=1315, test_boundary=1339):
         """Splits data frame into training-validation-test data frames.
@@ -149,11 +220,9 @@ class ElectricityFormatter:
         """
         print('Setting scalers with training data...')
 
-        column_definitions = self.get_column_definition()
-        id_column = get_single_col_by_input_type(InputTypes.ID,
-                                                       column_definitions)
-        target_column = get_single_col_by_input_type(InputTypes.TARGET,
-                                                           column_definitions)
+        column_definitions = self.getcolumn_definition()
+        id_column = get_single_col_by_input_type(InputTypes.ID, column_definitions)
+        target_column = get_single_col_by_input_type(InputTypes.TARGET, column_definitions)
 
         # Format real scalers
         real_inputs = extract_cols_from_data_type(
@@ -161,8 +230,8 @@ class ElectricityFormatter:
             {InputTypes.ID, InputTypes.TIME})
 
         # Initialise scaler caches
-        self._real_scalers = {}
-        self._target_scaler = {}
+        self.real_scalers = {}
+        self.target_scaler = {}
         identifiers = []
         for identifier, sliced in df.groupby(id_column):
 
@@ -170,11 +239,8 @@ class ElectricityFormatter:
 
                 data = sliced[real_inputs].values
                 targets = sliced[[target_column]].values
-                self._real_scalers[identifier] \
-                = sklearn.preprocessing.StandardScaler().fit(data)
-
-                self._target_scaler[identifier] \
-                = sklearn.preprocessing.StandardScaler().fit(targets)
+                self.real_scalers[identifier] = sklearn.preprocessing.StandardScaler().fit(data)
+                self.target_scaler[identifier] = sklearn.preprocessing.StandardScaler().fit(targets)
                 identifiers.append(identifier)
 
         # Format categorical scalers
@@ -187,8 +253,7 @@ class ElectricityFormatter:
         for col in categorical_inputs:
             # Set all to str so that we don't have mixed integer/string columns
             srs = df[col].apply(str)
-            categorical_scalers[col] = sklearn.preprocessing.LabelEncoder().fit(
-              srs.values)
+            categorical_scalers[col] = sklearn.preprocessing.LabelEncoder().fit(srs.values)
             num_classes.append(srs.nunique())
 
         # Set categorical scaler outputs
@@ -207,11 +272,11 @@ class ElectricityFormatter:
           Transformed data frame.
         """
 
-        if self._real_scalers is None and self._cat_scalers is None:
+        if self.real_scalers is None and self._cat_scalers is None:
             raise ValueError('Scalers have not been set!')
 
         # Extract relevant columns
-        column_definitions = self.get_column_definition()
+        column_definitions = self.getcolumn_definition()
         id_col = get_single_col_by_input_type(InputTypes.ID, column_definitions)
         real_inputs = extract_cols_from_data_type(
             DataTypes.REAL_VALUED, column_definitions,
@@ -226,7 +291,7 @@ class ElectricityFormatter:
             # Filter out any trajectories that are too short
             if len(sliced) >= self._time_steps:
                 sliced_copy = sliced.copy()
-                sliced_copy[real_inputs] = self._real_scalers[identifier].transform(sliced_copy[real_inputs].values)
+                sliced_copy[real_inputs] = self.real_scalers[identifier].transform(sliced_copy[real_inputs].values)
                 df_list.append(sliced_copy)
 
         output = pd.concat(df_list, axis=0)
@@ -238,24 +303,10 @@ class ElectricityFormatter:
 
         return output
 
-    # Default params
-    def get_fixed_params(self):
-        """Returns fixed model parameters for experiments."""
-
-        fixed_params = {
-            'total_time_steps': 8 * 24,
-            'num_encoder_steps': 7 * 24,
-            'num_epochs': 100,
-            'early_stopping_patience': 5,
-            'multiprocessing_workers': 5
-        }
-
-        return fixed_params
-
-    def get_column_definition(self):
+    def getcolumn_definition(self):
         """"Returns formatted column definition in order expected by the TFT."""
 
-        column_definition = self._column_definition
+        column_definition = self.column_definition
 
         # Sanity checks first.
         # Ensure only one ID and time column exist
@@ -312,9 +363,7 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         _, _, data = self.formatter.split_data(
-            self.aggregating_to_hourly_data(
-                pd.read_csv(self.data_path_file, index_col=0, sep=';', decimal=',')
-            )
+            aggregating_to_hourly_data(pd.read_csv(self.data_path_file, index_col=0, sep=';', decimal=','))
         )
         data = data.reset_index(drop=True)
         data_index, col_mappings = self.build_data_index(data)
@@ -327,7 +376,7 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
         return ConverterReturn(samples, None, None)
 
     def build_data_index(self, data):
-        column_definition = self.formatter._column_definition
+        column_definition = self.formatter.column_definition
         col_mappings = {
             'identifier': [get_single_col_by_input_type(InputTypes.ID, column_definition)],
             'time': [get_single_col_by_input_type(InputTypes.TIME, column_definition)],
@@ -335,29 +384,10 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
             'inputs': [tup[0] for tup in column_definition if tup[2] not in {InputTypes.ID, InputTypes.TIME}]
         }
         lookback = self.formatter.get_time_steps()
-        data_index = self.get_index_filtering(data, col_mappings["identifier"], col_mappings["outputs"], lookback)
+        data_index = get_index_filtering(data, col_mappings["identifier"], col_mappings["outputs"], lookback)
         group_size = data.groupby(col_mappings["identifier"]).apply(lambda x: x.shape[0]).mean()
         data_index = data_index[data_index.end_rel < group_size].reset_index()
         return data_index, col_mappings
-
-    def get_index_filtering(self, data, id_col, target_col, lookback):
-        g = data.groupby(id_col)
-
-        df_index_abs = g[target_col].transform(lambda x: x.index+lookback) \
-                        .reset_index() \
-                        .rename(columns={'index': 'init_abs', target_col[0]: 'end_abs'})
-        df_index_rel_init = g[target_col].transform(lambda x: x.reset_index(drop=True).index) \
-                        .rename(columns={target_col[0]: 'init_rel'})
-        df_index_rel_end = g[target_col].transform(lambda x: x.reset_index(drop=True).index+lookback) \
-                        .rename(columns={target_col[0]: 'end_rel'})
-        df_total_count = g[target_col].transform(lambda x: x.shape[0] - lookback + 1) \
-                        .rename(columns = {target_col[0]: 'group_count'})
-
-        return pd.concat([df_index_abs,
-                          df_index_rel_init,
-                          df_index_rel_end,
-                          data[id_col],
-                          df_total_count], axis = 1).reset_index(drop = True)
 
     def get_sample(self, data, data_index, col_mappings, idx):
         _data_index = data.iloc[data_index.init_abs.iloc[idx]:data_index.end_abs.iloc[idx]]
@@ -376,53 +406,6 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
             data_map[k] = np.concatenate(data_map[k], axis=0)
 
         # prepare outputs
-        scaler = self.formatter._target_scaler[data_map["identifier"][0][0]]
+        scaler = self.formatter.target_scaler[data_map["identifier"][0][0]]
         outputs = data_map['outputs'][self.num_encoder_steps:, 0]
         return expand(data_map['inputs']), expand(outputs), scaler.mean_, scaler.scale_
-
-    def aggregating_to_hourly_data(self, df):
-        df.index = pd.to_datetime(df.index)
-        df.sort_index(inplace=True)
-
-        # Used to determine the start and end dates of a series
-        output = df.resample('1h').mean().replace(0., np.nan)
-
-        earliest_time = output.index.min()
-
-        df_list = []
-        for label in output:
-            print('Processing {}'.format(label))
-            srs = output[label]
-
-            start_date = min(srs.fillna(method='ffill').dropna().index)
-            end_date = max(srs.fillna(method='bfill').dropna().index)
-
-            active_range = (srs.index >= start_date) & (srs.index <= end_date)
-            srs = srs[active_range].fillna(0.)
-
-            tmp = pd.DataFrame({'power_usage': srs})
-            date = tmp.index
-            tmp['t'] = (date - earliest_time).seconds / 60 / 60 + (
-                date - earliest_time).days * 24
-            tmp['days_from_start'] = (date - earliest_time).days
-            tmp['categorical_id'] = label
-            tmp['date'] = date
-            tmp['id'] = label
-            tmp['hour'] = date.hour
-            tmp['day'] = date.day
-            tmp['day_of_week'] = date.dayofweek
-            tmp['month'] = date.month
-
-            df_list.append(tmp)
-
-        output = pd.concat(df_list, axis=0, join='outer').reset_index(drop=True)
-
-        output['categorical_id'] = output['id'].copy()
-        output['hours_from_start'] = output['t']
-        output['categorical_day_of_week'] = output['day_of_week'].copy()
-        output['categorical_hour'] = output['hour'].copy()
-
-        # Filter to match range used by other academic papers
-        output = output[(output['days_from_start'] >= 1096)
-                        & (output['days_from_start'] < 1346)].copy()
-        return output
