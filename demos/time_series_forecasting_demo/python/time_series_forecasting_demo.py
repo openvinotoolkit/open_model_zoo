@@ -13,14 +13,11 @@
  limitations under the License.
 """
 import argparse
-import itertools
 import logging as log
 import sys
-import time
 from pathlib import Path
 from collections import OrderedDict
 
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from openvino.inference_engine import IECore
@@ -193,13 +190,7 @@ def main(args):
         ax.autoscale_view(True,True,True)
         return curves
 
-    movie = animation.FuncAnimation(
-        fig,
-        animate,
-        frames=len(dataset),
-        interval=50,
-        blit=True
-    )
+    movie = animation.FuncAnimation(fig, animate, frames=len(dataset), interval=50, blit=True)
 
     ax.legend(loc="upper right")
     plt.show()
