@@ -24,7 +24,7 @@ class TimeSeriesDenormalize(Postprocessor):
     prediction_types = (TimeSeriesForecastingQuantilesPrediction, )
 
     def process_image(self, annotation, prediction):
-        for i in range(len(annotation)):
+        for i, _ in enumerate(annotation):
             annotation[i].outputs = annotation[i].inorm(annotation[i].outputs)
             for k in prediction[i].preds.keys():
                 prediction[i].preds[k] = annotation[i].inorm(prediction[i].preds[k])
