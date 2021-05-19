@@ -15,23 +15,23 @@
  limitations under the License.
 """
 
-import logging as log
-import os.path as osp
+import logging
 import sys
-from time import perf_counter
 from argparse import ArgumentParser
 from pathlib import Path
+from time import perf_counter
 
 import cv2
 import numpy as np
+from openvino.inference_engine import IECore
 
-from ie_module import InferenceContext
 from landmarks_detector import LandmarksDetector
 from face_detector import FaceDetector
 from faces_database import FacesDatabase
 from face_identifier import FaceIdentifier
 
-sys.path.append(osp.join(osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__)))), 'common/python'))
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+
 
 import monitors
 from helpers import resolution
@@ -39,6 +39,8 @@ from images_capture import open_images_capture
 from models import OutputTransform
 from performance_metrics import PerformanceMetrics
 
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
+log = logging.getLogger()
 
 DEVICE_KINDS = ['CPU', 'GPU', 'FPGA', 'MYRIAD', 'HETERO', 'HDDL']
 
@@ -138,64 +140,48 @@ class FrameProcessor:
     QUEUE_SIZE = 16
 
     def __init__(self, args):
-        used_devices = {args.d_fd, args.d_lm, args.d_reid}
-        self.context = InferenceContext(used_devices, args.cpu_lib, args.gpu_lib, args.perf_stats)
-        context = self.context
+        self.gpu_ext = args.gpu_lib
+        self.perf_count = args.perf_stats
+        self.allow_grow = args.allow_grow and not args.no_show
 
-        log.info("Loading models")
-        face_detector_net = self.load_model(args.m_fd)
+        log.info('Initializing Inference Engine...')
+        ie = IECore()
+        if args.cpu_lib and 'CPU' in {args.d_fd, args.d_lm, args.d_reid}:
+            log.info('Using CPU extensions library "{}"'.format(args.cpu_lib))
+            ie.add_extension(args.cpu_lib, 'CPU')
 
-        assert (args.fd_input_height and args.fd_input_width) or \
-               (args.fd_input_height == 0 and args.fd_input_width == 0), \
-            "Both -fd_iw and -fd_ih parameters should be specified for reshape"
-
-        if args.fd_input_height and args.fd_input_width :
-            face_detector_net.reshape({"data": [1, 3, args.fd_input_height, args.fd_input_width]})
-        landmarks_net = self.load_model(args.m_lm)
-        face_reid_net = self.load_model(args.m_reid)
-
-        self.face_detector = FaceDetector(face_detector_net,
+        log.info('Loading networks...')
+        self.face_detector = FaceDetector(ie, args.m_fd,
+                                          args.fd_input_height,
+                                          args.fd_input_width,
                                           confidence_threshold=args.t_fd,
                                           roi_scale_factor=args.exp_r_fd)
-
-        self.landmarks_detector = LandmarksDetector(landmarks_net)
-        self.face_identifier = FaceIdentifier(face_reid_net,
+        self.landmarks_detector = LandmarksDetector(ie, args.m_lm)
+        self.face_identifier = FaceIdentifier(ie, args.m_reid,
                                               match_threshold=args.t_id,
                                               match_algo = args.match_algo)
+        self.face_detector.deploy(args.d_fd, self.get_config(args.d_fd))
+        self.landmarks_detector.deploy(args.d_lm, self.get_config(args.d_lm), self.QUEUE_SIZE)
+        self.face_identifier.deploy(args.d_reid, self.get_config(args.d_reid), self.QUEUE_SIZE)
 
-        self.face_detector.deploy(args.d_fd, context)
-        self.landmarks_detector.deploy(args.d_lm, context,
-                                       queue_size=self.QUEUE_SIZE)
-        self.face_identifier.deploy(args.d_reid, context,
-                                    queue_size=self.QUEUE_SIZE)
-        log.info("Models are loaded")
-
-        log.info("Building faces database using images from '%s'" % (args.fg))
+        log.info('Building faces database using images from "{}"'.format(args.fg))
         self.faces_database = FacesDatabase(args.fg, self.face_identifier,
                                             self.landmarks_detector,
                                             self.face_detector if args.run_detector else None, args.no_show)
         self.face_identifier.set_faces_database(self.faces_database)
-        log.info("Database is built, registered %s identities" % (len(self.faces_database)))
+        log.info('Database is built, registered {} identities'.format(len(self.faces_database)))
 
-        self.allow_grow = args.allow_grow and not args.no_show
-
-    def load_model(self, model_path):
-        model_path = osp.abspath(model_path)
-        model_weights_path = osp.splitext(model_path)[0] + ".bin"
-        log.info("Loading the model from '%s'" % (model_path))
-        assert osp.isfile(model_path), \
-            "Model description is not found at '%s'" % (model_path)
-        assert osp.isfile(model_weights_path), \
-            "Model weights are not found at '%s'" % (model_weights_path)
-        model = self.context.ie_core.read_network(model_path, model_weights_path)
-        log.info("Model is loaded")
-        return model
+    def get_config(self, device):
+        config = {
+            "PERF_COUNT": "YES" if self.perf_count else "NO",
+        }
+        if device == 'GPU' and self.gpu_ext:
+            config['CONFIG_FILE'] = self.gpu_ext
+        return config
 
     def process(self, frame):
-        assert len(frame.shape) == 3, \
-            "Expected input frame in (H, W, C) format"
-        assert frame.shape[2] in [3, 4], \
-            "Expected BGR or BGRA input"
+        assert len(frame.shape) == 3, "Expected input frame in (H, W, C) format"
+        assert frame.shape[2] in [3, 4], "Expected BGR or BGRA input"
 
         orig_image = frame.copy()
         frame = frame.transpose((2, 0, 1)) # HWC to CHW
@@ -262,7 +248,7 @@ def draw_detections(frame, frame_processor, detections, output_transform):
         for point in keypoints:
             x = xmin + output_transform.scale(roi.size[0] * point[0])
             y = ymin + output_transform.scale(roi.size[1] * point[1])
-            cv2.circle(frame, (int(x), int(y)), 2, (0, 255, 255), 2)
+            cv2.circle(frame, (int(x), int(y)), 1, (0, 255, 255), 2)
         textsize = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 1)[0]
         cv2.rectangle(frame, (xmin, ymin), (xmin + textsize[0], ymin - textsize[1]), (255, 255, 255), cv2.FILLED)
         cv2.putText(frame, text, (xmin, ymin), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1)
@@ -278,9 +264,6 @@ def center_crop(frame, crop_size):
 
 def main():
     args = build_argparser().parse_args()
-
-    log.basicConfig(format="[ %(levelname)s ] %(asctime)-15s %(message)s",
-                    level=log.INFO if not args.verbose else log.DEBUG, stream=sys.stdout)
 
     cap = open_images_capture(args.input, args.loop)
     frame_processor = FrameProcessor(args)

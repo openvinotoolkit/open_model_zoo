@@ -35,20 +35,20 @@ class LandmarksDetector(Module):
         def get_array(self):
             return np.array(self.points, dtype=np.float64)
 
-    def __init__(self, model):
-        super(LandmarksDetector, self).__init__(model)
+    def __init__(self, ie, model):
+        super(LandmarksDetector, self).__init__(ie, model)
 
-        assert len(model.input_info) == 1, "Expected 1 input blob"
-        assert len(model.outputs) == 1, "Expected 1 output blob"
-        self.input_blob = next(iter(model.input_info))
-        self.output_blob = next(iter(model.outputs))
-        self.input_shape = model.input_info[self.input_blob].input_data.shape
+        assert len(self.model.input_info) == 1, "Expected 1 input blob"
+        assert len(self.model.outputs) == 1, "Expected 1 output blob"
+        self.input_blob = next(iter(self.model.input_info))
+        self.output_blob = next(iter(self.model.outputs))
+        self.input_shape = self.model.input_info[self.input_blob].input_data.shape
 
         assert np.array_equal([1, self.POINTS_NUMBER * 2, 1, 1],
-                              model.outputs[self.output_blob].shape), \
+                              self.model.outputs[self.output_blob].shape), \
             "Expected model output shape %s, but got %s" % \
             ([1, self.POINTS_NUMBER * 2, 1, 1],
-             model.outputs[self.output_blob].shape)
+             self.model.outputs[self.output_blob].shape)
 
     def preprocess(self, frame, rois):
         assert len(frame.shape) == 4, "Frame shape should be [1, c, h, w]"

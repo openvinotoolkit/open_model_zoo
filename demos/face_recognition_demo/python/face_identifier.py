@@ -39,20 +39,20 @@ class FaceIdentifier(Module):
             self.distance = distance
             self.descriptor = desc
 
-    def __init__(self, model, match_threshold=0.5, match_algo='HUNGARIAN'):
-        super(FaceIdentifier, self).__init__(model)
+    def __init__(self, ie, model, match_threshold=0.5, match_algo='HUNGARIAN'):
+        super(FaceIdentifier, self).__init__(ie, model)
 
-        assert len(model.input_info) == 1, "Expected 1 input blob"
-        assert len(model.outputs) == 1, "Expected 1 output blob"
+        assert len(self.model.input_info) == 1, "Expected 1 input blob"
+        assert len(self.model.outputs) == 1, "Expected 1 output blob"
 
-        self.input_blob = next(iter(model.input_info))
-        self.output_blob = next(iter(model.outputs))
-        self.input_shape = model.input_info[self.input_blob].input_data.shape
+        self.input_blob = next(iter(self.model.input_info))
+        self.output_blob = next(iter(self.model.outputs))
+        self.input_shape = self.model.input_info[self.input_blob].input_data.shape
 
-        assert len(model.outputs[self.output_blob].shape) == 4 or \
-            len(model.outputs[self.output_blob].shape) == 2, \
+        assert len(self.model.outputs[self.output_blob].shape) == 4 or \
+            len(self.model.outputs[self.output_blob].shape) == 2, \
             "Expected model output shape [1, n, 1, 1] or [1, n], got %s" % \
-            (model.outputs[self.output_blob].shape)
+            (self.model.outputs[self.output_blob].shape)
 
         self.faces_database = None
 
