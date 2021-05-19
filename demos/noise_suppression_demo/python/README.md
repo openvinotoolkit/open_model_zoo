@@ -44,10 +44,10 @@ Options:
 You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
 [Model Downloader](../../../tools/downloader/README.md) executed with "--name dns*"):
 ```
-    python3 noise_suppression.py
-            --model=<path_to_model>/noise-suppression-poconetlike-0001.xml
-            --input=noisy.wav
-            --output=cleaned.wav
+    python3 noise_suppression.py \
+        --model=<path_to_model>/noise-suppression-poconetlike-0001.xml \
+        --input=noisy.wav \
+        --output=cleaned.wav
 ```
 
 ## Demo Inputs
