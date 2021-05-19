@@ -13,7 +13,7 @@ The demo application expects an image retrieval model in the Intermediate Repres
 As input, the demo application takes:
 
 * a path to a list of images represented by textfile with following format: 'path_to_image' 'ID'
-* a path to a video file or a device node of a web-camera
+* a path to a video file or a device node of a webcam
 
 The demo workflow is the following:
 
@@ -57,7 +57,7 @@ Options:
                         Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
                         Required. Path to a video file or a device node of a
-                        web-camera.
+                        webcam.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.

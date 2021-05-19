@@ -10,7 +10,7 @@ The demo application expects an gesture recognition model in the Intermediate Re
 
 As input, the demo application takes:
 
-* a path to a video file or a device node of a web-camera specified with a command line argument `--input`
+* a path to a video file or a device node of a webcam specified with a command line argument `--input`
 * a path to a file in JSON format with gesture class names `--class_map`
 
 The demo workflow is the following:
@@ -60,7 +60,7 @@ Options:
                         detector model.
   -i INPUT, --input INPUT
                         Required. Path to a video file or a device node of a
-                        web-camera.
+                        webcam.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT

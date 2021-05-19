@@ -12,7 +12,7 @@ As input, the demo application takes:
 
 * a path to an image
 * a path to a folder with images
-* a path to a video file or a device node of a web-camera
+* a path to a video file or a device node of a webcam
 
 The demo workflow is the following:
 

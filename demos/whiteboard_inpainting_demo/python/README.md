@@ -62,7 +62,7 @@ optional arguments:
   -h, --help            Show this help message and exit.
   -i INPUT, --input INPUT
                         Required. Path to a video file or a device node of a
-                        web-camera.
+                        webcam.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.
