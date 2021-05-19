@@ -40,6 +40,7 @@ The Open Model Zoo includes the following demos:
 - [Multi-Channel Face Detection C++ Demo](./multi_channel_face_detection_demo/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel face detection scenario.
 - [Multi-Channel Human Pose Estimation C++ Demo](./multi_channel_human_pose_estimation_demo/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel human pose estimation scenario.
 - [Multi-Channel Object Detection Yolov3 C++ Demo](./multi_channel_object_detection_demo_yolov3/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel common object detection scenario.
+- [Noise Suppression Python\* Demo](./noise_suppression_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to reduce noise in speech audio.
 - [Object Detection Python\* Demo](./object_detection_demo/python/README.md) - Demo application for several object detection model types (like SSD, Yolo, etc).
 - [Object Detection C++ Demo](./object_detection_demo/cpp/README.md) - Demo application for Object Detection networks (different models architectures are supported), async API showcase, simple OpenCV interoperability (supports video and camera inputs).
 - [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/cpp/README.md) - Demo application for pedestrian tracking scenario.
@@ -55,7 +56,6 @@ The Open Model Zoo includes the following demos:
 - [Text Spotting Python\* Demo](./text_spotting_demo/python/README.md) - The demo demonstrates how to run Text Spotting models.
 - [Text-to-speech Python\* Demo](./text_to_speech_demo/python/README.md) - Shows an example of using Forward Tacotron and WaveRNN neural networks for text to speech task.
 - [Whiteboard Inpainting Python\* Demo](./whiteboard_inpainting_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to detect and hide a person on a video so that all text on a whiteboard is visible.
-- [Noise Suppression Python\* Demo](./noise_suppression_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to reduce noise in speech audio.
 
 ## Media Files Available for Demos
 

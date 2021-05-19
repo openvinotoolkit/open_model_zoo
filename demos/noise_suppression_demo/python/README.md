@@ -33,12 +33,12 @@ Options:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model
   -i INPUT, --input INPUT
-                        Required. Path to a 16kHz sound file with speech+noise
+                        Required. Path to a 16kHz wav file with speech+noise
   -o OUTPUT, --output OUTPUT
-                        Optional. Path to output sound file with speech
+                        Optional. Path to output wav file for cleaned speech
   -d DEVICE, --device DEVICE
-                        Optional. Target device to perform inference
-                        on. Default value is CPU
+                        Optional. Target device to perform inference on.
+                        Default value is CPU
 ```
 
 You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the

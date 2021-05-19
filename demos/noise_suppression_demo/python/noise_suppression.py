@@ -22,7 +22,7 @@ from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 import numpy as np
-import soundfile
+import wave
 
 from openvino.inference_engine import IECore, Blob
 
@@ -32,15 +32,38 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model",
                       required=True, type=Path)
-    args.add_argument("-i", "--input", help="Required. Path to a 16kHz sound file with speech+noise",
+    args.add_argument("-i", "--input", help="Required. Path to a 16kHz wav file with speech+noise",
                       required=True, type=str)
-    args.add_argument("-o", "--output", help="Optional. Path to output sound file with speech",
+    args.add_argument("-o", "--output", help="Optional. Path to output wav file for cleaned speech",
                       required=False, type=str, default="noise_suppression_demo_out.wav")
     args.add_argument("-d", "--device",
                       help="Optional. Target device to perform inference on. "
                            "Default value is CPU",
                       default="CPU", type=str)
     return parser
+
+def wav_read(wav_name):
+    with wave.open(wav_name, "rb") as wav:
+        if wav.getsampwidth() != 2:
+            raise RuntimeError("wav file {} does not have int16 format".format(wav_name))
+        if wav.getframerate() != 16000:
+            raise RuntimeError("wav file {} does not have 16kHz sampling rate".format(wav_name))
+
+        data = wav.readframes( wav.getnframes() )
+        x = np.frombuffer(data, dtype=np.int16)
+        x = x.astype(np.float32) * (1.0 / np.iinfo(np.int16).max)
+        if wav.getnchannels() > 1:
+            x = x.reshape(-1, wav.getnchannels())
+            x = x.mean(1)
+    return x
+
+def wav_write(wav_name, x):
+    x = (x*np.iinfo(np.int16).max).astype(np.int16)
+    with wave.open(wav_name, "wb") as wav:
+        wav.setnchannels(1)
+        wav.setframerate(16000)
+        wav.setsampwidth(2)
+        wav.writeframes(x.tobytes())
 
 def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
@@ -73,10 +96,7 @@ def main():
     log.info("Loading model to the {}".format(args.device))
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
 
-    sample_inp, freq = soundfile.read(args.input, start=0, stop=None, dtype='float32')
-    assert freq == 16000, "Only 16kHz sampling rate is supported for input audio"
-    if sample_inp.ndim == 2:
-        sample_inp = sample_inp.mean(0)
+    sample_inp = wav_read(args.input)
 
     input_size = input_shapes["input"][1]
     res = None
@@ -119,12 +139,12 @@ def main():
         samples_out.append(res["output"].squeeze(0))
 
     log.info("Sequence of length {:0.2f}s is processed by {:0.2f}s".format(
-        sum(s.shape[0] for s in samples_out)/freq,
+        sum(s.shape[0] for s in samples_out)/16000,
         sum(samples_times),
 
     ))
     sample_out = np.concatenate(samples_out, 0)
-    soundfile.write(args.output, sample_out, freq)
+    wav_write(args.output, sample_out)
 
 
 if __name__ == '__main__':
