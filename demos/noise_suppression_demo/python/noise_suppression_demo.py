@@ -123,7 +123,7 @@ def main():
                 inputs[n] = np.zeros(input_shapes[n], dtype=np.float32)
 
         t0 = time.perf_counter()
-        # Copy inputs manually through InferRequest functionality to speedup
+        # Set inputs manually through InferRequest functionality to speedup
         infer_request_ptr = ie_encoder_exec.requests[0]
         for n, data in inputs.items():
             info_ptr = ie_encoder.input_info[n]
