@@ -117,7 +117,7 @@ def main():
         #add states to input
         for n in state_inp_names:
             if res:
-                inputs[n] = res[n.replace('inp', 'out')]
+                inputs[n] = res[n.replace('inp', 'out')].buffer
             else:
                 #on the first iteration fill states by zeros
                 inputs[n] = np.zeros(input_shapes[n], dtype=np.float32)
@@ -131,12 +131,13 @@ def main():
             infer_request_ptr.set_blob(n, blob, info_ptr.preprocess_info)
 
         # infer by IE
-        res = ie_encoder_exec.infer()
+        infer_request_ptr.infer()
+        res = infer_request_ptr.output_blobs
 
         t1 = time.perf_counter()
 
         samples_times.append(t1-t0)
-        samples_out.append(res["output"].squeeze(0))
+        samples_out.append(res["output"].buffer.squeeze(0))
 
     log.info("Sequence of length {:0.2f}s is processed by {:0.2f}s".format(
         sum(s.shape[0] for s in samples_out)/16000,
