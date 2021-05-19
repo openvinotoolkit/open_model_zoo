@@ -8,7 +8,7 @@ The network works with mono audio sampled on 16kHz.
 The audio processed iterative by patches with 2048 size.
 On each iteration it takes 2048 (128ms) samples as input and returns 2048 (128ms) samples as output with 640 (40ms) samples delay.
 In addition the network required 52 state tensors to make processing seamless.
-On the first iteration these state tensors have to be filled by 0.
+On the first iteration these state tensors have to be filled with 0.
 On the consequences iterations theses tensors have to be taken from corresponding outputs of previous iteration.
 You can try [Noise Suppression Python\* Demo](../../../demos/noise_suppression_demo/python/README.md) to see how it works.
 
