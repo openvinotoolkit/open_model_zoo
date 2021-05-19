@@ -1,0 +1,9 @@
+compression:
+  algorithms:
+    - name: DefaultQuantization
+      params:
+        num_samples_for_tuning: 2000
+        preset: accuracy
+        stat_subset_size: 300
+        use_fast_bias: False
+        use_layerwise_tuning: False

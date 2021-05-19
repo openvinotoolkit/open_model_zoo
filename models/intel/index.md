@@ -1,8 +1,9 @@
 # Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models
 
-OpenVINO&trade; toolkit provides a set of pre-trained models
+OpenVINO&trade; toolkit provides a set of Intel pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on GitHub](https://github.com/openvinotoolkit/open_model_zoo).
+The table [Intel's Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
 
 The models can be downloaded via [Model Downloader](../../tools/downloader/README.md).
 
@@ -301,5 +302,12 @@ Deep Learning models for time series forecasting.
 |------------|---------------------|-----------|
 | [time-series-forecasting-electricity-0001](./time-series-forecasting-electricity-0001/README.md) | 0.40 | 2.26 |
 
+## See Also
+
+* [Open Model Zoo Demos](../../demos/README.md)
+* [Model Downloader](../../tools/downloader/README.md)
+* [Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models](../public/index.md)
+
 ## Legal Information
+
 [*] Other names and brands may be claimed as the property of others.

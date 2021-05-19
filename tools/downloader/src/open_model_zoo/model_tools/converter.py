@@ -19,7 +19,9 @@ import sys
 
 from pathlib import Path
 
-from open_model_zoo.model_tools import _common
+from open_model_zoo.model_tools import (
+    _configuration, _common, _concurrency, _reporting,
+)
 
 
 def run_pre_convert(reporter, model, output_dir, args):
@@ -105,12 +107,25 @@ def main():
     args = parser.parse_args()
 
     mo_path = args.mo
+
     if mo_path is None:
-        try:
-            mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/model_optimizer/mo.py'
-        except KeyError:
-            sys.exit('Unable to locate Model Optimizer. '
-                + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
+        mo_package_path = _common.get_package_path(args.python, 'mo')
+
+        if mo_package_path:
+            # run MO as a module
+            mo_cmd_prefix = [str(args.python), '-m', 'mo']
+            mo_dir = mo_package_path.parent
+        else:
+            try:
+                mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/model_optimizer/mo.py'
+            except KeyError:
+                sys.exit('Unable to locate Model Optimizer. '
+                    + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
+
+    if mo_path is not None:
+        # run MO as a script
+        mo_cmd_prefix = [str(args.python), '--', str(mo_path)]
+        mo_dir = mo_path.parent
 
     extra_mo_args = args.extra_mo_args or []
 
@@ -122,7 +137,7 @@ def main():
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    models = _common.load_models_from_args(parser, args)
+    models = _configuration.load_models_from_args(parser, args)
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
@@ -149,7 +164,7 @@ def main():
             'config_dir': _common.MODEL_ROOT / model.subdirectory,
             'conv_dir': output_dir / model.subdirectory,
             'dl_dir': args.download_dir / model.subdirectory,
-            'mo_dir': mo_path.parent,
+            'mo_dir': mo_dir,
         }
 
         if model.conversion_to_onnx_args:
@@ -163,7 +178,7 @@ def main():
 
         for model_precision in sorted(model_precisions):
             data_type = model_precision.split('-')[0]
-            mo_cmd = [str(args.python), '--', str(mo_path),
+            mo_cmd = [*mo_cmd_prefix,
                 '--framework={}'.format(model_format),
                 '--data_type={}'.format(data_type),
                 '--output_dir={}'.format(output_dir / model.subdirectory / model_precision),
@@ -185,13 +200,13 @@ def main():
 
         return True
 
-    reporter = _common.Reporter(_common.DirectOutputContext())
+    reporter = _reporting.Reporter(_reporting.DirectOutputContext())
 
     if args.jobs == 1 or args.dry_run:
         results = [convert(reporter, model) for model in models]
     else:
-        results = _common.run_in_parallel(args.jobs,
-            lambda context, model: convert(_common.Reporter(context), model),
+        results = _concurrency.run_in_parallel(args.jobs,
+            lambda context, model: convert(_reporting.Reporter(context), model),
             models)
 
     failed_models = [model.name for model, successful in zip(models, results) if not successful]

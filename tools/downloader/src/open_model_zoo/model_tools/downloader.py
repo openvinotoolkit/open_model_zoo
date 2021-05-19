@@ -30,7 +30,9 @@ import types
 
 from pathlib import Path
 
-from open_model_zoo.model_tools import _common
+from open_model_zoo.model_tools import (
+    _configuration, _common, _concurrency, _reporting,
+)
 
 CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 
@@ -342,14 +344,14 @@ def main():
     args = parser.parse_args()
 
     def make_reporter(context):
-        return _common.Reporter(context,
+        return _reporting.Reporter(context,
             enable_human_output=args.progress_format == 'text',
             enable_json_output=args.progress_format == 'json')
 
-    reporter = make_reporter(_common.DirectOutputContext())
+    reporter = make_reporter(_reporting.DirectOutputContext())
 
     cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
-    models = _common.load_models_from_args(parser, args)
+    models = _configuration.load_models_from_args(parser, args)
 
     failed_models = set()
 
@@ -367,7 +369,7 @@ def main():
             results = [download_model(reporter, args, cache, session_factory, requested_precisions, model)
                 for model in models]
         else:
-            results = _common.run_in_parallel(args.jobs,
+            results = _concurrency.run_in_parallel(args.jobs,
                 lambda context, model: download_model(
                     make_reporter(context), args, cache, session_factory, requested_precisions, model),
                 models)

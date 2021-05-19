@@ -42,17 +42,17 @@ The text-spotting-0004-detector model is a Mask-RCNN-based text detector with Re
 
     The expected channel order is `BGR`.
 
-2.	Name: `im_info`, shape: `1, 3`. Image information: processed image height,
-    processed image width, and processed image scale with respect to the original image resolution.
+2. Name: `im_info`, shape: `1, 3`. Image information: processed image height,
+   processed image width, and processed image scale with respect to the original image resolution.
 
 ### Outputs
 
-1.	Name: `labels`, shape: `100`. Contiguous integer class ID for every
-    detected object, `0` is for text class.
-2.	Name: `boxes`, shape: `100, 5`. Bounding boxes around every detected object
-    in the (top_left_x, top_left_y, bottom_right_x, bottom_right_y, confidence) format.
-3.	Name: `masks`, shape: `100, 28, 28`. Text segmentation masks for every output bounding box.
-4.  Name: `text_features.0`, shape `100, 64, 28, 28`. Text features that are fed to a text recognition head.
+1. Name: `labels`, shape: `100`. Contiguous integer class ID for every
+   detected object, `0` is for text class.
+2. Name: `boxes`, shape: `100, 5`. Bounding boxes around every detected object
+   in the (top_left_x, top_left_y, bottom_right_x, bottom_right_y, confidence) format.
+3. Name: `masks`, shape: `100, 28, 28`. Text segmentation masks for every output bounding box.
+4. Name: `text_features.0`, shape `100, 64, 28, 28`. Text features that are fed to a text recognition head.
 
 ## Encoder model specification
 
@@ -80,15 +80,20 @@ Name: `output`, shape: `1, 256, 28, 28`. Encoded text recognition features.
 
 ### Inputs
 
-1.	Name: `encoder_outputs`, shape: `1, (28*28), 256`. Encoded text recognition features.
-2.	Name: `prev_symbol`, shape: `1, 1`. Index in alphabet of previously generated symbol.
-3.	Name: `prev_hidden`, shape: `1, 1, 256`. Previous hidden state of GRU.
+1. Name: `encoder_outputs`, shape: `1, (28*28), 256`. Encoded text recognition features.
+2. Name: `prev_symbol`, shape: `1, 1`. Index in alphabet of previously generated symbol.
+3. Name: `prev_hidden`, shape: `1, 1, 256`. Previous hidden state of GRU.
 
 ### Outputs
 
-1.	Name: `output`, shape: `1, 38`. Encoded text recognition features. Indices starting from 2 correspond to symbols from the
+1. Name: `output`, shape: `1, 38`. Encoded text recognition features. Indices starting from 2 correspond to symbols from the
 alphabet. The 0 and 1 are special Start of Sequence and End of Sequence symbols correspondingly.
-2.	Name: `hidden`, shape: `1, 1, 256`. Current hidden state of GRU.
+2. Name: `hidden`, shape: `1, 1, 256`. Current hidden state of GRU.
+
+## Training Pipeline
+
+The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/develop/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/develop/models/text_spotting/model_templates/alphanumeric-text-spotting/readme.md), allowing to fine-tune the model on custom dataset.
 
 ## Legal Information
+
 [*] Other names and brands may be claimed as the property of others.

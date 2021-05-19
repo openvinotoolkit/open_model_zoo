@@ -18,7 +18,7 @@ import sys
 
 from pathlib import Path
 
-from open_model_zoo.model_tools import _common
+from open_model_zoo.model_tools import _configuration
 
 def to_info(model):
     return {
@@ -28,6 +28,7 @@ def to_info(model):
         'framework': model.framework,
         'license_url': model.license_url,
         'precisions': sorted(model.precisions),
+        'quantization_output_precisions': sorted(model.quantization_output_precisions),
         'subdirectory': str(model.subdirectory),
         'task_type': str(model.task_type),
     }
@@ -42,7 +43,7 @@ def main():
     parser.add_argument('--print_all', action='store_true', help='print all available models')
     args = parser.parse_args()
 
-    models = _common.load_models_from_args(parser, args)
+    models = _configuration.load_models_from_args(parser, args)
 
     json.dump(list(map(to_info, models)), sys.stdout, indent=4)
     print() # add a final newline

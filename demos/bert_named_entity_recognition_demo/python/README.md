@@ -8,14 +8,21 @@ Upon the start-up the demo application reads command line parameters and loads a
 It also fetch data from the user-provided url to populate the "context" text.
 The text is then used to search named entities.
 
+## Preparing to Run
+
+The list of models supported by the demo is in <omz_dir>/demos/bert_named_entity_recognition_demo/python/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* bert-base-ner
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```
-python3 bert_named_entity_recognition_demo.py -h
-```
-The command yields the following usage message:
+
 ```
 usage: bert_named_entity_recognition_demo.py [-h] -v VOCAB -m MODEL -i INPUT
                                        [--input_names INPUT_NAMES]
@@ -38,10 +45,6 @@ Options:
                         for device specified. Default value is CPU
 ```
 
-> **NOTE**: Before running the demo with a trained model, make sure to convert the model to the Inference Engine's
-> Intermediate Representation format (\*.xml + \*.bin)
-> using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 ## Demo Inputs
 
 The application reads text from the HTML page at the given URL.
@@ -50,14 +53,16 @@ Notice that since order of inputs for the model does matter, the demo applicatio
 from the command-line match the actual network inputs.
 
 ## Demo Outputs
+
 The application outputs recognized named entities (`LOC` - location, `PER` - person, `ORG` - organization, `MISC` - miscellaneous)
 for each sentence in input text.
 
-
 ## Example Demo Cmd-Line
-You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
+
+You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded and converted with the
 [Model Downloader](../../../tools/downloader/README.md) executed with "--name bert*"):
-```
+
+```sh
     python3 bert_named_entity_recognition_demo.py.py
             --vocab=<models_dir>/models/public/bert-base-ner/vocab.txt
             --model=<path_to_model>/bert-base-ner.xml
@@ -66,19 +71,21 @@ You can use the following command to try the demo (assuming the model from the O
 ```
 
 ## Classifying Documents with Long Texts
+
 Notice that when the original "context" (text from the url) do not fit the model input
 (128 for the Bert-Base), the demo reshapes model to maximum sentence length in the "context".
 
 ## Demo Performance
+
 Even though the demo reports inference performance (by measuring wall-clock time for individual inference calls),
 it is only baseline performance, as certain tricks like batching,
 [throughput mode](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Intro_to_Performance.html) can be applied.
 Please use the full-blown [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
 for any actual performance measurements.
 
-
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
 * [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)

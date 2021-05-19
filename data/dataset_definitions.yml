@@ -1167,6 +1167,7 @@ datasets:
       images_dir: nyudepthv2/val/converted/images
       depth_map_dir: nyudepthv2/val/converted/depth
       data_dir: nyudepthv2/val/official
+      allow_convert_data: False
 
   - name: SCUT_EPT
     data_source: SCUT_EPT/test
