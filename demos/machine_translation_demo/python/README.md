@@ -63,6 +63,10 @@ For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-train
 python3 ./machine_translation_demo -i "a sample english text" -m <path_to_model>/machine-translation-nar-en-de-0001.xml --tokenizer-src <omz_root>/models/intel/machine-translation-nar-en-de-0001/tokenizer_src --tokenizer-tgt <omz_root>/models/intel/machine-translation-nar-en-de-0001/tokenizer_tgt
 ```
 
+## Demo Output
+
+The application outputs translated sentences from source to target language.
+
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)
