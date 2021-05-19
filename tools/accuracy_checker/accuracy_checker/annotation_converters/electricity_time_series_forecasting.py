@@ -16,22 +16,32 @@ limitations under the License.
 
 import enum
 import numpy as np
-import sklearn.preprocessing
-from tqdm import tqdm
 
 from ..utils import UnsupportedPackage
-try:
-    import pandas as pd
-except ImportError as import_error:
-    pd = UnsupportedPackage("pandas", import_error.msg)
 
 from ..representation import TimeSeriesForecastingAnnotation
 from ..config import PathField, NumberField
 from .format_converter import BaseFormatConverter, ConverterReturn
 from ..logging import print_info
+try:
+    import pandas as pd
+except ImportError as import_error:
+    pd = UnsupportedPackage("pandas", import_error.msg)
+
+try:
+    import sklearn.preprocessing as sk_preprocessing
+except ImportError as error:
+    sk_preprocessing = UnsupportedPackage('sklearn', error.msg)
+
+try:
+    from tqdm import tqdm
+except ImportError as error:
+    tqdm = UnsupportedPackage('tqdm', error.msg)
+
 
 def expand(x, axis=0):
     return np.expand_dims(x, axis=axis)
+
 
 def get_single_col_by_input_type(input_type, column_definition):
     """Returns name of single column.
@@ -245,8 +255,8 @@ class ElectricityFormatter:
 
                 data = sliced[real_inputs].values
                 targets = sliced[[target_column]].values
-                self.real_scalers[identifier] = sklearn.preprocessing.StandardScaler().fit(data)
-                self.target_scaler[identifier] = sklearn.preprocessing.StandardScaler().fit(targets)
+                self.real_scalers[identifier] = sk_preprocessing.StandardScaler().fit(data)
+                self.target_scaler[identifier] = sk_preprocessing.StandardScaler().fit(targets)
                 identifiers.append(identifier)
 
         # Format categorical scalers
@@ -259,7 +269,7 @@ class ElectricityFormatter:
         for col in categorical_inputs:
             # Set all to str so that we don't have mixed integer/string columns
             srs = df[col].apply(str)
-            categorical_scalers[col] = sklearn.preprocessing.LabelEncoder().fit(srs.values)
+            categorical_scalers[col] = sk_preprocessing.LabelEncoder().fit(srs.values)
             num_classes.append(srs.nunique())
 
         # Set categorical scaler outputs
@@ -365,6 +375,8 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
     def configure(self):
         if isinstance(pd, UnsupportedPackage):
             pd.raise_error(self.__provider__)
+        if isinstance(sk_preprocessing, UnsupportedPackage):
+            sk_preprocessing.raise_error(self.__provider__)
         self.data_path_file = self.get_value_from_config('data_path_file')
         self.num_encoder_steps = int(self.get_value_from_config('num_encoder_steps'))
         self.formatter = ElectricityFormatter()
@@ -376,7 +388,10 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
         data = data.reset_index(drop=True)
         data_index, col_mappings = self.build_data_index(data)
         samples = []
-        for idx in tqdm(range(int(data_index.shape[0]))):
+        iterator = range(int(data_index.shape[0]))
+        if not isinstance(tqdm, UnsupportedPackage):
+            iterator = tqdm(iterator)
+        for idx in iterator:
             samples.append(
                 TimeSeriesForecastingAnnotation(f"inputs_{idx}", *self.get_sample(data, data_index, col_mappings, idx))
             )
