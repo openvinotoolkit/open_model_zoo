@@ -23,13 +23,7 @@ from ..utils import UnsupportedPackage
 try:
     import pandas as pd
 except ImportError as import_error:
-<<<<<<< HEAD
-    editdistance = UnsupportedPackage("pandas", import_error.msg)
-=======
     pd = UnsupportedPackage("pandas", import_error.msg)
-import numpy as np
-import sklearn.preprocessing
->>>>>>> c67ddc1961d8ed50828a525fcd5da1b699f6d46e
 
 from ..representation import TimeSeriesForecastingAnnotation
 from ..config import PathField, NumberField
