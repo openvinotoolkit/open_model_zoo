@@ -4,10 +4,6 @@ ctdet_coco_dlav0_384
 ctdet_coco_dlav0_512
 # For -at faceboxes
 faceboxes-pytorch
-# For -at retinaface
-retinaface-anti-cov
-retinaface-resnet50
-ssh-mxnet
 # For -at ssd
 efficientdet-d0-tf
 efficientdet-d1-tf

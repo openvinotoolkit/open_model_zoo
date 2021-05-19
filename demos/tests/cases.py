@@ -256,13 +256,6 @@ NATIVE_DEMOS = [
                               '-m': ModelArg('faceboxes-pytorch')}
             ),
             *combine_cases(
-                TestCase(options={'-at': 'retinaface'}),
-                single_option_cases('-m',
-                    ModelArg('retinaface-anti-cov'),
-                    ModelArg('retinaface-resnet50'),
-                    ModelArg('ssh-mxnet'))
-            ),
-            *combine_cases(
                 TestCase(options={'-at': 'ssd'}),
                 single_option_cases('-m',
                     ModelArg('efficientdet-d0-tf'),
@@ -379,7 +372,7 @@ NATIVE_DEMOS = [
                     TestCase(options={}),
                     TestCase(options={
                         '-m_lm': ModelArg('landmarks-regression-retail-0009'),
-                        '-m_reid': ModelArg('face-recognition-mobilefacenet-arcface'),
+                        '-m_reid': ModelArg('Sphereface'),
                     }),
                 ],
             ),
@@ -647,12 +640,6 @@ PYTHON_DEMOS = [
             ),
             TestCase(options={'--architecture_type': 'ctpn',
                               '-m': ModelArg('ctpn')}
-            ),
-            *combine_cases(
-                TestCase(options={'--architecture_type': 'retinaface'}),
-                single_option_cases('-m',
-                    ModelArg('retinaface-anti-cov'),
-                    ModelArg('retinaface-resnet50'))
             ),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'ssd'}),
