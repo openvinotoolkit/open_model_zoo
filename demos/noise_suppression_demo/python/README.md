@@ -22,11 +22,11 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 
 Running the application with the `-h` option yields the following usage message:
 ```
-python3 noise_suppression.py -h
+python3 noise_suppression_demo.py -h
 ```
 The command yields the following usage message:
 ```
-usage: noise_suppression.py [-h] -m MODEL -i INPUT [-o OUTPUT] [-d DEVICE]
+usage: noise_suppression_demo.py [-h] -m MODEL -i INPUT [-o OUTPUT] [-d DEVICE]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -44,7 +44,7 @@ Options:
 You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
 [Model Downloader](../../../tools/downloader/README.md) executed with "--name dns*"):
 ```
-    python3 noise_suppression.py \
+    python3 noise_suppression_demo.py \
         --model=<path_to_model>/noise-suppression-poconetlike-0001.xml \
         --input=noisy.wav \
         --output=cleaned.wav
