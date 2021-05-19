@@ -299,10 +299,10 @@ int main(int argc, char *argv[]) {
         //------------------------------- Preparing Input ------------------------------------------------------
         slog::info << "Reading input" << slog::endl;
 
-        auto vaContext = std::make_shared<InferenceBackend::VaApiContext>(core);
+        auto vaContext = std::make_shared<VaApiContext>(core);
         auto sharedContext = vaContext->sharedContext();
 
-        pz::GstVaApiDecoder decoder;
+        GstVaApiDecoder decoder;
         VaApiImage::Ptr srcImage;
 
         decoder.open(FLAGS_i);

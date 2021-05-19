@@ -1,3 +1,19 @@
+/*
+// Copyright (C) 2018-2021 Intel Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+*/
+
 #include "gst_vaapi_decoder.h"
 
 #include <cassert>
@@ -7,9 +23,6 @@
 #if not defined(UNUSED)
 #define UNUSED(x) (void)(x)
 #endif
-
-namespace pz
-{
 
 using GstMemoryUniquePtr = std::unique_ptr<GstMemory, decltype(&gst_memory_unref)>;
 
@@ -113,13 +126,13 @@ std::shared_ptr<VaApiImage> GstVaApiDecoder::CreateImage(GstSample* sample, GstM
 
         auto unique_image =  bufferToImage(buffer);
 
-        auto image_deleter = [sample, buffer](InferenceBackend::VaApiImage *image)
+        auto image_deleter = [sample, buffer](VaApiImage *image)
         {
             gst_sample_unref(sample);
             delete image;
         };
 
-        return std::shared_ptr<InferenceBackend::VaApiImage>(unique_image.release(), image_deleter);
+        return std::shared_ptr<VaApiImage>(unique_image.release(), image_deleter);
     }
     catch (const std::exception &e)
     {
@@ -239,6 +252,4 @@ void GstVaApiDecoder::close()
         gst_object_unref (pipeline_);
         pipeline_ = nullptr;
     }
-}
-
 }
