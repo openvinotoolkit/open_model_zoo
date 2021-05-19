@@ -31,10 +31,11 @@ from ..representation import (
     ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation,
 )
 from ..data_readers import KaldiFrameIdentifier, KaldiMatrixIdentifier
-from ..utils import get_path, OrderedSet, init_telemetry, send_telemetry_event
+from ..utils import (
+    get_path, OrderedSet, cast_to_bool, is_relative_to, start_telemetry, send_telemetry_event, end_telemetry
+)
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
-from ..utils import cast_to_bool, is_relative_to
 
 DatasetConversionInfo = namedtuple('DatasetConversionInfo',
                                    [
@@ -221,12 +222,7 @@ def make_subset_kaldi(annotation, size, shuffle=True):
 
 def main():
     main_argparser = build_argparser()
-    tm = init_telemetry()
-    if tm:
-        try:
-            tm.start_session('ac')
-        except Exception: # pylint:disable=W0703
-            pass
+    tm = start_telemetry()
 
     args, _ = main_argparser.parse_known_args()
     converter, converter_argparser, converter_args = get_converter_arguments(args)
@@ -258,7 +254,7 @@ def main():
             subsample_size = int(args.subsample)
 
         converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed, args.shuffle)
-    send_telemetry_event(tm, 'dataset_analysis',  'enabled' if dataset_analysis else 'disabled')
+    send_telemetry_event(tm, 'dataset_analysis', 'enabled' if args.analyze_dataset else 'disabled')
     if args.analyze_dataset:
         analyze_dataset(converted_annotation, meta)
 
@@ -279,12 +275,7 @@ def main():
 
     save_annotation(converted_annotation, meta, annotation_file, meta_file, dataset_config)
     send_telemetry_event(tm, 'annotation_saving', True)
-    if tm:
-        try:
-            tm.end_session('ac')
-            tm.force_shutdown(1.0)
-        except Exception: # pylint:disable=W0703
-            pass
+    end_telemetry(tm)
 
 
 def save_annotation(annotation, meta, annotation_file, meta_file, dataset_config=None):

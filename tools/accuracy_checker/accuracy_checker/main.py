@@ -27,7 +27,15 @@ from .config import ConfigReader
 from .logging import print_info, add_file_handler, exception
 from .evaluators import ModelEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
-from .utils import get_path, cast_to_bool, check_file_existence, validate_print_interval, init_telemetry, send_telemetry_event
+from .utils import (
+    get_path,
+    cast_to_bool,
+    check_file_existence,
+    validate_print_interval,
+    start_telemetry,
+    end_telemetry,
+    send_telemetry_event
+)
 from . import __version__
 
 
@@ -369,21 +377,15 @@ def build_arguments_parser():
 def main():
     return_code = 0
     args = build_arguments_parser().parse_args()
-    tm = init_telemetry()
-    if tm:
-        try:
-            tm.start_session('ac')
-        except Exception: # pylint:disable=W0703
-            pass
+    tm = start_telemetry()
     progress_bar_provider = args.progress if ':' not in args.progress else args.progress.split(':')[0]
     progress_reporter = ProgressReporter.provide(progress_bar_provider, None, print_interval=args.progress_interval)
     if args.log_file:
         add_file_handler(args.log_file)
-    intermdeiate_metrics = args.intermediate_metrics_results
     evaluator_kwargs = {}
-    if intermdeiate_metrics:
+    if args.intermediate_metrics_results:
         validate_print_interval(args.metrics_interval)
-        evaluator_kwargs['intermediate_metrics_results'] = intermdeiate_metrics
+        evaluator_kwargs['intermediate_metrics_results'] = args.intermediate_metrics_results
         evaluator_kwargs['metrics_interval'] = args.metrics_interval
         evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
     evaluator_kwargs['store_only'] = args.store_only
@@ -392,13 +394,8 @@ def main():
     config, mode = ConfigReader.merge(args)
     evaluator_class = EVALUATION_MODE.get(mode)
     if not evaluator_class:
-        if tm:
-            try:
-                send_telemetry_event(tm, 'error', 'Unknown evaluation mode')
-                tm.end_session()
-                tm.force_shutdown(1.0)
-            except Exception: # pylint:disable=W0703
-                pass
+        send_telemetry_event(tm, 'error', 'Unknown evaluation mode')
+        end_telemetry(tm)
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
         config_entry['_store_only'] = args.store_only
@@ -407,13 +404,10 @@ def main():
             processing_info = evaluator_class.get_processing_info(config_entry)
             print_processing_info(*processing_info)
             evaluator = evaluator_class.from_configs(config_entry)
-            evaluator_class.send_processing_info(tm)
+            evaluator.send_processing_info(tm)
             if args.profile:
-                _timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-                profiler_dir = args.profiler_logs_dir / _timestamp
-                print_info('Metric profiling activated. Profiler output will be stored in {}'.format(profiler_dir))
-                evaluator.set_profiling_dir(profiler_dir)
-                send_telemetry_event('metric_profiling', 'activated')
+                setup_profiling(args.profiler_log_dir, evaluator)
+                send_telemetry_event(tm, 'metric_profiling', 'activated')
             send_telemetry_event(tm, 'model_run', 'started')
             evaluator.process_dataset(
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
@@ -434,13 +428,8 @@ def main():
             exception(e)
             return_code = 1
             continue
-    if tm:
-        try:
-            send_telemetry_event(tm, 'status', 'success' if not return_code else 'fail')
-            tm.end_session('ac')
-            tm.force_shutdown(1.0)
-        except Exception: # pylint:disable=W0703
-            pass
+        send_telemetry_event(tm, 'status', 'success' if not return_code else 'fail')
+        end_telemetry(tm)
     sys.exit(return_code)
 
 
@@ -488,6 +477,13 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
                 'abs_threshold': metric_result.get('abs_threshold', 0),
                 'rel_threshold': metric_result.get('rel_threshold', 0)
             })
+
+
+def setup_profiling(logs_dir, evaluator):
+    _timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    profiler_dir = logs_dir / _timestamp
+    print_info('Metric profiling activated. Profiler output will be stored in {}'.format(profiler_dir))
+    evaluator.set_profiling_dir(profiler_dir)
 
 
 if __name__ == '__main__':

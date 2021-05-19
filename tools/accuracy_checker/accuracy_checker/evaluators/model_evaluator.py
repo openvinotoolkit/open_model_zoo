@@ -33,7 +33,7 @@ from .base_evaluator import BaseEvaluator
 from .quantization_model_evaluator import create_dataset_attributes
 
 
-# pylint: disable=W0223
+# pylint: disable=W0223,R0904
 class ModelEvaluator(BaseEvaluator):
     def __init__(
             self, launcher, input_feeder, adapter, preprocessor, postprocessor, dataset, metric, async_mode, config
@@ -47,6 +47,7 @@ class ModelEvaluator(BaseEvaluator):
         self.dataset = dataset
         self.metric_executor = metric
         self.process_dataset = self.process_dataset_sync if not async_mode else self.process_dataset_async
+        self.async_mode = async_mode
 
         self._annotations = []
         self._predictions = []
@@ -206,16 +207,16 @@ class ModelEvaluator(BaseEvaluator):
         framework = launcher_config['framework']
         device = launcher_config.get('device', 'CPU')
         send_telemetry_event(
-            sender, 'execution_info', 
+            sender, 'execution_info',
             {
                 'framework': framework if framework != 'dlsdk' else 'openvino',
                 'device': device
             }
         )
         send_telemetry_event(
-            sender, 
-            'inference_mode', 
-            'sync' if self.process_dataset == self.process_dataset_sync else 'async'
+            sender,
+            'inference_mode',
+            'sync' if not self.async_mode else 'async'
         )
         if hasattr(self.launcher, 'get_model_file_type'):
             send_telemetry_event(sender, 'model_file_type', self.launcher.get_model_file_type())
@@ -227,7 +228,6 @@ class ModelEvaluator(BaseEvaluator):
         if metrics:
             for metric in metrics:
                 send_telemetry_event(sender, 'metric', metric.get('type'))
-
 
     def _get_batch_input(self, batch_annotation, batch_input):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)

@@ -21,7 +21,7 @@ from pathlib import Path
 from .base_evaluator import BaseEvaluator
 from ..utils import send_telemetry_event
 
-
+# pylint:disable=R0904
 class ModuleEvaluator(BaseEvaluator):
     def __init__(self, internal_module, config):
         super().__init__()
@@ -34,7 +34,7 @@ class ModuleEvaluator(BaseEvaluator):
         module_config = config.get('module_config')
         python_path = config.get('python_path')
 
-        return cls(load_module(module, python_path).from_configs(module_config, *args, **kwargs)), config
+        return cls(load_module(module, python_path).from_configs(module_config, *args, **kwargs), config)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         self._internal_module.process_dataset(

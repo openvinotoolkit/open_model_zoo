@@ -105,50 +105,7 @@ class Dataset:
 
     @staticmethod
     def load_annotation(config):
-        def ignore_subset_settings(config):
-            subset_file = config.get('subset_file')
-            store_subset = config.get('store_subset')
-            if subset_file is None:
-                return False
-            if Path(subset_file).exists() and not store_subset:
-                return True
-            return False
-
-        def _create_subset(annotation, config):
-            subsample_size = config.get('subsample_size')
-            subsample_meta = {'subset': False, 'shuffle': False}
-            if not ignore_subset_settings(config):
-
-                if subsample_size is not None:
-                    subsample_seed = config.get('subsample_seed', 666)
-                    shuffle = config.get('shuffle', True)
-                    annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
-                    subsample_meta = {
-                        'shuffle': shuffle,
-                        'subset': True
-                    }
-                
-            elif subsample_size is not None:
-                warnings.warn("Subset selection parameters will be ignored")
-                config.pop('subsample_size', None)
-                config.pop('subsample_seed', None)
-                config.pop('shuffle', None)
-        
-            return annotation, subsample_meta
-
-        annotation, meta = None, None
-        use_converted_annotation = True
-        if 'annotation' in config:
-            annotation_file = Path(config['annotation'])
-            if annotation_file.exists():
-                print_info('Annotation for {dataset_name} dataset will be loaded from {file}'.format(
-                    dataset_name=config['name'], file=annotation_file))
-                annotation = read_annotation(get_path(annotation_file))
-                meta = Dataset.load_meta(config)
-                use_converted_annotation = False
-
-        if not annotation and 'annotation_conversion' in config:
-            tm = init_telemetry()
+        def _convert_annotation():
             print_info("Annotation conversion for {dataset_name} dataset has been started".format(
                 dataset_name=config['name']))
             send_telemetry_event(tm, 'annotation_converter', config['annotation_conversion'].get('converter'))
@@ -161,24 +118,17 @@ class Dataset:
                 print_info("Annotation conversion for {dataset_name} dataset has been finished".format(
                     dataset_name=config['name']))
                 send_telemetry_event(tm, 'annotation_conversion', 'finished')
+            return annotation, meta
 
-        if not annotation:
-            raise ConfigError('path to converted annotation or data for conversion should be specified')
-        annotation, subset_meta = _create_subset(annotation, config)
-        send_telemetry_event(tm, 'subset_selection', subset_meta)
-        dataset_analysis = config.get('analyze_datase', False)
-        send_telemetry_event(tm, 'dataset_analysis', 'enabled' if dataset_analysis else 'disabled')
-
-        if dataset_analysis:
+        def _run_dataset_analysis(meta):
             if config.get('segmentation_masks_source'):
                 meta['segmentation_masks_source'] = config.get('segmentation_masks_source')
             meta = analyze_dataset(annotation, meta)
             if meta.get('segmentation_masks_source'):
                 del meta['segmentation_masks_source']
+            return meta
 
-        annotation_saving = False
-        if use_converted_annotation and contains_all(config, ['annotation', 'annotation_conversion']):
-            annotation_saving = True
+        def _save_annotation():
             annotation_name = config['annotation']
             meta_name = config.get('dataset_meta')
             if meta_name:
@@ -188,6 +138,38 @@ class Dataset:
             print_info('Converted annotation for {dataset_name} dataset will be saved to {file}'.format(
                 dataset_name=config['name'], file=Path(annotation_name)))
             save_annotation(annotation, meta, Path(annotation_name), meta_name, config)
+
+        annotation, meta = None, None
+        use_converted_annotation = True
+        if 'annotation' in config:
+            annotation_file = Path(config['annotation'])
+            if annotation_file.exists():
+                print_info('Annotation for {dataset_name} dataset will be loaded from {file}'.format(
+                    dataset_name=config['name'], file=annotation_file))
+                annotation = read_annotation(get_path(annotation_file))
+                meta = Dataset.load_meta(config)
+                use_converted_annotation = False
+
+        tm = init_telemetry()
+
+        if not annotation and 'annotation_conversion' in config:
+            annotation, meta = _convert_annotation()
+
+        if not annotation:
+            raise ConfigError('path to converted annotation or data for conversion should be specified')
+        annotation, subset_meta = _create_subset(annotation, config)
+        send_telemetry_event(tm, 'subset_selection', subset_meta)
+        dataset_analysis = config.get('analyze_datase', False)
+        send_telemetry_event(tm, 'dataset_analysis', 'enabled' if dataset_analysis else 'disabled')
+
+        if dataset_analysis:
+            meta = _run_dataset_analysis(meta)
+
+        annotation_saving = False
+        if use_converted_annotation and contains_all(config, ['annotation', 'annotation_conversion']):
+            annotation_saving = True
+            _save_annotation()
+        if use_converted_annotation:
             send_telemetry_event(tm, 'annotation_saving', annotation_saving)
 
         return annotation, meta
@@ -684,3 +666,36 @@ class DataProvider:
 
 class DatasetWrapper(DataProvider):
     pass
+
+
+def ignore_subset_settings(config):
+    subset_file = config.get('subset_file')
+    store_subset = config.get('store_subset')
+    if subset_file is None:
+        return False
+    if Path(subset_file).exists() and not store_subset:
+        return True
+    return False
+
+
+def _create_subset(annotation, config):
+    subsample_size = config.get('subsample_size')
+    subsample_meta = {'subset': False, 'shuffle': False}
+    if not ignore_subset_settings(config):
+
+        if subsample_size is not None:
+            subsample_seed = config.get('subsample_seed', 666)
+            shuffle = config.get('shuffle', True)
+            annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
+            subsample_meta = {
+                'shuffle': shuffle,
+                'subset': True
+            }
+
+    elif subsample_size is not None:
+        warnings.warn("Subset selection parameters will be ignored")
+        config.pop('subsample_size', None)
+        config.pop('subsample_seed', None)
+        config.pop('shuffle', None)
+
+    return annotation, subsample_meta

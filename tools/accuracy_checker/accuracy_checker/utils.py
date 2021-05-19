@@ -35,6 +35,8 @@ import defusedxml.ElementTree as et
 import numpy as np
 import yaml
 
+from . import __version__
+
 try:
     from shapely.geometry.polygon import Polygon
 except ImportError:
@@ -851,11 +853,11 @@ def convert_xctr_yctr_w_h_to_x1y1x2y2(x, y, width, height):
 
 def init_telemetry():
     try:
-        import openvino_telemetry as tm
+        import openvino_telemetry as tm # pylint:disable=C0415
     except ImportError:
         return None
     try:
-        telemetry = tm.Telemetry('Accuracy Checker', tid='UA-194864834-1')
+        telemetry = tm.Telemetry('Accuracy Checker', version=__version__, tid='UA-194864834-1')
         return telemetry
     except Exception: # pylint:disable=W0703
         return None
@@ -869,3 +871,22 @@ def send_telemetry_event(tm, *args, **kwargs):
     except Exception: # pylint:disable=W0703
         pass
     return
+
+
+def start_telemetry():
+    tm = init_telemetry()
+    if tm:
+        try:
+            tm.start_session('ac')
+        except Exception:  # pylint:disable=W0703
+            pass
+    return tm
+
+
+def end_telemetry(tm):
+    if tm:
+        try:
+            tm.end_session()
+            tm.force_shutdown(1.0)
+        except Exception: # pylint:disable=W0703
+            pass
