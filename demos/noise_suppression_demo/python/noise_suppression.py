@@ -24,7 +24,7 @@ from pathlib import Path
 import numpy as np
 import soundfile
 
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, Blob
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -59,13 +59,14 @@ def main():
     ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
 
     # check input and output names
-    input_names = [i.strip() for i in ie_encoder.inputs.keys()]
-    output_names = [o.strip() for o in ie_encoder.outputs.keys()]
+    input_shapes = {k:v.input_data.shape for k,v in ie_encoder.input_info.items()}
+    input_names = list(ie_encoder.input_info.keys())
+    output_names = list(ie_encoder.outputs.keys())
 
     assert "input" in input_names, "'input' is not presented in model"
     assert "output" in output_names, "'output' is not presented in model"
     state_inp_names = [n for n in input_names if "state" in n]
-    state_param_num = sum(np.prod(ie_encoder.inputs[n].shape) for n in state_inp_names)
+    state_param_num = sum(np.prod(input_shapes[n]) for n in state_inp_names)
     log.info("state_param_num = {} ({:.1f}Mb)".format(state_param_num, state_param_num*4e-6))
 
     # load model to the device
@@ -77,7 +78,7 @@ def main():
     if sample_inp.ndim == 2:
         sample_inp = sample_inp.mean(0)
 
-    input_size = ie_encoder.inputs["input"].shape[1]
+    input_size = input_shapes["input"][1]
     res = None
 
     samples_out = []
@@ -98,13 +99,19 @@ def main():
             if res:
                 inputs[n] = res[n.replace('inp', 'out')]
             else:
-                shape = ie_encoder.inputs[n].shape
-                inputs[n] = np.zeros(shape, dtype=np.float32)
+                #on the first iteration fill states by zeros
+                inputs[n] = np.zeros(input_shapes[n], dtype=np.float32)
 
         t0 = time.perf_counter()
+        # Copy inputs manually through InferRequest functionality to speedup
+        infer_request_ptr = ie_encoder_exec.requests[0]
+        for n, data in inputs.items():
+            info_ptr = ie_encoder.input_info[n]
+            blob = Blob(info_ptr.tensor_desc, data)
+            infer_request_ptr.set_blob(n, blob, info_ptr.preprocess_info)
 
         # infer by IE
-        res = ie_encoder_exec.infer(inputs=inputs)
+        res = ie_encoder_exec.infer()
 
         t1 = time.perf_counter()
 
@@ -113,7 +120,8 @@ def main():
 
     log.info("Sequence of length {:0.2f}s is processed by {:0.2f}s".format(
         sum(s.shape[0] for s in samples_out)/freq,
-        sum(samples_times)
+        sum(samples_times),
+
     ))
     sample_out = np.concatenate(samples_out, 0)
     soundfile.write(args.output, sample_out, freq)
