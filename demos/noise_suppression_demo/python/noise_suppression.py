@@ -59,7 +59,7 @@ def main():
     ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
 
     # check input and output names
-    input_shapes = {k:v.input_data.shape for k,v in ie_encoder.input_info.items()}
+    input_shapes = {k: v.input_data.shape for k, v in ie_encoder.input_info.items()}
     input_names = list(ie_encoder.input_info.keys())
     output_names = list(ie_encoder.outputs.keys())
 
