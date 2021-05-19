@@ -306,8 +306,6 @@ Deep Learning models for noise suppression.
 * [Model Downloader](../../tools/downloader/README.md)
 * [Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models](../public/index.md)
 
-
-
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.
