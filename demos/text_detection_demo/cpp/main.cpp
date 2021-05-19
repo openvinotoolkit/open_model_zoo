@@ -135,14 +135,16 @@ int main(int argc, char *argv[]) {
         auto decoder_bandwidth = FLAGS_b;
 
         slog::info << "Loading network files" << slog::endl;
-        Cnn text_detection, text_recognition;
+        Cnn text_detection;
+        CnnFactory factory;
+        auto text_recognition = factory.create(FLAGS_tr_composite);
 
         if (!FLAGS_m_td.empty())
             text_detection.Init(FLAGS_m_td, ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td));
 
-        if (!FLAGS_m_tr.empty())
-            text_recognition.Init(FLAGS_m_tr, ie, FLAGS_d_tr);
-
+        if (!FLAGS_m_tr.empty()) {
+            text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
+        }
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat image = cap->read();
         if (!image.data) {
@@ -189,7 +191,7 @@ int main(int argc, char *argv[]) {
                 rects.resize(static_cast<size_t>(FLAGS_max_rect_num));
             }
 
-            int num_found = text_recognition.is_initialized() ? 0 : static_cast<int>(rects.size());
+            int num_found = text_recognition->is_initialized() ? 0 : static_cast<int>(rects.size());
 
             for (const auto &rect : rects) {
                 cv::Mat cropped_text;
@@ -200,7 +202,7 @@ int main(int argc, char *argv[]) {
                     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
                     points = floatPointsFromRotatedRect(rect);
                     topLeftPoint(points, &top_left_point_idx);
-                    cropped_text = cropImage(image, points, text_recognition.input_size(), top_left_point_idx);
+                    cropped_text = cropImage(image, points, text_recognition->input_size(), top_left_point_idx);
                     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                     text_crop_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
                 } else {
@@ -222,8 +224,8 @@ int main(int argc, char *argv[]) {
 
                 std::string res = "";
                 double conf = 1.0;
-                if (text_recognition.is_initialized()) {
-                    auto blobs = text_recognition.Infer(cropped_text);
+                if (text_recognition->is_initialized()) {
+                    auto blobs = text_recognition->Infer(cropped_text);
                     auto out_blob = blobs.begin()->second;
                     if (FLAGS_tr_o_blb_nm != "") {
                         const auto& iter = blobs.find(FLAGS_tr_o_blb_nm);
@@ -273,7 +275,7 @@ int main(int argc, char *argv[]) {
                             std::cout << ",";
                     }
 
-                    if (text_recognition.is_initialized()) {
+                    if (text_recognition->is_initialized()) {
                         std::cout << "," << res;
                     }
 
@@ -282,7 +284,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                if (!FLAGS_no_show && (!res.empty() || !text_recognition.is_initialized())) {
+                if (!FLAGS_no_show && (!res.empty() || !text_recognition->is_initialized())) {
                     for (size_t i = 0; i < points.size() ; i++) {
                         cv::line(demo_image, points[i], points[(i+1) % points.size()], cv::Scalar(50, 205, 50), 2);
                     }
@@ -333,19 +335,19 @@ int main(int argc, char *argv[]) {
           }
         }
 
-        if (text_recognition.ncalls() && !FLAGS_r) {
+        if (text_recognition->ncalls() && !FLAGS_r) {
           std::cout << "text recognition model inference (ms) (fps): "
-                    << text_recognition.time_elapsed() / text_recognition.ncalls() << " "
-                    << text_recognition.ncalls() * 1000 / text_recognition.time_elapsed() << std::endl;
+                    << text_recognition->time_elapsed() / text_recognition->ncalls() << " "
+                    << text_recognition->ncalls() * 1000 / text_recognition->time_elapsed() << std::endl;
           if (std::fabs(text_recognition_postproc_time) < std::numeric_limits<double>::epsilon()) {
               throw std::logic_error("text_recognition_postproc_time can't be equal to zero");
           }
           std::cout << "text recognition postprocessing (ms) (fps): "
-                    << text_recognition_postproc_time / text_recognition.ncalls() / 1000 << " "
-                    << text_recognition.ncalls() * 1000000 / text_recognition_postproc_time << std::endl << std::endl;
+                    << text_recognition_postproc_time / text_recognition->ncalls() / 1000 << " "
+                    << text_recognition->ncalls() * 1000000 / text_recognition_postproc_time << std::endl << std::endl;
           if (std::fabs(text_crop_time) > std::numeric_limits<double>::epsilon()) {
-              std::cout << "text crop (ms) (fps): " << text_crop_time / text_recognition.ncalls() / 1000 << " "
-                    << text_recognition.ncalls() * 1000000 / text_crop_time << std::endl << std::endl;
+              std::cout << "text crop (ms) (fps): " << text_crop_time / text_recognition->ncalls() / 1000 << " "
+                    << text_recognition->ncalls() * 1000000 / text_crop_time << std::endl << std::endl;
           }
         }
 

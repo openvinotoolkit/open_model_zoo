@@ -19,6 +19,7 @@ static const char text_detection_model_message[] = "Required. Path to the Text D
 static const char text_recognition_model_message[] = "Required. Path to the Text Recognition model (.xml) file.";
 static const char text_recognition_decoder_type_message[] = "Optional. Type of the decoder, either 'simple' for SimpleDecoder or 'ctc' for CTC greedy and CTC beam search decoders. Default is 'ctc'";
 static const char text_recognition_model_symbols_set_message[] = "Optional. Symbol set for the Text Recognition model.";
+static const char text_recognition_model_is_composite[] = "Optional. Set this flag if text recognition model is composite (i.e. encoder-decoder)";
 static const char text_recognition_pad_token_is_first_message[] = "Optional. Specifies if pad token is the first symbol in the alphabet. "
                                                                     "Default is false";
 static const char text_recognition_output_blob_name[] = "Optional. Name of the output blob of the model which would be used as model output. "
@@ -60,6 +61,7 @@ DEFINE_string(dt, "ctc", text_recognition_decoder_type_message);
 DEFINE_string(m_tr_ss, "0123456789abcdefghijklmnopqrstuvwxyz", text_recognition_model_symbols_set_message);
 DEFINE_bool(tr_pt_first, false, text_recognition_pad_token_is_first_message);
 DEFINE_string(tr_o_blb_nm, "", text_recognition_output_blob_name);
+DEFINE_bool(tr_composite, false, text_recognition_model_is_composite);
 DEFINE_bool(cc, false, text_central_image_crop_message);
 DEFINE_int32(w_td, 0, image_width_for_text_detection_model_message);
 DEFINE_int32(h_td, 0, image_height_for_text_detection_model_message);
@@ -94,6 +96,7 @@ static void showUsage() {
     std::cout << "    -dt \"<type>\"               " << text_recognition_decoder_type_message << std::endl;
     std::cout << "    -m_tr_ss \"<value>\"           " << text_recognition_model_symbols_set_message << std::endl;
     std::cout << "    -tr_pt_first                   " << text_recognition_pad_token_is_first_message << std::endl;
+    std::cout << "    -tr_composite                   " << text_recognition_model_is_composite << std::endl;
     std::cout << "    -tr_o_blb_nm                   " << text_recognition_output_blob_name << std::endl;
     std::cout << "    -cc                          " << text_central_image_crop_message << std::endl;
     std::cout << "    -w_td \"<value>\"              " << image_width_for_text_detection_model_message << std::endl;

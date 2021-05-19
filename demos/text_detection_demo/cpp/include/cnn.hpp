@@ -9,6 +9,7 @@
 
 #include <inference_engine.hpp>
 #include <opencv2/opencv.hpp>
+#include <ie_blob.h>
 
 using namespace InferenceEngine;
 
@@ -28,7 +29,7 @@ class Cnn {
 
     const cv::Size& input_size() const {return input_size_;}
 
-  private:
+  protected:
     bool is_initialized_;
     cv::Size input_size_;
     int channels_;
@@ -38,4 +39,30 @@ class Cnn {
 
     double time_elapsed_;
     size_t ncalls_;
+};
+
+class EncoderDecoderCNN : public Cnn {
+  public:
+
+    void Init(const std::string &model_path, Core & ie, const std::string & deviceName,
+              const cv::Size &new_input_resolution = cv::Size());
+
+    InferenceEngine::BlobMap Infer(const cv::Mat &frame);
+  private:
+    InferRequest infer_request_encoder_;
+    InferRequest infer_request_decoder_;
+    std::vector<std::string> input_names_decoder;
+    std::vector<std::string> output_names_encoder;
+    std::vector<std::string> output_names_decoder;
+    InputInfo::Ptr input_info_decoder_;
+};
+
+class CnnFactory {
+public:
+    virtual Cnn* create(unsigned type) {
+        switch (type) {
+            case 0: return new Cnn();
+            case 1: return new EncoderDecoderCNN();
+        }
+    }
 };
