@@ -1,7 +1,5 @@
 # VA Object Detection C++ Demo
 
-![](../object_detection.gif)
-
 This demo showcases HW-accelerated video decoding using libVA and sharing VA surface data with input blob without copying.
 Data is then processed inside Inference Engine using SSD-like object detection models.
 Image data sharing can improve overall frame-rate of the application, because it removes data copying process.
