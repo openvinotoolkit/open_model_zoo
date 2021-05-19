@@ -41,4 +41,4 @@ rawpy>=0.16.0
 lmdb>=1.2.1
 
 # pandas datasets support
-pandaspandas~=1.1.5
+pandas~=1.1.5
