@@ -187,10 +187,16 @@ def main(args):
         preds = model(sample.inputs)
         curves = actors.update_curves(preds, sample)
         ax.relim()
-        ax.autoscale_view(True,True,True)
+        ax.autoscale_view(True, True, True)
         return curves
 
-    movie = animation.FuncAnimation(fig, animate, frames=len(dataset), interval=50, blit=True)
+    _ = animation.FuncAnimation(
+        fig,
+        animate,
+        frames=len(dataset),
+        interval=50,
+        blit=True
+    )
 
     ax.legend(loc="upper right")
     plt.show()
