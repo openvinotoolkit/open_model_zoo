@@ -449,12 +449,6 @@ PYTHON_DEMOS = [
                           '--questions': ['What frameworks does OpenVINO support?', 'Who are developers?']}),
         [
             TestCase(options={
-                '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-0001'),
-                '--input_names': '0,1,2',
-                '--output_names': '3171,3172',
-                '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-0001/vocab.txt'),
-            }),
-            TestCase(options={
                 '-m': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
                 '--input_names': 'input_ids,attention_mask,token_type_ids',
                 '--output_names': 'output_s,output_e',
