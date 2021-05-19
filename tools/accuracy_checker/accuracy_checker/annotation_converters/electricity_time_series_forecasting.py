@@ -23,7 +23,13 @@ from ..utils import UnsupportedPackage
 try:
     import pandas as pd
 except ImportError as import_error:
+<<<<<<< HEAD
     editdistance = UnsupportedPackage("pandas", import_error.msg)
+=======
+    pd = UnsupportedPackage("pandas", import_error.msg)
+import numpy as np
+import sklearn.preprocessing
+>>>>>>> c67ddc1961d8ed50828a525fcd5da1b699f6d46e
 
 from ..representation import TimeSeriesForecastingAnnotation
 from ..config import PathField, NumberField
@@ -357,6 +363,8 @@ class ElectricityTimeSeriesForecastingConverter(BaseFormatConverter):
         return configuration_parameters
 
     def configure(self):
+        if isinstance(pd, UnsupportedPackage):
+            pd.raise_error(self.__provider__)
         self.data_path_file = self.get_value_from_config('data_path_file')
         self.num_encoder_steps = int(self.get_value_from_config('num_encoder_steps'))
         self.formatter = ElectricityFormatter()

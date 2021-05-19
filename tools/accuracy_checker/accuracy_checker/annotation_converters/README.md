@@ -174,6 +174,11 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `target_suffix` - target ground truth file name's suffix (default `out`).
   * `recursive` - enables acquiring of dataset files from `data_dir` subcatalogs (default False).
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+* `parametric_image_processing` - converts dataset for image processing which required variable conditions for getting result, to `ImageProcessingAnnotation. Parameters provided as float value in reference image name using `_` as delimeter.
+  * `input_dir` - directory with input images.
+  * `reference_dir` - directory with reference images.
+  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+  * `param_scale` - multiplayer for parameters (Optional, default `0.001`).
 * `super_resolution` - converts dataset for single image super resolution task to `SuperResolutionAnnotation`.
   * `data_dir` - path to folder, where images in low and high resolution are located.
   * `lr_dir` - path to directory, where images in low resolution are located.
@@ -375,14 +380,16 @@ The main difference between this converter and `super_resolution` in data organi
   * `data_dir` - dataset root directory, which contains subdirectories with extracted video frames.
   * `out_fps` - output frame rate of generated video clips.
   * `clip_length` - number of frames of generated video clips.
+  * `img_prefix` - prefix for used images. (Optional, default - `img_`).
 * `redweb` - converts [ReDWeb](https://sites.google.com/site/redwebcvpr18) dataset for monocular relative depth perception to `DepthEstimationAnnotation`
   * `data_dir` - the dataset root directory, where `imgs` - directory with RGB images and `RD` - directory with relative depth maps are located (Optional, if you want to provide `annotation_file`)
   * `annotation_file`- the file in txt format which contains pairs of image and depth map files. (Optional, if not provided full content of `data_dir` will be considered as dataset.)
 * `nyu_depth_v2` - converts [NYU Depth Dataset V2](https://cs.nyu.edu/~silberman/datasets/nyu_depth_v2.html) for depth estimation to `DepthEstimationAnnotation`. This converter accept preprocessed data stored in HDF5 format, which can be downloaded from this [page](http://datasets.lids.mit.edu/fastdepth/data/)
   * `data_dir` - directory with HDF5 files. (Optional, can be omitted if you already have converted images and depth maps).
-  * `images_dir` - directory for images. If `data_dir` provided, the directory will be used for saving converted images, otherwise used for data reading. (Optional, can be not provided in conversion case, default value `<data_dir>/converted/images`).
-  * `depth_map_dir` - directory for reference depth maps, stored in numpy format. If `data_dir` provided, the directory will be used for saving converted depth maps, otherwise used for data reading.
+  * `images_dir` - directory for images. If `allow_convert_data` is True, the directory will be used for saving converted images, otherwise used for data reading. (Optional, can be not provided in conversion case, default value `<data_dir>/converted/images`).
+  * `depth_map_dir` - directory for reference depth maps, stored in numpy format. If `allow_convert_data` is True, the directory will be used for saving converted depth maps, otherwise used for data reading.
     (Optional, can be not provided in conversion case, default value `<data_dir>/converted/depth`). Please, note, you need to specify path to directory with depth maps with `additional_data_source` parameter in your config during evaluation.
+  * `allow_convert_data` - allows to convert data from HDF5 format (Optional, default False).
 * `inpainting` - converts images to `ImageInpaintingAnnotation`.
   * `images_dir` - path to images directory.
   * `masks_dir` - path to mask dataset to be used for inpainting (Optional).
@@ -517,6 +524,9 @@ The main difference between this converter and `super_resolution` in data organi
 * `electricity` - converts Electricity dataset to `TimeSeriesForecastingAnnotation`.
   * `data_path_file` - Path to dataset file in .csv format.
   * `num_encoder_steps` - The maximum number of historical timestamps that model use.
+* `yolo_labeling` - converts object detection dataset with annotation in YOLO labeling format to `DetectionAnnotation`.
+  * `data_dir` - path to directory with annotation files in txt format and images.
+  * `labels_file` - path to file with labels in txt format (optional).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

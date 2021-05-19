@@ -47,5 +47,10 @@ Expected color order: `BGR`.
 2. The `labels` is a blob with the shape `750` in the format `N`, where `N` is the number of detected
    bounding boxes. It contains predicted class ID (0 - face) per each detected box.
 
+## Training Pipeline
+
+The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/develop/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/develop/models/object_detection/model_templates/face-detection/readme.md), allowing to fine-tune the model on custom dataset.
+
 ## Legal Information
+
 [*] Other names and brands may be claimed as the property of others.
