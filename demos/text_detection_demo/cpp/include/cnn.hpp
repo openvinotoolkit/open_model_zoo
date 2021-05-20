@@ -17,10 +17,10 @@ class Cnn {
   public:
     Cnn():is_initialized_(false), channels_(0), time_elapsed_(0), ncalls_(0) {}
 
-    void Init(const std::string &model_path, Core & ie, const std::string & deviceName,
+    virtual void Init(const std::string &model_path, Core & ie, const std::string & deviceName,
               const cv::Size &new_input_resolution = cv::Size());
 
-    InferenceEngine::BlobMap Infer(const cv::Mat &frame);
+    virtual InferenceEngine::BlobMap Infer(const cv::Mat &frame);
 
     bool is_initialized() const {return is_initialized_;}
 
@@ -59,7 +59,7 @@ class EncoderDecoderCNN : public Cnn {
 
 class CnnFactory {
 public:
-    virtual Cnn* create(unsigned type) {
+    Cnn* create(unsigned type) {
         switch (type) {
             case 0: return new Cnn();
             case 1: return new EncoderDecoderCNN();

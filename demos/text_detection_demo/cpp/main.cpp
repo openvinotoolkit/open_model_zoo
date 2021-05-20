@@ -85,14 +85,17 @@ int main(int argc, char *argv[]) {
         const double avg_time_decay = 0.8;
 
         const char kPadSymbol = '#';
-        if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
-            throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
         std::string kAlphabet;
-        if (FLAGS_tr_pt_first)
-            kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
+        if (!FLAGS_tr_composite) {
+            if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
+                throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
+            if (FLAGS_tr_pt_first)
+                kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
+            else
+                kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
+        }
         else
-            kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
-
+            kAlphabet = FLAGS_m_tr_ss;
         const double min_text_recognition_confidence = FLAGS_thr;
 
         slog::info << "Loading Inference Engine" << slog::endl;
@@ -260,6 +263,7 @@ int main(int argc, char *argv[]) {
                         slog::err << "No decoder type or invalid decoder type (-dt) provided: " + decoder_type << slog::endl;
                         return -1;
                     }
+                    std::cout << "decoded: " << res << std::endl;
                     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                     text_recognition_postproc_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 
