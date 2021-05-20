@@ -54,7 +54,7 @@ class EncoderDecoderCNN : public Cnn {
     std::vector<std::string> input_names_decoder;
     std::vector<std::string> output_names_encoder;
     std::vector<std::string> output_names_decoder;
-    InputInfo::Ptr input_info_decoder_;
+    InputInfo::Ptr input_info_decoder_input;
 };
 
 class CnnFactory {
