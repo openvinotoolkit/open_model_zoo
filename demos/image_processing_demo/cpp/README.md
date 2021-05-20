@@ -105,7 +105,7 @@ User is able to change mode in run time using the next keys:
 
 ## Demo Output
 
-The demo uses OpenCV to display and writing the resulting images.
+The demo uses OpenCV to display and write the resulting images.
 
 > **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo is not supported with any of the Model Downloader available topologies. Other models may produce unexpected results on these devices as well.
 

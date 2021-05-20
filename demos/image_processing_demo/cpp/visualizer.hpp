@@ -51,8 +51,6 @@ private:
     void markImage(cv::Mat& image, const std::pair<std::string, std::string>& marks, float alpha);
     void changeDisplayImg();
 public:
-    Visualizer() = default;
-
     cv::Size getSize();
 
     // change display image for new input and result images
