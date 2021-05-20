@@ -72,16 +72,48 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     const auto& inputInfo = cnnNetwork.getInputsInfo();
     const auto& outputInfo = cnnNetwork.getOutputsInfo();
 
-    for(const auto& input : inputInfo) {
+    for (const auto& input : inputInfo) {
         input.second->setPrecision(InferenceEngine::Precision::U8);
         input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
     }
 
     for (const auto& output : outputInfo) {
+        const InferenceEngine::TensorDesc& inputDesc = output.second->getTensorDesc();
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(InferenceEngine::Layout::NCHW);
     }
     // --------------------------- Check input & output ----------------------------------------------------
+    ModelBase::IOPattern inputPattern("CenterNet",
+        // Number of inputs 
+        { 1 },
+        // Size of inputs
+        { 4 },
+        {{ "input.1", {1, 3, 0, 0} }},
+        // Precisions
+        { InferenceEngine::Precision::U8 },
+        // Layouts
+        { InferenceEngine::Layout::NHWC });
+
+    ModelBase::IOPattern outputPattern("CenterNet",
+        // Number of  outputs
+        { 3 },
+        // Size of inputs
+        { 4 },
+        // Names & Dims
+        { { "center_heatmap", {1, 80, 128, 128} }, { "regression", {1, 2, 0, 0} }, { "width_height", {1, 2, 0, 0} } },
+        // Precisions
+        { InferenceEngine::Precision::FP32 },
+        // Layouts
+        { InferenceEngine::Layout::NCHW });
+
+    // input.1
+    // center_heatmap
+    // "regression"
+    // "width_height
+
+    ModelBase::findIONames(inputInfo, outputInfo);
+    ModelBase::checkInputsOutputs("CenterNet", {inputPattern , outputPattern}, inputInfo, outputInfo);
+
     checkInputsOutputs(inputInfo, outputInfo);
 }
 

@@ -15,6 +15,7 @@
 */
 
 #include "models/model_base.h"
+#include <iostream>
 #include <inference_engine.hpp>
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
