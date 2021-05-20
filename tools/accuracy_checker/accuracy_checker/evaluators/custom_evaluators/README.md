@@ -41,7 +41,7 @@ Optionally you can provide `module_config` section which contains config for cus
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/asr_encoder_prediction_joint_evaluator.py`.
 
 * **Im2latex formula recognition** demonstrates how to run encoder-decoder model for extractring latex formula from image.
-  Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/im2latex_evaluator.py`.
+  Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/custom_text_recognition_evaluator.py`.
   Configuration file example: `<omz_dir>/models/intel/formula-recognition-medium-scan-0001/accuracy-check.yml`.
 
 * **I3D Evaluator** demonstrates how to evaluate two-stream I3D model (RGB + Flow).
