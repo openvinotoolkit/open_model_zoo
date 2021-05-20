@@ -49,7 +49,7 @@ class FaceIdentifier(Module):
         self.output_blob = next(iter(self.model.outputs))
         self.input_shape = self.model.input_info[self.input_blob].input_data.shape
         output_shape = self.model.outputs[self.output_blob].shape
-        
+
         assert len(output_shape) in (2, 4), \
             'Expected model output shape [1, n, 1, 1] or [1, n], got {}'.format(output_shape)
 
