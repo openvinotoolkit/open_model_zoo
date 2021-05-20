@@ -504,7 +504,7 @@ PYTHON_DEMOS = [
             ModelArg('face-detection-retail-0005'),
             ModelArg('face-detection-retail-0044')),
         TestCase(options={'-m_lm': ModelArg('landmarks-regression-retail-0009')}),
-        TestCase(options={'-m_reid': ModelArg('face-reidentification-retail-0095')}),
+        #TestCase(options={'-m_reid': ModelArg('face-reidentification-retail-0095')}),
     )),
 
     PythonDemo(name='colorization_demo', device_keys=['-d'], test_cases=combine_cases(
