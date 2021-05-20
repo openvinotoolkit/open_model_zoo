@@ -463,6 +463,34 @@ PYTHON_DEMOS = [
         ]
     )),
 
+    PythonDemo(name='bert_question_answering_embedding_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': 'https://en.wikipedia.org/wiki/OpenVINO',
+                          '--questions': ['What frameworks does OpenVINO support?', 'Who are developers?']}),
+        [
+            TestCase(options={
+                '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
+                '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
+                '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
+                '-m_qa': ModelArg('bert-small-uncased-whole-word-masking-squad-0001'),
+                '--input_names_qa': 'input_ids,attention_mask,token_type_ids',
+                '--output_names_qa': 'output_s,output_e',
+            }),
+            TestCase(options={
+                '-m_emb': ModelArg('bert-large-uncased-whole-word-masking-squad-emb-0001'),
+                '--input_names_emb': 'input_ids,attention_mask,token_type_ids,position_ids',
+                '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-emb-0001/vocab.txt'),
+            }),
+        ]
+    )),
+
+    PythonDemo(name='bert_named_entity_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={
+            '-i': 'https://en.wikipedia.org/wiki/OpenVINO',
+            '-m': ModelArg('bert-base-ner'),
+            '-v': ModelFileArg('bert-base-ner', 'bert-base-ner/vocab.txt')
+        }),
+    )),
+
     PythonDemo(name='face_recognition_demo', device_keys=['-d_fd', '-d_lm', '-d_reid'],
                test_cases=combine_cases(
         TestCase(options={'--no_show': None,
@@ -477,6 +505,34 @@ PYTHON_DEMOS = [
             ModelArg('face-detection-retail-0044')),
         TestCase(options={'-m_lm': ModelArg('landmarks-regression-retail-0009')}),
         TestCase(options={'-m_reid': ModelArg('face-reidentification-retail-0095')}),
+    )),
+
+    PythonDemo(name='colorization_demo', device_keys=['-d'], test_cases=combine_cases(
+       TestCase(options={
+           '--no_show': None,
+           **MONITORS,
+           '-i': DataPatternArg('classification'),
+           '-m': ModelArg('colorization-v2'),
+       })
+    )),
+
+    PythonDemo(name='face_detection_mtcnn_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': image_net_arg('00000002'),
+                          '-m_p': ModelArg('mtcnn-p'),
+                          '-m_r': ModelArg('mtcnn-r'),
+                          '-m_o': ModelArg('mtcnn-o')}),
+    )),
+
+    PythonDemo(name='gesture_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
+                          '-m_d': ModelArg('person-detection-asl-0001')}),
+        [
+            TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
+            TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
+                              '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
+        ],
     )),
 
     PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
