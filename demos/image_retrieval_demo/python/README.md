@@ -31,7 +31,7 @@ The demo workflow is the following:
 
 The demo sample input videos can be found in this [repository](https://github.com/19900531/test). An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
 
-The list of models supported by the demo is in <omz_dir>/demos/image_retrieval_demo/python/models.lst file.
+The list of models supported by the demo is in `<omz_dir>/demos/image_retrieval_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 ### Supported Models

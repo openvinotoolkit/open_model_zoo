@@ -39,6 +39,7 @@ def _get_text_from_ast(ast_nodes):
     return ''.join(map(get_text_from_node, ast_nodes))
 
 ExternalReference = collections.namedtuple('ExternalReference', ['type', 'url'])
+OMZReference = collections.namedtuple('OMZReference', ['type', 'link'])
 
 class DocumentationPage:
     def __init__(self, markdown_text):
@@ -58,6 +59,11 @@ class DocumentationPage:
                 yield ExternalReference('image', node['src'])
             elif node['type'] == 'link':
                 yield ExternalReference('link', node['link'])
+
+    def omz_references(self):
+        for node in _get_all_ast_nodes(self._ast):
+            if node['type'] == 'codespan':
+                yield OMZReference('text', node['text'])
 
     def html_fragments(self):
         for node in _get_all_ast_nodes(self._ast):

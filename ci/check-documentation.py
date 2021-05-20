@@ -114,8 +114,23 @@ def main():
             if md_path in index_child_md_links:
                 referenced_md_files.add(target_path)
 
-        # check for existence of links to README.md files of models and demos
+        for link in sorted([ref.link for ref in doc_page.omz_references() if '<omz_dir>/' in ref.link]):
+            file_path = OMZ_ROOT / link.replace('<omz_dir>/', '')
 
+            try:
+                file_relative_path = file_path.relative_to(OMZ_ROOT)
+            except ValueError:
+                complain(f'{md_path_rel}: invalid OMZ reference {file_path!r}')
+                continue
+
+            if str(file_relative_path) == md_path_rel: # self-link
+                continue
+
+            if not (file_relative_path.is_file() or file_relative_path.is_dir()):
+                complain(f'{md_path_rel}: OMZ reference "{file_relative_path}" target'
+                    ' does not exist')
+
+        # check for existence of links to README.md files of models and demos
         if md_path in index_child_md_links:
             for md_file in index_child_md_links[md_path]:
                 if md_file not in referenced_md_files:
