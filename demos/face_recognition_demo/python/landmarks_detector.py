@@ -15,43 +15,28 @@
 """
 
 import numpy as np
-
 from utils import cut_rois, resize_input
 from ie_module import Module
+
 
 class LandmarksDetector(Module):
     POINTS_NUMBER = 5
 
-    class Result:
-        def __init__(self, outputs):
-            self.points = outputs
-
-            self.left_eye = self.points[0]
-            self.right_eye = self.points[1]
-            self.nose_tip = self.points[2]
-            self.left_lip_corner = self.points[3]
-            self.right_lip_corner = self.points[4]
-
-        def get_array(self):
-            return np.array(self.points, dtype=np.float64)
-
     def __init__(self, ie, model):
         super(LandmarksDetector, self).__init__(ie, model)
 
-        assert len(self.model.input_info) == 1, "Expected 1 input blob"
-        assert len(self.model.outputs) == 1, "Expected 1 output blob"
+        assert len(self.model.input_info) == 1, 'Expected 1 input blob'
+        assert len(self.model.outputs) == 1, 'Expected 1 output blob'
         self.input_blob = next(iter(self.model.input_info))
         self.output_blob = next(iter(self.model.outputs))
         self.input_shape = self.model.input_info[self.input_blob].input_data.shape
+        output_shape = self.model.outputs[self.output_blob].shape
 
-        assert np.array_equal([1, self.POINTS_NUMBER * 2, 1, 1],
-                              self.model.outputs[self.output_blob].shape), \
-            "Expected model output shape %s, but got %s" % \
-            ([1, self.POINTS_NUMBER * 2, 1, 1],
-             self.model.outputs[self.output_blob].shape)
+        assert np.array_equal([1, self.POINTS_NUMBER * 2, 1, 1], output_shape), \
+            'Expected model output shape {}, got {}'.format(
+            [1, self.POINTS_NUMBER * 2, 1, 1], output_shape)
 
     def preprocess(self, frame, rois):
-        assert len(frame.shape) == 4, "Frame shape should be [1, c, h, w]"
         inputs = cut_rois(frame, rois)
         inputs = [resize_input(input, self.input_shape) for input in inputs]
         return inputs
@@ -64,8 +49,7 @@ class LandmarksDetector(Module):
         for input in inputs:
             self.enqueue(input)
 
-    def get_landmarks(self):
+    def postprocess(self):
         outputs = self.get_outputs()
-        results = [LandmarksDetector.Result(out[self.output_blob].buffer.reshape((-1, 2)))
-                      for out in outputs]
+        results = [out[self.output_blob].buffer.reshape((-1, 2)).astype(np.float64) for out in outputs]
         return results

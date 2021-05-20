@@ -15,9 +15,9 @@
 """
 
 import numpy as np
-from numpy import clip
-from ie_module import Module
 from utils import resize_input
+from ie_module import Module
+
 
 class FaceDetector(Module):
     class Result:
@@ -43,42 +43,36 @@ class FaceDetector(Module):
         def clip(self, width, height):
             min = [0, 0]
             max = [width, height]
-            self.position[:] = clip(self.position, min, max)
-            self.size[:] = clip(self.size, min, max)
+            self.position[:] = np.clip(self.position, min, max)
+            self.size[:] = np.clip(self.size, min, max)
 
     def __init__(self, ie, model, input_height, input_width, confidence_threshold=0.5, roi_scale_factor=1.15):
         super(FaceDetector, self).__init__(ie, model)
 
-        if input_height and input_width: # true true
+        if input_height and input_width:
             self.model.reshape({"data": [1, 3, input_height, input_width]})
         elif not (input_height == 0 and input_width == 0):
             raise ValueError('Both input_height and input_width should be specified for Face Detector reshape')
 
-        assert len(self.model.input_info) == 1, "Expected 1 input blob"
-        assert len(self.model.outputs) == 1, "Expected 1 output blob"
+        assert len(self.model.input_info) == 1, 'Expected 1 input blob'
+        assert len(self.model.outputs) == 1, 'Expected 1 output blob'
         self.input_blob = next(iter(self.model.input_info))
         self.output_blob = next(iter(self.model.outputs))
         self.input_shape = self.model.input_info[self.input_blob].input_data.shape
         self.output_shape = self.model.outputs[self.output_blob].shape
 
-        assert len(self.output_shape) == 4 and \
-               self.output_shape[3] == self.Result.OUTPUT_SIZE, \
-            "Expected model output shape with %s outputs" % \
-            (self.Result.OUTPUT_SIZE)
-
-        assert 0.0 <= confidence_threshold and confidence_threshold <= 1.0, \
-            "Confidence threshold is expected to be in range [0; 1]"
+        assert len(self.output_shape) == 4 and self.output_shape[3] == self.Result.OUTPUT_SIZE, \
+            'Expected model output shape with {} outputs'.format(self.Result.OUTPUT_SIZE)
+        assert 0.0 <= confidence_threshold <= 1.0, \
+            'Confidence threshold is expected to be in range [0; 1]'
         self.confidence_threshold = confidence_threshold
 
-        assert 0.0 < roi_scale_factor, "Expected positive ROI scale factor"
+        assert 0.0 < roi_scale_factor, 'Expected positive ROI scale factor'
         self.roi_scale_factor = roi_scale_factor
 
     def preprocess(self, frame):
-        assert len(frame.shape) == 4, "Frame shape should be [1, c, h, w]"
-        assert frame.shape[0] == 1
-        assert frame.shape[1] == 3
-        input = resize_input(frame, self.input_shape)
-        return input
+        self.input_size = frame.shape
+        return resize_input(frame, self.input_shape)
 
     def start_async(self, frame):
         input = self.preprocess(frame)
@@ -87,12 +81,9 @@ class FaceDetector(Module):
     def enqueue(self, input):
         return super(FaceDetector, self).enqueue({self.input_blob: input})
 
-    def get_roi_proposals(self, frame):
+    def postprocess(self):
         outputs = self.get_outputs()[0][self.output_blob].buffer
         # outputs shape is [N_requests, 1, 1, N_max_faces, 7]
-
-        frame_width = frame.shape[-1]
-        frame_height = frame.shape[-2]
 
         results = []
         for output in outputs[0][0]:
@@ -100,10 +91,9 @@ class FaceDetector(Module):
             if result.confidence < self.confidence_threshold:
                 break # results are sorted by confidence decrease
 
-            result.resize_roi(frame_width, frame_height)
+            result.resize_roi(self.input_size[1], self.input_size[0])
             result.rescale_roi(self.roi_scale_factor)
-            result.clip(frame_width, frame_height)
-
+            result.clip(self.input_size[1], self.input_size[0])
             results.append(result)
 
         return results

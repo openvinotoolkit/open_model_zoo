@@ -24,6 +24,7 @@ from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cosine
 from face_detector import FaceDetector
 
+
 class FacesDatabase:
     IMAGE_EXTENSIONS = ['jpg', 'png']
 
@@ -54,32 +55,23 @@ class FacesDatabase:
             log.error("The images database folder has no images.")
 
         self.database = []
-        for num, path in enumerate(paths):
+        for path in paths:
             label = osp.splitext(osp.basename(path))[0]
             image = cv2.imread(path, flags=cv2.IMREAD_COLOR)
 
-            assert len(image.shape) == 3, \
-                "Expected an input image in (H, W, C) format"
-            assert image.shape[2] in [3, 4], \
-                "Expected BGR or BGRA input"
-
             orig_image = image.copy()
-            image = image.transpose((2, 0, 1)) # HWC to CHW
-            image = np.expand_dims(image, axis=0)
 
             if face_detector:
-                face_detector.start_async(image)
-                rois = face_detector.get_roi_proposals(image)
+                rois = face_detector.infer((image,))
                 if len(rois) < 1:
-                    log.warning("Not found faces on the image '%s'" % (path))
+                    log.warning("Not found faces on the image '{}'".format(path))
             else:
-                w, h = image.shape[-1], image.shape[-2]
+                w, h = image.shape[1], image.shape[0]
                 rois = [FaceDetector.Result([0, 0, 0, 0, 0, w, h])]
 
-            for i, roi in enumerate(rois):
+            for roi in rois:
                 r = [roi]
-                landmarks_detector.start_async(image, r)
-                landmarks = landmarks_detector.get_landmarks()
+                landmarks = landmarks_detector.infer((image, r))
 
                 face_identifier.start_async(image, r, landmarks)
                 descriptor = face_identifier.get_descriptors()[0]
@@ -99,11 +91,10 @@ class FacesDatabase:
         if self.no_show:
             return None
         save = False
-        label = None
         winname = "Unknown face"
         cv2.namedWindow(winname)
         cv2.moveWindow(winname, 0, 0)
-        w = int(400 * image.shape[0]/image.shape[1])
+        w = int(400 * image.shape[0] / image.shape[1])
         sz = (400, w)
         resized = cv2.resize(image, sz, interpolation=cv2.INTER_AREA)
         font = cv2.FONT_HERSHEY_PLAIN
@@ -146,8 +137,7 @@ class FacesDatabase:
                 continue
 
         cv2.destroyWindow(winname)
-        label = name if save else None
-        return label
+        return name if save else None
 
     def match_faces(self, descriptors, match_algo='HUNGARIAN'):
         database = self.database
@@ -155,7 +145,7 @@ class FacesDatabase:
         for i, desc in enumerate(descriptors):
             for j, identity in enumerate(database):
                 dist = []
-                for k, id_desc in enumerate(identity.descriptors):
+                for id_desc in identity.descriptors:
                     dist.append(FacesDatabase.Identity.cosine_dist(desc, id_desc))
                 distances[i][j] = dist[np.argmin(dist)]
 
@@ -189,7 +179,7 @@ class FacesDatabase:
         match = -1
         for j, identity in enumerate(self.database):
             dist = []
-            for k, id_desc in enumerate(identity.descriptors):
+            for id_desc in identity.descriptors:
                 dist.append(FacesDatabase.Identity.cosine_dist(desc, id_desc))
             if dist[np.argmin(dist)] < threshold:
                 match = j

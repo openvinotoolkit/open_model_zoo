@@ -25,13 +25,13 @@ import cv2
 import numpy as np
 from openvino.inference_engine import IECore
 
+sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+
+from utils import crop
 from landmarks_detector import LandmarksDetector
 from face_detector import FaceDetector
 from faces_database import FacesDatabase
 from face_identifier import FaceIdentifier
-
-sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
-
 
 import monitors
 from helpers import resolution
@@ -180,28 +180,15 @@ class FrameProcessor:
         return config
 
     def process(self, frame):
-        assert len(frame.shape) == 3, "Expected input frame in (H, W, C) format"
-        assert frame.shape[2] in [3, 4], "Expected BGR or BGRA input"
-
         orig_image = frame.copy()
-        frame = frame.transpose((2, 0, 1)) # HWC to CHW
-        frame = np.expand_dims(frame, axis=0)
 
-        self.face_detector.clear()
-        self.landmarks_detector.clear()
-        self.face_identifier.clear()
-
-        self.face_detector.start_async(frame)
-        rois = self.face_detector.get_roi_proposals(frame)
+        rois = self.face_detector.infer((frame,))
         if self.QUEUE_SIZE < len(rois):
-            log.warning("Too many faces for processing. Will be processed only %s of %s." %
-                (self.QUEUE_SIZE, len(rois)))
+            log.warning('Too many faces for processing. Will be processed only {} of {}'.format(self.QUEUE_SIZE, len(rois)))
             rois = rois[:self.QUEUE_SIZE]
-        self.landmarks_detector.start_async(frame, rois)
-        landmarks = self.landmarks_detector.get_landmarks()
 
-        self.face_identifier.start_async(frame, rois, landmarks)
-        face_identities, unknowns = self.face_identifier.get_matches()
+        landmarks = self.landmarks_detector.infer((frame, rois))
+        face_identities, unknowns = self.face_identifier.infer((frame, rois, landmarks))
         if self.allow_grow and len(unknowns) > 0:
             for i in unknowns:
                 # This check is preventing asking to save half-images in the boundary of images
@@ -209,15 +196,13 @@ class FrameProcessor:
                     (rois[i].position[0] + rois[i].size[0] > orig_image.shape[1]) or \
                     (rois[i].position[1] + rois[i].size[1] > orig_image.shape[0]):
                     continue
-                crop = orig_image[int(rois[i].position[1]):int(rois[i].position[1]+rois[i].size[1]), int(rois[i].position[0]):int(rois[i].position[0]+rois[i].size[0])]
-                name = self.faces_database.ask_to_save(crop)
+                crop_image = crop(orig_image, rois[i])
+                name = self.faces_database.ask_to_save(crop_image)
                 if name:
-                    id = self.faces_database.dump_faces(crop, face_identities[i].descriptor, name)
+                    id = self.faces_database.dump_faces(crop_image, face_identities[i].descriptor, name)
                     face_identities[i].id = id
 
-        outputs = [rois, landmarks, face_identities]
-
-        return outputs
+        return [rois, landmarks, face_identities]
 
     def get_performance_stats(self):
         stats = {
@@ -243,9 +228,7 @@ def draw_detections(frame, frame_processor, detections, output_transform):
         xmin, ymin, xmax, ymax = output_transform.scale([xmin, ymin, xmax, ymax])
         cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 220, 0), 2)
 
-        keypoints = [landmarks.left_eye, landmarks.right_eye, landmarks.nose_tip,
-                     landmarks.left_lip_corner, landmarks.right_lip_corner]
-        for point in keypoints:
+        for point in landmarks:
             x = xmin + output_transform.scale(roi.size[0] * point[0])
             y = ymin + output_transform.scale(roi.size[1] * point[1])
             cv2.circle(frame, (int(x), int(y)), 1, (0, 255, 255), 2)
@@ -321,7 +304,6 @@ def main():
             if key in {ord('q'), ord('Q'), 27}:
                 break
             presenter.handleKey(key)
-
 
     metrics.print_total()
     print(presenter.reportMeans())

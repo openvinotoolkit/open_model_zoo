@@ -62,3 +62,8 @@ class Module:
     def clear(self):
         self.perf_stats = []
         self.outputs = []
+
+    def infer(self, inputs):
+        self.clear()
+        self.start_async(*inputs)
+        return self.postprocess()

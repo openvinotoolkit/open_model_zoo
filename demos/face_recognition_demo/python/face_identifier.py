@@ -16,9 +16,9 @@
 
 import cv2
 import numpy as np
-
 from utils import cut_rois, resize_input
 from ie_module import Module
+
 
 class FaceIdentifier(Module):
     # Taken from the description of the model:
@@ -42,20 +42,18 @@ class FaceIdentifier(Module):
     def __init__(self, ie, model, match_threshold=0.5, match_algo='HUNGARIAN'):
         super(FaceIdentifier, self).__init__(ie, model)
 
-        assert len(self.model.input_info) == 1, "Expected 1 input blob"
-        assert len(self.model.outputs) == 1, "Expected 1 output blob"
+        assert len(self.model.input_info) == 1, 'Expected 1 input blob'
+        assert len(self.model.outputs) == 1, 'Expected 1 output blob'
 
         self.input_blob = next(iter(self.model.input_info))
         self.output_blob = next(iter(self.model.outputs))
         self.input_shape = self.model.input_info[self.input_blob].input_data.shape
-
-        assert len(self.model.outputs[self.output_blob].shape) == 4 or \
-            len(self.model.outputs[self.output_blob].shape) == 2, \
-            "Expected model output shape [1, n, 1, 1] or [1, n], got %s" % \
-            (self.model.outputs[self.output_blob].shape)
+        output_shape = self.model.outputs[self.output_blob].shape
+        
+        assert len(output_shape) in (2, 4), \
+            'Expected model output shape [1, n, 1, 1] or [1, n], got {}'.format(output_shape)
 
         self.faces_database = None
-
         self.match_threshold = match_threshold
         self.match_algo = match_algo
 
@@ -68,8 +66,8 @@ class FaceIdentifier(Module):
         return self.faces_database[id].label
 
     def preprocess(self, frame, rois, landmarks):
-        assert len(frame.shape) == 4, "Frame shape should be [1, c, h, w]"
-        inputs = cut_rois(frame, rois)
+        image = frame.copy()
+        inputs = cut_rois(image, rois)
         self._align_rois(inputs, landmarks)
         inputs = [resize_input(input, self.input_shape) for input in inputs]
         return inputs
@@ -85,7 +83,7 @@ class FaceIdentifier(Module):
     def get_threshold(self):
         return self.match_threshold
 
-    def get_matches(self):
+    def postprocess(self):
         descriptors = self.get_descriptors()
 
         matches = []
@@ -118,34 +116,26 @@ class FaceIdentifier(Module):
     @staticmethod
     def get_transform(src, dst):
         assert np.array_equal(src.shape, dst.shape) and len(src.shape) == 2, \
-            "2d input arrays are expected, got %s" % (src.shape)
-        src_col_mean, src_col_std = FaceIdentifier.normalize(src, axis=(0))
-        dst_col_mean, dst_col_std = FaceIdentifier.normalize(dst, axis=(0))
+            '2d input arrays are expected, got {}'.format(src.shape)
+        src_col_mean, src_col_std = FaceIdentifier.normalize(src, axis=0)
+        dst_col_mean, dst_col_std = FaceIdentifier.normalize(dst, axis=0)
 
         u, _, vt = np.linalg.svd(np.matmul(src.T, dst))
         r = np.matmul(u, vt).T
 
         transform = np.empty((2, 3))
         transform[:, 0:2] = r * (dst_col_std / src_col_std)
-        transform[:, 2] = dst_col_mean.T - \
-            np.matmul(transform[:, 0:2], src_col_mean.T)
+        transform[:, 2] = dst_col_mean.T - np.matmul(transform[:, 0:2], src_col_mean.T)
         return transform
 
     def _align_rois(self, face_images, face_landmarks):
         assert len(face_images) == len(face_landmarks), \
-            "Input lengths differ, got %s and %s" % \
-            (len(face_images), len(face_landmarks))
+            'Input lengths differ, got {} and {}'.format(len(face_images), len(face_landmarks))
 
         for image, image_landmarks in zip(face_images, face_landmarks):
-            assert len(image.shape) == 4, "Face image is expected"
-            image = image[0]
-
-            scale = np.array((image.shape[-1], image.shape[-2]))
+            scale = np.array((image.shape[1], image.shape[0]))
             desired_landmarks = np.array(self.REFERENCE_LANDMARKS, dtype=np.float64) * scale
-            landmarks = image_landmarks.get_array() * scale
+            landmarks = image_landmarks * scale
 
             transform = FaceIdentifier.get_transform(desired_landmarks, landmarks)
-            img = image.transpose((1, 2, 0))
-            cv2.warpAffine(img, transform, tuple(scale), img,
-                           flags=cv2.WARP_INVERSE_MAP)
-            image[:] = img.transpose((2, 0, 1))
+            cv2.warpAffine(image, transform, tuple(scale), image, flags=cv2.WARP_INVERSE_MAP)
