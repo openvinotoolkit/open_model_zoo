@@ -94,8 +94,6 @@
 | text-detection-0003 | YES | YES | YES |
 | text-detection-0004 | YES | YES | YES |
 | text-image-super-resolution-0001 | YES | YES | YES |
-| text-recognition-0012 | YES | YES | YES |
-| text-recognition-0013 | YES | YES |    |
 | text-spotting-0005-detector | YES |    |    |
 | text-spotting-0005-recognizer-decoder | YES |    |    |
 | text-spotting-0005-recognizer-encoder | YES |    |    |

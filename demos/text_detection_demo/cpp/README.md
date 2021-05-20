@@ -7,8 +7,7 @@ The demo shows an example of using neural networks to detect and recognize print
 * `text-detection-0003`, which is a detection network for finding text.
 * `text-detection-0004`, which is a lightweight detection network for finding text.
 * `horizontal-text-detection-0001`, which is a detection network that works much faster than models above, but it is applicable to finding more or less horizontal text only.
-* `text-recognition-0012`, which is a recognition network for recognizing text.
-* `text-recognition-0013`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and specify output layer name via `-tr_o_blb_nm` option for this model (see model [description](../../../models/intel/text-recognition-0013/README.md) for details).
+* `text-recognition-0014`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and specify output layer name via `-tr_o_blb_nm` option for this model (see model [description](../../../models/intel/text-recognition-0014/README.md) for details).
 * `text-recognition-resnet-fc`, which is a recognition network for recognizing text. You should add option `-tr_pt_first`.
 * `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
 
@@ -34,8 +33,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 * text-detection-0004
 
 * decoder_type = ctc
-  * text-recognition-0012
-  * text-recognition-0013
+  * text-recognition-0014
 * decoder_type = simple
   * text-recognition-resnet-fc
 
@@ -85,7 +83,7 @@ For example, use the following command line command to run the application:
 ./text_detection_demo \
   -i <path_to_image>/sample.jpg \
   -m_td <path_to_model>/text-detection-0004.xml \
-  -m_tr <path_to_model>/text-recognition-0013.xml \
+  -m_tr <path_to_model>/text-recognition-0014.xml \
   -dt ctc \
   -tr_pt_first \
   -tr_o_blb_nm "logits"
