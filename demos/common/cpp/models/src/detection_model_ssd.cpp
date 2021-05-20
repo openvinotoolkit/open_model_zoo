@@ -196,6 +196,22 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     }
 
     // --------------------------- Check input & output ----------------------------------------------------
+    ModelBase::IOPattern inputPattern(
+        // Number of inputs 
+        { 1 },
+        { { "data", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } } });
+
+    ModelBase::IOPattern outputPattern(
+        // Number of  outputs
+        { 1 },
+        // Names & Dims
+        { { "detection_out", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW} },
+        { "regression", { InferenceEngine::Precision::FP32, {1, 2, 128, 128}, InferenceEngine::Layout::NCHW } },
+        { "width_height", { InferenceEngine::Precision::FP32, {1, 2, 128, 128}, InferenceEngine::Layout::NCHW } } });
+
+    ModelBase::findIONames(inputInfo, outputInfo);
+    ModelBase::checkInputsOutputs({ "SSD", {inputPattern , outputPattern} }, inputInfo, outputInfo);
+
     checkInputsOutputs(inputInfo, outputInfo);
 }
 

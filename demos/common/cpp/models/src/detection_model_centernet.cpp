@@ -83,28 +83,18 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
         output.second->setLayout(InferenceEngine::Layout::NCHW);
     }
     // --------------------------- Check input & output ----------------------------------------------------
-    ModelBase::IOPattern inputPattern("CenterNet",
+    ModelBase::IOPattern inputPattern(
         // Number of inputs 
         { 1 },
-        // Size of inputs
-        { 4 },
-        {{ "input.1", {1, 3, 0, 0} }},
-        // Precisions
-        { InferenceEngine::Precision::U8 },
-        // Layouts
-        { InferenceEngine::Layout::NHWC });
+        { { "input.1", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NHWC } } });
 
-    ModelBase::IOPattern outputPattern("CenterNet",
+    ModelBase::IOPattern outputPattern(
         // Number of  outputs
         { 3 },
-        // Size of inputs
-        { 4 },
         // Names & Dims
-        { { "center_heatmap", {1, 80, 128, 128} }, { "regression", {1, 2, 0, 0} }, { "width_height", {1, 2, 0, 0} } },
-        // Precisions
-        { InferenceEngine::Precision::FP32 },
-        // Layouts
-        { InferenceEngine::Layout::NCHW });
+        { { "center_heatmap", { InferenceEngine::Precision::FP32, {1, 80, 0, 0}, InferenceEngine::Layout::NCHW} },
+        { "regression", { InferenceEngine::Precision::FP32, {1, 2, 0, 0}, InferenceEngine::Layout::NCHW } },
+        { "width_height", { InferenceEngine::Precision::FP32, {1, 2, 0, 0}, InferenceEngine::Layout::NCHW } } });
 
     // input.1
     // center_heatmap
@@ -112,7 +102,7 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     // "width_height
 
     ModelBase::findIONames(inputInfo, outputInfo);
-    ModelBase::checkInputsOutputs("CenterNet", {inputPattern , outputPattern}, inputInfo, outputInfo);
+    ModelBase::checkInputsOutputs({ "CenterNet", {inputPattern , outputPattern} }, inputInfo, outputInfo);
 
     checkInputsOutputs(inputInfo, outputInfo);
 }

@@ -46,17 +46,11 @@ public:
     }
 
     struct IOPattern {
-        const std::string modelName;
         const std::set<int> possibleNums;
-        const std::set<int> possibleSizes;
-        const std::map<std::string, InferenceEngine::SizeVector> possibleDims;
-        const std::set<InferenceEngine::Precision> possiblePrecisions;
-        const std::set<InferenceEngine::Layout> possibleLayouts;
+        const std::map<std::string, InferenceEngine::TensorDesc> possibleLayers;
 
-        IOPattern (std::string&& modelName, std::set<int>&& num, std::set<int>&& sizes, std::map<std::string, InferenceEngine::SizeVector>&& dims,
-            std::set<InferenceEngine::Precision>&& precisions, std::set<InferenceEngine::Layout>&& layouts)
-            : modelName(std::move(modelName)), possibleNums(std::move(num)), possibleSizes(std::move(sizes)), possibleDims(std::move(dims)),
-            possiblePrecisions(std::move(precisions)), possibleLayouts(std::move(layouts)) {}
+        IOPattern (std::set<int>&& num, std::map<std::string, InferenceEngine::TensorDesc>&& layers)
+            : possibleNums(std::move(num)), possibleLayers(std::move(layers)) {}
     };
         
 protected:
@@ -66,7 +60,7 @@ protected:
     void findIONames(const InputsDataMap& inputsInfo, const OutputsDataMap& outputInfo);
 
     template<class InputsDataMap, class OutputsDataMap>
-    void checkInputsOutputs(const std::string& modelName, const std::vector<ModelBase::IOPattern>& modelIOPattern,
+    void checkInputsOutputs(const std::pair<std::string, std::vector<ModelBase::IOPattern>>& modelIOPattern,
         const InputsDataMap& inputsInfo, const OutputsDataMap& outputsInfo);
 
     virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) = 0;
@@ -110,74 +104,61 @@ void check(const std::string& modelName, const std::string& type, const ModelBas
     }
 
     size_t i = 0;
-    for (const auto& layer : info) {
-        const InferenceEngine::TensorDesc& desc = layer.second->getTensorDesc();
-        auto modelDims = desc.getDims();
+    for (const auto& layerToCheck : info) {
+        const InferenceEngine::TensorDesc& layerToCheckDesc = layerToCheck.second->getTensorDesc();
+        auto layerToCheckDims = layerToCheckDesc.getDims();
 
         // --------------------------- Check dimensions--------------------------- 
-        auto& dims  = pattern.possibleDims.find(layer.first);
-        if (dims == pattern.possibleDims.end()) {
+        auto& layerDesc  = pattern.possibleLayers.find(layerToCheck.first);
+        if (layerDesc == pattern.possibleLayers.end()) {
             std::ostringstream ossNames;
-
-            for (const auto& s : pattern.possibleDims) {
+            for (const auto& s : pattern.possibleLayers) {
                 ossNames << s.first << ", ";
             }
 
-            //// --- Convert set to string
-            //std::copy(pattern.possiblelayerSizes.begin(), pattern.possiblelayerSizes.end(),
-            //    std::ostream_iterator<int>(ossSizes, ","));
-            throw std::logic_error("In " + pattern.modelName + " network wrong " + type + " layer name: " + layer.first + ". Name should be one of the next: " + ossNames.str());
+            throw std::logic_error("In " + modelName + " network wrong " + type + " layer name: " + layerToCheck.first + ". Name should be one of the next: " + ossNames.str());
         }
 
-        if (modelDims.size() != dims->second.size()) {
-            throw std::logic_error("Unsupported " + std::to_string(modelDims.size()) + "D " + type + " layer '" + layer.first + "'. " +
-                " In " + pattern.modelName + " network number of dimensions for '" + layer.first + "' layer should be : " + std::to_string(dims->second.size()));
+        auto& layerDims = layerDesc->second.getDims();
+        if (layerToCheckDims.size() != layerDims.size()) {
+            throw std::logic_error("Unsupported " + std::to_string(layerToCheckDims.size()) + "D " + type + " layer '" + layerToCheck.first + "'. " +
+                " In " + modelName + " network number of dimensions for '" + layerToCheck.first + "' layer should be : " + std::to_string(layerDims.size()));
         }
 
-        for (size_t i = 0; i < modelDims.size(); ++i) {
-            if (dims->second[i] != modelDims[i] && dims->second[i] != 0) {
-                std::ostringstream ossModelDims, ossDims;
-                for (size_t i = 0; i < modelDims.size(); ++i) {
-                    ossModelDims << modelDims[i] << ",";
-                    if (dims->second[i] == 0) {
-                        ossDims << "X,";
+        for (size_t i = 0; i < layerToCheckDims.size(); ++i) {
+            if (layerDims[i] != layerToCheckDims[i] && layerDims[i] != 0) {
+                std::ostringstream ossDims1, ossDims2;
+                for (size_t i = 0; i < layerDims.size(); ++i) {
+                    ossDims1 << layerToCheckDims[i] << ",";
+                    if (layerDims[i] == 0) {
+                        ossDims2 << "X,";
                     }
                     else {
-                        ossDims << dims->second[i] << ",";
+                        ossDims2 << layerDims[i] << ",";
                     }
                 }
-                throw std::logic_error("Unsupported " + type + " layer '" + layer.first + "' with dimension [" + ossModelDims.str() + "]. " +
-                    " In " + pattern.modelName + " network demensions for '" + layer.first + "' layer should be : [" + ossDims.str() + "]");
+                throw std::logic_error("Unsupported " + type + " layer '" + layerToCheck.first + "' with dimension [" + ossDims1.str() + "]. " +
+                    " In " + modelName + " network demensions for '" + layerToCheck.first + "' layer should be : [" + ossDims2.str() + "]");
             }
         }
 
         // --------------------------- Check precision---------------------------
-        if (pattern.possiblePrecisions.find(desc.getPrecision()) == pattern.possiblePrecisions.end()) {
-            std::ostringstream ossPrecisions;
+        if (layerDesc->second.getPrecision() != layerToCheckDesc.getPrecision()) {
+           // std::ostringstream ossPrecisions;
 
-            for (const auto& p : pattern.possiblePrecisions) {
-                ossPrecisions << p.name() << ", ";
-            }
+            //for (const auto& p : pattern.possiblePrecisions) {
+            //    ossPrecisions << p.name() << ", ";
+            //}
 
-            //std::transform(pattern.possiblelayerPrecisions.begin(), pattern.possiblelayerPrecisions.end(),
-            //    std::ostream_iterator<std::string>(osslayerPrecisions, ","),
-            //    [](const InferenceEngine::Precision& p) {
-            //        return p.name();
-            //    });
-
-            throw std::logic_error("In " + pattern.modelName + " network " +
-                type + " layer '" + layer.first + "' precision should be one of the following : " + ossPrecisions.str() + " - but " + desc.getPrecision().name() + " given");
+            throw std::logic_error("In " + modelName + " network " +
+                type + " layer '" + layerToCheck.first + "' precision should be: " + layerDesc->second.getPrecision().name() + " - but " + layerToCheckDesc.getPrecision().name() + " given");
         }
 
         // --------------------------- Check layout--------------------------- 
-        if (pattern.possibleLayouts.find(desc.getLayout()) == pattern.possibleLayouts.end()) {
-            std::ostringstream ossLayouts;
-            for (const auto& l : pattern.possibleLayouts) {
-                ossLayouts << l << ", ";
-            }
+        if (layerDesc->second.getLayout() != layerToCheckDesc.getLayout()) {
             std::ostringstream oss;
-            oss << "In " << modelName << " network " << type << " layer '" << layer.first  << "' layout should be one of the following  "
-                << ossLayouts.str() << " - but " << desc.getLayout() << " given";
+            oss << "In " << modelName << " network " << type << " layer '" << layerToCheck.first  << "' layout should be "
+                << layerDesc->second.getLayout() << " - but " << layerToCheck.second->getLayout() << " given";
 
             throw std::logic_error(oss.str());
         }
@@ -186,13 +167,13 @@ void check(const std::string& modelName, const std::string& type, const ModelBas
 }
 
 template<class InputsDataMap, class OutputsDataMap>
-void  ModelBase::checkInputsOutputs(const std::string& modelName, const std::vector<ModelBase::IOPattern>& modelIOPattern,
+void  ModelBase::checkInputsOutputs(const std::pair<std::string, std::vector<ModelBase::IOPattern>>& modelIOPattern,
     const InputsDataMap& inputsInfo, const OutputsDataMap& outputsInfo) {
     //--------------------------- Check inputs blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    check(modelName, "input", modelIOPattern[0], inputsInfo);
+    check(modelIOPattern.first, "input", modelIOPattern.second[0], inputsInfo);
 
     // --------------------------- Check output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-    check(modelName, "output", modelIOPattern[1], outputsInfo);
+    check(modelIOPattern.first, "output", modelIOPattern.second[1], outputsInfo);
 }
