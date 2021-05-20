@@ -34,6 +34,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 
 * asl-recognition-0004
 * common-sign-language-0001
+* common-sign-language-0002
 * person-detection-asl-0001
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
@@ -102,7 +103,11 @@ python gesture_recognition_demo.py \
 
 The demo starts in person tracking mode and to switch it in the action recognition mode you should press `0-9` button with appropriate detection ID (the number in top-left of each bounding box). If frame contains only one person, they will be chosen automatically. After that you can switch back to tracking mode by pressing space button.
 
-An example of file with class names can be found within the OMZ directory at `<omz_dir>/data/dataset_classes/msasl100.json`.
+An example of file with class names can be found within the OMZ directory:
+
+* MS-ASL-100: `<omz_dir>/data/dataset_classes/msasl100.json`
+* Jester-27: `<omz_dir>/data/dataset_classes/jester27.json`
+* Common-Sign-Language-12: `<omz_dir>/data/dataset_classes/common_sign_language12.json`
 
 > **NOTE**: To run the demo application with video examples of gestures specify the `-s` key with valid path to the directory with video samples. The name of each video sample should be the valid name of gesture from `<omz_dir>/data/dataset_classes/msasl100.json` file. To navigate between samples use 'f' and 'b' keys for iterating next and previous video sample, respectively.
 

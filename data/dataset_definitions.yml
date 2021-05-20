@@ -981,6 +981,17 @@ datasets:
       clip_length: 8
     annotation: jester_action_recognition.pickle
 
+  - name: common_sign_language_gestures
+    data_source: common_sign_language_gestures/global_crops
+    annotation_conversion:
+      converter: continuous_clip_action_recognition
+      annotation_file: common_sign_language_gestures/test.txt
+      data_dir: common_sign_language_gestures/global_crops
+      out_fps: 15
+      clip_length: 8
+      img_prefix: ''
+    annotation: common_sign_language_recognition.pickle
+
   - name: ReDWeb_V1
     data_source: ReDWeb_V1
     annotation_conversion:

@@ -238,6 +238,7 @@ that predict an actual labels are called *decoder*.
 |   action-recognition-0001-encoder                                                      | 7.340 | 21.276 |
 |   action-recognition-0001-decoder                                                      | 0.147 | 4.405  |
 | [asl-recognition-0004](./asl-recognition-0004/README.md)                               | 6.660 | 4.133  |
+| [common-sign-language-0002](./common-sign-language-0002/README.md)                     | 4.227 | 4.113  |
 | [weld-porosity-detection-0001](./weld-porosity-detection-0001/README.md)               | 3.636 | 11.173 |
 
 ## Image Retrieval
