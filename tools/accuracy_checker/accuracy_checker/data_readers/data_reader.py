@@ -903,15 +903,18 @@ class KaldiARKReader(BaseReader):
                     key = KaldiARKReader.read_token(fd)
                     if not key:
                         break
-                    _ = fd.read(2)
-                    ark_type = KaldiARKReader.read_token(fd)
-                    float_size = 4 if ark_type[0] == 'F' else 8
-                    float_type = np.float32 if ark_type[0] == 'F' else float
-                    num_rows = KaldiARKReader.read_int32(fd)
-                    num_cols = KaldiARKReader.read_int32(fd)
-                    mat_data = fd.read(float_size * num_cols * num_rows)
-                    mat = np.frombuffer(mat_data, dtype=float_type)
-                    ut[key] = mat.reshape(num_rows, num_cols)
+                    binary = fd.read(2).decode()
+                    if binary == ' [':
+                        mat = KaldiARKReader.read_ascii_mat(fd)
+                    else:
+                        ark_type = KaldiARKReader.read_token(fd)
+                        float_size = 4 if ark_type[0] == 'F' else 8
+                        float_type = np.float32 if ark_type[0] == 'F' else float
+                        num_rows = KaldiARKReader.read_int32(fd)
+                        num_cols = KaldiARKReader.read_int32(fd)
+                        mat_data = fd.read(float_size * num_cols * num_rows)
+                        mat = np.frombuffer(mat_data, dtype=float_type).reshape(num_rows, num_cols)
+                    ut[key] = mat
                 except EOFError:
                     break
             return ut
@@ -943,7 +946,7 @@ class KaldiARKReader(BaseReader):
         key = ''
         while True:
             c = bytes.decode(fd.read(1))
-            if c in [' ', '']:
+            if c in [' ', '', '\0', '\4']:
                 break
             key += c
         return None if key == '' else key.strip()
@@ -959,7 +962,7 @@ class KaldiARKReader(BaseReader):
             return self.read_frame(data_id.file, data_id.key, data_id.id)
         matrix = self.read_utterance(data_id.file, data_id.key)
         if self.multi_infer:
-            matrix = matrix.tolist()
+            matrix = list(matrix)
         return matrix
 
     def _read_list(self, data_id):
@@ -971,3 +974,18 @@ class KaldiARKReader(BaseReader):
     def reset(self):
         del self.buffer
         self.buffer = {}
+
+    @staticmethod
+    def read_ascii_mat(fd):
+        rows = []
+        while True:
+            line = fd.readline().decode()
+            if not line.strip():
+                continue # skip empty line
+            arr = line.strip().split()
+            if arr[-1] != ']':
+                rows.append(np.array(arr, dtype='float32')) # not last line
+            else:
+                rows.append(np.array(arr[:-1], dtype='float32')) # last line
+                mat = np.vstack(rows)
+                return mat

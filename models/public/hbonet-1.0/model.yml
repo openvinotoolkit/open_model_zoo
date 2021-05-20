@@ -43,4 +43,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=prob
   - --input_model=$conv_dir/hbonet_1_0.onnx
+quantizable: yes
 license: https://github.com/d-li14/HBONet/blob/master/LICENSE

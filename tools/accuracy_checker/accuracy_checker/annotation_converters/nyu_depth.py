@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-from ..config import PathField, ConfigError
+from ..config import PathField, ConfigError, BoolField
 from ..utils import contains_all, get_path, check_file_existence, UnsupportedPackage
 from ..representation import DepthEstimationAnnotation
 from ..representation.depth_estimation import GTLoader
@@ -28,33 +28,44 @@ class NYUDepthV2Converter(BaseFormatConverter):
             'data_dir': PathField(
                 is_directory=True, optional=True,
                 description='path to directory with data in original hdf5 format stored'
+            ),
+            'allow_convert_data': BoolField(
+                optional=True, default=False, description="Allows to convert data from hdf5 format"
             )
         })
         return parameters
 
     def configure(self):
         self.data_dir = self.get_value_from_config('data_dir')
-        if self.data_dir is None and not contains_all(self.config, ['images_dir', 'depth_map_dir']):
-            raise ConfigError('data_dir or both images_dir and depth_map_dir should be provided')
+        self.allow_convert_data = self.get_value_from_config('allow_convert_data')
         self.images_dir = self.get_value_from_config('images_dir')
         self.depths_dir = self.get_value_from_config('depth_map_dir')
-        if self.data_dir and isinstance(h5py, UnsupportedPackage):
-            h5py.raise_error(self.__provider__)
-        if self.images_dir is None:
-            self.images_dir = self.data_dir.parent / 'converted/images'
-        if self.depths_dir is None:
-            self.depths_dir = self.data_dir.parent / 'converted/depth'
-        if self.data_dir is None:
-            self.images_dir = get_path(self.images_dir, is_directory=True)
-            self.depths_dir = get_path(self.depths_dir, is_directory=True)
-        else:
+
+        if self.allow_convert_data:
+            if isinstance(h5py, UnsupportedPackage):
+                h5py.raise_error(self.__provider__)
+            if self.data_dir is None:
+                raise ConfigError('please provide data_dir to convert data from hdf5 format')
+
+            if self.images_dir is None:
+                self.images_dir = self.data_dir.parent / 'converted/images'
+            if self.depths_dir is None:
+                self.depths_dir = self.data_dir.parent / 'converted/depth'
+
             if not self.images_dir.exists():
                 self.images_dir.mkdir(parents=True)
             if not self.depths_dir.exists():
                 self.depths_dir.mkdir(parents=True)
 
+        else:
+            if not contains_all(self.config, ['images_dir', 'depth_map_dir']):
+                raise ConfigError('both images_dir and depth_map_dir should be provided')
+            self.images_dir = get_path(self.images_dir, is_directory=True)
+            self.depths_dir = get_path(self.depths_dir, is_directory=True)
+
+
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        if self.data_dir is not None:
+        if self.allow_convert_data:
             images_list = self.convert_data()
         else:
             images_list = list(self.images_dir.glob('*.png'))

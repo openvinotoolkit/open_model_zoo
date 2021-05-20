@@ -1,6 +1,6 @@
 # Smart Classroom C++ Demo
 
-![](./smart_classroom.gif)
+![example](./smart_classroom.gif)
 
 The demo shows an example of joint usage of several neural networks to detect student actions (sitting, standing, raising hand for the `person-detection-action-recognition-0005` model and sitting, writing, raising hand, standing, turned around, lie on the desk for the `person-detection-action-recognition-0006` model) and recognize people by faces in the classroom environment. The demo uses Async API for action and face detection networks. It allows to parallelize execution of face recognition and detection: while face recognition is running on one accelerator, face and action detection could be performed on another. You can use a set of the following pre-trained models with the demo:
 
@@ -14,8 +14,6 @@ a vector of features for each detected face.
 * `person-detection-raisinghand-recognition-0001`, which is a detection network for finding students and simultaneously predicting their current actions (in contrast with the previous model, predicts only if a student raising hand or not).
 * `person-detection-action-recognition-teacher-0002`, which is a detection network for finding persons and simultaneously predicting their current actions.
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
-
 ## How It Works
 
 On the start-up, the application reads command line parameters and loads four networks to the Inference Engine for execution on different devices depending on `-m...` options family. Upon getting a frame from the OpenCV VideoCapture, it performs inference of Face Detection and Action Detection networks. After that, the ROIs obtained by Face Detector are fed to the Facial Landmarks Regression network. Then landmarks are used to align faces by affine transform and feed them to the Face Recognition network. The recognized faces are matched with detected actions to find an action for a recognized person for each frame.
@@ -25,12 +23,35 @@ On the start-up, the application reads command line parameters and loads four ne
 ## Creating a Gallery for Face Recognition
 
 To recognize faces on a frame, the demo needs a gallery of reference images. Each image should contain a tight crop of face. You can create the gallery from an arbitrary list of images:
+
 1. Put images containing tight crops of frontal-oriented faces (or use `-crop_gallery` key for the demo) to a separate empty folder. Each identity must have only one image. Name images as `id_name0.png, id_name1.png, ...`.
 2. Run the `create_list.py <path_to_folder_with_images>` command to get a list of files and identities in `.json` format.
+
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in <omz_dir>/demos/smart_classroom_demo/cpp/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* face-detection-adas-0001
+* face-recognition-mobilefacenet-arcface
+* face-recognition-resnet100-arcface
+* face-recognition-resnet34-arcface
+* face-recognition-resnet50-arcface
+* landmarks-regression-retail-0009
+* person-detection-action-recognition-0005
+* person-detection-action-recognition-0006
+* person-detection-action-recognition-teacher-0002
+* person-detection-raisinghand-recognition-0001
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
 InferenceEngine:
     API version ............ <version>
@@ -87,11 +108,8 @@ Options:
 
 Running the application with the empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/smart_classroom_demo/cpp/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 Example of a valid command line to run the application with pre-trained models for recognizing students actions:
+
 ```sh
 ./smart_classroom_demo -m_act <path_to_model>/person-detection-action-recognition-0005.xml \
                        -m_fd <path_to_model>/face-detection-adas-0001.xml \
@@ -100,6 +118,7 @@ Example of a valid command line to run the application with pre-trained models f
                        -fg <path_to_faces_gallery.json> \
                        -i <path_to_video>
 ```
+
 > **NOTE**: To recognize actions of students, use `person-detection-action-recognition-0005` model for 3 basic actions and `person-detection-action-recognition-0006` model for 6 actions.
 
 Example of a valid command line to run the application for recognizing actions of a teacher:
@@ -115,24 +134,21 @@ Example of a valid command line to run the application for recognizing actions o
 > **NOTE**: To recognize actions of a teacher, use `person-detection-action-recognition-teacher-0002` model.
 
 Example of a valid command line to run the application for recognizing first raised-hand students:
+
 ```sh
 ./smart_classroom_demo -m_act <path_to_model>/person-detection-raisinghand-recognition-0001.xml \
                        -a_top <number of first raised-hand students> \
                        -i <path_to_video>
 ```
+
 > **NOTE**: To recognize raising hand action of students, use `person-detection-raisinghand-recognition-0001` model.
 
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with labeled actions and faces.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
->* `face-detection-adas-0001`
->* `landmarks-regression-retail-0009`
->* `person-detection-action-recognition-0005`
-> Other models may produce unexpected results on these devices.
-
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

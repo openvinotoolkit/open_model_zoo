@@ -1,6 +1,7 @@
 # A list of models that covers all Model Downloader/Converter features
 
 faceboxes-pytorch # PyTorch (external module), Google Drive downloads, --model-param
+hbonet-0.5 # used for quantization testing
 mobilenet-v1-0.25-128 # TensorFlow, HTTP downloads
 mobilenet-v2-pytorch # PyTorch (torchvision)
 mtcnn-p # Caffe, HTTPS downloads, regex replacement
