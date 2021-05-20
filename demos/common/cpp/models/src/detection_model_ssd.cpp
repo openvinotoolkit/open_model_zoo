@@ -232,7 +232,7 @@ void ModelSSD::prepareMultipleOutputs(OutputsDataMap& outputInfo) {
         throw std::logic_error("Incorrect number of 'boxes' output dimensions");
     }
 
-    for(auto name : outputsNames) {
+    for (const std::string& name : outputsNames) {
         outputInfo[name]->setPrecision(Precision::FP32);
     }
 }
