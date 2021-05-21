@@ -9,7 +9,6 @@
 
 #include <inference_engine.hpp>
 #include <opencv2/opencv.hpp>
-#include <ie_blob.h>
 
 using namespace InferenceEngine;
 
