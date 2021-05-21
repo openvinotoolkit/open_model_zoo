@@ -61,7 +61,7 @@ class DocumentationPage:
 
     def omz_references(self):
         for node in _get_all_ast_nodes(self._ast):
-            if node['type'] == 'codespan':
+            if node['type'] == 'codespan' and node['text'].startswith('<omz_dir>/'):
                 yield node['text']
 
     def html_fragments(self):
