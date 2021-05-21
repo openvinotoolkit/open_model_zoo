@@ -34,6 +34,13 @@
 using namespace InferenceEngine;
 
 
+std::string str_tolower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+                   [](unsigned char c){ return std::tolower(c); }
+                  );
+    return s;
+}
+
 std::vector<cv::Point2f> floatPointsFromRotatedRect(const cv::RotatedRect &rect);
 std::vector<cv::Point> boundedIntPointsFromRotatedRect(const cv::RotatedRect &rect, const cv::Size& image_size);
 cv::Point topLeftPoint(const std::vector<cv::Point2f> & points, int *idx);
@@ -147,6 +154,13 @@ int main(int argc, char *argv[]) {
 
         if (!FLAGS_m_tr.empty()) {
             text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
+            text_recognition->setInOutNames(FLAGS_out_enc_hidden_name,
+                                            FLAGS_out_dec_hidden_name,
+                                            FLAGS_in_dec_hidden_name,
+                                            FLAGS_features_name,
+                                            FLAGS_in_dec_symbol_name,
+                                            FLAGS_out_dec_symbol_name,
+                                            FLAGS_tr_o_blb_nm);
         }
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat image = cap->read();
@@ -265,7 +279,8 @@ int main(int argc, char *argv[]) {
                     }
                     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                     text_recognition_postproc_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-
+                    if (FLAGS_lower)
+                        res = str_tolower(res);
                     res = conf >= min_text_recognition_confidence ? res : "";
                     num_found += !res.empty() ? 1 : 0;
                 }

@@ -26,7 +26,13 @@ class Cnn {
 
     size_t ncalls() const {return ncalls_;}
     double time_elapsed() const {return time_elapsed_;}
-
+    virtual void setInOutNames(const std::string out_enc_hidden_name,
+                               const std::string out_dec_hidden_name,
+                               const std::string in_dec_hidden_name,
+                               const std::string features_name,
+                               const std::string in_dec_symbol_name,
+                               const std::string out_dec_symbol_name,
+                               const std::string logits_name) {};
     const cv::Size& input_size() const {return input_size_;}
 
   protected:
@@ -48,12 +54,26 @@ class EncoderDecoderCNN : public Cnn {
               const cv::Size &new_input_resolution = cv::Size());
 
     InferenceEngine::BlobMap Infer(const cv::Mat &frame);
+    void setInOutNames(const std::string out_enc_hidden_name,
+                      const std::string out_dec_hidden_name,
+                      const std::string in_dec_hidden_name,
+                      const std::string features_name,
+                      const std::string in_dec_symbol_name,
+                      const std::string out_dec_symbol_name,
+                      const std::string logits_name);
   private:
     InferRequest infer_request_encoder_;
     InferRequest infer_request_decoder_;
     std::vector<std::string> input_names_decoder;
     std::vector<std::string> output_names_encoder;
     std::vector<std::string> output_names_decoder;
+    std::string features_name_;
+    std::string out_enc_hidden_name_;
+    std::string out_dec_hidden_name_;
+    std::string in_dec_hidden_name_;
+    std::string in_dec_symbol_name_;
+    std::string out_dec_symbol_name_;
+    std::string logits_name_;
     InputInfo::Ptr input_info_decoder_input;
 };
 

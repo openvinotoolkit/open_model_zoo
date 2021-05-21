@@ -175,6 +175,22 @@ void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std
     is_initialized_ = true;
 }
 
+void EncoderDecoderCNN::setInOutNames(const std::string out_enc_hidden_name,
+                                    const std::string out_dec_hidden_name,
+                                    const std::string in_dec_hidden_name,
+                                    const std::string features_name,
+                                    const std::string in_dec_symbol_name,
+                                    const std::string out_dec_symbol_name,
+                                    const std::string logits_name) {
+    out_enc_hidden_name_ = out_enc_hidden_name;
+    out_dec_hidden_name_ = out_dec_hidden_name;
+    in_dec_hidden_name_ = in_dec_hidden_name;
+    features_name_ = features_name;
+    in_dec_symbol_name_ = in_dec_symbol_name;
+    out_dec_symbol_name_ = out_dec_symbol_name;
+    logits_name_ = logits_name;
+}
+
 InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -219,17 +235,16 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
     }
     // blobs here are set for concrete network
     // in case of different network this needs to be changed or generalized
-    infer_request_decoder_.SetBlob("features", encoder_blobs["features"]);
-    infer_request_decoder_.SetBlob("hidden", encoder_blobs["decoder_hidden"]);
-
-    const std::string decoder_input_name = "decoder_input";
-    const std::string decoder_output_name = "decoder_output";
+    infer_request_decoder_.SetBlob(features_name_, encoder_blobs[features_name_]);
+    infer_request_decoder_.SetBlob(in_dec_hidden_name_, encoder_blobs[out_enc_hidden_name_]);
 
     InferenceEngine::LockedMemory<void> input_decoder =
-        InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(decoder_input_name))->wmap();
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(in_dec_symbol_name_))->wmap();
     float* input_data_decoder = input_decoder.as<float *>();
     input_data_decoder[0] = 0;
-    auto num_classes = infer_request_decoder_.GetBlob(decoder_output_name)->size();
+    auto num_classes = infer_request_decoder_.GetBlob(out_dec_symbol_name_)->size();
+
+
     InferenceEngine::BlobMap decoder_blobs;
     auto targets = InferenceEngine::make_shared_blob<float>(
         InferenceEngine::TensorDesc(Precision::FP32, std::vector<size_t> {1, MAX_NUM_DECODER, num_classes},
@@ -243,7 +258,7 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
             decoder_blobs[output_name] = infer_request_decoder_.GetBlob(output_name);
         }
         InferenceEngine::LockedMemory<void> output_decoder =
-                    InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(decoder_output_name))->wmap();
+                     InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(out_dec_symbol_name_))->wmap();
         float* output_data_decoder = output_decoder.as<float *>();
 
 
@@ -262,13 +277,14 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
         }
         for (size_t i = 0; i < num_classes; i+= 1)
             data_targets[num_decoder * num_classes + i] = output_data_decoder[i];
-        input_data_decoder[0] = max_elem_idx;
-        infer_request_decoder_.SetBlob("hidden", decoder_blobs["decoder_hidden"]);
+        input_data_decoder[0] = float(max_elem_idx);
+
+        infer_request_decoder_.SetBlob(in_dec_hidden_name_, decoder_blobs[out_enc_hidden_name_]);
     }
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     time_elapsed_ += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
     ncalls_++;
-    decoder_blobs["logits"] = targets;
+    decoder_blobs[logits_name_] = targets;
     return decoder_blobs;
 }
