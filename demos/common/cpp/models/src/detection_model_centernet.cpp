@@ -48,7 +48,7 @@ void ModelCenterNet::checkInputsOutputs(const InputsDataMap& inputInfo, const Ou
 
     // --------------------------- Reading image input parameters -------------------------------------------
     std::string imageInputName = inputInfo.begin()->first;
-    //inputsNames.push_back(imageInputName);
+    inputsNames.push_back(imageInputName);
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
 
@@ -63,7 +63,7 @@ void ModelCenterNet::checkInputsOutputs(const InputsDataMap& inputInfo, const Ou
         if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
             throw std::logic_error("This demo accepts networks with FP32 output precision");
         }
-        //outputsNames.push_back(output.first);
+        outputsNames.push_back(output.first);
     }
 }
 
@@ -83,26 +83,24 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
         output.second->setLayout(InferenceEngine::Layout::NCHW);
     }
     // --------------------------- Check input & output ----------------------------------------------------
-    ModelBase::IOPattern inputPattern(
-        // Number of inputs 
-        { 1 },
-        { { "input.1", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NHWC } } });
+    ModelBase::IOPattern inputPattern_(
+        // Possible number of inputs 
+        {
+            { 1, { { "input.1", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NHWC } } } },
+        }
+    );
 
-    ModelBase::IOPattern outputPattern(
-        // Number of  outputs
-        { 3 },
-        // Names & Dims
-        { { "center_heatmap", { InferenceEngine::Precision::FP32, {1, 80, 0, 0}, InferenceEngine::Layout::NCHW} },
-        { "regression", { InferenceEngine::Precision::FP32, {1, 2, 0, 0}, InferenceEngine::Layout::NCHW } },
-        { "width_height", { InferenceEngine::Precision::FP32, {1, 2, 0, 0}, InferenceEngine::Layout::NCHW } } });
+    ModelBase::IOPattern outputPattern_(
+        {
+            { 3, {  { "center_heatmap", { InferenceEngine::Precision::FP32, {1, 80, 0, 0}, InferenceEngine::Layout::NCHW} },
+                    { "regression", { InferenceEngine::Precision::FP32, {1, 2, 0, 0}, InferenceEngine::Layout::NCHW } },
+                    { "width_height", { InferenceEngine::Precision::FP32, {1, 2, 0, 0}, InferenceEngine::Layout::NCHW } } } }
+        }
+    );
 
-    // input.1
-    // center_heatmap
-    // "regression"
-    // "width_height
 
     ModelBase::findIONames(inputInfo, outputInfo);
-    ModelBase::checkInputsOutputs({ "CenterNet", {inputPattern , outputPattern} }, inputInfo, outputInfo);
+    ModelBase::checkInputsOutputs({ "CenterNet", {inputPattern_ , outputPattern_} }, inputInfo, outputInfo);
 
     checkInputsOutputs(inputInfo, outputInfo);
 }

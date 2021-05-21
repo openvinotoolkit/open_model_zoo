@@ -196,83 +196,50 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     }
 
     // --------------------------- Check input & output ----------------------------------------------------
-    ModelBase::IOPattern inputPattern(
+
+    ModelBase::IOPattern inputPattern_(
         // Possible number of inputs 
-        { 1, 2 },
-        // Possible input layers
-
         {
-          //efficientdet-d0-tf 
-          { "image_arrays/placeholder_port_0", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+            { 1, {  { "image_arrays/placeholder_port_0", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+                    { "image", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+                    { "image_tensor", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+                    { "data", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+                    { "input.1", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+                    { "input_1", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+                    { "Placeholder", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } } } } ,
 
-          // person-detection-retail-0013 ssd300 ssd512 vehicle-detection-adas-0002
-          { "data", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+            { 2, {  { "image_tensor", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+                    { "image_info", {  InferenceEngine::Precision::FP32, {1, 3}, InferenceEngine::Layout::NC } } } },
 
-          // product-detection-0001
-          { "input.1", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+        }
+    );
 
-          // person-vehicle-bike-detection-? ssd-resnet34-1200-onnx vehicle-detection-????
-          { "image", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
-
-          //rfcn-resnet101-coco-tf //ssd_mobilenet_v1_coco ssd_mobilenet_v1_fpn_coco ssd_mobilenet_v2_coco ssd_resnet50_v1_fpn_coco ssdlite_mobilenet_v2 ssdlite_mobilenet_v2
-          { "image_tensor", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
-          { "image_info", {  InferenceEngine::Precision::FP32, {1, 3}, InferenceEngine::Layout::NC } },
-
-          // retinanet-tf
-          { "input_1", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
-
-          // vehicle-license-plate-detection-barrier-????
-          { "Placeholder", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
-        });
-
-
-    ModelBase::IOPattern outputPattern(
-        // Possible number of outputs
-        { 1, 4, 8, 9 },
-        // Possible outputs layers
+    ModelBase::IOPattern outputPattern_(
+        // Possible number of inputs 
         {
-          // skip efficientdet-d0-tf
-          { "detections", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW} },
+            { 1, {  { "detections", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW} } ,
+                    { "detection_out", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW} },
+                    { "detection_output", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW } },
+                    { "DetectionOutput", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW } },
+                    { "DetectionOutput_", {  InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW } },
+                    { "527", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW } },
+                    { "868", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW } } } },
 
-          // person-detection-retail-0013, person-vehicle-bike-detection-? ssd300  ssd512 vehicle-detection-???? vehicle-detection-adas-0002
-          { "detection_out", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW} },
+            { 4, {  { "bboxes", { InferenceEngine::Precision::FP32, {1, 0, 4}, InferenceEngine::Layout::CHW } },
+                    { "labels", { InferenceEngine::Precision::FP32, {1,200}, InferenceEngine::Layout::NC } },
+                    { "scores", { InferenceEngine::Precision::FP32, {1, 200}, InferenceEngine::Layout::NC } } } },
 
-          { "527", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW } },
+            { 8, {  { "boxes", { InferenceEngine::Precision::FP32, {0, 5}, InferenceEngine::Layout::NC } },
+                    { "labels", { InferenceEngine::Precision::FP32, {100}, InferenceEngine::Layout::C } } } },
 
-          // rfcn-resnet101-coco-tf
-          { "detection_output", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW } },
+            { 9, {  { "boxes", { InferenceEngine::Precision::FP32, {0, 5}, InferenceEngine::Layout::NC } },
+                    { "labels", { InferenceEngine::Precision::FP32, {100}, InferenceEngine::Layout::C } } } },
+        }
+    );
 
-          // person-detection-????
-          { "boxes", { InferenceEngine::Precision::FP32, {0, 5}, InferenceEngine::Layout::NC } },
-          //{ "labels", { InferenceEngine::Precision::FP32, {100}, InferenceEngine::Layout::C } },
-
-          //product-detection-0001
-          { "868", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW } },
-
-          // retinanet-tf ssd_mobilenet_v1_coco ssd_mobilenet_v1_fpn_coco ssd_mobilenet_v2_coco ssd_resnet50_v1_fpn_coco
-          { "DetectionOutput", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW } },
-
-          //ssd-resnet34-1200-onnx
-          { "bboxes", { InferenceEngine::Precision::FP32, {1, 0, 4}, InferenceEngine::Layout::CHW } },
-          { "labels", { InferenceEngine::Precision::FP32, {1,200}, InferenceEngine::Layout::NC } },
-          { "scores", { InferenceEngine::Precision::FP32, {1, 200}, InferenceEngine::Layout::NC } },
-
-          // vehicle-license-plate-detection-barrier-????
-          { "DetectionOutput_", {  InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW } },
-        },
-
-        //skip next layers:
-        // person-detection-0106
-        { "1021_1022.0","1341_1342.0", "1661_1662.0", "1981_1982.0", "2301_2302.0", "2323_2324.0", "3115_3116.0",
-        // person-detection-0203
-          "1095_1096.0", "1312_1313.0", "1529_1530.0", "1746_1747.0", "1963_1964.0", "2234_2235.0",
-        // person-vehicle-bike-detection-2003 person-vehicle-bike-detection-2004 
-          "TopK_1123.0", "TopK_1339.0", "TopK_1555.0", "TopK_1829.0", "TopK_1829.0", "TopK_691.0", "TopK_907.0",
-        //ssd-resnet34-1200-onnx
-          "TopK_717.0"});
 
     ModelBase::findIONames(inputInfo, outputInfo);
-    ModelBase::checkInputsOutputs({ "SSD", {inputPattern , outputPattern} }, inputInfo, outputInfo);
+    ModelBase::checkInputsOutputs({ "SSD", {inputPattern_ , outputPattern_} }, inputInfo, outputInfo);
 
     checkInputsOutputs(inputInfo, outputInfo);
 }
