@@ -193,7 +193,6 @@ void EncoderDecoderCNN::setInOutNames(const std::string out_enc_hidden_name,
 }
 
 InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
-
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     /* Resize manually and copy data from the image to the input blob */
     InferenceEngine::LockedMemory<void> inputMapped =
@@ -245,14 +244,15 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
     input_data_decoder[0] = 0;
     auto num_classes = infer_request_decoder_.GetBlob(out_dec_symbol_name_)->size();
 
-
     InferenceEngine::BlobMap decoder_blobs;
+
     auto targets = InferenceEngine::make_shared_blob<float>(
         InferenceEngine::TensorDesc(Precision::FP32, std::vector<size_t> {1, MAX_NUM_DECODER, num_classes},
         Layout::HWC));
     targets->allocate();
     LockedMemory<void> blobMapped = targets->wmap();
     auto data_targets = blobMapped.as<float*>();
+
     for (size_t num_decoder = 0; num_decoder < MAX_NUM_DECODER; num_decoder ++) {
         infer_request_decoder_.Infer();
         for (const auto &output_name : output_names_decoder) {
@@ -262,9 +262,8 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
                      InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(out_dec_symbol_name_))->wmap();
         float* output_data_decoder = output_decoder.as<float *>();
 
-        std::vector<float> output_data_as_vector(output_data_decoder, output_data_decoder + num_classes);
-        auto max_elem_vector = std::max_element(output_data_as_vector.begin(), output_data_as_vector.end());
-        auto argmax = std::distance(output_data_as_vector.begin(), max_elem_vector);
+        auto max_elem_vector = std::max_element(output_data_decoder, output_data_decoder + num_classes);
+        auto argmax = std::distance(output_data_decoder, max_elem_vector);
         for (size_t i = 0; i < num_classes; i+= 1)
             data_targets[num_decoder * num_classes + i] = output_data_decoder[i];
         input_data_decoder[0] = float(argmax);
