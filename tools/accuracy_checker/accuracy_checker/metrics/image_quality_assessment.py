@@ -287,6 +287,7 @@ class VisionInformationFidelity(BaseRegressionMetric):
             convolve2d.raise_error(self.__provider__)
 
     def configure(self):
+        super().configure()
         self.sigma_nsq = self.get_value_from_config('sigma_nsq')
 
     def _vif_diff(self, annotation_image, prediction_image):
@@ -371,8 +372,6 @@ class LPIPS(BaseRegressionMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(self.lpips_differ, *args, **kwargs)
-        if isinstance(lpips, UnsupportedPackage):
-            lpips.raise_error(self.__provider__)
 
     @classmethod
     def parameters(cls):
@@ -400,6 +399,8 @@ class LPIPS(BaseRegressionMetric):
         self.color_order = self.get_value_from_config('color_order')
         self.normalized_images = self.get_value_from_config('normalized_images')
         self.color_scale = 255 if not self.normalized_images else 1
+        if isinstance(lpips, UnsupportedPackage):
+            lpips.raise_error(self.__provider__)
         self.loss = lpips.LPIPS(net=self.get_value_from_config('net'))
         self.dist_threshold = self.get_value_from_config('distance_threshold')
 

@@ -82,8 +82,8 @@ LoadInferenceEngine(const std::vector<std::string>& devices,
         if ((device.find("CPU") != std::string::npos)) {
             if (!custom_cpu_library.empty()) {
                 // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                auto extension_ptr = make_so_pointer<IExtension>(custom_cpu_library);
-                ie.AddExtension(std::static_pointer_cast<IExtension>(extension_ptr), "CPU");
+                auto extension_ptr = std::make_shared<Extension>(custom_cpu_library);
+                ie.AddExtension(std::static_pointer_cast<Extension>(extension_ptr), "CPU");
             }
         } else if (!custom_cldnn_kernels.empty()) {
             // Load Extensions for other plugins not CPU

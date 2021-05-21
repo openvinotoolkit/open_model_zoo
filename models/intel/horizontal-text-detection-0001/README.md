@@ -42,5 +42,10 @@ Expected color order - `BGR`.
 2. The `labels` is a blob with the shape `100` in the format `N`, where `N` is the number of detected
    bounding boxes. In case of text detection, it is equal to `0` for each detected box.
 
+## Training Pipeline
+
+The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/develop/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/develop/models/object_detection/model_templates/horizontal-text-detection/readme.md), allowing to fine-tune the model on custom dataset.
+
 ## Legal Information
+
 [*] Other names and brands may be claimed as the property of others.

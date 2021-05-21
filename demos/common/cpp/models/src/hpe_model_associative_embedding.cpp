@@ -131,8 +131,7 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
 }
 
 std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult& infResult) {
-    HumanPoseResult* result = new HumanPoseResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    HumanPoseResult* result = new HumanPoseResult(infResult.frameId, infResult.metaData);
 
     auto aembds = infResult.outputsData[embeddingsBlobName];
     const SizeVector& aembdsDims = aembds->getTensorDesc().getDims();

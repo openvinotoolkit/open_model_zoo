@@ -104,7 +104,7 @@ from .audio_recognition import (
     CTCBeamSearchDecoderWithLm,
     FastCTCBeamSearchDecoderWithLm
 )
-
+from .kaldi_asr_decoder import KaldiLatGenDecoder
 from .regression import RegressionAdapter, MultiOutputRegression
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
@@ -113,6 +113,8 @@ from .optical_flow import PWCNetAdapter
 from .salient_objects_detection import SalientObjectDetection
 from .noise_suppression import NoiseSuppressionAdapter
 from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
+
+from .time_series import QuantilesPredictorAdapter
 
 __all__ = [
     'Adapter',
@@ -228,6 +230,7 @@ __all__ = [
     'CTCGreedyDecoder',
     'CTCBeamSearchDecoderWithLm',
     'FastCTCBeamSearchDecoderWithLm',
+    'KaldiLatGenDecoder',
 
     'QualityAssessmentAdapter',
 
@@ -240,4 +243,5 @@ __all__ = [
     'GVADetectionAdapter',
     'GVAClassificationAdapter',
 
+    'QuantilesPredictorAdapter'
 ]

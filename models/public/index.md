@@ -1,11 +1,11 @@
-# Overview of OpenVINO&trade; Toolkit Public Models
+# Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models
 
-OpenVINO&trade; toolkit provides a set of public models
+OpenVINO&trade; toolkit provides a set of public pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
+The table [Public Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
 
-You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ Model Downloader and other automation tools.
-Review the tools description in the file `<OPENVINO_INSTALL_DIR>/deployment_tools/open_model_zoo/tools/downloader/README.md` for details.
+You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/downloader/README.md) and other automation tools.
 
 ## Classification
 
@@ -88,6 +88,7 @@ detect areas with complex shape.
 | HRNet V2 C1 Segmentation  | PyTorch\*      | [hrnet-v2-c1-segmentation](./hrnet-v2-c1-segmentation/README.md) | 77.69% | 81.993 | 66.4768 |
 | Fastseg MobileV3Large LR-ASPP, F=128  | PyTorch\*      | [fastseg-large](./fastseg-large/README.md) | 72.67% | 140.9611 | 3.2 |
 | Fastseg MobileV3Small LR-ASPP, F=128  | PyTorch\*      | [fastseg-small](./fastseg-small/README.md) | 67.15% | 69.2204 | 1.1 |
+| PSPNet R-50-D8  | PyTorch\*      | [pspnet-pytorch](./pspnet-pytorch/README.md) | 70.6% | 357.1719 | 46.5827 |
 
 ### Instance Segmentation
 
@@ -124,6 +125,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | EfficientDet-D0                      | TensorFlow\*             | [efficientdet-d0-tf](./efficientdet-d0-tf/README.md)| 31.95% | 2.54 | 3.9 |
 | EfficientDet-D1                      | TensorFlow\*             | [efficientdet-d1-tf](./efficientdet-d1-tf/README.md)| 37.54% | 6.1 | 6.6 |
 | FaceBoxes                            | PyTorch\*                | [faceboxes-pytorch](./faceboxes-pytorch/README.md)|83.565% | 1.8975 | 1.0059 |
+| Face Detection Retail                | Caffe\*                  | [face-detection-retail-0044](./face-detection-retail-0044/README.md) | 83.00% | 1.067 | 0.588 |
 | Faster R-CNN with Inception-ResNet v2| TensorFlow\*             | [faster_rcnn_inception_resnet_v2_atrous_coco](./faster_rcnn_inception_resnet_v2_atrous_coco/README.md)| 40.69% | 30.687 | 13.307 |
 | Faster R-CNN with Inception v2       | TensorFlow\*             | [faster_rcnn_inception_v2_coco](./faster_rcnn_inception_v2_coco/README.md) | 26.24%| 30.687 | 13.307 |
 | Faster R-CNN with ResNet 50          | TensorFlow\*             | [faster_rcnn_resnet50_coco](./faster_rcnn_resnet50_coco/README.md) | 31.09% | 57.203 | 29.162 |
@@ -141,17 +143,15 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | SSD lite with MobileNet V2           | TensorFlow\*             | [ssdlite_mobilenet_v2](./ssdlite_mobilenet_v2/README.md) | 24.2946% | 1.525 | 4.475 |
 | SSD with ResNet-50 V1 FPN            | TensorFlow\*             | [ssd_resnet50_v1_fpn_coco](./ssd_resnet50_v1_fpn_coco/README.md)| 38.4557% | 178.6807 | 59.9326 |
 | SSD with ResNet 34 1200x1200         | PyTorch\*                | [ssd-resnet34-1200-onnx](./ssd-resnet34-1200-onnx/README.md) | 20.7198%/39.2752% | 433.411 | 20.058  |
-| SSH                                  | MXNet\*                  | [ssh-mxnet](./ssh-mxnet/README.md) | 84.80% | 267.0594 | 19.7684 |
-| RetinaFace-R50                       | MXNet\*                  | [retinaface-resnet50](./retinaface-resnet50/README.md) | 87.2902% | 100.8478 | 29.427 |
-| RetinaFace-Anti-Cov                  | MXNet\*                  | [retinaface-anti-cov](./retinaface-anti-cov/README.md)  | 77.1531% | 2.7781 | 0.5955 |
 | Ultra Lightweight Face Detection RFB 320| PyTorch\*             | [ultra-lightweight-face-detection-rfb-320](./ultra-lightweight-face-detection-rfb-320/README.md)|84.78% | 0.2106 | 0.3004 |
 | Ultra Lightweight Face Detection slim 320| PyTorch\*            | [ultra-lightweight-face-detection-slim-320](./ultra-lightweight-face-detection-slim-320/README.md)|83.32% | 0.1724 | 0.2844 |
+| Vehicle License Plate Detection Barrier | TensorFlow\* | [vehicle-license-plate-detection-barrier-0123](./vehicle-license-plate-detection-barrier-0123/README.md) | 	99.52% | 0.271 | 0.547 |
 | YOLO v1 Tiny                         | TensorFlow.js\*          | [yolo-v1-tiny-tf](./yolo-v1-tiny-tf/README.md) | 54.79% | 6.9883	 |	15.8587 |
 | YOLO v2 Tiny                         | Keras\*                  | [yolo-v2-tiny-tf](./yolo-v2-tiny-tf/README.md) | 27.3443%/29.1184%| 5.4236	 |	11.2295 |
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/README.md) | 53.1453%/56.483% | 63.0301	 |	50.9526 |
 | YOLO v3                              | Keras\*                  | [yolo-v3-tf](./yolo-v3-tf/README.md) | 62.2759%/67.7221% | 65.9843	 |	61.9221 |
 | YOLO v3 Tiny                         | Keras\*                  | [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/README.md) | 35.9%/39.7% | 5.582  | 8.848 |
-| YOLO v4                              | Keras\*                  | [yolo-v4-tf](./yolo-v4-tf/README.md) | 71.17%/75.02% | 128.608	 |	64.33 |
+| YOLO v4                              | Keras\*                  | [yolo-v4-tf](./yolo-v4-tf/README.md) | 71.23%/77.40%/50.26% | 129.5567	 |	64.33 |
 | YOLO v4 Tiny                         | Keras\*                  | [yolo-v4-tiny-tf](./yolo-v4-tiny-tf/README.md) | | 6.9289 | 6.0535 |
 
 ## Face Recognition
@@ -159,10 +159,6 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------------ | -------------- | -------------- | -------- |------ | ------- |
 | FaceNet                              | TensorFlow\*   | [facenet-20180408-102900](./facenet-20180408-102900/README.md) | 99.14% | 2.846 | 23.469 |
-| LResNet34E-IR,ArcFace@ms1m-refine-v1 | MXNet\*        | [face-recognition-resnet34-arcface](./face-recognition-resnet34-arcface/README.md) | 	98.7488%| 8.934 | 34.129 |
-| LResNet50E-IR,ArcFace@ms1m-refine-v1 | MXNet\*        | [face-recognition-resnet50-arcface](./face-recognition-resnet50-arcface/README.md) | 98.8835%| 12.637 | 43.576 |
-| LResNet100E-IR,ArcFace@ms1m-refine-v2| MXNet\*        | [face-recognition-resnet100-arcface](./face-recognition-resnet100-arcface/README.md) | 99.0218%| 24.209 | 65.131 |
-| MobileFaceNet,ArcFace@ms1m-refine-v1 | MXNet\*        | [face-recognition-mobilefacenet-arcface](./face-recognition-mobilefacenet-arcface/README.md) | 98.8695% | 0.449 | 0.993 |
 | SphereFace                           | Caffe\*        | [Sphereface](./Sphereface/README.md) | 98.8321% | 3.504 | 22.671 |
 
 ## Human Pose Estimation
@@ -216,6 +212,7 @@ The task of action recognition is to predict action that is being performed on a
 | Model Name                        | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | --------------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | RGB-I3D, pretrained on ImageNet\* | TensorFlow\*   | [i3d-rgb-tf](./i3d-rgb-tf/README.md) | 65.96%/86.01% | 278.9815 | 12.6900|
+| common-sign-language-0001         | PyTorch\*      | [common-sign-language-0001](./common-sign-language-0001/README.md) | 93.58% | 4.2269 | 4.1128 |
 
 ## Colorization
 
@@ -253,6 +250,12 @@ The task of image translation is to generate the output based on exemplar.
 | -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
 | CoCosNet   | PyTorch\*      | [cocosnet](./cocosnet/README.md) | 12.93dB  | 1080.7032 | 167.9141 |
 
+## Optical Character Recognition
+
+| Model Name | Implementation | OMZ Model Name                     | Accuracy | GFlops    | mParams  |
+| -----------| -------------- | ---------------------------------- | -------- | --------- | -------- |
+| license-plate-recognition-barrier-0007 | TensorFlow\* | [license-plate-recognition-barrier-0007](./license-plate-recognition-barrier-0007/README.md) | 98% | 0.347 | 1.435 |
+
 ## Place Recognition
 
 The task of place recognition is to quickly and accurately recognize the location of a given query photograph.
@@ -289,6 +292,13 @@ The reported metric is collected over the alphanumeric subset of icdar 13 (1015 
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | Resnet-FC      | PyTorch\*      | [text-recognition-resnet-fc](./text-recognition-resnet-fc/README.md) | 90.94% | 40.3704 | 177.9668  |
 
+## Text to Speech
+
+| Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
+| -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
+| ForwardTacotron | PyTorch\* | [forward-tacotron](./forward-tacotron/README.md):<br>forward-tacotron-duration-prediction <br>forward-tacotron-regression |  | <br>6.66 <br>4.91 | <br>13.81 <br>3.05 |
+| WaveRNN        | PyTorch\*      | [wavernn](./wavernn/README.md):<br>wavernn-upsampler <br>wavernn-rnn |  | <br>0.37 <br>0.06 | <br>0.4 <br>3.83 |
+
 ## Named Entity Recognition
 
 Named entity recognition (NER) is the task of tagging entities in text with their corresponding type.
@@ -296,6 +306,18 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 | Model Name     | Implementation | OMZ Model Name                                   | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------ | -------- | ------- | --------- |
 | bert-base-NER  | PyTorch\*      | [bert-base-ner](./bert-base-ner/README.md) | 94.45%  | 22.3874 | 107.4319  |
+
+## Vehicle Reidentification
+
+| Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
+| -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
+| vehicle-reid-0001 | PyTorch\* | [vehicle-reid-0001](./vehicle-reid-0001/README.md) | 96.31%/85.15 % | 2.643 | 2.183 |
+
+## See Also
+
+* [Open Model Zoo Demos](../../demos/README.md)
+* [Model Downloader](../../tools/downloader/README.md)
+* [Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models](../intel/index.md)
 
 ## Legal Information
 

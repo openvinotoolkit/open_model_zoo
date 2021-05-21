@@ -57,7 +57,7 @@ void BaseDetection::submitRequest() {
 void BaseDetection::wait() {
     if (!enabled()|| !request || !isAsync)
         return;
-    request->Wait(IInferRequest::WaitMode::RESULT_READY);
+    request->Wait(InferRequest::WaitMode::RESULT_READY);
 }
 
 bool BaseDetection::enabled() const  {
@@ -104,7 +104,7 @@ void FaceDetection::enqueue(const cv::Mat &frame) {
     if (!enabled()) return;
 
     if (!request) {
-        request = net.CreateInferRequestPtr();
+        request = std::make_shared<InferenceEngine::InferRequest>(net.CreateInferRequest());
     }
 
     width = static_cast<float>(frame.cols);
@@ -311,7 +311,7 @@ void AntispoofingClassifier::enqueue(const cv::Mat& face) {
         return;
     }
     if (!request) {
-        request = net.CreateInferRequestPtr();
+        request = std::make_shared<InferenceEngine::InferRequest>(net.CreateInferRequest());
     }
 
     Blob::Ptr  inputBlob = request->GetBlob(input);
@@ -396,7 +396,7 @@ void AgeGenderDetection::enqueue(const cv::Mat &face) {
         return;
     }
     if (!request) {
-        request = net.CreateInferRequestPtr();
+        request = std::make_shared<InferenceEngine::InferRequest>(net.CreateInferRequest());
     }
 
     Blob::Ptr  inputBlob = request->GetBlob(input);
@@ -486,7 +486,7 @@ void HeadPoseDetection::enqueue(const cv::Mat &face) {
         return;
     }
     if (!request) {
-        request = net.CreateInferRequestPtr();
+        request = std::make_shared<InferenceEngine::InferRequest>(net.CreateInferRequest());
     }
 
     Blob::Ptr inputBlob = request->GetBlob(input);
@@ -579,7 +579,7 @@ void EmotionsDetection::enqueue(const cv::Mat &face) {
         return;
     }
     if (!request) {
-        request = net.CreateInferRequestPtr();
+        request = std::make_shared<InferenceEngine::InferRequest>(net.CreateInferRequest());
     }
 
     Blob::Ptr inputBlob = request->GetBlob(input);
@@ -693,7 +693,7 @@ void FacialLandmarksDetection::enqueue(const cv::Mat &face) {
         return;
     }
     if (!request) {
-        request = net.CreateInferRequestPtr();
+        request = std::make_shared<InferenceEngine::InferRequest>(net.CreateInferRequest());
     }
 
     Blob::Ptr inputBlob = request->GetBlob(input);
@@ -716,7 +716,7 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
         std::cout << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << std::endl;
     }
 
-    auto begin = n_lm * idx;
+    auto begin = n_lm / 2 * idx;
     auto end = begin + n_lm / 2;
     for (auto i_lm = begin; i_lm < end; ++i_lm) {
         float normed_x = normed_coordinates[2 * i_lm];

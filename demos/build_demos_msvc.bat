@@ -24,6 +24,7 @@ set SUPPORTED_VS_VERSIONS=VS2015 VS2017 VS2019
 
 set VS_VERSION=
 set EXTRA_CMAKE_OPTS=
+set BUILD_TARGETS=
 
 :argParse
 if not "%1" == "" (
@@ -31,6 +32,14 @@ if not "%1" == "" (
     rem so it gets split into two arguments
     if "%1" == "-DENABLE_PYTHON" (
         set EXTRA_CMAKE_OPTS=%EXTRA_CMAKE_OPTS% %1=%2
+        shift & shift
+        goto argParse
+    )
+    rem to build more than one specific demo use quotation marks,
+    rem list the necessary demos separated by space,
+    rem ex. --target="classification_demo segmentation_demo"
+    if "%1" == "--target" (
+        set BUILD_TARGETS=%BUILD_TARGETS% %1 %~2
         shift & shift
         goto argParse
     )
@@ -84,7 +93,8 @@ if "%VS_VERSION%" == "" (
         echo vswhere.exe was not found.
         echo To use Visual Studio autodetection, make sure Visual Studio 2017 version 15.2
         echo or a newer version of Visual Studio is installed. If you'd like to use Visual
-        echo Studio 2015, request it explicitly by running "%0 VS2015".
+        echo Studio 2015, request it explicitly by running:
+        echo     "%~0" VS2015
         goto errorHandling
     )
 
@@ -122,8 +132,9 @@ cd "%SOLUTION_DIR64%" && cmake -G "Visual Studio !VS_VERSION!" -A %PLATFORM% %EX
 echo.
 echo ###############^|^| Build Open Model Zoo Demos using MS Visual Studio ^|^|###############
 echo.
-echo cmake --build . --config Release
-cmake --build . --config Release
+echo cmake --build . --config Release %BUILD_TARGETS%
+cmake --build . --config Release %BUILD_TARGETS%
+
 if ERRORLEVEL 1 goto errorHandling
 
 echo Done.

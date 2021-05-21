@@ -52,9 +52,6 @@ models:
           - type: resize
             dst_width: 100
             dst_height: 32
-          - type: normalization
-            mean: 0.5
-            std: 0.5
 
         metrics:
           - type: character_recognition_accuracy
@@ -65,9 +62,6 @@ models:
           - type: resize
             dst_width: 100
             dst_height: 32
-          - type: normalization
-            mean: 0.5
-            std: 0.5
 
         metrics:
           - type: character_recognition_accuracy
@@ -78,9 +72,6 @@ models:
           - type: resize
             dst_width: 100
             dst_height: 32
-          - type: normalization
-            mean: 0.5
-            std: 0.5
 
         metrics:
           - type: character_recognition_accuracy
@@ -91,9 +82,6 @@ models:
           - type: resize
             dst_width: 100
             dst_height: 32
-          - type: normalization
-            mean: 0.5
-            std: 0.5
 
         metrics:
           - type: character_recognition_accuracy
@@ -104,8 +92,5 @@ models:
           - type: resize
             dst_width: 100
             dst_height: 32
-          - type: normalization
-            mean: 0.5
-            std: 0.5
         metrics:
           - type: character_recognition_accuracy
