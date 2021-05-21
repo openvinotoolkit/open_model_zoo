@@ -48,7 +48,7 @@ void ModelCenterNet::checkInputsOutputs(const InputsDataMap& inputInfo, const Ou
 
     // --------------------------- Reading image input parameters -------------------------------------------
     std::string imageInputName = inputInfo.begin()->first;
-    inputsNames.push_back(imageInputName);
+    //inputsNames.push_back(imageInputName);
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
 
@@ -63,7 +63,7 @@ void ModelCenterNet::checkInputsOutputs(const InputsDataMap& inputInfo, const Ou
         if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
             throw std::logic_error("This demo accepts networks with FP32 output precision");
         }
-        outputsNames.push_back(output.first);
+        //outputsNames.push_back(output.first);
     }
 }
 
