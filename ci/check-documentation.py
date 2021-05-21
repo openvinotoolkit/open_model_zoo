@@ -114,8 +114,10 @@ def main():
             if md_path in index_child_md_links:
                 referenced_md_files.add(target_path)
 
-        for link in sorted([ref.link for ref in doc_page.omz_references() if '<omz_dir>/' in ref.link]):
-            file_path = OMZ_ROOT / link.replace('<omz_dir>/', '')
+        # check <omz_dir> link validity
+
+        for link in sorted([link for link in doc_page.omz_references() if link.startswith('<omz_dir>')]):
+            file_path = Path(link.replace('<omz_dir>', str(OMZ_ROOT)))
 
             try:
                 file_relative_path = file_path.relative_to(OMZ_ROOT)
