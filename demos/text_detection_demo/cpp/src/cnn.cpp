@@ -123,7 +123,6 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
 
 
 void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
-    std::cout << "EncoderDecoderCNN init" << std::endl;
     // ---------------------------------------------------------------------------------------------------
     // --------------------------- 0. checking paths -----------------------------------------------------
     std::string model_path_decoder = model_path;
@@ -163,7 +162,6 @@ void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std
     channels_ = input_info->getTensorDesc().getDims()[1];
     input_size_ = cv::Size(input_info->getTensorDesc().getDims()[3], input_info->getTensorDesc().getDims()[2]);
 
-    std::cout << "input_size " << input_info->getTensorDesc().getDims()[3] << " " << input_info->getTensorDesc().getDims()[2] << std::endl;
     // --------------------------- Loading model to the device -------------------------------------------
     ExecutableNetwork executable_network_encoder = ie.LoadNetwork(network_encoder, deviceName);
     ExecutableNetwork executable_network_decoder = ie.LoadNetwork(network_decoder, deviceName);
@@ -231,7 +229,6 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
         InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(decoder_input_name))->wmap();
     float* input_data_decoder = input_decoder.as<float *>();
     input_data_decoder[0] = 0;
-    auto element_size = infer_request_decoder_.GetBlob(decoder_output_name)->element_size();
     auto num_classes = infer_request_decoder_.GetBlob(decoder_output_name)->size();
     InferenceEngine::BlobMap decoder_blobs;
     auto targets = InferenceEngine::make_shared_blob<float>(
@@ -245,26 +242,25 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
         for (const auto &output_name : output_names_decoder) {
             decoder_blobs[output_name] = infer_request_decoder_.GetBlob(output_name);
         }
-        // argmax:
         InferenceEngine::LockedMemory<void> output_decoder =
                     InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(decoder_output_name))->wmap();
         float* output_data_decoder = output_decoder.as<float *>();
 
 
 
-        float max_elem = -1e+7;
+        // argmax:
+        float max_elem = -1e+7; // log probabilities are in (-inf, 0]
         int max_elem_idx = 0;
 
         for (size_t i = 0; i < num_classes; i+= 1 ) {
             auto cur_elem = output_data_decoder[i];
-            // std::cout << "cur elem" << cur_elem << std::endl;
             if (cur_elem > max_elem) {
                 max_elem = cur_elem;
                 max_elem_idx = i;
 
             }
         }
-        for (auto i = 0; i < num_classes; i+= 1)
+        for (size_t i = 0; i < num_classes; i+= 1)
             data_targets[num_decoder * num_classes + i] = output_data_decoder[i];
         input_data_decoder[0] = max_elem_idx;
         infer_request_decoder_.SetBlob("hidden", decoder_blobs["decoder_hidden"]);
@@ -276,4 +272,3 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
     decoder_blobs["logits"] = targets;
     return decoder_blobs;
 }
-

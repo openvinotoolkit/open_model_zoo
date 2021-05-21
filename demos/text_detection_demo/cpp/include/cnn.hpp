@@ -63,6 +63,7 @@ public:
         switch (type) {
             case 0: return new Cnn();
             case 1: return new EncoderDecoderCNN();
+            default: return new Cnn();
         }
     }
 };

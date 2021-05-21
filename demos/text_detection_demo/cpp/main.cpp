@@ -263,7 +263,6 @@ int main(int argc, char *argv[]) {
                         slog::err << "No decoder type or invalid decoder type (-dt) provided: " + decoder_type << slog::endl;
                         return -1;
                     }
-                    std::cout << "decoded: " << res << std::endl;
                     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                     text_recognition_postproc_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 
