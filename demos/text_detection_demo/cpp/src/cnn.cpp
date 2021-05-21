@@ -262,23 +262,12 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
                      InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(out_dec_symbol_name_))->wmap();
         float* output_data_decoder = output_decoder.as<float *>();
 
-
-
-        // argmax:
-        float max_elem = -1e+7; // log probabilities are in (-inf, 0]
-        int max_elem_idx = 0;
-
-        for (size_t i = 0; i < num_classes; i+= 1 ) {
-            auto cur_elem = output_data_decoder[i];
-            if (cur_elem > max_elem) {
-                max_elem = cur_elem;
-                max_elem_idx = i;
-
-            }
-        }
+        std::vector<float> output_data_as_vector(output_data_decoder, output_data_decoder + num_classes);
+        auto max_elem_vector = std::max_element(output_data_as_vector.begin(), output_data_as_vector.end());
+        auto argmax = std::distance(output_data_as_vector.begin(), max_elem_vector);
         for (size_t i = 0; i < num_classes; i+= 1)
             data_targets[num_decoder * num_classes + i] = output_data_decoder[i];
-        input_data_decoder[0] = float(max_elem_idx);
+        input_data_decoder[0] = float(argmax);
 
         infer_request_decoder_.SetBlob(in_dec_hidden_name_, decoder_blobs[out_enc_hidden_name_]);
     }
