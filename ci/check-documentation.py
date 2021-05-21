@@ -128,7 +128,7 @@ def main():
             if str(file_relative_path) == md_path_rel: # self-link
                 continue
 
-            if not (file_relative_path.is_file() or file_relative_path.is_dir()):
+            if not (file_path.is_file() or file_path.is_dir()):
                 complain(f'{md_path_rel}: OMZ reference "{file_relative_path}" target'
                     ' does not exist')
 
