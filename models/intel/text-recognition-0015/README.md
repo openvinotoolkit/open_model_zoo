@@ -71,5 +71,16 @@ The text-recognition-15-decoder model is a GRU based decoder with 2d attention m
 1.	Name: `decoder_hidden`, shape: `1, 1, 1024`. Current context state of the LSTM cell.
 2.	Name: `decoder_output`, shape: `1, 66`. Classification confidence scores in the [0, 1] range
     for every letter.
+## Use text-detection demo
+
+Model is supported by [text-detection c++ demo](../../../demos/text_detection_demo/cpp/main.cpp). In order to use this model in the demo, user should pass the following options:
+```
+  -m_tr_ss "  #?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  -tr_o_blb_nm  "logits"
+  -tr_composite
+  -dt simple -lower
+```
+
+For more information, please, see documentation of the demo.
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
