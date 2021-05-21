@@ -59,9 +59,9 @@ class DocumentationPage:
             elif node['type'] == 'link':
                 yield ExternalReference('link', node['link'])
 
-    def omz_references(self):
+    def code_spans(self):
         for node in _get_all_ast_nodes(self._ast):
-            if node['type'] == 'codespan' and node['text'].startswith('<omz_dir>/'):
+            if node['type'] == 'codespan':
                 yield node['text']
 
     def html_fragments(self):
