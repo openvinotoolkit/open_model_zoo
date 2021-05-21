@@ -126,7 +126,8 @@ void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std
     // ---------------------------------------------------------------------------------------------------
     // --------------------------- 0. checking paths -----------------------------------------------------
     std::string model_path_decoder = model_path;
-    model_path_decoder = model_path_decoder.replace(model_path_decoder.find("encoder"), 7, "decoder");
+    while (model_path_decoder.find("encoder") != std::string::npos)
+        model_path_decoder = model_path_decoder.replace(model_path_decoder.find("encoder"), 7, "decoder");
     auto network_encoder = ie.ReadNetwork(model_path);
     auto network_decoder = ie.ReadNetwork(model_path_decoder);
     InputsDataMap inputInfo(network_encoder.getInputsInfo());
