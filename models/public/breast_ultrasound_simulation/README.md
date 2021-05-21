@@ -21,6 +21,19 @@ The network is trained on [IVUS](http://www.cvc.uab.es/IVUSchallenge2011/dataset
 Segmentation masks from [INbreast](http://medicalresearch.inescporto.pt/breastresearch/index.php/Get_INbreast_Database) dataset is used to generate stage 0 simulation results for breast ultrasound.
 
 
+## **Specification and Performance**
+
+
+| Type | Simulation |
+| --- | --- |
+| Source Framework | Pytorch (converted to ONNX) |
+| FLOPs | 34,027 |
+| params | 33,640 |
+
+## **Input and Output**
+
+Input is Psuedo B mode ultrasound volume of size 128x128x128 and output is the final simulated ultrasound volume of the same size.
+
 
 
 ## Acknowledgement

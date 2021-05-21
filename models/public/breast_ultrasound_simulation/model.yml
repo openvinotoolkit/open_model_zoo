@@ -17,4 +17,5 @@ model_optimizer_args:
   - --input_shape=[1,128,128]
   - --input_model=$dl_dir/ultrasound-simulation.onnx
 framework: onnx
-license: http://www.cvc.uab.es/IVUSchallenge2011/dataset.html
+license: http://www.cvc.uab.es/IVUSchallenge2011/dataset.htmlls
+
