@@ -83,6 +83,31 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     }
 
     // --------------------------- Check input & output ----------------------------------------------------
+
+    ModelBase::IOPattern inputPattern_(
+        // Possible number of inputs 
+        {
+            { 1, { { "input_1", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+                   { "image_input", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } } } },
+        }
+    );
+
+    ModelBase::IOPattern outputPattern_(
+        {
+            { 2, {  { "conv2d_9/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 0, 0}, InferenceEngine::Layout::NCHW} },
+                    { "conv2d_12/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 0, 0}, InferenceEngine::Layout::NCHW } } } },
+
+            { 3, {  { "conv2d_58/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 0, 0}, InferenceEngine::Layout::NCHW} },
+                    { "conv2d_66/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 0, 0}, InferenceEngine::Layout::NCHW } },
+                    { "conv2d_74/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 0, 0}, InferenceEngine::Layout::NCHW } } } }
+        }
+    );
+    //
+//    conv2d_12/Conv2D/YoloRegion
+//conv2d_9/Conv2D/YoloRegion
+    ModelBase::findIONames(inputInfo, outputInfo);
+    ModelBase::checkInputsOutputs({ "YOLO", {inputPattern_ , outputPattern_} }, inputInfo, outputInfo);
+
     checkInputsOutputs(inputInfo, outputInfo);
 
     //---------------------------- Read yolo regions from IR -----------------------------------------------
