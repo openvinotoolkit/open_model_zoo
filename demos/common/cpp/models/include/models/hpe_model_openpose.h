@@ -33,6 +33,7 @@ public:
     static const size_t keypointsNumber = 18;
 
 protected:
+    IOPattern getIOPattern() override { return {}; };
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
 
     static const int minJointsNumber = 3;

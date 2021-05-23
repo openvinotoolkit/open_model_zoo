@@ -36,6 +36,7 @@ protected:
     size_t nTop;
     std::vector<std::string> labels;
 
+    IOPattern getIOPattern() override { return {}; };
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override;
 

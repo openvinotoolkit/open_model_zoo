@@ -29,86 +29,72 @@ ModelYolo3::ModelYolo3(const std::string& modelFileName, float confidenceThresho
     useAdvancedPostprocessing(useAdvancedPostprocessing), regionsFile(regionsFile) {
 }
 
-template<class InputsDataMap, class OutputsDataMap>
-void ModelYolo3::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
-    // --------------------------- Check input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    if (inputInfo.size() != 1) {
-        throw std::logic_error("This demo accepts YOLO networks that have only one input");
-    }
-    const auto& input = inputInfo.begin()->second;
-    if (input->getPrecision() != InferenceEngine::Precision::U8) {
-        throw std::logic_error("This demo accepts networks with U8 input precision");
-    }
 
-    // -------------------Reading image input parameters----------------------------------------------------
-    inputsNames.push_back(inputInfo.begin()->first);
-    const TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
-    netInputHeight = getTensorHeight(inputDesc);
-    netInputWidth = getTensorWidth(inputDesc);
-
-    // --------------------------- Check output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-    for (const auto& output : outputInfo) {
-        outputsNames.push_back(output.first);
-        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
-            throw std::logic_error("This demo accepts networks with FP32 output precision");
+ModelBase::IOPattern ModelYolo3::getIOPattern() {
+    ModelBase::BlobPattern inputPattern(
+        "input",
+        // Possible models' inputs
+        // Describe number of inputs, precision, dimensions and layout.
+        // If it doesn't matter what dimension's value is set 0.
+        {
+            { 1, { { "", { InferenceEngine::Precision::U8, {1, 3, 0, 0},  useAutoResize ? InferenceEngine::Layout::NCHW : InferenceEngine::Layout::NHWC} } } },
         }
-    }
+    );
+
+    ModelBase::BlobPattern outputPattern(
+        "output",
+        {
+            { 1, {  { "", { InferenceEngine::Precision::FP32, {1, 125, 13, 13}, InferenceEngine::Layout::NCHW} } } },
+
+            { 2, {  { "conv2d_9/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 13, 13}, InferenceEngine::Layout::NCHW} },
+                    { "conv2d_12/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 26, 26}, InferenceEngine::Layout::NCHW } } } },
+
+            { 3, {  { "conv2d_58/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 13, 13}, InferenceEngine::Layout::NCHW} },
+                    { "conv2d_66/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 26, 26}, InferenceEngine::Layout::NCHW } },
+                    { "conv2d_74/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 52, 52}, InferenceEngine::Layout::NCHW } } } }
+        }
+    );
+
+    return { "YOLO", {inputPattern, outputPattern} };
 }
 
+//template<class InputsDataMap, class OutputsDataMap>
+//void ModelYolo3::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
+//    // --------------------------- Check input blobs ------------------------------------------------------
+//    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
+//    if (inputInfo.size() != 1) {
+//        throw std::logic_error("This demo accepts YOLO networks that have only one input");
+//    }
+//    const auto& input = inputInfo.begin()->second;
+//    if (input->getPrecision() != InferenceEngine::Precision::U8) {
+//        throw std::logic_error("This demo accepts networks with U8 input precision");
+//    }
+//
+//    // -------------------Reading image input parameters----------------------------------------------------
+//    inputsNames.push_back(inputInfo.begin()->first);
+//    const TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
+//    netInputHeight = getTensorHeight(inputDesc);
+//    netInputWidth = getTensorWidth(inputDesc);
+//
+//    // --------------------------- Check output blobs -----------------------------------------------------
+//    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
+//    for (const auto& output : outputInfo) {
+//        outputsNames.push_back(output.first);
+//        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
+//            throw std::logic_error("This demo accepts networks with FP32 output precision");
+//        }
+//    }
+//}
+
 void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
-    // --------------------------- Configure input & output -----------------------------------------------
+    // --------------------------- Configure and check input & output -----------------------------------------------
     const auto& inputInfo = cnnNetwork.getInputsInfo();
     const auto& outputInfo = cnnNetwork.getOutputsInfo();
-    for (const auto& input : inputInfo) {
-        if (input.second->getTensorDesc().getDims().size() == 4) {
-            if (useAutoResize) {
-                input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
-                input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
-            }
-            else {
-                input.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
-            }
-            input.second->setPrecision(InferenceEngine::Precision::U8);
-        }
-        else if (input.second->getTensorDesc().getDims().size() == 2) {  // 2nd input contains image info
-            input.second->setPrecision(InferenceEngine::Precision::FP32);
-        }
-    }
 
-    for (const auto& output : outputInfo) {
-        output.second->setPrecision(InferenceEngine::Precision::FP32);
-        output.second->setLayout(InferenceEngine::Layout::NCHW);
-    }
-
-    // --------------------------- Check input & output ----------------------------------------------------
-
-    ModelBase::IOPattern inputPattern_(
-        // Possible number of inputs 
-        {
-            { 1, { { "input_1", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
-                   { "image_input", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } } } },
-        }
-    );
-
-    ModelBase::IOPattern outputPattern_(
-        {
-            { 2, {  { "conv2d_9/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 0, 0}, InferenceEngine::Layout::NCHW} },
-                    { "conv2d_12/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 0, 0}, InferenceEngine::Layout::NCHW } } } },
-
-            { 3, {  { "conv2d_58/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 0, 0}, InferenceEngine::Layout::NCHW} },
-                    { "conv2d_66/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 0, 0}, InferenceEngine::Layout::NCHW } },
-                    { "conv2d_74/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 0, 0}, InferenceEngine::Layout::NCHW } } } }
-        }
-    );
-    //
-//    conv2d_12/Conv2D/YoloRegion
-//conv2d_9/Conv2D/YoloRegion
-    ModelBase::findIONames(inputInfo, outputInfo);
-    ModelBase::checkInputsOutputs({ "YOLO", {inputPattern_ , outputPattern_} }, inputInfo, outputInfo);
-
-    checkInputsOutputs(inputInfo, outputInfo);
+    const auto ioPattern = getIOPattern();
+    findIONames(ioPattern, inputInfo, outputInfo);
+    checkInputsOutputs(ioPattern, inputInfo, outputInfo);
+    getNetInputSize(inputInfo);
 
     //---------------------------- Read yolo regions from IR -----------------------------------------------
     if (auto ngraphFunction = (cnnNetwork).getFunction()) {
@@ -130,18 +116,24 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 }
 
 void ModelYolo3::checkCompiledNetworkInputsOutputs() {
-    checkInputsOutputs(execNetwork.GetInputsInfo(), execNetwork.GetOutputsInfo());
+    // --------------------------- Check inputs & outputs -----------------------------------------------
+    const auto& inputInfo = execNetwork.GetInputsInfo();
+    const auto& outputInfo = execNetwork.GetOutputsInfo();
+    const auto ioPattern = getIOPattern();
+    findIONames(ioPattern, inputInfo, outputInfo);
+    checkInputsOutputs(ioPattern, inputInfo, outputInfo);
+    getNetInputSize(inputInfo);
 
     //------------------------- Read yolo regions from file -----------------------------------------------
     cv::FileStorage fs(regionsFile, cv::FileStorage::READ);
     cv::FileNode regionsYolo = fs["Regions"];
     cv::FileNodeIterator it = regionsYolo.begin(), endIt = regionsYolo.end();
 
-    for (; it != endIt; ++it) {
-        std::vector<float> anchors;
-        (*it)["anchors"] >> anchors;
-        regions.emplace(static_cast<std::string>((*it)["name"]), Region((int)(*it)["num"], (int)(*it)["classes"], (int)(*it)["coords"], anchors));
-    }
+        for (; it != endIt; ++it) {
+            std::vector<float> anchors;
+            (*it)["anchors"] >> anchors;
+            regions.emplace(static_cast<std::string>((*it)["name"]), Region((int)(*it)["num"], (int)(*it)["classes"], (int)(*it)["coords"], anchors));
+        }
     fs.release();
 }
 

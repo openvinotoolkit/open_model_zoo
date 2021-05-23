@@ -29,4 +29,31 @@ protected:
 
     size_t netInputHeight = 0;
     size_t netInputWidth = 0;
+
+    template<class InputsDataMap>
+    void getNetInputSize(const InputsDataMap& inputsInfo) {
+        const auto& inputDesc = inputsInfo.find(inputsNames[0])->second->getTensorDesc();
+        netInputHeight = getTensorHeight(inputDesc);
+        netInputWidth = getTensorWidth(inputDesc);
+    };
+
+    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override {
+        const auto& inputInfo = cnnNetwork.getInputsInfo();
+        const auto& outputInfo = cnnNetwork.getOutputsInfo();
+
+        const auto ioPattern = getIOPattern();
+        findIONames(ioPattern, inputInfo, outputInfo);
+        prepareBlobs(ioPattern, inputInfo, outputInfo);
+        checkInputsOutputs(ioPattern, inputInfo, outputInfo);
+        getNetInputSize(inputInfo);
+   };
+
+    void checkCompiledNetworkInputsOutputs() override {
+        const auto& inputInfo = execNetwork.GetInputsInfo();
+        const auto& outputInfo = execNetwork.GetOutputsInfo();
+        const auto ioPattern = getIOPattern();
+        findIONames(ioPattern, inputInfo, outputInfo);
+        //checkInputsOutputs(ioPattern, inputInfo, outputInfo);
+        getNetInputSize(inputInfo);
+    };
 };

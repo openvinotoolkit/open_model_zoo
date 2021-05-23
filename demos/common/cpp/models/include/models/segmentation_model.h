@@ -30,12 +30,16 @@ public:
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
+    IOPattern getIOPattern() override { return {}; };
     void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override;
 
-    template<class InputsDataMap, class OutputsDataMap>
-    void checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo);
+    //template<class InputsDataMap, class OutputsDataMap>
+    //void checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo);
     int outHeight = 0;
     int outWidth = 0;
     int outChannels = 0;
+
+    template<class OutputsDataMap>
+    void getBlobDims(const OutputsDataMap& outputInfo);
 };

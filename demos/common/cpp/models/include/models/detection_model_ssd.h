@@ -38,17 +38,21 @@ protected:
     std::unique_ptr<ResultBase> postprocessSingleOutput(InferenceResult& infResult);
     std::unique_ptr<ResultBase> postprocessMultipleOutputs(InferenceResult& infResult);
 
+    IOPattern getIOPattern() override;
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override;
 
-    template<class InputsDataMap, class OutputsDataMap>
-    void checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo);
+    //template<class InputsDataMap, class OutputsDataMap>
+    //void checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo);
 
-    template<class OutputsDataMap>
-    void checkSingleOutput(const OutputsDataMap& outputInfo);
+    //template<class OutputsDataMap>
+    //void checkSingleOutput(const OutputsDataMap& outputInfo);
 
-    template<class OutputsDataMap>
-    void checkMultipleOutputs(const OutputsDataMap& outputInfo);
+    //template<class OutputsDataMap>
+    //void checkMultipleOutputs(const OutputsDataMap& outputInfo);
     size_t maxProposalCount = 0;
     size_t objectSize = 0;
+
+    template<class OutputsDataMap>
+    void getBlobDims(const OutputsDataMap& outputInfo);
 };

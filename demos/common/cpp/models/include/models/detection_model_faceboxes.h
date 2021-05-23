@@ -43,11 +43,13 @@ protected:
     const std::vector<int> steps;
     const std::vector<std::vector<int>> minSizes;
     std::vector<Anchor> anchors;
+
+    IOPattern getIOPattern() override;
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override;
 
-    template<class InputsDataMap, class OutputsDataMap>
-    void checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo);
-    void priorBoxes(const std::vector<std::pair<size_t, size_t>>& featureMaps);
+    //template<class InputsDataMap, class OutputsDataMap>
+    //void checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo);
+    void getAnchors(const std::vector<std::pair<size_t, size_t>>& featureMaps);
 
 };

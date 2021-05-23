@@ -27,70 +27,57 @@ ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
     : DetectionModel(modelFileName, confidenceThreshold, false , labels) {
 }
 
-template<class InputsDataMap, class OutputsDataMap>
-void ModelCenterNet::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
-    // --------------------------- Prepare input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    if (inputInfo.size() != 1) {
-        throw std::logic_error("This demo accepts CenterNet networks that have only one input");
-    }
+//template<class InputsDataMap, class OutputsDataMap>
+//void ModelCenterNet::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
+//    // --------------------------- Prepare input blobs ------------------------------------------------------
+//    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
+//    if (inputInfo.size() != 1) {
+//        throw std::logic_error("This demo accepts CenterNet networks that have only one input");
+//    }
+//
+//    const auto& input = inputInfo.begin()->second;
+//    const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
+//
+//    if (inputDesc.getDims()[1] != 3) {
+//        throw std::logic_error("Expected 3-channel input in CenterNet network");
+//    }
+//
+//    if (input->getPrecision() != InferenceEngine::Precision::U8) {
+//        throw std::logic_error("This demo accepts networks with U8 input precision");
+//    }
+//
+//    // --------------------------- Reading image input parameters -------------------------------------------
+//    std::string imageInputName = inputInfo.begin()->first;
+//    inputsNames.push_back(imageInputName);
+//    netInputHeight = getTensorHeight(inputDesc);
+//    netInputWidth = getTensorWidth(inputDesc);
+//
+//    // --------------------------- Prepare output blobs -----------------------------------------------------
+//    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
+//
+//    if (outputInfo.size() != 3) {
+//        throw std::logic_error("This demo expect CenterNet networks that have 3 outputs blobs");
+//    }
+//
+//    for (const auto& output : outputInfo) {
+//        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
+//            throw std::logic_error("This demo accepts networks with FP32 output precision");
+//        }
+//        outputsNames.push_back(output.first);
+//    }
+//}
 
-    const auto& input = inputInfo.begin()->second;
-    const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
-
-    if (inputDesc.getDims()[1] != 3) {
-        throw std::logic_error("Expected 3-channel input in CenterNet network");
-    }
-
-    if (input->getPrecision() != InferenceEngine::Precision::U8) {
-        throw std::logic_error("This demo accepts networks with U8 input precision");
-    }
-
-    // --------------------------- Reading image input parameters -------------------------------------------
-    std::string imageInputName = inputInfo.begin()->first;
-    inputsNames.push_back(imageInputName);
-    netInputHeight = getTensorHeight(inputDesc);
-    netInputWidth = getTensorWidth(inputDesc);
-
-    // --------------------------- Prepare output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-
-    if (outputInfo.size() != 3) {
-        throw std::logic_error("This demo expect CenterNet networks that have 3 outputs blobs");
-    }
-
-    for (const auto& output : outputInfo) {
-        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
-            throw std::logic_error("This demo accepts networks with FP32 output precision");
-        }
-        outputsNames.push_back(output.first);
-    }
-}
-
-void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
-    // --------------------------- Configure input & output -------------------------------------------------
-    const auto& inputInfo = cnnNetwork.getInputsInfo();
-    const auto& outputInfo = cnnNetwork.getOutputsInfo();
-
-    for (const auto& input : inputInfo) {
-        input.second->setPrecision(InferenceEngine::Precision::U8);
-        input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
-    }
-
-    for (const auto& output : outputInfo) {
-        const InferenceEngine::TensorDesc& inputDesc = output.second->getTensorDesc();
-        output.second->setPrecision(InferenceEngine::Precision::FP32);
-        output.second->setLayout(InferenceEngine::Layout::NCHW);
-    }
-    // --------------------------- Check input & output ----------------------------------------------------
-    ModelBase::IOPattern inputPattern_(
+ModelBase::IOPattern ModelCenterNet::getIOPattern() {
+    ModelBase::BlobPattern inputPattern(
+        "input",
         // Possible number of inputs 
         {
-            { 1, { { "input.1", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NHWC } } } },
+            { 1, { { "", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NHWC } } } },
         }
     );
 
-    ModelBase::IOPattern outputPattern_(
+    ModelBase::BlobPattern outputPattern(
+        "output",
         {
             { 3, {  { "center_heatmap", { InferenceEngine::Precision::FP32, {1, 80, 0, 0}, InferenceEngine::Layout::NCHW} },
                     { "regression", { InferenceEngine::Precision::FP32, {1, 2, 0, 0}, InferenceEngine::Layout::NCHW } },
@@ -98,15 +85,28 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
         }
     );
 
+    return  { "CenterNet", { inputPattern , outputPattern } };
+}
 
-    ModelBase::findIONames(inputInfo, outputInfo);
-    ModelBase::checkInputsOutputs({ "CenterNet", {inputPattern_ , outputPattern_} }, inputInfo, outputInfo);
+void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+    // --------------------------- Configure input & output -------------------------------------------------
+    const auto& inputInfo = cnnNetwork.getInputsInfo();
+    const auto& outputInfo = cnnNetwork.getOutputsInfo();
 
-    checkInputsOutputs(inputInfo, outputInfo);
+    const auto ioPattern = getIOPattern();
+    findIONames(ioPattern, inputInfo, outputInfo);
+    prepareBlobs(ioPattern, inputInfo, outputInfo);
+    checkInputsOutputs(ioPattern, inputInfo, outputInfo);
+    getNetInputSize(inputInfo);
 }
 
 void ModelCenterNet::checkCompiledNetworkInputsOutputs() {
-    checkInputsOutputs(execNetwork.GetInputsInfo(), execNetwork.GetOutputsInfo());
+    const auto& inputInfo = execNetwork.GetInputsInfo();
+    const auto& outputInfo = execNetwork.GetOutputsInfo();
+    const auto ioPattern = getIOPattern();
+    findIONames(ioPattern, inputInfo, outputInfo);
+    checkInputsOutputs(ioPattern, inputInfo, outputInfo);
+    getNetInputSize(inputInfo);
 }
 
 cv::Point2f getDir(const cv::Point2f& srcPoint, float rotRadius) {

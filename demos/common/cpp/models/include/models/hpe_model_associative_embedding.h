@@ -33,6 +33,7 @@ public:
         const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
 
 protected:
+    IOPattern getIOPattern() override { return {}; };
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override { throw std::logic_error("Compiled networks aren't supported in this demo"); };
     cv::Size inputLayerSize;

@@ -22,6 +22,30 @@
 
 using namespace InferenceEngine;
 
+
+void ModelBase::prepareBlobs(const IOPattern& modelIOPattern, const InferenceEngine::InputsDataMap& inputInfo, const InferenceEngine::OutputsDataMap& outputInfo) {
+    const auto& inputBlobPattern = modelIOPattern.second[0].patterns.find(inputInfo.size())->second;
+    for (auto& blobName : inputsNames) {
+        const auto& blobPatternDesc = inputsNames.size() > 1 ? inputBlobPattern.find(blobName)->second : inputBlobPattern.begin()->second;
+        const auto& blobData = inputInfo.find(blobName)->second;
+
+        blobData->setPrecision(blobPatternDesc.getPrecision());
+        blobData->setLayout(blobPatternDesc.getLayout());
+        if (blobData->getTensorDesc().getDims().size() == 4) {
+            blobData->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+        }
+    }
+
+    const auto& outputBlobPattern = modelIOPattern.second[1].patterns.find(outputInfo.size())->second;
+    for (const auto& blobName : outputsNames) {
+        const auto& blobPatternDesc = outputsNames.size() > 1 ? outputBlobPattern.find(blobName)->second : outputBlobPattern.begin()->second;
+        const auto& blobData = outputInfo.find(blobName)->second;
+
+        blobData->setPrecision(blobPatternDesc.getPrecision());
+        blobData->setLayout(blobPatternDesc.getLayout());
+    }
+}
+
 InferenceEngine::CNNNetwork ModelBase::prepareNetwork(InferenceEngine::Core& core) {
     // --------------------------- Load inference engine ------------------------------------------------
     slog::info << "Loading Inference Engine" << slog::endl;
@@ -65,5 +89,33 @@ ExecutableNetwork ModelBase::loadExecutableNetwork(const CnnConfig& cnnConfig, I
         execNetwork = core.ImportNetwork(modelFileName, cnnConfig.devices, cnnConfig.execNetworkConfig);
         checkCompiledNetworkInputsOutputs();
     }
+
+    //InferenceEngine::CNNNetwork cnnNetwork{};
+    //if (!isNetworkCompiled) {
+    //    slog::info << "Loading network files" << slog::endl;
+    //    /** Read network model **/
+    //    cnnNetwork = core.ReadNetwork(modelFileName);
+    //    /** Set batch size to 1 **/
+    //    slog::info << "Batch size is forced to 1." << slog::endl;
+    //    setBatchOne(cnnNetwork);
+    //}
+    //else {
+    //    slog::info << "Import compiled model to the device" << slog::endl;
+    //    execNetwork = core.ImportNetwork(modelFileName, cnnConfig.devices, cnnConfig.execNetworkConfig);
+    //}
+
+    //fillCheckBlobNames();
+
+    //if (!isNetworkCompiled) {
+    //    prepareInputsOutputs_();
+    //}
+
+    //checkInputsOutputs(getModelPattern, inputInfo, outputInfo);
+
+    //if (!isNetworkCompiled) {
+    //    slog::info << "Loading model to the device" << slog::endl;
+    //    execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.devices, cnnConfig.execNetworkConfig);
+    //}
+
     return execNetwork;
 }
