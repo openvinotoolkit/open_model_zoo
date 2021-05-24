@@ -356,14 +356,6 @@ the `--precisions` option:
 ./quantizer.py --all --dataset_dir <DATASET_DIR> --precisions=FP16-INT8
 ```
 
-The script will attempt to locate Post-Training Optimization Toolkit using
-the environment variables set by the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
-script. You can override this heuristic with the `--pot` option:
-
-```sh
-./quantizer.py --all --dataset_dir <DATASET_DIR> --pot my/openvino/path/post_training_optimization_toolkit/main.py
-```
-
 By default, the script will run Post-Training Optimization Toolkit using the same
 Python executable that was used to run the script itself. To use a different
 Python executable, use the `-p`/`--python` option:
@@ -371,6 +363,24 @@ Python executable, use the `-p`/`--python` option:
 ```sh
 ./quantizer.py --all --dataset_dir <DATASET_DIR> --python my/python
 ```
+
+The script will attempt to locate Post-Training Optimization Toolkit using several methods:
+
+1. If the `--pot` option was specified, then its value will be used as the path
+   to the script to run:
+
+   ```sh
+   ./quantizer.py --all --dataset_dir <DATASET_DIR> --pot my/openvino/path/post_training_optimization_toolkit/main.py
+   ```
+
+2. Otherwise, if the selected Python executable can import the `pot` package,
+   then that package will be used.
+
+3. Otherwise, if the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
+   script has been executed, the environment variables set by that script will
+   be used to locate Post-Training Optimization Toolkit within the OpenVINO toolkit.
+
+4. Otherwise, the script will fail.
 
 It's possible to specify a target device for Post-Training Optimization Toolkit
 to optimize for, by using the `--target_device` option:
