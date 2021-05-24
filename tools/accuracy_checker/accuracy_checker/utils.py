@@ -304,7 +304,7 @@ def read_yaml(file: Union[str, Path], *args, **kwargs):
         return yaml.safe_load(content, *args, **kwargs)
 
 
-def read_csv(file: Union[str, Path], is_dict=True, *args, **kwargs):
+def read_csv(file: Union[str, Path], *args, is_dict=True, **kwargs):
     with get_path(file).open(encoding='utf-8') as content:
         if is_dict:
             return list(csv.DictReader(content, *args, **kwargs))
