@@ -216,11 +216,6 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
     @staticmethod
     def convert_image(features):
         image = np.array(features[1:], dtype=np.uint8).reshape((28, 28))
-        # column_template = '{}x{}'
-        # for x in range(28):
-        #     for y in range(28):
-        #         pixel = int(features[column_template.format(x+1, y+1)])
-        #         image[x, y] = pixel
 
         return image
 
