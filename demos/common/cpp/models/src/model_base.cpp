@@ -22,7 +22,6 @@
 
 using namespace InferenceEngine;
 
-
 void ModelBase::prepareBlobs(const IOPattern& modelIOPattern, const InferenceEngine::InputsDataMap& inputInfo, const InferenceEngine::OutputsDataMap& outputInfo) {
     auto inputsNum = inputInfo.size();
     const auto& inputBlobPattern = modelIOPattern.second[0].patterns.find(inputsNum)->second;

@@ -84,8 +84,8 @@ ModelBase::IOPattern ClassificationModel::getIOPattern() {
         // Describe number of inputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is - set 0.
         {
-            { 1, { { "common", { InferenceEngine::Precision::FP32, {1, labels.size(), 1, 1}, InferenceEngine::Layout::NCHW} },
-                   { "prob", { InferenceEngine::Precision::FP32, {1, labels.size()}, InferenceEngine::Layout::CN} }} },
+            { 1, { { "common", { InferenceEngine::Precision::FP32, {1, 0, 1, 1}, InferenceEngine::Layout::NCHW} },
+                   { "prob", { InferenceEngine::Precision::FP32, {1, 0}, InferenceEngine::Layout::CN} }} },
         }
     );
 

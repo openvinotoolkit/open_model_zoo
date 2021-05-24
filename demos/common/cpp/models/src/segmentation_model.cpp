@@ -45,7 +45,7 @@ ModelBase::IOPattern SegmentationModel::getIOPattern() {
         }
     );
 
-    return { "SSD", {inputPattern, outputPattern} };
+    return { "segmentation", {inputPattern, outputPattern} };
 }
 
 template<class OutputsDataMap>
@@ -69,93 +69,26 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
 
 }
 
-//template<class InputsDataMap, class OutputsDataMap>
-//void SegmentationModel::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
-//    // --------------------------- Check input blobs -----------------------------------------
-//    const auto& input = inputInfo.begin()->second;
-//    if (inputInfo.size() != 1)
-//        throw std::runtime_error("Demo supports topologies only with 1 input");
-//
-//    if (input->getPrecision() != InferenceEngine::Precision::U8) {
-//        throw std::logic_error("This demo accepts networks with U8 input precision");
-//    }
-//    std::string imageInputName = inputInfo.begin()->first;
-//    inputsNames.push_back(imageInputName);
-//
-//    const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
-//
-//    const InferenceEngine::SizeVector& inSizeVector = inputDesc.getDims();
-//    if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
-//        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-//
-//    // --------------------------- Check output blobs -----------------------------------------------------
-//    if (outputInfo.size() != 1) {
-//        throw std::runtime_error("Demo supports topologies only with 1 output");
-//    }
-//
-//    const auto& output = outputInfo.begin()->second;
-//    outputsNames.push_back(outputInfo.begin()->first);
-//
-//    if (isNetworkCompiled && (output->getPrecision() != InferenceEngine::Precision::FP32 || output->getPrecision() != InferenceEngine::Precision::I32)) {
-//        throw std::logic_error("This demo accepts networks with FP32 or I32 output precision");
-//    }
-
-    //const InferenceEngine::SizeVector& outSizeVector = output->getTensorDesc().getDims();
-    //switch (outSizeVector.size()) {
-    //case 3:
-    //    outChannels = 0;
-    //    outHeight = (int)(outSizeVector[1]);
-    //    outWidth = (int)(outSizeVector[2]);
-    //    break;
-    //case 4:
-    //    outChannels = (int)(outSizeVector[1]);
-    //    outHeight = (int)(outSizeVector[2]);
-    //    outWidth = (int)(outSizeVector[3]);
-    //    break;
-    //default:
-    //    throw std::runtime_error("Unexpected output blob shape. Only 4D and 3D output blobs are"
-    //        "supported.");
-    //}
-//}
-
-//void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
-//    // --------------------------- Configure input & output ---------------------------------------------
-//    const auto& inputInfo = cnnNetwork.getInputsInfo();
-//    const auto& outputInfo = cnnNetwork.getOutputsInfo();
-//
-//    for (const auto& input : inputInfo) {
-//        if (useAutoResize) {
-//            input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
-//            input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
-//        }
-//        else {
-//            input.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
-//        }
-//        input.second->setPrecision(InferenceEngine::Precision::U8);
-//    }
-//
-//    // --------------------------- Check input & output ----------------------------------------------------
-//    checkInputsOutputs(inputInfo, outputInfo);
-//}
-
-//void SegmentationModel::checkCompiledNetworkInputsOutputs() {
-//    checkInputsOutputs(execNetwork.GetInputsInfo(), execNetwork.GetOutputsInfo());
-//}
-
 std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
+
+    std::shared_ptr<InternalModelData> resPtr = nullptr;
 
     if (useAutoResize) {
         /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
         request->SetBlob(inputsNames[0], wrapMat2Blob(img));
         /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-        return std::make_shared<InternalImageMatModelData>(img);
+        resPtr = std::make_shared<InternalImageMatModelData>(img);
     }
-    /* Resize and copy data from the image to the input blob */
-    InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-    matU8ToBlob<uint8_t>(img, frameBlob);
-    return std::make_shared<InternalImageModelData>(img.cols, img.rows);
+    else {
+        /* Resize and copy data from the image to the input blob */
+        InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
+        matU8ToBlob<uint8_t>(img, frameBlob);
+        resPtr = std::make_shared<InternalImageModelData>(img.cols, img.rows);
+    }
+
+    return resPtr;
 }
 
 std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult) {

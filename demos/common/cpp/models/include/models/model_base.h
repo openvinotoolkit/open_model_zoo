@@ -61,10 +61,10 @@ protected:
     void prepareIECore(InferenceEngine::Core& core);
 
     template<class InputsDataMap, class OutputsDataMap>
-    void findIONames(IOPattern& modelBlobPattern, const InputsDataMap& inputsInfo, const OutputsDataMap& outputInfo);
+    void findIONames(const IOPattern& modelBlobPattern, const InputsDataMap& inputsInfo, const OutputsDataMap& outputInfo);
 
     template<class DataMap>
-    void findAndCheckBlobNames(BlobPattern& pattern, std::vector<std::string>& names, const DataMap& info, const std::string& modelName);
+    void findAndCheckBlobNames(const BlobPattern& pattern, std::vector<std::string>& names, const DataMap& info, const std::string& modelName);
 
     void prepareBlobs(const IOPattern& modelBlobPattern, const InferenceEngine::InputsDataMap& inputInfo, const InferenceEngine::OutputsDataMap& outputInfo);
 
@@ -76,8 +76,6 @@ protected:
     virtual void checkCompiledNetworkInputsOutputs() = 0;
     std::vector<std::string> inputsNames;
     std::vector<std::string> outputsNames;
-    std::vector<std::string> inputsNames_;
-    std::vector<std::string> outputsNames_;
     InferenceEngine::ExecutableNetwork execNetwork;
     std::string modelFileName;
     CnnConfig cnnConfig = {};
@@ -86,7 +84,7 @@ protected:
 
 
 template<class DataMap>
-void ModelBase::findAndCheckBlobNames(BlobPattern& pattern, std::vector<std::string>& names, const DataMap& info, const std::string& modelName) {
+void ModelBase::findAndCheckBlobNames(const BlobPattern& pattern, std::vector<std::string>& names, const DataMap& info, const std::string& modelName) {
     //--------------------------- Find IO names --------------------------------
     //--------------------------- Check number of I/O---------------------------
     auto blobsNum = info.size();
@@ -125,7 +123,7 @@ void ModelBase::findAndCheckBlobNames(BlobPattern& pattern, std::vector<std::str
 }
 
 template<class InputsDataMap, class OutputsDataMap>
-void ModelBase::findIONames(IOPattern& modelBlobPattern, const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
+void ModelBase::findIONames(const IOPattern& modelBlobPattern, const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
     //--------------------------- Find input names ---------------------------
     findAndCheckBlobNames(modelBlobPattern.second[0], inputsNames, inputInfo, modelBlobPattern.first);
 
@@ -138,62 +136,61 @@ void check(const std::string& modelName, const ModelBase::BlobPattern& pattern,
     const DataMap& info, std::vector<std::string>& names) {
     // --------------------------- Check BLOB ---------------------------
     auto blobsNum = info.size();
-    auto& layersPatterns = pattern.patterns.find(blobsNum)->second;
-    for (auto& layerName : names) {
-        auto& layerPatternIt = layersPatterns.find(layerName);
-        if (layerPatternIt == layersPatterns.end()) {
-            layerPatternIt = layersPatterns.begin();
+    auto& blobsPatterns = pattern.patterns.find(blobsNum)->second;
+    for (auto& blobName : names) {
+        auto& blobPatternIt = blobsPatterns.find(blobName);
+        if (blobPatternIt == blobsPatterns.end()) {
+            blobPatternIt = blobsPatterns.begin();
         }
-        const auto& layerPatternDesc = layerPatternIt->second;
-        const auto& layerPatternDims = layerPatternDesc.getDims();
+        const auto& blobPatternDesc = blobPatternIt->second;
+        const auto& blobPatternDims = blobPatternDesc.getDims();
 
-        const auto& layerToCheckDesc = info.find(layerName)->second->getTensorDesc();
-        const auto& layerToCheckDims = layerToCheckDesc.getDims();
+        const auto& blobToCheckDesc = info.find(blobName)->second->getTensorDesc();
+        const auto& blobToCheckDims = blobToCheckDesc.getDims();
 
 
         // --------------------------- Check number of dimensions ---------------------------
-        if (layerToCheckDims.size() != layerPatternDims.size()) {
-            throw std::logic_error("Unsupported " + std::to_string(layerToCheckDims.size()) + "D " + pattern.type + " layer '" + layerName + "'. " +
-                " In " + modelName + " network number of dimensions for '" + layerName + "' layer should be : " + std::to_string(layerPatternDims.size()));
+        if (blobToCheckDims.size() != blobPatternDims.size()) {
+            throw std::logic_error("Unsupported " + std::to_string(blobToCheckDims.size()) + "D " + pattern.type + " blob '" + blobName + "'. " +
+                " In " + modelName + " network number of dimensions for '" + blobName + "' blob should be : " + std::to_string(blobPatternDims.size()));
         }
 
         // --------------------------- Check dimensions -------------------------------------
-        for (size_t i = 0; i < layerToCheckDims.size(); ++i) {
-            if (layerPatternDims[i] != layerToCheckDims[i] && layerPatternDims[i] != 0) {
+        for (size_t i = 0; i < blobToCheckDims.size(); ++i) {
+            if (blobPatternDims[i] != blobToCheckDims[i] && blobPatternDims[i] != 0) {
                 std::ostringstream ossDims1, ossDims2;
-                for (size_t i = 0; i < layerToCheckDims.size(); ++i) {
-                    ossDims1 << layerToCheckDims[i] << ",";
-                    if (layerPatternDims[i] == 0) {
+                for (size_t i = 0; i < blobToCheckDims.size(); ++i) {
+                    ossDims1 << blobToCheckDims[i] << ",";
+                    if (blobPatternDims[i] == 0) {
                         ossDims2 << "X,";
                     }
                     else {
-                        ossDims2 << layerPatternDims[i] << ",";
+                        ossDims2 << blobPatternDims[i] << ",";
                     }
                 }
-                throw std::logic_error("Unsupported " + pattern.type + " layer '" + layerName + "' with dimension [" + ossDims1.str() + "]. " +
-                    " In " + modelName + " network demensions for '" + layerName + "' layer should be : [" + ossDims2.str() + "]");
+                throw std::logic_error("Unsupported " + pattern.type + " blob '" + blobName + "' with dimension [" + ossDims1.str() + "]. " +
+                    " In " + modelName + " network demensions for '" + blobName + "' blob should be : [" + ossDims2.str() + "]");
             }
         }
 
         // --------------------------- Check precision-------------------------------------
-        if (layerPatternDesc.getPrecision() != layerToCheckDesc.getPrecision()) {
-
+        if (blobPatternDesc.getPrecision() != blobToCheckDesc.getPrecision()) {
             throw std::logic_error("In " + modelName + " network " +
-                pattern.type + " layer '" + layerName + "' precision should be: " + layerPatternDesc.getPrecision().name() +
-                " - but " + layerToCheckDesc.getPrecision().name() + " given");
+                pattern.type + " blob '" + blobName + "' precision should be: " + blobPatternDesc.getPrecision().name() +
+                " - but " + blobToCheckDesc.getPrecision().name() + " given");
         }
 
-        // keep proper input order
-        if (layerToCheckDims.size() == 4 && layerToCheckDesc.getPrecision() == InferenceEngine::Precision::U8 &&
-            names.size() > 1 && names[0] != layerName) {
+        // Keep proper input order
+        if (blobToCheckDims.size() == 4 && blobToCheckDesc.getPrecision() == InferenceEngine::Precision::U8 &&
+            names.size() > 1 && names[0] != blobName) {
             std::swap(names[0], names[1]);
         }
 
         // --------------------------- Check layout----------------------------------------
-        if (layerPatternDesc.getLayout() != layerToCheckDesc.getLayout()) {
+        if (blobPatternDesc.getLayout() != blobToCheckDesc.getLayout()) {
             std::ostringstream oss;
-            oss << "In " << modelName << " network " << pattern.type << " layer '" << layerName << "' layout should be "
-                << layerPatternDesc.getLayout() << " - but " << layerToCheckDesc.getLayout() << " given";
+            oss << "In " << modelName << " network " << pattern.type << " blob '" << blobName << "' layout should be "
+                << blobPatternDesc.getLayout() << " - but " << blobToCheckDesc.getLayout() << " given";
 
             throw std::logic_error(oss.str());
         }

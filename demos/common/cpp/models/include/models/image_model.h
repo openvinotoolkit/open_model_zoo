@@ -15,6 +15,7 @@
 */
 #pragma once
 #include "models/model_base.h"
+#include <utils/common.hpp>
 
 class ImageModel : public ModelBase {
 public:

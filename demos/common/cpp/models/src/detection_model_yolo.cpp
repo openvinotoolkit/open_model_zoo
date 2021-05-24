@@ -62,7 +62,7 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure and check input & output -----------------------------------------------
     ImageModel::prepareInputsOutputs(cnnNetwork);
 
-    //---------------------------- Read yolo regions from IR -----------------------------------------------
+    //---------------------------- Read yolo regions from IR --------------------------------------------------------
     const auto& outputInfo = cnnNetwork.getOutputsInfo();
     if (auto ngraphFunction = (cnnNetwork).getFunction()) {
         for (const auto op : ngraphFunction->get_ops()) {
@@ -91,11 +91,11 @@ void ModelYolo3::checkCompiledNetworkInputsOutputs() {
     cv::FileNode regionsYolo = fs["Regions"];
     cv::FileNodeIterator it = regionsYolo.begin(), endIt = regionsYolo.end();
 
-        for (; it != endIt; ++it) {
-            std::vector<float> anchors;
-            (*it)["anchors"] >> anchors;
-            regions.emplace(static_cast<std::string>((*it)["name"]), Region((int)(*it)["num"], (int)(*it)["classes"], (int)(*it)["coords"], anchors));
-        }
+    for (; it != endIt; ++it) {
+        std::vector<float> anchors;
+        (*it)["anchors"] >> anchors;
+        regions.emplace(static_cast<std::string>((*it)["name"]), Region((int)(*it)["num"], (int)(*it)["classes"], (int)(*it)["coords"], anchors));
+    }
     fs.release();
 }
 
