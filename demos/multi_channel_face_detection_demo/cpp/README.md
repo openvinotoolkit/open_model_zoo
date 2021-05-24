@@ -76,7 +76,7 @@ Video files will be processed simultaneously.
 
 ### Input Video Sources
 
-General parameter for input video source is `-i`. Use it to specify video files or web cameras as input video sources. You can also run the demo on web cameras and video files simultaneously by specifying both parameters: `-i <webcam_id0>,<webcam_id1>,<video_file1>,<video_file2>` with paths to webcams and video files separated by a comma. To run the demo with a single input source(a web camera or a video file), but several channels, specify an additional parameter, `duplicate_num`, for example: `-duplicate_num 3`. You will see four channels: one real and three duplicated. With several input sources, the `-duplicate_num` parameter will duplicate each of them.
+General parameter for input source is `-i`. You can run the demo on web cameras and video files simultaneously by specifying: `-i <webcam_id0>,<webcam_id1>,<video_file1>,<video_file2>` with paths to webcams and video files separated by a comma. To run the demo with a single input source (a web camera or a video file), but several channels, specify an additional parameter, `duplicate_num`, for example: `-duplicate_num 4`. You will see four channels. With several input sources, the `-duplicate_num` parameter will duplicate each of them.
 
 Below are some examples of demo input specification:
 
