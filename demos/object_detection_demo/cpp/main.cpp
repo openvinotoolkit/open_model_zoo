@@ -211,6 +211,10 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -at is not set");
     }
 
+    if (FLAGS_at == "yolo" && fileExt(FLAGS_m) == "blob" && FLAGS_yolo_regions.empty()) {
+        throw std::logic_error("Parameter -yolo_regions is not set");
+    }
+
     if (!FLAGS_output_resolution.empty() && FLAGS_output_resolution.find("x") == std::string::npos) {
         throw std::logic_error("Correct format of -output_resolution parameter is \"width\"x\"height\".");
     }

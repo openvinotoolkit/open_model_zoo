@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,7 +58,7 @@ public:
     using IOPattern = std::pair<std::string, std::vector<ModelBase::BlobPattern>>;
 protected:
     IOPattern virtual getIOPattern() = 0;
-    InferenceEngine::CNNNetwork prepareNetwork(InferenceEngine::Core& core);
+    void prepareIECore(InferenceEngine::Core& core);
 
     template<class InputsDataMap, class OutputsDataMap>
     void findIONames(IOPattern& modelBlobPattern, const InputsDataMap& inputsInfo, const OutputsDataMap& outputInfo);
@@ -87,12 +87,11 @@ protected:
 
 template<class DataMap>
 void ModelBase::findAndCheckBlobNames(BlobPattern& pattern, std::vector<std::string>& names, const DataMap& info, const std::string& modelName) {
-    //--------------------------- Find IO names -------------------------------- 
-    //--------------------------- Check number of I/O--------------------------- 
+    //--------------------------- Find IO names --------------------------------
+    //--------------------------- Check number of I/O---------------------------
     auto blobsNum = info.size();
     if (pattern.patterns.find(blobsNum) == pattern.patterns.end()) {
         std::ostringstream ossNums;
-        // Convert set to string
         for (const auto& n : pattern.patterns) {
             ossNums << n.first << ", ";
         }
@@ -127,10 +126,10 @@ void ModelBase::findAndCheckBlobNames(BlobPattern& pattern, std::vector<std::str
 
 template<class InputsDataMap, class OutputsDataMap>
 void ModelBase::findIONames(IOPattern& modelBlobPattern, const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
-    //--------------------------- Find input names --------------------------- 
+    //--------------------------- Find input names ---------------------------
     findAndCheckBlobNames(modelBlobPattern.second[0], inputsNames, inputInfo, modelBlobPattern.first);
 
-    //--------------------------- Find outputs names --------------------------- 
+    //--------------------------- Find outputs names ---------------------------
     findAndCheckBlobNames(modelBlobPattern.second[1], outputsNames, outputInfo, modelBlobPattern.first);
 }
 
@@ -203,19 +202,9 @@ void check(const std::string& modelName, const ModelBase::BlobPattern& pattern,
 
 
 template<class InputsDataMap, class OutputsDataMap>
-void  ModelBase::checkInputsOutputs(const IOPattern& modelBlobPattern,
+void ModelBase::checkInputsOutputs(const IOPattern& modelBlobPattern,
     const InputsDataMap& inputsInfo, const OutputsDataMap& outputsInfo) {
 
-
-    ////--------------------------- Check inputs blobs ------------------------------------------------------
-    //slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    //fillCheckBlobNames(inputsNames, modelBlobPattern.first, modelBlobPattern.second[0], inputsInfo);
-
-    //// --------------------------- Check output blobs -----------------------------------------------------
-    //slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-    //fillCheckBlobNames(outputsNames, modelBlobPattern.first, modelBlobPattern.second[1], outputsInfo);
-
-    //prepareInputsOutputs_(modelBlobPattern.second, inputsInfo,  outputsInfo);
     //--------------------------- Check inputs blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     check(modelBlobPattern.first, modelBlobPattern.second[0], inputsInfo, inputsNames);

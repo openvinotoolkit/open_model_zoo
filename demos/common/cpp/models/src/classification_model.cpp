@@ -92,56 +92,7 @@ ModelBase::IOPattern ClassificationModel::getIOPattern() {
     return { "classification", {inputPattern, outputPattern} };
 }
 
-//template<class InputsDataMap, class OutputsDataMap>
-//void ClassificationModel::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
-//    // --------------------------- Check input blobs ------------------------------------------------------
-//    const auto& input = inputInfo.begin()->second;
-//    if (inputInfo.size() != 1) {
-//        throw std::runtime_error("Demo supports topologies only with 1 input");
-//    }
-//
-//    if (input->getPrecision() != InferenceEngine::Precision::U8) {
-//        throw std::logic_error("This demo accepts compiled networks with U8 input precision");
-//    }
-//    inputsNames.push_back(inputInfo.begin()->first);
-//
-//    const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
-//    const InferenceEngine::SizeVector& inSizeVector = inputDesc.getDims();
-//    if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
-//        throw std::runtime_error("3-channel 4-dimensional model's input is expected");
-//    if (inSizeVector[2] != inSizeVector[3])
-//        throw std::logic_error("Model input has incorrect image shape. Must be NxN square."
-//            " Got " + std::to_string(inSizeVector[2]) +
-//            "x" + std::to_string(inSizeVector[3]) + ".");;
-//
-//    // --------------------------- Check output blobs -----------------------------------------------------
-//    if (outputInfo.size() != 1) {
-//        throw std::runtime_error("Demo supports topologies only with 1 output");
-//    }
-//    const auto& output = outputInfo.begin()->second;
-//    outputsNames.push_back(outputInfo.begin()->first);
-//
-//    const InferenceEngine::SizeVector& outSizeVector = output->getTensorDesc().getDims();
-//    if (outSizeVector.size() != 2 && outSizeVector.size() != 4)
-//        throw std::runtime_error("Demo supports topologies only with 2-dimensional or 4-dimensional output");
-//    if (outSizeVector.size() == 4 && outSizeVector[2] != 1 && outSizeVector[3] != 1)
-//        throw std::runtime_error("Demo supports topologies only with 4-dimensional output which has last two dimensions of size 1");
-//    if (nTop > outSizeVector[1])
-//        throw std::runtime_error("The model provides " + std::to_string(outSizeVector[1]) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
-//    if (outSizeVector[1] == labels.size() + 1) {
-//        labels.insert(labels.begin(), "other");
-//        slog::warn << "Inserted 'other' label as first.\n";
-//    }
-//    else if (outSizeVector[1] != labels.size()) {
-//        throw std::logic_error("Model's number of classes and parsed labels must match (" + std::to_string(outSizeVector[1]) + " and " + std::to_string(labels.size()) + ')');
-//    }
-//
-//    if (output->getPrecision() != InferenceEngine::Precision::FP32) {
-//        throw std::logic_error("This demo accepts compiled networks with FP32 output precision");
-//    }
-//}
-
-void ClassificationModel::specialChecks(InferenceEngine::SizeVector inSizeVector, InferenceEngine::SizeVector outSizeVector) {
+void ClassificationModel::specialChecks(const InferenceEngine::SizeVector& inSizeVector, const InferenceEngine::SizeVector& outSizeVector) {
     if (inSizeVector[2] != inSizeVector[3]) {
         throw std::logic_error("Model input has incorrect image shape. Must be NxN square."
             " Got " + std::to_string(inSizeVector[2]) +

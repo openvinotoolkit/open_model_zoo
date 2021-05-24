@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,9 +22,9 @@
 
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
-    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),
-      maxProposalsCount(0), boxIOUThreshold(boxIOUThreshold), variance({0.1f, 0.2f}),
-      steps({32, 64, 128}), minSizes({ {32, 64, 128}, {256}, {512} }) {
+    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, { "Face" }),
+    maxProposalsCount(0), boxIOUThreshold(boxIOUThreshold), variance({ 0.1f, 0.2f }),
+    steps({ 32, 64, 128 }), minSizes({ {32, 64, 128}, {256}, {512} }) {
 }
 
 ModelBase::IOPattern ModelFaceBoxes::getIOPattern() {
@@ -34,7 +34,7 @@ ModelBase::IOPattern ModelFaceBoxes::getIOPattern() {
         // Describe number of inputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is set 0.
         {
-            { 1, {  { "input.1", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, useAutoResize ? InferenceEngine::Layout::NHWC : InferenceEngine::Layout::NCHW } } } } 
+        { 1, { { "input.1", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, useAutoResize ? InferenceEngine::Layout::NHWC : InferenceEngine::Layout::NCHW } } } }
         }
     );
 
@@ -44,8 +44,8 @@ ModelBase::IOPattern ModelFaceBoxes::getIOPattern() {
         // Describe number of inputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is - set 0.
         {
-            { 2, {  { "boxes", { InferenceEngine::Precision::FP32, {1, 21824, 4}, InferenceEngine::Layout::CHW } },
-                    { "scores", { InferenceEngine::Precision::FP32, {1, 21824, 2}, InferenceEngine::Layout::CHW } } } }
+        { 2, { { "boxes", { InferenceEngine::Precision::FP32, {1, 21824, 4}, InferenceEngine::Layout::CHW } },
+        { "scores", { InferenceEngine::Precision::FP32, {1, 21824, 2}, InferenceEngine::Layout::CHW } } } }
         }
     );
 
@@ -81,86 +81,6 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     getAnchors(featureMaps);
 }
 
-//template<class InputsDataMap, class OutputsDataMap>
-//void  ModelFaceBoxes::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
-//    // --------------------------- Check input blobs ------------------------------------------------------
-//    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-//
-//    if (inputInfo.size() != 1) {
-//        throw std::logic_error("This demo accepts networks that have only one input");
-//    }
-//
-//    const auto& input = inputInfo.begin()->second;
-//    const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
-//
-//    if (inputDesc.getDims()[1] != 3) {
-//        throw std::logic_error("Expected 3-channel input in FaceBoxes network");
-//    }
-//
-//    if (input->getPrecision() != InferenceEngine::Precision::U8) {
-//        throw std::logic_error("This demo accepts networks with U8 input precision");
-//    }
-//
-//    // --------------------------- Reading image input parameters -------------------------------------------
-//    std::string imageInputName = inputInfo.begin()->first;
-//    inputsNames.push_back(imageInputName);
-//    netInputHeight = getTensorHeight(inputDesc);
-//    netInputWidth = getTensorWidth(inputDesc);
-//
-//    // --------------------------- Check output blobs -----------------------------------------------------
-//    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-//
-//    if (outputInfo.size() != 2) {
-//        throw std::logic_error("This demo expect FaceBoxes networks that have 2 outputs blobs");
-//    }
-//
-//    const InferenceEngine::TensorDesc& outputDesc = outputInfo.begin()->second->getTensorDesc();
-//    maxProposalsCount = outputDesc.getDims()[1];
-//
-//    for (const auto& output : outputInfo) {
-//        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
-//            throw std::logic_error("This demo accepts networks with FP32 output precision");
-//        }
-//        outputsNames.push_back(output.first);
-//    }
-
-//    // --------------------------- Calculating anchors ----------------------------------------------------
-//    std::vector<std::pair<size_t, size_t>> featureMaps;
-//    for (auto s : steps) {
-//        featureMaps.push_back({ netInputHeight / s, netInputWidth / s });
-//    }
-//
-//    priorBoxes(featureMaps);
-//}
-
-//void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
-//    // --------------------------- Configure input & output -------------------------------------------------
-//    const auto& inputInfo = cnnNetwork.getInputsInfo();
-//    const auto& outputInfo = cnnNetwork.getOutputsInfo();
-//
-//    for (const auto& input : inputInfo) {
-//        if (useAutoResize) {
-//            input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
-//            input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
-//        }
-//        else {
-//            input.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
-//        }
-//        input.second->setPrecision(InferenceEngine::Precision::U8);
-//    }
-//
-//    for (const auto& output : outputInfo) {
-//        output.second->setPrecision(InferenceEngine::Precision::FP32);
-//        output.second->setLayout(InferenceEngine::Layout::CHW);
-//    }
-//    // --------------------------- Check input & output ----------------------------------------------------
-//    checkInputsOutputs(inputInfo, outputInfo);
-//}
-//
-//void ModelFaceBoxes::checkCompiledNetworkInputsOutputs() {
-//    checkInputsOutputs(execNetwork.GetInputsInfo(), execNetwork.GetOutputsInfo());
-//}
-
 void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>& anchors, const std::vector<float>& vx, const std::vector<float>& vy,
     const int minSize, const int step) {
     float skx = static_cast<float>(minSize);
@@ -179,7 +99,7 @@ void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>& anchors, const std::v
     for (auto cy : dense_cy) {
         for (auto cx : dense_cx) {
             anchors.push_back({ cx - 0.5f * skx, cy - 0.5f * sky,
-                 cx + 0.5f * skx, cy + 0.5f * sky });  // left top right bottom
+            cx + 0.5f * skx, cy + 0.5f * sky }); // left top right bottom
         }
     }
 
@@ -223,7 +143,7 @@ void ModelFaceBoxes::getAnchors(const std::vector<std::pair<size_t, size_t>>& fe
         for (size_t i = 0; i < featureMaps[k].first; ++i) {
             for (size_t j = 0; j < featureMaps[k].second; ++j) {
                 if (k == 0) {
-                    calculateAnchorsZeroLevel(anchors, j, i,  minSizes[k], steps[k]);;
+                    calculateAnchorsZeroLevel(anchors, j, i, minSizes[k], steps[k]);;
                 }
                 else {
                     calculateAnchors(anchors, { j + 0.5f }, { i + 0.5f }, minSizes[k][0], steps[k]);
@@ -258,7 +178,7 @@ std::vector<ModelFaceBoxes::Anchor> filterBBoxes(const InferenceEngine::MemoryBl
     InferenceEngine::LockedMemory<const void> bboxesOutputMapped = bboxesInfRes->rmap();
     auto desc = bboxesInfRes->getTensorDesc();
     auto sz = desc.getDims();
-    const float *bboxesPtr = bboxesOutputMapped.as<float*>();
+    const float* bboxesPtr = bboxesOutputMapped.as<float*>();
 
     std::vector<ModelFaceBoxes::Anchor> bboxes;
     bboxes.reserve(ModelFaceBoxes::INIT_VECTOR_SIZE);
@@ -276,7 +196,7 @@ std::vector<ModelFaceBoxes::Anchor> filterBBoxes(const InferenceEngine::MemoryBl
         auto predH = exp(dh * variance[1]) * anchors[i].getHeight();
 
         bboxes.push_back({ static_cast<float>(predCtrX - 0.5f * predW), static_cast<float>(predCtrY - 0.5f * predH),
-                                     static_cast<float>(predCtrX + 0.5f * predW), static_cast<float>(predCtrY + 0.5f * predH) });
+        static_cast<float>(predCtrX + 0.5f * predW), static_cast<float>(predCtrY + 0.5f * predH) });
 
     }
 
@@ -310,7 +230,7 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
         desc.y = bboxes[i].top / scaleY;
         desc.width = bboxes[i].getWidth() / scaleX;
         desc.height = bboxes[i].getHeight() / scaleY;
-        desc.labelID =  0;
+        desc.labelID = 0;
         desc.label = labels[0];
 
         result->objects.push_back(desc);
