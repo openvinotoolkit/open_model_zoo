@@ -18,7 +18,6 @@ import argparse
 import contextlib
 import functools
 import hashlib
-import re
 import requests
 import shutil
 import ssl
@@ -114,9 +113,9 @@ def try_download(reporter, file, num_attempts, start_download, size):
     return None
 
 def verify_hash(reporter, actual_hash, expected_hash, path):
-    if actual_hash != bytes.fromhex(expected_hash):
+    if actual_hash != expected_hash:
         reporter.log_error('Hash mismatch for "{}"', path)
-        reporter.log_details('Expected: {}', expected_hash)
+        reporter.log_details('Expected: {}', expected_hash.hex())
         reporter.log_details('Actual:   {}', actual_hash.hex())
         return False
     return True
@@ -128,7 +127,7 @@ class NullCache:
 
 class DirCache:
     _FORMAT = 1 # increment if backwards-incompatible changes to the format are made
-    _HASH_LEN = hashlib.sha256().digest_size * 2
+    _HASH_LEN = hashlib.sha256().digest_size
 
     def __init__(self, cache_dir):
         self._cache_dir = cache_dir / str(self._FORMAT)
@@ -138,10 +137,9 @@ class DirCache:
         self._staging_dir.mkdir(exist_ok=True)
 
     def _hash_path(self, hash):
-        hash = hash.lower()
         assert len(hash) == self._HASH_LEN
-        assert re.fullmatch('[0-9a-f]+', hash)
-        return self._cache_dir / hash[:2] / hash[2:]
+        hash_str = hash.hex().lower()
+        return self._cache_dir / hash_str[:2] / hash_str[2:]
 
     def has(self, hash):
         return self._hash_path(hash).exists()

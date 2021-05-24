@@ -196,6 +196,10 @@ Deep Learning models for text recognition in various applications.
 |------------|---------------------|-----------|
 | [text-recognition-0012](./text-recognition-0012/README.md)                                 | 1.485   | 5.568 |
 | [text-recognition-0013](./text-recognition-0013/README.md)                                 | 1.488   | 5.567 |
+| [text-recognition-0014](./text-recognition-0014/README.md)                                 | 0.5442  | 2.839 |
+| [text-recognition-0015](./text-recognition-0015/README.md)                                 |         |       |
+| encoder | 12.4 | 398 |
+| decoder | 0.03 | 4.33 |
 | [handwritten-score-recognition-0003](./handwritten-score-recognition-0003/README.md)       | 0.792   | 5.555 |
 | [handwritten-japanese-recognition-0001](./handwritten-japanese-recognition-0001/README.md) | 117.136 | 15.31 |
 | [handwritten-simplified-chinese-recognition-0001](./handwritten-simplified-chinese-recognition-0001/README.md) | 134.513 | 17.270 |
@@ -216,6 +220,10 @@ Deep Learning models for text spotting (simultaneous detection and recognition).
 |   text-spotting-0004-detector                        | 184.495 | 27.010 |
 |   text-spotting-0004-recognizer-encoder              | 2.082   | 1.328  |
 |   text-spotting-0004-recognizer-decoder              | 0.002   | 0.273  |
+| [text-spotting-0005](./text-spotting-0005/README.md) |         |        |
+|   text-spotting-0005-detector                        | 184.495 | 27.010 |
+|   text-spotting-0005-recognizer-encoder              | 2.082   | 1.328  |
+|   text-spotting-0005-recognizer-decoder              | 0.002   | 0.273  |
 
 ## Action Recognition Models
 
@@ -234,6 +242,7 @@ that predict an actual labels are called *decoder*.
 |   action-recognition-0001-encoder                                                      | 7.340 | 21.276 |
 |   action-recognition-0001-decoder                                                      | 0.147 | 4.405  |
 | [asl-recognition-0004](./asl-recognition-0004/README.md)                               | 6.660 | 4.133  |
+| [common-sign-language-0002](./common-sign-language-0002/README.md)                     | 4.227 | 4.113  |
 | [weld-porosity-detection-0001](./weld-porosity-detection-0001/README.md)               | 3.636 | 11.173 |
 
 ## Image Retrieval
@@ -293,6 +302,14 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 |   text-to-speech-en-multi-0001-duration-prediction                 | 28.75 | 26.18 |
 |   text-to-speech-en-multi-0001-regression                          | 7.81  | 5.12  |
 |   text-to-speech-en-multi-0001-generation                          | 48.38 | 12.77 |
+
+## Time Series Forecasting
+
+Deep Learning models for time series forecasting.
+
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [time-series-forecasting-electricity-0001](./time-series-forecasting-electricity-0001/README.md) | 0.40 | 2.26 |
 
 ## See Also
 

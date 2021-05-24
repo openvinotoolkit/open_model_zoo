@@ -10,6 +10,12 @@ Upon the start-up, the demo reads command-line parameters and loads a network an
 
 ## Preparing to Run
 
+The demo dependencies should be installed before run. That can be achieved with the following command:
+
+```sh
+python3 -mpip install --user -r <omz_dir>/demos/3d_segmentation_demo/python/requirements.txt
+```
+
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in <omz_dir>/demos/3d_segmentation_demo/python/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
@@ -96,9 +102,11 @@ python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/bra
 `--full_intensities_range` option is related to preprocessing of input data. It can be different for different models, for example, `brain-tumor-segmentation-0001` expects normalized data in [0,1] range and nullified non-positive values, while `brain-tumor-segmentation-0002` just requires z-score normalization in a full range. So to use `brain-tumor-segmentation-0002` model, the flag `--full_intensities_range` should be set, while for `brain-tumor-segmentation-0001` no preprocessing option is required.
 
 ## Demo Output
+
 The demo outputs a multipage TIFF image and a NIFTI archive.
 
 ## See Also
+
 * [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

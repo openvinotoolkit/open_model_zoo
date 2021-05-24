@@ -128,7 +128,7 @@ python multi_camera_multi_target_tracking_demo.py \
     --m_reid <path_to_model>/person-reidentification-retail-0277.xml \
     --config configs/person.py
 
-# web-cameras
+# webcam
 python multi_camera_multi_target_tracking_demo.py \
     -i 0 1 \
     --m_detector <path_to_model>/person-detection-retail-0013.xml \
