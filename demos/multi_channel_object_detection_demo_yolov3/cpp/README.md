@@ -37,7 +37,7 @@ Options:
     -h                           Print a usage message
     -i                           Required. A comma separated list of inputs to process. Each input must be a single image, a folder of images or anything that cv::VideoCapture can process.
     -loop                        Optional. Enable reading the inputs in a loop.
-    -duplicate_num               Optional. Multiply the inputs by the given factor. For example, if only one input is provided, but -duplicate_num is set to 2, the demo uses real input as the first input channel and duplicated the same data as the second input channel.
+    -duplicate_num               Optional. Multiply the inputs by the given factor. For example, if only one input is provided, but -duplicate_num is set to 2, the demo will split real input across channels, by interleaving frames between channels.
     -m "<path>"                  Required. Path to an .xml file with a trained model.
       -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations
           Or
