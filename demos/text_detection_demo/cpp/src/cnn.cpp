@@ -10,7 +10,7 @@
 
 #include <utils/common.hpp>
 
-#define MAX_NUM_DECODER 20
+constexpr size_t MAX_NUM_DECODER=20;
 
 void Cnn::Init(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
     // ---------------------------------------------------------------------------------------------------
