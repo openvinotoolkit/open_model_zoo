@@ -40,7 +40,7 @@ from .ncf_converter import MovieLensConverter
 from .brats import BratsConverter, BratsNumpyConverter
 from .oar3d import OAR3DTilingConverter
 from .cifar import CifarFormatConverter
-from .mnist import MNISTCSVFormatConverter
+from .mnist import MNISTCSVFormatConverter, MNISTFormatConverter
 from .wmt import WMTConverter
 from .common_semantic_segmentation import CommonSegmentationConverter
 from .camvid import CamVidConverter, CamVid32DatasetConverter
@@ -145,6 +145,7 @@ __all__ = [
     'OAR3DTilingConverter',
     'CifarFormatConverter',
     'MNISTCSVFormatConverter',
+    'MNISTFormatConverter',
     'WMTConverter',
     'CommonSegmentationConverter',
     'CamVidConverter',
