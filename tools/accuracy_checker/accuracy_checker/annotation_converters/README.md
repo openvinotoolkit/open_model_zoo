@@ -536,7 +536,7 @@ The main difference between this converter and `super_resolution` in data organi
 * `label_me_detection` - converts dataset obtained using [LabelMe](http://labelme.csail.mit.edu/Release3.0/) Annotation Tool to `DetectionAnnotation`.
   * `annotations_dir` - path to directory with annotation files in xml format.
   * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding). More details in [Customizing dataset meta](#customizing-dataset-meta) section.
-  * `images_dir` -path to directory with images (Optional).
+  * `images_dir` - path to directory with images (Optional).
   * `has_background` - allows convert dataset with/without adding background_label (Optional, default: False).
 * `label_me_segmentation` - converts dataset obtained using [LabelMe](http://labelme.csail.mit.edu/Release3.0/) Annotation Tool to `SegmentationAnnotation`.
   * `annotations_dir` - path to directory with annotation files in xml format.
