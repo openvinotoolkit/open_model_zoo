@@ -40,8 +40,8 @@ protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override {
         const auto& inputInfo = cnnNetwork.getInputsInfo();
         const auto& outputInfo = cnnNetwork.getOutputsInfo();
+        auto ioPattern = getIOPattern();
 
-        const auto ioPattern = getIOPattern();
         findIONames(ioPattern, inputInfo, outputInfo);
         prepareBlobs(ioPattern, inputInfo, outputInfo);
         checkInputsOutputs(ioPattern, inputInfo, outputInfo);
@@ -51,9 +51,10 @@ protected:
     void checkCompiledNetworkInputsOutputs() override {
         const auto& inputInfo = execNetwork.GetInputsInfo();
         const auto& outputInfo = execNetwork.GetOutputsInfo();
-        const auto ioPattern = getIOPattern();
+        auto ioPattern = getIOPattern();
+
         findIONames(ioPattern, inputInfo, outputInfo);
-        //checkInputsOutputs(ioPattern, inputInfo, outputInfo);
+        checkInputsOutputs(ioPattern, inputInfo, outputInfo);
         getNetInputSize(inputInfo);
     };
 };

@@ -32,7 +32,7 @@ ModelBase::IOPattern ModelSSD::getIOPattern() {
         // Describe number of inputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is set 0.
         {
-            { 1, {  { "", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, useAutoResize ? InferenceEngine::Layout::NHWC : InferenceEngine::Layout::NCHW} } } } ,
+            { 1, {  { "common", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, useAutoResize ? InferenceEngine::Layout::NHWC : InferenceEngine::Layout::NCHW} } } } ,
 
             { 2, {  { "image_tensor", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
                     { "image_info", {  InferenceEngine::Precision::FP32, {1, 3}, InferenceEngine::Layout::NC } } } },
@@ -46,7 +46,7 @@ ModelBase::IOPattern ModelSSD::getIOPattern() {
         // Describe number of inputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is - set 0.
         {
-            { 1, {  { "", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW} } } },
+            { 1, {  { "common", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW} } } },
 
             { 4, {  { "bboxes", { InferenceEngine::Precision::FP32, {1, 0, 4}, InferenceEngine::Layout::CHW } },
                     { "labels", { InferenceEngine::Precision::FP32, {1, 200}, InferenceEngine::Layout::NC } },

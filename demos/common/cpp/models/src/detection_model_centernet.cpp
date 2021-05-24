@@ -72,7 +72,7 @@ ModelBase::IOPattern ModelCenterNet::getIOPattern() {
         "input",
         // Possible number of inputs 
         {
-            { 1, { { "", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NHWC } } } },
+            { 1, { { "input.1", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NHWC } } } },
         }
     );
 
@@ -90,23 +90,11 @@ ModelBase::IOPattern ModelCenterNet::getIOPattern() {
 
 void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
-    const auto& inputInfo = cnnNetwork.getInputsInfo();
-    const auto& outputInfo = cnnNetwork.getOutputsInfo();
-
-    const auto ioPattern = getIOPattern();
-    findIONames(ioPattern, inputInfo, outputInfo);
-    prepareBlobs(ioPattern, inputInfo, outputInfo);
-    checkInputsOutputs(ioPattern, inputInfo, outputInfo);
-    getNetInputSize(inputInfo);
+    ImageModel::prepareInputsOutputs(cnnNetwork);
 }
 
 void ModelCenterNet::checkCompiledNetworkInputsOutputs() {
-    const auto& inputInfo = execNetwork.GetInputsInfo();
-    const auto& outputInfo = execNetwork.GetOutputsInfo();
-    const auto ioPattern = getIOPattern();
-    findIONames(ioPattern, inputInfo, outputInfo);
-    checkInputsOutputs(ioPattern, inputInfo, outputInfo);
-    getNetInputSize(inputInfo);
+    ImageModel::checkCompiledNetworkInputsOutputs();
 }
 
 cv::Point2f getDir(const cv::Point2f& srcPoint, float rotRadius) {

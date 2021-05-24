@@ -61,11 +61,10 @@ protected:
     InferenceEngine::CNNNetwork prepareNetwork(InferenceEngine::Core& core);
 
     template<class InputsDataMap, class OutputsDataMap>
-    void findIONames(const IOPattern& modelBlobPattern, const InputsDataMap& inputsInfo, const OutputsDataMap& outputInfo);
+    void findIONames(IOPattern& modelBlobPattern, const InputsDataMap& inputsInfo, const OutputsDataMap& outputInfo);
 
     template<class DataMap>
-    void findAndCheckBlobNames(std::vector<std::string>& names, std::string modelName,
-        const BlobPattern& pattern, const DataMap& info);
+    void findAndCheckBlobNames(BlobPattern& pattern, std::vector<std::string>& names, const DataMap& info, const std::string& modelName);
 
     void prepareBlobs(const IOPattern& modelBlobPattern, const InferenceEngine::InputsDataMap& inputInfo, const InferenceEngine::OutputsDataMap& outputInfo);
 
@@ -87,7 +86,7 @@ protected:
 
 
 template<class DataMap>
-void ModelBase::findAndCheckBlobNames(std::vector<std::string>& names, std::string modelName, const ModelBase::BlobPattern& pattern, const DataMap& info) {
+void ModelBase::findAndCheckBlobNames(BlobPattern& pattern, std::vector<std::string>& names, const DataMap& info, const std::string& modelName) {
     //--------------------------- Find IO names -------------------------------- 
     //--------------------------- Check number of I/O--------------------------- 
     auto blobsNum = info.size();
@@ -105,42 +104,48 @@ void ModelBase::findAndCheckBlobNames(std::vector<std::string>& names, std::stri
     size_t blobsFound = 0;
     auto& blobsPatterns = pattern.patterns.find(blobsNum)->second;
     for (const auto& blob : info) {
-        if (blobsNum > 1) {
-            const auto& b = blobsPatterns.find(blob.first);
-            if (b != blobsPatterns.end()) {
-                names.push_back(blob.first);
-                ++blobsFound;
-            }
-        } else {
+        const auto& b = blobsPatterns.find(blob.first);
+        if (b != blobsPatterns.end()) {
             names.push_back(blob.first);
             ++blobsFound;
         }
     }
 
-    if (blobsFound != blobsPatterns.size()) {
-        throw std::logic_error(modelName + " network has wrong " + pattern.type + " layers' names");
+    if (names.empty() && blobsNum == 1) {
+        const auto& b = blobsPatterns.find("common");
+        if (b != blobsPatterns.end()) {
+            auto blobName = info.begin()->first;
+            names.push_back(blobName);
+            ++blobsFound;
+        }
+    }
+
+    if (blobsFound == 0) {
+        throw std::logic_error(modelName + " network has wrong " + pattern.type + " blobs' names");
     }
 }
 
 template<class InputsDataMap, class OutputsDataMap>
-void ModelBase::findIONames(const IOPattern& modelBlobPattern, const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
+void ModelBase::findIONames(IOPattern& modelBlobPattern, const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
     //--------------------------- Find input names --------------------------- 
-    findAndCheckBlobNames(inputsNames, modelBlobPattern.first, modelBlobPattern.second[0], inputInfo);
+    findAndCheckBlobNames(modelBlobPattern.second[0], inputsNames, inputInfo, modelBlobPattern.first);
 
     //--------------------------- Find outputs names --------------------------- 
-    findAndCheckBlobNames(outputsNames, modelBlobPattern.first, modelBlobPattern.second[1], outputInfo);
+    findAndCheckBlobNames(modelBlobPattern.second[1], outputsNames, outputInfo, modelBlobPattern.first);
 }
 
 template<class DataMap>
 void check(const std::string& modelName, const ModelBase::BlobPattern& pattern,
     const DataMap& info, std::vector<std::string>& names) {
-    // --------------------------- Check BLOB --------------------------- 
-    auto& layersPatterns = pattern.patterns.find(info.size())->second;
-    if (layersPatterns.begin()->first == "") {
-
-    }
+    // --------------------------- Check BLOB ---------------------------
+    auto blobsNum = info.size();
+    auto& layersPatterns = pattern.patterns.find(blobsNum)->second;
     for (auto& layerName : names) {
-        const auto& layerPatternDesc = layersPatterns.begin()->first == "" ? layersPatterns.find(layerName)->second : layersPatterns.begin()->second;
+        auto& layerPatternIt = layersPatterns.find(layerName);
+        if (layerPatternIt == layersPatterns.end()) {
+            layerPatternIt = layersPatterns.begin();
+        }
+        const auto& layerPatternDesc = layerPatternIt->second;
         const auto& layerPatternDims = layerPatternDesc.getDims();
 
         const auto& layerToCheckDesc = info.find(layerName)->second->getTensorDesc();

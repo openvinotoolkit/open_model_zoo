@@ -28,34 +28,63 @@ ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confide
     generateAnchorsFpn();
 }
 
-template<class InputsDataMap, class OutputsDataMap>
-void  ModelRetinaFace::checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo) {
-    // --------------------------- Check input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-    if (inputInfo.size() != 1) {
-        throw std::logic_error("This demo accepts RetinaFace networks that have only one input");
-    }
+ModelBase::IOPattern ModelRetinaFace::getIOPattern() {
+    ModelBase::BlobPattern inputPattern(
+        "input",
+        // Possible models' inputs
+        // Describe number of inputs, precision, dimensions and layout.
+        // If it doesn't matter what dimension's value is set 0.
+        {
+            { 1, {  { "data", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, useAutoResize ? InferenceEngine::Layout::NHWC : InferenceEngine::Layout::NCHW} } } }
 
-    const auto& input = inputInfo.begin()->second;
-    if (input->getPrecision() != InferenceEngine::Precision::U8) {
-        throw std::logic_error("This demo accepts networks with U8 input precision");
-    }
+        }
+    );
 
-    //--- Reading image input parameters
-    std::string imageInputName = inputInfo.begin()->first;
-    inputsNames.push_back(imageInputName);
-    const InferenceEngine::TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
-    netInputHeight = getTensorHeight(inputDesc);
-    netInputWidth = getTensorWidth(inputDesc);
+    ModelBase::BlobPattern outputPattern(
+        "output",
+        // Possible models' outputs
+        // Describe number of inputs, precision, dimensions and layout.
+        // If it doesn't matter what dimension's value is - set 0.
+        {
+            { 6, {  { "rpn_cls_prob_reshape_stride32", { InferenceEngine::Precision::FP32, {1, 4, 20, 20}, InferenceEngine::Layout::NCHW } },
+                    { "rpn_bbox_pred_stride32", { InferenceEngine::Precision::FP32, {1, 8, 20, 20}, InferenceEngine::Layout::NCHW } },
+                    { "rpn_cls_prob_reshape_stride16", { InferenceEngine::Precision::FP32, {1, 4, 40, 40}, InferenceEngine::Layout::NCHW } },
+                    { "rpn_bbox_pred_stride16", { InferenceEngine::Precision::FP32, {1, 8, 40, 40}, InferenceEngine::Layout::NCHW } },
+                    { "rpn_cls_prob_reshape_stride8", { InferenceEngine::Precision::FP32, {1, 4, 80, 80}, InferenceEngine::Layout::NCHW } },
+                    { "rpn_bbox_pred_stride8", { InferenceEngine::Precision::FP32, {1, 8, 80, 80}, InferenceEngine::Layout::NCHW } } } },
 
-    // --------------------------- Check output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
+            { 9, {  { "face_rpn_cls_prob_reshape_stride32", { InferenceEngine::Precision::FP32, {1, 4, 20, 20}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_bbox_stride32", { InferenceEngine::Precision::FP32, {1, 8, 20, 20}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_landmark_pred_stride32", { InferenceEngine::Precision::FP32, {1, 20, 20, 20}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_cls_prob_reshape_stride16", { InferenceEngine::Precision::FP32, {1, 4, 40, 40}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_bbox_pred_stride16", { InferenceEngine::Precision::FP32, {1, 8, 40, 40}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_landmark_pred_stride16", { InferenceEngine::Precision::FP32, {1, 20, 40, 40}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_cls_prob_reshape_stride8", { InferenceEngine::Precision::FP32, {1, 4, 80, 80}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_bbox_pred_stride8", { InferenceEngine::Precision::FP32, {1, 8, 80, 80}, InferenceEngine::Layout::NCHW } }, 
+                    { "face_rpn_landmark_pred_stride8", { InferenceEngine::Precision::FP32, {1, 20, 80, 80}, InferenceEngine::Layout::NCHW } } } },
 
+            { 12, { { "face_rpn_cls_prob_reshape_stride32", { InferenceEngine::Precision::FP32, {1, 4, 20, 20}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_bbox_stride32", { InferenceEngine::Precision::FP32, {1, 8, 20, 20}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_landmark_pred_stride32", { InferenceEngine::Precision::FP32, {1, 20, 20, 20}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_type_prob_reshape_stride32", { InferenceEngine::Precision::FP32, {1, 6, 20, 20}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_cls_prob_reshape_stride16", { InferenceEngine::Precision::FP32, {1, 4, 40, 40}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_bbox_pred_stride16", { InferenceEngine::Precision::FP32, {1, 8, 40, 40}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_landmark_pred_stride16", { InferenceEngine::Precision::FP32, {1, 20, 40, 40}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_type_prob_reshape_stride16", { InferenceEngine::Precision::FP32, {1, 6, 40, 40}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_cls_prob_reshape_stride8", { InferenceEngine::Precision::FP32, {1, 4, 80, 80}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_bbox_pred_stride8", { InferenceEngine::Precision::FP32, {1, 8, 80, 80}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_landmark_pred_stride8", { InferenceEngine::Precision::FP32, {1, 20, 80, 80}, InferenceEngine::Layout::NCHW } },
+                    { "face_rpn_type_prob_reshape_stride8", { InferenceEngine::Precision::FP32, {1, 6, 80, 80}, InferenceEngine::Layout::NCHW } } } },
+
+        }
+    );
+
+    return { "RetinaFace", {inputPattern, outputPattern} };
+}
+template<class OutputsDataMap>
+InferenceEngine::SizeVector ModelRetinaFace::getBoxexSizes(const OutputsDataMap& outputInfo) {
     std::vector<size_t> outputsSizes[OT_MAX];
     for (const auto& output : outputInfo) {
-        if (output.second->getPrecision() != InferenceEngine::Precision::FP32) {
-            throw std::logic_error("This demo accepts networks with FP32 output precision");
-        }
 
         outputsNames.push_back(output.first);
 
@@ -93,38 +122,20 @@ void  ModelRetinaFace::checkInputsOutputs(const InputsDataMap& inputInfo, const 
         outputsSizes[type].insert(outputsSizes[type].begin() + i, num);
     }
 
-    if (outputsNames.size() != 6 && outputsNames.size() != 9 && outputsNames.size() != 12) {
-        throw std::logic_error("Expected 6, 9 or 12 output blobs in RetinaFace network");
-    }
-
-    calculatePriorBoxes(outputsSizes[OT_BBOX]);
+    return outputsSizes[OT_BBOX];
 }
 
 void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
-    const auto& inputInfo = cnnNetwork.getInputsInfo();
-    const auto& outputInfo = cnnNetwork.getOutputsInfo();
-    for (const auto& input : inputInfo) {
-        if (useAutoResize) {
-            input.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
-            input.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
-        }
-        else {
-            input.second->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
-        }
-        input.second->setPrecision(InferenceEngine::Precision::U8);
-    }
-
-    for (const auto& output : outputInfo) {
-        output.second->setPrecision(InferenceEngine::Precision::FP32);
-        output.second->setLayout(InferenceEngine::Layout::NCHW);
-    }
-    // --------------------------- Check input & output ----------------------------------------------------
-    checkInputsOutputs(inputInfo, outputInfo);
+    ImageModel::prepareInputsOutputs(cnnNetwork);
+    auto boxesSizes = getBoxexSizes(cnnNetwork.getOutputsInfo());
+    calculatePriorBoxes(boxesSizes);
 }
 
 void ModelRetinaFace::checkCompiledNetworkInputsOutputs() {
-    checkInputsOutputs(execNetwork.GetInputsInfo(), execNetwork.GetOutputsInfo());
+    ImageModel::checkCompiledNetworkInputsOutputs();
+    auto boxesSizes= getBoxexSizes(execNetwork.GetOutputsInfo());
+    calculatePriorBoxes(boxesSizes);
 }
 
 std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& anchor, const std::vector<int>& ratios) {
@@ -182,10 +193,10 @@ void ModelRetinaFace::generateAnchorsFpn() {
     }
 }
 
-void ModelRetinaFace::calculatePriorBoxes(InferenceEngine::SizeVector bboxSize) {
-    for (size_t idx = 0; idx < bboxSize.size(); ++idx) {
-        size_t width = bboxSize[idx];
-        size_t height = bboxSize[idx];
+void ModelRetinaFace::calculatePriorBoxes(const InferenceEngine::SizeVector& boxesSizes) {
+    for (size_t idx = 0; idx < boxesSizes.size(); ++idx) {
+        size_t width = boxesSizes[idx];
+        size_t height = boxesSizes[idx];
         auto s = anchorCfg[idx].stride;
         auto anchorNum = anchorsFpn[s].size();
 

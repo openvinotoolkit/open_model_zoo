@@ -36,10 +36,12 @@ protected:
     size_t nTop;
     std::vector<std::string> labels;
 
-    IOPattern getIOPattern() override { return {}; };
+    IOPattern getIOPattern() override;
+
+    void specialChecks(InferenceEngine::SizeVector inSizeVector, InferenceEngine::SizeVector outSizeVector);
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override;
 
-    template<class InputsDataMap, class OutputsDataMap>
-    void checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo);
+    //template<class InputsDataMap, class OutputsDataMap>
+    //void checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo);
 };

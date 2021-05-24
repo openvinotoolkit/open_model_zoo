@@ -24,9 +24,14 @@ using namespace InferenceEngine;
 
 
 void ModelBase::prepareBlobs(const IOPattern& modelIOPattern, const InferenceEngine::InputsDataMap& inputInfo, const InferenceEngine::OutputsDataMap& outputInfo) {
-    const auto& inputBlobPattern = modelIOPattern.second[0].patterns.find(inputInfo.size())->second;
+    auto inputsNum = inputInfo.size();
+    const auto& inputBlobPattern = modelIOPattern.second[0].patterns.find(inputsNum)->second;
     for (auto& blobName : inputsNames) {
-        const auto& blobPatternDesc = inputsNames.size() > 1 ? inputBlobPattern.find(blobName)->second : inputBlobPattern.begin()->second;
+        auto& blobPatternIt = inputBlobPattern.find(blobName);
+        if (blobPatternIt == inputBlobPattern.end()) {
+            blobPatternIt = inputBlobPattern.begin();
+        }
+        const auto& blobPatternDesc = blobPatternIt->second;
         const auto& blobData = inputInfo.find(blobName)->second;
 
         blobData->setPrecision(blobPatternDesc.getPrecision());
@@ -36,9 +41,14 @@ void ModelBase::prepareBlobs(const IOPattern& modelIOPattern, const InferenceEng
         }
     }
 
-    const auto& outputBlobPattern = modelIOPattern.second[1].patterns.find(outputInfo.size())->second;
+    auto outputsNum = outputInfo.size();
+    const auto& outputBlobPattern = modelIOPattern.second[1].patterns.find(outputsNum)->second;
     for (const auto& blobName : outputsNames) {
-        const auto& blobPatternDesc = outputsNames.size() > 1 ? outputBlobPattern.find(blobName)->second : outputBlobPattern.begin()->second;
+        auto& blobPatternIt = outputBlobPattern.find(blobName);
+        if (blobPatternIt == outputBlobPattern.end()) {
+            blobPatternIt = outputBlobPattern.begin();
+        }
+        const auto& blobPatternDesc = blobPatternIt->second;
         const auto& blobData = outputInfo.find(blobName)->second;
 
         blobData->setPrecision(blobPatternDesc.getPrecision());

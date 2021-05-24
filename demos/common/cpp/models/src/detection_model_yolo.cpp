@@ -37,14 +37,14 @@ ModelBase::IOPattern ModelYolo3::getIOPattern() {
         // Describe number of inputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is set 0.
         {
-            { 1, { { "", { InferenceEngine::Precision::U8, {1, 3, 0, 0},  useAutoResize ? InferenceEngine::Layout::NCHW : InferenceEngine::Layout::NHWC} } } },
+            { 1, { { "common", { InferenceEngine::Precision::U8, {1, 3, 0, 0},  useAutoResize ? InferenceEngine::Layout::NCHW : InferenceEngine::Layout::NHWC} } } },
         }
     );
 
     ModelBase::BlobPattern outputPattern(
         "output",
         {
-            { 1, {  { "", { InferenceEngine::Precision::FP32, {1, 125, 13, 13}, InferenceEngine::Layout::NCHW} } } },
+          //  { 1, {  { "common", { InferenceEngine::Precision::FP32, {1, 125, 13, 13}, InferenceEngine::Layout::NCHW} } } },
 
             { 2, {  { "conv2d_9/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 13, 13}, InferenceEngine::Layout::NCHW} },
                     { "conv2d_12/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 26, 26}, InferenceEngine::Layout::NCHW } } } },
@@ -88,15 +88,10 @@ ModelBase::IOPattern ModelYolo3::getIOPattern() {
 
 void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure and check input & output -----------------------------------------------
-    const auto& inputInfo = cnnNetwork.getInputsInfo();
-    const auto& outputInfo = cnnNetwork.getOutputsInfo();
-
-    const auto ioPattern = getIOPattern();
-    findIONames(ioPattern, inputInfo, outputInfo);
-    checkInputsOutputs(ioPattern, inputInfo, outputInfo);
-    getNetInputSize(inputInfo);
+    ImageModel::prepareInputsOutputs(cnnNetwork);
 
     //---------------------------- Read yolo regions from IR -----------------------------------------------
+    const auto& outputInfo = cnnNetwork.getOutputsInfo();
     if (auto ngraphFunction = (cnnNetwork).getFunction()) {
         for (const auto op : ngraphFunction->get_ops()) {
             auto outputLayer = outputInfo.find(op->get_friendly_name());
@@ -117,12 +112,7 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 
 void ModelYolo3::checkCompiledNetworkInputsOutputs() {
     // --------------------------- Check inputs & outputs -----------------------------------------------
-    const auto& inputInfo = execNetwork.GetInputsInfo();
-    const auto& outputInfo = execNetwork.GetOutputsInfo();
-    const auto ioPattern = getIOPattern();
-    findIONames(ioPattern, inputInfo, outputInfo);
-    checkInputsOutputs(ioPattern, inputInfo, outputInfo);
-    getNetInputSize(inputInfo);
+    ImageModel::checkCompiledNetworkInputsOutputs();
 
     //------------------------- Read yolo regions from file -----------------------------------------------
     cv::FileStorage fs(regionsFile, cv::FileStorage::READ);

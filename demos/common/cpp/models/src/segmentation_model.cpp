@@ -29,7 +29,7 @@ ModelBase::IOPattern SegmentationModel::getIOPattern() {
         // Describe number of inputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is set 0.
         {
-            { 1, {  { "", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, useAutoResize ? InferenceEngine::Layout::NHWC : InferenceEngine::Layout::NCHW} } } } ,
+            { 1, {  { "common", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, useAutoResize ? InferenceEngine::Layout::NHWC : InferenceEngine::Layout::NCHW} } } } ,
         }
     );
 
@@ -52,9 +52,9 @@ template<class OutputsDataMap>
 void SegmentationModel::getBlobDims(const OutputsDataMap& outputInfo) {
     const InferenceEngine::SizeVector outputDims = outputInfo.find(outputsNames[0])->second->getTensorDesc().getDims();
     auto nDims = outputDims.size();
-    outChannels = nDims > 3 ? (int)(outSizeVector[1]) : 0;
-    outHeight = (int)(outSizeVector[nDims - 2]);
-    outWidth = (int)(outSizeVector[nDims - 1]);
+    outChannels = nDims > 3 ? (int)(outputDims[1]) : 0;
+    outHeight = (int)(outputDims[nDims - 2]);
+    outWidth = (int)(outputDims[nDims - 1]);
 }
 
 void SegmentationModel::checkCompiledNetworkInputsOutputs() {

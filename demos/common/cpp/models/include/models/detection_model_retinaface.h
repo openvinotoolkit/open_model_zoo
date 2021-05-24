@@ -74,9 +74,11 @@ protected:
     std::vector<std::vector<Anchor>> anchors;
 
     void generateAnchorsFpn();
-    void calculatePriorBoxes(InferenceEngine::SizeVector bboxSize);
+    template<class OutputsDataMap>
+    InferenceEngine::SizeVector getBoxexSizes(const OutputsDataMap& outputInfo);
+    void calculatePriorBoxes(const InferenceEngine::SizeVector& boxSizes);
 
-    IOPattern getIOPattern() override { return {}; };
+    IOPattern getIOPattern() override;
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override;
 
