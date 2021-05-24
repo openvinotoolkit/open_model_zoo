@@ -120,12 +120,12 @@ def main():
 
         for code_span in doc_page.code_spans():
             if code_span.startswith(omz_reference_prefix):
-                target_path_rel = code_span[len(omz_reference_prefix):]
+                target_path_rel = Path(code_span[len(omz_reference_prefix):])
                 target_path = OMZ_ROOT / target_path_rel
 
-                if ".." in Path(target_path_rel).parts:
-                    complain(f'{md_path_rel}: OMZ reference "{code_span}" may'
-                        ' point outside the OMZ directory')
+                if ".." in target_path_rel.parts:
+                    complain(f'{md_path_rel}: OMZ reference "{code_span}"'
+                        ' contains a ".." component.')
                     continue
 
                 if not target_path.exists():
