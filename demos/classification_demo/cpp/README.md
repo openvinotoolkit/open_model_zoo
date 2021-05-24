@@ -16,7 +16,7 @@ You can stop the demo by pressing "Esc" or "Q" button. After that, the average m
 
 ## Preparing to Run
 
-The list of models supported by the demo is in <omz_dir>/demos/classification_demo/cpp/models.lst file.
+The list of models supported by the demo is in `<omz_dir>/demos/classification_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 ### Supported Models
