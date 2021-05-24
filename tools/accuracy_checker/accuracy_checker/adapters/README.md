@@ -412,3 +412,6 @@ AccuracyChecker supports following set of adapters:
   * `max_active` - max active paths for decoding (Optional, default `7000`).
   * `inverse_acoustic_scale` - inverse acoustic scale for lattice scaling (Optional, default `0`).
   * `word_insertion_penalty` - add word insertion penalty to the lattice. Penalties are negative log-probs, base e, and are added to the language model' part of the cost (Optional, `0`).
+* `quantiles_predictor` - converts output of Time Series Forecasting models to `TimeSeriesForecastingQuantilesPrediction`.
+  * `quantiles` - preds[i]->quantile[i] mapping.
+  * `output_name` - name of output node to convert.

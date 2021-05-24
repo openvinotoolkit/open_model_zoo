@@ -30,7 +30,7 @@ files:
   - name: resnest50-528c19ca.pth
     sha256: 528c19ca6509420548c8359f63ff37975e7d92f42eaf72a7af152a015c8ef48c
     size: 110273258
-    source: https://s3.us-west-1.wasabisys.com/resnest/resnest50-528c19ca.pth
+    source: https://github.com/zhanghang1989/ResNeSt/releases/download/weights_step1/resnest50-528c19ca.pth
   - name: model/resnest.py
     size: 2908
     sha256: ef4629dca658fb7b52dff05ca6b4cdd2f62eae387a67c8f3036e58aaf23955d1

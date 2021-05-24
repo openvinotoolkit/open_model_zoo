@@ -1,29 +1,31 @@
 # Handwritten Text Recognition Demo
+
 This example demonstrates an approach to recognize handwritten Japanese and simplified Chinese text lines using OpenVINO™. For Japanese, this demo supports all the characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html). For simplified Chinese, it supports the characters in [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release).
 
 ## How It Works
-
-The demo expects the following model in the Intermediate Representation (IR) format:
-
-   * handwritten-japanese-recognition-0001
-   * handwritten-simplified-chinese-recognition-0001
-
-
-It can be your own models or pre-trained model from OpenVINO Open Model Zoo.
-In the `models.lst` are the list of appropriate models for this demo
-that can be obtained via `Model downloader`.
-Please see more information about `Model downloader` [here](../../../tools/downloader/README.md).
-
 
 The demo workflow is the following:
 
 The demo first reads an image and performs the preprocessing such as resize and padding. Then after loading model to the plugin, the inference will start. After decoding the returned indexes into characters, the demo will display the predicted text.
 
-### Installation and dependencies
+## Preparing to Run
+
+The list of models supported by the demo is in <omz_dir>/demos/handwritten_text_recognition_demo/python/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* handwritten-japanese-recognition-0001
+* handwritten-simplified-chinese-recognition-0001
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
+### Installation and Dependencies
 
 The demo depends on:
-- opencv-python
-- numpy
+
+* opencv-python
+* numpy
 
 To install all the required Python modules you can use:
 
@@ -31,7 +33,10 @@ To install all the required Python modules you can use:
 pip install -r requirements.txt
 ```
 
-### Command line arguments
+## Running
+
+Running the application with the `-h` option yields the following usage message:
+
 ```
 usage: handwritten_text_recognition_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
                                             [-ni NUMBER_ITER] [-cl CHARLIST]
@@ -61,27 +66,28 @@ Options:
                         character, until a designated one is found
 ```
 
+For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
-For example:
+```sh
+python handwritten_text_recognition_demo.py -d CPU -i data/handwritten_japanese_test.png -m <path_to_model>/model.xml
 ```
-python handwritten_text_recognition_demo.py -i data/handwritten_japanese_test.png -m <path_to_model>/model.xml
 
-```
 When the `designated_characters` argument is provided, if the output character is not included in the designated characters, the script will check Top k steps in looking up the decoded character, until a designated one is found. By doing so, the output character will be restricted to a designated region. K is set to 20 by default.
 
-For example, if we want to restrict the output characters to only digits and hyphens, we need to provide the path to the designated character file, e.g. `digit_hyphen.txt`. Then the script will perform a post-filtering processing on the output characters, but please note that it is possible that other characters are still allowed if none of `digit_hyphen.txt` is in first K chosen elements.
+For example, if you want to restrict the output characters to only digits and hyphens, you need to provide the path to the designated character file, for example `digit_hyphen.txt`. Then the script will perform a post-filtering processing on the output characters, but please note that it is possible that other characters are still allowed if none of `digit_hyphen.txt` is in first K chosen elements. The mentioned characters text files located at `data` subfolder of this demo.
 
-The command line:
+The example command line:
 
-```
+```sh
 python handwritten_text_recognition_demo.py -i data/handwritten_japanese_test.png -m <path_to_model>/model.xml -dc data/digit_hyphen.txt
-
 ```
+
 ## Demo Output
+
 The application uses the terminal to show resulting recognition text and inference performance.
 
-
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

@@ -1,0 +1,129 @@
+evaluations:
+  - name: text-recognition-0015
+    module: custom_evaluators.custom_text_recognition_evaluator.TextRecognitionWithAttentionEvaluator
+    module_config:
+      model_type: SequentialTextRecognitionModel
+      lowercase: true
+      network_info:
+        max_seq_len: "24"
+        custom_label_map:
+          0: "<s>"
+          1: ""
+          2: "</s>"
+          3: "?"
+          4: "0"
+          5: "1"
+          6: "2"
+          7: "3"
+          8: "4"
+          9: "5"
+          10: "6"
+          11: "7"
+          12: "8"
+          13: "9"
+          14: "a"
+          15: "b"
+          16: "c"
+          17: "d"
+          18: "e"
+          19: "f"
+          20: "g"
+          21: "h"
+          22: "i"
+          23: "j"
+          24: "k"
+          25: "l"
+          26: "m"
+          27: "n"
+          28: "o"
+          29: "p"
+          30: "q"
+          31: "r"
+          32: "s"
+          33: "t"
+          34: "u"
+          35: "v"
+          36: "w"
+          37: "x"
+          38: "y"
+          39: "z"
+          40: "A"
+          41: "B"
+          42: "C"
+          43: "D"
+          44: "E"
+          45: "F"
+          46: "G"
+          47: "H"
+          48: "I"
+          49: "J"
+          50: "K"
+          51: "L"
+          52: "M"
+          53: "N"
+          54: "O"
+          55: "P"
+          56: "Q"
+          57: "R"
+          58: "S"
+          59: "T"
+          60: "U"
+          61: "V"
+          62: "W"
+          63: "X"
+          64: "Y"
+          65: "Z"
+
+      launchers:
+        - framework: dlsdk
+
+      datasets:
+        - name: SVT_recognition
+          preprocessing:
+            - type: bgr_to_gray
+              cast_to_float: false
+            - type: resize
+              dst_width: 256
+              dst_height: 64
+          metrics:
+            - type: character_recognition_accuracy
+
+        - name: IIIT5K
+          preprocessing:
+            - type: bgr_to_gray
+              cast_to_float: false
+            - type: resize
+              dst_width: 256
+              dst_height: 64
+          metrics:
+            - type: character_recognition_accuracy
+
+        - name: ICDAR2015_recognition
+          preprocessing:
+            - type: bgr_to_gray
+              cast_to_float: false
+            - type: resize
+              dst_width: 256
+              dst_height: 64
+          metrics:
+            - type: character_recognition_accuracy
+
+        - name: ICDAR03_recognition
+          preprocessing:
+            - type: bgr_to_gray
+              cast_to_float: false
+            - type: resize
+              dst_width: 256
+              dst_height: 64
+          metrics:
+            - type: character_recognition_accuracy
+
+        - name: ICDAR2013
+          preprocessing:
+            - type: bgr_to_gray
+              cast_to_float: false
+            - type: resize
+              dst_width: 256
+              dst_height: 64
+          metrics:
+            - type: character_recognition_accuracy

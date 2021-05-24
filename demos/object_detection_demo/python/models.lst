@@ -33,10 +33,6 @@ ssdlite_mobilenet_v2
 vehicle-detection-????
 vehicle-detection-adas-????
 vehicle-license-plate-detection-barrier-????
-# For --architecture_type=retinaface
-retinaface-anti-cov
-retinaface-resnet50
-ssh-mxnet
 # For --architecture_type=ultra_lightweight_face_detection
 ultra-lightweight-face-detection-rfb-320
 ultra-lightweight-face-detection-slim-320

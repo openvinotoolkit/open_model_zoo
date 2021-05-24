@@ -1,0 +1,26 @@
+models:
+  - name: time-series-forecasting-electricity-0001
+    launchers:
+      - framework: dlsdk
+        inputs:
+          - name: timestamps
+            type: INPUT
+            layout: NHWC
+        adapter:
+          type: quantiles_predictor
+          output_name: quantiles
+          quantiles:
+            0.5: 1
+            0.9: 2
+
+    datasets:
+      - name: electricity
+        reader:
+          type: annotation_features_extractor
+          features:
+            - inputs
+        metrics:
+          - type: normalised_quantile_loss
+            presenter: print_vector
+        postprocessing:
+          - type: time_series_denormalize

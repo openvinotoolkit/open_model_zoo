@@ -22,7 +22,7 @@ from .metric import Metric, FullDatasetEvaluationMetric
 from .metric_profiler import ProfilingExecutor
 
 MetricInstance = namedtuple(
-    'MetricInstance', ['name', 'metric_type', 'metric_fn', 'reference', 'threshold', 'presenter']
+    'MetricInstance', ['name', 'metric_type', 'metric_fn', 'reference', 'abs_threshold', 'rel_threshold', 'presenter']
 )
 
 
@@ -97,13 +97,14 @@ class MetricsExecutor:
         return results, profile_results
 
     def iterate_metrics(self, annotations, predictions):
-        for name, metric_type, functor, reference, threshold, presenter in self.metrics:
+        for name, metric_type, functor, reference, abs_threshold, rel_threshold, presenter in self.metrics:
             yield presenter, EvaluationResult(
                 name=name,
                 metric_type=metric_type,
                 evaluated_value=functor(annotations, predictions),
                 reference_value=reference,
-                threshold=threshold,
+                abs_threshold=abs_threshold,
+                rel_threshold=rel_threshold,
                 meta=functor.meta,
             )
 
@@ -111,7 +112,8 @@ class MetricsExecutor:
         type_ = 'type'
         identifier = 'name'
         reference = 'reference'
-        threshold = 'threshold'
+        abs_threshold = 'abs_threshold'
+        rel_threshold = 'rel_threshold'
         presenter = 'presenter'
         metric_config_validator = ConfigValidator(
             "metrics", on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT,
@@ -140,7 +142,8 @@ class MetricsExecutor:
             metric_type,
             metric_fn,
             metric_config_entry.get(reference),
-            metric_config_entry.get(threshold),
+            metric_config_entry.get(abs_threshold),
+            metric_config_entry.get(rel_threshold),
             metric_presenter
         ))
         if isinstance(metric_fn, FullDatasetEvaluationMetric):
