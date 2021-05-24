@@ -1,6 +1,6 @@
 # Gaze Estimation Demo
 
-![](../gaze_estimation.gif)
+![example](../gaze_estimation.gif)
 
 This demo showcases the work of gaze estimation model.
 
