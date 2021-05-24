@@ -120,15 +120,15 @@ def main():
 
         for code_span in doc_page.code_spans():
             if code_span.startswith(omz_reference_prefix):
-                file_relative_path = code_span[len(omz_reference_prefix):]
-                file_path = OMZ_ROOT / file_relative_path
+                target_path_rel = code_span[len(omz_reference_prefix):]
+                target_path = OMZ_ROOT / target_path_rel
 
-                if ".." in Path(file_relative_path).parts:
+                if ".." in Path(target_path_rel).parts:
                     complain(f'{md_path_rel}: OMZ reference "{code_span}" may'
                         ' point outside the OMZ directory')
                     continue
 
-                if not file_path.exists():
+                if not target_path.exists():
                     complain(f'{md_path_rel}: OMZ reference "{code_span}" target'
                         ' does not exist')
 
