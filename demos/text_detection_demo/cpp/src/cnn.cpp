@@ -149,12 +149,6 @@ void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std
 
     // ---------------------------------------------------------------------------------------------------
     InputInfo::Ptr input_info = network_encoder.getInputsInfo().begin()->second;
-    for (auto info: network_decoder.getInputsInfo()) {
-        if (info.first == "decoder_input") {
-            input_info_decoder_input = info.second;
-        }
-    }
-    // input_info_decoder_input = network_decoder.getInputsInfo()["decoder_input"];
     input_name_ = network_encoder.getInputsInfo().begin()->first;
 
     input_info->setLayout(Layout::NCHW);
