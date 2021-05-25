@@ -123,6 +123,40 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     return blobs;
 }
 
+std::string EncoderDecoderCNN::check_net_names(std::vector<std::string> output_names_encoder,
+                                               std::vector<std::string> input_names_decoder,
+                                               std::vector<std::string> output_names_decoder) {
+    if (std::find(
+            output_names_encoder.begin(),
+            output_names_encoder.end(),
+            out_enc_hidden_name_) == output_names_encoder.end())
+        return out_enc_hidden_name_;
+    if (std::find(output_names_encoder.begin(),
+            output_names_encoder.end(),
+            features_name_) == output_names_encoder.end())
+        return features_name_;
+    if (std::find(input_names_decoder.begin(),
+            input_names_decoder.end(),
+            in_dec_hidden_name_) == input_names_decoder.end())
+        return in_dec_hidden_name_;
+    if (std::find(input_names_decoder.begin(),
+            input_names_decoder.end(),
+            features_name_) == input_names_decoder.end())
+        return features_name_;
+    if (std::find(input_names_decoder.begin(),
+            input_names_decoder.end(),
+            in_dec_symbol_name_) == input_names_decoder.end())
+        return in_dec_symbol_name_;
+    if (std::find(output_names_decoder.begin(),
+            output_names_decoder.end(),
+            out_dec_hidden_name_) == output_names_decoder.end())
+        return out_dec_hidden_name_;
+    if (std::find(output_names_decoder.begin(),
+            output_names_decoder.end(),
+            out_dec_symbol_name_) == output_names_decoder.end())
+        return out_dec_symbol_name_;
+    return std::string("");
+ }
 
 void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
     // ---------------------------------------------------------------------------------------------------
@@ -132,6 +166,7 @@ void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std
         model_path_decoder = model_path_decoder.replace(model_path_decoder.find("encoder"), 7, "decoder");
     auto network_encoder = ie.ReadNetwork(model_path);
     auto network_decoder = ie.ReadNetwork(model_path_decoder);
+    // --------------------------- Checking net names ----------------------------------------------------
     InputsDataMap inputInfo(network_encoder.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::runtime_error("The network_encoder should have only one input");
@@ -144,6 +179,16 @@ void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std
     for (auto output : outputInfo) {
         output_names_decoder.emplace_back(output.first);
     }
+    std::vector<std::string> input_names_decoder;
+    inputInfo = network_decoder.getInputsInfo();
+    for (auto input : inputInfo) {
+        input_names_decoder.emplace_back(input.first);
+    }
+    auto name_not_exist = this->check_net_names(output_names_encoder,
+                                                input_names_decoder,
+                                                output_names_decoder);
+    if (name_not_exist != "")
+        throw std::runtime_error("'" + name_not_exist + "' does not exist in the network");
 
     // ---------------------------------------------------------------------------------------------------
     InputInfo::Ptr input_info = network_encoder.getInputsInfo().begin()->second;

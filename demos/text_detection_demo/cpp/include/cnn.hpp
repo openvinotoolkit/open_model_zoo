@@ -72,5 +72,8 @@ class EncoderDecoderCNN : public Cnn {
     std::string in_dec_symbol_name_;
     std::string out_dec_symbol_name_;
     std::string logits_name_;
+    std::string check_net_names(std::vector<std::string> output_names_encoder,
+                                               std::vector<std::string> input_names_decoder,
+                                               std::vector<std::string> output_names_decoder);
 };
 
