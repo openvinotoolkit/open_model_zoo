@@ -136,10 +136,6 @@ void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std
     if (inputInfo.size() != 1) {
         throw std::runtime_error("The network_encoder should have only one input");
     }
-    inputInfo = network_decoder.getInputsInfo();
-    for (auto input : inputInfo) {
-        input_names_decoder.emplace_back(input.first);
-    }
     OutputsDataMap outputInfo(network_encoder.getOutputsInfo());
     for (auto output : outputInfo) {
         output_names_encoder.emplace_back(output.first);

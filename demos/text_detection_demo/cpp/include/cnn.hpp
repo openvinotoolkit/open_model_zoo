@@ -63,7 +63,6 @@ class EncoderDecoderCNN : public Cnn {
   private:
     InferRequest infer_request_encoder_;
     InferRequest infer_request_decoder_;
-    std::vector<std::string> input_names_decoder;
     std::vector<std::string> output_names_encoder;
     std::vector<std::string> output_names_decoder;
     std::string features_name_;
