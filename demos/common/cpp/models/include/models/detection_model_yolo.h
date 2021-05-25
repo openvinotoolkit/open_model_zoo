@@ -35,7 +35,7 @@ protected:
         int coords = 0;
         std::vector<float> anchors;
 
-        Region(int n, int cl, int crds, std::vector<float> a) : num(n), classes(cl), coords(crds), anchors(a) {};
+        Region(int n, int cl, int crds, std::vector<float>&& a) : num(n), classes(cl), coords(crds), anchors(a) {};
         Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo);
     };
 public:

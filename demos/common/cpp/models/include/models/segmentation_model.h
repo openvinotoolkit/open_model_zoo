@@ -34,8 +34,6 @@ protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
     void checkCompiledNetworkInputsOutputs() override;
 
-    //template<class InputsDataMap, class OutputsDataMap>
-    //void checkInputsOutputs(const InputsDataMap& inputInfo, const OutputsDataMap& outputInfo);
     int outHeight = 0;
     int outWidth = 0;
     int outChannels = 0;

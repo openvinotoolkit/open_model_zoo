@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,7 @@ ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, { "Face" }),
     maxProposalsCount(0), boxIOUThreshold(boxIOUThreshold), variance({ 0.1f, 0.2f }),
-    steps({ 32, 64, 128 }), minSizes({ {32, 64, 128}, {256}, {512} }) {
+    steps({ 32, 64, 128 }), minSizes({ {32, 64, 128}, { 256 }, { 512 } }) {
 }
 
 ModelBase::IOPattern ModelFaceBoxes::getIOPattern() {
@@ -34,18 +34,18 @@ ModelBase::IOPattern ModelFaceBoxes::getIOPattern() {
         // Describe number of inputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is set 0.
         {
-        { 1, { { "input.1", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, useAutoResize ? InferenceEngine::Layout::NHWC : InferenceEngine::Layout::NCHW } } } }
+            { 1, { { "input.1", { InferenceEngine::Precision::U8, { 1, 3, 0, 0 }, useAutoResize ? InferenceEngine::Layout::NHWC : InferenceEngine::Layout::NCHW } } } }
         }
     );
 
     ModelBase::BlobPattern outputPattern(
         "output",
         // Possible models' outputs
-        // Describe number of inputs, precision, dimensions and layout.
+        // Describe number of outputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is - set 0.
         {
-        { 2, { { "boxes", { InferenceEngine::Precision::FP32, {1, 21824, 4}, InferenceEngine::Layout::CHW } },
-        { "scores", { InferenceEngine::Precision::FP32, {1, 21824, 2}, InferenceEngine::Layout::CHW } } } }
+            { 2, { { "boxes", { InferenceEngine::Precision::FP32, { 1, 21824, 4 }, InferenceEngine::Layout::CHW } },
+                 { "scores", { InferenceEngine::Precision::FP32, { 1, 21824, 2 }, InferenceEngine::Layout::CHW } } } }
         }
     );
 
@@ -99,7 +99,7 @@ void calculateAnchors(std::vector<ModelFaceBoxes::Anchor>& anchors, const std::v
     for (auto cy : dense_cy) {
         for (auto cx : dense_cx) {
             anchors.push_back({ cx - 0.5f * skx, cy - 0.5f * sky,
-            cx + 0.5f * skx, cy + 0.5f * sky }); // left top right bottom
+                cx + 0.5f * skx, cy + 0.5f * sky }); // left top right bottom
         }
     }
 
@@ -196,7 +196,7 @@ std::vector<ModelFaceBoxes::Anchor> filterBBoxes(const InferenceEngine::MemoryBl
         auto predH = exp(dh * variance[1]) * anchors[i].getHeight();
 
         bboxes.push_back({ static_cast<float>(predCtrX - 0.5f * predW), static_cast<float>(predCtrY - 0.5f * predH),
-        static_cast<float>(predCtrX + 0.5f * predW), static_cast<float>(predCtrY + 0.5f * predH) });
+            static_cast<float>(predCtrX + 0.5f * predW), static_cast<float>(predCtrY + 0.5f * predH) });
 
     }
 

@@ -43,9 +43,10 @@ ModelBase::IOPattern ModelYolo3::getIOPattern() {
 
     ModelBase::BlobPattern outputPattern(
         "output",
+        // Possible models' outputs
+        // Describe number of outputs, precision, dimensions and layout.
+        // If it doesn't matter what dimension's value is set 0.
         {
-          //  { 1, {  { "common", { InferenceEngine::Precision::FP32, {1, 125, 13, 13}, InferenceEngine::Layout::NCHW} } } },
-
             { 2, {  { "conv2d_9/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 13, 13}, InferenceEngine::Layout::NCHW} },
                     { "conv2d_12/Conv2D/YoloRegion", { InferenceEngine::Precision::FP32, {1, 255, 26, 26}, InferenceEngine::Layout::NCHW } } } },
 
@@ -94,7 +95,7 @@ void ModelYolo3::checkCompiledNetworkInputsOutputs() {
     for (; it != endIt; ++it) {
         std::vector<float> anchors;
         (*it)["anchors"] >> anchors;
-        regions.emplace(static_cast<std::string>((*it)["name"]), Region((int)(*it)["num"], (int)(*it)["classes"], (int)(*it)["coords"], anchors));
+        regions.emplace(static_cast<std::string>((*it)["name"]), Region{ (int)(*it)["num"], (int)(*it)["classes"], (int)(*it)["coords"], std::move(anchors) });
     }
     fs.release();
 }

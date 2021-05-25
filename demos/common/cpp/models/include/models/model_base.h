@@ -19,6 +19,7 @@
 #include "results.h"
 #include <utils/args_helper.hpp>
 #include <utils/config_factory.h>
+#include <utils/slog.hpp>
 
 class ModelBase {
 public:
@@ -32,7 +33,7 @@ public:
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
     virtual void onLoadCompleted(const std::vector<InferenceEngine::InferRequest::Ptr>& requests) {}
     const std::vector<std::string>& getOutputsNames() const { return outputsNames; }
-    const std::vector<std::string>& getinputsNames() const { return inputsNames; }
+    const std::vector<std::string>& getInputsNames() const { return inputsNames; }
 
     virtual InferenceEngine::ExecutableNetwork loadExecutableNetwork(const CnnConfig& cnnConfig, InferenceEngine::Core& core);
 
@@ -51,13 +52,13 @@ public:
         const InferenceEngine::ResizeAlgorithm resizeAlgo;
 
         BlobPattern(std::string&& type, std::map<size_t, std::map<std::string, InferenceEngine::TensorDesc>>&& patterns,
-            InferenceEngine::ResizeAlgorithm&& algo = InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR)
-            : type(std::move(type)), patterns(std::move(patterns)), resizeAlgo(algo) {}
+            InferenceEngine::ResizeAlgorithm algo = InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR)
+            : type(type), patterns(patterns), resizeAlgo(algo) {}
     };
 
     using IOPattern = std::pair<std::string, std::vector<ModelBase::BlobPattern>>;
 protected:
-    IOPattern virtual getIOPattern() = 0;
+    virtual IOPattern getIOPattern() = 0;
     void prepareIECore(InferenceEngine::Core& core);
 
     template<class InputsDataMap, class OutputsDataMap>
@@ -180,7 +181,7 @@ void check(const std::string& modelName, const ModelBase::BlobPattern& pattern,
                 " - but " + blobToCheckDesc.getPrecision().name() + " given");
         }
 
-        // Keep proper input order
+        // Keep proper input namaes order
         if (blobToCheckDims.size() == 4 && blobToCheckDesc.getPrecision() == InferenceEngine::Precision::U8 &&
             names.size() > 1 && names[0] != blobName) {
             std::swap(names[0], names[1]);
@@ -202,7 +203,7 @@ template<class InputsDataMap, class OutputsDataMap>
 void ModelBase::checkInputsOutputs(const IOPattern& modelBlobPattern,
     const InputsDataMap& inputsInfo, const OutputsDataMap& outputsInfo) {
 
-    //--------------------------- Check inputs blobs ------------------------------------------------------
+    //--------------------------- Check input blobs ------------------------------------------------------
     slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     check(modelBlobPattern.first, modelBlobPattern.second[0], inputsInfo, inputsNames);
 

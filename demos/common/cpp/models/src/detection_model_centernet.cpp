@@ -47,14 +47,6 @@ ModelBase::IOPattern ModelCenterNet::getIOPattern() {
     return  { "CenterNet", { inputPattern , outputPattern } };
 }
 
-void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
-    // --------------------------- Configure input & output -------------------------------------------------
-    ImageModel::prepareInputsOutputs(cnnNetwork);
-}
-
-void ModelCenterNet::checkCompiledNetworkInputsOutputs() {
-    ImageModel::checkCompiledNetworkInputsOutputs();
-}
 
 cv::Point2f getDir(const cv::Point2f& srcPoint, float rotRadius) {
     float sn = sinf(rotRadius);

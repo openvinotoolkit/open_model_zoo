@@ -43,7 +43,7 @@ ModelBase::IOPattern ModelSSD::getIOPattern() {
     ModelBase::BlobPattern outputPattern(
         "output",
         // Possible models' outputs
-        // Describe number of inputs, precision, dimensions and layout.
+        // Describe number of outputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is - set 0.
         {
             { 1, {  { "common", { InferenceEngine::Precision::FP32, {1, 1, 0, 7}, InferenceEngine::Layout::NCHW} } } },
@@ -80,7 +80,6 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     ImageModel::prepareInputsOutputs(cnnNetwork);
     getBlobDims(cnnNetwork.getOutputsInfo());
-
 }
 
 std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {

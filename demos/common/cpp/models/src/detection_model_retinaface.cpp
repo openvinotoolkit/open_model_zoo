@@ -23,8 +23,8 @@ ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confide
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, { "Face" }), // Default label is "Face"
     shouldDetectMasks(false), shouldDetectLandmarks(false), boxIOUThreshold(boxIOUThreshold), maskThreshold(0.8f), landmarkStd(1.0f),
     anchorCfg({ {32, { 32, 16 }, 16, { 1 }},
-    { 16, { 8, 4 }, 16, { 1 }},
-    { 8, { 2, 1 }, 16, { 1 }} }) {
+                { 16, { 8, 4 }, 16, { 1 }},
+                { 8, { 2, 1 }, 16, { 1 }} }) {
     generateAnchorsFpn();
 }
 
@@ -43,39 +43,38 @@ ModelBase::IOPattern ModelRetinaFace::getIOPattern() {
     ModelBase::BlobPattern outputPattern(
         "output",
         // Possible models' outputs
-        // Describe number of inputs, precision, dimensions and layout.
+        // Describe number of outputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is - set 0.
         {
         { 6, { { "rpn_cls_prob_reshape_stride32", { InferenceEngine::Precision::FP32, {1, 4, 20, 20}, InferenceEngine::Layout::NCHW } },
-        { "rpn_bbox_pred_stride32", { InferenceEngine::Precision::FP32, {1, 8, 20, 20}, InferenceEngine::Layout::NCHW } },
-        { "rpn_cls_prob_reshape_stride16", { InferenceEngine::Precision::FP32, {1, 4, 40, 40}, InferenceEngine::Layout::NCHW } },
-        { "rpn_bbox_pred_stride16", { InferenceEngine::Precision::FP32, {1, 8, 40, 40}, InferenceEngine::Layout::NCHW } },
-        { "rpn_cls_prob_reshape_stride8", { InferenceEngine::Precision::FP32, {1, 4, 80, 80}, InferenceEngine::Layout::NCHW } },
-        { "rpn_bbox_pred_stride8", { InferenceEngine::Precision::FP32, {1, 8, 80, 80}, InferenceEngine::Layout::NCHW } } } },
+                { "rpn_bbox_pred_stride32", { InferenceEngine::Precision::FP32, {1, 8, 20, 20}, InferenceEngine::Layout::NCHW } },
+                { "rpn_cls_prob_reshape_stride16", { InferenceEngine::Precision::FP32, {1, 4, 40, 40}, InferenceEngine::Layout::NCHW } },
+                { "rpn_bbox_pred_stride16", { InferenceEngine::Precision::FP32, {1, 8, 40, 40}, InferenceEngine::Layout::NCHW } },
+                { "rpn_cls_prob_reshape_stride8", { InferenceEngine::Precision::FP32, {1, 4, 80, 80}, InferenceEngine::Layout::NCHW } },
+                { "rpn_bbox_pred_stride8", { InferenceEngine::Precision::FP32, {1, 8, 80, 80}, InferenceEngine::Layout::NCHW } } } },
 
         { 9, { { "face_rpn_cls_prob_reshape_stride32", { InferenceEngine::Precision::FP32, {1, 4, 20, 20}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_bbox_stride32", { InferenceEngine::Precision::FP32, {1, 8, 20, 20}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_landmark_pred_stride32", { InferenceEngine::Precision::FP32, {1, 20, 20, 20}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_cls_prob_reshape_stride16", { InferenceEngine::Precision::FP32, {1, 4, 40, 40}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_bbox_pred_stride16", { InferenceEngine::Precision::FP32, {1, 8, 40, 40}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_landmark_pred_stride16", { InferenceEngine::Precision::FP32, {1, 20, 40, 40}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_cls_prob_reshape_stride8", { InferenceEngine::Precision::FP32, {1, 4, 80, 80}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_bbox_pred_stride8", { InferenceEngine::Precision::FP32, {1, 8, 80, 80}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_landmark_pred_stride8", { InferenceEngine::Precision::FP32, {1, 20, 80, 80}, InferenceEngine::Layout::NCHW } } } },
+                { "face_rpn_bbox_stride32", { InferenceEngine::Precision::FP32, {1, 8, 20, 20}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_landmark_pred_stride32", { InferenceEngine::Precision::FP32, {1, 20, 20, 20}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_cls_prob_reshape_stride16", { InferenceEngine::Precision::FP32, {1, 4, 40, 40}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_bbox_pred_stride16", { InferenceEngine::Precision::FP32, {1, 8, 40, 40}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_landmark_pred_stride16", { InferenceEngine::Precision::FP32, {1, 20, 40, 40}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_cls_prob_reshape_stride8", { InferenceEngine::Precision::FP32, {1, 4, 80, 80}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_bbox_pred_stride8", { InferenceEngine::Precision::FP32, {1, 8, 80, 80}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_landmark_pred_stride8", { InferenceEngine::Precision::FP32, {1, 20, 80, 80}, InferenceEngine::Layout::NCHW } } } },
 
         { 12, { { "face_rpn_cls_prob_reshape_stride32", { InferenceEngine::Precision::FP32, {1, 4, 20, 20}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_bbox_stride32", { InferenceEngine::Precision::FP32, {1, 8, 20, 20}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_landmark_pred_stride32", { InferenceEngine::Precision::FP32, {1, 20, 20, 20}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_type_prob_reshape_stride32", { InferenceEngine::Precision::FP32, {1, 6, 20, 20}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_cls_prob_reshape_stride16", { InferenceEngine::Precision::FP32, {1, 4, 40, 40}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_bbox_pred_stride16", { InferenceEngine::Precision::FP32, {1, 8, 40, 40}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_landmark_pred_stride16", { InferenceEngine::Precision::FP32, {1, 20, 40, 40}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_type_prob_reshape_stride16", { InferenceEngine::Precision::FP32, {1, 6, 40, 40}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_cls_prob_reshape_stride8", { InferenceEngine::Precision::FP32, {1, 4, 80, 80}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_bbox_pred_stride8", { InferenceEngine::Precision::FP32, {1, 8, 80, 80}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_landmark_pred_stride8", { InferenceEngine::Precision::FP32, {1, 20, 80, 80}, InferenceEngine::Layout::NCHW } },
-        { "face_rpn_type_prob_reshape_stride8", { InferenceEngine::Precision::FP32, {1, 6, 80, 80}, InferenceEngine::Layout::NCHW } } } },
-
+                { "face_rpn_bbox_stride32", { InferenceEngine::Precision::FP32, {1, 8, 20, 20}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_landmark_pred_stride32", { InferenceEngine::Precision::FP32, {1, 20, 20, 20}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_type_prob_reshape_stride32", { InferenceEngine::Precision::FP32, {1, 6, 20, 20}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_cls_prob_reshape_stride16", { InferenceEngine::Precision::FP32, {1, 4, 40, 40}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_bbox_pred_stride16", { InferenceEngine::Precision::FP32, {1, 8, 40, 40}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_landmark_pred_stride16", { InferenceEngine::Precision::FP32, {1, 20, 40, 40}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_type_prob_reshape_stride16", { InferenceEngine::Precision::FP32, {1, 6, 40, 40}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_cls_prob_reshape_stride8", { InferenceEngine::Precision::FP32, {1, 4, 80, 80}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_bbox_pred_stride8", { InferenceEngine::Precision::FP32, {1, 8, 80, 80}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_landmark_pred_stride8", { InferenceEngine::Precision::FP32, {1, 20, 80, 80}, InferenceEngine::Layout::NCHW } },
+                { "face_rpn_type_prob_reshape_stride8", { InferenceEngine::Precision::FP32, {1, 6, 80, 80}, InferenceEngine::Layout::NCHW } } } }
         }
     );
 
@@ -151,7 +150,7 @@ std::vector<ModelRetinaFace::Anchor> ratioEnum(const ModelRetinaFace::Anchor& an
         auto ws = sqrt(sizeRatio);
         auto hs = ws * ratio;
         retVal.push_back({ static_cast<float>(xCtr - 0.5f * (ws - 1.0f)), static_cast<float>(yCtr - 0.5f * (hs - 1.0f)),
-        static_cast<float>(xCtr + 0.5f * (ws - 1.0f)), static_cast<float>(yCtr + 0.5f * (hs - 1.0f)) });
+            static_cast<float>(xCtr + 0.5f * (ws - 1.0f)), static_cast<float>(yCtr + 0.5f * (hs - 1.0f)) });
     }
     return retVal;
 }
@@ -167,7 +166,7 @@ std::vector<ModelRetinaFace::Anchor> scaleEnum(const ModelRetinaFace::Anchor& an
         auto ws = w * scale;
         auto hs = h * scale;
         retVal.push_back({ static_cast<float>(xCtr - 0.5f * (ws - 1.0f)), static_cast<float>(yCtr - 0.5f * (hs - 1.0f)),
-        static_cast<float>(xCtr + 0.5f * (ws - 1.0f)), static_cast<float>(yCtr + 0.5f * (hs - 1.0f)) });
+            static_cast<float>(xCtr + 0.5f * (ws - 1.0f)), static_cast<float>(yCtr + 0.5f * (hs - 1.0f)) });
     }
     return retVal;
 }
@@ -277,7 +276,7 @@ void filterBBoxes(std::vector<ModelRetinaFace::Anchor>& bboxes, const std::vecto
         auto predH = exp(dh) * anchors[i].getHeight();
 
         bboxes.push_back({ static_cast<float>(predCtrX - 0.5f * (predW - 1.0f)), static_cast<float>(predCtrY - 0.5f * (predH - 1.0f)),
-        static_cast<float>(predCtrX + 0.5f * (predW - 1.0f)), static_cast<float>(predCtrY + 0.5f * (predH - 1.0f)) });
+            static_cast<float>(predCtrX + 0.5f * (predW - 1.0f)), static_cast<float>(predCtrY + 0.5f * (predH - 1.0f)) });
     }
 }
 
@@ -297,7 +296,7 @@ void filterLandmarks(std::vector<cv::Point2f>& landmarks, const std::vector<size
             auto deltaX = memPtr[offset + j * 2 * blockWidth] * landmarkStd;
             auto deltaY = memPtr[offset + (j * 2 + 1) * blockWidth] * landmarkStd;
             landmarks.push_back({ deltaX * anchors[i].getWidth() + anchors[i].getXCenter(),
-            deltaY * anchors[i].getHeight() + anchors[i].getYCenter() });
+                deltaY * anchors[i].getHeight() + anchors[i].getYCenter() });
         }
     }
 }

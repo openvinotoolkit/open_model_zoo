@@ -81,7 +81,7 @@ ModelBase::IOPattern ClassificationModel::getIOPattern() {
     ModelBase::BlobPattern outputPattern(
         "output",
         // Possible models' outputs
-        // Describe number of inputs, precision, dimensions and layout.
+        // Describe number of outputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is - set 0.
         {
             { 1, { { "common", { InferenceEngine::Precision::FP32, {1, 0, 1, 1}, InferenceEngine::Layout::NCHW} },
@@ -110,14 +110,14 @@ void ClassificationModel::specialChecks(const InferenceEngine::SizeVector& inSiz
 }
 void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     ImageModel::prepareInputsOutputs(cnnNetwork);
-    const InferenceEngine::SizeVector inputDims = cnnNetwork.getInputsInfo().find(inputsNames[0])->second->getTensorDesc().getDims();
-    const InferenceEngine::SizeVector outputDims = cnnNetwork.getOutputsInfo().find(outputsNames[0])->second->getTensorDesc().getDims();
-    specialChecks(inputDims, outputDims);
+    const InferenceEngine::SizeVector& inSizeVector = cnnNetwork.getInputsInfo().find(inputsNames[0])->second->getTensorDesc().getDims();
+    const InferenceEngine::SizeVector& outSizeVector = cnnNetwork.getOutputsInfo().find(outputsNames[0])->second->getTensorDesc().getDims();
+    specialChecks(inSizeVector, outSizeVector);
 }
 
 void ClassificationModel::checkCompiledNetworkInputsOutputs() {
     ImageModel::checkCompiledNetworkInputsOutputs();
-    const InferenceEngine::SizeVector inputDims = execNetwork.GetInputsInfo().find(inputsNames[0])->second->getTensorDesc().getDims();
-    const InferenceEngine::SizeVector outputDims = execNetwork.GetOutputsInfo().find(outputsNames[0])->second->getTensorDesc().getDims();
-    specialChecks(inputDims, outputDims);
+    const InferenceEngine::SizeVector& inSizeVector = execNetwork.GetInputsInfo().find(inputsNames[0])->second->getTensorDesc().getDims();
+    const InferenceEngine::SizeVector& outSizeVector = execNetwork.GetOutputsInfo().find(outputsNames[0])->second->getTensorDesc().getDims();
+    specialChecks(inSizeVector, outSizeVector);
 }

@@ -38,6 +38,4 @@ public:
 
 protected:
     IOPattern getIOPattern() override;
-    void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
-    void checkCompiledNetworkInputsOutputs() override;
 };

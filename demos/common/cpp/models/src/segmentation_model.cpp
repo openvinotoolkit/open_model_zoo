@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ ModelBase::IOPattern SegmentationModel::getIOPattern() {
     ModelBase::BlobPattern outputPattern(
         "output",
         // Possible models' outputs
-        // Describe number of inputs, precision, dimensions and layout.
+        // Describe number of outputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is - set 0.
         {
             { 1, {  { "ArgMax/Squeeze", { InferenceEngine::Precision::I32, {1, 513, 513}, InferenceEngine::Layout::CHW} },
