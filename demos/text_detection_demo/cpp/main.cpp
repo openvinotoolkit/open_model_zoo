@@ -160,7 +160,6 @@ int main(int argc, char *argv[]) {
             text_detection.Init(FLAGS_m_td, ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td));
 
         if (!FLAGS_m_tr.empty()) {
-            text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
             text_recognition->setInOutNames(FLAGS_out_enc_hidden_name,
                                             FLAGS_out_dec_hidden_name,
                                             FLAGS_in_dec_hidden_name,
@@ -168,6 +167,7 @@ int main(int argc, char *argv[]) {
                                             FLAGS_in_dec_symbol_name,
                                             FLAGS_out_dec_symbol_name,
                                             FLAGS_tr_o_blb_nm);
+            text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
         }
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat image = cap->read();
