@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 The `AclNet` model is designed to perform sound classification and is trained on internal dataset of environmental sounds for 53 different classes, listed in file `<omz_dir>/data/dataset_classes/aclnet_53cl.txt`.
-For details about the model, see this [paper](https://arxiv.org/test).
+For details about the model, see this [paper](https://arxiv.org/test1).
 
 The model input is a segment of PCM audio samples in `N, C, 1, L` format.
 
