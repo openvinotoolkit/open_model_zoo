@@ -20,7 +20,6 @@ static const char text_recognition_model_message[] = "Required. Path to the Text
 static const char text_recognition_decoder_type_message[] = "Optional. Type of the decoder, either 'simple' for SimpleDecoder or 'ctc' "
                                                                     "for CTC greedy and CTC beam search decoders. Default is 'ctc'";
 static const char text_recognition_model_symbols_set_message[] = "Optional. Symbol set for the Text Recognition model.";
-static const char text_recognition_model_is_composite[] = "Optional. Set this flag if text recognition model is composite (i.e. encoder-decoder)";
 static const char text_recognition_model_convert_to_lowercase[] = "Optional. Set this flag to convert recognized text to lowercase";
 static const char text_recognition_encoder_out_hidden_name[] = "Optional. Name of the text recognition model encoder output hidden blob";
 static const char text_recognition_decoder_out_hidden_name[] = "Optional. Name of the text recognition model decoder output hidden blob";
@@ -70,7 +69,6 @@ DEFINE_string(dt, "ctc", text_recognition_decoder_type_message);
 DEFINE_string(m_tr_ss, "0123456789abcdefghijklmnopqrstuvwxyz", text_recognition_model_symbols_set_message);
 DEFINE_bool(tr_pt_first, false, text_recognition_pad_token_is_first_message);
 DEFINE_string(tr_o_blb_nm, "", text_recognition_output_blob_name);
-DEFINE_bool(tr_composite, false, text_recognition_model_is_composite);
 DEFINE_bool(lower, false, text_recognition_model_convert_to_lowercase);
 DEFINE_string(out_enc_hidden_name, "decoder_hidden", text_recognition_encoder_out_hidden_name);
 DEFINE_string(out_dec_hidden_name, "decoder_hidden", text_recognition_decoder_out_hidden_name);
@@ -112,7 +110,6 @@ static void showUsage() {
     std::cout << "    -dt \"<type>\"                   " << text_recognition_decoder_type_message << std::endl;
     std::cout << "    -m_tr_ss \"<value>\"             " << text_recognition_model_symbols_set_message << std::endl;
     std::cout << "    -tr_pt_first                   " << text_recognition_pad_token_is_first_message << std::endl;
-    std::cout << "    -tr_composite                  " << text_recognition_model_is_composite << std::endl;
     std::cout << "    -lower                         " << text_recognition_model_convert_to_lowercase << std::endl;
     std::cout << "    -out_enc_hidden_name \"<value>\" " << text_recognition_encoder_out_hidden_name << std::endl;
     std::cout << "    -out_dec_hidden_name \"<value>\" " << text_recognition_decoder_out_hidden_name << std::endl;

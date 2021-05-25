@@ -10,7 +10,7 @@ The demo shows an example of using neural networks to detect and recognize print
 * `text-recognition-0012`, which is a recognition network for recognizing text.
 * `text-recognition-0013`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and specify output layer name via `-tr_o_blb_nm` option for this model (see model [description](../../../models/intel/text-recognition-0013/README.md) for details).
 * `text-recognition-0014`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and specify output layer name via `-tr_o_blb_nm` option for this model (see model [description](../../../models/intel/text-recognition-0014/README.md) for details).
-* `text-recognition-0015`, which is a recognition network for recognizing text. You should add option `-m_tr_ss "  #?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"` (supported symbols set), `-tr_o_blb_nm  "logits"` (to specify output name) `-tr_composite` (model consists of encoder and decoder part) and `-dt simple` (to specify decoder type). You can also specify `-lower` option to convert predicted text to lower-case. See model [description](../../../models/intel/text-recognition-0013/README.md) for details.
+* `text-recognition-0015`, which is a recognition network for recognizing text. You should add option `-m_tr_ss "  #?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"` (supported symbols set), `-tr_o_blb_nm  "logits"` (to specify output name) and `-dt simple` (to specify decoder type). You can also specify `-lower` option to convert predicted text to lower-case. See model [description](../../../models/intel/text-recognition-0013/README.md) for details.
 * `text-recognition-resnet-fc`, which is a recognition network for recognizing text. You should add option `-tr_pt_first`.
 * `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
 
@@ -70,7 +70,6 @@ Options:
     -dt "<type>"                   Optional. Type of the decoder, either 'simple' for SimpleDecoder or 'ctc' for CTC greedy and CTC beam search decoders. Default is 'ctc'
     -m_tr_ss "<value>"             Optional. Symbol set for the Text Recognition model.
     -tr_pt_first                   Optional. Specifies if pad token is the first symbol in the alphabet. Default is false
-    -tr_composite                  Optional. Set this flag if text recognition model is composite (i.e. encoder-decoder)
     -lower                         Optional. Set this flag to convert recognized text to lowercase
     -out_enc_hidden_name "<value>" Optional. Name of the text recognition model encoder output hidden blob
     -out_dec_hidden_name "<value>" Optional. Name of the text recognition model decoder output hidden blob

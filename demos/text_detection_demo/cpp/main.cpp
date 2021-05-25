@@ -33,13 +33,6 @@
 
 using namespace InferenceEngine;
 
-std::unique_ptr<Cnn> createCnn(unsigned type) {
-    switch (type) {
-        case 0: return std::unique_ptr<Cnn>(new Cnn());
-        case 1: return std::unique_ptr<Cnn>(new EncoderDecoderCNN());
-        default: return std::unique_ptr<Cnn>(new Cnn());
-    }
-};
 
 
 std::string str_tolower(std::string s) {
@@ -99,23 +92,6 @@ int main(int argc, char *argv[]) {
         double avg_time = 0;
         const double avg_time_decay = 0.8;
 
-        const char kPadSymbol = '#';
-        if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
-            throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
-        std::string kAlphabet;
-        if (!FLAGS_tr_composite) {
-            if (FLAGS_tr_pt_first)
-                kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
-            else
-                kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
-        }
-        else {
-            // The first three classes are START_TOKEN, PAD_TOKEN and END_TOKEN, respectively.
-            // They should be ignored in prediction. Note that this is model specific
-            // and could be different for other models.
-            kAlphabet = kPadSymbol + (kPadSymbol + (kPadSymbol + FLAGS_m_tr_ss));
-        }
-        const double min_text_recognition_confidence = FLAGS_thr;
 
         slog::info << "Loading Inference Engine" << slog::endl;
         Core ie;
@@ -157,22 +133,46 @@ int main(int argc, char *argv[]) {
         auto decoder_bandwidth = FLAGS_b;
 
         slog::info << "Loading network files" << slog::endl;
-        Cnn text_detection;
-        auto text_recognition = createCnn(FLAGS_tr_composite);
+        const char kPadSymbol = '#';
+        if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
+            throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
+        std::string kAlphabet;
+        std::unique_ptr<Cnn> text_recognition;
+        if (!FLAGS_m_tr.empty()) {
+            try {
+                text_recognition = std::unique_ptr<Cnn>(new EncoderDecoderCNN());
+                text_recognition->setInOutNames(FLAGS_out_enc_hidden_name,
+                                                FLAGS_out_dec_hidden_name,
+                                                FLAGS_in_dec_hidden_name,
+                                                FLAGS_features_name,
+                                                FLAGS_in_dec_symbol_name,
+                                                FLAGS_out_dec_symbol_name,
+                                                FLAGS_tr_o_blb_nm);
+                text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
+                slog::info << "Initialized composite text recognition model" << slog::endl;
+                kAlphabet = kPadSymbol + (kPadSymbol + (kPadSymbol + FLAGS_m_tr_ss));
+            }
+            catch (std::runtime_error e) {
+                if (std::string(e.what()).find("Decoder model could not be loaded") != std::string::npos) {
+                    text_recognition = std::unique_ptr<Cnn>(new Cnn());
+                    text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
+                    slog::info << "Initialized monolithic text recognition model" << slog::endl;
+                    if (FLAGS_tr_pt_first)
+                        kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
+                    else
+                        kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
+                }
+                else {
+                    throw std::runtime_error(e.what());
+                }
+            }
+        }
+        const double min_text_recognition_confidence = FLAGS_thr;
 
+        Cnn text_detection;
         if (!FLAGS_m_td.empty())
             text_detection.Init(FLAGS_m_td, ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td));
 
-        if (!FLAGS_m_tr.empty()) {
-            text_recognition->setInOutNames(FLAGS_out_enc_hidden_name,
-                                            FLAGS_out_dec_hidden_name,
-                                            FLAGS_in_dec_hidden_name,
-                                            FLAGS_features_name,
-                                            FLAGS_in_dec_symbol_name,
-                                            FLAGS_out_dec_symbol_name,
-                                            FLAGS_tr_o_blb_nm);
-            text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
-        }
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat image = cap->read();
         if (!image.data) {

@@ -162,10 +162,19 @@ void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std
     // ---------------------------------------------------------------------------------------------------
     // --------------------------- Checking paths --------------------------------------------------------
     std::string model_path_decoder = model_path;
-    while (model_path_decoder.find("encoder") != std::string::npos)
-        model_path_decoder = model_path_decoder.replace(model_path_decoder.find("encoder"), 7, "decoder");
     auto network_encoder = ie.ReadNetwork(model_path);
-    auto network_decoder = ie.ReadNetwork(model_path_decoder);
+    CNNNetwork network_decoder;
+    try {
+        if (model_path_decoder.find("encoder") == std::string::npos)
+            throw std::runtime_error("Model path does not contain 'encoder'");
+        while (model_path_decoder.find("encoder") != std::string::npos)
+            model_path_decoder = model_path_decoder.replace(model_path_decoder.find("encoder"), 7, "decoder");
+        network_decoder = ie.ReadNetwork(model_path_decoder);
+    }
+    catch (const std::runtime_error& error)
+    {
+        throw std::runtime_error(std::string("Decoder model could not be loaded\n") + error.what());
+    }
     // --------------------------- Checking net names ----------------------------------------------------
     InputsDataMap inputInfo(network_encoder.getInputsInfo());
     if (inputInfo.size() != 1) {
