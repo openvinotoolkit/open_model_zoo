@@ -88,7 +88,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
     * `wider_face_val_bbx_gt.txt` - annotation file
 
 ### Datasets in dataset_definitions.yml
-* `wider` used for evaluation models on WIDER Face dataset where the face is the first class. (model examples: [`mtcnn`](../models/public/mtcnn/README.md), [`retinaface-resnet50`](../models/public/retinaface-resnet50/README.md))
+* `wider` used for evaluation models on WIDER Face dataset where the face is the first class. (model example: [`mtcnn`](../models/public/mtcnn/README.md))
 * `wider_without_bkgr` used for evaluation models on WIDER Face dataset where the face is class zero. (model examples: [`mobilefacedet-v1-mxnet`](../models/public/mobilefacedet-v1-mxnet/README.md))
 
 ## [Visual Object Classes Challenge 2012 (VOC2012)](http://host.robots.ox.ac.uk/pascal/VOC/voc2012/)

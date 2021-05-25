@@ -42,14 +42,14 @@ The demo workflow is the following:
 ## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
-The list of models supported by the demo is in <omz_dir>/demos/text_spotting_demo/python/models.lst file.
+The list of models supported by the demo is in `<omz_dir>/demos/text_spotting_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 ### Supported Models
 
-* text-spotting-0004-detector
-* text-spotting-0004-recognizer-decoder
-* text-spotting-0004-recognizer-encoder
+* text-spotting-0005-detector
+* text-spotting-0005-recognizer-decoder
+* text-spotting-0005-recognizer-encoder
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -139,9 +139,9 @@ To run the demo, please provide paths to the model in the IR format and to an in
 
 ```bash
 python3 text_spotting_demo.py \
--m_m <path_to_model>/text-spotting-0004-detector.xml \
--m_te <path_to_model>/text-spotting-0004-recognizer-encoder.xml \
--m_td <path_to_model>/text-spotting-0004-recognizer-decoder.xml \
+-m_m <path_to_model>/text-spotting-0005-detector.xml \
+-m_te <path_to_model>/text-spotting-0005-recognizer-encoder.xml \
+-m_td <path_to_model>/text-spotting-0005-recognizer-decoder.xml \
 -i 0
 ```
 

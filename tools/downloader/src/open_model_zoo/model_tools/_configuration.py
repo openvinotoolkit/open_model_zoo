@@ -176,11 +176,13 @@ class ModelFile:
         with deserialization_context('In file "{}"'.format(name)):
             size = validate_nonnegative_int('"size"', file['size'])
 
-            sha256 = validate_string('"sha256"', file['sha256'])
+            sha256_str = validate_string('"sha256"', file['sha256'])
 
-            if not RE_SHA256SUM.fullmatch(sha256):
+            if not RE_SHA256SUM.fullmatch(sha256_str):
                 raise DeserializationError(
-                    '"sha256": got invalid hash {!r}'.format(sha256))
+                    '"sha256": got invalid hash {!r}'.format(sha256_str))
+
+            sha256 = bytes.fromhex(sha256_str)
 
             with deserialization_context('"source"'):
                 source = FileSource.deserialize(file['source'])
@@ -254,18 +256,21 @@ class PostprocUnpackArchive(Postproc):
 Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Model:
-    def __init__(self, name, subdirectory, files, postprocessing, mo_args, quantizable, framework,
-                 description, license_url, precisions, task_type, conversion_to_onnx_args):
+    def __init__(
+        self, name, subdirectory, files, postprocessing, mo_args, framework,
+        description, license_url, precisions, quantization_output_precisions,
+        task_type, conversion_to_onnx_args,
+    ):
         self.name = name
         self.subdirectory = subdirectory
         self.files = files
         self.postprocessing = postprocessing
         self.mo_args = mo_args
-        self.quantizable = quantizable
         self.framework = framework
         self.description = description
         self.license_url = license_url
         self.precisions = precisions
+        self.quantization_output_precisions = quantization_output_precisions
         self.task_type = task_type
         self.conversion_to_onnx_args = conversion_to_onnx_args
         self.converter_to_onnx = _common.KNOWN_FRAMEWORKS[framework]
@@ -345,6 +350,8 @@ class Model:
             if not isinstance(quantizable, bool):
                 raise DeserializationError('"quantizable": expected a boolean, got {!r}'.format(quantizable))
 
+            quantization_output_precisions = _common.KNOWN_QUANTIZED_PRECISIONS.keys() if quantizable else set()
+
             description = validate_string('"description"', model['description'])
 
             license_url = validate_string('"license"', model['license'])
@@ -352,8 +359,9 @@ class Model:
             task_type = validate_string_enum('"task_type"', model['task_type'],
                 _common.KNOWN_TASK_TYPES)
 
-            return cls(name, subdirectory, files, postprocessing, mo_args, quantizable, framework,
-                description, license_url, precisions, task_type, conversion_to_onnx_args)
+            return cls(name, subdirectory, files, postprocessing, mo_args, framework,
+                description, license_url, precisions, quantization_output_precisions,
+                task_type, conversion_to_onnx_args)
 
 def load_models(args):
     models = []

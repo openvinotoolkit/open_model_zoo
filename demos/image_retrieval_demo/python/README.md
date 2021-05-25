@@ -13,7 +13,7 @@ The demo application expects an image retrieval model in the Intermediate Repres
 As input, the demo application takes:
 
 * a path to a list of images represented by textfile with following format: 'path_to_image' 'ID'
-* a path to a video file or a device node of a web-camera
+* a path to a video file or a device node of a webcam
 
 The demo workflow is the following:
 
@@ -31,7 +31,7 @@ The demo workflow is the following:
 
 The demo sample input videos can be found in this [repository](https://github.com/19900531/test). An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
 
-The list of models supported by the demo is in <omz_dir>/demos/image_retrieval_demo/python/models.lst file.
+The list of models supported by the demo is in `<omz_dir>/demos/image_retrieval_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 ### Supported Models
@@ -57,7 +57,7 @@ Options:
                         Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
                         Required. Path to a video file or a device node of a
-                        web-camera.
+                        webcam.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
                         Optional. Name of output to save.

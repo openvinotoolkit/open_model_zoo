@@ -10,7 +10,7 @@ The program provides an interactive CLI interface that gets a sentence in the so
 
 ## Preparing to Run
 
-The list of models supported by the demo is in <omz_dir>/demos/machine_translation_demo/python/models.lst file.
+The list of models supported by the demo is in `<omz_dir>/demos/machine_translation_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 ### Supported Models
@@ -62,6 +62,10 @@ For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-train
 ```sh
 python3 ./machine_translation_demo -i "a sample english text" -m <path_to_model>/machine-translation-nar-en-de-0001.xml --tokenizer-src <omz_root>/models/intel/machine-translation-nar-en-de-0001/tokenizer_src --tokenizer-tgt <omz_root>/models/intel/machine-translation-nar-en-de-0001/tokenizer_tgt
 ```
+
+## Demo Output
+
+The application outputs translated sentences from source to target language.
 
 ## See Also
 

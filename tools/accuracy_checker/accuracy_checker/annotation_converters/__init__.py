@@ -40,7 +40,7 @@ from .ncf_converter import MovieLensConverter
 from .brats import BratsConverter, BratsNumpyConverter
 from .oar3d import OAR3DTilingConverter
 from .cifar import CifarFormatConverter
-from .mnist import MNISTCSVFormatConverter
+from .mnist import MNISTCSVFormatConverter, MNISTFormatConverter
 from .wmt import WMTConverter
 from .common_semantic_segmentation import CommonSegmentationConverter
 from .camvid import CamVidConverter, CamVid32DatasetConverter
@@ -103,8 +103,10 @@ from .tacotron2_test_data_converter import TacotronDataConverter
 from .noise_suppression_dataset import NoiseSuppressionDatasetConverter
 from .vimeo90k_sr import Vimeo90KSuperResolutionDatasetConverter
 from .lmdb import LMDBConverter
+from .electricity_time_series_forecasting import ElectricityTimeSeriesForecastingConverter
 from .kaldi_speech_recognition_pipeline import KaldiSpeechRecognitionDataConverter, KaldiFeatureRegressionConverter
 from .yolo_labeling_converter import YOLOLabelingConverter
+from .label_me_converter import LabelMeDetectionConverter, LabelMeSegmentationConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -144,6 +146,7 @@ __all__ = [
     'OAR3DTilingConverter',
     'CifarFormatConverter',
     'MNISTCSVFormatConverter',
+    'MNISTFormatConverter',
     'WMTConverter',
     'CommonSegmentationConverter',
     'CamVidConverter',
@@ -201,8 +204,11 @@ __all__ = [
     'NoiseSuppressionDatasetConverter',
     'Vimeo90KSuperResolutionDatasetConverter',
     'LMDBConverter',
+    'ElectricityTimeSeriesForecastingConverter',
     'KaldiSpeechRecognitionDataConverter',
     'KaldiFeatureRegressionConverter',
     'ParametricImageProcessing',
-    'YOLOLabelingConverter'
+    'YOLOLabelingConverter',
+    'LabelMeDetectionConverter',
+    'LabelMeSegmentationConverter'
 ]

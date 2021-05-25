@@ -47,5 +47,10 @@ Expected color order is `BGR`.
    bounding boxes. The value of each label is equal to predicted class ID
    (0 - vehicle, 1 - person, 2 - non-vehicle).
 
+## Training Pipeline
+
+The OpenVINO [Training Extensions](https://github.com/openvinotoolkit/training_extensions/blob/develop/README.md) provide a [training pipeline](https://github.com/openvinotoolkit/training_extensions/blob/develop/models/object_detection/model_templates/person-vehicle-bike-detection/readme.md), allowing to fine-tune the model on custom dataset.
+
 ## Legal Information
+
 [*] Other names and brands may be claimed as the property of others.

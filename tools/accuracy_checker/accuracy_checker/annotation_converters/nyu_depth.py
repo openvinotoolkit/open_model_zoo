@@ -30,7 +30,7 @@ class NYUDepthV2Converter(BaseFormatConverter):
                 description='path to directory with data in original hdf5 format stored'
             ),
             'allow_convert_data': BoolField(
-                optional=True, default=True, description="Allows to convert data from hdf5 format"
+                optional=True, default=False, description="Allows to convert data from hdf5 format"
             )
         })
         return parameters

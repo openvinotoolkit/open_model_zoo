@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import argparse
+import collections
 import os
 import string
 import sys
@@ -23,6 +24,8 @@ from open_model_zoo.model_tools import (
     _configuration, _common, _concurrency, _reporting,
 )
 
+ModelOptimizerProperties = collections.namedtuple('ModelOptimizerProperties',
+    ['cmd_prefix', 'extra_args', 'base_dir'])
 
 def run_pre_convert(reporter, model, output_dir, args):
     script = _common.MODEL_ROOT / model.subdirectory / 'pre-convert.py'
@@ -62,6 +65,65 @@ def convert_to_onnx(reporter, model, output_dir, args, template_variables):
     reporter.print()
 
     return success
+
+def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
+    if model.mo_args is None:
+        reporter.print_section_heading('Skipping {} (no conversions defined)', model.name)
+        reporter.print()
+        return True
+
+    model_precisions = requested_precisions & model.precisions
+    if not model_precisions:
+        reporter.print_section_heading('Skipping {} (all conversions skipped)', model.name)
+        reporter.print()
+        return True
+
+    (output_dir / model.subdirectory).mkdir(parents=True, exist_ok=True)
+
+    if not run_pre_convert(reporter, model, output_dir, args):
+        return False
+
+    model_format = model.framework
+
+    template_variables = {
+        'config_dir': _common.MODEL_ROOT / model.subdirectory,
+        'conv_dir': output_dir / model.subdirectory,
+        'dl_dir': args.download_dir / model.subdirectory,
+        'mo_dir': mo_props.base_dir,
+    }
+
+    if model.conversion_to_onnx_args:
+        if not convert_to_onnx(reporter, model, output_dir, args, template_variables):
+            return False
+        model_format = 'onnx'
+
+    expanded_mo_args = [
+        string.Template(arg).substitute(template_variables)
+        for arg in model.mo_args]
+
+    for model_precision in sorted(model_precisions):
+        data_type = model_precision.split('-')[0]
+        mo_cmd = [*mo_props.cmd_prefix,
+            '--framework={}'.format(model_format),
+            '--data_type={}'.format(data_type),
+            '--output_dir={}'.format(output_dir / model.subdirectory / model_precision),
+            '--model_name={}'.format(model.name),
+            *expanded_mo_args, *mo_props.extra_args]
+
+        reporter.print_section_heading('{}Converting {} to IR ({})',
+            '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
+
+        reporter.print('Conversion command: {}', _common.command_string(mo_cmd))
+
+        if not args.dry_run:
+            reporter.print(flush=True)
+
+            if not reporter.job_context.subprocess(mo_cmd):
+                return False
+
+        reporter.print()
+
+    return True
 
 def num_jobs_arg(value_str):
     if value_str == 'auto':
@@ -107,14 +169,25 @@ def main():
     args = parser.parse_args()
 
     mo_path = args.mo
-    if mo_path is None:
-        try:
-            mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/model_optimizer/mo.py'
-        except KeyError:
-            sys.exit('Unable to locate Model Optimizer. '
-                + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
-    extra_mo_args = args.extra_mo_args or []
+    if mo_path is None:
+        mo_package_path = _common.get_package_path(args.python, 'mo')
+
+        if mo_package_path:
+            # run MO as a module
+            mo_cmd_prefix = [str(args.python), '-m', 'mo']
+            mo_dir = mo_package_path.parent
+        else:
+            try:
+                mo_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/model_optimizer/mo.py'
+            except KeyError:
+                sys.exit('Unable to locate Model Optimizer. '
+                    + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
+
+    if mo_path is not None:
+        # run MO as a script
+        mo_cmd_prefix = [str(args.python), '--', str(mo_path)]
+        mo_dir = mo_path.parent
 
     if args.precisions is None:
         requested_precisions = _common.KNOWN_PRECISIONS
@@ -128,72 +201,20 @@ def main():
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
-    def convert(reporter, model):
-        if model.mo_args is None:
-            reporter.print_section_heading('Skipping {} (no conversions defined)', model.name)
-            reporter.print()
-            return True
-
-        model_precisions = requested_precisions & model.precisions
-        if not model_precisions:
-            reporter.print_section_heading('Skipping {} (all conversions skipped)', model.name)
-            reporter.print()
-            return True
-
-        (output_dir / model.subdirectory).mkdir(parents=True, exist_ok=True)
-
-        if not run_pre_convert(reporter, model, output_dir, args):
-            return False
-
-        model_format = model.framework
-
-        template_variables = {
-            'config_dir': _common.MODEL_ROOT / model.subdirectory,
-            'conv_dir': output_dir / model.subdirectory,
-            'dl_dir': args.download_dir / model.subdirectory,
-            'mo_dir': mo_path.parent,
-        }
-
-        if model.conversion_to_onnx_args:
-            if not convert_to_onnx(reporter, model, output_dir, args, template_variables):
-                return False
-            model_format = 'onnx'
-
-        expanded_mo_args = [
-            string.Template(arg).substitute(template_variables)
-            for arg in model.mo_args]
-
-        for model_precision in sorted(model_precisions):
-            data_type = model_precision.split('-')[0]
-            mo_cmd = [str(args.python), '--', str(mo_path),
-                '--framework={}'.format(model_format),
-                '--data_type={}'.format(data_type),
-                '--output_dir={}'.format(output_dir / model.subdirectory / model_precision),
-                '--model_name={}'.format(model.name),
-                *expanded_mo_args, *extra_mo_args]
-
-            reporter.print_section_heading('{}Converting {} to IR ({})',
-                '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
-
-            reporter.print('Conversion command: {}', _common.command_string(mo_cmd))
-
-            if not args.dry_run:
-                reporter.print(flush=True)
-
-                if not reporter.job_context.subprocess(mo_cmd):
-                    return False
-
-            reporter.print()
-
-        return True
-
     reporter = _reporting.Reporter(_reporting.DirectOutputContext())
+    mo_props = ModelOptimizerProperties(
+        cmd_prefix=mo_cmd_prefix,
+        extra_args=args.extra_mo_args or [],
+        base_dir=mo_dir,
+    )
+    shared_convert_args = (output_dir, args, mo_props, requested_precisions)
 
     if args.jobs == 1 or args.dry_run:
-        results = [convert(reporter, model) for model in models]
+        results = [convert(reporter, model, *shared_convert_args) for model in models]
     else:
         results = _concurrency.run_in_parallel(args.jobs,
-            lambda context, model: convert(_reporting.Reporter(context), model),
+            lambda context, model:
+                convert(_reporting.Reporter(context), model, *shared_convert_args),
             models)
 
     failed_models = [model.name for model, successful in zip(models, results) if not successful]

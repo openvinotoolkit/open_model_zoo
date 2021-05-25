@@ -33,7 +33,7 @@ The demo application takes an input with the help of the `-i` argument. This cou
 * Path to a single image
 * Path to a folder with images
 > In this Case non-interactive mode would be triggered. This means that demo will run the model over the input image(s) and will try to predict the formula. The output would be stored in the console or in the output file (if specified)
-* Integer identifier of the device (e.g. web-camera), typically 0.
+* Integer identifier of the device (e.g. webcam), typically 0.
 * Path to a video (.avi, .mp4, etc)
 > This will trigger interactive mode, which would be explained in detail later.
 
@@ -70,7 +70,7 @@ MacOS:
 
 The example of the interface:
 ![interactive example](./interactive_interface.png)
-When User runs demo application with the `-i` option and passes video or number of the web-camera device as an argument (typically 0), window with the image simillar to above should pop up.
+When User runs demo application with the `-i` option and passes video or number of the webcam device as an argument (typically 0), window with the image simillar to above should pop up.
 
 Example of usage of the interactive mode:
 
@@ -107,7 +107,7 @@ The demo has two preprocessing types: Crop and Pad to target shape and Resize an
 
 ## Preparing to Run
 
-The list of models supported by the demo is in <omz_dir>/demos/formula_recognition_demo/python/models.lst file. This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+The list of models supported by the demo is in `<omz_dir>/demos/formula_recognition_demo/python/models.lst` file. This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 ### Supported Models
 

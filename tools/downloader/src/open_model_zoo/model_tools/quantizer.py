@@ -40,7 +40,7 @@ DEFAULT_POT_CONFIG_BASE = {
     },
 }
 
-def quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
+def quantize(reporter, model, precision, args, output_dir, pot_cmd_prefix, pot_env):
     input_precision = _common.KNOWN_QUANTIZED_PRECISIONS[precision]
 
     pot_config_base_path = _common.MODEL_ROOT / model.subdirectory / 'quantization.yml'
@@ -82,7 +82,7 @@ def quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
     pot_output_dir = model_output_dir / 'pot-output'
     pot_output_dir.mkdir(parents=True, exist_ok=True)
 
-    pot_cmd = [str(args.python), '--', str(pot_path),
+    pot_cmd = [*pot_cmd_prefix,
         '--config={}'.format(pot_config_path),
         '--direct-dump',
         '--output-dir={}'.format(pot_output_dir),
@@ -137,11 +137,19 @@ def main():
 
     pot_path = args.pot
     if pot_path is None:
-        try:
-            pot_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/tools/post_training_optimization_toolkit/main.py'
-        except KeyError:
-            sys.exit('Unable to locate Post-Training Optimization Toolkit. '
-                + 'Use --pot or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
+        if _common.get_package_path(args.python, 'pot'):
+            # run POT as a module
+            pot_cmd_prefix = [str(args.python), '-m', 'pot']
+        else:
+            try:
+                pot_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/tools/post_training_optimization_toolkit/main.py'
+            except KeyError:
+                sys.exit('Unable to locate Post-Training Optimization Toolkit. '
+                    + 'Use --pot or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
+
+    if pot_path is not None:
+        # run POT as a script
+        pot_cmd_prefix = [str(args.python), '--', str(pot_path)]
 
     models = _configuration.load_models_from_args(parser, args)
 
@@ -175,8 +183,15 @@ def main():
         }
 
         for model in models:
-            if not model.quantizable:
+            if not model.quantization_output_precisions:
                 reporter.print_section_heading('Skipping {} (quantization not supported)', model.name)
+                reporter.print()
+                continue
+
+            model_precisions = requested_precisions & model.quantization_output_precisions
+
+            if not model_precisions:
+                reporter.print_section_heading('Skipping {} (all precisions skipped)', model.name)
                 reporter.print()
                 continue
 
@@ -184,8 +199,8 @@ def main():
                 'MODELS_DIR': str(args.model_dir / model.subdirectory)
             })
 
-            for precision in sorted(requested_precisions):
-                if not quantize(reporter, model, precision, args, output_dir, pot_path, pot_env):
+            for precision in sorted(model_precisions):
+                if not quantize(reporter, model, precision, args, output_dir, pot_cmd_prefix, pot_env):
                     failed_models.append(model.name)
                     break
 

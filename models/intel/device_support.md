@@ -96,9 +96,9 @@
 | text-image-super-resolution-0001 | YES | YES | YES |
 | text-recognition-0012 | YES | YES | YES |
 | text-recognition-0013 | YES | YES |    |
-| text-spotting-0004-detector | YES |    |    |
-| text-spotting-0004-recognizer-decoder | YES |    |    |
-| text-spotting-0004-recognizer-encoder | YES |    |    |
+| text-spotting-0005-detector | YES |    |    |
+| text-spotting-0005-recognizer-decoder | YES |    |    |
+| text-spotting-0005-recognizer-encoder | YES |    |    |
 | text-to-speech-en-0001-duration-prediction | YES |    |    |
 | text-to-speech-en-0001-generation | YES |    |    |
 | text-to-speech-en-0001-regression | YES |    |    |

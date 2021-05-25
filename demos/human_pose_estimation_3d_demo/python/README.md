@@ -13,7 +13,7 @@ The demo application expects a 3D human pose estimation model in the Intermediat
 
 As input, the demo application can take:
 
-* a path to a video file or a device node of a web-camera.
+* a path to a video file or a device node of a webcam.
 * a list of image paths.
 
 The demo workflow is the following:
@@ -26,7 +26,7 @@ The demo workflow is the following:
 ## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
-The list of models supported by the demo is in <omz_dir>/demos/human_pose_estimation_3d_demo/python/models.lst file.
+The list of models supported by the demo is in `<omz_dir>/demos/human_pose_estimation_3d_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 ### Supported Models
