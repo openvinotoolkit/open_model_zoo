@@ -10,7 +10,7 @@ The program provides an interactive CLI interface that gets a sentence in the so
 
 ## Preparing to Run
 
-The list of models supported by the demo is in <omz_dir>/demos/machine_translation_demo/python/models.lst file.
+The list of models supported by the demo is in `<omz_dir>/demos/machine_translation_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 ### Supported Models

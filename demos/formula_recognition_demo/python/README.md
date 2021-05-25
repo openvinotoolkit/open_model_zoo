@@ -107,7 +107,7 @@ The demo has two preprocessing types: Crop and Pad to target shape and Resize an
 
 ## Preparing to Run
 
-The list of models supported by the demo is in <omz_dir>/demos/formula_recognition_demo/python/models.lst file. This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+The list of models supported by the demo is in `<omz_dir>/demos/formula_recognition_demo/python/models.lst` file. This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 ### Supported Models
 

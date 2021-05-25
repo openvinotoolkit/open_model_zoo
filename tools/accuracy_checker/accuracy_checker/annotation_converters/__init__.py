@@ -106,6 +106,7 @@ from .lmdb import LMDBConverter
 from .electricity_time_series_forecasting import ElectricityTimeSeriesForecastingConverter
 from .kaldi_speech_recognition_pipeline import KaldiSpeechRecognitionDataConverter, KaldiFeatureRegressionConverter
 from .yolo_labeling_converter import YOLOLabelingConverter
+from .label_me_converter import LabelMeDetectionConverter, LabelMeSegmentationConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -207,5 +208,7 @@ __all__ = [
     'KaldiSpeechRecognitionDataConverter',
     'KaldiFeatureRegressionConverter',
     'ParametricImageProcessing',
-    'YOLOLabelingConverter'
+    'YOLOLabelingConverter',
+    'LabelMeDetectionConverter',
+    'LabelMeSegmentationConverter'
 ]

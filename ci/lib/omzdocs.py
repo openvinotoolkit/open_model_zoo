@@ -59,6 +59,11 @@ class DocumentationPage:
             elif node['type'] == 'link':
                 yield ExternalReference('link', node['link'])
 
+    def code_spans(self):
+        for node in _get_all_ast_nodes(self._ast):
+            if node['type'] == 'codespan':
+                yield node['text']
+
     def html_fragments(self):
         for node in _get_all_ast_nodes(self._ast):
             if node['type'] == 'inline_html':

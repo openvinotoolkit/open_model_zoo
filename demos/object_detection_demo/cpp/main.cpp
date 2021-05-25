@@ -66,6 +66,9 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 static const char iou_thresh_output_message[] = "Optional. Filtering intersection over union threshold for overlapping boxes.";
 static const char yolo_af_message[] = "Optional. Use advanced postprocessing/filtering algorithm for YOLO.";
 static const char yolo_regions_message[] = "Optional. YML file with YOLO regions for compiled networks.";
+static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
+    "in (width x height) format. Example: 1280x720. Input frame size used by default.";
+
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
@@ -86,6 +89,7 @@ DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_bool(yolo_af, true, yolo_af_message);
 DEFINE_string(yolo_regions, "", yolo_regions_message);
+DEFINE_string(output_resolution, "", output_resolution_message);
 
 /**
 * \brief This function shows a help message
