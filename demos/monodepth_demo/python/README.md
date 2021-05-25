@@ -3,7 +3,7 @@
 This topic demonstrates how to run the MonoDepth demo application, which produces a disparity map for a given input image.
 To this end, the code uses the network described in [Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-dataset Transfer](https://arxiv.org/abs/1907.01341).
 
-Below is the `midasnet` model inference result for <openvino_install_dir>/deployment_tools\demo\car_1.bmp sample image
+Below is the `midasnet` model inference result for `<openvino_dir>/deployment_tools/demo/car_1.bmp` sample image
 
 ![example](./disp.png)
 

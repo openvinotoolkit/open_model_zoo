@@ -107,7 +107,7 @@ Options:
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-**For example**, to run the demo for in-cabin driver monitoring scenario, please provide a path to the encoder and decoder models, an input video and a file with label names, located at demo folder, <omz_dir>/demos/action_recognition_demo/python/driver_actions.txt:
+**For example**, to run the demo for in-cabin driver monitoring scenario, please provide a path to the encoder and decoder models, an input video and a file with label names, located at demo folder, `<omz_dir>/demos/action_recognition_demo/python/driver_actions.txt`:
 
 ```sh
 python3 action_recognition_demo.py \
