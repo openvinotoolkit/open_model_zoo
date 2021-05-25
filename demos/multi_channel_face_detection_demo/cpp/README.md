@@ -39,7 +39,7 @@ Options:
     -h                           Print a usage message
     -i                           Required. A comma separated list of inputs to process. Each input must be a single image, a folder of images or anything that cv::VideoCapture can process.
     -loop                        Optional. Enable reading the inputs in a loop.
-    -duplicate_num               Optional. Multiply the inputs by the given factor. For example, if only one input is provided, but -ni is set to 2, the demo uses half of images from the input as it was the first input and another half goes as the second input.
+    -duplicate_num               Optional. Multiply the inputs by the given factor. For example, if only one input is provided, but -duplicate_num is set to 2, the demo will split real input across channels, by interleaving frames between channels.
     -m "<path>"                  Required. Path to an .xml file with a trained model.
       -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations
           Or
@@ -58,32 +58,31 @@ Options:
     -u                           Optional. List of monitors to show initially.
 ```
 
+Running the application with an empty list of options yields the usage message given above and an error message.
+
 For example, to run the demo with the pre-trained face detection model on CPU, with one single camera, use the following command:
 
 ```sh
-./multi_channel_face_detection_demo -m <path_to_model>/face-detection-retail-0004.xml -d CPU -nc 1
+./multi_channel_face_detection_demo -m <path_to_model>/face-detection-retail-0004.xml -d CPU -i 0
 ```
 
 To run the demo using two recorded video files, use the following command:
 
 ```sh
-./multi_channel_face_detection_demo -m <path_to_model>/face-detection-retail-0004.xml -d CPU -i <path_to_file>/file1 <path_to_file>/file2
+./multi_channel_face_detection_demo -m <path_to_model>/face-detection-retail-0004.xml -d CPU -i <path_to_file>/file1,<path_to_file>/file2
 ```
 
-Video files will be processed repeatedly.
+Video files will be processed simultaneously.
 
 ### Input Video Sources
 
-You can also run the demo on web cameras and video files simultaneously by specifying both parameters: `-nc <number_of_cams> -i <video_file1> <video_file2>` with paths to video files separated by a space.
-To run the demo with a single input source (a web camera or a video file), but several channels, specify an additional parameter: `-duplicate_num 3`. You will see four channels: one real and three duplicated. With several input sources, the `-duplicate_num` parameter will duplicate each of them.
+General parameter for input source is `-i`. You can run the demo on web cameras and video files simultaneously by specifying: `-i <webcam_id0>,<webcam_id1>,<video_file1>,<video_file2>` with paths to webcams and video files separated by a comma. To run the demo with a single input source (a web camera or a video file), but several channels, specify an additional parameter, `duplicate_num`, for example: `-duplicate_num 4`. You will see four channels. With several input sources, the `-duplicate_num` parameter will duplicate each of them.
 
-General parameter for input video source is `-i`. Use it to specify video files or web cameras as input video sources. You can add the parameter to a sample command line as follows:
+Below are some examples of demo input specification:
 
 ```sh
--i <file1> <file2>
+-i <file1>,<file2>
 ```
-
-`-nc <nc_value>` parameter simplifies usage of multiple web cameras. It connects web cameras with indexes from `0` to `nc_value-1`.
 
 To see all available web cameras, run the `ls /dev/video*` command. You will get output similar to the following:
 
@@ -95,17 +94,13 @@ user@user-PC:~ $ ls /dev/video*
 You can use `-i` option to connect all the three web cameras:
 
 ```sh
--i /dev/video0  /dev/video1  /dev/video2
+-i 0,1,2
 ```
-
-Alternatively, you can just set `-nc 3`, which simplifies application usage.
-
-If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use the `-i` parameter.
 
 To connect to IP cameras, use RTSP URIs:
 
 ```sh
--i rtsp://camera_address_1/ rtsp://camera_address_2/
+-i rtsp://camera_address_1/,rtsp://camera_address_2/
 ```
 
 ## Demo Output
