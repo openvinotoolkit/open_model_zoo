@@ -124,7 +124,7 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
 
 void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
     // ---------------------------------------------------------------------------------------------------
-    // --------------------------- 0. checking paths -----------------------------------------------------
+    // --------------------------- Checking paths --------------------------------------------------------
     std::string model_path_decoder = model_path;
     while (model_path_decoder.find("encoder") != std::string::npos)
         model_path_decoder = model_path_decoder.replace(model_path_decoder.find("encoder"), 7, "decoder");
@@ -258,7 +258,7 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
 
         auto max_elem_vector = std::max_element(output_data_decoder, output_data_decoder + num_classes);
         auto argmax = std::distance(output_data_decoder, max_elem_vector);
-        for (size_t i = 0; i < num_classes; i+= 1)
+        for (size_t i = 0; i < num_classes; i++)
             data_targets[num_decoder * num_classes + i] = output_data_decoder[i];
         input_data_decoder[0] = float(argmax);
 

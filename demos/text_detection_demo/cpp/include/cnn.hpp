@@ -50,16 +50,16 @@ class EncoderDecoderCNN : public Cnn {
   public:
 
     void Init(const std::string &model_path, Core & ie, const std::string & deviceName,
-              const cv::Size &new_input_resolution = cv::Size());
+              const cv::Size &new_input_resolution = cv::Size()) override;
 
-    InferenceEngine::BlobMap Infer(const cv::Mat &frame);
+    InferenceEngine::BlobMap Infer(const cv::Mat &frame) override;
     void setInOutNames(const std::string out_enc_hidden_name,
                       const std::string out_dec_hidden_name,
                       const std::string in_dec_hidden_name,
                       const std::string features_name,
                       const std::string in_dec_symbol_name,
                       const std::string out_dec_symbol_name,
-                      const std::string logits_name);
+                      const std::string logits_name) override;
   private:
     InferRequest infer_request_encoder_;
     InferRequest infer_request_decoder_;
@@ -73,7 +73,6 @@ class EncoderDecoderCNN : public Cnn {
     std::string in_dec_symbol_name_;
     std::string out_dec_symbol_name_;
     std::string logits_name_;
-    InputInfo::Ptr input_info_decoder_input;
 };
 
 class CnnFactory {
