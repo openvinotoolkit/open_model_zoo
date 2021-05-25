@@ -10,7 +10,9 @@
 
 #include <utils/common.hpp>
 
-constexpr size_t MAX_NUM_DECODER=20;
+namespace {
+constexpr size_t MAX_NUM_DECODER = 20;
+}
 
 void Cnn::Init(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
     // ---------------------------------------------------------------------------------------------------
@@ -252,9 +254,9 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
         for (const auto &output_name : output_names_decoder) {
             decoder_blobs[output_name] = infer_request_decoder_.GetBlob(output_name);
         }
-        InferenceEngine::LockedMemory<void> output_decoder =
-                     InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(out_dec_symbol_name_))->wmap();
-        float* output_data_decoder = output_decoder.as<float *>();
+        InferenceEngine::LockedMemory<const void> output_decoder =
+                     InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(out_dec_symbol_name_))->rmap();
+        const float * output_data_decoder = output_decoder.as<const float *>();
 
         auto max_elem_vector = std::max_element(output_data_decoder, output_data_decoder + num_classes);
         auto argmax = std::distance(output_data_decoder, max_elem_vector);
@@ -262,12 +264,11 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
             data_targets[num_decoder * num_classes + i] = output_data_decoder[i];
         input_data_decoder[0] = float(argmax);
 
-        infer_request_decoder_.SetBlob(in_dec_hidden_name_, decoder_blobs[out_enc_hidden_name_]);
+        infer_request_decoder_.SetBlob(in_dec_hidden_name_, infer_request_decoder_.GetBlob(out_enc_hidden_name_));
     }
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     time_elapsed_ += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
     ncalls_++;
-    decoder_blobs[logits_name_] = targets;
-    return decoder_blobs;
+    return {{logits_name_, targets}};
 }
