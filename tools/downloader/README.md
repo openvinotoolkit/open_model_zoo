@@ -13,7 +13,7 @@ based on configuration files in the models' directories.
 * `quantizer.py` (model quantizer) quantizes full-precision models in the IR
   format into low-precision versions using Post-Training Optimization Toolkit.
 
-* `compiler.py` compile models in the IR format into executable network blobs.
+* `compiler.py` (model compiler) compiles models in the IR format into executable network blobs.
 
 * `info_dumper.py` (model information dumper) prints information about the models
   in a stable machine-readable format.
@@ -408,7 +408,8 @@ Toolkit will still be created, so that you can inspect it.
 See the "Shared options" section for information on other options accepted by
 the script.
 
-## Networks compiler usage
+## Model Compiler usage
+
 The basic usage is to run the script like this:
 
 ```sh
@@ -448,7 +449,7 @@ the environment variables set by the OpenVINO&trade; toolkit's `setupvars.sh`/`s
 script. You can override this heuristic with the `--compiler` option:
 
 ```sh
-./compiler.py --all --compiler my/openvino/path/compile_tool/compile_tool_executable
+./compiler.py --all --compiler my/openvino/path/compile_tool/compile_tool
 ```
 
 It's possible to specify a target device for Compile Tool
@@ -458,8 +459,8 @@ to compile for, by using the `--target_device` option:
 ./compiler.py --all --target_device MYRIAD
 ```
 
-The supported values are those accepted by the "target_device" option in
-Compile Tool documentation. If this option is unspecified, default is `MYRIAD`.
+The supported values are those accepted by the `-d` option in
+Compile Tool documentation. If this option is unspecified, the default is `MYRIAD`.
 
 The script can print the compile commands without actually running them.
 To do this, use the `--dry_run` option:
