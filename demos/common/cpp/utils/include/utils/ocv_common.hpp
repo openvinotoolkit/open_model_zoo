@@ -113,7 +113,7 @@ inline void putHighlightedText(cv::Mat& frame,
 
 class OutputTransform {
     public:
-        OutputTransform() : doResize(false) {}
+        OutputTransform() : doResize(false), scaleFactor(1) {}
 
         OutputTransform(cv::Size inputSize, cv::Size outputResolution) :
             doResize(true), inputSize(inputSize), outputResolution(outputResolution) {}

@@ -51,7 +51,7 @@ numba==0.53.1
     # via
     #   librosa
     #   resampy
-numpy==1.19.5 ; python_version >= "3.4"
+numpy==1.19.5
     # via
     #   -r ${INTEL_OPENVINO_DIR}/python/requirements.txt
     #   -r demos/requirements.txt

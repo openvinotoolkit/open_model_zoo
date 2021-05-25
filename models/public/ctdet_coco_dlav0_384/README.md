@@ -49,7 +49,7 @@ Expected color order: `BGR`.
 
 ## Output
 
-1. Object center points heatmap, name: `center_heatmap`. Contains predicted objects center point, for each of the 80 categories, according to [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of objects, without background label, mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_00cl.txt` file.
+1. Object center points heatmap, name: `center_heatmap`. Contains predicted objects center point, for each of the 80 categories, according to [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of objects, without background label, mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 2. Object size output, name: `width_height`. Contains predicted width and height for each object.
 3. Regression output, name: `regression`. Contains offsets for each prediction.
 
