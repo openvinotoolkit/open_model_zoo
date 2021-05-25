@@ -43,7 +43,7 @@ void ModelBase::prepareBlobs(const IOPattern& modelIOPattern, const InferenceEng
     auto outputsNum = outputInfo.size();
     const auto& outputBlobPattern = modelIOPattern.second[1].patterns.find(outputsNum)->second;
     for (const auto& blobName : outputsNames) {
-        auto& blobPatternIt = outputBlobPattern.find(blobName);
+        auto blobPatternIt = outputBlobPattern.find(blobName);
         if (blobPatternIt == outputBlobPattern.end()) {
             blobPatternIt = outputBlobPattern.begin();
         }
