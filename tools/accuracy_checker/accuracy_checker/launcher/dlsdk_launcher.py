@@ -184,8 +184,8 @@ class DLSDKLauncher(Launcher):
         field_uri = uri_prefix or 'launcher.{}'.format(cls.__provider__)
         return DLSDKLauncherConfigValidator(
             field_uri, fields=cls.parameters(), delayed_model_loading=delayed_model_loading).validate(
-            config, field_uri=field_uri, validation_scheme=cls.validation_scheme(), fetch_only=fetch_only
-        )
+                config, field_uri=field_uri, validation_scheme=cls.validation_scheme(), fetch_only=fetch_only
+            )
 
     @property
     def device(self):
