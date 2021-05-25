@@ -76,4 +76,3 @@ class EncoderDecoderCNN : public Cnn {
                                                std::vector<std::string> input_names_decoder,
                                                std::vector<std::string> output_names_decoder);
 };
-
