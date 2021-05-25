@@ -1,9 +1,6 @@
 # Image Translation Demo
 
-This demo application demonstrates an example of using neural networks to synthesize a photo-realistic image based on exemplar image. You can use the following models with the demo:
-
-* `cocosnet`
-* `hrnet-v2-c1-segmentation`
+This demo application demonstrates an example of using neural networks to synthesize a photo-realistic image based on an exemplar image.
 
 ## How It Works
 
@@ -14,15 +11,22 @@ At the start-up the demo application reads command line parameters and loads a n
 3. Network inference (segmentation network (optional) + translation network).
 4. Save results to folder.
 
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in `<omz_dir>/demos/image_translation_demo/python/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* cocosnet
+* hrnet-v2-c1-segmentation
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-
-```
-python3 cocosnet_demo.py -h
-```
-
-The command yields the following usage message:
 
 ```
 usage: image_translation_demo.py [-h] -m_trn TRANSLATION_MODEL
@@ -58,24 +62,18 @@ Options:
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. Default
                         value is CPU
-
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 There are two ways to use this demo:
 
-1. Run with segmentation model in addition to translation model. You should use only models trained on ADE20k dataset.     Example: [hrnet-v2-c1-segmentation](../../../models/public/hrnet-v2-c1-segmentation/hrnet-v2-c1-segmentation.md).
-   In this case only input and reference images are required without any masks.
-   Segmentation masks will be generated via segmentation model.
+1. Run with segmentation model in addition to translation model. You should use only models trained on ADE20k dataset. Example: [hrnet-v2-c1-segmentation](../../../models/public/hrnet-v2-c1-segmentation/README.md).
+   In this case only input and reference images are required without any masks. Segmentation masks will be generated via segmentation model.
 
    You can use the following command to run demo on CPU using cocosnet and hrnet-v2-c1-segmentation models:
 
-   ```
+   ```sh
    python3 image_translation_demo.py \
        -d CPU \
        -m_trn <path_to_translation_model>/cocosnet.xml \
@@ -87,7 +85,7 @@ There are two ways to use this demo:
 2. Run with only translation model.
    You can use the following command to run demo on CPU using cocosnet as translation model:
 
-   ```
+   ```sh
    python3 image_translation_demo.py \
        -d CPU \
        -m_trn <path_to_translation_model>/cocosnet.xml \
@@ -104,6 +102,6 @@ The results of the demo processing are saved to a folder that is specified by th
 
 ## See Also
 
-* [Using Open Model Zoo demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

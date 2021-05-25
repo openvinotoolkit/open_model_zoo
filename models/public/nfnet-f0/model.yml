@@ -22,8 +22,8 @@ description: >-
   how many bottleneck blocks to allocate to each stage). Each subsequent variant has
   this depth pattern multiplied by N (where N = 1 for F0).
 
-  The model input is a blob that consists of a single image of "1x3x256x256" in RGB
-  order.
+  The model input is a blob that consists of a single image of "1, 3, 256, 256" in
+  "RGB" order.
 
   The model output is typical object classifier for the 1000 different classifications
   matching with those in the ImageNet database.
@@ -63,4 +63,5 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=probs
 framework: pytorch
+quantizable: yes
 license: https://raw.githubusercontent.com/rwightman/pytorch-image-models/master/LICENSE

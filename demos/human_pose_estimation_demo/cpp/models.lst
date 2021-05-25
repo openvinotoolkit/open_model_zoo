@@ -5,3 +5,5 @@ human-pose-estimation-0001
 human-pose-estimation-0005
 human-pose-estimation-0006
 human-pose-estimation-0007
+# For --architecture_type=higherhrnet
+higher-hrnet-w32-human-pose-estimation

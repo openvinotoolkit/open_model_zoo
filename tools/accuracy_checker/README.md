@@ -2,6 +2,13 @@
 
 ## Installation
 
+> **TIP**: You also can work with the Accuracy Checker inside the OpenVINO™ [Deep Learning Workbench](@ref workbench_docs_Workbench_DG_Introduction) (DL Workbench).
+> [DL Workbench](@ref workbench_docs_Workbench_DG_Introduction) is a platform built upon OpenVINO™ and provides a web-based graphical environment that enables you to optimize, fine-tune, analyze, visualize, and compare
+> performance of deep learning models on various Intel® architecture
+> configurations. In the DL Workbench, you can use most of OpenVINO™ toolkit components.
+> <br>
+> Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Install_from_Docker_Hub) to get started.
+
 ### Prerequisites
 
 Install prerequisites first:
@@ -44,7 +51,7 @@ The next step is installing backend frameworks for Accuracy Checker.
 In order to evaluate some models required frameworks have to be installed. Accuracy-Checker supports these frameworks:
 
 - [OpenVINO](https://software.intel.com/en-us/openvino-toolkit/documentation/get-started).
-- [Caffe](accuracy_checker/launcher/caffe_installation_readme.md).
+- [Caffe](https://caffe.berkeleyvision.org/installation.html).
 - [MXNet](https://mxnet.apache.org/).
 - [OpenCV DNN](https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html).
 - [TensorFlow](https://www.tensorflow.org/).
@@ -190,7 +197,7 @@ If your dataset data is a well-known competition problem (COCO, Pascal VOC, and 
 it is reasonable to declare it in some global configuration file ([definition file](dataset_definitions.yml)). This way in your local configuration file you can provide only
 `name` and all required steps will be picked from global one. To pass path to this global configuration use `--definition` argument of CLI.
 
-If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about dataset preparation you can find in [Dataset Preparation Guide](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md).
+If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about dataset preparation you can find in [Dataset Preparation Guide](../../data/datasets.md).
 
 Each dataset must have:
 

@@ -28,7 +28,8 @@ from .text_recognition import (
     BeamSearchDecoder,
     CTCGreedySearchDecoder,
     LPRAdapter,
-    AttentionOCRAdapter
+    AttentionOCRAdapter,
+    SimpleDecoder,
 )
 
 from .image_processing import (
@@ -74,6 +75,7 @@ from .segmentation import (
 from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
 from .pose_estimation_openpose import OpenPoseAdapter
 from .pose_estimation_associative_embedding import AssociativeEmbeddingAdapter
+from .pose_estimation_hrnet import HumanPoseHRNetAdapter
 
 from .pose_estimation_3d import HumanPose3dAdapter
 
@@ -102,14 +104,17 @@ from .audio_recognition import (
     CTCBeamSearchDecoderWithLm,
     FastCTCBeamSearchDecoderWithLm
 )
-
+from .kaldi_asr_decoder import KaldiLatGenDecoder
 from .regression import RegressionAdapter, MultiOutputRegression
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
 from .dna_seq_recognition import DNASeqRecognition
 from .optical_flow import PWCNetAdapter
 from .salient_objects_detection import SalientObjectDetection
+from .noise_suppression import NoiseSuppressionAdapter
 from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
+
+from .time_series import QuantilesPredictorAdapter
 
 __all__ = [
     'Adapter',
@@ -186,10 +191,12 @@ __all__ = [
     'LPRAdapter',
     'CTCGreedySearchDecoder',
     'AttentionOCRAdapter',
+    'SimpleDecoder',
 
     'AssociativeEmbeddingAdapter',
     'HumanPoseAdapter',
     'HumanPose3dAdapter',
+    'HumanPoseHRNetAdapter',
     'OpenPoseAdapter',
     'SingleHumanPoseAdapter',
     'StackedHourGlassNetworkAdapter',
@@ -223,6 +230,7 @@ __all__ = [
     'CTCGreedyDecoder',
     'CTCBeamSearchDecoderWithLm',
     'FastCTCBeamSearchDecoderWithLm',
+    'KaldiLatGenDecoder',
 
     'QualityAssessmentAdapter',
 
@@ -230,7 +238,10 @@ __all__ = [
 
     'PWCNetAdapter',
 
+    'NoiseSuppressionAdapter',
+
     'GVADetectionAdapter',
     'GVAClassificationAdapter',
 
+    'QuantilesPredictorAdapter'
 ]

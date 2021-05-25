@@ -1,6 +1,6 @@
 # Human Pose Estimation Python\* Demo
 
-![](../human_pose_estimation.gif)
+![example](../human_pose_estimation.gif)
 
 This demo showcases the work of multi-person 2D pose estimation algorithms. The task is to predict a pose: body skeleton, which consists of a predefined set of keypoints and connections between them, for every person in an input image/video.
 
@@ -15,24 +15,45 @@ model using the Model Optimizer tool with `--reverse_input_channels` argument sp
 the argument, refer to **When to Reverse Input Channels** section of
 [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in `<omz_dir>/demos/human_pose_estimation_demo/python/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* architecture_type=openpose
+  * human-pose-estimation-0001
+* architecture_type=ae
+  * human-pose-estimation-0005
+  * human-pose-estimation-0006
+  * human-pose-estimation-0007
+* architecture_type=higherhrnet
+  * higher-hrnet-w32-human-pose-estimation
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
-usage: human_pose_estimation_demo.py [-h] -m MODEL -at {ae,openpose} -i INPUT
-                                     [--loop] [-o OUTPUT]
+usage: human_pose_estimation_demo.py [-h] -m MODEL -at {ae,hrnet,openpose} -i
+                                     INPUT [--loop] [-o OUTPUT]
                                      [-limit OUTPUT_LIMIT] [-d DEVICE]
                                      [-t PROB_THRESHOLD] [--tsize TSIZE]
                                      [-nireq NUM_INFER_REQUESTS]
                                      [-nstreams NUM_STREAMS]
                                      [-nthreads NUM_THREADS] [-no_show]
+                                     [--output_resolution OUTPUT_RESOLUTION]
                                      [-u UTILIZATION_MONITORS] [-r]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -at {ae,openpose}, --architecture_type {ae,openpose}
+  -at {ae,higherhrnet,openpose}, --architecture_type {ae,higherhrnet,openpose}
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
@@ -80,6 +101,10 @@ Inference options:
 
 Input/output options:
   -no_show, --no_show   Optional. Don't show output.
+  --output_resolution OUTPUT_RESOLUTION
+                        Optional. Specify the maximum output window resolution
+                        in (width x height) format. Example: 1280x720.
+                        Input frame used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 
@@ -89,28 +114,24 @@ Debug options:
 ```
 
 Running the application with the empty list of options yields the short usage message and an error message.
+
 You can use the following command to do inference on CPU with a pre-trained human pose estimation model:
-```
+
+```sh
 python3 human_pose_estimation.py -i 0 -m human-pose-estimation-0002.xml -at ae -d CPU
 ```
-
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO
-[Model Downloader](../../../tools/downloader/README.md) or from
-[https://download.01.org/opencv/](https://download.01.org/opencv/).
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine
-format (\*.xml + \*.bin) using the
-[Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with estimated poses.
 The demo reports
+
 * **FPS**: average rate of video frame processing (frames per second)
 * **Latency**: average time required to process one frame (from reading the frame to displaying the results)
 You can use both of these metrics to measure application-level performance.
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

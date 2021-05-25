@@ -14,12 +14,6 @@
 // limitations under the License.
 */
 
-/**
-* \brief The entry point for the Inference Engine object_detection_demo demo application
-* \file object_detection_demo/cpp/main.cpp
-* \example object_detection_demo/cpp/main.cpp
-*/
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -120,6 +114,7 @@ static void showUsage() {
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
     std::cout << "    -loop                     " << loop_message << std::endl;
     std::cout << "    -no_show                  " << no_show_message << std::endl;
+    std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
     std::cout << "    -yolo_af                  " << yolo_af_message << std::endl;
 }
@@ -213,11 +208,14 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -at is not set");
     }
 
+    if (!FLAGS_output_resolution.empty() && FLAGS_output_resolution.find("x") == std::string::npos) {
+        throw std::logic_error("Correct format of -output_resolution parameter is \"width\"x\"height\".");
+    }
     return true;
 }
 
 // Input image is stored inside metadata, as we put it there during submission stage
-cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& palette) {
+cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette, OutputTransform& outputTransform) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -227,13 +225,13 @@ cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& p
     if (outputImg.empty()) {
         throw std::invalid_argument("Renderer: image provided in metadata is empty");
     }
-
+    outputTransform.resize(outputImg);
     // Visualizing result data over source image
     if (FLAGS_r) {
         slog::info << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
     }
 
-    for (const auto& obj : result.objects) {
+    for (auto& obj : result.objects) {
         if (FLAGS_r) {
             slog::info << " "
                 << std::left << std::setw(9) << obj.label << " | "
@@ -244,7 +242,7 @@ cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& p
                 << std::setw(4) << std::min(int(obj.y + obj.height), outputImg.rows)
                 << slog::endl;
         }
-
+        outputTransform.scaleRect(obj);
         std::ostringstream conf;
         conf << ":" << std::fixed << std::setprecision(1) << obj.confidence * 100 << '%';
         auto color = palette[obj.labelID];
@@ -256,7 +254,8 @@ cv::Mat renderDetectionData(const DetectionResult& result, const ColorPalette& p
     }
 
     try {
-        for (const auto& lmark : result.asRef<RetinaFaceDetectionResult>().landmarks) {
+        for (auto& lmark : result.asRef<RetinaFaceDetectionResult>().landmarks) {
+            outputTransform.scaleCoord(lmark);
             cv::circle(outputImg, lmark, 2, cv::Scalar(0, 255, 255), -1);
         }
     }
@@ -323,6 +322,10 @@ int main(int argc, char *argv[]) {
 
         cv::VideoWriter videoWriter;
 
+        cv::Size outputResolution;
+        OutputTransform outputTransform = OutputTransform();
+        size_t found = FLAGS_output_resolution.find("x");
+
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
                 auto startTime = std::chrono::steady_clock::now();
@@ -344,10 +347,24 @@ int main(int argc, char *argv[]) {
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 
+            if (frameNum == 0) {
+                if (found == std::string::npos) {
+                    outputResolution = curr_frame.size();
+                }
+                else {
+                    outputResolution = cv::Size{
+                        std::stoi(FLAGS_output_resolution.substr(0, found)),
+                        std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
+                    };
+                    outputTransform = OutputTransform(curr_frame.size(), outputResolution);
+                    outputResolution = outputTransform.computeResolution();
+                }
+            }
+
             // Preparing video writer if needed
             if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
                 if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                    cap->fps(), curr_frame.size())) {
+                    cap->fps(), outputResolution)) {
                     throw std::runtime_error("Can't open video writer");
                 }
             }
@@ -359,7 +376,7 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to DetectionResult*
             //    and use your own processing instead of calling renderDetectionData().
             while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
+                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -367,6 +384,7 @@ int main(int argc, char *argv[]) {
                 if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
                     videoWriter.write(outFrame);
                 }
+                framesProcessed++;
                 if (!FLAGS_no_show) {
                     cv::imshow("Detection Results", outFrame);
                     //--- Processing keyboard events
@@ -378,14 +396,14 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
-                framesProcessed++;
             }
         }
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
-        while (result = pipeline.getResult()) {
-            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette);
+        for (; framesProcessed <= frameNum; framesProcessed++) {
+            while (!(result = pipeline.getResult())) {}
+            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -398,7 +416,6 @@ int main(int argc, char *argv[]) {
                 //--- Updating output window
                 cv::waitKey(1);
             }
-            framesProcessed++;
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------

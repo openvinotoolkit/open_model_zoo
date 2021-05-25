@@ -1,0 +1,53 @@
+evaluations:
+  - name: text-spotting-0005
+    module: custom_evaluators.text_spotting_evaluator.TextSpottingEvaluator
+    module_config:
+      network_info:
+        detector: {}
+
+        recognizer_encoder: {}
+
+        recognizer_decoder: {}
+
+        recognizer_decoder_inputs:
+          prev_symbol: prev_symbol
+          prev_hidden: prev_hidden
+          encoder_outputs: encoder_outputs
+
+        recognizer_decoder_outputs:
+          symbols_distribution: output
+          cur_hidden: hidden
+
+        max_seq_len: '28'
+        recognizer_confidence_threshold: '0.45'
+
+        alphabet: __abcdefghijklmnopqrstuvwxyz0123456789
+        sos_index: '0'
+        eos_index: '1'
+
+        adapter:
+          type: mask_rcnn_with_text
+          classes_out: labels
+          boxes_out: boxes
+          raw_masks_out: masks
+          texts_out: texts
+          confidence_threshold: 0.65
+
+      launchers:
+        - framework: dlsdk
+
+      datasets:
+        - name: ICDAR2015_word_spotting
+
+          preprocessing:
+            - type: resize
+              dst_width: 1280
+              dst_height: 768
+          postprocessing:
+            - type: cast_to_int
+              round_policy: nearest_to_zero
+          metrics:
+            - type: incidental_text_hmean
+              name: f-measure
+              ignore_difficult: True
+              word_spotting: True

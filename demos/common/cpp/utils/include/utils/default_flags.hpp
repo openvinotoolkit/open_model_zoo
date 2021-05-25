@@ -12,10 +12,13 @@ DEFINE_bool(loop, false, loop_message);
 
 #define DEFINE_OUTPUT_FLAGS \
 DEFINE_string(o, "", output_message); \
-DEFINE_uint32(limit, 1000, limit_message);
+DEFINE_uint32(limit, 1000, limit_message); \
+DEFINE_string(output_resolution, "", output_resolution_message);
 
 static const char input_message[] = "Required. An input to process. The input must be a single image, a folder of "
     "images, video file or camera id.";
 static const char loop_message[] = "Optional. Enable reading the input in a loop.";
 static const char output_message[] = "Optional. Name of output to save.";
 static const char limit_message[] = "Optional. Number of frames to store in output. If 0 is set, all frames are stored.";
+static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
+    "in (width x height) format. Example: 1280x720. Input frame size used by default.";

@@ -45,7 +45,7 @@ from .segmentation_representation import (
     BrainTumorSegmentationAnnotation,
     BrainTumorSegmentationPrediction,
     CoCoInstanceSegmentationAnnotation,
-    CoCocInstanceSegmentationPrediction,
+    CoCoInstanceSegmentationPrediction,
     OAR3DTilingSegmentationAnnotation,
     SalientRegionAnnotation,
     SalientRegionPrediction,
@@ -101,6 +101,13 @@ from .raw_representation import RawTensorAnnotation, RawTensorPrediction
 
 from .optical_flow import OpticalFlowAnnotation, OpticalFlowPrediction
 
+from .noise_suppression import NoiseSuppressionAnnotation, NoiseSuppressionPrediction
+
+from .time_series_representation import (
+    TimeSeriesForecastingAnnotation,
+    TimeSeriesForecastingQuantilesPrediction
+)
+
 __all__ = [
     'BaseRepresentation',
 
@@ -140,7 +147,7 @@ __all__ = [
     'OAR3DTilingSegmentationAnnotation',
 
     'CoCoInstanceSegmentationAnnotation',
-    'CoCocInstanceSegmentationPrediction',
+    'CoCoInstanceSegmentationPrediction',
 
     'CharacterRecognition',
     'CharacterRecognitionAnnotation',
@@ -212,4 +219,10 @@ __all__ = [
     'OpticalFlowPrediction',
 
     'NiftiRegressionAnnotation',
+
+    'NoiseSuppressionAnnotation',
+    'NoiseSuppressionPrediction',
+
+    'TimeSeriesForecastingAnnotation',
+    'TimeSeriesForecastingQuantilesPrediction'
 ]

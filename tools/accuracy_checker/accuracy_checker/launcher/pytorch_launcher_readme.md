@@ -23,7 +23,7 @@ Each input description should has following info:
     Optionally you can determine `layout` in case when your model was trained with non-standard data layout (For PyTorch default layout is `NCHW`) and`precision` (Supported precisions: `FP32` - float, `FP16` - signed shot, `U8`  - unsigned char, `U16` - unsigned short int, `I8` - signed char, `I16` - short int, `I32` - int, `I64` - long int).
 If you model has several outputs you also need specify their names in config for ability to get their values in adapter using option `output_names`.
 
-PyTorch launcher config example (demonstrates how to run AlexNet model from [torchvision](https://pytorch.org/docs/stable/torchvision/models.html)):
+PyTorch launcher config example (demonstrates how to run AlexNet model from [torchvision](https://pytorch.org/vision/stable/models.html)):
 
 ```yml
 launchers:

@@ -34,20 +34,13 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::st
         devices.insert(device);
     }
     std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(devices, flags_nstreams);
-    for (auto& device : devices) {
+    for (const auto& device : devices) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             // limit threading for CPU portion of inference
             if (flags_nthreads != 0)
                 config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THREADS_NUM), std::to_string(flags_nthreads));
 
-            if (flags_d.find("MULTI") != std::string::npos
-                && devices.find("GPU") != devices.end()) {
-                config.execNetworkConfig.emplace(CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO));
-            }
-            else {
-                // pin threads for CPU portion of inference
-                config.execNetworkConfig.emplace(CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(YES));
-            }
+            config.execNetworkConfig.emplace(CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO));
 
             // for CPU execution, more throughput-oriented execution via streams
             config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
@@ -78,7 +71,7 @@ CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, const s
     for (const std::string& device : parseDevices(flags_d)) {
         devices.insert(device);
     }
-    for (auto& device : devices) {
+    for (const auto& device : devices) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1");
         }

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection.
+  Faster R-CNN with Inception ResNet v2 Atrous version. Used for object detection.
   For details see the paper <https://arxiv.org/abs/1506.01497>.
 task_type: detection
 files:

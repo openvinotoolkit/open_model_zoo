@@ -44,7 +44,7 @@ Place your files as shown in the table below:
 File | Destination
 ---|---
 configuration file | `models/public/<model_name>/model.yml`
-documentation file | `models/public/<model_name>/<model_name>.md`
+documentation file | `models/public/<model_name>/README.md`
 validation configuration file|`models/public/<model_name>/accuracy-check.yml`
 demo|`demos/<demo_name>`<br>or<br>`demos/python_demos/<demo_name>`
 
@@ -76,7 +76,7 @@ Description of the model. Must match with the description from the model [docume
 
 **`task_type`**
 
-[Model task type](tools/downloader/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [tools/downloader/common.py](tools/downloader/common.py) file.
+[Model task type](tools/downloader/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`open_model_zoo.model_tools._common`](tools/downloader/src/open_model_zoo/model_tools/_common.py) module.
 
 **`files`**
 
@@ -232,7 +232,7 @@ models:
 
 ## Documentation
 
-Documentation is a very important part of model contribution as it helps to better understand the possible usage of the model. Documentation must be named in accordance with the name of the model.
+Documentation is a very important part of model contribution as it helps to better understand the possible usage of the model. It must be located in a `README.md` file in the model subdirectory.
 The documentation should contain:
 * description of a model
 	* main purpose
@@ -248,7 +248,7 @@ The documentation should contain:
 * detailed description of input and output for original and converted models
 * the model's licensing terms
 
-Learn the detailed structure and headers naming convention from any model documentation (for example, [alexnet](./models/public/alexnet/alexnet.md)).
+Learn the detailed structure and headers naming convention from any model documentation (for example, [alexnet](./models/public/alexnet/README.md)).
 
 ## Legal Information
 

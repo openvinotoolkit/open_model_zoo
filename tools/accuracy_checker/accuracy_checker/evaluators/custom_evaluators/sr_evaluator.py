@@ -278,6 +278,7 @@ class BaseModel:
     def release(self):
         pass
 
+
 # pylint: disable=E0203
 class BaseDLSDKModel:
     def print_input_output_info(self):
@@ -310,7 +311,7 @@ class BaseDLSDKModel:
             print_info('\tshape: {}\n'.format(output_info.shape))
 
     def automatic_model_search(self, network_info):
-        model = Path(network_info['srmodel'])
+        model = Path(network_info.get('srmodel', network_info.get('model')))
         if model.is_dir():
             is_blob = network_info.get('_model_is_blob')
             if is_blob:
@@ -423,12 +424,13 @@ class SRFModel(BaseModel):
 
     def load_network(self, network_list, launcher):
         for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_network(network_dict['srmodel'], launcher)
+            self._part_by_name[network_dict['name']].load_network(
+                network_dict.get('srmodel', network_dict.get('model')), launcher)
         self.update_inputs_outputs_info()
 
     def load_model(self, network_list, launcher):
         for network_dict in network_list:
-            self._part_by_name[network_dict['name']].load_model(network_dict, launcher)
+            self._part_by_name[network_dict.get('name', 'srmodel')].load_model(network_dict, launcher)
         self.update_inputs_outputs_info()
 
     def _add_raw_predictions(self, prediction):
@@ -439,6 +441,10 @@ class SRFModel(BaseModel):
 
     def get_network(self):
         return [{'name': 'srmodel', 'model': self.srmodel.network}]
+
+    def update_inputs_outputs_info(self):
+        if hasattr(self.srmodel, 'update_inputs_outputs_info'):
+            self.srmodel.update_inputs_outputs_info()
 
 
 class FeedbackMixin:
