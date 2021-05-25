@@ -49,11 +49,10 @@ public:
     struct BlobPattern {
         const std::string type;
         const std::map<size_t, std::map<std::string, InferenceEngine::TensorDesc>> patterns;
-        const InferenceEngine::ResizeAlgorithm resizeAlgo;
 
         BlobPattern(std::string&& type, std::map<size_t, std::map<std::string, InferenceEngine::TensorDesc>>&& patterns,
             InferenceEngine::ResizeAlgorithm algo = InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR)
-            : type(type), patterns(patterns), resizeAlgo(algo) {}
+            : type(type), patterns(patterns) {}
     };
 
     using IOPattern = std::pair<std::string, std::vector<ModelBase::BlobPattern>>;
@@ -137,9 +136,9 @@ void check(const std::string& modelName, const ModelBase::BlobPattern& pattern,
     const DataMap& info, std::vector<std::string>& names) {
     // --------------------------- Check BLOB ---------------------------
     auto blobsNum = info.size();
-    auto& blobsPatterns = pattern.patterns.find(blobsNum)->second;
+    const auto& blobsPatterns = pattern.patterns.find(blobsNum)->second;
     for (auto& blobName : names) {
-        auto& blobPatternIt = blobsPatterns.find(blobName);
+        auto blobPatternIt = blobsPatterns.find(blobName);
         if (blobPatternIt == blobsPatterns.end()) {
             blobPatternIt = blobsPatterns.begin();
         }
