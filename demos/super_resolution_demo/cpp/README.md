@@ -8,8 +8,6 @@ You can use the following pre-trained model with the demo:
 * `single-image-super-resolution-1033`, which is the model that performs super resolution 3x upscale on a 360x640 image
 * `text-image-super-resolution-0001`, which is the model that performs super resolution 3x upscale on a 360x640 image
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
-
 ## How It Works
 
 On the start-up, the application reads command-line parameters and loads the
@@ -18,9 +16,24 @@ performs upscale using super resolution model.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in `<omz_dir>/demos/super_resolution_demo/cpp/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* single-image-super-resolution-1032
+* single-image-super-resolution-1033
+* text-image-super-resolution-0001
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
 ./super_resolution_demo -h
 InferenceEngine:
@@ -40,24 +53,18 @@ Options:
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/super_resolution_demo/cpp/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 To do inference on CPU using a trained model, run the following command:
 
 ```sh
-./super_resolution_demo -i <path_to_image>/image.bmp -m <path_to_model>/model.xml
+./super_resolution_demo -d CPU -i <path_to_image>/image.bmp -m <path_to_model>/single-image-super-resolution-1032.xml
 ```
 
 ## Demo Output
 
-The application outputs a reconstructed high-resolution image and saves it in
-the current working directory as `*.bmp` file with `sr` prefix.
-
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo is not supported with any of the Model Downloader available topologies. Other models may produce unexpected results on these devices as well.
+The application outputs a reconstructed high-resolution image and saves it in the current working directory as `*.bmp` file with `sr` prefix.
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

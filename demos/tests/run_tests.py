@@ -24,6 +24,7 @@ For the tests to work, the test data directory must contain:
 * a "Image_Retrieval" subdirectory with image retrieval dataset (images, videos) (see https://github.com/19900531/test)
   and list of images (see https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt)
 * a "msasl" subdirectory with the MS-ASL dataset (https://www.microsoft.com/en-us/research/project/ms-asl/)
+* a file how_are_you_doing.wav from <openvino_dir>/deployment_tools/demo/how_are_you_doing.wav
 """
 
 import argparse

@@ -108,14 +108,17 @@ from .attribute_classification import (
 )
 from .im2latex_images_match import Im2latexRenderBasedMetric
 
-from .speech_recognition import SpeechRecognitionWER, SpeechRecognitionCER
 from .audio_processing import SISDRMetric
+from .speech_recognition import SpeechRecognitionWER, SpeechRecognitionCER, SpeechRecognitionSER
+
 from .score_class_comparison import ScoreClassComparisonMetric
 from .dna_seq_accuracy import DNASequenceAccuracy
 
 from .gan_metrics import InceptionScore, FrechetInceptionDistance
 
 from .salient_objects_detection import SalienceMapMAE, SalienceEMeasure, SalienceMapFMeasure, SalienceSMeasure
+
+from .time_series import NormalisedQuantileLoss
 
 __all__ = [
     'Metric',
@@ -211,6 +214,7 @@ __all__ = [
 
     'SpeechRecognitionWER',
     'SpeechRecognitionCER',
+    'SpeechRecognitionSER',
 
     'SISDRMetric',
 
@@ -239,4 +243,6 @@ __all__ = [
     'PeakSignalToNoiseRatio',
     'StructuralSimilarity',
     'PeakSignalToNoiseRatioWithBlockingEffectFactor',
+
+    'NormalisedQuantileLoss'
 ]

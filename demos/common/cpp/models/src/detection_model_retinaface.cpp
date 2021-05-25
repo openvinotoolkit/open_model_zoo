@@ -315,12 +315,11 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         }
     }
     // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
-    // !shouldDetectLandmarks determines nms behavior, if true - boundaries are included in areas calculation for ssh-mxnet model
+    // !shouldDetectLandmarks determines nms behavior, if true - boundaries are included in areas calculation
     auto keep = nms(bboxes, scores, boxIOUThreshold, !shouldDetectLandmarks);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
-    RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult(infResult.frameId, infResult.metaData);
 
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;

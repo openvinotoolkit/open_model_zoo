@@ -120,8 +120,7 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
 }
 
 std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult& infResult) {
-    HumanPoseResult* result = new HumanPoseResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    HumanPoseResult* result = new HumanPoseResult(infResult.frameId, infResult.metaData);
 
     auto outputMapped = infResult.outputsData[outputsNames[0]];
     auto heatMapsMapped = infResult.outputsData[outputsNames[1]];

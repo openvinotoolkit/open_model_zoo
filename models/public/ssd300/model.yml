@@ -57,4 +57,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/models/VGGNet/VOC0712Plus/SSD_300x300_ft/VGG_VOC0712Plus_SSD_300x300_ft_iter_160000.caffemodel
   - --input_proto=$dl_dir/models/VGGNet/VOC0712Plus/SSD_300x300_ft/deploy.prototxt
 framework: caffe
+quantizable: yes
 license: https://raw.githubusercontent.com/weiliu89/caffe/ssd/LICENSE

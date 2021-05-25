@@ -1,24 +1,29 @@
 # Colorization Demo
 
-This demo demonstrates an example of using neural networks to colorize a video.
-You can use the following models with the demo:
+This demo demonstrates an example of using neural networks to colorize a grayscale image or video.
 
-* `colorization-v2`
-* `colorization-siggraph`
+## How It Works
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
+On the start-up, the application reads command-line parameters and loads one network to the Inference Engine for execution. Once the program receives an image, it performs the following steps:
 
-### How It Works
-
-On the start-up, the application reads command-line parameters and loads one network to the Inference Engine for execution.
-
-Once the program receives an image, it performs the following steps:
-
-1. Converts the frame of video into the LAB color space.
+1. Converts the frame into the LAB color space.
 2. Uses the L-channel to predict A and B channels.
 3. Restores the image by converting it into the BGR color space.
 
-### Running the Demo
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in `<omz_dir>/demos/colorization_demo/python/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* colorization-v2
+* colorization-siggraph
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
+## Running the Demo
 
 Running the application with the `-h` option yields the following usage message:
 
@@ -47,20 +52,14 @@ Options:
   -v, --verbose         Optional. Enable display of processing logs on screen.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
-
-
 ```
 
-To run the demo, you can use public or Intel's pretrained models. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/colorization_demo/python/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
-### Demo Output
+## Demo Output
 
 The demo uses OpenCV to display the colorized frame.
 
 ## See Also
 
-* [Using Open Model Zoo demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

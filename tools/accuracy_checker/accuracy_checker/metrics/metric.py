@@ -74,9 +74,13 @@ class Metric(ClassProvider):
                 description="Reference field for metric, if you want calculated metric tested against specific value "
                             "(i.e. reported in canonical paper)."
             ),
-            'threshold': NumberField(
+            'rel_threshold': NumberField(
                 optional=True, min_value=0,
-                description="Acceptable threshold for metric deviation from reference value."
+                description="Acceptable relative threshold for metric deviation from reference value."
+            ),
+            'abs_threshold': NumberField(
+                optional=True, min_value=0,
+                description="Acceptable absolute threshold for metric deviation from reference value."
             ),
             'presenter': StringField(optional=True, choices=BasePresenter.providers, description="Presenter."),
             'annotation_source': StringField(
