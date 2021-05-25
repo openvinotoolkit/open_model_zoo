@@ -33,6 +33,14 @@
 
 using namespace InferenceEngine;
 
+std::unique_ptr<Cnn> createCnn(unsigned type) {
+    switch (type) {
+        case 0: return std::unique_ptr<Cnn>(new Cnn());
+        case 1: return std::unique_ptr<Cnn>(new EncoderDecoderCNN());
+        default: return std::unique_ptr<Cnn>(new Cnn());
+    }
+};
+
 
 std::string str_tolower(std::string s) {
     std::transform(s.begin(), s.end(), s.begin(),
@@ -146,8 +154,7 @@ int main(int argc, char *argv[]) {
 
         slog::info << "Loading network files" << slog::endl;
         Cnn text_detection;
-        CnnFactory factory;
-        auto text_recognition = factory.create(FLAGS_tr_composite);
+        auto text_recognition = createCnn(FLAGS_tr_composite);
 
         if (!FLAGS_m_td.empty())
             text_detection.Init(FLAGS_m_td, ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td));

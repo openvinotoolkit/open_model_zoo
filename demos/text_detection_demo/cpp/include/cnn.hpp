@@ -75,13 +75,3 @@ class EncoderDecoderCNN : public Cnn {
     std::string logits_name_;
 };
 
-class CnnFactory {
-public:
-  std::unique_ptr<Cnn> create(unsigned type) {
-    switch (type) {
-    case 0: return std::unique_ptr<Cnn>(new Cnn());
-    case 1: return std::unique_ptr<Cnn>(new EncoderDecoderCNN());
-    default: return std::unique_ptr<Cnn>(new Cnn());
-    }
-  }
-};
