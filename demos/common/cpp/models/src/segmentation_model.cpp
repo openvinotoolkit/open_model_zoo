@@ -39,9 +39,11 @@ ModelBase::IOPattern SegmentationModel::getIOPattern() {
         // Describe number of outputs, precision, dimensions and layout.
         // If it doesn't matter what dimension's value is - set 0.
         {
-            { 1, {  { "ArgMax/Squeeze", { InferenceEngine::Precision::I32, {1, 513, 513}, InferenceEngine::Layout::CHW} },
-                    { "output0", { InferenceEngine::Precision::FP32, {1, 8, 1024, 2048}, InferenceEngine::Layout::NCHW} },
-                    { "softmax", { InferenceEngine::Precision::FP32, {1, 150, 320, 320}, InferenceEngine::Layout::NCHW} }} } ,
+            { 1, {  { "common", { InferenceEngine::Precision::FP32, {1, 0, 1024, 2048}, InferenceEngine::Layout::NCHW} },
+                    { "ArgMax/Squeeze", { InferenceEngine::Precision::I32, {1, 513, 513}, InferenceEngine::Layout::CHW} },
+                    { "segmentation_map", { InferenceEngine::Precision::I32, {1, 1, 512, 512}, InferenceEngine::Layout::NCHW} },
+                    { "softmax", { InferenceEngine::Precision::FP32, {1, 150, 320, 320}, InferenceEngine::Layout::NCHW} },
+                    { "L0317_ReWeight_SoftMax",  { InferenceEngine::Precision::FP32, {1, 4, 512, 896}, InferenceEngine::Layout::NCHW } } } },
         }
     );
 

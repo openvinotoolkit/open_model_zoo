@@ -85,7 +85,10 @@ ModelBase::IOPattern ClassificationModel::getIOPattern() {
         // If it doesn't matter what dimension's value is - set 0.
         {
             { 1, { { "common", { InferenceEngine::Precision::FP32, {1, 0, 1, 1}, InferenceEngine::Layout::NCHW} },
-                   { "prob", { InferenceEngine::Precision::FP32, {1, 0}, InferenceEngine::Layout::CN} }} },
+                   { "StatefulPartitionedCall/densenet121/predictions/Softmax", { InferenceEngine::Precision::FP32, {1, 0}, InferenceEngine::Layout::CN} },
+                   { "prob", { InferenceEngine::Precision::FP32, {1, 0}, InferenceEngine::Layout::CN} },
+                   { "gpu_0/softmax", { InferenceEngine::Precision::FP32, {1, 0}, InferenceEngine::Layout::CN} },
+                   { "output", { InferenceEngine::Precision::FP32, {1, 0}, InferenceEngine::Layout::CN} } } },
         }
     );
 

@@ -34,7 +34,8 @@ ModelBase::IOPattern ModelSSD::getIOPattern() {
         {
             { 1, {  { "common", { InferenceEngine::Precision::U8, {1, 3, 0, 0}, useAutoResize ? InferenceEngine::Layout::NHWC : InferenceEngine::Layout::NCHW} } } } ,
 
-            { 2, {  { "image_tensor", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+            { 2, {  { "image", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
+                    { "image_tensor", {  InferenceEngine::Precision::U8, {1, 3, 0, 0}, InferenceEngine::Layout::NCHW } },
                     { "image_info", {  InferenceEngine::Precision::FP32, {1, 3}, InferenceEngine::Layout::NC } } } },
 
         }

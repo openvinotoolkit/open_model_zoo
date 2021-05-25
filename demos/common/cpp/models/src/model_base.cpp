@@ -28,7 +28,7 @@ void ModelBase::prepareBlobs(const IOPattern& modelIOPattern, const InferenceEng
     for (auto& blobName : inputsNames) {
         auto blobPatternIt = inputBlobPattern.find(blobName);
         if (blobPatternIt == inputBlobPattern.end()) {
-            blobPatternIt = inputBlobPattern.begin();
+            blobPatternIt = inputBlobPattern.find("common");
         }
         const auto& blobPatternDesc = blobPatternIt->second;
         const auto& blobData = inputInfo.find(blobName)->second;
@@ -45,7 +45,7 @@ void ModelBase::prepareBlobs(const IOPattern& modelIOPattern, const InferenceEng
     for (const auto& blobName : outputsNames) {
         auto blobPatternIt = outputBlobPattern.find(blobName);
         if (blobPatternIt == outputBlobPattern.end()) {
-            blobPatternIt = outputBlobPattern.begin();
+            blobPatternIt = outputBlobPattern.find("common");
         }
         const auto& blobPatternDesc = blobPatternIt->second;
         const auto& blobData = outputInfo.find(blobName)->second;

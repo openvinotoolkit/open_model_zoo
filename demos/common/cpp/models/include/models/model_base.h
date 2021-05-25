@@ -140,7 +140,7 @@ void check(const std::string& modelName, const ModelBase::BlobPattern& pattern,
     for (auto& blobName : names) {
         auto blobPatternIt = blobsPatterns.find(blobName);
         if (blobPatternIt == blobsPatterns.end()) {
-            blobPatternIt = blobsPatterns.begin();
+            blobPatternIt = blobsPatterns.find("common");
         }
         const auto& blobPatternDesc = blobPatternIt->second;
         const auto& blobPatternDims = blobPatternDesc.getDims();
