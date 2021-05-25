@@ -100,17 +100,21 @@ int main(int argc, char *argv[]) {
         const double avg_time_decay = 0.8;
 
         const char kPadSymbol = '#';
+        if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
+            throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
         std::string kAlphabet;
         if (!FLAGS_tr_composite) {
-            if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
-                throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
             if (FLAGS_tr_pt_first)
                 kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
             else
                 kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
         }
-        else
-            kAlphabet = FLAGS_m_tr_ss;
+        else {
+            // The first three classes are START_TOKEN, PAD_TOKEN and END_TOKEN, respectively.
+            // They should be ignored in prediction. Note that this is model specific
+            // and could be different for other models.
+            kAlphabet = kPadSymbol + (kPadSymbol + (kPadSymbol + FLAGS_m_tr_ss));
+        }
         const double min_text_recognition_confidence = FLAGS_thr;
 
         slog::info << "Loading Inference Engine" << slog::endl;
