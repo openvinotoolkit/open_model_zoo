@@ -29,8 +29,8 @@ The [SISDR](https://arxiv.org/abs/1811.02508) quality metric was calculated on t
 | Metric                          | Value         |
 |---------------------------------|---------------|
 | SISDR for input noisy signal    |    11.73   dB |
-| SISDR for output cleaned signal |    19.22   dB |
-| SISDR increase                  |    +7.49   dB |
+| SISDR for output cleaned signal |    19.84   dB |
+| SISDR increase                  |    +8.10   dB |
 
 
 ## Input
