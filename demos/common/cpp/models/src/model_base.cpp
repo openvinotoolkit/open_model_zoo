@@ -26,7 +26,7 @@ void ModelBase::prepareBlobs(const IOPattern& modelIOPattern, const InferenceEng
     auto inputsNum = inputInfo.size();
     const auto& inputBlobPattern = modelIOPattern.second[0].patterns.find(inputsNum)->second;
     for (auto& blobName : inputsNames) {
-        auto& blobPatternIt = inputBlobPattern.find(blobName);
+        auto blobPatternIt = inputBlobPattern.find(blobName);
         if (blobPatternIt == inputBlobPattern.end()) {
             blobPatternIt = inputBlobPattern.begin();
         }
