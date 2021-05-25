@@ -50,8 +50,7 @@ public:
         const std::string type;
         const std::map<size_t, std::map<std::string, InferenceEngine::TensorDesc>> patterns;
 
-        BlobPattern(std::string&& type, std::map<size_t, std::map<std::string, InferenceEngine::TensorDesc>>&& patterns,
-            InferenceEngine::ResizeAlgorithm algo = InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR)
+        BlobPattern(std::string&& type, std::map<size_t, std::map<std::string, InferenceEngine::TensorDesc>>&& patterns)
             : type(type), patterns(patterns) {}
     };
 
@@ -180,7 +179,7 @@ void check(const std::string& modelName, const ModelBase::BlobPattern& pattern,
                 " - but " + blobToCheckDesc.getPrecision().name() + " given");
         }
 
-        // Keep proper input namaes order
+        // Keep proper input names order
         if (blobToCheckDims.size() == 4 && blobToCheckDesc.getPrecision() == InferenceEngine::Precision::U8 &&
             names.size() > 1 && names[0] != blobName) {
             std::swap(names[0], names[1]);
