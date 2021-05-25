@@ -107,6 +107,10 @@ class DLSDKLauncher(Launcher):
                             "In multi device mode allows setting comma-separated list for numbers "
                             "or one value which will be used for all devices"
             ),
+            'reset_memory_state': BoolField(
+                optional=True, default=False,
+                description='Reset infer request memory states after inference. '
+                            'State control essential for recurrent networks'),
             'device_config': DictField(optional=True, description='device configuration'),
             '_model_optimizer': PathField(optional=True, is_directory=True, description="Model optimizer."),
             '_tf_obj_detection_api_config_dir': PathField(
@@ -165,7 +169,6 @@ class DLSDKLauncher(Launcher):
                 self._model, self._weights = DLSDKLauncher.convert_model(self.config, dlsdk_launcher_config.framework)
             else:
                 self._model, self._weights = self.automatic_model_search()
-
             self.load_network(log=True, preprocessing=preprocessor)
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
         else:
@@ -174,16 +177,14 @@ class DLSDKLauncher(Launcher):
         self._lstm_inputs = None
         if '_list_lstm_inputs' in self.config:
             self._configure_lstm_inputs()
+        self.reset_memory_state = self.get_value_from_config('reset_memory_state')
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
         field_uri = uri_prefix or 'launcher.{}'.format(cls.__provider__)
         return DLSDKLauncherConfigValidator(
-            field_uri, fields=cls.parameters(),
-            delayed_model_loading=delayed_model_loading
-        ).validate(
-            config, field_uri=field_uri,
-            validation_scheme=cls.validation_scheme(), fetch_only=fetch_only
+            field_uri, fields=cls.parameters(), delayed_model_loading=delayed_model_loading).validate(
+            config, field_uri=field_uri, validation_scheme=cls.validation_scheme(), fetch_only=fetch_only
         )
 
     @property
@@ -231,11 +232,7 @@ class DLSDKLauncher(Launcher):
                     else:
                         ie_input_info = self.exec_network.inputs
                     layout = self._target_layout_mapping.get(key, ie_input_info[key].layout)
-                    tensor_desc = TensorDesc(
-                        ie_input_info[key].precision,
-                        input_data.shape,
-                        layout
-                    )
+                    tensor_desc = TensorDesc(ie_input_info[key].precision, input_data.shape, layout)
                     preprocess_info = self._preprocess_info.get(key)
                     if preprocess_info is not None:
                         self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data), preprocess_info)
@@ -243,6 +240,9 @@ class DLSDKLauncher(Launcher):
                         self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data))
             result = self.exec_network.infer(infer_inputs) if not self._use_set_blob else self.exec_network.infer()
             results.append(result)
+        if self.reset_memory_state:
+            for state in self.exec_network.requests[0].query_state():
+                state.reset()
 
         if metadata is not None:
             self._fill_meta(metadata)
@@ -727,7 +727,7 @@ class DLSDKLauncher(Launcher):
         else:
             for key, value in device_config.items():
                 if isinstance(value, dict):
-                    if key not in ie.known_plugins:
+                    if key not in self.ie_core.available_devices:
                         warnings.warn('{} device is unknown. Config loading may lead to error.'.format(key))
                     self.ie_core.set_config(value, key)
                 else:
