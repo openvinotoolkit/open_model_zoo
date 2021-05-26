@@ -259,7 +259,7 @@ class Model:
     def __init__(
         self, name, subdirectory, files, postprocessing, mo_args, framework,
         description, license_url, precisions, quantization_output_precisions,
-        task_type, conversion_to_onnx_args,
+        task_type, conversion_to_onnx_args, composite_model_name,
     ):
         self.name = name
         self.subdirectory = subdirectory
@@ -274,6 +274,7 @@ class Model:
         self.task_type = task_type
         self.conversion_to_onnx_args = conversion_to_onnx_args
         self.converter_to_onnx = _common.KNOWN_FRAMEWORKS[framework]
+        self.composite_model_name = composite_model_name
 
     @classmethod
     def deserialize(cls, model, name, subdirectory):
@@ -359,9 +360,23 @@ class Model:
             task_type = validate_string_enum('"task_type"', model['task_type'],
                 _common.KNOWN_TASK_TYPES)
 
+            composite_model_name = model.get('composite_model_name', None)
+            if composite_model_name is not None:
+                composite_model_name = validate_string('"composite_model_name"', composite_model_name)
+
             return cls(name, subdirectory, files, postprocessing, mo_args, framework,
                 description, license_url, precisions, quantization_output_precisions,
-                task_type, conversion_to_onnx_args)
+                task_type, conversion_to_onnx_args, composite_model_name)
+
+def check_composite_model_dir(model_dir):
+    if list(model_dir.glob('*/*/*')):
+        raise DeserializationError('{} directory should not contain any other folders'.format(model_dir))
+
+    model_name = model_dir.name
+    model_stages = list(model_dir.glob('*/model.yml'))
+    for model in model_stages:
+        if not model.parent.name.startswith(model_name):
+            raise DeserializationError('Unknown model name {}'.format(model.parent.name))
 
 def load_models(args):
     models = []
@@ -370,10 +385,17 @@ def load_models(args):
     for config_path in sorted(_common.MODEL_ROOT.glob('**/model.yml')):
         subdirectory = config_path.parent.relative_to(_common.MODEL_ROOT)
 
+        composite_model_config = config_path.parents[1] / 'composite-model.yml'
+        composite_model_name = None
+        if composite_model_config.is_file():
+            check_composite_model_dir(composite_model_config.parent)
+            composite_model_name = composite_model_config.parent.name
+
         with config_path.open('rb') as config_file, \
                 deserialization_context('In config "{}"'.format(config_path)):
 
             model = yaml.safe_load(config_file)
+            model['composite_model_name'] = composite_model_name
 
             for bad_key in ['name', 'subdirectory']:
                 if bad_key in model:
@@ -402,8 +424,12 @@ def load_models_or_die(args):
 # requires the --print_all, --all, --name and --list arguments to be in `args`
 def load_models_from_args(parser, args):
     if args.print_all:
+        model_names = set()
         for model in load_models_or_die(args):
-            print(model.name)
+            name_to_print = model.name if model.composite_model_name is None else model.composite_model_name
+            if name_to_print not in model_names:
+                print(name_to_print)
+                model_names.add(name_to_print)
         sys.exit()
 
     filter_args_count = sum([args.all, args.name is not None, args.list is not None])
@@ -435,8 +461,12 @@ def load_models_from_args(parser, args):
         models = collections.OrderedDict() # deduplicate models while preserving order
 
         for pattern in patterns:
-            matching_models = [model for model in all_models
-                if fnmatch.fnmatchcase(model.name, pattern)]
+            matching_models = []
+            for model in all_models:
+                if fnmatch.fnmatchcase(model.name, pattern):
+                    matching_models.append(model)
+                elif model.composite_model_name and fnmatch.fnmatchcase(model.composite_model_name, pattern):
+                    matching_models.append(model)
 
             if not matching_models:
                 sys.exit('No matching models: "{}"'.format(pattern))
