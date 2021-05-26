@@ -424,7 +424,7 @@ describing a single model. Each such object has the following keys:
 
 * `name`: the identifier of the model, as accepted by the `--name` option.
 
-* `composite_model_name`: the identifier of the composite model name, if the model is a part 
+* `composite_model_name`: the identifier of the composite model name, if the model is a part
   of composition of several models (e.g. encoder-decoder), otherwise - `null`
 
 * `description`: text describing the model. Paragraphs are separated by line feed characters.
