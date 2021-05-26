@@ -24,6 +24,12 @@ Additionally you can provide device specific parameters:
 * `gpu_extensions` (path to extension *.xml file with OpenCL kernel description for gpu).
 * `bitstream` for running on FPGA.
 
+Launcher understands which batch size will be used from model intermediate representation (IR). If you want to use batch for infer, please, provide model with required batch or convert it using specific parameter in `mo_params`.
+
+* `allow_reshape_input` - parameter, which allows to reshape input layer to data shape (default value is False).
+* `reset_memory_state` - parameter, which allows resetting internal infer request memory states after inference. State control essential for recurrent networks. (Optional, default is `False`).
+
+
 Device config contains device specific options which should be set to Inference Engine. For setting device specific flags, you are able to use `-dc` or `--device_config` command line option and provide path to YML file or specify device config directly to Accuracy Checker config file with key `device_config` in the launchers section. Device config should be represented as dictionary of one of two types:
 1. keys are plugin configuration keys and values are their values respectively. In this way configuration will be applied to current running device.
 2. keys are supported devices and values are plugin configuration for each device. Plugin configuration represented as dictionary where keys are plugin specific configuration keys and values are their values respectively.
@@ -76,10 +82,6 @@ Full list of supported parameters you can find in [Model Optimizer Developer Gui
 
 Model will be converted before every evaluation.
 You can provide `converted_model_dir` for saving converted model in specific folder, otherwise, converted models will be saved in path provided via `-C` command line argument or source model directory.
-
-Launcher understands which batch size will be used from model intermediate representation (IR). If you want to use batch for infer, please, provide model with required batch or convert it using specific parameter in `mo_params`.
-
-* `allow_reshape_input` - parameter, which allows to reshape input layer to data shape (default value is False).
 
 ## Configuration example
 
