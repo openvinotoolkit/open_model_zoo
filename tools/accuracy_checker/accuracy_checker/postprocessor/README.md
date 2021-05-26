@@ -1,13 +1,15 @@
 # Postprocessors
 
-Postprocessor is function which processes prediction and/or annotation data after model infer and before metric calculation. For correct work postprocessors require specific representation format.
+Postprocessor is a class which processes prediction and/or annotation data after model inference and before metric calculation. Unlike adapters, postprocessors do not work with raw model output, but with specific representation format.
 (e. g. clip boxes postprocessor expects detection annotation and detection prediction for processing).
 
 In case when you use complicated representation located in representation container, you can add options `annotation_source` and `prediction_source` in configuration file,
 if you want process only specific representations, another way postprocessor will be used for all suitable representations. `annotation_source` and `prediction_source` should contain
 comma separated list of annotation identifiers and output layer names respectively.
 
-Every postprocessor has parameters available for configuration.
+Every postprocessor has parameters available for configuration. The postprocessor and its parameters are set through the configuration file. Postprocessors are provided in `datasets` section of configuration file to use specific postprocessor.
+
+## Supported Postprocessors
 
 Accuracy Checker supports following set of postprocessors:
 

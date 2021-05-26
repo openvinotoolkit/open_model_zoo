@@ -304,9 +304,11 @@ def read_yaml(file: Union[str, Path], *args, **kwargs):
         return yaml.safe_load(content, *args, **kwargs)
 
 
-def read_csv(file: Union[str, Path], *args, **kwargs):
+def read_csv(file: Union[str, Path], *args, is_dict=True, **kwargs):
     with get_path(file).open(encoding='utf-8') as content:
-        return list(csv.DictReader(content, *args, **kwargs))
+        if is_dict:
+            return list(csv.DictReader(content, *args, **kwargs))
+        return list(csv.reader(content, *args, **kwargs))
 
 
 def extract_image_representations(image_representations, meta_only=False):

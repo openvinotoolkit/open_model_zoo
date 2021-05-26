@@ -1,7 +1,9 @@
 # Preprocessors
 
-Preprocessor is function which processes input data before model inference.
-Every preprocessor has parameters available for configuration.
+Preprocessor is a class which processes input data before model inference. Every preprocessor has parameters available for configuration. The preprocessor and its parameters are set through the configuration file. Preprocessors are provided in `datasets` section of configuration file to use specific preprocessor.
+
+## Supported Preprocessors
+
 Accuracy Checker supports following set of preprocessors:
 
 * `resize` - resizing the image to a new width and height.
