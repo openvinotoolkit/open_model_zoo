@@ -24,7 +24,7 @@ def build_argparser():
                         help="Path to an audio file in WAV PCM 16 kHz mono format")
     parser.add_argument('-d', '--device', default='CPU', type=str,
                         help="Optional. Specify the target device to infer on, for example: CPU, GPU, FPGA, HDDL, MYRIAD or HETERO. "
-                             "The sample will look for a suitable IE plugin for this device. (default is CPU)")
+                             "The demo will look for a suitable IE plugin for this device. (default is CPU)")
     parser.add_argument('-m', '--model', type=str, metavar="FILENAME", required=True,
                         help="Path to an .xml file with a trained model (required)")
     parser.add_argument('-L', '--lm', type=str, metavar="FILENAME",

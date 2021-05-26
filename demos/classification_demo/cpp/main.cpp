@@ -33,7 +33,7 @@ static const char labels_message[] = "Required. Path to .txt file with labels.";
 static const char gt_message[] = "Optional. Path to ground truth .txt file.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available "
                                             "devices is shown below). Default value is CPU. "
-                                            "Sample will look for a suitable plugin for device specified.";
+                                            "The demo will look for a suitable plugin for device specified.";
 static const char num_threads_message[] = "Optional. Specify count of threads.";
 static const char num_streams_message[] = "Optional. Specify count of streams.";
 static const char num_inf_req_message[] = "Optional. Number of infer requests.";

@@ -25,8 +25,8 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: bert_named_entity_recognition_demo.py [-h] -v VOCAB -m MODEL -i INPUT
-                                       [--input_names INPUT_NAMES]
-                                       [-d DEVICE]
+                                             [--input_names INPUT_NAMES]
+                                             [-d DEVICE]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -37,12 +37,11 @@ Options:
   -i INPUT, --input INPUT
                         Required. URL to a page with context
   --input_names INPUT_NAMES
-                        Optional. Inputs names for the  network.
-                        Default values are "input_ids,attention_mask,token_type_ids"
+                        Optional. Inputs names for the network. Default values
+                        are "input_ids,attention_mask,token_type_ids"
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU
-                        is acceptable. Sample will look for a suitable plugin
-                        for device specified. Default value is CPU
+                        Optional. Target device to perform inference
+                        on.Default value is CPU
 ```
 
 ## Demo Inputs

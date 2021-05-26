@@ -208,11 +208,13 @@ def build_argparser():
     args.add_argument("--max_formula_len",
                       help="Optional. Defines maximum length of the formula (number of tokens to decode)",
                       default="128", type=int)
-    args.add_argument("-t", "--conf_thresh", help="Optional. Probability threshold to treat model prediction as meaningful",
+    args.add_argument("-t", "--conf_thresh",
+                      help="Optional. Probability threshold to treat model prediction as meaningful",
                       default=0.95, type=float)
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
-                           "acceptable. Sample will look for a suitable plugin for device specified. Default value is CPU",
+                           "acceptable. The demo will look for a suitable plugin for device specified. Default value "
+                           "is CPU",
                       default="CPU", type=str)
     args.add_argument("--resolution", default=(1280, 720), type=int, nargs=2,
                       help='Optional. Resolution of the demo application window. Default: 1280 720')
@@ -222,7 +224,8 @@ def build_argparser():
                       action='store_true', default=False)
     args.add_argument('--imgs_layer', help='Optional. Encoder input name for images. See README for details.',
                       default='imgs')
-    args.add_argument('--row_enc_out_layer', help='Optional. Encoder output key for row_enc_out. See README for details.',
+    args.add_argument('--row_enc_out_layer',
+                      help='Optional. Encoder output key for row_enc_out. See README for details.',
                       default='row_enc_out')
     args.add_argument('--hidden_layer', help='Optional. Encoder output key for hidden. See README for details.',
                       default='hidden')
@@ -240,7 +243,8 @@ def build_argparser():
                       default='dec_st_h_t')
     args.add_argument('--output_layer', help='Optional. Decoder output key for output. See README for details.',
                       default='output')
-    args.add_argument('--output_prev_layer', help='Optional. Decoder input key for output_prev. See README for details.',
+    args.add_argument('--output_prev_layer',
+                      help='Optional. Decoder input key for output_prev. See README for details.',
                       default='output_prev')
     args.add_argument('--logit_layer', help='Optional. Decoder output key for logit. See README for details.',
                       default='logit')

@@ -73,7 +73,7 @@ def build_argparser():
                       required=False, type=int)
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU is acceptable. "
-                           "Sample will look for a suitable plugin for device specified. Default value is CPU",
+                           "The demo will look for a suitable plugin for device specified. Default value is CPU",
                       default="CPU",
                       required=False, type=str)
     args.add_argument('-c', '--colors', action='store_true',

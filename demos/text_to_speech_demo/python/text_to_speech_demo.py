@@ -57,7 +57,7 @@ def build_argparser():
 
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL, MYRIAD or HETERO is "
-                           "acceptable. The sample will look for a suitable plugin for device specified. "
+                           "acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU",
                       default="CPU", type=str)
 

@@ -62,7 +62,7 @@ class YOLO(Model):
         self.keep_aspect_ratio = keep_aspect_ratio
         self.resize_image = resize_image_letterbox if self.keep_aspect_ratio else resize_image
 
-        assert len(self.net.input_info) == 1, "Sample supports only YOLO V* based single input topologies"
+        assert len(self.net.input_info) == 1, "Expected 1 input blob"
         self.image_blob_name = next(iter(self.net.input_info))
         if self.net.input_info[self.image_blob_name].input_data.shape[1] == 3:
             self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape

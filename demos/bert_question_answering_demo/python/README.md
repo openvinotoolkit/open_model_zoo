@@ -61,27 +61,25 @@ Options:
   --questions QUESTION [QUESTION ...]
                         Optional. Prepared questions
   --input_names INPUT_NAMES
-                        Optional. Inputs names for the  network.
-                        Default values are "input_ids,attention_mask,token_type_ids"
+                        Optional. Inputs names for the network. Default values
+                        are "input_ids,attention_mask,token_type_ids"
   --output_names OUTPUT_NAMES
-                        Required. Outputs names for the network.
-                        Default values are "output_s,output_e"
+                        Optional. Outputs names for the network. Default
+                        values are "output_s,output_e"
   --model_squad_ver MODEL_SQUAD_VER
                         Optional. SQUAD version used for model fine tuning
   -q MAX_QUESTION_TOKEN_NUM, --max_question_token_num MAX_QUESTION_TOKEN_NUM
-                        Optional. Maximum number of tokens in question (used with the reshape option)
+                        Optional. Maximum number of tokens in question
   -a MAX_ANSWER_TOKEN_NUM, --max_answer_token_num MAX_ANSWER_TOKEN_NUM
                         Optional. Maximum number of tokens in answer
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU
-                        is acceptable. Sample will look for a suitable plugin
-                        for device specified. Default value is CPU
-  -r, --reshape
-                        Optional. Auto reshape sequence length
-                                  to the input context + max question len (to improve the speed)
-  -c, --colors
-                        Optional. Nice coloring of the questions/answers.
-                        Might not work on some terminals (like Windows* cmd console)
+                        Optional. Target device to perform inference
+                        on.Default value is CPU
+  -r, --reshape         Optional. Auto reshape sequence length to the input
+                        context + max question len (to improve the speed)
+  -c, --colors          Optional. Nice coloring of the questions/answers.
+                        Might not work on some terminals (like Windows* cmd
+                        console)
 
 ```
 
