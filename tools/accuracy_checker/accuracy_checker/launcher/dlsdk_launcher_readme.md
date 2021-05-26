@@ -36,6 +36,7 @@ You can provide `converted_model_dir` for saving converted model in specific fol
 Launcher understands which batch size will be used from model intermediate representation (IR). If you want to use batch for infer, please, provide model with required batch or convert it using specific parameter in `mo_params`.
 
 * `allow_reshape_input` - parameter, which allows to reshape input layer to data shape (default value is False).
+* `reset_memory_state` - parameter, which allows resetting internal infer request memory states after inference. State control essential for recurrent networks. (Optional, default is `False`).
 
 Additionally you can provide device specific parameters:
 
