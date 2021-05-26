@@ -231,7 +231,7 @@ class KaldiLatGenDecoder(Adapter):
             result = line.split(' ')
             utt = result[0]
             decoded = ' '.join([self.words_table[int(idx)] for idx in result[1:]])
-            decoded.replace('<UNK>', '')
+            decoded = decoded.replace('<UNK>', '')
             transcripts[utt] = decoded
         return transcripts
 
