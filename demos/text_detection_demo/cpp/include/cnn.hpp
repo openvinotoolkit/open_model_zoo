@@ -9,6 +9,7 @@
 
 #include <inference_engine.hpp>
 #include <opencv2/opencv.hpp>
+#include <utils/ocv_common.hpp>
 
 using namespace InferenceEngine;
 

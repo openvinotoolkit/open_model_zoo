@@ -46,7 +46,7 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
     input_name_ = network.getInputsInfo().begin()->first;
 
     input_info->setLayout(Layout::NCHW);
-    input_info->setPrecision(Precision::FP32);
+    input_info->setPrecision(Precision::U8);
 
     channels_ = input_info->getTensorDesc().getDims()[1];
     input_size_ = cv::Size(input_info->getTensorDesc().getDims()[3], input_info->getTensorDesc().getDims()[2]);
@@ -73,12 +73,6 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
 
 InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-
-    /* Resize manually and copy data from the image to the input blob */
-    InferenceEngine::LockedMemory<void> inputMapped =
-        InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_.GetBlob(input_name_))->wmap();
-    float* input_data = inputMapped.as<float *>();
-
     cv::Mat image;
     if (channels_ == 1) {
          cv::cvtColor(frame, image, cv::COLOR_BGR2GRAY);
@@ -86,22 +80,8 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
         image = frame.clone();
     }
 
-    image.convertTo(image, CV_32F);
-    cv::resize(image, image, input_size_);
-
-    int image_size = input_size_.area();
-
-    if (channels_ == 3) {
-        for (int pid = 0; pid < image_size; ++pid) {
-            for (int ch = 0; ch < channels_; ++ch) {
-                input_data[ch * image_size + pid] = image.at<cv::Vec3f>(pid)[ch];
-            }
-        }
-    } else if (channels_ == 1) {
-        for (int pid = 0; pid < image_size; ++pid) {
-            input_data[pid] = image.at<float>(pid);
-        }
-    }
+    auto blob = infer_request_.GetBlob(input_name_);
+    matU8ToBlob<uint8_t>(image, blob);
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Doing inference -------------------------------------------------------
@@ -204,7 +184,7 @@ void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std
     input_name_ = network_encoder.getInputsInfo().begin()->first;
 
     input_info->setLayout(Layout::NCHW);
-    input_info->setPrecision(Precision::FP32);
+    input_info->setPrecision(Precision::U8);
 
     channels_ = input_info->getTensorDesc().getDims()[1];
     input_size_ = cv::Size(input_info->getTensorDesc().getDims()[3], input_info->getTensorDesc().getDims()[2]);
@@ -240,10 +220,6 @@ void EncoderDecoderCNN::setInOutNames(const std::string out_enc_hidden_name,
 
 InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    /* Resize manually and copy data from the image to the input blob */
-    InferenceEngine::LockedMemory<void> inputMapped =
-        InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_encoder_.GetBlob(input_name_))->wmap();
-    float* input_data = inputMapped.as<float *>();
 
     cv::Mat image;
     if (channels_ == 1) {
@@ -252,22 +228,8 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
         image = frame.clone();
     }
 
-    image.convertTo(image, CV_32F);
-    cv::resize(image, image, input_size_);
-
-    int image_size = input_size_.area();
-
-    if (channels_ == 3) {
-        for (int pid = 0; pid < image_size; ++pid) {
-            for (int ch = 0; ch < channels_; ++ch) {
-                input_data[ch * image_size + pid] = image.at<cv::Vec3f>(pid)[ch];
-            }
-        }
-    } else if (channels_ == 1) {
-        for (int pid = 0; pid < image_size; ++pid) {
-            input_data[pid] = image.at<float>(pid);
-        }
-    }
+    InferenceEngine::Blob::Ptr blob = infer_request_encoder_.GetBlob(input_name_);
+    matU8ToBlob<uint8_t>(image, blob);
     // --------------------------- Doing inference -------------------------------------------------------
     /* Running the request synchronously */
     infer_request_encoder_.Infer();
