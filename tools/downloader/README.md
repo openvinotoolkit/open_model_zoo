@@ -424,8 +424,8 @@ describing a single model. Each such object has the following keys:
 
 * `name`: the identifier of the model, as accepted by the `--name` option.
 
-* `composite_model_name`: the identifier of the composite model name, if the model is a composition
-  of several models (e.g. encoder-decoder), otherwise - `null`
+* `composite_model_name`: the identifier of the composite model name, if the model is a part 
+  of composition of several models (e.g. encoder-decoder), otherwise - `null`
 
 * `description`: text describing the model. Paragraphs are separated by line feed characters.
 
@@ -510,9 +510,11 @@ tool will process:
 
 * `--name` takes a comma-separated list of patterns and selects models that match
   at least one of these patterns. The patterns may contain shell-style wildcards.
+  For composite models, the name of composite model is accepted, as well as the names
+  of individual models it consists of.
 
   ```sh
-  ./TOOL.py --name 'mtcnn-p,densenet-*'
+  ./TOOL.py --name 'mtcnn,densenet-*'
   ```
 
   See https://docs.python.org/3/library/fnmatch.html for a full description of
@@ -520,6 +522,8 @@ tool will process:
 
 * `--list` takes a path to a file that must contain a list of patterns and
   selects models that match at least one of those patterns.
+  For composite models, the name of composite model is accepted, as well as the names
+  of individual models it consists of.
 
   ```sh
   ./TOOL.py --list my.lst
@@ -530,7 +534,7 @@ tool will process:
   ignored. For example:
 
   ```
-  mtcnn-p
+  mtcnn # get all three models: mtcnn-o, mtcnn-p, mtcnn-r
   densenet-* # get all DenseNet variants
   ```
 
