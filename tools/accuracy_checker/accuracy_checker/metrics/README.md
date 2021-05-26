@@ -1,5 +1,6 @@
 # Metrics
 
+Metric is a class which is used to compare predicted data with annotated data and perform quality measurement.
 For correct work metrics require specific representation format.
 (e. g. map expects detection annotation and detection prediction for evaluation).
 
@@ -8,7 +9,9 @@ select specific representation, another way metric calculation possible only if 
 `annotation_source` and `prediction_source` should contain only one annotation identifier and output layer name respectively.
 You may optionally provide `reference` field for metric, if you want calculated metric tested against specific value (i.e. reported in canonical paper) and acceptable `abs_threshold` and `rel_threshold` for absolute and relative metric deviation from reference value respectively.
 
-Every metric has parameters available for configuration.
+Every metric has parameters available for configuration. The metric and its parameters are set through the configuration file. Metrics are provided in `datasets` section of configuration file to use specific metric.
+
+## Supported Metrics
 
 Accuracy Checker supports following set of metrics:
 

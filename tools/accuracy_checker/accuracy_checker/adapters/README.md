@@ -1,6 +1,11 @@
 # Adapters
 
-Adapter is a function for conversion network infer output to metric specific format.
+Adapter is a class for converting raw network infer output to specific representation format which is suitable for the further postprocessors work and the metrics calculation. Adapters may have parameters available for configuration. The adapter and its parameters, if necessary, are set through the configuration file.
+
+## Describing how to set adapter in Configuration File
+
+Adapters can be provided in `launchers` section of configuration file for each launcher to use specific adapter.
+
 You can use 2 ways to set adapter for topology:
 * Define adapter as a string.
 
@@ -15,6 +20,8 @@ adapter:
   type: reid
   grn_workaround: False
 ```
+
+## Supported Adapters
 
 AccuracyChecker supports following set of adapters:
 * `classification` - converting output of classification model to `ClassificationPrediction` representation.
