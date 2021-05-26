@@ -167,6 +167,9 @@ int main(int argc, char *argv[]) {
                 }
             }
         }
+        else {
+            text_recognition = std::unique_ptr<Cnn>(new Cnn());
+        }
         const double min_text_recognition_confidence = FLAGS_thr;
 
         Cnn text_detection;
