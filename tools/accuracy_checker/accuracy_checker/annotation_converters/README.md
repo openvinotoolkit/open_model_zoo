@@ -545,6 +545,17 @@ The main difference between this converter and `super_resolution` in data organi
   * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding). More details in [Customizing dataset meta](#customizing-dataset-meta) section.
   * `images_dir` - path to directory with images (Optional).
   * `masks_dir` - path to directory with ground truth segmentation masks (Optional).
+* `cls_dataset_folder` - converts generic classification dataset with [DatasetFolder](https://pytorch.org/vision/stable/datasets.html#datasetfolder) format to `ClassificationAnnotation`.
+  * `data_dir` - directory with input images in following structure:
+    ```
+        data_dir/class_a/xxx.ext
+        data_dir/class_a/xxy.ext
+        data_dir/class_b/[...]/xxz.ext
+        ...
+        data_dir/class_y/123.ext
+        data_dir/class_z/nsdf3.ext
+        data_dir/class_z/[...]/asd932_.ext
+    ```
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
