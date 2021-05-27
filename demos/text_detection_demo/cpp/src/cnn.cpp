@@ -235,16 +235,11 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
     infer_request_encoder_.Infer();
     // ---------------------------------------------------------------------------------------------------
 
-    // --------------------------- Processing output encoder -----------------------------------------------------
-
-    InferenceEngine::BlobMap encoder_blobs;
-    for (const auto &output_name : output_names_encoder) {
-        encoder_blobs[output_name] = infer_request_encoder_.GetBlob(output_name);
-    }
+    // --------------------------- Processing encoder output -----------------------------------------------------
     // blobs here are set for concrete network
     // in case of different network this needs to be changed or generalized
-    infer_request_decoder_.SetBlob(features_name_, encoder_blobs[features_name_]);
-    infer_request_decoder_.SetBlob(in_dec_hidden_name_, encoder_blobs[out_enc_hidden_name_]);
+    infer_request_decoder_.SetBlob(features_name_, infer_request_encoder_.GetBlob(features_name_));
+    infer_request_decoder_.SetBlob(in_dec_hidden_name_, infer_request_encoder_.GetBlob(out_enc_hidden_name_));
 
     InferenceEngine::LockedMemory<void> input_decoder =
         InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(in_dec_symbol_name_))->wmap();

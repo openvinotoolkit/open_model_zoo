@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
                                                 FLAGS_tr_o_blb_nm);
                 text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
                 slog::info << "Initialized composite text recognition model" << slog::endl;
-                kAlphabet = kPadSymbol + (kPadSymbol + (kPadSymbol + FLAGS_m_tr_ss));
+                kAlphabet = std::string(3, kPadSymbol) + FLAGS_m_tr_ss;
             }
             catch (std::runtime_error e) {
                 if (std::string(e.what()).find("Decoder model could not be loaded") != std::string::npos) {
