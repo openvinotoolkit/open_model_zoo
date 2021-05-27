@@ -29,7 +29,7 @@ class DatasetFolderConverter(DirectoryBasedAnnotationConverter):
         for idx, cls_dir in enumerate(classes):
             label_map[idx] = cls_dir
             for img in (self.data_dir / cls_dir).glob('*'):
-                identifier = '{}/{}'.format(cls_dir, img)
+                identifier = '{}/{}'.format(cls_dir, img.name)
                 annotations.append(ClassificationAnnotation(identifier, idx))
 
         return ConverterReturn(annotations, {'label_map': label_map}, None)
