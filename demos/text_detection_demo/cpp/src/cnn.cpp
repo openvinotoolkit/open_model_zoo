@@ -221,11 +221,9 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
     if (channels_ == 1) {
          cv::cvtColor(frame, image, cv::COLOR_BGR2GRAY);
     } else {
-        image = frame.clone();
+        image = frame;
     }
-
-    InferenceEngine::Blob::Ptr blob = infer_request_encoder_.GetBlob(input_name_);
-    matU8ToBlob<uint8_t>(image, blob);
+    matU8ToBlob<uint8_t>(image, infer_request_encoder_.GetBlob(input_name_));
 
     infer_request_encoder_.Infer();
     // --------------------------- Processing encoder output -----------------------------------------------------
