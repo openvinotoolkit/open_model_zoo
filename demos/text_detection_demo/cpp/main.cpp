@@ -150,21 +150,17 @@ int main(int argc, char *argv[]) {
                                                 FLAGS_tr_o_blb_nm);
                 text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
                 slog::info << "Initialized composite text recognition model" << slog::endl;
+                // 3 pad symbols stand for START_TOKEN, PAD_TOKEN and END_TOKEN, respectively;
                 kAlphabet = std::string(3, kPadSymbol) + FLAGS_m_tr_ss;
             }
-            catch (std::runtime_error e) {
-                if (std::string(e.what()).find("Decoder model could not be loaded") != std::string::npos) {
-                    text_recognition = std::unique_ptr<Cnn>(new Cnn());
-                    text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
-                    slog::info << "Initialized monolithic text recognition model" << slog::endl;
-                    if (FLAGS_tr_pt_first)
-                        kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
-                    else
-                        kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
-                }
-                else {
-                    throw std::runtime_error(e.what());
-                }
+            catch (DecoderNotFound e) {
+                text_recognition = std::unique_ptr<Cnn>(new Cnn());
+                text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
+                slog::info << "Initialized monolithic text recognition model" << slog::endl;
+                if (FLAGS_tr_pt_first)
+                    kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
+                else
+                    kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
             }
         }
         const double min_text_recognition_confidence = FLAGS_thr;

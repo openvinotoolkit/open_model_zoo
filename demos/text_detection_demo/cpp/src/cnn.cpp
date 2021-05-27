@@ -133,8 +133,9 @@ void EncoderDecoderCNN::check_net_names(std::vector<std::string> output_names_en
             out_dec_symbol_name_) == output_names_decoder.end())
         name_not_exist = out_dec_symbol_name_;
     if (name_not_exist != "")
-        throw std::runtime_error("'" + name_not_exist + "' does not exist in the network");
+        throw NameNotExist(name_not_exist);
  }
+
 
 void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
     // ---------------------------------------------------------------------------------------------------
@@ -151,7 +152,7 @@ void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std
     }
     catch (const std::runtime_error& error)
     {
-        throw std::runtime_error(std::string("Decoder model could not be loaded\n") + error.what());
+        throw DecoderNotFound();
     }
     // --------------------------- Checking net names ----------------------------------------------------
     InputsDataMap inputInfo(network_encoder.getInputsInfo());
