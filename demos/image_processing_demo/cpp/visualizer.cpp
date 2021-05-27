@@ -20,6 +20,13 @@
 #include "visualizer.hpp"
 
 
+Visualizer::Visualizer(const std::string& type) {
+    if (type == "sr")
+        winName = "Image Processing Demo - Super Resolution (press A for help)";
+    else if (type == "deblur")
+        winName = "Image Processing Demo - Deblurring (press A for help)";
+}
+
 cv::Size Visualizer::getSize() {
     return resolution;
 }
@@ -43,7 +50,7 @@ void Visualizer::handleKey(int key) {
     }
 }
 
-cv::Mat Visualizer::renderResultData(ImageResult result, OutputTransform& transform) {
+cv::Mat Visualizer::renderResultData(ImageResult result, cv::Size& newResolution) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -54,8 +61,7 @@ cv::Mat Visualizer::renderResultData(ImageResult result, OutputTransform& transf
     }
 
     if (!isResolutionSet) {
-        transform.resize(result.resultImage);
-        setResolution(transform);
+        setResolution(newResolution);
     }
 
     cv::resize(result.resultImage, result.resultImage, resolution);
@@ -94,6 +100,7 @@ void Visualizer::changeDisplayImg() {
         displayImg = inputImg.clone();
         resultImg(cv::Rect(0, 0, slider, inputImg.rows)).copyTo(displayImg(cv::Rect(0, 0, slider, resultImg.rows)));
         markImage(displayImg, {"R", "O"}, static_cast<float>(slider) / resolution.width);
+        drawSweepLine(displayImg);
     } else if (mode == "result") {
         displayImg = resultImg.clone();
         markImage(displayImg, {"R", ""}, 1);
@@ -101,6 +108,7 @@ void Visualizer::changeDisplayImg() {
         cv::absdiff(inputImg, resultImg, displayImg);
         resultImg(cv::Rect(0, 0, slider, resultImg.rows)).copyTo(displayImg(cv::Rect(0, 0, slider, displayImg.rows)));
         markImage(displayImg, {"R", "D"}, static_cast<float>(slider) / resolution.width);
+        drawSweepLine(displayImg);
     }
 }
 
@@ -114,8 +122,12 @@ void Visualizer::markImage(cv::Mat& image, const std::pair<std::string, std::str
                 cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
 }
 
-void Visualizer::setResolution(OutputTransform& transform) {
-    resolution = transform.computeResolution();
+void Visualizer::drawSweepLine(cv::Mat& image) {
+    cv::line(image, cv::Point(slider, 0), cv::Point(slider, image.rows), cv::Scalar(0, 255, 0), 2);
+}
+
+void Visualizer::setResolution(cv::Size& newResolution) {
+    resolution = newResolution;
     isResolutionSet = true;
     cv::setTrackbarMax(trackbarName, winName, resolution.width);
 }

@@ -47,14 +47,16 @@ private:
                                   "Esc or Q to quit"};
     void addTrackbar();
     void disableTrackbar();
-    void setResolution(OutputTransform& transform);
+    void setResolution(cv::Size& newResolution);
     void markImage(cv::Mat& image, const std::pair<std::string, std::string>& marks, float alpha);
+    void drawSweepLine(cv::Mat& image);
     void changeDisplayImg();
 public:
+    Visualizer(const std::string& type="");
     cv::Size getSize();
 
     // change display image for new input and result images
-    cv::Mat renderResultData(ImageResult result, OutputTransform& transform);
+    cv::Mat renderResultData(ImageResult result, cv::Size& newResolution);
 
     // show display image or specified value
     void show(cv::Mat img=cv::Mat());

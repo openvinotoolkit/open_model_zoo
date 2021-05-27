@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
         cv::Size outputResolution;
         OutputTransform outputTransform = OutputTransform();
         size_t found = FLAGS_output_resolution.find("x");
-        Visualizer view;
+        Visualizer view(FLAGS_at);
 
         // interactive mode for single image
         if (cap->getType() == "IMAGE" && !FLAGS_loop && !FLAGS_no_show) {
@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
             outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
             outputResolution = outputTransform.computeResolution();
 
-            view.renderResultData(result->asRef<ImageResult>(), outputTransform);
+            view.renderResultData(result->asRef<ImageResult>(), outputResolution);
             auto key = 1;
             while (!(27 == key || 'q' == key || 'Q' == key)) {
                 view.show();
@@ -253,19 +253,20 @@ int main(int argc, char *argv[]) {
                             std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
                         };
                     }
+
                     outputTransform = OutputTransform(result->asRef<ImageResult>().resultImage.size(), outputResolution);
                     outputResolution = outputTransform.computeResolution();
 
                     // Preparing video writer if needed
                     if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
                         if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                            cap->fps(), cv::Size(outputResolution.width, outputResolution.height))) {
+                            cap->fps(), outputResolution)) {
                             throw std::runtime_error("Can't open video writer");
                         }
                     }
                 }
 
-                cv::Mat outFrame = view.renderResultData(result->asRef<ImageResult>(), outputTransform);
+                cv::Mat outFrame = view.renderResultData(result->asRef<ImageResult>(), outputResolution);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -316,13 +317,13 @@ int main(int argc, char *argv[]) {
                     // Preparing video writer if needed
                     if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
                         if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                            cap->fps(), cv::Size(outputResolution.width, outputResolution.height))) {
+                            cap->fps(), outputResolution)) {
                             throw std::runtime_error("Can't open video writer");
                         }
                     }
                 }
 
-                cv::Mat outFrame = view.renderResultData(result->asRef<ImageResult>(), outputTransform);
+                cv::Mat outFrame = view.renderResultData(result->asRef<ImageResult>(), outputResolution);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,

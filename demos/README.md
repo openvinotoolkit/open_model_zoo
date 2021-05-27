@@ -26,7 +26,7 @@ The Open Model Zoo includes the following demos:
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/cpp/README.md) - Human pose estimation demo.
 - [Human Pose Estimation Python\* Demo](./human_pose_estimation_demo/python/README.md) - Human pose estimation demo.
 - [Image Inpainting Python\* Demo](./image_inpainting_demo/python/README.md) - Demo application for GMCNN inpainting network.
-- [Image Processing C++ Demo](./image_processing_demo/cpp/README.md) - Demo application to deblurring and enhance the resolution of the input image.
+- [Image Processing C++ Demo](./image_processing_demo/cpp/README.md) - Demo application for deblurring and enhancing the resolution of the input image.
 - [Image Retrieval Python\* Demo](./image_retrieval_demo/python/README.md) - The demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 - [Image Segmentation C++ Demo](./segmentation_demo/cpp/README.md) - Inference of semantic segmentation networks (supports video and camera inputs).
 - [Image Segmentation Python\* Demo](./segmentation_demo/python/README.md) - Inference of semantic segmentation networks (supports video and camera inputs).
