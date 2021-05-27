@@ -15,28 +15,17 @@ using namespace InferenceEngine;
 
 class Cnn {
   public:
-    Cnn():is_initialized_(false), channels_(0), time_elapsed_(0), ncalls_(0) {}
-
-    virtual void Init(const std::string &model_path, Core & ie, const std::string & deviceName,
+    // Cnn(): channels_(0), time_elapsed_(0), ncalls_(0) {}
+    Cnn(const std::string &model_path, Core & ie, const std::string & deviceName,
               const cv::Size &new_input_resolution = cv::Size());
 
     virtual InferenceEngine::BlobMap Infer(const cv::Mat &frame);
 
-    bool is_initialized() const {return is_initialized_;}
-
     size_t ncalls() const {return ncalls_;}
     double time_elapsed() const {return time_elapsed_;}
-    virtual void setInOutNames(const std::string out_enc_hidden_name,
-                               const std::string out_dec_hidden_name,
-                               const std::string in_dec_hidden_name,
-                               const std::string features_name,
-                               const std::string in_dec_symbol_name,
-                               const std::string out_dec_symbol_name,
-                               const std::string logits_name) {};
     const cv::Size& input_size() const {return input_size_;}
 
   protected:
-    bool is_initialized_;
     cv::Size input_size_;
     int channels_;
     std::string input_name_;
@@ -49,18 +38,18 @@ class Cnn {
 
 class EncoderDecoderCNN : public Cnn {
   public:
-
-    void Init(const std::string &model_path, Core & ie, const std::string & deviceName,
-              const cv::Size &new_input_resolution = cv::Size()) override;
-
-    InferenceEngine::BlobMap Infer(const cv::Mat &frame) override;
-    void setInOutNames(const std::string out_enc_hidden_name,
+    EncoderDecoderCNN(const std::string &model_path,
+                      Core & ie, const std::string & deviceName,
+                      const std::string out_enc_hidden_name,
                       const std::string out_dec_hidden_name,
                       const std::string in_dec_hidden_name,
                       const std::string features_name,
                       const std::string in_dec_symbol_name,
                       const std::string out_dec_symbol_name,
-                      const std::string logits_name) override;
+                      const std::string logits_name,
+                      const cv::Size &new_input_resolution = cv::Size()
+                      );
+    InferenceEngine::BlobMap Infer(const cv::Mat &frame) override;
   private:
     InferRequest infer_request_encoder_;
     InferRequest infer_request_decoder_;

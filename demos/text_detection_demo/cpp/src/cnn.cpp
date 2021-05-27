@@ -14,9 +14,11 @@ namespace {
 constexpr size_t MAX_NUM_DECODER = 20;
 }
 
-void Cnn::Init(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
+Cnn::Cnn(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
     // ---------------------------------------------------------------------------------------------------
-
+    channels_ = 0;
+    time_elapsed_ = 0;
+    ncalls_ = 0;
     // --------------------------- 1. Reading network ----------------------------------------------------
     auto network = ie.ReadNetwork(model_path);
 
@@ -67,8 +69,6 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
     // --------------------------- Creating infer request ------------------------------------------------
     infer_request_ = executable_network.CreateInferRequest();
     // ---------------------------------------------------------------------------------------------------
-
-    is_initialized_ = true;
 }
 
 InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
@@ -123,8 +123,26 @@ void EncoderDecoderCNN::check_net_names(const OutputsDataMap &output_info_encode
  }
 
 
-void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
+EncoderDecoderCNN::EncoderDecoderCNN(const std::string &model_path,
+                                     Core & ie, const std::string & deviceName,
+                                     const std::string out_enc_hidden_name,
+                                     const std::string out_dec_hidden_name,
+                                     const std::string in_dec_hidden_name,
+                                     const std::string features_name,
+                                     const std::string in_dec_symbol_name,
+                                     const std::string out_dec_symbol_name,
+                                     const std::string logits_name,
+                                     const cv::Size &new_input_resolution
+                        ) : Cnn(model_path, ie, deviceName, new_input_resolution) {
     // ---------------------------------------------------------------------------------------------------
+    // --------------------------- Setting names ---------------------------------------------------------
+    out_enc_hidden_name_ = out_enc_hidden_name;
+    out_dec_hidden_name_ = out_dec_hidden_name;
+    in_dec_hidden_name_ = in_dec_hidden_name;
+    features_name_ = features_name;
+    in_dec_symbol_name_ = in_dec_symbol_name;
+    out_dec_symbol_name_ = out_dec_symbol_name;
+    logits_name_ = logits_name;
     // --------------------------- Checking paths --------------------------------------------------------
     std::string model_path_decoder = model_path;
     auto network_encoder = ie.ReadNetwork(model_path);
@@ -164,23 +182,6 @@ void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std
     infer_request_decoder_ = executable_network_decoder.CreateInferRequest();
     // ---------------------------------------------------------------------------------------------------
 
-    is_initialized_ = true;
-}
-
-void EncoderDecoderCNN::setInOutNames(const std::string out_enc_hidden_name,
-                                    const std::string out_dec_hidden_name,
-                                    const std::string in_dec_hidden_name,
-                                    const std::string features_name,
-                                    const std::string in_dec_symbol_name,
-                                    const std::string out_dec_symbol_name,
-                                    const std::string logits_name) {
-    out_enc_hidden_name_ = out_enc_hidden_name;
-    out_dec_hidden_name_ = out_dec_hidden_name;
-    in_dec_hidden_name_ = in_dec_hidden_name;
-    features_name_ = features_name;
-    in_dec_symbol_name_ = in_dec_symbol_name;
-    out_dec_symbol_name_ = out_dec_symbol_name;
-    logits_name_ = logits_name;
 }
 
 InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {

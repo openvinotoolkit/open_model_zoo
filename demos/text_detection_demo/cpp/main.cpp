@@ -140,15 +140,16 @@ int main(int argc, char *argv[]) {
         std::unique_ptr<Cnn> text_recognition;
         if (!FLAGS_m_tr.empty()) {
             try {
-                text_recognition = std::unique_ptr<Cnn>(new EncoderDecoderCNN());
-                text_recognition->setInOutNames(FLAGS_out_enc_hidden_name,
-                                                FLAGS_out_dec_hidden_name,
-                                                FLAGS_in_dec_hidden_name,
-                                                FLAGS_features_name,
-                                                FLAGS_in_dec_symbol_name,
-                                                FLAGS_out_dec_symbol_name,
-                                                FLAGS_tr_o_blb_nm);
-                text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
+                text_recognition = std::unique_ptr<Cnn>(new EncoderDecoderCNN(FLAGS_m_tr,
+                                                            ie,
+                                                            FLAGS_d_tr,
+                                                            FLAGS_out_enc_hidden_name,
+                                                            FLAGS_out_dec_hidden_name,
+                                                            FLAGS_in_dec_hidden_name,
+                                                            FLAGS_features_name,
+                                                            FLAGS_in_dec_symbol_name,
+                                                            FLAGS_out_dec_symbol_name,
+                                                            FLAGS_tr_o_blb_nm));
                 slog::info << "Initialized composite text recognition model" << slog::endl;
                 // 3 pad symbols stand for START_TOKEN, PAD_TOKEN and END_TOKEN, respectively;
                 if (FLAGS_tr_pt_first)
@@ -157,8 +158,7 @@ int main(int argc, char *argv[]) {
                     throw std::logic_error("Wrong decoder. Use --dt simple for composite model.");
             }
             catch (DecoderNotFound e) {
-                text_recognition = std::unique_ptr<Cnn>(new Cnn());
-                text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
+                text_recognition = std::unique_ptr<Cnn>(new Cnn(FLAGS_m_tr, ie, FLAGS_d_tr));
                 slog::info << "Initialized monolithic text recognition model" << slog::endl;
                 if (FLAGS_tr_pt_first)
                     kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
@@ -168,10 +168,9 @@ int main(int argc, char *argv[]) {
         }
         const double min_text_recognition_confidence = FLAGS_thr;
 
-        Cnn text_detection;
+        std::unique_ptr<Cnn> text_detection;
         if (!FLAGS_m_td.empty())
-            text_detection.Init(FLAGS_m_td, ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td));
-
+            text_detection = std::unique_ptr<Cnn>(new Cnn(FLAGS_m_td, ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td)));
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat image = cap->read();
         if (!image.data) {
@@ -200,10 +199,10 @@ int main(int argc, char *argv[]) {
 
             std::chrono::steady_clock::time_point begin_frame = std::chrono::steady_clock::now();
             std::vector<cv::RotatedRect> rects;
-            if (text_detection.is_initialized()) {
-                auto blobs = text_detection.Infer(image);
+            if (text_detection != nullptr) {
+                auto blobs =  text_detection->Infer(image);
                 std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-                rects = postProcess(blobs, image.size(), text_detection.input_size(),
+                rects = postProcess(blobs, image.size(),  text_detection->input_size(),
                                     cls_conf_threshold, link_conf_threshold);
                 std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                 text_detection_postproc_time += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
@@ -224,7 +223,7 @@ int main(int argc, char *argv[]) {
                 std::vector<cv::Point2f> points;
                 int top_left_point_idx = 0;
 
-                if (rect.size != cv::Size2f(0, 0) && text_detection.is_initialized()) {
+                if (rect.size != cv::Size2f(0, 0) && text_detection != nullptr) {
                     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
                     points = floatPointsFromRotatedRect(rect);
                     topLeftPoint(points, &top_left_point_idx);
@@ -350,16 +349,16 @@ int main(int argc, char *argv[]) {
             image = cap->read();
         } while (image.data);
 
-        if (text_detection.ncalls() && !FLAGS_r) {
+        if (text_detection != nullptr && text_detection->ncalls() && !FLAGS_r) {
           std::cout << "text detection model inference (ms) (fps): "
-                    << text_detection.time_elapsed() / text_detection.ncalls() << " "
-                    << text_detection.ncalls() * 1000 / text_detection.time_elapsed() << std::endl;
+                    <<  text_detection->time_elapsed() /  text_detection->ncalls() << " "
+                    <<  text_detection->ncalls() * 1000 /  text_detection->time_elapsed() << std::endl;
           if (std::fabs(text_detection_postproc_time) < std::numeric_limits<double>::epsilon()) {
               std::cout << "text detection postprocessing: took no time " << std::endl;
           } else {
             std::cout << "text detection postprocessing (ms) (fps): "
-                      << text_detection_postproc_time / text_detection.ncalls() << " "
-                      << text_detection.ncalls() * 1000 / text_detection_postproc_time << std::endl << std::endl;
+                      << text_detection_postproc_time /  text_detection->ncalls() << " "
+                      <<  text_detection->ncalls() * 1000 / text_detection_postproc_time << std::endl << std::endl;
           }
         }
 
