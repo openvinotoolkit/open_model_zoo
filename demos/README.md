@@ -46,7 +46,7 @@ The Open Model Zoo includes the following demos:
 - [Place Recognition Python\* Demo](./place_recognition_demo/python/README.md) - This demo demonstrates how to run Place Recognition models using OpenVINO™.
 - [Security Barrier Camera C++ Demo](./security_barrier_camera_demo/cpp/README.md) - Vehicle Detection followed by the Vehicle Attributes and License-Plate Recognition, supports images/video and camera inputs.
 - [Speech Recognition Python\* Demo](./speech_recognition_demo/python/README.md) - Speech recognition demo: takes audio file with an English phrase on input, and converts it into text.
-- [Speech Recognition Offline Python\* Demo](./speech_recognition_offline_demo/python/README.md) - Offline speech recognition demo: takes a whole audio file with an English phrase on input, and converts it into text.
+- [Speech Recognition QuartzNet Python\* Demo](./speech_recognition_quartznet_demo/python/README.md) - Speech recognition demo for QuartzNet: takes a whole audio file with an English phrase on input and converts it into text.
 - [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md) - 2D human pose estimation demo.
 - [Smart Classroom C++ Demo](./smart_classroom_demo/cpp/README.md) - Face recognition and action detection demo for classroom environment.
 - [Sound Classification Python\* Demo](./sound_classification_demo/python/README.md) - Demo application for sound classification algorithm.

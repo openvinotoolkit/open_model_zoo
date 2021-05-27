@@ -1,4 +1,4 @@
-# Speech Recognition Offline Python\* Demo
+# Speech Recognition QuartzNet Python\* Demo
 
 This demo demonstrates Automatic Speech Recognition (ASR) with pretrained QuartzNet model.
 
@@ -8,7 +8,7 @@ After computing audio features, running a neural network to get character probab
 
 ## Preparing to Run
 
-The list of models supported by the demo is in `<omz_dir>/demos/speech_recognition_offline_demo/python/models.lst` file.
+The list of models supported by the demo is in `<omz_dir>/demos/speech_recognition_quartznet_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 ### Supported Models
@@ -22,7 +22,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 Run the application with `-h` option to see help message.
 
 ```
-usage: speech_recognition_offline_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
+usage: speech_recognition_quartznet_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
 
 optional arguments:
   -h, --help            Show this help message and exit.
@@ -40,7 +40,7 @@ optional arguments:
 The typical command line is:
 
 ```sh
-python3 speech_recognition_offline_demo.py -m quartznet-15x5-en.xml -i audio.wav
+python3 speech_recognition_quartznet_demo.py -m quartznet-15x5-en.xml -i audio.wav
 ```
 
 > **NOTE**: Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.
