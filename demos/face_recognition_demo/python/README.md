@@ -1,4 +1,4 @@
-# Face Recognition Demo
+# Face Recognition Python\* Demo
 
 This example demonstrates an approach to create interactive applications
 for video processing. It shows the basic architecture for building model
@@ -13,9 +13,7 @@ The following pretrained models can be used:
 * `landmarks-regression-retail-0009`, to predict face keypoints;
 * `face-reidentification-retail-0095`, to recognize persons.
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
-
-### How it works
+## How it works
 
 The application is invoked from command line. It reads the specified input
 video stream frame-by-frame, be it a camera device or a video file,
@@ -28,6 +26,36 @@ is done by the face recognition model, which uses keypoints found
 to align the faces and the face gallery to match faces found on a video
 frame with the ones in the gallery. Then, the processing results are
 visualized and displayed on the screen or written to the output file.
+
+## Preparing to Run
+
+### Installation and dependencies
+
+The demo depends on:
+
+* OpenVINO library (2021.4 or newer)
+* Python (any, which is supported by OpenVINO)
+* OpenCV (>=4.2.5)
+
+To install all the required Python modules you can use:
+
+``` sh
+pip install -r requirements.txt
+```
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in <omz_dir>/demos/face_recognition_demo/python/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* face-detection-adas-0001
+* face-detection-retail-0004
+* face-reidentification-retail-0095
+* landmarks-regression-retail-0009
+* Sphereface
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ### Creating a gallery for face recognition
 
@@ -53,20 +81,7 @@ fail and produce poor crops.
 Image file name is used as a person name during the visualization.
 Use the following name convention: `person_N_name.png` or `person_N_name.jpg`.
 
-### Installation and dependencies
-
-The demo depends on:
-- OpenVINO library (2021.4 or newer)
-- Python (any, which is supported by OpenVINO)
-- OpenCV (>=4.2.5)
-
-To install all the required Python modules you can use:
-
-``` sh
-pip install -r requirements.txt
-```
-
-### Running the demo:
+## Running
 
 Running the application with the `-h` option or without
 any arguments yields the following message:
@@ -208,14 +223,13 @@ python ./face_recognition_demo.py ^
 -fg "C:/face_gallery"
 ```
 
-Notice that the custom networks should be converted to the
-Inference Engine format (*.xml + *bin) first. To do this use the
-[Model Optimizer](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer) tool.
-
-### Demo output
+## Demo output
 
 The demo uses OpenCV window to display the resulting video frame and detections.
 If specified, it also writes output to a file. It outputs logs to the terminal.
 
 ## See also
-* [Using Inference Engine Demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
+* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/downloader/README.md)
