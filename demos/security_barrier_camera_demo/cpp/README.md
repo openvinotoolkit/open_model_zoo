@@ -125,7 +125,7 @@ For example, to run the sample on one Intel® Vision Accelerator Design with Int
 > * `tagAttr` for the Vehicle Attributes Recognition network
 > * `tagLPR` for the License Plate Recognition network
 >
-> For example, to run the sample on one Intel® Vision Accelerator Design with Intel® Movidius™ VPUs Compact R card with eight Intel&reg; Movidius&trade; X VPUs:
+> For example, to run the demo on one Intel® Vision Accelerator Design with Intel® Movidius™ VPUs Compact R card with eight Intel&reg; Movidius&trade; X VPUs:
 > ```json
 > "service_settings":
 > {

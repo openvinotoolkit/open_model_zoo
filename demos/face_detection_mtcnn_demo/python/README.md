@@ -49,8 +49,8 @@ Options:
                         recognized or not.
   -d "<device>", --device "<device>"
                         Optional. Specify the target device to infer on; CPU,
-                        GPU, FPGA, HDDL, MYRIAD or HETERO: is acceptable. The
-                        sample will look for a suitable plugin for device
+                        GPU, FPGA, HDDL, MYRIAD or HETERO is acceptable. The
+                        demo will look for a suitable plugin for device
                         specified. Default value is CPU
   --loop                Optional. Enable reading the input in a loop.
   --no_show             Optional. Don't show output

@@ -33,7 +33,7 @@ optional arguments:
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
                         example: CPU, GPU, FPGA, HDDL, MYRIAD or HETERO. The
-                        sample will look for a suitable IE plugin for this
+                        demo will look for a suitable IE plugin for this
                         device. Default value is CPU.
 ```
 

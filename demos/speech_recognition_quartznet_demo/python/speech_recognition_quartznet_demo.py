@@ -96,8 +96,9 @@ def build_argparser():
     parser.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.', required=True)
     parser.add_argument('-i', '--input', help="Path to an audio file in WAV PCM 16 kHz mono format", required=True)
     parser.add_argument('-d', '--device', default='CPU',
-                        help="Optional. Specify the target device to infer on, for example: CPU, GPU, FPGA, HDDL, MYRIAD or HETERO. "
-                             "The sample will look for a suitable IE plugin for this device. Default value is CPU.")
+                        help="Optional. Specify the target device to infer on, for example: "
+                             "CPU, GPU, FPGA, HDDL, MYRIAD or HETERO. "
+                             "The demo will look for a suitable IE plugin for this device. Default value is CPU.")
     return parser
 
 

@@ -145,7 +145,7 @@ Options:
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
     -labels "<path>"          Required. Path to .txt file with labels.
     -gt "<path>"              Optional. Path to ground truth .txt file.
-    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Sample will look for a suitable plugin for device specified.
+    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.
     -nthreads "<integer>"     Optional. Specify count of threads.
     -nstreams "<integer>"     Optional. Specify count of streams.
     -nireq "<integer>"        Optional. Number of infer requests.
