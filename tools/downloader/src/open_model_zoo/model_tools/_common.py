@@ -59,7 +59,7 @@ KNOWN_TASK_TYPES = {
     'machine_translation',
     'monocular_depth_estimation',
     'named_entity_recognition',
-    'noise_suppression'
+    'noise_suppression',
     'object_attributes',
     'optical_character_recognition',
     'place_recognition',
