@@ -510,6 +510,8 @@ PYTHON_DEMOS = [
             TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
             TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
                               '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
+            TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
+                              '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
         ],
     )),
 
@@ -567,28 +569,28 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
-       [
-           TestCase(options={
-               '-m': ModelArg('machine-translation-nar-en-ru-0001'),
-               '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
-               '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
-               '-i': [
-                   'The quick brown fox jumps over the lazy dog.',
-                   'The five boxing wizards jump quickly.',
-                   'Jackdaws love my big sphinx of quartz.'
-               ],
-           }),
-           TestCase(options={
-               '-m': ModelArg('machine-translation-nar-ru-en-0001'),
-               '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
-               '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
-               '-i': [
-                   'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
-                   'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',
-                   'Съешь же ещё этих мягких французских булок да выпей чаю.'
-               ],
-           }),
-       ]
+        [
+            TestCase(options={
+                '-m': ModelArg('machine-translation-nar-en-ru-0001'),
+                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
+                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
+                '-i': [
+                    'The quick brown fox jumps over the lazy dog.',
+                    'The five boxing wizards jump quickly.',
+                    'Jackdaws love my big sphinx of quartz.'
+                ],
+            }),
+            TestCase(options={
+                '-m': ModelArg('machine-translation-nar-ru-en-0001'),
+                '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_src'),
+                '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-ru-en-0001/tokenizer_tgt'),
+                '-i': [
+                    'В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!',
+                    'Широкая электрификация южных губерний даст мощный толчок подъёму сельского хозяйства.',
+                    'Съешь же ещё этих мягких французских булок да выпей чаю.'
+                ],
+            }),
+        ]
     )),
 
     PythonDemo(name='monodepth_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -793,6 +795,12 @@ PYTHON_DEMOS = [
                 '-m_m': ModelArg('text-spotting-0004-detector'),
                 '-m_te': ModelArg('text-spotting-0004-recognizer-encoder'),
                 '-m_td': ModelArg('text-spotting-0004-recognizer-decoder'),
+                '--no_track': None
+            }),
+            TestCase(options={
+                '-m_m': ModelArg('text-spotting-0005-detector'),
+                '-m_te': ModelArg('text-spotting-0005-recognizer-encoder'),
+                '-m_td': ModelArg('text-spotting-0005-recognizer-decoder'),
                 '--no_track': None
             }),
         ]

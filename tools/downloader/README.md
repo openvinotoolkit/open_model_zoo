@@ -470,6 +470,7 @@ describing a single model. Each such object has the following keys:
   * `machine_translation`
   * `monocular_depth_estimation`
   * `named_entity_recognition`
+  * `noise_suppression`
   * `object_attributes`
   * `optical_character_recognition`
   * `place_recognition`
@@ -479,8 +480,9 @@ describing a single model. Each such object has the following keys:
   * `sound_classification`
   * `speech_recognition`
   * `style_transfer`
-  * `token_recognition`
   * `text_to_speech`
+  * `time_series`
+  * `token_recognition`
 
   Additional possible values might be added in the future.
 
