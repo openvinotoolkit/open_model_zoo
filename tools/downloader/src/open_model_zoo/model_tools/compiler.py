@@ -27,13 +27,18 @@ KNOWN_COMPILABLE_PRECISIONS = {'FP16', 'FP32'}
 
 def compile(reporter, compiler_path, model, model_precision, args, output_dir):
     (output_dir / model.subdirectory).mkdir(parents=True, exist_ok=True)
+    extra_args = args.extra_args or []
+    # Set default precisions, if there are no any
+    if '-ip' not in str(extra_args):
+        extra_args.append("-ip=U8")
+    if '-op' not in str(extra_args):
+        extra_args.append("-op=FP32")
 
     compile_cmd = [str(compiler_path),
         '-m={}'.format(args.model_dir / model.subdirectory / model_precision / (model.name + '.xml')),
         '-d={}'.format(args.target_device),
-        '-ip={}'.format('U8' if args.input_precision is None else args.input_precision),
-        '-op={}'.format('FP32' if args.output_precision is None else args.output_precision),
         '-o={}'.format(output_dir / model.subdirectory / model_precision / (model.name + '.blob')),
+        *extra_args
     ]
     reporter.print_section_heading('{}Compiling {} to BLOB ({})',
         '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
@@ -67,6 +72,8 @@ def main():
     parser.add_argument('--all', action='store_true', help='compile all available models')
     parser.add_argument('--print_all', action='store_true', help='print all available models')
     parser.add_argument('--compile_tool', type=Path, help='Compile Tool executable entry point')
+    parser.add_argument('--add_compile_arg', dest='extra_args', metavar='ARG', action='append',
+        help='Extra argument to pass to Compile Tool')
     parser.add_argument('--dry_run', action='store_true',
         help='print the compilation commands without running them')
     args = parser.parse_args()

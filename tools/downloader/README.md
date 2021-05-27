@@ -462,6 +462,13 @@ to compile for, by using the `--target_device` option:
 The supported values are those accepted by the `-d` option in
 Compile Tool documentation. If this option is unspecified, the default is `MYRIAD`.
 
+You can add extra Compile Tool arguments, for example you are able to change inputs/outputs layers precisions and layouts. 
+The option can be repeated to add multiple arguments:
+
+```sh
+./converter.py --name=deeplabv3 --add_compile_arg=-op=I32 --add_compile_arg=--ol=CHW
+```
+
 The script can print the compile commands without actually running them.
 To do this, use the `--dry_run` option:
 

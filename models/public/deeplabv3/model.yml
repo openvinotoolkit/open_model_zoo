@@ -33,4 +33,5 @@ model_optimizer_args:
   - --input_model=$dl_dir/deeplabv3_mnv2_pascal_train_aug/frozen_inference_graph.pb
 framework: tf
 quantizable: yes
+compilable: yes
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
