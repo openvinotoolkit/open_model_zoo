@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 from open_model_zoo.model_tools import (
-    _configuration, _common, _concurrency, _reporting,
+    _configuration, _common, _reporting
 )
 
 KNOWN_COMPILABLE_PRECISIONS = {'FP16', 'FP32'}
@@ -38,7 +38,7 @@ def compile(reporter, compiler_path, model, model_precision, args, output_dir):
     reporter.print_section_heading('{}Compiling {} to BLOB ({})',
         '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
 
-    reporter.print('Conversion command: {}', common.command_string(compile_cmd))
+    reporter.print('Conversion command: {}',_common.command_string(compile_cmd))
     success = True
     if not args.dry_run:
         reporter.print(flush=True)
@@ -80,7 +80,7 @@ def main():
             sys.exit('Unable to locate Compile Tool. '
                 + 'Use --compiler or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
-    models = common.load_models_from_args(parser, args)
+    models =_configuration.load_models_from_args(parser, args)
 
     if args.precisions is None:
         requested_precisions = KNOWN_COMPILABLE_PRECISIONS
@@ -90,7 +90,7 @@ def main():
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    reporter = common.Reporter(common.DirectOutputContext())
+    reporter =_reporting.Reporter(_reporting.DirectOutputContext())
 
     output_dir = args.model_dir if args.output_dir is None else args.output_dir
 
