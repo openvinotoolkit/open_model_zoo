@@ -151,7 +151,10 @@ int main(int argc, char *argv[]) {
                 text_recognition->Init(FLAGS_m_tr, ie, FLAGS_d_tr);
                 slog::info << "Initialized composite text recognition model" << slog::endl;
                 // 3 pad symbols stand for START_TOKEN, PAD_TOKEN and END_TOKEN, respectively;
-                kAlphabet = std::string(3, kPadSymbol) + FLAGS_m_tr_ss;
+                if (FLAGS_tr_pt_first)
+                    kAlphabet = std::string(3, kPadSymbol) + FLAGS_m_tr_ss;
+                if (decoder_type != "simple")
+                    throw std::logic_error("Wrong decoder. Use --dt simple for composite model.");
             }
             catch (DecoderNotFound e) {
                 text_recognition = std::unique_ptr<Cnn>(new Cnn());
