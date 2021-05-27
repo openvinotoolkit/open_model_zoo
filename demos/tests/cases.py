@@ -570,7 +570,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='machine_translation_demo', device_keys=[], test_cases=combine_cases(
         [
-             TestCase(options={
+            TestCase(options={
                 '-m': ModelArg('machine-translation-nar-en-ru-0001'),
                 '--tokenizer-src': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_src'),
                 '--tokenizer-tgt': str(OMZ_DIR / 'models/intel/machine-translation-nar-en-ru-0001/tokenizer_tgt'),
