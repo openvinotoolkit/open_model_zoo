@@ -78,6 +78,7 @@
 | mask_rcnn_resnet101_atrous_coco | YES |    |    |
 | mask_rcnn_resnet50_atrous_coco | YES |    |    |
 | midasnet | YES |    |    |
+| mixnet-l | YES | YES | YES |
 | mobilefacedet-v1-mxnet | YES |    |    |
 | mobilenet-ssd | YES | YES | YES |
 | mobilenet-v1-0.25-128 | YES | YES | YES |
