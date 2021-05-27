@@ -462,7 +462,7 @@ to compile for, by using the `--target_device` option:
 The supported values are those accepted by the `-d` option in
 Compile Tool documentation. If this option is unspecified, the default is `MYRIAD`.
 
-You can add extra Compile Tool arguments, for example you are able to change inputs/outputs layers precisions and layouts. 
+You can add extra Compile Tool arguments, for example you are able to change inputs/outputs layers precisions and layouts.
 The option can be repeated to add multiple arguments:
 
 ```sh

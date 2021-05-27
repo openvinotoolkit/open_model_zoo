@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +41,7 @@ def compile(reporter, compiler_path, model, model_precision, args, output_dir):
     reporter.print_section_heading('{}Compiling {} to BLOB ({})',
         '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
 
-    reporter.print('Conversion command: {}',_common.command_string(compile_cmd))
+    reporter.print('Conversion command: {}', _common.command_string(compile_cmd))
     success = True
     if not args.dry_run:
         reporter.print(flush=True)
