@@ -777,7 +777,7 @@ PYTHON_DEMOS = [
         ]
     )),
 
-    PythonDemo(name='speech_recognition_offline_demo', device_keys=['-d'], test_cases=combine_cases(
+    PythonDemo(name='speech_recognition_quartznet_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
         single_option_cases('-m',
             ModelArg('quartznet-15x5-en'),
