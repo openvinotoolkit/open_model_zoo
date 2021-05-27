@@ -18,28 +18,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/image-retrieval-0001.xml
-    size: 151123
-    sha256: 8b7c9427e73d1649182e84337724ec7218a2e1350223e03aca4e38b10e939c0e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/image-retrieval-0001/FP32/image-retrieval-0001.xml
+    size: 159795
+    sha256: f330e8158baf7c0df83fadd50528f4ebfb6f7d470aeb2917f9cd091581b10eeb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/image-retrieval-0001/FP32/image-retrieval-0001.xml
   - name: FP32/image-retrieval-0001.bin
-    size: 10139164
-    sha256: 34f61497eb3c94e47ef53c69f5dc0fab5d585f1a029fd6714c4295baa78f89aa
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/image-retrieval-0001/FP32/image-retrieval-0001.bin
+    size: 10139232
+    sha256: 94318084c5296888a31cd0a076b17a2fb4a3f8fc63f727c50afbdc7c02d180b1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/image-retrieval-0001/FP32/image-retrieval-0001.bin
   - name: FP16/image-retrieval-0001.xml
-    size: 151058
-    sha256: 1ca4444428e2854f30b58fd9744e743dbf2fd29e16fbf40bc687a945000d4fe3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/image-retrieval-0001/FP16/image-retrieval-0001.xml
+    size: 159699
+    sha256: c5df6588aab1eeed8eb3e05492005f10cea3c2e80326d2f3d4b4e428820c67fe
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/image-retrieval-0001/FP16/image-retrieval-0001.xml
   - name: FP16/image-retrieval-0001.bin
-    size: 5069650
-    sha256: 39853ff354c3851c534a49f1e8be0e82cf9b1702870bcc4e7cbbf394d3b77c2e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/image-retrieval-0001/FP16/image-retrieval-0001.bin
+    size: 5069716
+    sha256: 33b6ee3af8e48a46cdc5d4bcf2e326c6520dc4c36bfae507b13b53757064fc3c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/image-retrieval-0001/FP16/image-retrieval-0001.bin
   - name: FP16-INT8/image-retrieval-0001.xml
-    size: 425417
-    sha256: 57a4fa0ce95fb948eab6e095ff4ce4b5d1b017b65de7ece8949b77364a738df3
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/image-retrieval-0001/FP16-INT8/image-retrieval-0001.xml
+    size: 425257
+    sha256: cd19ed8d2100c38fff03e0d96d85995aa2bda30b030131753479c8d9de6edcf7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/image-retrieval-0001/FP16-INT8/image-retrieval-0001.xml
   - name: FP16-INT8/image-retrieval-0001.bin
     size: 2640917
-    sha256: 1eb725a34b551960f592075957f7501080a24c5846fcc100c5e78cafae688e07
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/image-retrieval-0001/FP16-INT8/image-retrieval-0001.bin
+    sha256: 2b623fc94b2dd85b48bdcaddd68d363d4c54f1b9c023904fba538c5ab540b70d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/image-retrieval-0001/FP16-INT8/image-retrieval-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/yolo-v2-ava-0001.xml
-    size: 82256
-    sha256: 91f9692900a0d5d31fa9a5d469bb0c85cb13f807f9a8dde90244afc160e20d15
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.xml
+    size: 81120
+    sha256: b60a4f664feee1b0388b74e8c176da2e081557184ae50bfabfc8c6edc4dacf55
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.xml
   - name: FP32/yolo-v2-ava-0001.bin
     size: 202580240
-    sha256: ec32cd3d02e629685dc818a8af5734630c1f778a8a715cef93444aeb1bc88132
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.bin
+    sha256: 22cab294c1cd4142b038ea0f1dcf61ba57fd9321334b77012f78e1d3bb2e18c2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/yolo-v2-ava-0001/FP32/yolo-v2-ava-0001.bin
   - name: FP16/yolo-v2-ava-0001.xml
-    size: 82227
-    sha256: ae376ce04a160d85ea86bbb98e444841c600de440dc046f7c7ea383600b91378
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.xml
+    size: 81051
+    sha256: 5aba8d3a906c7483b8d27eefda25a1320fce8e0d0823177d6ff9c3c65cd50511
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.xml
   - name: FP16/yolo-v2-ava-0001.bin
     size: 101290122
-    sha256: 3d64e39d4c0378eaf870834a072725bc9e7320a5cc4ffa3422f13d0dcd170ddf
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.bin
+    sha256: ebfc093c839e8e0d85e55a5d764f17a1a84e24b980809c1efd1ec7865a140767
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/yolo-v2-ava-0001/FP16/yolo-v2-ava-0001.bin
   - name: FP16-INT8/yolo-v2-ava-0001.xml
-    size: 183514
-    sha256: 946a14b6408c53dd38967409eeaa004b811cf25b93f565bc36a3b8229c292fba
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.xml
+    size: 183072
+    sha256: ed8988141ec3f6df39caab668aa556063b6a9ab09c816276675f34267dbecd8a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.xml
   - name: FP16-INT8/yolo-v2-ava-0001.bin
     size: 50697466
-    sha256: 8faac5c4937df54f069ff850d610391a683149452ad3986640a37b1247601306
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.bin
+    sha256: 5ff7998ee1139a19a3765cc4e2fb672022fbaf5007791dca657a3e0a339231b9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/yolo-v2-ava-0001/FP16-INT8/yolo-v2-ava-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/yolo-v2-tiny-vehicle-detection-0001.xml
-    size: 32651
-    sha256: 68eae54f156264713cd8565c2974ef7f8b113656e2a27f9ed75cb50c557662f7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP32/yolo-v2-tiny-vehicle-detection-0001.xml
+    size: 32420
+    sha256: 180d4250a5ac10c308bade639a6057e0f280beb0d2850833a0a281e6101b9d94
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/yolo-v2-tiny-vehicle-detection-0001/FP32/yolo-v2-tiny-vehicle-detection-0001.xml
   - name: FP32/yolo-v2-tiny-vehicle-detection-0001.bin
     size: 44918056
-    sha256: b15e36bcc6763676fd25db67c328242875f0257ef7faf2d3bd8cebfb032151f5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP32/yolo-v2-tiny-vehicle-detection-0001.bin
+    sha256: 6ed32beb3db7a8978f05c132002bd2c1d7ba2bd32a7065fad77c6e7afb60b7d6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/yolo-v2-tiny-vehicle-detection-0001/FP32/yolo-v2-tiny-vehicle-detection-0001.bin
   - name: FP16/yolo-v2-tiny-vehicle-detection-0001.xml
-    size: 32631
-    sha256: 8e33c3a2a48caae0a176f4a86e3e708360599279a66c1b110cdb44aa577b86d9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16/yolo-v2-tiny-vehicle-detection-0001.xml
+    size: 32393
+    sha256: 456ed1224fb32a46ae1356ea03d01507a5523fd9ce5a9a05ac66eeeef1a841ef
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/yolo-v2-tiny-vehicle-detection-0001/FP16/yolo-v2-tiny-vehicle-detection-0001.xml
   - name: FP16/yolo-v2-tiny-vehicle-detection-0001.bin
     size: 22459030
-    sha256: 15aee0ac39cdfeff0f8dfdb85e8b3152331df42d879ba76e9d3c5e7548ca3007
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16/yolo-v2-tiny-vehicle-detection-0001.bin
+    sha256: 924673b0fd7bdc7881d537101b84a68b43efbbed6f51f57dbc7edf01a3a3a478
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/yolo-v2-tiny-vehicle-detection-0001/FP16/yolo-v2-tiny-vehicle-detection-0001.bin
   - name: FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.xml
-    size: 72297
-    sha256: e118e95f0a8c92ed9ffa538cb90c3bb77b58375cca978d7e8a5f3da054ee5971
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.xml
+    size: 73405
+    sha256: cd2813cced99c133eb5cbdfc89f117c797817807d70a3c6131dad5401a20bbb3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.xml
   - name: FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.bin
-    size: 11244398
-    sha256: b2d276fcf12b65c68cb5b6d85ed6ed0a72c9ef42d7d9759b3a502c22152cc8bf
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.bin
+    size: 11244400
+    sha256: 1eee6a4045964c9adb844857b161709ea195a9675056d88ca0bce0f08b30676a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/yolo-v2-tiny-vehicle-detection-0001/FP16-INT8/yolo-v2-tiny-vehicle-detection-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
