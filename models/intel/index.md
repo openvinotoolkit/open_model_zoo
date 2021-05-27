@@ -303,6 +303,12 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 |   text-to-speech-en-multi-0001-regression                          | 7.81  | 5.12  |
 |   text-to-speech-en-multi-0001-generation                          | 48.38 | 12.77 |
 
+Deep Learning models for noise suppression.
+
+| Model Name                                                                          | Complexity (GFLOPs)  | Size (Mp)  |
+|-------------------------------------------------------------------------------------|--------------------- |----------- |
+| [noise-suppression-poconetlike-0001](./noise-suppression-poconetlike-0001/README.md)| 1.2                  | 7.22       |
+
 ## Time Series Forecasting
 
 Deep Learning models for time series forecasting.
