@@ -203,7 +203,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `images_dir` - path to dataset root, where directories with low and high resolutions are located.
   * `lr_dir` - path to directory, where images in low resolution are located (Optional, default `<images_dir>/LR`).
   * `hr_dir` - path to directory, where images in high resolution are located (Optional, default `<images_dir>/HR`). **Note:** inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.
-  * `upsampled_dir` - path to directory, where upsampled images are located, if 2 streams used (Optional, default <images_dir>/upsample).
+  * `upsampled_dir` - path to directory, where upsampled images are located, if 2 streams used (Optional, default `<images_dir>/upsample`).
   * `relaxed_names` - allow to use more relaxed search of high resolution or/and upsampled images matching only numeric ids. Optional, by default full name matching required.
   * `hr_prefixed` - allow to use partial name matching  when low resolution filename is a part of high resolution filename. Not applicable when `relaxed_names` is set. Optional, by default full name matching required.
 * `multi_frame_super_resolution` - converts dataset for super resolution task with multiple input frames usage.
