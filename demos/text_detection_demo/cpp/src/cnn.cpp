@@ -132,6 +132,7 @@ EncoderDecoderCNN::EncoderDecoderCNN(const std::string &model_path,
                                      const std::string in_dec_symbol_name,
                                      const std::string out_dec_symbol_name,
                                      const std::string logits_name,
+                                     unsigned end_token;
                                      const cv::Size &new_input_resolution
                         ) : Cnn(model_path, ie, deviceName, new_input_resolution) {
     // ---------------------------------------------------------------------------------------------------
@@ -181,6 +182,7 @@ EncoderDecoderCNN::EncoderDecoderCNN(const std::string &model_path,
     infer_request_encoder_ = executable_network_encoder.CreateInferRequest();
     infer_request_decoder_ = executable_network_decoder.CreateInferRequest();
     // ---------------------------------------------------------------------------------------------------
+    end_token_ = end_token;
 
 }
 
@@ -225,6 +227,8 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
         auto argmax = std::distance(output_data_decoder, max_elem_vector);
         for (size_t i = 0; i < num_classes; i++)
             data_targets[num_decoder * num_classes + i] = output_data_decoder[i];
+        if (end_token_ == argmax)
+            break;
         input_data_decoder[0] = float(argmax);
 
         infer_request_decoder_.SetBlob(in_dec_hidden_name_, infer_request_decoder_.GetBlob(out_enc_hidden_name_));

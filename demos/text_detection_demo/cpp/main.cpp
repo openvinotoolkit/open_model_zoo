@@ -140,6 +140,9 @@ int main(int argc, char *argv[]) {
         std::unique_ptr<Cnn> text_recognition;
         if (!FLAGS_m_tr.empty()) {
             try {
+                // 2 spaces stand for START_TOKEN and PAD_TOKEN, respectively;
+                if (FLAGS_tr_pt_first)
+                    kAlphabet = std::string("  ") + std::string(kPadSymbol) + FLAGS_m_tr_ss;
                 text_recognition = std::unique_ptr<Cnn>(new EncoderDecoderCNN(FLAGS_m_tr,
                                                             ie,
                                                             FLAGS_d_tr,
@@ -149,11 +152,9 @@ int main(int argc, char *argv[]) {
                                                             FLAGS_features_name,
                                                             FLAGS_in_dec_symbol_name,
                                                             FLAGS_out_dec_symbol_name,
-                                                            FLAGS_tr_o_blb_nm));
+                                                            FLAGS_tr_o_blb_nm,
+                                                            kAlphabet.find(kPadSymbol)));
                 slog::info << "Initialized composite text recognition model" << slog::endl;
-                // 3 pad symbols stand for START_TOKEN, PAD_TOKEN and END_TOKEN, respectively;
-                if (FLAGS_tr_pt_first)
-                    kAlphabet = std::string(3, kPadSymbol) + FLAGS_m_tr_ss;
                 if (decoder_type != "simple")
                     throw std::logic_error("Wrong decoder. Use --dt simple for composite model.");
             }
