@@ -82,10 +82,6 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
 
     auto blob = infer_request_.GetBlob(input_name_);
     matU8ToBlob<uint8_t>(image, blob);
-    // ---------------------------------------------------------------------------------------------------
-
-    // --------------------------- Doing inference -------------------------------------------------------
-    /* Running the request synchronously */
     infer_request_.Infer();
     // ---------------------------------------------------------------------------------------------------
 
@@ -230,11 +226,8 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
 
     InferenceEngine::Blob::Ptr blob = infer_request_encoder_.GetBlob(input_name_);
     matU8ToBlob<uint8_t>(image, blob);
-    // --------------------------- Doing inference -------------------------------------------------------
-    /* Running the request synchronously */
-    infer_request_encoder_.Infer();
-    // ---------------------------------------------------------------------------------------------------
 
+    infer_request_encoder_.Infer();
     // --------------------------- Processing encoder output -----------------------------------------------------
     // blobs here are set for concrete network
     // in case of different network this needs to be changed or generalized
