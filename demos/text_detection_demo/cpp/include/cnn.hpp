@@ -64,8 +64,6 @@ class EncoderDecoderCNN : public Cnn {
   private:
     InferRequest infer_request_encoder_;
     InferRequest infer_request_decoder_;
-    std::vector<std::string> output_names_encoder;
-    std::vector<std::string> output_names_decoder;
     std::string features_name_;
     std::string out_enc_hidden_name_;
     std::string out_dec_hidden_name_;
@@ -73,9 +71,10 @@ class EncoderDecoderCNN : public Cnn {
     std::string in_dec_symbol_name_;
     std::string out_dec_symbol_name_;
     std::string logits_name_;
-    void check_net_names(std::vector<std::string> output_names_encoder,
-                                               std::vector<std::string> input_names_decoder,
-                                               std::vector<std::string> output_names_decoder);
+    void check_net_names(const OutputsDataMap &output_info_encoder,
+                                        const OutputsDataMap &output_info_decoder,
+                                        const InputsDataMap &input_info_decoder
+                                        );
 };
 
 class NameNotExist : public std::exception {

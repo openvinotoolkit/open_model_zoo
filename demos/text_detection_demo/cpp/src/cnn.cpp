@@ -99,38 +99,24 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     return blobs;
 }
 
-void EncoderDecoderCNN::check_net_names(std::vector<std::string> output_names_encoder,
-                                               std::vector<std::string> input_names_decoder,
-                                               std::vector<std::string> output_names_decoder) {
+void EncoderDecoderCNN::check_net_names(const OutputsDataMap &output_info_encoder,
+                                        const OutputsDataMap &output_info_decoder,
+                                        const InputsDataMap &input_info_decoder
+                                        ) {
     std::string name_not_exist = "";
-    if (std::find(
-            output_names_encoder.begin(),
-            output_names_encoder.end(),
-            out_enc_hidden_name_) == output_names_encoder.end())
+    if (output_info_encoder.find(out_enc_hidden_name_) == output_info_encoder.end())
         name_not_exist = out_enc_hidden_name_;
-    if (std::find(output_names_encoder.begin(),
-            output_names_encoder.end(),
-            features_name_) == output_names_encoder.end())
+    if (output_info_encoder.find(features_name_) == output_info_encoder.end())
         name_not_exist = features_name_;
-    if (std::find(input_names_decoder.begin(),
-            input_names_decoder.end(),
-            in_dec_hidden_name_) == input_names_decoder.end())
+    if (input_info_decoder.find(in_dec_hidden_name_) == input_info_decoder.end())
         name_not_exist = in_dec_hidden_name_;
-    if (std::find(input_names_decoder.begin(),
-            input_names_decoder.end(),
-            features_name_) == input_names_decoder.end())
+    if (input_info_decoder.find(features_name_) == input_info_decoder.end())
         name_not_exist = features_name_;
-    if (std::find(input_names_decoder.begin(),
-            input_names_decoder.end(),
-            in_dec_symbol_name_) == input_names_decoder.end())
+    if (input_info_decoder.find(in_dec_symbol_name_) == input_info_decoder.end())
         name_not_exist = in_dec_symbol_name_;
-    if (std::find(output_names_decoder.begin(),
-            output_names_decoder.end(),
-            out_dec_hidden_name_) == output_names_decoder.end())
+    if (output_info_decoder.find(out_dec_hidden_name_) == output_info_decoder.end())
         name_not_exist = out_dec_hidden_name_;
-    if (std::find(output_names_decoder.begin(),
-            output_names_decoder.end(),
-            out_dec_symbol_name_) == output_names_decoder.end())
+    if (output_info_decoder.find(out_dec_symbol_name_) == output_info_decoder.end())
         name_not_exist = out_dec_symbol_name_;
     if (name_not_exist != "")
         throw NameNotExist(name_not_exist);
@@ -143,38 +129,20 @@ void EncoderDecoderCNN::Init(const std::string &model_path, Core & ie, const std
     std::string model_path_decoder = model_path;
     auto network_encoder = ie.ReadNetwork(model_path);
     CNNNetwork network_decoder;
-    try {
-        if (model_path_decoder.find("encoder") == std::string::npos)
-            throw std::runtime_error("Model path does not contain 'encoder'");
-        while (model_path_decoder.find("encoder") != std::string::npos)
-            model_path_decoder = model_path_decoder.replace(model_path_decoder.find("encoder"), 7, "decoder");
-        network_decoder = ie.ReadNetwork(model_path_decoder);
-    }
-    catch (const std::runtime_error& error)
-    {
+    if (model_path_decoder.find("encoder") == std::string::npos)
         throw DecoderNotFound();
-    }
-    // --------------------------- Checking net names ----------------------------------------------------
+    while (model_path_decoder.find("encoder") != std::string::npos)
+        model_path_decoder = model_path_decoder.replace(model_path_decoder.find("encoder"), 7, "decoder");
+    network_decoder = ie.ReadNetwork(model_path_decoder);
+
     InputsDataMap inputInfo(network_encoder.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::runtime_error("The network_encoder should have only one input");
     }
-    OutputsDataMap outputInfo(network_encoder.getOutputsInfo());
-    for (auto output : outputInfo) {
-        output_names_encoder.emplace_back(output.first);
-    }
-    outputInfo = network_decoder.getOutputsInfo();
-    for (auto output : outputInfo) {
-        output_names_decoder.emplace_back(output.first);
-    }
-    std::vector<std::string> input_names_decoder;
-    inputInfo = network_decoder.getInputsInfo();
-    for (auto input : inputInfo) {
-        input_names_decoder.emplace_back(input.first);
-    }
-    this->check_net_names(output_names_encoder,
-                        input_names_decoder,
-                        output_names_decoder);
+    // --------------------------- Checking net names ----------------------------------------------------
+    this->check_net_names(network_encoder.getOutputsInfo(),
+                        network_decoder.getOutputsInfo(),
+                        network_decoder.getInputsInfo());
 
     // ---------------------------------------------------------------------------------------------------
     InputInfo::Ptr input_info = network_encoder.getInputsInfo().begin()->second;
