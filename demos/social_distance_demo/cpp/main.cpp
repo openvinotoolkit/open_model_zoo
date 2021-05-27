@@ -183,17 +183,12 @@ public:
 // accumulates and shows processed frames
 class Drawer : public Task {
 public:
-    explicit Drawer(VideoFrame::Ptr sharedVideoFrame, std::list<cv::Rect>&& boxes,
-        std::list<TrackableObject>&& trackables)
-        : Task{sharedVideoFrame, 1.0}, boxes{ std::move(boxes) },
-        trackables{ std::move(trackables) }  {}
+    explicit Drawer(VideoFrame::Ptr sharedVideoFrame)
+        : Task{sharedVideoFrame, 1.0} {}
     bool isReady() override;
     void process() override;
-    void drawDetections(Context& context, cv::Mat& frame);
 
 private:
-    std::list<cv::Rect> boxes;
-    std::list<TrackableObject> trackables;
 };
 
 // draws results on the frame
@@ -334,60 +329,6 @@ bool Drawer::isReady() {
     }
 }
 
-void Drawer::drawDetections(Context& context, cv::Mat& frame) {
-    unsigned sourceID = sharedVideoFrame->sourceID;
-    auto& personTracker = context.trackersContext.personTracker[sourceID];
-
-    for (const cv::Rect& bbox : boxes) {
-        cv::rectangle(frame, bbox, { 0, 255, 0 }, 2);
-        if (bbox.width < context.trackersContext.minW[sourceID]) {
-            context.trackersContext.minW[sourceID] = bbox.width;
-        }
-        if (bbox.width > context.trackersContext.maxW[sourceID]) {
-            context.trackersContext.maxW[sourceID] = bbox.width;
-        }
-    }
-
-    personTracker.similarity(trackables);
-
-    int w = frame.size().width;
-    int h = frame.size().height;
-    for (auto it1 = personTracker.trackables.begin(); it1 != personTracker.trackables.end(); ++it1) {
-        cv::Rect2d  l1 = it1->second.bbox;
-        auto it2 = it1;
-        ++it2;
-        for (; it2 != personTracker.trackables.end(); ++it2) {
-            cv::Rect2d  l2 = it2->second.bbox;
-            cv::Point2d a, b, c, d;
-            if (l1.y + l1.height < l2.y + l2.height) {
-                a = { l1.x, l1.y + l1.height };
-                b = { l1.x + l1.width, l1.y + l1.height };
-                c = { l2.x, l2.y + l2.height };
-                d = { l2.x + l2.width, l2.y + l2.height };
-            }
-            else {
-                c = { l1.x, l1.y + l1.height };
-                d = { l1.x + l1.width, l1.y + l1.height };
-                a = { l2.x, l2.y + l2.height };
-                b = { l2.x + l2.width, l2.y + l2.height };
-            }
-
-            std::tuple<int, int> frame_shape(h, w);
-            auto result = socialDistance(frame_shape, a, b, c, d, 4 /* ~ 5 feets */,
-                context.trackersContext.minW[sourceID],
-                context.trackersContext.maxW[sourceID]);
-
-            if (std::get<1>(result)) {
-                cv::rectangle(frame, l1, { 0, 255, 255 }, 2);
-                cv::rectangle(frame, l2, { 0, 255, 255 }, 2);
-                cv::Point2d rect1center = { l1.x + l1.width / 2, l1.y + l1.height / 2 };
-                cv::Point2d rect2center = { l2.x + l2.width / 2, l2.y + l2.height / 2 };
-                cv::line(frame, rect1center, rect2center, { 0, 0, 255 }, 3);
-            }
-        }
-    }
-}
-
 void Drawer::process() {
     const int64_t frameId = sharedVideoFrame->frameId;
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
@@ -405,7 +346,6 @@ void Drawer::process() {
     if (firstGridIt->first == lastShownframeId && firstGridIt->second.isFilled()) {
         lastShownframeId++;
         cv::Mat mat = firstGridIt->second.getMat();
-        drawDetections(context, mat);
         constexpr float OPACITY = 0.6f;
         fillROIColor(mat, cv::Rect(5, 5, 390, 115), cv::Scalar(255, 0, 0), OPACITY);
         cv::putText(mat, "Detection InferRequests usage", cv::Point2f(15, 70), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
@@ -453,9 +393,57 @@ void ResAggregator::process() {
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     context.freeDetectionInfersCount += context.detectorsInfers.inferRequests.lockedSize();
     context.frameCounter++;
-
+    unsigned sourceID = sharedVideoFrame->sourceID;
+    auto& personTracker = context.trackersContext.personTracker[sourceID];
     if (!FLAGS_no_show) {
-        tryPush(context.drawersContext.drawersWorker, std::make_shared<Drawer>(sharedVideoFrame, std::move(boxes), std::move(trackables)));
+        for (const cv::Rect& bbox : boxes) {
+            cv::rectangle(sharedVideoFrame->frame, bbox, { 0, 255, 0 }, 2);
+            if (bbox.width < context.trackersContext.minW[sourceID]) {
+                context.trackersContext.minW[sourceID] = bbox.width;
+            }
+            if (bbox.width > context.trackersContext.maxW[sourceID]) {
+                context.trackersContext.maxW[sourceID] = bbox.width;
+            }
+        }
+
+        personTracker.similarity(trackables);
+
+        int w = sharedVideoFrame->frame.size().width;
+        int h = sharedVideoFrame->frame.size().height;
+        for (auto it1 = personTracker.trackables.begin(); it1 != personTracker.trackables.end(); ++it1) {
+            cv::Rect2d  l1 = it1->second.bbox;
+            auto it2 = it1;
+            ++it2;
+            for (; it2 != personTracker.trackables.end(); ++it2) {
+                cv::Rect2d  l2 = it2->second.bbox;
+                cv::Point2d a, b, c, d;
+                if (l1.y + l1.height < l2.y + l2.height) {
+                    a = { l1.x, l1.y + l1.height };
+                    b = { l1.x + l1.width, l1.y + l1.height };
+                    c = { l2.x, l2.y + l2.height };
+                    d = { l2.x + l2.width, l2.y + l2.height };
+                }
+                else {
+                    c = { l1.x, l1.y + l1.height };
+                    d = { l1.x + l1.width, l1.y + l1.height };
+                    a = { l2.x, l2.y + l2.height };
+                    b = { l2.x + l2.width, l2.y + l2.height };
+                }
+
+                std::tuple<int, int> frame_shape(h, w);
+                auto result = socialDistance(frame_shape, a, b, c, d, 4 /* ~ 5 feets */,
+                    context.trackersContext.minW[sourceID],
+                    context.trackersContext.maxW[sourceID]);
+
+                if (std::get<1>(result)) {
+                    cv::Point2d rect1center = { l1.x + l1.width / 2, l1.y + l1.height / 2 };
+                    cv::Point2d rect2center = { l2.x + l2.width / 2, l2.y + l2.height / 2 };
+                    cv::line(sharedVideoFrame->frame, rect1center, rect2center, { 0, 0, 255 }, 3);
+                }
+            }
+        }
+
+        tryPush(context.drawersContext.drawersWorker, std::make_shared<Drawer>(sharedVideoFrame));
     }
     else {
         if (!context.isVideo) {

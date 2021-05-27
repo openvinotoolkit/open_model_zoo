@@ -34,13 +34,18 @@ public:
             for (const auto& to : tos) {
                 std::deque<std::pair<int, float>> sim;
                 for (auto &tracker : trackables) {
-                    float cosine = cosineSimilarity(to.reid, tracker.second.reid);
-                    if (cosine > similarityThreshold)
-                        sim.push_back(std::make_pair(tracker.first, cosine));
+                    if (!tracker.second.updated) {
+                        float cosine = cosineSimilarity(to.reid, tracker.second.reid);
+                        if (cosine > similarityThreshold) {
+                            sim.push_back(std::make_pair(tracker.first, cosine));
+                        }
+                    }
                 }
 
                 if (!sim.empty()) {
-                    int maxSimilarity = getMaxSimilarity(sim);
+                    auto maxSimilarity = std::max_element(sim.begin(), sim.end(), [](std::pair<int, float> a, std::pair<int, float> b) {
+                        return std::get<1>(a) > std::get<1>(b);
+                     })->first;
                     trackables.at(maxSimilarity) = to;
                     trackables.at(maxSimilarity).updated = true;
                     trackables.at(maxSimilarity).disappeared = 0;
@@ -88,19 +93,6 @@ public:
             trackables.insert({trackIdGenerator, to});
             trackIdGenerator += 1;
         }
-    }
-
-    int getMaxSimilarity(std::deque<std::pair<int, float>> &similList) {
-        std::sort(similList.begin(), similList.end(), [](std::pair<int, float> a, std::pair<int, float> b) {
-            return std::get<1>(a) > std::get<1>(b);
-        });
-
-        for (auto &sim : similList) {
-            if (!trackables.at(std::get<0>(sim)).updated)
-                return std::get<0>(sim);
-        }
-
-        return -1;
     }
 
 public:

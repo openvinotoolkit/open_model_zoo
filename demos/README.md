@@ -49,6 +49,7 @@ The Open Model Zoo includes the following demos:
 - [Speech Recognition Offline Python\* Demo](./speech_recognition_offline_demo/python/README.md) - Offline speech recognition demo: takes a whole audio file with an English phrase on input, and converts it into text.
 - [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md) - 2D human pose estimation demo.
 - [Smart Classroom C++ Demo](./smart_classroom_demo/cpp/README.md) - Face recognition and action detection demo for classroom environment.
+- [Social Distance C++ Demo](./social_distance_demo/cpp/README.md) - This demo showcases a retail social distance application that detects people and measures the distance between them.
 - [Sound Classification Python\* Demo](./sound_classification_demo/python/README.md) - Demo application for sound classification algorithm.
 - [Super Resolution C++ Demo](./super_resolution_demo/cpp/README.md) - Super Resolution demo (the demo supports only images as inputs). It enhances the resolution of the input image.
 - [Text Detection C++ Demo](./text_detection_demo/cpp/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
