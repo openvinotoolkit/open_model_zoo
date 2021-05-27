@@ -365,19 +365,20 @@ class Model:
                 task_type, conversion_to_onnx_args, composite_model_name)
 
 def check_composite_model_dir(model_dir):
-    if list(model_dir.glob('*/*/model.yml')):
-        raise DeserializationError(
-            '{} directory should not contain any model.yml files in any subdirectories '
-            'that are not direct children of the composite model directory'.format(model_dir))
+    with deserialization_context('In directory "{}"'.format(model_dir)):
+        if list(model_dir.glob('*/*/**/model.yml')):
+            raise DeserializationError(
+                'Directory should not contain any model.yml files in any subdirectories '
+                'that are not direct children of the composite model directory')
 
-    if list(model_dir.glob('model.yml')):
-        raise DeserializationError('{} directory should not contain any model.yml files'.format(model_dir))
+        if (model_dir / 'model.yml').exists():
+            raise DeserializationError('Directory should not contain a model.yml file')
 
-    model_name = model_dir.name
-    model_stages = list(model_dir.glob('*/model.yml'))
-    for model in model_stages:
-        if not model.parent.name.startswith(f'{model_name}-'):
-            raise DeserializationError('Names of composite model parts should start with composite model name')
+        model_name = model_dir.name
+        model_stages = list(model_dir.glob('*/model.yml'))
+        for model in model_stages:
+            if not model.parent.name.startswith(f'{model_name}-'):
+                raise DeserializationError('Names of composite model parts should start with composite model name')
 
 def load_models(args):
     models = []
@@ -386,17 +387,26 @@ def load_models(args):
     composite_models = []
 
     for composite_model_config in sorted(_common.MODEL_ROOT.glob('**/composite-model.yml')):
-        check_composite_model_dir(composite_model_config.parent)
-        composite_models.append(composite_model_config.parent.name)
+        composite_model_name = composite_model_config.parent.name
+        with deserialization_context('In model "{}"'.format(composite_model_name)):
+            if not RE_MODEL_NAME.fullmatch(composite_model_name):
+                raise DeserializationError('Invalid name, must consist only of letters, digits or ._-')
 
-        if composite_models[-1] in composite_models[:-1]:
-            raise DeserializationError(
-                'Duplicate composite model name "{}"'.format(composite_models[-1]))
+            check_composite_model_dir(composite_model_config.parent)
+
+            if composite_model_name in composite_models:
+                raise DeserializationError(
+                    'Duplicate composite model name "{}"'.format(composite_model_name))
+            composite_models.append(composite_model_name)
 
     for config_path in sorted(_common.MODEL_ROOT.glob('**/model.yml')):
-        subdirectory = config_path.parent.relative_to(_common.MODEL_ROOT)
+        subdirectory = config_path.parent
 
-        composite_model_name = subdirectory.parent.name if subdirectory.parent.name in composite_models else None
+        is_composite = ((subdirectory.parent / 'composite-model.yml').exists() and
+            subdirectory.parent.name in composite_models)
+        composite_model_name = subdirectory.parent.name if is_composite else None
+
+        subdirectory = subdirectory.relative_to(_common.MODEL_ROOT)
 
         with config_path.open('rb') as config_file, \
                 deserialization_context('In config "{}"'.format(config_path)):
