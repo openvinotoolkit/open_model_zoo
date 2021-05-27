@@ -42,7 +42,7 @@ Options:
 ```
 
 You can use the following command to try the demo (assuming the model from the Open Model Zoo, downloaded with the
-[Model Downloader](../../../tools/downloader/README.md) executed with "--name dns*"):
+[Model Downloader](../../../tools/downloader/README.md) executed with "--name noise-suppression*"):
 ```
     python3 noise_suppression_demo.py \
         --model=<path_to_model>/noise-suppression-poconetlike-0001.xml \
