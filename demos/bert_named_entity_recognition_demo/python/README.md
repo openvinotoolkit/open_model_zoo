@@ -41,7 +41,7 @@ Options:
                         are "input_ids,attention_mask,token_type_ids"
   -d DEVICE, --device DEVICE
                         Optional. Target device to perform inference
-                        on.Default value is CPU
+                        on. Default value is CPU
 ```
 
 ## Demo Inputs
