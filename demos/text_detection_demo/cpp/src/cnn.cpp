@@ -252,8 +252,6 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
     input_data_decoder[0] = 0;
     auto num_classes = infer_request_decoder_.GetBlob(out_dec_symbol_name_)->size();
 
-    InferenceEngine::BlobMap decoder_blobs;
-
     auto targets = InferenceEngine::make_shared_blob<float>(
         InferenceEngine::TensorDesc(Precision::FP32, std::vector<size_t> {1, MAX_NUM_DECODER, num_classes},
         Layout::HWC));
@@ -263,9 +261,6 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
 
     for (size_t num_decoder = 0; num_decoder < MAX_NUM_DECODER; num_decoder ++) {
         infer_request_decoder_.Infer();
-        for (const auto &output_name : output_names_decoder) {
-            decoder_blobs[output_name] = infer_request_decoder_.GetBlob(output_name);
-        }
         InferenceEngine::LockedMemory<const void> output_decoder =
                      InferenceEngine::as<InferenceEngine::MemoryBlob>(infer_request_decoder_.GetBlob(out_dec_symbol_name_))->rmap();
         const float * output_data_decoder = output_decoder.as<const float *>();
