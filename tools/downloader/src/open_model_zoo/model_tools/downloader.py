@@ -18,6 +18,7 @@ import argparse
 import contextlib
 import functools
 import hashlib
+import json
 import requests
 import shutil
 import ssl
@@ -358,19 +359,21 @@ def main():
             if getattr(args, mode):
                 telemetry.send_event('md', 'downloader_selection_mode', mode)
 
-        for model in models:
-            telemetry.send_event('md', 'downloader_model_name', model.name)
-            telemetry.send_event('md', 'downloader_framework', model.framework)
-
-        failed_models = set()
-
         if args.precisions is None:
             requested_precisions = _common.KNOWN_PRECISIONS
         else:
             requested_precisions = set(args.precisions.split(','))
 
-        for precision in requested_precisions:
-            telemetry.send_event('md', 'downloader_precision', precision)
+        for model in models:
+            precisions_to_send = requested_precisions if args.precisions else requested_precisions & model.precisions
+            model_information = {
+                'name': model.name,
+                'framework': model.framework,
+                'precisions': str(precisions_to_send).replace(',', ';'),
+            }
+            telemetry.send_event('md', 'downloader_model', json.dumps(model_information))
+
+        failed_models = set()
 
         unknown_precisions = requested_precisions - _common.KNOWN_PRECISIONS
         if unknown_precisions:

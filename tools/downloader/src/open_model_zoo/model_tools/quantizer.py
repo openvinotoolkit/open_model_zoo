@@ -142,17 +142,18 @@ def main():
             if getattr(args, mode):
                 telemetry.send_event('md', 'quantizer_selection_mode', mode)
 
-        for model in models:
-            telemetry.send_event('md', 'quantizer_model_name', model.name)
-            telemetry.send_event('md', 'quantizer_framework', model.framework)
-
         if args.precisions is None:
             requested_precisions = _common.KNOWN_QUANTIZED_PRECISIONS.keys()
         else:
             requested_precisions = set(args.precisions.split(','))
 
-        for precision in requested_precisions:
-            telemetry.send_event('md', 'quantizer_precision', precision)
+        for model in models:
+            model_information = {
+                'name': model.name,
+                'framework': model.framework,
+                'precisions': '[{};{}]'.format(*requested_precisions),
+            }
+            telemetry.send_event('md', 'quantizer_model', json.dumps(model_information))
 
         unknown_precisions = requested_precisions - _common.KNOWN_QUANTIZED_PRECISIONS.keys()
         if unknown_precisions:

@@ -14,6 +14,7 @@
 
 import argparse
 import collections
+import json
 import os
 import string
 import sys
@@ -84,7 +85,7 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
     if not run_pre_convert(reporter, model, output_dir, args):
         telemetry.send_event('md', 'converter_failed_models', model.name)
         telemetry.send_event('md', 'converter_error',
-            str({'error': 'pre-convert-script-failed', 'model': model.name, 'precision': None}))
+            json.dumps({'error': 'pre-convert-script-failed', 'model': model.name, 'precision': None}))
         return False
 
     model_format = model.framework
@@ -100,7 +101,7 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
         if not convert_to_onnx(reporter, model, output_dir, args, template_variables):
             telemetry.send_event('md', 'converter_failed_models', model.name)
             telemetry.send_event('md', 'converter_error',
-                str({'error': 'convert_to_onnx-failed', 'model': model.name, 'precision': None}))
+                json.dumps({'error': 'convert_to_onnx-failed', 'model': model.name, 'precision': None}))
             return False
         model_format = 'onnx'
 
@@ -128,7 +129,7 @@ def convert(reporter, model, output_dir, args, mo_props, requested_precisions):
             if not reporter.job_context.subprocess(mo_cmd):
                 telemetry.send_event('md', 'converter_failed_models', model.name)
                 telemetry.send_event('md', 'converter_error',
-                    str({'error': 'mo-failed', 'model': model.name, 'precision': model_precision}))
+                    json.dumps({'error': 'mo-failed', 'model': model.name, 'precision': model_precision}))
                 return False
 
         reporter.print()
@@ -184,17 +185,19 @@ def main():
             if getattr(args, mode):
                 telemetry.send_event('md', 'converter_selection_mode', mode)
 
-        for model in models:
-            telemetry.send_event('md', 'converter_model_name', model.name)
-            telemetry.send_event('md', 'converter_framework', model.framework)
-
         if args.precisions is None:
             requested_precisions = _common.KNOWN_PRECISIONS
         else:
             requested_precisions = set(args.precisions.split(','))
 
-        for precision in requested_precisions:
-            telemetry.send_event('md', 'converter_precision', precision)
+        for model in models:
+            precisions_to_send = requested_precisions if args.precisions else requested_precisions & model.precisions
+            model_information = {
+                'name': model.name,
+                'framework': model.framework,
+                'precisions': '[{};{}]'.format(*precisions_to_send),
+            }
+            telemetry.send_event('md', 'converter_model', json.dumps(model_information))
 
         unknown_precisions = requested_precisions - _common.KNOWN_PRECISIONS
         if unknown_precisions:
