@@ -220,7 +220,7 @@ class ModelEvaluator(BaseEvaluator):
         if adapter:
             adapter_type = adapter if isinstance(adapter, str) else adapter.get('type')
         metrics = dataset_config.get('metrics', [])
-        metric_info = [metric for metric in metrics]
+        metric_info = [metric['type'] for metric in metrics]
         details.update({
             'metrics': metric_info,
             'model_file_type': model_type,
