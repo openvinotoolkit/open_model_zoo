@@ -29,10 +29,11 @@ TestCase.__new__.__defaults__ = [],
 
 
 class Demo:
-    def __init__(self, name, implementation, device_keys=None, test_cases=None):
+    def __init__(self, name, implementation, model_keys=None, device_keys=None, test_cases=None):
         self.subdirectory = name + '/' + implementation
 
         self.device_keys = device_keys
+        self.model_keys = model_keys if model_keys else ['-m']
 
         self.test_cases = test_cases
 
@@ -48,8 +49,8 @@ class Demo:
 
 
 class CppDemo(Demo):
-    def __init__(self, name, implementation='cpp', device_keys=None, test_cases=None):
-        super().__init__(name, implementation, device_keys, test_cases)
+    def __init__(self, name, implementation='cpp', model_keys=None, device_keys=None, test_cases=None):
+        super().__init__(name, implementation, model_keys, device_keys, test_cases)
 
         self._exec_name = self._exec_name.replace('_cpp', '')
 
@@ -58,8 +59,8 @@ class CppDemo(Demo):
 
 
 class PythonDemo(Demo):
-    def __init__(self, name, implementation='python', device_keys=None, test_cases=None):
-        super().__init__(name, implementation, device_keys, test_cases)
+    def __init__(self, name, implementation='python', model_keys=None, device_keys=None, test_cases=None):
+        super().__init__(name, implementation, model_keys, device_keys, test_cases)
 
         self._exec_name = self._exec_name.replace('_python', '')
 
@@ -110,6 +111,7 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='crossroad_camera_demo',
+            model_keys=['-m', '-m_pa', '-m_reid'],
             device_keys=['-d', '-d_pa', '-d_reid'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -126,6 +128,7 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='gaze_estimation_demo',
+            model_keys=['-m', '-m_fd', '-m_hp', '-m_lm'],
             device_keys=['-d', '-d_fd', '-d_hp', '-d_lm'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -195,6 +198,7 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='interactive_face_detection_demo',
+            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp'],
             device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -217,6 +221,7 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
+            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp'],
             device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -343,7 +348,8 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    CppDemo('pedestrian_tracker_demo', device_keys=['-d_det', '-d_reid'], test_cases=combine_cases(
+    CppDemo('pedestrian_tracker_demo', model_keys=['-m_det', '-m_reid'], device_keys=['-d_det', '-d_reid'],
+            test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('person-detection-retail')}),
@@ -358,6 +364,7 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='security_barrier_camera_demo',
+            model_keys=['-m', '-m_lpr', '-m_va'],
             device_keys=['-d', '-d_lpr', '-d_va'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -392,6 +399,7 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='smart_classroom_demo',
+            model_keys=['-m_act', '-m_fd', '-m_lm', '-m_reid'],
             device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -475,7 +483,8 @@ NATIVE_DEMOS = [
             ModelArg('person-reidentification-retail-0288')),
     )),
 
-    CppDemo(name='text_detection_demo', device_keys=['-d_td', '-d_tr'], test_cases=combine_cases(
+    CppDemo(name='text_detection_demo', model_keys=['-m_td', '-m_tr'], device_keys=['-d_td', '-d_tr'],
+            test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('text-detection')}),
@@ -696,12 +705,11 @@ PYTHON_DEMOS = [
         single_option_cases('-g', image_retrieval_arg('gallery.txt')),
     )),
 
-    PythonDemo(name='instance_segmentation_demo', device_keys=[], test_cases=combine_cases(
+    PythonDemo(name='instance_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
             **MONITORS,
             '-i': DataPatternArg('instance-segmentation'),
             '--delay': '1',
-            '-d': 'CPU',  # GPU is not supported
             '--labels': str(OMZ_DIR / 'data/dataset_classes/coco_80cl_bkgr.txt')}),
         single_option_cases('-m',
             ModelArg('instance-segmentation-security-0002'),
@@ -833,8 +841,8 @@ PYTHON_DEMOS = [
                         ModelArg('vehicle-detection-0201'),
                         ModelArg('vehicle-detection-0201'),
                         ModelArg('vehicle-detection-adas-0002'),
-                        ModelArg('vehicle-license-plate-detection-barrier-0106')),
-                    TestCase(options={'-d': 'CPU', '-m': ModelArg('person-detection-0106')}),  # GPU is not supported
+                        ModelArg('vehicle-license-plate-detection-barrier-0106'),
+                        ModelArg('person-detection-0106')),
                     TestCase(options={'-m': ModelFileArg('ssd-resnet34-1200-onnx', 'resnet34-ssd1200.onnx'),
                                       '--reverse_input_channels': None,
                                       '--mean_values': ['123.675', '116.28', '103.53'],
@@ -969,9 +977,8 @@ PYTHON_DEMOS = [
             ModelFileArg('quartznet-15x5-en', 'quartznet.onnx'))
     )),
 
-    PythonDemo(name='text_spotting_demo', device_keys=[], test_cases=combine_cases(
+    PythonDemo(name='text_spotting_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
-                          '-d': 'CPU',  # GPU is not supported
                           '-i': DataPatternArg('text-detection')}),
         [
             TestCase(options={
