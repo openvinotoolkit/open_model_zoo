@@ -19,7 +19,6 @@ from pathlib import Path
 from collections import OrderedDict
 import warnings
 import pickle
-import json
 import numpy as np
 import yaml
 
@@ -45,7 +44,6 @@ from .utils import (
     JSONDecoderWithAutoConversion,
     read_json, read_yaml,
     get_path, contains_all, set_image_metadata, OrderedSet, contains_any,
-    init_telemetry, send_telemetry_event
 )
 
 from .representation import (
@@ -109,8 +107,6 @@ class Dataset:
         def _convert_annotation():
             print_info("Annotation conversion for {dataset_name} dataset has been started".format(
                 dataset_name=config['name']))
-            send_telemetry_event(tm, 'annotation_converter', str(config['annotation_conversion'].get('converter')))
-            send_telemetry_event(tm, 'annotation_conversion', 'started')
             print_info("Parameters to be used for conversion:")
             for key, value in config['annotation_conversion'].items():
                 print_info('{key}: {value}'.format(key=key, value=value))
@@ -118,7 +114,6 @@ class Dataset:
             if annotation is not None:
                 print_info("Annotation conversion for {dataset_name} dataset has been finished".format(
                     dataset_name=config['name']))
-                send_telemetry_event(tm, 'annotation_conversion', 'finished')
             return annotation, meta
 
         def _run_dataset_analysis(meta):
@@ -151,29 +146,54 @@ class Dataset:
                 meta = Dataset.load_meta(config)
                 use_converted_annotation = False
 
-        tm = init_telemetry()
-
         if not annotation and 'annotation_conversion' in config:
             annotation, meta = _convert_annotation()
 
         if not annotation:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
-        annotation, subset_meta = _create_subset(annotation, config)
-        send_telemetry_event(tm, 'subset_selection', json.dumps(subset_meta))
+        annotation = _create_subset(annotation, config)
         dataset_analysis = config.get('analyze_datase', False)
-        send_telemetry_event(tm, 'dataset_analysis', 'enabled' if dataset_analysis else 'disabled')
 
         if dataset_analysis:
             meta = _run_dataset_analysis(meta)
 
-        annotation_saving = False
         if use_converted_annotation and contains_all(config, ['annotation', 'annotation_conversion']):
-            annotation_saving = True
             _save_annotation()
-        if use_converted_annotation:
-            send_telemetry_event(tm, 'annotation_saving', str(annotation_saving))
 
         return annotation, meta
+
+    @staticmethod
+    def send_annotation_info(config):
+        info = {
+            'convert_annotation': False,
+            'converter': None,
+            'dataset_analysis': config.get('analyze_dataset', False),
+            'annotation_saving': False
+        }
+        subsample_size = config.get('subsample_size')
+        subsample_meta = {'subset': False, 'shuffle': False}
+        if not ignore_subset_settings(config):
+
+            if subsample_size is not None:
+                shuffle = config.get('shuffle', True)
+                subsample_meta = {
+                    'shuffle': shuffle,
+                    'subset': True
+                }
+
+        info['subset_info'] = subsample_meta
+        if 'annotation' in config:
+            annotation_file = Path(config['annotation'])
+            if annotation_file.exists():
+                return info
+
+        if 'annotation_conversion' in config:
+            info['converter'] = config['annotation_conversion'].get('converter')
+
+        if contains_all(config, ['annotation', 'annotation_conversion']):
+            info['annotation_saving'] = True
+
+        return info
 
     def create_data_provider(self):
         annotation, meta = self.load_annotation(self.config)
@@ -255,7 +275,6 @@ class Dataset:
         if meta is None:
             meta = self.load_meta(self._config)
         self.data_provider.set_annotation(annotation, meta)
-
 
     def provide_data_info(self, annotations, progress_reporter=None):
         return self.data_provider.provide_data_info(annotations, progress_reporter)
@@ -681,17 +700,12 @@ def ignore_subset_settings(config):
 
 def _create_subset(annotation, config):
     subsample_size = config.get('subsample_size')
-    subsample_meta = {'subset': False, 'shuffle': False}
     if not ignore_subset_settings(config):
 
         if subsample_size is not None:
             subsample_seed = config.get('subsample_seed', 666)
             shuffle = config.get('shuffle', True)
             annotation = create_subset(annotation, subsample_size, subsample_seed, shuffle)
-            subsample_meta = {
-                'shuffle': shuffle,
-                'subset': True
-            }
 
     elif subsample_size is not None:
         warnings.warn("Subset selection parameters will be ignored")
@@ -699,4 +713,4 @@ def _create_subset(annotation, config):
         config.pop('subsample_seed', None)
         config.pop('shuffle', None)
 
-    return annotation, subsample_meta
+    return annotation

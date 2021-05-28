@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import json
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -389,7 +390,11 @@ def main():
         evaluator_kwargs['metrics_interval'] = args.metrics_interval
         evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
     evaluator_kwargs['store_only'] = args.store_only
-    send_telemetry_event(tm, "mode", "online" if not args.store_only else "offline")
+    details = {
+        'mode': "online" if not args.store_only else "offline",
+        'metric_profiling': args.profile,
+        'error': None
+    }
 
     config, mode = ConfigReader.merge(args)
     evaluator_class = EVALUATION_MODE.get(mode)
@@ -398,17 +403,17 @@ def main():
         end_telemetry(tm)
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
+        details['status'] = 'started'
         config_entry['_store_only'] = args.store_only
         config_entry['_stored_data'] = args.stored_predictions
         try:
             processing_info = evaluator_class.get_processing_info(config_entry)
             print_processing_info(*processing_info)
             evaluator = evaluator_class.from_configs(config_entry)
-            evaluator.send_processing_info(tm)
+            details.update(evaluator.send_processing_info(tm))
             if args.profile:
                 setup_profiling(args.profiler_log_dir, evaluator)
-                send_telemetry_event(tm, 'metric_profiling', 'activated')
-            send_telemetry_event(tm, 'model_run', 'started')
+            send_telemetry_event(tm, 'model_run', details)
             evaluator.process_dataset(
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
             )
@@ -421,14 +426,16 @@ def main():
                         args.csv_result, processing_info, metrics_results, evaluator.dataset_size, metrics_meta
                     )
             evaluator.release()
-            send_telemetry_event(tm, 'model_run', 'finished')
+            details['status'] = 'finished'
+            send_telemetry_event(tm, 'model_run', details)
 
         except Exception as e:  # pylint:disable=W0703
-            send_telemetry_event(tm, 'error', str(type(e)))
+            details['status'] = 'error'
+            details['error'] = str(type(e))
+            send_telemetry_event(tm, 'model_run', json.dumps(details))
             exception(e)
             return_code = 1
             continue
-        send_telemetry_event(tm, 'status', 'success' if not return_code else 'fail')
         end_telemetry(tm)
     sys.exit(return_code)
 

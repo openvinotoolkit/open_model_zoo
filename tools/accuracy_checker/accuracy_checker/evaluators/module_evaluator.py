@@ -116,8 +116,8 @@ class ModuleEvaluator(BaseEvaluator):
 
     def send_processing_info(self, sender):
         if sender is None:
-            return
-        send_telemetry_event(sender, 'custom_evaluator', self._config['module'])
+            return {}
+        return {'custom_evaluator': self._config['module']}
 
     def set_profiling_dir(self, profiler_dir):
         self._internal_module.set_profiling_dir(profiler_dir)

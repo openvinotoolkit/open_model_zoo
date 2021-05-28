@@ -15,11 +15,10 @@ limitations under the License.
 """
 
 import copy
-import json
 import pickle
 import platform
 
-from ..utils import get_path, extract_image_representations, is_path, send_telemetry_event
+from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
 from ..launcher import create_launcher, DummyLauncher, InputFeeder, Launcher
 from ..launcher.loaders import StoredPredictionBatch
@@ -201,34 +200,34 @@ class ModelEvaluator(BaseEvaluator):
 
     def send_processing_info(self, sender):
         if not sender:
-            return
+            return {}
         launcher_config = self.config['launchers'][0]
         dataset_config = self.config['datasets'][0]
-        send_telemetry_event(sender, 'platform', platform.system)
         framework = launcher_config['framework']
         device = launcher_config.get('device', 'CPU')
-        send_telemetry_event(
-            sender, 'execution_info',
-            json.dumps({
-                'framework': framework if framework != 'dlsdk' else 'openvino',
-                'device': device.upper()
-            })
-        )
-        send_telemetry_event(
-            sender,
-            'inference_mode',
-            'sync' if not self.async_mode else 'async'
-        )
+        details = {
+            'platform': platform.system,
+            'framework': framework if framework != 'dlsdk' else 'openvino',
+            'device': device.upper(),
+            'inference_model': 'sync' if not self.async_mode else 'async'
+        }
+        model_type = None
+
         if hasattr(self.launcher, 'get_model_file_type'):
-            send_telemetry_event(sender, 'model_file_type', self.launcher.get_model_file_type())
+            model_type = self.launcher.get_model_file_type()
         adapter = launcher_config.get('adapter')
+        adapter_type = None
         if adapter:
             adapter_type = adapter if isinstance(adapter, str) else adapter.get('type')
-            send_telemetry_event(sender, 'adapter_type', adapter_type)
         metrics = dataset_config.get('metrics', [])
-        if metrics:
-            for metric in metrics:
-                send_telemetry_event(sender, 'metric', str(metric.get('type')))
+        metric_info = [metric for metric in metrics]
+        details.update({
+            'metrics': metric_info,
+            'model_file_type': model_type,
+            'adapter': adapter_type,
+        })
+        details.update(self.dataset.send_annotation_info(dataset_config))
+        return details
 
     def _get_batch_input(self, batch_annotation, batch_input):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
