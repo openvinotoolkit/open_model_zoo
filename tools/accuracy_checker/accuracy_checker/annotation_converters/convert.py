@@ -242,7 +242,6 @@ def main():
     out_dir = args.output_dir or Path.cwd()
 
     results = converter.convert()
-    send_telemetry_event(tm, 'annotation_conversion', 'finished')
     converted_annotation = results.annotations
     meta = results.meta
     errors = results.content_check_errors
