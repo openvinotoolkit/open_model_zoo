@@ -857,7 +857,7 @@ def init_telemetry():
     except ImportError:
         return None
     try:
-        telemetry = tm.Telemetry('Accuracy Checker', version=__version__, tid='UA-194864834-1')
+        telemetry = tm.Telemetry('Accuracy Checker', app_version= __version__, tid='UA-194864834-1')
         return telemetry
     except Exception: # pylint:disable=W0703
         return None
