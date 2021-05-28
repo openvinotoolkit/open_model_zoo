@@ -54,4 +54,4 @@ class BaseEvaluator:
     # helper for sending evaluation info
     @staticmethod
     def send_processing_info(sender):
-        pass
+        return {}
