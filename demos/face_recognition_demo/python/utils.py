@@ -15,6 +15,7 @@
 """
 
 import numpy as np
+
 from models.utils import resize_image
 
 
@@ -25,8 +26,10 @@ def crop(frame, roi):
     p2 = np.clip(p2, [0, 0], [frame.shape[1], frame.shape[0]])
     return frame[p1[1]:p2[1], p1[0]:p2[0]]
 
+
 def cut_rois(frame, rois):
     return [crop(frame, roi) for roi in rois]
+
 
 def resize_input(image, target_shape):
     _, _, h, w = target_shape

@@ -17,11 +17,12 @@
 import logging as log
 import os
 import os.path as osp
+
 import cv2
 import numpy as np
-
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cosine
+
 from face_detector import FaceDetector
 
 

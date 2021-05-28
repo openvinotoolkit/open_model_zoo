@@ -15,8 +15,9 @@
 """
 
 import numpy as np
-from utils import resize_input
+
 from ie_module import Module
+from utils import resize_input
 
 
 class FaceDetector(Module):

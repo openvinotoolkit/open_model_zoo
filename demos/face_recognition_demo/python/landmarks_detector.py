@@ -15,6 +15,7 @@
 """
 
 import numpy as np
+
 from utils import cut_rois, resize_input
 from ie_module import Module
 
