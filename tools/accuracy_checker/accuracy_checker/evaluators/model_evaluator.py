@@ -204,7 +204,7 @@ class ModelEvaluator(BaseEvaluator):
             return
         launcher_config = self.config['launchers'][0]
         dataset_config = self.config['datasets'][0]
-        sender.send_event('ac', 'platform', platform.system)
+        send_telemetry_event(sender, 'platform', platform.system)
         framework = launcher_config['framework']
         device = launcher_config.get('device', 'CPU')
         send_telemetry_event(
