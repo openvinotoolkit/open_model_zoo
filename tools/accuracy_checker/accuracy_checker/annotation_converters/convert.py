@@ -243,7 +243,7 @@ def main():
     if errors:
         warnings.warn('Following problems were found during conversion:'
                       '\n{}'.format('\n'.join(errors)))
-        send_telemetry_event(tm, 'conversion_errors', len(errors))
+        send_telemetry_event(tm, 'conversion_errors', str(len(errors)))
 
     subsample = args.subsample
     if subsample:
@@ -271,10 +271,10 @@ def main():
         'subsample_seed': args.subsample_seed,
         'shuffle': args.shuffle
     }
-    send_telemetry_event(tm, 'subset_selection', {'subset': bool(args.subsample), 'suffle': args.shuffle})
+    send_telemetry_event(tm, 'subset_selection', json.dumps({'subset': bool(args.subsample), 'shuffle': args.shuffle}))
 
     save_annotation(converted_annotation, meta, annotation_file, meta_file, dataset_config)
-    send_telemetry_event(tm, 'annotation_saving', True)
+    send_telemetry_event(tm, 'annotation_saving', 'true')
     end_telemetry(tm)
 
 

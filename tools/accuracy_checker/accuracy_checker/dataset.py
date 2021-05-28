@@ -19,6 +19,7 @@ from pathlib import Path
 from collections import OrderedDict
 import warnings
 import pickle
+import json
 import numpy as np
 import yaml
 
@@ -108,7 +109,7 @@ class Dataset:
         def _convert_annotation():
             print_info("Annotation conversion for {dataset_name} dataset has been started".format(
                 dataset_name=config['name']))
-            send_telemetry_event(tm, 'annotation_converter', config['annotation_conversion'].get('converter'))
+            send_telemetry_event(tm, 'annotation_converter', str(config['annotation_conversion'].get('converter')))
             send_telemetry_event(tm, 'annotation_conversion', 'started')
             print_info("Parameters to be used for conversion:")
             for key, value in config['annotation_conversion'].items():
@@ -158,7 +159,7 @@ class Dataset:
         if not annotation:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
         annotation, subset_meta = _create_subset(annotation, config)
-        send_telemetry_event(tm, 'subset_selection', subset_meta)
+        send_telemetry_event(tm, 'subset_selection', json.dumps(subset_meta))
         dataset_analysis = config.get('analyze_datase', False)
         send_telemetry_event(tm, 'dataset_analysis', 'enabled' if dataset_analysis else 'disabled')
 
@@ -170,7 +171,7 @@ class Dataset:
             annotation_saving = True
             _save_annotation()
         if use_converted_annotation:
-            send_telemetry_event(tm, 'annotation_saving', annotation_saving)
+            send_telemetry_event(tm, 'annotation_saving', str(annotation_saving))
 
         return annotation, meta
 

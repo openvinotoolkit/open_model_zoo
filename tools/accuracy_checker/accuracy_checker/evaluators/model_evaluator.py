@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import copy
+import json
 import pickle
 import platform
 
@@ -208,10 +209,10 @@ class ModelEvaluator(BaseEvaluator):
         device = launcher_config.get('device', 'CPU')
         send_telemetry_event(
             sender, 'execution_info',
-            {
+            json.dumps({
                 'framework': framework if framework != 'dlsdk' else 'openvino',
-                'device': device
-            }
+                'device': device.upper()
+            })
         )
         send_telemetry_event(
             sender,
@@ -227,7 +228,7 @@ class ModelEvaluator(BaseEvaluator):
         metrics = dataset_config.get('metrics', [])
         if metrics:
             for metric in metrics:
-                send_telemetry_event(sender, 'metric', metric.get('type'))
+                send_telemetry_event(sender, 'metric', str(metric.get('type')))
 
     def _get_batch_input(self, batch_annotation, batch_input):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
