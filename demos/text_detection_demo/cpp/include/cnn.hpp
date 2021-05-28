@@ -47,6 +47,7 @@ class EncoderDecoderCNN : public Cnn {
                       const std::string in_dec_symbol_name,
                       const std::string out_dec_symbol_name,
                       const std::string logits_name,
+                      unsigned end_token,
                       const cv::Size &new_input_resolution = cv::Size()
                       );
     InferenceEngine::BlobMap Infer(const cv::Mat &frame) override;
@@ -60,7 +61,7 @@ class EncoderDecoderCNN : public Cnn {
     std::string in_dec_symbol_name_;
     std::string out_dec_symbol_name_;
     std::string logits_name_;
-    unsugned end_token_;
+    unsigned end_token_;
     void check_net_names(const OutputsDataMap &output_info_encoder,
                                         const OutputsDataMap &output_info_decoder,
                                         const InputsDataMap &input_info_decoder
