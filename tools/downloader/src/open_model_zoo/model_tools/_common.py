@@ -85,7 +85,7 @@ try:
     from openvino_telemetry import Telemetry
 except ImportError:
     class Telemetry:
-        def __init__(self, app_name=None, app_version=None, tid=None): pass
+        def __init__(self, app_name=None, app_version=None): pass
 
         def start_session(self, category): pass
 
@@ -143,7 +143,7 @@ def get_version():
 @contextlib.contextmanager
 def telemetry_session(app_name, tool):
     version = get_version()
-    telemetry = Telemetry(app_name, version, tid='UA-194864834-1')
+    telemetry = Telemetry(app_name, version)
     telemetry.start_session('md')
     try:
         yield telemetry
