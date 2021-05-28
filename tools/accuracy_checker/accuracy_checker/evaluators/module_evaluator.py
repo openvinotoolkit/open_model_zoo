@@ -19,7 +19,6 @@ import sys
 import importlib
 from pathlib import Path
 from .base_evaluator import BaseEvaluator
-from ..utils import send_telemetry_event
 
 # pylint:disable=R0904
 class ModuleEvaluator(BaseEvaluator):
