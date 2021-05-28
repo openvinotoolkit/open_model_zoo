@@ -389,7 +389,7 @@ def main():
         evaluator_kwargs['metrics_interval'] = args.metrics_interval
         evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
     evaluator_kwargs['store_only'] = args.store_only
-    send_telemetry_event("mode", "online" if not args.store_only else "offline")
+    send_telemetry_event(tm, "mode", "online" if not args.store_only else "offline")
 
     config, mode = ConfigReader.merge(args)
     evaluator_class = EVALUATION_MODE.get(mode)
