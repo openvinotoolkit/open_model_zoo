@@ -33,8 +33,7 @@ class LandmarksDetector(Module):
         output_shape = self.model.outputs[self.output_blob].shape
 
         assert np.array_equal([1, self.POINTS_NUMBER * 2, 1, 1], output_shape), \
-            'Expected model output shape {}, got {}'.format(
-            [1, self.POINTS_NUMBER * 2, 1, 1], output_shape)
+            'Expected model output shape {}, got {}'.format([1, self.POINTS_NUMBER * 2, 1, 1], output_shape)
 
     def preprocess(self, frame, rois):
         inputs = cut_rois(frame, rois)

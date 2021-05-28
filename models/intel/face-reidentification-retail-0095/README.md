@@ -16,7 +16,7 @@ This is a lightweight network for the face re-identification scenario. It is bas
 | Face location requirements      | Tight aligned crop                        |
 | GFlops                          | 0.588                                     |
 | MParams                         | 1.107                                     |
-| Source framework                | PyTorch*                                  |
+| Source framework                | PyTorch\*                                  |
 
 LFW metric is the accuracy in the pairwise reidentification test. See the full [benchmark description](http://vis-www.cs.umass.edu/lfw/) for details.
 

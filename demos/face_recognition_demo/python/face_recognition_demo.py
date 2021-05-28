@@ -86,7 +86,7 @@ def build_argparser():
                               'on the face images, otherwise use full images.')
     gallery.add_argument('--allow_grow', action='store_true',
                          help='Optional. Allow to grow faces gallery and to dump on disk. '
-                               'Available only if --no_show option is off.')
+                              'Available only if --no_show option is off.')
 
     models = parser.add_argument_group('Models')
     models.add_argument('-m_fd', type=Path, required=True,
@@ -96,13 +96,13 @@ def build_argparser():
     models.add_argument('-m_reid', type=Path, required=True,
                         help='Required. Path to an .xml file with Face Reidentification model.')
     models.add_argument('-fd_iw', '--fd_input_width', default=0, type=int,
-                         help='Optional. Specify the input width of detection model. '
-                              'Both -fd_iw and -fd_ih parameters should be specified '
-                              'for reshape.')
+                        help='Optional. Specify the input width of detection model. '
+                             'Both -fd_iw and -fd_ih parameters should be specified '
+                             'for reshape.')
     models.add_argument('-fd_ih', '--fd_input_height', default=0, type=int,
-                         help='Optional. Specify the input height of detection model. '
-                              'Both -fd_iw and -fd_ih parameters should be specified '
-                              'for reshape.')
+                        help='Optional. Specify the input height of detection model. '
+                             'Both -fd_iw and -fd_ih parameters should be specified '
+                             'for reshape.')
 
     infer = parser.add_argument_group('Inference options')
     infer.add_argument('-d_fd', default='CPU', choices=DEVICE_KINDS,
@@ -159,7 +159,7 @@ class FrameProcessor:
         self.landmarks_detector = LandmarksDetector(ie, args.m_lm)
         self.face_identifier = FaceIdentifier(ie, args.m_reid,
                                               match_threshold=args.t_id,
-                                              match_algo = args.match_algo)
+                                              match_algo=args.match_algo)
         self.face_detector.deploy(args.d_fd, self.get_config(args.d_fd))
         self.landmarks_detector.deploy(args.d_lm, self.get_config(args.d_lm), self.QUEUE_SIZE)
         self.face_identifier.deploy(args.d_reid, self.get_config(args.d_reid), self.QUEUE_SIZE)
@@ -184,7 +184,8 @@ class FrameProcessor:
 
         rois = self.face_detector.infer((frame,))
         if self.QUEUE_SIZE < len(rois):
-            log.warning('Too many faces for processing. Will be processed only {} of {}'.format(self.QUEUE_SIZE, len(rois)))
+            log.warning('Too many faces for processing. Will be processed only {} of {}'
+                        .format(self.QUEUE_SIZE, len(rois)))
             rois = rois[:self.QUEUE_SIZE]
 
         landmarks = self.landmarks_detector.infer((frame, rois))

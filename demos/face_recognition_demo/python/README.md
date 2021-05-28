@@ -11,7 +11,7 @@ The following pretrained models can be used:
 
 * `face-detection-retail-0004` and `face-detection-adas-0001`, to detect faces and predict their bounding boxes;
 * `landmarks-regression-retail-0009`, to predict face keypoints;
-* `face-reidentification-retail-0095`, to recognize persons.
+* `face-reidentification-retail-0095` or `Sphereface`, to recognize persons.
 
 ## How it works
 
@@ -202,6 +202,7 @@ Linux (`sh`, `bash`, ...) (assuming OpenVINO installed in `/opt/intel/openvino`)
 source /opt/intel/openvino/bin/setupvars.sh
 
 python ./face_recognition_demo.py \
+-i <path_to_video>/input_video.mp4 \
 -m_fd <path_to_model>/face-detection-retail-0004.xml \
 -m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
 -m_reid <path_to_model>/face-reidentification-retail-0095.xml \
@@ -216,6 +217,7 @@ Windows (`cmd`, `powershell`) (assuming OpenVINO installed in `C:/Intel/openvino
 call C:/Intel/openvino/bin/setupvars.bat
 
 python ./face_recognition_demo.py ^
+-i <path_to_video>/input_video.mp4 ^
 -m_fd <path_to_model>/face-detection-retail-0004.xml ^
 -m_lm <path_to_model>/landmarks-regression-retail-0009.xml ^
 -m_reid <path_to_model>/face-reidentification-retail-0095.xml ^
