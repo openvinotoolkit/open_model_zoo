@@ -43,7 +43,7 @@ from .dependency import UnregisteredProviderException
 from .utils import (
     JSONDecoderWithAutoConversion,
     read_json, read_yaml,
-    get_path, contains_all, set_image_metadata, OrderedSet, contains_any,
+    get_path, contains_all, set_image_metadata, OrderedSet, contains_any
 )
 
 from .representation import (
