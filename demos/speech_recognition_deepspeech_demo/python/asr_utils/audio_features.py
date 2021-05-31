@@ -15,7 +15,7 @@ except OSError:
     sys.modules['soundfile'] = types.ModuleType('fake_soundfile')
     import librosa
 
-from utils.pipelines import BlockedSeqPipelineStage
+from asr_utils.pipelines import BlockedSeqPipelineStage
 
 
 class AudioFeaturesSeqPipelineStage(BlockedSeqPipelineStage):

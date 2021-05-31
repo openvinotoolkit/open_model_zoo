@@ -7,9 +7,9 @@
 #
 from copy import deepcopy
 
-from utils.audio_features import AudioFeaturesSeqPipelineStage
-from utils.rnn_seq_pipeline import RnnSeqPipelineStage
-from utils.ctc_decoder_seq_pipeline import CtcDecoderSeqPipelineStage
+from asr_utils.audio_features import AudioFeaturesSeqPipelineStage
+from asr_utils.rnn_seq_pipeline import RnnSeqPipelineStage
+from asr_utils.ctc_decoder_seq_pipeline import CtcDecoderSeqPipelineStage
 
 
 class DeepSpeechSeqPipeline:

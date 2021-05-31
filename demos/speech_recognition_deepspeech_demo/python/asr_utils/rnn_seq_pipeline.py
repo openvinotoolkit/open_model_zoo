@@ -9,7 +9,7 @@ from copy import deepcopy
 
 import numpy as np
 
-from utils.pipelines import BlockedSeqPipelineStage
+from asr_utils.pipelines import BlockedSeqPipelineStage
 
 
 class RnnSeqPipelineStage(BlockedSeqPipelineStage):

@@ -16,8 +16,8 @@ import numpy as np
 from tqdm import tqdm
 from openvino.inference_engine import IECore
 
-from utils.profiles import PROFILES
-from utils.deep_speech_seq_pipeline import DeepSpeechSeqPipeline
+from asr_utils.profiles import PROFILES
+from asr_utils.deep_speech_seq_pipeline import DeepSpeechSeqPipeline
 
 
 def build_argparser():

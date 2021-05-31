@@ -7,7 +7,7 @@ import codecs
 
 from ctcdecode_numpy import SeqCtcLmDecoder
 
-from utils.pipelines import BlockedSeqPipelineStage
+from asr_utils.pipelines import BlockedSeqPipelineStage
 
 
 def load_alphabet(filename):
