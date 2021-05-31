@@ -822,7 +822,7 @@ PYTHON_DEMOS = [
                               # run_tests.py puts pre-converted files into dl_dir as
                               # it always runs converter.py without --output_dir
                               '-L': ModelFileArg('mozilla-deepspeech-0.8.2', 'deepspeech-0.8.2-models.kenlm'),
-                              '--online': None}),
+                              '--realtime': None}),
             TestCase(options={'-p': 'mds08x_en',  # test without LM
                               '-m': ModelArg('mozilla-deepspeech-0.8.2')}),
         ],

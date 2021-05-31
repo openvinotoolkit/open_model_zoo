@@ -1,6 +1,6 @@
 # Speech Recognition DeepSpeech Python\* Demo
 
-This demo demonstrates Automatic Speech Recognition (ASR) with a pretrained Mozilla\* DeepSpeech 0.8.2 model.
+This demo shows Automatic Speech Recognition (ASR) with a pretrained Mozilla\* DeepSpeech 0.8.2 model.
 
 It works with version 0.6.1 as well, and should also work with other models trained with Mozilla DeepSpeech 0.6.x/0.7.x/0.8.x/0.9.x with ASCII alphabets.
 
@@ -14,9 +14,9 @@ The application accepts
 
 The application has two modes:
 
- * *Offline mode* (default). Audio data is fed in 10 second chunks into a pipeline of: computing audio features, running a neural network to get per-frame character probabilities, and CTC decoding. After processing the whole file, the demo prints the decoded text and the time spent.
+ * *Normal mode* (default). Audio data is streamed in 10 second chunks into a streaming pipeline of: computation of audio features, running a neural network to get per-frame character probabilities, and CTC decoding. After processing the whole file, the demo prints the decoded text and the time spent.
 
- * In *online mode* the app simulates speech recognition of live recording by feeding audio data from input file and displaying the current partial result in a creeping line in console output. Data is fed at real-time speed by introducing the necessary delays. Audio data is fed in 0.32 sec chunks (size is controlled by `--block-size` option) into the same pipeline. In this mode the pipeline provides updated recognition result after each data chunk.
+ * In *simulated real-time mode* the app simulates speech recognition of live recording by feeding audio data from input file and displaying the current partial result in a creeping line in console output. Data is fed at real-time speed by introducing the necessary delays. Audio data is fed in 0.32 sec chunks (size is controlled by `--block-size` option) into the same streaming pipeline. In this mode the pipeline provides updated recognition result after each data chunk.
 
 ## Preparing to Run
 
@@ -62,9 +62,9 @@ Here are the available command line options:
 ```
 usage: speech_recognition_deepspeech_demo.py [-h] -i FILENAME [-d DEVICE] -m
                                              FILENAME [-L FILENAME] -p NAME
-                                             [-b N] [-c N] [--online]
+                                             [-b N] [-c N] [--realtime]
                                              [--block-size BLOCK_SIZE]
-                                             [--online-window ONLINE_WINDOW]
+                                             [--realtime-window REALTIME_WINDOW]
 
 Speech recognition DeepSpeech demo
 
@@ -91,14 +91,16 @@ optional arguments:
                         500)
   -c N, --max-candidates N
                         Show top N (or less) candidates (default 1)
-  --online              Switch to realtime online ASR mode
+  --realtime            Simulated real-time mode: slow down data feeding to
+                        real time and show partial transcription during
+                        recognition
   --block-size BLOCK_SIZE
                         Block size in audio samples for streaming into ASR
                         pipeline (defaults to samples in 10 sec for offline;
                         samples in 16 frame strides for online)
-  --online-window ONLINE_WINDOW
-                        In online mode, show this many characters on screen
-                        (default 79)
+  --realtime-window REALTIME_WINDOW
+                        In simulated real-time mode, show this many characters
+                        on screen (default 79)
 ```
 
 The typical command line for offline mode is:
@@ -124,7 +126,7 @@ python3 speech_recognition_deepspeech_demo.py \
     -i <path_to_audio>/audio.wav
 ```
 
-To run in *online mode* add command-line option `--online`.
+To run in *simulated real-time mode* add command-line option `--realtime`.
 
 > **NOTE**: Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.
 
@@ -132,7 +134,7 @@ Optional (but highly recommended) language model files, `deepspeech-0.8.2-models
 
 ## Demo Output
 
-The application shows time taken by the initialization and processing stages, and the decoded text for the audio file. In online mode the current recognition result is shown while the app is running as well.
+The application shows time taken by the initialization and processing stages, and the decoded text for the audio file. In real-time mode the current recognition result is shown while the app is running as well.
 
 ## See Also
 

@@ -41,13 +41,14 @@ def build_argparser():
     parser.add_argument('-c', '--max-candidates', type=int, default=1, metavar="N",
                         help="Show top N (or less) candidates (default 1)")
 
-    parser.add_argument('--online', action='store_true',
-                        help="Switch to realtime online ASR mode")
+    parser.add_argument('--realtime', action='store_true',
+                        help="Simulated real-time mode: slow down data feeding to real time "
+                             "and show partial transcription during recognition")
     parser.add_argument('--block-size', type=int, default=None,
                         help="Block size in audio samples for streaming into ASR pipeline "
                         "(defaults to samples in 10 sec for offline; samples in 16 frame strides for online)")
-    parser.add_argument('--online-window', type=int, default=79,
-                        help="In online mode, show this many characters on screen (default 79)")
+    parser.add_argument('--realtime-window', type=int, default=79,
+                        help="In simulated real-time mode, show this many characters on screen (default 79)")
     return parser
 
 
@@ -64,7 +65,7 @@ def main():
     profile = get_profile(args.profile)
     if args.block_size is None:
         sr = profile['model_sampling_rate']
-        args.block_size = round(sr * 10) if not args.online else round(sr * profile['frame_stride_seconds'] * 16)
+        args.block_size = round(sr * 10) if not args.realtime else round(sr * profile['frame_stride_seconds'] * 16)
 
     start_load_time = timeit.default_timer()
     stt = DeepSpeechSeqPipeline(
@@ -75,7 +76,7 @@ def main():
         max_candidates = args.max_candidates,
         profile = profile,
         device = args.device,
-        online_decoding = args.online,
+        online_decoding = args.realtime,
     )
     print("Loading, including network weights, IE initialization, LM, building LM vocabulary trie: {} s".format(timeit.default_timer() - start_load_time))
 
@@ -91,7 +92,7 @@ def main():
 
         audio_pos = 0
         play_start_time = timeit.default_timer()
-        iter_wrapper = tqdm if not args.online else (lambda x: x)
+        iter_wrapper = tqdm if not args.realtime else (lambda x: x)
         for audio_iter in iter_wrapper(range(0, pcm_length, args.block_size)):
             audio_block = np.frombuffer(wave_read.readframes(args.block_size * channel_num), dtype=np.int16).reshape((-1, channel_num))
             if audio_block.shape[0] == 0:
@@ -108,20 +109,20 @@ def main():
             # the implementation of DeepSpeechSeqPipeline.recognize_audio() method.
             #
             partial_transcr = stt.recognize_audio(audio_block, sampling_rate, finish=False)
-            if args.online:
+            if args.realtime:
                 if partial_transcr is not None and len(partial_transcr) > 0:
-                    print('\r' + partial_transcr[0].text[-args.online_window:], end='')
+                    print('\r' + partial_transcr[0].text[-args.realtime_window:], end='')
                 to_wait = play_start_time + audio_pos/sampling_rate - timeit.default_timer()
                 if to_wait > 0:
                     time.sleep(to_wait)
 
     transcription = stt.recognize_audio(None, sampling_rate, finish=True)
-    if args.online:
-        # Replace the transcription with its finalized version for online mode
+    if args.realtime:
+        # Replace the transcription with its finalized version for real-time mode
         if transcription is not None and len(transcription) > 0:
-            print('\r' + transcription[0].text[-args.online_window:])
-    else:  #  not args.online
-        # Only show processing time in offline mode because online mode is being slowed down to real time by time.sleep()
+            print('\r' + transcription[0].text[-args.realtime_window:])
+    else:  #  not args.realtime
+        # Only show processing time in offline mode because real-time mode is being slowed down by time.sleep()
         print("Processing time (incl. loading audio, MFCC, RNN and beam search): {} s".format(timeit.default_timer() - start_proc_time))
 
     print("\nTranscription(s) and confidence score(s):")
