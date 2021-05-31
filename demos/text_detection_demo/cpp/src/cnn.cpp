@@ -83,7 +83,6 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     auto blob = infer_request_.GetBlob(input_name_);
     matU8ToBlob<uint8_t>(image, blob);
     infer_request_.Infer();
-    // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Processing output -----------------------------------------------------
 

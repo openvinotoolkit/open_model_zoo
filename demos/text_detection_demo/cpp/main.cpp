@@ -33,8 +33,6 @@
 
 using namespace InferenceEngine;
 
-
-
 std::string str_tolower(std::string s) {
     std::transform(s.begin(), s.end(), s.begin(),
                    [](unsigned char c){ return std::tolower(c); }
@@ -140,7 +138,7 @@ int main(int argc, char *argv[]) {
         std::unique_ptr<Cnn> text_recognition;
         if (!FLAGS_m_tr.empty()) {
             try {
-                // 2 spaces stand for START_TOKEN and PAD_TOKEN, respectively;
+                // 2 kPadSymbol stand for START_TOKEN and PAD_TOKEN, respectively
                 if (FLAGS_tr_pt_first)
                     kAlphabet = std::string(3, kPadSymbol) + FLAGS_m_tr_ss;
                 text_recognition = std::unique_ptr<Cnn>(new EncoderDecoderCNN(FLAGS_m_tr,
@@ -158,7 +156,7 @@ int main(int argc, char *argv[]) {
                 if (decoder_type != "simple")
                     throw std::logic_error("Wrong decoder. Use --dt simple for composite model.");
             }
-            catch (DecoderNotFound e) {
+            catch (const DecoderNotFound&) {
                 text_recognition = std::unique_ptr<Cnn>(new Cnn(FLAGS_m_tr, ie, FLAGS_d_tr));
                 slog::info << "Initialized monolithic text recognition model" << slog::endl;
                 if (FLAGS_tr_pt_first)
@@ -201,9 +199,9 @@ int main(int argc, char *argv[]) {
             std::chrono::steady_clock::time_point begin_frame = std::chrono::steady_clock::now();
             std::vector<cv::RotatedRect> rects;
             if (text_detection != nullptr) {
-                auto blobs =  text_detection->Infer(image);
+                auto blobs = text_detection->Infer(image);
                 std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-                rects = postProcess(blobs, image.size(),  text_detection->input_size(),
+                rects = postProcess(blobs, image.size(), text_detection->input_size(),
                                     cls_conf_threshold, link_conf_threshold);
                 std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                 text_detection_postproc_time += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
@@ -352,14 +350,14 @@ int main(int argc, char *argv[]) {
 
         if (text_detection != nullptr && text_detection->ncalls() && !FLAGS_r) {
           std::cout << "text detection model inference (ms) (fps): "
-                    <<  text_detection->time_elapsed() /  text_detection->ncalls() << " "
-                    <<  text_detection->ncalls() * 1000 /  text_detection->time_elapsed() << std::endl;
+                    << text_detection->time_elapsed() / text_detection->ncalls() << " "
+                    << text_detection->ncalls() * 1000 / text_detection->time_elapsed() << std::endl;
           if (std::fabs(text_detection_postproc_time) < std::numeric_limits<double>::epsilon()) {
               std::cout << "text detection postprocessing: took no time " << std::endl;
           } else {
             std::cout << "text detection postprocessing (ms) (fps): "
-                      << text_detection_postproc_time /  text_detection->ncalls() << " "
-                      <<  text_detection->ncalls() * 1000 / text_detection_postproc_time << std::endl << std::endl;
+                      << text_detection_postproc_time / text_detection->ncalls() << " "
+                      << text_detection->ncalls() * 1000 / text_detection_postproc_time << std::endl << std::endl;
           }
         }
 

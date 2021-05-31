@@ -75,6 +75,7 @@ The text-recognition-15-decoder model is a GRU based decoder with 2d attention m
 
 Model is supported by [text-detection c++ demo](../../../demos/text_detection_demo/cpp/README.md). In order to use this model in the demo, user should pass the following options:
 ```
+-tr_pt_first
   -m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
   -tr_o_blb_nm "logits"
   -tr_composite

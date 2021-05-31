@@ -15,7 +15,6 @@ using namespace InferenceEngine;
 
 class Cnn {
   public:
-    // Cnn(): channels_(0), time_elapsed_(0), ncalls_(0) {}
     Cnn(const std::string &model_path, Core & ie, const std::string & deviceName,
               const cv::Size &new_input_resolution = cv::Size());
 
@@ -80,10 +79,4 @@ class NameNotExist : public std::exception {
 	};
 };
 
-class DecoderNotFound : public std::exception {
-  public:
-	explicit DecoderNotFound() { };
-	const char * what () const noexcept override {
-		return "Decoder not found";
-	};
-};
+class DecoderNotFound {};
