@@ -403,9 +403,11 @@ def main():
         end_telemetry(tm)
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
-        details['status'] = 'started'
-        config_entry['_store_only'] = args.store_only
-        config_entry['_stored_data'] = args.stored_predictions
+        details.update({'status': 'started', "error": None})
+        config_entry.update({
+            '_store_only': args.store_only,
+            '_stored_data': args.stored_predictions
+        })
         try:
             processing_info = evaluator_class.get_processing_info(config_entry)
             print_processing_info(*processing_info)
