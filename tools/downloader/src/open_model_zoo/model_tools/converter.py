@@ -195,7 +195,7 @@ def main():
             model_information = {
                 'name': model.name,
                 'framework': model.framework,
-                'precisions': '[{};{}]'.format(*precisions_to_send),
+                'precisions': str(precisions_to_send).replace(',', ';'),
             }
             telemetry.send_event('md', 'converter_model', json.dumps(model_information))
 

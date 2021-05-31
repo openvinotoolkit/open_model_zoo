@@ -151,7 +151,7 @@ def main():
             model_information = {
                 'name': model.name,
                 'framework': model.framework,
-                'precisions': '[{};{}]'.format(*requested_precisions),
+                'precisions': str(requested_precisions).replace(',', ';'),
             }
             telemetry.send_event('md', 'quantizer_model', json.dumps(model_information))
 
