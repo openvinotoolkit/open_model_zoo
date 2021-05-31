@@ -116,7 +116,7 @@ void EncoderDecoderCNN::check_net_names(const OutputsDataMap &output_info_encode
     if (output_info_decoder.find(out_dec_symbol_name_) == output_info_decoder.end())
         name_not_exist = out_dec_symbol_name_;
     if (name_not_exist != "")
-        throw NameNotExist(name_not_exist);
+        throw std::runtime_error("'" + name_not_exist + "' does not exist in the network");
  }
 
 

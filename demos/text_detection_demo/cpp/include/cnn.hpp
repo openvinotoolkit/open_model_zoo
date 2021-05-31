@@ -67,16 +67,4 @@ class EncoderDecoderCNN : public Cnn {
                          );
 };
 
-class NameNotExist : public std::exception {
-  private:
-	std::string error_message;
-  public:
-	explicit NameNotExist(const std::string& name) {
-		error_message = std::string("Name '") + name + std::string("' does not exist in the network");
-	};
-	const char * what () const noexcept override {
-		return error_message.c_str();
-	};
-};
-
 class DecoderNotFound {};
