@@ -40,10 +40,6 @@
 | efficientnet-b7_auto_aug | YES |    |    |
 | f3net | YES | YES |    |
 | face-detection-retail-0044 | YES |    |    |
-| face-recognition-mobilefacenet-arcface | YES |    |    |
-| face-recognition-resnet100-arcface | YES |    |    |
-| face-recognition-resnet34-arcface | YES |    |    |
-| face-recognition-resnet50-arcface | YES |    |    |
 | faceboxes-pytorch | YES |    |    |
 | facenet-20180408-102900 | YES | YES | YES |
 | fast-neural-style-mosaic-onnx | YES |    |    |
@@ -121,8 +117,7 @@
 | resnet-50-caffe2 | YES | YES | YES |
 | resnet-50-pytorch | YES | YES | YES |
 | resnet-50-tf | YES | YES | YES |
-| retinaface-anti-cov | YES |    |    |
-| retinaface-resnet50 | YES |    |    |
+| retinaface-resnet50-pytorch | YES | YES |    |
 | retinanet-tf | YES |    |    |
 | rexnet-v1-x1.0 | YES |    |    |
 | rfcn-resnet101-coco-tf | YES | YES | YES |
@@ -146,7 +141,6 @@
 | ssd_mobilenet_v2_coco | YES | YES | YES |
 | ssd_resnet50_v1_fpn_coco | YES |    |    |
 | ssdlite_mobilenet_v2 | YES | YES | YES |
-| ssh-mxnet | YES |    |    |
 | text-recognition-resnet-fc | YES |    |    |
 | ultra-lightweight-face-detection-rfb-320 | YES |    |    |
 | ultra-lightweight-face-detection-slim-320 | YES |    |    |
