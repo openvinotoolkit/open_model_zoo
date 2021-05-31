@@ -138,7 +138,8 @@ EncoderDecoderCNN::EncoderDecoderCNN(const std::string &model_path,
                         in_dec_hidden_name_(in_dec_hidden_name),
                         in_dec_symbol_name_(in_dec_symbol_name),
                         out_dec_symbol_name_(out_dec_symbol_name),
-                        logits_name_(logits_name) {
+                        logits_name_(logits_name),
+                        end_token_(end_token) {
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Checking paths --------------------------------------------------------
@@ -179,8 +180,6 @@ EncoderDecoderCNN::EncoderDecoderCNN(const std::string &model_path,
     infer_request_encoder_ = executable_network_encoder.CreateInferRequest();
     infer_request_decoder_ = executable_network_decoder.CreateInferRequest();
     // ---------------------------------------------------------------------------------------------------
-    end_token_ = end_token;
-
 }
 
 InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
