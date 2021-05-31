@@ -27,6 +27,7 @@ class GTLoader(Enum):
     DICOM = 2
     RAWPY = 3
     SKIMAGE = 4
+    PILLOW_RGB = 5
 
 
 class ImageProcessingRepresentation(BaseRepresentation):
@@ -39,7 +40,8 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
         GTLoader.OPENCV: 'opencv_imread',
         GTLoader.DICOM: 'dicom_reader',
         GTLoader.RAWPY: 'rawpy',
-        GTLoader.SKIMAGE: 'skimage_imread'
+        GTLoader.SKIMAGE: 'skimage_imread',
+        GTLoader.PILLOW_RGB: 'pillow_imread'
     }
 
     def __init__(self, identifier, path_to_gt, gt_loader=GTLoader.PILLOW):
@@ -53,6 +55,7 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
         super().__init__(identifier)
         self._image_path = path_to_gt
         self._gt_loader = self.LOADERS.get(gt_loader)
+        self._pillow_to_rgb = gt_loader == GTLoader.PILLOW_RGB
         self._value = None
 
     @property
@@ -63,7 +66,7 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
                 data_source = self.metadata['data_source']
             loader = BaseReader.provide(self._gt_loader, data_source)
             if self._gt_loader == self.LOADERS[GTLoader.PILLOW]:
-                loader.convert_to_rgb = False
+                loader.convert_to_rgb = self._pillow_to_rgb
             gt = loader.read(self._image_path)
             return gt.astype(np.uint8) if self._gt_loader not in ['dicom_reader', 'rawpy'] else gt
         return self._value

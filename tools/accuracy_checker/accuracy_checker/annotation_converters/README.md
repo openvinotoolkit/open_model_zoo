@@ -193,12 +193,12 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `ignore_suffixes` - matched low resolution, high resolution image located in different directories without usage suffixes, using numeric ids (Optional, default False).
   * `lr_suffix` - low resolution file name's suffix (default lr).
   * `hr_suffix` - high resolution file name's suffix (default hr).
-  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `dicom`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `pillow_rgb` (for explicit data conversion to RGB format), `dicom`, `skimage`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
   * `two_streams` - enable 2 input streams where usually first for original image and second for upsampled image. (Optional, default False).
   * `upsample_suffix` - upsample images file name's suffix (default upsample).
 * `super_resolution_dir_based` - converts dataset for single image super resolution task to `SuperResolutionAnnotation` which have directory based structure (high resolution and low resolution images located on separated directories and matches by name or numeric id).
 The main difference between this converter and `super_resolution` in data organization. `super_resolution` converter should be used if all high and low resolution images located in the same dir and have difference in suffixes.
-  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `dicom`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `pillow_rgb` (for explicit data conversion to RGB format), `dicom`, `skimage`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
   * `two_streams` - enable 2 input streams where usually first for original image and second for upsampled image. (Optional, default False).
   * `images_dir` - path to dataset root, where directories with low and high resolutions are located.
   * `lr_dir` - path to directory, where images in low resolution are located (Optional, default `<images_dir>/LR`).
