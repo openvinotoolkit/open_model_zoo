@@ -21,7 +21,7 @@ from utils.deep_speech_seq_pipeline import DeepSpeechSeqPipeline
 
 
 def build_argparser():
-    parser = argparse.ArgumentParser(description="Speech recognition demo")
+    parser = argparse.ArgumentParser(description="Speech recognition DeepSpeech demo")
     parser.add_argument('-i', '--input', type=str, metavar="FILENAME", required=True,
                         help="Path to an audio file in WAV PCM 16 kHz mono format")
     parser.add_argument('-d', '--device', default='CPU', type=str,

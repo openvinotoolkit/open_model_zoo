@@ -156,5 +156,5 @@ if(ENABLE_PYTHON)
 
     add_subdirectory(human_pose_estimation_3d_demo/python/pose_extractor)
     add_subdirectory(common/python/monitors_extension)
-    add_subdirectory(speech_recognition_demo/python/ctcdecode-numpy)
+    add_subdirectory(speech_recognition_deepspeech_demo/python/ctcdecode-numpy)
 endif()

@@ -805,7 +805,7 @@ PYTHON_DEMOS = [
         ]
     )),
 
-    PythonDemo(name='speech_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+    PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
         [
             TestCase(options={'-p': 'mds08x_en',

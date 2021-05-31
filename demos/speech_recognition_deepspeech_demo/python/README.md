@@ -1,4 +1,4 @@
-# Speech Recognition Python\* Demo
+# Speech Recognition DeepSpeech Python\* Demo
 
 This demo demonstrates Automatic Speech Recognition (ASR) with a pretrained Mozilla\* DeepSpeech 0.8.2 model.
 
@@ -20,7 +20,7 @@ The application has two modes:
 
 ## Preparing to Run
 
-The list of models supported by the demo is in `<omz_dir>/demos/speech_recognition_demo/python/models.lst` file.
+The list of models supported by the demo is in `<omz_dir>/demos/speech_recognition_deepspeech_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 Don't forget to configure Model Optimizer, which is a requirement for Model Downloader, as described in its documentation.
 
@@ -60,13 +60,13 @@ Run the application with `-h` option to see help message.
 Here are the available command line options:
 
 ```
-usage: speech_recognition_demo.py [-h] -i FILENAME [-d DEVICE] -m FILENAME
-                                  [-L FILENAME] -p NAME [-b N] [-c N]
-                                  [--online] [--block-size BLOCK_SIZE]
-                                  [--online-window ONLINE_WINDOW]
-                                  [-l FILENAME]
+usage: speech_recognition_deepspeech_demo.py [-h] -i FILENAME [-d DEVICE] -m
+                                             FILENAME [-L FILENAME] -p NAME
+                                             [-b N] [-c N] [--online]
+                                             [--block-size BLOCK_SIZE]
+                                             [--online-window ONLINE_WINDOW]
 
-Speech recognition demo
+Speech recognition DeepSpeech demo
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -107,7 +107,7 @@ The typical command line for offline mode is:
 pip install -r requirements.txt
 source <openvino_dir>/bin/setupvars.sh
 
-python3 speech_recognition_demo.py \
+python3 speech_recognition_deepspeech_demo.py \
     -p mds08x_en \
     -m <path_to_model>/mozilla_deepspeech_0.8.2.xml \
     -L <path_to_file>/deepspeech-0.8.2-models.kenlm \
@@ -117,7 +117,7 @@ python3 speech_recognition_demo.py \
 For version 0.6.1 it is:
 
 ```shell
-python3 speech_recognition_demo.py \
+python3 speech_recognition_deepspeech_demo.py \
     -p mds06x_en \
     -m <path_to_model>/mozilla_deepspeech_0.6.1.xml \
     -L <path_to_file>/lm.binary \

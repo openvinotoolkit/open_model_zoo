@@ -52,7 +52,7 @@ def require_ctcdecode_numpy():
         except ImportError:
             raise ValueError(
                 "To use ctc_beam_search_decoder_with_lm adapter you need ctcdecode_numpy installed. "
-                "Please see open_model_zoo/demos/python_demos/speech_recognition_demo/README.md for instructions."
+                "Please see open_model_zoo/demos/speech_recognition_deepspeech_demo/python/README.md for instructions."
             )
         ctcdecode_numpy = ctcdecode_numpy_imported
 
