@@ -670,6 +670,9 @@ PYTHON_DEMOS = [
             TestCase(options={'--architecture_type': 'ctpn',
                               '-m': ModelArg('ctpn')}
             ),
+            TestCase(options={'--architecture_type': 'retinaface-pytorch',
+                              '-m': ModelArg('retinaface-resnet50-pytorch')}
+            ),
             *combine_cases(
                 TestCase(options={'--architecture_type': 'ssd'}),
                 [

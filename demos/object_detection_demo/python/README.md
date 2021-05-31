@@ -58,6 +58,8 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
   - ctpn
 * architecture_type = faceboxes
   - faceboxes-pytorch
+* architecture_type = retinaface-pytorch
+  - retinaface-resnet50-pytorch
 * architecture_type = ssd
   - efficientdet-d0-tf
   - efficientdet-d1-tf
@@ -102,10 +104,6 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
   - vehicle-detection-adas-0002
   - vehicle-license-plate-detection-barrier-0106
   - vehicle-license-plate-detection-barrier-0123
-* architecture_type = retinaface
-  - retinaface-anti-cov
-  - retinaface-resnet50
-  - ssh-mxnet
 * architecture_type = ultra_lightweight_face_detection
   - ultra-lightweight-face-detection-rfb-320
   - ultra-lightweight-face-detection-slim-320
@@ -136,7 +134,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
-                                {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection}
+                                {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}
                                 -i INPUT [-d DEVICE] [--labels LABELS]
                                 [-t PROB_THRESHOLD] [--keep_aspect_ratio]
                                 [--input_size INPUT_SIZE INPUT_SIZE]
@@ -145,16 +143,17 @@ usage: object_detection_demo.py [-h] -m MODEL -at
                                 [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
                                 [-limit OUTPUT_LIMIT] [--no_show]
                                 [--output_resolution OUTPUT_RESOLUTION]
-                                [-u UTILIZATION_MONITORS] [-r]
+                                [-u UTILIZATION_MONITORS]
                                 [--reverse_input_channels REVERSE_CHANNELS]
                                 [--mean_values MEAN_VALUES]
                                 [--scale_values SCALE_VALUES]
+                                [-r]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -at {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection}, --architecture_type {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection}
+  -at {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}, --architecture_type {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
@@ -213,7 +212,7 @@ Input transform options:
                         Optional. Normalize input by subtracting the mean
                         values per channel. Example: 255 255 255
   --scale_values SCALE_VALUES
-                        Optional. Divide input by scale values per channel
+                        Optional. Divide input by scale values per channel.
                         Division is applied after mean values subtraction.
                         Example: 255 255 255
 

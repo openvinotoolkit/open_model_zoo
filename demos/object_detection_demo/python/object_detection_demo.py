@@ -49,7 +49,8 @@ def build_argparser():
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
                       type=str, required=True, choices=('ssd', 'yolo', 'yolov4', 'faceboxes', 'centernet', 'ctpn',
-                                                        'retinaface', 'ultra_lightweight_face_detection'))
+                                                        'retinaface', 'ultra_lightweight_face_detection',
+                                                        'retinaface-pytorch'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -158,7 +159,8 @@ class ColorPalette:
 def get_model(ie, args):
     input_transform = models.InputTransform(args.reverse_input_channels, args.mean_values, args.scale_values)
     common_args = (ie, args.model, input_transform)
-    if args.architecture_type in ('ctpn', 'yolo', 'yolov4', 'retinaface') and not input_transform.is_trivial:
+    if args.architecture_type in ('ctpn', 'yolo', 'yolov4', 'retinaface',
+                                  'retinaface-pytorch') and not input_transform.is_trivial:
         raise ValueError("{} model doesn't support input transforms.".format(args.architecture_type))
 
     if args.architecture_type == 'ssd':
@@ -179,6 +181,8 @@ def get_model(ie, args):
         return models.RetinaFace(ie, args.model, threshold=args.prob_threshold)
     elif args.architecture_type == 'ultra_lightweight_face_detection':
         return models.UltraLightweightFaceDetection(*common_args, threshold=args.prob_threshold)
+    elif args.architecture_type == 'retinaface-pytorch':
+        return models.RetinaFacePyTorch(ie, args.model, threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 

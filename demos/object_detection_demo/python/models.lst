@@ -6,6 +6,8 @@ ctdet_coco_dlav0_512
 ctpn
 # For --architecture_type=faceboxes
 faceboxes-pytorch
+# For --architecture_type=retinaface-pytorch
+retinaface-resnet50-pytorch
 # For --architecture_type=ssd
 efficientdet-d0-tf
 efficientdet-d1-tf
