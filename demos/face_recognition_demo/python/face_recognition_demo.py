@@ -65,22 +65,15 @@ def build_argparser():
                               'Input frame size used by default.')
     general.add_argument('--no_show', action='store_true',
                          help="Optional. Don't show output.")
-    general.add_argument('-cw', '--crop_width', default=0, type=int,
-                         help='Optional. Crop the input stream to this width. '
-                              'Both -cw and -ch parameters should be specified '
-                              'to use crop.')
-    general.add_argument('-ch', '--crop_height', default=0, type=int,
-                         help='Optional. Crop the input stream to this height. '
-                              'Both -cw and -ch parameters should be specified '
-                              'to use crop.')
+    general.add_argument('--crop_size', default=(0, 0), type=int, nargs=2,
+                         help='Optional. Crop the input stream to this resolution.')
     general.add_argument('--match_algo', default='HUNGARIAN', choices=('HUNGARIAN', 'MIN_DIST'),
                          help='Optional. Algorithm for face matching. Default: HUNGARIAN.')
     general.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
     gallery = parser.add_argument_group('Faces database')
-    gallery.add_argument('-fg', type=Path, required=True,
-                         help='Required. Path to the face images directory.')
+    gallery.add_argument('-fg', default='', help='Optional. Path to the face images directory.')
     gallery.add_argument('--run_detector', action='store_true',
                          help='Optional. Use Face Detection model to find faces '
                               'on the face images, otherwise use full images.')
@@ -95,14 +88,9 @@ def build_argparser():
                         help='Required. Path to an .xml file with Facial Landmarks Detection model.')
     models.add_argument('-m_reid', type=Path, required=True,
                         help='Required. Path to an .xml file with Face Reidentification model.')
-    models.add_argument('-fd_iw', '--fd_input_width', default=0, type=int,
-                        help='Optional. Specify the input width of detection model. '
-                             'Both -fd_iw and -fd_ih parameters should be specified '
-                             'for reshape.')
-    models.add_argument('-fd_ih', '--fd_input_height', default=0, type=int,
-                        help='Optional. Specify the input height of detection model. '
-                             'Both -fd_iw and -fd_ih parameters should be specified '
-                             'for reshape.')
+    models.add_argument('--fd_input_size', default=(0, 0), type=int, nargs=2,
+                        help='Optional. Specify the input size of detection model for '
+                             'reshaping. Example: 500 700.')
 
     infer = parser.add_argument_group('Inference options')
     infer.add_argument('-d_fd', default='CPU', choices=DEVICE_KINDS,
@@ -152,8 +140,7 @@ class FrameProcessor:
 
         log.info('Loading networks...')
         self.face_detector = FaceDetector(ie, args.m_fd,
-                                          args.fd_input_height,
-                                          args.fd_input_width,
+                                          args.fd_input_size,
                                           confidence_threshold=args.t_fd,
                                           roi_scale_factor=args.exp_r_fd)
         self.landmarks_detector = LandmarksDetector(ie, args.m_lm)
@@ -261,8 +248,10 @@ def main():
     presenter = None
     output_transform = None
     input_crop = None
-    if args.crop_width and args.crop_height:
-        input_crop = np.array((args.crop_width, args.crop_height))
+    if args.crop_size[0] > 0 and args.crop_size[1] > 0:
+        input_crop = np.array(args.crop_size)
+    elif not (args.crop_size[0] == 0 and args.crop_size[1] == 0):
+        raise ValueError('Both crop height and width should be positive')
     video_writer = cv2.VideoWriter()
 
     while True:
@@ -272,7 +261,7 @@ def main():
             if frame_num == 0:
                 raise ValueError("Can't read an image from the input")
             break
-        if input_crop is not None:
+        if input_crop:
             frame = center_crop(frame, input_crop)
         if frame_num == 0:
             output_transform = OutputTransform(frame.shape[:2], args.output_resolution)

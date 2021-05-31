@@ -92,12 +92,12 @@ python ./face_recognition_demo.py -h
 usage: face_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
                                 [-limit OUTPUT_LIMIT] [--no_show]
                                 [--output_resolution OUTPUT_RESOLUTION]
-                                [-cw CROP_WIDTH] [-ch CROP_HEIGHT]
+                                [--crop_size CROP_SIZE]
                                 [--match_algo {HUNGARIAN,MIN_DIST}]
                                 [-u UTILIZATION_MONITORS]
                                 -fg PATH [--run_detector] [--allow_grow]
                                 -m_fd PATH -m_lm PATH -m_reid PATH
-                                [-fd_iw FD_INPUT_WIDTH] [-fd_ih FD_INPUT_HEIGHT]
+                                [--fd_input_size FD_INPUT_SIZE]
                                 [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
                                 [-d_lm {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
                                 [-d_reid {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
@@ -122,14 +122,8 @@ General:
                         in (width x height) format. Example: 1280x720.
                         Input frame size used by default.
   --no_show             Optional. Don't show output.
-  -cw CROP_WIDTH, --crop_width CROP_WIDTH
-                        Optional. Crop the input stream to this width.
-                        Both -cw and -ch parameters should be specified
-                        to use crop.
-  -ch CROP_HEIGHT, --crop_height CROP_HEIGHT
-                        Optional. Crop the input stream to this height.
-                        Both -cw and -ch parameters should be specified
-                        to use crop.
+  --crop_size CROP_SIZE
+                        Optional. Crop the input stream to this resolution.
   --match_algo {HUNGARIAN,MIN_DIST}
                         Optional. Algorithm for face matching.
                         Default: HUNGARIAN.
@@ -137,7 +131,7 @@ General:
                         Optional. List of monitors to show initially.
 
 Faces database:
-  -fg                   Required. Path to the face images directory.
+  -fg                   Optional. Path to the face images directory.
   --run_detector        Optional. Use Face Detection model to find faces
                         on the face images, otherwise use full images.
   --allow_grow          Optional. Flag to allow growing the face database,
@@ -157,14 +151,9 @@ Models:
                         model.
   -m_reid PATH          Required. Path to an .xml file with Face Reidentification
                         model.
-  -fd_iw FD_INPUT_WIDTH, --fd_input_width FD_INPUT_WIDTH
-                        Optional. Specify the input width of detection model.
-                        Both -fd_iw and -fd_ih parameters should be specified
-                        for reshape.
-  -fd_ih FD_INPUT_HEIGHT, --fd_input_height FD_INPUT_HEIGHT
-                        Optional. Specify the input height of detection model.
-                        Both -fd_iw and -fd_ih parameters should be specified
-                        for reshape.
+  --fd_input_size FD_INPUT_SIZE
+                        Optional. Specify the input size of detection model for
+                        reshaping. Example: 500 700.
 
 Inference options:
   -d_fd {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}
