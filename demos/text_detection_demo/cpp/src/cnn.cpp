@@ -77,7 +77,7 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     if (channels_ == 1) {
          cv::cvtColor(frame, image, cv::COLOR_BGR2GRAY);
     } else {
-        image = frame.clone();
+        image = frame;
     }
 
     auto blob = infer_request_.GetBlob(input_name_);
