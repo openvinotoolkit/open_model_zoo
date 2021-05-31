@@ -155,6 +155,8 @@ int main(int argc, char *argv[]) {
                 slog::info << "Initialized composite text recognition model" << slog::endl;
                 if (decoder_type != "simple")
                     throw std::logic_error("Wrong decoder. Use --dt simple for composite model.");
+                if (!FLAGS_tr_pt_first)
+                    throw std::logic_error("Flag '-tr_pt_first' was not set. Set the flag if you want to use composite model");
             }
             catch (const DecoderNotFound&) {
                 text_recognition = std::unique_ptr<Cnn>(new Cnn(FLAGS_m_tr, ie, FLAGS_d_tr));
