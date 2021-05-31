@@ -102,13 +102,19 @@ For example, use the following command line command to run the application:
   -tr_o_blb_nm "logits"
 ```
 
-For `text-recognition-resnet-fc` and `text-recognition-0015` you should use `simple` decoder for `-dt` option. For other models use `ctc` decoder (default decoder).
+For `text-recognition-resnet-fc` and `text-recognition-0015` you should use `simple` decoder for `-dt` option. For other models use `ctc` decoder (default decoder). In case of `text-recognition-0015` model, specify path to `text-recognition-0015-encoder` models for `-m_tr` key and decoder part will be found automatically as shown on example below:
 
-> **NOTE**: In case of composite model encoder and decoder are searched automatically: this means that model encoder should have `encoder` part in its name and model decoder should have `decoder` part. In this case to run the demo specify path to the encoder model (`-m_tr` parameter) and decoder model will be searched in the same path but `encoder` would be replaced with `decoder`. E.g.:
-> ```
-> model-text-recognition-0015:
->   model_encoder.xml
->   model_decoder.xml
+```sh
+./text_detection_demo \
+  -i <path_to_image>/sample.jpg \
+  -m_td <path_to_model>/text-detection-0003.xml \
+  -m_tr <path_to_model>/text-recognition-0015/text-recognition-0015-encoder/<precision>/text-recognition-0015-encoder.xml \
+  -dt simple \
+  -tr_pt_first \
+  -tr_o_blb_nm "logits" \
+  -m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+```
+
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.

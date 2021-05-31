@@ -392,19 +392,29 @@ NATIVE_DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('text-detection')}),
-        single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
+        single_option_cases('-m_td',
+            ModelArg('text-detection-0003'),
+            ModelArg('text-detection-0004'),
+            ModelArg('horizontal-text-detection-0001')),
         [
             *combine_cases(
                 TestCase(options={'-dt': 'ctc'}),
                 [
-                    *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
-                    TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
+#                    *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-0014'),
                                       '-tr_pt_first': None,
-                                      '-tr_o_blb_nm': 'logits'})
+                                      '-tr_o_blb_nm': 'logits'}),
                 ]),
-            TestCase(options={'-m_tr': ModelArg('text-recognition-resnet-fc'),
-                              '-tr_pt_first': None,
-                              '-dt': 'simple'}),
+            *combine_case(
+                TestCase(options={'-dt': 'simple'}),
+                [
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-0015-encoder'),
+                                      '-tr_pt_first': None,
+                                      '-tr_o_blb_nm': 'logits',
+                                      '-m_tr_ss': '?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'}),
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-resnet-fc'),
+                                      '-tr_pt_first': None}),
+                ]),
         ]
     )),
 ]
