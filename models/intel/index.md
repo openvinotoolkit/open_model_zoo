@@ -112,6 +112,7 @@ and accuracy (expect a bigger model to perform better).
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
+| [face-reidentification-retail-0095](./face-reidentification-retail-0095/README.md)     | 0.588 | 1.107 |
 | [person-reidentification-retail-0288](./person-reidentification-retail-0288/README.md) | 0.174 | 0.183 |
 | [person-reidentification-retail-0287](./person-reidentification-retail-0287/README.md) | 0.564 | 0.595 |
 | [person-reidentification-retail-0286](./person-reidentification-retail-0286/README.md) | 1.170 | 1.234 |
