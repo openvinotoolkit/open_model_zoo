@@ -75,6 +75,8 @@ def main():
         index_child_md_links[index_file_path] = sorted(required_md_links)
 
     omz_reference_prefix = '<omz_dir>/'
+    omz_github_url = 'https://github.com/openvinotoolkit/open_model_zoo/'
+    blob_tree_components = "../../"
 
     for md_path in sorted(all_md_files):
         referenced_md_files = set()
@@ -86,6 +88,19 @@ def main():
         # check local link validity
 
         for url in sorted([ref.url for ref in doc_page.external_references()]):
+            if url.startswith(omz_github_url):
+                suggested_reference = url[len(omz_github_url):]
+                md_path_parent_dir_components = '../' * len(md_path_rel.parent.parts)
+
+                if url.endswith('.md'):
+                    suggested_reference = omz_reference_prefix + suggested_reference
+                else:
+                    suggested_reference = blob_tree_components + md_path_parent_dir_components \
+                        + suggested_reference
+
+                complain(f'{md_path_rel}: non-local OMZ Repo reference "{url}"'
+                    f' (replace it by "{suggested_reference}")')
+
             try:
                 components = urllib.parse.urlparse(url)
             except ValueError:
