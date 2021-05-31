@@ -44,7 +44,7 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
                                            "Absolute path to the .xml file with kernels description.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers."
                                                  "Absolute path to a shared library with the kernels implementation.";
-static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
+static const char input_resizable_message[] = "Optional. Enables resizable input.";
 static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
 static const char no_show_message[] = "Optional. Disable showing of processed images.";
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. "
@@ -154,7 +154,8 @@ int main(int argc, char *argv[]) {
                 imageNames.erase(imageNames.begin() + i);
                 i--;
             } else {
-                inputImages.push_back(tmpImage);
+                // Clone cropped image to keep memory layout dense to enable -auto_resize
+                inputImages.push_back(centerSquareCrop(tmpImage).clone());
                 size_t lastSlashIdx = name.find_last_of("/\\");
                 if (lastSlashIdx != std::string::npos) {
                     imageNames[i] = name.substr(lastSlashIdx + 1);
@@ -258,10 +259,9 @@ int main(int argc, char *argv[]) {
 
             if (pipeline.isReadyToProcess()) {
                 auto imageStartTime = std::chrono::steady_clock::now();
-                cv::Mat curr_frame = centerSquareCrop(inputImages[nextImageIndex]);
 
-                pipeline.submitData(ImageInputData(curr_frame),
-                    std::make_shared<ClassificationImageMetaData>(curr_frame, imageStartTime, classIndices[nextImageIndex]));
+                pipeline.submitData(ImageInputData(inputImages[nextImageIndex]),
+                    std::make_shared<ClassificationImageMetaData>(inputImages[nextImageIndex], imageStartTime, classIndices[nextImageIndex]));
                 nextImageIndex++;
                 if (nextImageIndex == imageNames.size()) {
                     nextImageIndex = 0;
