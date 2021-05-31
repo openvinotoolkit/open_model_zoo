@@ -8,7 +8,6 @@ The demo shows an example of using neural networks to detect and recognize print
 * `text-detection-0004`, which is a lightweight detection network for finding text.
 * `horizontal-text-detection-0001`, which is a detection network that works much faster than models above, but it is applicable to finding more or less horizontal text only.
 * `text-recognition-0012`, which is a recognition network for recognizing text.
-* `text-recognition-0013`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and specify output layer name via `-tr_o_blb_nm` option for this model (see model [description](../../../models/intel/text-recognition-0013/README.md) for details).
 * `text-recognition-0014`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and specify output layer name via `-tr_o_blb_nm` option for this model (see model [description](../../../models/intel/text-recognition-0014/README.md) for details).
 * `text-recognition-0015`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"` (supported symbols set), `-tr_o_blb_nm "logits"` (to specify output name) and `-dt simple` (to specify decoder type). You can also specify `-lower` option to convert predicted text to lower-case. See model [description](../../../models/intel/text-recognition-0013/README.md) for details.
 * `text-recognition-resnet-fc`, which is a recognition network for recognizing text. You should add option `-tr_pt_first`.
@@ -37,7 +36,6 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 
 * decoder_type = ctc
   * text-recognition-0012
-  * text-recognition-0013
   * text-recognition-0014
 * decoder_type = simple
   * text-recognition-0015
@@ -45,11 +43,6 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
-> **NOTE**: In case of composite model encoder and decoder are searched automatically: this means that model encoder should have `encoder` part in its name and model decoder should have `decoder` part. In this case to run the demo specify path to the encoder model (`-m_tr` parameter) and decoder model will be searched in the same path but `encoder` would be replaced with `decoder`. E.g.:
-> ```
-> model-text-recognition-0015:
->   model_encoder.xml
->   model_decoder.xml
 > ```
 
 ## Running
@@ -111,6 +104,11 @@ For example, use the following command line command to run the application:
 
 For `text-recognition-resnet-fc` and `text-recognition-0015` you should use `simple` decoder for `-dt` option. For other models use `ctc` decoder (default decoder).
 
+> **NOTE**: In case of composite model encoder and decoder are searched automatically: this means that model encoder should have `encoder` part in its name and model decoder should have `decoder` part. In this case to run the demo specify path to the encoder model (`-m_tr` parameter) and decoder model will be searched in the same path but `encoder` would be replaced with `decoder`. E.g.:
+> ```
+> model-text-recognition-0015:
+>   model_encoder.xml
+>   model_decoder.xml
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
