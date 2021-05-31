@@ -62,9 +62,9 @@ class EncoderDecoderCNN : public Cnn {
     std::string logits_name_;
     unsigned end_token_;
     void check_net_names(const OutputsDataMap &output_info_encoder,
-                                        const OutputsDataMap &output_info_decoder,
-                                        const InputsDataMap &input_info_decoder
-                                        );
+                         const OutputsDataMap &output_info_decoder,
+                         const InputsDataMap &input_info_decoder
+                         );
 };
 
 class NameNotExist : public std::exception {
