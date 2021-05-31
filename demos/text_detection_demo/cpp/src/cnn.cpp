@@ -14,11 +14,9 @@ namespace {
 constexpr size_t MAX_NUM_DECODER = 20;
 }
 
-Cnn::Cnn(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
+Cnn::Cnn(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution)
+    : time_elapsed_(0), ncalls_(0) {
     // ---------------------------------------------------------------------------------------------------
-    channels_ = 0;
-    time_elapsed_ = 0;
-    ncalls_ = 0;
     // --------------------------- 1. Reading network ----------------------------------------------------
     auto network = ie.ReadNetwork(model_path);
 
@@ -133,16 +131,16 @@ EncoderDecoderCNN::EncoderDecoderCNN(const std::string &model_path,
                                      const std::string logits_name,
                                      size_t end_token,
                                      const cv::Size &new_input_resolution
-                        ) : Cnn(model_path, ie, deviceName, new_input_resolution) {
+                        ) : Cnn(model_path, ie, deviceName, new_input_resolution),
+                        features_name_(features_name),
+                        out_enc_hidden_name_(out_enc_hidden_name),
+                        out_dec_hidden_name_(out_dec_hidden_name),
+                        in_dec_hidden_name_(in_dec_hidden_name),
+                        in_dec_symbol_name_(in_dec_symbol_name),
+                        out_dec_symbol_name_(out_dec_symbol_name),
+                        logits_name_(logits_name) {
     // ---------------------------------------------------------------------------------------------------
-    // --------------------------- Setting names ---------------------------------------------------------
-    out_enc_hidden_name_ = out_enc_hidden_name;
-    out_dec_hidden_name_ = out_dec_hidden_name;
-    in_dec_hidden_name_ = in_dec_hidden_name;
-    features_name_ = features_name;
-    in_dec_symbol_name_ = in_dec_symbol_name;
-    out_dec_symbol_name_ = out_dec_symbol_name;
-    logits_name_ = logits_name;
+
     // --------------------------- Checking paths --------------------------------------------------------
     std::string model_path_decoder = model_path;
     auto network_encoder = ie.ReadNetwork(model_path);
