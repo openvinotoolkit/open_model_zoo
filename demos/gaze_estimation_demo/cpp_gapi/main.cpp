@@ -170,13 +170,10 @@ int main(int argc, char *argv[]) {
             FLAGS_d_fd,                // device specifier
         };
         /** Get information about frame from cv::VideoCapture **/
-        cv::VideoCapture cap;
-        size_t num_frames = 0;
-        cv::Size frame_size;
-        std::tie(cap, frame_size, num_frames) =
-            custom::setInput(FLAGS_i, stringToSize(FLAGS_res), FLAGS_limit);
+        std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+            std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
+        cv::Size frame_size = cap->getFrameSize();
         if (FLAGS_fd_reshape) {
-            CV_Assert(!FLAGS_fd_reshape && "cfgInputReshape isn't supported yet in OpenVino distribution.");
             InferenceEngine::Core ie;
             const auto network = ie.ReadNetwork(FLAGS_m_fd);
             const auto layerName = network.getInputsInfo().begin()->first;
@@ -190,10 +187,7 @@ int main(int argc, char *argv[]) {
             if (std::fabs(imageAspectRatio - networkAspectRatio) > aspectRatioThreshold) {
                 std::cout << "Face Detection network is reshaped" << std::endl;
                 layerDims[3] = static_cast<unsigned long>(layerDims[2] * imageAspectRatio);
-                // Unsupprted yet in OpenVino distribution
-                // You can uncomment this string and remove warning if build OMZ demos
-                // with OpenCV from source.
-                // face_net.cfgInputReshape(layerName, layerDims);
+                face_net.cfgInputReshape(layerName, layerDims);
             }
         }
         auto head_net = cv::gapi::ie::Params<nets::HeadPose> {
@@ -250,12 +244,11 @@ int main(int argc, char *argv[]) {
         /** Save output result **/
         cv::VideoWriter videoWriter;
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                  static_cast<int>(cap.get(cv::CAP_PROP_FPS)), frame_size)) {
+                                                  cap->fps(), frame_size)) {
             throw std::runtime_error("Can't open video writer");
         }
 
         pipeline.start();
-        uint32_t framesProcessed = 0;
         while (pipeline.pull(cv::gout(frame,
                                       out_cofidence,
                                       out_faces,
@@ -314,7 +307,7 @@ int main(int argc, char *argv[]) {
             }
 
             putTimingInfoOnFrame(frame, overallTimeAverager.getAveragedValue());
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || ++framesProcessed <= num_frames)) {
+            if (videoWriter.isOpened()) {
                 videoWriter.write(frame);
             }
             if (!FLAGS_no_show) {
@@ -330,15 +323,6 @@ int main(int argc, char *argv[]) {
                     flipImage = !flipImage;
                 else
                     presenter.handleKey(key);
-            }
-
-            if (FLAGS_loop && (framesProcessed == num_frames)) {
-                framesProcessed = 0;
-                /** Loop **/
-                pipeline.stop();
-                cap.set(cv::CAP_PROP_POS_FRAMES, 0.);
-                pipeline.setSource<custom::CustomCapSource>(cap);
-                pipeline.start();
             }
         }
 

@@ -6,22 +6,25 @@
 
 #include <opencv2/videoio.hpp>
 #include <opencv2/gapi/garg.hpp>
+#include <utils/images_capture.h>
 
 namespace custom {
 class CustomCapSource : public cv::gapi::wip::IStreamSource
 {
 public:
-    explicit CustomCapSource(const cv::VideoCapture& cap) : cap(cap) { prep(); }
+    explicit CustomCapSource(std::shared_ptr<ImagesCapture>& cap) : cap(cap) {
+        prep();
+    }
 
 protected:
-    cv::VideoCapture cap;
+    std::shared_ptr<ImagesCapture> cap;
     cv::Mat first;
     bool first_pulled = false;
     cv::Mat clear_frame;
     void prep() {
         GAPI_Assert(first.empty());
-        cv::Mat tmp;
-        if (!cap.read(tmp)) {
+        cv::Mat tmp = cap->read();
+        if (!tmp.data) {
             GAPI_Assert(false && "Couldn't grab the frame");
         }
         first = tmp.clone();
@@ -34,10 +37,9 @@ protected:
             data = first;
             return true;
         }
-        if (!cap.isOpened()) return false;
-        cv::Mat frame;
-        if (!cap.read(frame)) {
-            return false;
+        cv::Mat frame = cap->read();
+        if (!frame.data) {
+            return false;;
         }
         data = frame.clone();
         return true;
@@ -49,24 +51,4 @@ protected:
     }
 };
 
-std::tuple<cv::VideoCapture, cv::Size, size_t> setInput(const std::string& input,
-                                                        const cv::Size& camera_res,
-                                                        const int limit) {
-    cv::VideoCapture cap;
-    try {
-        // If stoi() throws exception input should be a path not a camera id
-        cap = cv::VideoCapture(std::stoi(input));
-    } catch (std::invalid_argument&) {
-        slog::info << "Input source is treated as a file path" << slog::endl;
-        cap = cv::VideoCapture(input);
-    }
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, camera_res.width);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, camera_res.height);
-    const cv::Size frame_size(int(cap.get(cv::CAP_PROP_FRAME_WIDTH)), int(cap.get(cv::CAP_PROP_FRAME_HEIGHT)));
-    const int video_length = int(cap.get(cv::CAP_PROP_FRAME_COUNT));
-    const size_t num_frames = limit > 0 && (limit < video_length)
-        ? limit
-        : video_length;
-    return std::make_tuple(cap, frame_size, num_frames);
-}
 } // namespace custom

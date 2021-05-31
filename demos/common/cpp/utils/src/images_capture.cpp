@@ -53,6 +53,10 @@ public:
         }
         return cv::Mat{};
     }
+
+    cv::Size getFrameSize() override {
+        return cv::Size{img.cols, img.rows};
+    }
 };
 
 class DirReader : public ImagesCapture {
@@ -62,6 +66,7 @@ class DirReader : public ImagesCapture {
     const size_t initialImageId;
     const size_t readLengthLimit;
     const std::string input;
+    cv::Size firstFrameSize;
 
 public:
     DirReader(const std::string &input, bool loop, size_t initialImageId, size_t readLengthLimit) : ImagesCapture{loop},
@@ -80,6 +85,9 @@ public:
         while (fileId < names.size()) {
             cv::Mat img = cv::imread(input + '/' + names[fileId]);
             if (img.data) {
+                if (readImgs == 0) {
+                    firstFrameSize = cv::Size{img.cols, img.rows};
+                }
                 ++readImgs;
                 if (readImgs - 1 >= initialImageId) return;
             }
@@ -115,6 +123,10 @@ public:
             }
         }
         return cv::Mat{};
+    }
+
+    cv::Size getFrameSize() override {
+        return firstFrameSize;
     }
 };
 
@@ -158,6 +170,11 @@ public:
         }
         return img;
     }
+
+    cv::Size getFrameSize() override {
+        return cv::Size{int(cap.get(cv::CAP_PROP_FRAME_WIDTH)),
+                        int(cap.get(cv::CAP_PROP_FRAME_HEIGHT))};
+    }
 };
 
 class CameraCapWrapper : public ImagesCapture {
@@ -199,6 +216,11 @@ public:
         }
         ++nextImgId;
         return img;
+    }
+
+    cv::Size getFrameSize() override {
+        return cv::Size{int(cap.get(cv::CAP_PROP_FRAME_WIDTH)),
+                        int(cap.get(cv::CAP_PROP_FRAME_HEIGHT))};
     }
 };
 

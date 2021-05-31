@@ -1,19 +1,18 @@
-# G-API Gaze Estimation C++ Demo
+# G-API Gaze Estimation Demo
 
 ![example](../gaze_estimation.gif)
 
 This demo showcases the work of gaze estimation model.
-The corresponding pre-trained model `gaze-estimation-adas-0002` is delivered with the product.
 
 The demo also relies on the following auxiliary networks:
+
 * `face-detection-retail-0004` or `face-detection-adas-0001` detection networks for finding faces
 * `head-pose-estimation-adas-0001`, which estimates head pose in Tait-Bryan angles, serving as an input for gaze estimation model
 * `facial-landmarks-35-adas-0002`, which estimates coordinates of facial landmarks for detected faces. The keypoints at the corners of eyes are used to locate eyes regions required for the gaze estimation model
 * `open-closed-eye-0001`, which estimates eyes state of detected faces.
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
-
 Other demo objectives are:
+
 * Video/Camera as inputs, via OpenCV*
 * Visualization of gaze estimation results, and, optionally, results of inference on auxiliary models
 
@@ -29,9 +28,29 @@ Other demo objectives are:
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html)
 
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in <omz_dir>/demos/gaze_estimation_demo/cpp_gapi/models.lst file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+### Supported Models
+
+* facial-landmarks-35-adas-0002
+* face-detection-adas-0001
+* face-detection-retail-0004
+* face-detection-retail-0005
+* face-detection-retail-0044
+* gaze-estimation-adas-0002
+* head-pose-estimation-adas-0001
+* open-closed-eye-0001
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
 InferenceEngine:
     API version ............ <version>
@@ -51,11 +70,11 @@ Options:
     -m_hp "<path>"           Required. Path to an .xml file with a trained Head Pose Estimation model.
     -m_lm "<path>"           Required. Path to an .xml file with a trained Facial Landmarks Estimation model.
     -m_es "<path>"           Required. Path to an .xml file with a trained Open/Closed Eye Estimation model.
-    -d "<device>"            Optional. Target device for Gaze Estimation network (the list of available devices is shown below). Default value is "CPU".
-    -d_fd "<device>"         Optional. Target device for Face Detection network (the list of available devices is shown below). Default value is "CPU".
-    -d_hp "<device>"         Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). Default value is "CPU".
-    -d_lm "<device>"         Optional. Target device for Facial Landmarks Estimation network (the list of available devices is shown below). Default value is "CPU".
-    -d_es "<device>"         Optional. Target device for Open/Closed Eye network (the list of available devices is shown below). Default value is "CPU".
+    -d "<device>"            Optional. Target device for Gaze Estimation network (the list of available devices is shown below).
+    -d_fd "<device>"         Optional. Target device for Face Detection network (the list of available devices is shown below).
+    -d_hp "<device>"         Optional. Target device for Head Pose Estimation network (the list of available devices is shown below).
+    -d_lm "<device>"         Optional. Target device for Facial Landmarks Estimation network (the list of available devices is shown below).
+    -d_es "<device>"         Optional. Target device for Open/Closed Eye network (the list of available devices is shown below).
     -fd_reshape              Optional. Reshape Face Detector network so that its input resolution has the same aspect ratio as the input frame.
     -no_show                 Optional. Don't show output.
     -r                       Optional. Output inference results as raw values.
@@ -65,25 +84,17 @@ Options:
 
 Running the application with an empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained and optimized `gaze-estimation-adas-0002` model, and the auxiliary models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/gaze_estimation_demo/cpp_gapi/models.lst`.
-
-> **NOTE**: Before running the demo with another trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 For example, to do inference on a CPU, run the following command:
 
 ```sh
-./gaze_estimation_demo_gapi -i <path_to_video>/input_video.mp4  -m <path_to_model>/gaze-estimation-adas-0002.xml -m_fd <path_to_model>/face-detection-retail-0004.xml -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml
+./gaze_estimation_demo_gapi -d CPU -i <path_to_video>/input_video.mp4  -m <path_to_model>/gaze-estimation-adas-0002.xml -m_fd <path_to_model>/face-detection-retail-0004.xml -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml
 ```
-
-## Demo Output
-
-The demo uses OpenCV to display the resulting frame with marked gaze vectors, text reports of **FPS** (frames per second performance) for the demo, and, optionally, marked facial landmarks, head pose angles, and face bounding boxes.
-By default, it shows only gaze estimation results. To see inference results of auxiliary networks, use run-time control keys.
 
 ### Run-Time Control Keys
 
 The demo allows you to control what information is displayed in run-time.
 The following keys are supported:
+
 * G - to toggle displaying gaze vector
 * B - to toggle displaying face detector bounding boxes
 * O - to toggle displaying head pose information
@@ -94,16 +105,13 @@ The following keys are supported:
 * F - to flip frames horizontally
 * Esc - to quit the demo
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
->* `face-detection-adas-0001`
->* `face-detection-retail-0004`
->* `facial-landmarks-35-adas-0002`
->* `gaze-estimation-adas-0002`
->* `head-pose-estimation-adas-0001`
->* `open-closed-eye-0001`
-> Other models may produce unexpected results on these devices.
+## Demo Output
+
+The demo uses OpenCV to display the resulting frame with marked gaze vectors, text reports of **FPS** (frames per second performance) for the demo, and, optionally, marked facial landmarks, head pose angles, and face bounding boxes.
+By default, it shows only gaze estimation results. To see inference results of auxiliary networks, use run-time control keys.
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
