@@ -12,6 +12,9 @@
 
 namespace {
 constexpr size_t MAX_NUM_DECODER = 20;
+void ThrowNameNotFound(std::string &name) {
+    throw std::runtime_error("Name '" + name + "' does not exist in the network");
+};
 }
 
 Cnn::Cnn(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution)
@@ -100,23 +103,20 @@ void EncoderDecoderCNN::check_net_names(const OutputsDataMap &output_info_encode
                                         const OutputsDataMap &output_info_decoder,
                                         const InputsDataMap &input_info_decoder
                                         ) {
-    std::string name_not_exist = "";
     if (output_info_encoder.find(out_enc_hidden_name_) == output_info_encoder.end())
-        name_not_exist = out_enc_hidden_name_;
+        ThrowNameNotFound(out_enc_hidden_name_);
     if (output_info_encoder.find(features_name_) == output_info_encoder.end())
-        name_not_exist = features_name_;
+        ThrowNameNotFound(features_name_);
     if (input_info_decoder.find(in_dec_hidden_name_) == input_info_decoder.end())
-        name_not_exist = in_dec_hidden_name_;
+        ThrowNameNotFound(in_dec_hidden_name_);
     if (input_info_decoder.find(features_name_) == input_info_decoder.end())
-        name_not_exist = features_name_;
+        ThrowNameNotFound(features_name_);
     if (input_info_decoder.find(in_dec_symbol_name_) == input_info_decoder.end())
-        name_not_exist = in_dec_symbol_name_;
+        ThrowNameNotFound(in_dec_symbol_name_);
     if (output_info_decoder.find(out_dec_hidden_name_) == output_info_decoder.end())
-        name_not_exist = out_dec_hidden_name_;
+        ThrowNameNotFound(out_dec_hidden_name_);
     if (output_info_decoder.find(out_dec_symbol_name_) == output_info_decoder.end())
-        name_not_exist = out_dec_symbol_name_;
-    if (name_not_exist != "")
-        throw std::runtime_error("'" + name_not_exist + "' does not exist in the network");
+        ThrowNameNotFound(out_dec_symbol_name_);
  }
 
 
