@@ -121,7 +121,7 @@ void EncoderDecoderCNN::check_net_names(const OutputsDataMap &output_info_encode
 
 
 EncoderDecoderCNN::EncoderDecoderCNN(const std::string &model_path,
-                                     Core & ie, const std::string & deviceName,
+                                     Core &ie, const std::string &deviceName,
                                      const std::string &out_enc_hidden_name,
                                      const std::string &out_dec_hidden_name,
                                      const std::string &in_dec_hidden_name,

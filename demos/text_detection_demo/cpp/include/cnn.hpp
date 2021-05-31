@@ -38,7 +38,7 @@ class Cnn {
 class EncoderDecoderCNN : public Cnn {
   public:
     EncoderDecoderCNN(const std::string &model_path,
-                      Core & ie, const std::string & deviceName,
+                      Core &ie, const std::string &deviceName,
                       const std::string &out_enc_hidden_name,
                       const std::string &out_dec_hidden_name,
                       const std::string &in_dec_hidden_name,
