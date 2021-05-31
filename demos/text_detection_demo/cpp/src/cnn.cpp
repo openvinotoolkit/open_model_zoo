@@ -220,7 +220,7 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
         const float * output_data_decoder = output_decoder.as<const float *>();
 
         auto max_elem_vector = std::max_element(output_data_decoder, output_data_decoder + num_classes);
-        auto argmax = std::distance(output_data_decoder, max_elem_vector);
+        auto argmax = static_cast<size_t>(std::distance(output_data_decoder, max_elem_vector));
         for (size_t i = 0; i < num_classes; i++)
             data_targets[num_decoder * num_classes + i] = output_data_decoder[i];
         if (end_token_ == argmax)
