@@ -343,6 +343,14 @@ AccuracyChecker supports following set of adapters:
    * `nms_threshold` - overlap threshold for NMS (optional, default 0.5).
    * `keep_top_k ` - maximal number of boxes which should be kept (optional).
    * `include_boundaries` - allows include boundaries for NMS (optional, default False).
+* `retinaface-pytorch` - converting output of RetinaFace PyTorch model to `DetectionPrediction` or representation container with `DetectionPrediction`, `FacialLandmarksPrediction` (depends on provided set of outputs)
+   * `scores_output` - name for output layer with face detection score.
+   * `bboxes_output` - name for output layer with face detection boxes.
+   * `landmarks_output` - name for output layer with predicted facial landmarks (optional, if not provided, only `DetectionPrediction` will be generated).
+   * `nms_threshold` - overlap threshold for NMS (optional, default 0.4).
+   * `keep_top_k ` - maximal number of boxes which should be kept (optional, default 750).
+   * `include_boundaries` - allows include boundaries for NMS (optional, default False).
+   * `confidence_threshold` - confidence threshold that is used to filter out detected instances (optional, default 0.02).
 * `faceboxes` - converting output of FaceBoxes model to `DetectionPrediction` representation.
   * `scores_out` - name of output layer with bounding boxes scores.
   * `boxes_out` - name of output layer with bounding boxes coordinates.
