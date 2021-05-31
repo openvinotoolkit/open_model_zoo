@@ -405,7 +405,7 @@ NATIVE_DEMOS = [
                                       '-tr_pt_first': None,
                                       '-tr_o_blb_nm': 'logits'}),
                 ]),
-            *combine_case(
+            *combine_cases(
                 TestCase(options={'-dt': 'simple'}),
                 [
                     TestCase(options={'-m_tr': ModelArg('text-recognition-0015-encoder'),
