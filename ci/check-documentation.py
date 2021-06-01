@@ -90,17 +90,19 @@ def main():
         for url in sorted([ref.url for ref in doc_page.external_references()]):
             if url.startswith(omz_github_url):
                 suggested_reference = url[len(omz_github_url):]
-                md_path_parent_dir_components = '../' * len(md_path_rel.parent.parts)
 
-                if url.endswith('.md'):
-                    suggested_reference = omz_reference_prefix + suggested_reference
-                else:
-                    suggested_reference = blob_tree_components + md_path_parent_dir_components \
-                        + suggested_reference
+                if suggested_reference.startswith(('blob', 'tree')):
+                    md_path_parent_dir_components = '../' * len(md_path_rel.parent.parts)
 
-                complain(f'{md_path_rel}: non-local OMZ Repo reference "{url}"'
-                    f' (replace it by "{suggested_reference}")')
-                continue
+                    if url.endswith('.md'):
+                        suggested_reference = blob_tree_components + md_path_parent_dir_components \
+                            + suggested_reference
+                    else:
+                        suggested_reference = omz_reference_prefix + suggested_reference
+
+                    complain(f'{md_path_rel}: non-local OMZ Repo reference "{url}"'
+                        f' (replace it by "{suggested_reference}")')
+                    continue
 
             try:
                 components = urllib.parse.urlparse(url)
