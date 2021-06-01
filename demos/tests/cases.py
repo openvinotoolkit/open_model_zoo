@@ -375,6 +375,10 @@ NATIVE_DEMOS = [
                         '-m_lm': ModelArg('landmarks-regression-retail-0009'),
                         '-m_reid': ModelArg('Sphereface'),
                     }),
+                    TestCase(options={
+                        '-m_lm': ModelArg('landmarks-regression-retail-0009'),
+                        '-m_reid': ModelArg('face-recognition-resnet100-arcface-onnx'),
+                    }),
                 ],
             ),
             TestCase(options={'-m_act': ModelArg('person-detection-raisinghand-recognition-0001'), '-a_top': '5'}),
@@ -526,6 +530,8 @@ PYTHON_DEMOS = [
         TestCase(options={'-m_lm': ModelArg('landmarks-regression-retail-0009')}),
         TestCase(options={'-m_reid': ModelArg('Sphereface')}),
         TestCase(options={'-m_reid': ModelArg('face-reidentification-retail-0095')}),
+        TestCase(options={'-m_reid': ModelArg('face-recognition-resnet100-arcface-onnx')}),
+        TestCase(options={'-m_reid': ModelArg('facenet-20180408-102900')}),
     )),
 
     PythonDemo(name='colorization_demo', device_keys=['-d'], test_cases=combine_cases(

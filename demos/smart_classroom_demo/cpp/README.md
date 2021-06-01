@@ -36,10 +36,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 ### Supported Models
 
 * face-detection-adas-0001
-* face-recognition-mobilefacenet-arcface
-* face-recognition-resnet100-arcface
-* face-recognition-resnet34-arcface
-* face-recognition-resnet50-arcface
+* face-recognition-resnet100-arcface-onnx
 * landmarks-regression-retail-0009
 * person-detection-action-recognition-0005
 * person-detection-action-recognition-0006

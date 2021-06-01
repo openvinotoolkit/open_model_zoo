@@ -11,7 +11,7 @@ The following pretrained models can be used:
 
 * `face-detection-retail-0004` and `face-detection-adas-0001`, to detect faces and predict their bounding boxes;
 * `landmarks-regression-retail-0009`, to predict face keypoints;
-* `face-reidentification-retail-0095` or `Sphereface`, to recognize persons.
+* `face-reidentification-retail-0095`, `Sphereface` or `face-recognition-resnet100-arcface-onnx`, to recognize persons.
 
 ## How it works
 
@@ -51,6 +51,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 
 * face-detection-adas-0001
 * face-detection-retail-0004
+* face-recognition-resnet100-arcface-onnx
 * face-reidentification-retail-0095
 * landmarks-regression-retail-0009
 * Sphereface
