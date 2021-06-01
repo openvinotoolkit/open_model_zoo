@@ -68,7 +68,7 @@ class PreprocessingExecutor:
         context.data_batch = self.process(batch_data, batch_annotation)
 
     def process(self, images, batch_annotation=None):
-        for i, _ in enumerate(images):
+        for i, _ in enumerate(images):           
             for processor in self.processors:
                 images[i] = processor(
                     image=images[i], annotation_meta=batch_annotation[i].metadata if batch_annotation else None

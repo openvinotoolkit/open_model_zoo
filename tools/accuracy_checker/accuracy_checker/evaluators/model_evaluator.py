@@ -336,9 +336,11 @@ class ModelEvaluator(BaseEvaluator):
         metric_config = self._configure_metrics(kwargs, output_callback)
         (enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
          ignore_metric_reference) = metric_config
+
         for batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_annotation, batch_input)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
+
             if stored_predictions:
                 self.prepare_prediction_to_store(batch_predictions, batch_identifiers, batch_meta, stored_predictions)
             if not store_only:
@@ -366,7 +368,6 @@ class ModelEvaluator(BaseEvaluator):
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
             batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
-
         annotations, predictions = self.postprocessor.process_batch(
             batch_annotations, batch_predictions, batch_meta
         )

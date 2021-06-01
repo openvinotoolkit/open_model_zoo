@@ -50,6 +50,7 @@ from .image_retrieval import ImageRetrievalConverter
 from .cvat_object_detection import CVATObjectDetectionConverter
 from .cvat_attributes_recognition import CVATAttributesRecognitionConverter
 from .cvat_age_gender_recognition import CVATAgeGenderRecognitionConverter
+from .coco_facial_landmarks import COCOFacialLandmarksRecognitionConverter
 from .cvat_facial_landmarks import CVATFacialLandmarksRecognitionConverter
 from .cvat_text_recognition import CVATTextRecognitionConverter
 from .cvat_multilabel_recognition import CVATMultilabelAttributesRecognitionConverter
@@ -169,6 +170,7 @@ __all__ = [
     'CVATObjectDetectionConverter',
     'CVATAttributesRecognitionConverter',
     'CVATAgeGenderRecognitionConverter',
+    'COCOFacialLandmarksRecognitionConverter',
     'CVATFacialLandmarksRecognitionConverter',
     'CVATTextRecognitionConverter',
     'CVATMultilabelAttributesRecognitionConverter',
