@@ -16,16 +16,20 @@
 
 #include "models/super_resolution_model.h"
 #include "utils/ocv_common.hpp"
+#include <utils/slog.hpp>
 
 using namespace InferenceEngine;
 
-SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName) :
+SuperResolutionModel::SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize) :
     ImageModel(modelFileName, false) {
+        netInputHeight = inputImgSize.height;
+        netInputWidth = inputImgSize.width;
 }
 
 void SuperResolutionModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input blobs --------------------------------------------------
+
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     if (inputShapes.size() != 1 && inputShapes.size() != 2)
         throw std::runtime_error("The demo supports topologies with 1 or 2 inputs only");
@@ -65,6 +69,24 @@ void SuperResolutionModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnn
     outputsNames.push_back(outputInfo.begin()->first);
     Data& data = *outputInfo.begin()->second;
     data.setPrecision(Precision::FP32);
+    changeInputSize(cnnNetwork, data.getDims()[2] / inputShapes[inputsNames[0]][2]);
+}
+
+void SuperResolutionModel::changeInputSize(CNNNetwork& cnnNetwork, int coeff) {
+    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+    SizeVector& lrShape = inputShapes[inputsNames[0]];
+
+    lrShape[0] = 1;
+    lrShape[2] = netInputHeight;
+    lrShape[3] = netInputWidth;
+
+    if (inputShapes.size() == 2) {
+        SizeVector& bicShape = inputShapes[inputsNames[1]];
+        bicShape[0] = 1;
+        bicShape[2] = coeff * netInputHeight;
+        bicShape[3] = coeff * netInputWidth;
+    }
+    cnnNetwork.reshape(inputShapes);
 }
 
 std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
@@ -76,6 +98,8 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
     if (img.channels() != (int)lrInputBlob->getTensorDesc().getDims()[1])
         cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
 
+    if (static_cast<size_t>(img.cols) != netInputWidth || static_cast<size_t>(img.rows) != netInputHeight)
+        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
     matU8ToBlob<float_t>(img, lrInputBlob);
 
     if (inputsNames.size() == 2) {

@@ -138,7 +138,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::string& type) {
     if (type == "sr") {
-        return std::unique_ptr<ImageModel>(new SuperResolutionModel(FLAGS_m));
+        return std::unique_ptr<ImageModel>(new SuperResolutionModel(FLAGS_m, frameSize));
     }
     if (type == "deblur") {
         return std::unique_ptr<ImageModel>(new DeblurringModel(FLAGS_m, frameSize));

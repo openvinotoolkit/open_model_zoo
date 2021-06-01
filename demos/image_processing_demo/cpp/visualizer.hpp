@@ -28,7 +28,7 @@ private:
     std::string trackbarName = "Processing";
 
     // images info
-    cv::Size resolution = cv::Size(960, 540);
+    cv::Size resolution = cv::Size(1000, 600);
     bool isResolutionSet = false;
     cv::Mat inputImg = cv::Mat(resolution, CV_32FC3, 0.);;
     cv::Mat resultImg = cv::Mat(resolution, CV_32FC3, 0.);;

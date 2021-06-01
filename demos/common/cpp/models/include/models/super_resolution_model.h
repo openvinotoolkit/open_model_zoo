@@ -22,12 +22,13 @@ class SuperResolutionModel : public ImageModel {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
-    SuperResolutionModel(const std::string& modelFileName);
+    SuperResolutionModel(const std::string& modelFileName, const cv::Size& inputImgSize);
 
     std::shared_ptr<InternalModelData> preprocess(
         const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
 protected:
+    void changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork, int coeff);
     void prepareInputsOutputs(InferenceEngine::CNNNetwork & cnnNetwork) override;
 };

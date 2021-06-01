@@ -97,9 +97,9 @@ void Visualizer::show(cv::Mat img) {
 
 void Visualizer::changeDisplayImg() {
     if (mode == "orig") {
-        displayImg = inputImg.clone();
-        resultImg(cv::Rect(0, 0, slider, inputImg.rows)).copyTo(displayImg(cv::Rect(0, 0, slider, resultImg.rows)));
-        markImage(displayImg, {"R", "O"}, static_cast<float>(slider) / resolution.width);
+        displayImg = resultImg.clone();
+        inputImg(cv::Rect(0, 0, slider, inputImg.rows)).copyTo(displayImg(cv::Rect(0, 0, slider, resultImg.rows)));
+        markImage(displayImg, {"O", "R"}, static_cast<float>(slider) / resolution.width);
         drawSweepLine(displayImg);
     } else if (mode == "result") {
         displayImg = resultImg.clone();
