@@ -100,6 +100,7 @@ def main():
 
                 complain(f'{md_path_rel}: non-local OMZ Repo reference "{url}"'
                     f' (replace it by "{suggested_reference}")')
+                continue
 
             try:
                 components = urllib.parse.urlparse(url)
