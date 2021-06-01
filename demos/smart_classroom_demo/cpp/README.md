@@ -37,11 +37,13 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 
 * face-detection-adas-0001
 * face-recognition-resnet100-arcface-onnx
+* face-reidentification-retail-0095
 * landmarks-regression-retail-0009
 * person-detection-action-recognition-0005
 * person-detection-action-recognition-0006
 * person-detection-action-recognition-teacher-0002
 * person-detection-raisinghand-recognition-0001
+* Sphereface
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
