@@ -16,9 +16,6 @@ models:
           - name: "token_type_ids"
             type: INPUT
             value: "segment_ids"'
-
-
-
     datasets:
       - name: squad_v1_1_msl384_mql64_ds128_lowercase
         reader:
