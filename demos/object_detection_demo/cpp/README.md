@@ -67,10 +67,6 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
   - ctdet_coco_dlav0_512
 * architecture_type = faceboxes
   - faceboxes-pytorch
-* architecture_type = retinaface
-  - retinaface-anti-cov
-  - retinaface-resnet50
-  - ssh-mxnet
 * architecture_type = ssd
   - efficientdet-d0-tf
   - efficientdet-d1-tf

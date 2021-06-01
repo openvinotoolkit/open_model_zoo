@@ -21,7 +21,7 @@ from .ctpn import CTPN
 from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
 from .open_pose import OpenPose
-from .retinaface import RetinaFace
+from .retinaface import RetinaFace, RetinaFacePyTorch
 from .segmentation import SegmentationModel, SalientObjectDetectionModel
 from .ssd import SSD
 from .ultra_lightweight_face_detection import UltraLightweightFaceDetection
@@ -39,6 +39,7 @@ __all__ = [
     'OpenPose',
     'OutputTransform',
     'RetinaFace',
+    'RetinaFacePyTorch',
     'SalientObjectDetectionModel',
     'SegmentationModel',
     'SSD',
