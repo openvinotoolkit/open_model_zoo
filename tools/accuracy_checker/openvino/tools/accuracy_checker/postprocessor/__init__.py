@@ -65,7 +65,7 @@ from .time_series_denormalize import TimeSeriesDenormalize
 from .interp import Interpolation
 from .invert_mask import InvertMask
 from .rescale_mask import RescaleMask
-
+from .face_98_landmarks_postprocess import Heatmap2Keypoints
 
 __all__ = [
     'Postprocessor',
@@ -149,4 +149,5 @@ __all__ = [
 
     'InvertMask',
     'RescaleMask',
+    'Heatmap2Keypoints'
 ]

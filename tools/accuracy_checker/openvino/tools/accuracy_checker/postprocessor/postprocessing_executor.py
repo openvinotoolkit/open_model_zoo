@@ -53,7 +53,6 @@ class PostprocessingExecutor:
         for method in self._image_processors:
             annotation_entries, prediction_entries = method.get_entries(annotation, prediction)
             method.process(annotation_entries, prediction_entries, image_metadata)
-
         return annotation, prediction
 
     def process_batch(self, annotations, predictions, metas=None, allow_empty_annotation=False):
@@ -64,7 +63,6 @@ class PostprocessingExecutor:
             zipped_result = zipped_transform(self.process_image, annotations, predictions)
         else:
             zipped_result = zipped_transform(self.process_image, annotations, predictions, metas)
-
         return zipped_result[0:2]  # return changed annotations and predictions only
 
     def full_process(self, annotations, predictions, metas=None):
