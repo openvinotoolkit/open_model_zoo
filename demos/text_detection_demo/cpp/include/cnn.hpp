@@ -37,7 +37,7 @@ class Cnn {
 
 class EncoderDecoderCNN : public Cnn {
   public:
-    EncoderDecoderCNN(const std::string &model_path,
+    EncoderDecoderCNN(std::string model_path,
                       Core &ie, const std::string &deviceName,
                       const std::string &out_enc_hidden_name,
                       const std::string &out_dec_hidden_name,
@@ -51,7 +51,6 @@ class EncoderDecoderCNN : public Cnn {
                       );
     InferenceEngine::BlobMap Infer(const cv::Mat &frame) override;
   private:
-    InferRequest infer_request_encoder_;
     InferRequest infer_request_decoder_;
     std::string features_name_;
     std::string out_enc_hidden_name_;
@@ -61,10 +60,9 @@ class EncoderDecoderCNN : public Cnn {
     std::string out_dec_symbol_name_;
     std::string logits_name_;
     size_t end_token_;
-    void check_net_names(const OutputsDataMap &output_info_encoder,
-                         const OutputsDataMap &output_info_decoder,
+    void check_net_names(const OutputsDataMap &output_info_decoder,
                          const InputsDataMap &input_info_decoder
-                         );
+                         ) const;
 };
 
 class DecoderNotFound {};
