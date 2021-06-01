@@ -12,7 +12,7 @@ For details see [paper](https://arxiv.org/abs/1512.03385),
 
 1. Install TensorFlow\*, version 1.14.0.
 2. Download [pre-trained weights](http://download.tensorflow.org/models/official/20181001_resnet/savedmodels/resnet_v1_fp32_savedmodel_NHWC_jpg.tar.gz)
-3. Run example conversion code, available at [freeze_saved_model.py](https://github.com/openvinotoolkit/open_model_zoo/blob/master/models/public/resnet-50-tf/freeze_saved_model.py)
+3. Run example conversion code, available at [freeze_saved_model.py](../../../../../blob/master/models/public/resnet-50-tf/freeze_saved_model.py)
 ```sh
 python3 freeze_saved_model.py --saved_model_dir path/to/downloaded/saved_model --save_file path/to/resulting/frozen_graph.pb
 ```

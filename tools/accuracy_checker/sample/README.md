@@ -40,7 +40,7 @@ Now try edit config, to run SampLeNet on other device or framework (e.g. Caffe, 
 
 ###  Additional useful resources
 
-* [config](https://github.com/openvinotoolkit/open_model_zoo/blob/master/tools/accuracy_checker/sample/opencv_sample_config.yml) for running SampleNet via [OpenCV launcher](../accuracy_checker/launcher/opencv_launcher_readme.md).
-* [config](https://github.com/openvinotoolkit/open_model_zoo/blob/master/tools/accuracy_checker/sample/sample_blob_config.yml) for running SampleNet using compiled executable network blob.
+* [config](../../../../../blob/master/tools/accuracy_checker/sample/opencv_sample_config.yml) for running SampleNet via [OpenCV launcher](../accuracy_checker/launcher/opencv_launcher_readme.md).
+* [config](../../../../../blob/master/tools/accuracy_checker/sample/sample_blob_config.yml) for running SampleNet using compiled executable network blob.
 
 >**NOTE**: Not all Inference Engine plugins support compiled network blob execution.
