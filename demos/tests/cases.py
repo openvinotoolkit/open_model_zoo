@@ -23,7 +23,9 @@ from args import (
 from data_sequences import DATA_SEQUENCES
 
 MONITORS = {'-u': 'cdm'}
-TestCase = collections.namedtuple('TestCase', ['options'])
+TestCase = collections.namedtuple('TestCase', ['options', 'extra_models'])
+# TODO with Python3.7 use namedtuple defaults instead
+TestCase.__new__.__defaults__ = [],
 
 
 class Demo:
@@ -71,7 +73,9 @@ class PythonDemo(Demo):
 def join_cases(*args):
     options = {}
     for case in args: options.update(case.options)
-    return TestCase(options=options)
+    extra_models = set()
+    for case in args: extra_models.update(case.extra_models)
+    return TestCase(options=options, extra_models=list(case.extra_models))
 
 
 def combine_cases(*args):
@@ -411,7 +415,8 @@ NATIVE_DEMOS = [
                     TestCase(options={'-m_tr': ModelArg('text-recognition-0015-encoder'),
                                       '-tr_pt_first': None,
                                       '-tr_o_blb_nm': 'logits',
-                                      '-m_tr_ss': '?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'}),
+                                      '-m_tr_ss': '?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'},
+                             extra_models=[ModelArg('text-recognition-0015-decoder')]),
                     TestCase(options={'-m_tr': ModelArg('text-recognition-resnet-fc'),
                                       '-tr_pt_first': None}),
                 ]),
