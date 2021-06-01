@@ -99,11 +99,11 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 You can use the following command to enhance the resolution of the images captured by a camera using a pre-trained single-image-super-resolution-1033 network:
 
-```
+```sh
 ./image_processing_demo -i 0 -m single-image-super-resolution-1033.xml -at sr
 ```
 
-## Modes
+### Modes
 
 Demo application supports 3 modes:
 
@@ -121,7 +121,6 @@ User is able to change mode in run time using the next keys:
 ## Demo Output
 
 The demo uses OpenCV to display and write the resulting images.
-
 
 ## See Also
 
