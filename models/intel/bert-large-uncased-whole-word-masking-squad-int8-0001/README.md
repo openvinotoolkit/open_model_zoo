@@ -27,26 +27,26 @@ The quality metrics were calculated on the SQuAD v1.1 dataset ("dev" split). Max
 
 ## Input
 
-1. Token IDs, name: `result.1`, shape: `1, 384`.
+1. Token IDs, name: `input_ids`, shape: `1, 384`.
 Sequence of tokens (integer values) representing the tokenized premise and question ("input_ids"). The sequence structure is as follows (`[CLS]`, `[SEP]` and `[PAD]` should be replaced by corresponding token IDs as specified by the dictionary):
 `[CLS]` + *tokenized question* + `[SEP]` + *tokenized premise of the question* + `[SEP]` + (`[PAD]` tokens to pad to the maximum sequence length of 384)
 
-2. Input mask, name: `result.2`, shape: `1, 384`.
+2. Input mask, name: `attention_mask`, shape: `1, 384`.
 Sequence of integer values representing the mask of valid values in the input ("input_mask"). The values of this input are are equal to:
     * `1` at positions corresponding to the `[CLS]` + *tokenized question* + `[SEP]` + *tokenized premise of the question* + `[SEP]` part of the Token IDs  (i.e. all positions except those containing the `[PAD]` tokens), and
     * `0` at all other positions
 
-3. Segment IDs, name: `result.3`, shape: `1, 384`.
+3. Segment IDs, name: `token_type_ids`, shape: `1, 384`.
 Sequence of integer values representing the segmentation of the Token IDs into question and premise ("segment_ids"). The values are equal to:
     * `1` at positions corresponding to the *tokenized premise of the question* + `[SEP]` part of the Token IDs, and
     * `0` at all other positions
 
 ## Output
 
-1. Answer start, name: `5211`, shape: `1, 384`.
+1. Answer start, name: `output_s`, shape: `1, 384`.
 Floating point-valued logit scores, where i-th value corresponds to the log-likelihood of the answer to the question starting at the i-th token position of the input.
 
-2. Answer end, name `5212`, shape: `1, 384`.
+2. Answer end, name `output_e`, shape: `1, 384`.
 Floating point-valued logit scores, where i-th value corresponds to the log-likelihoods of the answer ending at i-th token position.
 
 ## Legal Information
