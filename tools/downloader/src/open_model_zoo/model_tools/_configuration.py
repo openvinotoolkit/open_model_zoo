@@ -402,8 +402,7 @@ def load_models(args):
     for config_path in sorted(_common.MODEL_ROOT.glob('**/model.yml')):
         subdirectory = config_path.parent
 
-        is_composite = ((subdirectory.parent / 'composite-model.yml').exists() and
-            subdirectory.parent.name in composite_models)
+        is_composite = (subdirectory.parent / 'composite-model.yml').exists()
         composite_model_name = subdirectory.parent.name if is_composite else None
 
         subdirectory = subdirectory.relative_to(_common.MODEL_ROOT)
