@@ -46,8 +46,7 @@ class EncoderDecoderCNN : public Cnn {
                       const std::string &in_dec_symbol_name,
                       const std::string &out_dec_symbol_name,
                       const std::string &logits_name,
-                      size_t end_token,
-                      const cv::Size &new_input_resolution = cv::Size()
+                      size_t end_token
                       );
     InferenceEngine::BlobMap Infer(const cv::Mat &frame) override;
   private:

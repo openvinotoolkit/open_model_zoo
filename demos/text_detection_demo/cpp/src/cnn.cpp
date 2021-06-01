@@ -126,9 +126,8 @@ EncoderDecoderCNN::EncoderDecoderCNN(std::string model_path,
                                      const std::string &in_dec_symbol_name,
                                      const std::string &out_dec_symbol_name,
                                      const std::string &logits_name,
-                                     size_t end_token,
-                                     const cv::Size &new_input_resolution
-                        ) : Cnn(model_path, ie, deviceName, new_input_resolution),
+                                     size_t end_token
+                        ) : Cnn(model_path, ie, deviceName),
                         features_name_(features_name),
                         out_enc_hidden_name_(out_enc_hidden_name),
                         out_dec_hidden_name_(out_dec_hidden_name),
