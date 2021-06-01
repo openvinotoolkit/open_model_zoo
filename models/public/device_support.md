@@ -40,6 +40,7 @@
 | efficientnet-b7_auto_aug | YES |    |    |
 | f3net | YES | YES |    |
 | face-detection-retail-0044 | YES |    |    |
+| face-recognition-resnet100-arcface-onnx | YES | YES |    |
 | faceboxes-pytorch | YES |    |    |
 | facenet-20180408-102900 | YES | YES | YES |
 | fast-neural-style-mosaic-onnx | YES |    |    |

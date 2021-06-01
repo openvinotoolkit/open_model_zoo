@@ -161,6 +161,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------------ | -------------- | -------------- | -------- |------ | ------- |
 | FaceNet                              | TensorFlow\*   | [facenet-20180408-102900](./facenet-20180408-102900/README.md) | 99.14% | 2.846 | 23.469 |
+| LResNet100E-IR,ArcFace@ms1m-refine-v2| MXNet\*        | [face-recognition-resnet100-arcface-onnx](./face-recognition-resnet100-arcface-onnx/README.md) | 99.68%| 24.2115  | 65.1320 |
 | SphereFace                           | Caffe\*        | [Sphereface](./Sphereface/README.md) | 98.8321% | 3.504 | 22.671 |
 
 ## Human Pose Estimation
