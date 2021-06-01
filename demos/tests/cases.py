@@ -23,7 +23,9 @@ from args import (
 from data_sequences import DATA_SEQUENCES
 
 MONITORS = {'-u': 'cdm'}
-TestCase = collections.namedtuple('TestCase', ['options'])
+TestCase = collections.namedtuple('TestCase', ['options', 'extra_models'])
+# TODO with Python3.7 use namedtuple defaults instead
+TestCase.__new__.__defaults__ = [],
 
 
 class Demo:
@@ -71,7 +73,9 @@ class PythonDemo(Demo):
 def join_cases(*args):
     options = {}
     for case in args: options.update(case.options)
-    return TestCase(options=options)
+    extra_models = set()
+    for case in args: extra_models.update(case.extra_models)
+    return TestCase(options=options, extra_models=list(case.extra_models))
 
 
 def combine_cases(*args):
@@ -392,19 +396,30 @@ NATIVE_DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('text-detection')}),
-        single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
+        single_option_cases('-m_td',
+            ModelArg('text-detection-0003'),
+            ModelArg('text-detection-0004'),
+            ModelArg('horizontal-text-detection-0001')),
         [
             *combine_cases(
                 TestCase(options={'-dt': 'ctc'}),
                 [
-                    *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
-                    TestCase(options={'-m_tr': ModelArg('text-recognition-0013'),
+#                    *single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-0014'),
                                       '-tr_pt_first': None,
-                                      '-tr_o_blb_nm': 'logits'})
+                                      '-tr_o_blb_nm': 'logits'}),
                 ]),
-            TestCase(options={'-m_tr': ModelArg('text-recognition-resnet-fc'),
-                              '-tr_pt_first': None,
-                              '-dt': 'simple'}),
+            *combine_cases(
+                TestCase(options={'-dt': 'simple'}),
+                [
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-0015-encoder'),
+                                      '-tr_pt_first': None,
+                                      '-tr_o_blb_nm': 'logits',
+                                      '-m_tr_ss': '?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'},
+                             extra_models=[ModelArg('text-recognition-0015-decoder')]),
+                    TestCase(options={'-m_tr': ModelArg('text-recognition-resnet-fc'),
+                                      '-tr_pt_first': None}),
+                ]),
         ]
     )),
 ]

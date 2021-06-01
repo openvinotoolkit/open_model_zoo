@@ -196,7 +196,6 @@ Deep Learning models for text recognition in various applications.
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [text-recognition-0012](./text-recognition-0012/README.md)                                 | 1.485   | 5.568 |
-| [text-recognition-0013](./text-recognition-0013/README.md)                                 | 1.488   | 5.567 |
 | [text-recognition-0014](./text-recognition-0014/README.md)                                 | 0.5442  | 2.839 |
 | [text-recognition-0015](./text-recognition-0015/README.md)                                 |         |       |
 | encoder | 12.4 | 398 |

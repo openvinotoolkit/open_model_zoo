@@ -9,7 +9,7 @@ The demo shows an example of using neural networks to detect and recognize print
 * `horizontal-text-detection-0001`, which is a detection network that works much faster than models above, but it is applicable to finding more or less horizontal text only.
 * `text-recognition-0012`, which is a recognition network for recognizing text.
 * `text-recognition-0014`, which is a recognition network for recognizing text. You should add option `-tr_pt_first` and specify output layer name via `-tr_o_blb_nm` option for this model (see model [description](../../../models/intel/text-recognition-0014/README.md) for details).
-* `text-recognition-0015`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"` (supported symbols set), `-tr_o_blb_nm "logits"` (to specify output name) and `-dt simple` (to specify decoder type). You can also specify `-lower` option to convert predicted text to lower-case. See model [description](../../../models/intel/text-recognition-0013/README.md) for details.
+* `text-recognition-0015`, which is a recognition network for recognizing text. You should add options `-tr_pt_first`, `-m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"` (supported symbols set), `-tr_o_blb_nm "logits"` (to specify output name) and `-dt simple` (to specify decoder type). You can also specify `-lower` option to convert predicted text to lower-case. See model [description](../../../models/intel/text-recognition-0015/README.md) for details.
 * `text-recognition-resnet-fc`, which is a recognition network for recognizing text. You should add option `-tr_pt_first`.
 * `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
 
@@ -102,13 +102,19 @@ For example, use the following command line command to run the application:
   -tr_o_blb_nm "logits"
 ```
 
-For `text-recognition-resnet-fc` and `text-recognition-0015` you should use `simple` decoder for `-dt` option. For other models use `ctc` decoder (default decoder).
+For `text-recognition-resnet-fc` and `text-recognition-0015` you should use `simple` decoder for `-dt` option. For other models use `ctc` decoder (default decoder). In case of `text-recognition-0015` model, specify path to `text-recognition-0015-encoder` models for `-m_tr` key and decoder part will be found automatically as shown on example below:
 
-> **NOTE**: In case of composite model encoder and decoder are searched automatically: this means that model encoder should have `encoder` part in its name and model decoder should have `decoder` part. In this case to run the demo specify path to the encoder model (`-m_tr` parameter) and decoder model will be searched in the same path but `encoder` would be replaced with `decoder`. E.g.:
-> ```
-> model-text-recognition-0015:
->   model_encoder.xml
->   model_decoder.xml
+```sh
+./text_detection_demo \
+  -i <path_to_image>/sample.jpg \
+  -m_td <path_to_model>/text-detection-0003.xml \
+  -m_tr <path_to_model>/text-recognition-0015/text-recognition-0015-encoder/<precision>/text-recognition-0015-encoder.xml \
+  -dt simple \
+  -tr_pt_first \
+  -tr_o_blb_nm "logits" \
+  -m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+```
+
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
