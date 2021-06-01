@@ -165,14 +165,20 @@ int main(int argc, char *argv[]) {
         /** ---------------- End of graph ---------------- **/
         /** Configure networks **/
         auto face_net = cv::gapi::ie::Params<nets::Faces> {
-            FLAGS_m_fd,                // path to topology IR
+            FLAGS_m_fd,                          // path to topology IR
             fileNameNoExt(FLAGS_m_fd) + ".bin",  // path to weights
-            FLAGS_d_fd,                // device specifier
+            FLAGS_d_fd,                          // device specifier
         };
         /** Get information about frame from cv::VideoCapture **/
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
-        cv::Size frame_size = cap->getFrameSize();
+        const auto tmp = cap->read();
+        if (!tmp.data) {
+            return -1;
+        }
+        cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
+        cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
+            std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         if (FLAGS_fd_reshape) {
             InferenceEngine::Core ie;
             const auto network = ie.ReadNetwork(FLAGS_m_fd);
@@ -180,7 +186,7 @@ int main(int argc, char *argv[]) {
             const auto layerData = network.getInputsInfo().begin()->second;
                   auto layerDims = layerData->getTensorDesc().getDims();
 
-            const double imageAspectRatio = std::round(100. * frame_size.width/ frame_size.height) / 100.;
+            const double imageAspectRatio = std::round(100. * frame_size.width / frame_size.height) / 100.;
             const double networkAspectRatio = std::round(100. * layerDims[3] / layerDims[2]) / 100.;
             const double aspectRatioThreshold = 0.01;
 
@@ -192,22 +198,22 @@ int main(int argc, char *argv[]) {
         }
         auto head_net = cv::gapi::ie::Params<nets::HeadPose> {
             FLAGS_m_hp,                               // path to topology IR
-            fileNameNoExt(FLAGS_m_hp) + ".bin", // path to weights
+            fileNameNoExt(FLAGS_m_hp) + ".bin",       // path to weights
             FLAGS_d_hp,                               // device specifier
         }.cfgOutputLayers({"angle_y_fc", "angle_p_fc", "angle_r_fc"});
         auto landmarks_net = cv::gapi::ie::Params<nets::Landmarks> {
             FLAGS_m_lm,                               // path to topology IR
-            fileNameNoExt(FLAGS_m_lm) + ".bin", // path to weights
+            fileNameNoExt(FLAGS_m_lm) + ".bin",       // path to weights
             FLAGS_d_lm,                               // device specifier
         };
         auto gaze_net = cv::gapi::ie::Params<nets::Gaze> {
             FLAGS_m,                               // path to topology IR
-            fileNameNoExt(FLAGS_m) + ".bin", // path to weights
+            fileNameNoExt(FLAGS_m) + ".bin",       // path to weights
             FLAGS_d,                               // device specifier
         }.cfgInputLayers({"left_eye_image", "right_eye_image", "head_pose_angles"});
         auto eyes_net = cv::gapi::ie::Params<nets::Eyes> {
             FLAGS_m_es,                               // path to topology IR
-            fileNameNoExt(FLAGS_m_es) + ".bin", // path to weights
+            fileNameNoExt(FLAGS_m_es) + ".bin",       // path to weights
             FLAGS_d_es,                               // device specifier
         };
 

@@ -53,10 +53,6 @@ public:
         }
         return cv::Mat{};
     }
-
-    cv::Size getFrameSize() override {
-        return cv::Size{img.cols, img.rows};
-    }
 };
 
 class DirReader : public ImagesCapture {
@@ -124,10 +120,6 @@ public:
         }
         return cv::Mat{};
     }
-
-    cv::Size getFrameSize() override {
-        return firstFrameSize;
-    }
 };
 
 class VideoCapWrapper : public ImagesCapture {
@@ -170,11 +162,6 @@ public:
         }
         return img;
     }
-
-    cv::Size getFrameSize() override {
-        return cv::Size{int(cap.get(cv::CAP_PROP_FRAME_WIDTH)),
-                        int(cap.get(cv::CAP_PROP_FRAME_HEIGHT))};
-    }
 };
 
 class CameraCapWrapper : public ImagesCapture {
@@ -216,11 +203,6 @@ public:
         }
         ++nextImgId;
         return img;
-    }
-
-    cv::Size getFrameSize() override {
-        return cv::Size{int(cap.get(cv::CAP_PROP_FRAME_WIDTH)),
-                        int(cap.get(cv::CAP_PROP_FRAME_HEIGHT))};
     }
 };
 
