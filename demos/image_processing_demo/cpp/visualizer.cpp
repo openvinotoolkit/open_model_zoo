@@ -86,28 +86,29 @@ void Visualizer::show(cv::Mat img) {
         int pad = 10;
         int margin = 40;
         int baseline = 0;
-        int lineH = cv::getTextSize(helpMessage[0], cv::FONT_HERSHEY_COMPLEX, 0.75, 1, &baseline).height + pad;
+        int lineH = cv::getTextSize(helpMessage[0], cv::FONT_HERSHEY_COMPLEX_SMALL, 0.75, 1, &baseline).height + pad;
         for (size_t i = 0; i < 4; ++i) {
-            cv::putText(img, helpMessage[i], cv::Point(pad, margin + baseline + (i + 1)*lineH),  cv::FONT_HERSHEY_COMPLEX,
+            cv::putText(img, helpMessage[i], cv::Point(pad, margin + baseline + (i + 1)*lineH),  cv::FONT_HERSHEY_COMPLEX_SMALL,
                         0.75, cv::Scalar(255, 0, 255));
         }
     }
+
     cv::imshow(winName, img);
 }
 
 void Visualizer::changeDisplayImg() {
+    displayImg = resultImg.clone();
     if (mode == "orig") {
-        displayImg = resultImg.clone();
         inputImg(cv::Rect(0, 0, slider, inputImg.rows)).copyTo(displayImg(cv::Rect(0, 0, slider, resultImg.rows)));
         markImage(displayImg, {"O", "R"}, static_cast<float>(slider) / resolution.width);
         drawSweepLine(displayImg);
     } else if (mode == "result") {
-        displayImg = resultImg.clone();
         markImage(displayImg, {"R", ""}, 1);
     } else if (mode == "diff") {
-        cv::absdiff(inputImg, resultImg, displayImg);
-        resultImg(cv::Rect(0, 0, slider, resultImg.rows)).copyTo(displayImg(cv::Rect(0, 0, slider, displayImg.rows)));
-        markImage(displayImg, {"R", "D"}, static_cast<float>(slider) / resolution.width);
+        cv::Mat diffImg;
+        cv::absdiff(inputImg, resultImg, diffImg);
+        diffImg(cv::Rect(0, 0, slider, resultImg.rows)).copyTo(displayImg(cv::Rect(0, 0, slider, displayImg.rows)));
+        markImage(displayImg, {"D", "R"}, static_cast<float>(slider) / resolution.width);
         drawSweepLine(displayImg);
     }
 }

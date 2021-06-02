@@ -25,7 +25,7 @@ class Visualizer {
 private:
     // names of window and trackbar
     std::string winName = "Image Processing Demo (press A for help)";
-    std::string trackbarName = "Processing";
+    std::string trackbarName = "Orig/Diff | Res";
 
     // images info
     cv::Size resolution = cv::Size(1000, 600);
