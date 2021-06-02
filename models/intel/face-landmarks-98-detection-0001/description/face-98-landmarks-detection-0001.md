@@ -29,7 +29,7 @@ where:
   - C - number of channels
   - H - image height
   - W - image width
-Expected color order is BGR.
+Expected color order is `BGR`.
 
 ## Outputs
 
