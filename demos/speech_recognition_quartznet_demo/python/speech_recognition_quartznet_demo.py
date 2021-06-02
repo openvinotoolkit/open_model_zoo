@@ -64,6 +64,7 @@ class QuartzNet:
 
     @classmethod
     def audio_to_melspectrum(cls, audio, sampling_rate):
+        assert sampling_rate == 16000, "Only 16 KHz audio supported"
         preemph = 0.97
         preemphased = np.concatenate([audio[:1], audio[1:] - preemph * audio[:-1].astype(np.float32)])
 

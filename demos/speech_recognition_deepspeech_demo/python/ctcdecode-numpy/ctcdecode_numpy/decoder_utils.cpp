@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 Intel Corporation
+* Copyright (c) 2020-2021 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * This file is based in part on decoder_utils.cpp from https://github.com/parlance/ctcdecode,
@@ -13,17 +13,19 @@
 #include <limits>
 
 std::vector<std::pair<size_t, float>> get_pruned_log_probs(
-    const std::vector<float> &prob_step,
+    const float * prob_step,
+    size_t alphabet_len,
+    size_t prob_stride,
     float cutoff_prob,
     size_t cutoff_top_n,
-    int log_input) {
+    bool log_probs) {
   std::vector<std::pair<int, float>> prob_idx;
   float log_cutoff_prob = log(cutoff_prob);
-  for (size_t i = 0; i < prob_step.size(); ++i) {
-    prob_idx.push_back(std::pair<int, float>(i, prob_step[i]));
+  for (size_t i = 0; i < alphabet_len; ++i) {
+    prob_idx.push_back(std::pair<int, float>(i, prob_step[i * prob_stride]));
   }
-  // pruning of vacobulary
-  size_t cutoff_len = prob_step.size();
+  // pruning of vocabulary
+  size_t cutoff_len = alphabet_len;
   if (log_cutoff_prob < 0.0 || cutoff_top_n < cutoff_len) {
     std::sort(
         prob_idx.begin(), prob_idx.end(), pair_comp_second_rev<int, float>);
@@ -31,7 +33,7 @@ std::vector<std::pair<size_t, float>> get_pruned_log_probs(
       float cum_prob = 0.0;
       cutoff_len = 0;
       for (size_t i = 0; i < prob_idx.size(); ++i) {
-        cum_prob = log_sum_exp<float>(cum_prob, log_input ? prob_idx[i].second : log(prob_idx[i].second) );
+        cum_prob = log_sum_exp<float>(cum_prob, log_probs ? prob_idx[i].second : log(prob_idx[i].second) );
         cutoff_len += 1;
         if (cum_prob >= cutoff_prob || cutoff_len >= cutoff_top_n) break;
       }
@@ -44,34 +46,30 @@ std::vector<std::pair<size_t, float>> get_pruned_log_probs(
   std::vector<std::pair<size_t, float>> log_prob_idx;
   for (size_t i = 0; i < cutoff_len; ++i) {
     log_prob_idx.push_back(std::pair<int, float>(
-        prob_idx[i].first, log_input ? prob_idx[i].second : log(prob_idx[i].second + NUM_FLT_MIN)));
+        prob_idx[i].first, log_probs ? prob_idx[i].second : log(prob_idx[i].second + NUM_FLT_MIN)));
   }
   return log_prob_idx;
 }
 
 
 std::vector<std::pair<float, Output>> get_beam_search_result(
-    const std::vector<PathTrie *> &prefixes,
-    size_t beam_size) {
-  // allow for the post processing
-  std::vector<PathTrie *> space_prefixes;
-  if (space_prefixes.empty()) {
-    for (size_t i = 0; i < beam_size && i < prefixes.size(); ++i) {
-      space_prefixes.push_back(prefixes[i]);
-    }
-  }
+    const std::vector<PathTrie *> &prefixes,  // first num_candidates items come in sorted order
+    size_t num_candidates) {
+  // make a copy to avoid duplicating get_path_vec() method with const qualifier
+  std::vector<PathTrie *> prefixes_copy;
+  for (size_t i = 0; i < num_candidates && i < prefixes.size(); ++i)
+    prefixes_copy.push_back(prefixes[i]);
 
-  std::sort(space_prefixes.begin(), space_prefixes.end(), prefix_compare);
   std::vector<std::pair<float, Output>> output_vecs;
-  for (size_t i = 0; i < beam_size && i < space_prefixes.size(); ++i) {
+  for (size_t i = 0; i < prefixes_copy.size(); ++i) {
     std::vector<int> output;
     std::vector<int> timesteps;
-    space_prefixes[i]->get_path_vec(output, timesteps);
+    prefixes_copy[i]->get_path_vec(output, timesteps);
     Output outputs;
     outputs.tokens = output;
     outputs.timesteps = timesteps;
-    std::pair<float, Output> output_pair(-space_prefixes[i]->approx_ctc,
-                                               outputs);
+    outputs.audio_score = -prefixes_copy[i]->approx_ctc;
+    std::pair<float, Output> output_pair(-prefixes_copy[i]->score, outputs);
     output_vecs.emplace_back(output_pair);
   }
 

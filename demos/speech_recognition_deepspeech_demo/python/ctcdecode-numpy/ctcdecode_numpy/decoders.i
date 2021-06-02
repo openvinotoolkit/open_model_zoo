@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 Intel Corporation
+* Copyright (c) 2020-2021 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
 **********************************************************************/
 
@@ -8,6 +8,16 @@
 // to update decoders_wrap.cpp and impl.py
 
 %module impl
+
+// Catch C++ exceptions to ensure they're reported by Python
+%include "exception.i"
+%exception {
+  try {
+    $action
+  } catch (const std::exception& e) {
+    SWIG_exception(SWIG_RuntimeError, e.what());
+  }
+}
 
 %{
 #define SWIG_FILE_WITH_INIT
@@ -18,6 +28,9 @@ import_array();
 %}
 
 %{
+#include "scorer_base.h"
+#include "scorer_yoklm.h"
+#include "ctc_beam_search_decoder.h"
 #include "binding.h"
 %}
 
@@ -33,10 +46,17 @@ namespace std {
 }
 
 %apply (float * IN_ARRAY3, size_t DIM1, size_t DIM2, size_t DIM3) {(const float * probs, size_t batch_size, size_t max_frames, size_t num_classes)}
+%apply (float * IN_ARRAY2, size_t DIM1, size_t DIM2) {(const float * probs, size_t num_frames, size_t num_classes)}
 %apply (int * IN_ARRAY1, size_t DIM1) {(const int * seq_lens, size_t seq_lens_dim_batch)}
-%apply (int ** ARGOUTVIEWM_ARRAY1, size_t * DIM1) {(int ** tokens, size_t * tokens_dim)}
+%apply (int ** ARGOUTVIEWM_ARRAY1, size_t * DIM1) {(int ** symbols, size_t * symbols_dim)}
 %apply (int ** ARGOUTVIEWM_ARRAY1, size_t * DIM1) {(int ** timesteps, size_t * timesteps_dim)}
 %apply (float ** ARGOUTVIEWM_ARRAY1, size_t * DIM1) {(float ** scores, size_t * scores_dim)}
-%apply (int ** ARGOUTVIEWM_ARRAY1, size_t * DIM1) {(int ** tokens_lengths, size_t * tokens_lengths_dim)}
+%apply (int ** ARGOUTVIEWM_ARRAY1, size_t * DIM1) {(int ** symbols_lengths, size_t * symbols_lengths_dim)}
 
+// Workaround for the absent support of std::unique_ptr<...>.
+%ignore ScorerBase::dictionary;
+
+%include "scorer_base.h"
+%include "scorer_yoklm.h"
+%include "ctc_beam_search_decoder.h"
 %include "binding.h"
