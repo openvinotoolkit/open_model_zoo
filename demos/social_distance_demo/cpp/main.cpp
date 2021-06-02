@@ -406,6 +406,14 @@ void Drawer::process() {
                 context.drawersContext.presenter.handleKey(key);
             }
         }
+        else {
+            if (!context.isVideo) {
+                try {
+                    std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+                }
+                catch (const std::bad_weak_ptr&) {}
+            }
+        }
         firstGridIt->second.clear();
         gridMats.emplace((--gridMats.end())->first + 1, firstGridIt->second);
         gridMats.erase(firstGridIt);
