@@ -44,4 +44,4 @@ class Face98LandmarksPrediction(Face98LandmarksRepresentation):
        
 
     def to_annotation(self, **kwargs):
-        return PoseEstimationAnnotation(self.identifier, self.x_values, self.y_values)
+        return Face98LandmarksAnnotation(self.identifier, self.x_values, self.y_values)
