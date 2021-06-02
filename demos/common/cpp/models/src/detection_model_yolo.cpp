@@ -100,10 +100,15 @@ void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     for (auto& output : outputInfo) {
         output.second->setPrecision(InferenceEngine::Precision::FP32);
-        if (output.second->getDims().size() == 4) {
-            output.second->setLayout(InferenceEngine::Layout::NCHW);
+        if (output.first.find("YoloRegion") == std::string::npos) {
+            outputsNames.push_back(output.first);
+            return;
+        } else {
+            if (output.second->getDims().size() == 4) {
+                output.second->setLayout(InferenceEngine::Layout::NCHW);
+            }
+            outputsNames.push_back(output.first);
         }
-        outputsNames.push_back(output.first);
     }
 
     yoloVersion = YOLO_V3;
@@ -188,8 +193,12 @@ std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult & infResult) 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
     for (auto& output : infResult.outputsData) {
-        this->parseYOLOOutput(output.first, output.second, netInputHeight, netInputWidth,
-            internalData.inputImgHeight, internalData.inputImgWidth, objects);
+        if (output.first.find("ResWithPostprocess") != std::string::npos) {
+            this->parseYOLOOutput(output.second, internalData.inputImgHeight, internalData.inputImgWidth, objects);
+        } else {
+            this->parseYOLOOutput(output.first, output.second, netInputHeight, netInputWidth,
+                                  internalData.inputImgHeight, internalData.inputImgWidth, objects);
+        }
     }
 
     if (useAdvancedPostprocessing) {
@@ -316,6 +325,43 @@ int ModelYolo::calculateEntryIndex(int totalCells, int lcoords, int lclasses, in
     int n = location / totalCells;
     int loc = location % totalCells;
     return (n * (lcoords + lclasses) + entry) * totalCells + loc;
+}
+
+// --------------------------- For YOLO with postprocess ------------------------------------------
+void ModelYolo::parseYOLOOutput(const InferenceEngine::Blob::Ptr& blob,
+    const unsigned long original_im_h, const unsigned long original_im_w,
+    std::vector<DetectedObject>& objects) {
+    const int detections_num = static_cast<int>(blob->getTensorDesc().getDims()[0]);
+    const int len_of_res = static_cast<int>(blob->getTensorDesc().getDims()[1]);
+    const float* output_blob = blob->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type*>();
+
+    // --------------------------- Parsing YOLO output --------------------------------------------
+    for (int res_num = 0; res_num < detections_num; ++res_num) {
+        float object_score = output_blob[res_num * len_of_res + 4];
+        if (object_score < confidenceThreshold) {
+            continue;
+        }
+
+        const float* max_probability = std::max_element(&output_blob[res_num * len_of_res + 5], 
+                                                        &output_blob[res_num * len_of_res + (len_of_res - 1)]);
+        if (*max_probability >= confidenceThreshold) {
+            float x = output_blob[res_num * len_of_res];
+            float y = output_blob[res_num * len_of_res + 1];
+            float width = output_blob[res_num * len_of_res + 2];
+            float height = output_blob[res_num * len_of_res + 3];
+            int label_id = std::distance(&output_blob[res_num * len_of_res + 5], max_probability);
+
+            DetectedObject obj;
+            obj.x = (float)(x - width / 2) * original_im_w;
+            obj.y = (float)(y - height / 2) * original_im_h;
+            obj.width = (float)(width) * original_im_w;
+            obj.height = (float)(height) * original_im_h;
+            obj.confidence = *max_probability;
+            obj.labelID = label_id;
+            obj.label = getLabelName(obj.labelID);
+            objects.push_back(obj);
+        }
+    }
 }
 
 double ModelYolo::intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2) {

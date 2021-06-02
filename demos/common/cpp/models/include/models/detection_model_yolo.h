@@ -77,6 +77,9 @@ protected:
         const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,
         const unsigned long original_im_w, std::vector<DetectedObject>& objects);
 
+    void parseYOLOOutput(const InferenceEngine::Blob::Ptr& blob,
+        const unsigned long original_im_h, const unsigned long original_im_w, std::vector<DetectedObject>& objects);
+
     static int calculateEntryIndex(int entriesNum, int lcoords, int lclasses, int location, int entry);
     static double intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2);
 
