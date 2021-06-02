@@ -13,11 +13,11 @@ The network is able to recognize case-insensitive alphanumeric text (36 unique s
 
 | Metric                                         | Value              |
 | ---------------------------------------------- | ------------------ |
-| Accuracy on the alphanumeric subset of ICDAR13 | 88.87              |
-| Accuracy on the alphanumeric subset of ICDAR03 | 90.77              |
-| Accuracy on the alphanumeric subset of ICDAR15 | 69.08              |
-| Accuracy on the alphanumeric subset of SVT     | 83.00              |
-| Accuracy on the alphanumeric subset of IIIT5K  | 81.57              |
+| Accuracy on the alphanumeric subset of ICDAR13 | 0.8887             |
+| Accuracy on the alphanumeric subset of ICDAR03 | 0.9077             |
+| Accuracy on the alphanumeric subset of ICDAR15 | 0.6908             |
+| Accuracy on the alphanumeric subset of SVT     | 0.83               |
+| Accuracy on the alphanumeric subset of IIIT5K  | 0.8157             |
 | Text location requirements                     | Tight aligned crop |
 | GFlops                                         | 0.2726             |
 | MParams                                        | 1.4187             |

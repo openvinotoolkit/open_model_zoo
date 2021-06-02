@@ -18,11 +18,11 @@ The model is built on the ResNeXt-101 backbone with additional 2d attention-base
 
 | Metric                                         | Value              |
 | ---------------------------------------------- | ------------------ |
-| Accuracy on the alphanumeric subset of ICDAR13 | 89.95              |
-| Accuracy on the alphanumeric subset of ICDAR03 | 93.89              |
-| Accuracy on the alphanumeric subset of ICDAR15 | 73.55              |
-| Accuracy on the alphanumeric subset of SVT     | 87.64              |
-| Accuracy on the alphanumeric subset of IIIT5K  | 84.13              |
+| Accuracy on the alphanumeric subset of ICDAR13 | 0.8995             |
+| Accuracy on the alphanumeric subset of ICDAR03 | 0.9389             |
+| Accuracy on the alphanumeric subset of ICDAR15 | 0.7355             |
+| Accuracy on the alphanumeric subset of SVT     | 0.8764             |
+| Accuracy on the alphanumeric subset of IIIT5K  | 0.8413             |
 | Text location requirements                     | Tight aligned crop |
 | Source framework                               | PyTorch\*          |
 
