@@ -28,6 +28,7 @@ class GTLoader(Enum):
     RAWPY = 3
     SKIMAGE = 4
     PILLOW_RGB = 5
+    NUMPY = 6
 
 
 class ImageProcessingRepresentation(BaseRepresentation):
@@ -42,6 +43,7 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
         GTLoader.RAWPY: 'rawpy',
         GTLoader.SKIMAGE: 'skimage_imread',
         GTLoader.PILLOW_RGB: 'pillow_imread'
+        GTLoader.NUMPY: 'numpy_reader'
     }
 
     def __init__(self, identifier, path_to_gt, gt_loader=GTLoader.PILLOW):

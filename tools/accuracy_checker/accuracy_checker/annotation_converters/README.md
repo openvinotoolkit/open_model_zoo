@@ -238,7 +238,13 @@ The main difference between this converter and `super_resolution` in data organi
   * `frame_separator` - string separator between file name and frame number in `multi_frame` (optional, default `#`)
   * `frame_axis` - number of frame axis in 3D Image (optional, default `-1`, last axis)
   * `as_regression` - allows dataset conversion as `NiftiRegressionAnnotation` annotation (optional, default `False`)
-
+* `k_space_mri` - converts `k-spaced MRI` dataset format to `RegressionAnnotation` or `ImageRepresentationAnnotation` format.
+  * `data_dir` - path to dataset root
+  * `image_folder`- path to masked k-space files directory, relatively `data_dir` (optional, default `masked`)
+  * `reconstructed_folder`- path to reconstructed images directory, relatively `data_dir` (optional, default `reconstructed`)
+  * `masked_folder`- path to masked k-space files directory, relatively `data_dir` (optional, default `masked`)
+  * `mask_file` - k-space mask filename
+  * `stats_file` - k-space normalization factors filename
 * `movie_lens_converter` - converts Movie Lens Datasets format to `HitRatioAnnotation` format.
   * `rating_file` - path to file which contains movieId with top score for each userID (for example ml-1m-test-ratings.csv)
   * `negative_file` - path to file which contains negative examples.
