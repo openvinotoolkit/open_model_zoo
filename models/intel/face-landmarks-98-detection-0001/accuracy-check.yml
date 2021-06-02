@@ -3,11 +3,8 @@ models:
 
     launchers:
       - framework: dlsdk
-        device: CPU
-        allow_reshape_input: True
         adapter:
           type: face_landmarks_detection
-
 
     datasets:
       - name: face_98_landmarks_db
