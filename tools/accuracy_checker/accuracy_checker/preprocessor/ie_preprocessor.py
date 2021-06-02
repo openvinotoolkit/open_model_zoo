@@ -117,7 +117,7 @@ class IEPreprocessor:
         self.std_values = get_or_parse_value(config.get('std'), self.PRECOMPUTED_STDS)
         return PreprocessingOp('mean_variant', MeanVariant.MEAN_VALUE)
 
-    def set_mean_scale(self, num_channels, preprocess_info):
+    def set_normalization(self, num_channels, preprocess_info):
         preprocess_info.init(num_channels)
         if self.mean_values is None:
             self.mean_values = [0] * num_channels
