@@ -402,7 +402,8 @@ class OpenCVImageReader(BaseReader):
         self.flag = OPENCV_IMREAD_FLAGS[self.get_value_from_config('reading_flag')]
 
     def read(self, data_id):
-        return cv2.imread(str(get_path(self.data_source / data_id)), self.flag)
+        data_path = self.data_source / data_id if self.data_source else data_id
+        return cv2.imread(str(get_path(data_path)), self.flag)
 
 
 class PillowImageReader(BaseReader):
