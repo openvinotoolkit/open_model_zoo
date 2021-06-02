@@ -222,7 +222,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `word_spotting` - if it is true then transcriptions that have lengths less than 3 symbols or transcriptions containing non-alphanumeric symbols will be marked as difficult.
 * `icdar13_recognition` - converts ICDAR13 dataset for text recognition task to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
-  * `delimeter` - delimeter between image and text for recognition. Suppoted values - `space` and `tab` for space and tabular separator respectively.
+  * `delimeter` - delimeter between image and text for recognition. Supported values - `space` and `tab` for space and tabular separator respectively.
 * `lmdb_text_recognition_database` - converter for text recognition dataset in a form of LMDB database.
   * `lower_case` - parameter describing if ground truth text should be converted to lower case.
 * `unicode_character_recognition` - converts [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) dataset and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html) for handwritten Japanese text recognition task , and [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release) for handwritten simplified Chinese text recognition task to `CharacterRecognitionAnnotation`.
