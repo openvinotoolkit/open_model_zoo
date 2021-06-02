@@ -58,11 +58,9 @@ class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
         id2name, self.name2id = self._get_mapping_id_name(coco.imgs)
         num_landmarks = 98
         annotations = []
-        scales = []
-        centers = []        
         for img_id in img_ids:
             identifier = id2name[img_id]
-            ann_ids = coco.getAnnIds(imgIds=img_id, iscrowd=False)          
+            ann_ids = coco.getAnnIds(imgIds=img_id, iscrowd=False)
             objs = coco.loadAnns(ann_ids)
             for obj in objs:
                 keypoints = np.array(obj['keypoints']).reshape(-1, 3)
