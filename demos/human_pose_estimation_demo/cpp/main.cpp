@@ -274,12 +274,11 @@ int main(int argc, char *argv[]) {
             core);
         Presenter presenter(FLAGS_u);
 
-        pipeline.submitData(ImageInputData(curr_frame),
+        int64_t frameNum = pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
 
         uint32_t framesProcessed = 0;
         bool keepRunning = true;
-        int64_t frameNum = -1;
         std::unique_ptr<ResultBase> result;
 
         while (keepRunning) {
