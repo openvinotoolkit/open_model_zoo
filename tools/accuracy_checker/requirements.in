@@ -49,5 +49,3 @@ lmdb>=1.2.1
 
 # pandas datasets support
 pandas~=1.1.5
-
-xtcocotools

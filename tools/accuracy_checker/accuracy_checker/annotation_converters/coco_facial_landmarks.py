@@ -19,7 +19,8 @@ from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ..representation import Face98LandmarksAnnotation
 from ..utils import read_xml, check_file_existence
 from ..config import PathField
-from xtcocotools.coco import COCO
+import json
+
 
 class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
     __provider__ = 'coco_facial_landmarks'
@@ -40,37 +41,37 @@ class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
         super().configure()
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
 
-    def _get_mapping_id_name(self, imgs):
-        
-        id2name = {}
-        name2id = {}
-        for image_id, image in imgs.items():
-            file_name = image['file_name']
-            id2name[image_id] = file_name
-            name2id[file_name] = image_id
+    def _collectImageIds(self, data):
+        result = {}
+        ids = []
+        for itm in data:
+            img_name = itm["file_name"]
+            id = itm["id"]
+            ids.append(id)
+            result[id] = img_name
 
-        return id2name, name2id
+        return result, ids
+
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        coco = COCO(self.annotation_file)
-        img_ids = coco.getImgIds()
+        
+        with open(self.annotation_file) as f:
+            data = json.load(f)
+        coco_ann = data["annotations"]
+        id2name, img_ids = self._collectImageIds (data["images"])
         num_images = len(img_ids)
-        id2name, self.name2id = self._get_mapping_id_name(coco.imgs)
         num_landmarks = 98
         annotations = []
-        for img_id in img_ids:
-            identifier = id2name[img_id]
-            ann_ids = coco.getAnnIds(imgIds=img_id, iscrowd=False)
-            objs = coco.loadAnns(ann_ids)
-            for obj in objs:
-                keypoints = np.array(obj['keypoints']).reshape(-1, 3)
-                bbox = obj['bbox']
-                landmarks_x, landmarks_y = self.get_landmarks(keypoints, 98)
-                landmarks_annotation = Face98LandmarksAnnotation(identifier, np.array(landmarks_x), np.array(landmarks_y))
-                landmarks_annotation.metadata['rect'] = (bbox[0], bbox[1], bbox[0] + bbox[2], bbox[1] + bbox[3])
-                annotations.append(landmarks_annotation)
-                if progress_callback is not None and img_id % progress_interval == 0:
-                    progress_callback(img_id * 100 / len(img_ids))
+        for ann in coco_ann[1:]:
+            identifier = id2name[ann["image_id"]]
+            bbox = ann["bbox"]
+            keypoints = np.array(ann["keypoints"]).reshape(-1, 3)
+            landmarks_x, landmarks_y = self.get_landmarks(keypoints, 98)
+            landmarks_annotation = Face98LandmarksAnnotation(identifier, np.array(landmarks_x), np.array(landmarks_y))
+            landmarks_annotation.metadata['rect'] = (bbox[0], bbox[1], bbox[0] + bbox[2], bbox[1] + bbox[3])
+            annotations.append(landmarks_annotation)
+            if progress_callback is not None and img_id % progress_interval == 0:
+                progress_callback(img_id * 100 / len(img_ids))
         return ConverterReturn(annotations, None, None)
 
     @staticmethod
