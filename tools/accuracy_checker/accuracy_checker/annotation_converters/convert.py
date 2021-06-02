@@ -228,10 +228,10 @@ def main():
     args, _ = main_argparser.parse_known_args()
     converter, converter_argparser, converter_args = get_converter_arguments(args)
     details = {
-        'platform': platform.system, 'conversion_errors': None, 'save_annotation': True,
+        'platform': platform.system(), 'conversion_errors': None, 'save_annotation': True,
         'subsample': bool(args.subsample),
         'shuffle': args.shuffle,
-        'converter': converter.name(),
+        'converter': converter.get_name(),
         'dataset_analysis': args.analyze_dataset
     }
 
