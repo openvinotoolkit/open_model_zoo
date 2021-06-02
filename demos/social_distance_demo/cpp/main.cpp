@@ -97,7 +97,8 @@ struct Context {  // stores all global data for tasks
         drawersContext{pause, gridParam, displayResolution, showPeriod, monitorsStr},
         videoFramesContext{std::vector<uint64_t>(inputChannels.size(), lastFrameId), std::vector<std::mutex>(inputChannels.size())},
         trackersContext{std::vector<PersonTrackers>(inputChannels.size()), std::vector<int>(inputChannels.size(), 9999),
-                std::vector<int>(inputChannels.size(), 1)},
+                std::vector<int>(inputChannels.size(), 1), std::vector<int64_t>(inputChannels.size(), 0),
+                std::vector<std::map<int64_t, trackingData>>(inputChannels.size()) },
         nireq{nireq},
         isVideo{isVideo},
         t0{std::chrono::steady_clock::time_point()},
@@ -116,20 +117,24 @@ struct Context {  // stores all global data for tasks
         detectorsInfers.assign(detectorInferRequests);
         reidInfers.assign(reidInferRequests);
     }
+
     struct {
         std::vector<std::shared_ptr<InputChannel>> inputChannels;
         std::vector<int64_t> lastCapturedFrameIds;
         std::vector<std::mutex> lastCapturedFrameIdsMutexes;
         std::weak_ptr<Worker> readersWorker;
     } readersContext;
+
     struct {
         PersonDetector detector;
         std::weak_ptr<Worker> inferTasksWorker;
     } inferTasksContext;
+
     struct {
         ReId reid;
         std::weak_ptr<Worker> reidTasksWorker;
     } detectionsProcessorsContext;
+
     struct DrawersContext {
         DrawersContext(int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
                        const std::string& monitorsStr):
@@ -152,15 +157,30 @@ struct Context {  // stores all global data for tasks
         std::chrono::steady_clock::time_point updateTime;
         Presenter presenter;
     } drawersContext;
+
     struct {
         std::vector<uint64_t> lastframeIds;
         std::vector<std::mutex> lastFrameIdsMutexes;
     } videoFramesContext;
+
+    struct trackingData {
+        VideoFrame::Ptr sharedVideoFrame;
+        std::list<cv::Rect> boxes;
+        std::list<TrackableObject> trackables;
+
+        trackingData(VideoFrame::Ptr sharedVideoFrame, std::list<cv::Rect>&& boxes, std::list<TrackableObject>&& trackables)
+            : sharedVideoFrame(sharedVideoFrame), boxes(boxes), trackables(trackables) {}
+    };
+
     struct {
         std::vector<PersonTrackers> personTracker;
         std::vector<int> minW;
         std::vector<int> maxW;
+        std::vector<int64_t> lastProcessIDs;
+        std::vector<std::map<int64_t, trackingData>> processedData;
+        std::mutex trackerMutex;
     } trackersContext;
+
     std::weak_ptr<Worker> resAggregatorsWorker;
     std::mutex classifiersAggregatorPrintMutex;
     uint64_t nireq;
@@ -369,18 +389,22 @@ void Drawer::process() {
         cv::putText(mat, context.drawersContext.outThroughput.str(), cv::Point2f(15, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
 
         context.drawersContext.presenter.drawGraphs(mat);
-
-        cv::imshow("Detection results", firstGridIt->second.getMat());
-        context.drawersContext.prevShow = std::chrono::steady_clock::now();
-        const int key = cv::waitKey(context.drawersContext.pause);
-        if (key == 27 || 'q' == key || 'Q' == key || !context.isVideo) {
-            try {
-                std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
-            } catch (const std::bad_weak_ptr&) {}
-        } else if (key == 32) {
-            context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
-        } else {
-            context.drawersContext.presenter.handleKey(key);
+        if (!FLAGS_no_show) {
+            cv::imshow("Detection results", firstGridIt->second.getMat());
+            context.drawersContext.prevShow = std::chrono::steady_clock::now();
+            const int key = cv::waitKey(context.drawersContext.pause);
+            if (key == 27 || 'q' == key || 'Q' == key || !context.isVideo) {
+                try {
+                    std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+                }
+                catch (const std::bad_weak_ptr&) {}
+            }
+            else if (key == 32) {
+                context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
+            }
+            else {
+                context.drawersContext.presenter.handleKey(key);
+            }
         }
         firstGridIt->second.clear();
         gridMats.emplace((--gridMats.end())->first + 1, firstGridIt->second);
@@ -391,13 +415,27 @@ void Drawer::process() {
 
 void ResAggregator::process() {
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
+    context.trackersContext.trackerMutex.lock();
+
     context.freeDetectionInfersCount += context.detectorsInfers.inferRequests.lockedSize();
     context.frameCounter++;
+    auto frameID = sharedVideoFrame->frameId;
     unsigned sourceID = sharedVideoFrame->sourceID;
+    auto& data = context.trackersContext.processedData[sourceID];
+    auto trackingDataIt = data.find(frameID);
+    if (data.end() == trackingDataIt) {
+        trackingDataIt = data.emplace(frameID, Context::trackingData{sharedVideoFrame, std::move(boxes), std::move(trackables)}).first;
+    }
+
+    auto& lastProcessedFrameId = context.trackersContext.lastProcessIDs[sourceID];
     auto& personTracker = context.trackersContext.personTracker[sourceID];
-    if (!FLAGS_no_show) {
-        for (const cv::Rect& bbox : boxes) {
-            cv::rectangle(sharedVideoFrame->frame, bbox, { 0, 255, 0 }, 2);
+    auto firstTrackingData = data.begin();
+    if (lastProcessedFrameId == firstTrackingData->first) {
+        auto& _boxes = firstTrackingData->second.boxes;
+        auto& _trackables = firstTrackingData->second.trackables;
+        auto& _sharedVideoFrame = firstTrackingData->second.sharedVideoFrame;
+        for (const cv::Rect& bbox : _boxes) {
+            cv::rectangle(_sharedVideoFrame->frame, bbox, { 0, 255, 0 }, 2);
             if (bbox.width < context.trackersContext.minW[sourceID]) {
                 context.trackersContext.minW[sourceID] = bbox.width;
             }
@@ -406,10 +444,10 @@ void ResAggregator::process() {
             }
         }
 
-        personTracker.similarity(trackables);
+        personTracker.similarity(_trackables);
 
-        int w = sharedVideoFrame->frame.size().width;
-        int h = sharedVideoFrame->frame.size().height;
+        int w = _sharedVideoFrame->frame.size().width;
+        int h = _sharedVideoFrame->frame.size().height;
         for (auto it1 = personTracker.trackables.begin(); it1 != personTracker.trackables.end(); ++it1) {
             cv::Rect2d  l1 = it1->second.bbox;
             auto it2 = it1;
@@ -436,23 +474,20 @@ void ResAggregator::process() {
                     context.trackersContext.maxW[sourceID]);
 
                 if (std::get<1>(result)) {
+                    cv::rectangle(_sharedVideoFrame->frame, l1, { 0, 255, 255 }, 2);
+                    cv::rectangle(_sharedVideoFrame->frame, l2, { 0, 255, 255 }, 2);
                     cv::Point2d rect1center = { l1.x + l1.width / 2, l1.y + l1.height / 2 };
                     cv::Point2d rect2center = { l2.x + l2.width / 2, l2.y + l2.height / 2 };
-                    cv::line(sharedVideoFrame->frame, rect1center, rect2center, { 0, 0, 255 }, 3);
+                    cv::line(_sharedVideoFrame->frame, rect1center, rect2center, { 0, 0, 255 }, 3);
                 }
             }
         }
 
-        tryPush(context.drawersContext.drawersWorker, std::make_shared<Drawer>(sharedVideoFrame));
+        tryPush(context.drawersContext.drawersWorker, std::make_shared<Drawer>(_sharedVideoFrame));
+        ++lastProcessedFrameId;
+        data.erase(firstTrackingData);
     }
-    else {
-        if (!context.isVideo) {
-            try {
-                std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
-            }
-            catch (const std::bad_weak_ptr&) {}
-        }
-    }
+    context.trackersContext.trackerMutex.unlock();
 }
 
 bool DetectionsProcessor::isReady() {

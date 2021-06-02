@@ -87,7 +87,7 @@ public:
                     task->process();
                 }
             } catch (...) {
-                std::lock_guard<std::mutex> lock{excpetionMutex};
+                std::lock_guard<std::mutex> lock{exceptionMutex};
                 if (nullptr == currentException) {
                     currentException = std::current_exception();
                     stop();
@@ -115,7 +115,7 @@ private:
     std::vector<std::thread> threadPool;
     std::atomic<bool> running;
     std::exception_ptr currentException;
-    std::mutex excpetionMutex;
+    std::mutex exceptionMutex;
 };
 
 void tryPush(const std::weak_ptr<Worker>& worker, std::shared_ptr<Task>&& task) {
