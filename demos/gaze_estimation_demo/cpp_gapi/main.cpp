@@ -2,14 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <gflags/gflags.h>
-#include <inference_engine.hpp>
-
 #include <monitors/presenter.h>
 #include <utils/args_helper.hpp>
-#include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
-#include <utils/args_helper.hpp>
 
 #include "gaze_estimation_demo.hpp"
 #include "face_inference_results.hpp"

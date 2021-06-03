@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <opencv2/videoio.hpp>
-#include <opencv2/gapi/garg.hpp>
 #include <utils/images_capture.h>
 
 namespace custom {

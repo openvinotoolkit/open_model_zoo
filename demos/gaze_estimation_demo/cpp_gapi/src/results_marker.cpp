@@ -1,15 +1,8 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
-#include <cstdio>
-#include <iostream>
 
 #define _USE_MATH_DEFINES
-#include <cmath>
-
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/core/core.hpp>
 
 #include "results_marker.hpp"
 #include "face_inference_results.hpp"

@@ -1,10 +1,8 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
-
-#include <vector>
 
 #include <opencv2/core/core.hpp>
 
