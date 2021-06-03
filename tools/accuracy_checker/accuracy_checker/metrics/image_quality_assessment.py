@@ -370,7 +370,7 @@ def _get_sigmas(gt, p, win, mode='same', sums=None):
 class LPIPS(BaseRegressionMetric):
     __provider__ = 'lpips'
     annotation_types = (
-        SuperResolutionAnnotation, ImageProcessingAnnotation, ImageInpaintingAnnotation, SuperResolutionAnnotation
+        SuperResolutionAnnotation, ImageProcessingAnnotation, ImageInpaintingAnnotation, StyleTransferAnnotation
     )
     prediction_types = (
         SuperResolutionPrediction, ImageProcessingPrediction, ImageInpaintingPrediction, StyleTransferPrediction
