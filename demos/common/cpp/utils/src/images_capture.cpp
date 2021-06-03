@@ -62,7 +62,6 @@ class DirReader : public ImagesCapture {
     const size_t initialImageId;
     const size_t readLengthLimit;
     const std::string input;
-    cv::Size firstFrameSize;
 
 public:
     DirReader(const std::string &input, bool loop, size_t initialImageId, size_t readLengthLimit) : ImagesCapture{loop},
