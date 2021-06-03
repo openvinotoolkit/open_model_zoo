@@ -37,7 +37,7 @@ class Face98LandmarksAnnotation(Face98LandmarksRepresentation):
 
 class Face98LandmarksPrediction(Face98LandmarksRepresentation):
     def __init__(self, identifier='', x_values=None, y_values=None, heatmap=None):
-        super().__init__(identifier, x_values, y_values, heatmap) 
+        super().__init__(identifier, x_values, y_values, heatmap)
 
     def to_annotation(self, **kwargs):
         return Face98LandmarksAnnotation(self.identifier, self.x_values, self.y_values)

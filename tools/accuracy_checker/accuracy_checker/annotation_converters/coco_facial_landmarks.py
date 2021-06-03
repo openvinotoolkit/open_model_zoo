@@ -52,19 +52,17 @@ class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
 
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        
         with open(self.annotation_file) as f:
             data = json.load(f)
         coco_ann = data["annotations"]
         id2name, img_ids = self._collectImageIds(data["images"])
-        num_images = len(img_ids)
         num_landmarks = 98
         annotations = []
         for ann_id, ann in enumerate(coco_ann[1:]):
             identifier = id2name[ann["image_id"]]
             bbox = ann["bbox"]
             keypoints = np.array(ann["keypoints"]).reshape(-1, 3)
-            landmarks_x, landmarks_y = self.get_landmarks(keypoints, 98)
+            landmarks_x, landmarks_y = self.get_landmarks(keypoints, num_landmarks)
             landmarks_annotation = Face98LandmarksAnnotation(identifier, np.array(landmarks_x), np.array(landmarks_y))
             landmarks_annotation.metadata['rect'] = (bbox[0], bbox[1], bbox[0] + bbox[2], bbox[1] + bbox[3])
             annotations.append(landmarks_annotation)
@@ -76,7 +74,6 @@ class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
     def get_landmarks(keypoints, num_landmarks):
         landmarks_x, landmarks_y = np.zeros(num_landmarks), np.zeros(num_landmarks)
         for i, point in enumerate(keypoints):
-            
             x, y = point[0], point[1]
             landmarks_x[i] = float(x)
             landmarks_y[i] = float(y)
