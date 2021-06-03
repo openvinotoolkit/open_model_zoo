@@ -15,11 +15,10 @@ limitations under the License.
 """
 
 import numpy as np
-
-from ..config import BoolField
+import cv2
 from ..postprocessor.postprocessor import Postprocessor
 from ..representation import Face98LandmarksAnnotation, Face98LandmarksPrediction
-import cv2
+
 
 class Heatmap2Keypoints(Postprocessor):
     __provider__ = 'heatmap2keypoints'
@@ -68,15 +67,9 @@ class Heatmap2Keypoints(Postprocessor):
         scale = scale * padding
         return center, scale
 
-
-   
-
-    def _keypoints_from_heatmaps(self, heatmaps,
-                            center,
-                            scale):
+    def _keypoints_from_heatmaps(self, heatmaps, center, scale):
 
         def _get_max_preds(heatmaps):
-
             N, K, _, W = heatmaps.shape
             heatmaps_reshaped = heatmaps.reshape((N, K, -1))
             idx = np.argmax(heatmaps_reshaped, 2).reshape((N, K, 1))
@@ -101,12 +94,7 @@ class Heatmap2Keypoints(Postprocessor):
 
             return rotated_pt
 
-        def _get_affine_transform(center,
-                                 scale,
-                                 rot,
-                                 output_size,
-                                 shift=(0., 0.),
-                                 inv=False):
+        def _get_affine_transform(center, scale, rot, output_size, shift=(0., 0.), inv=False):
 
             scale_tmp = scale * 200.0
 
@@ -136,10 +124,6 @@ class Heatmap2Keypoints(Postprocessor):
 
             return trans
 
-        def affine_transform(pt, trans_mat):
-            new_pt = np.array(trans_mat) @ np.array([pt[0], pt[1], 1.])
-            return new_pt
-
         def _transform_preds(coords, center, scale, output_size, use_udp=False):
             target_coords = coords.copy()
             trans = _get_affine_transform(center, scale, 0, output_size, inv=True)
@@ -149,7 +133,7 @@ class Heatmap2Keypoints(Postprocessor):
 
         N, K, H, W = heatmaps.shape
         preds, maxvals = _get_max_preds(heatmaps)
-   
+
         for n in range(N):
             for k in range(K):
                 heatmap = heatmaps[n][k]
@@ -161,7 +145,6 @@ class Heatmap2Keypoints(Postprocessor):
                         heatmap[py + 1][px] - heatmap[py - 1][px]
                     ])
                     preds[n][k] += np.sign(diff) * .25
-
 
         # Transform back to the image
         for i in range(N):
