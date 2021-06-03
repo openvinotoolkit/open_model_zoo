@@ -223,7 +223,7 @@ class InputFeeder:
                     value = np.array(value, dtype=precision)
                 if isinstance(value, (int, float)) and 'shape' in input_:
                     value = np.full(input_['shape'], value, dtype=precision)
-                constant_inputs[name] = value
+                constant_inputs[name] = self.input_transform_func(value, name, None, precision)
             else:
                 config_non_constant_inputs.append(name)
                 if value is not None:

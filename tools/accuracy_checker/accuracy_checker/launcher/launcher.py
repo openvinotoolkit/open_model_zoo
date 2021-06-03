@@ -254,7 +254,7 @@ class Launcher(ClassProvider):
 
     @staticmethod
     def fit_to_input(data, layer_name, layout, precision):
-        if len(np.shape(data)) == len(layout):
+        if layout is not None and len(np.shape(data)) == len(layout):
             data = np.transpose(data, layout)
         else:
             data = np.array(data)
