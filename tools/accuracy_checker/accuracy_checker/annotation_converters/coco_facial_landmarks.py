@@ -13,13 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
+import json
 import numpy as np
 from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ..representation import Face98LandmarksAnnotation
-from ..utils import read_xml, check_file_existence
 from ..config import PathField
-import json
 
 
 class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
@@ -62,7 +60,7 @@ class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
         num_images = len(img_ids)
         num_landmarks = 98
         annotations = []
-        for ann in coco_ann[1:]:
+        for ann_id, ann in enumerate(coco_ann[1:]):
             identifier = id2name[ann["image_id"]]
             bbox = ann["bbox"]
             keypoints = np.array(ann["keypoints"]).reshape(-1, 3)
@@ -70,8 +68,8 @@ class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
             landmarks_annotation = Face98LandmarksAnnotation(identifier, np.array(landmarks_x), np.array(landmarks_y))
             landmarks_annotation.metadata['rect'] = (bbox[0], bbox[1], bbox[0] + bbox[2], bbox[1] + bbox[3])
             annotations.append(landmarks_annotation)
-            if progress_callback is not None and img_id % progress_interval == 0:
-                progress_callback(img_id * 100 / len(img_ids))
+            if progress_callback is not None and ann_id % progress_interval == 0:
+                progress_callback(ann_id * 100 / len(coco_ann[1:]))
         return ConverterReturn(annotations, None, None)
 
     @staticmethod
