@@ -369,6 +369,12 @@ def _get_sigmas(gt, p, win, mode='same', sums=None):
 
 class LPIPS(BaseRegressionMetric):
     __provider__ = 'lpips'
+    annotation_types = (
+        SuperResolutionAnnotation, ImageProcessingAnnotation, ImageInpaintingAnnotation, SuperResolutionAnnotation
+    )
+    prediction_types = (
+        SuperResolutionPrediction, ImageProcessingPrediction, ImageInpaintingPrediction, StyleTransferPrediction
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(self.lpips_differ, *args, **kwargs)
