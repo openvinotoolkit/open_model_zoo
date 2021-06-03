@@ -66,7 +66,7 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
                 data_source = self.metadata['data_source']
             loader = BaseReader.provide(self._gt_loader, data_source)
             if self._gt_loader == self.LOADERS[GTLoader.PILLOW]:
-                loader.convert_to_rgb = self._pillow_to_rgb
+                loader.convert_to_rgb = self._pillow_to_rgb if hasattr(self, '_pillow_to_rgb') else False
             gt = loader.read(self._image_path)
             return gt.astype(np.uint8) if self._gt_loader not in ['dicom_reader', 'rawpy'] else gt
         return self._value
