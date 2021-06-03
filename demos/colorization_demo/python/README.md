@@ -53,6 +53,15 @@ Options:
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```
+Running the application with an empty list of options yields the short version of the usage message and an error message.
+
+To run the demo, please provide paths to the model in the IR format, and to an input video or image(s):
+
+```bash
+python colorization_demo.py \
+    -i <path_to_image>/<image_name>.jpg \
+    -m <path_to_model>/colorization-v2.xml
+```
 
 ## Demo Output
 

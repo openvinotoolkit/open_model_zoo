@@ -74,7 +74,7 @@ python handwritten_text_recognition_demo.py -d CPU -i data/handwritten_japanese_
 
 When the `designated_characters` argument is provided, if the output character is not included in the designated characters, the script will check Top k steps in looking up the decoded character, until a designated one is found. By doing so, the output character will be restricted to a designated region. K is set to 20 by default.
 
-For example, if you want to restrict the output characters to only digits and hyphens, you need to provide the path to the designated character file, for example `digit_hyphen.txt`. Then the script will perform a post-filtering processing on the output characters, but please note that it is possible that other characters are still allowed if none of `digit_hyphen.txt` is in first K chosen elements. The mentioned characters text files located at `data` subfolder of this demo.
+For example, if you want to restrict the output characters to only digits and hyphens, you need to provide the path to the designated character file, for example `digit_hyphen.txt`. Then the script will perform a post-filtering processing on the output characters, but please note that it is possible that other characters are still allowed if none of `digit_hyphen.txt` is in first K chosen elements. The mentioned characters text files located in the `data` subfolder of this demo.
 
 The example command line:
 

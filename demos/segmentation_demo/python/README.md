@@ -113,7 +113,7 @@ You can use the following command to do inference on CPU on images captured by a
 
 The color palette is used to visualize predicted classes. By default, the colors from PASCAL VOC dataset are applied. In case then the number of output classes is larger than number of classes provided by PASCAL VOC dataset, the rest classes are randomly colorized. Also, one can use predefined colors from other datasets, like CAMVID.
 
-Available colors files located at `<omz_dir>/data/palettes` folder. If you want to assign custom colors for classes, you should create a `.txt` file, where the each line contains colors in `(R, G, B)` format. The demo application treat the number of each line as a dataset class identificator and apply specified color to pixels belonging to this class.
+Available colors files located in the `<omz_dir>/data/palettes` folder. If you want to assign custom colors for classes, you should create a `.txt` file, where the each line contains colors in `(R, G, B)` format. The demo application treat the number of each line as a dataset class identificator and apply specified color to pixels belonging to this class.
 
 ## Demo Output
 

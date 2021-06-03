@@ -130,7 +130,7 @@ To run in *simulated real-time mode* add command-line option `--realtime`.
 
 > **NOTE**: Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.
 
-Optional (but highly recommended) language model files, `deepspeech-0.8.2-models.kenlm` or `lm.binary` are part of corresponding model downloaded content and will be located at Model Downloader output folder after model downloading and conversion. An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/how_are_you_doing.wav`.
+Optional (but highly recommended) language model files, `deepspeech-0.8.2-models.kenlm` or `lm.binary` are part of corresponding model downloaded content and will be located in the Model Downloader output folder after model downloading and conversion. An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/how_are_you_doing.wav`.
 
 ## Demo Output
 

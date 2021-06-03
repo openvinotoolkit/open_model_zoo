@@ -5,7 +5,7 @@ This README describes the Question Answering demo application that uses a Squad-
 ## How It Works
 
 On startup the demo application reads command line parameters and loads a network to Inference engine.
-It also fetch data from the user-provided url to populate the "context" text.
+It also fetches data from the user-provided url to populate the "context" text.
 The text is then used to search answers for user-provided questions.
 
 ## Preparing to Run
@@ -24,7 +24,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 * bert-small-uncased-whole-word-masking-squad-int8-0002
 
 The "small" variants of these are so-called "distilled" models, which originated from the BERT Large but substantially smaller and faster.
-The demo also works fine with [official MLPerf* BERT ONNX models fine-tuned on the Squad dataset](https://github.com/mlcommons/inference/tree/master/language/bert). This model should be converted to OpenVINO Inference Engine format using command like example below:
+If you want to use an official MLPerf* BERT ONNX model rather than the distilled model on the Open model Zoo, the command line to convert the [int8 model](https://zenodo.org/record/3750364) is as follows:
 
 ```sh
     python3 mo.py

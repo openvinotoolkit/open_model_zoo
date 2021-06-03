@@ -100,7 +100,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 
 If you want to see classification results, you must use "-gt" and "-labels" flags to specify two .txt files containing lists of classes and labels.
 
-"Ground truth" file is used for matching image file names with correct object classes.
+"The ground truth" file is used for matching image file names with correct object classes.
 
 It has the following format:
 
