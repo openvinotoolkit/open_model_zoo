@@ -80,9 +80,6 @@ public:
         while (fileId < names.size()) {
             cv::Mat img = cv::imread(input + '/' + names[fileId]);
             if (img.data) {
-                if (readImgs == 0) {
-                    firstFrameSize = cv::Size{img.cols, img.rows};
-                }
                 ++readImgs;
                 if (readImgs - 1 >= initialImageId) return;
             }
