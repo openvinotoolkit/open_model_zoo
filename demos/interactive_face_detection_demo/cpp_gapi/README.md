@@ -99,7 +99,14 @@ Running the application with an empty list of options yields the usage message g
 For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
 ```sh
-./interactive_face_detection_demo_gapi -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/face-detection-adas-0001.xml -m_ag <path_to_model>/age-gender-recognition-retail-0013.xml -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml -m_em <path_to_model>/emotions-recognition-retail-0003.xml -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml -d GPU
+./interactive_face_detection_demo_gapi \
+  -d GPU \
+  -i <path_to_video>/inputVideo.mp4 \
+  -m <path_to_model>/face-detection-adas-0001.xml \
+  -m_ag <path_to_model>/age-gender-recognition-retail-0013.xml \
+  -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml \
+  -m_em <path_to_model>/emotions-recognition-retail-0003.xml \
+  -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml
 ```
 
 ## Demo Output

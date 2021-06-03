@@ -6,7 +6,7 @@ This demo demonstrates how to run Multi Camera Multi Target (e.g. person or vehi
 
 The demo expects the following models in the Intermediate Representation (IR) format:
 
-* either object detection model or object instance segmentation model
+* object detection model or object instance segmentation model
 * object re-identification model
 
 As input, the demo application takes:
@@ -28,7 +28,7 @@ and then for each detected object it extracts embeddings using re-identification
 
 ### Installation of Dependencies
 
-To install required dependencies run
+To install required dependencies, run
 
 ```bash
 pip3 install -r requirements.txt
@@ -37,6 +37,18 @@ pip3 install -r requirements.txt
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_camera_multi_target_tracking_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 

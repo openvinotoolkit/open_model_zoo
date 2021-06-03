@@ -6,7 +6,7 @@ This demo demonstrates how to run Gesture (e.g. American Sign Language (ASL) ges
 
 ## How It Works
 
-The demo application expects an gesture recognition model in the Intermediate Representation (IR) format.
+The demo application expects a gesture recognition model in the Intermediate Representation (IR) format.
 
 As input, the demo application takes:
 
@@ -29,6 +29,18 @@ The demo workflow is the following:
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/gesture_recognition_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 

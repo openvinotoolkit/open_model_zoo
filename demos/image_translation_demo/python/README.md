@@ -17,6 +17,18 @@ For demo input image or video files you may refer to [Media Files Available for 
 The list of models supported by the demo is in `<omz_dir>/demos/image_translation_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
 ### Supported Models
 
 * cocosnet
@@ -79,7 +91,8 @@ There are two ways to use this demo:
        -m_trn <path_to_translation_model>/cocosnet.xml \
        -m_seg <path_to_segmentation_model>/hrnet-v2-c1-segmentation.xml \
        -ii <path_to_input_image>/input_image.jpg \
-       -ri <path_to_exemplar_image>/reference_image.jpg
+       -ri <path_to_exemplar_image>/reference_image.jpg \
+       -o <output_dir>
    ```
 
 2. Run with only translation model.
@@ -91,7 +104,8 @@ There are two ways to use this demo:
        -m_trn <path_to_translation_model>/cocosnet.xml \
        -is <path_to_semantic_mask_of_image>/input_mask.png \
        -ri <path_to_exemplar_image>/reference_image.jpg \
-       -rs <path_to_exemplar_semantic>/reference_mask.png
+       -rs <path_to_exemplar_semantic>/reference_mask.png \
+       -o <output_dir>
    ```
 
    > **NOTE**: For segmentation masks you should use mask (with shape: [height x width]) that specifies class for each pixel. Number of classes is 151 (from ADE20k), where '0' - background class.

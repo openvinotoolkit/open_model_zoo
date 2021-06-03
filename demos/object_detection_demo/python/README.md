@@ -15,9 +15,9 @@ encoding the resulting (previous) frames or running further inference, like some
 the face detection results.
 There are important performance caveats though, for example the tasks that run in parallel should try to avoid
 oversubscribing the shared compute resources.
-For example, if the inference is performed on the HDDL, and the CPU is essentially idle,
-than it makes sense to do things on the CPU in parallel. But if the inference is performed say on the GPU,
-than it can take little gain to do the (resulting video) encoding on the same GPU in parallel,
+As another example, if the inference is performed on the HDDL, and the CPU is essentially idle,
+then it makes sense to do things on the CPU in parallel. But if the inference is performed say on the GPU,
+then there is little gain from doing the (resulting video) encoding on the same GPU in parallel,
 because the device is already busy.
 
 This and other performance implications and tips for the Async API are covered in the
@@ -44,6 +44,18 @@ Async API operates with a notion of the "Infer Request" that encapsulates the in
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/object_detection_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -222,7 +234,12 @@ Running the application with the empty list of options yields the usage message 
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 
 ```sh
-python3 object_detection_demo.py -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd300.xml -d GPU --labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt
+python3 object_detection_demo.py \
+  -d GPU \
+  -i <path_to_video>/inputVideo.mp4 \
+  -m <path_to_model>/ssd300.xml \
+  -at ssd \
+  --labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt
 ```
 
 The number of Infer Requests is specified by `-nireq` flag. An increase of this number usually leads to an increase
@@ -236,15 +253,15 @@ summed across all devices used.
 > **NOTE**: This demo is based on the callback functionality from the Inference Engine Python API.
   The selected approach makes the execution in multi-device mode optimal by preventing wait delays caused by
   the differences in device performance. However, the internal organization of the callback mechanism in Python API
-  leads to FPS decrease. Please, keep it in mind and use the C++ version of this demo for performance-critical cases.
+  leads to a decrease in FPS. Please, keep this in mind and use the C++ version of this demo for performance-critical cases.
 
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
 The demo reports
 
-* **FPS**: average rate of video frame processing (frames per second)
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results)
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
 You can use both of these metrics to measure application-level performance.
 
 ## See Also

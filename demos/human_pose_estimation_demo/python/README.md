@@ -17,6 +17,18 @@ For demo input image or video files you may refer to [Media Files Available for 
 The list of models supported by the demo is in `<omz_dir>/demos/human_pose_estimation_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
 ### Supported Models
 
 * architecture_type=openpose
@@ -114,7 +126,11 @@ Running the application with the empty list of options yields the short usage me
 You can use the following command to do inference on CPU with a pre-trained human pose estimation model:
 
 ```sh
-python3 human_pose_estimation.py -i 0 -m human-pose-estimation-0002.xml -at ae -d CPU
+python3 human_pose_estimation_demo.py \
+  -d CPU \
+  -i 0 \
+  -m <path_to_model>/human-pose-estimation-0005.xml \
+  -at ae
 ```
 
 ## Demo Output

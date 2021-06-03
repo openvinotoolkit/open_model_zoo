@@ -60,6 +60,18 @@ For demo input image or video files you may refer to [Media Files Available for 
 The list of models supported by the demo is in `<omz_dir>/demos/object_detection_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
 ### Supported Models
 
 * architecture_type = centernet
@@ -158,7 +170,12 @@ If labels file is used, it should correspond to model output. Demo treat labels,
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 
 ```sh
-./object_detection_demo -i <path_to_video>/inputVideo.mp4 -at ssd -m <path_to_model>/ssd300.xml -d GPU -labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt
+./object_detection_demo \
+  -d GPU \
+  -i <path_to_video>/inputVideo.mp4 \
+  -m <path_to_model>/ssd300.xml \
+  -at ssd \
+  -labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt
 ```
 
 ## Demo Output

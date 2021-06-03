@@ -32,6 +32,18 @@ For demo input image or video files you may refer to [Media Files Available for 
 The list of models supported by the demo is in `<omz_dir>/demos/gaze_estimation_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
 ### Supported Models
 
 * facial-landmarks-35-adas-0002
@@ -86,7 +98,14 @@ Running the application with an empty list of options yields an error message.
 For example, to do inference on a CPU, run the following command:
 
 ```sh
-./gaze_estimation_demo -d CPU -i <path_to_video>/input_video.mp4  -m <path_to_model>/gaze-estimation-adas-0002.xml -m_fd <path_to_model>/face-detection-retail-0004.xml -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml
+./gaze_estimation_demo \
+  -d CPU \
+  -i <path_to_video>/input_video.mp4 \
+  -m <path_to_model>/gaze-estimation-adas-0002.xml \
+  -m_fd <path_to_model>/face-detection-retail-0004.xml \
+  -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml \
+  -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml \
+  -m_es <path_to_model>/open-closed-eye-0001.xml
 ```
 
 ### Run-Time Control Keys
