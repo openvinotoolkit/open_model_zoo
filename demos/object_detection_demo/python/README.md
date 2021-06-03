@@ -31,7 +31,7 @@ Other demo objectives are:
 
 ## How It Works
 
-On the start-up, the application reads command-line parameters and loads a network to the Inference
+On startup, the application reads command-line parameters and loads a network to the Inference
 Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
 
 Async API operates with a notion of the "Infer Request" that encapsulates the inputs/outputs and separates

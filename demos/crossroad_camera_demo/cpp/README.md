@@ -21,7 +21,7 @@ the Person Detection results
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads the specified networks. The Person Detection
+On startup, the application reads command line parameters and loads the specified networks. The Person Detection
 network is required, the other two are optional.
 
 Upon getting a frame from the OpenCV VideoCapture, the application performs inference of Person Detection network, then performs another

@@ -5,7 +5,7 @@ The demo is based on https://github.com/seungwonpark/melgan, https://github.com/
 
 ## How It Works
 
-Upon the start-up, the demo application reads command-line parameters and loads four or three networks to the
+On startup, the demo application reads command-line parameters and loads four or three networks to the
 Inference Engine plugin. The demo pipeline reads text file by lines and divides every line to parts by punctuation marks.
 The heuristic algorithm chooses punctuation near to the some threshold by sentence length.
 When inference is done, the application outputs the audio to the WAV file with 22050 Hz sample rate.

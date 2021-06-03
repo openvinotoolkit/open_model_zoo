@@ -6,7 +6,7 @@ This demo showcases the work of multi-person 2D pose estimation algorithms. The 
 
 ## How It Works
 
-On the start-up, the application reads command-line parameters and loads a network to the Inference
+On startup, the application reads command-line parameters and loads a network to the Inference
 Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work

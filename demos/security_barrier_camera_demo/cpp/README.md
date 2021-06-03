@@ -13,7 +13,7 @@ Other demo objectives are:
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads the specified networks. The Vehicle and License Plate
+On startup, the application reads command line parameters and loads the specified networks. The Vehicle and License Plate
 Detection network is required, the other two are optional.
 
 The core component of the application pipeline is the Worker class, which executes incoming instances of a `Task` class.

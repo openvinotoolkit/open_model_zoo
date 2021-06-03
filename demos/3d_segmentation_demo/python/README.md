@@ -4,7 +4,7 @@ This topic demonstrates how to run the 3D Segmentation Demo, which segments 3D i
 
 ## How It Works
 
-Upon the start-up, the demo reads command-line parameters and loads a network and images to the Inference Engine plugin.
+On startup, the demo reads command-line parameters and loads a network and images to the Inference Engine plugin.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 

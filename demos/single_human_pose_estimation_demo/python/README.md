@@ -6,7 +6,7 @@ This demo showcases top-down pipeline for human pose estimation on video or imag
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads detection person model and single human pose estimation model. Upon getting a frame from the OpenCV VideoCapture, the demo executes top-down pipeline for this frame and displays the results.
+On startup, the application reads command line parameters and loads detection person model and single human pose estimation model. Upon getting a frame from the OpenCV VideoCapture, the demo executes top-down pipeline for this frame and displays the results.
 
 ## Preparing to Run
 

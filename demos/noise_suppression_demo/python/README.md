@@ -4,7 +4,7 @@ This README describes the Noise Suppresion demo application.
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network to Inference engine.
+On startup the demo application reads command line parameters and loads a network to Inference engine.
 It also read user-provided sound file with mix of speech and some noise to feed it into the network by small sequential patches.
 The output of network is also sequence of audio patches with clean speech. The patches collected together and save into ouput audio file.
 

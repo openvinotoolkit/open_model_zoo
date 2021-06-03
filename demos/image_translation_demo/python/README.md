@@ -4,7 +4,7 @@ This demo application demonstrates an example of using neural networks to synthe
 
 ## How It Works
 
-At the start-up the demo application reads command line parameters and loads a network to the Inference Engine plugin. To get the result, the demo performs the following steps:
+On startup the demo application reads command line parameters and loads a network to the Inference Engine plugin. To get the result, the demo performs the following steps:
 
 1. Reading input data (semantic segmentation mask of image for translation, exemplar image and mask of exemplar image).
 2. Preprocessing for input image and masks.

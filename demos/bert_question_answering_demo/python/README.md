@@ -4,7 +4,7 @@ This README describes the Question Answering demo application that uses a Squad-
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network to Inference engine.
+On startup the demo application reads command line parameters and loads a network to Inference engine.
 It also fetch data from the user-provided url to populate the "context" text.
 The text is then used to search answers for user-provided questions.
 

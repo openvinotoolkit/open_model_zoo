@@ -6,7 +6,7 @@ This demo showcases Pedestrian Tracking scenario: it reads frames from an input 
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads the specified networks.
+On startup, the application reads command line parameters and loads the specified networks.
 
 Upon getting a frame from the input video sequence (either a video file or a folder with images), the app performs inference of the pedestrian detector network.
 

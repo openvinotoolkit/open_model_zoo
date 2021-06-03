@@ -4,7 +4,7 @@ This demo demonstrates an example of using neural networks to colorize a graysca
 
 ## How It Works
 
-On the start-up, the application reads command-line parameters and loads one network to the Inference Engine for execution. Once the program receives an image, it performs the following steps:
+On startup, the application reads command-line parameters and loads one network to the Inference Engine for execution. Once the program receives an image, it performs the following steps:
 
 1. Converts the frame into the LAB color space.
 2. Uses the L-channel to predict A and B channels.

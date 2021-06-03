@@ -10,7 +10,7 @@ You can use the following pre-trained model with the demo:
 
 ## How It Works
 
-On the start-up, the application reads command-line parameters and loads the
+On startup, the application reads command-line parameters and loads the
 specified network. After that, the application reads an input image and
 performs upscale using super resolution model.
 
