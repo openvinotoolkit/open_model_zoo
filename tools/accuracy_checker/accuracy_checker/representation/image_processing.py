@@ -70,7 +70,7 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
             if self._gt_loader == self.LOADERS[GTLoader.PILLOW]:
                 loader.convert_to_rgb = self._pillow_to_rgb if hasattr(self, '_pillow_to_rgb') else False
             gt = loader.read(self._image_path)
-            return gt.astype(np.uint8) if self._gt_loader not in ['dicom_reader', 'rawpy'] else gt
+            return gt.astype(np.uint8) if self._gt_loader not in ['dicom_reader', 'rawpy', 'numpy_reader'] else gt
         return self._value
 
     @value.setter
