@@ -264,7 +264,7 @@ def main():
         cv2.putText(origin_image, 'summary: {:.1f} FPS'.format(1.0 / infer_time),
                     (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
 
-        if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id <= args.output_limit - 1):
+        if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id <= args.output_limit):
             video_writer.write(origin_image)
 
         if not args.no_show:
