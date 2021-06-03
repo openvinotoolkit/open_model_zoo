@@ -42,7 +42,7 @@ class ImageProcessingAnnotation(ImageProcessingRepresentation):
         GTLoader.DICOM: 'dicom_reader',
         GTLoader.RAWPY: 'rawpy',
         GTLoader.SKIMAGE: 'skimage_imread',
-        GTLoader.PILLOW_RGB: 'pillow_imread'
+        GTLoader.PILLOW_RGB: 'pillow_imread',
         GTLoader.NUMPY: 'numpy_reader'
     }
 

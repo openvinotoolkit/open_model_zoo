@@ -34,7 +34,7 @@ class Interpolation(Postprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'interp_mode': StringField(
+            'mode': StringField(
                 optional=True, choices=interp_modes_func.keys(), default='linear',
                 description="Interpolation mode: {}".format(', '.join(interp_modes_func))
             ),
@@ -46,7 +46,7 @@ class Interpolation(Postprocessor):
         return parameters
 
     def configure(self):
-        self.interp_func = interp_modes_func[self.get_value_from_config('interp_mode')]
+        self.interp_func = interp_modes_func[self.get_value_from_config('mode')]
         self.target_min = self.get_value_from_config('target_min')
         self.target_max = self.get_value_from_config('target_max')
         self.as_log = self.get_value_from_config('as_log')
