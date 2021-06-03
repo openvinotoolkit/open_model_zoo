@@ -57,16 +57,15 @@ class Heatmap2Keypoints(Postprocessor):
 
         return annotation, prediction
 
-
-    def _xywh2cs(self, x, y, w, h, padding=1.25):
-
+    @classmethod
+    def _xywh2cs(cls, x, y, w, h, padding=1.25):
         center = np.array([x + w * 0.5, y + h * 0.5], dtype=np.float32)
-
         scale = np.array([w / 200.0, h / 200.0], dtype=np.float32)
         scale = scale * padding
         return center, scale
 
-    def _keypoints_from_heatmaps(self, heatmaps, center, scale):
+    @classmethod
+    def _keypoints_from_heatmaps(cls, heatmaps, center, scale):
 
         def _get_max_preds(heatmaps):
             N, K, _, W = heatmaps.shape
