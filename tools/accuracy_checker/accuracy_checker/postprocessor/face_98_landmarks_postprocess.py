@@ -38,7 +38,6 @@ class Heatmap2Keypoints(Postprocessor):
         for annotation_, prediction_ in zip(annotation, prediction):
             height, width, _ = self.image_size
             x_start, y_start = 0, 0
-           
             resized_box = annotation_.metadata.get('rect')
 
             x_start, y_start, x_max, y_max = resized_box

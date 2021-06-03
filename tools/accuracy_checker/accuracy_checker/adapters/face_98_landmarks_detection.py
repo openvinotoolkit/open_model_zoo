@@ -1,6 +1,3 @@
-import cv2
-import numpy as np
-
 from ..adapters import Adapter
 from ..representation import Face98LandmarksPrediction
 
