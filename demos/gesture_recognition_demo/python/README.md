@@ -75,7 +75,7 @@ Options:
                         Required. Path to a video file or a device node of a
                         webcam.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of output to save.
+                        Optional. Name of output file/s to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.

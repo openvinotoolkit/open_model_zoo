@@ -27,7 +27,7 @@ def build_argparser():
     parser.add_argument("--loop", default=False, action="store_true",
                         help="Optional. Enable reading the input in a loop.")
     parser.add_argument("-o", "--output", required=False,
-                        help="Optional. Name of output to save.")
+                        help="Optional. Name of output file/s to save.")
     parser.add_argument("-limit", "--output_limit", required=False, default=1000, type=int,
                       help="Optional. Number of frames to store in output. "
                            "If 0 is set, all frames are stored.")

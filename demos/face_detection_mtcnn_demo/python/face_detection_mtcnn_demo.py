@@ -73,10 +73,10 @@ def build_argparser():
                       help="Optional. Don't show output",
                       action='store_true')
     args.add_argument('-o', '--output', required=False,
-                      help='Optional. Name of output to save.')
+                      help='Optional. Name of output file/s to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
-                              'If 0 is set, all frames are stored.')
+                            'If 0 is set, all frames are stored.')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
 
