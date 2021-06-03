@@ -5,6 +5,7 @@ models:
       - framework: dlsdk
         adapter:
           type: face_landmarks_detection
+          output_blob: 3851
 
     datasets:
       - name: face_98_landmarks_db

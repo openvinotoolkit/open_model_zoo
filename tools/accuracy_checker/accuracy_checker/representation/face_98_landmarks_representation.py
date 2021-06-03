@@ -19,12 +19,11 @@ from .base_representation import BaseRepresentation
 
 
 class Face98LandmarksRepresentation(BaseRepresentation):
-    def __init__(self, identifier='', x_values=None, y_values=None, heatmap = None):
+    def __init__(self, identifier='', x_values=None, y_values=None, heatmap=None):
         super().__init__(identifier)
         self.x_values = x_values if np.size(x_values) > 0 else []
         self.y_values = y_values if np.size(y_values) > 0 else []
         self.heatmap = heatmap
-
 
     @property
     def size(self):
@@ -34,14 +33,11 @@ class Face98LandmarksAnnotation(Face98LandmarksRepresentation):
     def normalization_coef(self, is_2d=False):
         min_x, max_x = np.min(self.x_values), np.max(self.x_values)
         min_y, max_y = np.min(self.y_values), np.max(self.y_values)
-
         return np.sqrt((max_x - min_x) ** 2 + (max_y - min_y) ** 2)
-    
 
 class Face98LandmarksPrediction(Face98LandmarksRepresentation):
     def __init__(self, identifier='', x_values=None, y_values=None, heatmap=None):
-        super().__init__(identifier, x_values, y_values, heatmap)
-       
+        super().__init__(identifier, x_values, y_values, heatmap) 
 
     def to_annotation(self, **kwargs):
         return Face98LandmarksAnnotation(self.identifier, self.x_values, self.y_values)
