@@ -61,8 +61,8 @@ void adjustBoundingBox(cv::Rect& boundingBox) {
 }
 
 cv::Rect createEyeBoundingBox(const cv::Point2i& p1,
-                                                 const cv::Point2i& p2,
-                                                 float scale = 1.8f) {
+                              const cv::Point2i& p2,
+                                    float scale = 1.8f) {
     cv::Rect result;
     float size = static_cast<float>(cv::norm(p1 - p2));
 
