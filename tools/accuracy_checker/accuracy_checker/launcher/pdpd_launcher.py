@@ -123,13 +123,15 @@ class PaddlePaddleLauncher(Launcher):
         layer_shape = self.inputs[layer_name]
         input_precision = np.float32 if not precision else precision
         if len(np.shape(data)) == 4:
-            data = np.transpose(data, layout).astype(input_precision)
+            if layout is not None:
+                data = np.transpose(data, layout)
+            data = data.astype(input_precision)
             if len(layer_shape) == 3:
                 if np.shape(data)[0] != 1:
                     raise ValueError('Only for batch size 1 first dimension can be omitted')
                 return self._paddle_tensor(data[0].astype(input_precision))
             return self._paddle_tensor(data.astype(input_precision))
-        if len(np.shape(data)) == 5 and len(layout) == 5:
+        if layout is not None and len(np.shape(data)) == 5 and len(layout) == 5:
             return self._paddle_tensor(np.transpose(data, layout).astype(input_precision))
         if len(np.shape(data))-1 == len(layer_shape):
             return self._paddle_tensor(np.array(data[0]).astype(input_precision))
