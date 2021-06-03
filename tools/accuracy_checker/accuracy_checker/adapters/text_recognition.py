@@ -352,7 +352,7 @@ class PDPDTextRecognition(Adapter):
         return params
 
     def configure(self):
-        self.labels_file = self.get_value_from_config('labels_file')
+        self.labels_file = self.get_value_from_config('vocabulary_file')
         chr_str = ''
         with self.labels_file.open("rb") as fin:
             lines = fin.readlines()
