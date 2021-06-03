@@ -12,7 +12,7 @@ Below is the `midasnet` model inference result for `<openvino_dir>/deployment_to
 On startup, the demo application reads command-line parameters and loads a network and an image to the
 Inference Engine plugin. When inference is done, the application outputs the disparity map in PFM and PNG format (color-coded).
 
-> **NOTE**: By default, Open Model Zoo demos expect input with the BGR channel order. If you trained your model to work with the RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Preparing to Run
 
