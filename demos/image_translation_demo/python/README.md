@@ -4,7 +4,7 @@ This demo application demonstrates an example of using neural networks to synthe
 
 ## How It Works
 
-At the start-up the demo application reads command line parameters and loads a network to the Inference Engine plugin. To get the result, the demo performs the following steps:
+On startup the demo application reads command line parameters and loads a network to the Inference Engine plugin. To get the result, the demo performs the following steps:
 
 1. Reading input data (semantic segmentation mask of image for translation, exemplar image and mask of exemplar image).
 2. Preprocessing for input image and masks.
@@ -16,6 +16,18 @@ At the start-up the demo application reads command line parameters and loads a n
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/image_translation_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -79,7 +91,8 @@ There are two ways to use this demo:
        -m_trn <path_to_translation_model>/cocosnet.xml \
        -m_seg <path_to_segmentation_model>/hrnet-v2-c1-segmentation.xml \
        -ii <path_to_input_image>/input_image.jpg \
-       -ri <path_to_exemplar_image>/reference_image.jpg
+       -ri <path_to_exemplar_image>/reference_image.jpg \
+       -o <output_dir>
    ```
 
 2. Run with only translation model.
@@ -91,7 +104,8 @@ There are two ways to use this demo:
        -m_trn <path_to_translation_model>/cocosnet.xml \
        -is <path_to_semantic_mask_of_image>/input_mask.png \
        -ri <path_to_exemplar_image>/reference_image.jpg \
-       -rs <path_to_exemplar_semantic>/reference_mask.png
+       -rs <path_to_exemplar_semantic>/reference_mask.png \
+       -o <output_dir>
    ```
 
    > **NOTE**: For segmentation masks you should use mask (with shape: [height x width]) that specifies class for each pixel. Number of classes is 151 (from ADE20k), where '0' - background class.

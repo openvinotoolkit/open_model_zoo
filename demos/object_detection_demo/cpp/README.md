@@ -27,9 +27,9 @@ need to pull Inference Engine demos helpers to your app
 
 ## How It Works
 
-On the start-up, the application reads command-line parameters and loads a network to the Inference Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference and displays the results.
+On startup, the application reads command-line parameters and loads a network to the Inference Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference and displays the results.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 This demo operates in asynchronous manner by using "Infer Requests" that encapsulate the inputs/outputs and separates *scheduling and waiting for result*,
 as shown in code mockup below:
@@ -59,6 +59,18 @@ For more details on the requests-based Inference Engine API, including the Async
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/object_detection_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -158,7 +170,12 @@ If labels file is used, it should correspond to model output. Demo treat labels,
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 
 ```sh
-./object_detection_demo -i <path_to_video>/inputVideo.mp4 -at ssd -m <path_to_model>/ssd300.xml -d GPU -labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt
+./object_detection_demo \
+  -d GPU \
+  -i <path_to_video>/inputVideo.mp4 \
+  -m <path_to_model>/ssd300.xml \
+  -at ssd \
+  -labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt
 ```
 
 ## Demo Output

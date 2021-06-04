@@ -100,7 +100,7 @@ Navigation keys:
 The overall process is simillar to the Non-interactive mode with the exception that it runs asynchronously.
 This means model inference and rendering of the formula do not block main thread, so the image from the web camera can move smoothly.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 The demo has two preprocessing types: Crop and Pad to target shape and Resize and pad to target shape. Two preprocessing types are used for two different datasets as model trained with concrete font size, so if one wants to run the model on inputs with bigger font size (e.g. if input is photographed in 12Mpx, while model trained to imitate scans in ~3Mpx) they should first resize the input to make font size like in train set. Example of the target font size:
 ![font_size](./sample.png)
@@ -108,6 +108,18 @@ The demo has two preprocessing types: Crop and Pad to target shape and Resize an
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/formula_recognition_demo/python/models.lst` file. This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -226,10 +238,10 @@ To run the demo, please provide paths to the model in the IR format and to an in
 
 ```bash
 python formula_recognition_demo.py \
-        -m_encoder <path_to_models>/encoder.xml \
-        -m_decoder <path_to_models>/decoder.xml \
-        --vocab_path <path_to_vocab> \
-        --preprocessing <preproc type> \
+        -m_encoder <path_to_models>/formula-recognition-medium-scan-0001-im2latex-encoder.xml \
+        -m_decoder <path_to_models>/formula-recognition-medium-scan-0001-im2latex-decoder.xml \
+        --vocab_path <omz_dir>/models/intel/formula-recognition-medium-scan-0001-im2latex-decoder/vocab.json \
+        --preprocessing resize \
         -i input_image.png
 ```
 
