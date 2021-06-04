@@ -359,6 +359,9 @@ class Resize(Preprocessor):
                 optional=True, min_value=1,
                 description='destination size must be divisible by a given number without remainder, '
                             'when aspect ratio resize used', value_type=int
+            ),
+            'include_boundary': BoolField(
+                optional=True, default=False, description='include boundary for calculation strided size'
             )
         })
 
@@ -370,6 +373,7 @@ class Resize(Preprocessor):
         self.resizer = create_resizer(self.config)
         self.scaling_func = ASPECT_RATIO_SCALE.get(self.get_value_from_config('aspect_ratio_scale'))
         self.factor = self.get_value_from_config('factor')
+        self.include_boundary = self.get_value_from_config('include_boundary')
         if inspect.isclass(self.scaling_func):
             self.scaling_func = self.scaling_func(self.config, self.parameters())
 
@@ -385,8 +389,8 @@ class Resize(Preprocessor):
             if scale_func:
                 dst_width, dst_height = scale_func(new_width, new_height, image_w, image_h)
                 if self.factor:
-                    dst_width -= (dst_width - 1) % self.factor
-                    dst_height -= (dst_height - 1) % self.factor
+                    dst_width -= (dst_width - int(not self.include_boundary)) % self.factor
+                    dst_height -= (dst_height - int(not self.include_boundary)) % self.factor
                 if new_height is None:
                     new_height = dst_height
                 if new_width is None:

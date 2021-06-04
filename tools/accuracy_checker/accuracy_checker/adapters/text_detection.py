@@ -929,3 +929,11 @@ class CRAFTTextDetectionAdapter(Adapter):
         for k, _ in enumerate(polys):
             polys[k] *= (scale * ratio_net, scale * ratio_net)
         return polys
+
+
+class PPOCRDetectionAdapter(Adapter):
+    __provider__ = 'ppocr_det'
+
+
+    def parameters(cls):
+        pass
