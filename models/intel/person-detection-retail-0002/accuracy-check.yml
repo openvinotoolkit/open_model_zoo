@@ -3,7 +3,6 @@ models:
 
     launchers:
       - framework: dlsdk
-        model: /home/automation/person-detection-retail-0002.xml
         adapter: ssd
         inputs:
           - name: im_info
