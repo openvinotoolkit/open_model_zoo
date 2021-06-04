@@ -33,6 +33,12 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * forward-tacotron-regression
 * wavernn-rnn
 * wavernn-upsampler
+* text-to-speech-en-0001-duration-prediction
+* text-to-speech-en-0001-generation
+* text-to-speech-en-0001-regression
+* text-to-speech-en-multi-0001-duration-prediction
+* text-to-speech-en-multi-0001-generation
+* text-to-speech-en-multi-0001-regression
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -89,7 +95,7 @@ Running the application with the empty list of options yields the usage message 
 
 ## Example for Running with Arguments
 
-### ForwardTacotron with WaveRNN
+### Speech syntesis with ForwardTacotron and WaveRNN models
 
 ```sh
 python3 text_to_speech_demo.py \
@@ -101,20 +107,31 @@ python3 text_to_speech_demo.py \
     --model_rnn <path_to_model>/wavernn_rnn.xml
 ```
 
-### Modified ForwardTacotron with MelGAN
+### Speech syntesis with text-to-speech-en-0001 models
 
 ```sh
 python3 text_to_speech_demo.py \
     -i <path_to_file>/text.txt \
     -o <path_to_audio>/audio.wav \
-    -m_duration <path_to_model>/forward_tacotron_duration_prediction_att.xml \
-    -m_forward <path_to_model>/forward_tacotron_regression_att.xml \
-    -m_melgan <path_to_model>/melganupsample.xml
+    -m_duration <path_to_model>/text-to-speech-en-0001-duration-prediction.xml \
+    -m_forward <path_to_model>/text-to-speech-en-0001-regression.xml \
+    -m_melgan <path_to_model>/text-to-speech-en-0001-generation.xml
+```
+
+### Speech syntesis with multi-speaker text-to-speech-en-multi-0001 models
+
+```sh
+python3 text_to_speech_demo.py \
+    -i <path_to_file>/text.txt \
+    -o <path_to_audio>/audio.wav \
+    -m_duration <path_to_model>/text-to-speech-en-multi-0001-duration-prediction.xml \
+    -m_forward <path_to_model>/text-to-speech-en-multi-0001-regression.xml \
+    -m_melgan <path_to_model>/text-to-speech-en-multi-0001-generation.xml
 ```
 
 ## Demo Output
 
-The application outputs is WAV file with generated audio.
+The application outputs WAV file with generated audio.
 
 ## See Also
 

@@ -1,5 +1,5 @@
 # This file can be used with the --list option of the model downloader.
-forward-tacotron-duration-prediction
-forward-tacotron-regression
-wavernn-rnn
-wavernn-upsampler
+forward-tacotron-*
+wavernn-*
+text-to-speech-en-????-*
+text-to-speech-en-multi-????-*
