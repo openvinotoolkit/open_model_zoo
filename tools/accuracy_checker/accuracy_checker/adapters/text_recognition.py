@@ -18,7 +18,7 @@ from collections import defaultdict
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, ConfigError, NumberField, BoolField, DictField, ListField, StringField
+from ..config import ConfigValidator, ConfigError, NumberField, BoolField, DictField, ListField, StringField, PathField
 from ..representation import CharacterRecognitionPrediction
 from ..utils import softmax
 
@@ -335,3 +335,58 @@ class AttentionOCRAdapter(Adapter):
                 decoded_out = decoded_out.lower()
             result.append(CharacterRecognitionPrediction(identifier, decoded_out))
         return result
+
+
+class PDPDTextRecognition(Adapter):
+    __provider__ = 'ppocr'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'vocabulary_file': PathField(description='file with decoding labels'),
+            'remove_duplicates': BoolField(
+                optional=True, default=True, description='remove duplications from result string'
+            )
+        })
+        return params
+
+    def configure(self):
+        self.labels_file = self.get_value_from_config('vocabulary_file')
+        chr_str = ''
+        with self.labels_file.open("rb") as fin:
+            lines = fin.readlines()
+            for line in lines:
+                line = line.decode('utf-8').strip("\n").strip("\r\n")
+                chr_str += line
+            chr_str += " "
+        dict_character = list(chr_str)
+        self.label_map = dict(enumerate(['<blank>'] + dict_character))
+        self.ignored_tokens = [0]
+        self.remove_duplicates = self.get_value_from_config('remove_duplicates')
+
+    def process(self, raw, identifiers, frame_meta):
+        results = []
+        outputs = self._extract_predictions(raw, frame_meta)
+        for identifier, out in zip(identifiers, outputs[self.output_blob]):
+            preds_idx = np.argmax(out, axis=1)
+            text = self.decode(preds_idx)
+            results.append(CharacterRecognitionPrediction(identifier, text))
+
+        return results
+
+    def decode(self, text_index):
+        """ convert text-index into text-label. """
+        char_list = []
+        for pos_id, idx in enumerate(text_index):
+            if idx in self.ignored_tokens:
+                continue
+            if self.remove_duplicates:
+                if pos_id > 0 and text_index[pos_id - 1] == idx:
+                    continue
+
+            if idx == len(self.label_map):
+                continue
+            char_list.append(self.label_map[int(idx)])
+
+        return ''.join(char_list)

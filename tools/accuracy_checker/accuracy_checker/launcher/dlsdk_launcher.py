@@ -464,7 +464,6 @@ class DLSDKLauncher(Launcher):
                         break
 
             extension_list = list(extensions_path.glob(file_format.format('{}_{}'.format(base_name, selection_mode))))
-
             return extension_list
 
         os_specific_formats = {
@@ -472,7 +471,6 @@ class DLSDKLauncher(Launcher):
             'Linux': ('lib{}.so',),
             'Windows': ('{}.dll',),
         }
-
         cpu_extensions_name = cpu_extensions.parts[-1]
         if cpu_extensions_name != 'AUTO':
             return cpu_extensions
@@ -484,14 +482,11 @@ class DLSDKLauncher(Launcher):
                 'Accuracy Checker can not automatically find cpu extensions library '
                 'for {} platform. Please, set cpu extension library manually.'.format(system_name)
             )
-
         extension_list = []
-
         for supported_format in file_formats:
             extension_list = get_cpu_extensions_list(supported_format, 'cpu_extension', selection_mode)
             if extension_list:
                 break
-
         if not extension_list:
             raise ConfigError('suitable CPU extension lib not found in {}'.format(extensions_path))
         return extension_list[0]
@@ -519,17 +514,14 @@ class DLSDKLauncher(Launcher):
 
         return convert_model(
             model_name,
-            config_model, config_weights, config_meta, framework,
-            mo_search_paths,
+            config_model, config_weights, config_meta, framework, mo_search_paths,
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'mo_params'),
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'mo_flags'),
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), '_tf_custom_op_config_dir'),
             get_parameter_value_from_config(
                 config, DLSDKLauncher.parameters(), '_tf_obj_detection_api_pipeline_config_path'
             ),
-            get_parameter_value_from_config(
-                config, DLSDKLauncher.parameters(), '_transformations_config_dir'
-            ),
+            get_parameter_value_from_config(config, DLSDKLauncher.parameters(), '_transformations_config_dir'),
             should_log_cmd=should_log_mo_cmd
         )
 
@@ -855,7 +847,7 @@ class DLSDKLauncher(Launcher):
             if len(data_shape) < 4:
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
-            return np.transpose(data, layout)
+            return np.transpose(data, layout) if layout is not None else data
         if len(layer_shape) == 2:
             if len(data_shape) == 1:
                 return np.transpose([data])
@@ -865,9 +857,8 @@ class DLSDKLauncher(Launcher):
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
         if len(layer_shape) == 3 and len(data_shape) == 4:
-            data = np.transpose(data, layout)
-            return data[0]
-        if len(layer_shape) == len(layout):
+            return np.transpose(data, layout)[0] if layout is not None else data[0]
+        if layout is not None and len(layer_shape) == len(layout):
             return np.transpose(data, layout)
         if (
                 len(layer_shape) == 1 and len(data_shape) > 1 and
@@ -986,6 +977,9 @@ class DLSDKLauncher(Launcher):
             preprocess_info_by_input[input_name] = preprocess_info
         self._preprocess_info = preprocess_info_by_input
         self.disable_resize_to_input = preprocess.ie_processor.has_resize()
+
+    def get_model_file_type(self):
+        return self._model.suffix
 
     def release(self):
         if 'network' in self.__dict__:

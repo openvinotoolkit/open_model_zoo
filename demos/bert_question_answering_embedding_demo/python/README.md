@@ -4,12 +4,12 @@ This README describes the Question Answering Embedding demo application that use
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads network(s) to the InferenceEngine.
+On startup the demo application reads command line parameters and loads network(s) to the InferenceEngine.
 It also fetches data from the user-provided urls to populate the list of "contexts" with the text.
 Prior to the actual inference to answer user's questions, the embedding vectors are pre-calculated (via inference) for each context from the list.
 This is done using the first ("emdbeddings-only") BERT model.
 
-After that, when user type the question and the "embeddings" network is used to calculate an embedding vector for the specified question.
+After that, when user types a question, the "embeddings" network is used to calculate an embedding vector for the specified question.
 Using the L2 distance between the embedding vector of the question and the embedding vectors for the contexts the best (closest) contexts are selected
 as candidates to further seek for the final answer to the question. At this point, the contexts are displayed to the user.
 
@@ -21,6 +21,18 @@ If second (conventional SQuAD-tuned) Bert model is provided as well, it is used 
 
 The list of models supported by the demo is in `<omz_dir>/demos/bert_question_answering_embedding_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -82,7 +94,7 @@ Options:
                         Optional. Maximum number of tokens in exact answer
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU
-                        is acceptable. Sample will look for a suitable plugin
+                        is acceptable. The demo will look for a suitable plugin
                         for device specified. Default value is CPU
   -c, --colors          Optional. Nice coloring of the questions/answers.
                         Might not work on some terminals (like Windows* cmd
@@ -94,7 +106,7 @@ You can use the following command to try the demo:
 
 ```sh
     python3 bert_question_answering_embedding_demo.py
-            --vocab=<omz_dir>/models/intel/<model_name>/vocab.txt
+            --vocab=<omz_dir>/models/intel/bert-small-uncased-whole-word-masking-squad-0002/vocab.txt
             --model_emb=<path_to_model>/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
             --input_names_emb="input_ids,attention_mask,token_type_ids,position_ids"
             --model_qa=<path_to_model>/bert-small-uncased-whole-word-masking-squad-0002.xml

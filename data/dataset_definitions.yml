@@ -1286,6 +1286,16 @@ datasets:
       target_suffix: sharp.png
     annotation: GOPRO.pickle
 
+  - name: speech_denoising_dataset
+    data_source: ICASSP_dev_test_set/track_1/synthetic
+    reader:
+      type: wav_reader
+      mono: True
+      to_float: True
+    annotation_conversion:
+      converter: noise_suppression_dataset
+      annotation_file: ICASSP_dev_test_set/track_1/synthetic/eval_speech.txt
+
   - name: PASCAL-S
     annotation_conversion:
       converter: salient_object_detection

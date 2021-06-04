@@ -18,11 +18,11 @@ The model is built on the ResNeXt-101 backbone with additional 2d attention-base
 
 | Metric                                         | Value              |
 | ---------------------------------------------- | ------------------ |
-| Accuracy on the alphanumeric subset of ICDAR13 | 89.95              |
-| Accuracy on the alphanumeric subset of ICDAR03 | 93.89              |
-| Accuracy on the alphanumeric subset of ICDAR15 | 73.55              |
-| Accuracy on the alphanumeric subset of SVT     | 87.64              |
-| Accuracy on the alphanumeric subset of IIIT5K  | 84.13              |
+| Accuracy on the alphanumeric subset of ICDAR13 | 0.8995             |
+| Accuracy on the alphanumeric subset of ICDAR03 | 0.9389             |
+| Accuracy on the alphanumeric subset of ICDAR15 | 0.7355             |
+| Accuracy on the alphanumeric subset of SVT     | 0.8764             |
+| Accuracy on the alphanumeric subset of IIIT5K  | 0.8413             |
 | Text location requirements                     | Tight aligned crop |
 | Source framework                               | PyTorch\*          |
 
@@ -71,5 +71,17 @@ The text-recognition-15-decoder model is a GRU based decoder with 2d attention m
 1.	Name: `decoder_hidden`, shape: `1, 1, 1024`. Current context state of the LSTM cell.
 2.	Name: `decoder_output`, shape: `1, 66`. Classification confidence scores in the [0, 1] range
     for every letter.
+## Use text-detection demo
+
+Model is supported by [text-detection c++ demo](../../../demos/text_detection_demo/cpp/README.md). In order to use this model in the demo, user should pass the following options:
+```
+-tr_pt_first
+-m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+-tr_o_blb_nm "logits"
+-tr_composite
+-dt simple -lower
+```
+
+For more information, please, see documentation of the demo.
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

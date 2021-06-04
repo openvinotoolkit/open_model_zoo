@@ -15,9 +15,9 @@ encoding the resulting (previous) frames or running further inference, like some
 the face detection results.
 There are important performance caveats though, for example the tasks that run in parallel should try to avoid
 oversubscribing the shared compute resources.
-For example, if the inference is performed on the HDDL, and the CPU is essentially idle,
-than it makes sense to do things on the CPU in parallel. But if the inference is performed say on the GPU,
-than it can take little gain to do the (resulting video) encoding on the same GPU in parallel,
+As another example, if the inference is performed on the HDDL, and the CPU is essentially idle,
+then it makes sense to do things on the CPU in parallel. But if the inference is performed say on the GPU,
+then there is little gain from doing the (resulting video) encoding on the same GPU in parallel,
 because the device is already busy.
 
 This and other performance implications and tips for the Async API are covered in the
@@ -31,23 +31,31 @@ Other demo objectives are:
 
 ## How It Works
 
-On the start-up, the application reads command-line parameters and loads a network to the Inference
+On startup, the application reads command-line parameters and loads a network to the Inference
 Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
 
 Async API operates with a notion of the "Infer Request" that encapsulates the inputs/outputs and separates
 *scheduling and waiting for result*.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work
-with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your
-model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about
-the argument, refer to **When to Reverse Input Channels** section of
-[Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/object_detection_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -58,6 +66,8 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
   - ctpn
 * architecture_type = faceboxes
   - faceboxes-pytorch
+* architecture_type = retinaface-pytorch
+  - retinaface-resnet50-pytorch
 * architecture_type = ssd
   - efficientdet-d0-tf
   - efficientdet-d1-tf
@@ -102,10 +112,6 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
   - vehicle-detection-adas-0002
   - vehicle-license-plate-detection-barrier-0106
   - vehicle-license-plate-detection-barrier-0123
-* architecture_type = retinaface
-  - retinaface-anti-cov
-  - retinaface-resnet50
-  - ssh-mxnet
 * architecture_type = ultra_lightweight_face_detection
   - ultra-lightweight-face-detection-rfb-320
   - ultra-lightweight-face-detection-slim-320
@@ -136,7 +142,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
-                                {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection}
+                                {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}
                                 -i INPUT [-d DEVICE] [--labels LABELS]
                                 [-t PROB_THRESHOLD] [--keep_aspect_ratio]
                                 [--input_size INPUT_SIZE INPUT_SIZE]
@@ -145,23 +151,24 @@ usage: object_detection_demo.py [-h] -m MODEL -at
                                 [-nthreads NUM_THREADS] [--loop] [-o OUTPUT]
                                 [-limit OUTPUT_LIMIT] [--no_show]
                                 [--output_resolution OUTPUT_RESOLUTION]
-                                [-u UTILIZATION_MONITORS] [-r]
+                                [-u UTILIZATION_MONITORS]
                                 [--reverse_input_channels REVERSE_CHANNELS]
                                 [--mean_values MEAN_VALUES]
                                 [--scale_values SCALE_VALUES]
+                                [-r]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -at {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection}, --architecture_type {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection}
+  -at {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}, --architecture_type {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
-                        GPU, FPGA, HDDL or MYRIAD is acceptable. The sample
+                        GPU, FPGA, HDDL or MYRIAD is acceptable. The demo
                         will look for a suitable plugin for device specified.
                         Default value is CPU.
 
@@ -213,7 +220,7 @@ Input transform options:
                         Optional. Normalize input by subtracting the mean
                         values per channel. Example: 255 255 255
   --scale_values SCALE_VALUES
-                        Optional. Divide input by scale values per channel
+                        Optional. Divide input by scale values per channel.
                         Division is applied after mean values subtraction.
                         Example: 255 255 255
 
@@ -227,7 +234,12 @@ Running the application with the empty list of options yields the usage message 
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 
 ```sh
-python3 object_detection_demo.py -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd300.xml -d GPU --labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt
+python3 object_detection_demo.py \
+  -d GPU \
+  -i <path_to_video>/inputVideo.mp4 \
+  -m <path_to_model>/ssd300.xml \
+  -at ssd \
+  --labels <omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt
 ```
 
 The number of Infer Requests is specified by `-nireq` flag. An increase of this number usually leads to an increase
@@ -241,15 +253,15 @@ summed across all devices used.
 > **NOTE**: This demo is based on the callback functionality from the Inference Engine Python API.
   The selected approach makes the execution in multi-device mode optimal by preventing wait delays caused by
   the differences in device performance. However, the internal organization of the callback mechanism in Python API
-  leads to FPS decrease. Please, keep it in mind and use the C++ version of this demo for performance-critical cases.
+  leads to a decrease in FPS. Please, keep this in mind and use the C++ version of this demo for performance-critical cases.
 
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
 The demo reports
 
-* **FPS**: average rate of video frame processing (frames per second)
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results)
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
 You can use both of these metrics to measure application-level performance.
 
 ## See Also

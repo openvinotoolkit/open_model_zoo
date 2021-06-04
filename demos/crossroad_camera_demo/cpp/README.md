@@ -2,7 +2,7 @@
 
 ![example](./crossroad_camera.gif)
 
-This demo provides an inference pipeline for persons' detection, recognition and reidentification. The demo uses Person Detection network followed by the Person Attributes Recognition and Person Reidentification Retail networks applied on top of the detection results. You can use a set of the following pre-trained models with the demo:
+This demo provides an inference pipeline for person detection, recognition and reidentification. The demo uses Person Detection network followed by the Person Attributes Recognition and Person Reidentification Retail networks applied on top of the detection results. You can use a set of the following pre-trained models with the demo:
 
 * `person-vehicle-bike-detection-crossroad-0078`, which is a primary detection network for finding the persons (and other objects if needed)
 * `person-attributes-recognition-crossroad-0230`, which is executed on top of the results from the first network and
@@ -21,25 +21,37 @@ the Person Detection results
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads the specified networks. The Person Detection
-network is required, the other two are optional.
+On startup, the application reads command line parameters and loads the specified networks. The Person Detection
+network is required, and the other two are optional.
 
 Upon getting a frame from the OpenCV VideoCapture, the application performs inference of Person Detection network, then performs another
 two inferences of Person Attributes Recognition and Person Reidentification Retail networks if they were specified in the
 command line, and displays the results.
 
-In case of a Person Reidentification Retail network specified, the resulting vector is generated for each detected person. This vector is
+If the Person Reidentification Retail network is specified, the resulting vector is generated for each detected person. This vector is
 compared one-by-one with all previously detected persons vectors using cosine similarity algorithm. If comparison result
 is greater than the specified (or default) threshold value, it is concluded that the person was already detected and a known
 REID value is assigned. Otherwise, the vector is added to a global list, and new REID value is assigned.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/crossroad_camera_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 

@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/face-detection-adas-0001.xml
-    size: 232319
-    sha256: ee34e4828ff0536caa657bc18642d015add8c4899549643d914b63ac767cc566
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
+    size: 226980
+    sha256: 1df05ec5801e48e8f4ef53783349b17d68a3cd7890a69b1ccdc54245097ec1f9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
   - name: FP32/face-detection-adas-0001.bin
     size: 4212072
-    sha256: 811a332d80dc1891dc8254192e03de6a6de821af1cf0c1968f7632022d340524
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
+    sha256: ce8117c9fddfa45c429fb80e14ac3ec6f4ad38c6dff2d566df1fe61a5bf3275c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
   - name: FP16/face-detection-adas-0001.xml
-    size: 232283
-    sha256: 59e5fc45ed24c9c9bcf336c87b40238cd4ab4377481c859040ada97d539ecf66
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-adas-0001/FP16/face-detection-adas-0001.xml
+    size: 226935
+    sha256: 88f2109d6957f1acc77bd8576a903e4d03e9651dcb8e29a522d1a6105bc3358a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/face-detection-adas-0001/FP16/face-detection-adas-0001.xml
   - name: FP16/face-detection-adas-0001.bin
     size: 2106088
-    sha256: df0f5799d801c6afb355d1c4771693c782efbb58d2eb2238982eac8fe84bc821
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
+    sha256: 1af5979ecb5a027fdfb5145f7b8557bdcf341935510e21ce6428c8023e632fd5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
   - name: FP16-INT8/face-detection-adas-0001.xml
-    size: 514882
-    sha256: cccbfe9a12501514b6855b4b550db440d9399aab8b49089caa6cca9e809064df
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-adas-0001/FP16-INT8/face-detection-adas-0001.xml
+    size: 471513
+    sha256: eb59520ce5109e705d36dee25d69f0b69344f9463287a2539308faca7f85bbdb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/face-detection-adas-0001/FP16-INT8/face-detection-adas-0001.xml
   - name: FP16-INT8/face-detection-adas-0001.bin
-    size: 1100294
-    sha256: a1995292449f55c49116c77c83ef3726e08d19b31ab38cc7a9540116ef8862cf
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/face-detection-adas-0001/FP16-INT8/face-detection-adas-0001.bin
+    size: 1262054
+    sha256: bf8717a583881422582a49ddf0f732bbed55695b42d127b60d882649317c3d18
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/face-detection-adas-0001/FP16-INT8/face-detection-adas-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

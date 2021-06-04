@@ -54,8 +54,8 @@ public:
         ref_type version = p.version;
 
         return os << "\t" << version.description << " version ......... "
-           << version.apiVersion.major << "." << version.apiVersion.minor
-           << "\n\tBuild ........... " << version.buildNumber;
+           << IE_VERSION_MAJOR << "." << IE_VERSION_MINOR
+           << "\n\tBuild ........... " << IE_VERSION_PATCH;
     }
 
 private:

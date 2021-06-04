@@ -1,0 +1,37 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Time Series Forecasting Model based on Temporal Fusion Transformer trained on Electricity
+  dataset.
+task_type: time_series
+files:
+  - name: FP32/time-series-forecasting-electricity-0001.xml
+    size: 393576
+    sha256: 8d2c00d9015959030ecdb480529cd64fe81f0eb8c75eb3e9791a3f058545f900
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/time-series-forecasting-electricity-0001/FP32/time-series-forecasting-electricity-0001.xml
+  - name: FP32/time-series-forecasting-electricity-0001.bin
+    size: 10054884
+    sha256: c249e6e3c577b446c13b72929b205306f0eb1220b703aacc91bbc071270a532e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/time-series-forecasting-electricity-0001/FP32/time-series-forecasting-electricity-0001.bin
+  - name: FP16/time-series-forecasting-electricity-0001.xml
+    size: 393360
+    sha256: 99b1e0dda1c0e1ca902b45f2daa20d99968994c1d8dc8ff161cf8c675433dd49
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/time-series-forecasting-electricity-0001/FP16/time-series-forecasting-electricity-0001.xml
+  - name: FP16/time-series-forecasting-electricity-0001.bin
+    size: 5046072
+    sha256: 345858d4f558dbb88441ab41e229d5f3eba4c0835ccfed8f85f5656586d07b4d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/time-series-forecasting-electricity-0001/FP16/time-series-forecasting-electricity-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

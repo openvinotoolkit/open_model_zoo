@@ -78,6 +78,10 @@ class Metric(ClassProvider):
                 optional=True, min_value=0,
                 description="Acceptable relative threshold for metric deviation from reference value."
             ),
+            'threshold': NumberField(
+                optional=True,
+                description="Deprecated. Acceptable absolute threshold for metric deviation from reference value."
+            ),
             'abs_threshold': NumberField(
                 optional=True, min_value=0,
                 description="Acceptable absolute threshold for metric deviation from reference value."

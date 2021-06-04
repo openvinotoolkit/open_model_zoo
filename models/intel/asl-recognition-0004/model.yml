@@ -17,20 +17,28 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/asl-recognition-0004.xml
-    size: 291890
-    sha256: a1e8573a2d4351ab542941390f3bf6accebbdd06c54a7edcbccd97c414ac12fa
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/asl-recognition-0004/FP32/asl-recognition-0004.xml
+    size: 288152
+    sha256: cae4b81c0619d480b00fb6651bc555d7f2b88dd00ea0a77efd7f4cea3d4d79f5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/asl-recognition-0004/FP32/asl-recognition-0004.xml
   - name: FP32/asl-recognition-0004.bin
     size: 16530620
-    sha256: d045bc6e14f1557517dfaa2cad5225822a77df83408d37b12e7f8ab73ab27e4f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/asl-recognition-0004/FP32/asl-recognition-0004.bin
+    sha256: 2ad01dbd763db804e995ad065a6a2254cea7b2957f663823566bd8ec22999efe
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/asl-recognition-0004/FP32/asl-recognition-0004.bin
   - name: FP16/asl-recognition-0004.xml
-    size: 291737
-    sha256: d86168869e5a40d779fae5dc52ffe8de05c84b878d8899f08954bccf51f1703d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/asl-recognition-0004/FP16/asl-recognition-0004.xml
+    size: 288065
+    sha256: f52045350fd3b6e1153210c1e910448dd415991918a94c7f7522331647c5847f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/asl-recognition-0004/FP16/asl-recognition-0004.xml
   - name: FP16/asl-recognition-0004.bin
     size: 8265332
-    sha256: 327d35259906efb450c4794de7f8d302427a860f7dd3eceabeed14c53f6b8b1e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/asl-recognition-0004/FP16/asl-recognition-0004.bin
+    sha256: 65123f61207b04e536db3799f18452ac7d03e9f84695f2a451bdfab6cf83880e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/asl-recognition-0004/FP16/asl-recognition-0004.bin
+  - name: FP16-INT8/asl-recognition-0004.xml
+    size: 696925
+    sha256: 7a3362a7da70c83ae9a727c1f38fe9115adac0786480f479ffa9b97ec6b2d88a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/asl-recognition-0004/FP16-INT8/asl-recognition-0004.xml
+  - name: FP16-INT8/asl-recognition-0004.bin
+    size: 4238953
+    sha256: 31e8b08cbc21f8d948871875507fb15b0864c63ca82583d4e4a77776fee71582
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/asl-recognition-0004/FP16-INT8/asl-recognition-0004.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

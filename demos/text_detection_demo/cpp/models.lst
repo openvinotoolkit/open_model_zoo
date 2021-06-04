@@ -5,4 +5,6 @@ text-detection-????
 # For --decoder_type=ctc
 text-recognition-????
 # For --decoder_type=simple
+text-recognition-????-encoder
+text-recognition-????-decoder
 text-recognition-resnet-fc

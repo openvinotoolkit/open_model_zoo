@@ -26,6 +26,7 @@ from open_model_zoo.model_tools import (
     _configuration, _common, _reporting,
 )
 
+
 DEFAULT_POT_CONFIG_BASE = {
     'compression': {
         'algorithms': [
@@ -135,81 +136,94 @@ def main():
     parser.add_argument('--target_device', help='target device for the quantized model')
     args = parser.parse_args()
 
-    pot_path = args.pot
-    if pot_path is None:
-        if _common.get_package_path(args.python, 'pot'):
-            # run POT as a module
-            pot_cmd_prefix = [str(args.python), '-m', 'pot']
+    with _common.telemetry_session('Model Quantizer', 'quantizer') as telemetry:
+        models = _configuration.load_models_from_args(parser, args)
+        for mode in ['all', 'list', 'name']:
+            if getattr(args, mode):
+                telemetry.send_event('md', 'quantizer_selection_mode', mode)
+
+        if args.precisions is None:
+            requested_precisions = _common.KNOWN_QUANTIZED_PRECISIONS.keys()
         else:
-            try:
-                pot_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/tools/post_training_optimization_toolkit/main.py'
-            except KeyError:
-                sys.exit('Unable to locate Post-Training Optimization Toolkit. '
-                    + 'Use --pot or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
+            requested_precisions = set(args.precisions.split(','))
 
-    if pot_path is not None:
-        # run POT as a script
-        pot_cmd_prefix = [str(args.python), '--', str(pot_path)]
+        for model in models:
+            model_information = {
+                'name': model.name,
+                'framework': model.framework,
+                'precisions': str(requested_precisions).replace(',', ';'),
+            }
+            telemetry.send_event('md', 'quantizer_model', json.dumps(model_information))
 
-    models = _configuration.load_models_from_args(parser, args)
-
-    # We can't mark it as required, because it's not required when --print_all is specified.
-    # So we have to check it manually.
-    if not args.dataset_dir:
-        sys.exit('--dataset_dir must be specified.')
-
-    if args.precisions is None:
-        requested_precisions = _common.KNOWN_QUANTIZED_PRECISIONS.keys()
-    else:
-        requested_precisions = set(args.precisions.split(','))
         unknown_precisions = requested_precisions - _common.KNOWN_QUANTIZED_PRECISIONS.keys()
         if unknown_precisions:
             sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-    reporter = _reporting.Reporter(_reporting.DirectOutputContext())
+        pot_path = args.pot
+        if pot_path is None:
+            if _common.get_package_path(args.python, 'pot'):
+                # run POT as a module
+                pot_cmd_prefix = [str(args.python), '-m', 'pot']
+            else:
+                try:
+                    pot_path = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools/tools/post_training_optimization_toolkit/main.py'
+                except KeyError:
+                    sys.exit('Unable to locate Post-Training Optimization Toolkit. '
+                        + 'Use --pot or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
-    output_dir = args.output_dir or args.model_dir
+        if pot_path is not None:
+            # run POT as a script
+            pot_cmd_prefix = [str(args.python), '--', str(pot_path)]
 
-    failed_models = []
+        # We can't mark it as required, because it's not required when --print_all is specified.
+        # So we have to check it manually.
+        if not args.dataset_dir:
+            sys.exit('--dataset_dir must be specified.')
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        annotation_dir = Path(temp_dir) / 'annotations'
-        annotation_dir.mkdir()
+        reporter = _reporting.Reporter(_reporting.DirectOutputContext())
 
-        pot_env = {
-            'ANNOTATIONS_DIR': str(annotation_dir),
-            'DATA_DIR': str(args.dataset_dir),
-            'DEFINITIONS_FILE': str(_common.DATASET_DEFINITIONS),
-        }
+        output_dir = args.output_dir or args.model_dir
 
-        for model in models:
-            if not model.quantization_output_precisions:
-                reporter.print_section_heading('Skipping {} (quantization not supported)', model.name)
-                reporter.print()
-                continue
+        failed_models = []
 
-            model_precisions = requested_precisions & model.quantization_output_precisions
+        with tempfile.TemporaryDirectory() as temp_dir:
+            annotation_dir = Path(temp_dir) / 'annotations'
+            annotation_dir.mkdir()
 
-            if not model_precisions:
-                reporter.print_section_heading('Skipping {} (all precisions skipped)', model.name)
-                reporter.print()
-                continue
+            pot_env = {
+                'ANNOTATIONS_DIR': str(annotation_dir),
+                'DATA_DIR': str(args.dataset_dir),
+                'DEFINITIONS_FILE': str(_common.DATASET_DEFINITIONS),
+            }
 
-            pot_env.update({
-                'MODELS_DIR': str(args.model_dir / model.subdirectory)
-            })
+            for model in models:
+                if not model.quantization_output_precisions:
+                    reporter.print_section_heading('Skipping {} (quantization not supported)', model.name)
+                    reporter.print()
+                    continue
 
-            for precision in sorted(model_precisions):
-                if not quantize(reporter, model, precision, args, output_dir, pot_cmd_prefix, pot_env):
-                    failed_models.append(model.name)
-                    break
+                model_precisions = requested_precisions & model.quantization_output_precisions
+
+                if not model_precisions:
+                    reporter.print_section_heading('Skipping {} (all precisions skipped)', model.name)
+                    reporter.print()
+                    continue
+
+                pot_env.update({
+                    'MODELS_DIR': str(args.model_dir / model.subdirectory)
+                })
+
+                for precision in sorted(model_precisions):
+                    if not quantize(reporter, model, precision, args, output_dir, pot_cmd_prefix, pot_env):
+                        failed_models.append(model.name)
+                        break
 
 
-    if failed_models:
-        reporter.print('FAILED:')
-        for failed_model_name in failed_models:
-            reporter.print(failed_model_name)
-        sys.exit(1)
+        if failed_models:
+            reporter.print('FAILED:')
+            for failed_model_name in failed_models:
+                reporter.print(failed_model_name)
+            sys.exit(1)
 
 if __name__ == '__main__':
     main()

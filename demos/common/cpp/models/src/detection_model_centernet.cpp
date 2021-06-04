@@ -121,8 +121,8 @@ std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& i
     cv::Mat resizedImg;
     cv::warpAffine(img, resizedImg, transInput, cv::Size(netInputWidth, netInputHeight), cv::INTER_LINEAR);
     request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg));
-
-    return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
+    /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
+    return std::make_shared<InternalImageMatModelData>(resizedImg, img.cols, img.rows);
 }
 
 std::vector<std::pair<size_t, float>> nms(float* scoresPtr, InferenceEngine::SizeVector sz, float threshold, int kernel = 3) {

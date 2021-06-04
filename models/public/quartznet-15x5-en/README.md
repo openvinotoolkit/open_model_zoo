@@ -48,7 +48,7 @@ Per-frame probabilities (after LogSoftmax) for every symbol in the alphabet, nam
 - C - alphabet size, including the CTC blank symbol
 
 The per-frame probabilities are to be decoded with a CTC decoder.
-The alphabet is: 0 = space, 1...26 = "a" to "z", 27 = apostrophe, 28 = CTC blank symbol. Example is provided [here](../../../demos/speech_recognition_demo/python/default_alphabet_example.conf).
+The alphabet is: 0 = space, 1...26 = "a" to "z", 27 = apostrophe, 28 = CTC blank symbol. Example is provided [here](../../../demos/speech_recognition_deepspeech_demo/python/default_alphabet_example.conf).
 
 #### Converted model
 

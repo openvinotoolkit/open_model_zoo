@@ -193,17 +193,17 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `ignore_suffixes` - matched low resolution, high resolution image located in different directories without usage suffixes, using numeric ids (Optional, default False).
   * `lr_suffix` - low resolution file name's suffix (default lr).
   * `hr_suffix` - high resolution file name's suffix (default hr).
-  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `dicom`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `pillow_rgb` (for explicit data conversion to RGB format), `dicom`, `skimage`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
   * `two_streams` - enable 2 input streams where usually first for original image and second for upsampled image. (Optional, default False).
   * `upsample_suffix` - upsample images file name's suffix (default upsample).
 * `super_resolution_dir_based` - converts dataset for single image super resolution task to `SuperResolutionAnnotation` which have directory based structure (high resolution and low resolution images located on separated directories and matches by name or numeric id).
 The main difference between this converter and `super_resolution` in data organization. `super_resolution` converter should be used if all high and low resolution images located in the same dir and have difference in suffixes.
-  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `dicom`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `pillow_rgb` (for explicit data conversion to RGB format), `dicom`, `skimage`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
   * `two_streams` - enable 2 input streams where usually first for original image and second for upsampled image. (Optional, default False).
   * `images_dir` - path to dataset root, where directories with low and high resolutions are located.
   * `lr_dir` - path to directory, where images in low resolution are located (Optional, default `<images_dir>/LR`).
   * `hr_dir` - path to directory, where images in high resolution are located (Optional, default `<images_dir>/HR`). **Note:** inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.
-  * `upsampled_dir` - path to directory, where upsampled images are located, if 2 streams used (Optional, default <images_dir>/upsample).
+  * `upsampled_dir` - path to directory, where upsampled images are located, if 2 streams used (Optional, default `<images_dir>/upsample`).
   * `relaxed_names` - allow to use more relaxed search of high resolution or/and upsampled images matching only numeric ids. Optional, by default full name matching required.
   * `hr_prefixed` - allow to use partial name matching  when low resolution filename is a part of high resolution filename. Not applicable when `relaxed_names` is set. Optional, by default full name matching required.
 * `multi_frame_super_resolution` - converts dataset for super resolution task with multiple input frames usage.
@@ -222,6 +222,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `word_spotting` - if it is true then transcriptions that have lengths less than 3 symbols or transcriptions containing non-alphanumeric symbols will be marked as difficult.
 * `icdar13_recognition` - converts ICDAR13 dataset for text recognition task to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
+  * `delimeter` - delimeter between image and text for recognition. Supported values - `space` and `tab` for space and tabular separator respectively.
 * `lmdb_text_recognition_database` - converter for text recognition dataset in a form of LMDB database.
   * `lower_case` - parameter describing if ground truth text should be converted to lower case.
 * `unicode_character_recognition` - converts [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) dataset and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html) for handwritten Japanese text recognition task , and [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release) for handwritten simplified Chinese text recognition task to `CharacterRecognitionAnnotation`.
@@ -545,6 +546,22 @@ The main difference between this converter and `super_resolution` in data organi
   * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding). More details in [Customizing dataset meta](#customizing-dataset-meta) section.
   * `images_dir` - path to directory with images (Optional).
   * `masks_dir` - path to directory with ground truth segmentation masks (Optional).
+* `cls_dataset_folder` - converts generic classification dataset with [DatasetFolder](https://pytorch.org/vision/stable/datasets.html#datasetfolder) format to `ClassificationAnnotation`.
+  * `data_dir` - directory with input images in following structure:
+    ```
+        data_dir/class_a/xxx.ext
+        data_dir/class_a/xxy.ext
+        data_dir/class_b/[...]/xxz.ext
+        ...
+        data_dir/class_y/123.ext
+        data_dir/class_z/nsdf3.ext
+        data_dir/class_z/[...]/asd932_.ext
+    ```
+* `open_images_detection` - converts Open Images dataset for object detection task to `DetectionAnnotation`.
+  * `bbox_csv_file` - path to cvs file which contains bounding box coordinates.
+  * `labels_file` - path to file with class labels in csv format.
+  * `images_dir` - path to images folder (Optional).
+  * `label_start` - specifies label index start in label map. You can provide another value, if you want to use this dataset for separate label validation (Optional, default value is 1).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

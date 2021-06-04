@@ -27,7 +27,7 @@ Engine.
 5. G-API pipeline performs four inferences, using the Age/Gender, Head Pose, Emotions, and Facial Landmarks detection networks if they are specified in the command line.
 6. The application displays the results.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Preparing to Run
 
@@ -99,7 +99,14 @@ Running the application with an empty list of options yields the usage message g
 For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
 ```sh
-./interactive_face_detection_demo_gapi -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/face-detection-adas-0001.xml -m_ag <path_to_model>/age-gender-recognition-retail-0013.xml -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml -m_em <path_to_model>/emotions-recognition-retail-0003.xml -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml -d GPU
+./interactive_face_detection_demo_gapi \
+  -d GPU \
+  -i <path_to_video>/inputVideo.mp4 \
+  -m <path_to_model>/face-detection-adas-0001.xml \
+  -m_ag <path_to_model>/age-gender-recognition-retail-0013.xml \
+  -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml \
+  -m_em <path_to_model>/emotions-recognition-retail-0003.xml \
+  -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml
 ```
 
 ## Demo Output

@@ -4,14 +4,26 @@ This README describes the Question Answering demo application that uses a Squad-
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network to Inference engine.
-It also fetch data from the user-provided url to populate the "context" text.
+On startup the demo application reads command line parameters and loads a network to Inference engine.
+It also fetches data from the user-provided url to populate the "context" text.
 The text is then used to search answers for user-provided questions.
 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/bert_question_answering_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -24,7 +36,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 * bert-small-uncased-whole-word-masking-squad-int8-0002
 
 The "small" variants of these are so-called "distilled" models, which originated from the BERT Large but substantially smaller and faster.
-The demo also works fine with [official MLPerf* BERT ONNX models fine-tuned on the Squad dataset](https://github.com/mlcommons/inference/tree/master/language/bert). This model should be converted to OpenVINO Inference Engine format using command like example below:
+If you want to use an official MLPerf* BERT ONNX model rather than the distilled model on the Open model Zoo, the command line to convert the [int8 model](https://zenodo.org/record/3750364) is as follows:
 
 ```sh
     python3 mo.py
@@ -61,27 +73,25 @@ Options:
   --questions QUESTION [QUESTION ...]
                         Optional. Prepared questions
   --input_names INPUT_NAMES
-                        Optional. Inputs names for the  network.
-                        Default values are "input_ids,attention_mask,token_type_ids"
+                        Optional. Inputs names for the network. Default values
+                        are "input_ids,attention_mask,token_type_ids"
   --output_names OUTPUT_NAMES
-                        Required. Outputs names for the network.
-                        Default values are "output_s,output_e"
+                        Optional. Outputs names for the network. Default
+                        values are "output_s,output_e"
   --model_squad_ver MODEL_SQUAD_VER
                         Optional. SQUAD version used for model fine tuning
   -q MAX_QUESTION_TOKEN_NUM, --max_question_token_num MAX_QUESTION_TOKEN_NUM
-                        Optional. Maximum number of tokens in question (used with the reshape option)
+                        Optional. Maximum number of tokens in question
   -a MAX_ANSWER_TOKEN_NUM, --max_answer_token_num MAX_ANSWER_TOKEN_NUM
                         Optional. Maximum number of tokens in answer
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU
-                        is acceptable. Sample will look for a suitable plugin
-                        for device specified. Default value is CPU
-  -r, --reshape
-                        Optional. Auto reshape sequence length
-                                  to the input context + max question len (to improve the speed)
-  -c, --colors
-                        Optional. Nice coloring of the questions/answers.
-                        Might not work on some terminals (like Windows* cmd console)
+                        Optional. Target device to perform inference
+                        on.Default value is CPU
+  -r, --reshape         Optional. Auto reshape sequence length to the input
+                        context + max question len (to improve the speed)
+  -c, --colors          Optional. Nice coloring of the questions/answers.
+                        Might not work on some terminals (like Windows* cmd
+                        console)
 
 ```
 

@@ -21,18 +21,36 @@ The demo workflow is the following:
 2. Extracted ROI is passed to artificial neural network that computes embedding vector for extracted frame area.
 3. Then the demo application searches computed embedding in gallery of images in order to determine which image in the gallery is the most similar to what one can see on video frame.
 4. The app visualizes results of it work as graphical window where following objects are shown.
-    - Input frame with detected ROI.
-    - Top-10 most similar images from the gallery.
-    - Performance characteristics.
+     - Input frame with detected ROI.
+     - Top-10 most similar images from the gallery.
+     - Performance characteristics.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Preparing to Run
 
-The demo sample input videos can be found in this [repository](https://github.com/19900531/test). An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
+The demo sample input videos and gallery images can be found in this [repository](https://github.com/19900531/test). An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/develop/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
+
+The demo dependencies should be installed before run. That can be achieved with the following command:
+
+```sh
+python3 -mpip install --user -r <omz_dir>/demos/requirements.txt
+```
 
 The list of models supported by the demo is in `<omz_dir>/demos/image_retrieval_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -89,7 +107,7 @@ To run the demo, please provide paths to the model in the IR format, to a file w
 ```bash
 python image_retrieval_demo.py \
 -m <path_to_model>/image-retrieval-0001.xml \
--i <path_to_video>/video.dav.mp4 \
+-i <path_to_video>/4946fb41-9da0-4af7-a858-b443bee6d0f6.dav \
 -g <path_to_file>/list.txt \
 --ground_truth text_label
 ```

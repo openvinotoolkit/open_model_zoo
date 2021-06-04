@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
 import platform
 import re
 import shlex
@@ -22,12 +23,14 @@ from pathlib import Path
 PACKAGE_DIR = Path(__file__).resolve().parent
 MODEL_ROOT = PACKAGE_DIR / 'models'
 DATASET_DEFINITIONS = PACKAGE_DIR / 'data/dataset_definitions.yml'
+VERSION_FILE = None
 
 if not MODEL_ROOT.exists() or not DATASET_DEFINITIONS.exists():
     # We are run directly from OMZ rather than from an installed environment.
     _OMZ_ROOT = PACKAGE_DIR.parents[4]
     MODEL_ROOT = _OMZ_ROOT / 'models'
     DATASET_DEFINITIONS = _OMZ_ROOT / 'data/dataset_definitions.yml'
+    VERSION_FILE = _OMZ_ROOT / 'version.txt'
 
 # make sure to update the documentation if you modify these
 KNOWN_FRAMEWORKS = {
@@ -59,6 +62,7 @@ KNOWN_TASK_TYPES = {
     'machine_translation',
     'monocular_depth_estimation',
     'named_entity_recognition',
+    'noise_suppression',
     'object_attributes',
     'optical_character_recognition',
     'place_recognition',
@@ -68,12 +72,29 @@ KNOWN_TASK_TYPES = {
     'sound_classification',
     'speech_recognition',
     'style_transfer',
-    'token_recognition',
     'text_to_speech',
+    'time_series',
+    'token_recognition',
 }
 
 KNOWN_QUANTIZED_PRECISIONS = {p + '-INT8': p for p in ['FP16', 'FP32']}
 assert KNOWN_QUANTIZED_PRECISIONS.keys() <= KNOWN_PRECISIONS
+
+
+try:
+    from openvino_telemetry import Telemetry
+except ImportError:
+    class Telemetry:
+        def __init__(self, app_name=None, app_version=None): pass
+
+        def start_session(self, category): pass
+
+        def send_event(self, event_category, event_action, event_label): pass
+
+        def end_session(self, category): pass
+
+        def force_shutdown(self, timeout): pass
+
 
 def quote_arg_windows(arg):
     if not arg: return '""'
@@ -110,3 +131,30 @@ def get_package_path(python_executable, package_name):
     # For a package, the file is __init__.py, so to get the package path,
     # take its parent directory.
     return file_path.parent
+
+def get_version():
+    if VERSION_FILE and VERSION_FILE.is_file():
+        with VERSION_FILE.open('r') as version_file:
+            version = version_file.readline().rstrip('\n')
+        return f'commit {version}'
+    else:
+        return 'unknown'
+
+@contextlib.contextmanager
+def telemetry_session(app_name, tool):
+    version = get_version()
+    telemetry = Telemetry(app_name, version)
+    telemetry.start_session('md')
+    try:
+        yield telemetry
+    except SystemExit as e:
+        telemetry.send_event('md', f'{tool}_result', 'failure' if e.code else 'success')
+        raise
+    except BaseException:
+        telemetry.send_event('md', f'{tool}_result', 'exception')
+        raise
+    else:
+        telemetry.send_event('md', f'{tool}_result', 'success')
+    finally:
+        telemetry.end_session('md')
+        telemetry.force_shutdown(1.0)

@@ -79,6 +79,9 @@ AccuracyChecker supports following set of adapters:
   * `labels` - optional, list of supported tokens for decoding raw labels (Optional, default configuration is ascii charmap, this parameter ignored if you have decoding part in the model).
   * `eos_index` - index of end of string token in labels. (Optional, default 2, ignored if you have decoding part in the model).
   * `to_lower_case` - allow converting decoded characters to lower case (Optional, default is `True`).
+* `ppocr` - converting PaddlePaddle CRNN-like model output to `CharacterRecognitionPrediction`.
+  * `vocabulary_file` - file with recogniton symbols for decoding.
+  * `remove_duplicates` - allow removement of duplicated symbols (Optional, default value - `True`).
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
 * `ssd_mxnet` - converting output of SSD-based models from MXNet framework to `DetectionPrediction` representation.
 * `pytorch_ssd_decoder` - converts output of SSD model from PyTorch without embedded decoder.
@@ -262,7 +265,7 @@ AccuracyChecker supports following set of adapters:
   * `lm_oov_score` - Replace LM score for out-of-vocabulary words with this value (default -1000, ignored without LM)
   * `lm_vocabulary_offset` - Start of vocabulary strings section in the LM file.  Default is to not filter candidate words using vocabulary (ignored without LM)
   * `lm_vocabulary_length` - Size in bytes of vocabulary strings section in the LM file (ignored without LM)
-* `fast_ctc_beam_search_decoder_with_lm` - CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition, depends on `ctcdecode_numpy` Python module located in the `<omz_dir>/demos/speech_recognition_demo/python/ctcdecode-numpy/` directory.
+* `fast_ctc_beam_search_decoder_with_lm` - CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition, depends on `ctcdecode_numpy` Python module located in the `<omz_dir>/demos/speech_recognition_deepspeech_demo/python/ctcdecode-numpy/` directory.
   * `beam_size` - Size of the beam to use during decoding (default 10).
   * `logarithmic_prob` - Set to "True" to indicate that network gives natural-logarithmic probabilities. Default is False for plain probabilities (after softmax).
   * `probability_out` - Name of the network's output with character probabilities (required)
@@ -343,6 +346,14 @@ AccuracyChecker supports following set of adapters:
    * `nms_threshold` - overlap threshold for NMS (optional, default 0.5).
    * `keep_top_k ` - maximal number of boxes which should be kept (optional).
    * `include_boundaries` - allows include boundaries for NMS (optional, default False).
+* `retinaface-pytorch` - converting output of RetinaFace PyTorch model to `DetectionPrediction` or representation container with `DetectionPrediction`, `FacialLandmarksPrediction` (depends on provided set of outputs)
+   * `scores_output` - name for output layer with face detection score.
+   * `bboxes_output` - name for output layer with face detection boxes.
+   * `landmarks_output` - name for output layer with predicted facial landmarks (optional, if not provided, only `DetectionPrediction` will be generated).
+   * `nms_threshold` - overlap threshold for NMS (optional, default 0.4).
+   * `keep_top_k ` - maximal number of boxes which should be kept (optional, default 750).
+   * `include_boundaries` - allows include boundaries for NMS (optional, default False).
+   * `confidence_threshold` - confidence threshold that is used to filter out detected instances (optional, default 0.02).
 * `faceboxes` - converting output of FaceBoxes model to `DetectionPrediction` representation.
   * `scores_out` - name of output layer with bounding boxes scores.
   * `boxes_out` - name of output layer with bounding boxes coordinates.

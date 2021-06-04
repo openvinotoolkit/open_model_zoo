@@ -5,7 +5,7 @@ The demo is based on https://github.com/seungwonpark/melgan, https://github.com/
 
 ## How It Works
 
-Upon the start-up, the demo application reads command-line parameters and loads four or three networks to the
+On startup, the demo application reads command-line parameters and loads four or three networks to the
 Inference Engine plugin. The demo pipeline reads text file by lines and divides every line to parts by punctuation marks.
 The heuristic algorithm chooses punctuation near to the some threshold by sentence length.
 When inference is done, the application outputs the audio to the WAV file with 22050 Hz sample rate.
@@ -14,6 +14,18 @@ When inference is done, the application outputs the audio to the WAV file with 2
 
 The list of models supported by the demo is in `<omz_dir>/demos/text_to_speech_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -50,7 +62,7 @@ Options:
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL, MYRIAD or HETERO is acceptable. The
-                        sample will look for a suitable plugin for device
+                        demo will look for a suitable plugin for device
                         specified. Default value is CPU
   -m_upsample MODEL_UPSAMPLE, --model_upsample MODEL_UPSAMPLE
                         Path to WaveRNN`s part for mel-spectrogram upsampling

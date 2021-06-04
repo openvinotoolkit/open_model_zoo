@@ -19,6 +19,7 @@ The Open Model Zoo includes the following demos:
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/cpp/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
 - [Deblurring Python\* Demo](./deblurring_demo/python/README.md) - Demo for deblurring the input images.
 - [Face Detection MTCNN Python\* Demo](./face_detection_mtcnn_demo/python/README.md) - The demo demonstrates how to run MTCNN face detection model to detect faces on images.
+- [Face Recognition Python\* Demo](./face_recognition_demo/python/README.md) - The interactive face recognition demo.
 - [Formula Recognition Python\* Demo](./formula_recognition_demo/python/README.md) - The demo demonstrates how to run Im2latex formula recognition models and recognize latex formulas.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/cpp/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
 - [Gesture Recognition Python\* Demo](./gesture_recognition_demo/python/README.md) - Demo application for Gesture Recognition algorithm (e.g. American Sign Language gestures), which classifies gesture actions that are being performed on input video.
@@ -41,13 +42,14 @@ The Open Model Zoo includes the following demos:
 - [Multi-Channel Face Detection C++ Demo](./multi_channel_face_detection_demo/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel face detection scenario.
 - [Multi-Channel Human Pose Estimation C++ Demo](./multi_channel_human_pose_estimation_demo/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel human pose estimation scenario.
 - [Multi-Channel Object Detection Yolov3 C++ Demo](./multi_channel_object_detection_demo_yolov3/cpp/README.md) - The demo demonstrates an inference pipeline for multi-channel common object detection scenario.
+- [Noise Suppression Python\* Demo](./noise_suppression_demo/python/README.md) - The demo shows how to use the OpenVINO™ toolkit to reduce noise in speech audio.
 - [Object Detection Python\* Demo](./object_detection_demo/python/README.md) - Demo application for several object detection model types (like SSD, Yolo, etc).
 - [Object Detection C++ Demo](./object_detection_demo/cpp/README.md) - Demo application for Object Detection networks (different models architectures are supported), async API showcase, simple OpenCV interoperability (supports video and camera inputs).
 - [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/cpp/README.md) - Demo application for pedestrian tracking scenario.
 - [Place Recognition Python\* Demo](./place_recognition_demo/python/README.md) - This demo demonstrates how to run Place Recognition models using OpenVINO™.
 - [Security Barrier Camera C++ Demo](./security_barrier_camera_demo/cpp/README.md) - Vehicle Detection followed by the Vehicle Attributes and License-Plate Recognition, supports images/video and camera inputs.
-- [Speech Recognition Python\* Demo](./speech_recognition_demo/python/README.md) - Speech recognition demo: takes audio file with an English phrase on input, and converts it into text.
-- [Speech Recognition Offline Python\* Demo](./speech_recognition_offline_demo/python/README.md) - Offline speech recognition demo: takes a whole audio file with an English phrase on input, and converts it into text.
+- [Speech Recognition DeepSpeech Python\* Demo](./speech_recognition_deepspeech_demo/python/README.md) - Speech recognition demo: accepts an audio file with an English phrase on input and converts it into text. This demo does streaming audio data processing and can optionally provide current transcription of the processed part.
+- [Speech Recognition QuartzNet Python\* Demo](./speech_recognition_quartznet_demo/python/README.md) - Speech recognition demo for QuartzNet: takes a whole audio file with an English phrase on input and converts it into text.
 - [Single Human Pose Estimation Python\* Demo](./single_human_pose_estimation_demo/python/README.md) - 2D human pose estimation demo.
 - [Smart Classroom C++ Demo](./smart_classroom_demo/cpp/README.md) - Face recognition and action detection demo for classroom environment.
 - [Sound Classification Python\* Demo](./sound_classification_demo/python/README.md) - Demo application for sound classification algorithm.

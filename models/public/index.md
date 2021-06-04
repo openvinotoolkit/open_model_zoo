@@ -32,6 +32,7 @@ You can download models and convert them into Inference Engine format (\*.xml + 
 | Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/README.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/README.md) | 77.904%/93.808%<br>77.69%/93.7% | 11.469 | 23.817 |
 | Inception (GoogleNet) V4    | TensorFlow\*                       | [googlenet-v4-tf](./googlenet-v4-tf/README.md) | 80.204%/95.21% | 24.584 | 42.648 |
 | Inception-ResNet V2         | TensorFlow\*                       | [inception-resnet-v2-tf](./inception-resnet-v2-tf/README.md) | 80.14%/95.10% | 22.227 | 30.223 |
+| MixNet L                    | TensorFlow\*                       | [mixnet-l](./mixnet-l/README.md)  | 78.30%/93.91% | 0.565 | 7.3 |
 | MobileNet V1 0.25 128       | Caffe\*                            | [mobilenet-v1-0.25-128](./mobilenet-v1-0.25-128/README.md)  | 40.54%/65% | 0.028 | 0.468 |
 | MobileNet V1 0.5 160        | Caffe\*                            | [mobilenet-v1-0.50-160](./mobilenet-v1-0.50-160/README.md) | 59.86%/82.04% | 0.156 | 1.327 |
 | MobileNet V1 0.5 224        | Caffe\*                            | [mobilenet-v1-0.50-224](./mobilenet-v1-0.50-224/README.md) | 63.042%/84.934%| 0.304 | 1.327 |
@@ -133,6 +134,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | MobileFace Detection V1              | MXNet\*                  | [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)| 	78.7488%| 3.5456 | 7.6828 |
 | MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/README.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| 48.1308%/62.2625% | <br>3.3715<br>0.0031<br>0.0263|<br>0.0066<br>0.1002<br>0.3890|
 | Pelee                                | Caffe\*                  | [pelee-coco](./pelee-coco/README.md) | 21.9761% | 1.290 | 5.98 |
+| RetinaFace with ResNet 50            | PyTorch\*                | [retinaface-resnet50-pytorch](./retinaface-resnet50-pytorch/README.md) | 91.78% | 88.8627 | 27.2646 |
 | RetinaNet with Resnet 50             | TensorFlow\*             | [retinanet-tf](./retinanet-tf/README.md) | 33.15% | 238.9469 | 64.9706 |
 | R-FCN with Resnet-101                | TensorFlow\*             | [rfcn-resnet101-coco-tf](./rfcn-resnet101-coco-tf/README.md) | 28.40%/45.02% | 53.462 | 171.85 |
 | SSD 300                              | Caffe\*                  | [ssd300](./ssd300/README.md)  | 87.09% | 62.815 | 26.285 |
@@ -159,6 +161,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------------ | -------------- | -------------- | -------- |------ | ------- |
 | FaceNet                              | TensorFlow\*   | [facenet-20180408-102900](./facenet-20180408-102900/README.md) | 99.14% | 2.846 | 23.469 |
+| LResNet100E-IR,ArcFace@ms1m-refine-v2| MXNet\*        | [face-recognition-resnet100-arcface-onnx](./face-recognition-resnet100-arcface-onnx/README.md) | 99.68%| 24.2115  | 65.1320 |
 | SphereFace                           | Caffe\*        | [Sphereface](./Sphereface/README.md) | 98.8321% | 3.504 | 22.671 |
 
 ## Human Pose Estimation

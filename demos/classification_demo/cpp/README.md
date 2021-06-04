@@ -4,7 +4,7 @@ The demo visualize OpenVINO performance on inference of neural networks for imag
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads a classification network to the Inference Engine for execution. It might take some time for demo to read all input images. Then the demo performs inference to classify the images and places them on grid.
+On startup, the application reads command line parameters and loads a classification network to the Inference Engine for execution. It might take some time for demo to read all input images. Then the demo performs inference to classify the images and places them on grid.
 
 The demo starts in "Testing mode" with fixed grid size. After calculating the average FPS result, it will switch to normal mode and grid will be readjusted depending on model performance. Bigger grid means higher performance.
 
@@ -12,12 +12,24 @@ When "ground truth" data applied, the color coding for the text, drawn above eac
 
 You can stop the demo by pressing "Esc" or "Q" button. After that, the average metrics values will be printed to the console.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/classification_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -100,7 +112,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 
 If you want to see classification results, you must use "-gt" and "-labels" flags to specify two .txt files containing lists of classes and labels.
 
-"Ground truth" file is used for matching image file names with correct object classes.
+"The ground truth" file is used for matching image file names with correct object classes.
 
 It has the following format:
 
@@ -142,10 +154,10 @@ Options:
           Or
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with kernels description.
     -pc                       Optional. Enables per-layer performance report.
-    -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
+    -auto_resize              Optional. Enables resizable input.
     -labels "<path>"          Required. Path to .txt file with labels.
     -gt "<path>"              Optional. Path to ground truth .txt file.
-    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Sample will look for a suitable plugin for device specified.
+    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for device specified.
     -nthreads "<integer>"     Optional. Specify count of threads.
     -nstreams "<integer>"     Optional. Specify count of streams.
     -nireq "<integer>"        Optional. Number of infer requests.

@@ -5,7 +5,7 @@
 This is the demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
 The following pre-trained models are delivered with the product:
 
-* `driver-action-recognition-adas-0002-encoder` + `driver-action-recognition-adas-0002-decoder`, which are models for driver monitoring scenario. They recognize actions like safe driving, talking to the phone and others
+* `driver-action-recognition-adas-0002-encoder` + `driver-action-recognition-adas-0002-decoder`, which are models for driver monitoring scenario. They recognize actions like safe driving, talking on the phone and others
 * `action-recognition-0001-encoder` + `action-recognition-0001-decoder` and `i3d-rgb-tf`, which are general-purpose action recognition (400 actions) models for Kinetics-400 dataset.
 
 For more information about the pre-trained models, refer to the [Intel](../../../models/intel/index.md) and [public](../../../models/public/index.md) models documentation.
@@ -18,9 +18,9 @@ Every step implements `PipelineStep` interface by creating a class derived from 
 * `DataStep` reads frames from the input video.
 *  Model step depends on architecture type:
     - For encder-decoder models there are two steps:
-      -  `EncoderStep` preprocesses a frame and feeds it to the encoder model to produce a frame embedding. simple averaging of encoder's outputs over a time window is applied.
-      -  `DecoderStep` feeds embeddings produced by the `EncoderStep` to the decoder model and produces predictions. For models that use `DummyDecoder` simple averaging of encoder's outputs over a time window is applied.
-    - For specific single models implemented corresponding `<ModelNameStep>` which does preprocess and produce predictions.
+      -  `EncoderStep` preprocesses a frame and feeds it to the encoder model to produce a frame embedding. Simple averaging of encoder's outputs over a time window is applied.
+      -  `DecoderStep` feeds embeddings produced by the `EncoderStep` to the decoder model and produces predictions. For models that use `DummyDecoder`, simple averaging of encoder's outputs over a time window is applied.
+    - For the specific implemented single models, the corresponding `<ModelNameStep>` does preprocessing and produces predictions.
 * `RenderStep` renders prediction results.
 
 Pipeline steps are composed in `AsyncPipeline`. Every step can be run in separate thread by adding it to the pipeline with `parallel=True` option.
@@ -30,15 +30,27 @@ To ensure maximum performance, Inference Engine models are wrapped in `AsyncWrap
 that uses Inference Engine async API by scheduling infer requests in cyclical order
 (inference on every new input is started asynchronously, result of the longest working infer request is returned).
 You can change the value of `num_requests` in `action_recognition_demo.py` to find an optimal number of parallel working infer requests for your inference accelerators
-(Compute Sticks and GPUs benefit from higher number of infer requests).
+(Intel(R) Neural Compute Stick devices and GPUs benefit from higher number of infer requests).
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/action_recognition_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -107,12 +119,13 @@ Options:
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-**For example**, to run the demo for in-cabin driver monitoring scenario, please provide a path to the encoder and decoder models, an input video and a file with label names, located at demo folder, <omz_dir>/demos/action_recognition_demo/python/driver_actions.txt:
+**For example**, to run the demo for in-cabin driver monitoring scenario, please provide a path to the encoder and decoder models, an input video and a file with label names, located in the demo folder, `<omz_dir>/demos/action_recognition_demo/python/driver_actions.txt`:
 
 ```sh
 python3 action_recognition_demo.py \
     -m_en <path_to_model>/driver-action-recognition-adas-0002-encoder.xml \
     -m_de <path_to_model>/driver-action-recognition-adas-0002-decoder.xml \
+    -at en-de \
     -i <path_to_video>/inputVideo.mp4 \
     -lb <omz_idr>/demos/action_recognition_demo/python/driver_actions.txt
 ```

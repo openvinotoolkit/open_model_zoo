@@ -112,6 +112,7 @@ and accuracy (expect a bigger model to perform better).
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
+| [face-reidentification-retail-0095](./face-reidentification-retail-0095/README.md)     | 0.588 | 1.107 |
 | [person-reidentification-retail-0288](./person-reidentification-retail-0288/README.md) | 0.174 | 0.183 |
 | [person-reidentification-retail-0287](./person-reidentification-retail-0287/README.md) | 0.564 | 0.595 |
 | [person-reidentification-retail-0286](./person-reidentification-retail-0286/README.md) | 1.170 | 1.234 |
@@ -195,7 +196,6 @@ Deep Learning models for text recognition in various applications.
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [text-recognition-0012](./text-recognition-0012/README.md)                                 | 1.485   | 5.568 |
-| [text-recognition-0013](./text-recognition-0013/README.md)                                 | 1.488   | 5.567 |
 | [text-recognition-0014](./text-recognition-0014/README.md)                                 | 0.5442  | 2.839 |
 | [text-recognition-0015](./text-recognition-0015/README.md)                                 |         |       |
 | encoder | 12.4 | 398 |
@@ -282,6 +282,8 @@ Deep Learning compressed models
 | [machine-translation-nar-ru-en-0001](./machine-translation-nar-ru-en-0001/README.md) | 23.17 | 69.29 |
 | [machine-translation-nar-en-de-0001](./machine-translation-nar-en-de-0001/README.md) | 23.19 | 77.47 |
 | [machine-translation-nar-de-en-0001](./machine-translation-nar-de-en-0001/README.md) | 23.19 | 77.47 |
+| [machine-translation-nar-en-de-0002](./machine-translation-nar-en-de-0002/README.md) | 23.19 | 77.47 |
+| [machine-translation-nar-de-en-0002](./machine-translation-nar-de-en-0002/README.md) | 23.19 | 77.47 |
 
 ## Text To Speech
 
@@ -302,6 +304,12 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 |   text-to-speech-en-multi-0001-duration-prediction                 | 28.75 | 26.18 |
 |   text-to-speech-en-multi-0001-regression                          | 7.81  | 5.12  |
 |   text-to-speech-en-multi-0001-generation                          | 48.38 | 12.77 |
+
+Deep Learning models for noise suppression.
+
+| Model Name                                                                          | Complexity (GFLOPs)  | Size (Mp)  |
+|-------------------------------------------------------------------------------------|--------------------- |----------- |
+| [noise-suppression-poconetlike-0001](./noise-suppression-poconetlike-0001/README.md)| 1.2                  | 7.22       |
 
 ## Time Series Forecasting
 
