@@ -15,7 +15,7 @@ The landmarks contain 98 keypoints.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| NME                             | 0.1597                                    |
+| NME                             | 0.1323                                    |
 | GFlops                          | 0.6                                       |
 | MParams                         | 9.66                                      |
 | Source framework                | PyTorch\*                                 |
