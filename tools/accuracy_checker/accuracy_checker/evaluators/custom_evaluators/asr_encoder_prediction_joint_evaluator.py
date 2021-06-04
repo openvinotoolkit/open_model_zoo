@@ -135,7 +135,7 @@ class BaseDLSDKModel:
         input_blob = next(iter(input_info))
         with_prefix = input_blob.startswith(self.default_model_suffix)
         if self.input_blob is None or with_prefix != self.with_prefix:
-            if self.input_blob is None:
+            if self.output_blob is None:
                 output_blob = next(iter(self.exec_network.outputs))
             else:
                 output_blob = (
@@ -367,7 +367,8 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         self.with_prefix = None
-        self.output_blob = None
+        if not hasattr(self, 'output_blob'):
+            self.output_blob = None
         self.input_blob = None
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
@@ -409,6 +410,7 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
 
 class EncoderDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'encoder'
+    output_blob = '472'
 
 
 class PredictionDLSDKModel(CommonDLSDKModel):
