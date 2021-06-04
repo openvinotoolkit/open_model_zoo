@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..config import PathField
+from ..config import PathField, NumberField
 from ..representation import DetectionAnnotation
 from ..utils import read_csv, check_file_existence
 from .format_converter import BaseFormatConverter, ConverterReturn
@@ -33,6 +33,11 @@ class OpenImagesDetectionConverter(BaseFormatConverter):
             'images_dir': PathField(
                 is_directory=True, optional=True,
                 description='Path to dataset images, used only for content existence check'
+            ),
+            'label_start': NumberField(
+                value_type=int, optional=True, default=1,
+                description='Specifies label index start in label map. Default value is 1. You can provide another'
+                            'value, if you want to use this dataset for separate label validation.'
             )
         })
 
@@ -42,12 +47,13 @@ class OpenImagesDetectionConverter(BaseFormatConverter):
         self.bbox_csv = self.get_value_from_config('bbox_csv_file')
         self.labels_file = self.get_value_from_config('labels_file')
         self.images_dir = self.get_value_from_config('images_dir')
+        self.label_start = self.get_value_from_config('label_start')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
         content_errors = [] if check_content else None
         bboxes = read_csv(self.bbox_csv)
-        label_map, annotations_label_map = self.get_labels_mapping(self.labels_file)
+        label_map, annotations_label_map = self.get_labels_mapping(self.labels_file, self.label_start)
         annotation_by_identifier = {}
         for row in bboxes:
             if annotation_by_identifier.get(row['ImageID']):
@@ -77,11 +83,11 @@ class OpenImagesDetectionConverter(BaseFormatConverter):
         return ConverterReturn(annotations, {'label_map': label_map}, content_errors)
 
     @staticmethod
-    def get_labels_mapping(labels_file):
+    def get_labels_mapping(labels_file, label_start):
         labels = read_csv(labels_file, is_dict=False)
         label_map = {}
         reversed_annotation_label_map = {}
-        for idx, (label_name, real_name) in enumerate(labels):
-            label_map[idx + 1] = real_name
-            reversed_annotation_label_map[label_name] = idx + 1
+        for idx, (label_name, real_name) in enumerate(labels, start=label_start):
+            label_map[idx] = real_name
+            reversed_annotation_label_map[label_name] = idx
         return label_map, reversed_annotation_label_map

@@ -560,6 +560,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `bbox_csv_file` - path to cvs file which contains bounding box coordinates.
   * `labels_file` - path to file with class labels in csv format.
   * `images_dir` - path to images folder (Optional).
+  * `label_start` - specifies label index start in label map. You can provide another value, if you want to use this dataset for separate label validation (Optional, default value is 1).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
