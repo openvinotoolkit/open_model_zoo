@@ -17,18 +17,17 @@ limitations under the License.
 from pathlib import Path
 import warnings
 import re
+import numpy as np
 
 from ..representation import (
     BrainTumorSegmentationAnnotation,
     NiftiRegressionAnnotation,
-    RegressionAnnotation,
     ImageProcessingAnnotation)
 from ..utils import get_path, read_txt, read_pickle, check_file_existence, UnsupportedPackage
 from ..config import StringField, PathField, BoolField, NumberField
 from .format_converter import DirectoryBasedAnnotationConverter
 from ..representation.segmentation_representation import GTMaskLoader
 from .format_converter import ConverterReturn
-import numpy as np
 from ..representation.image_processing import GTLoader
 
 try:
@@ -243,7 +242,7 @@ class KSpaceMRIConverter(DirectoryBasedAnnotationConverter):
         parameters = super().parameters()
         parameters.update({
             'image_folder': StringField(optional=True, default='images',
-                                                description="K-space images folder."),
+                                        description="K-space images folder."),
             'reconstructed_folder': StringField(optional=True, default='reconstructed',
                                                 description="Reconstructed images folder."),
             'sampled_folder': StringField(optional=True, default='sampled', description="Sampled k-space data folder."),
@@ -279,25 +278,23 @@ class KSpaceMRIConverter(DirectoryBasedAnnotationConverter):
         frame_separator = '#'
 
         for file_in_dir in image_dir.iterdir():
-            file_name = file_in_dir.parts[-1]
             data = np.load(file_in_dir)
             total_frames, width, height, _ = data.shape
             norm = np.sqrt(width * height)
             for frame_cnt in range(total_frames):
-                kspace_data = data[frame_cnt,...] / norm
+                kspace_data = data[frame_cnt, ...] / norm
                 rec_data = np.abs(np.fft.ifft2(kspace_data[:, :, 0] + 1j * kspace_data[:, :, 1]))
-                kspace_data[var_sampling_mask,:] = 0
+                kspace_data[var_sampling_mask, :] = 0
                 kspace_data = (kspace_data - stats[0]) / stats[1]
                 reconstructed_name = "{}{}{}{}".format(str(reconstructed_dir / file_in_dir.stem),
                                                        frame_separator, frame_cnt, file_in_dir.suffix)
                 sampled_name = "{}{}{}{}".format(str(sampled_dir / file_in_dir.stem), frame_separator,
-                                               frame_cnt, file_in_dir.suffix)
+                                                 frame_cnt, file_in_dir.suffix)
                 np.save(reconstructed_name, rec_data)
                 np.save(sampled_name, kspace_data)
                 annotation = ImageProcessingAnnotation(str(Path(sampled_name).relative_to(self.data_dir)),
                                                        str(Path(reconstructed_name).relative_to(self.data_dir)),
-                                                       gt_loader = GTLoader.NUMPY)
+                                                       gt_loader=GTLoader.NUMPY)
                 annotations.append(annotation)
 
         return ConverterReturn(annotations, None, None)
-
