@@ -593,7 +593,7 @@ class DLSDKLauncher(Launcher):
             data = np.concatenate([data, filled_part])
         precision = self.inputs[input_blob].precision
         data = data.astype(PRECISION_TO_DTYPE[precision])
-        if data_layout:
+        if data_layout is not None:
             data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
         input_layout = self.inputs[input_blob].layout
         layout_mismatch = (
