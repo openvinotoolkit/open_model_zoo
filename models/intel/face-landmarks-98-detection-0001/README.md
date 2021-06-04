@@ -23,7 +23,7 @@ The landmarks contain 98 keypoints.
 
 ## Inputs
 
-Name: `input`, shape: `1, 3, 64, 64`. An input image in the `B, C, H, W` format, where:
+Name: `input.1`, shape: `1, 3, 64, 64`. An input image in the `B, C, H, W` format, where:
 
 - `B` - batch size
 - `C` - number of channels
