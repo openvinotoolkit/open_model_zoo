@@ -143,8 +143,6 @@ double getDistance(const cv::Point2d &PF, const cv::Point2d &E, const cv::Point2
 
     while (!zaOverZLimit) {
         if (inf > 0) {
-            // inf = 9999
-            // _inf = -9999
             double lenZbF = getDistance(zb, F);
             cv::Point2d fProj(F.x, F.y + lenZbF);
             cv::Point2d eProj(E.x, F.y + lenZbF + lenEF);
@@ -167,8 +165,6 @@ double getDistance(const cv::Point2d &PF, const cv::Point2d &E, const cv::Point2
                 zb = lineIntersection(PFF, zbAUX);
             }
         } else {
-            // inf = - 9999
-            // _inf = 9999
             double lenZaE = getDistance(za, E);
             cv::Point2d fProj(F.x, F.y + lenZaE + lenEF);
             cv::Point2d eProj(E.x, F.y + lenZaE);
@@ -193,8 +189,7 @@ double getDistance(const cv::Point2d &PF, const cv::Point2d &E, const cv::Point2
         }
     }
 
-    cnt = static_cast<unsigned int>(cnt * coef);
-    return cnt;
+    return cnt * coef;
 }
 
 // euclidean, alert, distance

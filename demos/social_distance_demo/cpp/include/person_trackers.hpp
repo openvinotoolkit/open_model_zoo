@@ -42,18 +42,18 @@ public:
                     }
                 }
 
-                if (!sim.empty()) {
-                    auto maxSimilarity = std::max_element(sim.begin(), sim.end(), [](std::pair<int, float> a, std::pair<int, float> b) {
-                        return std::get<1>(a) > std::get<1>(b);
-                     })->first;
-                    trackables.at(maxSimilarity) = to;
-                    trackables.at(maxSimilarity).updated = true;
-                    trackables.at(maxSimilarity).disappeared = 0;
-                } else {
-                    trackables.insert({trackIdGenerator, to});
+                if (sim.empty()) {
+                    trackables.insert({ trackIdGenerator, to });
                     trackables.at(trackIdGenerator).updated = true;
                     trackables.at(trackIdGenerator).disappeared = 0;
                     trackIdGenerator += 1;
+                } else {
+                    int maxSimilarity = std::max_element(sim.begin(), sim.end(), [](std::pair<int, float> a, std::pair<int, float> b) {
+                        return std::get<1>(a) > std::get<1>(b);
+                        })->first;
+                    trackables.at(maxSimilarity) = to;
+                    trackables.at(maxSimilarity).updated = true;
+                    trackables.at(maxSimilarity).disappeared = 0;
                 }
             }
 
