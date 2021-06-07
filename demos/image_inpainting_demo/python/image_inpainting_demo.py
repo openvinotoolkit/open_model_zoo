@@ -107,6 +107,9 @@ def inpaint_auto(img, args):
     output_image = inpainting_processor.process(masked_image, mask)
     concat_imgs = np.hstack((masked_image, output_image))
     cv2.putText(concat_imgs, 'Performance: {:.1f} FPS'.format(float(1 / inpainting_processor.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+    cv2.putText(concat_imgs, 'original', (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 100))
+    cv2.putText(concat_imgs, 'result', (concat_imgs.shape[1]-5-cv2.getTextSize('result', cv2.FONT_HERSHEY_COMPLEX, 0.5, 1)[0][0], 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 100))
+    cv2.putText(concat_imgs, 'summary: {:.1f} FPS'.format(float(1 / inpainting_processor.infer_time)), (5, 35), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
     return concat_imgs, output_image
 
 def main():

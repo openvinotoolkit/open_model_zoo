@@ -103,8 +103,10 @@ Also, these hot keys are available:
 * **Backspace or C** to clear current mask
 * **Space or Enter** to inpaint
 * **R** to reset all changes
-* **Tab** to show original image
+* **Tab** to show/hide original image
 * **Esc or Q** to quit
+
+If Backpace, C or R keys are pressed while demo is showing original image, demo will hide original image and return back to editing mode.
 
 ## Demo Output
 
