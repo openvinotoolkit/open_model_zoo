@@ -95,7 +95,7 @@ Running the application with the empty list of options yields the usage message 
 
 ## Example for Running with Arguments
 
-### Speech syntesis with ForwardTacotron and WaveRNN models
+### Speech synthesis with ForwardTacotron and WaveRNN models
 
 ```sh
 python3 text_to_speech_demo.py \
@@ -107,7 +107,7 @@ python3 text_to_speech_demo.py \
     --model_rnn <path_to_model>/wavernn_rnn.xml
 ```
 
-### Speech syntesis with text-to-speech-en-0001 models
+### Speech synthesis with text-to-speech-en-0001 models
 
 ```sh
 python3 text_to_speech_demo.py \
@@ -118,7 +118,7 @@ python3 text_to_speech_demo.py \
     -m_melgan <path_to_model>/text-to-speech-en-0001-generation.xml
 ```
 
-### Speech syntesis with multi-speaker text-to-speech-en-multi-0001 models
+### Speech synthesis with multi-speaker text-to-speech-en-multi-0001 models
 
 ```sh
 python3 text_to_speech_demo.py \
