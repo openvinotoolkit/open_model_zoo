@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
             //--- If you need just plain data without rendering - cast result's underlying pointer to ImageResult*
             //    and use your own processing instead of calling renderSegmentationData().
             while (keepRunning && (result = pipeline.getResult())) {
-                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>(), outputTransform);
+                cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
