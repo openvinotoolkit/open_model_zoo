@@ -167,6 +167,7 @@ struct Context {  // stores all global data for tasks
         std::vector<int> minW;
         std::vector<int> maxW;
         std::vector<int64_t> lastProcessedIDs;
+        std::mutex trackerMutex;
     } trackersContext;
 
     std::weak_ptr<Worker> resAggregatorsWorker;
@@ -205,24 +206,19 @@ public:
     ResAggregator(const VideoFrame::Ptr& sharedVideoFrame, std::list<cv::Rect>&& boxes,
         std::list<TrackableObject>&& trackables)
         : Task{ sharedVideoFrame, 4.0 },
-        context(static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context),
-        sourceID(sharedVideoFrame->sourceID),
-        frameID(sharedVideoFrame->frameId),
-        lastProcessedFrameID(context.trackersContext.lastProcessedIDs[sourceID]),
-        boxes{std::move(boxes)},
-        trackables{std::move(trackables)} {}
+        boxes{ std::move(boxes) },
+        trackables{ std::move(trackables) } {}
 
     bool isReady() override {
-        return lastProcessedFrameID == frameID;
+        Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
+        std::lock_guard<std::mutex> lock(context.trackersContext.trackerMutex);
+        int64_t& lastProcessedFrameID = context.trackersContext.lastProcessedIDs[sharedVideoFrame->sourceID];
+        return lastProcessedFrameID == sharedVideoFrame->frameId;
     }
 
     void process() override;
 
 private:
-    Context& context;
-    const unsigned sourceID;
-    const int64_t& frameID;
-    int64_t& lastProcessedFrameID;
     std::list<cv::Rect> boxes;
     std::list<TrackableObject> trackables;
 };
@@ -421,9 +417,14 @@ void Drawer::process() {
 }
 
 void ResAggregator::process() {
+    Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
+    std::lock_guard<std::mutex> lock(context.trackersContext.trackerMutex);
     context.freeDetectionInfersCount += context.detectorsInfers.inferRequests.lockedSize();
     context.frameCounter++;
-
+    unsigned sourceID = sharedVideoFrame->sourceID;
+    int64_t& lastProcessedFrameID = context.trackersContext.lastProcessedIDs[sourceID];
+    context.freeDetectionInfersCount += context.detectorsInfers.inferRequests.lockedSize();
+    context.frameCounter++;
     auto& personTracker = context.trackersContext.personTracker[sourceID];
     for (const cv::Rect& bbox : boxes) {
         cv::rectangle(sharedVideoFrame->frame, bbox, { 0, 255, 0 }, 2);
