@@ -124,6 +124,7 @@ python3 text_to_speech_demo.py \
 python3 text_to_speech_demo.py \
     -i <path_to_file>/text.txt \
     -o <path_to_audio>/audio.wav \
+    -s_id 19 \
     -m_duration <path_to_model>/text-to-speech-en-multi-0001-duration-prediction.xml \
     -m_forward <path_to_model>/text-to-speech-en-multi-0001-regression.xml \
     -m_melgan <path_to_model>/text-to-speech-en-multi-0001-generation.xml
