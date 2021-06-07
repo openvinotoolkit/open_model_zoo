@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
         const auto tmp = cap->read();
         cap.reset();
         if (!tmp.data) {
-            CV_Assert(false && "Couldn't grab first frame");
+            throw std::runtime_error("Couldn't grab first frame");
         }
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
         cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
@@ -203,9 +203,9 @@ int main(int argc, char *argv[]) {
             FLAGS_d_lm,                               // device specifier
         };
         auto gaze_net = cv::gapi::ie::Params<nets::Gaze> {
-            FLAGS_m,                               // path to topology IR
-            fileNameNoExt(FLAGS_m) + ".bin",       // path to weights
-            FLAGS_d,                               // device specifier
+            FLAGS_m,                                  // path to topology IR
+            fileNameNoExt(FLAGS_m) + ".bin",          // path to weights
+            FLAGS_d,                                  // device specifier
         }.cfgInputLayers({"left_eye_image", "right_eye_image", "head_pose_angles"});
         auto eyes_net = cv::gapi::ie::Params<nets::Eyes> {
             FLAGS_m_es,                               // path to topology IR
