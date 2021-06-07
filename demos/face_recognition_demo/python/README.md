@@ -129,7 +129,7 @@ General:
                         single image, a folder of images, video file or camera id.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of output file/s to save.
+                        Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
@@ -207,12 +207,12 @@ Linux (`sh`, `bash`, ...) (assuming OpenVINO installed in `/opt/intel/openvino`)
 source /opt/intel/openvino/bin/setupvars.sh
 
 python ./face_recognition_demo.py \
--i <path_to_video>/input_video.mp4 \
--m_fd <path_to_model>/face-detection-retail-0004.xml \
--m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
--m_reid <path_to_model>/face-reidentification-retail-0095.xml \
---verbose \
--fg "/home/face_gallery"
+  -i <path_to_video>/input_video.mp4 \
+  -m_fd <path_to_model>/face-detection-retail-0004.xml \
+  -m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
+  -m_reid <path_to_model>/face-reidentification-retail-0095.xml \
+  --verbose \
+  -fg "/home/face_gallery"
 ```
 
 Windows (`cmd`, `powershell`) (assuming OpenVINO installed in `C:/Intel/openvino`):
@@ -222,12 +222,12 @@ Windows (`cmd`, `powershell`) (assuming OpenVINO installed in `C:/Intel/openvino
 call C:/Intel/openvino/bin/setupvars.bat
 
 python ./face_recognition_demo.py ^
--i <path_to_video>/input_video.mp4 ^
--m_fd <path_to_model>/face-detection-retail-0004.xml ^
--m_lm <path_to_model>/landmarks-regression-retail-0009.xml ^
--m_reid <path_to_model>/face-reidentification-retail-0095.xml ^
---verbose ^
--fg "C:/face_gallery"
+  -i <path_to_video>/input_video.mp4 ^
+  -m_fd <path_to_model>/face-detection-retail-0004.xml ^
+  -m_lm <path_to_model>/landmarks-regression-retail-0009.xml ^
+  -m_reid <path_to_model>/face-reidentification-retail-0095.xml ^
+  --verbose ^
+  -fg "C:/face_gallery"
 ```
 
 When single image applied as an input, the demo will process and render it quickly, then exit. In this particular case, recommendation is to also apply `loop` option, which will enforce looping over processing the single image, so processed results will be continuously visualized on screen.

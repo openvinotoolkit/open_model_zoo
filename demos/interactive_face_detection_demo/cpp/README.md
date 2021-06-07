@@ -82,7 +82,7 @@ Options:
     -h                         Print a usage message
     -i                         Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -loop                      Optional. Enable reading the input in a loop.
-    -o "<path>"                Optional. Name of output file/s to save.
+    -o "<path>"                Optional. Name of the output file(s) to save.
     -limit "<num>"             Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m "<path>"                Required. Path to an .xml file with a trained Face Detection model.
     -m_ag "<path>"             Optional. Path to an .xml file with a trained Age/Gender Recognition model.
