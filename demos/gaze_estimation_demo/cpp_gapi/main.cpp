@@ -6,7 +6,7 @@
 #include <utils/args_helper.hpp>
 #include <utils/slog.hpp>
 
-#include "gaze_estimation_demo.hpp"
+#include "gaze_estimation_demo_gapi.hpp"
 #include "face_inference_results.hpp"
 #include "results_marker.hpp"
 #include "exponential_averager.hpp"
