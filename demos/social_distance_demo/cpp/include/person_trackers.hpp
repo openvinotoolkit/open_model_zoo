@@ -11,8 +11,7 @@
 
 #include <opencv2/core.hpp>
 
-class TrackableObject {
-public:
+struct TrackableObject {
     TrackableObject(cv::Rect2i bb, const std::vector<float> &r, cv::Point centroid)
             : bbox{bb}, reid{r}, updated{false}, disappeared(0) {
         centroids.push_back(centroid);
