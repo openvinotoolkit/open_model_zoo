@@ -166,10 +166,10 @@ struct Context {  // stores all global data for tasks
         std::vector<PersonTrackers> personTracker;
         std::vector<int> minW;
         std::vector<int> maxW;
-        std::vector<std::atomic<uint64_t>> lastProcessedIds;
+        std::vector<std::atomic<int64_t>> lastProcessedIds;
 
-        //manual definition of constructor is needed only for creating vector<std::atomic<uint64_t>>
-        TrackersContext(std::vector<PersonTrackers>&& personTracker, std::vector<int>&& minW, std::vector<int>&& maxW) 
+        //manual definition of constructor is needed only for creating vector<std::atomic<int64_t>>
+        TrackersContext(std::vector<PersonTrackers>&& personTracker, std::vector<int>&& minW, std::vector<int>&& maxW)
             : personTracker(personTracker), minW(minW), maxW(maxW), lastProcessedIds(personTracker.size()) {
             for (size_t i = 0; i < lastProcessedIds.size(); ++i) {
                 lastProcessedIds[i] = 0;
