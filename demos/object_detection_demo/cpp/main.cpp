@@ -386,8 +386,10 @@ int main(int argc, char *argv[]) {
 
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
+                renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+
                 if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
                     videoWriter.write(outFrame);
                 }
@@ -404,7 +406,6 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
-                renderMetrics.update(renderingStart);
             }
         }
 
@@ -412,9 +413,11 @@ int main(int argc, char *argv[]) {
         pipeline.waitForTotalCompletion();
         for (; framesProcessed <= frameNum; framesProcessed++) {
             while (!(result = pipeline.getResult())) {}
+            auto renderingStart = std::chrono::steady_clock::now();
             cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
+            renderMetrics.update(renderingStart);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                 outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
