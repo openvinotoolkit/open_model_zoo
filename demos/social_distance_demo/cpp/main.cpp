@@ -645,8 +645,8 @@ int main(int argc, char* argv[]) {
         std::vector<std::string> files;
         parseInputFilesArguments(files);
         if (files.empty() && 0 == FLAGS_nc) throw std::logic_error("No inputs were found");
-        std::vector<std::shared_ptr<VideoCaptureSource>> videoCapturSourcess;
-        std::vector<std::shared_ptr<ImageSource>> imageSourcess;
+        std::vector<std::shared_ptr<VideoCaptureSource>> videoCapturSources;
+        std::vector<std::shared_ptr<ImageSource>> imageSources;
         if (FLAGS_nc) {
             for (size_t i = 0; i < FLAGS_nc; ++i) {
                 cv::VideoCapture videoCapture(i);
@@ -658,7 +658,7 @@ int main(int argc, char* argv[]) {
                 videoCapture.set(cv::CAP_PROP_BUFFERSIZE , 1);
                 videoCapture.set(cv::CAP_PROP_FRAME_WIDTH, 640);
                 videoCapture.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
-                videoCapturSourcess.push_back(std::make_shared<VideoCaptureSource>(videoCapture, FLAGS_loop_video));
+                videoCapturSources.push_back(std::make_shared<VideoCaptureSource>(videoCapture, FLAGS_loop_video));
             }
         }
         for (const std::string& file : files) {
@@ -669,18 +669,18 @@ int main(int argc, char* argv[]) {
                     slog::info << "Cannot open " << file << slog::endl;
                     return 1;
                 }
-                videoCapturSourcess.push_back(std::make_shared<VideoCaptureSource>(videoCapture, FLAGS_loop_video));
+                videoCapturSources.push_back(std::make_shared<VideoCaptureSource>(videoCapture, FLAGS_loop_video));
             } else {
-                imageSourcess.push_back(std::make_shared<ImageSource>(frame, true));
+                imageSources.push_back(std::make_shared<ImageSource>(frame, true));
             }
         }
-        uint32_t channelsNum = 0 == FLAGS_ni ? videoCapturSourcess.size() + imageSourcess.size() : FLAGS_ni;
+        uint32_t channelsNum = 0 == FLAGS_ni ? videoCapturSources.size() + imageSources.size() : FLAGS_ni;
         std::vector<std::shared_ptr<IInputSource>> inputSources;
-        inputSources.reserve(videoCapturSourcess.size() + imageSourcess.size());
-        for (const std::shared_ptr<VideoCaptureSource>& videoSource : videoCapturSourcess) {
+        inputSources.reserve(videoCapturSources.size() + imageSources.size());
+        for (const std::shared_ptr<VideoCaptureSource>& videoSource : videoCapturSources) {
             inputSources.push_back(videoSource);
         }
-        for (const std::shared_ptr<ImageSource>& imageSource : imageSourcess) {
+        for (const std::shared_ptr<ImageSource>& imageSource : imageSources) {
             inputSources.push_back(imageSource);
         }
 
@@ -777,8 +777,8 @@ int main(int argc, char* argv[]) {
             nreidireq = nireq * 3;
         }
 
-        bool isVideo = imageSourcess.empty() ? true : false;
-        int pause = imageSourcess.empty() ? 1 : 0;
+        bool isVideo = imageSources.empty() ? true : false;
+        int pause = imageSources.empty() ? 1 : 0;
         std::chrono::steady_clock::duration showPeriod = 0 == FLAGS_fps ? std::chrono::steady_clock::duration::zero()
             : std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::seconds{1}) / FLAGS_fps;
         std::vector<cv::Size> gridParam;
