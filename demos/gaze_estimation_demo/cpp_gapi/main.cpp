@@ -168,8 +168,9 @@ int main(int argc, char *argv[]) {
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
         const auto tmp = cap->read();
+        cap.reset();
         if (!tmp.data) {
-            return -1;
+            CV_Assert(false && "Couldn't grab first frame");
         }
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
         cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
