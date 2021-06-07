@@ -37,8 +37,8 @@ def build_argparser():
     args.add_argument("-i", "--input", type=str, required=True,
                       help="Required. Path to an image to infer")
     args.add_argument("-d", "--device", type=str, default="CPU",
-                      help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL, MYRIAD or HETERO: is "
-                           "acceptable. The sample will look for a suitable plugin for device specified. Default "
+                      help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL, MYRIAD or HETERO is "
+                           "acceptable. The demo will look for a suitable plugin for device specified. Default "
                            "value is CPU")
     args.add_argument("-ni", "--number_iter", type=int, default=1,
                       help="Optional. Number of inference iterations")

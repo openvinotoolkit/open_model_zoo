@@ -3,7 +3,7 @@ exclude=
     # generic excludes
     .git,__pycache__,
     # generated files
-    demos/speech_recognition_demo/python/ctcdecode-numpy/ctcdecode_numpy/impl.py,
+    demos/speech_recognition_deepspeech_demo/python/ctcdecode-numpy/ctcdecode_numpy/impl.py,
     models/public/mozilla-deepspeech-0.8.2/mds_convert_utils/memmapped_file_system_pb2.py,
 
 select=

@@ -91,7 +91,10 @@ class SpeechRecognitionSER(PerImageEvaluationMetric):
         self.meta['target'] = 'higher-worse'
 
     def update(self, annotation, prediction):
-        ser = int(annotation.label != prediction.label)
+        # remove extra whitespaces
+        gt_label = ' '.join(annotation.label.split())
+        pred_label = ' '.join(prediction.label.split())
+        ser = int(gt_label != pred_label)
         self.score += ser
         self.length += 1
         return ser

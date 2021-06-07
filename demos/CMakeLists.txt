@@ -128,7 +128,7 @@ macro(add_demo)
 endmacro()
 
 find_package(OpenCV REQUIRED COMPONENTS core highgui videoio imgproc imgcodecs gapi)
-find_package(InferenceEngine 2.0 REQUIRED)
+find_package(InferenceEngine REQUIRED)
 find_package(ngraph REQUIRED)
 
 add_subdirectory(thirdparty/gflags)
@@ -156,5 +156,5 @@ if(ENABLE_PYTHON)
 
     add_subdirectory(human_pose_estimation_3d_demo/python/pose_extractor)
     add_subdirectory(common/python/monitors_extension)
-    add_subdirectory(speech_recognition_demo/python/ctcdecode-numpy)
+    add_subdirectory(speech_recognition_deepspeech_demo/python/ctcdecode-numpy)
 endif()

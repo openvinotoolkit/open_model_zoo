@@ -88,7 +88,7 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
 
     for demo in demos_to_test:
         for case in demo.test_cases:
-            for arg in case.options.values():
+            for arg in list(case.options.values()) + case.extra_models:
                 if isinstance(arg, Arg):
                     for model_request in arg.required_models:
                         model_names.add(model_request.name)
@@ -207,7 +207,7 @@ def main():
                         for key, value in sorted(test_case.options.items())
                         for demo_arg in option_to_args(key, value)]
 
-                    case_model_names = {arg.name for arg in test_case.options.values() if isinstance(arg, ModelArg)}
+                    case_model_names = {arg.name for arg in list(test_case.options.values()) + test_case.extra_models if isinstance(arg, ModelArg)}
 
                     undeclared_case_model_names = case_model_names - declared_model_names
                     if undeclared_case_model_names:

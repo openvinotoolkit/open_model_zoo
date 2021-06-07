@@ -198,7 +198,7 @@ def preprocess_input_mask(data, inverse=False):
     img, mask = data.data[0], data.data[1]
     if len(mask.shape) == 3 and mask.shape[-1] != 1:
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
-    mask /= 255
+    mask = mask.astype(float) / 255
     mask[mask >= 0.5] = 1
     mask[mask < 0.5] = 0
     if len(mask.shape) == 2:

@@ -1,0 +1,31 @@
+evaluations:
+  - name: text-to-speech-en-multi-0001
+    module: custom_evaluators.text_to_speech_evaluator.TextToSpeechEvaluator
+    module_config:
+      network_info:
+        forward_tacotron_duration: {}
+
+        forward_tacotron_regression: {}
+        forward_tacotron_regression_inputs:
+          data: data
+          data_mask: data_mask
+          pos_mask: pos_mask
+          speaker_embedding: speaker_embedding
+
+        melgan: {}
+        max_mel_len: '128'
+        max_regression_len: '512'
+        pos_mask_window: '4'
+
+        adapter:
+          type: regression
+          keep_shape: True
+
+      launchers:
+        - framework: dlsdk
+
+      datasets:
+        - name: forward_tacotron_melgan_multispeaker_io
+          metrics:
+            - type: relative_l2_error
+              presenter: print_vector

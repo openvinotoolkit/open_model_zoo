@@ -71,6 +71,8 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
 
     request->SetCompletionCallback(
         [this, frameID, request, internalModelData, metaData] {
+            request->SetCompletionCallback([]{});
+
             {
                 std::lock_guard<std::mutex> lock(mtx);
 

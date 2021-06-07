@@ -47,7 +47,7 @@ def build_argparser():
                            "the kernels implementations.")
     args.add_argument("-d", "--device", type=str, default="CPU",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is"
-                           " acceptable. The sample will look for a suitable plugin for device specified. "
+                           " acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU")
     args.add_argument('--labels', type=str, default=None,
                       help="Optional. Labels mapping file")

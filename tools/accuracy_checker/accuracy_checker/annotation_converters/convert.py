@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import warnings
+import platform
 
 import copy
 import json
@@ -31,10 +32,11 @@ from ..representation import (
     ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation,
 )
 from ..data_readers import KaldiFrameIdentifier, KaldiMatrixIdentifier
-from ..utils import get_path, OrderedSet
+from ..utils import (
+    get_path, OrderedSet, cast_to_bool, is_relative_to, start_telemetry, send_telemetry_event, end_telemetry
+)
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
-from ..utils import cast_to_bool, is_relative_to
 
 DatasetConversionInfo = namedtuple('DatasetConversionInfo',
                                    [
@@ -221,8 +223,17 @@ def make_subset_kaldi(annotation, size, shuffle=True):
 
 def main():
     main_argparser = build_argparser()
+    tm = start_telemetry()
+
     args, _ = main_argparser.parse_known_args()
     converter, converter_argparser, converter_args = get_converter_arguments(args)
+    details = {
+        'platform': platform.system(), 'conversion_errors': None, 'save_annotation': True,
+        'subsample': bool(args.subsample),
+        'shuffle': args.shuffle,
+        'converter': converter.get_name(),
+        'dataset_analysis': args.analyze_dataset
+    }
 
     main_argparser = ArgumentParser(parents=[main_argparser, converter_argparser])
     args = main_argparser.parse_args()
@@ -237,6 +248,7 @@ def main():
     if errors:
         warnings.warn('Following problems were found during conversion:'
                       '\n{}'.format('\n'.join(errors)))
+        details['conversion_errors'] = str(len(errors))
 
     subsample = args.subsample
     if subsample:
@@ -247,6 +259,8 @@ def main():
             subsample_size = int(args.subsample)
 
         converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed, args.shuffle)
+        details['dataset_size'] = len(converted_annotation)
+    send_telemetry_event(tm, 'annotation_conversion', json.dumps(details))
     if args.analyze_dataset:
         analyze_dataset(converted_annotation, meta)
 
@@ -259,12 +273,10 @@ def main():
     dataset_config = {
         'name': annotation_name,
         'annotation_conversion': converter_config,
-        'subsample_size': subsample,
-        'subsample_seed': args.subsample_seed,
-        'shuffle': args.shuffle
     }
 
     save_annotation(converted_annotation, meta, annotation_file, meta_file, dataset_config)
+    end_telemetry(tm)
 
 
 def save_annotation(annotation, meta, annotation_file, meta_file, dataset_config=None):
@@ -298,7 +310,14 @@ def get_conversion_attributes(config, dataset_size):
                 continue
 
             if isinstance(m_path, list):
-                for m_path in config['_command_line_mapping'][key]:
+                path_list = []
+                for path in m_path:
+                    if isinstance(path, list):
+                        path_list.extend(path)
+                    else:
+                        path_list.append(path)
+
+                for m_path in path_list:
                     if is_relative_to(value, m_path):
                         break
             conversion_parameters[key] = str(value.relative_to(m_path))

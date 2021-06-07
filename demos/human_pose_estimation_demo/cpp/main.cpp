@@ -59,6 +59,8 @@ static const char num_streams_message[] = "Optional. Number of streams to use fo
 "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 static const char no_show_message[] = "Optional. Don't show output.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
+    "in (width x height) format. Example: 1280x720. Input frame size used by default.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
@@ -74,6 +76,7 @@ DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_string(output_resolution, "", output_resolution_message);
 
 /**
 * \brief This function shows a help message
@@ -271,12 +274,11 @@ int main(int argc, char *argv[]) {
             core);
         Presenter presenter(FLAGS_u);
 
-        pipeline.submitData(ImageInputData(curr_frame),
+        int64_t frameNum = pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
 
         uint32_t framesProcessed = 0;
         bool keepRunning = true;
-        int64_t frameNum = -1;
         std::unique_ptr<ResultBase> result;
 
         while (keepRunning) {
@@ -298,7 +300,7 @@ int main(int argc, char *argv[]) {
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - cast result's underlying pointer to HumanPoseResult*
             //    and use your own processing instead of calling renderHumanPose().
-            while ((result = pipeline.getResult()) && keepRunning) {
+            while (keepRunning && (result = pipeline.getResult())) {
                 cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);

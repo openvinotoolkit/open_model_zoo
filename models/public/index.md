@@ -1,11 +1,11 @@
-# Overview of OpenVINO&trade; Toolkit Public Models
+# Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models
 
-OpenVINO&trade; toolkit provides a set of public models
+OpenVINO&trade; toolkit provides a set of public pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on Github](https://github.com/openvinotoolkit/open_model_zoo).
+The table [Public Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
 
-You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ Model Downloader and other automation tools.
-Review the tools description in the file `<OPENVINO_INSTALL_DIR>/deployment_tools/open_model_zoo/tools/downloader/README.md` for details.
+You can download models and convert them into Inference Engine format (\*.xml + \*.bin) using the OpenVINO™ [Model Downloader](../../tools/downloader/README.md) and other automation tools.
 
 ## Classification
 
@@ -32,6 +32,7 @@ Review the tools description in the file `<OPENVINO_INSTALL_DIR>/deployment_tool
 | Inception (GoogleNet) V3    | TensorFlow\*<br>PyTorch\*          | [googlenet-v3](./googlenet-v3/README.md) <br> [googlenet-v3-pytorch](./googlenet-v3-pytorch/README.md) | 77.904%/93.808%<br>77.69%/93.7% | 11.469 | 23.817 |
 | Inception (GoogleNet) V4    | TensorFlow\*                       | [googlenet-v4-tf](./googlenet-v4-tf/README.md) | 80.204%/95.21% | 24.584 | 42.648 |
 | Inception-ResNet V2         | TensorFlow\*                       | [inception-resnet-v2-tf](./inception-resnet-v2-tf/README.md) | 80.14%/95.10% | 22.227 | 30.223 |
+| MixNet L                    | TensorFlow\*                       | [mixnet-l](./mixnet-l/README.md)  | 78.30%/93.91% | 0.565 | 7.3 |
 | MobileNet V1 0.25 128       | Caffe\*                            | [mobilenet-v1-0.25-128](./mobilenet-v1-0.25-128/README.md)  | 40.54%/65% | 0.028 | 0.468 |
 | MobileNet V1 0.5 160        | Caffe\*                            | [mobilenet-v1-0.50-160](./mobilenet-v1-0.50-160/README.md) | 59.86%/82.04% | 0.156 | 1.327 |
 | MobileNet V1 0.5 224        | Caffe\*                            | [mobilenet-v1-0.50-224](./mobilenet-v1-0.50-224/README.md) | 63.042%/84.934%| 0.304 | 1.327 |
@@ -133,6 +134,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | MobileFace Detection V1              | MXNet\*                  | [mobilefacedet-v1-mxnet](./mobilefacedet-v1-mxnet/README.md)| 	78.7488%| 3.5456 | 7.6828 |
 | MTCNN                                | Caffe\*                  | [mtcnn](./mtcnn/README.md):<br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| 48.1308%/62.2625% | <br>3.3715<br>0.0031<br>0.0263|<br>0.0066<br>0.1002<br>0.3890|
 | Pelee                                | Caffe\*                  | [pelee-coco](./pelee-coco/README.md) | 21.9761% | 1.290 | 5.98 |
+| RetinaFace with ResNet 50            | PyTorch\*                | [retinaface-resnet50-pytorch](./retinaface-resnet50-pytorch/README.md) | 91.78% | 88.8627 | 27.2646 |
 | RetinaNet with Resnet 50             | TensorFlow\*             | [retinanet-tf](./retinanet-tf/README.md) | 33.15% | 238.9469 | 64.9706 |
 | R-FCN with Resnet-101                | TensorFlow\*             | [rfcn-resnet101-coco-tf](./rfcn-resnet101-coco-tf/README.md) | 28.40%/45.02% | 53.462 | 171.85 |
 | SSD 300                              | Caffe\*                  | [ssd300](./ssd300/README.md)  | 87.09% | 62.815 | 26.285 |
@@ -143,9 +145,6 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | SSD lite with MobileNet V2           | TensorFlow\*             | [ssdlite_mobilenet_v2](./ssdlite_mobilenet_v2/README.md) | 24.2946% | 1.525 | 4.475 |
 | SSD with ResNet-50 V1 FPN            | TensorFlow\*             | [ssd_resnet50_v1_fpn_coco](./ssd_resnet50_v1_fpn_coco/README.md)| 38.4557% | 178.6807 | 59.9326 |
 | SSD with ResNet 34 1200x1200         | PyTorch\*                | [ssd-resnet34-1200-onnx](./ssd-resnet34-1200-onnx/README.md) | 20.7198%/39.2752% | 433.411 | 20.058  |
-| SSH                                  | MXNet\*                  | [ssh-mxnet](./ssh-mxnet/README.md) | 84.80% | 267.0594 | 19.7684 |
-| RetinaFace-R50                       | MXNet\*                  | [retinaface-resnet50](./retinaface-resnet50/README.md) | 87.2902% | 100.8478 | 29.427 |
-| RetinaFace-Anti-Cov                  | MXNet\*                  | [retinaface-anti-cov](./retinaface-anti-cov/README.md)  | 77.1531% | 2.7781 | 0.5955 |
 | Ultra Lightweight Face Detection RFB 320| PyTorch\*             | [ultra-lightweight-face-detection-rfb-320](./ultra-lightweight-face-detection-rfb-320/README.md)|84.78% | 0.2106 | 0.3004 |
 | Ultra Lightweight Face Detection slim 320| PyTorch\*            | [ultra-lightweight-face-detection-slim-320](./ultra-lightweight-face-detection-slim-320/README.md)|83.32% | 0.1724 | 0.2844 |
 | Vehicle License Plate Detection Barrier | TensorFlow\* | [vehicle-license-plate-detection-barrier-0123](./vehicle-license-plate-detection-barrier-0123/README.md) | 	99.52% | 0.271 | 0.547 |
@@ -154,7 +153,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | YOLO v2                              | Keras\*                  | [yolo-v2-tf](./yolo-v2-tf/README.md) | 53.1453%/56.483% | 63.0301	 |	50.9526 |
 | YOLO v3                              | Keras\*                  | [yolo-v3-tf](./yolo-v3-tf/README.md) | 62.2759%/67.7221% | 65.9843	 |	61.9221 |
 | YOLO v3 Tiny                         | Keras\*                  | [yolo-v3-tiny-tf](./yolo-v3-tiny-tf/README.md) | 35.9%/39.7% | 5.582  | 8.848 |
-| YOLO v4                              | Keras\*                  | [yolo-v4-tf](./yolo-v4-tf/README.md) | 71.17%/75.02% | 128.608	 |	64.33 |
+| YOLO v4                              | Keras\*                  | [yolo-v4-tf](./yolo-v4-tf/README.md) | 71.23%/77.40%/50.26% | 129.5567	 |	64.33 |
 | YOLO v4 Tiny                         | Keras\*                  | [yolo-v4-tiny-tf](./yolo-v4-tiny-tf/README.md) | | 6.9289 | 6.0535 |
 
 ## Face Recognition
@@ -162,10 +161,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Model Name                           | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------------------ | -------------- | -------------- | -------- |------ | ------- |
 | FaceNet                              | TensorFlow\*   | [facenet-20180408-102900](./facenet-20180408-102900/README.md) | 99.14% | 2.846 | 23.469 |
-| LResNet34E-IR,ArcFace@ms1m-refine-v1 | MXNet\*        | [face-recognition-resnet34-arcface](./face-recognition-resnet34-arcface/README.md) | 	98.7488%| 8.934 | 34.129 |
-| LResNet50E-IR,ArcFace@ms1m-refine-v1 | MXNet\*        | [face-recognition-resnet50-arcface](./face-recognition-resnet50-arcface/README.md) | 98.8835%| 12.637 | 43.576 |
-| LResNet100E-IR,ArcFace@ms1m-refine-v2| MXNet\*        | [face-recognition-resnet100-arcface](./face-recognition-resnet100-arcface/README.md) | 99.0218%| 24.209 | 65.131 |
-| MobileFaceNet,ArcFace@ms1m-refine-v1 | MXNet\*        | [face-recognition-mobilefacenet-arcface](./face-recognition-mobilefacenet-arcface/README.md) | 98.8695% | 0.449 | 0.993 |
+| LResNet100E-IR,ArcFace@ms1m-refine-v2| MXNet\*        | [face-recognition-resnet100-arcface-onnx](./face-recognition-resnet100-arcface-onnx/README.md) | 99.68%| 24.2115  | 65.1320 |
 | SphereFace                           | Caffe\*        | [Sphereface](./Sphereface/README.md) | 98.8321% | 3.504 | 22.671 |
 
 ## Human Pose Estimation
@@ -319,6 +315,12 @@ Named entity recognition (NER) is the task of tagging entities in text with thei
 | Model Name     | Implementation | OMZ Model Name                                         | Accuracy | GFlops  | mParams  |
 | -------------- | -------------- | ------------------------------------------------------ | -------- | ------- | -------- |
 | vehicle-reid-0001 | PyTorch\* | [vehicle-reid-0001](./vehicle-reid-0001/README.md) | 96.31%/85.15 % | 2.643 | 2.183 |
+
+## See Also
+
+* [Open Model Zoo Demos](../../demos/README.md)
+* [Model Downloader](../../tools/downloader/README.md)
+* [Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models](../intel/index.md)
 
 ## Legal Information
 

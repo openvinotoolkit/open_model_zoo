@@ -103,6 +103,11 @@ from .optical_flow import OpticalFlowAnnotation, OpticalFlowPrediction
 
 from .noise_suppression import NoiseSuppressionAnnotation, NoiseSuppressionPrediction
 
+from .time_series_representation import (
+    TimeSeriesForecastingAnnotation,
+    TimeSeriesForecastingQuantilesPrediction
+)
+
 __all__ = [
     'BaseRepresentation',
 
@@ -216,5 +221,8 @@ __all__ = [
     'NiftiRegressionAnnotation',
 
     'NoiseSuppressionAnnotation',
-    'NoiseSuppressionPrediction'
+    'NoiseSuppressionPrediction',
+
+    'TimeSeriesForecastingAnnotation',
+    'TimeSeriesForecastingQuantilesPrediction'
 ]

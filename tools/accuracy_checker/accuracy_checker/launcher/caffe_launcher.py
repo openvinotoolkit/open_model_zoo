@@ -96,7 +96,7 @@ class CaffeLauncher(Launcher):
         if len(data_shape) == 5 and len(layer_shape) == 4:
             data = data[0]
             data_shape = np.shape(data)
-        data = np.transpose(data, layout) if len(data_shape) == 4 else np.array(data)
+        data = np.transpose(data, layout) if len(data_shape) == 4 and layout is not None else np.array(data)
         data_shape = np.shape(data)
         if layer_shape != data_shape:
             self._do_reshape = True

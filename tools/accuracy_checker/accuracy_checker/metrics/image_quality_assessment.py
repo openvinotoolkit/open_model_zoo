@@ -110,8 +110,8 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
         self.color_scale = 255 if not self.normalized_images else 1
 
     def _psnr_differ(self, annotation_image, prediction_image):
-        prediction = np.asarray(prediction_image).astype(np.float)
-        ground_truth = np.asarray(annotation_image).astype(np.float)
+        prediction = np.squeeze(np.asarray(prediction_image)).astype(np.float)
+        ground_truth = np.squeeze(np.asarray(annotation_image)).astype(np.float)
 
         height, width = prediction.shape[:2]
         prediction = prediction[
@@ -287,6 +287,7 @@ class VisionInformationFidelity(BaseRegressionMetric):
             convolve2d.raise_error(self.__provider__)
 
     def configure(self):
+        super().configure()
         self.sigma_nsq = self.get_value_from_config('sigma_nsq')
 
     def _vif_diff(self, annotation_image, prediction_image):
@@ -368,11 +369,15 @@ def _get_sigmas(gt, p, win, mode='same', sums=None):
 
 class LPIPS(BaseRegressionMetric):
     __provider__ = 'lpips'
+    annotation_types = (
+        SuperResolutionAnnotation, ImageProcessingAnnotation, ImageInpaintingAnnotation, StyleTransferAnnotation
+    )
+    prediction_types = (
+        SuperResolutionPrediction, ImageProcessingPrediction, ImageInpaintingPrediction, StyleTransferPrediction
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(self.lpips_differ, *args, **kwargs)
-        if isinstance(lpips, UnsupportedPackage):
-            lpips.raise_error(self.__provider__)
 
     @classmethod
     def parameters(cls):
@@ -400,6 +405,8 @@ class LPIPS(BaseRegressionMetric):
         self.color_order = self.get_value_from_config('color_order')
         self.normalized_images = self.get_value_from_config('normalized_images')
         self.color_scale = 255 if not self.normalized_images else 1
+        if isinstance(lpips, UnsupportedPackage):
+            lpips.raise_error(self.__provider__)
         self.loss = lpips.LPIPS(net=self.get_value_from_config('net'))
         self.dist_threshold = self.get_value_from_config('distance_threshold')
 

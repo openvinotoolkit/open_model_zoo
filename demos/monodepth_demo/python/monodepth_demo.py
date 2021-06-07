@@ -24,7 +24,7 @@ def main():
         "Absolute path to a shared library with the kernels implementations", type=str, default=None)
     parser.add_argument("-d", "--device",
         help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. "
-        "Sample will look for a suitable plugin for device specified. Default value is CPU", default="CPU", type=str)
+        "The demo will look for a suitable plugin for device specified. Default value is CPU", default="CPU", type=str)
 
     args = parser.parse_args()
 
@@ -40,8 +40,8 @@ def main():
     log.info("Loading network")
     net = ie.read_network(args.model, args.model.with_suffix(".bin"))
 
-    assert len(net.input_info) == 1, "Sample supports only single input topologies"
-    assert len(net.outputs) == 1, "Sample supports only single output topologies"
+    assert len(net.input_info) == 1, "Expected model with only 1 input blob"
+    assert len(net.outputs) == 1, "Expected model with only 1 output blob"
 
     log.info("preparing input blobs")
     input_blob = next(iter(net.input_info))
