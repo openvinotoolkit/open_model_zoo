@@ -1,0 +1,15 @@
+models:
+  - name: face-recognition-resnet100-arcface-onnx
+
+    launchers:
+      - framework: dlsdk
+        adapter: reid
+
+    datasets:
+      - name: lfw_bin
+
+        preprocessing:
+          - type: auto_resize
+
+        metrics:
+          - type: pairwise_accuracy_subsets

@@ -53,6 +53,8 @@ static const char num_streams_message[] = "Optional. Number of streams to use fo
 "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 static const char no_show_message[] = "Optional. Don't show output.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
+    "in (width x height) format. Example: 1280x720. Input frame size used by default.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(m, "", model_message);
@@ -66,6 +68,7 @@ DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_string(output_resolution, "", output_resolution_message);
 
 /**
 * \brief This function shows a help message
@@ -167,7 +170,7 @@ cv::Mat applyColorMap(cv::Mat input) {
     return out;
 }
 
-cv::Mat renderSegmentationData(const SegmentationResult& result, OutputTransform& outputTransform) {
+cv::Mat renderSegmentationData(const ImageResult& result, OutputTransform& outputTransform) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -180,7 +183,7 @@ cv::Mat renderSegmentationData(const SegmentationResult& result, OutputTransform
     }
 
     // Visualizing result data over source image
-    cv::Mat output = inputImg / 2 + applyColorMap(result.mask) / 2;
+    cv::Mat output = inputImg / 2 + applyColorMap(result.resultImage) / 2;
     outputTransform.resize(output);
     return output;
 }
@@ -267,10 +270,10 @@ int main(int argc, char* argv[])
             pipeline.waitForData();
 
             //--- Checking for results and rendering data if it's ready
-            //--- If you need just plain data without rendering - cast result's underlying pointer to SegmentationResult*
+            //--- If you need just plain data without rendering - cast result's underlying pointer to ImageResult*
             //    and use your own processing instead of calling renderSegmentationData().
-            while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>(), outputTransform);
+            while (keepRunning && (result = pipeline.getResult())) {
+                cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -301,7 +304,7 @@ int main(int argc, char* argv[])
             result = pipeline.getResult();
             if (result != nullptr)
             {
-                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>(), outputTransform);
+                cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,

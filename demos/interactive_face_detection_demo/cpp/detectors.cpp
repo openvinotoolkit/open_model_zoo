@@ -716,7 +716,7 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
         std::cout << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << std::endl;
     }
 
-    auto begin = n_lm * idx;
+    auto begin = n_lm / 2 * idx;
     auto end = begin + n_lm / 2;
     for (auto i_lm = begin; i_lm < end; ++i_lm) {
         float normed_x = normed_coordinates[2 * i_lm];
@@ -802,7 +802,7 @@ double CallStat::getSmoothedDuration() {
     // Additional check is needed for the first frame while duration of the first
     // visualisation is not calculated yet.
     if (_smoothed_duration < 0) {
-        auto t = std::chrono::high_resolution_clock::now();
+        auto t = std::chrono::steady_clock::now();
         return std::chrono::duration_cast<ms>(t - _last_call_start).count();
     }
     return _smoothed_duration;
@@ -817,7 +817,7 @@ double CallStat::getLastCallDuration() {
 }
 
 void CallStat::calculateDuration() {
-    auto t = std::chrono::high_resolution_clock::now();
+    auto t = std::chrono::steady_clock::now();
     _last_call_duration = std::chrono::duration_cast<ms>(t - _last_call_start).count();
     _number_of_calls++;
     _total_duration += _last_call_duration;
@@ -826,12 +826,12 @@ void CallStat::calculateDuration() {
     }
     double alpha = 0.1;
     _smoothed_duration = _smoothed_duration * (1.0 - alpha) + _last_call_duration * alpha;
+    _last_call_start = t;
 }
 
 void CallStat::setStartTime() {
-    _last_call_start = std::chrono::high_resolution_clock::now();
+    _last_call_start = std::chrono::steady_clock::now();
 }
-
 
 void Timer::start(const std::string& name) {
     if (_timers.find(name) == _timers.end()) {

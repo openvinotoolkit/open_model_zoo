@@ -109,4 +109,5 @@ model_optimizer_args:
   - --output=prob
   - --input_model=$conv_dir/regnetx-3.2gf.onnx
 framework: pytorch
+quantizable: yes
 license: https://raw.githubusercontent.com/facebookresearch/pycls/master/LICENSE

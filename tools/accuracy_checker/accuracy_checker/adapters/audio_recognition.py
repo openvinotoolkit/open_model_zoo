@@ -52,7 +52,7 @@ def require_ctcdecode_numpy():
         except ImportError:
             raise ValueError(
                 "To use ctc_beam_search_decoder_with_lm adapter you need ctcdecode_numpy installed. "
-                "Please see open_model_zoo/demos/python_demos/speech_recognition_demo/README.md for instructions."
+                "Please see open_model_zoo/demos/speech_recognition_deepspeech_demo/python/README.md for instructions."
             )
         ctcdecode_numpy = ctcdecode_numpy_imported
 
@@ -442,7 +442,7 @@ class FastCTCBeamSearchDecoderWithLm(CTCBeamSearchDecoderWithLm):
             )
         if self.sep not in [' ', '']:
             raise ValueError("fast_ctc_beam_search_decoder_with_lm does not support non-default value of sep")
-        self.ctcdecoder_state = ctcdecode_numpy.CTCBeamDecoder(
+        self.ctcdecoder_state = ctcdecode_numpy.BatchedCtcLmDecoder(
             self.alphabet,
             model_path=str(lm_file) if lm_file is not None else None,
             alpha=self.alpha,

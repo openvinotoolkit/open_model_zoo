@@ -20,7 +20,7 @@
 * @param batchIndex - batch index of an image inside of the blob.
 */
 template <typename T>
-void matU8ToBlob(const cv::Mat& orig_image, InferenceEngine::Blob::Ptr& blob, int batchIndex = 0) {
+void matU8ToBlob(const cv::Mat& orig_image, const InferenceEngine::Blob::Ptr& blob, int batchIndex = 0) {
     InferenceEngine::SizeVector blobSize = blob->getTensorDesc().getDims();
     const size_t width = blobSize[3];
     const size_t height = blobSize[2];
@@ -113,10 +113,10 @@ inline void putHighlightedText(cv::Mat& frame,
 
 class OutputTransform {
     public:
-        OutputTransform() : doResize(false) {}
+        OutputTransform() : doResize(false), scaleFactor(1) {}
 
         OutputTransform(cv::Size inputSize, cv::Size outputResolution) :
-            doResize(true), inputSize(inputSize), outputResolution(outputResolution) {}
+            doResize(true), scaleFactor(1), inputSize(inputSize), outputResolution(outputResolution) {}
 
         cv::Size computeResolution() {
             float inputWidth = static_cast<float>(inputSize.width);

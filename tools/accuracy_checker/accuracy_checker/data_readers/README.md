@@ -1,14 +1,19 @@
 # Data Readers
 
-Data Reader is a function for reading input data.
-You can use 2 ways to set data_reader for dataset:
+Data Reader is a class for reading input data in a specific format. Readers may have parameters available for configuration. The reader and its parameters, if necessary, are set through the configuration file.
+
+## Describing how to set data reader in Configuration File
+
+Data readers can be provided in `datasets` section of configuration file to use specific reader. If reader is not specified, `opencv_imread` reader will be used by default.
+
+You can use 2 ways to set data reader for dataset:
 * Define reader as a string.
 
 ```yml
 reader: opencv_imread
 ```
 
-* Define reader as a dictionary, using `type:` for setting reader name. This approach gives opportunity to set additional parameters for adapter if it is required.
+* Define reader as a dictionary, using `type:` for setting reader name. This approach gives opportunity to set additional parameters for reader if it is required.
 
 ```yml
 reader:
@@ -27,7 +32,10 @@ reader:
     *.jpeg: opencv_imread
 ```
 
+## Supported Data Readers
+
 AccuracyChecker supports following list of data readers:
+
 * `opencv_imread` - read images using OpenCV library. Default color space is BGR.
    * `reading_flag` - (Optional) flag which specifies the way image should be read: `color` - default, loads color image, `gray` - loads image in grayscale mode, `unchanged` - loads image as such including alpha channel.
 * `pillow_imread` - read images using Pillow library. Default color space is RGB.

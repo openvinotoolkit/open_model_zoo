@@ -19,20 +19,20 @@ description: >-
 task_type: question_answering
 files:
   - name: FP32/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
-    size: 1269670
-    sha256: 50b44c8830d423b9075a7573d171eca8638d3a4419afc422926057a63f11e8f9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/bert-large-uncased-whole-word-masking-squad-emb-0001/FP32/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
+    size: 1244365
+    sha256: cb19c1e93171121cc193d65ca7eb85eb50f355f87aac0315ccd1808dea55f05a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/bert-large-uncased-whole-word-masking-squad-emb-0001/FP32/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
   - name: FP32/bert-large-uncased-whole-word-masking-squad-emb-0001.bin
     size: 1340567764
-    sha256: 071d13a1744c5c90d54e78a13f6c0dbe581128a06c996eb7b5fde4162e11f5f8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/bert-large-uncased-whole-word-masking-squad-emb-0001/FP32/bert-large-uncased-whole-word-masking-squad-emb-0001.bin
+    sha256: 28b2dab1f1a5d95a1c0a32254f73163608ea14cde9752d2feefe353f7bd04311
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/bert-large-uncased-whole-word-masking-squad-emb-0001/FP32/bert-large-uncased-whole-word-masking-squad-emb-0001.bin
   - name: FP16/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
-    size: 1268441
-    sha256: 7f8117040f6211cff4a7b88b62f4001ddc8bbf71484c9c5beaa416c8e0ad86f5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/bert-large-uncased-whole-word-masking-squad-emb-0001/FP16/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
+    size: 1243137
+    sha256: 090acebb1ec1691646820e7d9c80704bde11e7e20ee197adadadb67d8bb18e5c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/bert-large-uncased-whole-word-masking-squad-emb-0001/FP16/bert-large-uncased-whole-word-masking-squad-emb-0001.xml
   - name: FP16/bert-large-uncased-whole-word-masking-squad-emb-0001.bin
     size: 670283952
-    sha256: 0293b6998bd86d8c743781e10ab238d0a54019d9c45a3f780087387a574454ea
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/bert-large-uncased-whole-word-masking-squad-emb-0001/FP16/bert-large-uncased-whole-word-masking-squad-emb-0001.bin
+    sha256: e4dbdeb2c12b3730832622bf6e1cd194c71fc8bfc8d603a050b80fe078876137
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/bert-large-uncased-whole-word-masking-squad-emb-0001/FP16/bert-large-uncased-whole-word-masking-squad-emb-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -107,6 +107,10 @@ class DLSDKLauncher(Launcher):
                             "In multi device mode allows setting comma-separated list for numbers "
                             "or one value which will be used for all devices"
             ),
+            'reset_memory_state': BoolField(
+                optional=True, default=False,
+                description='Reset infer request memory states after inference. '
+                            'State control essential for recurrent networks'),
             'device_config': DictField(optional=True, description='device configuration'),
             '_model_optimizer': PathField(optional=True, is_directory=True, description="Model optimizer."),
             '_tf_obj_detection_api_config_dir': PathField(
@@ -165,7 +169,6 @@ class DLSDKLauncher(Launcher):
                 self._model, self._weights = DLSDKLauncher.convert_model(self.config, dlsdk_launcher_config.framework)
             else:
                 self._model, self._weights = self.automatic_model_search()
-
             self.load_network(log=True, preprocessing=preprocessor)
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
         else:
@@ -174,17 +177,14 @@ class DLSDKLauncher(Launcher):
         self._lstm_inputs = None
         if '_list_lstm_inputs' in self.config:
             self._configure_lstm_inputs()
+        self.reset_memory_state = self.get_value_from_config('reset_memory_state')
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
         field_uri = uri_prefix or 'launcher.{}'.format(cls.__provider__)
         return DLSDKLauncherConfigValidator(
-            field_uri, fields=cls.parameters(),
-            delayed_model_loading=delayed_model_loading
-        ).validate(
-            config, field_uri=field_uri,
-            validation_scheme=cls.validation_scheme(), fetch_only=fetch_only
-        )
+            field_uri, fields=cls.parameters(), delayed_model_loading=delayed_model_loading).validate(
+                config, field_uri=field_uri, validation_scheme=cls.validation_scheme(), fetch_only=fetch_only)
 
     @property
     def device(self):
@@ -231,11 +231,7 @@ class DLSDKLauncher(Launcher):
                     else:
                         ie_input_info = self.exec_network.inputs
                     layout = self._target_layout_mapping.get(key, ie_input_info[key].layout)
-                    tensor_desc = TensorDesc(
-                        ie_input_info[key].precision,
-                        input_data.shape,
-                        layout
-                    )
+                    tensor_desc = TensorDesc(ie_input_info[key].precision, input_data.shape, layout)
                     preprocess_info = self._preprocess_info.get(key)
                     if preprocess_info is not None:
                         self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data), preprocess_info)
@@ -243,6 +239,9 @@ class DLSDKLauncher(Launcher):
                         self.exec_network.requests[0].set_blob(key, Blob(tensor_desc, input_data))
             result = self.exec_network.infer(infer_inputs) if not self._use_set_blob else self.exec_network.infer()
             results.append(result)
+        if self.reset_memory_state:
+            for state in self.exec_network.requests[0].query_state():
+                state.reset()
 
         if metadata is not None:
             self._fill_meta(metadata)
@@ -465,7 +464,6 @@ class DLSDKLauncher(Launcher):
                         break
 
             extension_list = list(extensions_path.glob(file_format.format('{}_{}'.format(base_name, selection_mode))))
-
             return extension_list
 
         os_specific_formats = {
@@ -473,7 +471,6 @@ class DLSDKLauncher(Launcher):
             'Linux': ('lib{}.so',),
             'Windows': ('{}.dll',),
         }
-
         cpu_extensions_name = cpu_extensions.parts[-1]
         if cpu_extensions_name != 'AUTO':
             return cpu_extensions
@@ -485,14 +482,11 @@ class DLSDKLauncher(Launcher):
                 'Accuracy Checker can not automatically find cpu extensions library '
                 'for {} platform. Please, set cpu extension library manually.'.format(system_name)
             )
-
         extension_list = []
-
         for supported_format in file_formats:
             extension_list = get_cpu_extensions_list(supported_format, 'cpu_extension', selection_mode)
             if extension_list:
                 break
-
         if not extension_list:
             raise ConfigError('suitable CPU extension lib not found in {}'.format(extensions_path))
         return extension_list[0]
@@ -520,17 +514,14 @@ class DLSDKLauncher(Launcher):
 
         return convert_model(
             model_name,
-            config_model, config_weights, config_meta, framework,
-            mo_search_paths,
+            config_model, config_weights, config_meta, framework, mo_search_paths,
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'mo_params'),
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'mo_flags'),
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), '_tf_custom_op_config_dir'),
             get_parameter_value_from_config(
                 config, DLSDKLauncher.parameters(), '_tf_obj_detection_api_pipeline_config_path'
             ),
-            get_parameter_value_from_config(
-                config, DLSDKLauncher.parameters(), '_transformations_config_dir'
-            ),
+            get_parameter_value_from_config(config, DLSDKLauncher.parameters(), '_transformations_config_dir'),
             should_log_cmd=should_log_mo_cmd
         )
 
@@ -602,7 +593,8 @@ class DLSDKLauncher(Launcher):
             data = np.concatenate([data, filled_part])
         precision = self.inputs[input_blob].precision
         data = data.astype(PRECISION_TO_DTYPE[precision])
-        data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
+        if data_layout is not None:
+            data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
         input_layout = self.inputs[input_blob].layout
         layout_mismatch = (
             data_layout is not None and len(input_layout) == len(data_layout) and input_layout != data_layout
@@ -727,7 +719,7 @@ class DLSDKLauncher(Launcher):
         else:
             for key, value in device_config.items():
                 if isinstance(value, dict):
-                    if key not in ie.known_plugins:
+                    if key not in self.ie_core.available_devices:
                         warnings.warn('{} device is unknown. Config loading may lead to error.'.format(key))
                     self.ie_core.set_config(value, key)
                 else:
@@ -856,7 +848,7 @@ class DLSDKLauncher(Launcher):
             if len(data_shape) < 4:
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
-            return np.transpose(data, layout)
+            return np.transpose(data, layout) if layout is not None else data
         if len(layer_shape) == 2:
             if len(data_shape) == 1:
                 return np.transpose([data])
@@ -866,9 +858,8 @@ class DLSDKLauncher(Launcher):
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
         if len(layer_shape) == 3 and len(data_shape) == 4:
-            data = np.transpose(data, layout)
-            return data[0]
-        if len(layer_shape) == len(layout):
+            return np.transpose(data, layout)[0] if layout is not None else data[0]
+        if layout is not None and len(layer_shape) == len(layout):
             return np.transpose(data, layout)
         if (
                 len(layer_shape) == 1 and len(data_shape) > 1 and
@@ -987,6 +978,9 @@ class DLSDKLauncher(Launcher):
             preprocess_info_by_input[input_name] = preprocess_info
         self._preprocess_info = preprocess_info_by_input
         self.disable_resize_to_input = preprocess.ie_processor.has_resize()
+
+    def get_model_file_type(self):
+        return self._model.suffix
 
     def release(self):
         if 'network' in self.__dict__:

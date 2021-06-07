@@ -1,2 +1,2 @@
-tokenizers>=0.9.3
-numpy>=1.11.0
+tokenizers>=0.10.1
+numpy>=1.16.6,<1.20

@@ -28,7 +28,7 @@ For details on this model, see [repository](https://github.com/mozilla/DeepSpeec
 | WER @ Librispeech test-clean | **7.55%**  | with LM, **beam_width = 500**, C++ CTC decoder |
 
 *NB*: beam_width=32 is a low value for a CTC decoder, and was used to achieve reasonable evaluation time with Python CTC decoder in Accuracy Checker.
-Increasing beam_width improves WER metric and slows down decoding.  Speech recognition demo has a faster C++ CTC decoder module.
+Increasing beam_width improves WER metric and slows down decoding.  Speech Recognition DeepSpeech Demo has a faster C++ CTC decoder module.
 
 ## Input
 

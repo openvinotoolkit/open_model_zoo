@@ -1,5 +1,7 @@
 # Deep Learning accuracy validation framework
 
+The Accuracy Checker is an extensible, flexible and configurable Deep Learning accuracy validation framework. The tool has a modular structure and allows to reproduce validation pipeline and collect aggregated quality indicators for popular datasets both for networks in source frameworks and in the OpenVINO™ supported formats.
+
 ## Installation
 
 > **TIP**: You also can work with the Accuracy Checker inside the OpenVINO™ [Deep Learning Workbench](@ref workbench_docs_Workbench_DG_Introduction) (DL Workbench).
@@ -51,7 +53,7 @@ The next step is installing backend frameworks for Accuracy Checker.
 In order to evaluate some models required frameworks have to be installed. Accuracy-Checker supports these frameworks:
 
 - [OpenVINO](https://software.intel.com/en-us/openvino-toolkit/documentation/get-started).
-- [Caffe](accuracy_checker/launcher/caffe_installation_readme.md).
+- [Caffe](https://caffe.berkeleyvision.org/installation.html).
 - [MXNet](https://mxnet.apache.org/).
 - [OpenCV DNN](https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html).
 - [TensorFlow](https://www.tensorflow.org/).
@@ -246,20 +248,20 @@ example of dataset definition:
 
 ### Preprocessing, Metrics, Postprocessing
 
-Each entry of preprocessing, metrics, postprocessing must have `type` field,
-other options are specific to type. If you do not provide any other option, then it
-will be picked from *definitions* file.
+Each entry of preprocessing, metrics, postprocessing must have a `type` field,
+with other options are specific to the type. If you do not provide any other option, then it
+will be picked from the *definitions* file.
 
 You can find useful following instructions:
 
-- [how to convert annotations](accuracy_checker/annotation_converters/README.md)
-- [how to use preprocessing](accuracy_checker/preprocessor/README.md).
-- [how to use postprocessing](accuracy_checker/postprocessor/README.md).
-- [how to use metrics](accuracy_checker/metrics/README.md).
-- [how to use readers](accuracy_checker/data_readers/README.md).
+- [How to convert annotations](accuracy_checker/annotation_converters/README.md)
+- [How to use preprocessing](accuracy_checker/preprocessor/README.md)
+- [How to use postprocessing](accuracy_checker/postprocessor/README.md)
+- [How to use metrics](accuracy_checker/metrics/README.md)
+- [How to use readers](accuracy_checker/data_readers/README.md)
 
-You may optionally provide `reference` field for metric, if you want calculated metric
-tested against specific value (i.e. reported in canonical paper).
+You may optionally provide `reference` field for metric, if you want the calculated metric
+tested against a specific value (i.e. reported in canonical paper).
 
 Some metrics support providing vector results ( e. g. mAP is able to return average precision for each detection class). You can change view mode for metric results using `presenter` (e.g. `print_vector`, `print_scalar`).
 
@@ -275,7 +277,7 @@ metrics:
 
 ### Testing new models
 
-Typical workflow for testing new model include:
+Typical workflow for testing a new model includes:
 
 1. Convert annotation of your dataset. Use one of the converters from annotation-converters, or write your own if there is no converter for your dataset. You can find detailed instruction how to use converters in [Annotation Conversion Guide](accuracy_checker/annotation_converters/README.md).
 2. Choose one of *adapters* or write your own. Adapter converts raw output produced by framework to high level problem specific representation (e.g. *ClassificationPrediction*, *DetectionPrediction*, etc).

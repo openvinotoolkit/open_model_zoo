@@ -158,8 +158,11 @@ def create_adapter(adapter_config, launcher=None, dataset=None, delayed_model_lo
     adapter_config = adapter_config if isinstance(adapter_config, dict) else {}
     if adapter_type in REQUIRES_KALDI and launcher:
         kaldi_bin_dir = launcher.config.get('_kaldi_bin_dir')
+        kaldi_log_file = launcher.config.get('_kaldi_log_file')
         if kaldi_bin_dir:
             adapter_config['_kaldi_bin_dir'] = kaldi_bin_dir
+        if kaldi_log_file:
+            adapter_config['_kaldi_log_file'] = kaldi_log_file
 
     adapter = Adapter.provide(adapter_type, adapter_config, label_map=label_map)
 

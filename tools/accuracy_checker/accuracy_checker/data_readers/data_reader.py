@@ -86,6 +86,7 @@ ListIdentifier = namedtuple('ListIdentifier', ['values'])
 MultiInstanceIdentifier = namedtuple('MultiInstanceIdentifier', ['identifier', 'object_id'])
 KaldiMatrixIdentifier = namedtuple('KaldiMatrixIdentifier', ['file', 'key'])
 KaldiFrameIdentifier = namedtuple('KaldiFrameIdentifier', ['file', 'key', 'id'])
+ParametricImageIdentifier = namedtuple('ParametricImageIdentifier', ['identifier', 'parameters'])
 
 IdentifierSerializationOptions = namedtuple(
     "identifierSerializationOptions", ['type', 'fields', 'class_id', 'recursive', 'to_tuple']
@@ -104,7 +105,10 @@ identifier_serialization = {
     'KaldiMatrixIdentifier': IdentifierSerializationOptions(
         'kaldi_matrix', ['file', 'key'], KaldiMatrixIdentifier, [False, False], [False, False]),
     'KaldiFrameIdentifier': IdentifierSerializationOptions(
-        'kaldi_frame', ['file', 'key', 'id'], KaldiFrameIdentifier, [False, False, False], [False, False, False])
+        'kaldi_frame', ['file', 'key', 'id'], KaldiFrameIdentifier, [False, False, False], [False, False, False]),
+    'ParametricImageIdentifier': IdentifierSerializationOptions(
+        'parametric_image_identifier', ['identifier', 'parameters'], ParametricImageIdentifier, False, [False, True]
+    )
 }
 
 identifier_deserialization = {option.type: option for option in identifier_serialization.values()}
@@ -150,6 +154,8 @@ def create_identifier_key(identifier):
         return ClipIdentifier(identifier.video, identifier.clip_id, tuple(identifier.frames))
     if isinstance(identifier, MultiFramesInputIdentifier):
         return MultiFramesInputIdentifier(tuple(identifier.input_id), tuple(identifier.frames))
+    if isinstance(identifier, ParametricImageIdentifier):
+        return ParametricImageIdentifier(identifier.identifier, tuple(identifier.parameters))
     return identifier
 
 
@@ -204,6 +210,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(ImagePairIdentifier, self._read_pair)
         self.read_dispatcher.register(ListIdentifier, self._read_list_ids)
         self.read_dispatcher.register(MultiInstanceIdentifier, self._read_multi_instance_single_object)
+        self.read_dispatcher.register(ParametricImageIdentifier, self._read_parametric_input)
         self.multi_infer = False
 
         self.validate_config(config, data_source)
@@ -302,6 +309,10 @@ class BaseReader(ClassProvider):
     def _read_multi_instance_single_object(self, data_id):
         return self.read_dispatcher(data_id.identifier)
 
+    def _read_parametric_input(self, data_id):
+        data = self.read_dispatcher(data_id.identifier)
+        return [data, *data_id.parameters]
+
     def read_item(self, data_id):
         data_rep = DataRepresentation(
             self.read_dispatcher(data_id),
@@ -391,7 +402,8 @@ class OpenCVImageReader(BaseReader):
         self.flag = OPENCV_IMREAD_FLAGS[self.get_value_from_config('reading_flag')]
 
     def read(self, data_id):
-        return cv2.imread(str(get_path(self.data_source / data_id)), self.flag)
+        data_path = self.data_source / data_id if self.data_source else data_id
+        return cv2.imread(str(get_path(data_path)), self.flag)
 
 
 class PillowImageReader(BaseReader):
@@ -892,15 +904,18 @@ class KaldiARKReader(BaseReader):
                     key = KaldiARKReader.read_token(fd)
                     if not key:
                         break
-                    _ = fd.read(2)
-                    ark_type = KaldiARKReader.read_token(fd)
-                    float_size = 4 if ark_type[0] == 'F' else 8
-                    float_type = np.float32 if ark_type[0] == 'F' else float
-                    num_rows = KaldiARKReader.read_int32(fd)
-                    num_cols = KaldiARKReader.read_int32(fd)
-                    mat_data = fd.read(float_size * num_cols * num_rows)
-                    mat = np.frombuffer(mat_data, dtype=float_type)
-                    ut[key] = mat.reshape(num_rows, num_cols)
+                    binary = fd.read(2).decode()
+                    if binary == ' [':
+                        mat = KaldiARKReader.read_ascii_mat(fd)
+                    else:
+                        ark_type = KaldiARKReader.read_token(fd)
+                        float_size = 4 if ark_type[0] == 'F' else 8
+                        float_type = np.float32 if ark_type[0] == 'F' else float
+                        num_rows = KaldiARKReader.read_int32(fd)
+                        num_cols = KaldiARKReader.read_int32(fd)
+                        mat_data = fd.read(float_size * num_cols * num_rows)
+                        mat = np.frombuffer(mat_data, dtype=float_type).reshape(num_rows, num_cols)
+                    ut[key] = mat
                 except EOFError:
                     break
             return ut
@@ -932,7 +947,7 @@ class KaldiARKReader(BaseReader):
         key = ''
         while True:
             c = bytes.decode(fd.read(1))
-            if c in [' ', '']:
+            if c in [' ', '', '\0', '\4']:
                 break
             key += c
         return None if key == '' else key.strip()
@@ -948,7 +963,7 @@ class KaldiARKReader(BaseReader):
             return self.read_frame(data_id.file, data_id.key, data_id.id)
         matrix = self.read_utterance(data_id.file, data_id.key)
         if self.multi_infer:
-            matrix = matrix.tolist()
+            matrix = list(matrix)
         return matrix
 
     def _read_list(self, data_id):
@@ -960,3 +975,18 @@ class KaldiARKReader(BaseReader):
     def reset(self):
         del self.buffer
         self.buffer = {}
+
+    @staticmethod
+    def read_ascii_mat(fd):
+        rows = []
+        while True:
+            line = fd.readline().decode()
+            if not line.strip():
+                continue # skip empty line
+            arr = line.strip().split()
+            if arr[-1] != ']':
+                rows.append(np.array(arr, dtype='float32')) # not last line
+            else:
+                rows.append(np.array(arr[:-1], dtype='float32')) # last line
+                mat = np.vstack(rows)
+                return mat

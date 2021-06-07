@@ -1,8 +1,9 @@
 # Overview of OpenVINO&trade; Toolkit Intel's Pre-Trained Models
 
-OpenVINO&trade; toolkit provides a set of pre-trained models
+OpenVINO&trade; toolkit provides a set of Intel pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on GitHub](https://github.com/openvinotoolkit/open_model_zoo).
+The table [Intel's Pre-Trained Models Device Support](./device_support.md) summarizes devices supported by each model.
 
 The models can be downloaded via [Model Downloader](../../tools/downloader/README.md).
 
@@ -111,6 +112,7 @@ and accuracy (expect a bigger model to perform better).
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
+| [face-reidentification-retail-0095](./face-reidentification-retail-0095/README.md)     | 0.588 | 1.107 |
 | [person-reidentification-retail-0288](./person-reidentification-retail-0288/README.md) | 0.174 | 0.183 |
 | [person-reidentification-retail-0287](./person-reidentification-retail-0287/README.md) | 0.564 | 0.595 |
 | [person-reidentification-retail-0286](./person-reidentification-retail-0286/README.md) | 1.170 | 1.234 |
@@ -194,7 +196,10 @@ Deep Learning models for text recognition in various applications.
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
 | [text-recognition-0012](./text-recognition-0012/README.md)                                 | 1.485   | 5.568 |
-| [text-recognition-0013](./text-recognition-0013/README.md)                                 | 1.488   | 5.567 |
+| [text-recognition-0014](./text-recognition-0014/README.md)                                 | 0.5442  | 2.839 |
+| [text-recognition-0015](./text-recognition-0015/README.md)                                 |         |       |
+| encoder | 12.4 | 398 |
+| decoder | 0.03 | 4.33 |
 | [handwritten-score-recognition-0003](./handwritten-score-recognition-0003/README.md)       | 0.792   | 5.555 |
 | [handwritten-japanese-recognition-0001](./handwritten-japanese-recognition-0001/README.md) | 117.136 | 15.31 |
 | [handwritten-simplified-chinese-recognition-0001](./handwritten-simplified-chinese-recognition-0001/README.md) | 134.513 | 17.270 |
@@ -215,6 +220,10 @@ Deep Learning models for text spotting (simultaneous detection and recognition).
 |   text-spotting-0004-detector                        | 184.495 | 27.010 |
 |   text-spotting-0004-recognizer-encoder              | 2.082   | 1.328  |
 |   text-spotting-0004-recognizer-decoder              | 0.002   | 0.273  |
+| [text-spotting-0005](./text-spotting-0005/README.md) |         |        |
+|   text-spotting-0005-detector                        | 184.495 | 27.010 |
+|   text-spotting-0005-recognizer-encoder              | 2.082   | 1.328  |
+|   text-spotting-0005-recognizer-decoder              | 0.002   | 0.273  |
 
 ## Action Recognition Models
 
@@ -233,6 +242,7 @@ that predict an actual labels are called *decoder*.
 |   action-recognition-0001-encoder                                                      | 7.340 | 21.276 |
 |   action-recognition-0001-decoder                                                      | 0.147 | 4.405  |
 | [asl-recognition-0004](./asl-recognition-0004/README.md)                               | 6.660 | 4.133  |
+| [common-sign-language-0002](./common-sign-language-0002/README.md)                     | 4.227 | 4.113  |
 | [weld-porosity-detection-0001](./weld-porosity-detection-0001/README.md)               | 3.636 | 11.173 |
 
 ## Image Retrieval
@@ -272,6 +282,8 @@ Deep Learning compressed models
 | [machine-translation-nar-ru-en-0001](./machine-translation-nar-ru-en-0001/README.md) | 23.17 | 69.29 |
 | [machine-translation-nar-en-de-0001](./machine-translation-nar-en-de-0001/README.md) | 23.19 | 77.47 |
 | [machine-translation-nar-de-en-0001](./machine-translation-nar-de-en-0001/README.md) | 23.19 | 77.47 |
+| [machine-translation-nar-en-de-0002](./machine-translation-nar-en-de-0002/README.md) | 23.19 | 77.47 |
+| [machine-translation-nar-de-en-0002](./machine-translation-nar-de-en-0002/README.md) | 23.19 | 77.47 |
 
 ## Text To Speech
 
@@ -284,5 +296,35 @@ Deep Learning models for speech synthesis (mel spectrogram generation and wave f
 |   text-to-speech-en-0001-regression                          | 7.65  | 4.96   |
 |   text-to-speech-en-0001-generation                          | 48.38 | 12.77  |
 
+Deep Learning models for speech synthesis (mel spectrogram generation and wave form generation).
+
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [text-to-speech-en-multi-0001](./text-to-speech-en-multi-0001/README.md) |       |        |
+|   text-to-speech-en-multi-0001-duration-prediction                 | 28.75 | 26.18 |
+|   text-to-speech-en-multi-0001-regression                          | 7.81  | 5.12  |
+|   text-to-speech-en-multi-0001-generation                          | 48.38 | 12.77 |
+
+Deep Learning models for noise suppression.
+
+| Model Name                                                                          | Complexity (GFLOPs)  | Size (Mp)  |
+|-------------------------------------------------------------------------------------|--------------------- |----------- |
+| [noise-suppression-poconetlike-0001](./noise-suppression-poconetlike-0001/README.md)| 1.2                  | 7.22       |
+
+## Time Series Forecasting
+
+Deep Learning models for time series forecasting.
+
+| Model Name | Complexity (GFLOPs) | Size (Mp) |
+|------------|---------------------|-----------|
+| [time-series-forecasting-electricity-0001](./time-series-forecasting-electricity-0001/README.md) | 0.40 | 2.26 |
+
+## See Also
+
+* [Open Model Zoo Demos](../../demos/README.md)
+* [Model Downloader](../../tools/downloader/README.md)
+* [Overview of OpenVINO&trade; Toolkit Public Pre-Trained Models](../public/index.md)
+
 ## Legal Information
+
 [*] Other names and brands may be claimed as the property of others.

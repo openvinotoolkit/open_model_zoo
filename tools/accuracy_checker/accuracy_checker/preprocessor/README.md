@@ -1,7 +1,9 @@
 # Preprocessors
 
-Preprocessor is function which processes input data before model inference.
-Every preprocessor has parameters available for configuration.
+Preprocessor is a class which processes input data before model inference. Every preprocessor has parameters available for configuration. The preprocessor and its parameters are set through the configuration file. Preprocessors are provided in `datasets` section of configuration file to use specific preprocessor.
+
+## Supported Preprocessors
+
 Accuracy Checker supports following set of preprocessors:
 
 * `resize` - resizing the image to a new width and height.
@@ -36,7 +38,11 @@ Accuracy Checker supports following set of preprocessors:
       2. Make image height and width divisible by min destination size without remainder.
     - `min_ratio` - rescale width and height according to minimal ratio `source_size / destination_size`.
     - `mask_rcnn_benchmark_aspect_ratio` - rescale image size according [preprocessing](https://github.com/onnx/models/blob/master/vision/object_detection_segmentation/mask-rcnn/README.md#preprocessing-steps) for maskrcnn-benchmark models in ONNX zoo
-  * `factor` -  destination size for aspect ratio resize must be divisible by a given number without remainder.
+    - `ppcrnn_ratio` - calculate scales in the following way:
+      1. find original image ratio (input_width / input_height)
+      2. if `dst_height` * ratio larger then `dst_width`, then `dst_width` = 32 * ratio
+      3. Otherwise `dst_width` = `dst_height` * ratio
+* `factor` -  destination size for aspect ratio resize must be divisible by a given number without remainder.
   Please pay attention that this parameter only works with `aspect_ratio_scale` parameters.
 * `auto_resize` - automatic resizing image to input layer shape. (supported only for one input layer case, use OpenCV for image resize)
 * `normalization` - changing the range of pixel intensity values.

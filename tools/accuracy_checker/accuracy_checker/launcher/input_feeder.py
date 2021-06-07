@@ -20,7 +20,9 @@ import numpy as np
 
 from ..config import ConfigError
 from ..utils import extract_image_representations
-from ..data_readers import MultiFramesInputIdentifier, KaldiFrameIdentifier, KaldiMatrixIdentifier
+from ..data_readers import (
+    MultiFramesInputIdentifier, KaldiFrameIdentifier, KaldiMatrixIdentifier, ParametricImageIdentifier
+)
 
 LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
     'NCHW': [0, 3, 1, 2],
@@ -122,6 +124,16 @@ class InputFeeder:
         return image_infos
 
     def fill_non_constant_inputs(self, data_representation_batch):
+        def match_by_regex(data, identifiers, input_regex):
+            if not isinstance(identifiers, list):
+                identifiers = [identifiers]
+            input_data = None
+            for identifier, data_value in zip(identifiers, data):
+                if input_regex.match(identifier):
+                    input_data = data_value
+                    break
+            return input_data
+
         filled_inputs = {}
         check_regex = True
         if self.image_info_inputs or self.orig_image_info_inputs:
@@ -131,9 +143,12 @@ class InputFeeder:
             input_batch = []
             input_regex = (self.inputs_mapping or {}).get(input_layer)
             for data_representation in data_representation_batch:
-                input_data = None
                 identifiers = data_representation.identifier
                 data = data_representation.data
+                if isinstance(identifiers, ParametricImageIdentifier):
+                    input_batch.append(data[idx])
+                    continue
+
                 if not isinstance(identifiers, list) and input_regex is None:
                     input_data = data
                     input_batch.append(input_data)
@@ -148,6 +163,7 @@ class InputFeeder:
                 if input_regex is None and check_regex:
                     raise ConfigError('Impossible to choose correct data for layer {}.'
                                       'Please provide regular expression for matching in config.'.format(input_layer))
+
                 if isinstance(identifiers, MultiFramesInputIdentifier):
                     input_id_order = {
                         input_index: frame_id for frame_id, input_index in enumerate(identifiers.input_id)
@@ -159,10 +175,7 @@ class InputFeeder:
                         assert idx < len(identifiers), 'number input layers and data is not matched'
                         input_batch.append(data[idx])
                         continue
-                    for identifier, data_value in zip(identifiers, data):
-                        if input_regex.match(identifier):
-                            input_data = data_value
-                            break
+                    input_data = match_by_regex(data, identifiers, input_regex)
 
                 if input_data is None:
                     raise ConfigError('Suitable data for filling layer {} not found'.format(input_layer))
@@ -212,7 +225,7 @@ class InputFeeder:
                     value = np.array(value, dtype=precision)
                 if isinstance(value, (int, float)) and 'shape' in input_:
                     value = np.full(input_['shape'], value, dtype=precision)
-                constant_inputs[name] = value
+                constant_inputs[name] = self.input_transform_func(value, name, None, precision)
             else:
                 config_non_constant_inputs.append(name)
                 if value is not None:

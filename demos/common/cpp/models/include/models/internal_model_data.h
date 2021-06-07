@@ -17,9 +17,9 @@
 #pragma once
 struct InternalModelData
 {
-   virtual ~InternalModelData() {}
+    virtual ~InternalModelData() {}
 
-   template<class T> T& asRef() {
+    template<class T> T& asRef() {
         return dynamic_cast<T&>(*this);
     }
 
@@ -42,6 +42,9 @@ struct InternalImageMatModelData : public InternalImageModelData
 {
     InternalImageMatModelData(const cv::Mat& mat) :
         InternalImageModelData(mat.cols, mat.rows), mat(mat) {}
+
+    InternalImageMatModelData(const cv::Mat& mat, int width, int height) :
+        InternalImageModelData(width, height), mat(mat) {}
 
     cv::Mat mat;
 };

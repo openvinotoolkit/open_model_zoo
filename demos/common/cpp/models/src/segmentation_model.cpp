@@ -81,7 +81,7 @@ std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData
         /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
         request->SetBlob(inputsNames[0], wrapMat2Blob(img));
         /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-         resPtr = std::make_shared<InternalImageMatModelData>(img);
+        resPtr = std::make_shared<InternalImageMatModelData>(img);
     }
     else
     {
@@ -95,7 +95,7 @@ std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData
 }
 
 std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult) {
-    SegmentationResult* result = new SegmentationResult(infResult.frameId, infResult.metaData);
+    ImageResult* result = new ImageResult(infResult.frameId, infResult.metaData);
 
     const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
 
@@ -103,12 +103,12 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
 
     void* pData = blobPtr->rmap().as<void*>();
 
-    result->mask = cv::Mat(outHeight, outWidth, CV_8UC1);
+    result->resultImage = cv::Mat(outHeight, outWidth, CV_8UC1);
 
     if (outChannels == 1 && blobPtr->getTensorDesc().getPrecision() == Precision::I32)
     {
         cv::Mat predictions(outHeight, outWidth, CV_32SC1, pData);
-        predictions.convertTo(result->mask, CV_8UC1);
+        predictions.convertTo(result->resultImage, CV_8UC1);
     }
     else if (blobPtr->getTensorDesc().getPrecision() == Precision::FP32)
     {
@@ -129,12 +129,12 @@ std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infR
                     }
                 } // nChannels
 
-                result->mask.at<uint8_t>(rowId, colId) = classId;
+                result->resultImage.at<uint8_t>(rowId, colId) = classId;
             } // width
         } // height
     }
 
-    cv::resize(result->mask, result->mask,
+    cv::resize(result->resultImage, result->resultImage,
         cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight),
         0, 0, cv::INTER_NEAREST);
 

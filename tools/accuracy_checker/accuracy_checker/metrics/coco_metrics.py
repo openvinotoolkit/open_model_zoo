@@ -189,6 +189,8 @@ class MSCOCOKeypointsBaseMetric(MSCOCOBaseMetric):
 
         def _prepare_annotations(annotation, label):
             annotation_ids = annotation.labels == label
+            if not np.size(annotation_ids):
+                return [], [], [], [], []
             difficult_box_mask = np.full(annotation.size, False)
             difficult_box_indices = annotation.metadata.get("difficult_boxes", [])
             iscrowd = np.array(annotation.metadata.get('iscrowd', [0] * annotation.size))
@@ -346,6 +348,10 @@ def prepare_predictions(prediction, label, max_detections):
 
 def prepare_annotations(annotation, label, create_boxes=False):
     annotation_ids = np.argwhere(np.array(annotation.labels) == label).reshape(-1)
+    if not np.size(annotation_ids):
+        boxes = None if not create_boxes else np.array([])
+        areas = None if not create_boxes else np.array([])
+        return [], [], [], boxes, areas
     difficult_box_mask = np.full(annotation.size, False)
     difficult_box_indices = annotation.metadata.get("difficult_boxes", [])
     iscrowd = np.array(annotation.metadata.get('iscrowd', [0]*annotation.size))
