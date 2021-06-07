@@ -23,6 +23,7 @@ from open_model_zoo.model_tools import _configuration
 def to_info(model):
     return {
         'name': model.name,
+        'composite_model_name': model.composite_model_name,
 
         'description': model.description,
         'framework': model.framework,
