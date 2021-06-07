@@ -101,6 +101,9 @@ def is_correct_args(args):
     if args.alpha < 0.5 or args.alpha > 2.0:
         print('Can not use time coefficient less than 0.5 or greater than 2.0')
         return False
+    if args.speaker_id < -1 or args.speaker_id > 39:
+        print('Mistake in the range of args.speaker_id. Speaker_id should be -1 (GUI regime) or in range [0,39]')
+        return False
 
     return True
 
