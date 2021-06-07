@@ -15,7 +15,7 @@ std::pair<double, double> getLineComponent(const cv::Point2d &p1, const cv::Poin
     double a = 0;
 
     if (std::fabs(run) < 0.0000001) {
-        double sign = (run > 0) - (run < 0);
+        double sign = run < 0 ? -1.0 : 1.0;
         a = rise / (sign * 0.0000001);
     } else {
         a = rise / run;
