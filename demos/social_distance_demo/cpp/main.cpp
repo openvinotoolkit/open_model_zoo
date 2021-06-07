@@ -97,8 +97,7 @@ struct Context {  // stores all global data for tasks
         drawersContext{pause, gridParam, displayResolution, showPeriod, monitorsStr},
         videoFramesContext{std::vector<uint64_t>(inputChannels.size(), lastFrameId), std::vector<std::mutex>(inputChannels.size())},
         trackersContext{std::vector<PersonTrackers>(inputChannels.size()), std::vector<int>(inputChannels.size(), 9999),
-                std::vector<int>(inputChannels.size(), 1), std::vector<int64_t>(inputChannels.size(), 0),
-                std::vector<std::mutex>(inputChannels.size()) },
+            std::vector<int>(inputChannels.size(), 1)},
         nireq{nireq},
         isVideo{isVideo},
         t0{std::chrono::steady_clock::time_point()},
@@ -163,12 +162,19 @@ struct Context {  // stores all global data for tasks
         std::vector<std::mutex> lastFrameIdsMutexes;
     } videoFramesContext;
 
-    struct {
+    struct TrackersContext {
         std::vector<PersonTrackers> personTracker;
         std::vector<int> minW;
         std::vector<int> maxW;
-        std::vector<int64_t> lastProcessedIds;
-        std::vector<std::mutex> lastProcessedIdsMutexes;
+        std::vector<std::atomic<uint64_t>> lastProcessedIds;
+
+        //manual definition of constructor is needed only for creating vector<std::atomic<uint64_t>>
+        TrackersContext(std::vector<PersonTrackers>&& personTracker, std::vector<int>&& minW, std::vector<int>&& maxW) 
+            : personTracker(personTracker), minW(minW), maxW(maxW), lastProcessedIds(personTracker.size()) {
+            for (size_t i = 0; i < lastProcessedIds.size(); ++i) {
+                lastProcessedIds[i] = 0;
+            }
+        }
     } trackersContext;
 
     std::weak_ptr<Worker> resAggregatorsWorker;
@@ -212,9 +218,7 @@ public:
 
     bool isReady() override {
         Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
-        std::lock_guard<std::mutex> lock(context.trackersContext.lastProcessedIdsMutexes[sharedVideoFrame->sourceID]);
-        int64_t& lastProcessedFrameId = context.trackersContext.lastProcessedIds[sharedVideoFrame->sourceID];
-
+        auto& lastProcessedFrameId = context.trackersContext.lastProcessedIds[sharedVideoFrame->sourceID];
         return lastProcessedFrameId == sharedVideoFrame->frameId;
     }
 
@@ -423,7 +427,6 @@ void ResAggregator::process() {
     context.freeDetectionInfersCount += context.detectorsInfers.inferRequests.lockedSize();
     context.frameCounter++;
     unsigned sourceID = sharedVideoFrame->sourceID;
-    int64_t& lastProcessedFrameID = context.trackersContext.lastProcessedIds[sourceID];
     auto& personTracker = context.trackersContext.personTracker[sourceID];
     for (const cv::Rect& bbox : boxes) {
         cv::rectangle(sharedVideoFrame->frame, bbox, { 0, 255, 0 }, 2);
@@ -475,7 +478,7 @@ void ResAggregator::process() {
     }
 
     tryPush(context.drawersContext.drawersWorker, std::make_shared<Drawer>(sharedVideoFrame));
-    ++lastProcessedFrameID;;
+    ++context.trackersContext.lastProcessedIds[sourceID];;
 }
 
 bool DetectionsProcessor::isReady() {
