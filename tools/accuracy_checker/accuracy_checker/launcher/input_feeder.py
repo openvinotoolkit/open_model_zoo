@@ -125,6 +125,8 @@ class InputFeeder:
 
     def fill_non_constant_inputs(self, data_representation_batch):
         def match_by_regex(data, identifiers, input_regex):
+            if not isinstance(identifiers, list):
+                identifiers = [identifiers]
             input_data = None
             for identifier, data_value in zip(identifiers, data):
                 if input_regex.match(identifier):
