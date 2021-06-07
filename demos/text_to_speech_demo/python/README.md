@@ -107,6 +107,10 @@ python3 text_to_speech_demo.py \
     --model_rnn <path_to_model>/wavernn_rnn.xml
 ```
 
+> **NOTE**: You can use `--upsampler_width` parameter for this demo for the purpose of control width of the time axis
+> in the input mel-spectrogram for the `wavernn_upsampler` network. This option can help you improve the speed of
+> the pipeline inference on the long sentences.
+
 ### Speech synthesis with text-to-speech-en-0001 models
 
 ```sh
@@ -129,6 +133,12 @@ python3 text_to_speech_demo.py \
     -m_forward <path_to_model>/text-to-speech-en-multi-0001-regression.xml \
     -m_melgan <path_to_model>/text-to-speech-en-multi-0001-generation.xml
 ```
+
+> **NOTE**: `s_id` defines the style of the speaker utterance. You can choose it equal to -1 to activate the
+> multi-speaker TTS model parameters selection window. This window provides an opportunity to choose the gender of the
+> speaker, index number of the speaker or calculate PCA based speaker embedding. The `s_id` is available only for
+> `text-to-speech-en-multi-0001` models.
+
 
 ## Demo Output
 
