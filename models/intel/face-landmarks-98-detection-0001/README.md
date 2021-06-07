@@ -33,7 +33,6 @@ Expected color order is `BGR`.
 
 ## Outputs
 
-The net outputs blob:
 The net outputs a blob `3851` with the shape: `1, 98, 16, 16`, containing location heatmaps for 98 keypoints. Locations that are filtered out by non-maximum suppression algorithm have negated values assigned to them.
 
 ## Legal Information
