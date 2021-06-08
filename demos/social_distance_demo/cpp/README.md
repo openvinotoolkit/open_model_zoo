@@ -2,7 +2,7 @@
 
 ![](./social_distance.gif)
 
-This demo showcases a retail social distance application that detects people and measures the distance between them. If this distance is less than a value previously provided by the user, then an alert is triggered. With this application you can use the [person-detection-retail-0013](../../../models/intel/person-detection-retail-0013/README.md) and [person-reidentification-retail-0277](../../../models/intel/person-reidentification-retail-0277/README.md) Intel® pre-trained models, that can be downloaded using the **model downloader**. The **model downloader** downloads the __.xml__ and __.bin__ files that is used by the application. All supported models by this demo are listed in [models list](models.lst).
+This demo showcases a retail social distance application that detects people and measures the distance between them. If this distance is less than a value previously provided by the user, then an alert is triggered. With this application you can use the [person-detection-retail-0013](../../../models/intel/person-detection-retail-0013/README.md) and [person-reidentification-retail-0277](../../../models/intel/person-reidentification-retail-0277/README.md) Intel® pre-trained models, that can be downloaded using the **model downloader**. The **model downloader** downloads the __.xml__ and __.bin__ files that are used by the application. All supported models by this demo are listed in [models list](models.lst).
 
 For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
@@ -80,12 +80,12 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 For example, to do inference on a GPU with the OpenVINO toolkit pre-trained models, run the following command:
 
 ```sh
-./social_distance_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/person-detection-retail-0013.xml -m_reid <path_to_model>/person-reidentification-retail-0277.xml -d_det GPU
+./social_distance_demo -i <path_to_video>/inputVideo.mp4 -m_det <path_to_model>/person-detection-retail-0013.xml -m_reid <path_to_model>/person-reidentification-retail-0277.xml -d_det GPU
 ```
 
 To do inference for two video inputs using two asynchronous infer request on CPU with the OpenVINO toolkit pre-trained models, run the following command:
 ```sh
-./social_distance_demo -i <path_to_video>/inputVideo_0.mp4 <path_to_video>/inputVideo_1.mp4 -m <path_to_model>/person-detection-retail-0013.xml -m_reid <path_to_model>/person-reidentification-retail-0277.xml -d_det CPU -d_reid CPU -nireq 2
+./social_distance_demo -i <path_to_video>/inputVideo_0.mp4 <path_to_video>/inputVideo_1.mp4 -m_det <path_to_model>/person-detection-retail-0013.xml -m_reid <path_to_model>/person-reidentification-retail-0277.xml -d_det CPU -d_reid CPU -nireq 2
 ```
 
 To do inference for video inputs on Intel® Vision Accelerator Design with Intel® Movidius™ VPUs, some optimization hints are suggested to make good use of the computation ability:
@@ -96,7 +96,7 @@ To do inference for video inputs on Intel® Vision Accelerator Design with Intel
 
 For example, to run the sample on one Intel® Vision Accelerator Design with Intel® Movidius™ VPUs Compact R card, run the following command:
 ```sh
-./social_distance_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/person-detection-retail-0013.xml -m_reid <path_to_model>/person-reidentification-retail-0277.xml  -d_det HDDL -d_reid HDDL -n_iqs 10 -n_wt 4 -nireq 10
+./social_distance_demo -i <path_to_video>/inputVideo.mp4 -m_det <path_to_model>/person-detection-retail-0013.xml -m_reid <path_to_model>/person-reidentification-retail-0277.xml  -d_det HDDL -d_reid HDDL -n_iqs 10 -n_wt 4 -nireq 10
 ```
 
 > **NOTE**: For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/deployment_tools/inference_engine/external/hddl/config/` directory using the following tags:
