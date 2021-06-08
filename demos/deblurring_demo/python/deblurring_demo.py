@@ -64,7 +64,7 @@ def build_argparser():
     io_args.add_argument('--loop', default=False, action='store_true',
                          help='Optional. Enable reading the input in a loop.')
     io_args.add_argument('-o', '--output', required=False,
-                         help='Optional. Name of output to save.')
+                         help='Optional. Name of the output file(s) to save.')
     io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')

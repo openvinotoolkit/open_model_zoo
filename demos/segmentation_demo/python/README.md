@@ -100,7 +100,7 @@ Inference options:
 Input/output options:
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of output to save.
+                        Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
@@ -121,9 +121,17 @@ You can use the following command to do inference on CPU on images captured by a
     python3 segmentation_demo.py -d CPU -i 0 -m <path_to_model>/semantic-segmentation-adas-0001.xml
 ```
 
-## Color Palettes
+You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
 
-The color palette is used to visualize predicted classes. By default, the colors from PASCAL VOC dataset are applied. In case then the number of output classes is larger than number of classes provided by PASCAL VOC dataset, the rest classes are randomly colorized. Also, one can use predefined colors from other datasets, like CAMVID.
+* To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
+* To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
+To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
+
+>**NOTE**: Windows* systems may not have the Motion JPEG codec installed by default. If this is the case, OpenCV FFMPEG backend can be downloaded by the PowerShell script provided with the OpenVINO install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. Run the script with Administrative privileges. Alternatively, you can save results as images.
+
+### Color Palettes
+
+The color palette is used to visualize predicted classes. By default, the colors from PASCAL VOC dataset are applied. In case when the number of output classes is larger than number of classes provided by PASCAL VOC dataset, the rest classes are randomly colorized. Also, one can use predefined colors from other datasets, like CAMVID.
 
 Available colors files located in the `<omz_dir>/data/palettes` folder. If you want to assign custom colors for classes, you should create a `.txt` file, where the each line contains colors in `(R, G, B)` format. The demo application treat the number of each line as a dataset class identificator and apply specified color to pixels belonging to this class.
 
