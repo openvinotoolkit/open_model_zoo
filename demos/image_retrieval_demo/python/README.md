@@ -88,7 +88,7 @@ Options:
                         Optional. Ground truth class.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on: CPU,
-                        GPU, FPGA, HDDL or MYRIAD. The demo will look for a
+                        GPU, HDDL or MYRIAD. The demo will look for a
                         suitable plugin for device specified (by default, it
                         is CPU).
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION

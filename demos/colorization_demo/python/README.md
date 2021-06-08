@@ -50,7 +50,7 @@ Options:
                         Required. Path to .xml file with pre-trained model.
   -d DEVICE, --device DEVICE
                         Optional. Specify target device for infer: CPU, GPU,
-                        FPGA, HDDL or MYRIAD. Default: CPU
+                        HDDL or MYRIAD. Default: CPU
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a single image,
                         a folder of images, video file or camera id.

@@ -182,7 +182,7 @@ Options:
                         prediction as meaningful
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
-                        GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
+                        GPU, HDDL or MYRIAD is acceptable. The demo will
                         look for a suitable plugin for device specified.
                         Default value is CPU
   --resolution RESOLUTION RESOLUTION

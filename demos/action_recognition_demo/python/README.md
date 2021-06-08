@@ -105,7 +105,7 @@ Options:
                         to a shared library with the kernels implementation.
   -d DEVICE, --device DEVICE
                         Optional. Specify a target device to infer on. CPU,
-                        GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
+                        GPU, HDDL or MYRIAD is acceptable. The demo will
                         look for a suitable plugin for the device specified.
                         Default value is CPU.
   -lb LABELS, --labels LABELS

@@ -67,7 +67,7 @@ Options:
   -o OUT, --out OUT     Required. Path to an output .wav file
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
-                        GPU, FPGA, HDDL, MYRIAD or HETERO is acceptable. The
+                        GPU, HDDL, MYRIAD or HETERO is acceptable. The
                         demo will look for a suitable plugin for device
                         specified. Default value is CPU
   -m_upsample MODEL_UPSAMPLE, --model_upsample MODEL_UPSAMPLE

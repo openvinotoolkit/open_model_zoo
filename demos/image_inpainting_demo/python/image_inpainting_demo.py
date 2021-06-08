@@ -31,7 +31,7 @@ def build_arg_parser():
                       required=True, type=Path)
     args.add_argument("-i", "--input", type=str, default='', help="path to image.")
     args.add_argument("-d", "--device",
-                      help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
+                      help="Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is "
                            "acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU", default="CPU", type=str)
     args.add_argument("-p", "--parts", help="Optional. Number of parts to draw mask. Ignored in GUI mode",

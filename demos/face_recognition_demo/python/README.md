@@ -114,9 +114,9 @@ usage: face_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
                                 -fg PATH [--run_detector] [--allow_grow]
                                 -m_fd PATH -m_lm PATH -m_reid PATH
                                 [--fd_input_size FD_INPUT_SIZE]
-                                [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
-                                [-d_lm {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
-                                [-d_reid {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
+                                [-d_fd {CPU,GPU,MYRIAD,HETERO,HDDL}]
+                                [-d_lm {CPU,GPU,MYRIAD,HETERO,HDDL}]
+                                [-d_reid {CPU,GPU,MYRIAD,HETERO,HDDL}]
                                 [-l PATH] [-c PATH] [-v] [-pc] [-t_fd [0..1]]
                                 [-t_id [0..1]] [-exp_r_fd NUMBER]
 
@@ -172,13 +172,13 @@ Models:
                         reshaping. Example: 500 700.
 
 Inference options:
-  -d_fd {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}
+  -d_fd {CPU,GPU,MYRIAD,HETERO,HDDL}
                         Optional. Target device for Face Detection model.
                         Default value is CPU.
-  -d_lm {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}
+  -d_lm {CPU,GPU,MYRIAD,HETERO,HDDL}
                         Optional. Target device for Facial Landmarks Detection
                         model. Default value is CPU.
-  -d_reid {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}
+  -d_reid {CPU,GPU,MYRIAD,HETERO,HDDL}
                         Optional. Target device for Face Reidentification
                         model. Default value is CPU.
   -l PATH, --cpu_lib PATH
