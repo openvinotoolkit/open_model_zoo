@@ -601,3 +601,111 @@ class YoloV5Adapter(YoloV3Adapter):
                                                  size_correct=lambda x: (2.0 / (1.0 + np.exp(-x))) ** 2,
                                                  conf_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
                                                  prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
+
+
+class YolofAdapter(Adapter):
+    __provider__ = 'yolof'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'classes': NumberField(
+                value_type=int, optional=True, min_value=1, default=80, description="Number of detection classes."
+            ),
+            'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
+                                     description="Minimal objectiveness score value for valid detections."),
+            'transpose': ListField(optional=True, description="Transpose output tensor to specified format."),
+            'raw_output': BoolField(
+                optional=True, default=False,
+                description="Preprocesses output in the original way."
+            ),
+            'output_format': StringField(
+                choices=['BHW', 'HWB'], optional=True, default='BHW',
+                description="Set output layer format"
+            )
+        })
+        return params
+
+    def configure(self):
+        self.classes = self.get_value_from_config('classes')
+        self.threshold = self.get_value_from_config('threshold')
+        self.transpose = self.get_value_from_config('transpose')
+        self.raw_output = self.get_value_from_config('raw_output')
+        self.output_format = self.get_value_from_config('output_format')
+        if self.raw_output:
+            self.processor = YoloOutputProcessor(coord_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
+                                                 conf_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
+                                                 prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
+        else:
+            self.processor = YoloOutputProcessor()
+
+    def process(self, raw, identifiers, frame_meta):
+        """
+        Args:
+            identifiers: list of input data identifiers
+            raw: output of model
+        Returns:
+            list of DetectionPrediction objects
+        """
+
+        result = []
+
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        print(raw_outputs)
+        self.select_output_blob(raw_outputs)
+        print(raw_outputs[self.output_blob].shape)
+        probabilities = raw_outputs[self.output_blob][..., :self.classes]
+        print(probabilities.shape)
+        probabilities = self.processor.prob_correct(probabilities)
+        print("After sigmoid", probabilities)
+
+        box_size = self.coords + 1 + self.classes
+        for identifier, prediction, meta in zip(identifiers, predictions, frame_meta):
+            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+            input_shape = list(meta.get('input_shape', {'data': (1, 3, 416, 416)}).values())[0]
+            nchw_layout = input_shape[1] == 3
+            self.processor.width_normalizer = input_shape[3 if nchw_layout else 2]
+            self.processor.height_normalizer = input_shape[2 if nchw_layout else 1]
+            for layer_id, p in enumerate(prediction):
+                anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
+                num = len(anchors) // 2 if self.masked_anchors else self.num
+                if self.transpose:
+                    p = np.transpose(p, self.transpose)
+                if self.do_reshape or len(p.shape) != 3:
+                    try:
+                        cells = self.cells[layer_id]
+                    except IndexError:
+                        raise ConfigError('Number of output layers ({}) is more than detection grid size ({}). '
+                                          'Check "cells" option.'.format(len(prediction), len(self.cells)))
+                    if self.output_format == 'BHW':
+                        new_shape = (num * box_size, cells, cells)
+                    else:
+                        new_shape = (cells, cells, num * box_size)
+
+                    p = np.reshape(p, new_shape)
+                else:
+                    # Get grid size from output shape - ignore self.cells value.
+                    # N.B.: value p.shape[1] will always contain grid size, but here we use if clause just for
+                    # clarification (works ONLY for square grids).
+                    cells = p.shape[1] if self.output_format == 'BHW' else p.shape[0]
+
+                self.processor.x_normalizer = cells
+                self.processor.y_normalizer = cells
+
+                labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num,
+                                                                              box_size, anchors,
+                                                                              self.processor, self.threshold)
+                detections['labels'].extend(labels)
+                detections['scores'].extend(scores)
+                detections['x_mins'].extend(x_mins)
+                detections['y_mins'].extend(y_mins)
+                detections['x_maxs'].extend(x_maxs)
+                detections['y_maxs'].extend(y_maxs)
+
+            result.append(DetectionPrediction(
+                identifier, detections['labels'], detections['scores'], detections['x_mins'], detections['y_mins'],
+                detections['x_maxs'], detections['y_maxs']
+            ))
+
+        return result
