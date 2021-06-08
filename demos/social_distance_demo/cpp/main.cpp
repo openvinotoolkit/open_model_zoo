@@ -478,7 +478,7 @@ void ResAggregator::process() {
     }
 
     tryPush(context.drawersContext.drawersWorker, std::make_shared<Drawer>(sharedVideoFrame));
-    ++context.trackersContext.lastProcessedIds[sourceID];;
+    ++context.trackersContext.lastProcessedIds[sourceID];
 }
 
 bool DetectionsProcessor::isReady() {
