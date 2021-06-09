@@ -79,7 +79,7 @@ def build_argparser():
                       help='Optional. Threshold for the predicted score of an action.',
                       default=0.8, type=float)
     args.add_argument('-d', '--device',
-                      help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL '
+                      help='Optional. Specify the target device to infer on: CPU, GPU, HDDL '
                            'or MYRIAD. The demo will look for a suitable plugin for device '
                            'specified (by default, it is CPU).',
                       default='CPU', type=str)

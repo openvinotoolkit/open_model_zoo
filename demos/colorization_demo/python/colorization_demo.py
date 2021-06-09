@@ -35,7 +35,7 @@ def build_arg():
     in_args.add_argument("-m", "--model", help="Required. Path to .xml file with pre-trained model.",
                          required=True, type=Path)
     in_args.add_argument("-d", "--device",
-                         help="Optional. Specify target device for infer: CPU, GPU, FPGA, HDDL or MYRIAD. "
+                         help="Optional. Specify target device for infer: CPU, GPU, HDDL or MYRIAD. "
                               "Default: CPU",
                          default="CPU", type=str)
     in_args.add_argument('-i', "--input", required=True,

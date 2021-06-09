@@ -93,7 +93,6 @@ Options:
     -auto_resize               Optional. Enable resizable input with support of ROI crop and auto resize.
     -nireq                     Optional. Number of infer requests. 0 sets the number of infer requests equal to the number of inputs.
     -nc                        Required for web camera input. Maximum number of processed camera inputs (web cameras).
-    -fpga_device_ids           Optional. Specify FPGA device IDs (0,1,n).
     -loop_video                Optional. Enable playing video on a loop.
     -n_iqs                     Optional. Number of allocated frames. It is a multiplier of the number of inputs.
     -ni                        Optional. Specify the number of channels generated from provided inputs (with -i and -nc keys). For example, if only one camera is provided, but -ni is set to 2, the demo will process frames as if they are captured from two cameras. 0 sets the number of input channels equal to the number of provided inputs.

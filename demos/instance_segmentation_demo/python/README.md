@@ -95,7 +95,7 @@ Options:
                         If 0 is set, all frames are stored.
   -d "<device>", --device "<device>"
                         Optional. Specify the target device to infer on: CPU,
-                        GPU, FPGA, HDDL or MYRIAD. The demo will look for a
+                        GPU, HDDL or MYRIAD. The demo will look for a
                         suitable plugin for device specified (by default, it
                         is CPU).
   -l "<absolute_path>", --cpu_extension "<absolute_path>"

@@ -63,7 +63,7 @@ def build_argparser():
                       help="Optional. The threshold to define the face is recognized or not.",
                       type=float, default=0.6, metavar='"<num>"')
     args.add_argument("-d", "--device",
-                      help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL, MYRIAD or HETERO is "
+                      help="Optional. Specify the target device to infer on; CPU, GPU, HDDL, MYRIAD or HETERO is "
                            "acceptable. The demo will look for a suitable plugin for device specified. Default "
                            "value is CPU",
                       default="CPU", type=str, metavar='"<device>"')

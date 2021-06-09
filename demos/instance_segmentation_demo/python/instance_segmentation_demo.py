@@ -57,7 +57,7 @@ def build_argparser():
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
     args.add_argument('-d', '--device',
-                      help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
+                      help='Optional. Specify the target device to infer on: CPU, GPU, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
                            '(by default, it is CPU).',
                       default='CPU', type=str, metavar='"<device>"')

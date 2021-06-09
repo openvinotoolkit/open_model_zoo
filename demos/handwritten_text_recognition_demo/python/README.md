@@ -63,7 +63,7 @@ Options:
                         Required. Path to an image to infer
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
-                        GPU, FPGA, HDDL, MYRIAD or HETERO is acceptable. The
+                        GPU, HDDL, MYRIAD or HETERO is acceptable. The
                         demo will look for a suitable plugin for device
                         specified. Default value is CPU
   -ni NUMBER_ITER, --number_iter NUMBER_ITER

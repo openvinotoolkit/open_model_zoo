@@ -92,7 +92,7 @@ optional arguments:
   --no_show             Optional. Don't show output.
   -d DEVICE, --device DEVICE
                         Optional. Specify a target device to infer on. CPU,
-                        GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
+                        GPU, HDDL or MYRIAD is acceptable. The demo will
                         look for a suitable plugin for the device specified.
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         MKLDNN (CPU)-targeted custom layers. Absolute path to a

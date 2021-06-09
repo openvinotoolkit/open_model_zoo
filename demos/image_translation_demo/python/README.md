@@ -72,7 +72,7 @@ Options:
                         saved
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
-                        GPU, FPGA, HDDL or MYRIAD is acceptable. Default
+                        GPU, HDDL or MYRIAD is acceptable. Default
                         value is CPU
 ```
 

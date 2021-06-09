@@ -745,10 +745,6 @@ int main(int argc, char* argv[]) {
                     ie.SetConfig({{ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
                 }
             }
-
-            if ("FPGA" == device) {
-                ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_DEVICE_ID, FLAGS_fpga_device_ids } }, "FPGA");
-            }
         }
 
         /** Per layer metrics **/

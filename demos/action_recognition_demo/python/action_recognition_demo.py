@@ -58,7 +58,7 @@ def build_argparser():
                       help='Optional. For CPU custom layers, if any. Absolute path to a shared library with the '
                            'kernels implementation.', type=str, default=None)
     args.add_argument('-d', '--device',
-                      help='Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is '
+                      help='Optional. Specify a target device to infer on. CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for the device specified. '
                            'Default value is CPU.',
                       default='CPU', type=str)

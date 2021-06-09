@@ -82,7 +82,7 @@ Options:
                         If 0 is set, all frames are stored.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on: CPU,
-                        GPU, FPGA, HDDL or MYRIAD. The demo will look for a
+                        GPU, HDDL or MYRIAD. The demo will look for a
                         suitable plugin for device specified (by default, it
                         is CPU).
   --height_size HEIGHT_SIZE

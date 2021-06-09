@@ -23,7 +23,7 @@ def main():
         help="Optional. Required for CPU custom layers. Absolute MKLDNN (CPU)-targeted custom layers. "
         "Absolute path to a shared library with the kernels implementations", type=str, default=None)
     parser.add_argument("-d", "--device",
-        help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. "
+        help="Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is acceptable. "
         "The demo will look for a suitable plugin for device specified. Default value is CPU", default="CPU", type=str)
 
     args = parser.parse_args()
