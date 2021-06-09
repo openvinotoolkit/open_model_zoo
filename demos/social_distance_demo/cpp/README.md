@@ -142,6 +142,6 @@ For example, to run the sample on one Intel® Vision Accelerator Design with Int
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
