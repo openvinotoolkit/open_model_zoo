@@ -82,7 +82,7 @@ DEFINE_string(u, "", utilization_monitors_message);
 */
 void showUsage() {
     std::cout << std::endl;
-    std::cout << "interactive_vehicle_detection [OPTION]" << std::endl;
+    std::cout << "social_distance_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                         " << help_message << std::endl;

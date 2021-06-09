@@ -69,7 +69,7 @@ Running the application with the <code>-h</code> option yields the following usa
 ```
 [ INFO ] InferenceEngine: <version>
 
-interactive_vehicle_detection [OPTION]
+social_distance_demo [OPTION]
 Options:
 
     -h                         Print a usage message.
