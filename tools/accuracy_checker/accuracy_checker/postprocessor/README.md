@@ -117,7 +117,7 @@ Accuracy Checker supports following set of postprocessors:
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
 * `pad_signal` - add left padding to reference signal if it was done for input data. Supported representations: `NoiseSuppressionAnnotation`, `NoiseSuppressionPrediction`.
 * `time_series_denormalize` - apply denormalization to predicted and ground truth curves. Supported representations: `TimeSeriesForecastingAnnotation`, `TimeSeriesForecastingQuantilesPrediction`.
-* `interpolation` - Interpolates values into target range. Supported representation: `ImageProcessingPrediction`, `ImageInpaintingAnnotation`.
+* `interpolation` - Interpolates values into target range. Supported representation: `ImageProcessingPrediction`, `ImageProcessingAnnotation`.
   * `mode` - interpolation mode. Currently only `linear` mode available. (Optional, default value is `linear`)
   * `target_min` - Minimum of target range. (Optional, default value is 0)
   * `target_max` - Maximum of target range. (Optional, default value is 255)

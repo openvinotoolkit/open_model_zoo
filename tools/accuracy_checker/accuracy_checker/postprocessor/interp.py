@@ -52,7 +52,6 @@ class Interpolation(Postprocessor):
         self.as_log = self.get_value_from_config('as_log')
 
     def process_image(self, annotation, prediction):
-        @singledispatch
         def cast_func(entry):
             pass
 
