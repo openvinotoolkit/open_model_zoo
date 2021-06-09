@@ -36,7 +36,8 @@ LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
     'NCHWD': [0, 2, 3, 4, 1],
     'NC': [0, 1],
     'CN': [1, 0],
-    'CNH': [1, 0, 2]
+    'CNH': [1, 0, 2],
+    'N': [0]
 }
 
 DIM_IDS_TO_LAYOUT = {
