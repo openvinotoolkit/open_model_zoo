@@ -559,7 +559,7 @@ class EncoderONNXModel(BaseModel):
         return results, results[0]
 
     def fit_to_input(self, input_data):
-        return {self.input_blob.name: input_data[0]}
+        return {self.input_blob.name: input_data}
 
     def release(self):
         del self.inference_session
