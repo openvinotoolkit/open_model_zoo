@@ -2,9 +2,7 @@
 
 ![](./social_distance.gif)
 
-This demo showcases a retail social distance application that detects people and measures the distance between them. If this distance is less than a value previously provided by the user, then an alert is triggered. With this application you can use the [person-detection-retail-0013](../../../models/intel/person-detection-retail-0013/README.md) and [person-reidentification-retail-0277](../../../models/intel/person-reidentification-retail-0277/README.md) Intel® pre-trained models, that can be downloaded using the **model downloader**. The **model downloader** downloads the __.xml__ and __.bin__ files that is used by the application. All supported models by this demo are listed in [models list](models.lst).
-
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
+This demo showcases a retail social distance application that detects people and measures the distance between them. If this distance is less than a value previously provided by the user, then an alert is triggered.
 
 Other demo objectives are:
 * Video/Camera as inputs, via OpenCV\*
@@ -33,6 +31,37 @@ The pipeline of this demo executes the following sequence of `Task`s:
 At the end of the sequence, the `VideoFrame` is destroyed and the sequence starts again for the next frame.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html)
+
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in `<omz_dir>/demos/social_distance_demo/cpp/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
+### Supported Models
+
+* person-detection-0200
+* person-detection-0201
+* person-detection-0202
+* person-detection-retail-0013
+* person-reidentification-retail-0277
+* person-reidentification-retail-0286
+* person-reidentification-retail-0287
+* person-reidentification-retail-0288
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -72,10 +101,6 @@ Options:
 ```
 
 Running the application with an empty list of options yields an error message.
-
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md).
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 For example, to do inference on a GPU with the OpenVINO toolkit pre-trained models, run the following command:
 
