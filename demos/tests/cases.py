@@ -754,6 +754,12 @@ PYTHON_DEMOS = [
             ModelArg('person-reidentification-retail-0288')),
     )),
 
+    PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
+                          '-m': ModelArg('noise-suppression-poconetlike-0001')}),
+
+    )),
+
     PythonDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('object-detection-demo')}),
         [
@@ -937,6 +943,11 @@ PYTHON_DEMOS = [
                     ModelArg('person-detection-retail-0013'),
                     ModelArg('ssd_mobilenet_v1_coco'))),
         ]
+    )),
+
+    PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        single_option_cases('-m', ModelArg('aclnet'), ModelArg('aclnet-int8', precision='FP32-INT8')),
     )),
 
     PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
