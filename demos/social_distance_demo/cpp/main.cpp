@@ -400,9 +400,6 @@ void Drawer::process() {
                 }
                 catch (const std::bad_weak_ptr&) {}
             }
-            else if (key == 32) {
-                context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
-            }
             else {
                 context.drawersContext.presenter.handleKey(key);
             }
