@@ -329,10 +329,9 @@ NATIVE_DEMOS = [
         TestCase(options={'-no_show': None,
             **MONITORS,
             '-i': DataPatternArg('person-detection-retail')}),
-        [
-            TestCase(options={'-m_det': ModelArg('person-detection-retail-0002')}),
-            TestCase(options={'-m_det': ModelArg('person-detection-retail-0013')}),
-        ],
+        single_option_cases('-m_det',
+            ModelArg('person-detection-retail-0002'),
+            ModelArg('person-detection-retail-0013')),
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0277'),
             ModelArg('person-reidentification-retail-0286'),
@@ -405,6 +404,22 @@ NATIVE_DEMOS = [
             ),
             TestCase(options={'-m_act': ModelArg('person-detection-raisinghand-recognition-0001'), '-a_top': '5'}),
         ],
+    )),
+
+    CppDemo(name='social_distance_demo', device_keys=['-d_det', '-d_reid'], test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            **MONITORS,
+            '-i': DataDirectoryArg('person-detection-retail')}),
+        single_option_cases('-m_det',
+            ModelArg('person-detection-0200'),
+            ModelArg('person-detection-0201'),
+            ModelArg('person-detection-0202'),
+            ModelArg('person-detection-retail-0013')),
+        single_option_cases('-m_reid',
+            ModelArg('person-reidentification-retail-0277'),
+            ModelArg('person-reidentification-retail-0286'),
+            ModelArg('person-reidentification-retail-0287'),
+            ModelArg('person-reidentification-retail-0288')),
     )),
 
     CppDemo(name='text_detection_demo', device_keys=['-d_td', '-d_tr'], test_cases=combine_cases(
