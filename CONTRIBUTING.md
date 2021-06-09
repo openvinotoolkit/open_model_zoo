@@ -193,7 +193,7 @@ Demos are required to support the following keys:
 
  -  `-i "<input>"`: Required. An input to process. The input can usually be a single image, a folder of images or anything that OpenCV's `VideoCapture` can process.
  -  `-m "<path>"`: Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m_`.
- -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
+ -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
  -  `-no_show`: Optional. Do not visualize inference results.
 
 > **TIP**: For Python, it is preferable to use `--` instead of `-` for long keys.
