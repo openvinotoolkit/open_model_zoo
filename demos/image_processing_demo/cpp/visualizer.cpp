@@ -130,7 +130,6 @@ void Visualizer::drawSweepLine(cv::Mat& image) {
 void Visualizer::setResolution(cv::Size& newResolution) {
     resolution = newResolution;
     isResolutionSet = true;
-    cv::setTrackbarMax(trackbarName, winName, resolution.width);
 }
 
 void Visualizer::addTrackbar() {
