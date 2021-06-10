@@ -20,7 +20,7 @@
 
 #include <utils/args_helper.hpp>
 #include <utils/common.hpp>
-#include <cldnn/cldnn_config.hpp>
+#include <gpu/gpu_config.hpp>
 
 using namespace InferenceEngine;
 
@@ -56,7 +56,7 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::st
                 && devices.find("CPU") != devices.end()) {
                 // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                config.execNetworkConfig.emplace(CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1");
+                config.execNetworkConfig.emplace(GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1");
             }
         }
     }
