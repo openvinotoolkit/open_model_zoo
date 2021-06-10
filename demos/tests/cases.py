@@ -652,6 +652,26 @@ PYTHON_DEMOS = [
         TestCase(options={'-m_reid': ModelArg('facenet-20180408-102900')}),
     )),
 
+    PythonDemo(name='formula_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None}),
+        [
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/'
+                                    'assets/formula-recognition-medium-scan-0001.png'),
+                '-m_encoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-encoder'),
+                '-m_decoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-decoder'),
+                '--vocab': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/vocab.json')
+            }),
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/formula-recognition-polynomials-handwritten-0001/'
+                                    'assets/formula-recognition-polynomials-handwritten-0001.png'),
+                '-m_encoder': ModelArg('formula-recognition-polynomials-handwritten-0001-encoder'),
+                '-m_decoder': ModelArg('formula-recognition-polynomials-handwritten-0001-decoder'),
+                '--vocab': str(OMZ_DIR / 'models/intel/formula-recognition-polynomials-handwritten-0001/vocab.json'),
+            })
+        ],
+    )),
+
     PythonDemo(name='gesture_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
                           '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
