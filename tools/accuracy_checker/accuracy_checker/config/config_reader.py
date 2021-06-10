@@ -59,6 +59,8 @@ ADAPTERS_PATHS = {
 ANNOTATION_CONVERSION_PATHS = {
     'vocab_file': ['model_attributes', 'source', 'models'],
     'merges_file': ['model_attributes', 'source', 'models'],
+    'mask_file': ['model_attributes', 'source', 'models'],
+    'stats_file': ['model_attributes', 'source', 'models'],
 }
 
 LIST_ENTRIES_PATHS = {

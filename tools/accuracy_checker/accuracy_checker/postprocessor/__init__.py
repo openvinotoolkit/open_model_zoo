@@ -62,6 +62,8 @@ from .min_max_normalization import MinMaxRegressionNormalization
 from .crop_image import CropImage, CornerCropImage
 from .pad_signal import PadSignal
 from .time_series_denormalize import TimeSeriesDenormalize
+from .interp import Interpolation
+
 
 __all__ = [
     'Postprocessor',
@@ -138,5 +140,7 @@ __all__ = [
 
     'PadSignal',
 
-    'TimeSeriesDenormalize'
+    'TimeSeriesDenormalize',
+
+    'Interpolation'
 ]
