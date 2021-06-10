@@ -31,7 +31,6 @@ public:
                      currSourceId{0} {
         cv::Size size(static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.width / aspectRatio.height))),
                       static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.height / aspectRatio.width))));
-        std::cout << size.width << " " << size.height << std::endl;
         // if targetFPS == 0 then set minimum possible grid size
         if (size.width == 0 || size.height == 0) {
             size = {1, 1};
