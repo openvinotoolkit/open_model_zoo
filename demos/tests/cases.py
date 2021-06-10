@@ -664,6 +664,21 @@ PYTHON_DEMOS = [
         ],
     )),
 
+    PythonDemo(name='handwritten_text_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+        [
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/handwritten-japanese-recognition-0001/assets/test.png'),
+                '-m': ModelArg('handwritten-japanese-recognition-0001'),
+                '-cl': str(OMZ_DIR / 'data/dataset_classes/kondate_nakayosi.txt')
+            }),
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/handwritten-simplified-chinese-recognition-0001/assets/test.png'),
+                '-m': ModelArg('handwritten-simplified-chinese-recognition-0001'),
+                '-cl': str(OMZ_DIR / 'data/dataset_classes/scut_ept.txt')
+            }),
+        ],
+    )),
+
     PythonDemo(name='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
                           **MONITORS,
