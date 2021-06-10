@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from functools import singledispatch
 import numpy as np
 from ..config import StringField, NumberField, BoolField
 from ..representation import ImageProcessingPrediction, ImageProcessingAnnotation
