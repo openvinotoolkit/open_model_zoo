@@ -59,12 +59,14 @@ def check_and_update_numpy(min_acceptable='1.15'):
     except ImportError:
         update_required = True
     if update_required:
-        subprocess.call(['pip3', 'install', 'numpy>={}'.format(min_acceptable)])
+        subprocess.call([sys.executable, '-m', 'pip', 'install', 'numpy>={}'.format(min_acceptable)])
 
 
 def install_dependencies_with_pip(dependencies):
     for dep in dependencies:
-        subprocess.call(['pip3', 'install', str(dep)])
+        if dep.startswith('#'):
+            continue
+        subprocess.call([sys.executable, '-m', 'pip', 'install', str(dep)])
 
 
 class CoreInstall(install_command):
