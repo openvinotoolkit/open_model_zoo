@@ -1,22 +1,10 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <cstdio>
-#include <string>
-
 #define _USE_MATH_DEFINES
-#include <cmath>
-
-#include <utility>
-#include <memory>
-#include <map>
-#include <vector>
-#include <set>
 
 #include "utils.hpp"
-
-using namespace InferenceEngine;
 
 namespace gaze_estimation {
 void gazeVectorToGazeAngles(const cv::Point3f& gazeVector, cv::Point2f& gazeAngles) {
@@ -30,17 +18,17 @@ void gazeVectorToGazeAngles(const cv::Point3f& gazeVector, cv::Point2f& gazeAngl
     gazeAngles.y = static_cast<float>(180.0 / M_PI * (M_PI_2 - std::acos(v1 / r)));
 }
 
-void putTimingInfoOnFrame(cv::Mat& image, double overallTime, double inferenceTime) {
+void putTimingInfoOnFrame(cv::Mat& image, double overallTime) {
     auto frameHeight = image.rows;
     double fontScale = 1.6 * frameHeight / 640;
     auto fontColor = cv::Scalar(0, 0, 255);
     int thickness = 2;
 
     double overallFPS = 1000. / overallTime;
-    double inferenceFPS = 1000. / inferenceTime;
 
+    const auto format = cv::format("Overall FPS: %0.0f", overallFPS);
     cv::putText(image,
-                cv::format("Overall FPS: %0.0f, Inference FPS: %0.0f", overallFPS, inferenceFPS),
+                format,
                 cv::Point(10, static_cast<int>(30 * fontScale / 1.6)), cv::FONT_HERSHEY_PLAIN, fontScale, fontColor, thickness);
 }
 }  // namespace gaze_estimation

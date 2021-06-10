@@ -1,4 +1,4 @@
-# Gaze Estimation Demo
+# G-API Gaze Estimation Demo
 
 ![example](../gaze_estimation.gif)
 
@@ -13,36 +13,26 @@ The demo also relies on the following auxiliary networks:
 
 Other demo objectives are:
 
-* Video/Camera as inputs, via OpenCV*
+* Video/Camera as inputs, via OpenCV\*
 * Visualization of gaze estimation results, and, optionally, results of inference on auxiliary models
 
 ## How It Works
 
-1. The application reads command-line parameters and loads four networks to the Inference Engine
-2. The application gets a frame from the OpenCV VideoCapture
-3. The application performs inference on auxiliary models to obtain head pose angles and images of eyes regions serving as an input for gaze estimation model
-4. The application performs inference on gaze estimation model using inference results of auxiliary models
-5. The application shows the results
+1. The application reads command-line parameters and loads four networks.
+2. The application uses graph for processing frame from source.
+* Graph receives frame.
+* Performs inference of Face Detection network. ROIs obtained by Face Detector are fed to the Facial Landmarks and Head-Pose estimation networks.
+* Gets information about head pose angles. Finds eyes regions serving as an input for Gaze Estimation model.
+* Performs inference of Gaze Estimation network and processes its result.
+3. The application shows the results.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html)
 
 ## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
-The list of models supported by the demo is in `<omz_dir>/demos/gaze_estimation_demo/cpp/models.lst` file.
+The list of models supported by the demo is in <omz_dir>/demos/gaze_estimation_demo/cpp_gapi/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
-
-An example of using the Model Downloader:
-
-```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
-```
-
-An example of using the Model Converter:
-
-```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
-```
 
 ### Supported Models
 
@@ -66,7 +56,7 @@ InferenceEngine:
     API version ............ <version>
     Build .................. <number>
 
-gaze_estimation_demo [OPTION]
+gaze_estimation_demo_gapi [OPTION]
 Options:
 
     -h                       Print a usage message.
@@ -80,14 +70,13 @@ Options:
     -m_hp "<path>"           Required. Path to an .xml file with a trained Head Pose Estimation model.
     -m_lm "<path>"           Required. Path to an .xml file with a trained Facial Landmarks Estimation model.
     -m_es "<path>"           Required. Path to an .xml file with a trained Open/Closed Eye Estimation model.
-    -d "<device>"            Optional. Target device for Gaze Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
-    -d_fd "<device>"         Optional. Target device for Face Detection network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
-    -d_hp "<device>"         Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
-    -d_lm "<device>"         Optional. Target device for Facial Landmarks Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
-    -d_es "<device>"         Optional. Target device for Open/Closed Eye network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
+    -d "<device>"            Optional. Target device for Gaze Estimation network (the list of available devices is shown below).
+    -d_fd "<device>"         Optional. Target device for Face Detection network (the list of available devices is shown below).
+    -d_hp "<device>"         Optional. Target device for Head Pose Estimation network (the list of available devices is shown below).
+    -d_lm "<device>"         Optional. Target device for Facial Landmarks Estimation network (the list of available devices is shown below).
+    -d_es "<device>"         Optional. Target device for Open/Closed Eye network (the list of available devices is shown below).
     -fd_reshape              Optional. Reshape Face Detector network so that its input resolution has the same aspect ratio as the input frame.
     -no_show                 Optional. Don't show output.
-    -pc                      Optional. Enable per-layer performance report.
     -r                       Optional. Output inference results as raw values.
     -t                       Optional. Probability threshold for Face Detector. The default value is 0.5.
     -u                       Optional. List of monitors to show initially.
@@ -98,14 +87,7 @@ Running the application with an empty list of options yields an error message.
 For example, to do inference on a CPU, run the following command:
 
 ```sh
-./gaze_estimation_demo \
-  -d CPU \
-  -i <path_to_video>/input_video.mp4 \
-  -m <path_to_model>/gaze-estimation-adas-0002.xml \
-  -m_fd <path_to_model>/face-detection-retail-0004.xml \
-  -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml \
-  -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml \
-  -m_es <path_to_model>/open-closed-eye-0001.xml
+./gaze_estimation_demo_gapi -d CPU -i <path_to_video>/input_video.mp4  -m <path_to_model>/gaze-estimation-adas-0002.xml -m_fd <path_to_model>/face-detection-retail-0004.xml -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml
 ```
 
 ### Run-Time Control Keys
@@ -123,13 +105,12 @@ The following keys are supported:
 * F - to flip frames horizontally
 * Esc - to quit the demo
 
-You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
+You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the -o option:
 
-* To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
-* To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
-To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
+* To save processed results in an AVI file, specify the name of the output file with avi extension, for example: -o output.avi.
+* To save processed results as images, specify the template name of the output image file with jpg or png extension, for example: -o output_%03d.jpg. The actual file names are constructed from the template at runtime by replacing regular expression %03d with the frame number, resulting in the following: output_000.jpg, output_001.jpg, and so on. To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the limit option. The default value is 1000. To change it, you can apply the -limit N option, where N is the number of frames to store.
 
->**NOTE**: Windows* systems may not have the Motion JPEG codec installed by default. If this is the case, OpenCV FFMPEG backend can be downloaded by the PowerShell script provided with the OpenVINO install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. Run the script with Administrative privileges. Alternatively, you can save results as images.
+> **NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, OpenCV FFMPEG backend can be downloaded by the PowerShell script provided with the OpenVINO install package and located at <INSTALL_DIR>/opencv/ffmpeg-download.ps1. Run the script with Administrative privileges. Alternatively, you can save results as images.
 
 ## Demo Output
 
