@@ -14,7 +14,7 @@
 #include <stdexcept>
 #include <string>
 
-#include <cldnn/cldnn_config.hpp>
+#include <gpu/gpu_config.hpp>
 #include <inference_engine.hpp>
 #include <monitors/presenter.h>
 #include <vpu/hddl_config.hpp>
@@ -741,7 +741,7 @@ int main(int argc, char* argv[]) {
                 if (devices.end() != devices.find("CPU")) {
                     // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
                     // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                    ie.SetConfig({{ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
+                    ie.SetConfig({{ GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
                 }
             }
         }
