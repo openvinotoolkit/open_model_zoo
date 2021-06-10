@@ -216,10 +216,6 @@ Deep Learning models for text spotting (simultaneous detection and recognition).
 
 | Model Name | Complexity (GFLOPs) | Size (Mp) |
 |------------|---------------------|-----------|
-| [text-spotting-0004](./text-spotting-0004/README.md) |         |        |
-|   text-spotting-0004-detector                        | 184.495 | 27.010 |
-|   text-spotting-0004-recognizer-encoder              | 2.082   | 1.328  |
-|   text-spotting-0004-recognizer-decoder              | 0.002   | 0.273  |
 | [text-spotting-0005](./text-spotting-0005/README.md) |         |        |
 |   text-spotting-0005-detector                        | 184.495 | 27.010 |
 |   text-spotting-0005-recognizer-encoder              | 2.082   | 1.328  |
@@ -280,8 +276,6 @@ Deep Learning compressed models
 |------------|---------------------|-----------|
 | [machine-translation-nar-en-ru-0001](./machine-translation-nar-en-ru-0001/README.md) | 23.17 | 69.29 |
 | [machine-translation-nar-ru-en-0001](./machine-translation-nar-ru-en-0001/README.md) | 23.17 | 69.29 |
-| [machine-translation-nar-en-de-0001](./machine-translation-nar-en-de-0001/README.md) | 23.19 | 77.47 |
-| [machine-translation-nar-de-en-0001](./machine-translation-nar-de-en-0001/README.md) | 23.19 | 77.47 |
 | [machine-translation-nar-en-de-0002](./machine-translation-nar-en-de-0002/README.md) | 23.19 | 77.47 |
 | [machine-translation-nar-de-en-0002](./machine-translation-nar-de-en-0002/README.md) | 23.19 | 77.47 |
 
