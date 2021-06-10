@@ -13,7 +13,7 @@ The demo also relies on the following auxiliary networks:
 
 Other demo objectives are:
 
-* Video/Camera as inputs, via OpenCV*
+* Video/Camera as inputs, via OpenCV\*
 * Visualization of gaze estimation results, and, optionally, results of inference on auxiliary models
 
 ## How It Works
