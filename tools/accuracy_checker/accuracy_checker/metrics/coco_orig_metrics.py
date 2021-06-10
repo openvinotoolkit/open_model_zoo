@@ -27,7 +27,7 @@ from ..representation import (
     DetectionPrediction,
     DetectionAnnotation,
     CoCoInstanceSegmentationAnnotation,
-    CoCoInstanceSegmentationPrediction,
+    CoCocInstanceSegmentationPrediction,
     PoseEstimationAnnotation,
     PoseEstimationPrediction
 )
@@ -474,7 +474,7 @@ class MSCOCOorigAveragePrecision(MSCOCOorigBaseMetric):
 class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision, PerImageEvaluationMetric): # pylint:disable=R0901
     __provider__ = 'coco_orig_segm_precision'
     annotation_types = (CoCoInstanceSegmentationAnnotation, )
-    prediction_types = (CoCoInstanceSegmentationPrediction, )
+    prediction_types = (CoCocInstanceSegmentationPrediction, )
 
     iou_type = 'segm'
 
@@ -582,7 +582,7 @@ class MSCOCOorigRecall(MSCOCOorigBaseMetric):
 class MSCOCOorigSegmRecall(MSCOCOorigRecall):
     __provider__ = 'coco_orig_segm_recall'
     annotation_types = (CoCoInstanceSegmentationAnnotation, )
-    prediction_types = (CoCoInstanceSegmentationPrediction, )
+    prediction_types = (CoCocInstanceSegmentationPrediction, )
 
     iou_type = 'segm'
 

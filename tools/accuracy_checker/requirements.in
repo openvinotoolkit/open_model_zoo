@@ -1,44 +1,36 @@
 # progress bar
-tqdm>=4.54.1
+tqdm
 
 # image reading and preprocessing
-# scikit-image version will be changed to 0.18 after fixing tests (compare_ssim method has been removed in this version)
-# note: python 3.6 wheels is not available since 0.18
-scikit-image~=0.17.2
+scikit-image
 
 # reid
-scikit-learn>=0.24.1
+scikit-learn
 
 # cpu extension usage
-py-cpuinfo>=7.0.0
+py-cpuinfo!=5.0,!=6.0
 
 # text detection
-shapely>=1.7.1
+shapely
 
 # brain tumor segmentation
-nibabel>=3.2.1
-scipy~=1.5.4
+nibabel
+scipy
 
 # dicom images reading
-pydicom>=2.1.2
+pydicom
 
 # nlp, tokenization
-sentencepiece>=0.1.95
-tokenizers>=0.10.1
-nltk>=3.5
+sentencepiece
+tokenizers
+nltk
 
 # editdistance calculation
-editdistance>=0.5.3
+editdistance
 
 # DNA sequence matching
-parasail>=1.2.4
-fast-ctc-decode>=0.2.5
+parasail
+fast-ctc-decode
 
 # raw image formats processing
-rawpy>=0.16.0
-
-# lmdb dataset support
-lmdb>=1.2.1
-
-# pandas datasets support
-pandas~=1.1.5
+rawpy

@@ -13,13 +13,10 @@
 # limitations under the License.
 
 description: >-
-  The "mozilla-deepspeech-0.8.2" model is a speech recognition neural network pre-trained
-  by Mozilla based on DeepSpeech architecture (CTC decoder with beam search and n-gram
-  language model) with changed neural network topology.
-
-  For details on the original DeepSpeech, see paper <https://arxiv.org/abs/1412.5567>.
-
-  For details on this model, see repository <https://github.com/mozilla/DeepSpeech/releases/tag/v0.8.2>.
+  "mozilla-deepspeech-0.8.2" is a speech recognition neural network pre-trained by Mozilla
+  based on DeepSpeech architecture (CTC decoder with beam search and n-gram language model)
+  with modified neural network.
+  For details on the original DeepSpeech see paper <https://arxiv.org/abs/1412.5567>.
 task_type: speech_recognition
 files:
   - name: deepspeech-0.8.2-models.pbmm

@@ -20,8 +20,6 @@ from pathlib import Path
 ArgContext = collections.namedtuple('ArgContext',
     ['test_data_dir', 'dl_dir', 'model_info', 'data_sequences', 'data_sequence_dir'])
 
-RequestedModel = collections.namedtuple('RequestedModel', ['name', 'precisions'])
-
 OMZ_DIR = Path(__file__).parents[2].resolve()
 
 
@@ -45,16 +43,7 @@ def image_retrieval_arg(id):
     return TestDataArg('Image_Retrieval/{}'.format(id))
 
 
-class Arg:
-    @property
-    def required_models(self):
-        return []
-
-    def resolve(self, context):
-        raise NotImplementedError
-
-
-class ModelArg(Arg):
+class ModelArg:
     def __init__(self, name, precision='FP32'):
         self.name = name
         self.precision = precision
@@ -62,25 +51,8 @@ class ModelArg(Arg):
     def resolve(self, context):
         return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))
 
-    @property
-    def required_models(self):
-        return [RequestedModel(self.name, [self.precision])]
 
-
-class ModelFileArg(Arg):
-    def __init__(self, model_name, file_name):
-        self.model_name = model_name
-        self.file_name = file_name
-
-    def resolve(self, context):
-        return str(context.dl_dir / context.model_info[self.model_name]["subdirectory"] / self.file_name)
-
-    @property
-    def required_models(self):
-        return [RequestedModel(self.model_name, [])]
-
-
-class DataPatternArg(Arg):
+class DataPatternArg:
     def __init__(self, sequence_name):
         self.sequence_name = sequence_name
 
@@ -89,7 +61,7 @@ class DataPatternArg(Arg):
         seq = [Path(data.resolve(context))
             for data in context.data_sequences[self.sequence_name]]
 
-        assert len({data.suffix for data in seq}) == 1, "all images in the sequence must have the same extension"
+        assert len(set(data.suffix for data in seq)) == 1, "all images in the sequence must have the same extension"
         assert '%' not in seq[0].suffix
 
         name_format = 'input-%04d' + seq[0].suffix
@@ -103,7 +75,7 @@ class DataPatternArg(Arg):
         return str(seq_dir / name_format)
 
 
-class DataDirectoryArg(Arg):
+class DataDirectoryArg:
     def __init__(self, sequence_name):
         self.backend = DataPatternArg(sequence_name)
 
@@ -112,7 +84,7 @@ class DataDirectoryArg(Arg):
         return str(Path(pattern).parent)
 
 
-class DataDirectoryOrigFileNamesArg(Arg):
+class DataDirectoryOrigFileNamesArg:
     def __init__(self, sequence_name):
         self.sequence_name = sequence_name
 

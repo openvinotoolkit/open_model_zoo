@@ -17,28 +17,28 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/weld-porosity-detection-0001.xml
-    size: 60877
-    sha256: 66c3b137f6a9076b62720289db564a24ab3474fa117d442460269108e1106902
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/weld-porosity-detection-0001/FP32/weld-porosity-detection-0001.xml
+    size: 61729
+    sha256: 904220b596c25213ac3f2ba88a4b89bf322b86706e024118eae6e3cefe4733d3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/weld-porosity-detection-0001/FP32/weld-porosity-detection-0001.xml
   - name: FP32/weld-porosity-detection-0001.bin
     size: 44693044
-    sha256: d89149062ed8b9bbd976a0d39537890f601dc55d62d0f85ccd20818de92ef037
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/weld-porosity-detection-0001/FP32/weld-porosity-detection-0001.bin
+    sha256: 91fd5057ce1213c705518648dbf62e16a59061e8f2dcd02b83a9137d66ba6327
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/weld-porosity-detection-0001/FP32/weld-porosity-detection-0001.bin
   - name: FP16/weld-porosity-detection-0001.xml
-    size: 60853
-    sha256: 5538b59514d5247cc14aebfc50d9b7228f8b24150bebdab2944b4820551e85a4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/weld-porosity-detection-0001/FP16/weld-porosity-detection-0001.xml
+    size: 61704
+    sha256: 63d83ccde274181bf5dc72035d946a0812b6848e0741f811e998157dc80bf6e1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/weld-porosity-detection-0001/FP16/weld-porosity-detection-0001.xml
   - name: FP16/weld-porosity-detection-0001.bin
     size: 22346530
-    sha256: d35735eec51cfcfa1fdd3ecd62547dc56b84a48c5e22407144025c05b2e68945
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/weld-porosity-detection-0001/FP16/weld-porosity-detection-0001.bin
+    sha256: 157c06cd80929fc4abec9ffa760345e0dae536a98034e0f45a3b247d285d13cf
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/weld-porosity-detection-0001/FP16/weld-porosity-detection-0001.bin
   - name: FP16-INT8/weld-porosity-detection-0001.xml
-    size: 162672
-    sha256: aae1b1666844a28e50ca121cd1d018b0b0cc6253a528510c626d72f4da82bc6a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/weld-porosity-detection-0001/FP16-INT8/weld-porosity-detection-0001.xml
+    size: 164208
+    sha256: 7d2a963dff1270e59b4dfb0bd8c5763ba7aec34d1a7bdac28fa9a50a387b6098
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/weld-porosity-detection-0001/FP16-INT8/weld-porosity-detection-0001.xml
   - name: FP16-INT8/weld-porosity-detection-0001.bin
     size: 11197380
-    sha256: cdc129afbb26bf6d5fb5f7dffd32e6425bd41dbe5c6097fda7c7270f32ad47bc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/weld-porosity-detection-0001/FP16-INT8/weld-porosity-detection-0001.bin
+    sha256: dce5ee4834b3f57d1a4b8252e8d7536938f76c27f5be96fcc26bc646e68a41b1
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/weld-porosity-detection-0001/FP16-INT8/weld-porosity-detection-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

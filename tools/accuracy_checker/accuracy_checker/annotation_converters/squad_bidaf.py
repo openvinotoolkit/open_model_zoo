@@ -102,9 +102,9 @@ class SQUADConverterBiDAF(BaseFormatConverter):
                     tokens.extend(re.split("([{}])".format("".join(additional_separators)), token))
             else:
                 tokens = nltk_tokens
-            assert not any(t == '<NULL>' for t in tokens)
-            assert not any(' ' in t for t in tokens)
-            assert not any('\t' in t for t in tokens)
+            assert not any([t == '<NULL>' for t in tokens])
+            assert not any([' ' in t for t in tokens])
+            assert not any(['\t' in t for t in tokens])
             return tokens
 
         words = tokenize(text, is_context)

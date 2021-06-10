@@ -37,7 +37,7 @@ const float HPEOpenPose::foundMidPointsRatioThreshold = 0.8f;
 const float HPEOpenPose::minSubsetScore = 0.2f;
 
 HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold) :
-    ImageModel(modelFileName, false),
+    ModelBase(modelFileName),
     aspectRatio(aspectRatio),
     targetSize(targetSize),
     confidenceThreshold(confidenceThreshold) {
@@ -46,8 +46,6 @@ HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, i
 void HPEOpenPose::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    changeInputSize(cnnNetwork);
-
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     if (inputShapes.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 input");
@@ -82,7 +80,7 @@ void HPEOpenPose::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
         throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
 }
 
-void HPEOpenPose::changeInputSize(CNNNetwork& cnnNetwork) {
+void HPEOpenPose::reshape(CNNNetwork& cnnNetwork) {
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     SizeVector& inputDims = inputShapes.begin()->second;
     if (!targetSize) {
@@ -120,7 +118,8 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
 }
 
 std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult& infResult) {
-    HumanPoseResult* result = new HumanPoseResult(infResult.frameId, infResult.metaData);
+    HumanPoseResult* result = new HumanPoseResult;
+    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     auto outputMapped = infResult.outputsData[outputsNames[0]];
     auto heatMapsMapped = infResult.outputsData[outputsNames[1]];
@@ -190,8 +189,8 @@ public:
 private:
     const std::vector<cv::Mat>& heatMaps;
     float minPeaksDistance;
-    std::vector<std::vector<Peak> >& peaksFromHeatMap;
     float confidenceThreshold;
+    std::vector<std::vector<Peak> >& peaksFromHeatMap;
 };
 
 std::vector<HumanPose> HPEOpenPose::extractPoses(

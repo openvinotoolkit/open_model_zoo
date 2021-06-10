@@ -6,7 +6,7 @@ models:
         weights: mobilenet-ssd.caffemodel
         adapter: ssd
     datasets:
-      - name: VOC2007_detection
+      - name: VOC2012
         preprocessing:
           - type: resize
             size: 300
@@ -15,11 +15,6 @@ models:
             std:  127.5
         postprocessing:
           - type: resize_prediction_boxes
-        metrics:
-          - type: map
-            integral: 11point
-            ignore_difficult: True
-            presenter: print_scalar
 
   - name: mobilenet-ssd
     launchers:
@@ -27,14 +22,9 @@ models:
         adapter: ssd
 
     datasets:
-      - name: VOC2007_detection
+      - name: VOC2012
         preprocessing:
           - type: resize
             size: 300
         postprocessing:
           - type: resize_prediction_boxes
-        metrics:
-          - type: map
-            integral: 11point
-            ignore_difficult: True
-            presenter: print_scalar

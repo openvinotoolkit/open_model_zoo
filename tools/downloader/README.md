@@ -20,13 +20,6 @@ Please use these tools instead of attempting to parse the configuration files
 directly. Their format is undocumented and may change in incompatible ways in
 future releases.
 
-> **TIP**: You also can work with the Model Downloader inside the OpenVINO™ [Deep Learning Workbench](@ref workbench_docs_Workbench_DG_Introduction) (DL Workbench).
-> [DL Workbench](@ref workbench_docs_Workbench_DG_Introduction) is a platform built upon OpenVINO™ and provides a web-based graphical environment that enables you to optimize, fine-tune, analyze, visualize, and compare
-> performance of deep learning models on various Intel® architecture
-> configurations. In the DL Workbench, you can use most of OpenVINO™ toolkit components.
-> <br>
-> Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Install_from_Docker_Hub) to get started.
-
 ## Prerequisites
 
 1. Install Python (version 3.6 or higher)
@@ -260,31 +253,13 @@ option:
 
 If the specified precision is not supported for a model, that model will be skipped.
 
-By default, the script will run Model Optimizer using the same Python executable
-that was used to run the script itself. To use a different Python executable,
-use the `-p`/`--python` option:
+The script will attempt to locate Model Optimizer using the environment
+variables set by the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
+script. You can override this heuristic with the `--mo` option:
 
 ```sh
-./converter.py --all --python my/python
+./converter.py --all --mo my/openvino/path/model_optimizer/mo.py
 ```
-
-The script will attempt to locate Model Optimizer using several methods:
-
-1. If the `--mo` option was specified, then its value will be used as the path
-   to the script to run:
-
-   ```sh
-   ./converter.py --all --mo my/openvino/path/model_optimizer/mo.py
-   ```
-
-2. Otherwise, if the selected Python executable can import the `mo` package,
-   then that package will be used.
-
-3. Otherwise, if the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
-   script has been executed, the environment variables set by that script will
-   be used to locate Model Optimizer within the toolkit.
-
-4. Otherwise, the script will fail.
 
 You can add extra Model Optimizer arguments to the ones specified in the model
 configuration by using the `--add_mo_arg` option. The option can be repeated
@@ -292,6 +267,14 @@ to add multiple arguments:
 
 ```sh
 ./converter.py --name=caffenet --add_mo_arg=--reverse_input_channels --add_mo_arg=--silent
+```
+
+By default, the script will run Model Optimizer using the same Python executable
+that was used to run the script itself. To use a different Python executable,
+use the `-p`/`--python` option:
+
+```sh
+./converter.py --all --python my/python
 ```
 
 The script can run multiple conversion commands concurrently. To enable this,
@@ -320,7 +303,7 @@ the script.
 Before you run the model quantizer, you must prepare a directory with
 the datasets required for the quantization process. This directory will be
 referred to as `<DATASET_DIR>` below. You can find more detailed information
-about dataset preparation in the [Dataset Preparation Guide](../../data/datasets.md).
+about dataset preparation in the [Dataset Preparation Guide](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md).
 
 The basic usage is to run the script like this:
 
@@ -356,6 +339,14 @@ the `--precisions` option:
 ./quantizer.py --all --dataset_dir <DATASET_DIR> --precisions=FP16-INT8
 ```
 
+The script will attempt to locate Post-Training Optimization Toolkit using
+the environment variables set by the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
+script. You can override this heuristic with the `--pot` option:
+
+```sh
+./quantizer.py --all --dataset_dir <DATASET_DIR> --pot my/openvino/path/post_training_optimization_toolkit/main.py
+```
+
 By default, the script will run Post-Training Optimization Toolkit using the same
 Python executable that was used to run the script itself. To use a different
 Python executable, use the `-p`/`--python` option:
@@ -363,24 +354,6 @@ Python executable, use the `-p`/`--python` option:
 ```sh
 ./quantizer.py --all --dataset_dir <DATASET_DIR> --python my/python
 ```
-
-The script will attempt to locate Post-Training Optimization Toolkit using several methods:
-
-1. If the `--pot` option was specified, then its value will be used as the path
-   to the script to run:
-
-   ```sh
-   ./quantizer.py --all --dataset_dir <DATASET_DIR> --pot my/openvino/path/post_training_optimization_toolkit/main.py
-   ```
-
-2. Otherwise, if the selected Python executable can import the `pot` package,
-   then that package will be used.
-
-3. Otherwise, if the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
-   script has been executed, the environment variables set by that script will
-   be used to locate Post-Training Optimization Toolkit within the OpenVINO toolkit.
-
-4. Otherwise, the script will fail.
 
 It's possible to specify a target device for Post-Training Optimization Toolkit
 to optimize for, by using the `--target_device` option:
@@ -424,9 +397,6 @@ describing a single model. Each such object has the following keys:
 
 * `name`: the identifier of the model, as accepted by the `--name` option.
 
-* `composite_model_name`: the identifier of the composite model name, if the model is a part
-  of composition of several models (e.g. encoder-decoder), otherwise - `null`
-
 * `description`: text describing the model. Paragraphs are separated by line feed characters.
 
 * `framework`: a string identifying the framework whose format the model is downloaded in.
@@ -448,10 +418,6 @@ describing a single model. Each such object has the following keys:
 
   Additional possible values might be added in the future.
 
-* `quantization_output_precisions`: the list of precisions that the model can be quantized to by
-  the model quantizer. Current possible values are `FP16-INT8` and `FP32-INT8`; additional
-  possible values might be added in the future.
-
 * `subdirectory`: the subdirectory of the output tree into which the downloaded or converted files
   will be placed by the downloader or the converter, respectively.
 
@@ -472,20 +438,16 @@ describing a single model. Each such object has the following keys:
   * `instance_segmentation`
   * `machine_translation`
   * `monocular_depth_estimation`
-  * `named_entity_recognition`
-  * `noise_suppression`
   * `object_attributes`
   * `optical_character_recognition`
   * `place_recognition`
   * `question_answering`
-  * `salient_object_detection`
   * `semantic_segmentation`
   * `sound_classification`
   * `speech_recognition`
   * `style_transfer`
-  * `text_to_speech`
-  * `time_series`
   * `token_recognition`
+  * `text_to_speech`
 
   Additional possible values might be added in the future.
 
@@ -510,11 +472,9 @@ tool will process:
 
 * `--name` takes a comma-separated list of patterns and selects models that match
   at least one of these patterns. The patterns may contain shell-style wildcards.
-  For composite models, the name of composite model is accepted, as well as the names
-  of individual models it consists of.
 
   ```sh
-  ./TOOL.py --name 'mtcnn,densenet-*'
+  ./TOOL.py --name 'mtcnn-p,densenet-*'
   ```
 
   See https://docs.python.org/3/library/fnmatch.html for a full description of
@@ -522,8 +482,6 @@ tool will process:
 
 * `--list` takes a path to a file that must contain a list of patterns and
   selects models that match at least one of those patterns.
-  For composite models, the name of composite model is accepted, as well as the names
-  of individual models it consists of.
 
   ```sh
   ./TOOL.py --list my.lst
@@ -534,7 +492,7 @@ tool will process:
   ignored. For example:
 
   ```
-  mtcnn # get all three models: mtcnn-o, mtcnn-p, mtcnn-r
+  mtcnn-p
   densenet-* # get all DenseNet variants
   ```
 

@@ -16,19 +16,14 @@ limitations under the License.
 
 from pathlib import Path
 import warnings
-import re
 
-from ..representation import BrainTumorSegmentationAnnotation, NiftiRegressionAnnotation
-from ..utils import get_path, read_txt, read_pickle, check_file_existence, UnsupportedPackage
-from ..config import StringField, PathField, BoolField, NumberField
+from ..representation import BrainTumorSegmentationAnnotation
+from ..utils import get_path, read_txt, read_pickle, check_file_existence
+from ..config import StringField, PathField, BoolField
 from .format_converter import DirectoryBasedAnnotationConverter
 from ..representation.segmentation_representation import GTMaskLoader
 from .format_converter import ConverterReturn
 
-try:
-    import nibabel as nib
-except ImportError as import_error:
-    nib = UnsupportedPackage("nibabel", import_error.msg)
 
 class BratsConverter(DirectoryBasedAnnotationConverter):
     __provider__ = 'brats'
@@ -41,14 +36,6 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
             'image_folder': StringField(optional=True, default='imagesTr', description="Image folder."),
             'mask_folder': StringField(optional=True, default='labelsTr', description="Mask folder."),
             'labels_file': PathField(optional=True, default=None, description="File with labels"),
-            'relaxed_names': BoolField(optional=True, default=False),
-            'frame_separator': StringField(optional=True, default='#',
-                                           description="Separator between filename and frame number"),
-            'multi_frame': BoolField(optional=True, default=False,
-                                     description="Add annotation for each frame in source file"),
-            'frame_axis': NumberField(optional=True, default=-1, description="Frames dimension axis"),
-            'as_regression': BoolField(optional=True, default=False,
-                                       description="annotate dataset as RegressionAnnotation"),
             'mask_channels_first': BoolField(optional=True, default=False)
         })
 
@@ -60,24 +47,8 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
         self.mask_folder = self.get_value_from_config('mask_folder')
         self.labels_file = self.get_value_from_config('labels_file')
         self.mask_channels_first = self.get_value_from_config('mask_channels_first')
-        self.relaxed_names = self.get_value_from_config('relaxed_names')
-        self.multi_frame = self.get_value_from_config('multi_frame')
-        self.frame_axis = int(self.get_value_from_config('frame_axis'))
-        self.frame_separator = self.get_value_from_config('frame_separator')
-        self.as_regression = self.get_value_from_config('as_regression')
 
     def convert(self, check_content=False, **kwargs):
-        if self.multi_frame and isinstance(nib, UnsupportedPackage):
-            nib.raise_error(self.__provider__)
-        if self.as_regression:
-            annotation_class = NiftiRegressionAnnotation
-            reader_config = {'to_4D': False, 'multi_frame': self.multi_frame,
-                             'separator': self.frame_separator, 'frame_axis': self.frame_axis}
-        else:
-            annotation_class = BrainTumorSegmentationAnnotation
-            reader_config = {'loader': GTMaskLoader.NIFTI_CHANNELS_FIRST if self.mask_channels_first else
-                                       GTMaskLoader.NIFTI}
-
         mask_folder = Path(self.mask_folder)
         image_folder = Path(self.image_folder)
         image_dir = get_path(self.data_dir / image_folder, is_directory=True)
@@ -90,11 +61,7 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
             mask_file_name = (
                 file_name.rsplit('.', 1)[0] + '.nii.gz' if not file_name.endswith('.nii.gz') else file_name
             )
-            if not self.relaxed_names:
-                mask = mask_dir / mask_file_name
-            else:
-                mask = self.find_file_by_id(mask_dir, mask_file_name)
-                mask_file_name = mask.parts[-1]
+            mask = mask_dir / mask_file_name
             if not mask.exists():
                 if not check_content:
                     warnings.warn('Annotation mask for {} does not exist. File will be ignored.'.format(file_name))
@@ -104,26 +71,13 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
                             file_in_dir, mask)
                     )
                 continue
+            annotation = BrainTumorSegmentationAnnotation(
+                str(image_folder / file_name),
+                str(mask_folder / mask_file_name),
+                loader=GTMaskLoader.NIFTI_CHANNELS_FIRST if self.mask_channels_first else GTMaskLoader.NIFTI
+            )
 
-            if self.multi_frame:
-                nib_image = nib.load(file_in_dir)
-                total_frames = nib_image.dataobj.shape[self.frame_axis]
-                for frame_cnt in range(total_frames):
-                    annotation = annotation_class(
-                        "{}{}{}".format(str(image_folder / file_name), self.frame_separator, frame_cnt),
-                        "{}{}{}".format(str(mask_folder / mask_file_name), self.frame_separator, frame_cnt),
-                        **reader_config
-                    )
-                    annotations.append(annotation)
-            else:
-
-                annotation = annotation_class(
-                    str(image_folder / file_name),
-                    str(mask_folder / mask_file_name),
-                    **reader_config
-                )
-
-                annotations.append(annotation)
+            annotations.append(annotation)
 
         return ConverterReturn(annotations, self._get_meta(), content_check_errors)
 
@@ -131,27 +85,6 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
         if not self.labels_file:
             return None
         return {'label_map': dict(enumerate(read_txt(self.labels_file)))}
-
-    @staticmethod
-    def find_file_by_id(search_dir, file_name):
-        def get_index(file_name):
-            numbers = [int(s) for s in re.findall(r'\d+', file_name)]
-            if not numbers:
-                raise ValueError('no numeric in {}'.format(file_name))
-            return numbers
-
-        idx = get_index(file_name)
-        found_files = []
-        for i in idx:
-            found_files.extend(search_dir.glob('*{}*'.format(i)))
-        if not found_files:
-            return None
-        return found_files[0]
-
-    @staticmethod
-    def find_file_with_prefix(search_dir, file_name):
-        found_files = list(search_dir.glob('*{}*'.format(file_name)))
-        return found_files[0] if found_files else None
 
 
 class BratsNumpyConverter(DirectoryBasedAnnotationConverter):

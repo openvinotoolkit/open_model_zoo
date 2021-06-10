@@ -150,7 +150,7 @@ public:
 
     void wait() override {
         if (!request || !isAsync) return;
-        request->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
+        request->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
     }
 
     void printPerformanceCounts(const std::string &fullDeviceName) override {

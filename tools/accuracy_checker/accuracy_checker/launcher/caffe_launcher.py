@@ -96,7 +96,7 @@ class CaffeLauncher(Launcher):
         if len(data_shape) == 5 and len(layer_shape) == 4:
             data = data[0]
             data_shape = np.shape(data)
-        data = np.transpose(data, layout) if len(data_shape) == 4 and layout is not None else np.array(data)
+        data = np.transpose(data, layout) if len(data_shape) == 4 else np.array(data)
         data_shape = np.shape(data)
         if layer_shape != data_shape:
             self._do_reshape = True
@@ -115,6 +115,7 @@ class CaffeLauncher(Launcher):
             if len(models_list) != 1:
                 raise ConfigError('Several suitable models found, please specify required model')
             model = models_list[0]
+            print_info('Found model {}'.format(model))
         if weights is None or Path(weights).is_dir():
             weights_dir = weights or model.parent
             weights = Path(weights_dir) / model.name.replace('prototxt', 'caffemodel')
@@ -125,15 +126,8 @@ class CaffeLauncher(Launcher):
                 if len(weights_list) != 1:
                     raise ConfigError('Several suitable weights found, please specify required explicitly')
                 weights = weights_list[0]
-        accepted_suffixes = ['.prototxt']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('Found model {}'.format(model))
+            print_info('Found weights {}'.format(weights))
         weights = Path(weights)
-        accepted_weights_suffixes = ['.caffemodel']
-        if weights.suffix not in accepted_weights_suffixes:
-            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
-        print_info('Found weights {}'.format(weights))
 
         return model, weights
 

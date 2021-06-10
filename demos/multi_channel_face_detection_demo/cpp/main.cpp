@@ -61,7 +61,7 @@ void showUsage() {
     std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
     std::cout << "    -pc                          " << performance_counter_message << std::endl;
     std::cout << "    -t                           " << thresh_output_message << std::endl;
-    std::cout << "    -no_show                     " << no_show_message << std::endl;
+    std::cout << "    -no_show                     " << no_show_processed_video << std::endl;
     std::cout << "    -show_stats                  " << show_statistics << std::endl;
     std::cout << "    -real_input_fps              " << real_input_fps << std::endl;
     std::cout << "    -u                           " << utilization_monitors_message << std::endl;

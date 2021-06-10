@@ -63,7 +63,7 @@ static const char custom_cpu_library_message[] = "Required for CPU custom layers
 static const char thresh_output_message[] = "Optional. Probability threshold for detections";
 static const char bb_enlarge_coef_output_message[] = "Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face";
 static const char raw_output_message[] = "Optional. Output inference results as raw values";
-static const char no_show_message[] = "Optional. Don't show output.";
+static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char async_message[] = "Optional. Enable asynchronous mode";
 static const char dx_coef_output_message[] = "Optional. Coefficient to shift the bounding box around the detected face along the Ox axis";
 static const char dy_coef_output_message[] = "Optional. Coefficient to shift the bounding box around the detected face along the Oy axis";
@@ -101,7 +101,7 @@ DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_output_message);
-DEFINE_bool(no_show, false, no_show_message);
+DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_bool(async, false, async_message);
 DEFINE_double(dx_coef, 1, dx_coef_output_message);
 DEFINE_double(dy_coef, 1, dy_coef_output_message);
@@ -151,7 +151,7 @@ static void showUsage() {
     std::cout << "    -dyn_lm                    " << dyn_batch_lm_message << std::endl;
     std::cout << "    -dyn_am                    " << dyn_batch_am_message << std::endl;
     std::cout << "    -async                     " << async_message << std::endl;
-    std::cout << "    -no_show                   " << no_show_message << std::endl;
+    std::cout << "    -no_show                   " << no_show_processed_video << std::endl;
     std::cout << "    -pc                        " << performance_counter_message << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;
     std::cout << "    -t                         " << thresh_output_message << std::endl;

@@ -77,11 +77,11 @@ class StaticIOUTracker(object):
 
         # Prune out too old tracks.
         alive = tuple(i for i, age in enumerate(self.age) if age < self.age_threshold)
-        self.history = [self.history[i] for i in alive]
-        self.history_areas = [self.history_areas[i] for i in alive]
-        self.history_classes = [self.history_classes[i] for i in alive]
-        self.age = [self.age[i] for i in alive]
-        self.ids = [self.ids[i] for i in alive]
+        self.history = list(self.history[i] for i in alive)
+        self.history_areas = list(self.history_areas[i] for i in alive)
+        self.history_classes = list(self.history_classes[i] for i in alive)
+        self.age = list(self.age[i] for i in alive)
+        self.ids = list(self.ids[i] for i in alive)
 
         # Save new tracks.
         for i, j in enumerate(assignment):

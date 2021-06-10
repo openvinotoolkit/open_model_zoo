@@ -35,5 +35,4 @@ model_optimizer_args:
   - --input_model=$dl_dir/Sphereface.caffemodel
   - --input_proto=$dl_dir/Sphereface.prototxt
 framework: caffe
-quantizable: yes
 license: https://raw.githubusercontent.com/wy1iu/sphereface/master/LICENSE

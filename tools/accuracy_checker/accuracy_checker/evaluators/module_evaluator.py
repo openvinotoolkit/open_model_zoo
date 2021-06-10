@@ -20,12 +20,11 @@ import importlib
 from pathlib import Path
 from .base_evaluator import BaseEvaluator
 
-# pylint:disable=R0904
+
 class ModuleEvaluator(BaseEvaluator):
-    def __init__(self, internal_module, config):
+    def __init__(self, internal_module):
         super().__init__()
         self._internal_module = internal_module
-        self._config = config
 
     @classmethod
     def from_configs(cls, config, *args, **kwargs):
@@ -33,7 +32,7 @@ class ModuleEvaluator(BaseEvaluator):
         module_config = config.get('module_config')
         python_path = config.get('python_path')
 
-        return cls(load_module(module, python_path).from_configs(module_config, *args, **kwargs), config)
+        return cls(load_module(module, python_path).from_configs(module_config, *args, **kwargs))
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         self._internal_module.process_dataset(
@@ -113,17 +112,8 @@ class ModuleEvaluator(BaseEvaluator):
         python_path = config.get('python_path')
         return load_module(module, python_path).get_processing_info(config)
 
-    def send_processing_info(self, sender):
-        if sender is None:
-            return {}
-        return {'custom_evaluator': self._config['module']}
-
     def set_profiling_dir(self, profiler_dir):
         self._internal_module.set_profiling_dir(profiler_dir)
-
-    @property
-    def dataset_size(self):
-        return self._internal_module.dataset_size
 
 
 def load_module(model_cls, python_path=None):

@@ -15,7 +15,7 @@
 description: >-
   This is a Caffe2* version of "densenet-121" model, one of the DenseNet group of
   models designed to perform image classification. This model was converted from Caffe*
-  to Caffe2* format. For details see repository <https://github.com/facebookarchive/models/tree/master/densenet121>,
+  to Caffe2* format.  For details see repository <https://github.com/facebookarchive/models/tree/master/densenet121>,
   paper <https://arxiv.org/abs/1608.06993>.
 task_type: classification
 files:

@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import warnings
 from collections import namedtuple, OrderedDict
 
 from ..config import ConfigValidator, ConfigError, StringField
@@ -23,7 +22,7 @@ from .metric import Metric, FullDatasetEvaluationMetric
 from .metric_profiler import ProfilingExecutor
 
 MetricInstance = namedtuple(
-    'MetricInstance', ['name', 'metric_type', 'metric_fn', 'reference', 'abs_threshold', 'rel_threshold', 'presenter']
+    'MetricInstance', ['name', 'metric_type', 'metric_fn', 'reference', 'threshold', 'presenter']
 )
 
 
@@ -98,14 +97,13 @@ class MetricsExecutor:
         return results, profile_results
 
     def iterate_metrics(self, annotations, predictions):
-        for name, metric_type, functor, reference, abs_threshold, rel_threshold, presenter in self.metrics:
+        for name, metric_type, functor, reference, threshold, presenter in self.metrics:
             yield presenter, EvaluationResult(
                 name=name,
                 metric_type=metric_type,
                 evaluated_value=functor(annotations, predictions),
                 reference_value=reference,
-                abs_threshold=abs_threshold,
-                rel_threshold=rel_threshold,
+                threshold=threshold,
                 meta=functor.meta,
             )
 
@@ -113,9 +111,7 @@ class MetricsExecutor:
         type_ = 'type'
         identifier = 'name'
         reference = 'reference'
-        abs_threshold = 'abs_threshold'
         threshold = 'threshold'
-        rel_threshold = 'rel_threshold'
         presenter = 'presenter'
         metric_config_validator = ConfigValidator(
             "metrics", on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT,
@@ -138,25 +134,13 @@ class MetricsExecutor:
             metric_type, metric_config_entry, self.dataset, metric_identifier, state=self.state, **metric_kwargs
         )
         metric_presenter = BasePresenter.provide(metric_config_entry.get(presenter, 'print_scalar'))
-        threshold_v = metric_config_entry.get(threshold)
-        abs_threshold_v = metric_config_entry.get(abs_threshold)
-        if threshold_v is not None and abs_threshold_v is not None:
-            warnings.warn(
-                f'both threshold and abs_threshold are provided for metric {metric_identifier}. '
-                f'threshold will be ignored'
-            )
-        if abs_threshold_v is None:
-            abs_threshold_v = threshold_v
-        if threshold_v is not None:
-            warnings.warn('threshold option is deprecated. Please use abs_threshold instead', DeprecationWarning)
 
         self.metrics.append(MetricInstance(
             metric_identifier,
             metric_type,
             metric_fn,
             metric_config_entry.get(reference),
-            abs_threshold_v,
-            metric_config_entry.get(rel_threshold),
+            metric_config_entry.get(threshold),
             metric_presenter
         ))
         if isinstance(metric_fn, FullDatasetEvaluationMetric):

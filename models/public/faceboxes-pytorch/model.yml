@@ -46,5 +46,4 @@ model_optimizer_args:
   - --mean_values=input.1[104.0,117.0,123.0]
   - --output=boxes,scores
 framework: pytorch
-quantizable: yes
 license: https://github.com/zisianw/FaceBoxes.PyTorch/blob/master/LICENSE

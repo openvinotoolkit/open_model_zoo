@@ -50,8 +50,3 @@ class BaseEvaluator:
     # reset progress for metrics calculation
     def reset(self):
         raise NotImplementedError
-
-    # helper for sending evaluation info
-    @staticmethod
-    def send_processing_info(sender):
-        return {}

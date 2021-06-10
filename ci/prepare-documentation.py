@@ -39,20 +39,16 @@ import argparse
 import logging
 import re
 import shutil
-import sys
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
 from pathlib import Path
 
+import mistune
 import yaml
 
 OMZ_ROOT = Path(__file__).resolve().parents[1]
-
-sys.path.append(str(OMZ_ROOT / 'ci/lib'))
-
-import omzdocs
 
 XML_ID_ATTRIBUTE = '{http://www.w3.org/XML/1998/namespace}id'
 
@@ -66,6 +62,29 @@ HUMAN_READABLE_TASK_TYPES = {
     'object_attributes': 'Object Attribute Estimation',
     'text_to_speech': 'Text-to-speech',
 }
+
+parse_markdown = mistune.create_markdown(renderer=mistune.AstRenderer())
+
+
+def get_all_ast_nodes(ast_nodes):
+    for node in ast_nodes:
+        yield node
+        if 'children' in node:
+            # workaround for https://github.com/lepture/mistune/issues/269
+            if isinstance(node['children'], str):
+                yield {'type': 'text', 'text': node['children']}
+            else:
+                yield from get_all_ast_nodes(node['children'])
+
+
+def get_text_from_ast(ast_nodes):
+    def get_text_from_node(node):
+        if node['type'] != 'text':
+            raise RuntimeError(f'unsupported node type: {node["type"]}')
+        return node['text']
+
+    return ''.join(map(get_text_from_node, ast_nodes))
+
 
 def add_page(output_root, parent, *, id=None, path=None, title=None):
     if parent.tag == 'tab':
@@ -86,13 +105,13 @@ def add_page(output_root, parent, *, id=None, path=None, title=None):
     with (OMZ_ROOT / path).open('r', encoding='utf-8') as input_file:
         lines = input_file.readlines()
 
-    page = omzdocs.DocumentationPage(''.join(lines))
+    ast = parse_markdown(''.join(lines))
 
-    if page.title is None:
+    if not ast or ast[0]['type'] != 'heading' or ast[0]['level'] != 1:
         raise RuntimeError(f'{path}: must begin with level 1 heading')
 
     if not title:
-        title = page.title
+        title = get_text_from_ast(ast[0]['children'])
 
     element.attrib['title'] = title
 
@@ -109,7 +128,7 @@ def add_page(output_root, parent, *, id=None, path=None, title=None):
         output_file.writelines(lines)
 
     # copy all referenced images
-    image_urls = [ref.url for ref in page.external_references() if ref.type == 'image']
+    image_urls = [node['src'] for node in get_all_ast_nodes(ast) if node['type'] == 'image']
 
     for image_url in image_urls:
         parsed_image_url = urllib.parse.urlparse(image_url)
@@ -161,11 +180,13 @@ def add_model_pages(output_root, parent_element, group, group_title):
 
         model_name = md_path_rel.parts[2]
 
-        expected_md_path = Path('models', group, model_name, 'README.md')
+        expected_md_paths = [
+            Path('models', group, model_name, model_name + '.md'),
+            Path('models', group, model_name, 'description', model_name + '.md'),
+        ]
 
-        if md_path_rel != expected_md_path:
-            raise RuntimeError(f'{md_path_rel}: unexpected documentation file,'
-                ' should be {expected_md_path}')
+        if md_path_rel not in expected_md_paths:
+            raise RuntimeError(f'{md_path_rel}: unexpected documentation file')
 
         # FIXME: use the info dumper to query model information instead of
         # parsing the configs. We're not doing that now, because the info
@@ -232,16 +253,6 @@ def main():
     navindex_element = ET.SubElement(doxygenlayout_element, 'navindex')
 
     add_accuracy_checker_pages(output_root, navindex_element)
-
-    datasets_element = add_page(output_root, navindex_element,
-        id='omz_data_datasets', path='data/datasets.md')
-
-    # The xml:id here is omz_data rather than omz_data_datasets, because
-    # later we might want to have other pages in the "data" directory. If
-    # that happens, we'll create a parent page with ID "omz_data" and move
-    # the xml:id to that page, thus integrating the new pages without having
-    # to change the upstream OpenVINO documentation building process.
-    datasets_element.attrib[XML_ID_ATTRIBUTE] = 'omz_data'
 
     downloader_element = add_page(output_root, navindex_element,
         id='omz_tools_downloader', path='tools/downloader/README.md', title='Model Downloader')

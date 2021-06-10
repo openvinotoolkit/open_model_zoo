@@ -65,7 +65,7 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
                     if file_list and fname.name not in file_list:
                         continue
 
-                    if self.max_duration > 0 and not self.annotation_file:
+                    if self.max_duration > 0:
                         with wave.open(str(fname), "rb") as wav:
                             duration = wav.getnframes() / wav.getframerate()
                         if duration > self.max_duration:
@@ -87,11 +87,7 @@ class LibrispeechConverter(DirectoryBasedAnnotationConverter):
             for line in json_file:
                 record = json.loads(line)
                 annotation_list.append(record)
-                duration = (float(record['duration']))
-                if self.max_duration and duration > self.max_duration:
-                    continue
-                durations.append(duration)
-
+                durations.append(float(record['duration']))
                 filename = Path(record["audio_filepath"]).name
                 if self.numpy_files:
                     filename = filename.replace('wav', 'npy')

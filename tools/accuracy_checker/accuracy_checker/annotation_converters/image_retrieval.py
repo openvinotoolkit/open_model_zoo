@@ -49,7 +49,7 @@ class ImageRetrievalConverter(BaseFormatConverter):
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_errors = None if not check_content else []
-        gallery = []
+        gallery = list()
         gallery_ids = set()
         if progress_callback:
             num_iteration = len(read_txt(self.gallery_annotation_file)) + len(read_txt(self.queries_annotation_file))
@@ -67,7 +67,7 @@ class ImageRetrievalConverter(BaseFormatConverter):
             if progress_callback and line_id % progress_interval == 0:
                 progress_callback(line_id * 100 / num_iteration)
 
-        queries = []
+        queries = list()
         queries_ids = set()
         for line_id, line in enumerate(read_txt(self.queries_annotation_file)):
             identifier, image_id = line.split()

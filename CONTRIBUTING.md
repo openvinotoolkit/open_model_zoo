@@ -44,7 +44,7 @@ Place your files as shown in the table below:
 File | Destination
 ---|---
 configuration file | `models/public/<model_name>/model.yml`
-documentation file | `models/public/<model_name>/README.md`
+documentation file | `models/public/<model_name>/<model_name>.md`
 validation configuration file|`models/public/<model_name>/accuracy-check.yml`
 demo|`demos/<demo_name>`<br>or<br>`demos/python_demos/<demo_name>`
 
@@ -76,7 +76,7 @@ Description of the model. Must match with the description from the model [docume
 
 **`task_type`**
 
-[Model task type](tools/downloader/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`open_model_zoo.model_tools._common`](tools/downloader/src/open_model_zoo/model_tools/_common.py) module.
+[Model task type](tools/downloader/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [tools/downloader/common.py](tools/downloader/common.py) file.
 
 **`files`**
 
@@ -193,7 +193,7 @@ Demos are required to support the following keys:
 
  -  `-i "<input>"`: Required. An input to process. The input can usually be a single image, a folder of images or anything that OpenCV's `VideoCapture` can process.
  -  `-m "<path>"`: Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m_`.
- -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
+ -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
  -  `-no_show`: Optional. Do not visualize inference results.
 
 > **TIP**: For Python, it is preferable to use `--` instead of `-` for long keys.
@@ -204,7 +204,7 @@ Add `README.md` file, which describes demo usage. Update [demos' README.md](demo
 
 ## Accuracy Validation
 
-Accuracy validation can be performed by the [Accuracy Checker](./tools/accuracy_checker/README.md) tool. This tool can use either IE to run a converted model, or an original framework to run an original model. Accuracy Checker supports lots of datasets, metrics and preprocessing options, which simplifies validation if a task is supported by the tool. You only need to create a configuration file that contains necessary parameters for accuracy validation (specify a dataset and annotation, pre- and post-processing parameters, accuracy metrics to compute and so on) of converted model. For details, refer to [Testing new models](./tools/accuracy_checker/README.md#testing-new-models).
+Accuracy validation can be performed by the [Accuracy Checker](./tools/accuracy_checker) tool. This tool can use either IE to run a converted model, or an original framework to run an original model. Accuracy Checker supports lots of datasets, metrics and preprocessing options, which simplifies validation if a task is supported by the tool. You only need to create a configuration file that contains necessary parameters for accuracy validation (specify a dataset and annotation, pre- and post-processing parameters, accuracy metrics to compute and so on) of converted model. For details, refer to [Testing new models](./tools/accuracy_checker#testing-new-models).
 
 If a model uses a dataset which is not supported by the Accuracy Checker, you also must provide the license and the link to it and mention it in the PR description.
 
@@ -232,7 +232,7 @@ models:
 
 ## Documentation
 
-Documentation is a very important part of model contribution as it helps to better understand the possible usage of the model. It must be located in a `README.md` file in the model subdirectory.
+Documentation is a very important part of model contribution as it helps to better understand the possible usage of the model. Documentation must be named in accordance with the name of the model.
 The documentation should contain:
 * description of a model
 	* main purpose
@@ -248,7 +248,7 @@ The documentation should contain:
 * detailed description of input and output for original and converted models
 * the model's licensing terms
 
-Learn the detailed structure and headers naming convention from any model documentation (for example, [alexnet](./models/public/alexnet/README.md)).
+Learn the detailed structure and headers naming convention from any model documentation (for example, [alexnet](./models/public/alexnet/alexnet.md)).
 
 ## Legal Information
 

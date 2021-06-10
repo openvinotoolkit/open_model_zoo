@@ -18,7 +18,7 @@ import cv2
 import numpy as np
 
 from .model import Model
-from .utils import Detection, nms
+from .utils import Detection
 
 
 class CTPN(Model):
@@ -189,8 +189,7 @@ class CTPN(Model):
         proposals, scores = proposals[order, :], scores[order]
 
         # apply nms
-        keep = nms(proposals[:, 0], proposals[:, 1], proposals[:, 2], proposals[:, 3], scores.reshape(-1),
-                   self.nms_threshold, include_boundaries=True)
+        keep = self.nms(proposals[:, 0], proposals[:, 1], proposals[:, 2], proposals[:, 3], scores.reshape(-1), self.nms_threshold)
         if self.post_nms_top_n > 0:
             keep = keep[:self.post_nms_top_n]
         proposals, scores = proposals[keep, :], scores[keep]
@@ -212,6 +211,37 @@ class CTPN(Model):
                              (widths > self.min_width))[0]
 
         return text_recs[keep_inds]
+
+    @staticmethod
+    def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None):
+        b = 1 if include_boundaries else 0
+
+        areas = (x2 - x1 + b) * (y2 - y1 + b)
+        order = scores.argsort()[::-1]
+
+        if keep_top_k:
+            order = order[:keep_top_k]
+
+        keep = []
+        while order.size > 0:
+            i = order[0]
+            keep.append(i)
+
+            xx1 = np.maximum(x1[i], x1[order[1:]])
+            yy1 = np.maximum(y1[i], y1[order[1:]])
+            xx2 = np.minimum(x2[i], x2[order[1:]])
+            yy2 = np.minimum(y2[i], y2[order[1:]])
+
+            w = np.maximum(0.0, xx2 - xx1 + b)
+            h = np.maximum(0.0, yy2 - yy1 + b)
+            intersection = w * h
+
+            union = (areas[i] + areas[order[1:]] - intersection)
+            overlap = np.divide(intersection, union, out=np.zeros_like(intersection, dtype=float), where=union != 0)
+
+            order = order[np.where(overlap <= thresh)[0] + 1]  # pylint: disable=W0143
+
+        return keep
 
     @staticmethod
     def bbox_transform_inv(boxes, deltas):

@@ -18,12 +18,12 @@ import math
 import numpy as np
 
 from .model import Model
-from .utils import Detection, resize_image, nms
+from .utils import Detection, resize_image
 
 
 class FaceBoxes(Model):
-    def __init__(self, ie, model_path, input_transform, threshold=0.5):
-        super().__init__(ie, model_path, input_transform)
+    def __init__(self, ie, model_path, threshold=0.5):
+        super().__init__(ie, model_path)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
         self.image_blob_name = next(iter(self.net.input_info))
@@ -65,7 +65,6 @@ class FaceBoxes(Model):
         resized_image = resize_image(image, (self.w, self.h))
         meta = {'original_shape': image.shape,
                 'resized_shape': resized_image.shape}
-        resized_image = self.input_transform(resized_image)
         resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
 
@@ -97,8 +96,8 @@ class FaceBoxes(Model):
             x_maxs = (filtered_boxes[:, 0] + 0.5 * filtered_boxes[:, 2])
             y_maxs = (filtered_boxes[:, 1] + 0.5 * filtered_boxes[:, 3])
 
-            keep = nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.nms_threshold,
-                       keep_top_k=self.keep_top_k)
+            keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.nms_threshold,
+                            include_boundaries=False, keep_top_k=self.keep_top_k)
 
             filtered_score = filtered_score[keep]
             x_mins = x_mins[keep]
@@ -157,6 +156,37 @@ class FaceBoxes(Model):
         anchors = np.clip(anchors, 0, 1)
 
         return anchors
+
+    @staticmethod
+    def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None):
+        b = 1 if include_boundaries else 0
+
+        areas = (x2 - x1 + b) * (y2 - y1 + b)
+        order = scores.argsort()[::-1]
+
+        if keep_top_k:
+            order = order[:keep_top_k]
+
+        keep = []
+        while order.size > 0:
+            i = order[0]
+            keep.append(i)
+
+            xx1 = np.maximum(x1[i], x1[order[1:]])
+            yy1 = np.maximum(y1[i], y1[order[1:]])
+            xx2 = np.minimum(x2[i], x2[order[1:]])
+            yy2 = np.minimum(y2[i], y2[order[1:]])
+
+            w = np.maximum(0.0, xx2 - xx1 + b)
+            h = np.maximum(0.0, yy2 - yy1 + b)
+            intersection = w * h
+
+            union = (areas[i] + areas[order[1:]] - intersection)
+            overlap = np.divide(intersection, union, out=np.zeros_like(intersection, dtype=float), where=union != 0)
+
+            order = order[np.where(overlap <= thresh)[0] + 1]  # pylint: disable=W0143
+
+        return keep
 
     @staticmethod
     def resize_boxes(detections, image_size):

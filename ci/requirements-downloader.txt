@@ -10,5 +10,5 @@ pyyaml==5.4.1
     # via -r tools/downloader/requirements.in
 requests==2.25.1
     # via -r tools/downloader/requirements.in
-urllib3==1.26.4
+urllib3==1.26.3
     # via requests

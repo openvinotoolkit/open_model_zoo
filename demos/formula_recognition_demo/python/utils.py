@@ -22,7 +22,6 @@ import subprocess
 import tempfile
 from enum import Enum
 from multiprocessing.pool import ThreadPool
-from types import SimpleNamespace as namespace
 
 import cv2 as cv
 import numpy as np
@@ -188,7 +187,7 @@ class Model:
             assert image_raw is not None, "Error reading image {}".format(filenm)
             image = preprocess_image(
                 PREPROCESSING[self.args.preprocessing_type], image_raw, target_shape)
-            record = namespace(img_name=filenm, img=image)
+            record = dict(img_name=filenm, img=image, formula=None)
             self.images_list.append(record)
 
     def check_model_dimensions(self):

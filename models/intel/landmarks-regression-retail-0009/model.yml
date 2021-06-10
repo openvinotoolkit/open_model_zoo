@@ -18,28 +18,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/landmarks-regression-retail-0009.xml
-    size: 43238
-    sha256: 18151efc7f02817cc83d131aabee07223ee6d08b8adce6a98edcf89b8e629c27
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+    size: 44270
+    sha256: de576cc96cf5529e4598e75536f66b9f56758f381d97de845c15f56066c59fdc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
   - name: FP32/landmarks-regression-retail-0009.bin
     size: 762464
-    sha256: fded2798c32a4cac80f939461aa7941c828bd7a5c1d07c89f4a7142eb872fd48
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+    sha256: 743d6045dd1c8df90649d2e19ce40ee41de18b799e261bb11682e1d9ef124b5d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
   - name: FP16/landmarks-regression-retail-0009.xml
-    size: 43224
-    sha256: ffee4ef81d2cd12e3dfd7153dfc7a57bacf7c5fb409ea70578f2c6a4c09c6ef4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
+    size: 44251
+    sha256: b4c6b28c06de8767673f9e59aaa432cbe012f9ece36b0b072a75b8db5f8a91a6
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
   - name: FP16/landmarks-regression-retail-0009.bin
     size: 381248
-    sha256: 01b76805be16af19109f95be49bfb2b1b2729a20e4de5f1733f1f05702731c37
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
+    sha256: 973b13e64b3576f754a690266b069438b531bc657233d09d7b382ca36e6cf1e4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
   - name: FP16-INT8/landmarks-regression-retail-0009.xml
-    size: 88757
-    sha256: f33c8a7b32bc870f8fc77b862400ae2e976e77fde50fa6dba30916a2334f7ff4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml
+    size: 89724
+    sha256: 3c8e87c27934c60cde60770a65c3f9bb830d14cd4dfc6407fbd7289d1d80abcb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml
   - name: FP16-INT8/landmarks-regression-retail-0009.bin
     size: 196426
-    sha256: c890951a87aec5adeedb6949a16e1928ef1843c68cacf6b34aa4b0fe35c897f5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.bin
+    sha256: 25a025e2a0af9ef64ddd96eaed41d9312a7304552498db22641d6408b3c1dcf0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

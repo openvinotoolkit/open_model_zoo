@@ -14,10 +14,10 @@
 
 description: >-
   The "efficientdet-d1-tf" model is one of the EfficientDet <https://arxiv.org/abs/1911.09070>
-  models  designed to perform object detection. This model was pre-trained in TensorFlow*.
-  All the EfficientDet models have been pre-trained on the Common Objects in Context
-  (COCO) <https://cocodataset.org/#home> image database. For details about this family
-  of models, check out the Google AutoML repository <https://github.com/google/automl/tree/master/efficientdet>.
+  models  designed to perform object detection. This model was pretrained in TensorFlow*.
+  All the EfficientDet models have been pretrained on the MSCOCO* image database.
+  For details about this family of models, check out the Google AutoML repository
+  <https://github.com/google/automl/tree/master/efficientdet>.
 task_type: detection
 files:
   - name: efficientdet-d1.tar.gz
@@ -48,10 +48,6 @@ files:
     size: 25677
     sha256: eb68091efcf989a908225c2af6d7f632f90c6602659ab06dea628cbdcabdd403
     source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/utils.py
-  - name: model/keras/__init__.py
-    size: 0
-    sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-    source: https://raw.githubusercontent.com/google/automl/341af7d4da7805c3a874877484e133f33c420ec5/efficientdet/keras/__init__.py
   - name: model/keras/efficientdet_keras.py
     size: 32414
     sha256: 4b60b29aabae4365bb9d77b40698a974de9fd4d998f9be94df12b184c0e09ca9

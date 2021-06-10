@@ -22,11 +22,9 @@
 
 struct MetaData;
 struct ResultBase {
-    ResultBase(int64_t frameId = -1, const std::shared_ptr<MetaData>& metaData = nullptr) :
-        frameId(frameId), metaData(metaData) {}
     virtual ~ResultBase() {}
 
-    int64_t frameId;
+    int64_t frameId = -1;
 
     std::shared_ptr<MetaData> metaData;
     bool IsEmpty() { return frameId < 0; }
@@ -59,9 +57,6 @@ struct InferenceResult : public ResultBase {
 };
 
 struct ClassificationResult : public ResultBase {
-    ClassificationResult(int64_t frameId = -1, const std::shared_ptr<MetaData>& metaData = nullptr) :
-        ResultBase(frameId, metaData) {}
-
     std::vector<std::pair<unsigned int, std::string>> topLabels;
 };
 
@@ -72,22 +67,15 @@ struct DetectedObject : public cv::Rect2f {
 };
 
 struct DetectionResult : public ResultBase {
-    DetectionResult(int64_t frameId = -1, const std::shared_ptr<MetaData>& metaData = nullptr) :
-        ResultBase(frameId, metaData) {}
     std::vector<DetectedObject> objects;
 };
 
 struct RetinaFaceDetectionResult : public DetectionResult {
-    RetinaFaceDetectionResult(int64_t frameId = -1, const std::shared_ptr<MetaData>& metaData = nullptr) :
-        DetectionResult(frameId, metaData) {
-    }
     std::vector<cv::Point2f> landmarks;
 };
 
-struct ImageResult : public ResultBase {
-    ImageResult(int64_t frameId = -1, const std::shared_ptr<MetaData>& metaData = nullptr) :
-        ResultBase(frameId, metaData) {}
-    cv::Mat resultImage;
+struct SegmentationResult : public ResultBase {
+    cv::Mat mask;
 };
 
 struct HumanPose {
@@ -96,8 +84,5 @@ struct HumanPose {
 };
 
 struct HumanPoseResult : public ResultBase {
-    HumanPoseResult(int64_t frameId = -1, const std::shared_ptr<MetaData>& metaData = nullptr) :
-        ResultBase(frameId, metaData) {
-    }
     std::vector<HumanPose> poses;
 };

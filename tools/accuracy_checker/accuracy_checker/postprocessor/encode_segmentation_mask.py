@@ -34,7 +34,7 @@ class EncodeSegMask(PostprocessorWithSpecificTargets):
         segmentation_colors = self.meta.get("segmentation_colors")
         prediction_to_gt_label = self.meta.get('prediction_to_gt_labels')
 
-        if annotation and any([ann is not None for ann in annotation]):
+        if annotation:
             if not segmentation_colors:
                 raise ValueError("No 'segmentation_colors' in dataset metadata.")
 

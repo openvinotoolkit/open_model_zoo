@@ -126,7 +126,7 @@ def main():
         seq = min(c, int(np.ceil((len(c_tokens_id) + args.max_question_token_num) / 64) * 64))
         if seq < c:
             input_info = list(ie_encoder.inputs)
-            new_shapes = {}
+            new_shapes = dict([])
             for i in input_info:
                 n, c = ie_encoder.inputs[i].shape
                 new_shapes[i] = [n, seq]
@@ -143,8 +143,8 @@ def main():
                      " as (context length + max question length) exceeds the current (input) network sequence length")
 
     # check input and output names
-    input_names = [i.strip() for i in args.input_names.split(',')]
-    output_names = [o.strip() for o in args.output_names.split(',')]
+    input_names = list(i.strip() for i in args.input_names.split(','))
+    output_names = list(o.strip() for o in args.output_names.split(','))
     if ie_encoder.inputs.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
         log.error("Input or Output names do not match")
         log.error("    The demo expects input->output names: {}->{}. "

@@ -136,7 +136,7 @@ class SQUADConverterEMB(BaseFormatConverter):
         self.lower_case = self.get_value_from_config('lower_case')
         vocab_file = str(self.get_value_from_config('vocab_file'))
         with open(vocab_file, "r", encoding="utf-8") as r:
-            self.vocab = {t.rstrip("\n"): i for i, t in enumerate(r.readlines())}
+            self.vocab = dict((t.rstrip("\n"), i) for i, t in enumerate(r.readlines()))
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
 

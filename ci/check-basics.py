@@ -49,7 +49,7 @@ def main():
         cwd=OMZ_ROOT,
     ).stdout.strip()
 
-    print('running miscellaneous checks...', flush=True)
+    print('running text checks...', flush=True)
 
     if subprocess.run(['git', '--no-pager', 'diff', '--check', empty_tree_hash, '--'],
             cwd=OMZ_ROOT).returncode != 0:
@@ -103,10 +103,6 @@ def main():
                 complain(f"{path}: isn't a symbolic link but it should be a symbolic link to accuracy-check.yml "
                          "from models directory")
 
-        if path.startswith('models/') and '/description/' in path:
-            complain(f"{path}: the model documentation convention has changed;"
-                " put the text in README.md and the images under /assets/")
-
         if mode not in {'100644', '100755'}: # not a regular or executable file
             continue
 
@@ -147,10 +143,6 @@ def main():
 
     print('running flake8...', flush=True)
     if subprocess.run([sys.executable, '-m', 'flake8', '--config=.flake8'], cwd=OMZ_ROOT).returncode != 0:
-        all_passed = False
-
-    print('running documentation checks...', flush=True)
-    if subprocess.run([sys.executable, '--', str(OMZ_ROOT / 'ci/check-documentation.py')]).returncode != 0:
         all_passed = False
 
     sys.exit(0 if all_passed else 1)

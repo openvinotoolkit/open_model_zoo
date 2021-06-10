@@ -28,7 +28,6 @@ hbonet-0.25
 hbonet-0.5
 hbonet-1.0
 inception-resnet-v2-tf
-mixnet-l
 mobilenet-v1-0.25-128
 mobilenet-v1-0.50-160
 mobilenet-v1-0.50-224
@@ -38,7 +37,6 @@ mobilenet-v2
 mobilenet-v2-1.0-224
 mobilenet-v2-1.4-224
 mobilenet-v2-pytorch
-nfnet-f0
 octave-densenet-121-0.125
 octave-resnet-101-0.125
 octave-resnet-200-0.125
@@ -48,9 +46,6 @@ octave-resnext-101-0.25
 octave-resnext-50-0.25
 octave-se-resnet-50-0.125
 regnetx-3.2gf
-repvgg-a0
-repvgg-b1
-repvgg-b3
 resnest-50-pytorch
 resnet-18-pytorch
 resnet-50-caffe2

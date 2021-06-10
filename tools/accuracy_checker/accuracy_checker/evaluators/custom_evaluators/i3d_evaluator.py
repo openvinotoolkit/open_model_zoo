@@ -213,10 +213,6 @@ class I3DEvaluator(BaseEvaluator):
 
         return extracted_results, extracted_meta
 
-    @property
-    def dataset_size(self):
-        return self.dataset.size
-
     def release(self):
         self.rgb_model.release()
         self.flow_model.release()
@@ -299,16 +295,10 @@ class BaseModel:
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models found')
             model = model_list[0]
-        accepted_suffixes = ['.blob', '.xml']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(net_type, model))
+            print_info('{} - Found model: {}'.format(net_type, model))
         if model.suffix == '.blob':
             return model, None
         weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
-        accepted_weights_suffixes = ['.bin']
-        if weights.suffix not in accepted_weights_suffixes:
-            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
         print_info('{} - Found weights: {}'.format(net_type, weights))
 
         return model, weights

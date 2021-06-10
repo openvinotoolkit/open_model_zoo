@@ -120,7 +120,7 @@ class BadFunctionChecker(BaseChecker):
     )
 
     def visit_call(self, node):
-        bad_functions = {f.strip() for f in self.config.bad_functions.split(',')}
+        bad_functions = set(f.strip() for f in self.config.bad_functions.split(','))
         if self._function_name(node) in bad_functions:
             self.add_message('bad-function-call', node=node)
 

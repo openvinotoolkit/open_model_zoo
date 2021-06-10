@@ -14,15 +14,16 @@
 // limitations under the License.
 */
 #pragma once
-#include "image_model.h"
+#include "model_base.h"
 
-class HPEOpenPose : public ImageModel {
+class HPEOpenPose : public ModelBase {
 public:
     /// Constructor
     /// @param modelFileName name of model to load
     /// @param aspectRatio - the ratio of input width to its height.
     /// @param targetSize - the height used for network reshaping.
     /// @param confidenceThreshold - threshold to eliminate low-confidence keypoints.
+    /// Any keypoint with confidence lower than this threshold will be ignored.
     HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold);
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
@@ -45,12 +46,12 @@ protected:
     static const float minSubsetScore;
     cv::Size inputLayerSize;
     double aspectRatio;
-    int targetSize;
     float confidenceThreshold;
+    int targetSize;
 
     std::vector<HumanPose> extractPoses(const std::vector<cv::Mat>& heatMaps,
                                         const std::vector<cv::Mat>& pafs) const;
     void resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const;
 
-    void changeInputSize(InferenceEngine::CNNNetwork& cnnNetwork);
+    void reshape(InferenceEngine::CNNNetwork& cnnNetwork) override;
 };

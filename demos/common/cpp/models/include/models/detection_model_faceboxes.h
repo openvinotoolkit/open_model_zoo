@@ -16,7 +16,6 @@
 
 #pragma once
 #include "detection_model.h"
-#include <utils/nms.hpp>
 
 class ModelFaceBoxes : public DetectionModel {
 public:
@@ -39,8 +38,8 @@ public:
 protected:
     size_t maxProposalsCount;
     const float boxIOUThreshold;
-    const std::vector<float> variance;
     const std::vector<int> steps;
+    const std::vector<float> variance;
     const std::vector<std::vector<int>> minSizes;
     std::vector<Anchor> anchors;
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;

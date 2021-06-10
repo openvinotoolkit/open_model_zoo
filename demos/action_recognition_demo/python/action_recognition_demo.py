@@ -40,7 +40,7 @@ def build_argparser():
     args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
     args.add_argument('-o', '--output', required=False,
-                      help='Optional. Name of the output file(s) to save.')
+                      help='Optional. Name of output to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
@@ -58,7 +58,7 @@ def build_argparser():
                       help='Optional. For CPU custom layers, if any. Absolute path to a shared library with the '
                            'kernels implementation.', type=str, default=None)
     args.add_argument('-d', '--device',
-                      help='Optional. Specify a target device to infer on. CPU, GPU, HDDL or MYRIAD is '
+                      help='Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for the device specified. '
                            'Default value is CPU.',
                       default='CPU', type=str)

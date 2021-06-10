@@ -239,6 +239,9 @@ class CocosnetEvaluator(BaseEvaluator):
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
             presenter.write_result(metric_result, ignore_results_formatting)
 
+    def reset_progress(self, progress_reporter):
+        progress_reporter.reset(self.dataset.size)
+
     def release(self):
         self.test_model.release()
         if self.check_model:
@@ -328,10 +331,6 @@ class CocosnetEvaluator(BaseEvaluator):
             ignore_results_formatting = config.get('ignore_results_formatting', False)
         return compute_intermediate_metric_res, metric_interval, ignore_results_formatting
 
-    @property
-    def dataset_size(self):
-        return self.dataset.size
-
 
 class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
@@ -357,16 +356,10 @@ class BaseModel:
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models found')
             model = model_list[0]
-        accepted_suffixes = ['.blob', '.xml']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(net_type, model))
+            print_info('{} - Found model: {}'.format(net_type, model))
         if model.suffix == '.blob':
             return model, None
         weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
-        accepted_weights_suffixes = ['.bin']
-        if weights.suffix not in accepted_weights_suffixes:
-            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
         print_info('{} - Found weights: {}'.format(net_type, weights))
 
         return model, weights

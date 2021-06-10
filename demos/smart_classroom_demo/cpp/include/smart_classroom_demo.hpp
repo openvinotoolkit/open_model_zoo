@@ -49,7 +49,7 @@ static const char threshold_output_message_face_reid[] = "Optional. Cosine dista
 static const char reid_gallery_path_message[] = "Optional. Path to a faces gallery in .json format.";
 static const char act_stat_output_message[] = "Optional. Output file name to save per-person action statistics in.";
 static const char raw_output_message[] = "Optional. Output Inference results as raw values.";
-static const char no_show_message[] = "Optional. Don't show output.";
+static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char input_image_height_output_message[] = "Optional. Input image height for face detector.";
 static const char input_image_width_output_message[] = "Optional. Input image width for face detector.";
 static const char expand_ratio_output_message[] = "Optional. Expand ratio for bbox before face recognition.";
@@ -90,7 +90,7 @@ DEFINE_double(t_ar, 0.75, action_threshold_output_message);
 DEFINE_double(t_fd, 0.6, face_threshold_output_message);
 DEFINE_double(t_reid, 0.7, threshold_output_message_face_reid);
 DEFINE_string(fg, "", reid_gallery_path_message);
-DEFINE_bool(no_show, false, no_show_message);
+DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_int32(inh_fd, 600, input_image_height_output_message);
 DEFINE_int32(inw_fd, 600, input_image_width_output_message);
 DEFINE_double(exp_r_fd, 1.15, face_threshold_output_message);
@@ -121,8 +121,8 @@ static void showUsage() {
     std::cout << "    -i                             " << input_message << std::endl;
     std::cout << "    -loop                          " << loop_message << std::endl;
     std::cout << "    -read_limit                    " << read_limit_message << std::endl;
-    std::cout << "    -o \"<path>\"                    " << output_message << std::endl;
-    std::cout << "    -limit \"<num>\"                 " << limit_message << std::endl;
+    std::cout << "    -o \"<path>\"                  " << output_message << std::endl;
+    std::cout << "    -limit \"<num>\"               " << limit_message << std::endl;
     std::cout << "    -m_act '<path>'                " << person_action_detection_model_message << std::endl;
     std::cout << "    -m_fd '<path>'                 " << face_detection_model_message << std::endl;
     std::cout << "    -m_lm '<path>'                 " << facial_landmarks_model_message << std::endl;
@@ -147,7 +147,7 @@ static void showUsage() {
     std::cout << "    -t_reid                        " << threshold_output_message_face_reid << std::endl;
     std::cout << "    -fg                            " << reid_gallery_path_message << std::endl;
     std::cout << "    -teacher_id                    " << teacher_id_message << std::endl;
-    std::cout << "    -no_show                       " << no_show_message << std::endl;
+    std::cout << "    -no_show                       " << no_show_processed_video << std::endl;
     std::cout << "    -min_ad                        " << min_action_duration_message << std::endl;
     std::cout << "    -d_ad                          " << same_action_time_delta_message << std::endl;
     std::cout << "    -student_ac                    " << student_actions_message << std::endl;

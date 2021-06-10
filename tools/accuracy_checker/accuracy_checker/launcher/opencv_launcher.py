@@ -169,7 +169,7 @@ class OpenCVLauncher(Launcher):
             raise ConfigError('inputs should be provided in config')
 
         def parse_shape_value(shape):
-            return (1, *map(int, get_or_parse_value(shape, ())))
+            return tuple([1, *[int(elem) for elem in get_or_parse_value(shape, ())]])
 
         return OrderedDict([(elem.get('name'), parse_shape_value(elem.get('shape'))) for elem in inputs])
 

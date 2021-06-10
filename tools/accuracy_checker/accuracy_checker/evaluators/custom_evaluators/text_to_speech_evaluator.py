@@ -165,10 +165,6 @@ class TextToSpeechEvaluator(BaseEvaluator):
     def set_profiling_dir(self, profiler_dir):
         self.metric_executor.set_profiling_dir(profiler_dir)
 
-    @property
-    def dataset_size(self):
-        return self.dataset.size
-
     def release(self):
         self.model.release()
         self.launcher.release()
@@ -310,9 +306,6 @@ class SequentialModel:
             self.forward_tacotron_duration_input = None
             self.melgan_input = None
         self.forward_tacotron_regression_input = network_info['forward_tacotron_regression_inputs']
-        self.duration_speaker_embeddings = (
-            'speaker_embedding' if 'speaker_embedding' in self.forward_tacotron_regression_input else None
-        )
         self.duration_output = 'duration'
         self.embeddings_output = 'embeddings'
         self.mel_output = 'mel'
@@ -352,8 +345,7 @@ class SequentialModel:
     def predict(self, identifiers, input_data, input_meta, input_names, callback=None):
         assert len(identifiers) == 1
 
-        duration_input = dict(zip(input_names, input_data[0]))
-        duration_output = self.forward_tacotron_duration.predict(duration_input)
+        duration_output = self.forward_tacotron_duration.predict(dict(zip(input_names, input_data[0])))
         if callback:
             callback(duration_output)
 
@@ -372,9 +364,6 @@ class SequentialModel:
                 self.forward_tacotron_regression_input['data']: processed_emb,
                 self.forward_tacotron_regression_input['data_mask']: input_mask,
                 self.forward_tacotron_regression_input['pos_mask']: pos_mask}
-            if self.duration_speaker_embeddings:
-                sp_emb_input = self.forward_tacotron_regression_input['speaker_embedding']
-                input_to_regression[sp_emb_input] = duration_input[self.duration_speaker_embeddings]
             mels = self.forward_tacotron_regression.predict(input_to_regression)
         else:
             mels = self.forward_tacotron_regression.predict({self.forward_tacotron_regression_input: processed_emb})
@@ -448,10 +437,6 @@ class SequentialModel:
             self.adapter.output_blob = self.audio_output
             self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
             self.melgan_input = next(iter(self.melgan.inputs))
-            if self.duration_speaker_embeddings:
-                self.duration_speaker_embeddings = generate_name(
-                    'forward_tacotron_duration_', with_prefix, self.duration_speaker_embeddings
-                )
             for key, value in self.forward_tacotron_regression_input.items():
                 self.forward_tacotron_regression_input[key] = generate_name(
                     'forward_tacotron_regression_', with_prefix, value
@@ -495,16 +480,10 @@ class TTSDLSDKModel:
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
-        accepted_suffixes = ['.blob', '.xml']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
+            print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
         if model.suffix == '.blob':
             return model, None
         weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
-        accepted_weights_suffixes = ['.bin']
-        if weights.suffix not in accepted_weights_suffixes:
-            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
         print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
 
         return model, weights

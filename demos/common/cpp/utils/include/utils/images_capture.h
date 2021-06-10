@@ -7,7 +7,6 @@
 
 #include <opencv2/core/mat.hpp>
 #include <opencv2/videoio.hpp>
-#include "utils/performance_metrics.hpp"
 
 class ImagesCapture {
 public:
@@ -16,12 +15,7 @@ public:
     ImagesCapture(bool loop) : loop{loop} {}
     virtual double fps() const = 0;
     virtual cv::Mat read() = 0;
-    virtual std::string getType() const = 0;
-    const PerformanceMetrics& getMetrics() { return readerMetrics; }
     virtual ~ImagesCapture() = default;
-
-protected:
-    PerformanceMetrics readerMetrics;
 };
 
 // An advanced version of

@@ -5,7 +5,8 @@
 file(GLOB SRC_FILES ./*.cpp)
 file(GLOB H_FILES ./*.h)
 
-add_demo(NAME object_detection_demo
-    SOURCES ${SRC_FILES}
-    HEADERS ${H_FILES}
-    DEPENDENCIES monitors models pipelines)
+ie_add_sample(NAME object_detection_demo
+              SOURCES ${SRC_FILES}
+              HEADERS ${H_FILES}
+              DEPENDENCIES monitors models pipelines
+              OPENCV_DEPENDENCIES highgui videoio imgproc)

@@ -22,7 +22,7 @@ from .utils import resize_image
 
 
 class HpeAssociativeEmbedding(Model):
-    def __init__(self, ie, model_path, target_size, aspect_ratio, prob_threshold, delta=0.0, size_divisor=32, padding_mode='right_bottom'):
+    def __init__(self, ie, model_path, target_size, aspect_ratio, prob_threshold, size_divisor=32):
         super().__init__(ie, model_path)
         self.image_blob_name = self._get_inputs(self.net)
         self.heatmaps_blob_name = find_layer_by_name('heatmaps', self.net.outputs)
@@ -36,10 +36,8 @@ class HpeAssociativeEmbedding(Model):
         if target_size is None:
             h, w = self.net.input_info[self.image_blob_name].input_data.shape[-2:]
             target_size = min(h, w)
-        self.index_of_max_dimension = 0
         if aspect_ratio >= 1.0:  # img width >= height
             input_height, input_width = target_size, round(target_size * aspect_ratio)
-            self.index_of_max_dimension = 1
         else:
             input_height, input_width = round(target_size / aspect_ratio), target_size
         self.h = (input_height + size_divisor - 1) // size_divisor * size_divisor
@@ -53,7 +51,7 @@ class HpeAssociativeEmbedding(Model):
             num_joints=self.net.outputs[self.heatmaps_blob_name].shape[1],
             adjust=True,
             refine=True,
-            delta=delta,
+            delta=0.0,
             max_num_people=30,
             detection_threshold=0.1,
             tag_threshold=1,
@@ -62,7 +60,6 @@ class HpeAssociativeEmbedding(Model):
             ignore_too_much=False,
             dist_reweight=True)
         self.size_divisor = size_divisor
-        self.padding_mode = padding_mode
 
     @staticmethod
     def _get_inputs(net):
@@ -71,7 +68,7 @@ class HpeAssociativeEmbedding(Model):
             if len(blob.input_data.shape) == 4:
                 image_blob_name = blob_name
             else:
-                raise RuntimeError('Unsupported {}D input layer "{}". Only 4D input layers are supported'
+                raise RuntimeError('Unsupported {}D input layer "{}". Only 2D and 4D input layers are supported'
                                    .format(len(blob.shape), blob_name))
         if image_blob_name is None:
             raise RuntimeError('Failed to identify the input for the image.')
@@ -84,32 +81,19 @@ class HpeAssociativeEmbedding(Model):
             self.logger.warn("Chosen model aspect ratio doesn't match image aspect ratio")
         resize_img_scale = np.array((inputs.shape[1] / w, inputs.shape[0] / h), np.float32)
 
-        if self.padding_mode == 'center':
-            pad = ((self.h - h + 1) // 2, (self.h - h) // 2, (self.w - w + 1) // 2, (self.w - w) // 2)
-        else:
-            pad = (0, self.h - h, 0, self.w - w)
-        img = np.pad(img, (pad[:2], pad[2:], (0, 0)), mode='constant', constant_values=0)
+        img = np.pad(img, ((0, self.h - h), (0, self.w - w), (0, 0)),
+                     mode='constant', constant_values=0)
         img = img.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         img = img[None]
-        meta = {
-            'original_size': inputs.shape[:2],
-            'resize_img_scale': resize_img_scale
-        }
-        return {self.image_blob_name: img}, meta
+        return {self.image_blob_name: img}, resize_img_scale
 
-    def postprocess(self, outputs, meta):
+    def postprocess(self, outputs, resize_img_scale):
         heatmaps = outputs[self.heatmaps_blob_name]
         nms_heatmaps = outputs[self.nms_heatmaps_blob_name]
         aembds = outputs[self.embeddings_blob_name]
         poses, scores = self.decoder(heatmaps, aembds, nms_heatmaps=nms_heatmaps)
         # Rescale poses to the original image.
-        if self.padding_mode == 'center':
-            scale = meta['resize_img_scale'][self.index_of_max_dimension]
-            poses[:, :, :2] *= scale * self.output_scale
-            shift = (meta['original_size'][self.index_of_max_dimension] - max(self.h, self.w) * scale) / 2
-            poses[:, :, 1 - self.index_of_max_dimension] += shift
-        else:
-            poses[:, :, :2] *= meta['resize_img_scale'] * self.output_scale
+        poses[:, :, :2] *= resize_img_scale * self.output_scale
         return poses, scores
 
 

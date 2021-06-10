@@ -4,18 +4,19 @@ models:
       - framework: dlsdk
         adapter:
           type: bert_question_answering
-          start_token_logits_output: "output_s"
-          end_token_logits_output: "output_e"
+          start_token_logits_output: "5211"
+          end_token_logits_output: "5212"
         inputs:
-          - name: "input_ids"
+          - name: "result.1"
             type: INPUT
             value: "input_ids"
-          - name: "attention_mask"
+          - name: "result.2"
             type: INPUT
-            value: "input_mask"
-          - name: "token_type_ids"
+            value: 'input_mask'
+          - name: "result.3"
             type: INPUT
-            value: "segment_ids"
+            value: 'segment_ids'
+
     datasets:
       - name: squad_v1_1_msl384_mql64_ds128_lowercase
         reader:

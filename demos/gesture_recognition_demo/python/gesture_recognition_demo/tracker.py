@@ -181,7 +181,7 @@ class Tracker:  # pylint: disable=too-few-public-methods
         """Returns active detections"""
 
         if self._last_detections is None or len(self._last_detections) == 0:
-            return [], {}
+            return list(), dict()
 
         out_detections = []
         for det in self._last_detections:
@@ -196,10 +196,10 @@ class Tracker:  # pylint: disable=too-few-public-methods
             out_detections.sort(key=lambda x: x.conf, reverse=True)
             out_detections = out_detections[:max_num_detections]
 
-        matched_det_ids = {det.id for det in out_detections} & labels_map.keys()
+        matched_det_ids = set(det.id for det in out_detections) & labels_map.keys()
         unused_det_ids = sorted(set(range(max_num_detections)) - matched_det_ids)
 
-        out_labels_map = {}
+        out_labels_map = dict()
         for det in out_detections:
             if det.id in matched_det_ids:
                 out_labels_map[det.id] = labels_map[det.id]

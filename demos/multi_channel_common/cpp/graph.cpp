@@ -49,7 +49,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_GPU_THROUGHPUT_STREAMS, InferenceEngine::PluginConfigParams::GPU_THROUGHPUT_AUTO}}, "GPU");
     }
     if (!cpuExtensionPath.empty()) {
-        auto extension_ptr = std::make_shared<InferenceEngine::Extension>(cpuExtensionPath);
+        auto extension_ptr = InferenceEngine::make_so_pointer<InferenceEngine::IExtension>(cpuExtensionPath);
         ie.AddExtension(extension_ptr, "CPU");
     }
     if (!cldnnConfigPath.empty()) {
@@ -88,7 +88,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     }
 
     for (size_t i = 0; i < maxRequests; ++i) {
-        auto req = std::make_shared<InferenceEngine::InferRequest>(network.CreateInferRequest());
+        auto req = network.CreateInferRequestPtr();
         availableRequests.push(req);
     }
 
@@ -96,7 +96,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         postLoad(outputDataBlobNames, cnnNetwork);
 
     availableRequests.front()->StartAsync();
-    availableRequests.front()->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
+    availableRequests.front()->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
 }
 
 void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc) {
@@ -234,7 +234,7 @@ std::vector<std::shared_ptr<VideoFrame> > IEGraph::getBatchData(cv::Size frameSi
         busyBatchRequests.pop();
     }
 
-    if (nullptr != req && InferenceEngine::OK == req->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY)) {
+    if (nullptr != req && InferenceEngine::OK == req->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY)) {
         auto detections = postprocessing(req, outputDataBlobNames, frameSize);
         for (decltype(detections.size()) i = 0; i < detections.size(); i ++) {
             vframes[i]->detections = std::move(detections[i]);
@@ -273,7 +273,7 @@ IEGraph::~IEGraph() {
             if (!busyBatchRequests.empty()) {
                 auto& req = busyBatchRequests.front().req;
                 if (nullptr != req) {
-                    req->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
+                    req->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
                     availableRequests.push(std::move(req));
                 }
                 busyBatchRequests.pop();

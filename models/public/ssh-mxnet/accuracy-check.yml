@@ -1,0 +1,35 @@
+models:
+  - name: ssh-mxnet
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: retinaface
+          bboxes_outputs:
+            - rpn_bbox_pred_stride32
+            - rpn_bbox_pred_stride16
+            - rpn_bbox_pred_stride8
+          scores_outputs:
+            - rpn_cls_prob_reshape_stride32
+            - rpn_cls_prob_reshape_stride16
+            - rpn_cls_prob_reshape_stride8
+          keep_top_k: 1000
+          nms_threshold: 0.3
+          include_boundaries: True
+    datasets:
+      - name: wider
+        preprocessing:
+          - type: resize
+            size: 640
+        postprocessing:
+          - type: cast_to_int
+          - type: clip_boxes
+            size: 1024
+            apply_to: annotation
+          - type: filter
+            apply_to: annotation
+            height_range: 64, 1024
+            is_empty: True
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: True

@@ -106,12 +106,10 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
             fetch_only: only fetch possible error without raising
             validation_scheme: scheme for validation
         """
-        error_stack = []
         if not self.delayed_model_loading:
-            framework_parameters, error_stack = self.check_model_source(entry, fetch_only, field_uri, validation_scheme)
-            if not error_stack:
-                self._set_model_source(framework_parameters)
-        error_stack += super().validate(entry, field_uri, fetch_only, validation_scheme)
+            framework_parameters = self.check_model_source(entry)
+            self._set_model_source(framework_parameters)
+        error_stack = super().validate(entry, field_uri, fetch_only, validation_scheme)
         self.create_device_regex(known_plugins)
         if 'device' not in entry:
             return error_stack
@@ -148,7 +146,7 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         self.fields['kaldi_model'].optional = framework.name != 'kaldi'
 
     @staticmethod
-    def check_model_source(entry, fetch_only=False, field_uri=None, validation_scheme=None):
+    def check_model_source(entry):
         dlsdk_model_options = ['model']
         caffe_model_options = ['caffe_model', 'caffe_weights']
         mxnet_model_options = ['mxnet_weights']
@@ -177,18 +175,8 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
                 specified.append(mo_source_option)
 
         if not specified:
-            error = ConfigError(
-                '{} None provided'.format(multiple_model_sources_err), entry, field_uri, validation_scheme
-            )
-            if not fetch_only:
-                raise error
-            return None, [error]
+            raise ConfigError('{} None provided'.format(multiple_model_sources_err))
         if len(specified) > 1:
-            error = ConfigError(
-                '{} Several provided'.format(multiple_model_sources_err), entry, field_uri, validation_scheme
-            )
-            if not fetch_only:
-                raise error
-            return None, [error]
+            raise ConfigError('{} Several provided'.format(multiple_model_sources_err))
 
-        return specified[0], []
+        return specified[0]

@@ -56,7 +56,7 @@ def postprocess(scores, classes, boxes, raw_cls_masks,
     classes = classes[confidence_filter]
     boxes = boxes[confidence_filter]
     if raw_cls_masks is not None:
-        raw_cls_masks = [segm for segm, is_valid in zip(raw_cls_masks, confidence_filter) if is_valid]
+        raw_cls_masks = list(segm for segm, is_valid in zip(raw_cls_masks, confidence_filter) if is_valid)
 
     if len(scores) == 0:
         return no_detections

@@ -210,7 +210,7 @@ class MTCNNPAdapter(Adapter):
 
     def _extract_predictions(self, outputs_list, meta):
         scales = [1] if not meta[0] or 'scales' not in meta[0] else meta[0]['scales']
-        total_boxes = np.zeros((0, 9), float)
+        total_boxes = np.zeros((0, 9), np.float)
         for idx, outputs in enumerate(outputs_list):
             scale = scales[idx]
             mapping = outputs[self.probability_out][0, 1, :, :]
