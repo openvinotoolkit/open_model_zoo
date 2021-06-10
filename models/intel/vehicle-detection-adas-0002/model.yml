@@ -18,28 +18,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/vehicle-detection-adas-0002.xml
-    size: 208096
-    sha256: 2b035c5cfd591e5e81efcd3d70efbd6b78d7cb547299ccfac265cfd8d5a35cb8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
+    size: 209285
+    sha256: d0259fde2324446c7bfe05295fe1d8a2b238a9703170e130345b71fe46c46a41
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
   - name: FP32/vehicle-detection-adas-0002.bin
     size: 4314552
-    sha256: df85cc72d9fc59981d9accadae07a46f31dc169ececfd44e66f1d5a1d12ba2f0
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
+    sha256: 55d0d6b54a8965cc2b22d166ab044ecdc7ba9a7b018cdf42c5a757aa782fc573
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
   - name: FP16/vehicle-detection-adas-0002.xml
-    size: 208062
-    sha256: b9b9a1d1bbd2fc92374f61d509facdd4e898e728c90c72d2300bfb2cf1ba818d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
+    size: 209251
+    sha256: 1d4780d49a08908b692b1ebe91aa85b1b620147c59759d34959f38708d209b7c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
   - name: FP16/vehicle-detection-adas-0002.bin
     size: 2157328
-    sha256: df5f4c3df3f1fab267a879ea1a77edc9a1be59a39bd14e7b94fbd723f8400797
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
+    sha256: 7dbf5fd834d33b1b25bd3dd567a12124be47e093a62089e46fcb5f5f1869c1e0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
   - name: FP16-INT8/vehicle-detection-adas-0002.xml
-    size: 396076
-    sha256: 0742901039012b726e6908db94be70655dc0fcc747dcf96384b7cc29836bfd36
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.xml
+    size: 440420
+    sha256: 1db004b51b45366a5be99afed9dd857ddaf8424c17d1020efbb01490d3084e16
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.xml
   - name: FP16-INT8/vehicle-detection-adas-0002.bin
-    size: 1309300
-    sha256: e04accb50e94374bdbbcf580f9c262eceddb82db32eb99ce06999aef998b4970
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.bin
+    size: 1123348
+    sha256: 4a3a61c14e9b0531f2013aad3b07f06c6d962a7734e0f9f671ac6620bf05405c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
