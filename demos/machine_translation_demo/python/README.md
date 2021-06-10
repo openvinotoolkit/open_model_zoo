@@ -27,8 +27,8 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 
 ### Supported Models
 
-* machine-translation-nar-de-en-0001
-* machine-translation-nar-en-de-0001
+* machine-translation-nar-de-en-0002
+* machine-translation-nar-en-de-0002
 * machine-translation-nar-en-ru-0001
 * machine-translation-nar-ru-en-0001
 
@@ -75,9 +75,9 @@ For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-train
 python3 ./machine_translation_demo \
   -d CPU \
   -i "a sample english text" \
-  -m <path_to_model>/machine-translation-nar-en-de-0001.xml \
-  --tokenizer-src <omz_root>/models/intel/machine-translation-nar-en-de-0001/tokenizer_src \
-  --tokenizer-tgt <omz_root>/models/intel/machine-translation-nar-en-de-0001/tokenizer_tgt
+  -m <path_to_model>/machine-translation-nar-en-de-0002.xml \
+  --tokenizer-src <omz_root>/models/intel/machine-translation-nar-en-de-0002/tokenizer_src \
+  --tokenizer-tgt <omz_root>/models/intel/machine-translation-nar-en-de-0002/tokenizer_tgt
 ```
 
 ## Demo Output
