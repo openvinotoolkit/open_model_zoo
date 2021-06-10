@@ -620,6 +620,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='deblurring_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': DataPatternArg('face-detection-adas'),
+                          **MONITORS,
                           '--no_show': None,
                           '-m': ModelArg('deblurgan-v2')}),
     )),
@@ -1017,11 +1018,12 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='whiteboard_inpainting_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
+                          **MONITORS,
                           '--no_show': None}),
         [
             *single_option_cases('-m_i',
                 ModelArg('instance-segmentation-security-0002'),
-                ModelArg('instance-segmentation-security-0091'),
+                # ModelArg('instance-segmentation-security-0091'),
                 ModelArg('instance-segmentation-security-0228'),
                 ModelArg('instance-segmentation-security-1039'),
                 ModelArg('instance-segmentation-security-1040')),
