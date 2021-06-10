@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is an action recognition composite model for the driver monitoring use case, consisting of encoder and decoder parts. The encoder model uses Video Transformer approach with MobileNetV2 encoder. It is able to recognize actions such as drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting. The full list of recognized actions is located here: `<omz_dir>/demos/action_recognition_demo/python/driver_actions.txt`.
+This is an action recognition composite model for the driver monitoring use case, consisting of encoder and decoder parts. The encoder model uses Video Transformer approach with MobileNetV2 encoder. It is able to recognize actions such as drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting. The full list of recognized actions is located at `<omz_dir>/demos/action_recognition_demo/python/driver_actions.txt`.
 
 ## Example
 
