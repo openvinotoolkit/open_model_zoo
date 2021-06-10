@@ -53,7 +53,7 @@ def build_argparser():
     args.add_argument("-o", "--output_dir", help="Required. Path to a folder where output files will be saved",
                       required=True, type=str)
     args.add_argument("-d", "--device",
-                      help="Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is "
+                      help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. Default value is CPU",
                       default="CPU", type=str)
     return parser

@@ -1,6 +1,6 @@
 #
 # This config file requires ctcdecode_numpy Python module for fast_ctc_beam_search_decoder_with_lm.
-# Please see open_model_zoo/demos/speech_recognition_deepspeech_demo/python/README.md for installation instructions.
+# Please see open_model_zoo/demos/python_demos/speech_recognition_demo/README.md for installation instructions.
 #
 models:
   - name: mozilla-deepspeech-0.8.2

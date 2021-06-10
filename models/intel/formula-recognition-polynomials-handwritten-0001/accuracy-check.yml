@@ -1,6 +1,6 @@
 evaluations:
   - name: formula-recognition-polynomials-handwritten-0001
-    module: custom_evaluators.custom_text_recognition_evaluator.TextRecognitionWithAttentionEvaluator
+    module: custom_evaluators.im2latex_evaluator.Im2latexEvaluator
     module_config:
       network_info:
         max_seq_len: "192"

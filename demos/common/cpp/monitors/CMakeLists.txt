@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+find_package(OpenCV REQUIRED COMPONENTS core imgproc)
+
 set(SOURCES
     src/cpu_monitor.cpp
     src/memory_monitor.cpp

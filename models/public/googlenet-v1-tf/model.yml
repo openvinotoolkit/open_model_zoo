@@ -13,10 +13,10 @@
 # limitations under the License.
 
 description: >-
-  The "googlenet-v1-tf" model is one of the Inception family, designed to perform
-  image classification. Like the other Inception models, the "googlenet-v1-tf" model
-  has been pre-trained on the ImageNet image database. For details about this family
-  of models, check out the paper <https://arxiv.org/abs/1602.07261>, repository <https://github.com/tensorflow/models/tree/master/research/slim>.
+  The `googlenet-v1-tf` model is one of the Inception <https://arxiv.org/abs/1602.07261>
+  family, designed to perform image classification. Like the other Inception
+  models, the `googlenet-v1-tf` model has been pretrained on the ImageNet image database.
+  For details about this family of models, check out the paper.
 task_type: classification
 files:
   - name: inception_v1_2016_08_28.tar.gz

@@ -45,12 +45,10 @@ from .segmentation_representation import (
     BrainTumorSegmentationAnnotation,
     BrainTumorSegmentationPrediction,
     CoCoInstanceSegmentationAnnotation,
-    CoCoInstanceSegmentationPrediction,
+    CoCocInstanceSegmentationPrediction,
     OAR3DTilingSegmentationAnnotation,
     SalientRegionAnnotation,
-    SalientRegionPrediction,
-    BackgroundMattingAnnotation,
-    BackgroundMattingPrediction
+    SalientRegionPrediction
 )
 from .character_recognition_representation import (
     CharacterRecognition,
@@ -67,8 +65,7 @@ from .regression_representation import (
     FacialLandmarks3DPrediction,
     GazeVectorAnnotation,
     GazeVectorPrediction,
-    FeaturesRegressionAnnotation,
-    NiftiRegressionAnnotation,
+    FeaturesRegressionAnnotation
 )
 from .multilabel_recognition import MultiLabelRecognitionAnnotation, MultiLabelRecognitionPrediction
 from .super_resolution_representation import SuperResolutionAnnotation, SuperResolutionPrediction
@@ -101,13 +98,6 @@ from .raw_representation import RawTensorAnnotation, RawTensorPrediction
 
 from .optical_flow import OpticalFlowAnnotation, OpticalFlowPrediction
 
-from .noise_suppression import NoiseSuppressionAnnotation, NoiseSuppressionPrediction
-
-from .time_series_representation import (
-    TimeSeriesForecastingAnnotation,
-    TimeSeriesForecastingQuantilesPrediction
-)
-
 __all__ = [
     'BaseRepresentation',
 
@@ -139,15 +129,12 @@ __all__ = [
     'SalientRegionAnnotation',
     'SalientRegionPrediction',
 
-    'BackgroundMattingAnnotation',
-    'BackgroundMattingPrediction',
-
     'BrainTumorSegmentationAnnotation',
     'BrainTumorSegmentationPrediction',
     'OAR3DTilingSegmentationAnnotation',
 
     'CoCoInstanceSegmentationAnnotation',
-    'CoCoInstanceSegmentationPrediction',
+    'CoCocInstanceSegmentationPrediction',
 
     'CharacterRecognition',
     'CharacterRecognitionAnnotation',
@@ -217,12 +204,4 @@ __all__ = [
 
     'OpticalFlowAnnotation',
     'OpticalFlowPrediction',
-
-    'NiftiRegressionAnnotation',
-
-    'NoiseSuppressionAnnotation',
-    'NoiseSuppressionPrediction',
-
-    'TimeSeriesForecastingAnnotation',
-    'TimeSeriesForecastingQuantilesPrediction'
 ]

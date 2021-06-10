@@ -87,10 +87,7 @@ class ONNXLauncher(Launcher):
             if len(model_list) != 1:
                 raise ConfigError('Several suitable models found, please specify explicitly')
             model = model_list[0]
-        accepted_suffixes = ['.onnx']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('Found model {}'.format(model))
+            print_info('Found model: {}'.format(model))
 
         return model
 
@@ -133,8 +130,7 @@ class ONNXLauncher(Launcher):
         layer_shape = self.inputs[layer_name]
         input_precision = self._input_precisions.get(layer_name, np.float32) if not precision else precision
         if len(np.shape(data)) == 4:
-            if layout:
-                data = np.transpose(data, layout).astype(input_precision)
+            data = np.transpose(data, layout).astype(input_precision)
             if len(layer_shape) == 3:
                 if np.shape(data)[0] != 1:
                     raise ValueError('Only for batch size 1 first dimension can be omitted')

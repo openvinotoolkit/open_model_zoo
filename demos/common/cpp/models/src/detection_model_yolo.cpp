@@ -82,7 +82,9 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 }
 
 std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult) {
-    DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
+    DetectionResult* result = new DetectionResult;
+
+    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
     std::vector<DetectedObject> objects;
 
     // Parsing outputs

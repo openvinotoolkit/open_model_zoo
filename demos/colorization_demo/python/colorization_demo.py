@@ -35,7 +35,7 @@ def build_arg():
     in_args.add_argument("-m", "--model", help="Required. Path to .xml file with pre-trained model.",
                          required=True, type=Path)
     in_args.add_argument("-d", "--device",
-                         help="Optional. Specify target device for infer: CPU, GPU, HDDL or MYRIAD. "
+                         help="Optional. Specify target device for infer: CPU, GPU, FPGA, HDDL or MYRIAD. "
                               "Default: CPU",
                          default="CPU", type=str)
     in_args.add_argument('-i', "--input", required=True,
@@ -44,11 +44,11 @@ def build_arg():
     in_args.add_argument('--loop', default=False, action='store_true',
                          help='Optional. Enable reading the input in a loop.')
     in_args.add_argument('-o', '--output', required=False,
-                         help='Optional. Name of the output file(s) to save.')
+                         help='Optional. Name of output to save.')
     in_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')
-    in_args.add_argument("--no_show", help="Optional. Don't show output.",
+    in_args.add_argument("--no_show", help="Optional. Disable display of results on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
                          action='store_true', default=False)

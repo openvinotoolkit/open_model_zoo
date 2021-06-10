@@ -90,16 +90,6 @@ def east_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
     return resize_w, resize_h
 
 
-def ppocr_aspect_ratio(dst_width, dst_height, image_width, image_height):
-    ratio = image_width / image_height
-    tmp_w = int(32 * ratio)
-    if np.ceil(dst_height * ratio) > dst_width:
-        resize_w = tmp_w
-    else:
-        resize_w = int(np.ceil(dst_height * ratio))
-    return resize_w, dst_height
-
-
 class ScaleFactor:
     def __init__(self, config, parameters):
         self.scale = get_parameter_value_from_config(config, parameters, 'scale')
@@ -133,7 +123,6 @@ ASPECT_RATIO_SCALE = {
     'min_ratio': min_ratio,
     'mask_rcnn_benchmark_aspect_ratio': mask_rcnn_benchmark_ratio,
     'scale_factor': ScaleFactor,
-    'ppcrnn_ratio': ppocr_aspect_ratio
 }
 
 

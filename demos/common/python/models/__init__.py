@@ -21,11 +21,10 @@ from .ctpn import CTPN
 from .faceboxes import FaceBoxes
 from .hpe_associative_embedding import HpeAssociativeEmbedding
 from .open_pose import OpenPose
-from .retinaface import RetinaFace, RetinaFacePyTorch
-from .segmentation import SegmentationModel, SalientObjectDetectionModel
+from .retinaface import RetinaFace
+from .segmentation import SegmentationModel
 from .ssd import SSD
-from .ultra_lightweight_face_detection import UltraLightweightFaceDetection
-from .utils import DetectionWithLandmarks, InputTransform, OutputTransform
+from .utils import DetectionWithLandmarks
 from .yolo import YOLO, YoloV4
 
 __all__ = [
@@ -35,15 +34,10 @@ __all__ = [
     'Deblurring',
     'FaceBoxes',
     'HpeAssociativeEmbedding',
-    'InputTransform',
     'OpenPose',
-    'OutputTransform',
     'RetinaFace',
-    'RetinaFacePyTorch',
-    'SalientObjectDetectionModel',
     'SegmentationModel',
     'SSD',
-    'UltraLightweightFaceDetection',
     'YOLO',
     'YoloV4',
 ]

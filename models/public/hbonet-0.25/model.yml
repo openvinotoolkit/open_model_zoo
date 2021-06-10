@@ -13,8 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "hbonet-0.25" model is one of the classification models from repository <https://github.com/d-li14/HBONet>
-  with "width_mult=0.25"
+  "hbonet-0.25" is one of HBONet architectures <https://arxiv.org/abs/1908.03888>
 task_type: classification
 files:
   - name: hbonet.py

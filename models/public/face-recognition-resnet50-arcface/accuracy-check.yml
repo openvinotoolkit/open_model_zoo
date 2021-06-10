@@ -1,0 +1,37 @@
+models:
+  - name: face-recognition-resnet50-arcface-mx
+
+    launchers:
+      - framework: mxnet
+        model: model-r50-am-lfw/model-0000.params
+        adapter: reid
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 3, 112, 112
+
+    datasets:
+      - name: lfw_bin
+
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: auto_resize
+
+        metrics:
+          - type: pairwise_accuracy_subsets
+
+  - name: face-recognition-resnet50-arcface
+
+    launchers:
+      - framework: dlsdk
+        adapter: reid
+
+    datasets:
+      - name: lfw_bin
+
+        preprocessing:
+          - type: auto_resize
+
+
+        metrics:
+          - type: pairwise_accuracy_subsets

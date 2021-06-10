@@ -26,5 +26,4 @@ model_optimizer_args:
   - --scale_values=[255, 255, 255]
   - --output=19
   - --input_model=$dl_dir/open-closed-eye.onnx
-quantizable: yes
 license: https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE

@@ -37,7 +37,6 @@ class TestRegressionMetric:
             'mae',
             'mae',
             None,
-            None,
             {'postfix': ' ', 'scale': 1, 'names': ['mean', 'std'], 'calculate_mean': False, 'target': 'higher-worse'}
         )
         dispatcher = MetricsExecutor(config, None)
@@ -56,7 +55,6 @@ class TestRegressionMetric:
             None,
             'mae',
             'mae',
-            None,
             None,
             {'postfix': ' ', 'scale': 1, 'names': ['mean', 'std'], 'calculate_mean': False, 'target': 'higher-worse'}
         )
@@ -77,7 +75,6 @@ class TestRegressionMetric:
             'mae',
             'mae',
             None,
-            None,
             {'postfix': ' ', 'scale': 1, 'names': ['mean', 'std'], 'calculate_mean': False, 'target': 'higher-worse'}
         )
         dispatcher = MetricsExecutor(config, None)
@@ -96,7 +93,6 @@ class TestRegressionMetric:
             None,
             'mse',
             'mse',
-            None,
             None,
             {'postfix': ' ', 'scale': 1, 'names': ['mean', 'std'], 'calculate_mean': False, 'target': 'higher-worse'}
         )
@@ -117,7 +113,6 @@ class TestRegressionMetric:
             'mse',
             'mse',
             None,
-            None,
             {'postfix': ' ', 'scale': 1, 'names': ['mean', 'std'], 'calculate_mean': False, 'target': 'higher-worse'}
         )
         dispatcher = MetricsExecutor(config, None)
@@ -136,7 +131,6 @@ class TestRegressionMetric:
             None,
             'mse',
             'mse',
-            None,
             None,
             {'postfix': ' ', 'scale': 1, 'names': ['mean', 'std'], 'calculate_mean': False, 'target': 'higher-worse'}
         )
@@ -162,7 +156,6 @@ class TestRegressionMetric:
             'mae_on_interval',
             'mae_on_interval',
             None,
-            None,
             {'postfix': ' ', 'scale': 1, 'names': [], 'calculate_mean': False, 'target': 'higher-worse'}
         )
         dispatcher = MetricsExecutor(config, None)
@@ -182,7 +175,6 @@ class TestRegressionMetric:
             None,
             'mae_on_interval',
             'mae_on_interval',
-            None,
             None,
             {
                 'postfix': ' ',
@@ -210,7 +202,6 @@ class TestRegressionMetric:
             'mae_on_interval',
             'mae_on_interval',
             None,
-            None,
             {'postfix': ' ', 'scale': 1, 'names': ['mean: <= 0.0 < 1.0', 'std: <= 0.0 < 1.0'], 'calculate_mean': False, 'target': 'higher-worse'}
         )
         dispatcher = MetricsExecutor(config, None)
@@ -237,7 +228,6 @@ class TestRegressionMetric:
             None,
             'mae_on_interval',
             'mae_on_interval',
-            None,
             None,
             {
                 'postfix': ' ',
@@ -279,7 +269,6 @@ class TestRegressionMetric:
             'mae_on_interval',
             'mae_on_interval',
             None,
-            None,
             {
                 'postfix': ' ',
                 'scale': 1,
@@ -313,7 +302,6 @@ class TestRegressionMetric:
             'mae_on_interval',
             'mae_on_interval',
             None,
-            None,
             {
                 'postfix': ' ',
                 'scale': 1,
@@ -346,7 +334,6 @@ class TestRegressionMetric:
             None,
             'mae_on_interval',
             'mae_on_interval',
-            None,
             None,
             {
                 'postfix': ' ', 'scale': 1,

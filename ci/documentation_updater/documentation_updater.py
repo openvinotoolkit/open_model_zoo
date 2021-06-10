@@ -56,12 +56,12 @@ def parse():
     return args
 
 
-def collect_readme(directory):
-    files = {file.parent.name: file for file in directory.glob('**/README.md')}
+def collect_readme(directory, ignored_files):
+    files = {file.stem: file for file in directory.glob('**/*.md') if file.name not in ignored_files}
     logging.info('Collected {} description files'.format(len(files)))
     if not files:
-        logging.error("No markdown file found in {}. Ensure, that you set right directory."
-                      .format(directory))
+        logging.error("No markdown file found in {}. Exceptions - {}. Ensure, that you set right directory."
+                      .format(directory, ignored_files))
         exit(1)
     return files
 
@@ -174,7 +174,8 @@ def main():
     args = parse()
     logging.basicConfig(level=getattr(logging, args.log_level.upper()), format='%(levelname)s: %(message)s')
 
-    descriptions = collect_descriptions(collect_readme(args.model_dir))
+    ignored_files = ('index.md',)
+    descriptions = collect_descriptions(collect_readme(args.model_dir, ignored_files))
     models = get_models_from_configs(args.model_dir)
     update_model_configs(models, descriptions, args.mode)
 

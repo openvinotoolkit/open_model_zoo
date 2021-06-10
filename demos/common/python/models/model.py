@@ -18,12 +18,11 @@ import logging
 
 
 class Model:
-    def __init__(self, ie, model_path, input_transform=None):
+    def __init__(self, ie, model_path):
         self.logger = logging.getLogger()
         self.logger.info('Reading network from IR...')
-        self.net = ie.read_network(model_path)
+        self.net = ie.read_network(model_path, model_path.with_suffix('.bin'))
         self.set_batch_size(1)
-        self.input_transform = input_transform
 
     def preprocess(self, inputs):
         meta = {}

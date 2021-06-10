@@ -21,7 +21,6 @@ from ...adapters import create_adapter
 from ...config import ConfigError
 from ...launcher import create_launcher
 from ...utils import contains_all
-from ...logging import print_info
 
 
 scale = 255.0/32768.0
@@ -199,10 +198,6 @@ class BaseONNXModel:
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
-        accepted_suffixes = ['.onnx']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
 
         return model
 

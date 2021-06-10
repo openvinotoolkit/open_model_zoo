@@ -2,9 +2,6 @@
 # Copyright (C) 2020 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
-
-from types import SimpleNamespace as namespace
-
 from .struct_utils import parse_format, align_pos
 
 
@@ -25,7 +22,7 @@ def parse_header(data, pos=0):
     if fst_type != b'const' or arc_type != b'standard' or version != 1:
         raise ValueError("Cannot parse OpenFst TRIE: this version of format is not supported")
 
-    return namespace(
+    return dict(
         magic=magic, fst_type=fst_type, arc_type=arc_type, version=version,
         flags=flags, properties=properties,
         start_state=start_state, num_states=num_states, num_arcs=num_arcs,
@@ -47,15 +44,15 @@ def parse_openfst(data, pos=0, base_offset=0):
 
     pos = align_pos(pos, align=16, base_offset=base_offset)
     states = []
-    for state_idx in range(header.num_states):  # pylint: disable=unused-variable
+    for state_idx in range(header['num_states']):  # pylint: disable=unused-variable
         state, pos = parse_state(data, pos)
         states.append(state)
 
     pos = align_pos(pos, align=16, base_offset=base_offset)
     arcs = []
-    for arc_idx in range(header.num_arcs):  # pylint: disable=unused-variable
+    for arc_idx in range(header['num_arcs']):  # pylint: disable=unused-variable
         arc, pos = parse_arc(data, pos)
         arcs.append(arc)
 
-    fst = namespace(meta=header, states=states, arcs=arcs)
+    fst = dict(meta=header, states=states, arcs=arcs)
     return fst, pos

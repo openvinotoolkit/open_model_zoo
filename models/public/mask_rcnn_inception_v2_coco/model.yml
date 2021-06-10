@@ -13,9 +13,8 @@
 # limitations under the License.
 
 description: >-
-  Mask R-CNN Inception V2 trained on the Common Objects in Context (COCO) <https://cocodataset.org/#home>
-  dataset. The model is used for object instance segmentation. For details, see a
-  paper <https://arxiv.org/abs/1703.06870>.
+  Mask R-CNN Inception V2 trained on the COCO dataset. The model is used for object
+  instance segmentation.  For details, see a paper <https://arxiv.org/abs/1703.06870>.
 task_type: instance_segmentation
 files:
   - name: mask_rcnn_inception_v2_coco_2018_01_28.tar.gz

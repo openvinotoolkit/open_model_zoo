@@ -31,8 +31,7 @@ LOADERS_MAPPING = {
     'opencv': GTLoader.OPENCV,
     'pillow': GTLoader.PILLOW,
     'dicom': GTLoader.DICOM,
-    'skimage': GTLoader.SKIMAGE,
-    'pillow_rgb': GTLoader.PILLOW_RGB
+    'skimage': GTLoader.SKIMAGE
 }
 
 

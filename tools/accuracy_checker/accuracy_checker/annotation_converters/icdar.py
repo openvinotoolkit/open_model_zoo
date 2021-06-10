@@ -18,12 +18,11 @@ import numpy as np
 from ..representation import TextDetectionAnnotation, CharacterRecognitionAnnotation
 from ..utils import read_txt, check_file_existence
 from .format_converter import FileBasedAnnotationConverter, DirectoryBasedAnnotationConverter, ConverterReturn
-from ..config import PathField, BoolField, StringField
+from ..config import PathField, BoolField
 
 
 def box_to_points(box):
     return np.array([[box[0][0], box[0][1]], [box[1][0], box[0][1]], [box[1][0], box[1][1]], [box[0][0], box[1][1]]])
-
 
 def strip(text):
     if text.lower().endswith("'s"):
@@ -34,7 +33,6 @@ def strip(text):
     text = text.strip()
 
     return text
-
 
 def is_word(text):
     text = strip(text)
@@ -159,9 +157,7 @@ class ICDAR13RecognitionDatasetConverter(FileBasedAnnotationConverter):
                 'images_dir': PathField(
                     is_directory=True, optional=True,
                     description='path to dataset images, used only for content existence check'
-                ),
-                'delimeter': StringField(optional=True, default='space', choices=['tab', 'space'],
-                                         description='Delimiter used for separation image and text')
+                )
             }
         )
         return parameters
@@ -169,8 +165,6 @@ class ICDAR13RecognitionDatasetConverter(FileBasedAnnotationConverter):
     def configure(self):
         super().configure()
         self.images_dir = self.get_value_from_config('images_dir')
-        delimeter = self.get_value_from_config('delimeter')
-        self.delimeter = ' ' if delimeter == 'space' else '\t'
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
@@ -183,7 +177,7 @@ class ICDAR13RecognitionDatasetConverter(FileBasedAnnotationConverter):
         num_iterations = len(original_annotations)
 
         for line_id, line in enumerate(original_annotations):
-            identifier, text = line.strip().split(self.delimeter)
+            identifier, text = line.strip().split(' ')
             annotations.append(CharacterRecognitionAnnotation(identifier, text))
             if check_content:
                 if not check_file_existence(self.images_dir / identifier):

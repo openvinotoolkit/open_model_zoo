@@ -223,7 +223,7 @@ private:
     double _total_duration;
     double _last_call_duration;
     double _smoothed_duration;
-    std::chrono::time_point<std::chrono::steady_clock> _last_call_start;
+    std::chrono::time_point<std::chrono::high_resolution_clock> _last_call_start;
 };
 
 class Timer {

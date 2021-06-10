@@ -17,27 +17,26 @@
 #pragma once
 #include "input_data.h"
 #include "results.h"
-#include "utils/config_factory.h"
 
 class ModelBase {
 public:
     ModelBase(const std::string& modelFileName)
-        : modelFileName(modelFileName)
+        : execNetwork(nullptr), modelFileName(modelFileName)
     {}
 
     virtual ~ModelBase() {}
 
+    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) = 0;
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) = 0;
     virtual std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) = 0;
-    virtual void onLoadCompleted(const std::vector<InferenceEngine::InferRequest::Ptr>& requests) {}
+        virtual void onLoadCompleted(InferenceEngine::ExecutableNetwork* execNetwork, const std::vector<InferenceEngine::InferRequest::Ptr>& requests) {
+        this->execNetwork = execNetwork; }
     const std::vector<std::string>& getOutputsNames() const { return outputsNames; }
     const std::vector<std::string>& getInputsNames() const { return inputsNames; }
 
-    virtual InferenceEngine::ExecutableNetwork loadExecutableNetwork(const CnnConfig& cnnConfig, InferenceEngine::Core& core);
-
     std::string getModelFileName() { return modelFileName; }
 
-    void setBatchOne(InferenceEngine::CNNNetwork & cnnNetwork) {
+    virtual void reshape(InferenceEngine::CNNNetwork & cnnNetwork) {
         auto shapes = cnnNetwork.getInputShapes();
         for (auto& shape : shapes)
             shape.second[0] = 1;
@@ -45,12 +44,8 @@ public:
     }
 
 protected:
-    InferenceEngine::CNNNetwork prepareNetwork(InferenceEngine::Core& core);
-    virtual void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) = 0;
-
     std::vector<std::string> inputsNames;
     std::vector<std::string> outputsNames;
-    InferenceEngine::ExecutableNetwork execNetwork;
+    InferenceEngine::ExecutableNetwork* execNetwork;
     std::string modelFileName;
-    CnnConfig cnnConfig = {};
 };

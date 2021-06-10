@@ -241,6 +241,7 @@ class CaffeModelMixin:
             for meta in batch_meta:
                 meta['input_shape'].append(self.inputs)
             results.append(self.net.forward(**feed_dict))
+
         return results
 
     @property
@@ -248,6 +249,7 @@ class CaffeModelMixin:
         inputs_map = {}
         for input_blob in self.net.inputs:
             inputs_map[input_blob] = self.net.blobs[input_blob].data.shape
+
         return inputs_map
 
     def release(self):
@@ -262,6 +264,7 @@ class CaffeModelMixin:
         data = np.transpose(data, layout) if len(data_shape) == 4 else np.array(data)
         if precision:
             data = data.astype(precision)
+
         return data
 
     def automatic_model_search(self, network_info):
@@ -276,25 +279,17 @@ class CaffeModelMixin:
             if len(models_list) != 1:
                 raise ConfigError('Several suitable models found, please specify required model')
             model = models_list[0]
-        if weights is None or Path(weights).is_dir():
-            weights_dir = weights or model.parent
-            weights = Path(weights_dir) / model.name.replace('prototxt', 'caffemodel')
-            if not weights.exists():
-                weights_list = list(weights_dir.glob('*.caffemodel'))
-                if not weights_list:
-                    raise ConfigError('Suitable weights is not detected')
-                if len(weights_list) != 1:
-                    raise ConfigError('Several suitable weights found, please specify required explicitly')
-                weights = weights_list[0]
-        weights = Path(weights)
-        accepted_suffixes = ['.prototxt']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(self.default_model_name, model))
-        accepted_weights_suffixes = ['.caffemodel']
-        if weights.suffix not in accepted_weights_suffixes:
-            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
-        print_info('{} - Found weights: {}'.format(self.default_model_name, weights))
+            if weights is None or Path(weights).is_dir():
+                weights_dir = weights or model.parent
+                weights = Path(weights_dir) / model.name.replace('prototxt', 'caffemodel')
+                if not weights.exists():
+                    weights_list = list(weights_dir.glob('*.caffemodel'))
+                    if not weights_list:
+                        raise ConfigError('Suitable weights is not detected')
+                    if len(weights_list) != 1:
+                        raise ConfigError('Several suitable weights found, please specify required explicitly')
+                    weights = weights_list[0]
+            weights = Path(weights)
         return model, weights
 
 
@@ -309,6 +304,7 @@ class DLSDKModelMixin:
             results.append(self.exec_network.infer(feed_dict))
             for meta in batch_meta:
                 meta['input_shape'].append(input_shapes)
+
         return results
 
     def _reshape_input(self, input_shapes):
@@ -338,6 +334,7 @@ class DLSDKModelMixin:
             data = np.transpose(data, layout)
         if precision:
             data = data.astype(precision)
+
         return data
 
     def prepare_model(self, launcher):
@@ -371,6 +368,7 @@ class DLSDKModelMixin:
             model, weights = launcher.convert_model(self.model_info)
         else:
             model, weights = self.auto_model_search(self.model_info)
+
         return model, weights
 
     def auto_model_search(self, network_info):
@@ -385,25 +383,19 @@ class DLSDKModelMixin:
             if len(models_list) != 1:
                 raise ConfigError('Several suitable models found, please specify required model')
             model = models_list[0]
-        if weights is None or Path(weights).is_dir():
-            weights_dir = weights or model.parent
-            weights = Path(weights_dir) / model.name.replace('xml', 'bin')
-            if not weights.exists():
-                weights_list = list(weights_dir.glob('*.bin'))
-                if not weights_list:
-                    raise ConfigError('Suitable weights is not detected')
-                if len(weights_list) != 1:
-                    raise ConfigError('Several suitable weights found, please specify required explicitly')
-                weights = weights_list[0]
-        weights = get_path(weights)
-        accepted_suffixes = ['.blob', '.xml']
-        if model.suffix not in accepted_suffixes:
-            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
-        print_info('{} - Found model: {}'.format(self.default_model_name, model))
-        accepted_weights_suffixes = ['.bin']
-        if weights.suffix not in accepted_weights_suffixes:
-            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
-        print_info('{} - Found weights: {}'.format(self.default_model_name, weights))
+            print_info('{} - Found model: {}'.format(self.default_model_name, model))
+            if weights is None or Path(weights).is_dir():
+                weights_dir = weights or model.parent
+                weights = Path(weights_dir) / model.name.replace('xml', 'bin')
+                if not weights.exists():
+                    weights_list = list(weights_dir.glob('*.bin'))
+                    if not weights_list:
+                        raise ConfigError('Suitable weights is not detected')
+                    if len(weights_list) != 1:
+                        raise ConfigError('Several suitable weights found, please specify required explicitly')
+                    weights = weights_list[0]
+            weights = get_path(weights)
+            print_info('{} - Found weights: {}'.format(self.default_model_name, weights))
         return model, weights
 
     def load_network(self, network, launcher, model_prefix):
@@ -465,6 +457,7 @@ class DLSDKModelMixin:
                 c_input['name'] = generate_name(model_prefix, network_with_prefix, c_input['name'])
             self.model_info['inputs'] = config_inputs
         config_outputs = self.model_info['outputs']
+
         for key, value in config_outputs.items():
             config_with_prefix = value.startswith(model_prefix)
             if config_with_prefix != network_with_prefix:
@@ -551,6 +544,7 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
 
     def predict(self, input_blobs, batch_meta, output_callback=None):
         raw_outputs = self._infer(input_blobs, batch_meta)
+
         if output_callback:
             batch_size = np.shape(next(iter(input_blobs[0].values())))[0]
             output_callback(self.transform_for_callback(batch_size, raw_outputs))
@@ -571,6 +565,7 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
                 else:
                     box_outs[layer_name] = np.expand_dims(data[i], axis=0)
             output_per_box.append(box_outs)
+
         return output_per_box
 
 
@@ -602,6 +597,7 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
                 else:
                     box_outs[layer_name] = np.expand_dims(data[i], axis=0)
             output_per_box.append(box_outs)
+
         return output_per_box
 
 
@@ -681,6 +677,7 @@ class MTCNNEvaluator(BaseEvaluator):
                     self.compute_metrics(
                         print_results=True, ignore_results_formatting=ignore_results_formatting
                     )
+
         if _progress_reporter:
             _progress_reporter.finish()
 
@@ -694,11 +691,13 @@ class MTCNNEvaluator(BaseEvaluator):
             self._metrics_results.append(evaluated_metric)
             if print_results:
                 result_presenter.write_result(evaluated_metric, ignore_results_formatting)
+
         return self._metrics_results
 
     def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
         if not self._metrics_results:
             self.compute_metrics(False, ignore_results_formatting)
+
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
@@ -711,6 +710,7 @@ class MTCNNEvaluator(BaseEvaluator):
                 extracted_meta.append(metadata)
             if print_results:
                 presenter.write_result(metric_result, ignore_results_formatting)
+
         return extracted_results, extracted_meta
 
     def print_metrics_results(self, ignore_results_formatting=False):
@@ -817,11 +817,13 @@ class MTCNNEvaluator(BaseEvaluator):
         pr_kwargs = {}
         if isinstance(check_progress, int) and not isinstance(check_progress, bool):
             pr_kwargs = {"print_interval": check_progress}
+
         return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
 
     def _prepare_dataset(self, dataset_tag=''):
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
+
         if self.dataset.batch is None:
             self.dataset.batch = 1
 
@@ -836,10 +838,6 @@ class MTCNNEvaluator(BaseEvaluator):
             progress_reporter.reset(self.dataset.size)
             return progress_reporter
         return None if not check_progress else self._create_progress_reporter(check_progress, self.dataset.size)
-
-    @property
-    def dataset_size(self):
-        return self.dataset.size
 
 
 def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_mapping, iou_type=None):
@@ -868,6 +866,7 @@ def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_ma
     previous_stage_predictions[0].y_mins = y_mins
     previous_stage_predictions[0].x_maxs = x_maxs
     previous_stage_predictions[0].y_maxs = y_maxs
+
     return previous_stage_predictions
 
 
@@ -879,6 +878,7 @@ def nms(prediction, threshold, iou_type):
     ]
     peek = MTCNNPAdapter.nms(bboxes, threshold, iou_type)
     prediction.remove([i for i in range(prediction.size) if i not in peek])
+
     return prediction, peek
 
 

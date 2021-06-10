@@ -33,10 +33,11 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
                                            "Absolute path to an .xml file with the kernels description.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
                                                  "Absolute path to a shared library with the kernels implementation.";
-static const char no_show_message[] = "Optional. Don't show output.";
+static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char input_resizable_message[] = "Optional. Enable resizable input with support of ROI crop and auto resize.";
 static const char ninfer_request_message[] = "Optional. Number of infer requests. 0 sets the number of infer requests equal to the number of inputs.";
 static const char num_cameras[] = "Required for web camera input. Maximum number of processed camera inputs (web cameras).";
+static const char fpga_device_ids_message[] = "Optional. Specify FPGA device IDs (0,1,n).";
 static const char loop_video_output_message[] = "Optional. Enable playing video on a loop.";
 static const char input_queue_size[] = "Optional. Number of allocated frames. It is a multiplier of the number of inputs.";
 static const char ninputs_message[] = "Optional. Specify the number of channels generated from provided inputs (with -i and -nc keys). "
@@ -69,10 +70,11 @@ DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
-DEFINE_bool(no_show, false, no_show_message);
+DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nireq, 0, ninfer_request_message);
 DEFINE_uint32(nc, 0, num_cameras);
+DEFINE_string(fpga_device_ids, "", fpga_device_ids_message);
 DEFINE_bool(loop_video, false, loop_video_output_message);
 DEFINE_uint32(n_iqs, 3, input_queue_size);
 DEFINE_uint32(ni, 0, ninputs_message);
@@ -106,10 +108,11 @@ void showUsage() {
     std::cout << "    -pc                        " << performance_counter_message << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;
     std::cout << "    -t                         " << thresh_output_message << std::endl;
-    std::cout << "    -no_show                   " << no_show_message << std::endl;
+    std::cout << "    -no_show                   " << no_show_processed_video << std::endl;
     std::cout << "    -auto_resize               " << input_resizable_message << std::endl;
     std::cout << "    -nireq                     " << ninfer_request_message << std::endl;
     std::cout << "    -nc                        " << num_cameras << std::endl;
+    std::cout << "    -fpga_device_ids           " << fpga_device_ids_message << std::endl;
     std::cout << "    -loop_video                " << loop_video_output_message << std::endl;
     std::cout << "    -n_iqs                     " << input_queue_size << std::endl;
     std::cout << "    -ni                        " << ninputs_message << std::endl;

@@ -254,7 +254,7 @@ class PostprocessorWithSpecificTargets(Postprocessor):
         return target_annotations, target_predictions
 
     def _choose_targets_using_apply_to(self, annotations, predictions):
-        if all(annotation is None for annotation in annotations):
+        if all([annotation is None for annotation in annotations]):
             apply_to = ApplyToOption.PREDICTION
             self._deprocess_predictions = True
         else:

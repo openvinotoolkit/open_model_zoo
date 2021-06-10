@@ -34,7 +34,7 @@ struct Peak {
 
 class Pose {
     public:
-        explicit Pose(size_t numJoints) : peaks(numJoints) {}
+        explicit Pose(int numJoints) : peaks(numJoints) {}
 
         void add(size_t index, Peak peak) {
             peaks[index] = peak;
@@ -48,7 +48,7 @@ class Pose {
 
         float getPoseTag() const { return poseTag; }
 
-        float getMeanScore() const { return sum / static_cast<float>(size()); }
+        float getMeanScore() const { return sum / static_cast<float>(validPointsNum); }
 
         Peak& getPeak(size_t index) { return peaks[index]; }
 
@@ -67,11 +67,11 @@ class Pose {
 void findPeaks(const std::vector<cv::Mat>& nmsHeatMaps,
                const std::vector<cv::Mat>& aembdsMaps,
                std::vector<std::vector<Peak>>& allPeaks,
-               size_t jointId, size_t maxNumPeople,
+               int jointId, int maxNumPeople,
                float detectionThreshold);
 
 std::vector<Pose> matchByTag(std::vector<std::vector<Peak>>& allPeaks,
-                             size_t maxNumPeople, size_t numJoints,
+                             int maxNumPeople, int numJoints,
                              float tagThreshold);
 
 void adjustAndRefine(std::vector<Pose>& allPoses,

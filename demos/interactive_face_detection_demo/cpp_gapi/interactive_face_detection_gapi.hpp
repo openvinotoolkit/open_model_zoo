@@ -5,12 +5,10 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <gflags/gflags.h>
-#include <utils/default_flags.hpp>
-
-DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message";
 static const char input_video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
+static const char output_video_message[] = "Optional. Path to an output video file.";
 static const char face_detection_model_message[] = "Required. Path to an .xml file with a trained Face Detection model.";
 static const char age_gender_model_message[] = "Optional. Path to an .xml file with a trained Age/Gender Recognition model.";
 static const char head_pose_model_message[] = "Optional. Path to an .xml file with a trained Head Pose Estimation model.";
@@ -29,7 +27,7 @@ static const char target_device_message_lm[] = "Optional. Target device for Faci
 static const char thresh_output_message[] = "Optional. Probability threshold for detections";
 static const char bb_enlarge_coef_output_message[] = "Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face";
 static const char raw_output_message[] = "Optional. Output inference results as raw values";
-static const char no_show_message[] = "Optional. Don't show output.";
+static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char dx_coef_output_message[] = "Optional. Coefficient to shift the bounding box around the detected face along the Ox axis";
 static const char dy_coef_output_message[] = "Optional. Coefficient to shift the bounding box around the detected face along the Oy axis";
 // TODO: Make this option valid for single image case
@@ -54,6 +52,7 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", input_video_message);
+DEFINE_string(o, "", output_video_message);
 DEFINE_string(m, "", face_detection_model_message);
 DEFINE_string(m_ag, "", age_gender_model_message);
 DEFINE_string(m_hp, "", head_pose_model_message);
@@ -67,7 +66,7 @@ DEFINE_string(d_lm, "CPU", target_device_message_lm);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_output_message);
-DEFINE_bool(no_show, false, no_show_message);
+DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_double(dx_coef, 1, dx_coef_output_message);
 DEFINE_double(dy_coef, 1, dy_coef_output_message);
 DEFINE_bool(loop, false, loop_output_message);
@@ -81,13 +80,12 @@ DEFINE_string(u, "", utilization_monitors_message);
 
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "interactive_face_detection_demo_gapi [OPTION]" << std::endl;
+    std::cout << "interactive_face_detection [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                         " << help_message << std::endl;
     std::cout << "    -i \"<path>\"                " << input_video_message << std::endl;
-    std::cout << "    -o \"<path>\"                " << output_message << std::endl;
-    std::cout << "    -limit \"<num>\"             " << limit_message << std::endl;
+    std::cout << "    -o \"<path>\"                " << output_video_message << std::endl;
     std::cout << "    -m \"<path>\"                " << face_detection_model_message<< std::endl;
     std::cout << "    -m_ag \"<path>\"             " << age_gender_model_message << std::endl;
     std::cout << "    -m_hp \"<path>\"             " << head_pose_model_message << std::endl;
@@ -98,7 +96,7 @@ static void showUsage() {
     std::cout << "    -d_hp \"<device>\"           " << target_device_message_hp << std::endl;
     std::cout << "    -d_em \"<device>\"           " << target_device_message_em << std::endl;
     std::cout << "    -d_lm \"<device>\"           " << target_device_message_lm << std::endl;
-    std::cout << "    -no_show                   " << no_show_message << std::endl;
+    std::cout << "    -no_show                   " << no_show_processed_video << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;
     std::cout << "    -t                         " << thresh_output_message << std::endl;
     std::cout << "    -bb_enlarge_coef           " << bb_enlarge_coef_output_message << std::endl;

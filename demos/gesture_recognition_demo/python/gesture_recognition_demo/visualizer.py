@@ -30,7 +30,7 @@ class Visualizer:
         self._last_key = Value('i', -1, lock=True)
         self._need_stop = Value('i', False, lock=False)
         self._worker_process = None
-        self._tasks = {}
+        self._tasks = dict()
 
     def register_window(self, name):
         """Allocates resources for the new window"""

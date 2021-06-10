@@ -54,12 +54,12 @@ def build_argparser():
     args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
     args.add_argument('-o', '--output', required=False,
-                      help='Optional. Name of the output file(s) to save.')
+                      help='Optional. Name of output to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
     args.add_argument('-d', '--device',
-                      help='Optional. Specify the target device to infer on: CPU, GPU, HDDL '
+                      help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL '
                            'or MYRIAD. The demo will look for a suitable plugin for device '
                            'specified (by default, it is CPU).',
                       default='CPU', type=str)
@@ -84,6 +84,8 @@ def time_elapsed(func, *args):
 
 
 def main():
+    """ Main function. """
+
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 

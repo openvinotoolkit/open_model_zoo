@@ -79,10 +79,10 @@ class TestInputFeeder:
 
     def test_create_input_feeder_config_inputs_contain_only_const_inputs_with_not_list_value(self):
         input_feeder = InputFeeder(
-            [{'name': 'const_data', 'type': 'CONST_INPUT', 'value': 0}],
+            [{'name': 'const_data', 'type': 'CONST_INPUT', 'value': 'value'}],
             {'data': (1, 3, 10, 10), 'const_data': (1, 4)}
         )
-        assert input_feeder.const_inputs['const_data'] == np.array(0)
+        assert input_feeder.const_inputs['const_data'] == 'value'
         assert not input_feeder.inputs_mapping
         assert input_feeder.non_constant_inputs == ['data']
 

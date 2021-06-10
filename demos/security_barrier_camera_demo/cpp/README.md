@@ -1,19 +1,25 @@
 # Security Barrier Camera C++ Demo
 
-![example](./security_barrier_camera.gif)
+![](./security_barrier_camera.gif)
 
 This demo showcases Vehicle and License Plate Detection network followed by the Vehicle Attributes Recognition and License Plate Recognition networks applied on top
-of the detection results.
+of the detection results. You can use a set of the following pre-trained models with the demo:
+* `vehicle-license-plate-detection-barrier-0106` or `vehicle-license-plate-detection-barrier-0123`, which is primary detection network to find the vehicles and license plates
+* `vehicle-attributes-recognition-barrier-0039` or `vehicle-attributes-recognition-barrier-0042`, which is executed on top of the results from the first network and
+reports general vehicle attributes, for example, vehicle type (car/van/bus/track) and color
+* `license-plate-recognition-barrier-0001` or `license-plate-recognition-barrier-0007`, which is executed on top of the results from the first network
+and reports a string per recognized license plate
+
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 Other demo objectives are:
-
 * Video/Camera as inputs, via OpenCV\*
 * Example of complex asynchronous networks pipelining: Vehicle Attributes and License Plate Recognition networks are executed on top of the Vehicle Detection results
 * Visualization of Vehicle Attributes and License Plate information for each detected object
 
 ## How It Works
 
-On startup, the application reads command line parameters and loads the specified networks. The Vehicle and License Plate
+On the start-up, the application reads command line parameters and loads the specified networks. The Vehicle and License Plate
 Detection network is required, the other two are optional.
 
 The core component of the application pipeline is the Worker class, which executes incoming instances of a `Task` class.
@@ -25,7 +31,6 @@ Each `Task` stores a smart pointer to an instance of `VideoFrame`, which represe
 When the sequence of `Task`s is completed and none of the `Task`s require a `VideoFrame` instance, the `VideoFrame` is destroyed.
 This triggers creation of a new sequence of `Task`s.
 The pipeline of this demo executes the following sequence of `Task`s:
-
 * `Reader`, which reads a new frame
 * `InferTask`, which starts detection inference
 * `RectExtractor`, which waits for detection inference to complete and runs a classifier and a recognizer
@@ -34,41 +39,11 @@ The pipeline of this demo executes the following sequence of `Task`s:
 
 At the end of the sequence, the `VideoFrame` is destroyed and the sequence starts again for the next frame.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
-
-## Preparing to Run
-
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
-The list of models supported by the demo is in `<omz_dir>/demos/security_barrier_camera_demo/cpp/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
-
-An example of using the Model Downloader:
-
-```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
-```
-
-An example of using the Model Converter:
-
-```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
-```
-
-### Supported Models
-
-* license-plate-recognition-barrier-0001
-* license-plate-recognition-barrier-0007
-* vehicle-attributes-recognition-barrier-0039
-* vehicle-attributes-recognition-barrier-0042
-* vehicle-license-plate-detection-barrier-0106
-* vehicle-license-plate-detection-barrier-0123
-
-> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html)
 
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-
 ```
 [ INFO ] InferenceEngine: <version>
 
@@ -89,10 +64,11 @@ Options:
     -pc                        Optional. Enables per-layer performance statistics.
     -r                         Optional. Output inference results as raw values.
     -t                         Optional. Probability threshold for vehicle and license plate detections.
-    -no_show                   Optional. Don't show output.
+    -no_show                   Optional. Do not show processed video.
     -auto_resize               Optional. Enable resizable input with support of ROI crop and auto resize.
     -nireq                     Optional. Number of infer requests. 0 sets the number of infer requests equal to the number of inputs.
     -nc                        Required for web camera input. Maximum number of processed camera inputs (web cameras).
+    -fpga_device_ids           Optional. Specify FPGA device IDs (0,1,n).
     -loop_video                Optional. Enable playing video on a loop.
     -n_iqs                     Optional. Number of allocated frames. It is a multiplier of the number of inputs.
     -ni                        Optional. Specify the number of channels generated from provided inputs (with -i and -nc keys). For example, if only one camera is provided, but -ni is set to 2, the demo will process frames as if they are captured from two cameras. 0 sets the number of input channels equal to the number of provided inputs.
@@ -107,16 +83,19 @@ Options:
 
 Running the application with an empty list of options yields an error message.
 
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+
+> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
+
 For example, to do inference on a GPU with the OpenVINO toolkit pre-trained models, run the following command:
 
 ```sh
 ./security_barrier_camera_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d GPU
 ```
 
-To do inference for two video inputs using two asynchronous infer request, run the following command:
-
+To do inference for two video inputs using two asynchronous infer request on FPGA with the OpenVINO toolkit pre-trained models, run the following command:
 ```sh
-./security_barrier_camera_demo -i <path_to_video>/inputVideo_0.mp4 <path_to_video>/inputVideo_1.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d CPU -nireq 2
+./security_barrier_camera_demo -i <path_to_video>/inputVideo_0.mp4 <path_to_video>/inputVideo_1.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d HETERO:FPGA,CPU -d_va HETERO:FPGA,CPU -d_lpr HETERO:FPGA,CPU -nireq 2
 ```
 
 To do inference for video inputs on Intel® Vision Accelerator Design with Intel® Movidius™ VPUs, some optimization hints are suggested to make good use of the computation ability:
@@ -126,7 +105,6 @@ To do inference for video inputs on Intel® Vision Accelerator Design with Intel
 * configuring the number of threads (`-n_wt`) for multi-threaded processing.
 
 For example, to run the sample on one Intel® Vision Accelerator Design with Intel® Movidius™ VPUs Compact R card, run the following command:
-
 ```sh
 ./security_barrier_camera_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d HDDL -d_va HDDL -d_lpr HDDL -n_iqs 10 -n_wt 4 -nireq 10
 ```
@@ -136,7 +114,7 @@ For example, to run the sample on one Intel® Vision Accelerator Design with Int
 > * `tagAttr` for the Vehicle Attributes Recognition network
 > * `tagLPR` for the License Plate Recognition network
 >
-> For example, to run the demo on one Intel® Vision Accelerator Design with Intel® Movidius™ VPUs Compact R card with eight Intel&reg; Movidius&trade; X VPUs:
+> For example, to run the sample on one Intel® Vision Accelerator Design with Intel® Movidius™ VPUs Compact R card with eight Intel&reg; Movidius&trade; X VPUs:
 > ```json
 > "service_settings":
 > {
@@ -144,12 +122,25 @@ For example, to run the sample on one Intel® Vision Accelerator Design with Int
 > }
 > ```
 
+
+### Optimization Hints for Heterogeneous Scenarios with FPGA
+
+If you build the Inference Engine with the OMP, you can use the following parameters for Heterogeneous scenarios:
+
+* `OMP_NUM_THREADS`: Specifies number of threads to use. For heterogeneous scenarios with FPGA, when several inference requests are used asynchronously, limiting the number of CPU threads with `OMP_NUM_THREADS` allows to avoid competing for resources between threads. For the Security Barrier Camera Demo, recommended value is `OMP_NUM_THREADS=1`.
+* `KMP_BLOCKTIME`: Sets the time, in milliseconds, that a thread should wait, after completing the execution of a parallel region, before sleeping. The default value is 200ms, which is not optimal for the demo. Recommended value is `KMP_BLOCKTIME=1`.
+
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
 
-## See Also
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
+>* `license-plate-recognition-barrier-0001`
+>* `vehicle-attributes-recognition-barrier-0039`
+>* `vehicle-license-plate-detection-barrier-0106`
+> Other models may produce unexpected results on these devices.
 
-* [Open Model Zoo Demos](../../README.md)
+## See Also
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

@@ -647,8 +647,8 @@ class ObjectCropWithScale(Preprocessor):
             new_width = int(np.math.floor(width / sf))
             if new_size < 2:
                 return (
-                    np.zeros((self.dst_width, self.dst_height, img.shape[2]), dtype=np.float32) if len(img.shape) > 2
-                    else np.zeros((self.dst_width, self.dst_height), dtype=np.float32)
+                    np.zeros((self.dst_width, self.dst_height, img.shape[2])) if len(img.shape) > 2
+                    else np.zeros(self.dst_width, self.dst_height)
                 )
             img = cv2.resize(img, dsize=(new_width, new_height), interpolation=cv2.INTER_LINEAR)
             center = center * 1.0 / sf
@@ -666,7 +666,7 @@ class ObjectCropWithScale(Preprocessor):
 
         if len(img.shape) > 2:
             new_shape += [img.shape[2]]
-        new_img = np.zeros(new_shape, dtype=np.float32)
+        new_img = np.zeros(new_shape)
         new_x = [max(0, -ul[0]), min(br[0], img.shape[1]) - ul[0]]
         new_y = [max(0, -ul[1]), min(br[1], img.shape[0]) - ul[1]]
         old_x = [max(0, ul[0]), min(img.shape[1], br[0])]

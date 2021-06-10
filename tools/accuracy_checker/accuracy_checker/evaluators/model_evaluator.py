@@ -16,7 +16,6 @@ limitations under the License.
 
 import copy
 import pickle
-import platform
 
 from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
@@ -30,15 +29,13 @@ from ..adapters import create_adapter, Adapter
 from ..config import ConfigError, StringField
 from ..data_readers import BaseReader, DataRepresentation
 from .base_evaluator import BaseEvaluator
-from .quantization_model_evaluator import create_dataset_attributes
 
 
-# pylint: disable=W0223,R0904
+# pylint: disable=W0223
 class ModelEvaluator(BaseEvaluator):
     def __init__(
-            self, launcher, input_feeder, adapter, preprocessor, postprocessor, dataset, metric, async_mode, config
+            self, launcher, input_feeder, adapter, preprocessor, postprocessor, dataset, metric, async_mode
     ):
-        self.config = config
         self.launcher = launcher
         self.input_feeder = input_feeder
         self.adapter = adapter
@@ -47,14 +44,13 @@ class ModelEvaluator(BaseEvaluator):
         self.dataset = dataset
         self.metric_executor = metric
         self.process_dataset = self.process_dataset_sync if not async_mode else self.process_dataset_async
-        self.async_mode = async_mode
 
         self._annotations = []
         self._predictions = []
         self._metrics_results = []
 
     @classmethod
-    def from_configs(cls, model_config, delayed_annotation_loading=False):
+    def from_configs(cls, model_config):
         model_name = model_config['name']
         launcher_config = model_config['launchers'][0]
         dataset_config = model_config['datasets'][0]
@@ -64,22 +60,22 @@ class ModelEvaluator(BaseEvaluator):
             not model_config.get('_store_only', False) and cls._is_stored(model_config.get('_stored_data'))
         )
 
-        dataset = Dataset(dataset_config) if not delayed_annotation_loading else None
-        dataset_metadata = dataset.metadata if dataset is not None else {}
+        dataset = Dataset(dataset_config)
+
         launcher_kwargs = {'delayed_model_loading': postpone_model_loading}
         enable_ie_preprocessing = (
             dataset_config.get('_ie_preprocessing', False)
             if launcher_config['framework'] == 'dlsdk' else False
         )
         preprocessor = PreprocessingExecutor(
-            dataset_config.get('preprocessing'), dataset_name, dataset_metadata,
+            dataset_config.get('preprocessing'), dataset_name, dataset.metadata,
             enable_ie_preprocessing=enable_ie_preprocessing
         )
         input_precision = launcher_config.get('_input_precision', [])
         if enable_ie_preprocessing:
             launcher_kwargs['preprocessor'] = preprocessor
         if launcher_config['framework'] == 'dummy' and launcher_config.get('provide_identifiers', False):
-            launcher_kwargs = {'identifiers': dataset.identifiers if dataset is not None else []}
+            launcher_kwargs = {'identifiers': dataset.identifiers}
         if input_precision:
             launcher_kwargs['postpone_inputs_configuration'] = True
         launcher = create_launcher(launcher_config, model_name, **launcher_kwargs)
@@ -95,20 +91,18 @@ class ModelEvaluator(BaseEvaluator):
             if input_precision:
                 launcher.update_input_configuration(input_feeder.inputs_config)
             preprocessor.input_shapes = launcher.inputs_info_for_meta()
-        postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset_metadata)
-        metric_dispatcher = None
-        if not delayed_annotation_loading:
-            metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
-            if metric_dispatcher.profile_metrics:
-                metric_dispatcher.set_processing_info(ModelEvaluator.get_processing_info(model_config))
+        postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset.metadata)
+        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), dataset)
+        if metric_dispatcher.profile_metrics:
+            metric_dispatcher.set_processing_info(ModelEvaluator.get_processing_info(model_config))
 
         return cls(
             launcher, input_feeder, adapter,
-            preprocessor, postprocessor, dataset, metric_dispatcher, async_mode, model_config
+            preprocessor, postprocessor, dataset, metric_dispatcher, async_mode
         )
 
     @classmethod
-    def validate_config(cls, model_config, delayed_annotation_loading=False):
+    def validate_config(cls, model_config):
         uri_prefix = ''
         if 'models' in model_config:
             model_config = model_config['models'][0]
@@ -134,7 +128,7 @@ class ModelEvaluator(BaseEvaluator):
                         Adapter.validate_config(adapter_config, fetch_only=True, uri_prefix=adapter_uri))
 
         datasets_uri = '{}.datasets'.format(uri_prefix) if uri_prefix else 'datasets'
-        if 'datasets' not in model_config or (not delayed_annotation_loading and not model_config['datasets']):
+        if 'datasets' not in model_config or not model_config['datasets']:
             config_errors.append(
                 ConfigError(
                     'datasets section is not provided', model_config.get('datasets', []),
@@ -145,25 +139,15 @@ class ModelEvaluator(BaseEvaluator):
             for dataset_id, dataset_config in enumerate(model_config['datasets']):
                 data_reader_config = dataset_config.get('reader', 'opencv_imread')
                 current_dataset_uri = '{}.{}'.format(datasets_uri, dataset_id)
-                if not delayed_annotation_loading:
-                    config_errors.extend(
-                        Dataset.validate_config(dataset_config, fetch_only=True, uri_prefix=current_dataset_uri)
-                    )
-                    config_errors.extend(
-                        MetricsExecutor.validate_config(
-                            dataset_config.get('metrics', []), fetch_only=True,
-                            uri_prefix='{}.metrics'.format(current_dataset_uri))
-                    )
-
+                config_errors.extend(
+                    Dataset.validate_config(dataset_config, fetch_only=True, uri_prefix=current_dataset_uri)
+                )
                 config_errors.extend(
                     BaseReader.validate_config(
                         data_reader_config, data_source=dataset_config.get('data_source'), fetch_only=True,
-                        uri_prefix='{}.reader'.format(current_dataset_uri),
-                        check_data_source=not delayed_annotation_loading,
-                        check_reader_type=delayed_annotation_loading
+                        uri_prefix='{}.reader'.format(current_dataset_uri)
                     )
                 )
-
                 config_errors.extend(
                     PreprocessingExecutor.validate_config(
                         dataset_config.get('preprocessing'), fetch_only=True,
@@ -175,6 +159,11 @@ class ModelEvaluator(BaseEvaluator):
                         dataset_config.get('postprocessing'), fetch_only=True,
                         uri_prefix='{}.postprocessing'.format(current_dataset_uri)
                     )
+                )
+                config_errors.extend(
+                    MetricsExecutor.validate_config(
+                        dataset_config.get('metrics', []), fetch_only=True,
+                        uri_prefix='{}.metrics'.format(current_dataset_uri))
                 )
 
         return config_errors
@@ -198,40 +187,9 @@ class ModelEvaluator(BaseEvaluator):
             dataset_config['name']
         )
 
-    def send_processing_info(self, sender):
-        if not sender:
-            return {}
-        launcher_config = self.config['launchers'][0]
-        dataset_config = self.config['datasets'][0]
-        framework = launcher_config['framework']
-        device = launcher_config.get('device', 'CPU')
-        details = {
-            'platform': platform.system,
-            'framework': framework if framework != 'dlsdk' else 'openvino',
-            'device': device.upper(),
-            'inference_model': 'sync' if not self.async_mode else 'async'
-        }
-        model_type = None
-
-        if hasattr(self.launcher, 'get_model_file_type'):
-            model_type = self.launcher.get_model_file_type()
-        adapter = launcher_config.get('adapter')
-        adapter_type = None
-        if adapter:
-            adapter_type = adapter if isinstance(adapter, str) else adapter.get('type')
-        metrics = dataset_config.get('metrics', [])
-        metric_info = [metric['type'] for metric in metrics]
-        details.update({
-            'metrics': metric_info,
-            'model_file_type': model_type,
-            'adapter': adapter_type,
-        })
-        details.update(self.dataset.send_annotation_info(dataset_config))
-        return details
-
     def _get_batch_input(self, batch_annotation, batch_input):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
-        batch_meta = extract_image_representations(batch_input, meta_only=True)
+        _, batch_meta = extract_image_representations(batch_input)
         filled_inputs = self.input_feeder.fill_inputs(batch_input)
 
         return filled_inputs, batch_meta
@@ -244,9 +202,6 @@ class ModelEvaluator(BaseEvaluator):
             ready_irs.append(request_id)
 
         def prepare_dataset(store_only_mode):
-            if self.dataset is None:
-                raise ConfigError('dataset entry is not assigned for execution')
-
             if self.dataset.batch is None:
                 self.dataset.batch = self.launcher.batch
             if progress_reporter:
@@ -312,9 +267,6 @@ class ModelEvaluator(BaseEvaluator):
             print_info("prediction objects are save to {}".format(stored_predictions))
 
     def process_dataset_sync(self, stored_predictions, progress_reporter, *args, **kwargs):
-        if self.dataset is None:
-            raise ConfigError('dataset entry is not assigned for evaluation')
-
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
         store_only = kwargs.get('store_only', False)
@@ -409,30 +361,15 @@ class ModelEvaluator(BaseEvaluator):
 
             batch_input, batch_meta = self._get_batch_input(batch_annotation, batch_input)
             self.launcher.predict_async(infer_requests_pool[ir_id], batch_input, batch_meta,
-                                        context=(batch_id, batch_input_ids, batch_annotation))
+                                        context=tuple([batch_id, batch_input_ids, batch_annotation]))
             queued_irs.append(ir_id)
 
         return free_irs, queued_irs
 
     def process_single_image(self, image):
-        if self.dataset is None and not hasattr(self, '_reader'):
-            data_reader_config = self.config['datasets'][0].get('reader', 'opencv_imread')
-            data_source = None
-            if isinstance(data_reader_config, str):
-                data_reader_type = data_reader_config
-                data_reader_config = None
-            elif isinstance(data_reader_config, dict):
-                data_reader_type = data_reader_config['type']
-            else:
-                raise ConfigError('reader should be dict or string')
-            self._reader = BaseReader.provide(
-                data_reader_type, data_source, data_reader_config, postpone_data_source=True
-            )
-        elif not hasattr(self, '_reader'):
-            self._reader = self.dataset.data_provider.data_reader
         input_data = self._prepare_data_for_single_inference(image)
         batch_input = self.preprocessor.process(input_data)
-        batch_meta = extract_image_representations(batch_input, meta_only=True)
+        _, batch_meta = extract_image_representations(batch_input)
         filled_inputs = self.input_feeder.fill_inputs(batch_input)
         batch_predictions = self.launcher.predict(filled_inputs, batch_meta)
 
@@ -450,8 +387,8 @@ class ModelEvaluator(BaseEvaluator):
         def get_data(image, create_representation=True):
             if is_path(image):
                 return [
-                    DataRepresentation(self._reader.read_dispatcher(image), identifier=image)
-                    if create_representation else self._reader.read_dispatcher(image)]
+                    DataRepresentation(self.dataset.data_provider.data_reader.read_dispatcher(image), identifier=image)
+                    if create_representation else self.dataset.data_provider.data_reader.read_dispatcher(image)]
             return [DataRepresentation(image, identifier='image') if create_representation else image]
 
         if not isinstance(data, list):
@@ -463,12 +400,6 @@ class ModelEvaluator(BaseEvaluator):
         self.input_feeder.ordered_inputs = True
 
         return [DataRepresentation(input_data, identifier=list(range(len(data))))]
-
-    def select_dataset(self, dataset_config):
-        dataset_attributes = create_dataset_attributes(dataset_config, '', False)
-        self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
-        if self.dataset.annotation_provider and self.dataset.annotation_provider.metadata:
-            self.adapter.label_map = self.dataset.annotation_provider.metadata.get('label_map')
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
@@ -570,10 +501,6 @@ class ModelEvaluator(BaseEvaluator):
         with open(stored_predictions, 'wb'):
             print_info("File {} will be cleared for storing predictions".format(stored_predictions))
 
-    @property
-    def dataset_size(self):
-        return self.dataset.size
-
     def reset_progress(self, progress_reporter):
         progress_reporter.reset(self.dataset.size)
 
@@ -588,11 +515,7 @@ class ModelEvaluator(BaseEvaluator):
         self._predictions = []
         self._metrics_results = []
         self.dataset.reset(self.postprocessor.has_processors)
-        if self.adapter:
-            self.adapter.reset()
 
     def release(self):
         self.input_feeder.release()
         self.launcher.release()
-        if self.adapter:
-            self.adapter.release()

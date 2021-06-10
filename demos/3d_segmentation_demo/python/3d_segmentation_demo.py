@@ -339,8 +339,8 @@ def main():
     result = res[out_name]
     batch, channels, out_d, out_h, out_w = result.shape
 
-    list_img = []
-    list_seg_result = []
+    list_img = list()
+    list_seg_result = list()
 
     logger.info("Processing of the received inference results is started")
     start_time = datetime.now()

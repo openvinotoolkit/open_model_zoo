@@ -16,7 +16,7 @@ description: >-
   DeblurGAN-v2 is a generative adversarial network (GAN) for single image motion deblurring.
   This model is based on a relativistic conditional GAN with a double-scale discriminator.
   For details about architecture of model, check out the paper <https://arxiv.org/abs/1908.03826>.
-  Model used MobileNet as backbone and was trained on GoPro, DVD, NFS datasets. For
+  Model used Mobilenet as backbone and was trained on GoPro, DVD, NFS datasets. For
   details about implementation of model, check out the DeblurGAN-v2: Deblurring (Orders-of-Magnitude)
   Faster and Better <https://github.com/VITA-Group/DeblurGANv2> repository.
 task_type: image_processing

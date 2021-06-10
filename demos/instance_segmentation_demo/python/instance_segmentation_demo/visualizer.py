@@ -122,7 +122,7 @@ class Visualizer(object):
         presenter.drawGraphs(result)
 
         if self.show_masks and segms is not None:
-            segms = [segm for segm, show in zip(segms, filter_mask) if show]
+            segms = list(segm for segm, show in zip(segms, filter_mask) if show)
             result = self.overlay_masks(result, segms, classes, ids)
 
         if self.show_boxes:

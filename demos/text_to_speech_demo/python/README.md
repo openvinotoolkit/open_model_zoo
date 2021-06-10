@@ -1,46 +1,15 @@
 # Text-to-speech Python\* Demo
 
+## Description
 The text to speech demo show how to run the ForwardTacotron and WaveRNN models or modified ForwardTacotron and MelGAN models to produce an audio file for a given input text file.
 The demo is based on https://github.com/seungwonpark/melgan, https://github.com/as-ideas/ForwardTacotron and https://github.com/fatchord/WaveRNN repositories.
 
 ## How It Works
 
-On startup, the demo application reads command-line parameters and loads four or three networks to the
+Upon the start-up, the demo application reads command-line parameters and loads four or three networks to the
 Inference Engine plugin. The demo pipeline reads text file by lines and divides every line to parts by punctuation marks.
 The heuristic algorithm chooses punctuation near to the some threshold by sentence length.
 When inference is done, the application outputs the audio to the WAV file with 22050 Hz sample rate.
-
-## Preparing to Run
-
-The list of models supported by the demo is in `<omz_dir>/demos/text_to_speech_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
-
-An example of using the Model Downloader:
-
-```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
-```
-
-An example of using the Model Converter:
-
-```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
-```
-
-### Supported Models
-
-* forward-tacotron-duration-prediction
-* forward-tacotron-regression
-* wavernn-rnn
-* wavernn-upsampler
-* text-to-speech-en-0001-duration-prediction
-* text-to-speech-en-0001-generation
-* text-to-speech-en-0001-regression
-* text-to-speech-en-multi-0001-duration-prediction
-* text-to-speech-en-multi-0001-generation
-* text-to-speech-en-multi-0001-regression
-
-> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -51,8 +20,7 @@ usage: text_to_speech_demo.py [-h] -m_duration MODEL_DURATION -m_forward
                               MODEL_FORWARD -i INPUT [-o OUT] [-d DEVICE]
                               [-m_upsample MODEL_UPSAMPLE] [-m_rnn MODEL_RNN]
                               [--upsampler_width UPSAMPLER_WIDTH]
-                              [-m_melgan MODEL_MELGAN] [-s_id SPEAKER_ID]
-                              [-a ALPHA]
+                              [-m_melgan MODEL_MELGAN]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -67,8 +35,8 @@ Options:
   -o OUT, --out OUT     Required. Path to an output .wav file
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
-                        GPU, HDDL, MYRIAD or HETERO is acceptable. The
-                        demo will look for a suitable plugin for device
+                        GPU, FPGA, HDDL, MYRIAD or HETERO is acceptable. The
+                        sample will look for a suitable plugin for device
                         specified. Default value is CPU
   -m_upsample MODEL_UPSAMPLE, --model_upsample MODEL_UPSAMPLE
                         Path to WaveRNN`s part for mel-spectrogram upsampling
@@ -82,22 +50,14 @@ Options:
                         model.
   -m_melgan MODEL_MELGAN, --model_melgan MODEL_MELGAN
                         Path to model of the MelGAN (*.xml format).
-  -s_id SPEAKER_ID, --speaker_id SPEAKER_ID
-                        Ordinal number of the speaker in embeddings array for
-                        multi-speaker model. If -1 then activates the multi-
-                        speaker TTS model parameters selection window.
-  -a ALPHA, --alpha ALPHA
-                        Coefficient for controlling of the speech time
-                        (inversely proportional to speed).
 ```
 
 Running the application with the empty list of options yields the usage message and an error message.
 
-## Example for Running with Arguments
+## Example for running with arguments
 
-### Speech synthesis with ForwardTacotron and WaveRNN models
-
-```sh
+### ForwardTacotron with WaveRNN
+```
 python3 text_to_speech_demo.py \
     --input <path_to_file>/text.txt \
     -o <path_to_audio>/audio.wav \
@@ -106,46 +66,28 @@ python3 text_to_speech_demo.py \
     --model_upsample <path_to_model>/wavernn_upsampler.xml \
     --model_rnn <path_to_model>/wavernn_rnn.xml
 ```
-
-> **NOTE**: You can use `--upsampler_width` parameter for this demo for the purpose of control width of the time axis
-> in the input mel-spectrogram for the `wavernn_upsampler` network. This option can help you improve the speed of
-> the pipeline inference on the long sentences.
-
-### Speech synthesis with text-to-speech-en-0001 models
-
-```sh
+### Modified ForwardTacotron with MelGAN
+```
 python3 text_to_speech_demo.py \
     -i <path_to_file>/text.txt \
     -o <path_to_audio>/audio.wav \
-    -m_duration <path_to_model>/text-to-speech-en-0001-duration-prediction.xml \
-    -m_forward <path_to_model>/text-to-speech-en-0001-regression.xml \
-    -m_melgan <path_to_model>/text-to-speech-en-0001-generation.xml
+    -m_duration <path_to_model>/forward_tacotron_duration_prediction_att.xml \
+    -m_forward <path_to_model>/forward_tacotron_regression_att.xml \
+    -m_melgan <path_to_model>/melganupsample.xml
 ```
+To run the demo, you can use public pre-trained models. You can download the pre-trained models with the OpenVINO
+[Model Downloader](../../../tools/downloader/README.md).
 
-### Speech synthesis with multi-speaker text-to-speech-en-multi-0001 models
-
-```sh
-python3 text_to_speech_demo.py \
-    -i <path_to_file>/text.txt \
-    -o <path_to_audio>/audio.wav \
-    -s_id 19 \
-    -m_duration <path_to_model>/text-to-speech-en-multi-0001-duration-prediction.xml \
-    -m_forward <path_to_model>/text-to-speech-en-multi-0001-regression.xml \
-    -m_melgan <path_to_model>/text-to-speech-en-multi-0001-generation.xml
-```
-
-> **NOTE**: `s_id` defines the style of the speaker utterance. You can choose it equal to -1 to activate the
-> multi-speaker TTS model parameters selection window. This window provides an opportunity to choose the gender of the
-> speaker, index number of the speaker or calculate PCA based speaker embedding. The `s_id` is available only for
-> `text-to-speech-en-multi-0001` models.
-
+> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine
+format (\*.xml + \*.bin) using the
+[Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 ## Demo Output
 
-The application outputs WAV file with generated audio.
+The application outputs is WAV file with generated audio.
 
 ## See Also
 
-* [Open Model Zoo Demos](../../README.md)
+* [Using Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

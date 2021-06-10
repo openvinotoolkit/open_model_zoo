@@ -18,7 +18,7 @@ models:
           raw_output: True
 
     datasets:
-      - name: VOC2007_detection_no_bkgr
+      - name: VOC2012_without_background
 
         preprocessing:
           - type: bgr_to_rgb
@@ -57,7 +57,7 @@ models:
           classes: 20
 
     datasets:
-      - name: VOC2007_detection_no_bkgr
+      - name: VOC2012_without_background
 
         preprocessing:
           - type: resize

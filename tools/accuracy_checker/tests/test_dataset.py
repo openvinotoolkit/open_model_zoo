@@ -23,12 +23,10 @@ from accuracy_checker.annotation_converters.format_converter import ConverterRet
 
 from accuracy_checker.dataset import Dataset
 
-
 def copy_dataset_config(config):
     new_config = copy.deepcopy(config)
 
     return new_config
-
 
 class MockPreprocessor:
     @staticmethod
@@ -384,5 +382,5 @@ class TestAnnotationConversion:
         )
         dataset = Dataset(config)
         assert len(dataset.data_provider) == 1
-        assert dataset.identifiers == ['1']
+        assert dataset.identifiers() == ['1']
         assert dataset.data_provider.full_size == 2

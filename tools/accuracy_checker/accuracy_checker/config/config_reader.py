@@ -50,17 +50,12 @@ PREPROCESSING_PATHS = {
 ADAPTERS_PATHS = {
     'lm_file': ['model_attributes', 'models', 'source'],
     'vocabulary_file': ['model_attributes', 'models', 'source'],
-    'merges_file': ['model_attributes', 'models', 'source'],
-    'fst_file': ['model_attributes', 'models', 'source'],
-    'words_file': ['model_attributes', 'models', 'source'],
-    'transition_model_file': ['model_attributes', 'models', 'source'],
+    'merges_file': ['model_attributes', 'models', 'source']
 }
 
 ANNOTATION_CONVERSION_PATHS = {
     'vocab_file': ['model_attributes', 'source', 'models'],
-    'merges_file': ['model_attributes', 'source', 'models'],
-    'mask_file': ['model_attributes', 'source', 'models'],
-    'stats_file': ['model_attributes', 'source', 'models'],
+    'merges_file': ['model_attributes', 'source', 'models']
 }
 
 LIST_ENTRIES_PATHS = {
@@ -74,8 +69,7 @@ LIST_ENTRIES_PATHS = {
         'mxnet_weights': 'models',
         'onnx_model': 'models',
         'kaldi_model': 'models',
-        'saved_model_dir': 'models',
-        'params': 'models'
+        'saved_model_dir': 'models'
 }
 
 COMMAND_LINE_ARGS_AS_ENV_VARS = {
@@ -85,7 +79,6 @@ COMMAND_LINE_ARGS_AS_ENV_VARS = {
     'models': 'MODELS_DIR',
     'extensions': 'EXTENSIONS_DIR',
     'model_attributes': 'MODEL_ATTRIBUTES_DIR',
-    'kaldi_bin_dir': 'KALDI_BIN_DIR'
 }
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
 CONFIG_SHARED_PARAMETERS = ['bitstream']
@@ -96,8 +89,7 @@ ACCEPTABLE_MODEL = [
     'onnx_model',
     'kaldi_model',
     'model',
-    'saved_model_dir',
-    'params'
+    'saved_model_dir'
 ]
 
 
@@ -130,7 +122,7 @@ class ConfigReader:
     @staticmethod
     def process_config(config, mode='models', arguments=None):
         if arguments is None:
-            arguments = {}
+            arguments = dict()
         ConfigReader._merge_paths_with_prefixes(arguments, config, mode)
         ConfigReader._provide_cmd_arguments(arguments, config, mode)
         ConfigReader._filter_launchers(config, arguments, mode)
@@ -415,7 +407,7 @@ class ConfigReader:
             'model_optimizer', 'tf_custom_op_config_dir',
             'tf_obj_detection_api_pipeline_config_path',
             'transformations_config_dir',
-            'cpu_extensions_mode', 'vpu_log_level'
+            'cpu_extensions_mode', 'vpu_log_level', 'device_config'
         ]
         arguments_dict = arguments if isinstance(arguments, dict) else vars(arguments)
         update_launcher_entry = {}
@@ -605,10 +597,9 @@ class ConfigReader:
 def create_command_line_mapping(config, default_value, value_map=None):
     mapping = {}
     value_map = value_map or {}
-    for key, value in config.items():
+    for key in config:
         if key.endswith('file') or key.endswith('dir'):
-            if not Path(value).is_absolute():
-                mapping[key] = value_map.get(key, default_value)
+            mapping[key] = value_map.get(key, default_value)
 
     return mapping
 
@@ -771,32 +762,25 @@ def merge_entry_paths(keys, value, args, value_id=0):
         if config_path.is_absolute():
             value[field] = Path(value[field])
             continue
-        argument_list = argument
 
-        if not isinstance(argument, list):
-            argument_list = [argument]
+        if isinstance(argument, list):
+            argument = next(filter(args.get, argument), argument[-1])
 
-        selected_argument = None
-        for arg_candidate in argument_list:
+        if argument not in args or not args[argument]:
+            continue
 
-            if arg_candidate not in args or not args[arg_candidate]:
-                continue
+        selected_argument = args[argument]
+        if isinstance(selected_argument, list):
+            if len(selected_argument) > 1:
+                if len(selected_argument) <= value_id:
+                    raise ValueError('list of arguments for {} less than number of evaluations')
+                selected_argument = selected_argument[value_id]
+            else:
+                selected_argument = selected_argument[0]
 
-            selected_argument = args[arg_candidate]
-            if isinstance(selected_argument, list):
-                if len(selected_argument) > 1:
-                    if len(selected_argument) <= value_id:
-                        raise ValueError('list of arguments for {} less than number of evaluations')
-                    selected_argument = selected_argument[value_id]
-                else:
-                    selected_argument = selected_argument[0]
-
-            if not selected_argument.is_dir():
-                raise ConfigError('argument: {} should be a directory'.format(argument))
-
-            if (selected_argument / config_path).exists():
-                break
-        value[field] = selected_argument / config_path if selected_argument is not None else config_path
+        if not selected_argument.is_dir():
+            raise ConfigError('argument: {} should be a directory'.format(argument))
+        value[field] = selected_argument / config_path
 
 
 def get_mode(config):
@@ -852,12 +836,6 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
 
         return launcher_entry
 
-    kaldi_binaries = arguments.kaldi_bin_dir if 'kaldi_bin_dir' in arguments else None
-    kaldi_logs = arguments.kaldi_log_file if 'kaldi_log_file' in arguments else None
-    if kaldi_binaries:
-        launcher_entry['_kaldi_bin_dir'] = kaldi_binaries
-        launcher_entry['_kaldi_log_file'] = kaldi_logs
-
     if launcher_entry['framework'].lower() != 'dlsdk':
         return launcher_entry
 
@@ -865,9 +843,6 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
     _convert_models_args(launcher_entry)
     _async_evaluation_args(launcher_entry)
     _fpga_specific_args(launcher_entry)
-
-    if 'device_config' in arguments and arguments.device_config:
-        merge_device_configs(launcher_entry, arguments.device_config)
 
     if 'cpu_extensions' not in launcher_entry and 'extensions' in arguments and arguments.extensions:
         extensions = arguments.extensions
@@ -908,22 +883,3 @@ def prepare_commandline_conversion_mapping(commandline_conversion, args):
             mapping[key] = possible_paths
 
     return mapping
-
-
-def merge_device_configs(launcher_entry, device_config_file):
-    embedded_device_config = launcher_entry.get('device_config')
-    external_device_config = read_yaml(device_config_file)
-    if not embedded_device_config:
-        embedded_device_config = external_device_config
-    elif (
-            not isinstance(next(iter(external_device_config.values())), dict)
-            and not isinstance(next(iter(embedded_device_config.values())), dict)
-    ):
-        embedded_device_config.update(external_device_config)
-    else:
-        for key, value in external_device_config.items():
-            if key not in embedded_device_config:
-                embedded_device_config[key] = {}
-            embedded_device_config[key].update(value)
-    launcher_entry['device_config'] = embedded_device_config
-    return launcher_entry

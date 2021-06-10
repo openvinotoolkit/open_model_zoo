@@ -24,7 +24,7 @@ import numpy as np
 from accuracy_checker.representation import (
     DetectionAnnotation, DetectionPrediction,
     SegmentationPrediction, SegmentationAnnotation,
-    CoCoInstanceSegmentationAnnotation, CoCoInstanceSegmentationPrediction)
+    CoCoInstanceSegmentationAnnotation, CoCocInstanceSegmentationPrediction)
 from accuracy_checker.utils import get_path
 
 
@@ -103,7 +103,7 @@ def make_instance_segmentation_representation(raw_mask, labels, ground_truth=Fal
     if ground_truth:
         return [CoCoInstanceSegmentationAnnotation('identifier', raw_mask, labels)]
 
-    return [CoCoInstanceSegmentationPrediction('identifier', raw_mask, labels, None)]
+    return [CoCocInstanceSegmentationPrediction('identifier', raw_mask, labels, None)]
 
 
 def update_dict(dictionary, **kwargs):

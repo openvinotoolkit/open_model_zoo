@@ -21,7 +21,7 @@ import numpy as np
 
 from .adapter import Adapter
 from ..config import StringField, ConfigError
-from ..representation import CoCoInstanceSegmentationPrediction, DetectionPrediction, ContainerPrediction
+from ..representation import CoCocInstanceSegmentationPrediction, DetectionPrediction, ContainerPrediction
 from ..postprocessor import FRCNNPostprocessingBboxResize
 from ..utils import UnsupportedPackage
 
@@ -144,7 +144,7 @@ class MaskRCNNAdapter(Adapter):
             detection_prediction = DetectionPrediction(
                 identifier, im_classes, im_scores, x_mins, y_mins, x_maxs, y_maxs
             )
-            instance_segmentation_prediction = CoCoInstanceSegmentationPrediction(
+            instance_segmentation_prediction = CoCocInstanceSegmentationPrediction(
                 identifier, masks, im_classes, im_scores
             )
             instance_segmentation_prediction.metadata['rects'] = np.c_[x_mins, y_mins, x_maxs, y_maxs]
@@ -209,7 +209,7 @@ class MaskRCNNAdapter(Adapter):
 
             x_mins, y_mins, x_maxs, y_maxs = boxes.T
             detection_prediction = DetectionPrediction(identifier, classes, scores, x_mins, y_mins, x_maxs, y_maxs)
-            instance_segmentation_prediction = CoCoInstanceSegmentationPrediction(identifier, masks, classes, scores)
+            instance_segmentation_prediction = CoCocInstanceSegmentationPrediction(identifier, masks, classes, scores)
             instance_segmentation_prediction.metadata['rects'] = np.c_[x_mins, y_mins, x_maxs, y_maxs]
             instance_segmentation_prediction.metadata['image_size'] = image_meta['image_size']
             results.append(ContainerPrediction({
@@ -276,7 +276,7 @@ class MaskRCNNAdapter(Adapter):
                 box[3::2] *= coeff_y
                 cls_mask = self.segm_postprocess(box[2:], cls_mask, *image_size, True, True)
                 instance_masks.append(cls_mask)
-            instance_segmentation_prediction = CoCoInstanceSegmentationPrediction(
+            instance_segmentation_prediction = CoCocInstanceSegmentationPrediction(
                 identifier, instance_masks, detection_prediction.labels, detection_prediction.scores
             )
             instance_segmentation_prediction.metadata['image_size'] = frame_meta[batch_index]['image_size']

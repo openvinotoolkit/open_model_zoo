@@ -11,7 +11,6 @@
 #include <limits>
 #include <stdexcept>
 #include <numeric>
-#include <iostream>
 
 namespace  {
     void softmax_and_choose(const std::vector<float>::const_iterator& begin, const std::vector<float>::const_iterator& end, int *argmax, float *prob) {
@@ -50,29 +49,8 @@ namespace  {
     };
 }  // namespace
 
-std::string SimpleDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, double *conf) {
-    std::string result = "";
-    const int num_classes = alphabet.length();
-    *conf = 1;
-
-    for (std::vector<float>::const_iterator it = data.begin(); it != data.end(); it += num_classes) {
-        int argmax;
-        float prob;
-
-        softmax_and_choose(it, it + num_classes, &argmax, &prob);
-        (*conf) *= prob;
-        auto symbol = alphabet[argmax];
-        if (symbol != pad_symbol)
-            result += symbol;
-        else
-            break;
-    }
-
-    return result;
-}
-
 std::string CTCGreedyDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, double *conf) {
-    std::string result = "";
+    std::string res = "";
     bool prev_pad = false;
     *conf = 1;
 
@@ -87,16 +65,15 @@ std::string CTCGreedyDecoder(const std::vector<float> &data, const std::string& 
 
       auto symbol = alphabet[argmax];
       if (symbol != pad_symbol) {
-          if (result.empty() || prev_pad || (!result.empty() && symbol != result.back())) {
+          if (res.empty() || prev_pad || (!res.empty() && symbol != res.back())) {
             prev_pad = false;
-            result += symbol;
+            res += symbol;
           }
       } else {
         prev_pad = true;
       }
     }
-
-    return result;
+    return res;
 }
 
 std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, double *conf, int bandwidth) {
@@ -168,10 +145,10 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
     }
 
     *conf = last[0].prob();
-    std::string result = "";
+    std::string res="";
     for (const auto& idx: last[0].sentence) {
-        result += alphabet[idx];
+        res += alphabet[idx];
     }
 
-    return result;
+    return res;
 }

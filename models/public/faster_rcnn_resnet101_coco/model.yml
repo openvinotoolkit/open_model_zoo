@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  Faster R-CNN ResNet-101 model. Used for object detection. For details, see the paper
+  Faster R-CNN Resnet-101 model. Used for object detection. For details, see the paper
   <https://arxiv.org/abs/1506.01497>.
 task_type: detection
 files:

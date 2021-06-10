@@ -32,7 +32,7 @@ void ActionDetection::submitRequest() {
 
 void ActionDetection::enqueue(const cv::Mat &frame) {
     if (!request) {
-        request = std::make_shared<InferenceEngine::InferRequest>(net_.CreateInferRequest());
+        request = net_.CreateInferRequestPtr();
     }
 
     width_ = static_cast<float>(frame.cols);
@@ -54,7 +54,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
 
     InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
-        throw std::runtime_error("Action Detection network should have only one input");
+        THROW_IE_EXCEPTION << "Action Detection network should have only one input";
     }
     InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
     inputInfoFirst->setPrecision(Precision::U8);

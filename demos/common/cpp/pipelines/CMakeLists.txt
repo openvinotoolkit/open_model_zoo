@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+find_package(InferenceEngine 2.0 REQUIRED)
+find_package(OpenCV REQUIRED COMPONENTS core imgproc)
+
 file(GLOB SOURCES ./src/*.cpp)
 file(GLOB HEADERS ./include/pipelines/*.h)
 

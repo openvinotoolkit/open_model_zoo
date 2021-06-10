@@ -13,8 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "hbonet-1.0" model is one of the classification models from repository <https://github.com/d-li14/HBONet>
-  with "width_mult=1.0"
+  "hbonet-1.0" is one of HBONet architectures <https://arxiv.org/abs/1908.03888>
 task_type: classification
 files:
   - name: hbonet.py
@@ -43,5 +42,4 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=prob
   - --input_model=$conv_dir/hbonet_1_0.onnx
-quantizable: yes
 license: https://github.com/d-li14/HBONet/blob/master/LICENSE

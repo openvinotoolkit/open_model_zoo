@@ -1,6 +1,6 @@
 # Image Retrieval Python\* Demo
 
-![example](./image_retrieval.gif)
+![](./image_retrieval.gif)
 
 This demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 
@@ -11,9 +11,8 @@ This demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 The demo application expects an image retrieval model in the Intermediate Representation (IR) format.
 
 As input, the demo application takes:
-
-* a path to a list of images represented by textfile with following format: 'path_to_image' 'ID'
-* a path to a video file or a device node of a webcam
+* a path to a list of images represented by textfile with following format 'path_to_image' 'ID' `--images`
+* a path to a video file or a device node of a web-camera specified with a command line argument `--video`
 
 The demo workflow is the following:
 
@@ -21,42 +20,11 @@ The demo workflow is the following:
 2. Extracted ROI is passed to artificial neural network that computes embedding vector for extracted frame area.
 3. Then the demo application searches computed embedding in gallery of images in order to determine which image in the gallery is the most similar to what one can see on video frame.
 4. The app visualizes results of it work as graphical window where following objects are shown.
-     - Input frame with detected ROI.
-     - Top-10 most similar images from the gallery.
-     - Performance characteristics.
+    - Input frame with detected ROI.
+    - Top-10 most similar images from the gallery.
+    - Performance characteristics.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
-
-## Preparing to Run
-
-The demo sample input videos and gallery images can be found in this [repository](https://github.com/19900531/test). An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/develop/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
-
-The demo dependencies should be installed before run. That can be achieved with the following command:
-
-```sh
-python3 -mpip install --user -r <omz_dir>/demos/requirements.txt
-```
-
-The list of models supported by the demo is in `<omz_dir>/demos/image_retrieval_demo/python/models.lst` file.
-This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
-
-An example of using the Model Downloader:
-
-```sh
-python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
-```
-
-An example of using the Model Converter:
-
-```sh
-python3 <omz_dir>/tools/downloader/converter.py --list models.lst
-```
-
-### Supported Models
-
-* image-retrieval-0001
-
-> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Running
 
@@ -75,10 +43,10 @@ Options:
                         Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
                         Required. Path to a video file or a device node of a
-                        webcam.
+                        web-camera.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of the output file(s) to save.
+                        Optional. Name of output to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
@@ -88,7 +56,7 @@ Options:
                         Optional. Ground truth class.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on: CPU,
-                        GPU, HDDL or MYRIAD. The demo will look for a
+                        GPU, FPGA, HDDL or MYRIAD. The demo will look for a
                         suitable plugin for device specified (by default, it
                         is CPU).
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
@@ -102,30 +70,28 @@ Options:
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, please provide paths to the model in the IR format, to a file with class labels, and to an input video, image, or folder with images:
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
 
+> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
+
+To run the demo, please provide paths to the model in the IR format, to a file with class labels, and to an input video, image, or folder with images:
 ```bash
 python image_retrieval_demo.py \
-  -m <path_to_model>/image-retrieval-0001.xml \
-  -i <path_to_video>/4946fb41-9da0-4af7-a858-b443bee6d0f6.dav \
-  -g <path_to_file>/list.txt \
-  --ground_truth text_label
+-m <path_to_model>/image-retrieval-0001.xml \
+-i <path_to_video>/video.dav.mp4 \
+-g <path_to_file>/list.txt \
+--ground_truth text_label
 ```
 
-You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
+An example of file listing gallery images can be found [here](https://github.com/openvinotoolkit/training_extensions/blob/develop/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
 
-* To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
-* To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
-To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
-
->**NOTE**: Windows* systems may not have the Motion JPEG codec installed by default. If this is the case, OpenCV FFMPEG backend can be downloaded by the PowerShell script provided with the OpenVINO install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. Run the script with Administrative privileges. Alternatively, you can save results as images.
+Examples of videos can be found [here](https://github.com/19900531/test).
 
 ## Demo Output
 
 The application uses OpenCV to display gallery searching result and current inference performance.
 
 ## See Also
-
-* [Open Model Zoo Demos](../../README.md)
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

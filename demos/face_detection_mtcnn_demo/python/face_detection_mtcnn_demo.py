@@ -63,8 +63,8 @@ def build_argparser():
                       help="Optional. The threshold to define the face is recognized or not.",
                       type=float, default=0.6, metavar='"<num>"')
     args.add_argument("-d", "--device",
-                      help="Optional. Specify the target device to infer on; CPU, GPU, HDDL, MYRIAD or HETERO is "
-                           "acceptable. The demo will look for a suitable plugin for device specified. Default "
+                      help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL, MYRIAD or HETERO: is "
+                           "acceptable. The sample will look for a suitable plugin for device specified. Default "
                            "value is CPU",
                       default="CPU", type=str, metavar='"<device>"')
     args.add_argument('--loop', default=False, action='store_true',
@@ -73,10 +73,10 @@ def build_argparser():
                       help="Optional. Don't show output",
                       action='store_true')
     args.add_argument('-o', '--output', required=False,
-                      help='Optional. Name of the output file(s) to save.')
+                      help='Optional. Name of output to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
-                            'If 0 is set, all frames are stored.')
+                              'If 0 is set, all frames are stored.')
     args.add_argument('-u', '--utilization_monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
 
@@ -264,7 +264,7 @@ def main():
         cv2.putText(origin_image, 'summary: {:.1f} FPS'.format(1.0 / infer_time),
                     (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
 
-        if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id <= args.output_limit):
+        if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id <= args.output_limit - 1):
             video_writer.write(origin_image)
 
         if not args.no_show:
