@@ -4,10 +4,6 @@ ctdet_coco_dlav0_384
 ctdet_coco_dlav0_512
 # For -at faceboxes
 faceboxes-pytorch
-# For -at retinaface
-retinaface-anti-cov
-retinaface-resnet50
-ssh-mxnet
 # For -at ssd
 efficientdet-d0-tf
 efficientdet-d1-tf
@@ -25,6 +21,7 @@ rfcn-resnet101-coco-tf
 retinanet-tf
 ssd300
 ssd512
+ssd-resnet34-1200-onnx
 ssd_mobilenet_v1_coco
 ssd_mobilenet_v1_fpn_coco
 ssd_mobilenet_v2_coco

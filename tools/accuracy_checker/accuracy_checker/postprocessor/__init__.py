@@ -60,6 +60,9 @@ from .argmax_segmentation_mask import ArgMaxSegmentationMask
 from .normalize_salient_map import SalientMapNormalizer
 from .min_max_normalization import MinMaxRegressionNormalization
 from .crop_image import CropImage, CornerCropImage
+from .pad_signal import PadSignal
+from .time_series_denormalize import TimeSeriesDenormalize
+from .interp import Interpolation
 
 
 __all__ = [
@@ -134,4 +137,10 @@ __all__ = [
 
     'CropImage',
     'CornerCropImage',
+
+    'PadSignal',
+
+    'TimeSeriesDenormalize',
+
+    'Interpolation'
 ]

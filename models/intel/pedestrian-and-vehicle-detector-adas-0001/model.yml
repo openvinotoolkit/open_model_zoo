@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/pedestrian-and-vehicle-detector-adas-0001.xml
-    size: 240501
-    sha256: d1dd876c8ede2406c672df63d6740c329e742578f3c32880bf8426872c6489a9
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.xml
+    size: 236355
+    sha256: a10f644d7ddf6f41d985eb675ce81e8f45fdc3482e0857068595ab4a6152617d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.xml
   - name: FP32/pedestrian-and-vehicle-detector-adas-0001.bin
     size: 6598568
-    sha256: 24b06d7ecc98d1d58fead4e1c2bc30501693d17ec516119393b61a351011525c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.bin
+    sha256: cbda0834790336f318ceb244cbdee8c265c89552ccccd2afef3e3a05ab0faa47
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.bin
   - name: FP16/pedestrian-and-vehicle-detector-adas-0001.xml
-    size: 240455
-    sha256: a6105d0a3271549efb19cd4691e0afacad13194c6687f8e773cf9b4ff215c782
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.xml
+    size: 236309
+    sha256: 3587163e9d8234892edc89ecf5ca83dc47421a2ac9fd745e055b393f19b7de38
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.xml
   - name: FP16/pedestrian-and-vehicle-detector-adas-0001.bin
     size: 3299336
-    sha256: 3f9739b91277bc916f29b17d043115c6669e113e5d60d61589063d8054c40d7d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.bin
+    sha256: a8d6da0de83c2a6d058f3a7f0dbe9664a1dc25b3a25ca443d71d59d10f7174f4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.bin
   - name: FP16-INT8/pedestrian-and-vehicle-detector-adas-0001.xml
-    size: 483136
-    sha256: 1a27eec57d0313e1576d392f711d30a123a06cd616771ac36d23a6d72502d6d8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/pedestrian-and-vehicle-detector-adas-0001/FP16-INT8/pedestrian-and-vehicle-detector-adas-0001.xml
+    size: 478621
+    sha256: a80bc898eca4260e6b62b5c0738f94f534d2714411f2f58f577b7a587b027da9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/pedestrian-and-vehicle-detector-adas-0001/FP16-INT8/pedestrian-and-vehicle-detector-adas-0001.xml
   - name: FP16-INT8/pedestrian-and-vehicle-detector-adas-0001.bin
     size: 1705674
-    sha256: 790a4493772b50daadd8e32800260744b183f3c19851c9649d25daf1af6e260e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/pedestrian-and-vehicle-detector-adas-0001/FP16-INT8/pedestrian-and-vehicle-detector-adas-0001.bin
+    sha256: 17147b5074fa788db47d0cf573a2e3446e4f2d38ce08d9089320c3afb9983b28
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/pedestrian-and-vehicle-detector-adas-0001/FP16-INT8/pedestrian-and-vehicle-detector-adas-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

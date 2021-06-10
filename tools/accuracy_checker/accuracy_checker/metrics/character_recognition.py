@@ -19,6 +19,7 @@ from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
 from .average_editdistance_meter import AverageEditdistanceMeter
 from ..utils import UnsupportedPackage
+from ..config import BoolField
 try:
     import editdistance
 except ImportError as import_error:
@@ -31,11 +32,25 @@ class CharacterRecognitionAccuracy(PerImageEvaluationMetric):
     annotation_types = (CharacterRecognitionAnnotation, )
     prediction_types = (CharacterRecognitionPrediction, )
 
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'remove_spaces': BoolField(optional=True, default=False)
+        })
+        return params
+
     def configure(self):
         self.accuracy = AverageMeter(lambda annotation, prediction: int(annotation == prediction))
+        self.remove_spaces = self.get_value_from_config('remove_spaces')
 
     def update(self, annotation, prediction):
-        return self.accuracy.update(annotation.label, prediction.label)
+        gt_label = annotation.label
+        pred_label = prediction.label
+        if self.remove_spaces:
+            gt_label = gt_label.replace(' ', '')
+            pred_label = pred_label.replace(' ', '')
+        return self.accuracy.update(gt_label, pred_label)
 
     def evaluate(self, annotations, predictions):
         return self.accuracy.evaluate()

@@ -17,9 +17,10 @@
 import re
 
 import numpy as np
+from itertools import product as product
 
 from .model import Model
-from .utils import DetectionWithLandmarks, Detection, resize_image
+from .utils import DetectionWithLandmarks, Detection, resize_image, nms
 
 
 class RetinaFace(Model):
@@ -133,33 +134,6 @@ class RetinaFacePostprocessor:
 
         return anchors
 
-    @staticmethod
-    def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True):
-        b = 1 if include_boundaries else 0
-        areas = (x2 - x1 + b) * (y2 - y1 + b)
-        order = scores.argsort()[::-1]
-
-        keep = []
-        while order.size > 0:
-            i = order[0]
-            keep.append(i)
-
-            xx1 = np.maximum(x1[i], x1[order[1:]])
-            yy1 = np.maximum(y1[i], y1[order[1:]])
-            xx2 = np.minimum(x2[i], x2[order[1:]])
-            yy2 = np.minimum(y2[i], y2[order[1:]])
-
-            w = np.maximum(0.0, xx2 - xx1)
-            h = np.maximum(0.0, yy2 - yy1)
-            intersection = w * h
-
-            union = (areas[i] + areas[order[1:]] - intersection)
-            overlap = np.divide(intersection, union, out=np.zeros_like(intersection, dtype=float), where=union != 0)
-
-            order = order[np.where(overlap <= thresh)[0] + 1] # pylint: disable=W0143
-
-        return keep
-
     def process_output(self, raw_output, scale_x, scale_y, face_prob_threshold, mask_prob_threshold):
         bboxes_outputs = [raw_output[name][0] for name in raw_output if re.search('.bbox.', name)]
         bboxes_outputs.sort(key=lambda x: x.shape[1])
@@ -205,8 +179,8 @@ class RetinaFacePostprocessor:
             landmarks_list = np.array(landmarks_list)
             mask_scores_list = np.array(mask_scores_list)
             x_mins, y_mins, x_maxs, y_maxs = proposals_list.T
-            keep = self.nms(x_mins, y_mins, x_maxs, y_maxs, scores_list, self.nms_threshold,
-                            include_boundaries=not self._process_landmarks)
+            keep = nms(x_mins, y_mins, x_maxs, y_maxs, scores_list, self.nms_threshold,
+                       include_boundaries=not self._process_landmarks)
             proposals_list = proposals_list[keep]
             scores_list = scores_list[keep]
             if self._process_landmarks:
@@ -329,3 +303,152 @@ class RetinaFacePostprocessor:
             pred[:, i, 1] = landmark_deltas[:, i, 1] * heights + ctr_y
 
         return pred
+
+
+class RetinaFacePyTorch(Model):
+    def __init__(self, ie, model_path, threshold=0.5):
+        super().__init__(ie, model_path)
+
+        assert len(self.net.input_info) == 1, "Expected 1 input blob"
+        expected_outputs_count = (2, 3)
+        assert len(self.net.outputs) in expected_outputs_count, "Expected {} or {} output blobs".format(
+            expected_outputs_count[0], expected_outputs_count[1])
+
+        self.threshold = threshold
+        self.process_landmarks = len(self.net.outputs) == 3
+        self.postprocessor = RetinaFacePyTorchPostprocessor(process_landmarks=self.process_landmarks)
+
+        self.labels = ['Face']
+
+        self.image_blob_name = next(iter(self.net.input_info))
+        self._output_layer_names = self.net.outputs
+        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
+
+    def preprocess(self, inputs):
+        image = inputs
+
+        resized_image = resize_image(image, (self.w, self.h))
+        meta = {'original_shape': image.shape,
+                'resized_shape': resized_image.shape}
+        resized_image = np.expand_dims(resized_image.transpose((2, 0, 1)), axis=0) # Change data layout from HWC to CHW
+
+        dict_inputs = {self.image_blob_name: resized_image}
+        return dict_inputs, meta
+
+    def postprocess(self, outputs, meta):
+        scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
+        scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
+
+        outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold,
+                                                    meta['resized_shape'][:2])
+        return outputs
+
+
+class RetinaFacePyTorchPostprocessor:
+    def __init__(self, process_landmarks=True):
+        self._process_landmarks = process_landmarks
+        self.nms_threshold = 0.5 if process_landmarks else 0.3
+        self.variance = [0.1, 0.2]
+
+    def process_output(self, raw_output, scale_x, scale_y, face_prob_threshold, image_size):
+        bboxes_output = [raw_output[name][0] for name in raw_output if re.search('.bbox.', name)][0]
+
+        scores_output = [raw_output[name][0] for name in raw_output if re.search('.cls.', name)][0]
+
+        if self._process_landmarks:
+            landmarks_output = [raw_output[name][0] for name in raw_output if re.search('.landmark.', name)][0]
+
+        prior_data = self.generate_prior_data(image_size)
+        proposals = self._get_proposals(bboxes_output, prior_data, image_size)
+        scores = scores_output[:, 1]
+        filter_idx = np.where(scores > face_prob_threshold)[0]
+        proposals = proposals[filter_idx]
+        scores = scores[filter_idx]
+        if self._process_landmarks:
+            landmarks = self._get_landmarks(landmarks_output, prior_data,
+                                            image_size)
+            landmarks = landmarks[filter_idx]
+
+        if np.size(scores) > 0:
+
+            x_mins, y_mins, x_maxs, y_maxs = proposals.T
+            keep = nms(x_mins, y_mins, x_maxs, y_maxs, scores, self.nms_threshold,
+                       include_boundaries=not self._process_landmarks)
+
+            proposals = proposals[keep]
+            scores = scores[keep]
+            if self._process_landmarks:
+                landmarks = landmarks[keep]
+
+        result = []
+        if np.size(scores) != 0:
+            scores = np.reshape(scores, -1)
+            x_mins, y_mins, x_maxs, y_maxs = np.array(proposals).T # pylint: disable=E0633
+            x_mins /= scale_x
+            x_maxs /= scale_x
+            y_mins /= scale_y
+            y_maxs /= scale_y
+
+            result = []
+            if self._process_landmarks:
+                landmarks_x_coords = np.array(landmarks)[:, ::2] / scale_x
+                landmarks_y_coords = np.array(landmarks)[:, 1::2] / scale_y
+                for x_min, y_min, x_max, y_max, score, landmarks_x, landmarks_y in zip(
+                    x_mins, y_mins, x_maxs, y_maxs, scores, landmarks_x_coords, landmarks_y_coords):
+                    result.append(DetectionWithLandmarks(x_min, y_min, x_max, y_max, score, 0, landmarks_x,
+                                                         landmarks_y))
+            else:
+                for x_min, y_min, x_max, y_max, score in zip(x_mins, y_mins, x_maxs, y_maxs, scores):
+                    result.append(Detection(x_min, y_min, x_max, y_max, score, 0))
+
+        return result
+
+    @staticmethod
+    def generate_prior_data(image_size):
+        global_min_sizes = [[16, 32], [64, 128], [256, 512]]
+        steps = [8, 16, 32]
+        anchors = []
+        feature_maps = [[int(np.rint(image_size[0]/step)), int(np.rint(image_size[1]/step))] for step in steps]
+        for idx, feature_map in enumerate(feature_maps):
+            min_sizes = global_min_sizes[idx]
+            for i, j in product(range(feature_map[0]), range(feature_map[1])):
+                for min_size in min_sizes:
+                    s_kx = min_size / image_size[1]
+                    s_ky = min_size / image_size[0]
+                    dense_cx = [x * steps[idx] / image_size[1] for x in [j + 0.5]]
+                    dense_cy = [y * steps[idx] / image_size[0] for y in [i + 0.5]]
+                    for cy, cx in product(dense_cy, dense_cx):
+                        anchors += [cx, cy, s_kx, s_ky]
+
+        priors = np.array(anchors).reshape((-1, 4))
+        return priors
+
+    def _get_proposals(self, raw_boxes, priors, image_size):
+        proposals = self.decode_boxes(raw_boxes, priors, self.variance)
+        proposals[:, ::2] = proposals[:, ::2] * image_size[1]
+        proposals[:, 1::2] = proposals[:, 1::2] * image_size[0]
+        return proposals
+
+    @staticmethod
+    def decode_boxes(raw_boxes, priors, variance):
+        boxes = np.concatenate((
+            priors[:, :2] + raw_boxes[:, :2] * variance[0] * priors[:, 2:],
+            priors[:, 2:] * np.exp(raw_boxes[:, 2:] * variance[1])), 1)
+        boxes[:, :2] -= boxes[:, 2:] / 2
+        boxes[:, 2:] += boxes[:, :2]
+        return boxes
+
+    def _get_landmarks(self, raw_landmarks, priors, image_size):
+        landmarks = self.decode_landmarks(raw_landmarks, priors, self.variance)
+        landmarks[:, ::2] = landmarks[:, ::2] * image_size[1]
+        landmarks[:, 1::2] = landmarks[:, 1::2] * image_size[0]
+        return landmarks
+
+    @staticmethod
+    def decode_landmarks(raw_landmarks, priors, variance):
+        landmarks = np.concatenate((priors[:, :2] + raw_landmarks[:, :2] * variance[0] * priors[:, 2:],
+                                    priors[:, :2] + raw_landmarks[:, 2:4] * variance[0] * priors[:, 2:],
+                                    priors[:, :2] + raw_landmarks[:, 4:6] * variance[0] * priors[:, 2:],
+                                    priors[:, :2] + raw_landmarks[:, 6:8] * variance[0] * priors[:, 2:],
+                                    priors[:, :2] + raw_landmarks[:, 8:10] * variance[0] * priors[:, 2:]), 1)
+        return landmarks

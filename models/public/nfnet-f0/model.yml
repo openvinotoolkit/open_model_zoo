@@ -1,0 +1,67 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  NFNet F0 is one of the image classification Normalizer-Free models pre-trained on
+  the ImageNet dataset. NFNets are Normalizer-Free ResNets in which use Adaptive Gradient
+  Clipping (AGC), which clips gradients based on the unit-wise ratio of gradient norms
+  to parameter norms.
+
+  F0 variant is the baseline variant with a depth pattern [1, 2, 6, 3] (indicating
+  how many bottleneck blocks to allocate to each stage). Each subsequent variant has
+  this depth pattern multiplied by N (where N = 1 for F0).
+
+  The model input is a blob that consists of a single image of "1, 3, 256, 256" in
+  "RGB" order.
+
+  The model output is typical object classifier for the 1000 different classifications
+  matching with those in the ImageNet database.
+
+  For details see repository <https://github.com/rwightman/pytorch-image-models> and
+  paper <https://arxiv.org/abs/2102.06171>.
+task_type: classification
+files:
+  - name: timm-0.4.5-py3-none-any.whl
+    size: 287415
+    sha256: 8699f644a60527005db07f31ceffef5349c4d144749e1243733c64220a7d6f92
+    source: https://files.pythonhosted.org/packages/9e/89/d94f59780b5dd973154bf506d8ce598f6bfe7cc44dd445d644d6d3be8c39/timm-0.4.5-py3-none-any.whl
+  - name: dm_nfnet_f0-604f9c3a.pth
+    size: 285993610
+    sha256: 604f9c3a436da9ef5652b7d940efc40c026015552a0fda759acf6ba7e386cfae
+    source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-dnf-weights/dm_nfnet_f0-604f9c3a.pth
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: timm-0.4.5-py3-none-any.whl
+conversion_to_onnx_args:
+  - --model-path=$dl_dir
+  - --model-path=$config_dir
+  - --model-name=create_normfreenet
+  - --import-module=model
+  - --weights=$dl_dir/dm_nfnet_f0-604f9c3a.pth
+  - --input-shape=1,3,256,256
+  - --input-names=image
+  - --output-names=probs
+  - --output-file=$conv_dir/nfnet-f0.onnx
+model_optimizer_args:
+  - --input_shape=[1,3,256,256]
+  - --input=image
+  - --input_model=$conv_dir/nfnet-f0.onnx
+  - --mean_values=image[123.675,116.28,103.53]
+  - --scale_values=image[58.395, 57.12, 57.375]
+  - --reverse_input_channels
+  - --output=probs
+framework: pytorch
+quantizable: yes
+license: https://raw.githubusercontent.com/rwightman/pytorch-image-models/master/LICENSE

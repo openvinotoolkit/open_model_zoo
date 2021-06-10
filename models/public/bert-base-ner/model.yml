@@ -1,0 +1,93 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  "bert-base-ner" is a fine-tuned BERT model that is ready to use for Named Entity
+  Recognition and achieves state-of-the-art performance for the NER task. It has been
+  trained to recognize four types of entities: location (LOC), organizations (ORG),
+  person (PER) and Miscellaneous (MISC).
+
+  Specifically, this model is a bert-base-cased model that was fine-tuned on the English
+  version of the standard CoNLL-2003 Named Entity Recognition <https://www.aclweb.org/anthology/W03-0419.pdf>
+  dataset. For details about the original model, check out BERT: Pre-training of Deep
+  Bidirectional Transformers for Language Understanding <https://arxiv.org/abs/1810.04805>,
+  HuggingFace's Transformers: State-of-the-art Natural Language Processing <https://arxiv.org/abs/1910.03771>
+  papers and repository <https://github.com/huggingface/transformers>
+
+  Tokenization occurs using the BERT tokenizer (see the demo code for implementation
+  details) and the enclosed "vocab.txt" dictionary file.
+task_type: named_entity_recognition
+files:
+  - name: transformers-4.5.1-py3-none-any.whl
+    size: 2060589
+    sha256: 0a57d1cd9301a617c7015d7184228984abdfb1ae2158c29cfb32582219756d23
+    source: https://files.pythonhosted.org/packages/d8/b2/57495b5309f09fa501866e225c84532d1fd89536ea62406b2181933fb418/transformers-4.5.1-py3-none-any.whl
+  - name: bert-base-ner/pytorch_model.bin
+    size: 433316646
+    sha256: 4c0b01790e435da1337ea519d76e747427f2d3ee9c0e49b4952caa06298021f6
+    source: https://huggingface.co/dslim/bert-base-NER/resolve/main/pytorch_model.bin
+  - name: bert-base-ner/config.json
+    size: 829
+    sha256: a5dc77a0d60dadf5645103017f3c7b8ece4ef1b450bc1ea68e17da1d3ae7e515
+    source: https://huggingface.co/dslim/bert-base-NER/resolve/main/config.json
+  - name: bert-base-ner/vocab.txt
+    size: 213450
+    sha256: eeaa9875b23b04b4c54ef759d03db9d1ba1554838f8fb26c5d96fa551df93d02
+    source: https://huggingface.co/dslim/bert-base-NER/resolve/main/vocab.txt
+  - name: packaging-20.9-py2.py3-none-any.whl
+    size: 40870
+    sha256: 67714da7f7bc052e064859c05c595155bd1ee9f69f76557e21f051443c20947a
+    source: https://files.pythonhosted.org/packages/3e/89/7ea760b4daa42653ece2380531c90f64788d979110a2ab51049d92f408af/packaging-20.9-py2.py3-none-any.whl
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: transformers-4.5.1-py3-none-any.whl
+  - $type: unpack_archive
+    format: zip
+    file: packaging-20.9-py2.py3-none-any.whl
+  - $type: regex_replace
+    file: transformers/__init__.py
+    pattern: 'from . import dependency_versions_check'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/file_utils.py
+    pattern: 'from tqdm.auto import tqdm'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/file_utils.py
+    pattern: 'from .hf_api import HfFolder'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: transformers/file_utils.py
+    pattern: from filelock import FileLock
+    replacement: '# \g<0>'
+conversion_to_onnx_args:
+  - --model-path=$dl_dir
+  - --model-path=$config_dir
+  - --model-name=create_model
+  - --import-module=model
+  - --model-param=model_dir=r"$dl_dir/bert-base-ner"
+  - --input-names=input_ids,attention_mask,token_type_ids
+  - --output-names=output
+  - --input-shapes=[1,128],[1,128],[1,128]
+  - --output-file=$conv_dir/bert-base-ner.onnx
+  - --inputs-dtype=long
+model_optimizer_args:
+  - --input_shape=[1,128],[1,128],[1,128]
+  - --input=input_ids,attention_mask,token_type_ids
+  - --input_model=$conv_dir/bert-base-ner.onnx
+  - --output=output
+framework: pytorch
+quantizable: yes
+license: https://raw.githubusercontent.com/huggingface/transformers/master/LICENSE

@@ -1,0 +1,2 @@
+matplotlib
+numpy>=1.16.6,<1.20

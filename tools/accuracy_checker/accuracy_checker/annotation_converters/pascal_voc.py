@@ -28,7 +28,7 @@ _VOC_CLASSES_DETECTION = (
     'sheep', 'sofa', 'train', 'tvmonitor'
 )
 
-_VOC_CLASSES_SEGMENTATION = tuple(['__background__']) + _VOC_CLASSES_DETECTION
+_VOC_CLASSES_SEGMENTATION = ('__background__',) + _VOC_CLASSES_DETECTION
 _SEGMENTATION_COLORS = ((
     (0, 0, 0), (128, 0, 0), (0, 128, 0), (128, 128, 0),
     (0, 0, 128), (128, 0, 128), (0, 128, 128), (128, 128, 128),

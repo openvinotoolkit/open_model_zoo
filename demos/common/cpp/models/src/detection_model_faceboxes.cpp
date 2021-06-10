@@ -146,8 +146,8 @@ void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<size_t, size_t>>& fe
 
     for (size_t k = 0; k < featureMaps.size(); ++k) {
         std::vector<float> a;
-        for (int i = 0; i < featureMaps[k].first; ++i) {
-            for (int j = 0; j < featureMaps[k].second; ++j) {
+        for (size_t i = 0; i < featureMaps[k].first; ++i) {
+            for (size_t j = 0; j < featureMaps[k].second; ++j) {
                 if (k == 0) {
                     calculateAnchorsZeroLevel(anchors, j, i,  minSizes[k], steps[k]);;
                 }
@@ -158,48 +158,6 @@ void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<size_t, size_t>>& fe
         }
     }
 }
-
-std::vector<int> nms(const std::vector<ModelFaceBoxes::Anchor>& boxes, const std::vector<float>& scores, const float thresh) {
-
-    std::vector<float> areas(boxes.size());
-
-    for (int i = 0; i < boxes.size(); ++i) {
-        areas[i] = (boxes[i].right - boxes[i].left) * (boxes[i].bottom - boxes[i].top);
-    }
-
-    std::vector<int> order(scores.size());
-    std::iota(order.begin(), order.end(), 0);
-    std::sort(order.begin(), order.end(), [&scores](int o1, int o2) { return scores[o1] > scores[o2]; });
-
-    int ordersNum = 0;
-    for (; ordersNum < order.size() && scores[order[ordersNum]] >= 0; ordersNum++);
-
-    std::vector<int> keep;
-    bool shouldContinue = true;
-    for (int i = 0; shouldContinue && i < ordersNum; ++i) {
-        auto idx1 = order[i];
-        if (idx1 >= 0) {
-            keep.push_back(idx1);
-            shouldContinue = false;
-            for (int j = i + 1; j < ordersNum; ++j) {
-                auto idx2 = order[j];
-                if (idx2 >= 0) {
-                    shouldContinue = true;
-                    auto overlappingWidth = std::min(boxes[idx1].right, boxes[idx2].right) - std::max(boxes[idx1].left, boxes[idx2].left);
-                    auto overlappingHeight = std::min(boxes[idx1].bottom, boxes[idx2].bottom) - std::max(boxes[idx1].top, boxes[idx2].top);
-                    auto intersection = overlappingWidth > 0 && overlappingHeight > 0 ? overlappingWidth * overlappingHeight : 0;
-                    auto overlap = intersection / (areas[idx1] + areas[idx2] - intersection);
-
-                    if (overlap >= thresh) {
-                        order[j] = -1;
-                    }
-                }
-            }
-        }
-    }
-    return keep;
-}
-
 
 std::pair<std::vector<size_t>, std::vector<float>> filterScores(const InferenceEngine::MemoryBlob::Ptr& scoreInfRes, const float confidenceThreshold) {
     auto desc = scoreInfRes->getTensorDesc();
@@ -264,8 +222,7 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
     std::vector<int> keep = nms(bboxes, scores.second, boxIOUThreshold);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
-    DetectionResult* result = new DetectionResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
     float scaleX = static_cast<float>(netInputWidth) / imgWidth;

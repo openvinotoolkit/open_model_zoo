@@ -27,9 +27,8 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime) {
     TimePoint currentTime = Clock::now();
 
     if (!firstFrameProcessed) {
-        lastUpdateTime = currentTime;
+        lastUpdateTime = lastRequestStartTime;
         firstFrameProcessed = true;
-        return;
     }
 
     currentMovingStatistic.latency += currentTime - lastRequestStartTime;

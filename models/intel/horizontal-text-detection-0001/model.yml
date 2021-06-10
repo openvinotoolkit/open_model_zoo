@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/horizontal-text-detection-0001.xml
-    size: 861266
-    sha256: 6f1ca35dce597b425705a5d1726be85c23e62407908f84aa980d5c58d9c36145
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.xml
+    size: 843706
+    sha256: 22f6e02134bbd66a9cc834451e93cc8fc3697d9ea27ca784e502065c133ff727
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.xml
   - name: FP32/horizontal-text-detection-0001.bin
     size: 7753404
-    sha256: 7a47203054bf21231cd094f411184db82d9f3a12b091f16c0b7fb3bc1315ebb7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.bin
+    sha256: 663e08e61c76c55266aa49e42c6e28c9af644ef99dc0b2995358a49a3f5c6106
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.bin
   - name: FP16/horizontal-text-detection-0001.xml
-    size: 861104
-    sha256: ea04d8c19449f6f23de600d5ba608abc328af6c908ab93431b42bbdcded5c962
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.xml
+    size: 843537
+    sha256: 1f2fe17971dabbd693628d6a7331aa8b42a5c81ed6e2681961b30ba9ef337cdb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.xml
   - name: FP16/horizontal-text-detection-0001.bin
-    size: 3876858
-    sha256: 5865e9c9102cd93ac989ee00af509c8b3c3e671d695d750ed61b53d218bfbf4d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.bin
+    size: 3876864
+    sha256: c4301405190efa36a4c4cbb853c50562cdca463397fbd0889ad5a07defa50c65
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.bin
   - name: FP16-INT8/horizontal-text-detection-0001.xml
-    size: 1472288
-    sha256: af458a2fb9b0048c384c94df5bab3b4044a2a239eda202d991a6612f2c2e9f74
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/horizontal-text-detection-0001/FP16-INT8/horizontal-text-detection-0001.xml
+    size: 1457277
+    sha256: e937fb240086cfd1f70d476f2cb1e3d2277c34da0f7c7a78c2faa2f9e4bef6cc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/horizontal-text-detection-0001/FP16-INT8/horizontal-text-detection-0001.xml
   - name: FP16-INT8/horizontal-text-detection-0001.bin
-    size: 2038032
-    sha256: a379a946c6d61d21e02d75295c479dff81e503ce7e2bf28cd5a00f35f2bec197
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/horizontal-text-detection-0001/FP16-INT8/horizontal-text-detection-0001.bin
+    size: 2038038
+    sha256: 604ada3951fcf65bfd1ba7f568cc8716a242557114f17c45e9ded2631893fb2e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/horizontal-text-detection-0001/FP16-INT8/horizontal-text-detection-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

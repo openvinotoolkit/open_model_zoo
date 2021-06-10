@@ -16,8 +16,8 @@ description: >-
   The "regnetx-3.2gf" model is one of the RegNetX design space <https://arxiv.org/pdf/2003.13678>
   models designed to perform image classification. The RegNet design space provides
   simple and fast networks that work well across a wide range of flop regimes. This
-  model was pretrained in PyTorch*. All RegNet classification models have been pretrained
-  on the ImageNet* dataset. For details about this family of models, check out the
+  model was pre-trained in PyTorch*. All RegNet classification models have been pre-trained
+  on the ImageNet dataset. For details about this family of models, check out the
   Codebase for Image Classification Research <https://github.com/facebookresearch/pycls>.
 task_type: classification
 files:
@@ -109,4 +109,5 @@ model_optimizer_args:
   - --output=prob
   - --input_model=$conv_dir/regnetx-3.2gf.onnx
 framework: pytorch
+quantizable: yes
 license: https://raw.githubusercontent.com/facebookresearch/pycls/master/LICENSE

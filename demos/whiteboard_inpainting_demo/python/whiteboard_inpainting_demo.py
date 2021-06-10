@@ -71,7 +71,7 @@ def main():
     parser.add_argument('--loop', default=False, action='store_true',
                         help='Optional. Enable reading the input in a loop.')
     parser.add_argument('-o', '--output', required=False,
-                        help='Optional. Name of output to save.')
+                        help='Optional. Name of the output file(s) to save.')
     parser.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                         help='Optional. Number of frames to store in output. '
                              'If 0 is set, all frames are stored.')
@@ -83,7 +83,7 @@ def main():
                         help='Optional. Threshold for person instance segmentation model.')
     parser.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     parser.add_argument('-d', '--device', type=str, default='CPU',
-                        help='Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is '
+                        help='Optional. Specify a target device to infer on. CPU, GPU, HDDL or MYRIAD is '
                              'acceptable. The demo will look for a suitable plugin for the device specified.')
     parser.add_argument('-l', '--cpu_extension', type=str, default=None,
                         help='MKLDNN (CPU)-targeted custom layers. Absolute \

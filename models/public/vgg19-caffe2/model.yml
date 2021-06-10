@@ -14,7 +14,7 @@
 
 description: >-
   This is a Caffe2* version of "vgg19" model, designed to perform image classification.
-  This model was converted from Caffe* to Caffe2* format.  For details see repository
+  This model was converted from Caffe* to Caffe2* format. For details see repository
   <https://github.com/facebookarchive/models/tree/master/vgg19>, paper <https://arxiv.org/abs/1409.1556>.
 task_type: classification
 files:

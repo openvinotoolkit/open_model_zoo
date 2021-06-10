@@ -15,8 +15,8 @@
 description: >-
   The "i3d-rgb-tf" is a model for video classification, based on paper "Quo Vadis,
   Action Recognition? A New Model and the Kinetics Dataset" <https://arxiv.org/abs/1705.07750>.
-  This model use RGB input stream and trained on Kinetics-400* dataset   . Additionally,
-  this model has initialize values from Inception v1 model pretrained on ImageNet*
+  This model use RGB input stream and trained on Kinetics-400 dataset. Additionally,
+  this model has initialize values from Inception v1 model pre-trained on ImageNet
   dataset.
 
   Originally redistributed as a checkpoint file, was converted to frozen graph.

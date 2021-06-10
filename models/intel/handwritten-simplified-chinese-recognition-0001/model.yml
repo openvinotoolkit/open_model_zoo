@@ -18,28 +18,28 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/handwritten-simplified-chinese-recognition-0001.xml
-    size: 116334
-    sha256: 036ab5157e911808245de4f5fc59ae594cdfa0043db6603bc0ce0db96c044c4e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP32/handwritten-simplified-chinese-recognition-0001.xml
+    size: 114496
+    sha256: f54db36eb5fb64bd0aa62d0eccc7772745ef110ebe296eacc0383e06703a0205
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP32/handwritten-simplified-chinese-recognition-0001.xml
   - name: FP32/handwritten-simplified-chinese-recognition-0001.bin
     size: 69071580
-    sha256: 373eefe1b612ba55d52498cc3c6bd1c90f7c32e082ced0e540056a6b7382a22c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP32/handwritten-simplified-chinese-recognition-0001.bin
+    sha256: 8295d68ee79beee84b683dfbd6f11ce8dbb2a2db9efb5d88d901497e38c28a73
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP32/handwritten-simplified-chinese-recognition-0001.bin
   - name: FP16/handwritten-simplified-chinese-recognition-0001.xml
-    size: 116258
-    sha256: 0ceb8c16fc6ffb390c4980e3f667496f8aedd4389683a1f2cf001686a6c23112
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16/handwritten-simplified-chinese-recognition-0001.xml
+    size: 114413
+    sha256: f2efd3b6126a698c0927705d28ebaeb9ba3d532687a75fb143413d3727721bce
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16/handwritten-simplified-chinese-recognition-0001.xml
   - name: FP16/handwritten-simplified-chinese-recognition-0001.bin
     size: 34535842
-    sha256: 1bb5768c4f50502a5d76e039b04081589e36336d9f66255b17da6de3f64d67c8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16/handwritten-simplified-chinese-recognition-0001.bin
+    sha256: d8be35afd3e7bdb16cec47cf6760cd033bb9b50bf6ce3b563607981c11315b56
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16/handwritten-simplified-chinese-recognition-0001.bin
   - name: FP16-INT8/handwritten-simplified-chinese-recognition-0001.xml
-    size: 243508
-    sha256: 716e668da22a080396ada5b7768370caa57583325d5f24c897099dcdf96d7daf
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16-INT8/handwritten-simplified-chinese-recognition-0001.xml
+    size: 240459
+    sha256: 4eff9324aed31e83cfcdb3c41e6a1ec2c7272574470289cde82ba35f4b26e0b4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16-INT8/handwritten-simplified-chinese-recognition-0001.xml
   - name: FP16-INT8/handwritten-simplified-chinese-recognition-0001.bin
     size: 17320954
-    sha256: 7b18114ab92b8109b768659a83afd5c7d7bb4368b3b46e91c192d6192a9dd502
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16-INT8/handwritten-simplified-chinese-recognition-0001.bin
+    sha256: b81c9c33f0336f7a2469152202d8201edc6aaad1d4ba44d1e80209c46c6450cb
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/handwritten-simplified-chinese-recognition-0001/FP16-INT8/handwritten-simplified-chinese-recognition-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

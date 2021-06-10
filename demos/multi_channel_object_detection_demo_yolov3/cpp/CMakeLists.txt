@@ -19,18 +19,6 @@ if(MULTICHANNEL_DEMO_USE_NATIVE_CAM OR MULTICHANNEL_DEMO_USE_TBB)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
-if( BUILD_DEMO_NAME AND NOT ${BUILD_DEMO_NAME} STREQUAL ${TARGET_NAME} )
-    message(STATUS "DEMO ${TARGET_NAME} SKIPPED")
-    return()
-endif()
-
-# Find OpenCV components if exist
-find_package(OpenCV COMPONENTS highgui QUIET)
-if(NOT(OpenCV_FOUND))
-    message(WARNING "OPENCV is disabled or not found, " ${TARGET_NAME} " skipped")
-    return()
-endif()
-
 file(GLOB MAIN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB MAIN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 
@@ -46,13 +34,3 @@ set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_PDB_NAME ${TARGET_NAME})
 
 target_link_libraries(${TARGET_NAME} PRIVATE
     ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} ngraph::ngraph monitors multi_channel_common)
-
-if(COMMAND add_cpplint_target)
-    add_cpplint_target(${TARGET_NAME}_cpplint FOR_TARGETS ${TARGET_NAME})
-endif()
-
-if(NOT TARGET ie_samples)
-    add_custom_target(ie_samples ALL)
-endif()
-
-add_dependencies(ie_samples ${TARGET_NAME})
