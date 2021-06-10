@@ -508,14 +508,14 @@ PYTHON_DEMOS = [
             }),
             TestCase(options={
                 '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-0001'),
-                '--input_names': '0,1,2',
-                '--output_names': '3171,3172',
+                '--input_names': 'input_ids,attention_mask,token_type_ids',
+                '--output_names': 'output_s,output_e',
                 '--vocab': str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-0001/vocab.txt'),
             }),
             TestCase(options={
                 '-m': ModelArg('bert-large-uncased-whole-word-masking-squad-int8-0001', precision='FP32-INT8'),
-                '--input_names': 'result.1,result.2,result.3',
-                '--output_names': '5211,5212',
+                '--input_names': 'input_ids,attention_mask,token_type_ids',
+                '--output_names': 'output_s,output_e',
                 '--vocab':
                     str(OMZ_DIR / 'models/intel/bert-large-uncased-whole-word-masking-squad-int8-0001/vocab.txt'),
             }),
