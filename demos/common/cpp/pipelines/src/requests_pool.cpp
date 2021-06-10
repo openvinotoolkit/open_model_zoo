@@ -19,7 +19,7 @@
 RequestsPool::RequestsPool(InferenceEngine::ExecutableNetwork& execNetwork, unsigned int size) :
     numRequestsInUse(0) {
     for (unsigned int infReqId = 0; infReqId < size; ++infReqId) {
-        requests.emplace(execNetwork.CreateInferRequestPtr(), false);
+        requests.emplace(std::make_shared<InferenceEngine::InferRequest>(execNetwork.CreateInferRequest()), false);
     }
 }
 
@@ -59,7 +59,7 @@ void RequestsPool::waitForTotalCompletion() {
     // upon completion of request we're waiting for. Synchronization is applied there
     for (auto& pair : requests) {
         if (pair.second) {
-            pair.first->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
+            pair.first->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
         }
     }
 }

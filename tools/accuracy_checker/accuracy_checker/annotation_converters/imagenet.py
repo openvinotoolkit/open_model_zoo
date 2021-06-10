@@ -86,7 +86,7 @@ class ImageNetFormatConverter(BaseFormatConverter):
         label_map = {}
         if dataset_meta:
             meta = read_json(dataset_meta)
-            if 'labels' in dataset_meta and 'label_map' not in meta:
+            if 'labels' in meta and 'label_map' not in meta:
                 labels = ['background'] + meta['labels'] if has_background else meta['labels']
                 label_map = dict(enumerate(labels))
                 meta['label_map'] = label_map

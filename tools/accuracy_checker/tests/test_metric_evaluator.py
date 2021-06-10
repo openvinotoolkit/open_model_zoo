@@ -52,7 +52,7 @@ class TestMetric:
     def test_accuracy_arguments(self):
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
         assert len(dispatcher.metrics) == 1
-        _, _, accuracy_metric, _, _, _ = dispatcher.metrics[0]
+        _, _, accuracy_metric, _, _, _, _ = dispatcher.metrics[0]
         assert isinstance(accuracy_metric, ClassificationAccuracy)
         assert accuracy_metric.top_k == 1
 
@@ -153,7 +153,8 @@ class TestMetric:
             assert evaluation_result.name == 'accuracy'
             assert evaluation_result.evaluated_value == pytest.approx(1.0)
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
     def test_complete_accuracy_with_container_default_sources(self):
         annotations = [ContainerAnnotation({'a': ClassificationAnnotation('identifier', 3)})]
@@ -166,7 +167,8 @@ class TestMetric:
             assert evaluation_result.name == 'accuracy'
             assert evaluation_result.evaluated_value == pytest.approx(1.0)
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
     def test_complete_accuracy_with_container_sources(self):
         annotations = [ContainerAnnotation({'a': ClassificationAnnotation('identifier', 3)})]
@@ -180,7 +182,8 @@ class TestMetric:
             assert evaluation_result.name == 'accuracy'
             assert evaluation_result.evaluated_value == pytest.approx(1.0)
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
     def test_zero_accuracy(self):
         annotation = [ClassificationAnnotation('identifier', 2)]
@@ -192,7 +195,8 @@ class TestMetric:
             assert evaluation_result.name == 'accuracy'
             assert evaluation_result.evaluated_value == 0.0
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
     def test_complete_accuracy_top_3(self):
         annotations = [ClassificationAnnotation('identifier', 3)]
@@ -205,7 +209,8 @@ class TestMetric:
             assert evaluation_result.name == 'accuracy'
             assert evaluation_result.evaluated_value == pytest.approx(1.0)
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
     def test_zero_accuracy_top_3(self):
         annotations = [ClassificationAnnotation('identifier', 3)]
@@ -217,7 +222,8 @@ class TestMetric:
             assert evaluation_result.name == 'accuracy'
             assert evaluation_result.evaluated_value == 0.0
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
     def test_reference_is_10_by_config(self):
         annotations = [ClassificationAnnotation('identifier', 3)]
@@ -229,19 +235,20 @@ class TestMetric:
             assert evaluation_result.name == 'accuracy'
             assert evaluation_result.evaluated_value == 0.0
             assert evaluation_result.reference_value == 10
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
     def test_threshold_is_10_by_config(self):
         annotations = [ClassificationAnnotation('identifier', 3)]
         predictions = [ClassificationPrediction('identifier', [5.0, 3.0, 4.0, 1.0])]
 
-        dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 3, 'threshold': 10}], None)
+        dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 3, 'abs_threshold': 10}], None)
 
         for _, evaluation_result in dispatcher.iterate_metrics([annotations], [predictions]):
             assert evaluation_result.name == 'accuracy'
             assert evaluation_result.evaluated_value == 0.0
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold == 10
+            assert evaluation_result.abs_threshold == 10
 
     def test_classification_per_class_accuracy_fully_zero_prediction(self):
         annotation = ClassificationAnnotation('identifier', 0)
@@ -255,7 +262,8 @@ class TestMetric:
             assert evaluation_result.evaluated_value[0] == pytest.approx(0.0)
             assert evaluation_result.evaluated_value[1] == pytest.approx(0.0)
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
     def test_classification_per_class_accuracy_partially_zero_prediction(self):
         annotation = [ClassificationAnnotation('identifier', 1)]
@@ -271,7 +279,8 @@ class TestMetric:
             assert evaluation_result.evaluated_value[0] == pytest.approx(0.0)
             assert evaluation_result.evaluated_value[1] == pytest.approx(1.0)
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
     def test_classification_per_class_accuracy_complete_prediction(self):
         annotation = [ClassificationAnnotation('identifier_1', 1), ClassificationAnnotation('identifier_2', 0)]
@@ -290,7 +299,8 @@ class TestMetric:
             assert evaluation_result.evaluated_value[0] == pytest.approx(1.0)
             assert evaluation_result.evaluated_value[1] == pytest.approx(1.0)
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
     def test_classification_per_class_accuracy_partially_prediction(self):
         annotation = [
@@ -314,7 +324,8 @@ class TestMetric:
             assert evaluation_result.evaluated_value[0] == pytest.approx(0.5)
             assert evaluation_result.evaluated_value[1] == pytest.approx(1.0)
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
     def test_classification_per_class_accuracy_prediction_top3_zero(self):
         annotation = [ClassificationAnnotation('identifier_1', 0), ClassificationAnnotation('identifier_2', 1)]
@@ -335,7 +346,8 @@ class TestMetric:
             assert evaluation_result.evaluated_value[2] == pytest.approx(0.0)
             assert evaluation_result.evaluated_value[3] == pytest.approx(0.0)
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
     def test_classification_per_class_accuracy_prediction_top3(self):
         annotation = [ClassificationAnnotation('identifier_1', 1), ClassificationAnnotation('identifier_2', 1)]
@@ -356,7 +368,8 @@ class TestMetric:
             assert evaluation_result.evaluated_value[2] == pytest.approx(0.0)
             assert evaluation_result.evaluated_value[3] == pytest.approx(0.0)
             assert evaluation_result.reference_value is None
-            assert evaluation_result.threshold is None
+            assert evaluation_result.abs_threshold is None
+            assert evaluation_result.rel_threshold is None
 
 
 class TestMetricPerInstanceResult:

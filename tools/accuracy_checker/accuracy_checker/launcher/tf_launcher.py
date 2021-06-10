@@ -92,7 +92,7 @@ class TFLauncher(Launcher):
                 self._outputs_tensors.append(tensor)
 
         self.device = '/{}:0'.format(self.get_value_from_config('device').lower())
-        self._output_layouts = dict()
+        self._output_layouts = {}
         self._lstm_inputs = None
         if '_list_lstm_inputs' in self.config:
             self._configure_lstm_inputs()
@@ -106,19 +106,18 @@ class TFLauncher(Launcher):
             if len(data_shape) < 4:
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
-            return np.transpose(data, layout)
+            return np.transpose(data, layout) if layout is not None else data
         if len(layer_shape) == 2:
             if len(data_shape) == 1:
                 return np.transpose([data])
             if len(data_shape) > 2:
-                if all([dim == 1 for dim in layer_shape]) and all([dim == 1 for dim in data_shape]):
+                if all(dim == 1 for dim in layer_shape) and all(dim == 1 for dim in data_shape):
                     return np.resize(data, layer_shape)
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
         if len(layer_shape) == 3 and len(data_shape) == 4:
-            data = np.transpose(data, layout)
-            return data[0]
-        if len(layer_shape) == len(layout):
+            return np.transpose(data, layout)[0] if layout is not None else data[0]
+        if layout is not None and len(layer_shape) == len(layout):
             return np.transpose(data, layout)
         if (
                 len(layer_shape) == 1 and len(data_shape) > 1 and
@@ -298,6 +297,21 @@ class TFLauncher(Launcher):
                 self.tf.saved_model.loader.load(sess, [self.tag_constants.SERVING], model_dir)
 
         return graph
+
+    def fit_to_input(self, data, layer_name, layout, precision):
+        layer_shape = self.inputs[layer_name]
+        if (
+                len(layer_shape) > len(np.shape(data)) and
+                len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(np.shape(data))))
+        ):
+            if -1 not in layer_shape:
+                data = np.resize(data, layer_shape)
+
+        if len(np.shape(data)) == len(layout):
+            data = np.transpose(data, layout)
+        else:
+            data = np.array(data)
+        return data.astype(precision) if precision else data
 
     def _get_graph_inputs(self, graph, config_inputs=None):
         inputs_ops = {'Placeholder'}

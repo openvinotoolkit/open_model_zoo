@@ -1,0 +1,36 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Encoder part of text recognition model.
+task_type: feature_extraction
+files:
+  - name: FP32/text-recognition-0015-encoder.xml
+    size: 314319
+    sha256: 7356e7bd55b56db0dae2a79a1b4a93fe3aa3e96188008e7af6dbf28f0015b034
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-recognition-0015/text-recognition-0015-encoder/FP32/text-recognition-0015-encoder.xml
+  - name: FP32/text-recognition-0015-encoder.bin
+    size: 1592248036
+    sha256: 77778b16d366dc10e95264432ce31e838c5feddb22b67ee969d2a67818ea095b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-recognition-0015/text-recognition-0015-encoder/FP32/text-recognition-0015-encoder.bin
+  - name: FP16/text-recognition-0015-encoder.xml
+    size: 314041
+    sha256: b0749656777110a7f03cfe180d395e699a7ef01cc501ac9522fe1ec79429cda5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-recognition-0015/text-recognition-0015-encoder/FP16/text-recognition-0015-encoder.xml
+  - name: FP16/text-recognition-0015-encoder.bin
+    size: 796124044
+    sha256: 69e195c5aa92e4cccb23c8e7edf3fa32aca8ee28d6d86bb1b3eb8e419dc0fbca
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-recognition-0015/text-recognition-0015-encoder/FP16/text-recognition-0015-encoder.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

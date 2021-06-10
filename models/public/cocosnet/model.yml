@@ -85,11 +85,6 @@ files:
       id: 1zVG4SnR1uI8bC8fagZrgxNYCI5GRmJuR
 postprocessing:
   - $type: regex_replace
-    file: model_files/models/networks/normalization.py
-    pattern: 'x.var\((.*?)\)'
-    # use std instead var to support PyTorch < 1.7
-    replacement: '(x.std(\g<1>) ** 2)'
-  - $type: regex_replace
     file: model_files/models/networks/__init__.py
     pattern: 'from models\.networks\.(ContextualLoss|loss|discriminator) '
     replacement: '# \g<0>'

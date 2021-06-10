@@ -19,10 +19,11 @@
 #include <deque>
 #include <map>
 #include <condition_variable>
-#include "pipelines/config_factory.h"
+#include "utils/config_factory.h"
 #include "pipelines/requests_pool.h"
 #include "models/results.h"
 #include "models/model_base.h"
+#include <utils/performance_metrics.hpp>
 
 /// This is base class for asynchronous pipeline
 /// Derived classes should add functions for data submission and output processing
@@ -33,7 +34,7 @@ public:
     /// @param cnnConfig - fine tuning configuration for CNN model
     /// @param engine - reference to InferenceEngine::Core instance to use.
     /// If it is omitted, new instance of InferenceEngine::Core will be created inside.
-    AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& engine);
+    AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& core);
     virtual ~AsyncPipeline();
 
     /// Waits until either output data becomes available or pipeline allows to submit more input data.
@@ -62,6 +63,10 @@ public:
     /// ready (so results can be extracted in the same order as they were submitted). Otherwise, function will return if any result is ready.
     virtual std::unique_ptr<ResultBase> getResult(bool shouldKeepOrder = true);
 
+    PerformanceMetrics getInferenceMetircs(){ return inferenceMetrics;}
+    PerformanceMetrics getPreprocessMetrics(){ return preprocessMetrics;}
+    PerformanceMetrics getPostprocessMetrics() { return postprocessMetrics;}
+
 protected:
     /// Returns processed result, if available
     /// @param shouldKeepOrder if true, function will return processed data sequentially,
@@ -83,4 +88,7 @@ protected:
     std::exception_ptr callbackException = nullptr;
 
     std::unique_ptr<ModelBase> model;
+    PerformanceMetrics inferenceMetrics;
+    PerformanceMetrics preprocessMetrics;
+    PerformanceMetrics postprocessMetrics;
 };

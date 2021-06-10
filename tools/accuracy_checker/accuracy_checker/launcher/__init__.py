@@ -69,6 +69,13 @@ except ImportError as import_error:
         'onnx_runtime', "ONNX Runtime isn't installed. Please, install it before using. \n{}".format(import_error.msg)
     )
 
+try:
+    from .pdpd_launcher import PaddlePaddleLauncher
+except ImportError as import_error:
+    PaddlePaddleLauncher = unsupported_launcher(
+        'paddle_paddle', "PaddlePaddle isn't installed. Please, install it before using. \n{}".format(import_error.msg)
+    )
+
 from .pytorch_launcher import PyTorchLauncher
 
 __all__ = [
@@ -82,6 +89,7 @@ __all__ = [
     'OpenCVLauncher',
     'ONNXLauncher',
     'PyTorchLauncher',
+    'PaddlePaddleLauncher',
     'DummyLauncher',
     'InputFeeder'
 ]

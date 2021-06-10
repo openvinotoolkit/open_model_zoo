@@ -28,7 +28,9 @@ from .text_recognition import (
     BeamSearchDecoder,
     CTCGreedySearchDecoder,
     LPRAdapter,
-    AttentionOCRAdapter
+    AttentionOCRAdapter,
+    SimpleDecoder,
+    PDPDTextRecognition
 )
 
 from .image_processing import (
@@ -64,14 +66,17 @@ from .detection_person_vehicle import (
 )
 from .detection_head import HeadDetectionAdapter
 from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxNet, SSDONNXAdapter
-from .retinaface import RetinaFaceAdapter
+from .retinaface import RetinaFaceAdapter, RetinaFacePyTorchAdapter
 from .retinanet import RetinaNetAdapter, MultiOutRetinaNet, RetinaNetTF2
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX, YoloV3TF2, YoloV5Adapter
 from .classification import ClassificationAdapter
-from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter
+from .segmentation import (
+    SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter, BackgroundMattingAdapter
+)
 from .pose_estimation import HumanPoseAdapter, SingleHumanPoseAdapter, StackedHourGlassNetworkAdapter
 from .pose_estimation_openpose import OpenPoseAdapter
 from .pose_estimation_associative_embedding import AssociativeEmbeddingAdapter
+from .pose_estimation_hrnet import HumanPoseHRNetAdapter
 
 from .pose_estimation_3d import HumanPose3dAdapter
 
@@ -100,14 +105,17 @@ from .audio_recognition import (
     CTCBeamSearchDecoderWithLm,
     FastCTCBeamSearchDecoderWithLm
 )
-
+from .kaldi_asr_decoder import KaldiLatGenDecoder
 from .regression import RegressionAdapter, MultiOutputRegression
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
 from .dna_seq_recognition import DNASeqRecognition
 from .optical_flow import PWCNetAdapter
 from .salient_objects_detection import SalientObjectDetection
+from .noise_suppression import NoiseSuppressionAdapter
 from .dummy_adapters import GVADetectionAdapter, XML2DetectionAdapter, GVAClassificationAdapter
+
+from .time_series import QuantilesPredictorAdapter
 
 __all__ = [
     'Adapter',
@@ -125,6 +133,7 @@ __all__ = [
     'RetinaNetTF2',
     'ClassAgnosticDetectionAdapter',
     'RetinaFaceAdapter',
+    'RetinaFacePyTorchAdapter',
     'FaceBoxesAdapter',
     'FaceDetectionAdapter',
     'FaceDetectionRefinementAdapter',
@@ -156,6 +165,7 @@ __all__ = [
     'BrainTumorSegmentationAdapter',
     'DUCSegmentationAdapter',
     'SalientObjectDetection',
+    'BackgroundMattingAdapter',
 
     'ReidAdapter',
 
@@ -183,10 +193,13 @@ __all__ = [
     'LPRAdapter',
     'CTCGreedySearchDecoder',
     'AttentionOCRAdapter',
+    'SimpleDecoder',
+    'PDPDTextRecognition',
 
     'AssociativeEmbeddingAdapter',
     'HumanPoseAdapter',
     'HumanPose3dAdapter',
+    'HumanPoseHRNetAdapter',
     'OpenPoseAdapter',
     'SingleHumanPoseAdapter',
     'StackedHourGlassNetworkAdapter',
@@ -220,6 +233,7 @@ __all__ = [
     'CTCGreedyDecoder',
     'CTCBeamSearchDecoderWithLm',
     'FastCTCBeamSearchDecoderWithLm',
+    'KaldiLatGenDecoder',
 
     'QualityAssessmentAdapter',
 
@@ -227,7 +241,10 @@ __all__ = [
 
     'PWCNetAdapter',
 
+    'NoiseSuppressionAdapter',
+
     'GVADetectionAdapter',
     'GVAClassificationAdapter',
 
+    'QuantilesPredictorAdapter'
 ]

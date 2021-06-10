@@ -1,0 +1,27 @@
+models:
+  - name: pspnet-pytorch
+    launchers:
+      - framework: dlsdk
+        adapter: segmentation
+    datasets:
+      - name: VOC2012_Segmentation
+        preprocessing:
+          - type: resize
+            aspect_ratio_scale: frcnn_keep_aspect_ratio
+            dst_height: 512
+            dst_width: 2048
+          - type: crop
+            size: 512
+        postprocessing:
+          - type: resize_segmentation_mask
+            apply_to: annotation
+            to_dst_image_size: True
+          - type: encode_segmentation_mask
+            apply_to: annotation
+          - type: crop_segmentation_mask
+            size: 512
+            apply_to: annotation
+        metrics:
+          - type: mean_iou
+            use_argmax: false
+            presenter: print_scalar

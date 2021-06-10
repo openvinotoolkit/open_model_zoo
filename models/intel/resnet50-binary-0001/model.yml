@@ -17,20 +17,20 @@ description: >-
 task_type: classification
 files:
   - name: FP32-INT1/resnet50-binary-0001.xml
-    size: 238980
-    sha256: c2a550c2fcf40b4c6b093f4de943aeeaee883088d6fac0eff136939e3d81909e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
+    size: 234412
+    sha256: 7811d2bee5515830fcd462beb3ed6b75cb9e7f46a48194e16bd16af296eaba24
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
   - name: FP32-INT1/resnet50-binary-0001.bin
     size: 22112984
-    sha256: e1b2cd17644699369284e7a0c6113b0ae1d6411ddca6ceba2423a4cbe139072c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
+    sha256: 10c922fa141bb08e42209862e0c9cce90f826413732b0ab84c386bbc7bf769b7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
   - name: FP16-INT1/resnet50-binary-0001.xml
-    size: 238881
-    sha256: fe70f2f3aa16d0a0176c7dba907730f4c17f000aeeac67f9229a5f576f310a65
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.xml
+    size: 234306
+    sha256: 8babd7a4a7a6132da5f0a706462fae7b8932dd8fd91a075c84745bd828bb337d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.xml
   - name: FP16-INT1/resnet50-binary-0001.bin
     size: 12348792
-    sha256: fcc76148a770e81bfbb3c2af30397ee54a52532bdbc97c3bd5a29e9f7836ba58
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
+    sha256: 0b70416666f5705a6307cdcf1c335050f2b5cb2467515d43b3c3f98ce29514cf
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/resnet50-binary-0001/FP16-INT1/resnet50-binary-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

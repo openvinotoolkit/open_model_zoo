@@ -17,7 +17,7 @@ limitations under the License.
 from ..utils import read_txt, check_file_existence
 from ..representation import ClassificationAnnotation
 from ..data_readers import ClipIdentifier
-from ..config import PathField, NumberField
+from ..config import PathField, NumberField, StringField
 
 from .format_converter import BaseFormatConverter, ConverterReturn
 
@@ -85,7 +85,8 @@ class MSASLContiniousConverter(BaseFormatConverter):
             ),
             'clip_length': NumberField(
                 value_type=int, optional=True, min_value=1, default=16, description="Clip length."
-            )
+            ),
+            'img_prefix': StringField(optional=True, default='img_', description="Images prefix")
         })
 
         return params
@@ -95,6 +96,7 @@ class MSASLContiniousConverter(BaseFormatConverter):
         self.data_dir = self.get_value_from_config('data_dir')
         self.out_fps = self.get_value_from_config('out_fps')
         self.clip_length = self.get_value_from_config('clip_length')
+        self.img_prefix = self.get_value_from_config('img_prefix')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         records = self.load_annotations(self.annotation_file)
@@ -107,7 +109,7 @@ class MSASLContiniousConverter(BaseFormatConverter):
                 progress_callback(record_idx * 100 / num_iterations)
 
             frame_indices = self.get_indices(record, self.out_fps, self.clip_length)
-            frames = ['img_{:05d}.jpg'.format(idx) for idx in frame_indices]
+            frames = ['{}{:05d}.jpg'.format(self.img_prefix, idx) for idx in frame_indices]
 
             identifier = ClipIdentifier(record.path, record_idx, frames)
 
@@ -119,7 +121,7 @@ class MSASLContiniousConverter(BaseFormatConverter):
 
             annotations.append(ClassificationAnnotation(identifier, record.label))
 
-        return ConverterReturn(annotations, dict(), content_errors)
+        return ConverterReturn(annotations, {}, content_errors)
 
     @staticmethod
     def load_annotations(ann_file):

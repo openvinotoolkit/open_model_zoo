@@ -1,0 +1,175 @@
+models:
+  - name: noise-suppression-poconetlike-0001
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: noise_suppression
+          output_blob: output
+        inputs:
+          - name: inp_state_000
+            type: LSTM_INPUT
+            value: out_state_000
+          - name: inp_state_001
+            type: LSTM_INPUT
+            value: out_state_001
+          - name: inp_state_002
+            type: LSTM_INPUT
+            value: out_state_002
+          - name: inp_state_003
+            type: LSTM_INPUT
+            value: out_state_003
+          - name: inp_state_004
+            type: LSTM_INPUT
+            value: out_state_004
+          - name: inp_state_005
+            type: LSTM_INPUT
+            value: out_state_005
+          - name: inp_state_006
+            type: LSTM_INPUT
+            value: out_state_006
+          - name: inp_state_007
+            type: LSTM_INPUT
+            value: out_state_007
+          - name: inp_state_008
+            type: LSTM_INPUT
+            value: out_state_008
+          - name: inp_state_009
+            type: LSTM_INPUT
+            value: out_state_009
+          - name: inp_state_010
+            type: LSTM_INPUT
+            value: out_state_010
+          - name: inp_state_011
+            type: LSTM_INPUT
+            value: out_state_011
+          - name: inp_state_012
+            type: LSTM_INPUT
+            value: out_state_012
+          - name: inp_state_013
+            type: LSTM_INPUT
+            value: out_state_013
+          - name: inp_state_014
+            type: LSTM_INPUT
+            value: out_state_014
+          - name: inp_state_015
+            type: LSTM_INPUT
+            value: out_state_015
+          - name: inp_state_016
+            type: LSTM_INPUT
+            value: out_state_016
+          - name: inp_state_017
+            type: LSTM_INPUT
+            value: out_state_017
+          - name: inp_state_018
+            type: LSTM_INPUT
+            value: out_state_018
+          - name: inp_state_019
+            type: LSTM_INPUT
+            value: out_state_019
+          - name: inp_state_020
+            type: LSTM_INPUT
+            value: out_state_020
+          - name: inp_state_021
+            type: LSTM_INPUT
+            value: out_state_021
+          - name: inp_state_022
+            type: LSTM_INPUT
+            value: out_state_022
+          - name: inp_state_023
+            type: LSTM_INPUT
+            value: out_state_023
+          - name: inp_state_024
+            type: LSTM_INPUT
+            value: out_state_024
+          - name: inp_state_025
+            type: LSTM_INPUT
+            value: out_state_025
+          - name: inp_state_026
+            type: LSTM_INPUT
+            value: out_state_026
+          - name: inp_state_027
+            type: LSTM_INPUT
+            value: out_state_027
+          - name: inp_state_028
+            type: LSTM_INPUT
+            value: out_state_028
+          - name: inp_state_029
+            type: LSTM_INPUT
+            value: out_state_029
+          - name: inp_state_030
+            type: LSTM_INPUT
+            value: out_state_030
+          - name: inp_state_031
+            type: LSTM_INPUT
+            value: out_state_031
+          - name: inp_state_032
+            type: LSTM_INPUT
+            value: out_state_032
+          - name: inp_state_033
+            type: LSTM_INPUT
+            value: out_state_033
+          - name: inp_state_034
+            type: LSTM_INPUT
+            value: out_state_034
+          - name: inp_state_035
+            type: LSTM_INPUT
+            value: out_state_035
+          - name: inp_state_036
+            type: LSTM_INPUT
+            value: out_state_036
+          - name: inp_state_037
+            type: LSTM_INPUT
+            value: out_state_037
+          - name: inp_state_038
+            type: LSTM_INPUT
+            value: out_state_038
+          - name: inp_state_039
+            type: LSTM_INPUT
+            value: out_state_039
+          - name: inp_state_040
+            type: LSTM_INPUT
+            value: out_state_040
+          - name: inp_state_041
+            type: LSTM_INPUT
+            value: out_state_041
+          - name: inp_state_042
+            type: LSTM_INPUT
+            value: out_state_042
+          - name: inp_state_043
+            type: LSTM_INPUT
+            value: out_state_043
+          - name: inp_state_044
+            type: LSTM_INPUT
+            value: out_state_044
+          - name: inp_state_045
+            type: LSTM_INPUT
+            value: out_state_045
+          - name: inp_state_046
+            type: LSTM_INPUT
+            value: out_state_046
+          - name: inp_state_047
+            type: LSTM_INPUT
+            value: out_state_047
+          - name: inp_state_048
+            type: LSTM_INPUT
+            value: out_state_048
+          - name: inp_state_049
+            type: LSTM_INPUT
+            value: out_state_049
+          - name: inp_state_050
+            type: LSTM_INPUT
+            value: out_state_050
+          - name: inp_state_051
+            type: LSTM_INPUT
+            value: out_state_051
+    datasets:
+      - name: speech_denoising_dataset
+        preprocessing:
+          - type: audio_patches
+            size: 2048
+        postprocessing:
+          - type: pad_signal
+        metrics:
+          - type: sisdr
+            delay: 640
+            presenter: print_vector

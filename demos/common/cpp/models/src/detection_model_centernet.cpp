@@ -59,13 +59,11 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
         throw std::logic_error("This demo expect networks that have 3 outputs blobs");
     }
 
-    const InferenceEngine::TensorDesc& outputDesc = outputInfo.begin()->second->getTensorDesc();
     for (auto& output : outputInfo) {
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(InferenceEngine::Layout::NCHW);
         outputsNames.push_back(output.first);
     }
-
 }
 
 cv::Point2f getDir(const cv::Point2f& srcPoint, float rotRadius) {
@@ -123,8 +121,8 @@ std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& i
     cv::Mat resizedImg;
     cv::warpAffine(img, resizedImg, transInput, cv::Size(netInputWidth, netInputHeight), cv::INTER_LINEAR);
     request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg));
-
-    return std::shared_ptr<InternalModelData>(new InternalImageModelData(img.cols, img.rows));
+    /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
+    return std::make_shared<InternalImageMatModelData>(resizedImg, img.cols, img.rows);
 }
 
 std::vector<std::pair<size_t, float>> nms(float* scoresPtr, InferenceEngine::SizeVector sz, float threshold, int kernel = 3) {
@@ -132,13 +130,13 @@ std::vector<std::pair<size_t, float>> nms(float* scoresPtr, InferenceEngine::Siz
     scores.reserve(ModelCenterNet::INIT_VECTOR_SIZE);
     auto chSize = sz[2] * sz[3];
 
-    for (int i = 0; i < sz[1] * sz[2] * sz[3]; ++i) {
+    for (size_t i = 0; i < sz[1] * sz[2] * sz[3]; ++i) {
         scoresPtr[i] = expf(scoresPtr[i]) / (1 + expf(scoresPtr[i]));
     }
 
-    for (int ch = 0; ch < sz[1]; ++ch) {
-        for (int w = 0; w < sz[2]; ++w) {
-            for (int h = 0; h < sz[3]; ++h) {
+    for (size_t ch = 0; ch < sz[1]; ++ch) {
+        for (size_t w = 0; w < sz[2]; ++w) {
+            for (size_t h = 0; h < sz[3]; ++h) {
                 float max = scoresPtr[chSize * ch + sz[2] * w + h];
 
                 // ---------------------  filter on threshold--------------------------------------
@@ -214,7 +212,7 @@ std::vector<ModelCenterNet::BBox> calcBBoxes(const std::vector<std::pair<size_t,
     const std::vector<std::pair<float, float>>& wh, const InferenceEngine::SizeVector& sz) {
     std::vector<ModelCenterNet::BBox> bboxes(scores.size());
 
-    for (int i = 0; i < bboxes.size(); ++i) {
+    for (size_t i = 0; i < bboxes.size(); ++i) {
         size_t chIdx = scores[i].first % (sz[2] * sz[3]);
         auto xCenter = chIdx % sz[3];
         auto yCenter = chIdx / sz[3];
@@ -268,11 +266,10 @@ std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResu
     transform(bboxes, sz, scale, centerX, centerY);
 
     // --------------------------- Create detection result objects ------------------------------------
-    DetectionResult* result = new DetectionResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
 
     result->objects.reserve(scores.size());
-    for (int i = 0; i < scores.size(); ++i) {
+    for (size_t i = 0; i < scores.size(); ++i) {
         DetectedObject desc;
         desc.confidence = scores[i].second;
         desc.labelID = scores[i].first / chSize;

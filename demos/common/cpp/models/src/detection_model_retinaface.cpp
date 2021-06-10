@@ -21,7 +21,7 @@
 
 ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),  // Default label is "Face"
-    boxIOUThreshold(boxIOUThreshold), maskThreshold(0.8f), shouldDetectMasks(false), shouldDetectLandmarks(false), landmarkStd(1.0f),
+    shouldDetectMasks(false), shouldDetectLandmarks(false), boxIOUThreshold(boxIOUThreshold), maskThreshold(0.8f), landmarkStd(1.0f),
     anchorCfg({ {32, { 32, 16 }, 16, { 1 }},
               { 16, { 8, 4 }, 16, { 1 }},
               { 8, { 2, 1 }, 16, { 1 }} }) {
@@ -59,24 +59,24 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
 
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
 
-    std::vector<int> outputsSizes[OT_MAX];
+    std::vector<size_t> outputsSizes[OT_MAX];
     for (auto& output : outputInfo) {
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(InferenceEngine::Layout::NCHW);
         outputsNames.push_back(output.first);
 
         EOutputType type = OT_MAX;
-        if (output.first.find("bbox") != -1) {
+        if (output.first.find("bbox") != std::string::npos) {
             type = OT_BBOX;
         }
-        else if (output.first.find("cls") != -1) {
+        else if (output.first.find("cls") != std::string::npos) {
             type = OT_SCORES;
         }
-        else if (output.first.find("landmark") != -1) {
+        else if (output.first.find("landmark") != std::string::npos) {
             type = OT_LANDMARK;
             shouldDetectLandmarks = true;
         }
-        else if (output.first.find("type") != -1) {
+        else if (output.first.find("type") != std::string::npos) {
             type = OT_MASKSCORES;
             labels.clear();
             labels.push_back("No Mask");
@@ -103,18 +103,18 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
         throw std::logic_error("Expected 6, 9 or 12 output blobs");
     }
 
-    for (int idx = 0; idx < outputsSizes[OT_BBOX].size(); ++idx) {
-        int width = outputsSizes[OT_BBOX][idx];
-        int height = outputsSizes[OT_BBOX][idx];
+    for (size_t idx = 0; idx < outputsSizes[OT_BBOX].size(); ++idx) {
+        size_t width = outputsSizes[OT_BBOX][idx];
+        size_t height = outputsSizes[OT_BBOX][idx];
         auto s = anchorCfg[idx].stride;
         auto anchorNum = anchorsFpn[s].size();
 
         anchors.push_back(std::vector<ModelRetinaFace::Anchor>(height * width * anchorNum));
-        for (int iw = 0; iw < width; ++iw) {
-            auto sw = iw * s;
-            for (int ih = 0; ih < height; ++ih) {
-                auto sh = ih * s;
-                for (int k = 0; k < anchorNum; ++k) {
+        for (size_t iw = 0; iw < width; ++iw) {
+            size_t sw = iw * s;
+            for (size_t ih = 0; ih < height; ++ih) {
+                size_t sh = ih * s;
+                for (size_t k = 0; k < anchorNum; ++k) {
                     Anchor& anc = anchors[idx][(ih * width + iw) * anchorNum + k];
                     anc.left = anchorsFpn[s][k].left + sw;
                     anc.top = anchorsFpn[s][k].top + sh;
@@ -257,8 +257,6 @@ void filterLandmarks(std::vector<cv::Point2f>& landmarks, const std::vector<size
     const float *memPtr = outputMapped.as<float*>();
 
     for (auto i : indices) {
-        auto ctrX = anchors[i].getXCenter();
-        auto ctrY = anchors[i].getYCenter();
         for (int j = 0; j < ModelRetinaFace::LANDMARKS_NUM; ++j) {
             auto offset = (i % anchorNum) * landmarkPredLen * sz[2] * sz[3] + i / anchorNum;
             auto deltaX = memPtr[offset + j * 2 * blockWidth] * landmarkStd;
@@ -282,44 +280,6 @@ void filterMasksScores(std::vector<float>& masks, const std::vector<size_t>& ind
     }
 }
 
-std::vector<int> nms(const std::vector<ModelRetinaFace::Anchor>& boxes, const std::vector<float>& scores, const float thresh, bool includeBoundaries) {
-    std::vector<float> areas(boxes.size());
-    for (int i = 0; i < boxes.size(); ++i) {
-        areas[i] = (boxes[i].right - boxes[i].left + includeBoundaries) * (boxes[i].bottom - boxes[i].top + includeBoundaries);
-    }
-    std::vector<int> order(scores.size());
-    std::iota(order.begin(), order.end(), 0);
-    std::sort(order.begin(), order.end(), [&scores](int o1, int o2) { return scores[o1] > scores[o2]; });
-
-    int ordersNum = 0;
-    for (; ordersNum < order.size() && scores[order[ordersNum]] >= 0; ordersNum++);
-
-    std::vector<int> keep;
-    bool shouldContinue = true;
-    for (int i = 0; shouldContinue && i < ordersNum; ++i) {
-        auto idx1 = order[i];
-        if (idx1 >= 0) {
-            keep.push_back(idx1);
-            shouldContinue = false;
-            for (int j = i + 1; j < ordersNum; ++j) {
-                auto idx2 = order[j];
-                if (idx2 >= 0) {
-                    shouldContinue = true;
-                    auto overlappingWidth = std::fminf(boxes[idx1].right, boxes[idx2].right) - std::fmaxf(boxes[idx1].left, boxes[idx2].left);
-                    auto overlappingHeight = std::fminf(boxes[idx1].bottom, boxes[idx2].bottom) - std::fmaxf(boxes[idx1].top, boxes[idx2].top);
-                    auto intersection = overlappingWidth > 0 && overlappingHeight > 0 ? overlappingWidth * overlappingHeight : 0;
-                    auto overlap = intersection / (areas[idx1] + areas[idx2] - intersection);
-
-                    if (overlap >= thresh) {
-                        order[j] = -1;
-                    }
-                }
-            }
-        }
-    }
-    return keep;
-}
-
 std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infResult) {
     std::vector<float> scores;
     scores.reserve(INIT_VECTOR_SIZE);
@@ -336,7 +296,7 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
     }
 
     // --------------------------- Gather & Filter output from all levels ----------------------------------------------------------
-    for (int idx = 0; idx < anchorCfg.size(); ++idx) {
+    for (size_t idx = 0; idx < anchorCfg.size(); ++idx) {
         const auto bboxRaw = infResult.outputsData[separateOutputsNames[OT_BBOX][idx]];
         const auto scoresRaw = infResult.outputsData[separateOutputsNames[OT_SCORES][idx]];
         auto s = anchorCfg[idx].stride;
@@ -355,12 +315,11 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         }
     }
     // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
-    // !shouldDetectLandmarks determines nms behavior, if true - boundaries are included in areas calculation for ssh-mxnet model
+    // !shouldDetectLandmarks determines nms behavior, if true - boundaries are included in areas calculation
     auto keep = nms(bboxes, scores, boxIOUThreshold, !shouldDetectLandmarks);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
-    RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult(infResult.frameId, infResult.metaData);
 
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;

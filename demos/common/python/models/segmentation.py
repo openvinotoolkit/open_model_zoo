@@ -50,7 +50,6 @@ class SegmentationModel(Model):
 
         blob_name = next(iter(self.net.outputs))
         blob = self.net.outputs[blob_name]
-        blob.precision = "FP32"
 
         out_size = blob.shape
         if len(out_size) == 3:
@@ -82,5 +81,16 @@ class SegmentationModel(Model):
         else:
             result = np.argmax(predictions, axis=0).astype(np.uint8)
 
+        result = cv2.resize(result, (input_image_width, input_image_height), 0, 0, interpolation=cv2.INTER_NEAREST)
+        return result
+
+
+class SalientObjectDetectionModel(SegmentationModel):
+
+    def postprocess(self, outputs, meta):
+        input_image_height = meta['original_shape'][0]
+        input_image_width = meta['original_shape'][1]
+        result = outputs[self.out_blob_name].squeeze()
+        result = 1/(1 + np.exp(-result))
         result = cv2.resize(result, (input_image_width, input_image_height), 0, 0, interpolation=cv2.INTER_NEAREST)
         return result

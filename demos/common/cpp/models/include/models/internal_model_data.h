@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
 */
 
 #pragma once
-struct InternalModelData {
-   virtual ~InternalModelData(){}
+struct InternalModelData
+{
+    virtual ~InternalModelData() {}
 
-   template<class T> T& asRef() {
+    template<class T> T& asRef() {
         return dynamic_cast<T&>(*this);
     }
 
@@ -27,24 +28,31 @@ struct InternalModelData {
     }
 };
 
-struct InternalImageModelData : public InternalModelData {
-    InternalImageModelData(int width, int height) {
-        inputImgWidth = width;
-        inputImgHeight = height;
-    }
+struct InternalImageModelData : public InternalModelData
+{
+    InternalImageModelData(int width, int height) :
+        inputImgWidth(width),
+        inputImgHeight(height) {}
 
     int inputImgWidth;
     int inputImgHeight;
 };
 
-struct InternalImageMatModelData : public InternalImageModelData {
-    InternalImageMatModelData(const cv::Mat& mat) : InternalImageModelData(mat.cols, mat.rows), mat(mat) {}
+struct InternalImageMatModelData : public InternalImageModelData
+{
+    InternalImageMatModelData(const cv::Mat& mat) :
+        InternalImageModelData(mat.cols, mat.rows), mat(mat) {}
+
+    InternalImageMatModelData(const cv::Mat& mat, int width, int height) :
+        InternalImageModelData(width, height), mat(mat) {}
 
     cv::Mat mat;
 };
 
-struct InternalScaleMatData : public InternalModelData {
-    InternalScaleMatData(float scaleX, float scaleY, cv::Mat&& mat) : x(scaleX), y(scaleY), mat(std::move(mat)) {}
+struct InternalScaleMatData : public InternalModelData
+{
+    InternalScaleMatData(float scaleX, float scaleY, cv::Mat&& mat) :
+        x(scaleX), y(scaleY), mat(std::move(mat)) {}
 
     float x;
     float y;

@@ -13,9 +13,9 @@
 # limitations under the License.
 
 description: >-
-  The "efficientnet-b5" model is one of the EfficientNet <https://arxiv.org/abs/1905.11946>  models
-  designed to perform image classification. This model was pretrained in TensorFlow*.
-  All the EfficientNet models have been pretrained on the ImageNet* image database.
+  The "efficientnet-b5" model is one of the EfficientNet <https://arxiv.org/abs/1905.11946>
+  models designed to perform image classification. This model was pre-trained in TensorFlow*.
+  All the EfficientNet models have been pre-trained on the ImageNet image database.
   For details about this family of models, check out the TensorFlow Cloud TPU repository
   <https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet>.
 task_type: classification

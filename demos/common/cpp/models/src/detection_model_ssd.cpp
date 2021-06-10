@@ -41,13 +41,17 @@ std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputDa
 }
 
 std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
+    return outputsNames.size() > 1 ?
+        postprocessMultipleOutputs(infResult) :
+        postprocessSingleOutput(infResult);
+}
+
+std::unique_ptr<ResultBase> ModelSSD::postprocessSingleOutput(InferenceResult& infResult) {
     LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
     const float *detections = outputMapped.as<float*>();
 
-    DetectionResult* result = new DetectionResult;
+    DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
-
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
@@ -58,6 +62,8 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
         }
 
         float confidence = detections[i * objectSize + 2];
+
+        /** Filtering out objects with confidence < confidence_threshold probability **/
         if (confidence > confidenceThreshold) {
             DetectedObject desc;
 
@@ -69,7 +75,48 @@ std::unique_ptr<ResultBase> ModelSSD::postprocess(InferenceResult& infResult) {
             desc.width = detections[i * objectSize + 5] * internalData.inputImgWidth - desc.x;
             desc.height = detections[i * objectSize + 6] * internalData.inputImgHeight - desc.y;
 
-            /** Filtering out objects with confidence < confidence_threshold probability **/
+            result->objects.push_back(desc);
+        }
+    }
+
+    return retVal;
+}
+
+std::unique_ptr<ResultBase> ModelSSD::postprocessMultipleOutputs(InferenceResult& infResult) {
+    std::vector<LockedMemory<const void>> mappedMemoryAreas;
+    for (const auto& name : outputsNames) {
+        mappedMemoryAreas.push_back(infResult.outputsData[name]->rmap());
+    }
+
+    const float *boxes = mappedMemoryAreas[0].as<float*>();
+    const float *labels = mappedMemoryAreas[1].as<float*>();
+    const float *scores = mappedMemoryAreas.size() > 2 ? mappedMemoryAreas[2].as<float*>() : nullptr;
+
+    DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
+    auto retVal = std::unique_ptr<ResultBase>(result);
+
+    const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
+
+    // In models with scores are stored in separate output, coordinates are normalized to [0,1]
+    // In other multiple-outputs models coordinates are normalized to [0,netInputWidth] and [0,netInputHeight]
+    float widthScale = ((float)internalData.inputImgWidth) / (scores ? 1 : netInputWidth);
+    float heightScale = ((float)internalData.inputImgHeight) / (scores ? 1 : netInputHeight);
+
+    for (size_t i = 0; i < maxProposalCount; i++) {
+        float confidence = scores ? scores[i] : boxes[i * objectSize + 4];
+
+        /** Filtering out objects with confidence < confidence_threshold probability **/
+        if (confidence > confidenceThreshold) {
+            DetectedObject desc;
+
+            desc.confidence = confidence;
+            desc.labelID = static_cast<int>(labels[i]);
+            desc.label = getLabelName(desc.labelID);
+            desc.x = boxes[i * objectSize] * widthScale;
+            desc.y = boxes[i * objectSize + 1] * heightScale;
+            desc.width = boxes[i * objectSize + 2] * widthScale - desc.x;
+            desc.height = boxes[i * objectSize + 3] * heightScale - desc.y;
+
             result->objects.push_back(desc);
         }
     }
@@ -120,9 +167,15 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Prepare output blobs -----------------------------------------------------
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
     OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
-    if (outputInfo.size() != 1) {
-        throw std::logic_error("This demo accepts networks having only one output");
+    if (outputInfo.size() == 1) {
+        prepareSingleOutput(outputInfo);
     }
+    else {
+        prepareMultipleOutputs(outputInfo);
+    }
+}
+
+void ModelSSD::prepareSingleOutput(OutputsDataMap& outputInfo) {
     DataPtr& output = outputInfo.begin()->second;
     outputsNames.push_back(outputInfo.begin()->first);
 
@@ -140,4 +193,46 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 
     output->setPrecision(Precision::FP32);
     output->setLayout(Layout::NCHW);
+}
+
+void ModelSSD::prepareMultipleOutputs(OutputsDataMap& outputInfo) {
+    if (outputInfo.find("bboxes") != outputInfo.end() && outputInfo.find("labels") != outputInfo.end() &&
+        outputInfo.find("scores") != outputInfo.end()) {
+        outputsNames.push_back("bboxes");
+        outputsNames.push_back("labels");
+        outputsNames.push_back("scores");
+    }
+    else if (outputInfo.find("boxes") != outputInfo.end() && outputInfo.find("labels") != outputInfo.end()) {
+        outputsNames.push_back("boxes");
+        outputsNames.push_back("labels");
+    }
+    else {
+        throw std::logic_error("Non-supported model architecutre (wrong number of outputs or wrong outputs names)");
+    }
+
+    const SizeVector outputDims = outputInfo[outputsNames[0]]->getTensorDesc().getDims();
+
+    if (outputDims.size() == 2) {
+        maxProposalCount = outputDims[0];
+        objectSize = outputDims[1];
+
+        if (objectSize != 5) {
+            throw std::logic_error("Incorrect 'boxes' output shape, [n][5] shape is required");
+        }
+    }
+    else if (outputDims.size() == 3) {
+        maxProposalCount = outputDims[1];
+        objectSize = outputDims[2];
+
+        if (objectSize != 4) {
+            throw std::logic_error("Incorrect 'bboxes' output shape, [b][n][4] shape is required");
+        }
+    }
+    else {
+        throw std::logic_error("Incorrect number of 'boxes' output dimensions");
+    }
+
+    for (const std::string& name : outputsNames) {
+        outputInfo[name]->setPrecision(Precision::FP32);
+    }
 }

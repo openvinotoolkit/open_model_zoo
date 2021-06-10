@@ -1,0 +1,133 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  "pspnet-pytorch" is a semantic segmentation model, pre-trained on Pascal VOC <http://host.robots.ox.ac.uk/pascal/VOC/>
+  dataset for 21 object classes, listed in "<omz_dir>/data/dataset_classes/voc_20cl_bkgr.txt"
+  file. The model was built on ResNetV1-50 <https://arxiv.org/pdf/1812.01187.pdf>
+  backbone and PSP segmentation head. This model is used for pixel-level prediction
+  tasks. For details see repository <https://github.com/open-mmlab/mmsegmentation/tree/master>,
+  paper <https://arxiv.org/abs/1612.01105>.
+task_type: semantic_segmentation
+files:
+  - name: pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
+    size: 196212259
+    sha256: ed5dfbd939dd2e4f78a0c2e6726a57150f3aec95e07f2cf64aeffea68a712c5b
+    source: https://download.openmmlab.com/mmsegmentation/v0.5/pspnet/pspnet_r50-d8_512x512_20k_voc12aug/pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth
+  - name: models/configs/pspnet/pspnet_r50-d8_512x512_20k_voc12aug.py
+    size: 263
+    sha256: 0a36424a1dec8d068fc5676c90106a0b15914b474e36e91aad4621e26aa56aae
+    source: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/993be2523b908d1e0cb45bc68e92d210b5b2cda1/configs/pspnet/pspnet_r50-d8_512x512_20k_voc12aug.py
+  - name: models/configs/_base_/models/pspnet_r50-d8.py
+    size: 1261
+    sha256: 8ac435c6388d9896dacde51e0f24d3d3c27f4972dad88f1eba9327341b689c25
+    source: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/993be2523b908d1e0cb45bc68e92d210b5b2cda1/configs/_base_/models/pspnet_r50-d8.py
+  - name: models/configs/_base_/datasets/pascal_voc12_aug.py
+    size: 261
+    sha256: b61d01edccac1a2622944761a50772a54b4848cd9e4817c25551f2cccdd05a08
+    source: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/993be2523b908d1e0cb45bc68e92d210b5b2cda1/configs/_base_/datasets/pascal_voc12_aug.py
+  - name: models/configs/_base_/datasets/pascal_voc12.py
+    size: 1930
+    sha256: b9fac8609d3c8d8a3536803b53a1222ba2d6f02af6b1638b7e78af4ab233805b
+    source: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/993be2523b908d1e0cb45bc68e92d210b5b2cda1/configs/_base_/datasets/pascal_voc12.py
+  - name: models/configs/_base_/default_runtime.py
+    size: 321
+    sha256: 27e0d1e40cf3956e2af35b8de32436eb78f91715570ba435144b29b515b1b5a1
+    source: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/993be2523b908d1e0cb45bc68e92d210b5b2cda1/configs/_base_/default_runtime.py
+  - name: models/mmsegmentation-0.11.0-py3-none-any.whl
+    size: 147357
+    sha256: 5b28a1b1c84fef8a28ac6852ef72dfab6f56dc13c33b4b24ebb358f4ea003a4a
+    source: https://files.pythonhosted.org/packages/b4/f9/4722a9dfc9bf2d6d6f5cabb90cd61d549ae316ccbe226fc6e245b586d5f9/mmsegmentation-0.11.0-py3-none-any.whl
+  - name: models/addict-2.4.0-py3-none-any.whl
+    size: 3832
+    sha256: 249bb56bbfd3cdc2a004ea0ff4c2b6ddc84d53bc2194761636eb314d5cfa5dfc
+    source: https://files.pythonhosted.org/packages/6a/00/b08f23b7d7e1e14ce01419a467b583edbb93c6cdb8654e54a9cc579cd61f/addict-2.4.0-py3-none-any.whl
+  - name: models/mmcv-1.2.0.tar.gz
+    size: 241987
+    sha256: 2e34bcacd977f101f98447be08e565c19aedeedadc155e97f8f75efe356b7ca9
+    source: https://files.pythonhosted.org/packages/d4/a0/01de45397c6222a29cf088bf54d4fb5038a4a524340eef0f923335a23116/mmcv-1.2.0.tar.gz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: models/mmcv-1.2.0.tar.gz
+  - $type: unpack_archive
+    format: zip
+    file: models/addict-2.4.0-py3-none-any.whl
+  - $type: unpack_archive
+    format: zip
+    file: models/mmsegmentation-0.11.0-py3-none-any.whl
+
+  - $type: regex_replace
+    pattern: '''../_base_/schedules/schedule_20k.py'''
+    replacement: '# \g<0>'
+    file: models/configs/pspnet/pspnet_r50-d8_512x512_20k_voc12aug.py
+  - $type: regex_replace
+    pattern: 'from (?!.resnet)'
+    replacement: '# \g<0>'
+    file: models/mmseg/models/backbones/__init__.py
+  - $type: regex_replace
+    pattern: '''(?!ResNet)\w+'',?'
+    replacement: ''
+    file: models/mmseg/models/backbones/__init__.py
+  - $type: regex_replace
+    pattern: 'from (?!(.fcn_head|.psp_head))'
+    replacement: '# \g<0>'
+    file: models/mmseg/models/decode_heads/__init__.py
+  - $type: regex_replace
+    pattern: '''(?!FCN|PSP)\w+'',?'
+    replacement: ''
+    file: models/mmseg/models/decode_heads/__init__.py
+  - $type: regex_replace
+    pattern: 'from yapf'
+    replacement: '# \g<0>'
+    file: models/mmcv-1.2.0/mmcv/utils/config.py
+  - $type: regex_replace
+    pattern: 'from (.video|.visualization|.fileio|.image)'
+    replacement: '# \g<0>'
+    file: models/mmcv-1.2.0/mmcv/__init__.py
+  - $type: regex_replace
+    pattern: 'import cv2'
+    replacement: '# \g<0>'
+    file: models/mmcv-1.2.0/mmcv/utils/env.py
+  - $type: regex_replace
+    pattern: 'import regex as re'
+    replacement: 'import re'
+    file: models/mmcv-1.2.0/mmcv/cnn/bricks/plugin.py
+  - $type: regex_replace
+    pattern: 'import regex as re'
+    replacement: 'import re'
+    file: models/mmcv-1.2.0/mmcv/utils/config.py
+
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir/models
+  - --model-path=$dl_dir/models/addict
+  - --model-path=$dl_dir/models/mmcv-1.2.0
+  - --model-name=PSPNet
+  - --import-module=model
+  - --model-param=weights_path=r"$dl_dir/pspnet_r50-d8_512x512_20k_voc12aug_20200617_101958-ed5dfbd9.pth"
+  - --model-param=config_path=r"$dl_dir/models/configs/pspnet/pspnet_r50-d8_512x512_20k_voc12aug.py"
+  - --input-shapes=1,3,512,512
+  - --input-names=input.1
+  - --output-names=segmentation_map
+  - --output-file=$conv_dir/pspnet_r50-d8.onnx
+model_optimizer_args:
+  - --input_shape=[1,3,512,512]
+  - --input=input.1
+  - --mean_values=input.1[123.675,116.28,103.53]
+  - --scale_values=input.1[58.395,57.12,57.375]
+  - --input_model=$conv_dir/pspnet_r50-d8.onnx
+  - --reverse_input_channels
+framework: pytorch
+license: https://raw.githubusercontent.com/open-mmlab/mmsegmentation/master/LICENSE

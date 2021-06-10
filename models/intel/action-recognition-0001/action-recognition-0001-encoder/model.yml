@@ -18,28 +18,28 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/action-recognition-0001-encoder.xml
-    size: 102411
-    sha256: 42ffb7a6cfe550c6c1c29840137a9af73327ac1328b3ad8ce57d3577a3cc4a81
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/action-recognition-0001/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.xml
+    size: 100943
+    sha256: 44d5b626d377106dabc7cbf41a68125df67d0ed243ba1ed423ac94f8e5df3650
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/action-recognition-0001/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.xml
   - name: FP32/action-recognition-0001-encoder.bin
     size: 85104664
-    sha256: c33e24b3f74918104eeafc106ee7f0b56804f03b87098c14ad66af6386cdb648
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/action-recognition-0001/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.bin
+    sha256: 1301d5c858fd1bae88eedafdf0e7e1b783f1f80a8edc98818913e0244ef497f2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/action-recognition-0001/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.bin
   - name: FP16/action-recognition-0001-encoder.xml
-    size: 102371
-    sha256: 8ad8caa288fb377f0a22d9e03ef5e6f7ea71a46e515cb987e2ea08ca478a1b22
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/action-recognition-0001/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.xml
+    size: 100907
+    sha256: 360791c176f54b8c4db4180053a19f7cb99cb3523c30d589f1393594ed64f65a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/action-recognition-0001/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.xml
   - name: FP16/action-recognition-0001-encoder.bin
     size: 42552332
-    sha256: 57d374b873dc87c72e5baab53245d59f1b866f6e2c3e670c923537f45018782c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/action-recognition-0001/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.bin
+    sha256: 883c3c68ba1ccfcae64d1dbd857c3f305ac76ba0f7d8460c43b553e76670a911
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/action-recognition-0001/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.bin
   - name: FP16-INT8/action-recognition-0001-encoder.xml
-    size: 281667
-    sha256: e5d946475c0a3fd961c6ef303501250679aec7c844b4a19388fc30561ec76581
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/action-recognition-0001/action-recognition-0001-encoder/FP16-INT8/action-recognition-0001-encoder.xml
+    size: 278546
+    sha256: eab591804a1acf3fe2338d4b3573c821ed2bf76605f75e4ad0076f7fb9172b93
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/action-recognition-0001/action-recognition-0001-encoder/FP16-INT8/action-recognition-0001-encoder.xml
   - name: FP16-INT8/action-recognition-0001-encoder.bin
-    size: 21318878
-    sha256: 2e2bc0010d0b92a32c8e247798647021f6b5b92fa9d2256705cb08d818fd2234
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/action-recognition-0001/action-recognition-0001-encoder/FP16-INT8/action-recognition-0001-encoder.bin
+    size: 21309656
+    sha256: fddcab91569cbb215a589b045b2ebd297a89a9926a09741ab522e883f21633bf
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/action-recognition-0001/action-recognition-0001-encoder/FP16-INT8/action-recognition-0001-encoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

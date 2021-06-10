@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-asl-0001.xml
-    size: 989419
-    sha256: 4c4e57fab55363e6e6051d5030dbd282bb3e2debc0f8bbbd888884e7cc8ba495
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-detection-asl-0001/FP32/person-detection-asl-0001.xml
+    size: 970756
+    sha256: 3e60f39724c94a98d3ae9261aa7d09694f11bb8067aa072224c649753fc19ab0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/person-detection-asl-0001/FP32/person-detection-asl-0001.xml
   - name: FP32/person-detection-asl-0001.bin
     size: 4026304
-    sha256: 0211de411259cf3601bab2529f16df42547fc3378b37994f17f4fe84f18d9599
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-detection-asl-0001/FP32/person-detection-asl-0001.bin
+    sha256: 3c3fa948f36169938f359255841a181a5c337a8daeb492a0f8b51cbd77b60406
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/person-detection-asl-0001/FP32/person-detection-asl-0001.bin
   - name: FP16/person-detection-asl-0001.xml
-    size: 989270
-    sha256: 9e7f419488cee38566495c1c4a1ad0bb83c8483d34069a3d5995774cf9e731cb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-detection-asl-0001/FP16/person-detection-asl-0001.xml
+    size: 970388
+    sha256: b77ac6be514af56958c957f21a698e4f0ff50c140bef1a7a07323420671fb0d8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/person-detection-asl-0001/FP16/person-detection-asl-0001.xml
   - name: FP16/person-detection-asl-0001.bin
-    size: 2013330
-    sha256: 2aab4b519ea48a90f9c0ad8d00ca11aa128d8ffe9233f8e281e2a78d1382a019
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-detection-asl-0001/FP16/person-detection-asl-0001.bin
+    size: 2013336
+    sha256: 4aadeaf9b85df034797e575690ff2fdfc1e156e105a8165521a569f8970b17ee
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/person-detection-asl-0001/FP16/person-detection-asl-0001.bin
   - name: FP16-INT8/person-detection-asl-0001.xml
-    size: 1597906
-    sha256: 55e82a51b4211fe894ba0cff9fc09322f8d7a380f50b2365ecbef6db7d7d9395
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-detection-asl-0001/FP16-INT8/person-detection-asl-0001.xml
+    size: 1581814
+    sha256: 8d66642e3158c72d811a02686072ef0468d32923ce88923e3641218d3eed7ef2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/person-detection-asl-0001/FP16-INT8/person-detection-asl-0001.xml
   - name: FP16-INT8/person-detection-asl-0001.bin
-    size: 1055660
-    sha256: 4be7605680dd4f2ca92da8eb6edb8e333091712e803f1e454967e4d96cb71972
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-detection-asl-0001/FP16-INT8/person-detection-asl-0001.bin
+    size: 1055666
+    sha256: eee6679787bc9910b5c711034e28392b035248381881815ad6ce94aa82aec102
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/person-detection-asl-0001/FP16-INT8/person-detection-asl-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -1,0 +1,44 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Mask R-CNN-based text detector.
+task_type: detection
+files:
+  - name: FP32/text-spotting-0005-detector.xml
+    size: 752245
+    sha256: 678ef0d3afb35bdbbd869f67754d9ae64762c64fc687d27b828390b141f1490f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-spotting-0005/text-spotting-0005-detector/FP32/text-spotting-0005-detector.xml
+  - name: FP32/text-spotting-0005-detector.bin
+    size: 103797672
+    sha256: ba257b3f7f80ad29b3195c94978155f374e79d902a2e0212e098135d96010478
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-spotting-0005/text-spotting-0005-detector/FP32/text-spotting-0005-detector.bin
+  - name: FP16/text-spotting-0005-detector.xml
+    size: 751596
+    sha256: ab0b6aaceebefa4cc5ae375900a3396c83cd620ea483e31913d043b2827bfeb4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-spotting-0005/text-spotting-0005-detector/FP16/text-spotting-0005-detector.xml
+  - name: FP16/text-spotting-0005-detector.bin
+    size: 51899056
+    sha256: 9607843df9a875666a2aa6574974a8728f721bef7c4b0116538b40512e1ade30
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-spotting-0005/text-spotting-0005-detector/FP16/text-spotting-0005-detector.bin
+  - name: FP16-INT8/text-spotting-0005-detector.xml
+    size: 1141663
+    sha256: 58ac8cf896e7c598dd46c726446e3ffb84f146044fcd72a1a2b790dac9933b31
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-spotting-0005/text-spotting-0005-detector/FP16-INT8/text-spotting-0005-detector.xml
+  - name: FP16-INT8/text-spotting-0005-detector.bin
+    size: 15611019
+    sha256: 8750d89a62b28fd48828a76d3cb454c87177408eb13a1963391c0002f0f1e18e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-spotting-0005/text-spotting-0005-detector/FP16-INT8/text-spotting-0005-detector.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -112,7 +112,8 @@ class MxNetLauncher(Launcher):
         return self._batch
 
     def fit_to_input(self, data, input_layer, layout, precision):
-        data = np.transpose(data, layout)
+        if layout:
+            data = np.transpose(data, layout)
         return self.mxnet.nd.array(data.astype(precision) if precision else data)
 
     @property
@@ -174,7 +175,10 @@ class MxNetLauncher(Launcher):
                     'Several model checkpoint found, please specify explicitly, which should be used for validation'
                 )
             model = model_list[0]
-            print_info('Found model {}'.format(model))
+        accepted_suffixes = ['.params']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('Found model {}'.format(model))
 
         return model
 

@@ -15,7 +15,8 @@
 description: >-
   YOLO v2 is a real-time object detection model implemented with Keras* from this
   repository <https://github.com/david8862/keras-YOLOv3-model-set> and converted to
-  TensorFlow* framework. This model was pretrained on COCO* dataset with 80 classes.
+  TensorFlow* framework. This model was pre-trained on Common Objects in Context (COCO)
+  <https://cocodataset.org/#home> dataset with 80 classes.
 task_type: detection
 files:
   - name: yolo-v2.pb
@@ -29,5 +30,6 @@ model_optimizer_args:
   - --reverse_input_channels
   - --transformations_config=$mo_dir/extensions/front/tf/yolo_v2.json
   - --input_model=$dl_dir/yolo-v2.pb
+quantizable: yes
 framework: tf
 license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE
