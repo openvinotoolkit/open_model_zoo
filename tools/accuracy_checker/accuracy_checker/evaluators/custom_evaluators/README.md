@@ -30,9 +30,9 @@ Optionally you can provide `module_config` section which contains config for cus
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/mtcnn_evaluator.py`.
   Configuration file example: `<omz_dir>/models/public/mtcnn/accuracy-check.yml`.
 
-* **Text Spotting Evaluator** demonstrates how to evaluate the `text-spotting-0004` model via Accuracy Checker.
+* **Text Spotting Evaluator** demonstrates how to evaluate the `text-spotting-0005` model via Accuracy Checker.
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/text_spotting_evaluator.py`.
-  Configuration file example: `<omz_dir>/models/intel/text-spotting-0004/accuracy-check.yml`.
+  Configuration file example: `<omz_dir>/models/intel/text-spotting-0005/accuracy-check.yml`.
 
 * **Automatic Speech Recognition Evaluator** shows how to evaluate speech recognition pipeline (encoder + decoder).
   Evaluator code: `<omz_dir>/tools/accuracy_checker/accuracy_checker/evaluators/custom_evaluators/asr_encoder_decoder_evaluator.py`.
