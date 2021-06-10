@@ -99,7 +99,7 @@ Options:
 
 ```sh
     python3 bert_question_answering_demo.py
-            --vocab=<omz_dir>/models/intel/<model_name>/vocab.txt
+            --vocab=<omz_dir>/models/intel/bert-small-uncased-whole-word-masking-squad-0001/vocab.txt
             --model=<path_to_model>/bert-small-uncased-whole-word-masking-squad-0001.xml
             --input_names="input_ids,attention_mask,token_type_ids"
             --output_names="output_s,output_e"

@@ -59,7 +59,7 @@ Regardless of what mode is selected (interactive or non-interactive) the process
 Sympy python package is used for rendering. To install it, please, run:
 `pip install -r requirements.txt`
 Sympy package needs LaTeX system installed in the operating system.
-For Windows you can use MiKTeX (just download and install it), for Ubuntu/MacOS you can use TeX Live:
+For Windows you can use [MiKTeX\*](https://miktex.org/) (just download and install it), for Ubuntu/MacOS you can use TeX Live\*:
 Ubuntu:
 `apt-get update && apt-get install texlive`
 MacOS:
@@ -234,15 +234,25 @@ Options:
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, please provide paths to the model in the IR format and to an input video or folder with images:
+For example, to do inference with pre-trained `formula-recognition-medium-scan-0001` models, run the following command:
 
 ```bash
 python formula_recognition_demo.py \
-        -m_encoder <path_to_models>/formula-recognition-medium-scan-0001-im2latex-encoder.xml \
-        -m_decoder <path_to_models>/formula-recognition-medium-scan-0001-im2latex-decoder.xml \
-        --vocab_path <omz_dir>/models/intel/formula-recognition-medium-scan-0001-im2latex-decoder/vocab.json \
-        --preprocessing resize \
-        -i input_image.png
+    -i sample.png \
+    -m_encoder <path_to_models>/formula-recognition-medium-scan-0001-im2latex-encoder.xml \
+    -m_decoder <path_to_models>/formula-recognition-medium-scan-0001-im2latex-decoder.xml \
+    --vocab_path <omz_dir>/models/intel/formula-recognition-medium-scan-0001/vocab.json \
+    --preprocessing resize
+```
+
+To run the demo with `formula-recognition-polynomials-handwritten-0001` models use command like:
+```bash
+python formula_recognition_demo.py \
+    -i sample2.png \
+    -m_encoder <path_to_models>/formula-recognition-polynomials-handwritten-0001-encoder.xml \
+    -m_decoder <path_to_models>/formula-recognition-polynomials-handwritten-0001-decoder.xml \
+    --vocab_path <omz_dir>/models/intel/formula-recognition-polynomials-handwritten-0001/vocab.json \
+    --preprocessing crop
 ```
 
 ## Demo Output
