@@ -76,7 +76,6 @@ def main():
 
     omz_reference_prefix = '<omz_dir>/'
     omz_github_url = 'https://github.com/openvinotoolkit/open_model_zoo/'
-    blob_tree_components = "../../"
 
     for md_path in sorted(all_md_files):
         referenced_md_files = set()
@@ -89,19 +88,28 @@ def main():
 
         for url in sorted([ref.url for ref in doc_page.external_references()]):
             if url.startswith(omz_github_url):
-                suggested_reference = url[len(omz_github_url):]
+                omz_relative_url = url[len(omz_github_url):]
+                omz_relative_path = Path(urllib.request.url2pathname(omz_relative_url))
 
-                if suggested_reference.startswith(('blob', 'tree')):
-                    md_path_parent_dir_components = '../' * len(md_path_rel.parent.parts)
+                if omz_relative_path.as_posix().startswith(('blob/', 'tree/')):
+                    omz_relative_path = Path(*omz_relative_path.parts[1:]) # removed blob/ or tree/
+                    omz_relative_posix_path = omz_relative_path.as_posix()
+
+                    distance_to_md_parent_dir = 0
 
                     if url.endswith('.md'):
-                        suggested_reference = blob_tree_components + md_path_parent_dir_components \
-                            + suggested_reference
+                        for parent in md_path_rel.parents:
+                            try:
+                                omz_relative_posix_path = omz_relative_path.relative_to(parent).as_posix()
+                                break
+                            except:
+                                distance_to_md_parent_dir += 1
+                        suggested_path = '../' * distance_to_md_parent_dir + omz_relative_posix_path
                     else:
-                        suggested_reference = omz_reference_prefix + suggested_reference
+                        suggested_path = omz_reference_prefix + omz_relative_posix_path
 
                     complain(f'{md_path_rel}: non-local OMZ Repo reference "{url}"'
-                        f' (replace it by "{suggested_reference}")')
+                        f' (replace it by `{suggested_path}`)')
                     continue
 
             try:
