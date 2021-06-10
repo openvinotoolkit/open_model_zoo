@@ -17,20 +17,20 @@ description: >-
 task_type: token_recognition
 files:
   - name: FP32/formula-recognition-polynomials-handwritten-0001-decoder.xml
-    size: 50001
-    sha256: fab7f0769cf9a3defb6490203cf5377cf29af06381c3bc60765361cb31cc3059
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP32/formula-recognition-polynomials-handwritten-0001-decoder.xml
+    size: 50003
+    sha256: 5b9da3c376c6f71f81488e85522c5228e04485087460c361d95dc804aa003b58
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP32/formula-recognition-polynomials-handwritten-0001-decoder.xml
   - name: FP32/formula-recognition-polynomials-handwritten-0001-decoder.bin
     size: 10179560
-    sha256: 2565b7b96104f7edc57b4de3de9e880d7d17756e591a07ee3a1cfa3d2a0a70f4
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP32/formula-recognition-polynomials-handwritten-0001-decoder.bin
+    sha256: 93b3e2ff393ff907ccae41a53cb072abe17fff759157b559490889fb8e66faa0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP32/formula-recognition-polynomials-handwritten-0001-decoder.bin
   - name: FP16/formula-recognition-polynomials-handwritten-0001-decoder.xml
     size: 49987
-    sha256: 92c1c0e0f3b0da86e70bcbcfc6c20b6e13ea98c95c2c0e8079c837a0608b425e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.xml
+    sha256: c4e515cd866e012b09942f1dcdbdb41c63fe844d8d47f208e2a17df40baad9a0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.xml
   - name: FP16/formula-recognition-polynomials-handwritten-0001-decoder.bin
     size: 5089834
     sha256: 7f1cadeabd8a1a1bb5847f1947d573ffa2a3ce5043f5d78fe3e19f4239a46f8e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-decoder/FP16/formula-recognition-polynomials-handwritten-0001-decoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

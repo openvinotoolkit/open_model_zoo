@@ -18,28 +18,28 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/text-spotting-0005-recognizer-decoder.xml
-    size: 52259
-    sha256: ef0e5222f0eda3968d2299d19f6a1b0956edf1a8f9a3ab43692013b496325525
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.xml
+    size: 50446
+    sha256: 8e883eb30cc58d4eede8242dbb182f60cc206c4b227e020042e04e6dc931da03
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.xml
   - name: FP32/text-spotting-0005-recognizer-decoder.bin
-    size: 2707708
-    sha256: d4747457cf3bc73dca5353332745dc5f260cd62fa0367e2808408e8c58ec9bdd
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.bin
+    size: 2707724
+    sha256: 6387c3f25dc911a57e3e8bcbf8dc8be22a55644ccb837e2fed2e8fef4517f7e5
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.bin
   - name: FP16/text-spotting-0005-recognizer-decoder.xml
-    size: 52230
-    sha256: 42f98150f6f8816c6144389e4fd82dc06e6a66138dec975a1737309a8cbcf124
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.xml
+    size: 50418
+    sha256: 8a377701d4f4c20f898dead27401b3463e0e46a58976df5ea2b3b0c07c55adef
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.xml
   - name: FP16/text-spotting-0005-recognizer-decoder.bin
-    size: 1353904
-    sha256: 8ea97ef6a3a8c60459c11393ad4567eea800985de0d1c46080323adf4e369146
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.bin
+    size: 1353920
+    sha256: 19f19af30ce2d8cf4bbbfd5f8a4e9d125dd0f26017b0d56899fb01af0f7556b3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.bin
   - name: FP16-INT8/text-spotting-0005-recognizer-decoder.xml
-    size: 62862
-    sha256: eb7145dabb5ad7a6aba7cac7b3f4eeb9af9c2d24a4568b536a0775b6a616093a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16-INT8/text-spotting-0005-recognizer-decoder.xml
+    size: 80802
+    sha256: 2042ef2d1c1a9daf73bb22e5bcfa90109196e1a29450ef0a592065c2ab2d0b54
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16-INT8/text-spotting-0005-recognizer-decoder.xml
   - name: FP16-INT8/text-spotting-0005-recognizer-decoder.bin
-    size: 1085100
-    sha256: 9159a0d0a79b15c4078d6376414c12673121c7f161bd582fe43145196d561136
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16-INT8/text-spotting-0005-recognizer-decoder.bin
+    size: 1085540
+    sha256: 191f0f9d50409de2e49f67a7cba1524965d09ac3c91d70eba3fe48207867af13
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16-INT8/text-spotting-0005-recognizer-decoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -19,20 +19,20 @@ description: >-
 task_type: noise_suppression
 files:
   - name: FP32/noise-suppression-poconetlike-0001.xml
-    size: 977670
-    sha256: 787aecbc9645dee9886431060219a867bd266526761623ee9c6406d9f0dc1c0c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.xml
+    size: 1158371
+    sha256: 75e9a3c6f88f7ef168a03d7c425a39b215f4e02c1fdde25050425de4a1caf593
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.xml
   - name: FP32/noise-suppression-poconetlike-0001.bin
-    size: 29590352
-    sha256: c60f94927745906826441b9149d26eca304241cb248ba10f03f3b566f27529bb
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.bin
+    size: 29589884
+    sha256: df0058f520250c34fc1a49d97410437e435e2b59d102f8ba5475c8581e03cad7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/noise-suppression-poconetlike-0001/FP32/noise-suppression-poconetlike-0001.bin
   - name: FP16/noise-suppression-poconetlike-0001.xml
-    size: 976776
-    sha256: 2b1ddfde4d84d95edad67517b2460f082190a451b18b34353d4e29203759b051
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.xml
+    size: 1158262
+    sha256: a576acee5c0ec9272bca9396d4e75a355f71d635c34199b24f7f128d41e23b78
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.xml
   - name: FP16/noise-suppression-poconetlike-0001.bin
-    size: 14795830
-    sha256: c35540ac3f2c4f947ddde3fe35cd7cae3176ad236e1a5f34e71edeae21f01758
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.bin
+    size: 14795362
+    sha256: 24031cd684cf1fcd05ff0498ee78149591f3ed11bd5e3f02545dec8b42c1becc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/noise-suppression-poconetlike-0001/FP16/noise-suppression-poconetlike-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

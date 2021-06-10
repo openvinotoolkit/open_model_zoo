@@ -18,28 +18,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-teacher-0002.xml
-    size: 673089
-    sha256: dae3c64ccf7ec780038d36d7b4cfcd019c2ca1b11f56dfc9cb779354f8ab6639
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
+    size: 681855
+    sha256: 9dc77792b4ccc8d96e30854070ed392d88661d1b6f10191ad36f5f051c4a1359
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
   - name: FP32/person-detection-action-recognition-teacher-0002.bin
     size: 7800360
-    sha256: ba972a60c4ff56aee316bbac20a97ea18d45085b8491c30a2402573a3d355041
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
+    sha256: 4998076345069ea57e34a0fdf48ea02a2aac7e068f7ebd730dc896970ba9dfa8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
   - name: FP16/person-detection-action-recognition-teacher-0002.xml
-    size: 672556
-    sha256: dbeff07c43bfd9c1afb4ef447c7764ee182d6b6fb285f962f1bbcd1b3a56378b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
+    size: 681320
+    sha256: 0e1ee1b0a29098ee5c705c1b8f29889e7c0d3819764d8db5f5a5ffa43abe3589
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
   - name: FP16/person-detection-action-recognition-teacher-0002.bin
     size: 3900234
-    sha256: 3c940c81a3325acc74c30753333052a832a043d50c95a751d0be353b9919b71e
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
+    sha256: b5d354a64d1f1ed393b4b5e90083ac84db41bbf699689ec85bb64f602622d234
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
   - name: FP16-INT8/person-detection-action-recognition-teacher-0002.xml
-    size: 1949342
-    sha256: a40c96c576220b11470a4f5d30d4a4de5c356f7178352eba69d041ba6402b6c2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.xml
+    size: 1949822
+    sha256: f12df4e865dda7fe5ff8022bb25e6d12e15dbbf76174cee1989147e9e8fd6cdd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.xml
   - name: FP16-INT8/person-detection-action-recognition-teacher-0002.bin
-    size: 2123844
-    sha256: 4e9021d4ea50fd6367ff517e4a02a8338178f8dc79d2ab135ca6eeaa0eef734c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/1/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.bin
+    size: 2055068
+    sha256: 3f74b190bdb86e2352a5ed9bd02e21e8ecdaac7a61b53dee92477c9e8b616f7c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/person-detection-action-recognition-teacher-0002/FP16-INT8/person-detection-action-recognition-teacher-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE
