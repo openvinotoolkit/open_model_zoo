@@ -102,7 +102,7 @@ def main():
                             try:
                                 omz_relative_posix_path = omz_relative_path.relative_to(parent).as_posix()
                                 break
-                            except:
+                            except ValueError:
                                 distance_to_md_parent_dir += 1
                         suggested_path = '../' * distance_to_md_parent_dir + omz_relative_posix_path
                     else:
