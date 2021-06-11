@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import math
+import tempfile
 from pathlib import Path
 
 import cv2
@@ -441,9 +442,10 @@ class LPIPS(BaseRegressionMetric):
             'squeeze': torchvision.models.squeezenet1_1,
             'vgg': torchvision.models.vgg16
         }
-        preloaded_weights = torch.utils.model_zoo.load_url(
-            model_weights[net], model_dir='.', progress=False, map_location='cpu'
-        )
+        with tempfile.TemporaryDirectory(prefix='lpips_model', dir=Path.cwd()) as model_dir:
+            preloaded_weights = torch.utils.model_zoo.load_url(
+                model_weights[net], model_dir=model_dir, progress=False, map_location='cpu'
+            )
         model = model_classes[net](pretrained=False)
         model.load_state_dict(preloaded_weights)
         feats = model.features
