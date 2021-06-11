@@ -91,8 +91,8 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 ## Legal Information
 
 The original model is distributed under the following
-[license1](https://github.com/AlexeyAB/darknet/blob/master/LICENSE):
-[license2](https://github.com/tensorflow/models/blob/master/LICENSE):
+[license1](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE):
+[license2](https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE):
 
 ```
 MIT License
