@@ -176,7 +176,7 @@ def main():
         q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
 
         # maximum number of tokens that can be processed by network at once
-        max_length = ie_encoder.input_nfo[input_names[0]].input_data.shape[1]
+        max_length = ie_encoder.input_info[input_names[0]].input_data.shape[1]
 
         # calculate number of tokens for context in each inference request.
         # reserve 3 positions for special tokens
