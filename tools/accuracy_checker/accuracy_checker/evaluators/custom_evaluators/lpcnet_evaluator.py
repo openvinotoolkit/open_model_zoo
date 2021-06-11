@@ -271,7 +271,8 @@ class DecoderModel:
                 p = np.maximum(p - 0.002, 0).astype('float64')
                 p = p / (1e-8 + np.sum(p))
 
-                fexc[0, 0, 2] = np.argmax(np.random.multinomial(1, p[0, 0, :], 1))
+                rng = np.random.default_rng(12345)
+                fexc[0, 0, 2] = np.argmax(rng.multinomial(1, p[0, 0, :], 1))
                 pcm[pcm_start_index] = pred + ulaw2lin(fexc[0, 0, 2])
                 fexc[0, 0, 0] = lin2ulaw(pcm[pcm_start_index])
                 mem.append(coef * mem_ + pcm[pcm_start_index])
