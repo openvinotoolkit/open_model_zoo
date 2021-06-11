@@ -988,8 +988,8 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-        single_option_cases('-m', ModelArg('aclnet'), ModelArg('aclnet-int8', precision='FP32-INT8')),
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
+                          '-m': ModelArg('aclnet')}),
     )),
 
     PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
