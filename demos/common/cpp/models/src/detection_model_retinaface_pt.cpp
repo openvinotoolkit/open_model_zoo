@@ -19,9 +19,13 @@
 #include <utils/slog.hpp>
 #include "models/detection_model_retinaface_pt.h"
 
+#if !defined(_countof)
+#define _countof(x) (sizeof(x) / sizeof(x[0]))
+#endif
+
 ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),  // Default label is "Face"
-    shouldDetectMasks(false), shouldDetectLandmarks(false), boxIOUThreshold(boxIOUThreshold), maskThreshold(0.8f), landmarkStd(1.0f) {
+    landmarksNum(0), boxIOUThreshold(boxIOUThreshold){
 }
 
 void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -54,6 +58,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
 
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
+    landmarksNum = 0;
 
     std::vector<uint32_t> outputsSizes[OT_MAX];
     for (auto& output : outputInfo) {
@@ -61,7 +66,6 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
         output.second->setLayout(output.second->getDims().size()==4 ? InferenceEngine::Layout::NCHW : InferenceEngine::Layout::CHW);
         outputsNames.push_back(output.first);
 
-        EOutputType type = OT_MAX;
         outputsNames.resize(2);
         if (output.first.find("bbox") != std::string::npos) {
             outputsNames[OT_BBOX] = output.first;
@@ -72,7 +76,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
         else if (output.first.find("landmark") != std::string::npos) {
             outputsNames.resize(std::max(outputsNames.size(), (size_t)OT_LANDMARK + 1));
             outputsNames[OT_LANDMARK] = output.first;
-            shouldDetectLandmarks = true;
+            landmarksNum = output.second->getDims()[2]/2; // Each landmark consist of 2 variables (x and y)
         }
         else {
             continue;
@@ -87,7 +91,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
         throw std::logic_error("Expected 2 or 3 output blobs");
     }
 
-    priorData = generatePriorData();
+    priors = generatePriorData();
 }
 
 
@@ -124,20 +128,20 @@ std::vector<float> ModelRetinaFacePT::getFilteredScores(const InferenceEngine::M
     return scores;
 }
 
-std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<uint32_t>& indicies, std::vector<ModelRetinaFacePT::Box> priors, int imgWidth, int imgHeight) {
+std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<uint32_t>& indicies, int imgWidth, int imgHeight) {
     InferenceEngine::LockedMemory<const void> outputMapped = rawData->rmap();
     const float *memPtr = outputMapped.as<float*>();
     auto desc = rawData->getTensorDesc();
     auto sz = desc.getDims();
 
-    std::vector<cv::Point2f> landmarks(LANDMARKS_NUM*indicies.size());
+    std::vector<cv::Point2f> landmarks(landmarksNum*indicies.size());
 
-    for (int i = 0; i < indicies.size(); i++) {
+    for (size_t i = 0; i < indicies.size(); i++) {
         uint32_t idx = indicies[i];
         auto& prior = priors[idx];
-        for (int j = 0; j < LANDMARKS_NUM; j++) {
-            landmarks[i*LANDMARKS_NUM + j].x = (prior.cX + memPtr[idx*sz[2] + j*2] * variance[0] * prior.width) * imgWidth;
-            landmarks[i*LANDMARKS_NUM + j].y = (prior.cY + memPtr[idx*sz[2] + j*2 + 1] * variance[0] * prior.height) * imgHeight;
+        for (int j = 0; j < landmarksNum; j++) {
+            landmarks[i*landmarksNum + j].x = (prior.cX + memPtr[idx*sz[2] + j*2] * variance[0] * prior.width) * imgWidth;
+            landmarks[i*landmarksNum + j].y = (prior.cY + memPtr[idx*sz[2] + j*2 + 1] * variance[0] * prior.height) * imgHeight;
         }
     }
     return landmarks;
@@ -167,7 +171,7 @@ std::vector<ModelRetinaFacePT::Box> ModelRetinaFacePT::generatePriorData() {
     return anchors;
 }
 
-std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(const InferenceEngine::MemoryBlob::Ptr& rawData, std::vector<ModelRetinaFacePT::Box> priors, const std::vector<uint32_t>& indicies,int imgWidth, int imgHeight) {
+std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<uint32_t>& indicies,int imgWidth, int imgHeight) {
     std::vector<ModelRetinaFacePT::Rect> rects;
     rects.reserve(indicies.size());
 
@@ -203,17 +207,17 @@ std::unique_ptr<ResultBase> ModelRetinaFacePT::postprocess(InferenceResult& infR
     const auto bboxRaw = infResult.outputsData[outputsNames[OT_BBOX]];
     const auto scoresRaw = infResult.outputsData[outputsNames[OT_SCORES]];
 
-    auto& validIndicies = doThresholding(scoresRaw, confidenceThreshold);
-    auto& scores = getFilteredScores(scoresRaw, validIndicies);
+    const auto& validIndicies = doThresholding(scoresRaw, confidenceThreshold);
+    const auto& scores = getFilteredScores(scoresRaw, validIndicies);
 
-    auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
-    auto& landmarks = shouldDetectLandmarks ?
-        getFilteredLandmarks(infResult.outputsData[outputsNames[OT_LANDMARK]], validIndicies, priorData, internalData.inputImgWidth, internalData.inputImgHeight) :
+    const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
+    const auto& landmarks = landmarksNum ?
+        getFilteredLandmarks(infResult.outputsData[outputsNames[OT_LANDMARK]], validIndicies, internalData.inputImgWidth, internalData.inputImgHeight) :
         std::vector<cv::Point2f>();
 
-    auto& proposals = getFilteredProposals(bboxRaw, priorData, validIndicies, internalData.inputImgWidth, internalData.inputImgHeight);
+    const auto& proposals = getFilteredProposals(bboxRaw, validIndicies, internalData.inputImgWidth, internalData.inputImgHeight);
 
-    const auto& keptIndicies = nms(proposals, scores, boxIOUThreshold, !shouldDetectLandmarks);
+    const auto& keptIndicies = nms(proposals, scores, boxIOUThreshold, !landmarksNum);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
     RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult(infResult.frameId, infResult.metaData);
@@ -222,7 +226,7 @@ std::unique_ptr<ResultBase> ModelRetinaFacePT::postprocess(InferenceResult& infR
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
 
     result->objects.reserve(keptIndicies.size());
-    result->landmarks.reserve(keptIndicies.size() * ModelRetinaFacePT::LANDMARKS_NUM);
+    result->landmarks.reserve(keptIndicies.size() * landmarksNum);
     for (auto i : keptIndicies) {
         DetectedObject desc;
         desc.confidence = scores[i];
@@ -238,9 +242,9 @@ std::unique_ptr<ResultBase> ModelRetinaFacePT::postprocess(InferenceResult& infR
         result->objects.push_back(desc);
 
         //--- Filtering landmarks coordinates
-        for (uint32_t l = 0; l < LANDMARKS_NUM && shouldDetectLandmarks; ++l) {
-            result->landmarks.emplace_back(landmarks[i*LANDMARKS_NUM+l].x,
-                landmarks[i*LANDMARKS_NUM + l].y
+        for (uint32_t l = 0; l < landmarksNum; ++l) {
+            result->landmarks.emplace_back(landmarks[i*landmarksNum +l].x,
+                landmarks[i*landmarksNum + l].y
             );
         }
     }

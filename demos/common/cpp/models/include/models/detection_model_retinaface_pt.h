@@ -18,6 +18,7 @@
 #include <vector>
 #include "detection_model.h"
 #include <utils/nms.hpp>
+#include <string>
 
 class ModelRetinaFacePT
     : public DetectionModel {
@@ -41,8 +42,6 @@ public:
         float getYCenter() const { return top + (getHeight() - 1.0f) / 2.0f; }
     };
 
-    static constexpr int LANDMARKS_NUM = 5;
-
     /// Loads model and performs required initialization
     /// @param model_name name of model to load
     /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
@@ -52,15 +51,11 @@ public:
     /// than actual classes number, default "Label #N" will be shown for missing items.
     class ModelRetinaFacePT(const std::string& model_name, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold);
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
-    std::unique_ptr<ResultBase> ModelRetinaFacePT::process_output(InferenceResult& infResult);
-protected:
 
-    bool shouldDetectMasks;
-    bool shouldDetectLandmarks;
+protected:
+    size_t landmarksNum;
     const float boxIOUThreshold;
-    const float maskThreshold;
     float variance[2] = { 0.1f, 0.2f };
-    float landmarkStd;
 
     enum EOutputType {
         OT_BBOX,
@@ -69,15 +64,15 @@ protected:
         OT_MAX
     };
 
-    std::vector<ModelRetinaFacePT::Box> priorData;
+    std::vector<ModelRetinaFacePT::Box> priors;
 
     std::vector<uint32_t> doThresholding(const InferenceEngine::MemoryBlob::Ptr& rawData, const float confidenceThreshold);
     std::vector<float> getFilteredScores(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<uint32_t>& indicies);
     std::vector<cv::Point2f> getFilteredLandmarks(const InferenceEngine::MemoryBlob::Ptr& rawData,
-        const std::vector<uint32_t>& indicies, std::vector<ModelRetinaFacePT::Box> priors, int imgWidth, int imgHeight);
+        const std::vector<uint32_t>& indicies, int imgWidth, int imgHeight);
     std::vector<ModelRetinaFacePT::Box> generatePriorData();
     std::vector<ModelRetinaFacePT::Rect> getFilteredProposals(const InferenceEngine::MemoryBlob::Ptr& rawData,
-        std::vector<ModelRetinaFacePT::Box> priors, const std::vector<uint32_t>& indicies, int imgWidth, int imgHeight);
+        const std::vector<uint32_t>& indicies, int imgWidth, int imgHeight);
 
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
 };
