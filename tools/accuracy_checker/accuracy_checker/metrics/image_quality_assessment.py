@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import math
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -407,8 +408,8 @@ class LPIPS(BaseRegressionMetric):
         self.color_scale = 255 if not self.normalized_images else 1
         if isinstance(lpips, UnsupportedPackage):
             lpips.raise_error(self.__provider__)
-        self.loss = lpips.LPIPS(net=self.get_value_from_config('net'))
         self.dist_threshold = self.get_value_from_config('distance_threshold')
+        self.loss = self._create_loss()
 
     def lpips_differ(self, annotation_image, prediction_image):
         if self.color_order == 'BGR':
@@ -425,3 +426,31 @@ class LPIPS(BaseRegressionMetric):
             self.meta['names'].append('ratio_greater_{}'.format(self.dist_threshold))
             results += (invalid_ratio, )
         return results
+
+    def _create_loss(self):
+        import torch # pylint: disable=C0415
+        import torchvision # pylint: disable=C0415
+        net = self.get_value_from_config('net')
+        model_weights = {
+            'alex': 'https://download.pytorch.org/models/alexnet-owt-7be5be79.pth',
+            'squeeze': 'https://download.pytorch.org/models/squeezenet1_1-b8a52dc0.pth',
+            'vgg':  'https://download.pytorch.org/models/vgg16-397923af.pth'
+        }
+        model_classes = {
+            'alex': torchvision.models.alexnet,
+            'squeeze': torchvision.models.squeezenet1_1,
+            'vgg': torchvision.models.vgg16
+        }
+        preloaded_weights = torch.utils.model_zoo.load_url(
+            model_weights[net], model_dir='.', progress=False, map_location='cpu'
+        )
+        model = model_classes[net](pretrained=False)
+        model.load_state_dict(preloaded_weights)
+        feats = model.features
+        loss = lpips.LPIPS(pnet_rand=True)
+        for slice_id in range(1, loss.net.N_slices + 1):
+            sl = getattr(loss.net, 'slice{}'.format(slice_id))
+            for module_id in sl._modules: # pylint: disable=W0212
+                sl._modules[module_id] = feats[int(module_id)] # pylint: disable=W0212
+            setattr(loss.net, 'slice{}'.format(slice_id), sl)
+        return loss
