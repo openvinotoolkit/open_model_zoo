@@ -136,7 +136,7 @@ std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const Inference
         uint32_t idx = indicies[i];
         auto& prior = priors[idx];
         for (int j = 0; j < LANDMARKS_NUM; j++) {
-            landmarks[i*LANDMARKS_NUM+j].x = (prior.cX + memPtr[idx*sz[2] + j*2] * variance[0] * prior.width) * imgWidth;
+            landmarks[i*LANDMARKS_NUM + j].x = (prior.cX + memPtr[idx*sz[2] + j*2] * variance[0] * prior.width) * imgWidth;
             landmarks[i*LANDMARKS_NUM + j].y = (prior.cY + memPtr[idx*sz[2] + j*2 + 1] * variance[0] * prior.height) * imgHeight;
         }
     }
