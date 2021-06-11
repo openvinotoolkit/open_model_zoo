@@ -25,7 +25,7 @@
 
 ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),  // Default label is "Face"
-    landmarksNum(0), boxIOUThreshold(boxIOUThreshold){
+    landmarksNum(0), boxIOUThreshold(boxIOUThreshold) {
 }
 
 void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -139,7 +139,7 @@ std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const Inference
     for (size_t i = 0; i < indicies.size(); i++) {
         uint32_t idx = indicies[i];
         auto& prior = priors[idx];
-        for (int j = 0; j < landmarksNum; j++) {
+        for (size_t j = 0; j < landmarksNum; j++) {
             landmarks[i*landmarksNum + j].x = (prior.cX + memPtr[idx*sz[2] + j*2] * variance[0] * prior.width) * imgWidth;
             landmarks[i*landmarksNum + j].y = (prior.cY + memPtr[idx*sz[2] + j*2 + 1] * variance[0] * prior.height) * imgHeight;
         }
@@ -151,7 +151,7 @@ std::vector<ModelRetinaFacePT::Box> ModelRetinaFacePT::generatePriorData() {
     float globalMinSizes[][2] = { {16, 32}, {64, 128}, {256, 512} };
     float steps[] = { 8., 16., 32. };
     std::vector<ModelRetinaFacePT::Box> anchors;
-    for (int stepNum = 0; stepNum < _countof(steps); stepNum++) {
+    for (size_t stepNum = 0; stepNum < _countof(steps); stepNum++) {
         int featureW = (int)std::round(netInputWidth / steps[stepNum]);
         int featureH = (int)std::round(netInputHeight / steps[stepNum]);
 
@@ -221,9 +221,6 @@ std::unique_ptr<ResultBase> ModelRetinaFacePT::postprocess(InferenceResult& infR
 
     // --------------------------- Create detection result objects --------------------------------------------------------
     RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult(infResult.frameId, infResult.metaData);
-
-    auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
-    auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
 
     result->objects.reserve(keptIndicies.size());
     result->landmarks.reserve(keptIndicies.size() * landmarksNum);
