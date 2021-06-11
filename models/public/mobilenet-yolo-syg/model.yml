@@ -54,5 +54,6 @@ model_optimizer_args:
   - --reverse_input_channels
 
 framework: tf
-license: https://github.com/AlexeyAB/darknet/blob/master/LICENSE
-         https://github.com/tensorflow/models/blob/master/LICENSE
+quantizable: yes
+license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
+         https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE
