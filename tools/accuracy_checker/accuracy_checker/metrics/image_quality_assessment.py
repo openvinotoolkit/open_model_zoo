@@ -433,7 +433,9 @@ class LPIPS(BaseRegressionMetric):
         import torchvision # pylint: disable=C0415
         net = self.get_value_from_config('net')
         model_weights = {
-            'alex': 'https://download.pytorch.org/models/alexnet-owt-7be5be79.pth',
+            'alex': ('https://download.pytorch.org/models/alexnet-owt-7be5be79.pth',
+                     'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth'
+                     ),
             'squeeze': 'https://download.pytorch.org/models/squeezenet1_1-b8a52dc0.pth',
             'vgg':  'https://download.pytorch.org/models/vgg16-397923af.pth'
         }
@@ -443,8 +445,11 @@ class LPIPS(BaseRegressionMetric):
             'vgg': torchvision.models.vgg16
         }
         with tempfile.TemporaryDirectory(prefix='lpips_model', dir=Path.cwd()) as model_dir:
+            weights = model_weights[net]
+            if isinstance(weights, tuple):
+                weights = weights[1] if torch.__version__ <= '1.6.0' else weights[0]
             preloaded_weights = torch.utils.model_zoo.load_url(
-                model_weights[net], model_dir=model_dir, progress=False, map_location='cpu'
+                weights, model_dir=model_dir, progress=False, map_location='cpu'
             )
         model = model_classes[net](pretrained=False)
         model.load_state_dict(preloaded_weights)
