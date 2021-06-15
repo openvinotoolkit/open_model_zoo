@@ -982,6 +982,9 @@ class DLSDKLauncher(Launcher):
     def get_model_file_type(self):
         return self._model.suffix
 
+    def input_shape(self, input_name):
+        return self.inputs[input_name].shape
+
     def release(self):
         if 'network' in self.__dict__:
             del self.network

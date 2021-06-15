@@ -88,8 +88,8 @@ class ModelEvaluator(BaseEvaluator):
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)
         launcher_inputs = launcher.inputs if not postpone_model_loading else {}
         input_feeder = InputFeeder(
-            launcher.config.get('inputs', []), launcher_inputs, launcher.fit_to_input, launcher.default_layout,
-            launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision
+            launcher.config.get('inputs', []), launcher_inputs, launcher.input_shape, launcher.fit_to_input,
+            launcher.default_layout, launcher_config['framework'] == 'dummy' or postpone_model_loading, input_precision
         )
         if not postpone_model_loading:
             if input_precision:

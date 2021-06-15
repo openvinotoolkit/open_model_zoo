@@ -406,7 +406,7 @@ class ModelEvaluator:
         network = next(iter(network_list))['model'] if network_list is not None else None
         self.launcher.load_network(network)
         self.input_feeder = InputFeeder(
-            self.launcher.config.get('inputs', []), self.launcher.inputs,
+            self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
             self.launcher.fit_to_input, self.launcher.default_layout
         )
         if self.adapter:
@@ -417,7 +417,7 @@ class ModelEvaluator:
         xml_path, bin_path = model_paths['model'], model_paths['weights']
         self.launcher.load_ir(xml_path, bin_path)
         self.input_feeder = InputFeeder(
-            self.launcher.config.get('inputs', []), self.launcher.inputs,
+            self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
             self.launcher.fit_to_input, self.launcher.default_layout
         )
         if self.adapter:

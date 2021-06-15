@@ -248,6 +248,9 @@ class Launcher(ClassProvider):
     def inputs(self):
         raise NotImplementedError
 
+    def input_shape(self, input_name):
+        return self.inputs[input_name]
+
     def predict_async(self, *args, **kwargs):
         raise NotImplementedError('Launcher does not support async mode')
 
