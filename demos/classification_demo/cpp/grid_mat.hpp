@@ -31,9 +31,8 @@ public:
                      currSourceId{0} {
         cv::Size size(static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.width / aspectRatio.height))),
                       static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.height / aspectRatio.width))));
-        // if targetFPS == 0 then set minimum possible grid size
         if (size.width == 0 || size.height == 0) {
-            size = {1, 1};
+            size = {1, 1};  // set minimum possible grid size
         }
         int minCellSize = std::min(maxDisp.width / size.width, maxDisp.height / size.height);
         cellSize = cv::Size(minCellSize, minCellSize);
