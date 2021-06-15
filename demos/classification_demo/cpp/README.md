@@ -20,6 +20,7 @@ The list of models supported by the demo is in `<omz_dir>/demos/classification_d
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
+
 ```sh
 python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
 ```
