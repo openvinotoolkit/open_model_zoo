@@ -960,3 +960,32 @@ class UltraLightweightFaceDetectionAdapter(Adapter):
             result.append(DetectionPrediction(identifier, labels, filtered_score, x_mins, y_mins, x_maxs, y_maxs))
 
         return result
+
+
+class PPDetectionAdapter(Adapter):
+    __provider__ = 'ppdetection'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'boxes_out': StringField(description='output with boxes'),
+            'num_boxes_out': StringField(description='number of boxes output')
+        })
+        return params
+
+    def configure(self):
+        self.boxes_out = self.get_value_from_config('boxes_out')
+        self.num_boxes_out = self.get_value_from_config('num_boxes_out')
+
+    def process(self, raw, identifiers, frame_meta):
+        predictions = self._extract_predictions(raw, frame_meta)
+        results = []
+        boxes_start = 0
+        for identifier, num_boxes in zip(identifiers, predictions[self.num_boxes_out]):
+            batch_boxes = predictions[self.boxes_out][boxes_start:num_boxes]
+            boxes_start += num_boxes
+            labels, scores, x_mins, y_mins, x_maxs, y_maxs = batch_boxes.T
+            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
+
+        return results
