@@ -134,6 +134,9 @@ AccuracyChecker supports following set of adapters:
   * `cls_out` - the name of output layer with detected probabilities for each class. The layer shape is [num_boxes, num_classes], where `num_boxes` is number of predicted boxes, `num_classes` - number of classes in the dataset including background.
   * `bbox_out` - the name of output layer with detected boxes deltas. The layer shape is [num_boxes, 8] where  `num_boxes` is number of predicted boxes, 8 (4 for background + 4 for foreground) bounding boxes coordinates.
   * `roid_out` - the name of output layer with regions of interest.
+* `ppdetection` - converts output of PaddlePaddle object detection models to `DetectionPrediction`.
+  * `boxes_out` - the name of output layer with predicted boxes in format [[`label`, `score`, `x_min`, `y_min`, `x_max`, `y_max`] ...
+  * `num_boxes_out` - the name of output layer with number of predicted boxes for each image in batch.
 * `face_person_detection` - converting face person detection model output with 2 detection outputs to `ContainerPredition`, where value of parameters `face_out`and `person_out` are used for identification `DetectionPrediction` in container.
   * `face_out` -  face detection output layer name.
   * `person_out` - person detection output layer name.
