@@ -6,7 +6,7 @@ The demo visualize OpenVINO performance on inference of neural networks for imag
 
 On startup, the application reads command line parameters and loads a classification network to the Inference Engine for execution. It might take some time for demo to read all input images. Then the demo performs inference to classify the images and places them on grid.
 
-The demo starts in "Testing mode" with fixed grid size. After calculating the average FPS result, it will switch to normal mode and grid will be readjusted depending on model performance. Bigger grid means higher performance.
+The demo starts in "Testing mode" with fixed grid size. After calculating the average FPS result, it will switch to normal mode and grid will be readjusted depending on model performance. Bigger grid means higher performance. You can repeat testing by pressing "Space" or "R" button.
 
 When "ground truth" data applied, the color coding for the text, drawn above each image, shows whether the classification was correct: green means correct class prediction, red means wrong.
 
@@ -20,7 +20,7 @@ The list of models supported by the demo is in `<omz_dir>/demos/classification_d
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
-
+-
 ```sh
 python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
 ```
