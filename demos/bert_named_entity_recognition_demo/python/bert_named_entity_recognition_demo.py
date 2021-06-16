@@ -89,7 +89,7 @@ def main():
         log.error("    The demo expects input names: {}. "
                   "Please use the --input_names to specify the right names "
                   "(see actual values below)".format(input_names))
-        log.error("    Actual network input names: {}".format(list(ie_encoder.inputs.keys())))
+        log.error("    Actual network input names: {}".format(list(ie_encoder.input_info.keys())))
         raise Exception("Unexpected network input names")
     if len(ie_encoder.outputs) != 1:
         log.log.error('Demo expects model with single output, while provided {}'.format(len(ie_encoder.outputs)))

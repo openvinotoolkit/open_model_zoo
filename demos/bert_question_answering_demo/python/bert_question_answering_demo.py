@@ -120,17 +120,17 @@ def main():
 
     if args.reshape:
         # reshape the sequence length to the context + maximum question length (in tokens)
-        first_input_layer = next(iter(ie_encoder.inputs))
-        c = ie_encoder.inputs[first_input_layer].shape[1]
+        first_input_layer = next(iter(ie_encoder.input_info))
+        c = ie_encoder.input_info[first_input_layer].input_data.shape[1]
         # find the closest multiple of 64, if it is smaller than current network's sequence length, let' use that
         seq = min(c, int(np.ceil((len(c_tokens_id) + args.max_question_token_num) / 64) * 64))
         if seq < c:
-            input_info = list(ie_encoder.inputs)
             new_shapes = {}
-            for i in input_info:
-                n, c = ie_encoder.inputs[i].shape
-                new_shapes[i] = [n, seq]
-                log.info("Reshaped input {} from {} to the {}".format(i, ie_encoder.inputs[i].shape, new_shapes[i]))
+            for input_name, input_info in ie_encoder.input_info.items():
+                n, c = input_info.input_data.shape
+                new_shapes[input_name] = [n, seq]
+                log.info("Reshaped input {} from {} to the {}".format(
+                    input_name, input_info.input_data.shape, new_shapes[input_name]))
             log.info("Attempting to reshape the network to the modified inputs...")
             try:
                 ie_encoder.reshape(new_shapes)
@@ -145,12 +145,12 @@ def main():
     # check input and output names
     input_names = [i.strip() for i in args.input_names.split(',')]
     output_names = [o.strip() for o in args.output_names.split(',')]
-    if ie_encoder.inputs.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
+    if ie_encoder.input_info.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
         log.error("Input or Output names do not match")
         log.error("    The demo expects input->output names: {}->{}. "
                   "Please use the --input_names and --output_names to specify the right names "
                   "(see actual values below)".format(input_names, output_names))
-        log.error("    Actual network input->output names: {}->{}".format(list(ie_encoder.inputs.keys()),
+        log.error("    Actual network input->output names: {}->{}".format(list(ie_encoder.input_info.keys()),
                                                                           list(ie_encoder.outputs.keys())))
         raise Exception("Unexpected network input or output names")
 
@@ -176,7 +176,7 @@ def main():
         q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
 
         # maximum number of tokens that can be processed by network at once
-        max_length = ie_encoder.inputs[input_names[0]].shape[1]
+        max_length = ie_encoder.input_info[input_names[0]].input_data.shape[1]
 
         # calculate number of tokens for context in each inference request.
         # reserve 3 positions for special tokens
