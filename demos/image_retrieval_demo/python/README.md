@@ -112,7 +112,6 @@ python image_retrieval_demo.py \
   --ground_truth text_label
 ```
 
-When a single image is applied as an input, the demo processes and renders it quickly, then exits. To continuously visualize processed results on the screen, apply the `loop` option, which enforces looping over processing a single image.
 You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
 
 * To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.

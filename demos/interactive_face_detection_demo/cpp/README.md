@@ -131,7 +131,8 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 ./interactive_face_detection_demo -i <path_to_video>/<input_video>.mp4 -m <path_to_model>/face-detection-adas-0001.xml -m_ag <path_to_model>/age-gender-recognition-retail-0013.xml -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml -m_em <path_to_model>/emotions-recognition-retail-0003.xml -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml -m_am <path_to_model>/anti-spoof-mn3.xml -d GPU
 ```
 
-When a single image is applied as an input, the demo processes and renders it quickly, then exits. To continuously visualize processed results on the screen, apply the `loop` option, which enforces looping over processing a single image.
+>**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
+
 You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
 
 * To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.

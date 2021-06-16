@@ -113,7 +113,8 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 > * the model `person-vehicle-bike-detection-crossroad-0078` returns for persons the category index 1, it is the default value for the demo
 > * the model `person-vehicle-bike-detection-crossroad-1016` returns for persons the category index 2, so for the demo to work correctly, the command line parameter `-person_label 2` should be added.
 
-When a single image is applied as an input, the demo processes and renders it quickly, then exits. To continuously visualize processed results on the screen, apply the `loop` option, which enforces looping over processing a single image.
+>**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
+
 You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
 
 * To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.

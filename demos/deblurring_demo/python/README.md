@@ -100,6 +100,8 @@ You can use the following command to do inference on CPU on images captured by a
     python3 deblurring_demo.py -i 0 -d CPU -m <path_to_model>/deblurgan-v2.xml
 ```
 
+>**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
+
 You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
 
 * To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.

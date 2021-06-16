@@ -123,7 +123,8 @@ An example of file with class names can be found within the OMZ directory:
 
 > **NOTE**: To run the demo application with video examples of gestures specify the `-s` key with valid path to the directory with video samples. The name of each video sample should be the valid name of gesture from `<omz_dir>/data/dataset_classes/msasl100.json` file. To navigate between samples use 'f' and 'b' keys for iterating next and previous video sample, respectively.
 
-When a single image is applied as an input, the demo processes and renders it quickly, then exits. To continuously visualize processed results on the screen, apply the `loop` option, which enforces looping over processing a single image.
+>**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
+
 You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
 
 * To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
