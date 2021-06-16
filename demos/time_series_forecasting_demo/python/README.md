@@ -1,5 +1,7 @@
 # Time Series Forecasting Python\* Demo
 
+![example](./time_series_forecasting_demo.jpg)
+
 This README describes the Time Series Forecasting demo application.
 
 ## How It Works
