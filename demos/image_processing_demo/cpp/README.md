@@ -124,7 +124,7 @@ You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG
 * To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
 To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
 
->**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, OpenCV FFMPEG backend can be downloaded by the PowerShell script provided with the OpenVINO install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. Run the script with Administrative privileges. Alternatively, you can save results as images.
+>**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can can download OpenCV FFMPEG back end using the PowerShell script, provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; installed in system protected folder (this is a typical case). Alternatively, you can save results as images.
 
 ## Demo Output
 
