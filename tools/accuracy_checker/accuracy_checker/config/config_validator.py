@@ -368,7 +368,9 @@ class ListField(BaseField):
 
 
 class InputField(BaseField):
-    INPUTS_TYPES = ('CONST_INPUT', 'INPUT', 'IMAGE_INFO', 'ORIG_IMAGE_INFO', 'LSTM_INPUT', 'IGNORE_INPUT')
+    INPUTS_TYPES = (
+        'CONST_INPUT', 'INPUT', 'IMAGE_INFO', 'ORIG_IMAGE_INFO', 'LSTM_INPUT', 'IGNORE_INPUT', 'SCALE_FACTOR'
+    )
     LAYOUT_TYPES = ('NCHW', 'NHWC', 'NCWH', 'NWHC')
     PRECISIONS = ('FP32', 'FP16', 'U8', 'U16', 'I8', 'I16', 'I32', 'I64')
 
