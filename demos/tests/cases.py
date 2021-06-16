@@ -1043,7 +1043,7 @@ PYTHON_DEMOS = [
         [
             *single_option_cases('-m_i',
                 ModelArg('instance-segmentation-security-0002'),
-                # ModelArg('instance-segmentation-security-0091'),
+                # ModelArg('instance-segmentation-security-0091'), # Slow model
                 ModelArg('instance-segmentation-security-0228'),
                 ModelArg('instance-segmentation-security-1039'),
                 ModelArg('instance-segmentation-security-1040')),
