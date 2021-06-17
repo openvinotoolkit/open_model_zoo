@@ -101,7 +101,7 @@ class KaldiFeatureRegressionConverter(BaseFormatConverter):
             'features_subset_file': PathField(description='file with list testing ark files', optional=True),
             'ivectors': BoolField(optional=True, default=False, description='include ivectors features'),
             'ref_file_suffix': StringField(optional=True, default='_kaldi_score'),
-            'vector_mode': BoolField(optional=True, default=True, description='Split data to vectors')
+            'vectors_mode': BoolField(optional=True, default=True, description='Split data to vectors')
         })
         return params
 
