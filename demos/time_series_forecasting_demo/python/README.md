@@ -79,7 +79,7 @@ optional arguments:
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-You can use the following command to do inference on CPU on images captured by a camera using a pre-trained deblurgan-v2 network:
+You can use the following command to do inference on CPU on the converted dataset using a pre-trained time-series-forecasting-electricity network:
 
 ```sh
     python3 time_series_forecasting_demo.py -i electricity.pickle -m <path_to_model>/time-series-forecasting-electricity-0001.xml
