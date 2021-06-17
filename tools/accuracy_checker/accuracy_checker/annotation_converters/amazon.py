@@ -30,19 +30,6 @@ def unicode_to_utf8(d):
 def load_dict(filename):
     with open(filename, 'rb') as f:
         return unicode_to_utf8(pickle.load(f))
-    # try:
-    #     with open(filename, 'rb') as f:
-    #         return unicode_to_utf8(json.load(f))
-    # except:
-    #     with open(filename, 'rb') as f:
-    #         return unicode_to_utf8(pickle.load(f))
-
-
-# def fopen(filename, mode='r'):
-#     if filename.endswith('.gz'):
-#         return gzip.open(filename, mode)
-#     return open(filename, mode)
-
 
 class DataIterator:
 
@@ -53,11 +40,8 @@ class DataIterator:
                  item_info,
                  reviews_info,
                  batch_size=128,
-                 maxlen=100,
-                 skip_empty=False,
-                 sort_by_length=True,
-                 max_batch_size=20,
-                 minlen=None):
+                 maxlen=100):
+
         self.source = open(source, 'r')
         self.source_dicts = []
         for source_dict in [uid_voc, mid_voc, cat_voc]:
@@ -93,23 +77,17 @@ class DataIterator:
 
         self.batch_size = batch_size
         self.maxlen = maxlen
-        self.minlen = minlen
-        self.skip_empty = skip_empty
 
         self.n_uid = len(self.source_dicts[0])
         self.n_mid = len(self.source_dicts[1])
         self.n_cat = len(self.source_dicts[2])
 
         self.shuffle = False
-        self.sort_by_length = sort_by_length
 
         self.source_buffer = []
-        self.k = batch_size * max_batch_size
+        self.k = batch_size * 20
 
         self.end_of_data = False
-
-    def get_n(self):
-        return self.n_uid, self.n_mid, self.n_cat
 
     def __iter__(self):
         return self
@@ -137,14 +115,11 @@ class DataIterator:
                 self.source_buffer.append(ss.strip("\n").split("\t"))
 
             # sort by  history behavior length
-            if self.sort_by_length:
-                his_length = np.array([len(s[4].split("")) for s in self.source_buffer])
-                tidx = his_length.argsort()
+            his_length = np.array([len(s[4].split("")) for s in self.source_buffer])
+            tidx = his_length.argsort()
 
-                _sbuf = [self.source_buffer[i] for i in tidx]
-                self.source_buffer = _sbuf
-            else:
-                self.source_buffer.reverse()
+            _sbuf = [self.source_buffer[i] for i in tidx]
+            self.source_buffer = _sbuf
 
         if len(self.source_buffer) == 0:
             self.end_of_data = False
@@ -179,33 +154,7 @@ class DataIterator:
 
                 # read from source file and map to word index
 
-                #if len(mid_list) > self.maxlen:
-                #    continue
-                if self.minlen != None:
-                    if len(mid_list) >= self.minlen:
-                        continue
-                if self.skip_empty and (not mid_list):
-                    continue
-
-                noclk_mid_list = []
-                noclk_cat_list = []
-                for pos_mid in mid_list:
-                    noclk_tmp_mid = []
-                    noclk_tmp_cat = []
-                    noclk_index = 0
-                    while True:
-                        noclk_mid_indx = random.randint(0, len(self.mid_list_for_random)-1)
-                        noclk_mid = self.mid_list_for_random[noclk_mid_indx]
-                        if noclk_mid == pos_mid:
-                            continue
-                        noclk_tmp_mid.append(noclk_mid)
-                        noclk_tmp_cat.append(self.meta_id_map[noclk_mid])
-                        noclk_index += 1
-                        if noclk_index >= 5:
-                            break
-                    noclk_mid_list.append(noclk_tmp_mid)
-                    noclk_cat_list.append(noclk_tmp_cat)
-                source.append([uid, mid, cat, mid_list, cat_list, noclk_mid_list, noclk_cat_list])
+                source.append([uid, mid, cat, mid_list, cat_list])
                 target.append([float(ss[0]), 1-float(ss[0])])
 
                 if len(source) >= self.batch_size or len(target) >= self.batch_size:
@@ -286,67 +235,28 @@ class AmazonProductData(BaseFormatConverter):
         self.subsample_size = int(self.get_value_from_config('subsample_size'))
 
     @staticmethod
-    def prepare_data(input, target, maxlen=None, return_neg=False):
+    def prepare_data(input, target):
         # x: a list of sentences
         lengths_x = [len(s[4]) for s in input]
         seqs_mid = [inp[3] for inp in input]
         seqs_cat = [inp[4] for inp in input]
-        noclk_seqs_mid = [inp[5] for inp in input]
-        noclk_seqs_cat = [inp[6] for inp in input]
-        if maxlen is not None:
-            new_seqs_mid = []
-            new_seqs_cat = []
-            new_noclk_seqs_mid = []
-            new_noclk_seqs_cat = []
-            new_lengths_x = []
-            for l_x, inp in zip(lengths_x, input):
-                if l_x > maxlen:
-                    new_seqs_mid.append(inp[3][l_x - maxlen:])
-                    new_seqs_cat.append(inp[4][l_x - maxlen:])
-                    new_noclk_seqs_mid.append(inp[5][l_x - maxlen:])
-                    new_noclk_seqs_cat.append(inp[6][l_x - maxlen:])
-                    new_lengths_x.append(maxlen)
-                else:
-                    new_seqs_mid.append(inp[3])
-                    new_seqs_cat.append(inp[4])
-                    new_noclk_seqs_mid.append(inp[5])
-                    new_noclk_seqs_cat.append(inp[6])
-                    new_lengths_x.append(l_x)
-            lengths_x = new_lengths_x
-            seqs_mid = new_seqs_mid
-            seqs_cat = new_seqs_cat
-            noclk_seqs_mid = new_noclk_seqs_mid
-            noclk_seqs_cat = new_noclk_seqs_cat
-
-            if len(lengths_x) < 1:
-                return None, None, None, None
 
         n_samples = len(seqs_mid)
         maxlen_x = np.max(lengths_x)
-        neg_samples = len(noclk_seqs_mid[0][0])
 
         mid_his = np.zeros((n_samples, maxlen_x)).astype('int64')
         cat_his = np.zeros((n_samples, maxlen_x)).astype('int64')
-        noclk_mid_his = np.zeros((n_samples, maxlen_x, neg_samples)).astype('int64')
-        noclk_cat_his = np.zeros((n_samples, maxlen_x, neg_samples)).astype('int64')
         mid_mask = np.zeros((n_samples, maxlen_x)).astype('float32')
-        for idx, [s_x, s_y, no_sx, no_sy] in enumerate(zip(seqs_mid, seqs_cat, noclk_seqs_mid, noclk_seqs_cat)):
+        for idx, [s_x, s_y] in enumerate(zip(seqs_mid, seqs_cat)):
             mid_mask[idx, :lengths_x[idx]] = 1.
             mid_his[idx, :lengths_x[idx]] = s_x
             cat_his[idx, :lengths_x[idx]] = s_y
-            noclk_mid_his[idx, :lengths_x[idx], :] = no_sx
-            noclk_cat_his[idx, :lengths_x[idx], :] = no_sy
 
         uids = np.array([inp[0] for inp in input])
         mids = np.array([inp[1] for inp in input])
         cats = np.array([inp[2] for inp in input])
 
-        if return_neg:
-            return uids, mids, cats, mid_his, cat_his, mid_mask, np.array(target), np.array(
-                lengths_x), noclk_mid_his, noclk_cat_his
-
-        else:
-            return uids, mids, cats, mid_his, cat_his, mid_mask, np.array(target), np.array(lengths_x)
+        return uids, mids, cats, mid_his, cat_his, mid_mask, np.array(target), np.array(lengths_x)
 
     def convert(self, check_content=False, **kwargs):
         test_file = get_path(self.data_dir / self.test_data, is_directory=False)
@@ -358,7 +268,6 @@ class AmazonProductData(BaseFormatConverter):
 
         test_data = DataIterator(str(test_file), str(uid_voc), str(mid_voc), str(cat_voc), str(item_info),
                                  str(reviews_info), self.batch, self.max_len)
-        n_uid, n_mid, n_cat = test_data.get_n()
         preprocessed_folder = Path(self.preprocessed_dir)
         if not self.skip_dump and not preprocessed_folder.exists():
             preprocessed_folder.mkdir(exist_ok=True, parents=True)
@@ -375,7 +284,7 @@ class AmazonProductData(BaseFormatConverter):
         iteration = 0
 
         for src, tgt in test_data:
-            uids, mids, cats, mid_his, cat_his, mid_mask, gt, sl, _, _ = self.prepare_data(src, tgt, return_neg=True)
+            uids, mids, cats, mid_his, cat_his, mid_mask, gt, sl = self.prepare_data(src, tgt)
             c_input = input_folder / "{:02d}".format(subfolder)
             c_input = c_input / "{:06d}.npz".format(iteration)
 
@@ -412,5 +321,7 @@ class AmazonProductData(BaseFormatConverter):
             if not self.subsample_size or (self.subsample_size and (iteration < self.subsample_size)):
                 annotations.append(ClassificationAnnotation(identifiers, gt[:, 0].tolist()))
             iteration += 1
+            if self.subsample_size and (iteration > self.subsample_size):
+                break
 
         return ConverterReturn(annotations, None, None)
