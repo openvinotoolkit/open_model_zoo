@@ -256,7 +256,7 @@ AccuracyChecker supports following set of adapters:
   * `beam_size` - Size of the beam to use during decoding (default 10).
   * `logarithmic_prob` - Set to "True" to indicate that network gives natural-logarithmic probabilities. Default is False for plain probabilities (after softmax).
   * `probability_out` - Name of the network's output with character probabilities (required)
-  * `alphabet` - Alphabet as list of strings. Include an empty string for the CTC blank sybmol. Default is space + 26 English letters + apostrophe + blank.
+  * `alphabet` - Alphabet as list of strings. Include an empty string for the CTC blank symbol. Default is space + 26 English letters + apostrophe + blank.
   * `sep` - Word separator character. Use an empty string for character-based LM. Default is space.
   * `lm_file` - Path to LM in binary kenlm format, relative to --model_attributes or --models.  Default is beam search without LM.
   * `lm_alpha` - LM alpha: weight factor for LM score (required when using LM)
