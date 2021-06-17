@@ -913,7 +913,7 @@ class KaldiARKReader(BaseReader):
                     if not key:
                         break
                     binary = fd.read(2).decode()
-                    if binary == ' [':
+                    if binary in [' [', '[\r']:
                         mat = KaldiARKReader.read_ascii_mat(fd)
                     else:
                         ark_type = KaldiARKReader.read_token(fd)
