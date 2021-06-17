@@ -839,7 +839,6 @@ class DLSDKLauncher(Launcher):
                 return data
         return self._align_data_shape(data, layer_name, layout)
 
-    # @staticmethod
     def _data_to_blob(self, layer_shape, data, layout): # pylint:disable=R0911
         data_shape = np.shape(data)
         if len(layer_shape) == 4:
