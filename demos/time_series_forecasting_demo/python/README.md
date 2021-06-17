@@ -82,7 +82,7 @@ Running the application with the empty list of options yields the usage message 
 You can use the following command to do inference on CPU on the converted dataset using a pre-trained time-series-forecasting-electricity network:
 
 ```sh
-    python3 time_series_forecasting_demo.py -i electricity.pickle -m <path_to_model>/time-series-forecasting-electricity-0001.xml
+python3 time_series_forecasting_demo.py -i electricity.pickle -m <path_to_model>/time-series-forecasting-electricity-0001.xml
 ```
 
 ## Demo Output
