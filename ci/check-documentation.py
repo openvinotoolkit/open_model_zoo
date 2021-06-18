@@ -110,7 +110,7 @@ def main():
                         suggested_url = omz_reference_prefix + omz_relative_posix_path
 
                     complain(f'{md_path_rel}: non-local OMZ Repo reference "{url}"'
-                        f' (replace it by `{suggested_url}` )')
+                        f' (replace it by `{suggested_url}`)')
                     continue
 
             try:
