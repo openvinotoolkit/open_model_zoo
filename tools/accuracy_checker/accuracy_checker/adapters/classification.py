@@ -91,7 +91,7 @@ class ClassificationAdapter(Adapter):
         else:
             for identifier, output in zip(identifiers, prediction):
                 if self.argmax_output:
-                    single_prediction = ArgMaxClassificationPrediction(identifier, [output[0],])
+                    single_prediction = ArgMaxClassificationPrediction(identifier, [output[0], ])
                 elif self.fixed_output:
                     single_prediction = ArgMaxClassificationPrediction(identifiers[0],
                                                                        output[self.fixed_output_index])
