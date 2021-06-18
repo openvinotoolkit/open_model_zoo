@@ -313,7 +313,7 @@ class TFLauncher(Launcher):
             data = np.array(data)
 
         if len(np.shape(data)) > len(layout):
-            data = data[0,...]
+            data = data[0, ...]
 
         return data.astype(precision) if precision else data
 

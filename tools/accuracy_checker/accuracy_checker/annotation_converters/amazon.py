@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import pickle, random
+import pickle
 from pathlib import Path
 import numpy as np
 
@@ -24,15 +24,8 @@ from ..utils import get_path
 from .format_converter import BaseFormatConverter
 from .format_converter import ConverterReturn
 
-def unicode_to_utf8(d):
-    return dict((key, value) for (key,value) in d.items())
-
-def load_dict(filename):
-    with open(filename, 'rb') as f:
-        return unicode_to_utf8(pickle.load(f))
 
 class DataIterator:
-
     def __init__(self, source,
                  uid_voc,
                  mid_voc,
@@ -45,7 +38,7 @@ class DataIterator:
         self.source = open(source, 'r')
         self.source_dicts = []
         for source_dict in [uid_voc, mid_voc, cat_voc]:
-            self.source_dicts.append(load_dict(source_dict))
+            self.source_dicts.append(pickle.load(open(source_dict, 'rb'), encoding='UTF-8'))
 
         f_meta = open(item_info, "r")
         meta_map = {}
@@ -53,7 +46,7 @@ class DataIterator:
             arr = line.strip().split("\t")
             if arr[0] not in meta_map:
                 meta_map[arr[0]] = arr[1]
-        self.meta_id_map ={}
+        self.meta_id_map = {}
         for key in meta_map:
             val = meta_map[key]
             if key in self.source_dicts[1]:
@@ -108,7 +101,7 @@ class DataIterator:
         target = []
 
         if len(self.source_buffer) == 0:
-            for k_ in range(self.k):
+            for _ in range(self.k):
                 ss = self.source.readline()
                 if ss == "":
                     break
@@ -178,13 +171,13 @@ class AmazonProductData(BaseFormatConverter):
         parameters = super().parameters()
         parameters.update({
             "data_dir": PathField(optional=False, is_directory=True, check_exists=True,
-                                          description="Dataset root"),
+                                  description="Dataset root"),
             "preprocessed_dir": PathField(optional=False, is_directory=True, check_exists=True,
                                           description="Preprocessed dataset location"),
             "separator": StringField(optional=True, default='#',
                                      description="Separator between input identifier and file identifier"),
             "test_data": StringField(optional=True, default='local_test_splitByUser',
-                                   description="test data filename."),
+                                     description="test data filename."),
             "batch": NumberField(optional=True, default=1, description="Batch size"),
             "max_len": NumberField(optional=True, default=100, description="Maximum sequence length"),
             "subsample_size": NumberField(optional=True, default=0, description="Number of sentences to process"),
@@ -235,11 +228,11 @@ class AmazonProductData(BaseFormatConverter):
         self.subsample_size = int(self.get_value_from_config('subsample_size'))
 
     @staticmethod
-    def prepare_data(input, target):
+    def prepare_data(source, target):
         # x: a list of sentences
-        lengths_x = [len(s[4]) for s in input]
-        seqs_mid = [inp[3] for inp in input]
-        seqs_cat = [inp[4] for inp in input]
+        lengths_x = [len(s[4]) for s in source]
+        seqs_mid = [inp[3] for inp in source]
+        seqs_cat = [inp[4] for inp in source]
 
         n_samples = len(seqs_mid)
         maxlen_x = np.max(lengths_x)
@@ -252,9 +245,9 @@ class AmazonProductData(BaseFormatConverter):
             mid_his[idx, :lengths_x[idx]] = s_x
             cat_his[idx, :lengths_x[idx]] = s_y
 
-        uids = np.array([inp[0] for inp in input])
-        mids = np.array([inp[1] for inp in input])
-        cats = np.array([inp[2] for inp in input])
+        uids = np.array([inp[0] for inp in source])
+        mids = np.array([inp[1] for inp in source])
+        cats = np.array([inp[2] for inp in source])
 
         return uids, mids, cats, mid_his, cat_his, mid_mask, np.array(target), np.array(lengths_x)
 
