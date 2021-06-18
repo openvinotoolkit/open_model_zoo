@@ -91,13 +91,13 @@ def main():
                 omz_relative_url = url[len(omz_github_url):]
                 omz_relative_path = Path(urllib.request.url2pathname(omz_relative_url))
 
-                if omz_relative_path.as_posix().startswith(('blob/', 'tree/')):
+                if omz_relative_url.startswith(('blob/', 'tree/')):
                     omz_relative_path = Path(*omz_relative_path.parts[1:]) # removed blob/ or tree/
                     omz_relative_posix_path = omz_relative_path.as_posix()
 
-                    distance_to_md_parent_dir = 0
-
                     if url.endswith('.md'):
+                        distance_to_md_parent_dir = 0
+
                         for parent in md_path_rel.parents:
                             try:
                                 omz_relative_posix_path = omz_relative_path.relative_to(parent).as_posix()
@@ -105,11 +105,12 @@ def main():
                             except ValueError:
                                 distance_to_md_parent_dir += 1
                         suggested_path = '../' * distance_to_md_parent_dir + omz_relative_posix_path
+                        suggested_url = urllib.request.pathname2url(suggested_path)
                     else:
-                        suggested_path = omz_reference_prefix + omz_relative_posix_path
+                        suggested_url = omz_reference_prefix + omz_relative_posix_path
 
                     complain(f'{md_path_rel}: non-local OMZ Repo reference "{url}"'
-                        f' (replace it by `{suggested_path}`)')
+                        f' (replace it by `{suggested_url}` )')
                     continue
 
             try:
