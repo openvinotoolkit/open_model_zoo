@@ -572,12 +572,12 @@ The main difference between this converter and `super_resolution` in data organi
 * `amazon_product_data` - converts book reviews from `Amazon Product Data` (http://snap.stanford.edu/data/amazon/productGraph) dataset preprocessed for DIEN model to `ClassificationAnnotation`.
   * `test_data` - path to file with user reviews
   * `uid_voc` - path to user identification vocabulary
-  * `mid_voc' - path to
+  * `mid_voc` - path to movies identification vocabulary
   * `cat_voc` - path to category vocabulary
   * `item_info` - path to `item-info` file
   * `reviews_info` - path to `reviews-info` file
   * `preprocessed_dir` - path to preprocessed data
-  * `separator` - separator between input name and batch identifier in preprocessed data filename. (Optional, default `#`)`
+  * `separator` - separator between input name and batch identifier in preprocessed data filename. (Optional, default `#`)
   * `mid_his_batch` - identifier of model `mid_his_batch` input
   * `cat_his_batch` - identifier of model `cat_his_batch` input
   * `uid_batch` - identifier of model `uid_batch` input
