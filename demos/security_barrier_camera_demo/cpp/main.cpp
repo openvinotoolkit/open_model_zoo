@@ -14,17 +14,17 @@
 #include <vector>
 #include <set>
 
-#include <cldnn/cldnn_config.hpp>
+#include <gpu/gpu_config.hpp>
 #include <inference_engine.hpp>
 #include <vpu/hddl_config.hpp>
 #include <monitors/presenter.h>
 #include <utils/args_helper.hpp>
+#include <utils/grid_mat.hpp>
+#include <utils/input_wrappers.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
+#include <utils/threads_common.hpp>
 
-#include "common.hpp"
-#include "grid_mat.hpp"
-#include "input_wrappers.hpp"
 #include "security_barrier_camera_demo.hpp"
 #include "net_wrappers.hpp"
 
@@ -229,7 +229,7 @@ public:
                 std::make_shared<ResAggregator>(sharedVideoFrame, std::move(boxesAndDescrs)));
     }
     void push(BboxAndDescr&& bboxAndDescr) {
-        boxesAndDescrs.lockedPush_back(std::move(bboxAndDescr));
+        boxesAndDescrs.lockedPushBack(std::move(bboxAndDescr));
     }
     const VideoFrame::Ptr sharedVideoFrame;
 
@@ -446,7 +446,7 @@ bool DetectionsProcessor::isReady() {
                          break;
             }
         }
-        context.detectorsInfers.inferRequests.lockedPush_back(*inferRequest);
+        context.detectorsInfers.inferRequests.lockedPushBack(*inferRequest);
         requireGettingNumberOfDetections = false;
     }
 
@@ -497,11 +497,11 @@ void DetectionsProcessor::process() {
                                 = context.detectionsProcessorsContext.vehicleAttributesClassifier.getResults(attributesRequest);
 
                             if (FLAGS_r && ((classifiersAggregator->sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
-                                classifiersAggregator->rawAttributes.lockedPush_back("Vehicle Attributes results:" + attributes.first + ';'
+                                classifiersAggregator->rawAttributes.lockedPushBack("Vehicle Attributes results:" + attributes.first + ';'
                                                                                       + attributes.second + '\n');
                             }
                             classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::VEHICLE, rect, attributes.first + ' ' + attributes.second});
-                            context.attributesInfers.inferRequests.lockedPush_back(attributesRequest);
+                            context.attributesInfers.inferRequests.lockedPushBack(attributesRequest);
                         }, classifiersAggregator,
                            std::ref(attributesRequest),
                            vehicleRect,
@@ -535,10 +535,10 @@ void DetectionsProcessor::process() {
                             std::string result = context.detectionsProcessorsContext.lpr.getResults(lprRequest);
 
                             if (FLAGS_r && ((classifiersAggregator->sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
-                                classifiersAggregator->rawDecodedPlates.lockedPush_back("License Plate Recognition results:" + result + '\n');
+                                classifiersAggregator->rawDecodedPlates.lockedPushBack("License Plate Recognition results:" + result + '\n');
                             }
                             classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::PLATE, rect, std::move(result)});
-                            context.platesInfers.inferRequests.lockedPush_back(lprRequest);
+                            context.platesInfers.inferRequests.lockedPushBack(lprRequest);
                         }, classifiersAggregator,
                            std::ref(lprRequest),
                            plateRect,
@@ -742,12 +742,8 @@ int main(int argc, char* argv[]) {
                 if (devices.end() != devices.find("CPU")) {
                     // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
                     // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                    ie.SetConfig({{ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
+                    ie.SetConfig({{ GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
                 }
-            }
-
-            if ("FPGA" == device) {
-                ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_DEVICE_ID, FLAGS_fpga_device_ids } }, "FPGA");
             }
         }
 

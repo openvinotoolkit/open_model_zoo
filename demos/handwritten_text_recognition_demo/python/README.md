@@ -13,6 +13,18 @@ The demo first reads an image and performs the preprocessing such as resize and 
 The list of models supported by the demo is in `<omz_dir>/demos/handwritten_text_recognition_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
 ### Supported Models
 
 * handwritten-japanese-recognition-0001
@@ -51,7 +63,7 @@ Options:
                         Required. Path to an image to infer
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
-                        GPU, FPGA, HDDL, MYRIAD or HETERO is acceptable. The
+                        GPU, HDDL, MYRIAD or HETERO is acceptable. The
                         demo will look for a suitable plugin for device
                         specified. Default value is CPU
   -ni NUMBER_ITER, --number_iter NUMBER_ITER
@@ -66,20 +78,28 @@ Options:
                         character, until a designated one is found
 ```
 
-For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
+The decoding char list files provided within Open Model Zoo and for Japanese it is the `<omz_dir>/data/dataset_classes/kondate_nakayosi.txt`file, while for Simplified Chinese it is the `<omz_dir>/data/dataset_classes/scut_ept.txt` file. For example, to do inference on a CPU with the OpenVINO&trade; toolkit pre-trained `handwritten-japanese-recognition-0001` model, run the following command:
 
 ```sh
-python handwritten_text_recognition_demo.py -d CPU -i data/handwritten_japanese_test.png -m <path_to_model>/model.xml
+python handwritten_text_recognition_demo.py \
+  -d CPU \
+  -i data/handwritten_japanese_test.png \
+  -m <path_to_model>/handwritten-japanese-recognition-0001.xml
+  -cl <omz_dir>/data/dataset_classes/kondate_nakayosi.txt \
 ```
 
 When the `designated_characters` argument is provided, if the output character is not included in the designated characters, the script will check Top k steps in looking up the decoded character, until a designated one is found. By doing so, the output character will be restricted to a designated region. K is set to 20 by default.
 
-For example, if you want to restrict the output characters to only digits and hyphens, you need to provide the path to the designated character file, for example `digit_hyphen.txt`. Then the script will perform a post-filtering processing on the output characters, but please note that it is possible that other characters are still allowed if none of `digit_hyphen.txt` is in first K chosen elements. The mentioned characters text files located at `data` subfolder of this demo.
+For example, if you want to restrict the output characters to only digits and hyphens, you need to provide the path to the designated character file, for example `digit_hyphen.txt`. Then the script will perform a post-filtering processing on the output characters, but please note that it is possible that other characters are still allowed if none of designated characters are in the first K chosen elements. The mentioned characters text file located in the `data` subfolder of this demo.
 
-The example command line:
+The example command line for use pre-trained `handwritten-simplified-chinese-recognition-0001` model and `designated_charcters`option:
 
 ```sh
-python handwritten_text_recognition_demo.py -i data/handwritten_japanese_test.png -m <path_to_model>/model.xml -dc data/digit_hyphen.txt
+python handwritten_text_recognition_demo.py \
+  -i data/handwritten_simplified_chinese_test.png \
+  -m <path_to_model>/handwritten-simplified-chinese-recognition-0001.xml \
+  -cl <omz_dir>/data/dataset_classes/scut_ept.txt \
+  -dc data/digit_hyphen.txt
 ```
 
 ## Demo Output

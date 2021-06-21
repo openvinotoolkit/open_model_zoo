@@ -124,6 +124,7 @@ class Launcher(ClassProvider):
         self.image_info_inputs = self.config.get('_list_image_infos', [])
         self._lstm_inputs = self.config.get('_list_lstm_inputs', [])
         self._ignore_inputs = self.config.get('_list_ignore_inputs', [])
+        self._scale_factor_inputs = self.config.get('_list_scale_factor_inputs', [])
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
     @classmethod
@@ -153,6 +154,9 @@ class Launcher(ClassProvider):
             ),
             '_list_ignore_inputs': ListField(
                 allow_empty=True, optional=True, default=[], description='List of ignored inputs'
+            ),
+            '_list_scale_factor_inputs': ListField(
+                allow_empty=True, optional=True, default=[], description='List of scale factor inputs'
             ),
             '_input_precision': ListField(
                 allow_empty=True, optional=True, default=[], description='Input precision list from command line.'
@@ -244,6 +248,9 @@ class Launcher(ClassProvider):
     def inputs(self):
         raise NotImplementedError
 
+    def input_shape(self, input_name):
+        return self.inputs[input_name]
+
     def predict_async(self, *args, **kwargs):
         raise NotImplementedError('Launcher does not support async mode')
 
@@ -254,7 +261,7 @@ class Launcher(ClassProvider):
 
     @staticmethod
     def fit_to_input(data, layer_name, layout, precision):
-        if len(np.shape(data)) == len(layout):
+        if layout is not None and len(np.shape(data)) == len(layout):
             data = np.transpose(data, layout)
         else:
             data = np.array(data)

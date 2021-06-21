@@ -1,12 +1,9 @@
 """
 Copyright (c) 2018-2021 Intel Corporation
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,6 +11,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import math
+import tempfile
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -369,6 +368,12 @@ def _get_sigmas(gt, p, win, mode='same', sums=None):
 
 class LPIPS(BaseRegressionMetric):
     __provider__ = 'lpips'
+    annotation_types = (
+        SuperResolutionAnnotation, ImageProcessingAnnotation, ImageInpaintingAnnotation, StyleTransferAnnotation
+    )
+    prediction_types = (
+        SuperResolutionPrediction, ImageProcessingPrediction, ImageInpaintingPrediction, StyleTransferPrediction
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(self.lpips_differ, *args, **kwargs)
@@ -401,8 +406,8 @@ class LPIPS(BaseRegressionMetric):
         self.color_scale = 255 if not self.normalized_images else 1
         if isinstance(lpips, UnsupportedPackage):
             lpips.raise_error(self.__provider__)
-        self.loss = lpips.LPIPS(net=self.get_value_from_config('net'))
         self.dist_threshold = self.get_value_from_config('distance_threshold')
+        self.loss = self._create_loss()
 
     def lpips_differ(self, annotation_image, prediction_image):
         if self.color_order == 'BGR':
@@ -419,3 +424,37 @@ class LPIPS(BaseRegressionMetric):
             self.meta['names'].append('ratio_greater_{}'.format(self.dist_threshold))
             results += (invalid_ratio, )
         return results
+
+    def _create_loss(self):
+        import torch # pylint: disable=C0415
+        import torchvision # pylint: disable=C0415
+        net = self.get_value_from_config('net')
+        model_weights = {
+            'alex': ('https://download.pytorch.org/models/alexnet-owt-7be5be79.pth',
+                     'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth'
+                     ),
+            'squeeze': 'https://download.pytorch.org/models/squeezenet1_1-b8a52dc0.pth',
+            'vgg':  'https://download.pytorch.org/models/vgg16-397923af.pth'
+        }
+        model_classes = {
+            'alex': torchvision.models.alexnet,
+            'squeeze': torchvision.models.squeezenet1_1,
+            'vgg': torchvision.models.vgg16
+        }
+        with tempfile.TemporaryDirectory(prefix='lpips_model', dir=Path.cwd()) as model_dir:
+            weights = model_weights[net]
+            if isinstance(weights, tuple):
+                weights = weights[1] if torch.__version__ <= '1.6.0' else weights[0]
+            preloaded_weights = torch.utils.model_zoo.load_url(
+                weights, model_dir=model_dir, progress=False, map_location='cpu'
+            )
+        model = model_classes[net](pretrained=False)
+        model.load_state_dict(preloaded_weights)
+        feats = model.features
+        loss = lpips.LPIPS(pnet_rand=True)
+        for slice_id in range(1, loss.net.N_slices + 1):
+            sl = getattr(loss.net, 'slice{}'.format(slice_id))
+            for module_id in sl._modules: # pylint: disable=W0212
+                sl._modules[module_id] = feats[int(module_id)] # pylint: disable=W0212
+            setattr(loss.net, 'slice{}'.format(slice_id), sl)
+        return loss

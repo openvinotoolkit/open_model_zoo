@@ -15,17 +15,29 @@ The demo shows an example of using neural networks to detect and recognize print
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads one network to the Inference Engine for execution. Upon getting an image, it performs inference of text detection and prints the result as four points (`x1`, `y1`), (`x2`, `y2`), (`x3`, `y3`), (`x4`, `y4`) for each text bounding box.
+On startup, the application reads command line parameters and loads one network to the Inference Engine for execution. Upon getting an image, it performs inference of text detection and prints the result as four points (`x1`, `y1`), (`x2`, `y2`), (`x3`, `y3`), (`x4`, `y4`) for each text bounding box.
 
 If text recognition model is provided, the demo prints recognized text as well.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/text_detection_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -56,7 +68,7 @@ Options:
     -h                             Print a usage message.
     -i                             Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -loop                          Optional. Enable reading the input in a loop.
-    -o "<path>"                    Optional. Name of output to save.
+    -o "<path>"                    Optional. Name of the output file(s) to save.
     -limit "<num>"                 Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m_td "<path>"                 Required. Path to the Text Detection model (.xml) file.
     -m_tr "<path>"                 Required. Path to the Text Recognition model (.xml) file.
@@ -114,6 +126,14 @@ For `text-recognition-resnet-fc` and `text-recognition-0015` you should use `sim
   -tr_o_blb_nm "logits" \
   -m_tr_ss "?0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 ```
+
+You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
+
+* To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
+* To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
+To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
+
+>**NOTE**: Windows* systems may not have the Motion JPEG codec installed by default. If this is the case, OpenCV FFMPEG backend can be downloaded by the PowerShell script provided with the OpenVINO install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. Run the script with Administrative privileges. Alternatively, you can save results as images.
 
 ## Demo Output
 

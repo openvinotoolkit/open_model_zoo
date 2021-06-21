@@ -492,10 +492,12 @@ class JSONReader(BaseReader):
             if not self._postpone_data_source:
                 raise ConfigError('data_source parameter is required to create "{}" '
                                   'data reader and read data'.format(self.__provider__))
+        else:
+            self.data_source = get_path(self.data_source, is_directory=True)
 
     def read(self, data_id):
-
-        data = read_json(str(self.data_source / data_id))
+        data_path = self.data_source / data_id if self.data_source is not None else data_id
+        data = read_json(data_path)
         if self.key:
             data = data.get(self.key)
 
@@ -550,6 +552,8 @@ class NiftiImageReader(BaseReader):
             if not self._postpone_data_source:
                 raise ConfigError('data_source parameter is required to create "{}" '
                                   'data reader and read data'.format(self.__provider__))
+        else:
+            self.data_source = get_path(self.data_source, is_directory=True)
 
     def read(self, data_id):
         if self.multi_frame:
@@ -605,6 +609,8 @@ class NumPyReader(BaseReader):
             if not self._postpone_data_source:
                 raise ConfigError('data_source parameter is required to create "{}" '
                                   'data reader and read data'.format(self.__provider__))
+        else:
+            self.data_source = get_path(self.data_source, is_directory=True)
         self.keyRegex = {k: re.compile(k + self.id_sep) for k in self.keys}
         self.valRegex = re.compile(r"([^0-9]+)([0-9]+)")
 
@@ -674,6 +680,7 @@ class NumpyBinReader(BaseReader):
         return params
 
     def configure(self):
+        super().configure()
         self.dtype = self.get_value_from_config('dtype')
 
     def read(self, data_id):
@@ -762,6 +769,7 @@ class WavReader(BaseReader):
         return params
 
     def configure(self):
+        super().configure()
         self.mono = self.get_value_from_config('mono')
         self.to_float = self.get_value_from_config('to_float')
 
@@ -850,6 +858,7 @@ class RawpyReader(BaseReader):
         if isinstance(rawpy, UnsupportedPackage):
             rawpy.raise_error(self.__provider__)
         self.postprocess = self.get_value_from_config('postprocess')
+        super().configure()
 
     def read(self, data_id):
         data_path = self.data_source / data_id if self.data_source is not None else data_id
@@ -871,7 +880,6 @@ class ByteFileReader(BaseReader):
 
 class LMDBReader(BaseReader):
     __provider__ = 'lmdb_reader'
-
 
     def configure(self):
         super().configure()
@@ -905,7 +913,7 @@ class KaldiARKReader(BaseReader):
                     if not key:
                         break
                     binary = fd.read(2).decode()
-                    if binary == ' [':
+                    if binary in [' [', '[\r']:
                         mat = KaldiARKReader.read_ascii_mat(fd)
                     else:
                         ark_type = KaldiARKReader.read_token(fd)
@@ -930,9 +938,6 @@ class KaldiARKReader(BaseReader):
 
     @staticmethod
     def read_int32(fd):
-        """
-            Read a value in type 'int32' in kaldi setup
-        """
         int_size = bytes.decode(fd.read(1))
         assert int_size == '\04', 'Expect \'\\04\', but gets {}'.format(int_size)
         int_str = fd.read(4)
@@ -941,9 +946,6 @@ class KaldiARKReader(BaseReader):
 
     @staticmethod
     def read_token(fd):
-        """
-            Read {token + ' '} from the file(this function also consume the space)
-        """
         key = ''
         while True:
             c = bytes.decode(fd.read(1))

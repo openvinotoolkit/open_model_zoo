@@ -58,6 +58,9 @@ class BeamSearchDecoder(Adapter):
         self.softmaxed_probabilities = self.get_value_from_config('softmaxed_probabilities')
         self.logits_output = self.get_value_from_config("logits_output")
         self.custom_label_map = self.get_value_from_config("custom_label_map")
+        if self.custom_label_map:
+            labels = {int(k): v for k, v in self.custom_label_map.items()}
+            self.custom_label_map = labels
 
     def process(self, raw, identifiers, frame_meta):
         if self.custom_label_map:
@@ -179,6 +182,9 @@ class CTCGreedySearchDecoder(Adapter):
         self.blank_label = self.get_value_from_config('blank_label')
         self.logits_output = self.get_value_from_config("logits_output")
         self.custom_label_map = self.get_value_from_config("custom_label_map")
+        if self.custom_label_map:
+            labels = {int(k): v for k, v in self.custom_label_map.items()}
+            self.custom_label_map = labels
 
     def process(self, raw, identifiers=None, frame_meta=None):
         if self.custom_label_map:
@@ -246,6 +252,9 @@ class SimpleDecoder(Adapter):
     def configure(self):
         self.eos_label = self.get_value_from_config('eos_label')
         self.custom_label_map = self.get_value_from_config("custom_label_map")
+        if self.custom_label_map:
+            labels = {int(k): v for k, v in self.custom_label_map.items()}
+            self.custom_label_map = labels
 
     def process(self, raw, identifiers=None, frame_meta=None):
         if self.custom_label_map:

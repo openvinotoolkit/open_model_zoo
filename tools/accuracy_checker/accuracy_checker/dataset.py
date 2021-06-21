@@ -162,13 +162,13 @@ class Dataset:
 
         return annotation, meta
 
-    @staticmethod
-    def send_annotation_info(config):
+    def send_annotation_info(self, config):
         info = {
             'convert_annotation': False,
             'converter': None,
             'dataset_analysis': config.get('analyze_dataset', False),
-            'annotation_saving': False
+            'annotation_saving': False,
+            'dataset_size': self.size
         }
         subsample_size = config.get('subsample_size')
         subsample_meta = {'subset': False, 'shuffle': False}

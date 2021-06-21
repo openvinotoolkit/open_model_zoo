@@ -311,6 +311,15 @@ int main(int argc, char *argv[]) {
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                         keepRunning = false;
                     }
+                    else if (32 == key || 'r' == key || 'R' == key) {  // press space or r to restart testing if needed
+                        isTestMode = true;
+                        framesNum = 0;
+                        framesNumOnCalculationStart = 0;
+                        correctPredictionsCount = 0;
+                        accuracy = 0;
+                        elapsedSeconds = std::chrono::steady_clock::duration(0);
+                        startTime = std::chrono::steady_clock::now();
+                    }
                     else {
                         presenter.handleKey(key);
                     }

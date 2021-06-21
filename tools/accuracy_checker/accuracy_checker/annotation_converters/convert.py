@@ -259,6 +259,7 @@ def main():
             subsample_size = int(args.subsample)
 
         converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed, args.shuffle)
+        details['dataset_size'] = len(converted_annotation)
     send_telemetry_event(tm, 'annotation_conversion', json.dumps(details))
     if args.analyze_dataset:
         analyze_dataset(converted_annotation, meta)

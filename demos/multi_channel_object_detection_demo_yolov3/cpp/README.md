@@ -9,15 +9,27 @@ Other demo objectives are:
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads the specified networks. The Yolo v3 Object Detection network is required.
+On startup, the application reads command line parameters and loads the specified networks. The Yolo v3 Object Detection network is required.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_channel_object_detection_demo_yolov3/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin). You can also review OpenVINO [article](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) to see how to convert the YOLO V3 and tiny YOLO V3 into IR model and execute this demo with converted IR model.
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 

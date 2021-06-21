@@ -13,6 +13,7 @@
 | bert-small-uncased-whole-word-masking-squad-0002 | YES | YES |    |
 | bert-small-uncased-whole-word-masking-squad-emb-int8-0001 | YES | YES |    |
 | bert-small-uncased-whole-word-masking-squad-int8-0002 | YES | YES |    |
+| common-sign-language-0002 | YES | YES |    |
 | driver-action-recognition-adas-0002-decoder | YES | YES | YES |
 | driver-action-recognition-adas-0002-encoder | YES | YES | YES |
 | emotions-recognition-retail-0003 | YES | YES | YES |
@@ -38,9 +39,9 @@
 | head-pose-estimation-adas-0001 | YES | YES | YES |
 | horizontal-text-detection-0001 | YES | YES |    |
 | human-pose-estimation-0001 | YES | YES | YES |
-| human-pose-estimation-0005 | YES |    | YES |
-| human-pose-estimation-0006 | YES |    | YES |
-| human-pose-estimation-0007 | YES |    | YES |
+| human-pose-estimation-0005 | YES | YES | YES |
+| human-pose-estimation-0006 | YES | YES | YES |
+| human-pose-estimation-0007 | YES | YES | YES |
 | icnet-camvid-ava-0001 | YES | YES | YES |
 | icnet-camvid-ava-sparse-30-0001 | YES | YES | YES |
 | icnet-camvid-ava-sparse-60-0001 | YES | YES | YES |
@@ -52,10 +53,11 @@
 | instance-segmentation-security-1040 | YES |    |    |
 | landmarks-regression-retail-0009 | YES | YES | YES |
 | license-plate-recognition-barrier-0001 | YES | YES | YES |
-| machine-translation-nar-de-en-0001 | YES | YES |    |
-| machine-translation-nar-en-de-0001 | YES | YES |    |
+| machine-translation-nar-de-en-0002 | YES | YES |    |
+| machine-translation-nar-en-de-0002 | YES | YES |    |
 | machine-translation-nar-en-ru-0001 | YES | YES |    |
 | machine-translation-nar-ru-en-0001 | YES | YES |    |
+| noise-suppression-poconetlike-0001 | YES |    |    |
 | pedestrian-and-vehicle-detector-adas-0001 | YES | YES | YES |
 | pedestrian-detection-adas-0002 | YES | YES | YES |
 | person-attributes-recognition-crossroad-0230 | YES | YES | YES |
@@ -105,6 +107,10 @@
 | text-to-speech-en-0001-duration-prediction | YES |    |    |
 | text-to-speech-en-0001-generation | YES |    |    |
 | text-to-speech-en-0001-regression | YES |    |    |
+| text-to-speech-en-multi-0001-duration-prediction | YES |    |    |
+| text-to-speech-en-multi-0001-generation | YES |    |    |
+| text-to-speech-en-multi-0001-regression | YES |    |    |
+| time-series-forecasting-electricity-0001 | YES | YES |    |
 | unet-camvid-onnx-0001 | YES | YES | YES |
 | vehicle-attributes-recognition-barrier-0039 | YES | YES | YES |
 | vehicle-attributes-recognition-barrier-0042 | YES | YES | YES |

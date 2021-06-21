@@ -46,7 +46,6 @@
 #include "gaze_estimator.hpp"
 
 #include "results_marker.hpp"
-
 #include "exponential_averager.hpp"
 
 #include "utils.hpp"
@@ -90,14 +89,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Loading Inference Engine
-        std::vector<std::pair<std::string, std::string>> cmdOptions = {
-            {FLAGS_d, FLAGS_m}, {FLAGS_d_fd, FLAGS_m_fd},
-            {FLAGS_d_hp, FLAGS_m_hp}, {FLAGS_d_lm, FLAGS_m_lm},
-            {FLAGS_d_es, FLAGS_m_es}
-        };
-
         InferenceEngine::Core ie;
-        initializeIEObject(ie, cmdOptions);
 
         // Enable per-layer metrics
         if (FLAGS_pc) {

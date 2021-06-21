@@ -300,7 +300,7 @@ int main(int argc, char *argv[]) {
             //--- Checking for results and rendering data if it's ready
             //--- If you need just plain data without rendering - cast result's underlying pointer to HumanPoseResult*
             //    and use your own processing instead of calling renderHumanPose().
-            while ((result = pipeline.getResult()) && keepRunning) {
+            while (keepRunning && (result = pipeline.getResult())) {
                 cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);

@@ -84,15 +84,17 @@ def main():
 
     # check input and output names
     input_names = [i.strip() for i in args.input_names.split(',')]
-    output_names = ['output']
-    if ie_encoder.input_info.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
-        log.error("Input or Output names do not match")
-        log.error("    The demo expects input->output names: {}->{}. "
-                  "Please use the --input_names and --output_names to specify the right names "
-                  "(see actual values below)".format(input_names, output_names))
-        log.error("    Actual network input->output names: {}->{}".format(list(ie_encoder.inputs.keys()),
-                                                                          list(ie_encoder.outputs.keys())))
-        raise Exception("Unexpected network input or output names")
+    if ie_encoder.input_info.keys() != set(input_names):
+        log.error("Input names do not match")
+        log.error("    The demo expects input names: {}. "
+                  "Please use the --input_names to specify the right names "
+                  "(see actual values below)".format(input_names))
+        log.error("    Actual network input names: {}".format(list(ie_encoder.input_info.keys())))
+        raise Exception("Unexpected network input names")
+    if len(ie_encoder.outputs) != 1:
+        log.log.error('Demo expects model with single output, while provided {}'.format(len(ie_encoder.outputs)))
+        raise Exception('Unexpected number of outputs')
+    output_names = list(ie_encoder.outputs)
     max_length = ie_encoder.input_info[input_names[0]].input_data.shape[1]
     if max_sent_length > max_length:
         input_shapes = {

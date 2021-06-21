@@ -35,13 +35,25 @@ The demo workflow is the following:
     * By default, tracking is used to show object instance with the same color throughout the whole video.
       It assumes more or less static scene with instances in two frames being a part of the same track if intersection over union of the masks is greater than the 0.5 threshold. To disable tracking, specify the `--no_track` argument.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/instance_segmentation_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -77,13 +89,13 @@ Options:
                         a folder of images, video file or camera id.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of output to save.
+                        Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
   -d "<device>", --device "<device>"
                         Optional. Specify the target device to infer on: CPU,
-                        GPU, FPGA, HDDL or MYRIAD. The demo will look for a
+                        GPU, HDDL or MYRIAD. The demo will look for a
                         suitable plugin for device specified (by default, it
                         is CPU).
   -l "<absolute_path>", --cpu_extension "<absolute_path>"
@@ -114,11 +126,19 @@ To run the demo, please provide paths to the model in the IR format, to a file w
 ```bash
 python3 instance_segmentation_demo/instance_segmentation_demo.py \
     -m <path_to_model>/instance-segmentation-security-0228.xml \
-    --label <omz_dir>/data/dataset_classes/coco.txt \
+    --label <omz_dir>/data/dataset_classes/coco_80cl.txt \
     --no_keep_aspect_ratio \
     -i 0 \
     --delay 1
 ```
+
+You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
+
+* To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
+* To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
+To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
+
+>**NOTE**: Windows* systems may not have the Motion JPEG codec installed by default. If this is the case, OpenCV FFMPEG backend can be downloaded by the PowerShell script provided with the OpenVINO install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. Run the script with Administrative privileges. Alternatively, you can save results as images.
 
 ## Demo Output
 

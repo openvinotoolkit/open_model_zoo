@@ -118,11 +118,11 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
             if len(prediction.value) != 1:
                 raise ConfigError('annotation for all predictions should be provided')
             diff = self.value_differ(annotation.value, next(iter(prediction.value.values())))
-            if not np.isscalar(diff) and np.size(diff) > 1:
+            if not np.isscalar(diff) and np.ndim(diff) > 1:
                 diff = np.mean(diff)
             return diff
         diff = self.value_differ(annotation.value, prediction.value)
-        if not np.isscalar(diff) and np.size(diff) > 1:
+        if not np.isscalar(diff) and np.ndim(diff) > 1:
             diff = np.mean(diff)
         return diff
 

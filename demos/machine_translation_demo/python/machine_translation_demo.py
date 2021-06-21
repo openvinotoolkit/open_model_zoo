@@ -193,7 +193,7 @@ def build_argparser():
     parser.add_argument('-i', '--input', type=str, required=False, nargs='*',
                         help='Optional. Text for translation or path to the input .txt file. Replaces console input.')
     parser.add_argument('-d', '--device', default='CPU', type=str,
-                        help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
+                        help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
                              'acceptable. The demo will look for a suitable plugin for device specified. '
                              'Default value is CPU.')
     parser.add_argument('-o', '--output', required=False, type=str,

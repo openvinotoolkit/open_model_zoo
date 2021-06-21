@@ -67,15 +67,17 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     if (!request)
         return -1;
 
+    auto startTime = std::chrono::steady_clock::now();
     auto internalModelData = model->preprocess(inputData, request);
+    preprocessMetrics.update(startTime);
 
     request->SetCompletionCallback(
-        [this, frameID, request, internalModelData, metaData] {
+        [this, frameID, request, internalModelData, metaData, startTime] {
             request->SetCompletionCallback([]{});
 
             {
                 std::lock_guard<std::mutex> lock(mtx);
-
+                this->inferenceMetrics.update(startTime);
                 try {
                     InferenceResult result;
 
@@ -120,9 +122,11 @@ std::unique_ptr<ResultBase> AsyncPipeline::getResult(bool shouldKeepOrder) {
     if (infResult.IsEmpty()) {
         return std::unique_ptr<ResultBase>();
     }
+    auto startTime = std::chrono::steady_clock::now();
     auto result = model->postprocess(infResult);
-    *result = static_cast<ResultBase&>(infResult);
+    postprocessMetrics.update(startTime);
 
+    *result = static_cast<ResultBase&>(infResult);
     return result;
 }
 

@@ -17,6 +17,18 @@ For demo input image or video files you may refer to [Media Files Available for 
 The list of models supported by the demo is in `<omz_dir>/demos/image_inpainting_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
 ### Supported Models
 
 * gmcnn-places2-tf
@@ -41,7 +53,7 @@ Options:
                         path to image.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
-                        GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
+                        GPU, HDDL or MYRIAD is acceptable. The demo will
                         look for a suitable plugin for device specified.
                         Default value is CPU
   -p PARTS, --parts PARTS
@@ -91,8 +103,10 @@ Also, these hot keys are available:
 * **Backspace or C** to clear current mask
 * **Space or Enter** to inpaint
 * **R** to reset all changes
-* **Tab** to show original image
+* **Tab** to show/hide original image
 * **Esc or Q** to quit
+
+If Backpace, C or R keys are pressed while demo is showing original image, demo will hide original image and return back to editing mode.
 
 ## Demo Output
 

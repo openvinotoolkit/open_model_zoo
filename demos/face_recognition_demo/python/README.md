@@ -27,6 +27,8 @@ to align the faces and the face gallery to match faces found on a video
 frame with the ones in the gallery. Then, the processing results are
 visualized and displayed on the screen or written to the output file.
 
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+
 ## Preparing to Run
 
 ### Installation and dependencies
@@ -46,6 +48,18 @@ pip install -r requirements.txt
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in <omz_dir>/demos/face_recognition_demo/python/models.lst file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -100,9 +114,9 @@ usage: face_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
                                 -fg PATH [--run_detector] [--allow_grow]
                                 -m_fd PATH -m_lm PATH -m_reid PATH
                                 [--fd_input_size FD_INPUT_SIZE]
-                                [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
-                                [-d_lm {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
-                                [-d_reid {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
+                                [-d_fd {CPU,GPU,MYRIAD,HETERO,HDDL}]
+                                [-d_lm {CPU,GPU,MYRIAD,HETERO,HDDL}]
+                                [-d_reid {CPU,GPU,MYRIAD,HETERO,HDDL}]
                                 [-l PATH] [-c PATH] [-v] [-pc] [-t_fd [0..1]]
                                 [-t_id [0..1]] [-exp_r_fd NUMBER]
 
@@ -115,7 +129,7 @@ General:
                         single image, a folder of images, video file or camera id.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of output to save.
+                        Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
@@ -158,13 +172,13 @@ Models:
                         reshaping. Example: 500 700.
 
 Inference options:
-  -d_fd {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}
+  -d_fd {CPU,GPU,MYRIAD,HETERO,HDDL}
                         Optional. Target device for Face Detection model.
                         Default value is CPU.
-  -d_lm {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}
+  -d_lm {CPU,GPU,MYRIAD,HETERO,HDDL}
                         Optional. Target device for Facial Landmarks Detection
                         model. Default value is CPU.
-  -d_reid {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}
+  -d_reid {CPU,GPU,MYRIAD,HETERO,HDDL}
                         Optional. Target device for Face Reidentification
                         model. Default value is CPU.
   -l PATH, --cpu_lib PATH
@@ -193,12 +207,12 @@ Linux (`sh`, `bash`, ...) (assuming OpenVINO installed in `/opt/intel/openvino`)
 source /opt/intel/openvino/bin/setupvars.sh
 
 python ./face_recognition_demo.py \
--i <path_to_video>/input_video.mp4 \
--m_fd <path_to_model>/face-detection-retail-0004.xml \
--m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
--m_reid <path_to_model>/face-reidentification-retail-0095.xml \
---verbose \
--fg "/home/face_gallery"
+  -i <path_to_video>/input_video.mp4 \
+  -m_fd <path_to_model>/face-detection-retail-0004.xml \
+  -m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
+  -m_reid <path_to_model>/face-reidentification-retail-0095.xml \
+  --verbose \
+  -fg "/home/face_gallery"
 ```
 
 Windows (`cmd`, `powershell`) (assuming OpenVINO installed in `C:/Intel/openvino`):
@@ -208,13 +222,21 @@ Windows (`cmd`, `powershell`) (assuming OpenVINO installed in `C:/Intel/openvino
 call C:/Intel/openvino/bin/setupvars.bat
 
 python ./face_recognition_demo.py ^
--i <path_to_video>/input_video.mp4 ^
--m_fd <path_to_model>/face-detection-retail-0004.xml ^
--m_lm <path_to_model>/landmarks-regression-retail-0009.xml ^
--m_reid <path_to_model>/face-reidentification-retail-0095.xml ^
---verbose ^
--fg "C:/face_gallery"
+  -i <path_to_video>/input_video.mp4 ^
+  -m_fd <path_to_model>/face-detection-retail-0004.xml ^
+  -m_lm <path_to_model>/landmarks-regression-retail-0009.xml ^
+  -m_reid <path_to_model>/face-reidentification-retail-0095.xml ^
+  --verbose ^
+  -fg "C:/face_gallery"
 ```
+
+You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
+
+* To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
+* To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
+To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
+
+>**NOTE**: Windows* systems may not have the Motion JPEG codec installed by default. If this is the case, OpenCV FFMPEG backend can be downloaded by the PowerShell script provided with the OpenVINO install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. Run the script with Administrative privileges. Alternatively, you can save results as images.
 
 ## Demo output
 

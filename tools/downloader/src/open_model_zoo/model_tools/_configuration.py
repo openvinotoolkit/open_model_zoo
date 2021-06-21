@@ -259,7 +259,7 @@ class Model:
     def __init__(
         self, name, subdirectory, files, postprocessing, mo_args, framework,
         description, license_url, precisions, quantization_output_precisions,
-        task_type, conversion_to_onnx_args,
+        task_type, conversion_to_onnx_args, composite_model_name,
     ):
         self.name = name
         self.subdirectory = subdirectory
@@ -274,9 +274,10 @@ class Model:
         self.task_type = task_type
         self.conversion_to_onnx_args = conversion_to_onnx_args
         self.converter_to_onnx = _common.KNOWN_FRAMEWORKS[framework]
+        self.composite_model_name = composite_model_name
 
     @classmethod
-    def deserialize(cls, model, name, subdirectory):
+    def deserialize(cls, model, name, subdirectory, composite_model_name):
         with deserialization_context('In model "{}"'.format(name)):
             if not RE_MODEL_NAME.fullmatch(name):
                 raise DeserializationError('Invalid name, must consist only of letters, digits or ._-')
@@ -361,14 +362,50 @@ class Model:
 
             return cls(name, subdirectory, files, postprocessing, mo_args, framework,
                 description, license_url, precisions, quantization_output_precisions,
-                task_type, conversion_to_onnx_args)
+                task_type, conversion_to_onnx_args, composite_model_name)
+
+def check_composite_model_dir(model_dir):
+    with deserialization_context('In directory "{}"'.format(model_dir)):
+        if list(model_dir.glob('*/*/**/model.yml')):
+            raise DeserializationError(
+                'Directory should not contain any model.yml files in any subdirectories '
+                'that are not direct children of the composite model directory')
+
+        if (model_dir / 'model.yml').exists():
+            raise DeserializationError('Directory should not contain a model.yml file')
+
+        model_name = model_dir.name
+        model_stages = list(model_dir.glob('*/model.yml'))
+        for model in model_stages:
+            if not model.parent.name.startswith(f'{model_name}-'):
+                raise DeserializationError('Names of composite model parts should start with composite model name')
 
 def load_models(args):
     models = []
     model_names = set()
 
+    composite_models = []
+
+    for composite_model_config in sorted(_common.MODEL_ROOT.glob('**/composite-model.yml')):
+        composite_model_name = composite_model_config.parent.name
+        with deserialization_context('In model "{}"'.format(composite_model_name)):
+            if not RE_MODEL_NAME.fullmatch(composite_model_name):
+                raise DeserializationError('Invalid name, must consist only of letters, digits or ._-')
+
+            check_composite_model_dir(composite_model_config.parent)
+
+            if composite_model_name in composite_models:
+                raise DeserializationError(
+                    'Duplicate composite model name "{}"'.format(composite_model_name))
+            composite_models.append(composite_model_name)
+
     for config_path in sorted(_common.MODEL_ROOT.glob('**/model.yml')):
-        subdirectory = config_path.parent.relative_to(_common.MODEL_ROOT)
+        subdirectory = config_path.parent
+
+        is_composite = (subdirectory.parent / 'composite-model.yml').exists()
+        composite_model_name = subdirectory.parent.name if is_composite else None
+
+        subdirectory = subdirectory.relative_to(_common.MODEL_ROOT)
 
         with config_path.open('rb') as config_file, \
                 deserialization_context('In config "{}"'.format(config_path)):
@@ -379,7 +416,7 @@ def load_models(args):
                 if bad_key in model:
                     raise DeserializationError('Unsupported key "{}"'.format(bad_key))
 
-            models.append(Model.deserialize(model, subdirectory.name, subdirectory))
+            models.append(Model.deserialize(model, subdirectory.name, subdirectory, composite_model_name))
 
             if models[-1].name in model_names:
                 raise DeserializationError(
@@ -435,8 +472,12 @@ def load_models_from_args(parser, args):
         models = collections.OrderedDict() # deduplicate models while preserving order
 
         for pattern in patterns:
-            matching_models = [model for model in all_models
-                if fnmatch.fnmatchcase(model.name, pattern)]
+            matching_models = []
+            for model in all_models:
+                if fnmatch.fnmatchcase(model.name, pattern):
+                    matching_models.append(model)
+                elif model.composite_model_name and fnmatch.fnmatchcase(model.composite_model_name, pattern):
+                    matching_models.append(model)
 
             if not matching_models:
                 sys.exit('No matching models: "{}"'.format(pattern))

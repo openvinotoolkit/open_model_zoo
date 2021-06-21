@@ -55,7 +55,7 @@ def build_argparser():
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
     args.add_argument('-d', '--device', default='CPU', type=str,
-                      help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
+                      help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
 
@@ -85,7 +85,7 @@ def build_argparser():
     io_args.add_argument('--loop', default=False, action='store_true',
                          help='Optional. Enable reading the input in a loop.')
     io_args.add_argument('-o', '--output', required=False,
-                         help='Optional. Name of output to save.')
+                         help='Optional. Name of the output file(s) to save.')
     io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')

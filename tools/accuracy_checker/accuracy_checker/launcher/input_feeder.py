@@ -62,13 +62,13 @@ PRECISION_TO_DTYPE = {
     'STR': str,  # string
 }
 
-INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'IGNORE_INPUT', 'LSTM_INPUT']
+INPUT_TYPES_WITHOUT_VALUE = ['IMAGE_INFO', 'ORIG_IMAGE_INFO', 'IGNORE_INPUT', 'LSTM_INPUT', 'SCALE_FACTOR']
 
 
 class InputFeeder:
     def __init__(
-            self, inputs_config, network_inputs, prepare_input_data=None, default_layout='NCHW', dummy=False,
-            input_precisions_list=None
+            self, inputs_config, network_inputs, shape_checker, prepare_input_data=None, default_layout='NCHW',
+            dummy=False, input_precisions_list=None
     ):
         def fit_to_input(data, input_layer_name, layout, precision):
             if len(np.shape(data)) == 4:
@@ -77,6 +77,7 @@ class InputFeeder:
                 data = np.array(data)
             return data.astype(precision) if precision else data
 
+        self.shape_checker = shape_checker
         self.input_transform_func = prepare_input_data or fit_to_input
         self.network_inputs = network_inputs or []
         self.default_layout = default_layout
@@ -88,43 +89,68 @@ class InputFeeder:
         if not self.dummy:
             parsing_results = self._parse_inputs_config(inputs_config, self.default_layout, precisions_list)
             self.const_inputs, self.non_constant_inputs, self.inputs_mapping = parsing_results[:3]
-            self.image_info_inputs, self.orig_image_info_inputs, self.lstm_inputs = parsing_results[3:6]
-            self.ignore_inputs, self.layouts_mapping, self.precision_mapping, self.inputs_config = parsing_results[6:]
+            self.image_info_inputs, self.orig_image_info_inputs, self.scale_factor_inputs = parsing_results[3:6]
+            self.lstm_inputs = parsing_results[6]
+            self.ignore_inputs, self.layouts_mapping, self.precision_mapping, self.inputs_config = parsing_results[7:]
             if not self.non_constant_inputs:
                 raise ConfigError('Network should contain at least one layer for setting variable data.')
 
     def _fill_image_info_inputs(self, data_representation_batch):
-        def prepare_image_info(image_sizes_batch, omit_scale=False):
+        def prepare_image_info(image_sizes_batch, input_name, preprocessed_input_info=False):
             image_info = []
+            input_shape = self.shape_checker(input_name)
             for image_size in image_sizes_batch:
-                if np.isscalar(image_size) or isinstance(image_size, list):
+                if np.isscalar(image_size):
                     image_info.append(image_size)
                     continue
 
                 height, width = image_size[:2]
-                image_info.append([height, width, 1] if not omit_scale else [height, width])
+                image_info_ = [height, width]
+                info_size = input_shape[-1]
+                if info_size == 3:
+                    image_info_ += [1] if not preprocessed_input_info else image_size[2]
+                if info_size == 6:
+                    image_info_ += [0, 0, 0, 0]
+                image_info.append(image_info_)
 
             return image_info
+
+        def prepare_scale_factor(image_meta):
+            if 'scale_x' in image_meta[0]:
+                return [[meta['scale_y'], meta['scale_x']] for meta in image_meta]
+            return [[1, 1] for _ in image_meta]
+
         meta_batch = extract_image_representations(data_representation_batch, meta_only=True)
         image_infos = {}
         im_info_resolved = False
         if 'image_info' in meta_batch[0]:
             image_info_data = [meta['image_info'] for meta in meta_batch]
-            image_infos = {image_info_input: image_info_data for image_info_input in self.image_info_inputs}
+            image_infos = {
+                image_info_input:
+                    prepare_image_info(image_info_data, image_info_input, True)
+                for image_info_input in self.image_info_inputs
+            }
             im_info_resolved = True
-        if im_info_resolved and not self.orig_image_info_inputs:
+        if im_info_resolved and not self.orig_image_info_inputs and not self.scale_factor_inputs:
             return image_infos
+        if self.scale_factor_inputs:
+            scale_info = prepare_scale_factor(meta_batch)
+            update_image_infos = {input_name: scale_info for input_name in self.scale_factor_inputs}
+            image_infos.update(update_image_infos)
         image_sizes = [meta['image_size'] for meta in meta_batch]
-        image_info_data = prepare_image_info(image_sizes, True)
-        image_infos.update({image_info_input: image_info_data for image_info_input in self.orig_image_info_inputs})
-        image_info_data = prepare_image_info(image_sizes)
+        image_infos.update({image_info_input: prepare_image_info(image_sizes, image_info_input)
+                            for image_info_input in self.orig_image_info_inputs})
         if not im_info_resolved:
-            image_infos.update({image_info_input: image_info_data for image_info_input in self.image_info_inputs})
+            image_infos.update(
+                {image_info_input: prepare_image_info(image_sizes, image_info_input)
+                 for image_info_input in self.image_info_inputs})
 
         return image_infos
 
     def fill_non_constant_inputs(self, data_representation_batch):
         def match_by_regex(data, identifiers, input_regex):
+            if not isinstance(identifiers, list):
+                identifiers = [identifiers]
             input_data = None
             for identifier, data_value in zip(identifiers, data):
                 if input_regex.match(identifier):
@@ -134,7 +160,7 @@ class InputFeeder:
 
         filled_inputs = {}
         check_regex = True
-        if self.image_info_inputs or self.orig_image_info_inputs:
+        if self.image_info_inputs or self.orig_image_info_inputs or self.scale_factor_inputs:
             image_info_inputs = self._fill_image_info_inputs(data_representation_batch)
             filled_inputs = {**image_info_inputs}
         for idx, input_layer in enumerate(self.non_constant_inputs):
@@ -204,6 +230,7 @@ class InputFeeder:
         orig_image_info_inputs = []
         lstm_inputs = []
         ignore_inputs = []
+        scale_factor_inputs = []
 
         for input_ in inputs_entry:
             name = input_['name']
@@ -211,7 +238,7 @@ class InputFeeder:
                 raise ConfigError('network does not contain input "{}"'.format(name))
             if input_['type'] in INPUT_TYPES_WITHOUT_VALUE:
                 self._configure_inputs_without_value(
-                    input_, image_info_inputs, orig_image_info_inputs, lstm_inputs, ignore_inputs,
+                    input_, image_info_inputs, orig_image_info_inputs, scale_factor_inputs, lstm_inputs, ignore_inputs,
                     precision_info, precisions)
                 continue
 
@@ -223,7 +250,7 @@ class InputFeeder:
                     value = np.array(value, dtype=precision)
                 if isinstance(value, (int, float)) and 'shape' in input_:
                     value = np.full(input_['shape'], value, dtype=precision)
-                constant_inputs[name] = value
+                constant_inputs[name] = self.input_transform_func(value, name, None, precision)
             else:
                 config_non_constant_inputs.append(name)
                 if value is not None:
@@ -235,7 +262,7 @@ class InputFeeder:
 
         all_config_inputs = (
             config_non_constant_inputs + list(constant_inputs.keys()) +
-            image_info_inputs + lstm_inputs + orig_image_info_inputs + ignore_inputs
+            image_info_inputs + lstm_inputs + orig_image_info_inputs + ignore_inputs + scale_factor_inputs
         )
         not_config_inputs = [input_layer for input_layer in self.network_inputs if input_layer not in all_config_inputs]
         if config_non_constant_inputs and not_config_inputs:
@@ -252,6 +279,7 @@ class InputFeeder:
             non_constant_inputs_mapping or None,
             image_info_inputs,
             orig_image_info_inputs,
+            scale_factor_inputs,
             lstm_inputs,
             ignore_inputs,
             layouts,
@@ -261,7 +289,7 @@ class InputFeeder:
 
     def _configure_inputs_without_value(
             self, input_config, image_info_inputs,
-            orig_image_info_inputs, lstm_inputs, ignore_inputs,
+            orig_image_info_inputs, scale_factor_inputs, lstm_inputs, ignore_inputs,
             precision_info, precisions):
         name = input_config['name']
         if input_config['type'] == 'IMAGE_INFO':
@@ -270,6 +298,10 @@ class InputFeeder:
 
         if input_config['type'] == 'ORIG_IMAGE_INFO':
             orig_image_info_inputs.append(name)
+            self.get_layer_precision(input_config, name, precision_info, precisions)
+
+        if input_config['type'] == 'SCALE_FACTOR':
+            scale_factor_inputs.append(name)
             self.get_layer_precision(input_config, name, precision_info, precisions)
 
         if input_config['type'] == 'LSTM_INPUT':

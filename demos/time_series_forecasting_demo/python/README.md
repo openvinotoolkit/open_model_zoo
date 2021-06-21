@@ -4,19 +4,37 @@ This README describes the Time Series Forecasting demo application.
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network to Inference Engine.
+On startup the demo application reads command line parameters and loads a network to Inference Engine.
 
 The program provides an interactive CLI interface that gets a test dataset in .pickle format as input and draws predicted quantiles and ground truth curves.
 
-## Supported datasets
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in `<omz_dir>/demos/whiteboard_inpainting_demo/python/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
+### Supported datasets
 
 * [Electricity](https://archive.ics.uci.edu/ml/machine-learning-databases/00321/LD2011_2014.txt.zip).
 
 ### Prepare dataset
 
-Our demo works with the test dataset in the .pickle format provided by accuracy_checker.
+The demo works with the test dataset in the .pickle format provided by accuracy_checker.
 
-* Install accuracy_checker following [instruction](../../../tools/accuracy_checker/README.md).
+* Install accuracy_checker following to the [instruction](../../../tools/accuracy_checker/README.md).
 * Convert test dataset:
 ```
 wget https://archive.ics.uci.edu/ml/machine-learning-databases/00321/LD2011_2014.txt.zip
@@ -24,7 +42,7 @@ unzip LD2011_2014.txt.zip
 convert_annotation electricity --data_path_file LD2011_2014.txt
 ```
 
-### Running the Demo
+## Running the Demo
 
 Running the application with the `-h` option yields the following usage message:
 
@@ -45,11 +63,6 @@ optional arguments:
                         Optional. Names of predicted quantiles.
 ```
 
-To run the demo, you can use Intel's pretrained model. To download pretrained models, use the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/machine_translation_demo/python/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
-
 ## Demo Output
 
 The application draws predicted quantiles and ground truth curves.
@@ -57,6 +70,6 @@ The application draws predicted quantiles and ground truth curves.
 
 ## See Also
 
-* [Using Open Model Zoo demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

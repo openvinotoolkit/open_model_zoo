@@ -238,7 +238,14 @@ The main difference between this converter and `super_resolution` in data organi
   * `frame_separator` - string separator between file name and frame number in `multi_frame` (optional, default `#`)
   * `frame_axis` - number of frame axis in 3D Image (optional, default `-1`, last axis)
   * `as_regression` - allows dataset conversion as `NiftiRegressionAnnotation` annotation (optional, default `False`)
-
+* `k_space_mri` - converts `k-spaced MRI` dataset format to `ImageRepresentationAnnotation` format. MRI datasets, for example `Calgary-Campinas`, provides data in Fourier images form (so called k-space images). Converter performs dataset annotation and preprocessing of ground truth images and model input.
+  * `data_dir` - path to dataset root
+  * `image_folder`- path to source k-space files directory, relatively `data_dir` (optional, default `images`)
+  * `reconstructed_folder`- path to reconstructed images directory, relatively `data_dir` (optional, default `reconstructed`)
+  * `masked_folder`- path to masked k-space files directory, relatively `data_dir` (optional, default `masked`)
+  * `mask_file` - k-space mask filename
+  * `stats_file` - k-space normalization factors filename
+  * `skip_dumps` - allows dataset annotation without preprocessing
 * `movie_lens_converter` - converts Movie Lens Datasets format to `HitRatioAnnotation` format.
   * `rating_file` - path to file which contains movieId with top score for each userID (for example ml-1m-test-ratings.csv)
   * `negative_file` - path to file which contains negative examples.
@@ -559,7 +566,11 @@ The main difference between this converter and `super_resolution` in data organi
     ```
 * `rctw_preprocessed`- converts preprocessed Reading Chinese Text in the Wild (RCTW) dataset to `TextDetectionAnnotation`.
   * `annotation_file` - txt file contains annotation, where image and its annotation separated by tab. Image annotation is represented as json-string.
-
+* `open_images_detection` - converts Open Images dataset for object detection task to `DetectionAnnotation`.
+  * `bbox_csv_file` - path to cvs file which contains bounding box coordinates.
+  * `labels_file` - path to file with class labels in csv format.
+  * `images_dir` - path to images folder (Optional).
+  * `label_start` - specifies label index start in label map. You can provide another value, if you want to use this dataset for separate label validation (Optional, default value is 1).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

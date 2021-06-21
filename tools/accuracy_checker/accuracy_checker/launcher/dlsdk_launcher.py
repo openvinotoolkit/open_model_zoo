@@ -593,7 +593,8 @@ class DLSDKLauncher(Launcher):
             data = np.concatenate([data, filled_part])
         precision = self.inputs[input_blob].precision
         data = data.astype(PRECISION_TO_DTYPE[precision])
-        data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
+        if data_layout is not None:
+            data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
         input_layout = self.inputs[input_blob].layout
         layout_mismatch = (
             data_layout is not None and len(input_layout) == len(data_layout) and input_layout != data_layout
@@ -847,7 +848,7 @@ class DLSDKLauncher(Launcher):
             if len(data_shape) < 4:
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
-            return np.transpose(data, layout)
+            return np.transpose(data, layout) if layout is not None else data
         if len(layer_shape) == 2:
             if len(data_shape) == 1:
                 return np.transpose([data])
@@ -857,9 +858,8 @@ class DLSDKLauncher(Launcher):
                 if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
                     return np.resize(data, layer_shape)
         if len(layer_shape) == 3 and len(data_shape) == 4:
-            data = np.transpose(data, layout)
-            return data[0]
-        if len(layer_shape) == len(layout):
+            return np.transpose(data, layout)[0] if layout is not None else data[0]
+        if layout is not None and len(layer_shape) == len(layout):
             return np.transpose(data, layout)
         if (
                 len(layer_shape) == 1 and len(data_shape) > 1 and
@@ -981,6 +981,9 @@ class DLSDKLauncher(Launcher):
 
     def get_model_file_type(self):
         return self._model.suffix
+
+    def input_shape(self, input_name):
+        return self.inputs[input_name].shape
 
     def release(self):
         if 'network' in self.__dict__:

@@ -74,7 +74,7 @@ optional arguments:
                         Path to an audio file in WAV PCM 16 kHz mono format
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
-                        example: CPU, GPU, FPGA, HDDL, MYRIAD or HETERO. The
+                        example: CPU, GPU, HDDL, MYRIAD or HETERO. The
                         demo will look for a suitable IE plugin for this
                         device. (default is CPU)
   -m FILENAME, --model FILENAME
@@ -130,7 +130,7 @@ To run in *simulated real-time mode* add command-line option `--realtime`.
 
 > **NOTE**: Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported.
 
-Optional (but highly recommended) language model files, `deepspeech-0.8.2-models.kenlm` or `lm.binary` are part of corresponding model downloaded content and will be located at Model Downloader output folder after model downloading and conversion. An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/how_are_you_doing.wav`.
+Optional (but highly recommended) language model files, `deepspeech-0.8.2-models.kenlm` or `lm.binary` are part of corresponding model downloaded content and will be located in the Model Downloader output folder after model downloading and conversion. An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/how_are_you_doing.wav`.
 
 ## Demo Output
 

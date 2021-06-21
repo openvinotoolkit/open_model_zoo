@@ -56,7 +56,7 @@ def build_argparser():
                       type=str)
 
     args.add_argument("-d", "--device",
-                      help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL, MYRIAD or HETERO is "
+                      help="Optional. Specify the target device to infer on; CPU, GPU, HDDL, MYRIAD or HETERO is "
                            "acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU",
                       default="CPU", type=str)
@@ -100,6 +100,9 @@ def is_correct_args(args):
         return False
     if args.alpha < 0.5 or args.alpha > 2.0:
         print('Can not use time coefficient less than 0.5 or greater than 2.0')
+        return False
+    if args.speaker_id < -1 or args.speaker_id > 39:
+        print('Mistake in the range of args.speaker_id. Speaker_id should be -1 (GUI regime) or in range [0,39]')
         return False
 
     return True

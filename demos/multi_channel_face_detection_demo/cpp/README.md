@@ -9,15 +9,27 @@ Other demo objectives are:
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads the specified networks. The Face Detection network is required.
+On startup, the application reads command line parameters and loads the specified networks. The Face Detection network is required.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_channel_face_detection_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -63,13 +75,19 @@ Running the application with an empty list of options yields the usage message g
 For example, to run the demo with the pre-trained face detection model on CPU, with one single camera, use the following command:
 
 ```sh
-./multi_channel_face_detection_demo -m <path_to_model>/face-detection-retail-0004.xml -d CPU -i 0
+./multi_channel_face_detection_demo \
+  -d CPU \
+  -i 0 \
+  -m <path_to_model>/face-detection-retail-0004.xml
 ```
 
 To run the demo using two recorded video files, use the following command:
 
 ```sh
-./multi_channel_face_detection_demo -m <path_to_model>/face-detection-retail-0004.xml -d CPU -i <path_to_file>/file1,<path_to_file>/file2
+./multi_channel_face_detection_demo \
+  -d CPU \
+  -i <path_to_file>/file1,<path_to_file>/file2 \
+  -m <path_to_model>/face-detection-retail-0004.xml
 ```
 
 Video files will be processed simultaneously.
@@ -88,7 +106,7 @@ To see all available web cameras, run the `ls /dev/video*` command. You will get
 
 ```sh
 user@user-PC:~ $ ls /dev/video*
-/dev/video0  /dev/video1  /dev/video2
+/dev/video0 /dev/video1 /dev/video2
 ```
 
 You can use `-i` option to connect all the three web cameras:

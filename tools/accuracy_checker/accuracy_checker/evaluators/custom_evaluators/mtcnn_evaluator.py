@@ -250,6 +250,9 @@ class CaffeModelMixin:
             inputs_map[input_blob] = self.net.blobs[input_blob].data.shape
         return inputs_map
 
+    def input_shape(self, input_name):
+        return self.inputs[input_name]
+
     def release(self):
         del self.net
 
@@ -322,6 +325,9 @@ class DLSDKModelMixin:
         if not has_info:
             return self.exec_network.inputs
         return OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
+
+    def input_shape(self, input_name):
+        return self.inputs[input_name]
 
     def release(self):
         self.input_feeder.release()
@@ -410,14 +416,16 @@ class DLSDKModelMixin:
         self.network = network
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
         self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
 
     def load_model(self, network_info, launcher, model_prefix=None, log=False):
         self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         if log:
             self.print_input_output_info()
 
@@ -476,7 +484,7 @@ class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):
     def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher, *args, **kwargs):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
-        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         pnet_outs = model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         pnet_adapter_config.update({'regions_format': 'hw'})
@@ -487,14 +495,14 @@ class CaffeRefineStage(CaffeModelMixin, RefineBaseStage):
     def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher, *args, **kwargs):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
-        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
 
 
 class CaffeOutputStage(CaffeModelMixin, OutputBaseStage):
     def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
-        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
 
 
 class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
@@ -515,7 +523,8 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         self.network = network
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
         self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         pnet_outs = self.model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         self.adapter = create_adapter(pnet_adapter_config)
@@ -525,7 +534,9 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input
+        )
         pnet_outs = self.model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         self.adapter = create_adapter(pnet_adapter_config)

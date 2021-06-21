@@ -4,14 +4,26 @@ This README describes the Question Answering demo application that uses a Squad-
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network to Inference engine.
-It also fetch data from the user-provided url to populate the "context" text.
+On startup the demo application reads command line parameters and loads a network to Inference engine.
+It also fetches data from the user-provided url to populate the "context" text.
 The text is then used to search answers for user-provided questions.
 
 ## Preparing to Run
 
 The list of models supported by the demo is in `<omz_dir>/demos/bert_question_answering_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
 
 ### Supported Models
 
@@ -24,7 +36,7 @@ This file can be used as a parameter for [Model Downloader](../../../tools/downl
 * bert-small-uncased-whole-word-masking-squad-int8-0002
 
 The "small" variants of these are so-called "distilled" models, which originated from the BERT Large but substantially smaller and faster.
-The demo also works fine with [official MLPerf* BERT ONNX models fine-tuned on the Squad dataset](https://github.com/mlcommons/inference/tree/master/language/bert). This model should be converted to OpenVINO Inference Engine format using command like example below:
+If you want to use an official MLPerf* BERT ONNX model rather than the distilled model on the Open model Zoo, the command line to convert the [int8 model](https://zenodo.org/record/3750364) is as follows:
 
 ```sh
     python3 mo.py
@@ -87,7 +99,7 @@ Options:
 
 ```sh
     python3 bert_question_answering_demo.py
-            --vocab=<omz_dir>/models/intel/<model_name>/vocab.txt
+            --vocab=<omz_dir>/models/intel/bert-small-uncased-whole-word-masking-squad-0001/vocab.txt
             --model=<path_to_model>/bert-small-uncased-whole-word-masking-squad-0001.xml
             --input_names="input_ids,attention_mask,token_type_ids"
             --output_names="output_s,output_e"

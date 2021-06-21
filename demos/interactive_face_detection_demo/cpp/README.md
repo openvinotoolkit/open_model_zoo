@@ -31,7 +31,7 @@ Engine.
 4. The application performs up to five simultaneous inferences, using the Age/Gender, Head Pose, Emotions, Facial Landmarks, and Anti-spoof detection networks if they are specified in the command line.
 5. The application displays the results.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 The Async API operates with a notion of the Infer Request that encapsulates the inputs/outputs and separates scheduling and waiting for result.
 
@@ -82,7 +82,7 @@ Options:
     -h                         Print a usage message
     -i                         Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -loop                      Optional. Enable reading the input in a loop.
-    -o "<path>"                Optional. Name of output to save.
+    -o "<path>"                Optional. Name of the output file(s) to save.
     -limit "<num>"             Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m "<path>"                Required. Path to an .xml file with a trained Face Detection model.
     -m_ag "<path>"             Optional. Path to an .xml file with a trained Age/Gender Recognition model.
@@ -130,6 +130,14 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 ```sh
 ./interactive_face_detection_demo -i <path_to_video>/<input_video>.mp4 -m <path_to_model>/face-detection-adas-0001.xml -m_ag <path_to_model>/age-gender-recognition-retail-0013.xml -m_hp <path_to_model>/head-pose-estimation-adas-0001.xml -m_em <path_to_model>/emotions-recognition-retail-0003.xml -m_lm <path_to_model>/facial-landmarks-35-adas-0002.xml -m_am <path_to_model>/anti-spoof-mn3.xml -d GPU
 ```
+
+You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
+
+* To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
+* To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
+To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
+
+>**NOTE**: Windows* systems may not have the Motion JPEG codec installed by default. If this is the case, OpenCV FFMPEG backend can be downloaded by the PowerShell script provided with the OpenVINO install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. Run the script with Administrative privileges. Alternatively, you can save results as images.
 
 ## Demo Output
 
