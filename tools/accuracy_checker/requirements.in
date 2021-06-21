@@ -17,6 +17,7 @@ py-cpuinfo>=7.0.0
 
 # text detection
 shapely>=1.7.1
+pyclipper>=1.2.1
 
 # brain tumor segmentation
 nibabel>=3.2.1

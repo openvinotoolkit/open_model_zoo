@@ -564,6 +564,8 @@ The main difference between this converter and `super_resolution` in data organi
         data_dir/class_z/nsdf3.ext
         data_dir/class_z/[...]/asd932_.ext
     ```
+* `rctw_preprocessed`- converts preprocessed Reading Chinese Text in the Wild (RCTW) dataset to `TextDetectionAnnotation`.
+  * `annotation_file` - txt file contains annotation, where image and its annotation separated by tab. Image annotation is represented as json-string.
 * `open_images_detection` - converts Open Images dataset for object detection task to `DetectionAnnotation`.
   * `bbox_csv_file` - path to cvs file which contains bounding box coordinates.
   * `labels_file` - path to file with class labels in csv format.
