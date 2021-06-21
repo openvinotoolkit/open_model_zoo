@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import BoolField, StringField
+from ..config import BoolField, StringField, NumberField
 from ..representation import ClassificationPrediction, ArgMaxClassificationPrediction
 
 
@@ -35,6 +35,12 @@ class ClassificationAdapter(Adapter):
             'argmax_output': BoolField(
                 optional=True, default=False, description="identifier that model output is ArgMax layer"
             ),
+            'fixed_output': BoolField(
+                optional=True, default=False, description="special mode to gather predictions from specified index"
+            ),
+            'fixed_output_index': NumberField(
+                optional=True, default=0, description="Output index in fixed_output mode"
+            ),
             'block': BoolField(
                 optional=True, default=False, description="process whole batch as a single data block"
             ),
@@ -47,6 +53,8 @@ class ClassificationAdapter(Adapter):
         self.argmax_output = self.get_value_from_config('argmax_output')
         self.block = self.get_value_from_config('block')
         self.classification_out = self.get_value_from_config('classification_output')
+        self.fixed_output = self.get_value_from_config('fixed_output')
+        self.fixed_output_index = int(self.get_value_from_config('fixed_output_index'))
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -73,15 +81,20 @@ class ClassificationAdapter(Adapter):
         if self.block:
             if self.argmax_output:
                 single_prediction = ArgMaxClassificationPrediction(identifiers[0], prediction)
+            elif self.fixed_output:
+                single_prediction = ArgMaxClassificationPrediction(identifiers[0],
+                                                                   prediction[:, self.fixed_output_index])
             else:
                 single_prediction = ClassificationPrediction(identifiers[0], prediction)
 
             result.append(single_prediction)
-
         else:
             for identifier, output in zip(identifiers, prediction):
                 if self.argmax_output:
-                    single_prediction = ArgMaxClassificationPrediction(identifier, output[0])
+                    single_prediction = ArgMaxClassificationPrediction(identifier, [output[0], ])
+                elif self.fixed_output:
+                    single_prediction = ArgMaxClassificationPrediction(identifiers[0],
+                                                                       output[self.fixed_output_index])
                 else:
                     single_prediction = ClassificationPrediction(identifier, output)
                 result.append(single_prediction)

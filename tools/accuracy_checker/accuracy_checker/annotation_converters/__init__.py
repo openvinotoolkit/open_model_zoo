@@ -110,6 +110,7 @@ from .label_me_converter import LabelMeDetectionConverter, LabelMeSegmentationCo
 from .dataset_folder import DatasetFolderConverter
 from .open_images_converter import OpenImagesDetectionConverter
 from .calgarycampinas import KSpaceMRIConverter
+from .amazon import AmazonProductData
 
 __all__ = [
     'BaseFormatConverter',
@@ -216,5 +217,6 @@ __all__ = [
     'LabelMeSegmentationConverter',
     'DatasetFolderConverter',
     'OpenImagesDetectionConverter',
-    'KSpaceMRIConverter'
+    'KSpaceMRIConverter',
+    'AmazonProductData'
 ]

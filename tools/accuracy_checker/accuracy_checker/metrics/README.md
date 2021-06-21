@@ -19,6 +19,7 @@ Accuracy Checker supports following set of metrics:
 Supported representations: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`, `ArgMaxClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
   * `match` - Batch-oriented binary classification metric. Metric value calculated for each record in batch. Parameter `top_k` ignored in this mode.
+  * `cast_to_int` - in `match` mode predictions rounded to nearest integer before calculating metric value.
 * `accuracy_per_class` - classification accuracy metric which represents results for each class.  Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `ClassificationAnnotation`, `ClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).

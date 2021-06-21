@@ -569,6 +569,26 @@ The main difference between this converter and `super_resolution` in data organi
   * `labels_file` - path to file with class labels in csv format.
   * `images_dir` - path to images folder (Optional).
   * `label_start` - specifies label index start in label map. You can provide another value, if you want to use this dataset for separate label validation (Optional, default value is 1).
+* `amazon_product_data` - converts book reviews from `Amazon Product Data` (http://snap.stanford.edu/data/amazon/productGraph) dataset preprocessed for DIEN model to `ClassificationAnnotation`.
+  * `test_data` - path to file with user reviews
+  * `uid_voc` - path to user identification vocabulary
+  * `mid_voc` - path to movies identification vocabulary
+  * `cat_voc` - path to category vocabulary
+  * `item_info` - path to `item-info` file
+  * `reviews_info` - path to `reviews-info` file
+  * `preprocessed_dir` - path to preprocessed data
+  * `separator` - separator between input name and batch identifier in preprocessed data filename. (Optional, default `#`)
+  * `mid_his_batch` - identifier of model `mid_his_batch` input
+  * `cat_his_batch` - identifier of model `cat_his_batch` input
+  * `uid_batch` - identifier of model `uid_batch` input
+  * `mid_batch` - identifier of model `mid_batch` input
+  * `cat_batch` - identifier of model `cat_batch` input
+  * `mask` - identifier of model `mask` input
+  * `seq_len` - identifier of model `seq_len` input
+  * `skip_dump` - allow to skip storing preprocessed data. (Optional, default: `False`)
+  * `batch` -  batch for data preprocessing. (Optional, default `1`)
+  * `max_len` - maximum input sequence length. (Optional, default `100`)
+  * `subsample_size` - limit number of preprocessed sentences. (Optional, default `0`, no limitation)
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

@@ -55,7 +55,8 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
                 description="The number of classes with the highest probability, which will be used to decide "
                             "if prediction is correct."
             ),
-            'match': BoolField(optional=True, default=False)
+            'match': BoolField(optional=True, default=False),
+            'cast_to_int': BoolField(optional=True, default=False)
         })
 
         return parameters
@@ -63,6 +64,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
     def configure(self):
         self.top_k = self.get_value_from_config('top_k')
         self.match = self.get_value_from_config('match')
+        self.cast_to_int = self.get_value_from_config('cast_to_int')
 
         def loss(annotation_label, prediction_top_k_labels):
             return int(annotation_label in prediction_top_k_labels)
@@ -78,7 +80,9 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         if not self.match:
             accuracy = self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
         else:
-            accuracy = accuracy_score(annotation.label, prediction.label)
+            label = prediction.label if not self.cast_to_int else np.round(prediction.label)
+
+            accuracy = accuracy_score(annotation.label, label)
             self.accuracy.append(accuracy)
         if self.profiler:
             self.profiler.update(
@@ -345,7 +349,7 @@ class RocAucScore(PerImageEvaluationMetric):
         return 0
 
     def evaluate(self, annotations, predictions):
-        all_results = np.concatenate([t.squeeze() for t in self.results])
+        all_results = np.concatenate(self.results)
         all_targets = np.concatenate(self.targets)
         roc_auc = roc_auc_score(all_targets, all_results)
         return roc_auc

@@ -28,6 +28,8 @@ AccuracyChecker supports following set of adapters:
   * `argmax_output` - identifier that model output is ArgMax layer.
   * `block` - process whole batch as a single data block.
   * `classification_output` - target output layer name.
+  * `fixed_output` - in `block` mode enables gathering data from a part of full layer output
+  * `fixed_output_index` - index into layer output array to gather data from
 * `segmentation` - converting output of semantic segmentation model to `SeegmentationPrediction` representation.
   * `make_argmax` - allows to apply argmax operation to output values.
 * `segmentation_one_class` - converting output of semantic segmentation to `SeegmentationPrediction` representation. It is suitable for situation when model's output is probability of belong each pixel to foreground class.
