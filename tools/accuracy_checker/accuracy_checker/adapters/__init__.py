@@ -19,10 +19,11 @@ from .adapter import Adapter, AdapterField, create_adapter
 from .action_recognition import ActionDetection
 from .text_detection import (
     TextDetectionAdapter,
-    TextProposalsDetectionAdapter,
     EASTTextDetectionAdapter,
-    CRAFTTextDetectionAdapter
+    CRAFTTextDetectionAdapter,
+    PPOCRDetectionAdapter
 )
+from .ctpn import TextProposalsDetectionAdapter
 
 from .text_recognition import (
     BeamSearchDecoder,
@@ -188,6 +189,7 @@ __all__ = [
     'TextProposalsDetectionAdapter',
     'EASTTextDetectionAdapter',
     'CRAFTTextDetectionAdapter',
+    'PPOCRDetectionAdapter',
 
     'BeamSearchDecoder',
     'LPRAdapter',

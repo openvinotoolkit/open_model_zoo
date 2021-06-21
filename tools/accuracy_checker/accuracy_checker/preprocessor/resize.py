@@ -100,6 +100,17 @@ def ppocr_aspect_ratio(dst_width, dst_height, image_width, image_height):
     return resize_w, dst_height
 
 
+def ppocr_max_aspect_ratio(dst_width, dst_height, image_width, image_height):
+    limit_side = max(dst_width, dst_height)
+    ratio = 1
+    if max(image_width, image_height) > limit_side:
+        if image_width > image_height:
+            ratio = limit_side / image_width
+        else:
+            ratio = limit_side / image_height
+    return int(image_width * ratio), int(image_height * ratio)
+
+
 class ScaleFactor:
     def __init__(self, config, parameters):
         self.scale = get_parameter_value_from_config(config, parameters, 'scale')
@@ -121,7 +132,6 @@ def mask_rcnn_benchmark_ratio(dst_width, dst_height, image_width, image_height):
     return int(image_width * ratio), int(image_height * ratio)
 
 
-
 ASPECT_RATIO_SCALE = {
     'width': scale_width,
     'height': scale_height,
@@ -133,7 +143,8 @@ ASPECT_RATIO_SCALE = {
     'min_ratio': min_ratio,
     'mask_rcnn_benchmark_aspect_ratio': mask_rcnn_benchmark_ratio,
     'scale_factor': ScaleFactor,
-    'ppcrnn_ratio': ppocr_aspect_ratio
+    'ppcrnn_ratio': ppocr_aspect_ratio,
+    'ppocr_max_ratio': ppocr_max_aspect_ratio
 }
 
 

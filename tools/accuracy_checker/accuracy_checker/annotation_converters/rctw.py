@@ -37,7 +37,7 @@ class RCTWPreprocessedConverter(FileBasedAnnotationConverter):
                 all_points.append(points)
                 transcriptions.append(transcript)
                 if is_difficult:
-                    difficult.append(len(transcriptions))
+                    difficult.append(len(transcriptions) - 1)
             annotation = TextDetectionAnnotation(identifier, all_points, transcriptions)
             annotation.metadata['difficult_boxes'] = difficult
             annotations.append(annotation)
