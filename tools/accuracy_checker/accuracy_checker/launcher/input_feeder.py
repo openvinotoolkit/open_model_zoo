@@ -109,7 +109,7 @@ class InputFeeder:
                 image_info_ = [height, width]
                 info_size = input_shape[-1]
                 if info_size == 3:
-                    image_info_ += [1] if not preprocessed_input_info else image_size[2]
+                    image_info_ += ([1] if not preprocessed_input_info else [image_size[2]])
                 if info_size == 6:
                     image_info_ += [0, 0, 0, 0]
                 image_info.append(image_info_)
