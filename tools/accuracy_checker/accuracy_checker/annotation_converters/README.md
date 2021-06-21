@@ -557,6 +557,9 @@ The main difference between this converter and `super_resolution` in data organi
         data_dir/class_z/nsdf3.ext
         data_dir/class_z/[...]/asd932_.ext
     ```
+* `rctw_preprocessed`- converts preprocessed Reading Chinese Text in the Wild (RCTW) dataset to `TextDetectionAnnotation`.
+  * `annotation_file` - txt file contains annotation, where image and its annotation separated by tab. Image annotation is represented as json-string.
+
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)
