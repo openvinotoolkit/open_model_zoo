@@ -380,13 +380,13 @@ def check_composite_model_dir(model_dir):
             if not model.parent.name.startswith(f'{model_name}-'):
                 raise DeserializationError('Names of composite model parts should start with composite model name')
 
-def load_models(args):
+def load_models(models_root, args):
     models = []
     model_names = set()
 
     composite_models = []
 
-    for composite_model_config in sorted(_common.MODEL_ROOT.glob('**/composite-model.yml')):
+    for composite_model_config in sorted(models_root.glob('**/composite-model.yml')):
         composite_model_name = composite_model_config.parent.name
         with deserialization_context('In model "{}"'.format(composite_model_name)):
             if not RE_MODEL_NAME.fullmatch(composite_model_name):
@@ -399,13 +399,13 @@ def load_models(args):
                     'Duplicate composite model name "{}"'.format(composite_model_name))
             composite_models.append(composite_model_name)
 
-    for config_path in sorted(_common.MODEL_ROOT.glob('**/model.yml')):
+    for config_path in sorted(models_root.glob('**/model.yml')):
         subdirectory = config_path.parent
 
         is_composite = (subdirectory.parent / 'composite-model.yml').exists()
         composite_model_name = subdirectory.parent.name if is_composite else None
 
-        subdirectory = subdirectory.relative_to(_common.MODEL_ROOT)
+        subdirectory = subdirectory.relative_to(models_root)
 
         with config_path.open('rb') as config_file, \
                 deserialization_context('In config "{}"'.format(config_path)):
@@ -425,9 +425,9 @@ def load_models(args):
 
     return models
 
-def load_models_or_die(args):
+def load_models_or_die(models_root, args):
     try:
-        return load_models(args)
+        return load_models(models_root, args)
     except DeserializationError as e:
         indent = '    '
 
@@ -437,21 +437,13 @@ def load_models_or_die(args):
         sys.exit(1)
 
 # requires the --print_all, --all, --name and --list arguments to be in `args`
-def load_models_from_args(parser, args):
+def load_models_from_args(args, models_root):
     if args.print_all:
-        for model in load_models_or_die(args):
+        for model in load_models_or_die(models_root, args):
             print(model.name)
         sys.exit()
 
-    filter_args_count = sum([args.all, args.name is not None, args.list is not None])
-
-    if filter_args_count > 1:
-        parser.error('at most one of "--all", "--name" or "--list" can be specified')
-
-    if filter_args_count == 0:
-        parser.error('one of "--print_all", "--all", "--name" or "--list" must be specified')
-
-    all_models = load_models_or_die(args)
+    all_models = load_models_or_die(models_root, args)
 
     if args.all:
         return all_models
@@ -486,3 +478,12 @@ def load_models_from_args(parser, args):
                 models[model.name] = model
 
         return list(models.values())
+
+def check_model_selection_args(parser, args):
+    filter_args_count = sum([args.print_all, args.all, args.name is not None, args.list is not None])
+
+    if filter_args_count > 1:
+        parser.error('at most one of "--all", "--name" or "--list" can be specified')
+
+    if filter_args_count == 0:
+        parser.error('one of "--print_all", "--all", "--name" or "--list" must be specified')
