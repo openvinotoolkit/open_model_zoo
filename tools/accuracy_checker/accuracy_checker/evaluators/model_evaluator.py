@@ -339,7 +339,6 @@ class ModelEvaluator(BaseEvaluator):
         (enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
          ignore_metric_reference) = metric_config
         for batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) in enumerate(self.dataset):
-            print(batch_identifiers[0])
             filled_inputs, batch_meta = self._get_batch_input(batch_annotation, batch_input)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
             if stored_predictions:
@@ -373,6 +372,7 @@ class ModelEvaluator(BaseEvaluator):
         annotations, predictions = self.postprocessor.process_batch(
             batch_annotations, batch_predictions, batch_meta
         )
+
         _, profile_result = self.metric_executor.update_metrics_on_batch(
             batch_input_ids, annotations, predictions, enable_profiling
         )

@@ -52,6 +52,32 @@ class YoloOutputProcessor:
         return DetectionBox(x, y, w, h, confidence, probabilities)
 
 
+class YolofOutputProcessor:
+    def __init__(self, coord_correct=None, size_correct=None, conf_correct=None,
+                 prob_correct=None, coord_normalizer=(1, 1), size_normalizer=(1, 1)):
+        self.coord_correct = coord_correct if coord_correct else lambda x: x
+        self.size_correct = size_correct if size_correct else np.exp
+        self.conf_correct = conf_correct if conf_correct else lambda x: x
+        self.prob_correct = prob_correct if prob_correct else lambda x: x
+        self.x_normalizer, self.y_normalizer = coord_normalizer
+        self.width_normalizer, self.height_normalizer = size_normalizer
+
+    def __call__(self, bbox, i, j, anchors=None):
+        if anchors is None:
+            anchors = [1, 1]
+
+        x = self.coord_correct(bbox.x) * anchors[0] + i * 16
+        y = self.coord_correct(bbox.y) * anchors[1] + j * 16
+
+        w = self.size_correct(bbox.w) * anchors[0]
+        h = self.size_correct(bbox.h) * anchors[1]
+
+        confidence = np.max(bbox.probabilities)
+        probabilities = self.prob_correct(bbox.probabilities)
+
+        return DetectionBox(x, y, w, h, confidence, probabilities)
+
+
 class TinyYOLOv1Adapter(Adapter):
     """
     Class for converting output of Tiny YOLO v1 model to DetectionPrediction representation
@@ -142,7 +168,7 @@ def parse_output(predictions, cells, num, box_size, anchors, processor, threshol
         label = np.argmax(classes_prob)
 
         labels.append(label)
-        scores.append(processed_box.probabilities[label] * processed_box.confidence)
+        scores.append(processed_box.probabilities[label] * 1)
         x_mins.append(processed_box.x - processed_box.w / 2.0)
         y_mins.append(processed_box.y - processed_box.h / 2.0)
         x_maxs.append(processed_box.x + processed_box.w / 2.0)
@@ -603,109 +629,12 @@ class YoloV5Adapter(YoloV3Adapter):
                                                  prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
 
 
-class YolofAdapter(Adapter):
+class YolofAdapter(YoloV3Adapter):
     __provider__ = 'yolof'
 
-    @classmethod
-    def parameters(cls):
-        params = super().parameters()
-        params.update({
-            'classes': NumberField(
-                value_type=int, optional=True, min_value=1, default=80, description="Number of detection classes."
-            ),
-            'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
-                                     description="Minimal objectiveness score value for valid detections."),
-            'transpose': ListField(optional=True, description="Transpose output tensor to specified format."),
-            'raw_output': BoolField(
-                optional=True, default=False,
-                description="Preprocesses output in the original way."
-            ),
-            'output_format': StringField(
-                choices=['BHW', 'HWB'], optional=True, default='BHW',
-                description="Set output layer format"
-            )
-        })
-        return params
-
     def configure(self):
-        self.classes = self.get_value_from_config('classes')
-        self.threshold = self.get_value_from_config('threshold')
-        self.transpose = self.get_value_from_config('transpose')
-        self.raw_output = self.get_value_from_config('raw_output')
-        self.output_format = self.get_value_from_config('output_format')
+        super().configure()
         if self.raw_output:
-            self.processor = YoloOutputProcessor(coord_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
-                                                 conf_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
-                                                 prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
+            self.processor = YolofOutputProcessor(prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
         else:
-            self.processor = YoloOutputProcessor()
-
-    def process(self, raw, identifiers, frame_meta):
-        """
-        Args:
-            identifiers: list of input data identifiers
-            raw: output of model
-        Returns:
-            list of DetectionPrediction objects
-        """
-
-        result = []
-
-        raw_outputs = self._extract_predictions(raw, frame_meta)
-        print(raw_outputs)
-        self.select_output_blob(raw_outputs)
-        print(raw_outputs[self.output_blob].shape)
-        probabilities = raw_outputs[self.output_blob][..., :self.classes]
-        print(probabilities.shape)
-        probabilities = self.processor.prob_correct(probabilities)
-        print("After sigmoid", probabilities)
-
-        box_size = self.coords + 1 + self.classes
-        for identifier, prediction, meta in zip(identifiers, predictions, frame_meta):
-            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
-            input_shape = list(meta.get('input_shape', {'data': (1, 3, 416, 416)}).values())[0]
-            nchw_layout = input_shape[1] == 3
-            self.processor.width_normalizer = input_shape[3 if nchw_layout else 2]
-            self.processor.height_normalizer = input_shape[2 if nchw_layout else 1]
-            for layer_id, p in enumerate(prediction):
-                anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
-                num = len(anchors) // 2 if self.masked_anchors else self.num
-                if self.transpose:
-                    p = np.transpose(p, self.transpose)
-                if self.do_reshape or len(p.shape) != 3:
-                    try:
-                        cells = self.cells[layer_id]
-                    except IndexError:
-                        raise ConfigError('Number of output layers ({}) is more than detection grid size ({}). '
-                                          'Check "cells" option.'.format(len(prediction), len(self.cells)))
-                    if self.output_format == 'BHW':
-                        new_shape = (num * box_size, cells, cells)
-                    else:
-                        new_shape = (cells, cells, num * box_size)
-
-                    p = np.reshape(p, new_shape)
-                else:
-                    # Get grid size from output shape - ignore self.cells value.
-                    # N.B.: value p.shape[1] will always contain grid size, but here we use if clause just for
-                    # clarification (works ONLY for square grids).
-                    cells = p.shape[1] if self.output_format == 'BHW' else p.shape[0]
-
-                self.processor.x_normalizer = cells
-                self.processor.y_normalizer = cells
-
-                labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num,
-                                                                              box_size, anchors,
-                                                                              self.processor, self.threshold)
-                detections['labels'].extend(labels)
-                detections['scores'].extend(scores)
-                detections['x_mins'].extend(x_mins)
-                detections['y_mins'].extend(y_mins)
-                detections['x_maxs'].extend(x_maxs)
-                detections['y_maxs'].extend(y_maxs)
-
-            result.append(DetectionPrediction(
-                identifier, detections['labels'], detections['scores'], detections['x_mins'], detections['y_mins'],
-                detections['x_maxs'], detections['y_maxs']
-            ))
-
-        return result
+            self.processor = YolofOutputProcessor()
