@@ -226,10 +226,10 @@ std::tuple<bool, bool, double> socialDistance(std::tuple<int, int> &frameShape,
     std::tie(bdA, bdK) = getLineComponent(B, D);
     std::tie(acA, acK) = getLineComponent(A, C);
 
-    double bdinf = B.x < D.x ? -9999999999. : 9999999999.;
+    double bdinf = std::lround(B.x) <= std::lround(D.x) ? -9999999999. : 9999999999.;
     Line2d BDinf = getLine(D, cv::Point2d(bdinf, getY(bdinf, bdA, bdK)));
 
-    double acinf = A.x < C.x ? -9999999999. : 9999999999.;
+    double acinf = std::lround(A.x) <= std::lround(C.x) ? -9999999999. : 9999999999.;
     Line2d ACinf = getLine(C, cv::Point2d(acinf, getY(acinf, acA, acK)));
 
     // Vanishing point

@@ -29,46 +29,42 @@ public:
     PersonTrackers() : trackIdGenerator{0}, similarityThreshold{0.7f}, maxDisappeared{10} {}
 
     void similarity(std::list<TrackableObject> &tos) {
-        if (trackables.size() > 0) {
-            for (const auto& to : tos) {
-                std::deque<std::pair<int, float>> sim;
-                for (auto &tracker : trackables) {
-                    if (!tracker.second.updated) {
-                        float cosine = cosineSimilarity(to.reid, tracker.second.reid);
-                        if (cosine > similarityThreshold) {
-                            sim.push_back(std::make_pair(tracker.first, cosine));
-                        }
+        for (const auto& to : tos) {
+            std::deque<std::pair<int, float>> sim;
+            for (auto &tracker : trackables) {
+                if (!tracker.second.updated) {
+                    float cosine = cosineSimilarity(to.reid, tracker.second.reid);
+                    if (cosine > similarityThreshold) {
+                        sim.push_back(std::make_pair(tracker.first, cosine));
                     }
-                }
-
-                if (sim.empty()) {
-                    trackables.insert({ trackIdGenerator, to });
-                    trackables.at(trackIdGenerator).updated = true;
-                    trackables.at(trackIdGenerator).disappeared = 0;
-                    trackIdGenerator += 1;
-                } else {
-                    int maxSimilarity = std::max_element(sim.begin(), sim.end(), [](std::pair<int, float> a, std::pair<int, float> b) {
-                        return std::get<1>(a) > std::get<1>(b);
-                        })->first;
-                    trackables.at(maxSimilarity) = to;
-                    trackables.at(maxSimilarity).updated = true;
-                    trackables.at(maxSimilarity).disappeared = 0;
                 }
             }
 
-            for (auto it = trackables.begin(); it != trackables.end(); ) {
-                if (!it->second.updated) {
-                    it->second.disappeared += 1;
-                    if (it->second.disappeared > maxDisappeared) {
-                        it = trackables.erase(it);
-                        continue;
-                    }
-                }
-                it->second.updated = false;
-                ++it;
+            if (sim.empty()) {
+                trackables.insert({ trackIdGenerator, to });
+                trackables.at(trackIdGenerator).updated = true;
+                trackables.at(trackIdGenerator).disappeared = 0;
+                trackIdGenerator += 1;
+            } else {
+                int maxSimilarity = std::max_element(sim.begin(), sim.end(), [](std::pair<int, float> a, std::pair<int, float> b) {
+                    return std::get<1>(a) > std::get<1>(b);
+                    })->first;
+                trackables.at(maxSimilarity) = to;
+                trackables.at(maxSimilarity).updated = true;
+                trackables.at(maxSimilarity).disappeared = 0;
             }
-        } else {
-            registerTrackables(tos);
+        }
+
+        for (auto it = trackables.begin(); it != trackables.end(); ) {
+            if (!it->second.updated) {
+                it->second.disappeared += 1;
+                if (it->second.disappeared > maxDisappeared) {
+                    it = trackables.erase(it);
+                    continue;
+                }
+            }
+            it->second.updated = false;
+            ++it;
         }
     }
 
@@ -84,14 +80,6 @@ public:
             denomB += b[i] * b[i];
         }
         return static_cast<float>(dot / (sqrt(denomA) * sqrt(denomB) + 1e-6));
-    }
-
-    void registerTrackables(std::list<TrackableObject> &tos) {
-        for (auto &to : tos) {
-            to.disappeared = 0;
-            trackables.insert({trackIdGenerator, to});
-            trackIdGenerator += 1;
-        }
     }
 
 public:
