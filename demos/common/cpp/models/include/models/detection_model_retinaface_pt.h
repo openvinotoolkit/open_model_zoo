@@ -64,7 +64,7 @@ protected:
 
     std::vector<ModelRetinaFacePT::Box> priors;
 
-    std::vector<uint32_t> doThresholding(const InferenceEngine::MemoryBlob::Ptr& rawData, const float confidenceThreshold);
+    std::vector<uint32_t> filterByScore(const InferenceEngine::MemoryBlob::Ptr& rawData, const float confidenceThreshold);
     std::vector<float> getFilteredScores(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<uint32_t>& indicies);
     std::vector<cv::Point2f> getFilteredLandmarks(const InferenceEngine::MemoryBlob::Ptr& rawData,
         const std::vector<uint32_t>& indicies, int imgWidth, int imgHeight);

@@ -19,10 +19,6 @@
 #include <utils/slog.hpp>
 #include "models/detection_model_retinaface_pt.h"
 
-#if !defined(_countof)
-#define _countof(x) (sizeof(x) / sizeof(x[0]))
-#endif
-
 ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
     : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),  // Default label is "Face"
     landmarksNum(0), boxIOUThreshold(boxIOUThreshold) {
@@ -74,6 +70,8 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
             outputsNames[OT_SCORES] = output.first;
         }
         else if (output.first.find("landmark") != std::string::npos) {
+            // Landmarks might be optional, if it is present, resize names array to fit landmarks output name to the last item of array
+            // Considering that other outputs names are already filled in or will be filled later
             outputsNames.resize(std::max(outputsNames.size(), (size_t)OT_LANDMARK + 1));
             outputsNames[OT_LANDMARK] = output.first;
             landmarksNum = output.second->getDims()[2] / 2; // Each landmark consist of 2 variables (x and y)
@@ -87,22 +85,18 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
         throw std::runtime_error("Bbox or cls layers are not found");
     }
 
-    if (outputsNames.size() != 2 && outputsNames.size() != 3) {
-        throw std::logic_error("Expected 2 or 3 output blobs");
-    }
-
     priors = generatePriorData();
 }
 
 
-std::vector<uint32_t> ModelRetinaFacePT::doThresholding(const InferenceEngine::MemoryBlob::Ptr& rawData, const float confidenceThreshold) {
+std::vector<uint32_t> ModelRetinaFacePT::filterByScore(const InferenceEngine::MemoryBlob::Ptr& rawData, const float confidenceThreshold) {
     std::vector<uint32_t> indicies;
     auto desc = rawData->getTensorDesc();
     auto sz = desc.getDims();
     InferenceEngine::LockedMemory<const void> outputMapped = rawData->rmap();
     const float *memPtr = outputMapped.as<float*>();
 
-    for (uint32_t x = 0; x < sz[1]; ++x) {
+    for (size_t x = 0; x < sz[1]; ++x) {
         auto idx = (x * sz[2] + 1);
         auto score = memPtr[idx];
         if (score >= confidenceThreshold) {
@@ -151,7 +145,7 @@ std::vector<ModelRetinaFacePT::Box> ModelRetinaFacePT::generatePriorData() {
     float globalMinSizes[][2] = { {16, 32}, {64, 128}, {256, 512} };
     float steps[] = { 8., 16., 32. };
     std::vector<ModelRetinaFacePT::Box> anchors;
-    for (size_t stepNum = 0; stepNum < _countof(steps); stepNum++) {
+    for (size_t stepNum = 0; stepNum < arraySize(steps); stepNum++) {
         const int featureW = (int)std::round(netInputWidth / steps[stepNum]);
         const int featureH = (int)std::round(netInputHeight / steps[stepNum]);
 
@@ -207,7 +201,7 @@ std::unique_ptr<ResultBase> ModelRetinaFacePT::postprocess(InferenceResult& infR
     const auto bboxRaw = infResult.outputsData[outputsNames[OT_BBOX]];
     const auto scoresRaw = infResult.outputsData[outputsNames[OT_SCORES]];
 
-    const auto& validIndicies = doThresholding(scoresRaw, confidenceThreshold);
+    const auto& validIndicies = filterByScore(scoresRaw, confidenceThreshold);
     const auto& scores = getFilteredScores(scoresRaw, validIndicies);
 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
