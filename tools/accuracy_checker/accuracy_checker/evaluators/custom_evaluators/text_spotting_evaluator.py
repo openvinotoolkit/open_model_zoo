@@ -35,7 +35,7 @@ def softmax(x):
 
 
 class TextSpottingEvaluator(BaseEvaluator):
-    def __init__(self, dataset_config, launcher, model):
+    def __init__(self, dataset_config, launcher, model, orig_config):
         self.dataset_config = dataset_config
         self.preprocessing_executor = None
         self.preprocessor = None
@@ -44,10 +44,11 @@ class TextSpottingEvaluator(BaseEvaluator):
         self.metric_executor = None
         self.launcher = launcher
         self.model = model
+        self.config = orig_config
         self._metrics_results = []
 
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False):
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config = config['datasets']
         launcher_config = config['launchers'][0]
         if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
@@ -58,7 +59,7 @@ class TextSpottingEvaluator(BaseEvaluator):
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
-        return cls(dataset_config, launcher, model)
+        return cls(dataset_config, launcher, model, orig_config)
 
     def process_dataset(
             self, subset=None,
@@ -122,6 +123,7 @@ class TextSpottingEvaluator(BaseEvaluator):
                     self.compute_metrics(
                         print_results=True, ignore_results_formatting=ignore_results_formatting
                     )
+                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
 
         if _progress_reporter:
             _progress_reporter.finish()

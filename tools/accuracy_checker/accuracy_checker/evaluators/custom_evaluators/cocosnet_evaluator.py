@@ -36,7 +36,7 @@ from ...utils import extract_image_representations, contains_all, get_path
 class CocosnetEvaluator(BaseEvaluator):
     def __init__(
             self, dataset_config, launcher, preprocessor_mask, preprocessor_image,
-            gan_model, check_model
+            gan_model, check_model, orig_config
     ):
         self.launcher = launcher
         self.dataset_config = dataset_config
@@ -47,6 +47,7 @@ class CocosnetEvaluator(BaseEvaluator):
         self.metric_executor = None
         self.test_model = gan_model
         self.check_model = check_model
+        self.config = orig_config
         self._metrics_results = []
         self._part_by_name = {
             'gan_network': self.test_model,
@@ -55,7 +56,7 @@ class CocosnetEvaluator(BaseEvaluator):
             self._part_by_name.update({'verification_network': self.check_model})
 
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False):
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         launcher_config = config['launchers'][0]
         dataset_config = config['datasets']
 
@@ -94,7 +95,7 @@ class CocosnetEvaluator(BaseEvaluator):
             check_model = None
 
         return cls(
-            dataset_config, launcher, preprocessor_mask, preprocessor_image, gan_model, check_model
+            dataset_config, launcher, preprocessor_mask, preprocessor_image, gan_model, check_model, orig_config
         )
 
     @staticmethod
@@ -194,6 +195,7 @@ class CocosnetEvaluator(BaseEvaluator):
                     self.compute_metrics(
                         print_results=True, ignore_results_formatting=ignore_results_formatting
                     )
+                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
 
         if _progress_reporter:
             _progress_reporter.finish()

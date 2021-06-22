@@ -618,7 +618,7 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
 
 class MTCNNEvaluator(BaseEvaluator):
     def __init__(
-            self, dataset_config, launcher, stages
+            self, dataset_config, launcher, stages, orig_config
     ):
         self.dataset_config = dataset_config
         self.stages = stages
@@ -627,6 +627,7 @@ class MTCNNEvaluator(BaseEvaluator):
         self.postprocessor = None
         self.metric_executor = None
         self._annotations, self._predictions, self._metrics_results = [], [], []
+        self.config = orig_config
 
     def process_dataset(
             self, subset=None,
@@ -653,10 +654,8 @@ class MTCNNEvaluator(BaseEvaluator):
             batch_raw_prediction = []
             intermediate_callback = None
             if output_callback:
-                intermediate_callback = partial(output_callback,
-                                                metrics_result=None,
-                                                element_identifiers=batch_identifiers,
-                                                dataset_indices=batch_input_ids)
+                intermediate_callback = partial(output_callback, metrics_result=None,
+                                                element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
             batch_size = 1
             for stage in self.stages.values():
                 previous_stage_predictions = batch_prediction
@@ -682,16 +681,14 @@ class MTCNNEvaluator(BaseEvaluator):
             if output_callback:
                 output_callback(
                     list(self.stages.values())[-1].transform_for_callback(batch_size, batch_raw_prediction),
-                    metrics_result=metrics_result,
-                    element_identifiers=batch_identifiers,
+                    metrics_result=metrics_result, element_identifiers=batch_identifiers,
                     dataset_indices=batch_input_ids
                 )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
                 if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
-                    self.compute_metrics(
-                        print_results=True, ignore_results_formatting=ignore_results_formatting
-                    )
+                    self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting)
+                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
         if _progress_reporter:
             _progress_reporter.finish()
 
@@ -699,7 +696,6 @@ class MTCNNEvaluator(BaseEvaluator):
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
-
         for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
@@ -733,7 +729,7 @@ class MTCNNEvaluator(BaseEvaluator):
             presenter.write_result(metric_result, ignore_results_formatting)
 
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False):
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config = config['datasets']
         launcher_config = config['launchers'][0]
         if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
@@ -741,7 +737,7 @@ class MTCNNEvaluator(BaseEvaluator):
         models_info = config['network_info']
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
         stages = build_stages(models_info, [], launcher, config.get('_models'), delayed_model_loading)
-        return cls(dataset_config, launcher, stages)
+        return cls(dataset_config, launcher, stages, orig_config)
 
     @staticmethod
     def get_processing_info(config):
@@ -895,18 +891,14 @@ def nms(prediction, threshold, iou_type):
 
 def bbreg(boundingbox, reg):
     reg = reg.T
-
     # calibrate bounding boxes
     w = boundingbox[:, 2] - boundingbox[:, 0] + 1
     h = boundingbox[:, 3] - boundingbox[:, 1] + 1
-
     bb0 = boundingbox[:, 0] + reg[:, 0] * w
     bb1 = boundingbox[:, 1] + reg[:, 1] * h
     bb2 = boundingbox[:, 2] + reg[:, 2] * w
     bb3 = boundingbox[:, 3] + reg[:, 3] * h
-
     boundingbox[:, 0:4] = np.array([bb0, bb1, bb2, bb3]).T
-
     return boundingbox
 
 def filter_valid(dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph):
@@ -946,7 +938,6 @@ def pad(boxesA, h, w):
     if tmp.shape[0] != 0:
         dx[tmp] = 2 - x[tmp]
         x[tmp] = np.ones_like(x[tmp])
-
     tmp = np.where(y < 1)[0]
     if tmp.shape[0] != 0:
         dy[tmp] = 2 - y[tmp]

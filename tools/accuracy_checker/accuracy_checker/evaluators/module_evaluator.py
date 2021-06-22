@@ -32,6 +32,7 @@ class ModuleEvaluator(BaseEvaluator):
         module = config['module']
         module_config = config.get('module_config')
         python_path = config.get('python_path')
+        kwargs['orig_config'] = config
 
         return cls(load_module(module, python_path).from_configs(module_config, *args, **kwargs), config)
 

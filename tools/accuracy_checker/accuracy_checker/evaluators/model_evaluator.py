@@ -304,6 +304,8 @@ class ModelEvaluator(BaseEvaluator):
                             self.compute_metrics(
                                 print_results=True, ignore_results_formatting=ignore_results_formatting
                             )
+                            self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting,
+                                                      metric_interval)
 
         if progress_reporter:
             progress_reporter.finish()
@@ -344,6 +346,7 @@ class ModelEvaluator(BaseEvaluator):
                 progress_reporter.update(batch_id, len(batch_identifiers))
                 if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
                     self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting)
+                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
 
         if progress_reporter:
             progress_reporter.finish()
