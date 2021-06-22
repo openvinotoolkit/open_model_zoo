@@ -76,7 +76,7 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
         else if (output.first.find("landmark") != std::string::npos) {
             outputsNames.resize(std::max(outputsNames.size(), (size_t)OT_LANDMARK + 1));
             outputsNames[OT_LANDMARK] = output.first;
-            landmarksNum = output.second->getDims()[2]/2; // Each landmark consist of 2 variables (x and y)
+            landmarksNum = output.second->getDims()[2] / 2; // Each landmark consist of 2 variables (x and y)
         }
         else {
             continue;
@@ -152,8 +152,8 @@ std::vector<ModelRetinaFacePT::Box> ModelRetinaFacePT::generatePriorData() {
     float steps[] = { 8., 16., 32. };
     std::vector<ModelRetinaFacePT::Box> anchors;
     for (size_t stepNum = 0; stepNum < _countof(steps); stepNum++) {
-        int featureW = (int)std::round(netInputWidth / steps[stepNum]);
-        int featureH = (int)std::round(netInputHeight / steps[stepNum]);
+        const int featureW = (int)std::round(netInputWidth / steps[stepNum]);
+        const int featureH = (int)std::round(netInputHeight / steps[stepNum]);
 
         auto& minSizes = globalMinSizes[stepNum];
         for (int i = 0; i < featureH; i++) {

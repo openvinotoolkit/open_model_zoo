@@ -20,8 +20,7 @@
 #include <utils/nms.hpp>
 #include <string>
 
-class ModelRetinaFacePT
-    : public DetectionModel {
+class ModelRetinaFacePT : public DetectionModel {
 public:
     struct Box {
         float cX;
@@ -47,8 +46,7 @@ public:
     /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param useAutoResize - if true, image will be resized by IE.
-    /// @param labels - array of labels for every class. If this array is empty or contains less elements
-    /// than actual classes number, default "Label #N" will be shown for missing items.
+    /// @param boxIOUThreshold - threshold for NMS boxes filtering, varies in [0.0, 1.0] range.
     ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold);
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
