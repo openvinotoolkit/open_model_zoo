@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from ..presenters import write_csv_result
+
 
 # base class for custom evaluators
 class BaseEvaluator:
@@ -55,3 +57,14 @@ class BaseEvaluator:
     @staticmethod
     def send_processing_info(sender):
         return {}
+
+    # helper for writing intermediate metric results to csv file
+    def write_results_to_csv(self, csv_file, ignore_results_formatting, metric_interval):
+        if csv_file:
+            metrics_results, metrics_meta = self.extract_metrics_results(
+                print_results=False, ignore_results_formatting=ignore_results_formatting
+            )
+            processing_info = self.get_processing_info(self.config)
+            write_csv_result(
+                csv_file, processing_info, metrics_results, metric_interval, metrics_meta
+            )
