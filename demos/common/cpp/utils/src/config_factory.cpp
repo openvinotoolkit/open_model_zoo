@@ -18,9 +18,9 @@
 
 #include <set>
 
+#include <gpu/gpu_config.hpp>
 #include <utils/args_helper.hpp>
 #include <utils/common.hpp>
-#include <gpu/gpu_config.hpp>
 
 using namespace InferenceEngine;
 
@@ -100,7 +100,6 @@ CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, const std::
     }
 
     config.maxAsyncRequests = flags_nireq;
-
     /** Per layer metrics **/
     if (flags_pc) {
         config.execNetworkConfig.emplace(CONFIG_KEY(PERF_COUNT), PluginConfigParams::YES);
