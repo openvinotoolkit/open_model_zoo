@@ -299,26 +299,22 @@ int main(int argc, char* argv[])
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
 
-        for (; framesProcessed <= frameNum; framesProcessed++)
-        {
-            result = pipeline.getResult();
-            if (result != nullptr)
-            {
-                auto renderingStart = std::chrono::steady_clock::now();
-                cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
-                //--- Showing results and device information
-                presenter.drawGraphs(outFrame);
-                renderMetrics.update(renderingStart);
-                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                    videoWriter.write(outFrame);
-                }
-                if (!FLAGS_no_show) {
-                    cv::imshow("Segmentation Results", outFrame);
-                    //--- Updating output window
-                    cv::waitKey(1);
-                }
+        for (; framesProcessed <= frameNum; framesProcessed++) {
+            while (!(result = pipeline.getResult())) {}
+            auto renderingStart = std::chrono::steady_clock::now();
+            cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
+            //--- Showing results and device information
+            presenter.drawGraphs(outFrame);
+            renderMetrics.update(renderingStart);
+            metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
+                videoWriter.write(outFrame);
+            }
+            if (!FLAGS_no_show) {
+                cv::imshow("Segmentation Results", outFrame);
+                //--- Updating output window
+                cv::waitKey(1);
             }
         }
 

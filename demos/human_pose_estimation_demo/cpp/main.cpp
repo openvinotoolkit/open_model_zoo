@@ -116,7 +116,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -212,9 +211,7 @@ cv::Mat renderHumanPose(HumanPoseResult& result, OutputTransform& outputTransfor
 
 int main(int argc, char *argv[]) {
     try {
-        PerformanceMetrics metrics;
-
-        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+        PerformanceMetrics metrics, renderMetrics;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -222,7 +219,6 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        slog::info << "Reading input" << slog::endl;
         auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat curr_frame = cap->read();
@@ -268,6 +264,8 @@ int main(int argc, char *argv[]) {
             return -1;
         }
 
+        slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+
         InferenceEngine::Core core;
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
@@ -301,9 +299,11 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to HumanPoseResult*
             //    and use your own processing instead of calling renderHumanPose().
             while (keepRunning && (result = pipeline.getResult())) {
+                auto renderingStart = std::chrono::steady_clock::now();
                 cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
+                renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
@@ -328,9 +328,11 @@ int main(int argc, char *argv[]) {
         pipeline.waitForTotalCompletion();
         for (; framesProcessed <= frameNum; framesProcessed++) {
             while (!(result = pipeline.getResult())) {}
+            auto renderingStart = std::chrono::steady_clock::now();
             cv::Mat outFrame = renderHumanPose(result->asRef<HumanPoseResult>(), outputTransform);
             //--- Showing results and device information
             presenter.drawGraphs(outFrame);
+            renderMetrics.update(renderingStart);
             metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                 outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
@@ -346,6 +348,17 @@ int main(int argc, char *argv[]) {
         //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << slog::endl << "Metric reports:" << slog::endl;
         metrics.printTotal();
+        slog::info << slog::endl << "Avg time:\n";
+        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
+            cap->getMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Preprocessing:\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Inference:\t\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getInferenceMetircs().getTotal().latency << " ms\n";
+        slog::info << "  * Postprocessing:\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getPostprocessMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
+            renderMetrics.getTotal().latency << " ms" << slog::endl;
 
         slog::info << presenter.reportMeans() << slog::endl;
     }
@@ -358,6 +371,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
     return 0;
 }
