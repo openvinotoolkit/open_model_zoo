@@ -28,6 +28,7 @@ pydicom>=2.1.2
 # nlp, tokenization
 sentencepiece>=0.1.95
 tokenizers>=0.10.1
+transformers>=4.5
 nltk>=3.5
 
 # editdistance calculation

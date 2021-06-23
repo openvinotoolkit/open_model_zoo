@@ -63,7 +63,13 @@ from .text_classification import (
     BertXNLITFRecordConverter,
     IMDBConverter,
     MRPCConverter,
-    CoLAConverter
+    CoLAConverter,
+    MNLIDatasetConverter,
+    WNLIConverter,
+    QQPConverter,
+    QNLIConverter,
+    SST2Converter,
+    RTEConverter
 )
 from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
@@ -173,6 +179,12 @@ __all__ = [
     'IMDBConverter',
     'MRPCConverter',
     'CoLAConverter',
+    'MNLIDatasetConverter',
+    'QQPConverter',
+    'WNLIConverter',
+    'QNLIConverter',
+    'RTEConverter',
+    'SST2Converter',
     'CmuPanopticKeypointsConverter',
     'ActionRecognitionConverter',
     'MSASLContiniousConverter',

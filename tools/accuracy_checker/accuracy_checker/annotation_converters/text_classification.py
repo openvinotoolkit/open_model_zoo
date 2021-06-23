@@ -32,7 +32,12 @@ labels = {
     'mnli': ["contradiction", "entailment", "neutral"],
     'imdb': ['neg', 'pos'],
     'mrpc': ['0', '1'],
-    'cola': ['0', '1']
+    'cola': ['0', '1'],
+    'qqp': ['0', '1'],
+    'sst-2': ['0', '1'],
+    'rte': ["entailment", "not_entailment"],
+    'wnli': ["0", "1"],
+    'qnli':  ["entailment", "not_entailment"]
 }
 
 
@@ -53,7 +58,16 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register'),
             'class_token_first': BoolField(
                 optional=True, default=True,
-                description='Add [CLS] token to the begin of sequence. If False, will be added as the last token.')
+                description='Add [CLS] token to the begin of sequence. If False, will be added as the last token.'),
+            'enable_padding': BoolField(optional=True, default=True, description='pad input sequence to max length'),
+            'tokenizer_dir': PathField(
+                optional=True, is_directory=True,
+                description='A path to a directory containing vocabulary files required by the transformers tokenizer'
+            ),
+            'model_id': StringField(
+                optional=True,
+                description='The model id of a predefined tokenizer hosted inside a model repo on huggingface.co'
+            )
         })
 
         return params
@@ -62,10 +76,11 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
         self.annotation_file = self.get_value_from_config('annotation_file')
         self.max_seq_length = self.get_value_from_config('max_seq_length')
         self.lower_case = self.get_value_from_config('lower_case')
-        self.tokenizer = get_tokenizer(self.config, self.lower_case)
+        self.tokenizer, self.external_tok = get_tokenizer(self.config, self.lower_case)
         self.reversed_label_map = {value: key for key, value in self.label_map.items()}
         self.support_vocab = 'vocab_file' in self.config
         self.class_token_first = self.get_value_from_config('class_token_first')
+        self.enable_padding = self.get_value_from_config('enable_padding')
 
     def read_tsv(self):
         lines = []
@@ -82,53 +97,65 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
 
         return lines
 
-    def convert_single_example(self, example):
+    def convert_single_example(self, example): # pylint:disable=R0912
         identifier = [
             'input_ids_{}'.format(example.guid),
             'input_mask_{}'.format(example.guid),
             'segment_ids_{}'.format(example.guid)
         ]
-        tokens_a = self.tokenizer.tokenize(example.text_a)
-        tokens_b = None
-        if example.text_b:
-            tokens_b = self.tokenizer.tokenize(example.text_b if example.text_b is not None else '')
+        if not self.external_tok:
+            tokens_a = self.tokenizer.tokenize(example.text_a)
+            tokens_b = None
+            if example.text_b:
+                tokens_b = self.tokenizer.tokenize(example.text_b if example.text_b is not None else '')
 
-        if tokens_b:
-            # Modifies `tokens_a` and `tokens_b` in place so that the total
-            # length is less than the specified length.
-            # Account for two [SEP] & one [CLS] with "- 3"
-            truncate_seq_pair(tokens_a, tokens_b, self.max_seq_length - 3)
-        else:
-            # Account for one [SEP] & one [CLS] with "- 2"
-            if len(tokens_a) > self.max_seq_length - 2:
-                tokens_a = tokens_a[:self.max_seq_length - 2]
+            if tokens_b:
+                # Modifies `tokens_a` and `tokens_b` in place so that the total
+                # length is less than the specified length.
+                # Account for two [SEP] & one [CLS] with "- 3"
+                truncate_seq_pair(tokens_a, tokens_b, self.max_seq_length - 3)
+            else:
+                # Account for one [SEP] & one [CLS] with "- 2"
+                if len(tokens_a) > self.max_seq_length - 2:
+                    tokens_a = tokens_a[:self.max_seq_length - 2]
 
-        tokens = []
-        segment_ids = []
-        if self.class_token_first:
-            tokens.append("[CLS]" if self.support_vocab else CLS_ID)
-            segment_ids.append(SEG_ID_CLS)
-        for token in tokens_a:
-            tokens.append(token)
-            segment_ids.append(SEG_ID_A)
-        tokens.append('[SEP]' if self.support_vocab else SEP_ID)
-        segment_ids.append(SEG_ID_A)
-
-        if tokens_b:
-            for token in tokens_b:
+            tokens = []
+            segment_ids = []
+            if self.class_token_first:
+                tokens.append("[CLS]" if self.support_vocab else CLS_ID)
+                segment_ids.append(SEG_ID_CLS)
+            for token in tokens_a:
                 tokens.append(token)
-                segment_ids.append(SEG_ID_B)
+                segment_ids.append(SEG_ID_A)
             tokens.append('[SEP]' if self.support_vocab else SEP_ID)
-            segment_ids.append(SEG_ID_B)
+            segment_ids.append(SEG_ID_A)
 
-        if not self.class_token_first:
-            tokens.append("[CLS]" if self.support_vocab else CLS_ID)
-            segment_ids.append(SEG_ID_CLS)
+            if tokens_b:
+                for token in tokens_b:
+                    tokens.append(token)
+                    segment_ids.append(SEG_ID_B)
+                tokens.append('[SEP]' if self.support_vocab else SEP_ID)
+                segment_ids.append(SEG_ID_B)
 
-        input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab else tokens
+            if not self.class_token_first:
+                tokens.append("[CLS]" if self.support_vocab else CLS_ID)
+                segment_ids.append(SEG_ID_CLS)
+        else:
+            if example.text_b:
+                tokens = self.tokenizer.tokenize((example.text_a, example.text_b), add_special_tokens=True)
+                len_tokens_a = len(self.tokenizer.tokenize(example.text_a, add_special_tokens=True))
+                segment_ids = [SEG_ID_A] * len_tokens_a + [SEG_ID_B] * (len(tokens) - len_tokens_a)
+            else:
+                tokens = self.tokenizer.tokenize(example.text_a)
+                segment_ids = [SEG_ID_A] * len(tokens)
+
+            if len(tokens) > self.max_seq_length:
+                tokens = tokens[:self.max_seq_length]
+
+        input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab or self.external_tok else tokens
         input_mask = [0 if not self.class_token_first else 1] * len(input_ids)
 
-        if len(input_ids) < self.max_seq_length:
+        if self.enable_padding and len(input_ids) < self.max_seq_length:
             delta_len = self.max_seq_length - len(input_ids)
             input_ids = [0] * delta_len + input_ids if not self.class_token_first else input_ids + [0] * delta_len
             input_mask = [1] * delta_len + input_mask if not self.class_token_first else input_mask + [0] * delta_len
@@ -302,6 +329,61 @@ class CoLAConverter(BaseGLUETextClassificationConverter):
         super().__init__(config)
 
 
+class QQPConverter(BaseGLUETextClassificationConverter):
+    __provider__ = 'qqp'
+
+    def __init__(self, config):
+        self.label_map = dict(enumerate(labels['qqp']))
+        self.label_ind = 5
+        self.text_a_ind = 3
+        self.text_b_ind = 4
+        super().__init__(config)
+
+
+class SST2Converter(BaseGLUETextClassificationConverter):
+    __provider__ = 'sst-2'
+
+    def __init__(self, config):
+        self.label_map = dict(enumerate(labels['sst-2']))
+        self.label_ind = 1
+        self.text_a_ind = 0
+        self.text_b_ind = None
+        super().__init__(config)
+
+
+class RTEConverter(BaseGLUETextClassificationConverter):
+    __provider__ = 'rte'
+
+    def __init__(self, config):
+        self.label_map = dict(enumerate(labels['rte']))
+        self.label_ind = 3
+        self.text_a_ind = 1
+        self.text_b_ind = 2
+        super().__init__(config)
+
+
+class WNLIConverter(BaseGLUETextClassificationConverter):
+    __provider__ = 'wnli'
+
+    def __init__(self, config):
+        self.label_map = dict(enumerate(labels['wnli']))
+        self.label_ind = 3
+        self.text_a_ind = 1
+        self.text_b_ind = 2
+        super().__init__(config)
+
+
+class QNLIConverter(BaseGLUETextClassificationConverter):
+    __provider__ = 'qnli'
+
+    def __init__(self, config):
+        self.label_map = dict(enumerate(labels['qnli']))
+        self.label_ind = 3
+        self.text_a_ind = 1
+        self.text_b_ind = 2
+        super().__init__(config)
+
+
 class IMDBConverter(BaseGLUETextClassificationConverter):
     __provider__ = 'imdb'
     annotation_types = (TextClassificationAnnotation, )
@@ -330,7 +412,7 @@ class IMDBConverter(BaseGLUETextClassificationConverter):
         self.data_dir = self.get_value_from_config('data_dir')
         self.max_seq_length = self.get_value_from_config('max_seq_length')
         self.lower_case = self.get_value_from_config('lower_case')
-        self.tokenizer = get_tokenizer(self.config, self.lower_case)
+        self.tokenizer, self.external_tok = get_tokenizer(self.config, self.lower_case)
         imdb_labels = labels['imdb']
         self.label_map = dict(enumerate(imdb_labels))
         self.reversed_label_map = {value: key for key, value in self.label_map.items()}
