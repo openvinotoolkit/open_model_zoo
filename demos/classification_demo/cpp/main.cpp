@@ -104,7 +104,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -130,9 +129,7 @@ cv::Mat centerSquareCrop(const cv::Mat& image) {
 
 int main(int argc, char *argv[]) {
     try {
-        PerformanceMetrics metrics;
-
-        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+        PerformanceMetrics metrics, readerMetrics, renderMetrics;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -140,7 +137,6 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        slog::info << "Reading input" << slog::endl;
         std::vector<std::string> imageNames;
         std::vector<cv::Mat> inputImages;
         parseInputFilesArguments(imageNames);
@@ -148,12 +144,14 @@ int main(int argc, char *argv[]) {
         std::sort(imageNames.begin(), imageNames.end());
         for (size_t i = 0; i < imageNames.size(); i++) {
             const std::string& name = imageNames[i];
+            auto startTime = std::chrono::steady_clock::now();
             const cv::Mat& tmpImage = cv::imread(name);
             if (tmpImage.data == nullptr) {
                 std::cerr << "Could not read image " << name << '\n';
                 imageNames.erase(imageNames.begin() + i);
                 i--;
             } else {
+                readerMetrics.update(startTime);
                 // Clone cropped image to keep memory layout dense to enable -auto_resize
                 inputImages.push_back(centerSquareCrop(tmpImage).clone());
                 size_t lastSlashIdx = name.find_last_of("/\\");
@@ -210,6 +208,8 @@ int main(int argc, char *argv[]) {
                 }
         }
 
+        slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+
         InferenceEngine::Core core;
         AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, FLAGS_auto_resize, labels)),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
@@ -226,7 +226,6 @@ int main(int argc, char *argv[]) {
             height = std::stoi(gridMatRowsCols[1]);
         }
         GridMat gridMat(presenter, cv::Size(width, height));
-
         bool keepRunning = true;
         std::unique_ptr<ResultBase> result;
         double accuracy = 0;
@@ -273,6 +272,7 @@ int main(int argc, char *argv[]) {
 
             //--- Checking for results and rendering data if it's ready
             while ((result = pipeline.getResult(false)) && keepRunning) {
+                auto renderingStart = std::chrono::steady_clock::now();
                 const ClassificationResult& classificationResult = result->asRef<ClassificationResult>();
                 if (!classificationResult.metaData) {
                     throw std::invalid_argument("Renderer: metadata is null");
@@ -324,17 +324,28 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
+                renderMetrics.update(renderingStart);
             }
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << slog::endl << "Metric reports:" << slog::endl;
         metrics.printTotal();
-        if (!FLAGS_gt.empty()) {
-            std::cout << "Accuracy (top " << FLAGS_nt << "): " << accuracy << std::endl;
-        }
-        std::cout << presenter.reportMeans() << std::endl;
+        slog::info << slog::endl << "Avg time:\n";
+        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
+            readerMetrics.getTotal().latency << " ms\n";
+        slog::info << "  * Preprocessing:\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Inference:\t\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getInferenceMetircs().getTotal().latency << " ms\n";
+        slog::info << "  * Postprocessing:\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getPostprocessMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
+            renderMetrics.getTotal().latency << " ms" << slog::endl;
 
+        if (!FLAGS_gt.empty()) {
+            slog::info << "Accuracy (top " << FLAGS_nt << "): " << accuracy << slog::endl;
+        }
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
@@ -346,6 +357,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
     return 0;
 }
