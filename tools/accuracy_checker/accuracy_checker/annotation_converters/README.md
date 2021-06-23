@@ -323,13 +323,13 @@ The main difference between this converter and `super_resolution` in data organi
 * `lpr_txt` - converts annotation for license plate recognition task in txt format to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to txt annotation.
   * `decoding_dictionary` - path to file containing dictionary for output decoding.
-* `squad_emb` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `Question Answering Embedding Annotation`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+* `squad_emb` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `Question Answering Embedding Annotation`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
   * `testing_file` - path to testing file.
   * `vocab_file` - path to model co vocabulary file.
   * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
   * `max_query_length` - maximum number of tokens for the question (Optional, default value is 64).
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False)
-* `squad` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `Question Answering Annotation`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+* `squad` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `Question Answering Annotation`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
   * `testing_file` - path to testing file.
   * `vocab_file` - path to model co vocabulary file.
   * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
@@ -338,43 +338,167 @@ The main difference between this converter and `super_resolution` in data organi
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False)
 * `squad_bidaf` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `QuestionAnsweringBiDAFAnnotation`. **Note:** This converter not only converts data to metric specific format but also tokenize and encodes input for BiDAF using nltk.word_tokenize.
   * `testing_file` - path to testing file.
-* `xnli` - converts The Cross-lingual Natural Language Inference Corpus ([XNLI](https://github.com/facebookresearch/XNLI)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+* `xnli` - converts The Cross-lingual Natural Language Inference Corpus ([XNLI](https://github.com/facebookresearch/XNLI)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
   * `annotation_file` - path to dataset annotation file in tsv format.
-  * `vocab_file` -  path to model vocabulary file for WordPiece tokinezation (Optional in case, when another tokenization approach used).
+  * `vocab_file` -  path to model vocabulary file for WordPiece tokenization (Optional in case, when another tokenization approach used).
   * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
   * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
   * `language_filter` - comma-separated list of used in annotation language tags for selecting records for specific languages only. (Optional, if not used full annotation will be converted).
-* `mnli` - converts The Multi-Genre Natural Language Inference Corpus ([MNLI](https://cims.nyu.edu/~sbowman/multinli/)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
-  * `annotation_file` - path to dataset annotation file in tsv format.
-  * `vocab_file` - path to model vocabulary file for WordPiece tokinezation. (Optional, can be not provided in case, when another tokenization approach used.)
-  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
-  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
-  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
-* `mrpc` - converts The Microsoft Research Paraphrase Corpus ([MRPC](https://www.microsoft.com/en-us/download/details.aspx?id=52398)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
-  * `annotation_file` - path to dataset annotation file in tsv format.
-  * `vocab_file` - path to model vocabulary file for WordPiece tokenization. (Optional, can be not provided in case, when another tokenization approach used.)
-  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
-  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
-  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
-* `cola` - converts The Corpus of Linguistic Acceptability ([CoLA](https://nyu-mll.github.io/CoLA/)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
-  * `annotation_file` - path to dataset annotation file in tsv format.
-  * `vocab_file` - path to model vocabulary file for WordPiece tokinezation. (Optional, can be not provided in case, when another tokenization approach used.)
-  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
-  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
-  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
-* `cola` - converts The Corpus of Linguistic Acceptability ([CoLA](https://nyu-mll.github.io/CoLA/)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+  * `enable_padding` - pad sequence to maximum sequence length (Optional, default `True`).
+  You also can use [HuggingFace Transformers](https://huggingface.co/transformers/index.html) library capabilities for tokenization with providing `model_id` for downloading tokenizer files from huggingface.co or `tokenizer_dir` for specification pretrained model directory instead vocab_file or sentencepiece model.
+    e.g. using tokenizer for roberta-base should be
+    ```yaml
+        model_id: roberta-base
+    ```
+    or
+    ```yaml
+        tokenizer_dir: <model_saving_path>/roberta-base
+    ```
+* `mnli` - converts The Multi-Genre Natural Language Inference Corpus ([MNLI](https://cims.nyu.edu/~sbowman/multinli/)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
   * `annotation_file` - path to dataset annotation file in tsv format.
   * `vocab_file` - path to model vocabulary file for WordPiece tokenization. (Optional, can be not provided in case, when another tokenization approach used.)
   * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
   * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
-* `imdb` - converts [IMDB sentiment dataset](https://ai.stanford.edu/~amaas/data/sentiment/) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+  * `enable_padding` - pad sequence to maximum sequence length (Optional, default `True`).
+  You also can use [HuggingFace Transformers](https://huggingface.co/transformers/index.html) library capabilities for tokenization with providing `model_id` for downloading tokenizer files from huggingface.co or `tokenizer_dir` for specification pretrained model directory instead vocab_file or sentencepiece model.
+    e.g. using tokenizer for roberta-base should be
+    ```yaml
+        model_id: roberta-base
+    ```
+    or
+    ```yaml
+        tokenizer_dir: <model_saving_path>/roberta-base
+    ```
+* `mrpc` - converts The Microsoft Research Paraphrase Corpus ([MRPC](https://www.microsoft.com/en-us/download/details.aspx?id=52398)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
   * `annotation_file` - path to dataset annotation file in tsv format.
-  * `vocab_file` - path to model vocabulary file for WordPiece tokinezation. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `vocab_file` - path to model vocabulary file for WordPiece tokenization. (Optional, can be not provided in case, when another tokenization approach used.)
   * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
   * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+  * `enable_padding` - pad sequence to maximum sequence length (Optional, default `True`).
+  You also can use [HuggingFace Transformers](https://huggingface.co/transformers/index.html) library capabilities for tokenization with providing `model_id` for downloading tokenizer files from huggingface.co or `tokenizer_dir` for specification pretrained model directory instead vocab_file or sentencepiece model.
+    e.g. using tokenizer for roberta-base should be
+    ```yaml
+        model_id: roberta-base
+    ```
+    or
+    ```yaml
+        tokenizer_dir: <model_saving_path>/roberta-base
+    ```
+* `cola` - converts The Corpus of Linguistic Acceptability ([CoLA](https://nyu-mll.github.io/CoLA/)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model vocabulary file for WordPiece tokenization. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+  * `enable_padding` - pad sequence to maximum sequence length (Optional, default `True`).
+  You also can use [HuggingFace Transformers](https://huggingface.co/transformers/index.html) library capabilities for tokenization with providing `model_id` for downloading tokenizer files from huggingface.co or `tokenizer_dir` for specification pretrained model directory instead vocab_file or sentencepiece model.
+    e.g. using tokenizer for roberta-base should be
+    ```yaml
+        model_id: roberta-base
+    ```
+    or
+    ```yaml
+        tokenizer_dir: <model_saving_path>/roberta-base
+    ```
+* `wnli` - converts Winograd NLI dataset ([WNLI](https://cs.nyu.edu/~davise/papers/WinogradSchemas/WS.html)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model vocabulary file for WordPiece tokenization. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+  * `enable_padding` - pad sequence to maximum sequence length (Optional, default `True`).
+  You also can use [HuggingFace Transformers](https://huggingface.co/transformers/index.html) library capabilities for tokenization with providing `model_id` for downloading tokenizer files from huggingface.co or `tokenizer_dir` for specification pretrained model directory instead vocab_file or sentencepiece model.
+    e.g. using tokenizer for `roberta-base` model should be
+    ```yaml
+        model_id: roberta-base
+    ```
+    or
+    ```yaml
+        tokenizer_dir: <model_saving_path>/roberta-base
+    ```
+* `qnli` - converts Question NLI dataset to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model vocabulary file for WordPiece tokenization. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+  * `enable_padding` - pad sequence to maximum sequence length (Optional, default `True`).
+  You also can use [HuggingFace Transformers](https://huggingface.co/transformers/index.html) library capabilities for tokenization with providing `model_id` for downloading tokenizer files from huggingface.co or `tokenizer_dir` for specification pretrained model directory instead vocab_file or sentencepiece model.
+    e.g. using tokenizer for `roberta-base` model should be
+    ```yaml
+        model_id: roberta-base
+    ```
+    or
+    ```yaml
+        tokenizer_dir: <model_saving_path>/roberta-base
+    ```
+* `qqp` - converts Quora Question Pairs dataset to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model vocabulary file for WordPiece tokenization. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+  * `enable_padding` - pad sequence to maximum sequence length (Optional, default `True`).
+  You also can use [HuggingFace Transformers](https://huggingface.co/transformers/index.html) library capabilities for tokenization with providing `model_id` for downloading tokenizer files from huggingface.co or `tokenizer_dir` for specification pretrained model directory instead vocab_file or sentencepiece model.
+    e.g. using tokenizer for `roberta-base` model should be
+    ```yaml
+        model_id: roberta-base
+    ```
+    or
+    ```yaml
+        tokenizer_dir: <model_saving_path>/roberta-base
+    ```
+* `sst-2` - converts Stanford Sentiment Treebank [SST-2](https://nlp.stanford.edu/sentiment/index.html) dataset to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model vocabulary file for WordPiece tokenization. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+  * `enable_padding` - pad sequence to maximum sequence length (Optional, default `True`).
+  You also can use [HuggingFace Transformers](https://huggingface.co/transformers/index.html) library capabilities for tokenization with providing `model_id` for downloading tokenizer files from huggingface.co or `tokenizer_dir` for specification pretrained model directory instead vocab_file or sentencepiece model.
+    e.g. using tokenizer for `roberta-base` model should be
+    ```yaml
+        model_id: roberta-base
+    ```
+    or
+    ```yaml
+        tokenizer_dir: <model_saving_path>/roberta-base
+    ```
+* `rte` - converts Recognizing Textual Entailment [RTE](https://aclweb.org/aclwiki/Recognizing_Textual_Entailment) dataset to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model vocabulary file for WordPiece tokenization. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+  * `enable_padding` - pad sequence to maximum sequence length (Optional, default `True`).
+  You also can use [HuggingFace Transformers](https://huggingface.co/transformers/index.html) library capabilities for tokenization with providing `model_id` for downloading tokenizer files from huggingface.co or `tokenizer_dir` for specification pretrained model directory instead vocab_file or sentencepiece model.
+    e.g. using tokenizer for `roberta-base` model should be
+    ```yaml
+        model_id: roberta-base
+    ```
+    or
+    ```yaml
+        tokenizer_dir: <model_saving_path>/roberta-base
+    ```
+* `imdb` - converts [IMDB sentiment dataset](https://ai.stanford.edu/~amaas/data/sentiment/) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for model.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model vocabulary file for WordPiece tokenization. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+  * `enable_padding` - pad sequence to maximum sequence length (Optional, default `True`).
+  You also can use [HuggingFace Transformers](https://huggingface.co/transformers/index.html) library capabilities for tokenization with providing `model_id` for downloading tokenizer files from huggingface.co or `tokenizer_dir` for specification pretrained model directory instead vocab_file or sentencepiece model.
+    e.g. using tokenizer for roberta-base should be
+    ```yaml
+        model_id: roberta-base
+    ```
+    or
+    ```yaml
+        tokenizer_dir: <model_saving_path>/roberta-base
+    ```
 * `bert_xnli_tf_record` - converts The Cross-lingual Natural Language Inference Corpus ([XNLI](https://github.com/facebookresearch/XNLI)) stored in tf records format. This converter usage requires TensorFlow installation. Please make sure that TensorFlow installed before conversion.
   * `annotattion_file` - path to annotation file in tf records format.
 * `cmu_panoptic_keypoints` - converts CMU Panoptic dataset to `PoseEstimation3dAnnotation` format.
