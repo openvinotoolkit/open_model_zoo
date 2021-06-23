@@ -36,7 +36,7 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
                 "OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. Failed to query the metric with error: ") + ex.what());
         }
     }
-    slog::info << "Number of infer requests is set to " << nireq << slog::endl;
+    slog::info << "Number of inference requests is set to " << nireq << slog::endl;
     requestsPool.reset(new RequestsPool(execNetwork, nireq));
 
     // --------------------------- Call onLoadCompleted to complete initialization of model -------------

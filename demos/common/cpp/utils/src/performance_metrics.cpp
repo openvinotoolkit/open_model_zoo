@@ -96,6 +96,6 @@ void PerformanceMetrics::printTotal() const {
     Metrics metrics = getTotal();
 
     std::ostringstream out;
-    out << "Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms\nFPS: " << metrics.fps << '\n';
+    out << "  * Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms\n  * FPS: " << metrics.fps << '\n';
     std::cout << out.str();
 }

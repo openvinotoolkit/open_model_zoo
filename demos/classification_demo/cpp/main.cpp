@@ -144,14 +144,14 @@ int main(int argc, char *argv[]) {
         std::sort(imageNames.begin(), imageNames.end());
         for (size_t i = 0; i < imageNames.size(); i++) {
             const std::string& name = imageNames[i];
-            auto startTime = std::chrono::steady_clock::now();
+            auto readingStart= std::chrono::steady_clock::now();
             const cv::Mat& tmpImage = cv::imread(name);
             if (tmpImage.data == nullptr) {
                 std::cerr << "Could not read image " << name << '\n';
                 imageNames.erase(imageNames.begin() + i);
                 i--;
             } else {
-                readerMetrics.update(startTime);
+                readerMetrics.update(readingStart);
                 // Clone cropped image to keep memory layout dense to enable -auto_resize
                 inputImages.push_back(centerSquareCrop(tmpImage).clone());
                 size_t lastSlashIdx = name.find_last_of("/\\");
@@ -303,6 +303,7 @@ int main(int argc, char *argv[]) {
                 accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
                 gridMat.textUpdate(metrics, classificationResult.metaData->asRef<ImageMetaData>().timeStamp, accuracy, FLAGS_nt, isTestMode,
                                    !FLAGS_gt.empty(), presenter);
+                renderMetrics.update(renderingStart);
                 elapsedSeconds = std::chrono::steady_clock::now() - startTime;
                 if (!FLAGS_no_show) {
                     cv::imshow("classification_demo", gridMat.outImg);
@@ -324,7 +325,6 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
-                renderMetrics.update(renderingStart);
             }
         }
 
