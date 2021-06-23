@@ -372,7 +372,6 @@ class ModelEvaluator(BaseEvaluator):
         annotations, predictions = self.postprocessor.process_batch(
             batch_annotations, batch_predictions, batch_meta
         )
-
         _, profile_result = self.metric_executor.update_metrics_on_batch(
             batch_input_ids, annotations, predictions, enable_profiling
         )

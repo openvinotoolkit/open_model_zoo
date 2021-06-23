@@ -72,8 +72,8 @@ class YolofOutputProcessor:
         w = self.size_correct(bbox.w) * anchors[0]
         h = self.size_correct(bbox.h) * anchors[1]
 
-        confidence = np.max(bbox.probabilities)
         probabilities = self.prob_correct(bbox.probabilities)
+        confidence = self.conf_correct(probabilities)
 
         return DetectionBox(x, y, w, h, confidence, probabilities)
 
@@ -164,11 +164,10 @@ def parse_output(predictions, cells, num, box_size, anchors, processor, threshol
         if processed_box.confidence < threshold:
             continue
 
-        classes_prob = processed_box.probabilities
-        label = np.argmax(classes_prob)
+        label = np.argmax(processed_box.probabilities)
 
         labels.append(label)
-        scores.append(processed_box.probabilities[label] * 1)
+        scores.append(processed_box.probabilities[label] * processed_box.confidence)
         x_mins.append(processed_box.x - processed_box.w / 2.0)
         y_mins.append(processed_box.y - processed_box.h / 2.0)
         x_maxs.append(processed_box.x + processed_box.w / 2.0)
@@ -419,6 +418,8 @@ class YoloV3Adapter(Adapter):
         result = []
 
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        # print(raw_outputs['boxes'].shape)
+        # print(raw_outputs)
         batch = len(identifiers)
         out_precision = frame_meta[0].get('output_precision', {})
         out_layout = frame_meta[0].get('output_layout', {})
@@ -635,6 +636,5 @@ class YolofAdapter(YoloV3Adapter):
     def configure(self):
         super().configure()
         if self.raw_output:
-            self.processor = YolofOutputProcessor(prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
-        else:
-            self.processor = YolofOutputProcessor()
+            self.processor = YolofOutputProcessor(prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
+                                                  conf_correct=lambda x: np.max(x))
