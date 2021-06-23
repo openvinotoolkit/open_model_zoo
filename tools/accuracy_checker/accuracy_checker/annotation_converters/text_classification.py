@@ -418,6 +418,7 @@ class IMDBConverter(BaseGLUETextClassificationConverter):
         self.reversed_label_map = {value: key for key, value in self.label_map.items()}
         self.support_vocab = 'vocab_file' in self.config
         self.class_token_first = self.get_value_from_config('class_token_first')
+        self.enable_padding = self.get_value_from_config('enable_padding')
 
     def _create_examples(self):
         examples = []
