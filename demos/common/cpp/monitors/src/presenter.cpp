@@ -290,7 +290,7 @@ std::string Presenter::reportMeans() const {
     std::ostringstream collectedDataStream;
     collectedDataStream << std::fixed << std::setprecision(1);
     if (cpuMonitor.getHistorySize() > 1) {
-        collectedDataStream << "Mean core utilization: ";
+        collectedDataStream << "  * Mean core utilization: ";
         for (double mean : cpuMonitor.getMeanCpuLoad()) {
             collectedDataStream << mean * 100 << "% ";
         }
@@ -299,11 +299,11 @@ std::string Presenter::reportMeans() const {
     if (distributionCpuEnabled) {
         std::vector<double> meanCpuLoad = cpuMonitor.getMeanCpuLoad();
         double mean = std::accumulate(meanCpuLoad.begin(), meanCpuLoad.end(), 0.0) / meanCpuLoad.size();
-        collectedDataStream << "Mean CPU utilization: " << mean * 100 << "%\n";
+        collectedDataStream << "  * Mean CPU utilization: " << mean * 100 << "%\n";
     }
     if (memoryMonitor.getHistorySize() > 1) {
-        collectedDataStream << "Memory mean usage: " << memoryMonitor.getMeanMem() << " GiB\n";
-        collectedDataStream << "Mean swap usage: " << memoryMonitor.getMeanSwap() << " GiB\n";
+        collectedDataStream << "  * Memory mean usage: " << memoryMonitor.getMeanMem() << " GiB\n";
+        collectedDataStream << "  * Mean swap usage: " << memoryMonitor.getMeanSwap() << " GiB\n";
     }
     std::string collectedData = collectedDataStream.str();
     // drop last \n because usually it is not expected that printing an object starts a new line

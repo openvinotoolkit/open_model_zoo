@@ -36,7 +36,17 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
                 "OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. Failed to query the metric with error: ") + ex.what());
         }
     }
-    slog::info << "Number of inference requests is set to " << nireq << slog::endl;
+
+    slog::info << "Number of inference requests is set to " << nireq << "." << slog::endl;
+    if (cnnConfig.devices.find("CPU") != cnnConfig.devices.end()) {
+        slog::info << "Number of threads " << "is set to "
+            << execNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>() << "." << slog::endl;
+    }
+    for (const auto& device : cnnConfig.devices) {
+        slog::info << "Number of streams is set to "
+            << execNetwork.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device." << slog::endl;
+    }
+
     requestsPool.reset(new RequestsPool(execNetwork, nireq));
 
     // --------------------------- Call onLoadCompleted to complete initialization of model -------------

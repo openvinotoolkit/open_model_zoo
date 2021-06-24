@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <utils/args_helper.hpp>
 
 #include "ie_wrapper.hpp"
 
@@ -55,6 +56,23 @@ void IEWrapper::setExecPart() {
     }
 
     executableNetwork = ie.LoadNetwork(network, deviceName);
+
+    slog::info << slog::endl << "Loaded model " << modelPath << " to " << deviceName << " device.\n";
+    std::set<std::string> devices;
+    for (const std::string& device : parseDevices(deviceName)) {
+        devices.insert(device);
+    }
+
+    slog::info << "  * Number of inference requests is set to " << 1 << ".\n";
+    if (devices.find("CPU") != devices.end()) {
+        slog::info << "  * Number of threads " << "is set to "
+            << executableNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>() << ".\n";
+    }
+    for (const auto& device : devices) {
+        slog::info << "  * Number of streams is set to "
+            << executableNetwork.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device.\n";
+    }
+
     request = executableNetwork.CreateInferRequest();
 }
 

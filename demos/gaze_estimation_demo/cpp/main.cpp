@@ -61,7 +61,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
+
     if (FLAGS_i.empty())
         throw std::logic_error("Parameter -i is not set");
     if (FLAGS_m.empty())
@@ -81,14 +81,14 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
-
+        PerformanceMetrics renderMetrics;
         // ------------------------------ Parsing and validating of input arguments --------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
 
         // Loading Inference Engine
+        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
         InferenceEngine::Core ie;
 
         // Enable per-layer metrics
@@ -98,7 +98,6 @@ int main(int argc, char *argv[]) {
 
         // Set up face detector and estimators
         FaceDetector faceDetector(ie, FLAGS_m_fd, FLAGS_d_fd, FLAGS_t, FLAGS_fd_reshape);
-
         HeadPoseEstimator headPoseEstimator(ie, FLAGS_m_hp, FLAGS_d_hp);
         LandmarksEstimator landmarksEstimator(ie, FLAGS_m_lm, FLAGS_d_lm);
         EyeStateEstimator eyeStateEstimator(ie, FLAGS_m_es, FLAGS_d_es);
@@ -169,18 +168,19 @@ int main(int argc, char *argv[]) {
 
             if (FLAGS_r) {
                 for (auto& inferenceResult : inferenceResults) {
-                    std::cout << inferenceResult << std::endl;
+                    slog::info << inferenceResult << slog::endl;
                 }
             }
 
             presenter.drawGraphs(frame);
-
+            auto renderingStart = std::chrono::steady_clock::now();
             // Display the results
             for (auto const& inferenceResult : inferenceResults) {
                 resultsMarker.mark(frame, inferenceResult);
             }
             putTimingInfoOnFrame(frame, overallTimeAverager.getAveragedValue(),
                                  inferenceTimeAverager.getAveragedValue());
+            renderMetrics.update(renderingStart);
             framesProcessed++;
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
                 videoWriter.write(frame);
@@ -202,7 +202,14 @@ int main(int argc, char *argv[]) {
             }
             frame = cap->read();
         } while (frame.data);
-        std::cout << presenter.reportMeans() << '\n';
+
+        //// --------------------------- Report metrics -------------------------------------------------------
+        slog::info << slog::endl << "Avg time:\n";
+        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
+            cap->getMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
+            renderMetrics.getTotal().latency << " ms" << slog::endl;
+        slog::info << slog::endl << '\n' <<  presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -212,6 +219,5 @@ int main(int argc, char *argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-    slog::info << "Execution successful" << slog::endl;
     return 0;
 }

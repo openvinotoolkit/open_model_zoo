@@ -346,7 +346,7 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_gt.empty()) {
             slog::info << "Accuracy (top " << FLAGS_nt << "): " << accuracy << slog::endl;
         }
-        slog::info << presenter.reportMeans() << slog::endl;
+        slog::info << slog::endl << '\n' << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

@@ -16,11 +16,13 @@
 
 #pragma once
 #include <map>
+#include <set>
 #include <string>
 #include "gflags/gflags.h"
 
 struct CnnConfig {
-    std::string devices;
+    std::string deviceName;
+    std::set<std::string> devices;
     std::string cpuExtensionsPath;
     std::string clKernelsConfigPath;
     unsigned int maxAsyncRequests;

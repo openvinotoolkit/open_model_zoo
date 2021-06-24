@@ -49,10 +49,9 @@ ExecutableNetwork ModelBase::loadExecutableNetwork(const CnnConfig& cnnConfig, I
     this->cnnConfig = cnnConfig;
     auto cnnNetwork = prepareNetwork(core);
 
-    execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.devices, cnnConfig.execNetworkConfig);
-    slog::info << "Loaded model " << modelFileName << " to " << cnnConfig.devices << slog::endl;
-    slog::info << "Number of streams for " << cnnConfig.devices << " device is set to "
-        << execNetwork.GetConfig(cnnConfig.devices + "_THROUGHPUT_STREAMS").as<std::string>() << slog::endl;
+    execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.deviceName, cnnConfig.execNetworkConfig);
+    slog::info << "Loaded model " << modelFileName << " to " << cnnConfig.deviceName << " device." << slog::endl;
+
 
     return execNetwork;
 }

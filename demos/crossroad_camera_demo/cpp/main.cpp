@@ -24,6 +24,7 @@
 #include <inference_engine.hpp>
 
 #include <monitors/presenter.h>
+#include <utils/args_helper.hpp>
 #include <utils/images_capture.h>
 #include <utils/slog.hpp>
 #include <utils/ocv_common.hpp>
@@ -209,7 +210,10 @@ struct PersonDetection : BaseDetection{
         LockedMemory<const void> outputMapped = as<MemoryBlob>(request.GetBlob(outputName))->rmap();
         const float *detections = outputMapped.as<float *>();
         // pretty much regular SSD post-processing
-        slog::info << slog::endl;
+
+        if (FLAGS_r) {
+            slog::info << slog::endl;
+        }
         for (int i = 0; i < maxProposalCount; i++) {
             float image_id = detections[i * objectSize + 0];  // in case of batch
             if (image_id < 0) {  // indicates end of detections
@@ -492,7 +496,22 @@ struct Load {
     void into(Core & ie, const std::string & deviceName) const {
         if (detector.enabled()) {
             detector.net = ie.LoadNetwork(detector.read(ie), deviceName);
-            slog::info << "Loaded model " << detector.commandLineFlag << " to " << deviceName << slog::endl;
+
+            std::set<std::string> devices;
+            for (const std::string& device : parseDevices(deviceName)) {
+                devices.insert(device);
+            }
+
+            slog::info << slog::endl << "Loaded model " << detector.commandLineFlag << " to " << deviceName << " device.\n";
+            slog::info << "  * Number of inference requests is set to " << 1 << ".\n";
+            if (devices.find("CPU") != devices.end()) {
+                slog::info << "  * Number of threads " << "is set to "
+                    << detector.net.GetConfig("CPU_THREADS_NUM").as<std::string>() << ".\n";
+            }
+            for (const auto& device : devices) {
+                slog::info << "  * Number of streams is set to "
+                    << detector.net.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device.\n";
+            }
         }
     }
 };
@@ -540,7 +559,6 @@ int main(int argc, char *argv[]) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = std::make_shared<Extension>(FLAGS_l);
                     ie.AddExtension(extension_ptr, "CPU");
-                    //slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
             }
 
@@ -838,7 +856,7 @@ int main(int argc, char *argv[]) {
         slog::info << slog::endl << "Avg time:\n";
         slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
             cap->getMetrics().getTotal().latency << " ms\n";
-        slog::info << slog::endl << presenter.reportMeans() << slog::endl;
+        slog::info << slog::endl << '\n' << presenter.reportMeans() << slog::endl;
         // -----------------------------------------------------------------------------------------------------
     }
     catch (const std::exception& error) {
