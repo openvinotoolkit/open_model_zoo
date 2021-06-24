@@ -18,20 +18,20 @@ description: >-
 task_type: text_to_speech
 files:
   - name: FP32/text-to-speech-en-0001-duration-prediction.xml
-    size: 538197
-    sha256: ff2dda4a7bf861b65364cda3ab1f6b243b6bdc0a01a4cd7df6519bf89606883d
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-duration-prediction/FP32/text-to-speech-en-0001-duration-prediction.xml
+    size: 562415
+    sha256: 4cf1f83b0314cf3b8e507b16096dbd81e2420611cc30d710073759091032d74d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-0001/text-to-speech-en-0001-duration-prediction/FP32/text-to-speech-en-0001-duration-prediction.xml
   - name: FP32/text-to-speech-en-0001-duration-prediction.bin
-    size: 54275816
-    sha256: ec992d2148a523f2d86214eff875ea7cd9131114a06b322ea887c26bcf2a67a2
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-duration-prediction/FP32/text-to-speech-en-0001-duration-prediction.bin
+    size: 54275772
+    sha256: c8c5a2d7928b5edc61d534b080e0f5ef40e0ae6dd9dea64d36ba3643290a7448
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-0001/text-to-speech-en-0001-duration-prediction/FP32/text-to-speech-en-0001-duration-prediction.bin
   - name: FP16/text-to-speech-en-0001-duration-prediction.xml
-    size: 538022
-    sha256: 370cb164cf42d02cbff5a25a8c169f0c06144129aa650a985945b5a6a38b6ba7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-duration-prediction/FP16/text-to-speech-en-0001-duration-prediction.xml
+    size: 562152
+    sha256: 9dd225a263987da61affac35d2200fe8e4def83a79d33b83864ddff0e6708c68
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-0001/text-to-speech-en-0001-duration-prediction/FP16/text-to-speech-en-0001-duration-prediction.xml
   - name: FP16/text-to-speech-en-0001-duration-prediction.bin
     size: 27137958
-    sha256: 6267a92bece8ddec158e0440fe5e64d14e40fb83a7b135f2165da8f98f332378
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-to-speech-en-0001/text-to-speech-en-0001-duration-prediction/FP16/text-to-speech-en-0001-duration-prediction.bin
+    sha256: a6b40e0be55d6624c96e516209694d69c80a6d9d6396bfa91501a7b7aee2b528
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-0001/text-to-speech-en-0001-duration-prediction/FP16/text-to-speech-en-0001-duration-prediction.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

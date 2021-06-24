@@ -17,20 +17,20 @@ description: >-
 task_type: feature_extraction
 files:
   - name: FP32/text-recognition-0015-encoder.xml
-    size: 314319
-    sha256: 7356e7bd55b56db0dae2a79a1b4a93fe3aa3e96188008e7af6dbf28f0015b034
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-recognition-0015/text-recognition-0015-encoder/FP32/text-recognition-0015-encoder.xml
+    size: 326445
+    sha256: b8fc719de6ccbd6f7b2e72ebb43ef498ae948e8268eb8b1f09662bc365e1fc43
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-encoder/FP32/text-recognition-0015-encoder.xml
   - name: FP32/text-recognition-0015-encoder.bin
     size: 1592248036
-    sha256: 77778b16d366dc10e95264432ce31e838c5feddb22b67ee969d2a67818ea095b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-recognition-0015/text-recognition-0015-encoder/FP32/text-recognition-0015-encoder.bin
+    sha256: 33c650eea2d900f9666f7b2bbc38511d8d6b0d4ea4d15fe7b443a7382976610a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-encoder/FP32/text-recognition-0015-encoder.bin
   - name: FP16/text-recognition-0015-encoder.xml
-    size: 314041
-    sha256: b0749656777110a7f03cfe180d395e699a7ef01cc501ac9522fe1ec79429cda5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-recognition-0015/text-recognition-0015-encoder/FP16/text-recognition-0015-encoder.xml
+    size: 326304
+    sha256: d8cd929eeb0e8f82bb28e34cb56a9e22839dc27a15aa1200ccb0f27fe93a9430
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-encoder/FP16/text-recognition-0015-encoder.xml
   - name: FP16/text-recognition-0015-encoder.bin
     size: 796124044
-    sha256: 69e195c5aa92e4cccb23c8e7edf3fa32aca8ee28d6d86bb1b3eb8e419dc0fbca
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-recognition-0015/text-recognition-0015-encoder/FP16/text-recognition-0015-encoder.bin
+    sha256: f89705a9654f12ce52d976331b6000ca93032cd769032427d63b33f55583e024
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0015/text-recognition-0015-encoder/FP16/text-recognition-0015-encoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

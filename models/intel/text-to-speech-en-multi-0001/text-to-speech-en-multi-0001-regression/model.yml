@@ -18,20 +18,20 @@ description: >-
 task_type: text_to_speech
 files:
   - name: FP32/text-to-speech-en-multi-0001-regression.xml
-    size: 578439
-    sha256: 8566ba0543e74f7757767e2f8981b3c9478ab90c257b8c3190f9f6d1e75659e1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-regression/FP32/text-to-speech-en-multi-0001-regression.xml
+    size: 604296
+    sha256: d1a12d9657c131d817e645a2a6156519c0e17026f74658e2e885345863c9743c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-regression/FP32/text-to-speech-en-multi-0001-regression.xml
   - name: FP32/text-to-speech-en-multi-0001-regression.bin
-    size: 20493576
-    sha256: 0e8145c376ba5c1091564d5e5fc919845f0bd904c449db5b2f2c276cb4806ca5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-regression/FP32/text-to-speech-en-multi-0001-regression.bin
+    size: 20493524
+    sha256: ab3495c7cb0df6866e1a53792df64e32a4fe412ce74cb8aa2e4b5d40453b747e
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-regression/FP32/text-to-speech-en-multi-0001-regression.bin
   - name: FP16/text-to-speech-en-multi-0001-regression.xml
-    size: 578055
-    sha256: 6164b17ac33dabd44641353c6b66d5e3acaaf374add0b7f747f202d411b68069
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-regression/FP16/text-to-speech-en-multi-0001-regression.xml
+    size: 604045
+    sha256: 4a48981293cbfa53090c126eb41c391d2f43bb80a2d911f7d2a95c9fb8dee971
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-regression/FP16/text-to-speech-en-multi-0001-regression.xml
   - name: FP16/text-to-speech-en-multi-0001-regression.bin
-    size: 10246842
-    sha256: 4d3c2f3949c58c4019eb4ac39b1694f2915030a53d5e0431d764d3dab4e24a71
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-regression/FP16/text-to-speech-en-multi-0001-regression.bin
+    size: 10246838
+    sha256: 2d0d6ca7dc2b0eab36d3fd404a20c08ae386ff8309a6c0b627df307b46443963
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-regression/FP16/text-to-speech-en-multi-0001-regression.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

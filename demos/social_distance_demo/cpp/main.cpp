@@ -518,43 +518,45 @@ bool DetectionsProcessor::isReady() {
 }
 
 void DetectionsProcessor::process() {
-    Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
-
-    if (!FLAGS_m_reid.empty()) {
-        auto personRectsIt = personRects.begin();
-
-        for (auto reidRequestsIt = reservedReIdRequests.begin(); reidRequestsIt != reservedReIdRequests.end(); personRectsIt++, reidRequestsIt++) {
-            const cv::Rect personRect = *personRectsIt;
-            InferRequest& reidRequest = *reidRequestsIt;
-            context.detectionsProcessorsContext.reid.setImage(reidRequest, sharedVideoFrame->frame, personRect);
-
-            reidRequest.SetCompletionCallback(
-                std::bind([](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
-                             InferRequest &reidRequest, cv::Rect rect, Context &context) {
-                                 reidRequest.SetCompletionCallback([] {}); // destroy the stored bind object
-                                 std::vector<float> result = context.detectionsProcessorsContext.reid.getResults(reidRequest);
-
-                                 classifiersAggregator->push(cv::Rect(rect));
-                                 classifiersAggregator->push(TrackableObject{rect,
-                                        std::move(result), {rect.x + rect.width / 2, rect.y + rect.height } });
-                                 context.reidInfers.inferRequests.lockedPushBack(reidRequest);
-                          },
-                          classifiersAggregator, std::ref(reidRequest), personRect, std::ref(context)));
-
-            reidRequest.StartAsync();
-        }
-        personRects.erase(personRects.begin(), personRectsIt);
-    } else {
-        for (const cv::Rect& personRect : personRects) {
-            classifiersAggregator->push(cv::Rect(personRect));
-        }
-        personRects.clear();
-    }
-
-    // Run DetectionsProcessor for remaining persons
     if (!personRects.empty()) {
-        tryPush(context.detectionsProcessorsContext.reidTasksWorker,
-                std::make_shared<DetectionsProcessor>(sharedVideoFrame, std::move(classifiersAggregator), std::move(personRects)));
+        Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
+
+        if (!FLAGS_m_reid.empty()) {
+            auto personRectsIt = personRects.begin();
+
+            for (auto reidRequestsIt = reservedReIdRequests.begin(); reidRequestsIt != reservedReIdRequests.end(); personRectsIt++, reidRequestsIt++) {
+                const cv::Rect personRect = *personRectsIt;
+                InferRequest& reidRequest = *reidRequestsIt;
+                context.detectionsProcessorsContext.reid.setImage(reidRequest, sharedVideoFrame->frame, personRect);
+
+                reidRequest.SetCompletionCallback(
+                    std::bind([](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
+                                InferRequest &reidRequest, cv::Rect rect, Context &context) {
+                                    reidRequest.SetCompletionCallback([] {}); // destroy the stored bind object
+                                    std::vector<float> result = context.detectionsProcessorsContext.reid.getResults(reidRequest);
+
+                                    classifiersAggregator->push(cv::Rect(rect));
+                                    classifiersAggregator->push(TrackableObject{rect,
+                                            std::move(result), {rect.x + rect.width / 2, rect.y + rect.height } });
+                                    context.reidInfers.inferRequests.lockedPushBack(reidRequest);
+                            },
+                            classifiersAggregator, std::ref(reidRequest), personRect, std::ref(context)));
+
+                reidRequest.StartAsync();
+            }
+            personRects.erase(personRects.begin(), personRectsIt);
+        } else {
+            for (const cv::Rect& personRect : personRects) {
+                classifiersAggregator->push(cv::Rect(personRect));
+            }
+            personRects.clear();
+        }
+
+        // Run DetectionsProcessor for remaining persons
+        if (!personRects.empty()) {
+            tryPush(context.detectionsProcessorsContext.reidTasksWorker,
+                    std::make_shared<DetectionsProcessor>(sharedVideoFrame, std::move(classifiersAggregator), std::move(personRects)));
+        }
     }
 }
 

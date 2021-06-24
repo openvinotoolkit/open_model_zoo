@@ -18,20 +18,20 @@ description: >-
 task_type: machine_translation
 files:
   - name: FP32/machine-translation-nar-de-en-0002.xml
-    size: 875459
-    sha256: 0d24a054ede17308962752ea0b095d245b250b79a062ba6b9db2cede6a9367e7
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/machine-translation-nar-de-en-0002/FP32/machine-translation-nar-de-en-0002.xml
+    size: 912660
+    sha256: 05d22652a80cdd2c7a0af70af1a1f34baab9fc23aa38048157a92a0edc484eb2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-de-en-0002/FP32/machine-translation-nar-de-en-0002.xml
   - name: FP32/machine-translation-nar-de-en-0002.bin
-    size: 284547332
-    sha256: 08d670010c6a9aaaf1fed2575285d69baba765ca7f96128b3806cb796b2083b1
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/machine-translation-nar-de-en-0002/FP32/machine-translation-nar-de-en-0002.bin
+    size: 284547188
+    sha256: 04e5d748cfac36de86fd04b2b2fd290957d61b5162c03e88207e61bf75d42daf
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-de-en-0002/FP32/machine-translation-nar-de-en-0002.bin
   - name: FP16/machine-translation-nar-de-en-0002.xml
-    size: 875108
-    sha256: 981c6c5c411f92e8038c720970ea1795a046935c51b554fc7e34e23b533eb2d6
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/machine-translation-nar-de-en-0002/FP16/machine-translation-nar-de-en-0002.xml
+    size: 912717
+    sha256: 5d2eea704ac724dd5e654101a25368a826dc890ea35c93802bdc4d7e202c452f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-de-en-0002/FP16/machine-translation-nar-de-en-0002.xml
   - name: FP16/machine-translation-nar-de-en-0002.bin
-    size: 142274526
-    sha256: 49a4a85846295f836718285908782c343be911df6b596f92a623f962ec592541
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/machine-translation-nar-de-en-0002/FP16/machine-translation-nar-de-en-0002.bin
+    size: 142274522
+    sha256: c37f6074d11e4d84a94f01a0e9a82896cef790922c1fb46521ce59baafb95073
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-de-en-0002/FP16/machine-translation-nar-de-en-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

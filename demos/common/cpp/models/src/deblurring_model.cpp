@@ -29,7 +29,6 @@ DeblurringModel::DeblurringModel(const std::string& modelFileName, const cv::Siz
 void DeblurringModel::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    changeInputSize(cnnNetwork);
 
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     if (inputShapes.size() != 1)
@@ -52,6 +51,8 @@ void DeblurringModel::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
     const SizeVector& outSizeVector = data.getTensorDesc().getDims();
     if (outSizeVector.size() != 4 || outSizeVector[0] != 1 || outSizeVector[1] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's output is expected");
+
+    changeInputSize(cnnNetwork);
 }
 
 void DeblurringModel::changeInputSize(CNNNetwork& cnnNetwork) {
