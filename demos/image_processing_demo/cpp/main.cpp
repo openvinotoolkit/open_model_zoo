@@ -115,9 +115,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-
-    slog::info << "Parsing input parameters" << slog::endl;
-
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
     }
@@ -148,9 +145,7 @@ std::unique_ptr<ImageModel> getModel(const cv::Size& frameSize, const std::strin
 
 int main(int argc, char *argv[]) {
     try {
-        PerformanceMetrics metrics;
-
-        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+        PerformanceMetrics metrics, renderMetrics;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -158,7 +153,6 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        slog::info << "Reading input" << slog::endl;
         auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat curr_frame;
 
@@ -169,6 +163,7 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
+        slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
         InferenceEngine::Core core;
         std::unique_ptr<ImageModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at);
         AsyncPipeline pipeline(std::move(model),
@@ -193,6 +188,8 @@ int main(int argc, char *argv[]) {
         if (cap->getType() == "IMAGE" && !FLAGS_loop && !FLAGS_no_show) {
             pipeline.waitForTotalCompletion();
             result = pipeline.getResult();
+            metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp);
+            auto renderingStart = std::chrono::steady_clock::now();
             if (found == std::string::npos) {
                 outputResolution = result->asRef<ImageResult>().resultImage.size();
                 cv::Size viewSize = view.getSize();
@@ -209,12 +206,29 @@ int main(int argc, char *argv[]) {
             outputResolution = outputTransform.computeResolution();
 
             view.renderResultData(result->asRef<ImageResult>(), outputResolution);
+            renderMetrics.update(renderingStart);
             auto key = 1;
             while (!(27 == key || 'q' == key || 'Q' == key)) {
                 view.show();
                 key = cv::waitKey(1);
                 view.handleKey(key);
             }
+            //// --------------------------- Report metrics -------------------------------------------------------
+            slog::info << slog::endl << "Metric reports:" << slog::endl;
+            metrics.printTotal();
+            slog::info << slog::endl << "Avg time:\n";
+            slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
+                cap->getMetrics().getTotal().latency << " ms\n";
+            slog::info << "  * Preprocessing:\t" << std::fixed << std::setprecision(2) <<
+                pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
+            slog::info << "  * Inference:\t\t" << std::fixed << std::setprecision(2) <<
+                pipeline.getInferenceMetircs().getTotal().latency << " ms\n";
+            slog::info << "  * Postprocessing:\t" << std::fixed << std::setprecision(2) <<
+                pipeline.getPostprocessMetrics().getTotal().latency << " ms\n";
+            slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
+                renderMetrics.getTotal().latency << " ms" << slog::endl;
+
+            slog::info << slog::endl << presenter.reportMeans() << slog::endl;
             return 0;
         }
 
@@ -240,6 +254,7 @@ int main(int argc, char *argv[]) {
             //--- If you need just plain data without rendering - cast result's underlying pointer to ImageResult*
             //    and use your own processing instead of calling renderResultData().
             while ((result = pipeline.getResult()) && keepRunning) {
+                auto renderingStart = std::chrono::steady_clock::now();
                 if (framesProcessed == 0) {
                     if (found == std::string::npos) {
                         outputResolution = result->asRef<ImageResult>().resultImage.size();
@@ -269,6 +284,7 @@ int main(int argc, char *argv[]) {
                 cv::Mat outFrame = view.renderResultData(result->asRef<ImageResult>(), outputResolution);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
+                renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
@@ -343,8 +359,19 @@ int main(int argc, char *argv[]) {
         //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << slog::endl << "Metric reports:" << slog::endl;
         metrics.printTotal();
+        slog::info << slog::endl << "Avg time:\n";
+        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
+            cap->getMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Preprocessing:\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Inference:\t\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getInferenceMetircs().getTotal().latency << " ms\n";
+        slog::info << "  * Postprocessing:\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getPostprocessMetrics().getTotal().latency << " ms\n";
+        slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
+            renderMetrics.getTotal().latency << " ms" << slog::endl;
 
-        slog::info << presenter.reportMeans() << slog::endl;
+        slog::info << slog::endl << presenter.reportMeans() << slog::endl;
 
     }
     catch (const std::exception& error) {

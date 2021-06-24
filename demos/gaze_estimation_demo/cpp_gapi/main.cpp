@@ -187,7 +187,6 @@ int main(int argc, char *argv[]) {
             const double aspectRatioThreshold = 0.01;
 
             if (std::fabs(imageAspectRatio - networkAspectRatio) > aspectRatioThreshold) {
-                std::cout << "Face Detection network is reshaped" << std::endl;
                 layerDims[3] = static_cast<unsigned long>(layerDims[2] * imageAspectRatio);
                 face_net.cfgInputReshape(layerName, layerDims);
             }
@@ -297,7 +296,7 @@ int main(int argc, char *argv[]) {
             /** Print logs **/
             if (FLAGS_r) {
                 for (auto& inferenceResult : inferenceResults) {
-                    std::cout << inferenceResult << std::endl;
+                    slog::info << inferenceResult << slog::endl;
                 }
             }
 
@@ -334,7 +333,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        std::cout << presenter.reportMeans() << '\n';
+        slog::info << slog::endl << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -344,6 +343,5 @@ int main(int argc, char *argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-    slog::info << "Execution successful" << slog::endl;
     return 0;
 }

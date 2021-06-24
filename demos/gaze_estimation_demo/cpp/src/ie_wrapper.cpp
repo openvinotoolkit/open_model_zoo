@@ -64,7 +64,7 @@ void IEWrapper::setExecPart() {
     }
 
     slog::info << "  * Number of inference requests is set to " << 1 << ".\n";
-    if (devices.find("CPU") != devices.end() || devices.find("auto") != devices.end()
+    if (devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end()
         || devices.find("") != devices.end()) {
         slog::info << "  * Number of threads " << "is set to "
             << executableNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>() << ".\n";
