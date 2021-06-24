@@ -245,10 +245,9 @@ class YoloV4(YOLO):
 
         output_info = {}
         for i, (name, layer) in enumerate(outputs):
-            if name.startswith('conv'):
-                shape = layer.shape
-                yolo_params = self.Params(num, shape[2:4], anchors, masks[len(output_info)])
-                output_info[name] = (shape, yolo_params)
+            shape = layer.shape
+            yolo_params = self.Params(num, shape[2:4], anchors, masks[len(output_info)])
+            output_info[name] = (shape, yolo_params)
         return output_info
 
     @staticmethod
