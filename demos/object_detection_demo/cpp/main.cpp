@@ -247,7 +247,7 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
         outputTransform.scaleRect(obj);
         std::ostringstream conf;
         conf << ":" << std::fixed << std::setprecision(1) << obj.confidence * 100 << '%';
-        auto color = palette[obj.labelID];
+        const auto& color = palette[obj.labelID];
         cv::putText(outputImg, obj.label + conf.str(),
             cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 230, 230, 230 }, 3);
         cv::putText(outputImg, obj.label + conf.str(),
@@ -444,7 +444,7 @@ int main(int argc, char *argv[]) {
         slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
             renderMetrics.getTotal().latency << " ms" << slog::endl;
 
-        slog::info << presenter.reportMeans() << slog::endl;
+        slog::info << slog::endl << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
