@@ -83,6 +83,7 @@ Common model options:
   -c COLORS, --colors COLORS
                         Optional. Path to a text file containing colors for
                         classes.
+  --labels LABELS       Optional. Labels mapping file.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
@@ -111,6 +112,10 @@ Input/output options:
                         Input frame size used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+
+Debug options:
+  -r, --raw_output_message
+                        Optional. Output inference results as mask histogram.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

@@ -120,6 +120,7 @@ def build_argparser():
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('-c', '--colors', type=Path,
                                    help='Optional. Path to a text file containing colors for classes.')
+    common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
@@ -147,14 +148,29 @@ def build_argparser():
                               'Input frame size used by default.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
+
+    debug_args = parser.add_argument_group('Debug options')
+    debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results as mask histogram.',
+                            default=False, action='store_true')
     return parser
 
 
 def get_model(ie, args):
     if args.architecture_type == 'segmentation':
-        return SegmentationModel(ie, args.model), SegmentationVisualizer(args.colors)
+        return SegmentationModel(ie, args.model, labels=args.labels), SegmentationVisualizer(args.colors)
     if args.architecture_type == 'salient_object_detection':
-        return SalientObjectDetectionModel(ie, args.model), SaliencyMapVisualizer()
+        return SalientObjectDetectionModel(ie, args.model, labels=args.labels), SaliencyMapVisualizer()
+
+
+def print_raw_results(mask, labels=None):
+    log.info(' Class ID | Pixels | Percentage ')
+    max_classes = int(np.max(mask)) + 1 # We use +1 for only background case
+    histogram = cv2.calcHist([np.expand_dims(mask, axis=-1)], [0], None, [max_classes], [0, max_classes])
+    all = np.product(mask.shape)
+    for id, val in enumerate(histogram[:, 0]):
+        if val > 0:
+            label = labels[id] if labels and len(labels) >= id else '#{}'.format(id)
+            log.info('{:^9} | {:6d} | {:5.2f}% '.format(label, int(val), val / all * 100))
 
 
 def main():
@@ -217,6 +233,8 @@ def main():
         results = pipeline.get_result(next_frame_id_to_show)
         if results:
             objects, frame_meta = results
+            if args.raw_output_message:
+                print_raw_results(objects, model.labels)
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
             frame = visualizer.overlay_masks(frame, objects, output_transform)
@@ -241,6 +259,8 @@ def main():
         while results is None:
             results = pipeline.get_result(next_frame_id_to_show)
         objects, frame_meta = results
+        if args.raw_output_message:
+            print_raw_results(objects, model.labels)
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
