@@ -12,6 +12,8 @@
 #include <list>
 #include <memory>
 
+#include <ie_version.hpp>
+
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 
@@ -297,8 +299,6 @@ void setInput(cv::GStreamingCompiled stream, const std::string& input ) {
 int main(int argc, char *argv[]) {
     try {
         // ------------------------------ Parsing and validating of input arguments --------------------------
-
-        slog::info << "Parsing input parameters" << slog::endl;
         gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
         if (FLAGS_h) {
             showUsage();
@@ -311,12 +311,7 @@ int main(int argc, char *argv[]) {
         if (FLAGS_m.empty())
             throw std::logic_error("Parameter -m is not set");
 
-        std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press any key";
-        }
-        std::cout << std::endl;
-
+        slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
         cv::GComputation pipeline([=]() {
                 cv::GMat in;
 
@@ -363,31 +358,35 @@ int main(int argc, char *argv[]) {
             fileNameNoExt(FLAGS_m) + ".bin", // path to weights
             FLAGS_d                          // device to use
         };
+        slog::info << "Loaded model " << FLAGS_m << " to " << FLAGS_d << " device" << slog::endl;
 
         auto age_net = cv::gapi::ie::Params<AgeGender> {
             FLAGS_m_ag,                         // path to model
             fileNameNoExt(FLAGS_m_ag) + ".bin", // path to weights
             FLAGS_d_ag                          // device to use
         }.cfgOutputLayers({ "age_conv3", "prob" });
-
+        slog::info << "Loaded model " << FLAGS_m_ag << " to " << FLAGS_d_ag << " device" << slog::endl;
 
         auto hp_net = cv::gapi::ie::Params<HeadPose> {
             FLAGS_m_hp,                         // path to model
             fileNameNoExt(FLAGS_m_hp) + ".bin", // path to weights
             FLAGS_d_hp                          // device to use
         }.cfgOutputLayers({ "angle_y_fc", "angle_p_fc", "angle_r_fc" });
+        slog::info << "Loaded model " << FLAGS_m_hp << " to " << FLAGS_d_hp << " device" << slog::endl;
 
         auto lm_net = cv::gapi::ie::Params<FacialLandmark> {
             FLAGS_m_lm,                        // path to model
             fileNameNoExt(FLAGS_m_lm) + ".bin",// path to weights
             FLAGS_d_lm                         // device to use
         }.cfgOutputLayers({ "align_fc3" });
+        slog::info << "Loaded model " << FLAGS_m_lm << " to " << FLAGS_d_lm << " device" << slog::endl;
 
         auto emo_net = cv::gapi::ie::Params<Emotions> {
             FLAGS_m_em,                         // path to model
             fileNameNoExt(FLAGS_m_em) + ".bin", // path to weights
             FLAGS_d_em                          // device to use
         };
+        slog::info << "Loaded model " << FLAGS_m_em << " to " << FLAGS_d_em << " device" << slog::endl;
 
         // Form a kernel package (including an OpenCV-based implementation of our
         // post-processing) and a network package (holding our three networks).
@@ -425,12 +424,11 @@ int main(int argc, char *argv[]) {
         size_t id = 0;
         cv::VideoWriter videoWriter;
 
-        const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
+        const cv::Point THROUGHPUT_METRIC_POSITION{10, 30};
         std::unique_ptr<Presenter> presenter;
 
         Timer timer;
         do {
-            slog::info << "Setting media source" << slog::endl;
             try {
                 setInput(stream, FLAGS_i);
             } catch (const std::exception& error) {
@@ -439,7 +437,6 @@ int main(int argc, char *argv[]) {
                     error.what() << std::endl;
                 throw std::invalid_argument(msg.str());
             }
-            slog::info << "Start inference " << slog::endl;
 
             timer.start("total");
             stream.start();
@@ -509,10 +506,13 @@ int main(int argc, char *argv[]) {
                 //  Visualizing results
                 if (!FLAGS_no_show || !FLAGS_o.empty()) {
                     out.str("");
-                    out << "Total image throughput: " << std::fixed << std::setprecision(2)
-                        << 1000.f / (timer["total"].getSmoothedDuration()) << " fps";
-                    cv::putText(frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_TRIPLEX, 1,
-                                cv::Scalar(255, 0, 0), 2);
+                    out << "FPS: " << std::fixed << std::setprecision(1)
+                        << 1000.0 / (timer["total"].getSmoothedDuration());
+
+                    cv::putText(frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_COMPLEX, 0.65,
+                        cv::Scalar(230, 230, 230), 3);
+                    cv::putText(frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_COMPLEX, 0.65,
+                        cv::Scalar(255, 0, 0), 2);
 
                     // drawing faces
                     visualizer->draw(frame, faces);
@@ -539,13 +539,12 @@ int main(int argc, char *argv[]) {
             }
             timer.finish("total");
 
-            slog::info << "Number of processed frames: " << framesCounter << slog::endl;
-            slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
-
-            std::cout << presenter->reportMeans() << '\n';
+            //// --------------------------- Report metrics -------------------------------------------------------
+            slog::info << slog::endl << "Metric reports:\n";
+            slog::info << "  * Number of processed frames: " << framesCounter << "\n";
+            slog::info << "  * FPS: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << slog::endl;
+            slog::info << slog::endl << '\n' << presenter->reportMeans() << slog::endl;
         } while (FLAGS_loop);
-
-        slog::info << "No more frames to process!" << slog::endl;
 
         cv::destroyAllWindows();
     }

@@ -196,28 +196,28 @@ int main(int argc, char *argv[]) {
             fileNameNoExt(FLAGS_m_hp) + ".bin",       // path to weights
             FLAGS_d_hp,                               // device specifier
         }.cfgOutputLayers({"angle_y_fc", "angle_p_fc", "angle_r_fc"});
-        slog::info << slog::endl << "Loaded model " << FLAGS_m_hp << " to " << FLAGS_d_hp << " device.\n";
+        slog::info << "Loaded model " << FLAGS_m_hp << " to " << FLAGS_d_hp << " device." << slog::endl;
 
         auto landmarks_net = cv::gapi::ie::Params<nets::Landmarks> {
             FLAGS_m_lm,                               // path to topology IR
             fileNameNoExt(FLAGS_m_lm) + ".bin",       // path to weights
             FLAGS_d_lm,                               // device specifier
         };
-        slog::info << slog::endl << "Loaded model " << FLAGS_m_lm << " to " << FLAGS_d_lm << " device.\n";
+        slog::info << "Loaded model " << FLAGS_m_lm << " to " << FLAGS_d_lm << " device." << slog::endl;
 
         auto gaze_net = cv::gapi::ie::Params<nets::Gaze> {
             FLAGS_m,                                  // path to topology IR
             fileNameNoExt(FLAGS_m) + ".bin",          // path to weights
             FLAGS_d,                                  // device specifier
         }.cfgInputLayers({"left_eye_image", "right_eye_image", "head_pose_angles"});
-        slog::info << slog::endl << "Loaded model " << FLAGS_m << " to " << FLAGS_d << " device.\n";
+        slog::info << "Loaded model " << FLAGS_m << " to " << FLAGS_d << " device." << slog::endl;
 
         auto eyes_net = cv::gapi::ie::Params<nets::Eyes> {
             FLAGS_m_es,                               // path to topology IR
             fileNameNoExt(FLAGS_m_es) + ".bin",       // path to weights
             FLAGS_d_es,                               // device specifier
         };
-        slog::info << slog::endl << "Loaded model " << FLAGS_m_es << " to " << FLAGS_d_es << " device.\n";
+        slog::info << "Loaded model " << FLAGS_m_es << " to " << FLAGS_d_es << " device." << slog::endl;
         /** Custom kernels **/
         auto kernels = custom::kernels();
         auto networks = cv::gapi::networks(face_net, head_net, landmarks_net, gaze_net, eyes_net);
