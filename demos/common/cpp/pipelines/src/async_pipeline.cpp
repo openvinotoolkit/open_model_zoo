@@ -38,7 +38,8 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
     }
 
     slog::info << "Number of inference requests is set to " << nireq << "." << slog::endl;
-    if (cnnConfig.devices.find("CPU") != cnnConfig.devices.end()) {
+    if (cnnConfig.devices.find("CPU") != cnnConfig.devices.end() || cnnConfig.devices.find("auto") != cnnConfig.devices.end()
+        || cnnConfig.devices.find("") != cnnConfig.devices.end()) {
         slog::info << "Number of threads " << "is set to "
             << execNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>() << "." << slog::endl;
     }
