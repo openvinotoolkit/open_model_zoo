@@ -45,7 +45,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -67,7 +66,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         // ------------------------------ Parsing and validating of input arguments --------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -75,7 +73,7 @@ int main(int argc, char *argv[]) {
         }
 
         // --------------------------- 1. Loading Inference Engine -----------------------------
-
+        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
         Core ie;
 
         std::set<std::string> loadedDevices;
@@ -106,8 +104,6 @@ int main(int argc, char *argv[]) {
             if (loadedDevices.find(deviceName) != loadedDevices.end()) {
                 continue;
             }
-            slog::info << "Loading device " << deviceName << slog::endl;
-            slog::info << printable(ie.GetVersions(deviceName)) << slog::endl;
 
             /** Loading extensions for the CPU device **/
             if ((deviceName.find("CPU") != std::string::npos)) {
@@ -158,7 +154,7 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Can't read an image from the input");
         }
 
-        const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
+        const cv::Point THROUGHPUT_METRIC_POSITION{10, 30};
         Presenter presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, {frame.cols / 4, 60});
 
         Visualizer visualizer{frame.size()};
@@ -178,12 +174,6 @@ int main(int argc, char *argv[]) {
         faceDetector.submitRequest();
 
         cv::Mat next_frame = cap->read();
-
-        std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press Q or Esc";
-        }
-        std::cout << std::endl;
 
         while (frame.data) {
             timer.start("total");
@@ -312,9 +302,12 @@ int main(int argc, char *argv[]) {
 
             timer.finish("total");
             out.str("");
-            out << "Total image throughput: " << std::fixed << std::setprecision(1)
-                << 1000.0 / (timer["total"].getSmoothedDuration()) << " fps";
-            cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_TRIPLEX, 1,
+            out << "FPS: " << std::fixed << std::setprecision(1)
+                << 1000.0 / (timer["total"].getSmoothedDuration());
+
+            cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_COMPLEX, 0.65,
+                cv::Scalar(230, 230, 230), 3);
+            cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_COMPLEX, 0.65,
                         cv::Scalar(255, 0, 0), 2);
 
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesCounter <= FLAGS_limit)) {
@@ -332,9 +325,6 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        slog::info << "Number of processed frames: " << framesCounter << slog::endl;
-        slog::info << "Total image throughput: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << " fps" << slog::endl;
-
         // Showing performance results
         if (FLAGS_pc) {
             faceDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d));
@@ -345,7 +335,14 @@ int main(int argc, char *argv[]) {
             antispoofingClassifier.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_am));
         }
 
-        std::cout << presenter.reportMeans() << '\n';
+        //// --------------------------- Report metrics -------------------------------------------------------
+        slog::info << slog::endl << "Metric reports:\n";
+        slog::info << "  * Number of processed frames: " << framesCounter << "\n";
+        slog::info << "  * FPS: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << slog::endl;
+        slog::info << slog::endl << "Avg time:\n";
+        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
+            cap->getMetrics().getTotal().latency << " ms\n";
+        slog::info << slog::endl << '\n' << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -356,6 +353,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << "Execution successful" << slog::endl;
     return 0;
 }

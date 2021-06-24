@@ -19,6 +19,7 @@
 #include <inference_engine.hpp>
 #include <ngraph/ngraph.hpp>
 
+#include <utils/args_helper.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 
@@ -118,16 +119,14 @@ void FaceDetection::enqueue(const cv::Mat &frame) {
 }
 
 CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
-    slog::info << "Loading network files for Face Detection" << slog::endl;
     /** Read network model **/
     auto network = ie.ReadNetwork(pathToModel);
     /** Set batch size to 1 **/
-    slog::info << "Batch size is set to " << maxBatch << slog::endl;
     network.setBatchSize(maxBatch);
+    slog::info << slog::endl << "Batch size is set to " << network.getBatchSize() << " for Face Detection network" << slog::endl;
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check inputs -------------------------------------------------------------
-    slog::info << "Checking Face Detection network inputs" << slog::endl;
     InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Face Detection network should have only one input");
@@ -142,7 +141,6 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
-    slog::info << "Checking Face Detection network outputs" << slog::endl;
     OutputsDataMap outputInfo(network.getOutputsInfo());
     if (outputInfo.size() == 1) {
         DataPtr& _output = outputInfo.begin()->second;
@@ -176,7 +174,6 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
         }
     }
 
-    slog::info << "Loading Face Detection model to the " << deviceForInference << " device" << slog::endl;
     input = inputInfo.begin()->first;
     return network;
 }
@@ -334,16 +331,14 @@ float AntispoofingClassifier::operator[] (int idx) const {
 }
 
 CNNNetwork AntispoofingClassifier::read(const InferenceEngine::Core& ie) {
-    slog::info << "Loading network files for Antispoofing Classifier network" << slog::endl;
     // Read network
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size to be used.
     network.setBatchSize(maxBatch);
-    slog::info << "Batch size is set to " << network.getBatchSize() << " for Antispoofing Classifier network" << slog::endl;
+    slog::info << slog::endl << "Batch size is set to " << network.getBatchSize() << " for Antispoofing Classifier network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
     // Antispoofing Classifier network should have one input and one output
-    slog::info << "Checking Antispoofing Classifier network inputs" << slog::endl;
     InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Antispoofing Classifier network should have only one input");
@@ -354,7 +349,6 @@ CNNNetwork AntispoofingClassifier::read(const InferenceEngine::Core& ie) {
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
-    slog::info << "Checking Antispoofing Classifier network outputs" << slog::endl;
     OutputsDataMap outputInfo(network.getOutputsInfo());
     if (outputInfo.size() != 1) {
         throw std::logic_error("Antispoofing Classifier network should have one output layers");
@@ -365,7 +359,6 @@ CNNNetwork AntispoofingClassifier::read(const InferenceEngine::Core& ie) {
 
     prob_output = ptrProbOutput->getName();
 
-    slog::info << "Loading Antispoofing Classifier model to the " << deviceForInference << " plugin" << slog::endl;
     _enabled = true;
     return network;
 }
@@ -422,16 +415,14 @@ AgeGenderDetection::Result AgeGenderDetection::operator[] (int idx) const {
 }
 
 CNNNetwork AgeGenderDetection::read(const InferenceEngine::Core& ie) {
-    slog::info << "Loading network files for Age/Gender Recognition network" << slog::endl;
     // Read network
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size to be used.
     network.setBatchSize(maxBatch);
-    slog::info << "Batch size is set to " << network.getBatchSize() << " for Age/Gender Recognition network" << slog::endl;
+    slog::info << slog::endl << "Batch size is set to " << network.getBatchSize() << " for Age/Gender Recognition network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
     // Age/Gender Recognition network should have one input and two outputs
-    slog::info << "Checking Age/Gender Recognition network inputs" << slog::endl;
     InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Age/Gender Recognition network should have only one input");
@@ -442,7 +433,6 @@ CNNNetwork AgeGenderDetection::read(const InferenceEngine::Core& ie) {
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
-    slog::info << "Checking Age/Gender Recognition network outputs" << slog::endl;
     OutputsDataMap outputInfo(network.getOutputsInfo());
     if (outputInfo.size() != 2) {
         throw std::logic_error("Age/Gender Recognition network should have two output layers");
@@ -455,7 +445,6 @@ CNNNetwork AgeGenderDetection::read(const InferenceEngine::Core& ie) {
     outputAge = ptrAgeOutput->getName();
     outputGender = ptrGenderOutput->getName();
 
-    slog::info << "Loading Age/Gender Recognition model to the " << deviceForInference << " plugin" << slog::endl;
     _enabled = true;
     return network;
 }
@@ -518,15 +507,13 @@ HeadPoseDetection::Results HeadPoseDetection::operator[] (int idx) const {
 }
 
 CNNNetwork HeadPoseDetection::read(const InferenceEngine::Core& ie) {
-    slog::info << "Loading network files for Head Pose Estimation network" << slog::endl;
     // Read network model
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size
     network.setBatchSize(maxBatch);
-    slog::info << "Batch size is set to  " << network.getBatchSize() << " for Head Pose Estimation network" << slog::endl;
+    slog::info << slog::endl << "Batch size is set to  " << network.getBatchSize() << " for Head Pose Estimation network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
-    slog::info << "Checking Head Pose Estimation network inputs" << slog::endl;
     InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Head Pose Estimation network should have only one input");
@@ -537,7 +524,6 @@ CNNNetwork HeadPoseDetection::read(const InferenceEngine::Core& ie) {
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
-    slog::info << "Checking Head Pose Estimation network outputs" << slog::endl;
     OutputsDataMap outputInfo(network.getOutputsInfo());
     for (auto& output : outputInfo) {
         output.second->setPrecision(Precision::FP32);
@@ -547,8 +533,6 @@ CNNNetwork HeadPoseDetection::read(const InferenceEngine::Core& ie) {
             throw std::logic_error("There is no " + outName + " output in Head Pose Estimation network");
         }
     }
-
-    slog::info << "Loading Head Pose Estimation model to the " << deviceForInference << " plugin" << slog::endl;
 
     _enabled = true;
     return network;
@@ -630,17 +614,15 @@ std::map<std::string, float> EmotionsDetection::operator[] (int idx) const {
 }
 
 CNNNetwork EmotionsDetection::read(const InferenceEngine::Core& ie) {
-    slog::info << "Loading network files for Emotions Recognition" << slog::endl;
     // Read network model
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size
     network.setBatchSize(maxBatch);
-    slog::info << "Batch size is set to " << network.getBatchSize() << " for Emotions Recognition" << slog::endl;
+    slog::info << slog::endl << "Batch size is set to " << network.getBatchSize() << " for Emotions Recognition network" << slog::endl;
     // -----------------------------------------------------------------------------------------------------
 
     // Emotions Recognition network should have one input and one output.
     // ---------------------------Check inputs -------------------------------------------------------------
-    slog::info << "Checking Emotions Recognition network inputs" << slog::endl;
     InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Emotions Recognition network should have only one input");
@@ -651,7 +633,6 @@ CNNNetwork EmotionsDetection::read(const InferenceEngine::Core& ie) {
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
-    slog::info << "Checking Emotions Recognition network outputs" << slog::endl;
     InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
     if (outputInfo.size() != 1) {
         throw std::logic_error("Emotions Recognition network should have one output layer");
@@ -662,7 +643,6 @@ CNNNetwork EmotionsDetection::read(const InferenceEngine::Core& ie) {
 
     outputEmotions = outputInfo.begin()->first;
 
-    slog::info << "Loading Emotions Recognition model to the " << deviceForInference << " plugin" << slog::endl;
     _enabled = true;
     return network;
 }
@@ -734,15 +714,13 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
 }
 
 CNNNetwork FacialLandmarksDetection::read(const InferenceEngine::Core& ie) {
-    slog::info << "Loading network files for Facial Landmarks Estimation" << slog::endl;
     // Read network model
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size
     network.setBatchSize(maxBatch);
-    slog::info << "Batch size is set to  " << network.getBatchSize() << " for Facial Landmarks Estimation network" << slog::endl;
+    slog::info << slog::endl << "Batch size is set to  " << network.getBatchSize() << " for Facial Landmarks Estimation network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
-    slog::info << "Checking Facial Landmarks Estimation network inputs" << slog::endl;
     InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Facial Landmarks Estimation network should have only one input");
@@ -753,7 +731,6 @@ CNNNetwork FacialLandmarksDetection::read(const InferenceEngine::Core& ie) {
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
-    slog::info << "Checking Facial Landmarks Estimation network outputs" << slog::endl;
     OutputsDataMap outputInfo(network.getOutputsInfo());
     const std::string outName = outputInfo.begin()->first;
     if (outName != outputFacialLandmarksBlobName) {
@@ -767,9 +744,6 @@ CNNNetwork FacialLandmarksDetection::read(const InferenceEngine::Core& ie) {
         throw std::logic_error("Facial Landmarks Estimation network output layer should have 2 dimensions and 70 as"
                                " the last dimension");
     }
-
-    slog::info << "Loading Facial Landmarks Estimation model to the " << deviceForInference << " plugin"
-        << slog::endl;
 
     _enabled = true;
     return network;
@@ -790,6 +764,23 @@ void Load::into(InferenceEngine::Core & ie, const std::string & deviceName, bool
         }
 
         detector.net = ie.LoadNetwork(detector.read(ie), deviceName, config);
+
+        slog::info << "Loaded model " << detector.pathToModel << " to " << deviceName << " device.\n";
+        std::set<std::string> devices;
+        for (const std::string& device : parseDevices(deviceName)) {
+            devices.insert(device);
+        }
+
+        slog::info << "  * Number of inference requests is set to " << 1 << ".\n";
+        if (devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end()
+            || devices.find("") != devices.end()) {
+            slog::info << "  * Number of threads " << "is set to "
+                << detector.net.GetConfig("CPU_THREADS_NUM").as<std::string>() << ".\n";
+        }
+        for (const auto& device : devices) {
+            slog::info << "  * Number of streams is set to "
+                << detector.net.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device.\n";
+        }
     }
 }
 

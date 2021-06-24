@@ -207,12 +207,9 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
         out << "," << emotion.first;
     }
 
-    cv::putText(img,
-                out.str(),
-                cv::Point2f(static_cast<float>(f->_location.x), static_cast<float>(f->_location.y - 20)),
-                cv::FONT_HERSHEY_COMPLEX_SMALL,
-                1.5,
-                genderColor, 2);
+    auto textPos = cv::Point2f(static_cast<float>(f->_location.x), static_cast<float>(f->_location.y - 20));
+    cv::putText(img, out.str(), textPos, cv::FONT_HERSHEY_COMPLEX_SMALL, 1.5, { 230, 230, 230 }, 3);
+    cv::putText(img, out.str(), textPos, cv::FONT_HERSHEY_COMPLEX_SMALL, 1.5, genderColor, 2);
 
     if (f->isHeadPoseEnabled()) {
         cv::Point3f center(static_cast<float>(f->_location.x + f->_location.width / 2),
