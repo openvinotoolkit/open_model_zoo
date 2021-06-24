@@ -35,8 +35,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         return false;
     }
 
-    slog::info << "Parsing input parameters" << slog::endl;
-
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
     }
@@ -50,8 +48,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
-
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -64,7 +60,7 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------Load inference engine------------------------------------------------
-        slog::info << "Loading Inference Engine" << slog::endl;
+        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
         Core ie;
 
         if (!FLAGS_l.empty()) {
@@ -79,14 +75,9 @@ int main(int argc, char *argv[]) {
             slog::info << "GPU Extension loaded: " << FLAGS_c << slog::endl;
         }
 
-        /** Printing version **/
-        slog::info << "Device info: " << slog::endl;
-        slog::info << printable(ie.GetVersions(FLAGS_d)) << slog::endl;
-
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------Load network (Generated xml/bin files)-------------------------------------------
-        slog::info << "Loading network files" << slog::endl;
 
         /** Read network model **/
         auto network = ie.ReadNetwork(FLAGS_m);
@@ -96,7 +87,6 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // -----------------------------Prepare input blobs-----------------------------------------------------
-        slog::info << "Preparing input blobs" << slog::endl;
 
         /** Taking information about all topology inputs **/
         InputsDataMap inputInfo(network.getInputsInfo());
@@ -121,8 +111,6 @@ int main(int argc, char *argv[]) {
         size_t netInputHeight = getTensorHeight(inputDesc);
         size_t netInputWidth = getTensorWidth(inputDesc);
 
-        slog::info << "Network batch size is " << netBatchSize << slog::endl;
-
         /** Collect images **/
         std::vector<cv::Mat> images;
 
@@ -138,7 +126,6 @@ int main(int argc, char *argv[]) {
             if (inputIndex >= imagePaths.size()) {
                 inputIndex = 0;
             }
-            slog::info << "Prepare image " << imagePaths[inputIndex] << slog::endl;
 
             cv::Mat image = cv::imread(imagePaths[inputIndex], cv::IMREAD_COLOR);
 
@@ -154,8 +141,6 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Prepare output blobs------------------------------------------------------
-        slog::info << "Preparing output blobs" << slog::endl;
-
         InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
         for (auto & item : outputInfo) {
             item.second->setPrecision(Precision::FP32);
@@ -164,18 +149,15 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // -------------------------Load model to the device----------------------------------------------------
-        slog::info << "Loading model to the device" << slog::endl;
         auto executable_network = ie.LoadNetwork(network, FLAGS_d);
+        slog::info << "Loaded model " << FLAGS_m << " to " << FLAGS_d << " device." << slog::endl;
 
         // -------------------------Create Infer Request--------------------------------------------------------
-        slog::info << "Create infer request" << slog::endl;
         auto infer_request = executable_network.CreateInferRequest();
 
         // -----------------------------------------------------------------------------------------------------
 
         // -------------------------------Set input data--------------------------------------------------------
-        slog::info << "Setting input data to the blobs" << slog::endl;
-
         /** Iterate over all the input blobs **/
         for (const auto & inputInfoItem : inputInfo) {
             Blob::Ptr input = infer_request.GetBlob(inputInfoItem.first);
@@ -201,13 +183,10 @@ int main(int argc, char *argv[]) {
 
 
         // ----------------------------Do inference-------------------------------------------------------------
-        slog::info << "Start inference" << slog::endl;
         infer_request.Infer();
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Postprocess output blobs--------------------------------------------------
-        slog::info << "Processing output blobs" << slog::endl;
-
         const auto do_blob = infer_request.GetBlob(FLAGS_detection_output_name.c_str());
         LockedMemory<const void> doBlobMapped = as<MemoryBlob>(do_blob)->rmap();
         const auto do_data  = doBlobMapped.as<float*>();
@@ -240,6 +219,7 @@ int main(int argc, char *argv[]) {
         }
 
         /** Iterating over all boxes **/
+        slog::info << slog::endl;
         for (size_t box = 0; box < BOXES; ++box) {
             float* box_info = do_data + box * BOX_DESCRIPTION_SIZE;
             auto batch = static_cast<int>(box_info[0]);
@@ -278,6 +258,7 @@ int main(int argc, char *argv[]) {
                 cv::rectangle(output_images[batch], roi, cv::Scalar(0, 0, 1), 1);
             }
         }
+        slog::info << slog::endl;
         for (size_t i = 0; i < output_images.size(); i++) {
             std::string imgName = "out" + std::to_string(i) + ".png";
             cv::imwrite(imgName, output_images[i]);
@@ -294,8 +275,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << "Execution successful" << slog::endl;
-    slog::info << slog::endl << "This demo is an API example, for any performance measurements "
-                                "please use the dedicated benchmark_app tool from the openVINO toolkit" << slog::endl;
     return 0;
 }

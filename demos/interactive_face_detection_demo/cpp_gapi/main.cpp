@@ -557,6 +557,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << "Execution successful" << slog::endl;
     return 0;
 }
