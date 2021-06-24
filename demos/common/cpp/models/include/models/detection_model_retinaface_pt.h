@@ -64,13 +64,13 @@ protected:
 
     std::vector<ModelRetinaFacePT::Box> priors;
 
-    std::vector<uint32_t> filterByScore(const InferenceEngine::MemoryBlob::Ptr& rawData, const float confidenceThreshold);
-    std::vector<float> getFilteredScores(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<uint32_t>& indicies);
+    std::vector<size_t> filterByScore(const InferenceEngine::MemoryBlob::Ptr& rawData, const float confidenceThreshold);
+    std::vector<float> getFilteredScores(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<size_t>& indicies);
     std::vector<cv::Point2f> getFilteredLandmarks(const InferenceEngine::MemoryBlob::Ptr& rawData,
-        const std::vector<uint32_t>& indicies, int imgWidth, int imgHeight);
+        const std::vector<size_t>& indicies, int imgWidth, int imgHeight);
     std::vector<ModelRetinaFacePT::Box> generatePriorData();
     std::vector<ModelRetinaFacePT::Rect> getFilteredProposals(const InferenceEngine::MemoryBlob::Ptr& rawData,
-        const std::vector<uint32_t>& indicies, int imgWidth, int imgHeight);
+        const std::vector<size_t>& indicies, int imgWidth, int imgHeight);
 
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
 };

@@ -89,8 +89,8 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
 }
 
 
-std::vector<uint32_t> ModelRetinaFacePT::filterByScore(const InferenceEngine::MemoryBlob::Ptr& rawData, const float confidenceThreshold) {
-    std::vector<uint32_t> indicies;
+std::vector<size_t> ModelRetinaFacePT::filterByScore(const InferenceEngine::MemoryBlob::Ptr& rawData, const float confidenceThreshold) {
+    std::vector<size_t> indicies;
     auto desc = rawData->getTensorDesc();
     auto sz = desc.getDims();
     InferenceEngine::LockedMemory<const void> outputMapped = rawData->rmap();
@@ -107,7 +107,7 @@ std::vector<uint32_t> ModelRetinaFacePT::filterByScore(const InferenceEngine::Me
     return indicies;
 }
 
-std::vector<float> ModelRetinaFacePT::getFilteredScores(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<uint32_t>& indicies) {
+std::vector<float> ModelRetinaFacePT::getFilteredScores(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<size_t>& indicies) {
     InferenceEngine::LockedMemory<const void> outputMapped = rawData->rmap();
     const float *memPtr = outputMapped.as<float*>();
     auto desc = rawData->getTensorDesc();
@@ -122,7 +122,7 @@ std::vector<float> ModelRetinaFacePT::getFilteredScores(const InferenceEngine::M
     return scores;
 }
 
-std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<uint32_t>& indicies, int imgWidth, int imgHeight) {
+std::vector<cv::Point2f> ModelRetinaFacePT::getFilteredLandmarks(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<size_t>& indicies, int imgWidth, int imgHeight) {
     InferenceEngine::LockedMemory<const void> outputMapped = rawData->rmap();
     const float *memPtr = outputMapped.as<float*>();
     auto desc = rawData->getTensorDesc();
@@ -165,7 +165,7 @@ std::vector<ModelRetinaFacePT::Box> ModelRetinaFacePT::generatePriorData() {
     return anchors;
 }
 
-std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<uint32_t>& indicies,int imgWidth, int imgHeight) {
+std::vector<ModelRetinaFacePT::Rect> ModelRetinaFacePT::getFilteredProposals(const InferenceEngine::MemoryBlob::Ptr& rawData, const std::vector<size_t>& indicies,int imgWidth, int imgHeight) {
     std::vector<ModelRetinaFacePT::Rect> rects;
     rects.reserve(indicies.size());
 
