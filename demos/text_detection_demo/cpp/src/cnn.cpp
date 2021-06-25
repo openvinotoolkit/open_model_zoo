@@ -63,6 +63,7 @@ Cnn::Cnn(const std::string &model_path, Core & ie, const std::string & deviceNam
 
     // --------------------------- Loading model to the device -------------------------------------------
     ExecutableNetwork executable_network = ie.LoadNetwork(network, deviceName);
+    printExecNetworkInfo(executable_network, model_path, deviceName);
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Creating infer request ------------------------------------------------
@@ -148,6 +149,7 @@ EncoderDecoderCNN::EncoderDecoderCNN(std::string model_path,
 
     // --------------------------- Loading model to the device -------------------------------------------
     ExecutableNetwork executable_network_decoder = ie.LoadNetwork(network_decoder, deviceName);
+    printExecNetworkInfo(executable_network_decoder, model_path, deviceName);
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Creating infer request ------------------------------------------------
