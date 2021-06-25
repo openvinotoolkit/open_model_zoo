@@ -40,7 +40,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-
     if (FLAGS_m.empty()) {
         throw std::logic_error("Parameter -m is not set");
     }
@@ -390,14 +389,14 @@ void ResAggregator::process() {
                 case BboxAndDescr::ObjectType::NONE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {255, 255, 0},  4);
                                                      break;
                 case BboxAndDescr::ObjectType::VEHICLE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
-                                                         cv::putText(sharedVideoFrame->frame, bboxAndDescr.descr,
+                                                        putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
                                                                      cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y + 35},
-                                                                     cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 4);
+                                                                     cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 2);
                                                          break;
                 case BboxAndDescr::ObjectType::PLATE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 0, 255},  4);
-                                                      cv::putText(sharedVideoFrame->frame, bboxAndDescr.descr,
+                                                      putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
                                                                   cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y - 10},
-                                                                  cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 0, 255), 4);
+                                                                  cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 0, 255), 2);
                                                       break;
                 default: throw std::exception();  // must never happen
                           break;
@@ -628,8 +627,6 @@ void Reader::process() {
 
 int main(int argc, char* argv[]) {
     try {
-        slog::info << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << slog::endl;
-
         // ------------------------------ Parsing and validation of input args ---------------------------------
         try {
             if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -694,6 +691,7 @@ int main(int argc, char* argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load Inference Engine -------------------------------------
+        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
         InferenceEngine::Core ie;
 
         std::set<std::string> devices;
@@ -708,11 +706,6 @@ int main(int argc, char* argv[]) {
         std::map<std::string, uint32_t> device_nstreams = parseValuePerDevice(devices, FLAGS_nstreams);
 
         for (const std::string& device : devices) {
-            slog::info << "Loading device " << device << slog::endl;
-
-            /** Printing device version **/
-            slog::info << printable(ie.GetVersions(device)) << slog::endl;
-
             if ("CPU" == device) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -763,22 +756,23 @@ int main(int argc, char* argv[]) {
 
         // -----------------------------------------------------------------------------------------------------
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
-        slog::info << "Loading detection model to the "<< FLAGS_d << " plugin" << slog::endl;
         Detector detector(ie, FLAGS_d, FLAGS_m,
             {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d, "Detect"));
+        slog::info << "  * Number of inference requests is set to " << nireq << slog::endl;
+
         VehicleAttributesClassifier vehicleAttributesClassifier;
         std::size_t nclassifiersireq{0};
         Lpr lpr;
         std::size_t nrecognizersireq{0};
         if (!FLAGS_m_va.empty()) {
-            slog::info << "Loading Vehicle Attribs model to the "<< FLAGS_d_va << " plugin" << slog::endl;
             vehicleAttributesClassifier = VehicleAttributesClassifier(ie, FLAGS_d_va, FLAGS_m_va, FLAGS_auto_resize, makeTagConfig(FLAGS_d_va, "Attr"));
             nclassifiersireq = nireq * 3;
+            slog::info << "  * Number of inference requests is set to " << nclassifiersireq << slog::endl;
         }
         if (!FLAGS_m_lpr.empty()) {
-            slog::info << "Loading Licence Plate Recognition (LPR) model to the "<< FLAGS_d_lpr << " plugin" << slog::endl;
             lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));
             nrecognizersireq = nireq * 3;
+            slog::info << "  * Number of inference requests is set to " << nrecognizersireq << slog::endl;
         }
         bool isVideo = imageSourcess.empty() ? true : false;
         int pause = imageSourcess.empty() ? 1 : 0;
@@ -792,19 +786,6 @@ int main(int argc, char* argv[]) {
         size_t found = FLAGS_display_resolution.find("x");
         cv::Size displayResolution = cv::Size{std::stoi(FLAGS_display_resolution.substr(0, found)),
                                               std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()))};
-
-        slog::info << "Number of InferRequests: " << nireq << " (detection), " << nclassifiersireq << " (classification), " << nrecognizersireq << " (recognition)" << slog::endl;
-        std::ostringstream device_ss;
-        for (const auto& nstreams : device_nstreams) {
-            if (!device_ss.str().empty()) {
-                device_ss << ", ";
-            }
-            device_ss << nstreams.second << " streams for " << nstreams.first;
-        }
-        if (!device_ss.str().empty()) {
-            slog::info << device_ss.str() << slog::endl;
-        }
-        slog::info << "Display resolution: " << FLAGS_display_resolution << slog::endl;
 
         Context context{inputChannels,
                         detector,
@@ -828,12 +809,6 @@ int main(int argc, char* argv[]) {
                 VideoFrame::Ptr sharedVideoFrame = std::make_shared<ReborningVideoFrame>(context, sourceID, i);
                 worker->push(std::make_shared<Reader>(sharedVideoFrame));
             }
-        }
-        slog::info << "Number of allocated frames: " << FLAGS_n_iqs * (inputChannels.size()) << slog::endl;
-        if (FLAGS_auto_resize) {
-            slog::info << "Resizable input with support of ROI crop and auto resize is enabled" << slog::endl;
-        } else {
-            slog::info << "Resizable input with support of ROI crop and auto resize is disabled" << slog::endl;
         }
 
         // Running
@@ -863,14 +838,15 @@ int main(int argc, char* argv[]) {
         if (0 != frameCounter) {
             const float fps = static_cast<float>(frameCounter) / std::chrono::duration_cast<Sec>(t1 - context.t0).count()
                 / context.readersContext.inputChannels.size();
-            std::cout << std::fixed << std::setprecision(1) << fps << "FPS for (" << frameCounter << " / "
-                 << inputChannels.size() << ") frames\n";
             const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
                 / (frameCounter * context.nireq) * 100;
-            std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
-        }
 
-        std::cout << context.drawersContext.presenter.reportMeans() << '\n';
+            //// --------------------------- Report metrics -------------------------------------------------------
+            slog::info << slog::endl << "Metric reports:\n" ;
+            slog::info << "  * FPS: " << std::fixed << std::setprecision(1) << fps << '\n';
+            slog::info << "  * Detection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
+            slog::info << '\n' << context.drawersContext.presenter.reportMeans() << slog::endl;
+        }
     } catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
         return 1;
@@ -878,6 +854,6 @@ int main(int argc, char* argv[]) {
         std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
         return 1;
     }
-    slog::info << "Execution successful" << slog::endl;
+
     return 0;
 }

@@ -65,6 +65,8 @@ public:
         _output->setPrecision(InferenceEngine::Precision::FP32);
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
+        printExecNetworkInfo(net, xmlPath, deviceName);
+
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -159,6 +161,7 @@ public:
         outputNameForType = (it)->second->getName();  // type is the second output.
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
+        printExecNetworkInfo(net, FLAGS_m_va, deviceName);
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -262,6 +265,8 @@ public:
         }
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
+        printExecNetworkInfo(net, FLAGS_m_lpr, deviceName);
+
     }
 
     InferenceEngine::InferRequest createInferRequest() {

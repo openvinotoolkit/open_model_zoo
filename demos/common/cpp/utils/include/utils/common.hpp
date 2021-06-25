@@ -23,6 +23,8 @@
 #include <iostream>
 
 #include <inference_engine.hpp>
+#include "utils/slog.hpp"
+#include "utils/args_helper.hpp"
 
 #ifndef UNUSED
   #ifdef _WIN32
@@ -363,4 +365,23 @@ inline std::string fileNameNoExt(const std::string &filepath) {
     auto pos = filepath.rfind('.');
     if (pos == std::string::npos) return filepath;
     return filepath.substr(0, pos);
+}
+
+inline void printExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNetwork, const std::string& modelName,
+    const std::string& deviceName) {
+    slog::info << "Network " << modelName << " is loaded to " << deviceName << " device.\n";
+    std::set<std::string> devices;
+    for (const std::string& device : parseDevices(deviceName)) {
+        devices.insert(device);
+    }
+
+    if (devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end()
+        || devices.find("") != devices.end()) {
+        slog::info << "  * Number of threads " << "is set to "
+            << execNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>() << ".\n";
+    }
+    for (const auto& device : devices) {
+        slog::info << "  * Number of streams is set to "
+            << execNetwork.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device.\n";
+    }
 }
