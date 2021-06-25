@@ -333,7 +333,7 @@ int main(int argc, char* argv[])
         slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
             renderMetrics.getTotal().latency << " ms" << slog::endl;
 
-        slog::info << slog::endl << presenter.reportMeans() << slog::endl;
+        slog::info << '\n' << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

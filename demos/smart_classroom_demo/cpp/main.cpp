@@ -167,9 +167,9 @@ public:
     void DrawFPS(const float fps, const cv::Scalar& color) {
         if (enabled_ && !writer_.isOpened()) {
             cv::putText(frame_,
-                        std::to_string(static_cast<int>(fps)) + " fps",
-                        cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 1,
-                        color, 2, cv::LINE_AA);
+                std::to_string(static_cast<int>(fps)) + " fps",
+                cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 1,
+                color, 2, cv::LINE_AA);
         }
     }
 
@@ -523,8 +523,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         return false;
     }
 
-    slog::info << "Parsing input parameters" << slog::endl;
-
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
     }
@@ -540,7 +538,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 int main(int argc, char* argv[]) {
     try {
         /** This demo covers 4 certain topologies and cannot be generalized **/
-        slog::info << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << slog::endl;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -575,20 +572,16 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        slog::info << "Loading Inference Engine" << slog::endl;
+        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
         Core ie;
 
         std::vector<std::string> devices = {FLAGS_d_act, FLAGS_d_fd, FLAGS_d_lm,
                                             FLAGS_d_reid};
         std::set<std::string> loadedDevices;
 
-        slog::info << "Device info: " << slog::endl;
-
         for (const auto &device : devices) {
             if (loadedDevices.find(device) != loadedDevices.end())
                 continue;
-
-            slog::info << printable(ie.GetVersions(device)) << slog::endl;
 
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
@@ -984,12 +977,6 @@ int main(int argc, char* argv[]) {
         }
         sc_visualizer.Finalize();
 
-        slog::info << slog::endl;
-        if (work_num_frames > 0) {
-            const float mean_time_ms = work_time_ms / static_cast<float>(work_num_frames);
-            slog::info << "Mean FPS: " << 1e3f / mean_time_ms << slog::endl;
-        }
-        slog::info << "Frames processed: " << total_num_frames << slog::endl;
         if (FLAGS_pc) {
             std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, devices);
             face_detector->wait();
@@ -1042,7 +1029,15 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        std::cout << presenter.reportMeans() << '\n';
+        //// --------------------------- Report metrics -------------------------------------------------------
+        if (work_num_frames > 0) {
+            slog::info << slog::endl << "Metric reports:\n";
+            const float mean_time_ms = work_time_ms / static_cast<float>(work_num_frames);
+            slog::info << "  * FPS: " << 1e3f / mean_time_ms << "\n";
+            slog::info << "  * Frames processed: " << total_num_frames << slog::endl;
+        }
+
+        slog::info << '\n' << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -1052,8 +1047,6 @@ int main(int argc, char* argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-
-    slog::info << "Execution successful" << slog::endl;
 
     return 0;
 }
