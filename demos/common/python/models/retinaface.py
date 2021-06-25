@@ -20,7 +20,7 @@ import numpy as np
 from itertools import product as product
 
 from .model import Model
-from .utils import DetectionWithLandmarks, Detection, resize_image, nms
+from .utils import DetectionWithLandmarks, Detection, resize_image, nms, clip_detections
 
 
 class RetinaFace(Model):
@@ -62,7 +62,7 @@ class RetinaFace(Model):
         scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
 
         outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold, self.mask_threshold)
-        return outputs
+        return clip_detections(outputs, meta['original_shape'])
 
 
 class RetinaFacePostprocessor:

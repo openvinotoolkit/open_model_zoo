@@ -19,7 +19,7 @@ import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
 from .model import Model
-from .utils import Detection, load_labels
+from .utils import Detection, load_labels, clip_detections
 
 
 class CenterNet(Model):
@@ -89,7 +89,7 @@ class CenterNet(Model):
         center = np.array(meta['original_shape'][:2])/2.0
         dets = self._transform(filtered_detections, np.flip(center, 0), scale, height, width)
         dets = [Detection(x[0], x[1], x[2], x[3], score=x[4], id=x[5]) for x in dets]
-        return dets
+        return clip_detections(dets, meta['original_shape'])
 
     @staticmethod
     def get_affine_transform(center, scale, rot, output_size, inv=False):

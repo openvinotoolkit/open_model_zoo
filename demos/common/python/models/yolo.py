@@ -18,7 +18,7 @@ import numpy as np
 import ngraph
 
 from .model import Model
-from .utils import Detection, resize_image, resize_image_letterbox, load_labels
+from .utils import Detection, resize_image, resize_image_letterbox, load_labels, clip_detections
 
 class YOLO(Model):
     class Params:
@@ -213,7 +213,7 @@ class YOLO(Model):
         else:
             detections = self._resize_detections(detections, meta['original_shape'][1::-1])
 
-        return detections
+        return clip_detections(detections, meta['original_shape'])
 
 
 class YoloV4(YOLO):
