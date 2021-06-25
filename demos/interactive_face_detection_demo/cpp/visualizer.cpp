@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <utils/ocv_common.hpp>
 
 #include "visualizer.hpp"
 
@@ -208,8 +209,7 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
     }
 
     auto textPos = cv::Point2f(static_cast<float>(f->_location.x), static_cast<float>(f->_location.y - 20));
-    cv::putText(img, out.str(), textPos, cv::FONT_HERSHEY_COMPLEX_SMALL, 1.5, { 230, 230, 230 }, 3);
-    cv::putText(img, out.str(), textPos, cv::FONT_HERSHEY_COMPLEX_SMALL, 1.5, genderColor, 2);
+    putHighlightedText(img, out.str(), textPos, cv::FONT_HERSHEY_COMPLEX_SMALL, 1.5, genderColor, 2);
 
     if (f->isHeadPoseEnabled()) {
         cv::Point3f center(static_cast<float>(f->_location.x + f->_location.width / 2),

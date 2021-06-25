@@ -309,11 +309,9 @@ int main(int argc, char *argv[]) {
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
 
-        for (; framesProcessed <= frameNum; framesProcessed++)
-        {
+        for (; framesProcessed <= frameNum; framesProcessed++) {
             result = pipeline.getResult();
-            if (result != nullptr)
-            {
+            if (result != nullptr) {
                 if (framesProcessed == 0) {
                     if (found == std::string::npos) {
                         outputResolution = result->asRef<ImageResult>().resultImage.size();

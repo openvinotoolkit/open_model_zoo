@@ -765,7 +765,7 @@ void Load::into(InferenceEngine::Core & ie, const std::string & deviceName, bool
 
         detector.net = ie.LoadNetwork(detector.read(ie), deviceName, config);
 
-        slog::info << "Loaded model " << detector.pathToModel << " to " << deviceName << " device.\n";
+        slog::info << "Network" << detector.pathToModel << " is loaded  to " << deviceName << " device.\n";
         std::set<std::string> devices;
         for (const std::string& device : parseDevices(deviceName)) {
             devices.insert(device);

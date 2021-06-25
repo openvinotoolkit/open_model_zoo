@@ -50,7 +50,7 @@ ExecutableNetwork ModelBase::loadExecutableNetwork(const CnnConfig& cnnConfig, I
     auto cnnNetwork = prepareNetwork(core);
 
     execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.deviceName, cnnConfig.execNetworkConfig);
-    slog::info << "Loaded model " << modelFileName << " to " << cnnConfig.deviceName << " device." << slog::endl;
+    slog::info << "Network " << modelFileName << " is loaded to " << cnnConfig.deviceName << " device." << slog::endl;
 
 
     return execNetwork;

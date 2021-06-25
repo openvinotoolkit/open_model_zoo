@@ -8,6 +8,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <utils/args_helper.hpp>
 
 #include "graph.hpp"
 #include "threading.hpp"
@@ -71,10 +72,25 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         }
         cnnNetwork.reshape(inShapes);
     }
+    slog::info << "Batch size is set to " << cnnNetwork.getBatchSize() << slog::endl;
+    InferenceEngine::ExecutableNetwork executableNetwork;
+    executableNetwork = ie.LoadNetwork(cnnNetwork, deviceName);
+    slog::info << "Network " << modelPath << " is loaded to " << deviceName << " device.\n";
+    std::set<std::string> devices;
+    for (const std::string& device : parseDevices(deviceName)) {
+        devices.insert(device);
+    }
 
-    InferenceEngine::ExecutableNetwork network;
-    network = ie.LoadNetwork(cnnNetwork, deviceName);
-
+    slog::info << "  * Number of inference requests is set to " << maxRequests << ".\n";
+    if (devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end()
+        || devices.find("") != devices.end()) {
+        slog::info << "  * Number of threads " << "is set to "
+            << executableNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>() << ".\n";
+    }
+    for (const auto& device : devices) {
+        slog::info << "  * Number of streams is set to "
+            << executableNetwork.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device.\n";
+    }
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Face Detection network should have only one input");
@@ -88,7 +104,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     }
 
     for (size_t i = 0; i < maxRequests; ++i) {
-        auto req = std::make_shared<InferenceEngine::InferRequest>(network.CreateInferRequest());
+        auto req = std::make_shared<InferenceEngine::InferRequest>(executableNetwork.CreateInferRequest());
         availableRequests.push(req);
     }
 

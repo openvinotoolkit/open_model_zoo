@@ -305,10 +305,8 @@ int main(int argc, char *argv[]) {
             out << "FPS: " << std::fixed << std::setprecision(1)
                 << 1000.0 / (timer["total"].getSmoothedDuration());
 
-            cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_COMPLEX, 0.65,
-                cv::Scalar(230, 230, 230), 3);
-            cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_COMPLEX, 0.65,
-                        cv::Scalar(255, 0, 0), 2);
+            putHighlightedText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_COMPLEX, 0.65,
+                cv::Scalar(255, 0, 0), 2);
 
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesCounter <= FLAGS_limit)) {
                 videoWriter.write(prev_frame);

@@ -502,7 +502,7 @@ struct Load {
                 devices.insert(device);
             }
 
-            slog::info << slog::endl << "Loaded model " << detector.commandLineFlag << " to " << deviceName << " device.\n";
+            slog::info << slog::endl << "Network is loaded " << detector.commandLineFlag << " to " << deviceName << " device.\n";
             slog::info << "  * Number of inference requests is set to " << 1 << ".\n";
             if (devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end()
                 || devices.find("") != devices.end()) {
@@ -594,7 +594,9 @@ int main(int argc, char *argv[]) {
         auto total_t0 = std::chrono::high_resolution_clock::now();
 
         cv::Mat frame = cap->read();
-        if (!frame.data) throw std::logic_error("Can't read an image from the input");
+        if (!frame.data) {
+            throw std::logic_error("Can't read an image from the input");
+        }
 
         cv::VideoWriter videoWriter;
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
@@ -740,17 +742,17 @@ int main(int argc, char *argv[]) {
                         for (size_t i = 0; i < resPersAttrAndColor.attributes_strings.size(); ++i) {
                             cv::Scalar color;
                             if (resPersAttrAndColor.attributes_indicators[i]) {
-                                color = cv::Scalar(0, 255, 0);
+                                color = cv::Scalar(0, 200, 0); // has attribute
                             } else {
-                                color = cv::Scalar(0, 0, 255);
+                                color = cv::Scalar(0, 0, 255); // doesn't have has attribute
                             }
-                            cv::putText(frame,
+                            putHighlightedText(frame,
                                     resPersAttrAndColor.attributes_strings[i],
                                     cv::Point2f(static_cast<float>(result.location.x + 5 * result.location.width / 4),
                                                 static_cast<float>(result.location.y + 15 + 15 * i)),
                                     cv::FONT_HERSHEY_COMPLEX_SMALL,
                                     0.5,
-                                    color);
+                                    color, 1);
                         }
 
                         if (FLAGS_r) {
@@ -766,12 +768,12 @@ int main(int argc, char *argv[]) {
                         }
                     }
                     if (!resPersReid.empty()) {
-                        cv::putText(frame,
+                        putHighlightedText(frame,
                                     resPersReid,
                                     cv::Point2f(static_cast<float>(result.location.x), static_cast<float>(result.location.y + 30)),
                                     cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                    0.6,
-                                    cv::Scalar(255, 255, 255));
+                                    0.55,
+                                    cv::Scalar(250, 10, 10), 1);
 
                         if (FLAGS_r) {
                             slog::info << "Person Reidentification results: " << resPersReid << slog::endl;
@@ -785,22 +787,18 @@ int main(int argc, char *argv[]) {
 
             // --------------------------- Execution statistics ------------------------------------------------
             std::ostringstream out;
-            out << "Person detection time: " << std::fixed << std::setprecision(2) << detection.count()
-                << " ms ("
-                << 1000.f / detection.count() << " fps)";
+            out << "Detection time : " << std::fixed << std::setprecision(2) << detection.count()
+                << " ms (" << 1000.f / detection.count() << " fps)";
 
-            cv::putText(frame, out.str(), cv::Point2f(0, 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 230, 230, 230 }, 3);
-            cv::putText(frame, out.str(), cv::Point2f(0, 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 255, 0, 0 });
+            putHighlightedText(frame, out.str(), cv::Point2f(0, 20), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
 
             if (personDetection.results.size()) {
                 if (personAttribs.enabled() && personAttribsInferred) {
                     float average_time = static_cast<float>(personAttribsNetworkTime.count() / personAttribsInferred);
                     out.str("");
-                    out << "Person Attributes Recognition time (averaged over " << personAttribsInferred
-                        << " detections): " << std::fixed << std::setprecision(2) << average_time
-                        << " ms " << "(" << 1000.f / average_time << " fps)";
-                    cv::putText(frame, out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 230, 230, 230 }, 3);
-                    cv::putText(frame, out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 255, 0, 0 });
+                    out << "Attributes Recognition time: " << std::fixed << std::setprecision(2) << average_time
+                        << " ms (" << 1000.f / average_time << " fps)";
+                    putHighlightedText(frame, out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
                     if (FLAGS_r) {
                         slog::info << out.str() << slog::endl;;
                     }
@@ -808,11 +806,9 @@ int main(int argc, char *argv[]) {
                 if (personReId.enabled() && personReIdInferred) {
                     float average_time = static_cast<float>(personReIdNetworktime.count() / personReIdInferred);
                     out.str("");
-                    out << "Person Reidentification time (averaged over " << personReIdInferred
-                        << " detections): " << std::fixed << std::setprecision(2) << average_time
-                        << " ms " << "(" << 1000.f / average_time << " fps)";
-                    cv::putText(frame, out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 230, 230, 230 }, 3);
-                    cv::putText(frame, out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 255, 0, 0 });
+                    out << "Reidentification time: " << std::fixed << std::setprecision(2) << average_time
+                        << " ms (" << 1000.f / average_time << " fps)";
+                    putHighlightedText(frame, out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
                     if (FLAGS_r) {
                         slog::info << out.str() << slog::endl;;
                     }

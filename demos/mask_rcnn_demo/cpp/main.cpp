@@ -149,11 +149,26 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // -------------------------Load model to the device----------------------------------------------------
-        auto executable_network = ie.LoadNetwork(network, FLAGS_d);
-        slog::info << "Loaded model " << FLAGS_m << " to " << FLAGS_d << " device." << slog::endl;
+        auto executableNetwork = ie.LoadNetwork(network, FLAGS_d);
+        slog::info << "Network " << FLAGS_m << " is loaded to " << FLAGS_d << " device.\n";
+        std::set<std::string> devices;
+        for (const std::string& device : parseDevices(FLAGS_d)) {
+            devices.insert(device);
+        }
+
+        slog::info << "  * Number of inference requests is set to " << 1 << ".\n";
+        if (devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end()
+            || devices.find("") != devices.end()) {
+            slog::info << "  * Number of threads " << "is set to "
+                << executableNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>() << ".\n";
+        }
+        for (const auto& device : devices) {
+            slog::info << "  * Number of streams is set to "
+                << executableNetwork.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device.\n";
+        }
 
         // -------------------------Create Infer Request--------------------------------------------------------
-        auto infer_request = executable_network.CreateInferRequest();
+        auto infer_request = executableNetwork.CreateInferRequest();
 
         // -----------------------------------------------------------------------------------------------------
 

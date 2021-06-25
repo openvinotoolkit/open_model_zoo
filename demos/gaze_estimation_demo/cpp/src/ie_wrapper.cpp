@@ -57,7 +57,7 @@ void IEWrapper::setExecPart() {
 
     executableNetwork = ie.LoadNetwork(network, deviceName);
 
-    slog::info << slog::endl << "Loaded model " << modelPath << " to " << deviceName << " device.\n";
+    slog::info << slog::endl << "Network " << modelPath << " is loaded to " << deviceName << " device.\n";
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(deviceName)) {
         devices.insert(device);
