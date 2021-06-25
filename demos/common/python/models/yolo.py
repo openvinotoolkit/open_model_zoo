@@ -1,5 +1,5 @@
 """
- Copyright (C) 2020 Intel Corporation
+ Copyright (C) 2020-2021 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import io
 import numpy as np
 import ngraph
 
@@ -155,6 +156,7 @@ class YOLO(Model):
 
     @staticmethod
     def _filter(detections, iou_threshold):
+        print(iou_threshold)
         def iou(box_1, box_2):
             width_of_overlap_area = min(box_1.xmax, box_2.xmax) - max(box_1.xmin, box_2.xmin)
             height_of_overlap_area = min(box_1.ymax, box_2.ymax) - max(box_1.ymin, box_2.ymin)
@@ -304,4 +306,70 @@ class YoloV4(YOLO):
                     continue
                 objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
                                          confidence.item(), class_id.item()))
+        return objects
+
+class YOLOF(YOLO):
+    class Params:
+        def __init__(self, num, sides, anchors):
+            self.num = num
+            self.coords = 4
+            self.classes = 80
+            self.sides = sides
+            self.anchors = anchors
+
+    def _get_output_info(self):
+        num = 6
+        anchors = [16, 16, 32, 32, 64, 64, 128, 128, 256, 256, 512, 512]
+
+        output_info = {}
+        for i, (name, layer) in enumerate(self.net.outputs.items()):
+            shape = layer.shape
+            yolo_params = self.Params(num, shape[2:4], anchors)
+            output_info[name] = (shape, yolo_params)
+        return output_info
+
+    @staticmethod
+    def _parse_yolo_region(predictions, input_size, params, threshold, multiple_labels=False):
+        def sigmoid(x):
+            return 1. / (1. + np.exp(-x))
+        # ------------------------------------------ Extracting layer parameters ---------------------------------------
+        objects = []
+        bbox_size = params.coords + 1 + params.classes
+        # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
+        for row, col, n in np.ndindex(params.sides[0], params.sides[1], params.num):
+            # Getting raw values for each detection bounding bFox
+            bbox = predictions[0, n * bbox_size:(n + 1) * bbox_size, row, col]
+            x, y = bbox[:2]
+            width, height = bbox[2:4]
+
+            class_probabilities = sigmoid(bbox[5:])
+            object_probability = np.max(class_probabilities)
+            if object_probability < threshold:
+                continue
+            # Process raw value
+            stride = (input_size[0] / params.sides[0], input_size[1] / params.sides[1])
+
+            x = col * stride[1] + x * params.anchors[2 * n]
+            y = row * stride[0] + y * params.anchors[2 * n + 1]
+            # Value for exp is very big number in some cases so following construction is using here
+            try:
+                width = np.exp(width)
+                height = np.exp(height)
+            except OverflowError:
+                continue
+            width = width * params.anchors[2 * n]
+            height = height * params.anchors[2 * n + 1]
+
+            if multiple_labels:
+                for class_id, class_probability in enumerate(class_probabilities):
+                    confidence = object_probability * class_probability
+                    if confidence > threshold:
+                        objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
+                                                 confidence, class_id))
+            else:
+                class_id = np.argmax(class_probabilities)
+                confidence = class_probabilities[class_id]
+                objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
+                                         confidence.item(), class_id.item()))
+                print(x - width / 2, y - height / 2, x + width / 2, y + height / 2, confidence.item(), class_id.item())
         return objects
