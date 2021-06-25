@@ -468,6 +468,7 @@ class TTSDLSDKModel:
         self.default_model_suffix = suffix
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
+        self.launcher = launcher
 
     def predict(self, input_data):
         return self.exec_network.infer(input_data)
@@ -475,6 +476,11 @@ class TTSDLSDKModel:
     def release(self):
         del self.network
         del self.exec_network
+
+    def reshape(self, input_shapes):
+        del self.exec_network
+        self.network.reshape(input_shapes)
+        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
 
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
