@@ -845,8 +845,8 @@ int main(int argc, char* argv[]) {
             slog::info << slog::endl << "Metric reports:\n" ;
             slog::info << "  * FPS: " << std::fixed << std::setprecision(1) << fps << '\n';
             slog::info << "  * Detection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
-            slog::info << '\n' << context.drawersContext.presenter.reportMeans() << slog::endl;
         }
+        slog::info << '\n' << context.drawersContext.presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
         return 1;

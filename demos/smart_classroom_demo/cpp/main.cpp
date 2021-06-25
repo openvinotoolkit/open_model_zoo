@@ -750,12 +750,6 @@ int main(int argc, char* argv[]) {
         Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, FLAGS_limit, num_top_persons);
         DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad, FLAGS_al);
 
-        std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press ESC key";
-        }
-        std::cout << std::endl;
-
         if (actions_type != TOP_K) {
             action_detector->enqueue(frame);
             action_detector->submitRequest();

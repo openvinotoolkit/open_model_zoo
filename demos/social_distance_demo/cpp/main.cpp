@@ -627,8 +627,6 @@ void Reader::process() {
 
 int main(int argc, char* argv[]) {
     try {
-        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
-
         // ------------------------------ Parsing and validation of input args ---------------------------------
         try {
             if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -693,6 +691,7 @@ int main(int argc, char* argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load Inference Engine -------------------------------------
+        slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
         InferenceEngine::Core ie;
 
         std::set<std::string> devices;
@@ -707,11 +706,6 @@ int main(int argc, char* argv[]) {
         std::map<std::string, uint32_t> deviceNStreams = parseValuePerDevice(devices, FLAGS_nstreams);
 
         for (const std::string& device : devices) {
-            slog::info << "Loading device " << device << slog::endl;
-
-            /** Printing device version **/
-            std::cout << printable(ie.GetVersions(device)) << std::endl;
-
             if ("CPU" == device) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -762,16 +756,15 @@ int main(int argc, char* argv[]) {
 
         // -----------------------------------------------------------------------------------------------------
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
-        slog::info << "Loading person detection model to the "<< FLAGS_d_det << " plugin" << slog::endl;
         PersonDetector detector(ie, FLAGS_d_det, FLAGS_m_det,
             {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d_det, "Detect"));
-
+        slog::info << "  * Number of inference requests is set to " << nireq << slog::endl;
         ReId reid;
         std::size_t nreidireq{0};
         if (!FLAGS_m_reid.empty()) {
-            slog::info << "Loading person re-identicifation (Re-ID) model to the "<< FLAGS_d_reid << " plugin" << slog::endl;
             reid = ReId(ie, FLAGS_d_reid, FLAGS_m_reid, FLAGS_auto_resize, makeTagConfig(FLAGS_d_reid, "ReId"));
             nreidireq = nireq * 3;
+            slog::info << "  * Number of inference requests is set to " << nreidireq << slog::endl;
         }
 
         bool isVideo = imageSources.empty() ? true : false;
@@ -786,19 +779,6 @@ int main(int argc, char* argv[]) {
         size_t found = FLAGS_display_resolution.find("x");
         cv::Size displayResolution = cv::Size{std::stoi(FLAGS_display_resolution.substr(0, found)),
                                               std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()))};
-
-        slog::info << "Number of InferRequests: " << nireq << " (detection), " << nreidireq << " (re-identification)" << slog::endl;
-        std::ostringstream deviceSS;
-        for (const auto& nstreams : deviceNStreams) {
-            if (!deviceSS.str().empty()) {
-                deviceSS << ", ";
-            }
-            deviceSS << nstreams.second << " streams for " << nstreams.first;
-        }
-        if (!deviceSS.str().empty()) {
-            slog::info << deviceSS.str() << slog::endl;
-        }
-        slog::info << "Display resolution: " << FLAGS_display_resolution << slog::endl;
 
         Context context{inputChannels,
                         detector,
@@ -822,12 +802,6 @@ int main(int argc, char* argv[]) {
                 VideoFrame::Ptr sharedVideoFrame = std::make_shared<ReborningVideoFrame>(context, sourceID, i);
                 worker->push(std::make_shared<Reader>(sharedVideoFrame));
             }
-        }
-        slog::info << "Number of allocated frames: " << FLAGS_n_iqs * (inputChannels.size()) << slog::endl;
-        if (FLAGS_auto_resize) {
-            slog::info << "Resizable input with support of ROI crop and auto resize is enabled" << slog::endl;
-        } else {
-            slog::info << "Resizable input with support of ROI crop and auto resize is disabled" << slog::endl;
         }
 
         // Running
@@ -856,14 +830,15 @@ int main(int argc, char* argv[]) {
         if (0 != frameCounter) {
             const float fps = static_cast<float>(frameCounter) / std::chrono::duration_cast<Sec>(t1 - context.t0).count()
                 / context.readersContext.inputChannels.size();
-            std::cout << std::fixed << std::setprecision(1) << fps << "FPS for (" << frameCounter << " / "
-                 << inputChannels.size() << ") frames\n";
             const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
                 / (frameCounter * context.nireq) * 100;
-            std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
-        }
 
-        std::cout << context.drawersContext.presenter.reportMeans() << '\n';
+            //// --------------------------- Report metrics -------------------------------------------------------
+            slog::info << slog::endl << "Metric reports:\n";
+            slog::info << "  * FPS: " << std::fixed << std::setprecision(1) << fps << '\n';
+            slog::info << "  * Detection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
+        }
+        slog::info << '\n' << context.drawersContext.presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
         return 1;
@@ -871,6 +846,6 @@ int main(int argc, char* argv[]) {
         std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
         return 1;
     }
-    slog::info << "Execution successful" << slog::endl;
+
     return 0;
 }
