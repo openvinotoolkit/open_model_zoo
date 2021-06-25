@@ -75,9 +75,6 @@ LoadInferenceEngine(const std::vector<std::string>& devices,
             continue;
         }
 
-        std::cout << "Loading device " << device << std::endl;
-        std::cout << printable(ie.GetVersions(device)) << std::endl;
-
         /** Load extensions for the CPU device **/
         if ((device.find("CPU") != std::string::npos)) {
             if (!custom_cpu_library.empty()) {

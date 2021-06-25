@@ -12,7 +12,7 @@
 
 #include <monitors/presenter.h>
 #include <utils/images_capture.h>
-
+#include <utils/slog.hpp>
 #include <opencv2/core.hpp>
 
 #include <iostream>
@@ -66,9 +66,9 @@ CreatePedestrianTracker(const std::string& reid_model,
         tracker->set_descriptor_strong(descriptor_strong);
         tracker->set_distance_strong(distance_strong);
     } else {
-        std::cout << "WARNING: Reid model "
+        slog::info << "WARNING: Reid model "
             << "was not specified. "
-            << "Only fast reidentification approach will be used." << std::endl;
+            << "Only fast reidentification approach will be used." << slog::endl;
     }
 
     return tracker;
@@ -101,7 +101,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char **argv) {
     try {
-        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -131,6 +130,7 @@ int main(int argc, char **argv) {
         bool should_save_det_log = !detlog_out.empty();
 
         std::vector<std::string> devices{detector_mode, reid_mode};
+        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
         InferenceEngine::Core ie =
             LoadInferenceEngine(
                 devices, custom_cpu_library, path_to_custom_layers,
@@ -164,12 +164,6 @@ int main(int argc, char **argv) {
         cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
         Presenter presenter(FLAGS_u, 10, graphSize);
 
-        std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press ESC key";
-        }
-        std::cout << std::endl;
-
         for (unsigned frameIdx = 0; ; ++frameIdx) {
             pedestrian_detector.submitFrame(frame, frameIdx);
             pedestrian_detector.waitAndFetchResults();
@@ -195,8 +189,8 @@ int main(int argc, char **argv) {
                 cv::rectangle(frame, detection.rect, cv::Scalar(0, 0, 255), 3);
                 std::string text = std::to_string(detection.object_id) +
                     " conf: " + std::to_string(detection.confidence);
-                cv::putText(frame, text, detection.rect.tl(), cv::FONT_HERSHEY_COMPLEX,
-                            1.0, cv::Scalar(0, 0, 255), 3);
+                putHighlightedText(frame, text, detection.rect.tl() - cv::Point{10, 10}, cv::FONT_HERSHEY_COMPLEX,
+                            0.65, cv::Scalar(0, 0, 255), 2);
             }
 
             framesProcessed++;
@@ -234,7 +228,7 @@ int main(int argc, char **argv) {
             tracker->PrintReidPerformanceCounts(getFullDeviceName(ie, FLAGS_d_reid));
         }
 
-        std::cout << presenter.reportMeans() << '\n';
+        slog::info << '\n' << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
@@ -244,8 +238,6 @@ int main(int argc, char **argv) {
         std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
         return 1;
     }
-
-    std::cout << "Execution successful" << std::endl;
 
     return 0;
 }

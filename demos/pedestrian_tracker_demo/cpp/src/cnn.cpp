@@ -15,6 +15,10 @@
 
 #include <inference_engine.hpp>
 
+#include <utils/args_helper.hpp>
+#include <utils/slog.hpp>
+#include <utils/ocv_common.hpp>
+
 using namespace InferenceEngine;
 
 CnnBase::CnnBase(const Config& config,
@@ -54,9 +58,26 @@ void CnnBase::Load() {
     }
 
     executable_network_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
+    slog::info << "Network " << config_.path_to_model << " is loaded to " << deviceName_ << " device.\n";
+    std::set<std::string> devices;
+    for (const std::string& device : parseDevices(deviceName_)) {
+        devices.insert(device);
+    }
+
     infer_request_ = executable_network_.CreateInferRequest();
     infer_request_.SetInput(inputs);
     infer_request_.SetOutput(outputs_);
+
+    slog::info << "  * Number of inference requests is set to " << 1 << ".\n";
+    if (devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end()
+        || devices.find("") != devices.end()) {
+        slog::info << "  * Number of threads " << "is set to "
+            << executable_network_.GetConfig("CPU_THREADS_NUM").as<std::string>() << ".\n";
+    }
+    for (const auto& device : devices) {
+        slog::info << "  * Number of streams is set to "
+            << executable_network_.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device.\n";
+    }
 }
 
 void CnnBase::InferBatch(
