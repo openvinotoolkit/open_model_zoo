@@ -19,9 +19,9 @@ Accuracy metrics obtained on [Common Objects in Context (COCO)](https://cocodata
 
 | Metric                                                                | Value  |
 | --------------------------------------------------------------------- | -------|
-| mAP                                                                   | 59.33% |
-| [COCO mAP (0.5)](https://cocodataset.org/#detection-eval)             | 66.12% |
-| [COCO mAP (0.5:0.05:0.95)](https://cocodataset.org/#detection-eval)   | 42.99% |
+| mAP                                                                   | 60.41% |
+| [COCO mAP (0.5)](https://cocodataset.org/#detection-eval)             | 66.14% |
+| [COCO mAP (0.5:0.05:0.95)](https://cocodataset.org/#detection-eval)   | 43.51% |
 
 ## Input
 
@@ -56,9 +56,9 @@ Channel order is `BGR`.
 
 ### Converted model
 
-1. The array of detection summary info, name - `boxes`, shape - `1, 510, 38, 38`. The anchor values are `16,16,  32,32,  64,64,  128,128,  256,256,  512,512`.
+1. The array of detection summary info, name - `boxes`, shape - `1, 8664, 85`. The anchor values are `16,16,  32,32,  64,64,  128,128,  256,256,  512,512`.
 
-For each case format is `B,N*85,Cx,Cy`, where
+For each case format is `B,N*Cx*Cy,85`, where
 - `B` - batch size
 - `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index

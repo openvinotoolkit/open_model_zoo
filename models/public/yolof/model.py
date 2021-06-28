@@ -41,16 +41,16 @@ def build_anchor_generator(cfg, input_shape):
     return DefaultAnchorGenerator(cfg, input_shape)
 
 
-# def permute_to_N_HWA_K(tensor, K):
-#     """
-#     Transpose/reshape a tensor from (N, (A x K), H, W) to (N, (HxWxA), K)
-#     """
-#     assert tensor.dim() == 4, tensor.shape
-#     N, _, H, W = tensor.shape
-#     tensor = tensor.view(N, -1, K, H, W)
-#     tensor = tensor.permute(0, 3, 4, 1, 2)
-#     tensor = tensor.reshape(N, -1, K)  # Size=(N,HWA,K)
-#     return tensor
+def permute_to_N_HWA_K(tensor, K):
+    """
+    Transpose/reshape a tensor from (N, (A x K), H, W) to (N, (HxWxA), K)
+    """
+    assert tensor.dim() == 4, tensor.shape
+    N, _, H, W = tensor.shape
+    tensor = tensor.view(N, -1, K, H, W)
+    tensor = tensor.permute(0, 3, 4, 1, 2)
+    tensor = tensor.reshape(N, -1, K)  # Size=(N,HWA,K)
+    return tensor
 
 
 class YOLOF(nn.Module):
@@ -106,14 +106,18 @@ class YOLOF(nn.Module):
         return results
 
     def inference(self, box_cls, box_delta):
-        N, _, H, W = box_delta.shape
-        result = torch.cat((box_delta.view(N, 6, -1, H, W), torch.ones(N, 6, 1, H, W), box_cls.view(N, 6, -1, H, W)), 2).view(N, -1, H,  W)
+        box_cls = permute_to_N_HWA_K(box_cls, self.num_classes)
+        box_delta = permute_to_N_HWA_K(box_delta, 4)
+
+        N, A, C = box_delta.shape
+        result = torch.cat((box_delta, box_cls), 2)
+
         return result
 
 
 def get_model(weights):
     cfg = config
-    print(type(config))
+
     cfg.build_backbone = build_backbone
     cfg.build_anchor_generator = build_anchor_generator
     cfg.build_encoder = build_encoder

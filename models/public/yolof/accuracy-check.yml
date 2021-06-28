@@ -6,6 +6,7 @@ models:
           type: yolof
           anchors: "16,16,  32,32,  64,64,  128,128,  256,256,  512,512"
           num: 6
+          cells: [38]
           coords: 4
           classes: 80
           threshold: 0.05
@@ -21,7 +22,7 @@ models:
         postprocessing:
           - type: resize_prediction_boxes
             rescale: True
-          - type: nms
+          - type: batched_nms
             overlap: 0.6
           - type: clip_boxes
             apply_to: prediction

@@ -72,8 +72,8 @@ class YolofOutputProcessor:
         w = self.size_correct(bbox.w) * anchors[0]
         h = self.size_correct(bbox.h) * anchors[1]
 
-        probabilities = self.prob_correct(bbox.probabilities)
-        confidence = self.conf_correct(probabilities)
+        probabilities = bbox.probabilities
+        confidence = self.conf_correct(bbox.probabilities)
 
         return DetectionBox(x, y, w, h, confidence, probabilities)
 
@@ -418,8 +418,6 @@ class YoloV3Adapter(Adapter):
         result = []
 
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        # print(raw_outputs['boxes'].shape)
-        # print(raw_outputs)
         batch = len(identifiers)
         out_precision = frame_meta[0].get('output_precision', {})
         out_layout = frame_meta[0].get('output_layout', {})
@@ -633,8 +631,79 @@ class YoloV5Adapter(YoloV3Adapter):
 class YolofAdapter(YoloV3Adapter):
     __provider__ = 'yolof'
 
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'topk': NumberField(
+                value_type=int, optional=True, min_value=1, default=1000, description="Number of detection candidates."
+            ),
+        })
+
+        return parameters
+
     def configure(self):
         super().configure()
+        self.topk = self.get_value_from_config('topk')
         if self.raw_output:
-            self.processor = YolofOutputProcessor(prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
-                                                  conf_correct=lambda x: np.max(x))
+            self.processor = YolofOutputProcessor(prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
+
+    def process(self, raw, identifiers, frame_meta):
+        """
+        Args:
+            identifiers: list of input data identifiers
+            raw: output of model
+            frame_meta: meta info about data processing
+        Returns:
+            list of DetectionPrediction objects
+        """
+
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+
+        self.select_output_blob(raw_outputs)
+        predictions = raw_outputs[self.output_blob]
+        out_precision = frame_meta[0].get('output_precision', {})
+        if self.output_blob in out_precision and predictions.dtype != out_precision[self.output_blob]:
+            predictions = predictions.view(out_precision[self.output_blob])
+
+        results = []
+        cells = self.cells[0]
+        for identifier, prediction in zip(identifiers, predictions):
+            prob = prediction[:, self.coords:].flatten()
+            prob = self.processor.prob_correct(prob)
+
+            # get first topk
+            num_topk = min(self.topk, prediction.shape[0])
+            topk_idxs = np.argsort(-prob)
+            prob = prob[topk_idxs][:num_topk]
+            topk_idxs = topk_idxs[:num_topk]
+
+            # filter out the proposals with low confidence score
+            keep_idxs = prob > self.threshold
+            prob = prob[keep_idxs]
+            topk_idxs = topk_idxs[keep_idxs]
+            obj_indx = topk_idxs // self.classes
+            class_idx = topk_idxs % self.classes
+
+            labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
+            for ind, obj_ind in enumerate(obj_indx):
+                bbox = prediction[:, :self.coords][obj_ind]
+                raw_bbox = DetectionBox(bbox[0], bbox[1], bbox[2], bbox[3], 1, prob[ind])
+                i = obj_ind // (cells * self.num)
+                j = (obj_ind - i * cells * self.num) // self.num
+                n = (obj_ind - i * cells * self.num) % self.num
+                processed_box = self.processor(raw_bbox, j, i, self.anchors[2*n:2*n+2])
+
+                label = class_idx[ind]
+
+                labels.append(label)
+                scores.append(processed_box.confidence)
+                x_mins.append(processed_box.x - processed_box.w / 2.0)
+                y_mins.append(processed_box.y - processed_box.h / 2.0)
+                x_maxs.append(processed_box.x + processed_box.w / 2.0)
+                y_maxs.append(processed_box.y + processed_box.h / 2.0)
+
+            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
+
+        return results
