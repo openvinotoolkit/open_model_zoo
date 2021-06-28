@@ -94,6 +94,7 @@ class BaseDetectionMetricMixin(Metric):
         self.labels = list(labels.keys())
         valid_labels = list(filter(lambda x: x != self.dataset.metadata.get('background_label'), self.labels))
         self.meta['names'] = [labels[name] for name in valid_labels]
+        self.meta['orig_label_names'] = [labels[name] for name in valid_labels]
 
     def per_class_detection_statistics(self, annotations, predictions, labels, profile_boxes=False):
         labels_stat = {}
@@ -196,7 +197,9 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
     def evaluate(self, annotations, predictions):
         super().evaluate(annotations, predictions)
         average_precisions = self._calculate_map(annotations, predictions)
-        average_precisions, self.meta['names'] = finalize_metric_result(average_precisions, self.meta['names'])
+        average_precisions, self.meta['names'] = finalize_metric_result(
+            average_precisions, self.meta['orig_label_names']
+        )
         if not average_precisions:
             warnings.warn("No detections to compute mAP")
             average_precisions.append(0)
@@ -300,7 +303,7 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEval
     def evaluate(self, annotations, predictions):
         super().evaluate(annotations, predictions)
         recalls = self._calculate_recall(annotations, predictions)
-        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['names'])
+        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['orig_label_names'])
         if not recalls:
             warnings.warn("No detections to compute mAP")
             recalls.append(0)
