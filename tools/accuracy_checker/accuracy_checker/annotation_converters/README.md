@@ -53,7 +53,8 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 
 Accuracy Checker supports following list of annotation converters and specific for them parameters:
 * `cifar` - converts [CIFAR](https://www.cs.toronto.edu/~kriz/cifar.html) classification dataset to `ClassificationAnnotation`
-  * `data_batch_file` - path to pickle file which contain dataset batch (e.g. test_batch)
+  * `data_batch_file` - path to pickle file which contain dataset batch (e.g. test_batch).
+  * `batch_meta_file` - path to pickle file which contains label names (e.g. batches.meta).
   * `has_background` - allows to add background label to original labels (Optional, default value is False).
   * `convert_images` - allows to convert images from pickle file to user specified directory (default value is False).
   * `converted_images_dir` - path to converted images location.
