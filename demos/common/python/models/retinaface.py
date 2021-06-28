@@ -341,7 +341,7 @@ class RetinaFacePyTorch(Model):
 
         outputs = self.postprocessor.process_output(outputs, scale_x, scale_y, self.threshold,
                                                     meta['resized_shape'][:2])
-        return outputs
+        return clip_detections(outputs, meta['original_shape'])
 
 
 class RetinaFacePyTorchPostprocessor:
