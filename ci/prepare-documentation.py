@@ -54,6 +54,8 @@ OMZ_PREFIX = '<omz_dir>/'
 
 sys.path.append(str(OMZ_ROOT / 'ci/lib'))
 
+all_images_paths = {}
+
 import omzdocs
 
 XML_ID_ATTRIBUTE = '{http://www.w3.org/XML/1998/namespace}id'
@@ -119,9 +121,14 @@ def add_page(output_root, parent, *, id=None, path=None, title=None):
             continue # not a relative URL
 
         image_rel_path = path.parent / urllib.request.url2pathname(parsed_image_url.path)
+        image_filename = image_rel_path.name
+        image_abs_path = (OMZ_ROOT / image_rel_path).resolve()
 
-        (output_root / image_rel_path.parent).mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(OMZ_ROOT / image_rel_path, output_root / image_rel_path)
+        if image_filename in all_images_paths and all_images_paths[image_filename] != image_abs_path:
+            raise RuntimeError(f'{path}: Image with "{image_filename}" filename already exists. '
+                               f'Rename "{image_rel_path}" to unique name.')
+        else:
+            all_images_paths[image_filename] = image_abs_path
 
     non_md_links = [ref.url for ref in page.external_references()
                     if ref.type == 'link' and not ref.url.endswith('.md')]
@@ -140,6 +147,10 @@ def add_page(output_root, parent, *, id=None, path=None, title=None):
 
         raise RuntimeError(f'{path}: Relative link to non-markdown file "{non_md_link}". '
                            f'Replace it by `{suggested_path}`')
+
+        (output_root / image_rel_path.parent).mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(image_abs_path, output_root / image_rel_path)
+
     return element
 
 
