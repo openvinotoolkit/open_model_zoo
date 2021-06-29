@@ -33,7 +33,7 @@ EvaluationResult = namedtuple(
 class BasePresenter(ClassProvider):
     __provider_type__ = "presenter"
 
-    def write_result(self, evaluation_result, ignore_results_formatting=False):
+    def write_result(self, evaluation_result, ignore_results_formatting=False, ignore_metric_reference=False):
         raise NotImplementedError
 
     def extract_result(self, evaluation_result):
@@ -43,12 +43,13 @@ class BasePresenter(ClassProvider):
 class ScalarPrintPresenter(BasePresenter):
     __provider__ = "print_scalar"
 
-    def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False):
+    def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False,
+                     ignore_metric_reference=False):
         value, reference, name, _, abs_threshold, rel_threshold, meta = evaluation_result
         value = np.mean(value)
         postfix, scale, result_format = get_result_format_parameters(meta, ignore_results_formatting)
         difference = None
-        if reference:
+        if reference and not ignore_metric_reference:
             _, original_scale, _ = get_result_format_parameters(meta, False)
             difference = compare_with_ref(reference, value, original_scale)
         write_scalar_result(
@@ -72,7 +73,8 @@ class ScalarPrintPresenter(BasePresenter):
 class VectorPrintPresenter(BasePresenter):
     __provider__ = "print_vector"
 
-    def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False):
+    def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False,
+                     ignore_metric_reference=False):
         value, reference, name, _, abs_threshold, rel_threshold, meta = evaluation_result
         if abs_threshold:
             abs_threshold = float(abs_threshold)
@@ -88,7 +90,7 @@ class VectorPrintPresenter(BasePresenter):
                 else:
                     value = value[0]
             difference = None
-            if reference:
+            if reference and not ignore_metric_reference:
                 _, original_scale, _ = get_result_format_parameters(meta, False)
                 difference = compare_with_ref(reference, value, original_scale)
             write_scalar_result(
@@ -112,7 +114,7 @@ class VectorPrintPresenter(BasePresenter):
         if len(value) > 1 and meta.get('calculate_mean', True):
             mean_value = np.mean(np.multiply(value, scale))
             difference = None
-            if reference:
+            if reference and not ignore_metric_reference:
                 original_scale = get_result_format_parameters(meta, False)[1] if ignore_results_formatting else 1
                 difference = compare_with_ref(reference, mean_value, original_scale)
             write_scalar_result(
