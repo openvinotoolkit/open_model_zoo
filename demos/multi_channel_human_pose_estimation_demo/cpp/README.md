@@ -34,9 +34,6 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 ### Supported Models
 
 * human-pose-estimation-0001
-* human-pose-estimation-0005
-* human-pose-estimation-0006
-* human-pose-estimation-0007
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
