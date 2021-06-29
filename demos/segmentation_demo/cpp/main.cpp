@@ -202,9 +202,9 @@ void print_raw_results(const ImageResult& result, std::vector<std::string> label
     cv::minMaxLoc(result.resultImage, &min_val, &max_val);
     int max_classes = static_cast<int>(max_val) + 1; // We use +1 for only background case
     const float range[] = { 0, static_cast<float>(max_classes) };
-    const float * ranges = { range };
+    const float * ranges[] = { range };
     cv::Mat histogram;
-    cv::calcHist(&result.resultImage, 1, 0, cv::Mat(), histogram, 1, &max_classes, &ranges);
+    cv::calcHist(&result.resultImage, 1, 0, cv::Mat(), histogram, 1, &max_classes, ranges);
 
     const double all = result.resultImage.cols * result.resultImage.rows;
     for (int i = 0; i < max_classes; ++i)
