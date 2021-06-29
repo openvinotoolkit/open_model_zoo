@@ -172,7 +172,6 @@ int main(int argc, char *argv[]) {
             }
 
             presenter.drawGraphs(frame);
-            auto renderingStart = std::chrono::steady_clock::now();
             // Display the results
             for (auto const& inferenceResult : inferenceResults) {
                 resultsMarker.mark(frame, inferenceResult);
