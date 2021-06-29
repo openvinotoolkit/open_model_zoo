@@ -33,6 +33,12 @@
 
 using namespace InferenceEngine;
 
+std::string str_tolower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+                   [](unsigned char c){ return std::tolower(c); }
+                  );
+    return s;
+}
 
 std::vector<cv::Point2f> floatPointsFromRotatedRect(const cv::RotatedRect &rect);
 std::vector<cv::Point> boundedIntPointsFromRotatedRect(const cv::RotatedRect &rect, const cv::Size& image_size);
@@ -57,6 +63,10 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_m_td.empty() && FLAGS_m_tr.empty()) {
         throw std::logic_error("Neither parameter -m_td nor -m_tr is not set");
     }
+
+    if (!FLAGS_m_tr.empty() && FLAGS_dt.empty()) {
+        throw std::logic_error("Parameter -dt is not set");
+    }
     return true;
 }
 
@@ -80,16 +90,6 @@ int main(int argc, char *argv[]) {
         double avg_time = 0;
         const double avg_time_decay = 0.8;
 
-        const char kPadSymbol = '#';
-        if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
-            throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
-        std::string kAlphabet;
-        if (FLAGS_tr_pt_first)
-            kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
-        else
-            kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
-
-        const double min_text_recognition_confidence = FLAGS_thr;
 
         slog::info << "Loading Inference Engine" << slog::endl;
         Core ie;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
             if ((device.find("CPU") != std::string::npos)) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
+                    auto extension_ptr = std::make_shared<Extension>(FLAGS_l);
                     ie.AddExtension(extension_ptr, "CPU");
                     std::cout << "CPU Extension loaded: " << FLAGS_l << std::endl;
                 }
@@ -127,17 +127,50 @@ int main(int argc, char *argv[]) {
         auto extension_path = FLAGS_l;
         auto cls_conf_threshold = static_cast<float>(FLAGS_cls_pixel_thr);
         auto link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
+        auto decoder_type = FLAGS_dt;
         auto decoder_bandwidth = FLAGS_b;
 
         slog::info << "Loading network files" << slog::endl;
-        Cnn text_detection, text_recognition;
+        const char kPadSymbol = '#';
+        if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
+            throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
+        std::string kAlphabet;
+        std::unique_ptr<Cnn> text_recognition;
+        if (!FLAGS_m_tr.empty()) {
+            try {
+                // 2 kPadSymbol stand for START_TOKEN and PAD_TOKEN, respectively
+                kAlphabet = std::string(3, kPadSymbol) + FLAGS_m_tr_ss;
+                text_recognition = std::unique_ptr<Cnn>(new EncoderDecoderCNN(FLAGS_m_tr,
+                                                            ie,
+                                                            FLAGS_d_tr,
+                                                            FLAGS_out_enc_hidden_name,
+                                                            FLAGS_out_dec_hidden_name,
+                                                            FLAGS_in_dec_hidden_name,
+                                                            FLAGS_features_name,
+                                                            FLAGS_in_dec_symbol_name,
+                                                            FLAGS_out_dec_symbol_name,
+                                                            FLAGS_tr_o_blb_nm,
+                                                            kAlphabet.find(kPadSymbol, 2)));
+                slog::info << "Initialized composite text recognition model" << slog::endl;
+                if (!FLAGS_tr_pt_first)
+                    throw std::logic_error("Flag '-tr_pt_first' was not set. Set the flag if you want to use composite model");
+                if (decoder_type != "simple")
+                    throw std::logic_error("Wrong decoder. Use --dt simple for composite model.");
+            }
+            catch (const DecoderNotFound&) {
+                text_recognition = std::unique_ptr<Cnn>(new Cnn(FLAGS_m_tr, ie, FLAGS_d_tr));
+                slog::info << "Initialized monolithic text recognition model" << slog::endl;
+                if (FLAGS_tr_pt_first)
+                    kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
+                else
+                    kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
+            }
+        }
+        const double min_text_recognition_confidence = FLAGS_thr;
 
+        std::unique_ptr<Cnn> text_detection;
         if (!FLAGS_m_td.empty())
-            text_detection.Init(FLAGS_m_td, ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td));
-
-        if (!FLAGS_m_tr.empty())
-            text_recognition.Init(FLAGS_m_tr, ie, FLAGS_d_tr);
-
+            text_detection = std::unique_ptr<Cnn>(new Cnn(FLAGS_m_td, ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td)));
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat image = cap->read();
         if (!image.data) {
@@ -166,10 +199,10 @@ int main(int argc, char *argv[]) {
 
             std::chrono::steady_clock::time_point begin_frame = std::chrono::steady_clock::now();
             std::vector<cv::RotatedRect> rects;
-            if (text_detection.is_initialized()) {
-                auto blobs = text_detection.Infer(image);
+            if (text_detection != nullptr) {
+                auto blobs = text_detection->Infer(image);
                 std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-                rects = postProcess(blobs, image.size(), text_detection.input_size(),
+                rects = postProcess(blobs, image.size(), text_detection->input_size(),
                                     cls_conf_threshold, link_conf_threshold);
                 std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                 text_detection_postproc_time += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
@@ -183,19 +216,19 @@ int main(int argc, char *argv[]) {
                 });
                 rects.resize(static_cast<size_t>(FLAGS_max_rect_num));
             }
-
-            int num_found = text_recognition.is_initialized() ? 0 : static_cast<int>(rects.size());
+            int num_found = text_recognition != nullptr ? 0 : static_cast<int>(rects.size());
 
             for (const auto &rect : rects) {
                 cv::Mat cropped_text;
                 std::vector<cv::Point2f> points;
                 int top_left_point_idx = 0;
 
-                if (rect.size != cv::Size2f(0, 0) && text_detection.is_initialized()) {
+                if (rect.size != cv::Size2f(0, 0) && text_detection != nullptr) {
                     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
                     points = floatPointsFromRotatedRect(rect);
                     topLeftPoint(points, &top_left_point_idx);
-                    cropped_text = cropImage(image, points, text_recognition.input_size(), top_left_point_idx);
+                    auto size = text_recognition == nullptr ? cv::Size(rect.size) : text_recognition->input_size();
+                    cropped_text = cropImage(image, points, size, top_left_point_idx);
                     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                     text_crop_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
                 } else {
@@ -217,8 +250,8 @@ int main(int argc, char *argv[]) {
 
                 std::string res = "";
                 double conf = 1.0;
-                if (text_recognition.is_initialized()) {
-                    auto blobs = text_recognition.Infer(cropped_text);
+                if (text_recognition != nullptr) {
+                    auto blobs = text_recognition->Infer(cropped_text);
                     auto out_blob = blobs.begin()->second;
                     if (FLAGS_tr_o_blb_nm != "") {
                         const auto& iter = blobs.find(FLAGS_tr_o_blb_nm);
@@ -235,17 +268,28 @@ int main(int argc, char *argv[]) {
 
                     LockedMemory<const void> blobMapped = as<MemoryBlob>(out_blob)->rmap();
                     float *output_data_pointer = blobMapped.as<float *>();
-                    std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
+                    std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[1] * output_shape[2]);
 
                     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-                    if (decoder_bandwidth == 0) {
-                        res = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
-                    } else {
-                        res = CTCBeamSearchDecoder(output_data, kAlphabet, kPadSymbol, &conf, decoder_bandwidth);
+                    if (decoder_type == "simple") {
+                        res = SimpleDecoder(output_data, kAlphabet, kPadSymbol, &conf);
+                    }
+                    else if (decoder_type == "ctc") {
+                        if (decoder_bandwidth == 0) {
+                            res = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
+                        }
+                        else {
+                            res = CTCBeamSearchDecoder(output_data, kAlphabet, kPadSymbol, &conf, decoder_bandwidth);
+                        }
+                    }
+                    else {
+                        slog::err << "No decoder type or invalid decoder type (-dt) provided: " + decoder_type << slog::endl;
+                        return -1;
                     }
                     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                     text_recognition_postproc_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-
+                    if (FLAGS_lower)
+                        res = str_tolower(res);
                     res = conf >= min_text_recognition_confidence ? res : "";
                     num_found += !res.empty() ? 1 : 0;
                 }
@@ -258,7 +302,7 @@ int main(int argc, char *argv[]) {
                             std::cout << ",";
                     }
 
-                    if (text_recognition.is_initialized()) {
+                    if (text_recognition != nullptr) {
                         std::cout << "," << res;
                     }
 
@@ -267,7 +311,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                if (!FLAGS_no_show && (!res.empty() || !text_recognition.is_initialized())) {
+                if (!FLAGS_no_show && (!res.empty() || text_recognition == nullptr)) {
                     for (size_t i = 0; i < points.size() ; i++) {
                         cv::line(demo_image, points[i], points[(i+1) % points.size()], cv::Scalar(50, 205, 50), 2);
                     }
@@ -305,32 +349,32 @@ int main(int argc, char *argv[]) {
             image = cap->read();
         } while (image.data);
 
-        if (text_detection.ncalls() && !FLAGS_r) {
+        if (text_detection != nullptr && text_detection->ncalls() && !FLAGS_r) {
           std::cout << "text detection model inference (ms) (fps): "
-                    << text_detection.time_elapsed() / text_detection.ncalls() << " "
-                    << text_detection.ncalls() * 1000 / text_detection.time_elapsed() << std::endl;
+                    << text_detection->time_elapsed() / text_detection->ncalls() << " "
+                    << text_detection->ncalls() * 1000 / text_detection->time_elapsed() << std::endl;
           if (std::fabs(text_detection_postproc_time) < std::numeric_limits<double>::epsilon()) {
               std::cout << "text detection postprocessing: took no time " << std::endl;
           } else {
             std::cout << "text detection postprocessing (ms) (fps): "
-                      << text_detection_postproc_time / text_detection.ncalls() << " "
-                      << text_detection.ncalls() * 1000 / text_detection_postproc_time << std::endl << std::endl;
+                      << text_detection_postproc_time / text_detection->ncalls() << " "
+                      << text_detection->ncalls() * 1000 / text_detection_postproc_time << std::endl << std::endl;
           }
         }
 
-        if (text_recognition.ncalls() && !FLAGS_r) {
+        if (text_recognition != nullptr && text_recognition->ncalls() && !FLAGS_r) {
           std::cout << "text recognition model inference (ms) (fps): "
-                    << text_recognition.time_elapsed() / text_recognition.ncalls() << " "
-                    << text_recognition.ncalls() * 1000 / text_recognition.time_elapsed() << std::endl;
+                    << text_recognition->time_elapsed() / text_recognition->ncalls() << " "
+                    << text_recognition->ncalls() * 1000 / text_recognition->time_elapsed() << std::endl;
           if (std::fabs(text_recognition_postproc_time) < std::numeric_limits<double>::epsilon()) {
               throw std::logic_error("text_recognition_postproc_time can't be equal to zero");
           }
           std::cout << "text recognition postprocessing (ms) (fps): "
-                    << text_recognition_postproc_time / text_recognition.ncalls() / 1000 << " "
-                    << text_recognition.ncalls() * 1000000 / text_recognition_postproc_time << std::endl << std::endl;
+                    << text_recognition_postproc_time / text_recognition->ncalls() / 1000 << " "
+                    << text_recognition->ncalls() * 1000000 / text_recognition_postproc_time << std::endl << std::endl;
           if (std::fabs(text_crop_time) > std::numeric_limits<double>::epsilon()) {
-              std::cout << "text crop (ms) (fps): " << text_crop_time / text_recognition.ncalls() / 1000 << " "
-                    << text_recognition.ncalls() * 1000000 / text_crop_time << std::endl << std::endl;
+              std::cout << "text crop (ms) (fps): " << text_crop_time / text_recognition->ncalls() / 1000 << " "
+                    << text_recognition->ncalls() * 1000000 / text_crop_time << std::endl << std::endl;
           }
         }
 

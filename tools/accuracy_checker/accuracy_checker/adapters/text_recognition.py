@@ -15,12 +15,12 @@ limitations under the License.
 """
 
 from collections import defaultdict
-
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, ConfigError, NumberField, BoolField, DictField, ListField, StringField
+from ..config import ConfigValidator, ConfigError, NumberField, BoolField, DictField, ListField, StringField, PathField
 from ..representation import CharacterRecognitionPrediction
+from ..utils import softmax
 
 
 class BeamSearchDecoder(Adapter):
@@ -58,16 +58,19 @@ class BeamSearchDecoder(Adapter):
         self.softmaxed_probabilities = self.get_value_from_config('softmaxed_probabilities')
         self.logits_output = self.get_value_from_config("logits_output")
         self.custom_label_map = self.get_value_from_config("custom_label_map")
+        if self.custom_label_map:
+            labels = {int(k): v for k, v in self.custom_label_map.items()}
+            self.custom_label_map = labels
 
     def process(self, raw, identifiers, frame_meta):
+        if self.custom_label_map:
+            self.label_map = self.custom_label_map
         if not self.label_map:
             raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
         if self.blank_label is None:
             self.blank_label = len(self.label_map)
         if self.logits_output:
             self.output_blob = self.logits_output
-        if self.custom_label_map:
-            self.label_map = self.custom_label_map
         raw_output = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
@@ -107,7 +110,7 @@ class BeamSearchDecoder(Adapter):
         times, symbols = probabilities.shape
         # Initialize the beam with the empty sequence, a probability of 1 for ending in blank
         # and zero for ending in non-blank (in log space).
-        beam = [(tuple(), (0.0, -np.inf))]
+        beam = [((), (0.0, -np.inf))]
 
         for time in range(times):
             # A default dictionary to store the next step candidates.
@@ -179,16 +182,19 @@ class CTCGreedySearchDecoder(Adapter):
         self.blank_label = self.get_value_from_config('blank_label')
         self.logits_output = self.get_value_from_config("logits_output")
         self.custom_label_map = self.get_value_from_config("custom_label_map")
+        if self.custom_label_map:
+            labels = {int(k): v for k, v in self.custom_label_map.items()}
+            self.custom_label_map = labels
 
     def process(self, raw, identifiers=None, frame_meta=None):
+        if self.custom_label_map:
+            self.label_map = self.custom_label_map
         if not self.label_map:
             raise ConfigError('CTCGreedy Search Decoder requires dataset label map for correct decoding.')
         if self.blank_label is None:
             self.blank_label = 0
         if self.logits_output:
             self.output_blob = self.logits_output
-        if self.custom_label_map:
-            self.label_map = self.custom_label_map
         raw_output = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(raw_output)
         output = raw_output[self.output_blob]
@@ -219,6 +225,55 @@ class CTCGreedySearchDecoder(Adapter):
             if prob_index[i] != blank_id and (not (i > blank_id and prob_index[i - 1] == prob_index[i])):
                 selected_index.append(prob_index[i])
         return selected_index
+
+
+class SimpleDecoder(Adapter):
+    __provider__ = 'simple_decoder'
+    prediction_types = (CharacterRecognitionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'eos_label': StringField(
+                optional=True, default='[s]', description="End-of-sequence label."
+            ),
+            'custom_label_map': DictField(optional=True, description='Label map')
+
+        })
+        return parameters
+
+    @classmethod
+    def validate_config(cls, config, fetch_only=False, **kwargs):
+        return super().validate_config(
+            config, fetch_only=fetch_only, on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
+        )
+
+    def configure(self):
+        self.eos_label = self.get_value_from_config('eos_label')
+        self.custom_label_map = self.get_value_from_config("custom_label_map")
+        if self.custom_label_map:
+            labels = {int(k): v for k, v in self.custom_label_map.items()}
+            self.custom_label_map = labels
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        if self.custom_label_map:
+            self.label_map = self.custom_label_map
+        if not self.label_map:
+            raise ConfigError('Decoder requires dataset label map for correct decoding.')
+        raw_output = self._extract_predictions(raw, frame_meta)
+        self.select_output_blob(raw_output)
+        output = raw_output[self.output_blob]
+        output = softmax(output, 2)
+        preds_index = np.argmax(output, 2)
+
+        result = []
+        for identifier, data in zip(identifiers, preds_index):
+            decoded = ''.join(str(self.label_map[char]) for char in data)
+            decoded = decoded[:decoded.find(self.eos_label)]
+            result.append(CharacterRecognitionPrediction(identifier, decoded))
+
+        return result
 
 
 class LPRAdapter(Adapter):
@@ -267,7 +322,7 @@ class AttentionOCRAdapter(Adapter):
         return params
 
     def configure(self):
-        self._output_blob = self.get_value_from_config('output_blob')
+        self.output_blob = self.get_value_from_config('output_blob')
         self.labels = self.get_value_from_config('labels')
         self.eos_index = self.get_value_from_config('eos_index')
         self.lower_case = self.get_value_from_config('to_lower_case')
@@ -289,3 +344,58 @@ class AttentionOCRAdapter(Adapter):
                 decoded_out = decoded_out.lower()
             result.append(CharacterRecognitionPrediction(identifier, decoded_out))
         return result
+
+
+class PDPDTextRecognition(Adapter):
+    __provider__ = 'ppocr'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'vocabulary_file': PathField(description='file with decoding labels'),
+            'remove_duplicates': BoolField(
+                optional=True, default=True, description='remove duplications from result string'
+            )
+        })
+        return params
+
+    def configure(self):
+        self.labels_file = self.get_value_from_config('vocabulary_file')
+        chr_str = ''
+        with self.labels_file.open("rb") as fin:
+            lines = fin.readlines()
+            for line in lines:
+                line = line.decode('utf-8').strip("\n").strip("\r\n")
+                chr_str += line
+            chr_str += " "
+        dict_character = list(chr_str)
+        self.label_map = dict(enumerate(['<blank>'] + dict_character))
+        self.ignored_tokens = [0]
+        self.remove_duplicates = self.get_value_from_config('remove_duplicates')
+
+    def process(self, raw, identifiers, frame_meta):
+        results = []
+        outputs = self._extract_predictions(raw, frame_meta)
+        for identifier, out in zip(identifiers, outputs[self.output_blob]):
+            preds_idx = np.argmax(out, axis=1)
+            text = self.decode(preds_idx)
+            results.append(CharacterRecognitionPrediction(identifier, text))
+
+        return results
+
+    def decode(self, text_index):
+        """ convert text-index into text-label. """
+        char_list = []
+        for pos_id, idx in enumerate(text_index):
+            if idx in self.ignored_tokens:
+                continue
+            if self.remove_duplicates:
+                if pos_id > 0 and text_index[pos_id - 1] == idx:
+                    continue
+
+            if idx == len(self.label_map):
+                continue
+            char_list.append(self.label_map[int(idx)])
+
+        return ''.join(char_list)

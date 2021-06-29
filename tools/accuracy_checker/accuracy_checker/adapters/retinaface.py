@@ -14,9 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from itertools import product
 import numpy as np
+
 from ..adapters import Adapter
-from ..config import ListField, BoolField, NumberField
+from ..config import ListField, BoolField, NumberField, StringField
 from ..postprocessor import NMS
 from ..representation import (
     DetectionPrediction,
@@ -172,7 +174,7 @@ class RetinaFaceAdapter(Adapter):
         if boxes.shape[0] == 0:
             return np.zeros((0, box_deltas.shape[1]))
 
-        boxes = boxes.astype(np.float, copy=False)
+        boxes = boxes.astype(float, copy=False)
         widths = boxes[:, 2] - boxes[:, 0] + 1.0
         heights = boxes[:, 3] - boxes[:, 1] + 1.0
         ctr_x = boxes[:, 0] + 0.5 * (widths - 1.0)
@@ -267,7 +269,7 @@ class RetinaFaceAdapter(Adapter):
     def landmark_pred(boxes, landmark_deltas):
         if boxes.shape[0] == 0:
             return np.zeros((0, landmark_deltas.shape[1]))
-        boxes = boxes.astype(np.float, copy=False)
+        boxes = boxes.astype(float, copy=False)
         widths = boxes[:, 2] - boxes[:, 0] + 1.0
         heights = boxes[:, 3] - boxes[:, 1] + 1.0
         ctr_x = boxes[:, 0] + 0.5 * (widths - 1.0)
@@ -313,3 +315,150 @@ class RetinaFaceAdapter(Adapter):
             raw_predictions[target_out] = transposed_output
 
         return raw_predictions
+
+
+class RetinaFacePyTorchAdapter(Adapter):
+    __provider__ = 'retinaface_pytorch'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update(
+            {
+                'bboxes_output': StringField(description="Names for output layers with face detection boxes"),
+                'scores_output': StringField(description="Names for output layers with face detection score"),
+                'landmarks_output': StringField(
+                    optional=True, description="Names for output layers with predicted facial landmarks"
+                ),
+                'include_boundaries': BoolField(
+                    optional=True, default=False, description="Allows include boundaries for NMS"
+                ),
+                'keep_top_k': NumberField(
+                    min_value=1, optional=True, description="Maximal number of boxes which should be kept",
+                    value_type=int, default=750
+                ),
+                'nms_threshold': NumberField(
+                    min_value=0, optional=True, default=0.4, description="Overlap threshold for NMS"
+                ),
+                'confidence_threshold': NumberField(
+                    min_value=0, optional=True, default=0.02, description="Lower bound for valid boxes scores"
+                )
+            }
+        )
+        return params
+
+    def configure(self):
+        self.bboxes_output = self.get_value_from_config('bboxes_output')
+        self.scores_output = self.get_value_from_config('scores_output')
+        self.landmarks_output = self.get_value_from_config('landmarks_output')
+        self.include_boundaries = self.get_value_from_config('include_boundaries')
+        self.keep_top_k = self.get_value_from_config('keep_top_k')
+        self.nms_threshold = self.get_value_from_config('nms_threshold')
+        self.confidence_threshold = self.get_value_from_config('confidence_threshold')
+        self.variance = [0.1, 0.2]
+
+    def process(self, raw, identifiers, frame_meta):
+        raw_predictions = self._extract_predictions(raw, frame_meta)
+        results = []
+        for batch_id, (identifier, meta) in enumerate(zip(identifiers, frame_meta)):
+            image_size = meta['image_info'][:2]
+            prior_data = self.generate_prior_data(image_size)
+            proposals = self._get_proposals(raw_predictions[self.bboxes_output][batch_id], prior_data, image_size)
+            scores = raw_predictions[self.scores_output][batch_id][:, 1]
+            filter_idx = np.where(scores > self.confidence_threshold)[0]
+            proposals = proposals[filter_idx]
+            scores = scores[filter_idx]
+            x_mins, y_mins, x_maxs, y_maxs = proposals.T
+            keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, scores, self.nms_threshold,
+                           self.include_boundaries, self.keep_top_k)
+            proposals = proposals[keep]
+            scores = np.reshape(scores[keep], -1)
+            labels = np.full_like(scores, 1, dtype=int)
+            x_mins, y_mins, x_maxs, y_maxs = np.array(proposals).T # pylint: disable=E0633
+            x_scale, y_scale = self.get_scale(meta)
+            detection_representation = DetectionPrediction(
+                identifier, labels, scores, x_mins / x_scale, y_mins / y_scale, x_maxs / x_scale, y_maxs / y_scale
+            )
+            representations = {'face_detection': detection_representation}
+
+            if self.landmarks_output:
+                landmarks = self._get_landmarks(raw_predictions[self.landmarks_output][batch_id], prior_data,
+                                                image_size, filter_idx, keep)
+                landmarks_x_coords = np.array(landmarks)[:, ::2] / x_scale
+                landmarks_y_coords = np.array(landmarks)[:, 1::2] / y_scale
+                representations['landmarks_regression'] = FacialLandmarksPrediction(identifier, landmarks_x_coords,
+                                                                                    landmarks_y_coords)
+            results.append(
+                ContainerPrediction(representations) if len(representations) > 1 else detection_representation
+            )
+        return results
+
+    @staticmethod
+    def get_scale(meta):
+        if 'scale_x' in meta:
+            return meta['scale_x'], meta['scale_y']
+        original_image_size = meta['image_size'][:2]
+        image_input = [shape for shape in meta['input_shape'].values() if len(shape) == 4]
+        assert image_input, "image input not found"
+        assert len(image_input) == 1, 'model should have only one image input'
+        image_input = image_input[0]
+        if image_input[1] == 3:
+            processed_image_size = image_input[2:]
+        else:
+            processed_image_size = image_input[1:3]
+        y_scale = processed_image_size[0] / original_image_size[0]
+        x_scale = processed_image_size[1] / original_image_size[1]
+
+        return x_scale, y_scale
+
+    @staticmethod
+    def generate_prior_data(image_size):
+        global_min_sizes = [[16, 32], [64, 128], [256, 512]]
+        steps = [8, 16, 32]
+        anchors = []
+        feature_maps = [[int(np.rint(image_size[0]/step)), int(np.rint(image_size[1]/step))] for step in steps]
+        for idx, feature_map in enumerate(feature_maps):
+            min_sizes = global_min_sizes[idx]
+            for i, j in product(range(feature_map[0]), range(feature_map[1])):
+                for min_size in min_sizes:
+                    s_kx = min_size / image_size[1]
+                    s_ky = min_size / image_size[0]
+                    dense_cx = [x * steps[idx] / image_size[1] for x in [j + 0.5]]
+                    dense_cy = [y * steps[idx] / image_size[0] for y in [i + 0.5]]
+                    for cy, cx in product(dense_cy, dense_cx):
+                        anchors += [cx, cy, s_kx, s_ky]
+
+        priors = np.array(anchors).reshape((-1, 4))
+        return priors
+
+    def _get_proposals(self, raw_boxes, priors, image_size):
+        proposals = self.decode_boxes(raw_boxes, priors, self.variance)
+        proposals[:, ::2] = proposals[:, ::2] * image_size[1]
+        proposals[:, 1::2] = proposals[:, 1::2] * image_size[0]
+        return proposals
+
+    @staticmethod
+    def decode_boxes(raw_boxes, priors, variance):
+        boxes = np.concatenate((
+            priors[:, :2] + raw_boxes[:, :2] * variance[0] * priors[:, 2:],
+            priors[:, 2:] * np.exp(raw_boxes[:, 2:] * variance[1])), 1)
+        boxes[:, :2] -= boxes[:, 2:] / 2
+        boxes[:, 2:] += boxes[:, :2]
+        return boxes
+
+    def _get_landmarks(self, raw_landmarks, priors, image_size, filter_idx, nms_keep):
+        landmarks = self.decode_landmarks(raw_landmarks, priors, self.variance)
+        landmarks[:, ::2] = landmarks[:, ::2] * image_size[1]
+        landmarks[:, 1::2] = landmarks[:, 1::2] * image_size[0]
+        landmarks = landmarks[filter_idx]
+        landmarks = landmarks[nms_keep]
+        return landmarks
+
+    @staticmethod
+    def decode_landmarks(raw_landmarks, priors, variance):
+        landmarks = np.concatenate((priors[:, :2] + raw_landmarks[:, :2] * variance[0] * priors[:, 2:],
+                                    priors[:, :2] + raw_landmarks[:, 2:4] * variance[0] * priors[:, 2:],
+                                    priors[:, :2] + raw_landmarks[:, 4:6] * variance[0] * priors[:, 2:],
+                                    priors[:, :2] + raw_landmarks[:, 6:8] * variance[0] * priors[:, 2:],
+                                    priors[:, :2] + raw_landmarks[:, 8:10] * variance[0] * priors[:, 2:]), 1)
+        return landmarks

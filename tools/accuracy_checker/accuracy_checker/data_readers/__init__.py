@@ -35,6 +35,8 @@ from .data_reader import (
     SkimageReader,
     RawpyReader,
     ByteFileReader,
+    LMDBReader,
+    KaldiARKReader,
 
     DataRepresentation,
     ClipIdentifier,
@@ -42,6 +44,9 @@ from .data_reader import (
     ImagePairIdentifier,
     ListIdentifier,
     MultiInstanceIdentifier,
+    KaldiFrameIdentifier,
+    KaldiMatrixIdentifier,
+    ParametricImageIdentifier,
 
     serialize_identifier,
     deserialize_identifier,
@@ -73,6 +78,8 @@ __all__ = [
     'SkimageReader',
     'RawpyReader',
     'ByteFileReader',
+    'LMDBReader',
+    'KaldiARKReader',
 
     'DataRepresentation',
     'ClipIdentifier',
@@ -80,6 +87,10 @@ __all__ = [
     'ImagePairIdentifier',
     'ListIdentifier',
     'MultiInstanceIdentifier',
+    'KaldiMatrixIdentifier',
+    'KaldiFrameIdentifier',
+    'ParametricImageIdentifier',
+
     'create_reader',
     'REQUIRES_ANNOTATIONS',
 

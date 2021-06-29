@@ -1,6 +1,15 @@
 # Deep Learning accuracy validation framework
 
+The Accuracy Checker is an extensible, flexible and configurable Deep Learning accuracy validation framework. The tool has a modular structure and allows to reproduce validation pipeline and collect aggregated quality indicators for popular datasets both for networks in source frameworks and in the OpenVINO™ supported formats.
+
 ## Installation
+
+> **TIP**: You also can work with the Accuracy Checker inside the OpenVINO™ [Deep Learning Workbench](@ref workbench_docs_Workbench_DG_Introduction) (DL Workbench).
+> [DL Workbench](@ref workbench_docs_Workbench_DG_Introduction) is a platform built upon OpenVINO™ and provides a web-based graphical environment that enables you to optimize, fine-tune, analyze, visualize, and compare
+> performance of deep learning models on various Intel® architecture
+> configurations. In the DL Workbench, you can use most of OpenVINO™ toolkit components.
+> <br>
+> Proceed to an [easy installation from Docker](@ref workbench_docs_Workbench_DG_Install_from_Docker_Hub) to get started.
 
 ### Prerequisites
 
@@ -44,12 +53,13 @@ The next step is installing backend frameworks for Accuracy Checker.
 In order to evaluate some models required frameworks have to be installed. Accuracy-Checker supports these frameworks:
 
 - [OpenVINO](https://software.intel.com/en-us/openvino-toolkit/documentation/get-started).
-- [Caffe](accuracy_checker/launcher/caffe_installation_readme.md).
+- [Caffe](https://caffe.berkeleyvision.org/installation.html).
 - [MXNet](https://mxnet.apache.org/).
 - [OpenCV DNN](https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html).
 - [TensorFlow](https://www.tensorflow.org/).
 - [ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/master/README.md).
 - [PyTorch](https://pytorch.org/)
+- [PaddlePaddle](https://www.paddlepaddle.org.cn/documentation/docs/en/guides/index_en.html)
 
 You can use any of them or several at a time. For correct work, Accuracy Checker requires at least one. You are able postpone installation of other frameworks and install them when they will be necessary.
 
@@ -163,7 +173,9 @@ You can use field `global_definitions` for specifying path to global definitions
 ### Launchers
 
 Launcher is a description of how your model should be executed.
-Each launcher configuration starts with setting `framework` name. Currently *caffe*, *dlsdk*, *mxnet*, *tf*, *tf_lite*, *opencv*, *onnx_runtime* supported. Launcher description can have differences.
+Each launcher configuration starts with setting `framework` name.
+Currently *caffe*, *dlsdk*, *mxnet*, *tf*, *tf2*, *tf_lite*, *opencv*, *onnx_runtime*, *pytorch*, *paddlepaddle* supported.
+Launcher description can have differences.
 Please view:
 
 - [How to configure Caffe launcher](accuracy_checker/launcher/caffe_launcher_readme.md)
@@ -175,6 +187,7 @@ Please view:
 - [How to configure TensorFlow 2.0 Launcher](accuracy_checker/launcher/tf2_launcher_readme.md)
 - [How to configure ONNX Runtime Launcher](accuracy_checker/launcher/onnx_runtime_launcher_readme.md)
 - [How to configure PyTorch Launcher](accuracy_checker/launcher/pytorch_launcher_readme.md)
+- [How to configure PaddlePaddle Launcher](accuracy_checker/launcher/pdpd_launcher_readme.md)
 
 ### Datasets
 
@@ -186,7 +199,7 @@ If your dataset data is a well-known competition problem (COCO, Pascal VOC, and 
 it is reasonable to declare it in some global configuration file ([definition file](dataset_definitions.yml)). This way in your local configuration file you can provide only
 `name` and all required steps will be picked from global one. To pass path to this global configuration use `--definition` argument of CLI.
 
-If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about dataset preparation you can find in [Dataset Preparation Guide](https://github.com/openvinotoolkit/open_model_zoo/blob/develop/datasets.md).
+If you want to evaluate models using prepared config files and well-known datasets, you need to organize folders with validation datasets in a certain way. More detailed information about dataset preparation you can find in [Dataset Preparation Guide](../../data/datasets.md).
 
 Each dataset must have:
 
@@ -235,20 +248,20 @@ example of dataset definition:
 
 ### Preprocessing, Metrics, Postprocessing
 
-Each entry of preprocessing, metrics, postprocessing must have `type` field,
-other options are specific to type. If you do not provide any other option, then it
-will be picked from *definitions* file.
+Each entry of preprocessing, metrics, postprocessing must have a `type` field,
+with other options are specific to the type. If you do not provide any other option, then it
+will be picked from the *definitions* file.
 
 You can find useful following instructions:
 
-- [how to convert annotations](accuracy_checker/annotation_converters/README.md)
-- [how to use preprocessing](accuracy_checker/preprocessor/README.md).
-- [how to use postprocessing](accuracy_checker/postprocessor/README.md).
-- [how to use metrics](accuracy_checker/metrics/README.md).
-- [how to use readers](accuracy_checker/data_readers/README.md).
+- [How to convert annotations](accuracy_checker/annotation_converters/README.md)
+- [How to use preprocessing](accuracy_checker/preprocessor/README.md)
+- [How to use postprocessing](accuracy_checker/postprocessor/README.md)
+- [How to use metrics](accuracy_checker/metrics/README.md)
+- [How to use readers](accuracy_checker/data_readers/README.md)
 
-You may optionally provide `reference` field for metric, if you want calculated metric
-tested against specific value (i.e. reported in canonical paper).
+You may optionally provide `reference` field for metric, if you want the calculated metric
+tested against a specific value (i.e. reported in canonical paper).
 
 Some metrics support providing vector results ( e. g. mAP is able to return average precision for each detection class). You can change view mode for metric results using `presenter` (e.g. `print_vector`, `print_scalar`).
 
@@ -264,7 +277,7 @@ metrics:
 
 ### Testing new models
 
-Typical workflow for testing new model include:
+Typical workflow for testing a new model includes:
 
 1. Convert annotation of your dataset. Use one of the converters from annotation-converters, or write your own if there is no converter for your dataset. You can find detailed instruction how to use converters in [Annotation Conversion Guide](accuracy_checker/annotation_converters/README.md).
 2. Choose one of *adapters* or write your own. Adapter converts raw output produced by framework to high level problem specific representation (e.g. *ClassificationPrediction*, *DetectionPrediction*, etc).

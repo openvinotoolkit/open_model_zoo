@@ -58,34 +58,40 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `convert_images` - allows to convert images from pickle file to user specified directory (default value is False).
   * `converted_images_dir` - path to converted images location.
   * `num_classes` - the number of classes in the dataset - 10 or 100 (Optional, default 10)
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+* `mnist` - convert MNIST dataset for handwritten digit recognition to `ClaassificationAnnotation`. Dataset can be downloaded [here](https://deepai.org/dataset/mnist).
+  * `labels_file` - binary file which contains labels.
+  * `images_file` - binary file which contains images.
+  * `convert_images` - allows to convert images from data file to user specified directory (default value is False).
+  * `converted_images_dir` - path to converted images location if enabled `convert_images`.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding). Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `mnist_csv` - convert MNIST dataset for handwritten digit recognition stored in csv format to `ClassificationAnnotation`.
   * `annotation_file` - path to dataset file in csv format.
   * `convert_images` - allows to convert images from annotation file to user specified directory (default value is False).
   * `converted_images_dir` - path to converted images location if enabled `convert_images`.
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding). Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding). Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `fashion_mnist` - convert [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) dataset to `ClassificationAnnotation`.
   * `annotation_file` - path to labels file in binary format.
   * `data_file` - path to images file in binary format.
   * `convert_images` - allows to convert images from data file to user specified directory (default value is False).
   * `converted_images_dir` - path to converted images location if enabled `convert_images`.
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding). Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding). Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `imagenet` - convert ImageNet dataset for image classification task to `ClassificationAnnotation`.
   * `annotation_file` - path to annotation in txt format.
   * `labels_file` - path to file with word description of labels (synset_words).
   * `has_background` - allows to add background label to original labels and convert dataset for 1001 classes instead 1000 (default value is False).
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `voc_detection` - converts Pascal VOC annotation for detection task to `DetectionAnnotation`.
   * `imageset_file` - path to file with validation image list.
   * `annotations_dir` - path to directory with annotation files.
   * `images_dir` - path to directory with images related to devkit root (default JPEGImages).
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is True)
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `voc_segmentation` - converts Pascal VOC annotation for semantic segmentation task to `SegmentationAnnotation`.
   * `imageset_file` - path to file with validation image list.
   * `images_dir` - path to directory with images related to devkit root (default JPEGImages).
   * `mask_dir` - path to directory with ground truth segmentation masks related to devkit root (default SegmentationClass).
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 **Note**: Since OpenVINO 2020.4 the converter behaviour changed. `data_source` parameter of dataset should contains directory for images only, if you have segmentation mask in separated location, please use `segmentation_masks_source` for specifying gt masks location.
 * `mscoco_detection` - converts MS COCO dataset for object detection task to `DetectionAnnotation`.
   * `annotation_file` - path to annotation file in json format.
@@ -93,7 +99,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `use_full_label_map` - allows to use original label map (with 91 object categories) from paper instead public available(80 categories).
   * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
   * `sort_key` - key by which annotations will be sorted(supported keys are `image_id` and `image_size`, default is `image_id`).
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
   * `convert_COCO_to_VOC_labels` - allows to convert COCO labels to Pacsal VOC labels. Optional, default is False.
 * `mscoco_segmentation` - converts MS COCO dataset for object instance segmentation task to `CocoInstanceSegmentationAnnotation`.
   * `annotation_file` - path to annotation file in json format.
@@ -101,7 +107,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `use_full_label_map` - allows to use original label map (with 91 object categories) from paper instead public available(80 categories).
   * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
   * `sort_key` - key by which annotations will be sorted (supported keys are `image_id` and `image_size`, default is `image_id`).
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
   * `semantic_only` - converts MS COCO dataset annotation to `SegmentationAnnotation`. (Optional, default value is False)
   * `masks_dir` - path to store segmentation masks in `semantic_only` mode
   * `convert_COCO_to_VOC_labels` - allows to convert COCO labels to Pacsal VOC labels. Optional, default is False.
@@ -111,25 +117,25 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `use_full_label_map` - allows to use original label map (with 91 object categories) from paper instead public available(80 categories).
   * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
   * `sort_key` - key by which annotations will be sorted (supported keys are `image_id` and `image_size`, default is `image_id`).
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
   * `convert_COCO_to_VOC_labels` - allows to convert COCO labels to Pacsal VOC labels. Optional, default is False.
 * `mscoco_keypoints` - converts MS COCO dataset for keypoints localization task to `PoseEstimationAnnotation`.
   * `annotation_file` - path to annotation file in json format.
   * `sort_annotations` - allows to save annotations in a specific order: ascending order of image id or ascending order of image size.
   * `sort_key` - key by which annotations will be sorted (supported keys are `image_id` and `image_size`, default is `image_id`).
   * `remove_empty_images` - allows excluding/inclusing images without objects from/to the dataset..
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `wider` - converts from Wider Face dataset to `DetectionAnnotation`.
   * `annotation_file` - path to txt file, which contains ground truth data in WiderFace dataset format.
   * `label_start` - specifies face label index in label map. Default value is 1. You can provide another value, if you want to use this dataset for separate label validation,
   in case when your network predicts other class for faces.
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `detection_opencv_storage` - converts detection annotation stored in Detection OpenCV storage format to `DetectionAnnotation`.
   * `annotation_file` - path to annotation in xml format.
   * `image_names_file` - path to txt file, which contains image name list for dataset.
   * `label_start` - specifies label index start in label map. Default value is 1. You can provide another value, if you want to use this dataset for separate label validation.
   * `background_label` - specifies which index will be used for background label. You can not provide this parameter if your dataset has not background label.
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `cityscapes` - converts CityScapes Dataset to `SegmentationAnnotation`.
   * `dataset_root_dir` - path to dataset root.
   * `images_subfolder` - path from dataset root to directory with validation images (Optional, default `imgsFine/leftImg8bit/val`).
@@ -137,7 +143,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `masks_suffix` - suffix for mask file names (Optional, default `_gtFine_labelTrainIds`).
   * `images_suffix` - suffix for image file names (Optional, default `_leftImg8bit`).
   * `use_full_label_map` - allows to use full label map with 33 classes instead train label map with 18 classes (Optional, default `False`).
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `mapillary_20` - converts Mapillary dataset contained 20 classes to `SegmentationAnnotation`.
   * `data_dir` - path to dataset root folder. Relative paths to images and masks directory determine as `imgs` and `masks` respectively. In way when images and masks are located in non default directories, you can use parameters described below.
   * `images_dir` - path to images folder.
@@ -172,7 +178,13 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `data_dir` - path to folder, where images in low and high resolution are located.
   * `input_suffix` - input file name's suffix (default `in`).
   * `target_suffix` - target ground truth file name's suffix (default `out`).
+  * `recursive` - enables acquiring of dataset files from `data_dir` subcatalogs (default False).
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+* `parametric_image_processing` - converts dataset for image processing which required variable conditions for getting result, to `ImageProcessingAnnotation. Parameters provided as float value in reference image name using `_` as delimeter.
+  * `input_dir` - directory with input images.
+  * `reference_dir` - directory with reference images.
+  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+  * `param_scale` - multiplayer for parameters (Optional, default `0.001`).
 * `super_resolution` - converts dataset for single image super resolution task to `SuperResolutionAnnotation`.
   * `data_dir` - path to folder, where images in low and high resolution are located.
   * `lr_dir` - path to directory, where images in low resolution are located.
@@ -181,17 +193,17 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `ignore_suffixes` - matched low resolution, high resolution image located in different directories without usage suffixes, using numeric ids (Optional, default False).
   * `lr_suffix` - low resolution file name's suffix (default lr).
   * `hr_suffix` - high resolution file name's suffix (default hr).
-  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `dicom`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `pillow_rgb` (for explicit data conversion to RGB format), `dicom`, `skimage`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
   * `two_streams` - enable 2 input streams where usually first for original image and second for upsampled image. (Optional, default False).
   * `upsample_suffix` - upsample images file name's suffix (default upsample).
 * `super_resolution_dir_based` - converts dataset for single image super resolution task to `SuperResolutionAnnotation` which have directory based structure (high resolution and low resolution images located on separated directories and matches by name or numeric id).
 The main difference between this converter and `super_resolution` in data organization. `super_resolution` converter should be used if all high and low resolution images located in the same dir and have difference in suffixes.
-  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `dicom`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+  * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow`, `pillow_rgb` (for explicit data conversion to RGB format), `dicom`, `skimage`. (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
   * `two_streams` - enable 2 input streams where usually first for original image and second for upsampled image. (Optional, default False).
   * `images_dir` - path to dataset root, where directories with low and high resolutions are located.
-  *  `lr_dir` - path to directory, where images in low resolution are located (Optional, default <images_dir>/LR).
-  * `hr_dir` - path to directory, where images in high resolution are located (Optional, default <images_dir>/HR). **Note:** inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.
-  * `upsampled_dir` - path to directory, where upsampled images are located, if 2 streams used (Optional, default <images_dir>/upsample).
+  * `lr_dir` - path to directory, where images in low resolution are located (Optional, default `<images_dir>/LR`).
+  * `hr_dir` - path to directory, where images in high resolution are located (Optional, default `<images_dir>/HR`). **Note:** inside converted annotation, path to directory is not stored, only file name, please use `additional_data_source` for providing prefix.
+  * `upsampled_dir` - path to directory, where upsampled images are located, if 2 streams used (Optional, default `<images_dir>/upsample`).
   * `relaxed_names` - allow to use more relaxed search of high resolution or/and upsampled images matching only numeric ids. Optional, by default full name matching required.
   * `hr_prefixed` - allow to use partial name matching  when low resolution filename is a part of high resolution filename. Not applicable when `relaxed_names` is set. Optional, by default full name matching required.
 * `multi_frame_super_resolution` - converts dataset for super resolution task with multiple input frames usage.
@@ -210,14 +222,30 @@ The main difference between this converter and `super_resolution` in data organi
   * `word_spotting` - if it is true then transcriptions that have lengths less than 3 symbols or transcriptions containing non-alphanumeric symbols will be marked as difficult.
 * `icdar13_recognition` - converts ICDAR13 dataset for text recognition task to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
+  * `delimeter` - delimeter between image and text for recognition. Supported values - `space` and `tab` for space and tabular separator respectively.
+* `lmdb_text_recognition_database` - converter for text recognition dataset in a form of LMDB database.
+  * `lower_case` - parameter describing if ground truth text should be converted to lower case.
 * `unicode_character_recognition` - converts [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) dataset and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html) for handwritten Japanese text recognition task , and [SCUT-EPT](https://github.com/HCIILAB/SCUT-EPT_Dataset_Release) for handwritten simplified Chinese text recognition task to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
   * `decoding_char_file` - path to decoding_char_file, consisting of all supported characters separated by '\n' in txt format.
-* `brats` - converts BraTS dataset format to `BrainTumorSegmentationAnnotation` format.
+* `brats` - converts BraTS dataset format to `BrainTumorSegmentationAnnotation` format. Also can be used to convert other nifti-based datasets.
   * `data_dir` - dataset root directory, which contain subdirectories with validation data (`imagesTr`) and ground truth labels (`labelsTr`).
   Optionally you can provide relative path for these subdirectories (if they have different location) using `image_folder` and `mask_folder` parameters respectively.
-  * `mask_channels_first` - allows read gt mask nifti files and transpose in order where channels first (Optional, default False)
+  * `mask_channels_first` - allows read gt mask nifti files and transpose in order where channels first (Optional, default `False`)
   * `labels_file` - path to file, which contains labels (optional, if omitted no labels will be shown)
+  * `relaxed_names` - allows to use more relaxed search of labels matching only numeric ids. Optional, by default full name matching required.
+  * `multi_frame` - allows to convert annotation of 3D images as sequence of 2D frames (optional, default `False`)
+  * `frame_separator` - string separator between file name and frame number in `multi_frame` (optional, default `#`)
+  * `frame_axis` - number of frame axis in 3D Image (optional, default `-1`, last axis)
+  * `as_regression` - allows dataset conversion as `NiftiRegressionAnnotation` annotation (optional, default `False`)
+* `k_space_mri` - converts `k-spaced MRI` dataset format to `ImageRepresentationAnnotation` format. MRI datasets, for example `Calgary-Campinas`, provides data in Fourier images form (so called k-space images). Converter performs dataset annotation and preprocessing of ground truth images and model input.
+  * `data_dir` - path to dataset root
+  * `image_folder`- path to source k-space files directory, relatively `data_dir` (optional, default `images`)
+  * `reconstructed_folder`- path to reconstructed images directory, relatively `data_dir` (optional, default `reconstructed`)
+  * `masked_folder`- path to masked k-space files directory, relatively `data_dir` (optional, default `masked`)
+  * `mask_file` - k-space mask filename
+  * `stats_file` - k-space normalization factors filename
+  * `skip_dumps` - allows dataset annotation without preprocessing
 * `movie_lens_converter` - converts Movie Lens Datasets format to `HitRatioAnnotation` format.
   * `rating_file` - path to file which contains movieId with top score for each userID (for example ml-1m-test-ratings.csv)
   * `negative_file` - path to file which contains negative examples.
@@ -242,41 +270,50 @@ The main difference between this converter and `super_resolution` in data organi
   * `mask_prefix` - prefix part for mask file names. (Optional, default is empty).
   * `image_postfix` - postfix part for mask file names (optional, default is `.png`).
   * `mask_loader` - the way how GT mask should be loaded. Supported methods: `pillow`, `opencv`, `nifti`, `numpy`, `scipy`.
-  * `dataset_meta_file` - path to json file with prepared dataset meta info. It should contains `label_map` key with dictionary in format class_id: class_name and optionally `segmentation_colors` (if your dataset uses color encoding). Segmentation colors is a list of channel-wise values for each class. (e.g. if your dataset has 3 classes in BGR colors, segmentation colors for it will looks like: `[[255, 0, 0], [0, 255, 0], [0, 0, 255]]`). (Optional, you can provide self-created file as `dataset_meta` in your config).
-**Note: since OpenVINO 2020.4 converter behaviour changed. `data_source` parameter of dataset should contains directory for images only, if you have segmentation mask in separated location, please use `segmentation_masks_source` for specifying gt masks location.**
+  * `dataset_meta_file` - path to json file with prepared dataset meta info. It should contain `label_map` key with dictionary in format class_id: class_name and optionally `segmentation_colors` (if your dataset uses color encoding). Segmentation colors is a list of channel-wise values for each class. (e.g. if your dataset has 3 classes in BGR colors, segmentation colors for it will looks like: `[[255, 0, 0], [0, 255, 0], [0, 0, 255]]`). (Optional, you can provide self-created file as `dataset_meta` in your config).
+**Note: since OpenVINO 2020.4 converter behaviour changed. `data_source` parameter of dataset should contain the directory for images only, if you have segmentation mask in separated location, please use `segmentation_masks_source` for specifying gt masks location.**
+* `background_matting` - converts general format of datasets for background matting task to `BackgroundMattingAnnotation`. The converter expects following dataset structure:
+  1. images and GT masks are located in separated directories (e.g. `<dataset_root>/images` for images and `<dataset_root>/masks` for masks respectively)
+  2. images and GT masks has common part in names and can have difference in prefix and postfix (e.g. image name is image0001.jpeg, mask for it is gt0001.png are acceptable. In this case base_part - 0001, image_prefix - image, image_postfix - .jpeg, mask_prefix - gt, mask_postfix - .png)
+  * `images_dir` - path to directory with images.
+  * `masks_dir` - path to directory with GT masks.
+  * `image_prefix` - prefix part for image file names. (Optional, default is empty).
+  * `image_postfix` - postfix part for image file names (optional, default is `.png`).
+  * `mask_prefix` - prefix part for mask file names. (Optional, default is empty).
+  * `image_postfix` - postfix part for mask file names (optional, default is `.png`).
 * `camvid` - converts CamVid dataset with 12 classes to `SegmentationAnnotation`. Dataset can be found in the following [repository](https://github.com/alexgkendall/SegNet-Tutorial/tree/master/CamVid)
   * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space)
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `camvid_32` - converts CamVid dataset with 32 classes to `SegmentationAnnotation`. Dataset can be found [here](http://mi.eng.cam.ac.uk/research/projects/VideoRec/CamVid/).
   * `labels_dir` - directory with labeled ground truth images.
   * `images_dir` - directory with input data.
-  * `val_subset_ratio` - ratio of subset, which should be used for validation. It is the float value in (0, 1] range for definition subset size as <total_dataset_size> * <subset_ratio>. Optional, default 1 (it means full dataset used for validation).
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `val_subset_ratio` - ratio of subset, which should be used for validation. It is the float value in (0, 1] range for definition subset size as `<total_dataset_size> * <subset_ratio>`. Optional, default 1 (it means full dataset used for validation).
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `image_retrieval` - converts dataset for image retrieval task to `ReidentificationAnnotation`. Dataset should have following structure:
    1. the dataset root directory contains 2 subdirectory named `gallery` and `queries` for gallery images and query images respectively.
    2. Every of these subdirectories should contains text file with list of pairs: `<path_to_image>` `<image_ID>` (image_path and image_ID should be separated by space),  where `<path_to_image>` is path to the image related dataset root, `<image_ID>` is the number which represent image id in the gallery.
    * `data_dir` - path to dataset root directory.
    * `gallery_annotation_file` - file with gallery images and IDs concordance in txt format (Optional, default value is `<data_dir>/gallery/list.txt`)
    * `queries_annotation_file` - file with queries images and IDs concordance in txt format (Optional, default value is `<data_dir>/queries/list.txt`)
-* `cvat_object_detection` - converts [CVAT XML annotation version 1.1](https://github.com/openvinotoolkit/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `DetectionAnnotation`.
+* `cvat_object_detection` - converts [CVAT XML annotation version 1.1](https://openvinotoolkit.github.io/cvat/docs/for-developers/xml_format/) format for images to `DetectionAnnotation`.
   * `annotation_file` - path to xml file in appropriate format.
   * `has_background` - allows prepend original labels with special class represented background and convert dataset for n+1 classes instead n (default value is True).
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
-* `cvat_attributes_recognition` - converts [CVAT XML annotation version 1.1](https://github.com/openvinotoolkit/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `ClassificationAnnotation` or `ContainerAnnotation` with `ClassificationAnnotation` as value type and attribute names as keys (in multiple attributes case). Used bbox attributes as annotation classes.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+* `cvat_attributes_recognition` - converts [CVAT XML annotation version 1.1](https://openvinotoolkit.github.io/cvat/docs/for-developers/xml_format/) format for images to `ClassificationAnnotation` or `ContainerAnnotation` with `ClassificationAnnotation` as value type and attribute names as keys (in multiple attributes case). Used bbox attributes as annotation classes.
   * `annotation_file` - path to xml file in appropriate format.
   * `label` - the dataset label which will be used for attributes collection (e.g. if your dataset contains 2 labels: `face` and `person` and you want recognise attributes for face, you should use `face` as value for this parameter).
-* `cvat_age_gender` -  converts [CVAT XML annotation version 1.1](https://github.com/openvinotoolkit/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images which represent dataset for age gender recognition to `ContainerAnnotation` with `ClassificationAnnotation` for gender recognition, `ClassificationAnnotation` for age classification and `RegeressionAnnotation` for age regression. The identifiers for representations following: `gender_annotation`, `age_class_annotation`, `age_regression_annotation`.
+* `cvat_age_gender` -  converts [CVAT XML annotation version 1.1](https://openvinotoolkit.github.io/cvat/docs/for-developers/xml_format/) format for images which represent dataset for age gender recognition to `ContainerAnnotation` with `ClassificationAnnotation` for gender recognition, `ClassificationAnnotation` for age classification and `RegeressionAnnotation` for age regression. The identifiers for representations following: `gender_annotation`, `age_class_annotation`, `age_regression_annotation`.
   * `annotation_file` - path to xml file in appropriate format.
-* `cvat_facial_landmarks` - converts [CVAT XML annotation version 1.1](https://github.com/openvinotoolkit/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `FacialLandmarksAnnotation`.
+* `cvat_facial_landmarks` - converts [CVAT XML annotation version 1.1](https://openvinotoolkit.github.io/cvat/docs/for-developers/xml_format/) format for images to `FacialLandmarksAnnotation`.
   * `annotation_file` - path to xml file in appropriate format.
-* `cvat_pose_estimation` - converts [CVAT XML annotation version 1.1](https://github.com/openvinotoolkit/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `PoseEstimationAnnotation`.
+* `cvat_pose_estimation` - converts [CVAT XML annotation version 1.1](https://openvinotoolkit.github.io/cvat/docs/for-developers/xml_format/) format for images to `PoseEstimationAnnotation`.
   * `annotation_file` - path to xml file in appropriate format.
-* `cvat_text_recognition` - converts [CVAT XML annotation version 1.1](https://github.com/openvinotoolkit/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `CharacterRecognitionAnnotation`.
+* `cvat_text_recognition` - converts [CVAT XML annotation version 1.1](https://openvinotoolkit.github.io/cvat/docs/for-developers/xml_format/) format for images to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to xml file in appropriate format.
-* `cvat_binary_multilabel_attributes_recognition` - converts [CVAT XML annotation version 1.1](https://github.com/openvinotoolkit/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `MultiLabelRecognitionAnnotation`. Used bbox attributes as annotation classes. Each attribute field should contains `T` or `F` values for attribute existence/non-existence on the image respectively.
+* `cvat_binary_multilabel_attributes_recognition` - converts [CVAT XML annotation version 1.1](https://openvinotoolkit.github.io/cvat/docs/for-developers/xml_format/) format for images to `MultiLabelRecognitionAnnotation`. Used bbox attributes as annotation classes. Each attribute field should contains `T` or `F` values for attribute existence/non-existence on the image respectively.
   * `annotation_file` - path to xml file in appropriate format.
   * `label` - the dataset label which will be used for attributes collection (e.g. if your dataset contains 2 labels: `face` and `person` and you want recognise attributes for face, you should use `face` as value for this parameter).
-* `cvat_person_detection_action_recognition` converts dataset with [CVAT XML annotation version 1.1](https://github.com/openvinotoolkit/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) for person detection and action recognition task to `ContainerAnnotation` with `DetectionAnnotation` for person detection quality estimation named `person_annotation` and `ActionDetectionAnnotation` for action recognition named `action_annotation`.
+* `cvat_person_detection_action_recognition` converts dataset with [CVAT XML annotation version 1.1](https://openvinotoolkit.github.io/cvat/docs/for-developers/xml_format/) for person detection and action recognition task to `ContainerAnnotation` with `DetectionAnnotation` for person detection quality estimation named `person_annotation` and `ActionDetectionAnnotation` for action recognition named `action_annotation`.
   * `annotation_file` - path to xml file with ground truth.
   * `use_case` - use case, which determines the dataset label map. Supported range actions:
     * `common_3_actions`(seating, standing, raising hand)
@@ -308,7 +345,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
   * `language_filter` - comma-separated list of used in annotation language tags for selecting records for specific languages only. (Optional, if not used full annotation will be converted).
-* `mnli` - converts The Multi-Genre Natural Language Inference Corpus ([MNLI](http://www.nyu.edu/projects/bowman/multinli/)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+* `mnli` - converts The Multi-Genre Natural Language Inference Corpus ([MNLI](https://cims.nyu.edu/~sbowman/multinli/)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
   * `annotation_file` - path to dataset annotation file in tsv format.
   * `vocab_file` - path to model vocabulary file for WordPiece tokinezation. (Optional, can be not provided in case, when another tokenization approach used.)
   * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
@@ -342,7 +379,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `annotattion_file` - path to annotation file in tf records format.
 * `cmu_panoptic_keypoints` - converts CMU Panoptic dataset to `PoseEstimation3dAnnotation` format.
   * `data_dir` - dataset root directory, which contain subdirectories with validation scenes data.
-* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/openvinotoolkit/training_extensions/tree/develop/pytorch_toolkit/action_recognition#preparation).
+* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/openvinotoolkit/training_extensions/blob/develop/misc/pytorch_toolkit/action_recognition/README.md#preparation).
   * `annotation_file` - path to annotation file in json format.
   * `data_dir` - path to directory with prepared data (e. g. data/kinetics/frames_data).
   * `clips_per_video` - number of clips per video (Optional, default 3).
@@ -350,21 +387,23 @@ The main difference between this converter and `super_resolution` in data organi
   * `temporal_stride` - temporal stride for frames selection (Optional, default 2).
   * `numpy_input` - allows usage numpy files instead images. It can be useful if data required difficult preprocessing steps (e.g. conversion to optical flow) (Optional, default `False`)
   * `subset` - dataset split: `train`, `validation` or `test` (Optional, default `validation`).
-  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
   * `num_samples` - select first n samples from dataset (Optional, if not provided full subset of samples will be used).
 * `continuous_clip_action_recognition` - converts annotation of video-based MS-ASL dataset to `ClassificationAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
   * `data_dir` - dataset root directory, which contains subdirectories with extracted video frames.
   * `out_fps` - output frame rate of generated video clips.
   * `clip_length` - number of frames of generated video clips.
+  * `img_prefix` - prefix for used images. (Optional, default - `img_`).
 * `redweb` - converts [ReDWeb](https://sites.google.com/site/redwebcvpr18) dataset for monocular relative depth perception to `DepthEstimationAnnotation`
   * `data_dir` - the dataset root directory, where `imgs` - directory with RGB images and `RD` - directory with relative depth maps are located (Optional, if you want to provide `annotation_file`)
   * `annotation_file`- the file in txt format which contains pairs of image and depth map files. (Optional, if not provided full content of `data_dir` will be considered as dataset.)
 * `nyu_depth_v2` - converts [NYU Depth Dataset V2](https://cs.nyu.edu/~silberman/datasets/nyu_depth_v2.html) for depth estimation to `DepthEstimationAnnotation`. This converter accept preprocessed data stored in HDF5 format, which can be downloaded from this [page](http://datasets.lids.mit.edu/fastdepth/data/)
   * `data_dir` - directory with HDF5 files. (Optional, can be omitted if you already have converted images and depth maps).
-  * `images_dir` - directory for images. If `data_dir` provided, the directory will be used for saving converted images, otherwise used for data reading. (Optional, can be not provided in conversion case, default value `<data_dir>/converted/images`).
-  * `depth_map_dir` - directory for reference depth maps, stored in numpy format. If `data_dir` provided, the directory will be used for saving converted depth maps, otherwise used for data reading.
+  * `images_dir` - directory for images. If `allow_convert_data` is True, the directory will be used for saving converted images, otherwise used for data reading. (Optional, can be not provided in conversion case, default value `<data_dir>/converted/images`).
+  * `depth_map_dir` - directory for reference depth maps, stored in numpy format. If `allow_convert_data` is True, the directory will be used for saving converted depth maps, otherwise used for data reading.
     (Optional, can be not provided in conversion case, default value `<data_dir>/converted/depth`). Please, note, you need to specify path to directory with depth maps with `additional_data_source` parameter in your config during evaluation.
+  * `allow_convert_data` - allows to convert data from HDF5 format (Optional, default False).
 * `inpainting` - converts images to `ImageInpaintingAnnotation`.
   * `images_dir` - path to images directory.
   * `masks_dir` - path to mask dataset to be used for inpainting (Optional).
@@ -477,6 +516,59 @@ The main difference between this converter and `super_resolution` in data organi
   * `max_length` - maximal input sequence length (Optional, default 128).
   * `pad_input` - allow padding for input sequence if input less that `max_length` (Optional, default `True`).
   * `include_special_token_lables` - allow extension original dataset labels with special token labels (`[CLS'`, `[SEP]`]) (Optional, default `False`).
+* `tacotron2_data_converter` - converts input data for custom tacotron2 pipeline.
+  * `annotation_file` - tsv file with location input data and reference.
+* `noise_suppression_dataset` - converts dataset for audio denoising to `NoiseSuppressionAnnotation`
+  * `annotation_file` - txt file with file pairs `<clean_signal> <noisy_signal>`.
+* `vimeo90k` - converts Vimeo-90K dataset for a systematic evaluation of video processing algorithms to `SuperResolutionAnnotation`.
+  * `annotation_file` - path to text file with list of dataset setuplets included in test.
+  * `add_flow` - allows annotation of flow data (optional, default `False`).
+* `kaldi_asr_data` - converts preprocessed Kaldi\* features dataset to `CharacterRecognitionAnnotation`.
+   * `annotation_file` - file with gt transcription table.
+   * `data_dir` - directory with ark files.
+   * `features_subset_file` - file with list testing ark files, Optional, if not provided, all found in `data_dir` files will be used.
+   * `ivectors` - include ivectors features to input, Optional, default `False`.
+* `kaldi_feat_regression` - converts preprocessed Kaldi\* features to `RegressionAnnotation`.
+  * `data_dir` - directory with input ark files.
+  * `features_subset_file` - file with list testing ark files, Optional, if not provided, all found in `data_dir` files will be used.
+  * `ivectors` - include ivectors features to input, Optional, default `False`.
+  * `ref_data_dir` - directory with reference ark files (Optional, if not provided `data_dir` will be used instead).
+  * `vectors_mode` - allow usage each vector in utterance as independent data.
+  * `ref_file_suffix` - suffix for search reference files (Optional, default `_kaldi_score`).
+* `electricity` - converts Electricity dataset to `TimeSeriesForecastingAnnotation`.
+  * `data_path_file` - Path to dataset file in .csv format.
+  * `num_encoder_steps` - The maximum number of historical timestamps that model use.
+* `yolo_labeling` - converts object detection dataset with annotation in YOLO labeling format to `DetectionAnnotation`.
+  * `annotations_dir` - path to directory with annotation files in txt format.
+  * `images_dir` -  path to directory with images (Optional).
+  * `labels_file` - path to file with labels in txt format (Optional).
+  * `images_suffix` - suffix for image file names (Optional, default: `.jpg`).
+* `label_me_detection` - converts dataset obtained using [LabelMe](http://labelme.csail.mit.edu/Release3.0/) Annotation Tool to `DetectionAnnotation`.
+  * `annotations_dir` - path to directory with annotation files in xml format.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding). More details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `images_dir` - path to directory with images (Optional).
+  * `has_background` - allows convert dataset with/without adding background_label (Optional, default: False).
+* `label_me_segmentation` - converts dataset obtained using [LabelMe](http://labelme.csail.mit.edu/Release3.0/) Annotation Tool to `SegmentationAnnotation`.
+  * `annotations_dir` - path to directory with annotation files in xml format.
+  * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding). More details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `images_dir` - path to directory with images (Optional).
+  * `masks_dir` - path to directory with ground truth segmentation masks (Optional).
+* `cls_dataset_folder` - converts generic classification dataset with [DatasetFolder](https://pytorch.org/vision/stable/datasets.html#datasetfolder) format to `ClassificationAnnotation`.
+  * `data_dir` - directory with input images in following structure:
+    ```
+        data_dir/class_a/xxx.ext
+        data_dir/class_a/xxy.ext
+        data_dir/class_b/[...]/xxz.ext
+        ...
+        data_dir/class_y/123.ext
+        data_dir/class_z/nsdf3.ext
+        data_dir/class_z/[...]/asd932_.ext
+    ```
+* `open_images_detection` - converts Open Images dataset for object detection task to `DetectionAnnotation`.
+  * `bbox_csv_file` - path to cvs file which contains bounding box coordinates.
+  * `labels_file` - path to file with class labels in csv format.
+  * `images_dir` - path to images folder (Optional).
+  * `label_start` - specifies label index start in label map. You can provide another value, if you want to use this dataset for separate label validation (Optional, default value is 1).
 
 ## <a name="customizing-dataset-meta"></a>Customizing Dataset Meta
 There are situations when we need to customize some default dataset parameters (e.g. replace original dataset label map with own.)

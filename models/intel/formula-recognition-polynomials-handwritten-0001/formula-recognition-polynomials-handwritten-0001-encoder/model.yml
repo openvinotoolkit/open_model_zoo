@@ -17,20 +17,20 @@ description: >-
 task_type: feature_extraction
 files:
   - name: FP32/formula-recognition-polynomials-handwritten-0001-encoder.xml
-    size: 200071
-    sha256: 6ae9dfa7d0c80c41059ffb42f548f1eb7290505257dbf675854281228b852a0f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP32/formula-recognition-polynomials-handwritten-0001-encoder.xml
+    size: 197976
+    sha256: 0f994c1c1dd3ba2dc75a387427011c44e852e7623da2d4172b30f7721c7af0d2
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP32/formula-recognition-polynomials-handwritten-0001-encoder.xml
   - name: FP32/formula-recognition-polynomials-handwritten-0001-encoder.bin
-    size: 45210840
-    sha256: df835cb5db54d6d2efb72f99d707e8289c2034c26284095fc2ca88a1e9df998a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP32/formula-recognition-polynomials-handwritten-0001-encoder.bin
+    size: 45208792
+    sha256: 38084c37f20825be26ca444edd4f2181ea2089678f7c60c079871394c2d44d79
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP32/formula-recognition-polynomials-handwritten-0001-encoder.bin
   - name: FP16/formula-recognition-polynomials-handwritten-0001-encoder.xml
-    size: 200028
-    sha256: 98050a016d1ac81459f618ed559a910155dc71966d3f880ee7201cffa8af01aa
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.xml
+    size: 197933
+    sha256: d68ed2dfe1626bfa3a0f50add3a8a32709a42dede15cc1acf0fd841c6579c8d9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.xml
   - name: FP16/formula-recognition-polynomials-handwritten-0001-encoder.bin
-    size: 22605528
-    sha256: 3adf19986f49650e24bf81a351b1d0dc0e6de8c9dbb0a6ae9f90eb10c55765cc
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.bin
+    size: 22604504
+    sha256: 45b91bf30c2e9e6739dc4d493edc5c6f12d96173bf292e7426aabb6717b3dc67
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/formula-recognition-polynomials-handwritten-0001/formula-recognition-polynomials-handwritten-0001-encoder/FP16/formula-recognition-polynomials-handwritten-0001-encoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

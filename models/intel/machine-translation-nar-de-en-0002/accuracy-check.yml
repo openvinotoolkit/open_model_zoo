@@ -1,0 +1,37 @@
+models:
+  - name: machine-translation-nar-de-en-0002
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: narnmt
+          vocabulary_file: machine-translation-nar-de-en-0002/tokenizer_tgt/vocab.json
+          merges_file: machine-translation-nar-de-en-0002/tokenizer_tgt/merges.txt
+          output_name: pred
+        inputs:
+          - name: "tokens"
+            value: 'tokens'
+            type: INPUT
+
+    datasets:
+      - name: WMT2019_de_en
+        reader:
+          type: annotation_features_extractor
+          features:
+            - source
+
+        preprocessing:
+          - type: decode_by_sentence_piece_bpe_tokenizer
+            vocabulary_file: machine-translation-nar-de-en-0002/tokenizer_src/vocab.json
+            merges_file: machine-translation-nar-de-en-0002/tokenizer_src/merges.txt
+
+          - type: pad_with_eos
+            eos_index: 1
+            sequence_len: 150
+
+        postprocessing:
+          - type: to_lower_case
+          - type: remove_repeats
+
+        metrics:
+          - type: bleu
+            smooth: True

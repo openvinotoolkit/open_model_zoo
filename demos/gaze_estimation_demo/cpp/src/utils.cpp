@@ -19,30 +19,6 @@
 using namespace InferenceEngine;
 
 namespace gaze_estimation {
-void initializeIEObject(InferenceEngine::Core& ie,
-                        const std::vector<std::pair<std::string, std::string>>& cmdOptions) {
-    std::set<std::string> loadedDevices;
-    for (auto && option : cmdOptions) {
-        auto deviceName = option.first;
-        auto networkName = option.second;
-
-        if (deviceName.empty() || networkName.empty()) {
-            continue;
-        }
-
-        if (loadedDevices.find(deviceName) != loadedDevices.end()) {
-            continue;
-        }
-        slog::info << "Loading device " << deviceName << slog::endl;
-        slog::info << printable(ie.GetVersions(deviceName)) << slog::endl;
-
-        /** Loading extensions for the CPU device **/
-        if ((deviceName.find("CPU") != std::string::npos)) {
-            loadedDevices.insert(deviceName);
-        }
-    }
-}
-
 void gazeVectorToGazeAngles(const cv::Point3f& gazeVector, cv::Point2f& gazeAngles) {
     auto r = cv::norm(gazeVector);
 

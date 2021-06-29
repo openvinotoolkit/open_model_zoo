@@ -21,6 +21,7 @@ from ...adapters import create_adapter
 from ...config import ConfigError
 from ...launcher import create_launcher
 from ...utils import contains_all
+from ...logging import print_info
 
 
 scale = 255.0/32768.0
@@ -198,6 +199,10 @@ class BaseONNXModel:
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
+        accepted_suffixes = ['.onnx']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
 
         return model
 
@@ -265,8 +270,8 @@ class DecoderModel:
                 # Cut off the tail of the remaining distribution
                 p = np.maximum(p - 0.002, 0).astype('float64')
                 p = p / (1e-8 + np.sum(p))
-
-                fexc[0, 0, 2] = np.argmax(np.random.multinomial(1, p[0, 0, :], 1))
+                rng = np.random.default_rng(12345)
+                fexc[0, 0, 2] = np.argmax(rng.multinomial(1, p[0, 0, :], 1))
                 pcm[pcm_start_index] = pred + ulaw2lin(fexc[0, 0, 2])
                 fexc[0, 0, 0] = lin2ulaw(pcm[pcm_start_index])
                 mem.append(coef * mem_ + pcm[pcm_start_index])

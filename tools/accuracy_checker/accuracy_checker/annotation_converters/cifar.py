@@ -109,6 +109,9 @@ class CifarFormatConverter(BaseFormatConverter):
         if not self.converted_images_dir:
             self.converted_images_dir = self.data_batch_file.parent / 'converted_images'
         self.convert_images = self.get_value_from_config('convert_images')
+        # create directory for storing images if it is necessary
+        if self.convert_images and not self.converted_images_dir.exists():
+            self.converted_images_dir.mkdir(parents=True)
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
@@ -120,9 +123,6 @@ class CifarFormatConverter(BaseFormatConverter):
             annotations: list of annotation representation objects.
             meta: dictionary with additional dataset level metadata.
         """
-        # create directory for storing images if it is necessary
-        if self.convert_images and not self.converted_images_dir.exists():
-            self.converted_images_dir.mkdir(parents=True)
         check_images = check_content and not self.convert_images
         content_errors = None
 

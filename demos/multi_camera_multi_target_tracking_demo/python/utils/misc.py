@@ -16,6 +16,7 @@ import logging as log
 import os.path as osp
 import sys
 from importlib import import_module
+from types import SimpleNamespace as namespace
 
 
 class AverageEstimator(object):
@@ -66,13 +67,12 @@ def read_py_config(filename):
     sys.path.insert(0, config_dir)
     mod = import_module(module_name)
     sys.path.pop(0)
-    cfg_dict = {
+
+    return namespace(**{
         name: value
         for name, value in mod.__dict__.items()
         if not name.startswith('__')
-    }
-
-    return cfg_dict
+    })
 
 
 def check_pressed_keys(key):

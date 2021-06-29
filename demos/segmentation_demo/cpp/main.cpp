@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,12 +12,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-*/
-
-/**
-* \brief The entry point for the Inference Engine segmentation_demo_async demo application
-* \file segmentation_demo_async/main.cpp
-* \example segmentation_demo_async/main.cpp
 */
 
 #include <iostream>
@@ -36,7 +30,6 @@
 
 #include <pipelines/async_pipeline.h>
 #include <models/segmentation_model.h>
-#include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 
 DEFINE_INPUT_FLAGS
@@ -58,8 +51,10 @@ static const char num_threads_message[] = "Optional. Number of threads.";
 static const char num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in "
 "throughput mode (for HETERO and MULTI device cases use format "
 "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
-static const char no_show_processed_video[] = "Optional. Do not show processed video.";
+static const char no_show_message[] = "Optional. Don't show output.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
+static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
+    "in (width x height) format. Example: 1280x720. Input frame size used by default.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(m, "", model_message);
@@ -71,15 +66,16 @@ DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
-DEFINE_bool(no_show, false, no_show_processed_video);
+DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
+DEFINE_string(output_resolution, "", output_resolution_message);
 
 /**
 * \brief This function shows a help message
 */
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "segmentation_demo_async [OPTION]" << std::endl;
+    std::cout << "segmentation_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
@@ -97,7 +93,8 @@ static void showUsage() {
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
     std::cout << "    -nstreams                 " << num_streams_message << std::endl;
     std::cout << "    -loop                     " << loop_message << std::endl;
-    std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
+    std::cout << "    -no_show                  " << no_show_message << std::endl;
+    std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
 
@@ -120,6 +117,9 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -m is not set");
     }
 
+    if (!FLAGS_output_resolution.empty() && FLAGS_output_resolution.find("x") == std::string::npos) {
+        throw std::logic_error("Correct format of -output_resolution parameter is \"width\"x\"height\".");
+    }
     return true;
 }
 
@@ -170,7 +170,7 @@ cv::Mat applyColorMap(cv::Mat input) {
     return out;
 }
 
-cv::Mat renderSegmentationData(const SegmentationResult& result) {
+cv::Mat renderSegmentationData(const ImageResult& result, OutputTransform& outputTransform) {
     if (!result.metaData) {
         throw std::invalid_argument("Renderer: metadata is null");
     }
@@ -183,11 +183,15 @@ cv::Mat renderSegmentationData(const SegmentationResult& result) {
     }
 
     // Visualizing result data over source image
-    return inputImg / 2 + applyColorMap(result.mask) / 2;
+    cv::Mat output = inputImg / 2 + applyColorMap(result.resultImage) / 2;
+    outputTransform.resize(output);
+    return output;
 }
 
-int main(int argc, char *argv[]) {
-    try {
+int main(int argc, char* argv[])
+{
+    try
+    {
         PerformanceMetrics metrics;
 
         slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
@@ -204,7 +208,8 @@ int main(int argc, char *argv[]) {
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
         InferenceEngine::Core core;
-        AsyncPipeline pipeline(std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m, FLAGS_auto_resize)),
+        AsyncPipeline pipeline(
+            std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m, FLAGS_auto_resize)),
             ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
@@ -215,22 +220,21 @@ int main(int argc, char *argv[]) {
         uint32_t framesProcessed = 0;
         cv::VideoWriter videoWriter;
 
+        cv::Size outputResolution;
+        OutputTransform outputTransform = OutputTransform();
+        size_t found = FLAGS_output_resolution.find("x");
+
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
-                //--- Capturing frame
                 auto startTime = std::chrono::steady_clock::now();
+
+                //--- Capturing frame
                 curr_frame = cap->read();
-                if (frameNum == -1) {
-                    if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                                              cap->fps(), curr_frame.size())) {
-                        throw std::runtime_error("Can't open video writer");
-                    }
-                }
+
                 if (curr_frame.empty()) {
                     if (frameNum == -1) {
                         throw std::logic_error("Can't read an image from the input");
-                    }
-                    else {
+                    } else {
                         // Input stream is over
                         break;
                     }
@@ -240,14 +244,36 @@ int main(int argc, char *argv[]) {
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
             }
 
+            if (frameNum == 0) {
+                if (found == std::string::npos) {
+                    outputResolution = curr_frame.size();
+                }
+                else {
+                    outputResolution = cv::Size{
+                        std::stoi(FLAGS_output_resolution.substr(0, found)),
+                        std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
+                    };
+                    outputTransform = OutputTransform(curr_frame.size(), outputResolution);
+                    outputResolution = outputTransform.computeResolution();
+                }
+            }
+
+            // Preparing video writer if needed
+            if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
+                if (!videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                    cap->fps(), outputResolution)) {
+                    throw std::runtime_error("Can't open video writer");
+                }
+            }
+
             //--- Waiting for free input slot or output data available. Function will return immediately if any of them are available.
             pipeline.waitForData();
 
             //--- Checking for results and rendering data if it's ready
-            //--- If you need just plain data without rendering - cast result's underlying pointer to SegmentationResult*
+            //--- If you need just plain data without rendering - cast result's underlying pointer to ImageResult*
             //    and use your own processing instead of calling renderSegmentationData().
-            while ((result = pipeline.getResult()) && keepRunning) {
-                cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>());
+            while (keepRunning && (result = pipeline.getResult())) {
+                cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -255,6 +281,7 @@ int main(int argc, char *argv[]) {
                 if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
                     videoWriter.write(outFrame);
                 }
+                framesProcessed++;
                 if (!FLAGS_no_show) {
                     cv::imshow("Segmentation Results", outFrame);
 
@@ -266,27 +293,31 @@ int main(int argc, char *argv[]) {
                         presenter.handleKey(key);
                     }
                 }
-                framesProcessed++;
             }
-        }
+        } // while(keepRunning)
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
-        while (result = pipeline.getResult()) {
-            cv::Mat outFrame = renderSegmentationData(result->asRef<SegmentationResult>());
-            //--- Showing results and device information
-            presenter.drawGraphs(outFrame);
-            metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                videoWriter.write(outFrame);
+
+        for (; framesProcessed <= frameNum; framesProcessed++)
+        {
+            result = pipeline.getResult();
+            if (result != nullptr)
+            {
+                cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
+                //--- Showing results and device information
+                presenter.drawGraphs(outFrame);
+                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
+                    videoWriter.write(outFrame);
+                }
+                if (!FLAGS_no_show) {
+                    cv::imshow("Segmentation Results", outFrame);
+                    //--- Updating output window
+                    cv::waitKey(1);
+                }
             }
-            if (!FLAGS_no_show) {
-                cv::imshow("Segmentation Results", outFrame);
-                //--- Updating output window
-                cv::waitKey(1);
-            }
-            framesProcessed++;
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
@@ -305,5 +336,6 @@ int main(int argc, char *argv[]) {
     }
 
     slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
+
     return 0;
 }

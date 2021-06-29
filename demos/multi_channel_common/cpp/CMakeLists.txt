@@ -9,14 +9,6 @@ if(MULTICHANNEL_DEMO_USE_NATIVE_CAM OR MULTICHANNEL_DEMO_USE_TBB)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
-find_package(InferenceEngine 2.0 REQUIRED)
-# Find OpenCV components if exist
-find_package(OpenCV COMPONENTS highgui QUIET)
-if(NOT(OpenCV_FOUND))
-    message(WARNING "OPENCV is disabled or not found, " ${TARGET_NAME} " skipped")
-    return()
-endif()
-
 file(GLOB MAIN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB MAIN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 

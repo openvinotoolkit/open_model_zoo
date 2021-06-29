@@ -1,15 +1,16 @@
 # Gesture Recognition Python\* Demo
 
-![](./gesture_recognition.gif)
+![example](./gesture_recognition.gif)
 
 This demo demonstrates how to run Gesture (e.g. American Sign Language (ASL) gestures) Recognition models using OpenVINO&trade; toolkit.
 
 ## How It Works
 
-The demo application expects an gesture recognition model in the Intermediate Representation (IR) format.
+The demo application expects a gesture recognition model in the Intermediate Representation (IR) format.
 
 As input, the demo application takes:
-* a path to a video file or a device node of a web-camera specified with a command line argument `--input`
+
+* a path to a video file or a device node of a webcam specified with a command line argument `--input`
 * a path to a file in JSON format with gesture class names `--class_map`
 
 The demo workflow is the following:
@@ -21,7 +22,34 @@ The demo workflow is the following:
     - Last recognized gesture.
     - Performance characteristics.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+
+## Preparing to Run
+
+For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+The list of models supported by the demo is in `<omz_dir>/demos/gesture_recognition_demo/python/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
+### Supported Models
+
+* asl-recognition-0004
+* common-sign-language-0001
+* common-sign-language-0002
+* person-detection-asl-0001
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -45,9 +73,9 @@ Options:
                         detector model.
   -i INPUT, --input INPUT
                         Required. Path to a video file or a device node of a
-                        web-camera.
+                        webcam.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of output to save.
+                        Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
@@ -61,7 +89,7 @@ Options:
                         action.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on: CPU,
-                        GPU, FPGA, HDDL or MYRIAD. The demo will look for a
+                        GPU, HDDL or MYRIAD. The demo will look for a
                         suitable plugin for device specified (by default, it
                         is CPU).
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
@@ -75,11 +103,8 @@ Options:
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 To run the demo, please provide paths to the gesture recognition and person detection models in the IR format, to a file with class names, and to an input video:
+
 ```bash
 python gesture_recognition_demo.py \
     -m_a <path_to_model>/asl-recognition-0004.xml \
@@ -90,15 +115,30 @@ python gesture_recognition_demo.py \
 
 The demo starts in person tracking mode and to switch it in the action recognition mode you should press `0-9` button with appropriate detection ID (the number in top-left of each bounding box). If frame contains only one person, they will be chosen automatically. After that you can switch back to tracking mode by pressing space button.
 
-An example of file with class names can be found within the OMZ directory at `<omz_dir>/data/dataset_classes/msasl100.json`.
+An example of file with class names can be found within the OMZ directory:
 
-> **NOTE**: To run the demo application with video examples of gestures specify the `-s` key with valid path to the directory with video samples (you can find some ASL gesture video samples [here](https://github.com/intel-iot-devkit/sample-videos)). The name of each video sample should be the valid name of gesture from `<omz_dir>/data/dataset_classes/msasl100.json` file. To navigate between samples use 'f' and 'b' keys for iterating next and previous respectively video sample.
+* MS-ASL-100: `<omz_dir>/data/dataset_classes/msasl100.json`
+* Jester-27: `<omz_dir>/data/dataset_classes/jester27.json`
+* Common-Sign-Language-12: `<omz_dir>/data/dataset_classes/common_sign_language12.json`
+
+> **NOTE**: To run the demo application with video examples of gestures specify the `-s` key with valid path to the directory with video samples. The name of each video sample should be the valid name of gesture from `<omz_dir>/data/dataset_classes/msasl100.json` file. To navigate between samples use 'f' and 'b' keys for iterating next and previous video sample, respectively.
+
+>**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
+
+You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
+
+* To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
+* To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
+To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
+
+>**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
 
 ## Demo Output
 
 The application uses OpenCV to display gesture recognition result and current inference performance.
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

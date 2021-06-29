@@ -15,9 +15,9 @@ import argparse
 import json
 import logging as log
 
+import defusedxml.ElementTree as etree
 import motmetrics as mm
 import numpy as np
-from xml.etree import ElementTree as etree
 from tqdm import tqdm
 
 from mc_tracker.sct import TrackedObj

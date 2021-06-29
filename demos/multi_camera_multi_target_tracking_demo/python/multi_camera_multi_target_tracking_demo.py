@@ -105,16 +105,16 @@ def run(params, config, capture, detector, reid):
     output_detections = [[] for _ in range(capture.get_num_sources())]
     key = -1
 
-    if config['normalizer_config']['enabled']:
+    if config.normalizer_config.enabled:
         capture.add_transform(
             NormalizerCLAHE(
-                config['normalizer_config']['clip_limit'],
-                config['normalizer_config']['tile_size'],
+                config.normalizer_config.clip_limit,
+                config.normalizer_config.tile_size,
             )
         )
 
-    tracker = MultiCameraTracker(capture.get_num_sources(), reid, config['sct_config'], **config['mct_config'],
-                                 visual_analyze=config['analyzer'])
+    tracker = MultiCameraTracker(capture.get_num_sources(), reid, config.sct_config,
+                                 **vars(config.mct_config), visual_analyze=config.analyzer)
 
     thread_body = FramesThreadBody(capture, max_queue_length=len(capture.captures) * 2)
     frames_thread = Thread(target=thread_body)
@@ -161,7 +161,8 @@ def run(params, config, capture, detector, reid):
         avg_latency.update(latency)
         fps = round(1. / latency, 1)
 
-        vis = visualize_multicam_detections(prev_frames, tracked_objects, fps, **config['visualization_config'])
+        vis = visualize_multicam_detections(prev_frames, tracked_objects, fps,
+                                            **vars(config.visualization_config))
         presenter.drawGraphs(vis)
         if not params.no_show:
             cv.imshow(win_name, vis)
@@ -171,7 +172,8 @@ def run(params, config, capture, detector, reid):
             if len(params.output_video):
                 frame_size = [frame.shape[::-1] for frame in frames]
                 fps = capture.get_fps()
-                target_width, target_height = get_target_size(frame_size, None, **config['visualization_config'])
+                target_width, target_height = get_target_size(
+                    frame_size, None, **vars(config.visualization_config))
                 video_output_size = (target_width, target_height)
                 fourcc = cv.VideoWriter_fourcc(*'XVID')
                 output_video = cv.VideoWriter(params.output_video, fourcc, min(fps), video_output_size)
@@ -194,8 +196,8 @@ def run(params, config, capture, detector, reid):
     if len(params.save_detections):
         save_json_file(params.save_detections, output_detections, description='Detections')
 
-    if len(config['embeddings']['save_path']):
-        save_embeddings(tracker.scts, **config['embeddings'])
+    if len(config.embeddings.save_path):
+        save_embeddings(tracker.scts, **vars(config.embeddings))
 
 
 def main():
@@ -252,7 +254,7 @@ def main():
         log.error('No configuration file specified. Please specify parameter \'--config\'')
         sys.exit(1)
 
-    random.seed(config['random_seed'])
+    random.seed(config.random_seed)
     capture = MulticamCapture(args.input, args.loop)
 
     log.info("Creating Inference Engine")
@@ -262,13 +264,13 @@ def main():
         object_detector = DetectionsFromFileReader(args.detections, args.t_detector)
     elif args.m_segmentation:
         object_detector = MaskRCNN(ie, args.m_segmentation,
-                                   config['obj_segm']['trg_classes'],
+                                   config.obj_segm.trg_classes,
                                    args.t_segmentation,
                                    args.device, args.cpu_extension,
                                    capture.get_num_sources())
     else:
         object_detector = Detector(ie, args.m_detector,
-                                   config['obj_det']['trg_classes'],
+                                   config.obj_det.trg_classes,
                                    args.t_detector,
                                    args.device, args.cpu_extension,
                                    capture.get_num_sources())

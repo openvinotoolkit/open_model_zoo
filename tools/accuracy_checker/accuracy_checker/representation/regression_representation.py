@@ -135,3 +135,26 @@ class FeaturesRegressionAnnotation(BaseRepresentation):
     @value.setter
     def value(self, value):
         self._value = value
+
+class NiftiRegressionAnnotation(BaseRepresentation):
+    def __init__(self, identifier, value_file, mask_channels_first=False, to_4D=True,
+                 multi_frame=False, separator='#', frame_axis=-1):
+        super().__init__(identifier)
+        self.value_file = value_file
+        self._reader_config = {'type': 'nifti_reader', 'to_4D': to_4D, 'channels_first': mask_channels_first,
+                               'multi_frame': multi_frame, 'separator': separator, 'frame_axis': frame_axis}
+        self._value = None
+
+    @property
+    def value(self):
+        if self._value is None:
+            data_source = self.metadata.get('additional_data_source')
+            if data_source is None:
+                data_source = self.metadata['data_source']
+            reader = BaseReader.provide(self._reader_config['type'], data_source, self._reader_config)
+            return reader.read(self.value_file)
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value

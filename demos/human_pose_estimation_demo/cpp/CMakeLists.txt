@@ -5,8 +5,7 @@
 file(GLOB SRC_FILES ./*.cpp)
 file(GLOB H_FILES ./*.h)
 
-ie_add_sample(NAME human_pose_estimation_demo
-              SOURCES ${SRC_FILES}
-              HEADERS ${H_FILES}
-              DEPENDENCIES monitors models pipelines
-              OPENCV_DEPENDENCIES highgui videoio imgproc)
+add_demo(NAME human_pose_estimation_demo
+    SOURCES ${SRC_FILES}
+    HEADERS ${H_FILES}
+    DEPENDENCIES monitors models pipelines)

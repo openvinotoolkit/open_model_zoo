@@ -49,6 +49,8 @@ class YOLO(Model):
     def __init__(self, ie, model_path, labels=None, keep_aspect_ratio=False, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path)
 
+        self.is_tiny = self.net.name.lower().find('tiny') != -1  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
+
         if isinstance(labels, (list, tuple)):
             self.labels = labels
         else:
@@ -60,7 +62,7 @@ class YOLO(Model):
         self.keep_aspect_ratio = keep_aspect_ratio
         self.resize_image = resize_image_letterbox if self.keep_aspect_ratio else resize_image
 
-        assert len(self.net.input_info) == 1, "Sample supports only YOLO V* based single input topologies"
+        assert len(self.net.input_info) == 1, "Expected 1 input blob"
         self.image_blob_name = next(iter(self.net.input_info))
         if self.net.input_info[self.image_blob_name].input_data.shape[1] == 3:
             self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
@@ -104,7 +106,7 @@ class YOLO(Model):
     @staticmethod
     def _parse_yolo_region(predictions, input_size, params, threshold, multiple_labels=True):
         # ------------------------------------------ Extracting layer parameters ---------------------------------------
-        objects = list()
+        objects = []
         size_normalizer = input_size if params.isYoloV3 else params.sides
         bbox_size = params.coords + 1 + params.classes
         # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
@@ -196,9 +198,10 @@ class YOLO(Model):
         return detections
 
     def postprocess(self, outputs, meta):
-        detections = list()
+        detections = []
 
-        for layer_name, out_blob in outputs.items():
+        for layer_name in self.yolo_layer_params.keys():
+            out_blob = outputs[layer_name]
             layer_params = self.yolo_layer_params[layer_name]
             out_blob.shape = layer_params[0]
             detections += self._parse_yolo_region(out_blob, meta['resized_shape'], layer_params[1], self.threshold)
@@ -215,27 +218,35 @@ class YOLO(Model):
 
 class YoloV4(YOLO):
     class Params:
-        def __init__(self, sides, mask):
-            self.num = 3
+        def __init__(self, num, sides, anchors, mask):
+            self.num = num
             self.coords = 4
             self.classes = 80
             self.sides = sides
-            anchors = [12.0, 16.0, 19.0, 36.0, 40.0, 28.0,
-                            36.0, 75.0, 76.0, 55.0, 72.0, 146.0,
-                            142.0, 110.0, 192.0, 243.0, 459.0, 401.0]
             masked_anchors = []
             for idx in mask:
                 masked_anchors += [anchors[idx * 2], anchors[idx * 2 + 1]]
             self.anchors = masked_anchors
 
     def _get_output_info(self):
-        masks = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+        if self.is_tiny:
+            num = 2
+            anchors = [10.0, 14.0, 23.0, 27.0, 37.0, 58.0,
+                       81.0, 82.0, 135.0, 169.0, 344.0, 319.0]
+            masks = [[1, 2, 3], [3, 4, 5]]
+        else:
+            num = 3
+            anchors = [12.0, 16.0, 19.0, 36.0, 40.0, 28.0,
+                       36.0, 75.0, 76.0, 55.0, 72.0, 146.0,
+                       142.0, 110.0, 192.0, 243.0, 459.0, 401.0]
+            masks = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+
         outputs = sorted(self.net.outputs.items(), key=lambda x: x[1].shape[2], reverse=True)
 
         output_info = {}
         for i, (name, layer) in enumerate(outputs):
             shape = layer.shape
-            yolo_params = self.Params(shape[2:4], mask=masks[i])
+            yolo_params = self.Params(num, shape[2:4], anchors, masks[len(output_info)])
             output_info[name] = (shape, yolo_params)
         return output_info
 

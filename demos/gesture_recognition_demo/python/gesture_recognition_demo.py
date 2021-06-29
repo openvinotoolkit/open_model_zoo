@@ -65,7 +65,7 @@ def build_argparser():
     args.add_argument('-i', '--input', required=True,
                       help='Required. Path to a video file or a device node of a web-camera.')
     args.add_argument('-o', '--output', required=False,
-                      help='Optional. Name of output to save.')
+                      help='Optional. Name of the output file(s) to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
@@ -79,7 +79,7 @@ def build_argparser():
                       help='Optional. Threshold for the predicted score of an action.',
                       default=0.8, type=float)
     args.add_argument('-d', '--device',
-                      help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL '
+                      help='Optional. Specify the target device to infer on: CPU, GPU, HDDL '
                            'or MYRIAD. The demo will look for a suitable plugin for device '
                            'specified (by default, it is CPU).',
                       default='CPU', type=str)
@@ -109,8 +109,6 @@ def load_class_map(file_path):
 
 
 def main():
-    """ Main function. """
-
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
@@ -147,7 +145,7 @@ def main():
 
     last_caption = None
     active_object_id = -1
-    tracker_labels_map = dict()
+    tracker_labels_map = {}
     tracker_labels = set()
 
     frames_processed = 0
@@ -200,7 +198,7 @@ def main():
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
         if detections is not None:
-            tracker_labels = set(det.id for det in detections)
+            tracker_labels = {det.id for det in detections}
 
             for det in detections:
                 roi_color = (0, 255, 0) if active_object_id == det.id else (128, 128, 128)

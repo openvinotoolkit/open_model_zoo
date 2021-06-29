@@ -27,7 +27,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from models import Deblurring
 import monitors
-from pipelines import AsyncPipeline
+from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
 
@@ -45,7 +45,7 @@ def build_argparser():
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images or anything that cv2.VideoCapture can process.')
     args.add_argument('-d', '--device', default='CPU', type=str,
-                      help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
+                      help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
 
@@ -64,7 +64,7 @@ def build_argparser():
     io_args.add_argument('--loop', default=False, action='store_true',
                          help='Optional. Enable reading the input in a loop.')
     io_args.add_argument('-o', '--output', required=False,
-                         help='Optional. Name of output to save.')
+                         help='Optional. Name of the output file(s) to save.')
     io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')
@@ -74,39 +74,13 @@ def build_argparser():
     return parser
 
 
-def get_plugin_configs(device, num_streams, num_threads):
-    config_user_specified = {}
-
-    devices_nstreams = {}
-    if num_streams:
-        devices_nstreams = {device: num_streams for device in ['CPU', 'GPU'] if device in device} \
-            if num_streams.isdigit() \
-            else dict(device.split(':', 1) for device in num_streams.split(','))
-
-    if 'CPU' in device:
-        if num_threads is not None:
-            config_user_specified['CPU_THREADS_NUM'] = str(num_threads)
-        if 'CPU' in devices_nstreams:
-            config_user_specified['CPU_THROUGHPUT_STREAMS'] = devices_nstreams['CPU'] \
-                if int(devices_nstreams['CPU']) > 0 \
-                else 'CPU_THROUGHPUT_AUTO'
-
-    if 'GPU' in device:
-        if 'GPU' in devices_nstreams:
-            config_user_specified['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] \
-                if int(devices_nstreams['GPU']) > 0 \
-                else 'GPU_THROUGHPUT_AUTO'
-
-    return config_user_specified
-
-
 def main():
     args = build_argparser().parse_args()
 
     log.info('Initializing Inference Engine...')
     ie = IECore()
 
-    plugin_config = get_plugin_configs(args.device, args.num_streams, args.num_threads)
+    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
     cap = open_images_capture(args.input, args.loop)
 
