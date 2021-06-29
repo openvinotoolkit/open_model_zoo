@@ -21,7 +21,6 @@ import ssl
 import time
 import types
 
-from open_model_zoo.model_tools import _common
 from open_model_zoo.model_tools.download_engine import utils
 
 
@@ -153,7 +152,7 @@ class Downloader:
         reporter.print()
         return success
 
-    def download_model(self, reporter, session_factory, requested_precisions, model):
+    def download_model(self, reporter, session_factory, requested_precisions, model, known_precisions):
         session = session_factory()
 
         reporter.print_group_heading('Downloading {}', model.name)
@@ -166,7 +165,7 @@ class Downloader:
         for model_file in model.files:
             if len(model_file.name.parts) == 2:
                 p = model_file.name.parts[0]
-                if p in _common.KNOWN_PRECISIONS and p not in requested_precisions:
+                if p in known_precisions and p not in requested_precisions:
                     continue
 
             model_file_reporter = reporter.with_event_context(model=model.name, model_file=model_file.name.as_posix())

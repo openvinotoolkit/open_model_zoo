@@ -95,24 +95,6 @@ class DirCache:
                 staging_path.unlink()
 
 
-# There is no evidence that the requests.Session class is thread-safe,
-# so for safety, we use one Session per thread. This class ensures that
-# each thread gets its own Session.
-class ThreadSessionFactory:
-    def __init__(self, exit_stack):
-        self._lock = threading.Lock()
-        self._thread_local = threading.local()
-        self._exit_stack = exit_stack
-
-    def __call__(self):
-        try:
-            session = self._thread_local.session
-        except AttributeError:
-            with self._lock: # ExitStack might not be thread-safe either
-                session = self._exit_stack.enter_context(requests.Session())
-            self._thread_local.session = session
-        return session
-
 def verify_hash(reporter, actual_hash, expected_hash, path):
     if actual_hash != expected_hash:
         reporter.log_error('Hash mismatch for "{}"', path)
