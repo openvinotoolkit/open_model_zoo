@@ -4,6 +4,8 @@ ctdet_coco_dlav0_384
 ctdet_coco_dlav0_512
 # For --architecture_type=ctpn
 ctpn
+# For --architecture_type=detr
+detr-resnet50
 # For --architecture_type=faceboxes
 faceboxes-pytorch
 # For --architecture_type=retinaface-pytorch
