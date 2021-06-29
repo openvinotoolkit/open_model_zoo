@@ -29,6 +29,7 @@
 | densenet-201 | YES | YES | YES |
 | densenet-201-tf | YES | YES | YES |
 | dla-34 | YES | YES | YES |
+| drn-d-38 | YES | YES |    |
 | efficientdet-d0-tf | YES | YES | YES |
 | efficientdet-d1-tf | YES | YES | YES |
 | efficientnet-b0 | YES | YES | YES |
