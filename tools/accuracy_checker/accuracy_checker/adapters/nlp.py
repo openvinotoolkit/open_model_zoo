@@ -273,7 +273,10 @@ class BertTextClassification(Adapter):
                 optional=True,
                 description='Classification output layer name. If not provided, first output will be used.'
             ),
-            'single_score': BoolField(optional=True, default=False)
+            'single_score': BoolField(
+                optional=True, default=False, description='flag that highlight that model return single value '
+                'representing class id or probability belonging to class 1 in binary classification case'
+            )
         })
 
         return params
