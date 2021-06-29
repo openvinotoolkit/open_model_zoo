@@ -196,26 +196,27 @@ cv::Mat renderSegmentationData(const ImageResult& result, OutputTransform& outpu
 
 void print_raw_results(const ImageResult& result, std::vector<std::string> labels)
 {
+    slog::info << "     Class ID     | Pixels | Percentage " << slog::endl;
 
-    slog::info << " Class ID | Pixels | Percentage " << slog::endl;
-    cv::Mat histogram;
     double min_val, max_val;
     cv::minMaxLoc(result.resultImage, &min_val, &max_val);
     int max_classes = static_cast<int>(max_val) + 1; // We use +1 for only background case
-    const float range[] = { 0, max_classes };
+    const float range[] = { 0, static_cast<float>(max_classes) };
     const float * ranges = { range };
+    cv::Mat histogram;
     cv::calcHist(&result.resultImage, 1, 0, cv::Mat(), histogram, 1, &max_classes, &ranges);
+
     const double all = result.resultImage.cols * result.resultImage.rows;
     for (int i = 0; i < max_classes; ++i)
     {
-        const int value = histogram.at<int>(i);
+        const int value = static_cast<int>(histogram.at<float>(i));
         if (value > 0)
         {
             std::string label = i < labels.size() ? labels[i] : "#" + std::to_string(i);
             slog::info << " "
-                << std::setw(7) << label << " | "
-                << std::setw(6) << histogram.at<float>(i) << " | "
-                << std::setw(6) << histogram.at<float>(i) / all * 100 << "%"
+                << std::setw(16) << std::left << label << " | "
+                << std::setw(6) << value << " | "
+                << std::setw(6) << std::setprecision(4) << value / all * 100 << "%"
                 << slog::endl;
         }
     }

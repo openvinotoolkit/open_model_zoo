@@ -163,14 +163,14 @@ def get_model(ie, args):
 
 
 def print_raw_results(mask, labels=None):
-    log.info(' Class ID | Pixels | Percentage ')
+    log.info('     Class ID     | Pixels | Percentage ')
     max_classes = int(np.max(mask)) + 1 # We use +1 for only background case
     histogram = cv2.calcHist([np.expand_dims(mask, axis=-1)], [0], None, [max_classes], [0, max_classes])
     all = np.product(mask.shape)
     for id, val in enumerate(histogram[:, 0]):
         if val > 0:
             label = labels[id] if labels and len(labels) >= id else '#{}'.format(id)
-            log.info('{:^9} | {:6d} | {:5.2f}% '.format(label, int(val), val / all * 100))
+            log.info(' {:<16} | {:6d} | {:5.2f}% '.format(label, int(val), val / all * 100))
 
 
 def main():
