@@ -152,22 +152,7 @@ ObjectDetector::ObjectDetector(
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
     net_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
-    slog::info << "Network " << config.path_to_model << " is loaded to " << deviceName_ << " device.\n";
-    std::set<std::string> devices;
-    for (const std::string& device : parseDevices(deviceName_)) {
-        devices.insert(device);
-    }
-
-    slog::info << "  * Number of inference requests is set to " << 1 << ".\n";
-    if (devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end()
-        || devices.find("") != devices.end()) {
-        slog::info << "  * Number of threads " << "is set to "
-            << net_.GetConfig("CPU_THREADS_NUM").as<std::string>() << ".\n";
-    }
-    for (const auto& device : devices) {
-        slog::info << "  * Number of streams is set to "
-            << net_.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device.\n";
-    }
+    printExecNetworkInfo(net_, config.path_to_model, deviceName_);
 }
 
 void ObjectDetector::wait() {

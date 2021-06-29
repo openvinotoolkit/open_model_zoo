@@ -1025,13 +1025,13 @@ int main(int argc, char* argv[]) {
 
         //// --------------------------- Report metrics -------------------------------------------------------
         if (work_num_frames > 0) {
-            slog::info << slog::endl << "Metric reports:\n";
+            slog::info << "Metric reports:" << slog::endl;
             const float mean_time_ms = work_time_ms / static_cast<float>(work_num_frames);
-            slog::info << "  * FPS: " << 1e3f / mean_time_ms << "\n";
-            slog::info << "  * Frames processed: " << total_num_frames << slog::endl;
+            slog::info << "\tFPS: " << 1e3f / mean_time_ms << slog::endl;
+            slog::info << "\tFrames processed: " << total_num_frames << slog::endl;
         }
 
-        slog::info << '\n' << presenter.reportMeans() << slog::endl;
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

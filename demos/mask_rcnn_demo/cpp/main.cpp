@@ -67,12 +67,10 @@ int main(int argc, char *argv[]) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
             auto extension_ptr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
             ie.AddExtension(extension_ptr, "CPU");
-            slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
         }
         if (!FLAGS_c.empty()) {
             // clDNN Extensions are loaded from an .xml description and OpenCL kernel files
             ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "CPU");
-            slog::info << "GPU Extension loaded: " << FLAGS_c << slog::endl;
         }
 
         // -----------------------------------------------------------------------------------------------------
@@ -121,7 +119,7 @@ int main(int argc, char *argv[]) {
             slog::warn << "Network batch size is less than number of images (" << imagePaths.size() <<
                        "), some input files will be ignored" << slog::endl;
         }
-
+        slog::info << "Network batch size is set to " << netBatchSize << slog::endl;
         for (size_t i = 0, inputIndex = 0; i < netBatchSize; i++, inputIndex++) {
             if (inputIndex >= imagePaths.size()) {
                 inputIndex = 0;
@@ -150,22 +148,7 @@ int main(int argc, char *argv[]) {
 
         // -------------------------Load model to the device----------------------------------------------------
         auto executableNetwork = ie.LoadNetwork(network, FLAGS_d);
-        slog::info << "Network " << FLAGS_m << " is loaded to " << FLAGS_d << " device.\n";
-        std::set<std::string> devices;
-        for (const std::string& device : parseDevices(FLAGS_d)) {
-            devices.insert(device);
-        }
-
-        slog::info << "  * Number of inference requests is set to " << 1 << ".\n";
-        if (devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end()
-            || devices.find("") != devices.end()) {
-            slog::info << "  * Number of threads " << "is set to "
-                << executableNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>() << ".\n";
-        }
-        for (const auto& device : devices) {
-            slog::info << "  * Number of streams is set to "
-                << executableNetwork.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device.\n";
-        }
+        printExecNetworkInfo(executableNetwork, FLAGS_m, FLAGS_d);
 
         // -------------------------Create Infer Request--------------------------------------------------------
         auto infer_request = executableNetwork.CreateInferRequest();
@@ -234,7 +217,6 @@ int main(int argc, char *argv[]) {
         }
 
         /** Iterating over all boxes **/
-        slog::info << slog::endl;
         for (size_t box = 0; box < BOXES; ++box) {
             float* box_info = do_data + box * BOX_DESCRIPTION_SIZE;
             auto batch = static_cast<int>(box_info[0]);
@@ -273,7 +255,6 @@ int main(int argc, char *argv[]) {
                 cv::rectangle(output_images[batch], roi, cv::Scalar(0, 0, 1), 1);
             }
         }
-        slog::info << slog::endl;
         for (size_t i = 0; i < output_images.size(); i++) {
             std::string imgName = "out" + std::to_string(i) + ".png";
             cv::imwrite(imgName, output_images[i]);

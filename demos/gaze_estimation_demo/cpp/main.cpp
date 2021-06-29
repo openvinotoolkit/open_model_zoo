@@ -203,13 +203,7 @@ int main(int argc, char *argv[]) {
             frame = cap->read();
         } while (frame.data);
 
-        //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << slog::endl << "Avg time:\n";
-        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
-            cap->getMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
-            renderMetrics.getTotal().latency << " ms" << slog::endl;
-        slog::info << slog::endl << '\n' <<  presenter.reportMeans() << slog::endl;
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

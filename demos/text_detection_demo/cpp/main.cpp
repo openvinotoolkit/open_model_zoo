@@ -336,36 +336,37 @@ int main(int argc, char *argv[]) {
 
         if (text_detection != nullptr && text_detection->ncalls() && !FLAGS_r) {
           // --------------------------- Report metrics -------------------------------------------------------
-          slog::info << slog::endl << "Metric reports:\n";
-          slog::info << "Text detection model inference : \n";
-          slog::info << "  * Latency: " << std::fixed << std::setprecision(1) << text_detection->time_elapsed() / text_detection->ncalls() << '\n';
-          slog::info << "  * FPS: " << std::fixed << std::setprecision(1) << text_detection->ncalls() * 1000 / text_detection->time_elapsed() << '\n';
+          slog::info << "Metric reports:" << slog::endl;
+          slog::info << "Text detection model inference:" << slog::endl;
+          slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << text_detection->time_elapsed() / text_detection->ncalls() << slog::endl;
+          slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << text_detection->ncalls() * 1000 / text_detection->time_elapsed() << slog::endl;
           if (std::fabs(text_detection_postproc_time) < std::numeric_limits<double>::epsilon()) {
               slog::info << "Text detection postprocessing: took no time " << slog::endl;
           } else {
-              slog::info << "Text detection postprocessing: \n";
-              slog::info << "  * Latency: " << std::fixed << std::setprecision(1) << text_detection_postproc_time / text_detection->ncalls() << '\n';
-              slog::info << "  * FPS: " << std::fixed << std::setprecision(1) << text_detection->ncalls() * 1000 / text_detection_postproc_time << '\n';
+              slog::info << "Text detection postprocessing:" << slog::endl;
+              slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << text_detection_postproc_time / text_detection->ncalls() << slog::endl;
+              slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << text_detection->ncalls() * 1000 / text_detection_postproc_time << slog::endl;
           }
         }
 
         if (text_recognition != nullptr && text_recognition->ncalls() && !FLAGS_r) {
-            slog::info << "Text recognition model inference: \n";
-            slog::info << "  * Latency: "  << text_recognition->time_elapsed() / text_recognition->ncalls() << '\n';
-            slog::info << "  * FPS: " << std::fixed << std::setprecision(1) << text_recognition->ncalls() * 1000 / text_recognition->time_elapsed() << '\n';
+            slog::info << "Text recognition model inference:" << slog::endl;
+            slog::info << "\tLatency: "  << text_recognition->time_elapsed() / text_recognition->ncalls() << slog::endl;
+            slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << text_recognition->ncalls() * 1000 / text_recognition->time_elapsed() << slog::endl;
           if (std::fabs(text_recognition_postproc_time) < std::numeric_limits<double>::epsilon()) {
               throw std::logic_error("text_recognition_postproc_time can't be equal to zero");
           }
-          slog::info << "Text recognition postprocessing: \n";
-          slog::info << "  * Latency: "  << text_recognition_postproc_time / text_recognition->ncalls() / 1000 << "\n";
-          slog::info << "  * FPS: " << std::fixed << std::setprecision(1) << text_recognition->ncalls() * 1000000 / text_recognition_postproc_time << '\n';
+          slog::info << "Text recognition postprocessing:" << slog::endl;
+          slog::info << "\tLatency: "  << text_recognition_postproc_time / text_recognition->ncalls() / 1000 << slog::endl;
+          slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << text_recognition->ncalls() * 1000000 / text_recognition_postproc_time << slog::endl;
           if (std::fabs(text_crop_time) > std::numeric_limits<double>::epsilon()) {
-              slog::info << "Text crop: \n";
-              slog::info << "  * Latency: " << text_crop_time / text_recognition->ncalls() / 1000 << "\n";
-              slog::info << "  * FPS: " << text_recognition->ncalls() * 1000000 / text_crop_time;
+              slog::info << "Text crop:" << slog::endl;
+              slog::info << "\tLatency: " << text_crop_time / text_recognition->ncalls() / 1000 << slog::endl;
+              slog::info << "\tFPS: " << text_recognition->ncalls() * 1000000 / text_crop_time << slog::endl;
           }
         }
-        slog::info << slog::endl;
+
+        slog::info << presenter.reportMeans() << slog::endl;
         // ---------------------------------------------------------------------------------------------------
     } catch (const std::exception & ex) {
         slog::err << ex.what() << slog::endl;

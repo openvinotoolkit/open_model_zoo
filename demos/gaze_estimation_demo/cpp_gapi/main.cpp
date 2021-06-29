@@ -333,7 +333,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        slog::info << slog::endl << presenter.reportMeans() << slog::endl;
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

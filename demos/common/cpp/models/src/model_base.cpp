@@ -48,10 +48,7 @@ InferenceEngine::CNNNetwork ModelBase::prepareNetwork(InferenceEngine::Core& cor
 ExecutableNetwork ModelBase::loadExecutableNetwork(const CnnConfig& cnnConfig, InferenceEngine::Core& core) {
     this->cnnConfig = cnnConfig;
     auto cnnNetwork = prepareNetwork(core);
-
     execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.deviceName, cnnConfig.execNetworkConfig);
-    slog::info << "Network " << modelFileName << " is loaded to " << cnnConfig.deviceName << " device." << slog::endl;
-
-
+    printExecNetworkInfo(execNetwork, modelFileName, cnnConfig.deviceName);
     return execNetwork;
 }

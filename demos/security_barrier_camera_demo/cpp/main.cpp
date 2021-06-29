@@ -711,7 +711,6 @@ int main(int argc, char* argv[]) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = std::make_shared<Extension>(FLAGS_l);
                     ie.AddExtension(extension_ptr, "CPU");
-                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
                 if (FLAGS_nthreads != 0) {
                     ie.SetConfig({{ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }}, "CPU");
@@ -758,7 +757,7 @@ int main(int argc, char* argv[]) {
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
         Detector detector(ie, FLAGS_d, FLAGS_m,
             {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d, "Detect"));
-        slog::info << "  * Number of inference requests is set to " << nireq << slog::endl;
+        slog::info << "\tNumber of inference requests is set to " << nireq << slog::endl;
 
         VehicleAttributesClassifier vehicleAttributesClassifier;
         std::size_t nclassifiersireq{0};
@@ -767,12 +766,12 @@ int main(int argc, char* argv[]) {
         if (!FLAGS_m_va.empty()) {
             vehicleAttributesClassifier = VehicleAttributesClassifier(ie, FLAGS_d_va, FLAGS_m_va, FLAGS_auto_resize, makeTagConfig(FLAGS_d_va, "Attr"));
             nclassifiersireq = nireq * 3;
-            slog::info << "  * Number of inference requests is set to " << nclassifiersireq << slog::endl;
+            slog::info << "\tNumber of inference requests is set to " << nclassifiersireq << slog::endl;
         }
         if (!FLAGS_m_lpr.empty()) {
             lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));
             nrecognizersireq = nireq * 3;
-            slog::info << "  * Number of inference requests is set to " << nrecognizersireq << slog::endl;
+            slog::info << "\tNumber of inference requests is set to " << nrecognizersireq << slog::endl;
         }
         bool isVideo = imageSourcess.empty() ? true : false;
         int pause = imageSourcess.empty() ? 1 : 0;
@@ -842,11 +841,11 @@ int main(int argc, char* argv[]) {
                 / (frameCounter * context.nireq) * 100;
 
             //// --------------------------- Report metrics -------------------------------------------------------
-            slog::info << slog::endl << "Metric reports:\n" ;
-            slog::info << "  * FPS: " << std::fixed << std::setprecision(1) << fps << '\n';
-            slog::info << "  * Detection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
+            slog::info << "Metric reports:" << slog::endl;
+            slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << fps << slog::endl;
+            slog::info << "\tDetection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
         }
-        slog::info << '\n' << context.drawersContext.presenter.reportMeans() << slog::endl;
+        slog::info << context.drawersContext.presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
         return 1;

@@ -209,7 +209,6 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
-
         InferenceEngine::Core core;
         AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, FLAGS_auto_resize, labels)),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
@@ -329,24 +328,24 @@ int main(int argc, char *argv[]) {
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << slog::endl << "Metric reports:" << slog::endl;
+        slog::info << "Metric reports:" << slog::endl;
         metrics.printTotal();
-        slog::info << slog::endl << "Avg time:\n";
-        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
-            readerMetrics.getTotal().latency << " ms\n";
-        slog::info << "  * Preprocessing:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Inference:\t\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getInferenceMetircs().getTotal().latency << " ms\n";
-        slog::info << "  * Postprocessing:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getPostprocessMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
+        slog::info << "Avg time:" << slog::endl;
+        slog::info << "\tDecoding:\t" << std::fixed << std::setprecision(2) <<
+            readerMetrics.getTotal().latency << " ms" << slog::endl;;
+        slog::info << "\tPreprocessing:\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getPreprocessMetrics().getTotal().latency << " ms" << slog::endl;;
+        slog::info << "\tInference:\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getInferenceMetircs().getTotal().latency << " ms" << slog::endl;;
+        slog::info << "\tPostprocessing:\t" << std::fixed << std::setprecision(2) <<
+            pipeline.getPostprocessMetrics().getTotal().latency << " ms" << slog::endl;;
+        slog::info << "\tRendering:\t" << std::fixed << std::setprecision(2) <<
             renderMetrics.getTotal().latency << " ms" << slog::endl;
 
         if (!FLAGS_gt.empty()) {
             slog::info << "Accuracy (top " << FLAGS_nt << "): " << accuracy << slog::endl;
         }
-        slog::info << slog::endl << '\n' << presenter.reportMeans() << slog::endl;
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

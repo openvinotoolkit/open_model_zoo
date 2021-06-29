@@ -538,10 +538,10 @@ int main(int argc, char *argv[]) {
             timer.finish("total");
 
             //// --------------------------- Report metrics -------------------------------------------------------
-            slog::info << slog::endl << "Metric reports:\n";
-            slog::info << "  * Number of processed frames: " << framesCounter << "\n";
-            slog::info << "  * FPS: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << slog::endl;
-            slog::info << slog::endl << '\n' << presenter->reportMeans() << slog::endl;
+            slog::info << "Metric reports:" << slog::endl;
+            slog::info << "\tNumber of processed frames: " << framesCounter << slog::endl;
+            slog::info << "\tFPS: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << slog::endl;
+            slog::info << presenter->reportMeans() << slog::endl;
         } while (FLAGS_loop);
 
         cv::destroyAllWindows();

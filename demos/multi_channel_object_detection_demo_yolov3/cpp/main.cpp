@@ -566,9 +566,9 @@ int main(int argc, char* argv[]) {
         network.reset();
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << "Metric reports:\n";
-        slog::info << "  * FPS: " << 1000.f / averageFps << slog::endl;
-        slog::info << slog::endl << presenter.reportMeans() << slog::endl;
+        slog::info << "Metric reports:" << slog::endl;
+        slog::info << "\tFPS: " << 1000.f / averageFps << slog::endl;
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

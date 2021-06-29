@@ -228,7 +228,7 @@ int main(int argc, char **argv) {
             tracker->PrintReidPerformanceCounts(getFullDeviceName(ie, FLAGS_d_reid));
         }
 
-        slog::info << '\n' << presenter.reportMeans() << slog::endl;
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;

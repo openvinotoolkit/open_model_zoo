@@ -266,7 +266,6 @@ public:
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
         printExecNetworkInfo(net, FLAGS_m_lpr, deviceName);
-
     }
 
     InferenceEngine::InferRequest createInferRequest() {

@@ -334,13 +334,9 @@ int main(int argc, char *argv[]) {
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << slog::endl << "Metric reports:\n";
-        slog::info << "  * Number of processed frames: " << framesCounter << "\n";
-        slog::info << "  * FPS: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << slog::endl;
-        slog::info << slog::endl << "Avg time:\n";
-        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
-            cap->getMetrics().getTotal().latency << " ms\n";
-        slog::info << slog::endl << '\n' << presenter.reportMeans() << slog::endl;
+        slog::info << "Metric reports:" << slog::endl;
+        slog::info << "\tNumber of processed frames: " << framesCounter << slog::endl;
+        slog::info << "\tFPS: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

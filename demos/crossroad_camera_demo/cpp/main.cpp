@@ -496,23 +496,7 @@ struct Load {
     void into(Core & ie, const std::string & deviceName) const {
         if (detector.enabled()) {
             detector.net = ie.LoadNetwork(detector.read(ie), deviceName);
-
-            std::set<std::string> devices;
-            for (const std::string& device : parseDevices(deviceName)) {
-                devices.insert(device);
-            }
-
-            slog::info << slog::endl << "Network is loaded " << detector.commandLineFlag << " to " << deviceName << " device.\n";
-            slog::info << "  * Number of inference requests is set to " << 1 << ".\n";
-            if (devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end()
-                || devices.find("") != devices.end()) {
-                slog::info << "  * Number of threads " << "is set to "
-                    << detector.net.GetConfig("CPU_THREADS_NUM").as<std::string>() << ".\n";
-            }
-            for (const auto& device : devices) {
-                slog::info << "  * Number of streams is set to "
-                    << detector.net.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device.\n";
-            }
+            printExecNetworkInfo(detector.net, detector.commandLineFlag, deviceName);
         }
     }
 };
@@ -847,13 +831,8 @@ int main(int argc, char *argv[]) {
                 personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
             }
         }
-        //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << slog::endl << "Metric reports:\n";
-        slog::info << "  * Total Inference time: " << total.count() << slog::endl;
-        slog::info << slog::endl << "Avg time:\n";
-        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
-            cap->getMetrics().getTotal().latency << " ms\n";
-        slog::info << slog::endl << '\n' << presenter.reportMeans() << slog::endl;
+        slog::info << "Total Inference time: " << total.count() << slog::endl;
+        slog::info << presenter.reportMeans() << slog::endl;
         // -----------------------------------------------------------------------------------------------------
     }
     catch (const std::exception& error) {

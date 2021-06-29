@@ -758,13 +758,13 @@ int main(int argc, char* argv[]) {
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
         PersonDetector detector(ie, FLAGS_d_det, FLAGS_m_det,
             {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d_det, "Detect"));
-        slog::info << "  * Number of inference requests is set to " << nireq << slog::endl;
+        slog::info << "\tNumber of inference requests is set to " << nireq << slog::endl;
         ReId reid;
         std::size_t nreidireq{0};
         if (!FLAGS_m_reid.empty()) {
             reid = ReId(ie, FLAGS_d_reid, FLAGS_m_reid, FLAGS_auto_resize, makeTagConfig(FLAGS_d_reid, "ReId"));
             nreidireq = nireq * 3;
-            slog::info << "  * Number of inference requests is set to " << nreidireq << slog::endl;
+            slog::info << "\tNumber of inference requests is set to " << nreidireq << slog::endl;
         }
 
         bool isVideo = imageSources.empty() ? true : false;
@@ -834,11 +834,11 @@ int main(int argc, char* argv[]) {
                 / (frameCounter * context.nireq) * 100;
 
             //// --------------------------- Report metrics -------------------------------------------------------
-            slog::info << slog::endl << "Metric reports:\n";
-            slog::info << "  * FPS: " << std::fixed << std::setprecision(1) << fps << '\n';
-            slog::info << "  * Detection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
+            slog::info << "Metric reports:" << slog::endl;
+            slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << fps << slog::endl;
+            slog::info << "\tDetection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
         }
-        slog::info << '\n' << context.drawersContext.presenter.reportMeans() << slog::endl;
+        slog::info << context.drawersContext.presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
         return 1;
