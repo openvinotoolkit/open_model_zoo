@@ -78,7 +78,8 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
 
         self._create_subset(subset, num_images, allow_pairwise_subset)
         metric_config = self.configure_intermediate_metrics_results(kwargs)
-        compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
+        (compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
+         ignore_metric_reference) = metric_config
 
         if 'progress_reporter' in kwargs:
             _progress_reporter = kwargs['progress_reporter']
@@ -125,7 +126,8 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
                 _progress_reporter.update(batch_id, len(prediction))
                 if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
                     self.compute_metrics(
-                        print_results=True, ignore_results_formatting=ignore_results_formatting
+                        print_results=True, ignore_results_formatting=ignore_results_formatting,
+                        ignore_metric_reference=ignore_metric_reference
                     )
                     self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
 
@@ -135,7 +137,7 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
         if self.srmodel.store_predictions:
             self.srmodel.save_predictions()
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
@@ -144,13 +146,14 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
 
         return self._metrics_results
 
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
+                                ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting)
+            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
 
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
@@ -163,17 +166,17 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting)
+                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
         return extracted_results, extracted_meta
 
-    def print_metrics_results(self, ignore_results_formatting=False):
+    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting)
+            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting)
+            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
     @property
     def dataset_size(self):
@@ -220,11 +223,12 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
     @staticmethod
     def configure_intermediate_metrics_results(config):
         compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
-        metric_interval, ignore_results_formatting = None, None
+        metric_interval, ignore_results_formatting, ignore_metric_reference = None, None, None
         if compute_intermediate_metric_res:
             metric_interval = config.get('metrics_interval', 1000)
             ignore_results_formatting = config.get('ignore_results_formatting', False)
-        return compute_intermediate_metric_res, metric_interval, ignore_results_formatting
+            ignore_metric_reference = config.get('ignore_metric_reference', False)
+        return compute_intermediate_metric_res, metric_interval, ignore_results_formatting, ignore_metric_reference
 
     def load_network(self, network=None):
         self.srmodel.load_network(network, self.launcher)

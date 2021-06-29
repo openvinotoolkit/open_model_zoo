@@ -270,7 +270,8 @@ class ModelEvaluator(BaseEvaluator):
 
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
-        _, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
+        (_, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
+         ignore_metric_reference) = metric_config
         dataset_iterator = iter(enumerate(self.dataset))
         infer_requests_pool = {ir.request_id: ir for ir in self.launcher.get_async_requests()}
         free_irs = list(infer_requests_pool)
@@ -302,7 +303,8 @@ class ModelEvaluator(BaseEvaluator):
                         progress_reporter.update(batch_id, len(batch_identifiers))
                         if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
                             self.compute_metrics(
-                                print_results=True, ignore_results_formatting=ignore_results_formatting
+                                print_results=True, ignore_results_formatting=ignore_results_formatting,
+                                ignore_metric_reference=ignore_metric_reference
                             )
                             self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting,
                                                       metric_interval)
@@ -331,7 +333,8 @@ class ModelEvaluator(BaseEvaluator):
             self._reset_stored_predictions(stored_predictions)
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
-        enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
+        (enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
+         ignore_metric_reference) = metric_config
         for batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_annotation, batch_input)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
@@ -345,7 +348,8 @@ class ModelEvaluator(BaseEvaluator):
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_identifiers))
                 if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
-                    self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting)
+                    self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting,
+                                         ignore_metric_reference=ignore_metric_reference)
                     self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
 
         if progress_reporter:
@@ -473,7 +477,7 @@ class ModelEvaluator(BaseEvaluator):
         if self.dataset.annotation_provider and self.dataset.annotation_provider.metadata:
             self.adapter.label_map = self.dataset.annotation_provider.metadata.get('label_map')
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
@@ -482,12 +486,13 @@ class ModelEvaluator(BaseEvaluator):
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
         return self._metrics_results
 
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
+                                ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting)
+            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
 
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
@@ -500,17 +505,17 @@ class ModelEvaluator(BaseEvaluator):
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting)
+                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
         return extracted_results, extracted_meta
 
-    def print_metrics_results(self, ignore_results_formatting=False):
+    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting)
+            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting)
+            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
     def load(self, stored_predictions, progress_reporter):
         launcher = self.launcher
@@ -560,7 +565,9 @@ class ModelEvaluator(BaseEvaluator):
         if compute_intermediate_metric_res:
             metric_interval = config.get('metrics_interval', 1000)
             ignore_results_formatting = config.get('ignore_results_formatting', False)
-        return enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting
+        ignore_metric_reference = config.get('ignore_metric_reference', False)
+        return (enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
+                ignore_metric_reference)
 
     @staticmethod
     def store_predictions(stored_predictions, predictions):
