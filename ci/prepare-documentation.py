@@ -50,6 +50,8 @@ import yaml
 
 OMZ_ROOT = Path(__file__).resolve().parents[1]
 
+OMZ_PREFIX = '<omz_dir>/'
+
 sys.path.append(str(OMZ_ROOT / 'ci/lib'))
 
 import omzdocs
@@ -121,6 +123,23 @@ def add_page(output_root, parent, *, id=None, path=None, title=None):
         (output_root / image_rel_path.parent).mkdir(parents=True, exist_ok=True)
         shutil.copyfile(OMZ_ROOT / image_rel_path, output_root / image_rel_path)
 
+    non_md_links = [ref.url for ref in page.external_references()
+                    if ref.type == 'link' and not ref.url.endswith('.md')]
+
+    for non_md_link in non_md_links:
+        parsed_non_md_link = urllib.parse.urlparse(non_md_link)
+
+        if parsed_non_md_link.scheme or parsed_non_md_link.netloc:
+            continue # not a relative URL
+
+        if parsed_non_md_link.fragment:
+            continue # link to markdown section
+
+        relative_path = (OMZ_ROOT / Path(path).parent / non_md_link).resolve().relative_to(OMZ_ROOT)
+        suggested_path = OMZ_PREFIX + Path(relative_path).as_posix()
+
+        raise RuntimeError(f'{path}: Relative link to non-markdown file "{non_md_link}".'
+                           f'Replace it by `{suggested_path}`')
     return element
 
 
