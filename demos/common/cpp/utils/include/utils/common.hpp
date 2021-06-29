@@ -55,8 +55,7 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const PrintableIeVersion &p) {
         ref_type version = p.version;
 
-        return os << version.description << " version "
-           << IE_VERSION_MAJOR << "." << IE_VERSION_MINOR << "." << IE_VERSION_PATCH;
+        return os << version.description << " version " << version.buildNumber;
     }
 
 private:
