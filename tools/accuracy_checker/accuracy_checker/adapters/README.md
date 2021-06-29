@@ -309,6 +309,7 @@ AccuracyChecker supports following set of adapters:
 * `bert_classification` - converting output of BERT model trained for text classification task to `ClassificationPrediction`.
   * `num_classes` - number of predicted classes.
   * `classification_out` - name of output layer with classification probabilities. (Optional, if not provided default first output blob will be used).
+  * `single_score` - highlight that model return single value representing class id or probability belonging to class 1 in binary classification case (Optional, default `False`).
 * `bert_ner` - converting output of BERT model trained for named entity recognition task to `SequenceClassificationPrediction`.
   * `classification_out` - name of output layer with classification probabilities. (Optional, if not provided default first output blob will be used).
 * `human_pose_estimation_3d` - converting output of model for 3D human pose estimation to `PoseEstimation3dPrediction`.
