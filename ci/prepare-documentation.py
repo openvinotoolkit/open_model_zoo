@@ -67,12 +67,20 @@ HUMAN_READABLE_TASK_TYPES = {
     'text_to_speech': 'Text-to-speech',
 }
 
-def add_page(output_root, parent, *, id=None, path=None, title=None):
+def add_page(output_root, parent, *, id=None, path=None, title=None, index=-1):
+    if type(index) != int:
+        raise ValueError('index must be a number')
     if parent.tag == 'tab':
         parent.attrib['type'] = 'usergroup'
 
-    element = ET.SubElement(parent, 'tab', type='user', title=title, url='@ref ' + id if id else '')
-
+    element = ET.Element('tab')
+    element.attrib['type'] = 'user'
+    element.attrib['title'] = title
+    element.attrib['url'] = '@ref ' + id if id else ''
+    if index == -1:
+        parent.append(element)
+    else:
+        parent.insert(index, element)
     if not path:
         assert title, "title must be specified if path isn't"
 
@@ -214,6 +222,11 @@ def add_model_pages(output_root, parent_element, group, group_title):
 
     sort_titles(group_element)
 
+    title = 'Intel\'s Pre-Trained Models Device Support' if group == 'intel' else 'Public Pre-Trained Models Device Support'
+    add_page(output_root, group_element, 
+             id=f'omz_models_{group}_device_support', path=f'models/{group}/device_support.md',
+             title=title, index=0)
+
 
 def main():
     logging.basicConfig()
@@ -233,16 +246,6 @@ def main():
 
     add_accuracy_checker_pages(output_root, navindex_element)
 
-    datasets_element = add_page(output_root, navindex_element,
-        id='omz_data_datasets', path='data/datasets.md')
-
-    # The xml:id here is omz_data rather than omz_data_datasets, because
-    # later we might want to have other pages in the "data" directory. If
-    # that happens, we'll create a parent page with ID "omz_data" and move
-    # the xml:id to that page, thus integrating the new pages without having
-    # to change the upstream OpenVINO documentation building process.
-    datasets_element.attrib[XML_ID_ATTRIBUTE] = 'omz_data'
-
     downloader_element = add_page(output_root, navindex_element,
         id='omz_tools_downloader', path='tools/downloader/README.md', title='Model Downloader')
     downloader_element.attrib[XML_ID_ATTRIBUTE] = 'omz_tools_downloader'
@@ -255,6 +258,16 @@ def main():
         'intel', "Intel's Pre-trained Models")
     add_model_pages(output_root, trained_models_group_element,
         'public', "Public Pre-trained Models")
+
+    datasets_element = add_page(output_root, navindex_element, id='omz_data_datasets', path='data/datasets.md',
+                            title='Dataset Preparation Guide')
+
+    # The xml:id here is omz_data rather than omz_data_datasets, because
+    # later we might want to have other pages in the "data" directory. If
+    # that happens, we'll create a parent page with ID "omz_data" and move
+    # the xml:id to that page, thus integrating the new pages without having
+    # to change the upstream OpenVINO documentation building process.
+    datasets_element.attrib[XML_ID_ATTRIBUTE] = 'omz_data'
 
     demos_group_element = add_page(output_root, navindex_element,
         title="Demos", id='omz_demos', path='demos/README.md')

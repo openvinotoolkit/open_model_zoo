@@ -1,4 +1,4 @@
-# Public Pre-Trained Models Device Support {#omz_models_public_device_support}
+# Public Pre-Trained Models Device Support
 
 | Model Name | CPU | GPU | MYRIAD |
 |------------|-----|-----|--------|
