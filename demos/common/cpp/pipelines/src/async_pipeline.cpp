@@ -22,9 +22,7 @@ using namespace InferenceEngine;
 
 AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& core) :
     model(std::move(modelInstance)) {
-
     execNetwork = model->loadExecutableNetwork(cnnConfig, core);
-    
     // --------------------------- Create infer requests ------------------------------------------------
     unsigned int nireq = cnnConfig.maxAsyncRequests;
     if (nireq == 0) {
@@ -38,7 +36,6 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
     }
     slog::info << "\tNumber of inference requests is set to " << nireq << "." << slog::endl;
     requestsPool.reset(new RequestsPool(execNetwork, nireq));
-
     // --------------------------- Call onLoadCompleted to complete initialization of model -------------
     model->onLoadCompleted(requestsPool->getInferRequestsList());
 }
