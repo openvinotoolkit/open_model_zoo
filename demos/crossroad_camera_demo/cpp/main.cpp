@@ -836,11 +836,11 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
     }
     catch (const std::exception& error) {
-        slog ::err << "[ ERROR ] " << error.what() << slog::endl;
+        slog ::err << error.what() << slog::endl;
         return 1;
     }
     catch (...) {
-        slog::err << "[ ERROR ] Unknown/internal exception happened." << slog::endl;
+        slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
 

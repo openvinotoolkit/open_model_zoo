@@ -117,10 +117,8 @@ void Visualizer::markImage(cv::Mat& image, const std::pair<std::string, std::str
     int pad = 25;
     std::pair<float, float> positions(static_cast<float>(image.cols) * alpha / 2.0f,
                                              static_cast<float>(image.cols) * (1 + alpha) / 2.0f);
-
     putHighlightedText(image, marks.first, cv::Point(static_cast<int>(positions.first) - pad, 25),
         cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255), 2);
-
     putHighlightedText(image, marks.second, cv::Point(static_cast<int>(positions.second), 25),
         cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255), 2);
 }

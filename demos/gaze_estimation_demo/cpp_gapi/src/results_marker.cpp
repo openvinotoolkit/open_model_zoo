@@ -36,7 +36,7 @@ void ResultsMarker::mark(cv::Mat& image,
             static_cast<double>(faceInferenceResults.faceDetectionConfidence)),
             cv::Point(static_cast<int>(tl.x),
             static_cast<int>(tl.y - 5. * faceBoundingBoxWidth / 200.)),
-            cv::FONT_HERSHEY_COMPLEX, scale, { 200, 10, 10 }, 1);
+            cv::FONT_HERSHEY_COMPLEX, scale, cv::Scalar(200, 10, 10), 1);
     }
 
     if (showHeadPoseAxes) {
@@ -119,7 +119,7 @@ void ResultsMarker::mark(cv::Mat& image,
                 static_cast<double>(std::round(gazeAngles.y))),
                 cv::Point(static_cast<int>(faceBoundingBox.tl().x),
                 static_cast<int>(faceBoundingBox.br().y + 12. * faceBoundingBoxWidth / 100.)),
-                cv::FONT_HERSHEY_PLAIN, scale * 2, { 200, 10, 10 }, 1);
+                cv::FONT_HERSHEY_PLAIN, scale * 2, cv::Scalar(200, 10, 10), 1);
         }
     }
     if (showEyeState) {

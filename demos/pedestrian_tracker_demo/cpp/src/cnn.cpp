@@ -59,6 +59,9 @@ void CnnBase::Load() {
 
     executable_network_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
     printExecNetworkInfo(executable_network_, config_.path_to_model, deviceName_);
+    infer_request_ = executable_network_.CreateInferRequest();
+    infer_request_.SetInput(inputs);
+    infer_request_.SetOutput(outputs_);
 }
 
 void CnnBase::InferBatch(

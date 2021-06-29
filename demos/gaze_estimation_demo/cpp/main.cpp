@@ -81,7 +81,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        PerformanceMetrics renderMetrics;
         // ------------------------------ Parsing and validating of input arguments --------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -180,7 +179,6 @@ int main(int argc, char *argv[]) {
             }
             putTimingInfoOnFrame(frame, overallTimeAverager.getAveragedValue(),
                                  inferenceTimeAverager.getAveragedValue());
-            renderMetrics.update(renderingStart);
             framesProcessed++;
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
                 videoWriter.write(frame);
