@@ -318,44 +318,44 @@ int main(int argc, char *argv[]) {
         std::cout << std::endl;
 
         cv::GComputation pipeline([=]() {
-                cv::GMat in;
+            cv::GMat in;
 
-                cv::GMat frame = cv::gapi::copy(in);
+            cv::GMat frame = cv::gapi::copy(in);
 
-                cv::GMat detections = cv::gapi::infer<Faces>(in);
+            cv::GMat detections = cv::gapi::infer<Faces>(in);
 
-                cv::GArray<cv::Rect> faces = PostProc::on(detections, in,
-                                                          FLAGS_t,
-                                                          FLAGS_bb_enlarge_coef,
-                                                          FLAGS_dx_coef,
-                                                          FLAGS_dy_coef);
-                auto outs = GOut(frame, detections, faces);
+            cv::GArray<cv::Rect> faces = PostProc::on(detections, in,
+                                                      FLAGS_t,
+                                                      FLAGS_bb_enlarge_coef,
+                                                      FLAGS_dx_coef,
+                                                      FLAGS_dy_coef);
+            auto outs = GOut(frame, detections, faces);
 
-                cv::GArray<cv::GMat> ages, genders;
-                if (!FLAGS_m_ag.empty()) {
-                    std::tie(ages, genders) = cv::gapi::infer<AgeGender>(faces, in);
-                    outs += GOut(ages, genders);
-                }
+            cv::GArray<cv::GMat> ages, genders;
+            if (!FLAGS_m_ag.empty()) {
+                std::tie(ages, genders) = cv::gapi::infer<AgeGender>(faces, in);
+                outs += GOut(ages, genders);
+            }
 
-                cv::GArray<cv::GMat> y_fc, p_fc, r_fc;
-                if (!FLAGS_m_hp.empty()) {
-                    std::tie(y_fc, p_fc, r_fc) = cv::gapi::infer<HeadPose>(faces, in);
-                    outs += GOut(y_fc, p_fc, r_fc);
-                }
+            cv::GArray<cv::GMat> y_fc, p_fc, r_fc;
+            if (!FLAGS_m_hp.empty()) {
+                std::tie(y_fc, p_fc, r_fc) = cv::gapi::infer<HeadPose>(faces, in);
+                outs += GOut(y_fc, p_fc, r_fc);
+            }
 
-                cv::GArray<cv::GMat> emotions;
-                if (!FLAGS_m_em.empty()) {
-                    emotions = cv::gapi::infer<Emotions>(faces, in);
-                    outs += GOut(emotions);
-                }
+            cv::GArray<cv::GMat> emotions;
+            if (!FLAGS_m_em.empty()) {
+                emotions = cv::gapi::infer<Emotions>(faces, in);
+                outs += GOut(emotions);
+            }
 
-                cv::GArray<cv::GMat> landmarks;
-                if (!FLAGS_m_lm.empty()) {
-                    landmarks = cv::gapi::infer<FacialLandmark>(faces, in);
-                    outs += GOut(landmarks);
-                }
+            cv::GArray<cv::GMat> landmarks;
+            if (!FLAGS_m_lm.empty()) {
+                landmarks = cv::gapi::infer<FacialLandmark>(faces, in);
+                outs += GOut(landmarks);
+            }
 
-                return cv::GComputation(cv::GIn(in), std::move(outs));
+            return cv::GComputation(cv::GIn(in), std::move(outs));
         });
 
         auto det_net = cv::gapi::ie::Params<Faces> {

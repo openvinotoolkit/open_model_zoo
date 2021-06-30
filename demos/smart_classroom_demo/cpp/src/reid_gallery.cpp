@@ -64,6 +64,7 @@ RegistrationStatus EmbeddingsGallery::RegisterIdentity(const std::string& identi
       if (faces.size() == 0) {
         return RegistrationStatus::FAILURE_NOT_DETECTED;
       }
+      CV_Assert(faces.size() == 1);
       cv::Mat face_roi = image(faces[0].rect);
       target = face_roi;
     }

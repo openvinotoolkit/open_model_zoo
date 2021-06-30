@@ -1,14 +1,12 @@
-# Smart Classroom C++ Demo
+# Smart Classroom C++ G-API Demo
 
-![](../smart_classroom.gif)
+![example](../smart_classroom.gif)
 
 The demo shows an example of joint usage of several neural networks to detect student actions (sitting, standing, raising hand for the `person-detection-action-recognition-0005` model and sitting, writing, raising hand, standing, turned around, lie on the desk for the `person-detection-action-recognition-0006` model) and recognize people by faces in the classroom environment. The demo uses Async API for action and face detection networks. It allows to parallelize execution of face recognition and detection: while face recognition is running on one accelerator, face and action detection could be performed on another. You can use a set of the following pre-trained models with the demo:
 
 * `face-detection-adas-0001`, which is a primary detection network for finding faces.
 * `landmarks-regression-retail-0009`, which is executed on top of the results from the first network and outputs
 a vector of facial landmarks for each detected face.
-* `face-reidentification-retail-0095`,  which is executed on top of the results from the first network and outputs
-a vector of features for each detected face.
 * `person-detection-action-recognition-0005`, which is a detection network for finding persons and simultaneously predicting their current actions (3 actions - sitting, standing, raising hand).
 * `person-detection-action-recognition-0006`, which is a detection network for finding persons and simultaneously predicting their current actions (6 actions: sitting, writing, raising hand, standing, turned around, lie on the desk).
 * `person-detection-raisinghand-recognition-0001`, which is a detection network for finding students and simultaneously predicting their current actions (in contrast with the previous model, predicts only if a student raising hand or not).
@@ -16,9 +14,11 @@ a vector of features for each detected face.
 
 ## How It Works
 
-On startup, the application reads command line parameters and loads four networks to the Inference Engine for execution on different devices depending on `-m...` options family. Upon getting a frame from the OpenCV VideoCapture, it performs inference of Face Detection and Action Detection networks. After that, the ROIs obtained by Face Detector are fed to the Facial Landmarks Regression network. Then landmarks are used to align faces by affine transform and feed them to the Face Recognition network. The recognized faces are matched with detected actions to find an action for a recognized person for each frame.
+On the start-up, the application reads command line parameters and loads four networks for execution on different devices depending on `-m...` options family. Demo contains two parts. First part is processing faces from gallery. Second part is main detection and recognition functionality. Both parts are graphs.
+Face gallery graph gets a frame performs inference of Face Detection network. ROI obtained by Face Detector are fed to the Facial Landmarks Regression network. Then landmarks are used to align faces by affine transform and feed them to the Face Recognition network. Output contains identities metrics for each face from gallery.
+Main graph works with frames from input source. First steps are equal to gallery processing. These are the same operations with Face Detection, Landmarks Regression, Face Recognition networks. Besides this, graph performs Action Detection network. The recognized faces are matched with detected actions to find an action for a recognized person for each frame. Then it draws results on frame. Output contains processed frame and logs.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Creating a Gallery for Face Recognition
 
@@ -30,7 +30,7 @@ To recognize faces on a frame, the demo needs a gallery of reference images. Eac
 ## Preparing to Run
 
 For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
-The list of models supported by the demo is in `<omz_dir>/demos/smart_classroom_demo/cpp/models.lst` file.
+The list of models supported by the demo is in `<omz_dir>/demos/smart_classroom_demo/cpp_gapi/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
@@ -68,28 +68,24 @@ InferenceEngine:
     API version ............ <version>
     Build .................. <number>
 
-smart_classroom_demo [OPTION]
+smart_classroom_demo_gapi [OPTION]
 Options:
 
     -h                             Print a usage message.
     -i                             Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -loop                          Optional. Enable reading the input in a loop.
     -read_limit                    Optional. Read length limit before stopping or restarting reading the input.
-    -o "<path>"                    Optional. Name of the output file(s) to save.
+    -o "<path>"                    Optional. Name of output to save.
     -limit "<num>"                 Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m_act '<path>'                Required. Path to the Person/Action Detection Retail model (.xml) file.
     -m_fd '<path>'                 Required. Path to the Face Detection model (.xml) file.
-    -m_lm '<path>'                 Optional. Path to the Facial Landmarks Regression Retail model (.xml) file.
-    -m_reid '<path>'               Optional. Path to the Face Reidentification Retail model (.xml) file.
-    -l '<absolute_path>'           Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels implementation.
-          Or
-    -c '<absolute_path>'           Optional. For GPU custom kernels, if any. Absolute path to an .xml file with the kernels description.
-    -d_act '<device>'              Optional. Specify the target device for Person/Action Detection Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -d_fd '<device>'               Optional. Specify the target device for Face Detection Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -d_lm '<device>'               Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -d_reid '<device>'             Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
+    -m_lm '<path>'                 Required. Path to the Facial Landmarks Regression Retail model (.xml) file.
+    -m_reid '<path>'               Required. Path to the Face Reidentification Retail model (.xml) file.
+    -d_act '<device>'              Optional. Specify the target device for Person/Action Detection Retail (the list of available devices is shown below). Default value is CPU.
+    -d_fd '<device>'               Optional. Specify the target device for Face Detection Retail (the list of available devices is shown below). Default value is CPU.
+    -d_lm '<device>'               Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU.
+    -d_reid '<device>'             Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU.
     -greedy_reid_matching          Optional. Use faster greedy matching algorithm in face reid.
-    -pc                            Optional. Enables per-layer performance statistics.
     -r                             Optional. Output Inference results as raw values.
     -ad                            Optional. Output file name to save per-person action statistics in.
     -t_ad                          Optional. Probability threshold for person/action detection.
@@ -122,7 +118,7 @@ Running the application with the empty list of options yields an error message.
 Example of a valid command line to run the application with pre-trained models for recognizing students actions:
 
 ```sh
-./smart_classroom_demo \
+./smart_classroom_demo_gapi \
     -i <path_to_video> \
     -m_act <path_to_model>/person-detection-action-recognition-0005.xml \
     -student_ac "sitting, standing, raising hand" \
@@ -133,12 +129,12 @@ Example of a valid command line to run the application with pre-trained models f
     -fg <path_to_faces_gallery.json>
 ```
 
-> **NOTE**: To recognize actions of students, use `person-detection-action-recognition-0005` model for 3 basic actions and `person-detection-action-recognition-0006` model for 6 actions. See model description for more details on the list of recognized actions.
+> **NOTE**: To recognize actions of students, use `person-detection-action-recognition-0005` model for 3 basic actions and `person-detection-action-recognition-0006` model for 6 actions.
 
 Example of a valid command line to run the application for recognizing actions of a teacher:
 
 ```sh
-./smart_classroom_demo \
+./smart_classroom_demo_gapi \
     -i <path_to_video> \
     -m_act <path_to_model>/person-detection-action-recognition-teacher-0002.xml \
     -m_fd <path_to_model>/face-detection-adas-0001.xml \
@@ -154,23 +150,13 @@ Example of a valid command line to run the application for recognizing actions o
 Example of a valid command line to run the application for recognizing first raised-hand students:
 
 ```sh
-./smart_classroom_demo \
-    -i <path_to_video> \
-    -m_act <path_to_model>/person-detection-raisinghand-recognition-0001.xml \
-    -a_top <number of first raised-hand students>
+./smart_classroom_demo_gapi \
+  -i <path_to_video> \
+  -m_act <path_to_model>/person-detection-raisinghand-recognition-0001.xml \
+  -a_top <number of first raised-hand students> \
 ```
 
-> **NOTE**: To recognize raising hand action of students, use `person-detection-raisinghand-recognition-0001` model.
-
->**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
-
-You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
-
-* To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
-* To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
-To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
-
->**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
+> **NOTE**: To recognize raising hand action of students, use `person-detection-raisinghand-recognition-0001` model. See model description for more details on the list of recognized actions.
 
 ## Demo Output
 
