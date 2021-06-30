@@ -14,7 +14,6 @@
  limitations under the License.
 """
 
-import io
 import numpy as np
 import ngraph
 
