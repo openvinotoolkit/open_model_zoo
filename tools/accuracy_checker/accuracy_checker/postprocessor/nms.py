@@ -17,7 +17,6 @@ limitations under the License.
 from functools import singledispatch
 
 import numpy as np
-from numpy.core.defchararray import index
 
 from ..config import BoolField, NumberField
 from .postprocessor import Postprocessor

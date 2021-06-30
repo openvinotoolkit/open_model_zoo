@@ -9,8 +9,8 @@ YOLOF is a simple, fast, and efficient object detector without FPN. Model based 
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Detection     |
-| GFLOPs            | ?             |
-| MParams           | ?             |
+| GFLOPs            | 175.37942     |
+| MParams           | 48.228        |
 | Source framework  | PyTorch\*     |
 
 ## Accuracy
