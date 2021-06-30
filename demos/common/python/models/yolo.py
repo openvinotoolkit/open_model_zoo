@@ -185,12 +185,18 @@ class YOLO(Model):
         return [det for det in detections if det.score > 0]
 
     @staticmethod
-    def _resize_detections(detections, original_shape):
+    def _resize_detections(detections, original_shape, resized_shape=None):
+        w, h = original_shape
+
+        if resized_shape:
+            w = original_shape[0] / resized_shape[0]
+            h = original_shape[1] / resized_shape[1]
+
         for detection in detections:
-            detection.xmin *= original_shape[0]
-            detection.xmax *= original_shape[0]
-            detection.ymin *= original_shape[1]
-            detection.ymax *= original_shape[1]
+            detection.xmin *= w
+            detection.xmax *= w
+            detection.ymin *= h
+            detection.ymax *= h
         return detections
 
     @staticmethod
@@ -310,11 +316,12 @@ class YoloV4(YOLO):
 
 class YOLOF(YOLO):
     class Params:
-        def __init__(self, num, sides, anchors):
+        def __init__(self, num, num_objects, anchors):
             self.num = num
             self.coords = 4
             self.classes = 80
-            self.sides = sides
+            self.topk = 1000
+            self.cells = int(np.sqrt(num_objects // num))
             self.anchors = anchors
 
     def _get_output_info(self):
@@ -324,53 +331,74 @@ class YOLOF(YOLO):
         output_info = {}
         for i, (name, layer) in enumerate(self.net.outputs.items()):
             shape = layer.shape
-            yolo_params = self.Params(num, shape[2:4], anchors)
+            yolo_params = self.Params(num, shape[1], anchors)
             output_info[name] = (shape, yolo_params)
         return output_info
+
+    def postprocess(self, outputs, meta):
+        detections = []
+
+        for layer_name in self.yolo_layer_params.keys():
+            out_blob = outputs[layer_name]
+            layer_params = self.yolo_layer_params[layer_name]
+            out_blob.shape = layer_params[0]
+            detections += self._parse_yolo_region(out_blob, meta['resized_shape'], layer_params[1], self.threshold)
+
+        detections = self._filter(detections, self.iou_threshold)
+
+        detections = self._resize_detections(detections, meta['original_shape'][1::-1], meta['resized_shape'][1::-1])
+
+        return clip_detections(detections, meta['original_shape'])
 
     @staticmethod
     def _parse_yolo_region(predictions, input_size, params, threshold, multiple_labels=False):
         def sigmoid(x):
             return 1. / (1. + np.exp(-x))
-        # ------------------------------------------ Extracting layer parameters ---------------------------------------
+
         objects = []
-        bbox_size = params.coords + 1 + params.classes
-        # ------------------------------------------- Parsing YOLO Region output ---------------------------------------
-        for row, col, n in np.ndindex(params.sides[0], params.sides[1], params.num):
-            # Getting raw values for each detection bounding bFox
-            bbox = predictions[0, n * bbox_size:(n + 1) * bbox_size, row, col]
-            x, y = bbox[:2]
-            width, height = bbox[2:4]
+        for prediction in predictions:
+            prob = prediction[:, params.coords:].flatten()
+            class_probabilities = sigmoid(prob)
 
-            class_probabilities = sigmoid(bbox[5:])
-            object_probability = np.max(class_probabilities)
-            if object_probability < threshold:
-                continue
-            # Process raw value
-            stride = (input_size[0] / params.sides[0], input_size[1] / params.sides[1])
+            # get first topk
+            num_topk = min(params.topk, prediction.shape[0])
+            topk_idxs = np.argsort(-class_probabilities)
+            class_probabilities = class_probabilities[topk_idxs][:num_topk]
+            topk_idxs = topk_idxs[:num_topk]
 
-            x = col * stride[1] + x * params.anchors[2 * n]
-            y = row * stride[0] + y * params.anchors[2 * n + 1]
-            # Value for exp is very big number in some cases so following construction is using here
-            try:
-                width = np.exp(width)
-                height = np.exp(height)
-            except OverflowError:
-                continue
-            width = width * params.anchors[2 * n]
-            height = height * params.anchors[2 * n + 1]
+            # filter out the proposals with low confidence score
+            keep_idxs = class_probabilities > threshold
+            class_probabilities = class_probabilities[keep_idxs]
+            topk_idxs = topk_idxs[keep_idxs]
+            obj_indx = topk_idxs // params.classes
+            class_idx = topk_idxs % params.classes
 
-            if multiple_labels:
-                for class_id, class_probability in enumerate(class_probabilities):
-                    confidence = object_probability * class_probability
-                    if confidence > threshold:
-                        objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
-                                                 confidence, class_id))
-            else:
-                class_id = np.argmax(class_probabilities)
-                confidence = class_probabilities[class_id]
+            for ind, obj_ind in enumerate(obj_indx):
+                bbox = prediction[:, :params.coords][obj_ind]
+                x, y, width, height = bbox[:4]
+
+                row = obj_ind // (params.cells * params.num)
+                col = (obj_ind - row * params.cells * params.num) // params.num
+                n = (obj_ind - row * params.cells * params.num) % params.num
+
+                # Get relative coords
+                stride = (input_size[0] / params.cells, input_size[1] / params.cells)
+                x = x * params.anchors[2 * n] + col * stride[1]
+                y = y * params.anchors[2 * n + 1] + row * stride[0]
+
+                # Value for exp is very big number in some cases so following construction is using here
+                try:
+                    width = np.exp(width)
+                    height = np.exp(height)
+                except OverflowError:
+                    continue
+                width = width * params.anchors[2 * n] # / input_size[0]
+                height = height * params.anchors[2 * n + 1] # / input_size[1]
+
+                # Define class_label and cofidence
+                label = class_idx[ind]
+                confidence = class_probabilities[ind]
                 objects.append(Detection(x - width / 2, y - height / 2, x + width / 2, y + height / 2,
-                                         confidence.item(), class_id.item()))
-                # print(x - width / 2, y - height / 2, x + width / 2, y + height / 2, confidence.item(), class_id.item())
-        print(len(objects))
+                                         confidence.item(), label.item()))
+
         return objects

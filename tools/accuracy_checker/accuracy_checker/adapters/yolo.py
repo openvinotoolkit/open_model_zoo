@@ -690,10 +690,10 @@ class YolofAdapter(YoloV3Adapter):
             for ind, obj_ind in enumerate(obj_indx):
                 bbox = prediction[:, :self.coords][obj_ind]
                 raw_bbox = DetectionBox(bbox[0], bbox[1], bbox[2], bbox[3], 1, prob[ind])
-                i = obj_ind // (cells * self.num)
-                j = (obj_ind - i * cells * self.num) // self.num
-                n = (obj_ind - i * cells * self.num) % self.num
-                processed_box = self.processor(raw_bbox, j, i, self.anchors[2*n:2*n+2])
+                row = obj_ind // (cells * self.num)
+                col = (obj_ind - row * cells * self.num) // self.num
+                n = (obj_ind - row * cells * self.num) % self.num
+                processed_box = self.processor(raw_bbox, col, row, self.anchors[2*n:2*n+2])
 
                 label = class_idx[ind]
 

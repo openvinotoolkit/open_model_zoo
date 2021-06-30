@@ -135,6 +135,8 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * architecture_type = yolov4
   - yolo-v4-tf
   - yolo-v4-tiny-tf
+* architecture_type = yolof
+  - yolof
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -144,7 +146,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
-                                {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}
+                                {ssd,yolo,yolov4,yolof,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}
                                 -i INPUT [-d DEVICE] [--labels LABELS]
                                 [-t PROB_THRESHOLD] [--keep_aspect_ratio]
                                 [--input_size INPUT_SIZE INPUT_SIZE]
