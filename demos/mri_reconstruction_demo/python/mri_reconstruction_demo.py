@@ -1,3 +1,6 @@
+# Copyright (C) 2018-2021 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#
 import numpy as np
 import cv2 as cv
 import argparse
@@ -17,7 +20,6 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--input', dest='input', help='Path to input .npy file with MRI scan data.')
     parser.add_argument('-p', '--pattern', dest='pattern', help='Path to sampling mask in .npy format.')
     parser.add_argument('-m', '--model', dest='model', help='Path to .xml file of OpenVINO IR.')
-    parser.add_argument('-l', '--cpu_extension', dest='cpu_extension', help='Path to extensions library with FFT implementation.')
     parser.add_argument('-d', '--device', dest='device', default='CPU',
                         help='Optional. Specify the target device to infer on; CPU, '
                              'GPU, HDDL or MYRIAD is acceptable. For non-CPU targets, '
@@ -30,7 +32,6 @@ if __name__ == '__main__':
     bin_path = xml_path[:xml_path.rfind('.xml')] + '.bin'
 
     ie = IECore()
-    ie.add_extension(args.cpu_extension, "CPU")
 
     net = ie.read_network(xml_path, bin_path)
 

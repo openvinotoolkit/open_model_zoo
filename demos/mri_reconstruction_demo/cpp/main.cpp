@@ -1,3 +1,6 @@
+// Copyright (C) 2018-2021 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
+//
 #include <inference_engine.hpp>
 #include <opencv2/opencv.hpp>
 
@@ -37,7 +40,6 @@ int main(int argc, char** argv) {
         device = "HETERO:" + device + ",CPU";
 
     Core ie;
-    ie.AddExtension(make_so_pointer<IExtension>(FLAGS_l), "CPU");
 
     CNNNetwork net = ie.ReadNetwork(FLAGS_m);
     net.getInputsInfo().begin()->second->setLayout(Layout::NHWC);
@@ -159,10 +161,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
     if (FLAGS_m.empty()) {
         throw std::logic_error("Parameter -m is not set");
-    }
-
-    if (FLAGS_l.empty()) {
-        throw std::logic_error("Parameter -l is not set");
     }
 
     if (FLAGS_p.empty()) {
