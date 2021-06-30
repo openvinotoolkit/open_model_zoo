@@ -284,6 +284,13 @@ AccuracyChecker supports following set of adapters:
   * `lm_file` - Path to LM in binary kenlm format, relative to --model_attributes or --models.  Default is beam search without LM.
   * `lm_alpha` - LM alpha: weight factor for LM score (required when using LM)
   * `lm_beta` - LM beta: score bonus for each additional word, in log_e units (required when using LM)
+* `wav2vec` - decodes output Wav2Vec model to `CharacterRecognitionPrediction`.
+  * `alphabet` - list of supported tokens for conversion token_ids.
+  * `pad_token` - token, which represents padding in an alphabet (wav2vec uses this token as CTC-blank) Optional, default `<pad>`.
+  * `words_delimeter` - token, which represents delimiter between words in sequence. Optional, default `|`.
+  * `group_tokens` - allow replacing repeated tokens by one. Optional, default `True`.
+  * `lower_case` - allow converting result to lower case. Optional, default `False`.
+  * `cleanup_whitespaces` - allow merge extra whitespaces to one. Optional, default `True`.
 * `gaze_estimation` - converting output of gaze estimation model to `GazeVectorPrediction`.
 * `hit_ratio_adapter` - converting output NCF model to `HitRatioPrediction`.
 * `brain_tumor_segmentation` - converting output of brain tumor segmentation model to `BrainTumorSegmentationPrediction`.

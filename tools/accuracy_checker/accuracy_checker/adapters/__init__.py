@@ -105,7 +105,8 @@ from .audio_recognition import (
     CTCBeamSearchDecoder,
     CTCGreedyDecoder,
     CTCBeamSearchDecoderWithLm,
-    FastCTCBeamSearchDecoderWithLm
+    FastCTCBeamSearchDecoderWithLm,
+    Wav2VecDecoder
 )
 from .kaldi_asr_decoder import KaldiLatGenDecoder
 from .regression import RegressionAdapter, MultiOutputRegression
@@ -238,6 +239,7 @@ __all__ = [
     'CTCBeamSearchDecoderWithLm',
     'FastCTCBeamSearchDecoderWithLm',
     'KaldiLatGenDecoder',
+    'Wav2VecDecoder',
 
     'QualityAssessmentAdapter',
 

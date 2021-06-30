@@ -721,9 +721,7 @@ class AnnotationFeaturesReader(BaseReader):
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
-        parameters.update({
-            'features': ListField(allow_empty=False, value_type=str, description='List of features.')
-        })
+        parameters.update({'features': ListField(allow_empty=False, value_type=str, description='List of features.')})
         return parameters
 
     def configure(self):
@@ -764,7 +762,11 @@ class WavReader(BaseReader):
         params.update({
             'mono': BoolField(optional=True, default=False,
                               description='get mean along channels if multichannel audio loaded'),
-            'to_float': BoolField(optional=True, default=False, description='converts audio signal to float')
+            'to_float': BoolField(optional=True, default=False, description='converts audio signal to float'),
+            'float_dtype': StringField(
+                choices=['float16', 'float32', 'float64'], optional=True, default='float32',
+                description='specifies precision for conversion to float '
+            )
         })
         return params
 
@@ -772,6 +774,9 @@ class WavReader(BaseReader):
         super().configure()
         self.mono = self.get_value_from_config('mono')
         self.to_float = self.get_value_from_config('to_float')
+        self.float_dtype = self.get_value_from_config('float_dtype')
+        if self.float_dtype == 'float64':
+            self.float_dtype = 'float'
 
     def read(self, data_id):
         data_path = self.data_source / data_id if self.data_source is not None else data_id
@@ -793,7 +798,7 @@ class WavReader(BaseReader):
             if channels > 1 and self.mono:
                 data = data.mean(0, keepdims=True)
             if self.to_float:
-                data = data.astype(np.float32) / np.iinfo(self._samplewidth_types[sample_width]).max
+                data = data.astype(self.float_dtype) / np.iinfo(self._samplewidth_types[sample_width]).max
 
         return data, {'sample_rate': sample_rate}
 
@@ -823,7 +828,6 @@ class PickleReader(BaseReader):
         data = read_pickle(data_path)
         if isinstance(data, list) and len(data) == 2 and isinstance(data[1], dict):
             return data
-
         return data, {}
 
     def read_item(self, data_id):
