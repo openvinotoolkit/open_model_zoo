@@ -280,7 +280,8 @@ The main difference between this converter and `super_resolution` in data organi
   * `image_prefix` - prefix part for image file names. (Optional, default is empty).
   * `image_postfix` - postfix part for image file names (optional, default is `.png`).
   * `mask_prefix` - prefix part for mask file names. (Optional, default is empty).
-  * `image_postfix` - postfix part for mask file names (optional, default is `.png`).
+  * `image_postfix` - postfix part for mask file names (Optional, default is `.png`).
+  * `mask_to_gray`  - allows casting matting mask to gray scale (Optional, default `False`).
 * `camvid` - converts CamVid dataset with 12 classes to `SegmentationAnnotation`. Dataset can be found in the following [repository](https://github.com/alexgkendall/SegNet-Tutorial/tree/master/CamVid)
   * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space)
   * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
