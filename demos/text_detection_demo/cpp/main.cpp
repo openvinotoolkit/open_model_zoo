@@ -87,7 +87,6 @@ int main(int argc, char *argv[]) {
         double avg_time = 0;
         const double avg_time_decay = 0.8;
 
-
         slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
         Core ie;
 
@@ -106,7 +105,6 @@ int main(int argc, char *argv[]) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = std::make_shared<Extension>(FLAGS_l);
                     ie.AddExtension(extension_ptr, "CPU");
-                    std::cout << "CPU Extension loaded: " << FLAGS_l << std::endl;
                 }
             } else if (!FLAGS_c.empty()) {
                 // Load Extensions for GPU
@@ -279,18 +277,18 @@ int main(int argc, char *argv[]) {
 
                 if (FLAGS_r) {
                     for (size_t i = 0; i < points.size(); i++) {
-                        std::cout << clip(static_cast<int>(points[i].x), image.cols - 1) << "," <<
+                        slog::info << clip(static_cast<int>(points[i].x), image.cols - 1) << "," <<
                                      clip(static_cast<int>(points[i].y), image.rows - 1);
                         if (i != points.size() - 1)
-                            std::cout << ",";
+                            slog::info << ",";
                     }
 
                     if (text_recognition != nullptr) {
-                        std::cout << "," << res;
+                        slog::info << "," << res;
                     }
 
                     if (!points.empty()) {
-                        std::cout << std::endl;
+                        slog::info << slog::endl;
                     }
                 }
 

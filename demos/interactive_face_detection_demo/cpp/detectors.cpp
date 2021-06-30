@@ -76,7 +76,7 @@ void BaseDetection::printPerformanceCounts(std::string fullDeviceName) {
     if (!enabled()) {
         return;
     }
-    slog::info << "Performance counts for " << topoName << slog::endl << slog::endl;
+    slog::info << "Performance counts for " << topoName << slog::endl;
     ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
 }
 
@@ -185,7 +185,6 @@ void FaceDetection::fetchResults() {
     resultsFetched = true;
     LockedMemory<const void> outputMapped = as<MemoryBlob>(request->GetBlob(output))->rmap();
     const float *detections = outputMapped.as<float *>();
-
     if (!labels_output.empty()) {
         LockedMemory<const void> labelsMapped = as<MemoryBlob>(request->GetBlob(labels_output))->rmap();
         const int32_t *labels = labelsMapped.as<int32_t *>();
@@ -223,10 +222,10 @@ void FaceDetection::fetchResults() {
             r.location.height = bb_new_height;
 
             if (doRawOutputMessages) {
-                std::cout << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
+                slog::info << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
                              "    (" << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
                           << r.location.height << ")"
-                          << ((r.confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << std::endl;
+                          << ((r.confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << slog::endl;
             }
             if (r.confidence > detectionThreshold) {
                 results.push_back(r);
@@ -271,10 +270,10 @@ void FaceDetection::fetchResults() {
         r.location.height = bb_new_height;
 
         if (doRawOutputMessages) {
-            std::cout << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
+            slog::info << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
                          "    (" << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
                       << r.location.height << ")"
-                      << ((r.confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << std::endl;
+                      << ((r.confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << slog::endl;
         }
         if (r.confidence > detectionThreshold) {
             results.push_back(r);
@@ -324,7 +323,7 @@ float AntispoofingClassifier::operator[] (int idx) const {
     // use prediction for real face only
     float r = ProbBlobMapped.as<float*>()[2 * idx] * 100;
     if (doRawOutputMessages) {
-        std::cout << "[" << idx << "] element, real face probability = " << r << std::endl;
+        slog::info << "[" << idx << "] element, real face probability = " << r << slog::endl;
     }
 
     return r;
@@ -408,7 +407,7 @@ AgeGenderDetection::Result AgeGenderDetection::operator[] (int idx) const {
     AgeGenderDetection::Result r = {ageBlobMapped.as<float*>()[idx] * 100,
                                     genderBlobMapped.as<float*>()[idx * 2 + 1]};
     if (doRawOutputMessages) {
-        std::cout << "[" << idx << "] element, male prob = " << r.maleProb << ", age = " << r.age << std::endl;
+        slog::info << "[" << idx << "] element, male prob = " << r.maleProb << ", age = " << r.age << slog::endl;
     }
 
     return r;
@@ -498,9 +497,9 @@ HeadPoseDetection::Results HeadPoseDetection::operator[] (int idx) const {
                                     angleYMapped.as<float*>()[idx]};
 
     if (doRawOutputMessages) {
-        std::cout << "[" << idx << "] element, yaw = " << r.angle_y <<
+        slog::info << "[" << idx << "] element, yaw = " << r.angle_y <<
                      ", pitch = " << r.angle_p <<
-                     ", roll = " << r.angle_r << std::endl;
+                     ", roll = " << r.angle_r << slog::endl;
     }
 
     return r;
@@ -594,18 +593,18 @@ std::map<std::string, float> EmotionsDetection::operator[] (int idx) const {
     std::map<std::string, float> emotions;
 
     if (doRawOutputMessages) {
-        std::cout << "[" << idx << "] element, predicted emotions (name = prob):" << std::endl;
+        slog::info << "[" << idx << "] element, predicted emotions (name = prob):" << slog::endl;
     }
 
     for (size_t i = 0; i < emotionsVecSize; i++) {
         emotions[emotionsVec[i]] = outputIdxPos[i];
 
         if (doRawOutputMessages) {
-            std::cout << emotionsVec[i] << " = " << outputIdxPos[i];
+            slog::info << emotionsVec[i] << " = " << outputIdxPos[i];
             if (emotionsVecSize - 1 != i) {
-                std::cout << ", ";
+                slog::info << ", ";
             } else {
-                std::cout << std::endl;
+                slog::info << slog::endl;
             }
         }
     }
@@ -693,7 +692,7 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
     const float *normed_coordinates = facialLandmarksBlobMapped.as<float *>();
 
     if (doRawOutputMessages) {
-        std::cout << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << std::endl;
+        slog::info << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << slog::endl;
     }
 
     auto begin = n_lm / 2 * idx;
@@ -703,7 +702,7 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
         float normed_y = normed_coordinates[2 * i_lm + 1];
 
         if (doRawOutputMessages) {
-            std::cout << normed_x << ", " << normed_y << std::endl;
+            slog::info << normed_x << ", " << normed_y << slog::endl;
         }
 
         normedLandmarks.push_back(normed_x);

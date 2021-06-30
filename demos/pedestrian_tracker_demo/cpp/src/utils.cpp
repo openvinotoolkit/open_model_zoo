@@ -12,6 +12,7 @@
 #include <string>
 #include <set>
 #include <memory>
+#include <utils/slog.hpp>
 
 using namespace InferenceEngine;
 

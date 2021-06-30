@@ -216,12 +216,16 @@ public:
     ~ClassifiersAggregator() {
         std::mutex& printMutex = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
-        std::cout << rawDetections;
-        for (const std::string& rawAttribute : rawAttributes.container) {  // destructor assures that none uses the container
-            std::cout << rawAttribute;
-        }
-        for (const std::string& rawDecodedPlate : rawDecodedPlates.container) {
-            std::cout << rawDecodedPlate;
+        if (rawDetections != "") {
+            slog::info << "Frame #" << sharedVideoFrame->frameId << "\n";
+            slog::info << rawDetections;
+            for (const std::string& rawAttribute : rawAttributes.container) {  // destructor assures that none uses the container
+                slog::info << rawAttribute;
+            }
+            for (const std::string& rawDecodedPlate : rawDecodedPlates.container) {
+                slog::info << rawDecodedPlate;
+            }
+            slog::info << slog::endl;
         }
         printMutex.unlock();
         tryPush(static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.resAggregatorsWorker,
@@ -496,8 +500,8 @@ void DetectionsProcessor::process() {
                                 = context.detectionsProcessorsContext.vehicleAttributesClassifier.getResults(attributesRequest);
 
                             if (FLAGS_r && ((classifiersAggregator->sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
-                                classifiersAggregator->rawAttributes.lockedPushBack("Vehicle Attributes results:" + attributes.first + ';'
-                                                                                      + attributes.second + '\n');
+                                classifiersAggregator->rawAttributes.lockedPushBack("\t Vehicle Attributes results:" + attributes.first + ';'
+                                                                                      + attributes.second + "\n");
                             }
                             classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::VEHICLE, rect, attributes.first + ' ' + attributes.second});
                             context.attributesInfers.inferRequests.lockedPushBack(attributesRequest);
@@ -534,7 +538,7 @@ void DetectionsProcessor::process() {
                             std::string result = context.detectionsProcessorsContext.lpr.getResults(lprRequest);
 
                             if (FLAGS_r && ((classifiersAggregator->sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
-                                classifiersAggregator->rawDecodedPlates.lockedPushBack("License Plate Recognition results:" + result + '\n');
+                                classifiersAggregator->rawDecodedPlates.lockedPushBack("\t License Plate Recognition results:" + result + "\n");
                             }
                             classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::PLATE, rect, std::move(result)});
                             context.platesInfers.inferRequests.lockedPushBack(lprRequest);
@@ -847,10 +851,10 @@ int main(int argc, char* argv[]) {
         }
         slog::info << context.drawersContext.presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
-        std::cerr << "[ ERROR ] " << error.what() << std::endl;
+        slog::err << error.what() << slog::endl;
         return 1;
     } catch (...) {
-        std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
+        slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
 

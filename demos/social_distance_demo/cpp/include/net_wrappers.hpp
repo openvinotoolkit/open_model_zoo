@@ -113,8 +113,8 @@ public:
             results.push_back(Result{label, confidence, rect});
 
             if (rawResults) {
-                *rawResults << "[" << i << "," << label << "] element, prob = " << confidence
-                            << "    (" << rect.x << "," << rect.y << ")-(" << rect.width << "," << rect.height << ")" << std::endl;
+                *rawResults << "\t [" << i << "," << label << "] element, prob = " << confidence
+                            << "    (" << rect.x << "," << rect.y << ")-(" << rect.width << "," << rect.height << ")\n";
             }
         }
         return results;

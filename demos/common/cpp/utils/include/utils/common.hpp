@@ -55,7 +55,8 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const PrintableIeVersion &p) {
         ref_type version = p.version;
 
-        return os << version.description << " version " << version.buildNumber;
+        return os << version.description << " version " << IE_VERSION_MAJOR << "." << IE_VERSION_MINOR << "." << IE_VERSION_PATCH
+            << " (build " << version.buildNumber << ")";
     }
 
 private:
@@ -165,12 +166,11 @@ perfCountersSorted(std::map<std::string, InferenceEngine::InferenceEngineProfile
 }
 
 static UNUSED void printPerformanceCounts(const std::map<std::string, InferenceEngine::InferenceEngineProfileInfo>& performanceMap,
-                                          std::ostream &stream, const std::string &deviceName,
-                                          bool bshowHeader = true) {
+                                          std::ostream& stream, const std::string &deviceName, bool bshowHeader = true) {
     long long totalTime = 0;
     // Print performance counts
     if (bshowHeader) {
-        stream << std::endl << "performance counts:" << std::endl << std::endl;
+        stream << "Performance counts:" << std::endl;
     }
 
     auto performanceMapSorted = perfCountersSorted(performanceMap);
@@ -206,9 +206,7 @@ static UNUSED void printPerformanceCounts(const std::map<std::string, InferenceE
         }
     }
     stream << std::setw(20) << std::left << "Total time: " + std::to_string(totalTime) << " microseconds" << std::endl;
-    std::cout << std::endl;
-    std::cout << "Full device name: " << deviceName << std::endl;
-    std::cout << std::endl;
+    slog::info << "Full device name: " << deviceName << slog::endl;
 }
 
 static UNUSED void printPerformanceCounts(InferenceEngine::InferRequest request, std::ostream &stream, std::string deviceName, bool bshowHeader = true) {

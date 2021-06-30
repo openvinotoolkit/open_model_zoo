@@ -237,7 +237,9 @@ public:
     ~ClassifiersAggregator() {
         std::mutex &printMutex = static_cast<ReborningVideoFrame *>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
-        std::cout << rawDetections;
+        if (rawDetections != "") {
+            slog::info << rawDetections << slog::endl;
+        }
         printMutex.unlock();
         tryPush(static_cast<ReborningVideoFrame *>(sharedVideoFrame.get())->context.resAggregatorsWorker,
                 std::make_shared<ResAggregator>(sharedVideoFrame, std::move(boxes), std::move(trackables)));
@@ -487,6 +489,7 @@ bool DetectionsProcessor::isReady() {
 
         if (FLAGS_r && ((sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
             std::ostringstream rawResultsStream;
+            rawResultsStream << "Frame " << sharedVideoFrame->frameId << std::endl;
             results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), &rawResultsStream);
             classifiersAggregator->rawDetections = rawResultsStream.str();
         } else {

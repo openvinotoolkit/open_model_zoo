@@ -163,9 +163,9 @@ void IEWrapper::reshape(const std::map<std::string, std::vector<unsigned long> >
 }
 
 void IEWrapper::printPerlayerPerformance() const {
-    std::cout << "\n-----------------START-----------------" << std::endl;
-    std::cout << "Performance for " << modelPath << " model\n" << std::endl;
+    slog::info << "\n-----------------START-----------------" << slog::endl;
+    slog::info << "Performance for " << modelPath << " model\n" << slog::endl;
     printPerformanceCounts(request, std::cout, getFullDeviceName(ie, deviceName), false);
-    std::cout << "------------------END------------------\n" << std::endl;
+    slog::info << "------------------END------------------\n" << slog::endl;
 }
 }  // namespace gaze_estimation
