@@ -216,7 +216,7 @@ void print_raw_results(const ImageResult& result, std::vector<std::string> label
             slog::info << " "
                 << std::setw(16) << std::left << label << " | "
                 << std::setw(6) << value << " | "
-                << std::setw(6) << std::setprecision(4) << value / all * 100 << "%"
+                << std::setw(5) << std::setprecision(2) << std::fixed << std::right << value / all * 100 << "%"
                 << slog::endl;
         }
     }
