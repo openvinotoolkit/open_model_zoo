@@ -78,6 +78,7 @@ usage: action_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
                                   [-l CPU_EXTENSION] [-d DEVICE] [-lb LABELS]
                                   [--no_show] [-s LABEL_SMOOTHING]
                                   [-u UTILIZATION_MONITORS]
+                                  [-r RAW_OUTPUT]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -115,6 +116,8 @@ Options:
                         Optional. Number of frames used for output label
                         smoothing.
   -u UTILIZATION_MONITORS, --utilization-monitors UTILIZATION_MONITORS
+  -r, --raw_output
+                        Optional. Output inference results raw values showing.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.

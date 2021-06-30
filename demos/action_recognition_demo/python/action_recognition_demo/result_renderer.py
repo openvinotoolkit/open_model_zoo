@@ -54,13 +54,14 @@ class ResultRenderer:
             inference_time += self.meters[key].avg
         return inference_time
 
-    def render_frame(self, frame, logits, timers, frame_ind, fps):
+    def render_frame(self, frame, logits, timers, frame_ind, log, raw_output, fps):
         inference_time = self.update_timers(timers)
 
         if logits is not None:
             labels, probs = decode_output(logits, self.labels, top_k=self.number_of_predictions,
                                           label_postprocessing=self.postprocessing)
-            print("Frame {}: {} - {:.2f}% -- {:.2f}ms".format(frame_ind, labels[0], probs[0] * 100, inference_time))
+            if raw_output:
+                log.info("Frame {}: {} - {:.2f}% -- {:.2f}ms".format(frame_ind, labels[0], probs[0] * 100, inference_time))
         else:
             labels = ['Preparing...']
             probs = [0.]
