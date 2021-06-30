@@ -16,11 +16,11 @@
 import numpy as np
 
 from .model import Model
-from .utils import Detection, resize_image, load_labels
+from .utils import Detection, resize_image, load_labels, clip_detections
 
 
 class DETR(Model):
-    def __init__(self, ie, model_path, input_transform, labels=None):
+    def __init__(self, ie, model_path, input_transform, labels=None, threshold=0.5):
         super().__init__(ie, model_path, input_transform)
 
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
@@ -33,6 +33,8 @@ class DETR(Model):
             self.labels = labels
         else:
             self.labels = load_labels(labels) if labels else None
+
+        self.threshold = threshold
 
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
         assert self.c == 3, "Expected 3-channel input"
@@ -78,7 +80,11 @@ class DETR(Model):
         labels = np.argmax(scores[:, :-1], axis=-1)
         det_scores = np.max(scores[:, :-1], axis=-1)
 
-        return [Detection(*det) for det in zip(x_mins, y_mins, x_maxs, y_maxs, det_scores, labels)]
+        keep = det_scores > self.threshold
+
+        detections = [Detection(*det) for det in zip(x_mins[keep], y_mins[keep], x_maxs[keep], y_maxs[keep],
+                                                     det_scores[keep], labels[keep])]
+        return clip_detections(detections, meta['original_shape'])
 
     @staticmethod
     def box_cxcywh_to_xyxy(box):

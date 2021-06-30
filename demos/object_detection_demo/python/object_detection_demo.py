@@ -185,7 +185,7 @@ def get_model(ie, args):
     elif args.architecture_type == 'retinaface-pytorch':
         return models.RetinaFacePyTorch(ie, args.model, threshold=args.prob_threshold)
     elif args.architecture_type == 'detr':
-        return models.DETR(*common_args, labels=args.labels)
+        return models.DETR(*common_args, labels=args.labels, threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
