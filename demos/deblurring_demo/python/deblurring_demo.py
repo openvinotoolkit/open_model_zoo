@@ -95,7 +95,6 @@ def main():
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
     log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
 

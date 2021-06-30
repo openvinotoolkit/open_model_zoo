@@ -178,7 +178,6 @@ def main():
     next_frame_id_to_show = 0
 
     log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     presenter = None
     output_transform = None

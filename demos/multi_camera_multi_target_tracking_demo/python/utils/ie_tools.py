@@ -73,7 +73,6 @@ def load_ie_model(ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=
     assert len(net.outputs) in [1, 3, 4, 5], \
         "Supports topologies with only 1, 3, 4 or 5 outputs"
 
-    log.info("Preparing input blobs")
     input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
     net.batch_size = 1

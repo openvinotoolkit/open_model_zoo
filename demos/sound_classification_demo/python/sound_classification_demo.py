@@ -159,8 +159,6 @@ def main():
     log.info("Loading model to the plugin")
     exec_net = ie.load_network(network=net, device_name=args.device)
 
-    log.info("Preparing input")
-
     labels = []
     if args.labels:
         with open(args.labels, "r") as file:

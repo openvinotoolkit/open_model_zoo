@@ -81,7 +81,6 @@ def main():
     assert len(net.input_info) == 1, "Demo supports only single input topologies"
     assert len(net.outputs) == 1, "Demo supports only single output topologies"
 
-    log.info("Preparing input/output blobs")
     input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
 

@@ -117,12 +117,10 @@ def main():
     assert len(o_net.input_info.keys()) == 1, "Onet supports only single input topologies"
     assert len(o_net.outputs) == 3, "Onet supports three output topologies"
 
-    log.info("Preparing input blobs")
     pnet_input_blob = next(iter(p_net.input_info))
     rnet_input_blob = next(iter(r_net.input_info))
     onet_input_blob = next(iter(o_net.input_info))
 
-    log.info("Preparing output blobs")
     for name, blob in p_net.outputs.items():
         if blob.shape[1] == 2:
             pnet_cls_name = name
@@ -154,7 +152,6 @@ def main():
     next_frame_id = 0
 
     log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     presenter = None
     video_writer = cv2.VideoWriter()

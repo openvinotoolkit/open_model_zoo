@@ -305,9 +305,6 @@ def main():
             elif key in (ord('p'), ord('P')):
                 demo.resize_window("increase")
 
-    log.info("This demo is an API example, for any performance measurements please use the dedicated benchmark_app tool "
-             "from the openVINO toolkit\n")
-
 
 if __name__ == '__main__':
     sys.exit(main() or 0)

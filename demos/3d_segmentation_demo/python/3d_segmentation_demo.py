@@ -286,7 +286,6 @@ def main():
         input_info = ie_network.input_info
 
     # ---------------------------------------- 4. Preparing input data ----------------------------------------
-    logger.info("Preparing inputs")
 
     if len(input_info[input_name].input_data.shape) != 5:
         raise AttributeError("Incorrect shape {} for 3d convolution network".format(args.shape))
@@ -332,7 +331,6 @@ def main():
     start_time = datetime.now()
     res = executable_network.infer(test_im)
     infer_time = datetime.now() - start_time
-    logger.info("Finish inference")
     logger.info("Inference time is {}".format(infer_time))
 
     # ---------------------------- 6. Processing of the received inference results ------------------------------
@@ -396,7 +394,6 @@ def main():
             list_seg_result.append(seg_result)
 
     result_processing_time = datetime.now() - start_time
-    logger.info("Processing of the received inference results is finished")
     logger.info("Processing time is {}".format(result_processing_time))
 
     # --------------------------------------------- 7. Save output -----------------------------------------------

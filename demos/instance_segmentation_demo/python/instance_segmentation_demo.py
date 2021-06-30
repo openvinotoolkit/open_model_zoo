@@ -146,7 +146,6 @@ def main():
     render_time = 0
 
     log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     while frame is not None:
         if args.no_keep_aspect_ratio:

@@ -43,7 +43,6 @@ def main():
     assert len(net.input_info) == 1, "Expected model with only 1 input blob"
     assert len(net.outputs) == 1, "Expected model with only 1 output blob"
 
-    log.info("preparing input blobs")
     input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
     net.batch_size = 1
@@ -74,7 +73,6 @@ def main():
     res = exec_net.infer(inputs={input_blob: image_input})
 
     # processing output blob
-    log.info("processing output blob")
     disp = np.squeeze(res[out_blob][0])
 
     # resize disp to input resolution
@@ -100,9 +98,6 @@ def main():
     plt.imsave(out, disp, vmin=0, vmax=1, cmap='inferno')
 
     log.info("Color-coded disparity image was saved to {}".format(out))
-
-    log.info("This demo is an API example, for any performance measurements please use "
-             "the dedicated benchmark_app tool from the openVINO toolkit\n")
 
 
 if __name__ == '__main__':

@@ -172,8 +172,6 @@ def main():
             log.info('\n\tWord: {}\n\tConfidence: {}\n\tTag: {}'.format(word, score[idx][label_idx], label_to_tag[label_idx]))
 
     t1 = time.perf_counter()
-    log.info("The performance below is reported only for reference purposes, "
-            "please use the benchmark_app tool (part of the OpenVINO samples) for any actual measurements.")
     log.info("{} requests of {} length were processed in {:0.2f}sec ({:0.2}sec per request)".format(
         t_count,
         max_length,

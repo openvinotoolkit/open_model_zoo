@@ -90,7 +90,6 @@ def main():
                                   args.segmentation_model.replace(".xml", ".bin"),
                                   args.device) if args.segmentation_model else None
 
-    log.info("Preparing input data")
     input_data = []
     use_seg = bool(args.input_images) and bool(args.segmentation_model)
     assert use_seg ^ (bool(args.input_semantics) and bool(args.reference_semantics)), "Don't know where to get data"
@@ -140,7 +139,6 @@ def main():
     log.info("Inference for input")
     outs = [gan_model.infer(**data) for data in input_data]
 
-    log.info("Postprocessing for result")
     results = [postprocess(out) for out in outs]
 
     save_result(results, args.output_dir)

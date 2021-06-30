@@ -46,7 +46,6 @@ class ResultRenderer:
         self.meters = defaultdict(partial(WindowAverageMeter, 16))
         self.postprocessing = [LabelPostprocessing(n_frames=label_smoothing_window, history_size=label_smoothing_window)
                                for _ in range(number_of_predictions)]
-        print("To close the application, press 'CTRL+C' here or switch to the output window and press Esc or Q")
 
     def update_timers(self, timers):
         inference_time = 0.0

@@ -99,10 +99,8 @@ if __name__ == '__main__':
         raise RuntimeError("Can't open video writer")
 
     while original_frame is not None:
-        log.debug("#############################")
         (h_orig, w_orig) = original_frame.shape[:2]
 
-        log.debug("Preprocessing frame")
         if original_frame.shape[2] > 1:
             frame = cv.cvtColor(cv.cvtColor(original_frame, cv.COLOR_BGR2GRAY), cv.COLOR_GRAY2RGB)
         else:
@@ -113,13 +111,10 @@ if __name__ == '__main__':
         img_l_rs = cv.resize(img_lab.copy(), (w_in, h_in))[:, :, 0]
         inputs[input_blob] = img_l_rs
 
-        log.debug("Network inference")
-
         res = exec_net.infer(inputs=inputs)
 
         update_res = np.squeeze(res[output_blob])
 
-        log.debug("Get results")
         out = update_res.transpose((1, 2, 0))
         out = cv.resize(out, (w_orig, h_orig))
         img_lab_out = np.concatenate((img_lab[:, :, 0][:, :, np.newaxis], out), axis=2)
@@ -149,7 +144,6 @@ if __name__ == '__main__':
 
         presenter.drawGraphs(final_image)
         if not args.no_show:
-            log.debug("Show results")
             cv.imshow('Colorization Demo', final_image)
             key = cv.waitKey(1)
             if key in {ord("q"), ord("Q"), 27}:

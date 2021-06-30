@@ -74,7 +74,6 @@ class IEModel:
             "Supports topologies with only {} outputs, but got {}" \
             .format(self.get_allowed_outputs_len(), len(net.outputs))
 
-        log.info("Preparing input blobs")
         input_blob = next(iter(net.input_info))
         out_blob = next(iter(net.outputs))
         net.batch_size = 1

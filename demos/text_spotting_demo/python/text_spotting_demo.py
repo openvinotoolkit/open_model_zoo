@@ -233,7 +233,7 @@ def main():
         raise RuntimeError("Can't open video writer")
 
     log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
+
     while frame is not None:
         if not args.keep_aspect_ratio:
             # Resize the image to a target size.

@@ -284,8 +284,6 @@ def main():
             c_e = min(c_s + c_wnd_len, len(c_tokens_id))
 
         t1 = time.perf_counter()
-        log.info("The performance below is reported only for reference purposes, "
-                 "please use the benchmark_app tool (part of the OpenVINO samples) for any actual measurements.")
         log.info("{} requests of {} length were processed in {:0.2f}sec ({:0.2}sec per request)".format(
             t_count,
             max_length,

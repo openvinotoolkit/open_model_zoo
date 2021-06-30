@@ -201,7 +201,6 @@ def main():
             output_resolution):
         raise RuntimeError("Can't open video writer")
 
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     while True:
         if hpe_pipeline.callback_exceptions:
             raise hpe_pipeline.callback_exceptions[0]

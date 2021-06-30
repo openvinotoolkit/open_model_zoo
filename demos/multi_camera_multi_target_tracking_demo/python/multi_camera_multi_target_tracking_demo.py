@@ -281,7 +281,6 @@ def main():
         object_recognizer = None
 
     run(args, config, capture, object_detector, object_recognizer)
-    log.info('Demo finished successfully')
 
 
 if __name__ == '__main__':
