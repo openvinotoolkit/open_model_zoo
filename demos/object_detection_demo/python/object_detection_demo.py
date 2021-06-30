@@ -35,9 +35,9 @@ import monitors
 from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
-from helpers import resolution
+from helpers import resolution, log_ie_version, log_blobs_info, log_runtime_settings
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
 log = logging.getLogger()
 
 
@@ -221,25 +221,25 @@ def print_raw_results(detections, labels):
 def main():
     args = build_argparser().parse_args()
 
-    log.info('Initializing Inference Engine...')
+    cap = open_images_capture(args.input, args.loop)
+
     ie = IECore()
+    log_ie_version(log, ie, args.device)
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
-    log.info('Loading network...')
-
+    log.info('Reading model {}'.format(args.model))
     model = get_model(ie, args)
+    log_blobs_info(log, model)
 
     detector_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
-    cap = open_images_capture(args.input, args.loop)
+    log.info('Loaded model {} to {}'.format(args.model, args.device))
+    log_runtime_settings(log, detector_pipeline.exec_net, args.device)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
-
-    log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     palette = ColorPalette(len(model.labels) if model.labels else 100)
     metrics = PerformanceMetrics()
@@ -336,7 +336,7 @@ def main():
                 break
             presenter.handleKey(key)
 
-    metrics.print_total()
+    metrics.log_total(log)
     print(presenter.reportMeans())
 
 

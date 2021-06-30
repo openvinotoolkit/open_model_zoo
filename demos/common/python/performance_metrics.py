@@ -89,3 +89,9 @@ class PerformanceMetrics:
         total_latency, total_fps = self.get_total()
         print("Latency: {:.1f} ms".format(total_latency * 1e3) if total_latency is not None else "Latency: N/A")
         print("FPS: {:.1f}".format(total_fps) if total_fps is not None else "FPS: N/A")
+
+    def log_total(self, logger):
+        total_latency, total_fps = self.get_total()
+        logger.info('Metrics report:')
+        logger.info("\tLatency: {:.1f} ms".format(total_latency * 1e3) if total_latency is not None else "\tLatency: N/A")
+        logger.info("\tFPS: {:.1f}".format(total_fps) if total_fps is not None else "\tFPS: N/A")

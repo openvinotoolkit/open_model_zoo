@@ -32,9 +32,9 @@ import monitors
 from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
-from helpers import resolution
+from helpers import resolution, log_ie_version, log_blobs_info, log_runtime_settings
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
 log = logging.getLogger()
 
 
@@ -66,8 +66,11 @@ class SegmentationVisualizer:
     def __init__(self, colors_path=None):
         if colors_path:
             self.color_palette = self.get_palette_from_file(colors_path)
+            log.debug('The palette is loaded from {}'.format(colors_path))
         else:
             self.color_palette = self.pascal_voc_palette
+            log.debug('The PASCAL VOC palette is used')
+        log.debug('Get {} colors'.format(len(self.color_palette)))
         self.color_map = self.create_color_map()
 
     def get_palette_from_file(self, colors_path):
@@ -158,27 +161,28 @@ def get_model(ie, args):
 
 
 def main():
-    metrics = PerformanceMetrics()
     args = build_argparser().parse_args()
 
-    log.info('Initializing Inference Engine...')
+    cap = open_images_capture(args.input, args.loop)
+
     ie = IECore()
+    log_ie_version(log, ie, args.device)
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
-    log.info('Loading network...')
-
     model, visualizer = get_model(ie, args)
+    log.info('Reading model {}'.format(args.model))
+    log_blobs_info(log, model)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    cap = open_images_capture(args.input, args.loop)
+    log.info('Loaded model {} to {}'.format(args.model, args.device))
+    log_runtime_settings(log, pipeline.exec_net, args.device)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
 
-    log.info('Starting inference...')
-
+    metrics = PerformanceMetrics()
     presenter = None
     output_transform = None
     video_writer = cv2.VideoWriter()
@@ -254,7 +258,7 @@ def main():
             cv2.imshow('Segmentation Results', frame)
             key = cv2.waitKey(1)
 
-    metrics.print_total()
+    metrics.log_total(log)
     print(presenter.reportMeans())
 
 

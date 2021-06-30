@@ -54,21 +54,21 @@ class SSD(Model):
     def _get_output_parser(self, net, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):
         try:
             parser = SingleOutputParser(net.outputs)
-            self.logger.info('Use SingleOutputParser')
+            self.logger.debug('\tUse SingleOutputParser')
             return parser
         except ValueError:
             pass
 
         try:
             parser = MultipleOutputParser(net.outputs, bboxes, scores, labels)
-            self.logger.info('Use MultipleOutputParser')
+            self.logger.debug('\tUse MultipleOutputParser')
             return parser
         except ValueError:
             pass
 
         try:
             parser = BoxesLabelsParser(net.outputs, net.input_info[image_blob_name].input_data.shape[2:][::-1])
-            self.logger.info('Use BoxesLabelsParser')
+            self.logger.debug('\tUse BoxesLabelsParser')
             return parser
         except ValueError:
             pass

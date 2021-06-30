@@ -30,8 +30,9 @@ import monitors
 from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
+from helpers import resolution, log_ie_version, log_blobs_info, log_runtime_settings
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
 log = logging.getLogger()
 
 
@@ -77,29 +78,31 @@ def build_argparser():
 def main():
     args = build_argparser().parse_args()
 
-    log.info('Initializing Inference Engine...')
+    cap = open_images_capture(args.input, args.loop)
+
     ie = IECore()
+    log_ie_version(log, ie, args.device)
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
-    cap = open_images_capture(args.input, args.loop)
 
     start_time = perf_counter()
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
 
-    log.info('Loading network...')
+    log.info('Reading model {}'.format(args.model))
     model = Deblurring(ie, args.model, frame.shape)
+    log_blobs_info(log, model)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    log.info('Starting inference...')
+    log.info('Loaded model {} to {}'.format(args.model, args.device))
+    log_runtime_settings(log, pipeline.exec_net, args.device)
 
     pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
-
     next_frame_id = 1
     next_frame_id_to_show = 0
+
     metrics = PerformanceMetrics()
     presenter = monitors.Presenter(args.utilization_monitors, 55,
                                    (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
@@ -172,7 +175,7 @@ def main():
         else:
             break
 
-    metrics.print_total()
+    metrics.log_total(log)
     print(presenter.reportMeans())
 
 
