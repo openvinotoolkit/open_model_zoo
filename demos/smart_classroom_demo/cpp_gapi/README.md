@@ -24,8 +24,8 @@ Main graph works with frames from input source. First steps are equal to gallery
 
 To recognize faces on a frame, the demo needs a gallery of reference images. Each image should contain a tight crop of face. You can create the gallery from an arbitrary list of images:
 
-1. Put images containing tight crops of frontal-oriented faces (or use `-crop_gallery` key for the demo) to a separate empty folder. Each identity must have only one image. Name images as `id_name0.png, id_name1.png, ...`.
-2. Run the `python3 <omz_dir>/demos/smart_classroom_demo/utils/create_list.py <path_to_folder_with_images>` command to get a list of files and identities in `.json` format.
+1. Put images containing tight crops of frontal-oriented faces to a separate empty folder. Each identity must have only one image. Name images as `id_name0.png, id_name1.png, ...`.
+2. Run the `python3 <omz_dir>/demos/smart_classroom_demo/utils/create_list.py <path_to_folder_with_images>` command, which will create a `faces_gallery.json` file with list of files and identities.
 
 ## Preparing to Run
 
@@ -33,20 +33,29 @@ For demo input image or video files you may refer to [Media Files Available for 
 The list of models supported by the demo is in `<omz_dir>/demos/smart_classroom_demo/cpp_gapi/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
 ### Supported Models
 
 * face-detection-adas-0001
-* face-recognition-mobilefacenet-arcface
-* face-recognition-resnet100-arcface
-* face-recognition-resnet34-arcface
-* face-recognition-resnet50-arcface
+* face-recognition-resnet100-arcface-onnx
+* face-reidentification-retail-0095
 * landmarks-regression-retail-0009
 * person-detection-action-recognition-0005
 * person-detection-action-recognition-0006
 * person-detection-action-recognition-teacher-0002
 * person-detection-raisinghand-recognition-0001
-
-> **NOTE**: The demo deduces a number of actions for a person detection action recognition model by its name. The demo expects the name to end with `\d.xml`, `\d` denotes a digit.
+* Sphereface
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -109,22 +118,45 @@ Running the application with the empty list of options yields an error message.
 Example of a valid command line to run the application with pre-trained models for recognizing students actions:
 
 ```sh
-./smart_classroom_demo_gapi -m_act <path_to_model>/person-detection-action-recognition-0005.xml \
-                            -m_fd <path_to_model>/face-detection-adas-0001.xml \
-                            -i <path_to_video>
+./smart_classroom_demo_gapi \
+    -i <path_to_video> \
+    -m_act <path_to_model>/person-detection-action-recognition-0005.xml \
+    -student_ac "sitting, standing, raising hand" \
+    -m_fd <path_to_model>/face-detection-adas-0001.xml \
+    -m_reid <path_to_model>/face-reidentification-retail-0095.xml \
+    -m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
+    -t_reid 0.8 \
+    -fg <path_to_faces_gallery.json>
 ```
 
 > **NOTE**: To recognize actions of students, use `person-detection-action-recognition-0005` model for 3 basic actions and `person-detection-action-recognition-0006` model for 6 actions.
 
+Example of a valid command line to run the application for recognizing actions of a teacher:
+
+```sh
+./smart_classroom_demo_gapi \
+    -i <path_to_video> \
+    -m_act <path_to_model>/person-detection-action-recognition-teacher-0002.xml \
+    -m_fd <path_to_model>/face-detection-adas-0001.xml \
+    -m_reid <path_to_model>/face-reidentification-retail-0095.xml \
+    -m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
+    -fg <path to faces_gallery.json> \
+    -top_id \
+    -teacher_id <ID of a teacher in the face gallery>
+```
+
+> **NOTE**: To recognize actions of a teacher, use `person-detection-action-recognition-teacher-0002` model. See model description for more details on the list of recognized actions.
+
 Example of a valid command line to run the application for recognizing first raised-hand students:
 
 ```sh
-./smart_classroom_demo_gapi -m_act <path_to_model>/person-detection-raisinghand-recognition-0001.xml \
-                            -a_top <number of first raised-hand students> \
-                            -i <path_to_video>
+./smart_classroom_demo_gapi \
+  -i <path_to_video> \
+  -m_act <path_to_model>/person-detection-raisinghand-recognition-0001.xml \
+  -a_top <number of first raised-hand students> \
 ```
 
-> **NOTE**: To recognize raising hand action of students, use `person-detection-raisinghand-recognition-0001` model.
+> **NOTE**: To recognize raising hand action of students, use `person-detection-raisinghand-recognition-0001` model. See model description for more details on the list of recognized actions.
 
 ## Demo Output
 

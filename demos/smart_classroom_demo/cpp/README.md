@@ -149,7 +149,7 @@ Example of a valid command line to run the application for recognizing actions o
     -teacher_id <ID of a teacher in the face gallery>
 ```
 
-> **NOTE**: To recognize actions of a teacher, use `person-detection-action-recognition-teacher-0002` model.
+> **NOTE**: To recognize actions of a teacher, use `person-detection-action-recognition-teacher-0002` model. See model description for more details on the list of recognized actions.
 
 Example of a valid command line to run the application for recognizing first raised-hand students:
 
