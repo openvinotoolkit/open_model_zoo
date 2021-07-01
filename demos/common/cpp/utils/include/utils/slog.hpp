@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace slog {
 
@@ -66,6 +67,7 @@ public:
         return *this;
     }
 
+
     // Specializing for LogStreamEndLine to support slog::endl
     LogStream& operator<< (const LogStreamEndLine &/*arg*/) {
         _new_line = true;
@@ -77,6 +79,15 @@ public:
     // Specializing for LogStreamBoolAlpha to support slog::boolalpha
     LogStream& operator<< (const LogStreamBoolAlpha &/*arg*/) {
         (*_log_stream) << std::boolalpha;
+        return *this;
+    }
+
+    // Specializing for std::vector<T>
+    template<class T>
+    LogStream& operator<< (const std::vector<T>& vec) {
+        for (const auto& el : vec) {
+            *this << el << slog::endl;
+        }
         return *this;
     }
 };
