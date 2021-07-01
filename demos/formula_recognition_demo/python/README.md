@@ -64,6 +64,12 @@ Ubuntu:
 `apt-get update && apt-get install texlive`
 MacOS:
 `brew install texlive`
+
+If you face the `RuntimeError: dvipng is not installed` error, install it via
+`apt-get update && apt-get install dvipng`.
+You might also face the problem of missing `standalone.cls` file, it could be fixed with:
+`apt-get install texlive-latex-extra`.
+
 > Note: Other LaTeX systems should also work.
 
 ### Interactive mode
