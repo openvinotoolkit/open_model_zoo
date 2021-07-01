@@ -11,7 +11,7 @@ from openvino.inference_engine import IECore
 def kspace_to_image(kspace):
     assert(len(kspace.shape) == 3 and kspace.shape[-1] == 2)
     fft = cv.idft(kspace, flags=cv.DFT_SCALE)
-    img = cv.magnitude(fft[:,:,0], fft[:,:,1])
+    img = cv.magnitude(fft[:, :, 0], fft[:, :, 1])
     return cv.normalize(img, dst=None, alpha=255, beta=0, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
 
 
@@ -22,9 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--model', dest='model', help='Path to .xml file of OpenVINO IR.')
     parser.add_argument('-d', '--device', dest='device', default='CPU',
                         help='Optional. Specify the target device to infer on; CPU, '
-                             'GPU, HDDL or MYRIAD is acceptable. For non-CPU targets, '
-                             'HETERO plugin is used with CPU fallbacks to FFT implementation. '
-                             'Default value is CPU')
+                             'GPU, HDDL or MYRIAD is acceptable. Default value is CPU.')
     args = parser.parse_args()
 
     xml_path = args.model
@@ -35,8 +33,7 @@ if __name__ == '__main__':
 
     net = ie.read_network(xml_path, bin_path)
 
-    device = 'CPU' if args.device == 'CPU' else ('HETERO:' + args.device + ',CPU')
-    exec_net = ie.load_network(net, device)
+    exec_net = ie.load_network(net, args.device)
 
     # Hybrid-CS-Model-MRI/Data/stats_fs_unet_norm_20.npy
     stats = np.array([2.20295299e-01, 1.11048916e+03, 4.16997984e+00, 4.71741395e+00], dtype=np.float32)
@@ -72,6 +69,7 @@ if __name__ == '__main__':
     WIN_NAME = 'MRI reconstruction with OpenVINO'
 
     slice_id = 0
+
     def callback(pos):
         global slice_id
         slice_id = pos

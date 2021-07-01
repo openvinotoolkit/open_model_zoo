@@ -32,7 +32,7 @@ def main():
 
     stats = np.load(args.input_dir / "stats_fs_unet_norm_{}.npy".format(under_rate))
 
-    model = fsnet.wnet(stats[0], stats[1], stats[2], stats[3], kshape = (5,5), kshape2=(3,3))
+    model = fsnet.wnet(stats[0], stats[1], stats[2], stats[3], kshape = (5, 5), kshape2=(3, 3))
 
     model.load_weights(args.input_dir / "wnet_{}.hdf5".format(under_rate))
     model.save(args.output_dir / 'saved_model')

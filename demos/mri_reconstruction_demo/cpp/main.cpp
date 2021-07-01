@@ -35,16 +35,12 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    std::string device = FLAGS_d;
-    if (device != "CPU")
-        device = "HETERO:" + device + ",CPU";
-
     Core ie;
 
     CNNNetwork net = ie.ReadNetwork(FLAGS_m);
     net.getInputsInfo().begin()->second->setLayout(Layout::NHWC);
 
-    ExecutableNetwork execNet = ie.LoadNetwork(net, device);
+    ExecutableNetwork execNet = ie.LoadNetwork(net, FLAGS_d);
     InferRequest infReq = execNet.CreateInferRequest();
 
     // Hybrid-CS-Model-MRI/Data/sampling_mask_20perc.npy
