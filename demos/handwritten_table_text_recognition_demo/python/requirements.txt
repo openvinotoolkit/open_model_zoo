@@ -1,0 +1,7 @@
+scipy==1.5.1
+numpy==1.19.0
+opencv-python==4.2.0.34
+PySide2==5.15.0
+tqdm==4.46.0
+scikit-image==0.17.2
+python-docx==0.8.10
