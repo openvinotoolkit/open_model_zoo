@@ -21,8 +21,8 @@ On [validation dataset](https://sites.google.com/view/calgary-campinas-dataset/h
 
 ## Legal Information
 
-The original model is distributed under the
-[MIT](https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/LICENSE).
+The original model is distributed under the following
+[license](https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/LICENSE):
 
 ```
 MIT License
