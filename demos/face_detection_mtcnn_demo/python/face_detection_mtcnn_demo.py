@@ -34,7 +34,7 @@ import monitors
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
 log = logging.getLogger()
 
 
@@ -92,27 +92,27 @@ def preprocess_image(image, w, h):
 
 
 def main():
-    metrics = PerformanceMetrics()
-
     args = build_argparser().parse_args()
 
-    # Plugin initialization for specified device and load extensions library if specified
-    log.info("Creating Inference Engine")
+    cap = open_images_capture(args.input, args.loop)
 
+    # Plugin initialization for specified device and load extensions library if specified
     ie = IECore()
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
 
     # Read IR
-    log.info("Loading network files:\n\t{}".format(args.model_pnet))
+    log.info('Reading model {}'.format(args.model_pnet))
     p_net = ie.read_network(args.model_pnet)
     assert len(p_net.input_info.keys()) == 1, "Pnet supports only single input topologies"
     assert len(p_net.outputs) == 2, "Pnet supports two output topologies"
 
-    log.info("Loading network files:\n\t{}".format(args.model_rnet))
+    log.info('Reading model {}'.format(args.model_rnet))
     r_net = ie.read_network(args.model_rnet)
     assert len(r_net.input_info.keys()) == 1, "Rnet supports only single input topologies"
     assert len(r_net.outputs) == 2, "Rnet supports two output topologies"
 
-    log.info("Loading network files:\n\t{}".format(args.model_onet))
+    log.info('Reading model {}'.format(args.model_onet))
     o_net = ie.read_network(args.model_onet)
     assert len(o_net.input_info.keys()) == 1, "Onet supports only single input topologies"
     assert len(o_net.outputs) == 3, "Onet supports three output topologies"
@@ -147,14 +147,12 @@ def main():
         else:
             raise RuntimeError("Unsupported output layer for Onet")
 
-    cap = open_images_capture(args.input, args.loop)
-
     next_frame_id = 0
 
-    log.info('Starting inference...')
-
+    metrics = PerformanceMetrics()
     presenter = None
     video_writer = cv2.VideoWriter()
+    is_loaded_before = False
 
     while True:
         start_time = perf_counter()
@@ -179,17 +177,18 @@ def main():
         # *************************************
         # Pnet stage
         # *************************************
-        log.info("Loading Pnet model to the plugin")
 
         t0 = cv2.getTickCount()
         pnet_res = []
-        for scale in scales:
+        for i, scale in enumerate(scales):
             hs = int(oh*scale)
             ws = int(ow*scale)
             image = preprocess_image(rgb_image, ws, hs)
 
             p_net.reshape({pnet_input_blob: [1, 3, ws, hs]})  # Change weidth and height of input blob
             exec_pnet = ie.load_network(network=p_net, device_name=args.device)
+            if i == 0 and not is_loaded_before:
+                log.info("Loaded model {} to {}".format(args.model_pnet, args.device))
 
             p_res = exec_pnet.infer(inputs={pnet_input_blob: image})
             pnet_res.append(p_res)
@@ -208,10 +207,11 @@ def main():
 
         # Rnet stage
         if len(rectangles) > 0:
-            log.info("Loading Rnet model to the plugin")
 
             r_net.reshape({rnet_input_blob: [len(rectangles), 3, 24, 24]})  # Change batch size of input blob
             exec_rnet = ie.load_network(network=r_net, device_name=args.device)
+            if not is_loaded_before:
+                log.info("Loaded model {} to {}".format(args.model_rnet, args.device))
 
             rnet_input = []
             for rectangle in rectangles:
@@ -227,10 +227,12 @@ def main():
 
         # Onet stage
         if len(rectangles) > 0:
-            log.info("Loading Onet model to the plugin")
 
             o_net.reshape({onet_input_blob: [len(rectangles), 3, 48, 48]})  # Change batch size of input blob
             exec_onet = ie.load_network(network=o_net, device_name=args.device)
+            if not is_loaded_before:
+                log.info("Loaded model {} to {}".format(args.model_onet, args.device))
+                is_loaded_before = True
 
             onet_input = []
             for rectangle in rectangles:
@@ -273,7 +275,7 @@ def main():
 
         metrics.update(start_time, origin_image)
 
-    metrics.print_total()
+    metrics.log_total(log)
 
 
 if __name__ == '__main__':

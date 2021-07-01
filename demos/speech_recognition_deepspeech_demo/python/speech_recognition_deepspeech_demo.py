@@ -6,6 +6,9 @@
 # This file is based in part on deepspeech_openvino_0.5.py by Feng Yen-Chang at
 # https://github.com/openvinotoolkit/open_model_zoo/pull/419, commit 529805d011d9b405f142b2b40f4d202bd403a4f1 on Sep 19, 2019.
 #
+
+import sys
+import logging
 import time
 import wave
 import timeit
@@ -18,6 +21,9 @@ from openvino.inference_engine import IECore
 
 from asr_utils.profiles import PROFILES
 from asr_utils.deep_speech_seq_pipeline import DeepSpeechSeqPipeline
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def build_argparser():
@@ -67,10 +73,15 @@ def main():
         sr = profile['model_sampling_rate']
         args.block_size = round(sr * 10) if not args.realtime else round(sr * profile['frame_stride_seconds'] * 16)
 
+    ie = IECore()
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
+
     start_load_time = timeit.default_timer()
     stt = DeepSpeechSeqPipeline(
-        ie = IECore(),
+        ie = ie,
         model = args.model,
+        logger = log,
         lm = args.lm,
         beam_width = args.beam_width,
         max_candidates = args.max_candidates,
@@ -78,7 +89,7 @@ def main():
         device = args.device,
         online_decoding = args.realtime,
     )
-    print("Loading, including network weights, IE initialization, LM, building LM vocabulary trie: {} s".format(timeit.default_timer() - start_load_time))
+    log.debug("Loading, including network weights, IE initialization, LM, building LM vocabulary trie: {} s".format(timeit.default_timer() - start_load_time))
 
     start_proc_time = timeit.default_timer()
     with wave.open(args.input, 'rb') as wave_read:
@@ -87,8 +98,7 @@ def main():
         assert compression_type == 'NONE', "Only linear PCM WAV files supported"
         assert channel_num == 1, "Only mono WAV PCM supported"
         assert abs(sampling_rate / profile['model_sampling_rate'] - 1) < 0.1, "Only {} kHz WAV PCM supported".format(profile['model_sampling_rate'] / 1e3)
-        print("Audio file length: {} s".format(pcm_length / sampling_rate))
-        print("")
+        log.debug("Audio file length: {} s".format(pcm_length / sampling_rate))
 
         audio_pos = 0
         play_start_time = timeit.default_timer()
@@ -123,7 +133,7 @@ def main():
             print('\r' + transcription[0].text[-args.realtime_window:])
     else:  #  not args.realtime
         # Only show processing time in offline mode because real-time mode is being slowed down by time.sleep()
-        print("Processing time (incl. loading audio, MFCC, RNN and beam search): {} s".format(timeit.default_timer() - start_proc_time))
+        log.info("Processing time (incl. loading audio, MFCC, RNN and beam search): {} s".format(timeit.default_timer() - start_proc_time))
 
     print("\nTranscription(s) and confidence score(s):")
     for candidate in transcription:

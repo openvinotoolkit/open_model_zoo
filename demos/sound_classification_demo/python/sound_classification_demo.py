@@ -24,6 +24,9 @@ import wave
 import numpy as np
 from openvino.inference_engine import IECore
 
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
+
 
 def type_overlap(arg):
     if arg.endswith('%'):
@@ -134,16 +137,13 @@ def read_wav(file, as_float=False):
 def main():
     args = build_argparser()
 
-    logging.basicConfig(format="[ %(levelname)s ] %(message)s", level=logging.INFO, stream=sys.stdout)
-    log = logging.getLogger()
-
-    log.info("Creating Inference Engine")
     ie = IECore()
-
     if args.device == "CPU" and args.cpu_extension:
         ie.add_extension(args.cpu_extension, 'CPU')
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
 
-    log.info("Loading model {}".format(args.model))
+    log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, args.model[:-4] + ".bin")
 
     if len(net.input_info) != 1:
@@ -156,26 +156,25 @@ def main():
         sys.exit(1)
     output_blob = next(iter(net.outputs))
 
-    log.info("Loading model to the plugin")
-    exec_net = ie.load_network(network=net, device_name=args.device)
-
-    labels = []
-    if args.labels:
-        with open(args.labels, "r") as file:
-            labels = [line.rstrip() for line in file.readlines()]
-
     batch_size, channels, one, length = input_shape
     if one != 1:
         raise RuntimeError("Wrong third dimension size of model input shape - {} (expected 1)".format(one))
-
-    audio = AudioSource(args.input, channels=channels, samplerate=args.sample_rate)
 
     hop = length - args.overlap if isinstance(args.overlap, int) else int(length * (1.0 - args.overlap))
     if hop < 0:
         log.error("Wrong value for '-ol/--overlap' argument - overlapping more than clip length")
         sys.exit(1)
 
-    log.info("Starting inference")
+    exec_net = ie.load_network(network=net, device_name=args.device)
+    log.info('Loaded model {} to {}'.format(args.model, args.device))
+
+    labels = []
+    if args.labels:
+        with open(args.labels, "r") as file:
+            labels = [line.rstrip() for line in file.readlines()]
+
+    audio = AudioSource(args.input, channels=channels, samplerate=args.sample_rate)
+
     outputs = []
     clips = 0
     infer_time = 0

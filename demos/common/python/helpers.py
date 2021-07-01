@@ -29,10 +29,6 @@ def resolution(value):
         raise RuntimeError('Сorrect format of --output_resolution parameter is "width"x"height".')
     return result
 
-def log_ie_version(logger, ie, device):
-    version = ie.get_versions(device)[device]
-    logger.info('IE version: {}.{}.{}'.format(version.major, version.minor, version.build_number))
-
 def log_blobs_info(logger, model):
     for name, layer in model.net.input_info.items():
         logger.info('\tInput blob: {}, shape: {}, precision: {}'.format(name, layer.input_data.shape, layer.precision))

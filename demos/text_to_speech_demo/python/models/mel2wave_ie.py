@@ -24,7 +24,7 @@ from utils.wav_processing import (
 
 
 class WaveRNNIE:
-    def __init__(self, model_upsample, model_rnn, ie, target=11000, overlap=550, hop_length=275, bits=9, device='CPU',
+    def __init__(self, model_upsample, model_rnn, ie, logger, target=11000, overlap=550, hop_length=275, bits=9, device='CPU',
                  verbose=False, upsampler_width=-1):
         """
         return class provided WaveRNN inference.
@@ -47,16 +47,17 @@ class WaveRNNIE:
         self.pad = 2
         self.batch_sizes = [1, 2, 4, 8, 16, 32, 64, 128, 256]
         self.ie = ie
+        self.logger = logger
 
         self.upsample_net = self.load_network(model_upsample)
         if upsampler_width > 0:
             orig_shape = self.upsample_net.input_info['mels'].input_data.shape
             self.upsample_net.reshape({"mels": (orig_shape[0], upsampler_width, orig_shape[2])})
 
-        self.upsample_exec = self.create_exec_network(self.upsample_net)
+        self.upsample_exec = self.create_exec_network(self.upsample_net, model_upsample)
 
         self.rnn_net = self.load_network(model_rnn)
-        self.rnn_exec = self.create_exec_network(self.rnn_net, batch_sizes=self.batch_sizes)
+        self.rnn_exec = self.create_exec_network(self.rnn_net, model_rnn, batch_sizes=self.batch_sizes)
 
         # fixed number of the mels in mel-spectrogramm
         self.mel_len = self.upsample_net.input_info['mels'].input_data.shape[1] - 2 * self.pad
@@ -65,11 +66,11 @@ class WaveRNNIE:
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        print("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+        self.logger.info('Reading model {}'.format(model_xml))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
         return net
 
-    def create_exec_network(self, net, batch_sizes=None):
+    def create_exec_network(self, net, path, batch_sizes=None):
         if batch_sizes is not None:
             exec_net = []
             for b_s in batch_sizes:
@@ -77,6 +78,7 @@ class WaveRNNIE:
                 exec_net.append(self.ie.load_network(network=net, device_name=self.device))
         else:
             exec_net = self.ie.load_network(network=net, device_name=self.device)
+        self.logger.info('Loaded model {} to {}'.format(path, self.device))
         return exec_net
 
     @staticmethod
@@ -187,7 +189,7 @@ class WaveRNNIE:
 
 
 class MelGANIE:
-    def __init__(self, model, ie, device='CPU', default_width=800):
+    def __init__(self, model, ie, logger, device='CPU', default_width=800):
         """
         return class provided MelGAN inference.
 
@@ -198,6 +200,7 @@ class MelGANIE:
         """
         self.device = device
         self.ie = ie
+        self.logger = logger
 
         self.scales = 4
         self.hop_length = 256
@@ -217,11 +220,11 @@ class MelGANIE:
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        print("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+        self.logger.info('Reading model {}'.format(model_xml))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
         return net
 
-    def create_exec_network(self, net, scales=None):
+    def create_exec_network(self, net, path, scales=None):
         if scales is not None:
             orig_shape = net.input_info['mel'].input_data.shape
             exec_net = []
@@ -232,6 +235,7 @@ class MelGANIE:
                 net.reshape({"mel": orig_shape})
         else:
             exec_net = self.ie.load_network(network=net, device_name=self.device)
+        self.logger.info('Loaded model {} to {}'.format(path, self.device))
         return exec_net
 
     def forward(self, mel):

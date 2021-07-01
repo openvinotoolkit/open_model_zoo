@@ -31,7 +31,7 @@ import monitors
 from images_capture import open_images_capture
 from pipelines import get_user_config, AsyncPipeline
 from performance_metrics import PerformanceMetrics
-from helpers import resolution, log_ie_version, log_blobs_info, log_runtime_settings
+from helpers import resolution, log_blobs_info, log_runtime_settings
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
 log = logging.getLogger()
@@ -170,7 +170,8 @@ def main():
     cap = open_images_capture(args.input, args.loop)
 
     ie = IECore()
-    log_ie_version(log, ie, args.device)
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 

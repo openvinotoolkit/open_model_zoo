@@ -16,7 +16,7 @@
 import os
 import sys
 import time
-import logging as log
+import logging
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
@@ -25,6 +25,9 @@ import numpy as np
 
 from openvino.inference_engine import IECore
 from utils.codec import CTCCodec
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def build_argparser():
@@ -69,13 +72,15 @@ def preprocess_input(image_name, height, width):
 
 
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
     # Plugin initialization
     ie = IECore()
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
+
     # Read IR
-    log.info("Loading network")
+    log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
     assert len(net.input_info) == 1, "Demo supports only single input topologies"
@@ -96,11 +101,10 @@ def main():
     assert input_channel == input_image.shape[1], "The net's input channel should equal the input image's channel"
 
     # Loading model to the plugin
-    log.info("Loading model to the plugin")
     exec_net = ie.load_network(network=net, device_name=args.device)
+    log.info('Loaded model {} to {}'.format(args.model, args.device))
 
     # Start sync inference
-    log.info("Starting inference ({} iterations)".format(args.number_iter))
     infer_time = []
     for i in range(args.number_iter):
         t0 = time.time()

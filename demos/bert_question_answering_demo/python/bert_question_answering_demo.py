@@ -15,7 +15,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-import logging as log
+import logging
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
@@ -27,6 +27,9 @@ from openvino.inference_engine import IECore
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def build_argparser():
@@ -83,7 +86,6 @@ def find_sentence_range(context, s, e):
     return c_s, c_e
 
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
     if args.colors:
@@ -94,28 +96,23 @@ def main():
         COLOR_RESET = ""
 
     # load vocabulary file for model
-    log.info("Loading vocab file:\t{}".format(args.vocab))
     vocab = load_vocab_file(args.vocab)
-    log.info("{} tokens loaded".format(len(vocab)))
+    log.debug("Loaded vocab file from {}, get {} tokens".format(args.vocab, len(vocab)))
 
     # get context as a string (as we might need it's length for the sequence reshape)
     paragraphs = get_paragraphs(args.input)
     context = '\n'.join(paragraphs)
-    log.info("Size: {} chars".format(len(context)))
-    log.info("Context: " + COLOR_RED + context + COLOR_RESET)
     # encode context into token ids list
     c_tokens_id, c_tokens_se = text_to_tokens(context.lower(), vocab)
 
-    log.info("Initializing Inference Engine")
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device]
-    version_str = "{}.{}.{}".format(version.major, version.minor, version.build_number)
-    log.info("Plugin version is {}".format(version_str))
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
 
     # read IR
     model_xml = args.model
     model_bin = model_xml.with_suffix(".bin")
-    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+    log.info('Reading model {}'.format(args.model))
     ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
 
     if args.reshape:
@@ -129,17 +126,15 @@ def main():
             for input_name, input_info in ie_encoder.input_info.items():
                 n, c = input_info.input_data.shape
                 new_shapes[input_name] = [n, seq]
-                log.info("Reshaped input {} from {} to the {}".format(
-                    input_name, input_info.input_data.shape, new_shapes[input_name]))
-            log.info("Attempting to reshape the network to the modified inputs...")
             try:
                 ie_encoder.reshape(new_shapes)
-                log.info("Successful!")
+                log.debug("\tReshaped input {} from {} to the {}".format(
+                    input_name, input_info.input_data.shape, new_shapes[input_name]))
             except RuntimeError:
                 log.error("Failed to reshape the network, please retry the demo without '-r' option")
                 sys.exit(-1)
         else:
-            log.info("Skipping network reshaping,"
+            log.debug("Skipping network reshaping,"
                      " as (context length + max question length) exceeds the current (input) network sequence length")
 
     # check input and output names
@@ -155,8 +150,8 @@ def main():
         raise Exception("Unexpected network input or output names")
 
     # load model to the device
-    log.info("Loading model to the {}".format(args.device))
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
+    log.info('Loaded model {} to {}'.format(args.model, args.device))
 
     if args.questions:
         def questions():

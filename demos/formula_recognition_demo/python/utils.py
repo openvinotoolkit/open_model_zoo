@@ -122,7 +122,7 @@ def prerocess_crop(crop, tgt_shape, preprocess_type='crop'):
 def read_net(model_xml, ie):
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
-    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+    log.info('Reading model {}'.format(model_xml))
     return ie.read_network(model_xml, model_bin)
 
 
@@ -157,14 +157,17 @@ class Model:
 
     def __init__(self, args, interactive_mode):
         self.args = args
-        log.info("Creating Inference Engine")
         self.ie = IECore()
         self.ie.set_config(
             {"PERF_COUNT": "YES" if self.args.perf_counts else "NO"}, args.device)
+        version = self.ie.get_versions(args.device)[args.device].build_number
+        log.info('IE version: {}'.format(version))
         self.encoder = read_net(self.args.m_encoder, self.ie)
         self.dec_step = read_net(self.args.m_decoder, self.ie)
         self.exec_net_encoder = self.ie.load_network(network=self.encoder, device_name=self.args.device)
+        log.info('Loaded model {} to {}'.format(args.m_encoder, args.device))
         self.exec_net_decoder = self.ie.load_network(network=self.dec_step, device_name=self.args.device)
+        log.info('Loaded model {} to {}'.format(args.m_decoder, args.device))
         self.images_list = []
         self.vocab = Vocab(self.args.vocab_path)
         self.model_status = Model.Status.READY
@@ -182,7 +185,6 @@ class Model:
                             for inp in os.listdir(self.args.input))
         else:
             inputs = [self.args.input]
-        log.info("Loading and preprocessing images")
         for filenm in tqdm(inputs):
             image_raw = cv.imread(filenm)
             assert image_raw is not None, "Error reading image {}".format(filenm)

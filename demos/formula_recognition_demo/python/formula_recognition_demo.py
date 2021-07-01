@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging as log
+import logging
 import os
 import sys
 from argparse import SUPPRESS, ArgumentParser
@@ -26,6 +26,9 @@ from utils import (COLOR_BLACK, COLOR_RED, COLOR_WHITE, DEFAULT_RESIZE_STEP,
                    DEFAULT_WIDTH, MAX_HEIGHT, MAX_WIDTH, MIN_HEIGHT, MIN_WIDTH,
                    PREPROCESSING, Model, calculate_probability, print_stats,
                    create_renderer, prerocess_crop, strip_internal_spaces)
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 class InteractiveDemo:
@@ -159,11 +162,10 @@ def non_interactive_demo(model, args):
     renderer = create_renderer()
     show_window = not args.no_show
     for rec in tqdm(model.images_list):
-        log.info("Starting inference for %s", rec.img_name)
         image = rec.img
         distribution, targets = model.infer_sync(image)
         prob = calculate_probability(distribution)
-        log.info("Confidence score is %s", prob)
+        log.info("Confidence score is {}".format(prob))
         if prob >= args.conf_thresh ** len(distribution):
             phrase = model.vocab.construct_phrase(targets)
             if args.output_file:
@@ -254,9 +256,6 @@ def build_argparser():
 
 
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(message)s",
-                    level=log.INFO, stream=sys.stdout)
-
     args = build_argparser().parse_args()
     interactive_mode = not (os.path.isdir(args.input) or args.input.endswith('.png') or args.input.endswith('.jpg'))
     model = Model(args, interactive_mode)
@@ -275,7 +274,6 @@ def main():
     while True:
         ret, frame = capture.read()
         if not ret:
-            log.info("End of file or error reading from camera")
             break
         bin_crop = demo.get_crop(frame)
         model_input = prerocess_crop(bin_crop, (height, width), preprocess_type=args.preprocessing_type)
@@ -286,12 +284,12 @@ def main():
         else:
             distribution, targets = model_res
             prob = calculate_probability(distribution)
-            log.info("Confidence score is %s", prob)
+            log.debug("Confidence score is {}".format(prob))
             if prob >= args.conf_thresh ** len(distribution):
-                log.info("Prediction updated")
+                log.debug("Prediction updated")
                 phrase = model.vocab.construct_phrase(targets)
             else:
-                log.info("Confidence score is low, prediction is not complete")
+                log.debug("Confidence score is low, prediction is not complete")
                 phrase = ''
         frame = demo.draw(frame, phrase)
         prev_text = phrase

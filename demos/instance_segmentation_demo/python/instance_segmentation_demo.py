@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging as log
+import logging
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
@@ -33,6 +33,9 @@ from instance_segmentation_demo.visualizer import Visualizer
 
 import monitors
 from images_capture import open_images_capture
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def build_argparser():
@@ -98,24 +101,30 @@ def build_argparser():
 
 
 def main():
-    log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
+    cap = open_images_capture(args.input, args.loop)
+
+    with open(args.labels, 'rt') as labels_file:
+        class_labels = labels_file.read().splitlines()
+        assert len(class_labels), 'The file with class labels is empty'
+
     # Plugin initialization for specified device and load extensions library if specified.
-    log.info('Creating Inference Engine...')
     ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, 'CPU')
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
+
     # Read IR
-    log.info('Loading network')
+    log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, args.model.with_suffix('.bin'))
     image_input, image_info_input, (n, c, h, w), model_type, postprocessor = check_model(net)
     args.no_keep_aspect_ratio = model_type == 'yolact' or args.no_keep_aspect_ratio
 
-    log.info('Loading IR to the plugin...')
     exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)
+    log.info('Loaded model {} to {}'.format(args.model, args.device))
 
-    cap = open_images_capture(args.input, args.loop)
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
@@ -124,9 +133,6 @@ def main():
         tracker = None
     else:
         tracker = StaticIOUTracker()
-
-    with open(args.labels, 'rt') as labels_file:
-        class_labels = labels_file.read().splitlines()
 
     if args.delay:
         delay = args.delay
@@ -144,8 +150,6 @@ def main():
         raise RuntimeError("Can't open video writer")
 
     render_time = 0
-
-    log.info('Starting inference...')
 
     while frame is not None:
         if args.no_keep_aspect_ratio:

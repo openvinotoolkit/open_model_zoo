@@ -3,6 +3,7 @@
 import argparse
 import os
 import sys
+import logging
 import cv2
 
 from openvino.inference_engine import IECore
@@ -14,6 +15,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.
 import monitors
 from images_capture import open_images_capture
 
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 def build_argparser():
     parser = argparse.ArgumentParser()
@@ -41,14 +44,23 @@ def build_argparser():
 
 
 def run_demo(args):
-    ie = IECore()
-    detector_person = Detector(ie, path_to_model_xml=args.model_od,
-                              device=args.device,
-                              label_class=args.person_label)
-
-    single_human_pose_estimator = HumanPoseEstimator(ie, path_to_model_xml=args.model_hpe,
-                                                  device=args.device)
     cap = open_images_capture(args.input, args.loop)
+
+    ie = IECore()
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
+
+    log.info('Reading model {}'.format(args.model_od))
+    detector_person = Detector(ie, args.model_od,
+                               device=args.device,
+                               label_class=args.person_label)
+    log.info('Loaded model {} to {}'.format(args.model_od, args.device))
+
+    log.info('Reading model {}'.format(args.model_hpe))
+    single_human_pose_estimator = HumanPoseEstimator(ie, args.model_hpe,
+                                                     device=args.device)
+    log.info('Loaded model {} to {}'.format(args.model_hpe, args.device))
+
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")

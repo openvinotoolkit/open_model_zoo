@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging as log
+import logging
 import os
 import sys
 import time
@@ -34,6 +34,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.
 import monitors
 from images_capture import open_images_capture
 
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 SOS_INDEX = 0
 EOS_INDEX = 1
@@ -163,42 +165,46 @@ def segm_postprocess(box, raw_cls_mask, im_h, im_w):
 
 
 def main():
-    log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
+    cap = open_images_capture(args.input, args.loop)
+
     # Plugin initialization for specified device and load extensions library if specified.
-    log.info('Creating Inference Engine...')
     ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, 'CPU')
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
     # Read IR
-    log.info('Loading Mask-RCNN network')
+    log.info('Reading model {}'.format(args.mask_rcnn_model))
     mask_rcnn_net = ie.read_network(args.mask_rcnn_model, os.path.splitext(args.mask_rcnn_model)[0] + '.bin')
-
-    log.info('Loading encoder part of text recognition network')
-    text_enc_net = ie.read_network(args.text_enc_model, os.path.splitext(args.text_enc_model)[0] + '.bin')
-
-    log.info('Loading decoder part of text recognition network')
-    text_dec_net = ie.read_network(args.text_dec_model, os.path.splitext(args.text_dec_model)[0] + '.bin')
 
     model_required_inputs = {'image'}
     if set(mask_rcnn_net.input_info) == model_required_inputs:
         required_output_keys = {'boxes', 'labels', 'masks', 'text_features.0'}
         n, c, h, w = mask_rcnn_net.input_info['image'].input_data.shape
+        assert n == 1, 'Only batch 1 is supported by the demo application'
     else:
         raise RuntimeError('Demo supports only topologies with the following input keys: '
                            f'{model_required_inputs}.')
-
     assert required_output_keys.issubset(mask_rcnn_net.outputs.keys()), \
         f'Demo supports only topologies with the following output keys: {required_output_keys}' \
         f'Found: {mask_rcnn_net.outputs.keys()}.'
 
-    assert n == 1, 'Only batch 1 is supported by the demo application'
+    log.info('Reading model {}'.format(args.text_enc_model))
+    text_enc_net = ie.read_network(args.text_enc_model, os.path.splitext(args.text_enc_model)[0] + '.bin')
 
-    log.info('Loading IR to the plugin...')
+    log.info('Reading model {}'.format(args.text_dec_model))
+    text_dec_net = ie.read_network(args.text_dec_model, os.path.splitext(args.text_dec_model)[0] + '.bin')
+
     mask_rcnn_exec_net = ie.load_network(network=mask_rcnn_net, device_name=args.device, num_requests=2)
+    log.info('Loaded model {} to {}'.format(args.mask_rcnn_model, args.device))
+
     text_enc_exec_net = ie.load_network(network=text_enc_net, device_name=args.device)
+    log.info('Loaded model {} to {}'.format(args.text_enc_model, args.device))
+
     text_dec_exec_net = ie.load_network(network=text_dec_net, device_name=args.device)
+    log.info('Loaded model {} to {}'.format(args.text_dec_model, args.device))
 
     hidden_shape = text_dec_net.input_info[args.trd_input_prev_hidden].input_data.shape
 
@@ -206,7 +212,6 @@ def main():
     del text_enc_net
     del text_dec_net
 
-    cap = open_images_capture(args.input, args.loop)
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
@@ -231,8 +236,6 @@ def main():
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
                                              cap.fps(), (frame.shape[1], frame.shape[0])):
         raise RuntimeError("Can't open video writer")
-
-    log.info('Starting inference...')
 
     while frame is not None:
         if not args.keep_aspect_ratio:

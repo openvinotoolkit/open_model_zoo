@@ -14,7 +14,7 @@
 """
 import argparse
 import itertools
-import logging as log
+import logging
 import sys
 import time
 from pathlib import Path
@@ -22,6 +22,9 @@ from pathlib import Path
 import numpy as np
 from openvino.inference_engine import IECore
 from tokenizers import SentencePieceBPETokenizer
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 class Translator:
@@ -37,7 +40,9 @@ class Translator:
         self.model = TranslationEngine(model_xml, model_bin, device, output_name)
         self.max_tokens = self.model.get_max_tokens()
         self.tokenizer_src = Tokenizer(tokenizer_src, self.max_tokens)
+        log.debug('Loaded src tokenizer, max tokens: {}'.format(self.max_tokens))
         self.tokenizer_tgt = Tokenizer(tokenizer_tgt, self.max_tokens)
+        log.debug('Loaded tgt tokenizer, max tokens: {}'.format(self.max_tokens))
 
     def __call__(self, sentence, remove_repeats=True):
         """ Main translation method.
@@ -66,16 +71,17 @@ class TranslationEngine:
         output_name (str): name of output blob of model.
     """
     def __init__(self, model_xml, model_bin, device, output_name):
-        self.logger = log.getLogger("TranslationEngine")
-        self.logger.info(f"model_xml: {model_xml}")
-        self.logger.info(f"model_bin: {model_bin}")
-        self.ie = IECore()
-        self.net = self.ie.read_network(
+        ie = IECore()
+        version = ie.get_versions(args.device)[args.device].build_number
+        log.info('IE version: {}'.format(version))
+
+        log.info('Reading model {}'.format(model_xml))
+        self.net = ie.read_network(
             model=model_xml,
             weights=model_bin
         )
-        self.logger.info("loading model to the {}".format(device))
-        self.net_exec = self.ie.load_network(self.net, device)
+        self.net_exec = ie.load_network(self.net, device)
+        log.info('Loaded model {} to {}'.format(model_xml, device))
         self.output_name = output_name
         assert self.output_name != "", "there is not output in model"
 
@@ -110,10 +116,6 @@ class Tokenizer:
         max_tokens (int): max tokens.
     """
     def __init__(self, path, max_tokens):
-        self.logger = log.getLogger("Tokenizer")
-        self.logger.info("loading tokenizer")
-        self.logger.info(f"path: {path}")
-        self.logger.info(f"max_tokens: {max_tokens}")
         self.tokenizer = SentencePieceBPETokenizer.from_file(
             str(path / "vocab.json"),
             str(path / "merges.txt"),
@@ -218,9 +220,6 @@ def parse_input(input):
     return sentences
 
 def main(args):
-    log.basicConfig(format="[ %(levelname)s ] [ %(name)s ] %(message)s", level=log.INFO, stream=sys.stdout)
-    logger = log.getLogger("main")
-    logger.info("creating translator")
     model = Translator(
         model_xml=args.model,
         model_bin=args.model.with_suffix(".bin"),
@@ -254,7 +253,7 @@ def main(args):
             translation = model(sentence)
             stop = time.perf_counter()
             print(translation)
-            logger.info(f"time: {stop - start} s.")
+            log.info("time: {} s.".format(stop - start))
             if args.output:
                 with open(args.output, 'a', encoding='utf8') as f:
                     print(translation, file=f)

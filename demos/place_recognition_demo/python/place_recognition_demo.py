@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging as log
+import logging
 from pathlib import Path
 import sys
 import time
@@ -31,6 +31,9 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 import monitors
 from images_capture import open_images_capture
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def build_argparser():
@@ -84,13 +87,12 @@ def time_elapsed(func, *args):
 
 
 def main():
-    log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    place_recognition = PlaceRecognition(args.model, args.device, args.gallery_folder, args.cpu_extension,
-                                         args.gallery_size)
-
     cap = open_images_capture(args.input, args.loop)
+
+    place_recognition = PlaceRecognition(args.model, args.device, args.gallery_folder, args.cpu_extension,
+                                         log, args.gallery_size)
 
     compute_embeddings_times = []
     search_in_gallery_times = []

@@ -17,6 +17,7 @@
 """
 
 import sys
+import logging
 import time
 from argparse import ArgumentParser, SUPPRESS
 
@@ -28,6 +29,9 @@ from openvino.inference_engine import IECore
 from models.forward_tacotron_ie import ForwardTacotronIE
 from models.mel2wave_ie import WaveRNNIE, MelGANIE
 from utils.gui import init_parameters_interactive
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def save_wav(x, path):
@@ -115,14 +119,16 @@ def main():
         return 1
 
     ie = IECore()
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
 
     if args.model_melgan is not None:
-        vocoder = MelGANIE(args.model_melgan, ie, device=args.device)
+        vocoder = MelGANIE(args.model_melgan, ie, log, device=args.device)
     else:
-        vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, ie, device=args.device,
+        vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, ie, log, device=args.device,
                             upsampler_width=args.upsampler_width)
 
-    forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, ie, args.device, verbose=False)
+    forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, ie, log, args.device, verbose=False)
 
     audio_res = np.array([], dtype=np.int16)
 
@@ -147,7 +153,7 @@ def main():
         for line in f:
             count += 1
             line = line.rstrip()
-            print("Process line {0} with length {1}.".format(count, len(line)))
+            log.info("Process line {0} with length {1}.".format(count, len(line)))
 
             if len(line) > len_th:
                 texts = []
@@ -174,11 +180,11 @@ def main():
                 audio_res = np.append(audio_res, audio)
 
             if count % 5 == 0:
-                print('Vocoder time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'.format(time_wavernn, time_forward))
+                log.info('Vocoder time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'.format(time_wavernn, time_forward))
     time_e_all = time.perf_counter()
 
-    print('All time {:.3f}ms. Vocoder time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'
-          .format((time_e_all - time_s_all) * 1000, time_wavernn, time_forward))
+    log.info('All time {:.3f}ms. Vocoder time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'
+             .format((time_e_all - time_s_all) * 1000, time_wavernn, time_forward))
 
     save_wav(audio_res, args.out)
 

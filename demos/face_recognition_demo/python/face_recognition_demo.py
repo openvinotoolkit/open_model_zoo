@@ -39,7 +39,7 @@ from images_capture import open_images_capture
 from models import OutputTransform
 from performance_metrics import PerformanceMetrics
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
 log = logging.getLogger()
 
 DEVICE_KINDS = ['CPU', 'GPU', 'MYRIAD', 'HETERO', 'HDDL']
@@ -132,26 +132,36 @@ class FrameProcessor:
         self.perf_count = args.perf_stats
         self.allow_grow = args.allow_grow and not args.no_show
 
-        log.info('Initializing Inference Engine...')
         ie = IECore()
         if args.cpu_lib and 'CPU' in {args.d_fd, args.d_lm, args.d_reid}:
-            log.info('Using CPU extensions library "{}"'.format(args.cpu_lib))
             ie.add_extension(args.cpu_lib, 'CPU')
+        version = ie.get_versions(args.device)[args.device].build_number
+        log.info('IE version: {}'.format(version))
 
-        log.info('Loading networks...')
+        log.info('Reading model {}'.format(args.m_fd))
         self.face_detector = FaceDetector(ie, args.m_fd,
                                           args.fd_input_size,
                                           confidence_threshold=args.t_fd,
                                           roi_scale_factor=args.exp_r_fd)
+
+        log.info('Reading model {}'.format(args.m_lm))
         self.landmarks_detector = LandmarksDetector(ie, args.m_lm)
+
+        log.info('Reading model {}'.format(args.m_reid))
         self.face_identifier = FaceIdentifier(ie, args.m_reid,
                                               match_threshold=args.t_id,
                                               match_algo=args.match_algo)
-        self.face_detector.deploy(args.d_fd, self.get_config(args.d_fd))
-        self.landmarks_detector.deploy(args.d_lm, self.get_config(args.d_lm), self.QUEUE_SIZE)
-        self.face_identifier.deploy(args.d_reid, self.get_config(args.d_reid), self.QUEUE_SIZE)
 
-        log.info('Building faces database using images from "{}"'.format(args.fg))
+        self.face_detector.deploy(args.d_fd, self.get_config(args.d_fd))
+        log.info('Loaded model {} to {}'.format(args.m_fd, args.d_fd))
+
+        self.landmarks_detector.deploy(args.d_lm, self.get_config(args.d_lm), self.QUEUE_SIZE)
+        log.info('Loaded model {} to {}'.format(args.m_lm, args.d_lm))
+
+        self.face_identifier.deploy(args.d_reid, self.get_config(args.d_reid), self.QUEUE_SIZE)
+        log.info('Loaded model {} to {}'.format(args.m_reid, args.d_reid))
+
+        log.debug('Building faces database using images from {}'.format(args.fg))
         self.faces_database = FacesDatabase(args.fg, self.face_identifier,
                                             self.landmarks_detector,
                                             self.face_detector if args.run_detector else None, args.no_show)
@@ -239,8 +249,6 @@ def main():
     cap = open_images_capture(args.input, args.loop)
     frame_processor = FrameProcessor(args)
 
-    log.info('Starting inference...')
-
     frame_num = 0
     metrics = PerformanceMetrics()
     print_perf_stats = args.perf_stats
@@ -294,7 +302,7 @@ def main():
                 break
             presenter.handleKey(key)
 
-    metrics.print_total()
+    metrics.log_total(log)
     print(presenter.reportMeans())
 
 

@@ -29,7 +29,6 @@ from action_recognition_demo.steps import run_pipeline
 sys.path.append(path.join(path.dirname(path.dirname(path.dirname(path.abspath(__file__)))), 'common/python'))
 import monitors
 from images_capture import open_images_capture
-from helpers import log_ie_version
 
 logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
 log = logging.getLogger()
@@ -73,7 +72,7 @@ def build_argparser():
                       default=30, type=int)
     args.add_argument('-u', '--utilization-monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
-    args.add_argument('-r', '--raw_output', help='Optional. Output inference results raw values showing.',
+    args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
                       default=False, action='store_true')
 
     return parser
@@ -89,7 +88,6 @@ def main():
         labels = None
 
     ie = IECore()
-    log_ie_version(log, ie, args.device)
 
     if 'MYRIAD' in args.device:
         myriad_config = {'VPU_HW_STAGES_OPTIMIZATION': 'YES'}
@@ -97,6 +95,9 @@ def main():
 
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, 'CPU')
+
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
 
     decoder_target_device = 'CPU'
     if args.device != 'CPU':
@@ -122,7 +123,7 @@ def main():
     result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
     cap = open_images_capture(args.input, args.loop)
-    run_pipeline(cap, args.architecture_type, models, result_presenter.render_frame, log, args.raw_output,
+    run_pipeline(cap, args.architecture_type, models, result_presenter.render_frame, log, args.raw_output_message,
                  seq_size=seq_size, fps=cap.fps())
     print(presenter.reportMeans())
 

@@ -13,7 +13,7 @@ from asr_utils.pipelines import BlockedSeqPipelineStage
 
 
 class RnnSeqPipelineStage(BlockedSeqPipelineStage):
-    def __init__(self, profile, ie, model, device='CPU'):
+    def __init__(self, profile, ie, model, logger, device='CPU'):
         """
         Load/compile to the target device the IE IR file with the network and initialize the pipeline stage.
 
@@ -31,8 +31,10 @@ class RnnSeqPipelineStage(BlockedSeqPipelineStage):
             left_padding_len=padding_len, right_padding_len=padding_len,
             padding_shape=(self.p['num_mfcc_dct_coefs'],), cut_alignment=True)
 
+        logger.info('Reading model {}'.format(model))
         net = ie.read_network(model=model)
         self.exec_net = ie.load_network(network=net, device_name=device)
+        logger.info('Loaded model {} to {}'.format(model, device))
 
     def _reset_state(self):
         super()._reset_state()

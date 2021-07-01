@@ -12,7 +12,6 @@
 """
 
 import cv2
-import logging as log
 import numpy as np
 import os
 
@@ -59,12 +58,9 @@ class IEModel:
         """Loads a model in the Inference Engine format"""
         model_bin = os.path.splitext(model_xml)[0] + ".bin"
         # Plugin initialization for specified device and load extensions library if specified
-        log.info("Initializing Inference Engine plugin for %s ", device)
-
         if cpu_extension and 'CPU' in device:
             ie.add_extension(cpu_extension, 'CPU')
         # Read IR
-        log.info("Loading network files:\n\t%s\n\t%s", model_xml, model_bin)
         net = ie.read_network(model=model_xml, weights=model_bin)
 
         assert len(net.input_info) in self.get_allowed_inputs_len(), \
@@ -79,7 +75,6 @@ class IEModel:
         net.batch_size = 1
 
         # Loading model to the plugin
-        log.info("Loading model to the plugin")
         self.net = ie.load_network(network=net, device_name=device)
         self.inputs_info = net.input_info
         self.input_key = input_blob

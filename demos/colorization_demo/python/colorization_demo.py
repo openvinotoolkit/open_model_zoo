@@ -18,7 +18,7 @@
 from openvino.inference_engine import IECore
 import cv2 as cv
 import numpy as np
-import logging as log
+import logging
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -26,6 +26,9 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def build_arg():
@@ -50,8 +53,6 @@ def build_arg():
                               'If 0 is set, all frames are stored.')
     in_args.add_argument("--no_show", help="Optional. Don't show output.",
                          action='store_true', default=False)
-    in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
-                         action='store_true', default=False)
     in_args.add_argument("-u", "--utilization_monitors", default="", type=str,
                          help="Optional. List of monitors to show initially.")
     return parser
@@ -60,14 +61,15 @@ def build_arg():
 if __name__ == '__main__':
     args = build_arg().parse_args()
 
-    log.basicConfig(format="[ %(levelname)s ] %(message)s",
-                    level=log.INFO if not args.verbose else log.DEBUG, stream=sys.stdout)
+    cap = open_images_capture(args.input, args.loop)
 
-    log.debug("Load network")
     ie = IECore()
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
+
+    log.info('Reading model {}'.format(args.model))
     load_net = ie.read_network(args.model, args.model.with_suffix(".bin"))
     load_net.batch_size = 1
-    exec_net = ie.load_network(network=load_net, device_name=args.device)
 
     input_blob = next(iter(load_net.input_info))
     input_shape = load_net.input_info[input_blob].input_data.shape
@@ -81,9 +83,11 @@ if __name__ == '__main__':
     output_blob = next(iter(load_net.outputs))
     output_shape = load_net.outputs[output_blob].shape
 
+    exec_net = ie.load_network(network=load_net, device_name=args.device)
+    log.info('Loaded model {} to {}'.format(args.model, args.device))
+
     _, _, h_in, w_in = input_shape
 
-    cap = open_images_capture(args.input, args.loop)
     original_frame = cap.read()
     if original_frame is None:
         raise RuntimeError("Can't read an image from the input")

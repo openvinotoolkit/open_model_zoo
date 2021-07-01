@@ -12,6 +12,8 @@
  limitations under the License.
 """
 
+import sys
+import logging
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
@@ -21,6 +23,9 @@ from openvino.inference_engine import IECore
 
 from inpainting_gui import InpaintingGUI
 from inpainting import ImageInpainting
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def build_arg_parser():
@@ -82,11 +87,7 @@ def create_random_mask(parts, max_vertex, max_length, max_brush_width, h, w, max
     return mask
 
 
-def inpaint_auto(img, args):
-    ie = IECore()
-
-    inpainting_processor = ImageInpainting(ie, args.model, args.device)
-
+def inpaint_auto(img, inpainting_processor, args):
     #--- Generating mask
     if args.auto_mask_random:
         mask = create_random_mask(args.parts, args.max_vertex, args.max_length, args.max_brush_width,
@@ -125,9 +126,17 @@ def main():
         print("Error: -ar and -ac options cannot be used together...")
         return -1
 
+    ie = IECore()
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
+
+    log.info('Reading model {}'.format(args.model))
+    inpainting_processor = ImageInpainting(ie, args.model, args.device)
+    log.info('Loaded model {} to {}'.format(args.model, args.device))
+
     if args.auto_mask_color or args.auto_mask_random:
         # Command-line inpaining for just one image
-        concat_image, result = inpaint_auto(img, args)
+        concat_image, result = inpaint_auto(img, inpainting_processor, args)
         if args.output != "":
             cv2.imwrite(args.output, result)
         if not args.no_show:
@@ -138,8 +147,8 @@ def main():
         if args.no_show:
             print("Error: --no_show argument cannot be used in GUI mode")
             return -1
-        InpaintingGUI(img, args.model, args.device).run()
+        InpaintingGUI(img, inpainting_processor).run()
     return 0
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main() or 0)

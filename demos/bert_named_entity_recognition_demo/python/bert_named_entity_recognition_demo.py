@@ -16,7 +16,7 @@
  limitations under the License.
 """
 
-import logging as log
+import logging
 import re
 import sys
 import time
@@ -29,6 +29,9 @@ from openvino.inference_engine import IECore
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 sentence_splitter = r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s'
 label_to_tag = ['O', 'B-MIS', 'I-MIS', 'B-PER', 'I-PER', 'B-ORG', 'I-ORG', 'B-LOC', 'I-LOC']
@@ -54,32 +57,27 @@ def build_argparser():
     return parser
 
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
     # load vocabulary file for model
-    log.info("Loading vocab file:\t{}".format(args.vocab))
     vocab = load_vocab_file(args.vocab)
-    log.info("{} tokens loaded".format(len(vocab)))
+    log.debug("Loaded vocab file from {}, get {} tokens".format(args.vocab, len(vocab)))
 
     # get context as a string (as we might need it's length for the sequence reshape)
     paragraphs = get_paragraphs(args.input)
     context = '\n'.join(paragraphs)
-    log.info("Size: {} chars".format(len(context)))
     sentences = re.split(sentence_splitter, context)
     preprocessed_sentences = [text_to_tokens(sentence, vocab) for sentence in sentences]
     max_sent_length = max([len(tokens) + 2 for tokens, _ in preprocessed_sentences])
 
-    log.info("Initializing Inference Engine")
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device]
-    version_str = "{}.{}.{}".format(version.major, version.minor, version.build_number)
-    log.info("Plugin version is {}".format(version_str))
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
 
     # read IR
     model_xml = args.model
     model_bin = model_xml.with_suffix(".bin")
-    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+    log.info('Reading model {}'.format(args.model))
     ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
 
     # check input and output names
@@ -92,7 +90,7 @@ def main():
         log.error("    Actual network input names: {}".format(list(ie_encoder.input_info.keys())))
         raise Exception("Unexpected network input names")
     if len(ie_encoder.outputs) != 1:
-        log.log.error('Demo expects model with single output, while provided {}'.format(len(ie_encoder.outputs)))
+        log.error('Demo expects model with single output, while provided {}'.format(len(ie_encoder.outputs)))
         raise Exception('Unexpected number of outputs')
     output_names = list(ie_encoder.outputs)
     max_length = ie_encoder.input_info[input_names[0]].input_data.shape[1]
@@ -105,8 +103,8 @@ def main():
         ie_encoder.reshape(input_shapes)
         max_length = max_sent_length
     # load model to the device
-    log.info("Loading model to the {}".format(args.device))
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
+    log.info('Loaded model {} to {}'.format(args.model, args.device))
     # maximum number of tokens that can be processed by network at once
     t0 = time.perf_counter()
     t_count = 0

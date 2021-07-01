@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging as log
+import logging
 from pathlib import Path
 import sys
 import time
@@ -34,6 +34,8 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
 
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
+log = logging.getLogger()
 
 INPUT_SIZE = 224
 
@@ -114,16 +116,16 @@ def time_elapsed(func, *args):
 
 
 def main():
-    log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
-
-    img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE,
-                                   args.cpu_extension)
 
     cap = open_images_capture(args.input, args.loop)
     if cap.get_type() not in ('VIDEO', 'CAMERA'):
         raise RuntimeError("The input should be a video file or a numeric camera ID")
+
     frames = RoiDetectorOnVideo(cap)
+
+    img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE,
+                                   args.cpu_extension, log)
 
     compute_embeddings_times = []
     search_in_gallery_times = []

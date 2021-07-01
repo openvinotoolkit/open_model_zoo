@@ -17,12 +17,15 @@ from openvino.inference_engine import IECore
 
 
 class InferenceEngine:
-    def __init__(self, net_model_xml_path, device, stride):
+    def __init__(self, net_model_xml_path, device, stride, logger):
         self.device = device
         self.stride = stride
 
         self.ie = IECore()
+        version = self.ie.get_versions(self.device)[self.device].build_number
+        logger.info('IE version: {}'.format(version))
 
+        logger.info('Reading model {}'.format(net_model_xml_path))
         self.net = self.ie.read_network(net_model_xml_path, net_model_xml_path.with_suffix('.bin'))
         required_input_key = {'data'}
         assert required_input_key == set(self.net.input_info), \
@@ -32,6 +35,7 @@ class InferenceEngine:
             'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
 
         self.exec_net = self.ie.load_network(network=self.net, num_requests=1, device_name=device)
+        logger.info('Loaded model {} to {}'.format(net_model_xml_path, self.device))
 
     def infer(self, img):
         img = img[0:img.shape[0] - (img.shape[0] % self.stride),

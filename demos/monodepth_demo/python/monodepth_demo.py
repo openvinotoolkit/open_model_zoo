@@ -6,9 +6,12 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-import logging as log
+import logging
 from openvino.inference_engine import IECore
 import matplotlib.pyplot as plt
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def main():
@@ -28,16 +31,13 @@ def main():
 
     args = parser.parse_args()
 
-    # logging
-    log.basicConfig(format="[ %(levelname)s ] %(message)s",
-                    level=log.INFO, stream=sys.stdout)
-
-    log.info("creating inference engine")
     ie = IECore()
     if args.cpu_extension and "CPU" in args.device:
         ie.add_extension(args.cpu_extension, "CPU")
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
 
-    log.info("Loading network")
+    log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, args.model.with_suffix(".bin"))
 
     assert len(net.input_info) == 1, "Expected model with only 1 input blob"
@@ -55,7 +55,7 @@ def main():
 
     # resize
     if (input_height, input_width) != (height, width):
-        log.info("Image is resized from {} to {}".format(
+        log.debug("Image is resized from {} to {}".format(
             image.shape[:-1], (height, width)))
         image = cv2.resize(image, (width, height), cv2.INTER_CUBIC)
 
@@ -65,11 +65,10 @@ def main():
     image_input = np.expand_dims(image, 0)
 
     # loading model to the plugin
-    log.info("loading model to the plugin")
     exec_net = ie.load_network(network=net, device_name=args.device)
+    log.info('Loaded model {} to {}'.format(args.model, args.device))
 
     # start sync inference
-    log.info("starting inference")
     res = exec_net.infer(inputs={input_blob: image_input})
 
     # processing output blob

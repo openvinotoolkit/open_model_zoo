@@ -11,7 +11,7 @@
  limitations under the License.
 """
 
-import logging as log
+import logging
 import sys
 import os
 from argparse import ArgumentParser, SUPPRESS
@@ -25,6 +25,9 @@ from image_translation_demo.preprocessing import (
     preprocess_for_seg_model, preprocess_image, preprocess_semantics,
 )
 from image_translation_demo.postprocessing import postprocess, save_result
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def build_argparser():
@@ -77,18 +80,23 @@ def get_mask_from_image(image, model):
 
 
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    log.info("Creating CoCosNet Model")
-    ie_core = IECore()
+    ie = IECore()
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
 
-    gan_model = CocosnetModel(ie_core, args.translation_model,
+    log.info('Reading model {}'.format(args.translation_model))
+    gan_model = CocosnetModel(ie, args.translation_model,
                               args.translation_model.replace(".xml", ".bin"),
                               args.device)
-    seg_model = SegmentationModel(ie_core, args.segmentation_model,
+    log.info('Loaded model {} to {}'.format(args.translation_model, args.device))
+
+    log.info('Reading model {}'.format(args.segmentation_model))
+    seg_model = SegmentationModel(ie, args.segmentation_model,
                                   args.segmentation_model.replace(".xml", ".bin"),
                                   args.device) if args.segmentation_model else None
+    log.info('Loaded model {} to {}'.format(args.segmentation_model, args.device))
 
     input_data = []
     use_seg = bool(args.input_images) and bool(args.segmentation_model)
@@ -136,7 +144,6 @@ def main():
         }
         input_data.append(input_dict)
 
-    log.info("Inference for input")
     outs = [gan_model.infer(**data) for data in input_data]
 
     results = [postprocess(out) for out in outs]

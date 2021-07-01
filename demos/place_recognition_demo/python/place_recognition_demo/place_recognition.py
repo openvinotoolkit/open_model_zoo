@@ -27,16 +27,20 @@ from openvino.inference_engine import IECore # pylint: disable=no-name-in-module
 class IEModel: # pylint: disable=too-few-public-methods
     """ Class that allows working with Inference Engine model. """
 
-    def __init__(self, model_path, device, cpu_extension):
+    def __init__(self, model_path, device, cpu_extension, logger):
         ie = IECore()
         if cpu_extension and device == 'CPU':
             ie.add_extension(cpu_extension, 'CPU')
+        version = ie.get_versions(device)[device].build_number
+        logger.info('IE version: {}'.format(version))
 
+        logger.info('Reading model {}'.format(model_path))
         self.net = ie.read_network(model_path, model_path.with_suffix('.bin'))
         self.input_name = next(iter(self.net.input_info))
         self.output_name = next(iter(self.net.outputs))
         self.input_size = self.net.input_info[self.input_name].input_data.shape
         self.exec_net = ie.load_network(network=self.net, device_name=device)
+        logger.info('Loaded model {} to {}'.format(model_path, device))
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
@@ -50,9 +54,9 @@ class IEModel: # pylint: disable=too-few-public-methods
 class PlaceRecognition:
     """ Class representing Place Recognition algorithm. """
 
-    def __init__(self, model_path, device, gallery_path, cpu_extension, gallery_size):
+    def __init__(self, model_path, device, gallery_path, cpu_extension, logger, gallery_size):
         self.impaths = (list(gallery_path.rglob("*.jpg")))[:gallery_size or None]
-        self.model = IEModel(model_path, device, cpu_extension)
+        self.model = IEModel(model_path, device, cpu_extension, logger)
         self.input_size = self.model.input_size[2:]
         self.embeddings = self.compute_gallery_embeddings()
 

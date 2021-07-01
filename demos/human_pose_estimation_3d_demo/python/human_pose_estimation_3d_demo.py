@@ -14,6 +14,7 @@
 
 import json
 import sys
+import logging
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
@@ -27,6 +28,9 @@ from modules.parse_poses import parse_poses
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
+
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def rotate_poses(poses_3d, R, t):
@@ -74,8 +78,10 @@ if __name__ == '__main__':
                       help="Optional. List of monitors to show initially.")
     args = parser.parse_args()
 
+    cap = open_images_capture(args.input, args.loop)
+
     stride = 8
-    inference_engine = InferenceEngine(args.model, args.device, stride)
+    inference_engine = InferenceEngine(args.model, args.device, stride, log)
     canvas_3d = np.zeros((720, 1280, 3), dtype=np.uint8)
     plotter = Plotter3d(canvas_3d.shape[:2])
     canvas_3d_window_name = 'Canvas 3D'
@@ -91,7 +97,6 @@ if __name__ == '__main__':
     R = np.array(extrinsics['R'], dtype=np.float32)
     t = np.array(extrinsics['t'], dtype=np.float32)
 
-    cap = open_images_capture(args.input, args.loop)
     is_video = cap.get_type() in ('VIDEO', 'CAMERA')
     frame = cap.read()
     if frame is None:
