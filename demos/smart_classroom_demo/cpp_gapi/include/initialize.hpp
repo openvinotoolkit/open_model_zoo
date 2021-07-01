@@ -175,21 +175,12 @@ std::tuple<ConstantParams, TrackerParams, TrackerParams> getGraphArgs(const std:
 }
 
 void printInfo(const NetsFlagsPack& flags, std::string& teacher_id, std::string& top_id) {
-    slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+    slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
     if (!teacher_id.empty() && !top_id.empty()) {
         slog::err << "Cannot run simultaneously teacher action and top-k students recognition."
                   << slog::endl;
     }
     InferenceEngine::Core ie;
-    std::vector<std::string> devices = {flags.d_act, flags.d_fd, flags.d_lm, flags.d_reid};
-    std::set<std::string> loadedDevices;
-    slog::info << "Device info: " << slog::endl;
-    for (const auto &device : devices) {
-        if (loadedDevices.find(device) != loadedDevices.end())
-            continue;
-        std::cout << printable(ie.GetVersions(device)) << std::endl;
-        loadedDevices.insert(device);
-    }
 }
 
 void configNets(const NetsFlagsPack& flags,

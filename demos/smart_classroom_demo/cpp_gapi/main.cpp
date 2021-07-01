@@ -23,7 +23,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
     }
@@ -279,12 +278,6 @@ int main(int argc, char* argv[]) {
         /** TOP_K case starts without processing **/
         if (const_params.actions_type != TOP_K) stream.start();
 
-        std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press ESC key";
-        }
-        std::cout << std::endl;
-
         /** Main cycle **/
         auto started_all = std::chrono::high_resolution_clock::now();
         while (true) {
@@ -375,11 +368,12 @@ int main(int argc, char* argv[]) {
         slog::info << slog::endl;
         /** Results **/
         if ( work_num_frames > 0) {
+            slog::info << "Metric reports:" << slog::endl;
             const float mean_time_ms = work_time_ms_all / static_cast<float>(work_num_frames);
-            slog::info << "Mean FPS: " << 1e3f / mean_time_ms << slog::endl;
+            slog::info << "\tMean FPS: " << 1e3f / mean_time_ms << slog::endl;
         }
-        slog::info << "Frames: " << total_num_frames << slog::endl;
-        std::cout << presenter.reportMeans() << '\n';
+        slog::info << "\tFrames processed: " << total_num_frames << slog::endl;
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -389,6 +383,5 @@ int main(int argc, char* argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-    slog::info << "Execution successful" << slog::endl;
     return 0;
 }
