@@ -1,4 +1,4 @@
-# hybrid_cs_model_mri
+# hybrid-cs-model-mri
 
 ## Use Case and High-Level Description
 
