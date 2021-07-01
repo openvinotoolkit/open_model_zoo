@@ -897,9 +897,9 @@ class DETRAdapter(Adapter):
                  (x_c + 0.5 * w), (y_c + 0.5 * h)]
             return b
 
-        def softmax(x):
-            exp_x = np.exp(x)
-            return exp_x / np.sum(exp_x)
+        def softmax(logits):
+            res = [np.exp(logit) / np.sum(np.exp(logit)) for logit in logits]
+            return np.array(res)
 
         for identifier, logits, boxes in zip(identifiers, raw_output[self.scores_out], raw_output[self.boxes_out]):
             x_mins, y_mins, x_maxs, y_maxs = box_cxcywh_to_xyxy(boxes)
