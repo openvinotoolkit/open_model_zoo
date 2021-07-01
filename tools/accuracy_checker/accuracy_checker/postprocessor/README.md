@@ -122,3 +122,9 @@ Accuracy Checker supports following set of postprocessors:
   * `target_min` - Minimum of target range. (Optional, default value is 0)
   * `target_max` - Maximum of target range. (Optional, default value is 255)
   * `as_log` - Operates over logarithmic scale of source values. (Optional, default value is False)
+* `invert_mask` - inverts segmentation or background matting mask. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
+  * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
+* `rescale_mask` - rescale mask data range to have specified `min` and `max` values. Supported representations: `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
+  * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
+  * `min` - minimal value in range, optional, default 0.
+  * `max`- maximal value in range.
