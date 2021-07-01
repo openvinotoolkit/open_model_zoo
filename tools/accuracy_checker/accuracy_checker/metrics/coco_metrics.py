@@ -80,6 +80,7 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
             raise ConfigError('coco metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerate annotation')
         self.meta['names'] = [label_map[label] for label in self.labels]
+        self.meta['orig_label_names'] = [label_map[label] for label in self.labels]
         self.matching_results = [[] for _ in self.labels]
 
     def update(self, annotation, prediction):
@@ -132,7 +133,7 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
             compute_precision_recall(self.thresholds, self.matching_results[i])[0]
             for i, _ in enumerate(self.labels)
         ]
-        precision, self.meta['names'] = finalize_metric_result(precision, self.meta['names'])
+        precision, self.meta['names'] = finalize_metric_result(precision, self.meta['orig_label_names'])
 
         return precision
 
@@ -158,7 +159,7 @@ class MSCOCORecall(MSCOCOBaseMetric):
             compute_precision_recall(self.thresholds, self.matching_results[i])[1]
             for i, _ in enumerate(self.labels)
         ]
-        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['names'])
+        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['orig_label_names'])
 
         return recalls
 
@@ -241,7 +242,7 @@ class MSCOCOKeypointsPrecision(MSCOCOKeypointsBaseMetric):
             compute_precision_recall(self.thresholds, self.matching_results[i])[0]
             for i, _ in enumerate(self.labels)
         ]
-        precision, self.meta['names'] = finalize_metric_result(precision, self.meta['names'])
+        precision, self.meta['names'] = finalize_metric_result(precision, self.meta['orig_label_names'])
 
         return precision
 
@@ -260,7 +261,7 @@ class MSCOCOKeypointsRecall(MSCOCOKeypointsBaseMetric):
             compute_precision_recall(self.thresholds, self.matching_results[i])[1]
             for i, _ in enumerate(self.labels)
         ]
-        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['names'])
+        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['orig_label_names'])
 
         return recalls
 

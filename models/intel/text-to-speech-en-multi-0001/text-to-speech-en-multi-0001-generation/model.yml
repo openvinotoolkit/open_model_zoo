@@ -18,20 +18,20 @@ description: >-
 task_type: text_to_speech
 files:
   - name: FP32/text-to-speech-en-multi-0001-generation.xml
-    size: 219024
-    sha256: 6bb0286f6fbf4a2eec45035dac57082818bbb5868cc0313c05afe2acc7cc515c
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP32/text-to-speech-en-multi-0001-generation.xml
+    size: 232924
+    sha256: c4c67949991e3d5f69c97f072afcbb5c0672d6c258b78a4f27dce076e2b6a5b3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP32/text-to-speech-en-multi-0001-generation.xml
   - name: FP32/text-to-speech-en-multi-0001-generation.bin
     size: 51082860
-    sha256: f879c95c19d827f660a5a15b471774e4b044be5d3ad7045265e380dc3a303a9b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP32/text-to-speech-en-multi-0001-generation.bin
+    sha256: 85b709e49e2bfcdf6e5f519d593658a47ee28a0a0dd2719a398bc60c88bd5edd
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP32/text-to-speech-en-multi-0001-generation.bin
   - name: FP16/text-to-speech-en-multi-0001-generation.xml
-    size: 218991
-    sha256: f207512e8fbe3a24897ddffef5f1ec8592156f4576342d30c634bd15d6095f3a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16/text-to-speech-en-multi-0001-generation.xml
+    size: 232908
+    sha256: 2168f46f9c5e0a3f7ceb143a04285c8d839cdbfe43893294a84880586886df75
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16/text-to-speech-en-multi-0001-generation.xml
   - name: FP16/text-to-speech-en-multi-0001-generation.bin
-    size: 25541538
-    sha256: bf4bcebe3b2d6695a15d6a0ef7314bebb6f0835dc4ad921e52e28859efb7005b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16/text-to-speech-en-multi-0001-generation.bin
+    size: 25541540
+    sha256: 688ec9f7a883b1b805c0f1e5dd69c366cff7454622c44b108f107146fcbc0b33
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-generation/FP16/text-to-speech-en-multi-0001-generation.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

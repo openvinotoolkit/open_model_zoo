@@ -18,7 +18,7 @@ import numpy as np
 import ngraph
 
 from .model import Model
-from .utils import Detection, resize_image, resize_image_letterbox, load_labels
+from .utils import Detection, resize_image, resize_image_letterbox, load_labels, clip_detections
 
 class YOLO(Model):
     class Params:
@@ -213,7 +213,7 @@ class YOLO(Model):
         else:
             detections = self._resize_detections(detections, meta['original_shape'][1::-1])
 
-        return detections
+        return clip_detections(detections, meta['original_shape'])
 
 
 class YoloV4(YOLO):
@@ -245,10 +245,9 @@ class YoloV4(YOLO):
 
         output_info = {}
         for i, (name, layer) in enumerate(outputs):
-            if name.startswith('conv'):
-                shape = layer.shape
-                yolo_params = self.Params(num, shape[2:4], anchors, masks[len(output_info)])
-                output_info[name] = (shape, yolo_params)
+            shape = layer.shape
+            yolo_params = self.Params(num, shape[2:4], anchors, masks[len(output_info)])
+            output_info[name] = (shape, yolo_params)
         return output_info
 
     @staticmethod

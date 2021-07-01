@@ -53,7 +53,8 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 
 Accuracy Checker supports following list of annotation converters and specific for them parameters:
 * `cifar` - converts [CIFAR](https://www.cs.toronto.edu/~kriz/cifar.html) classification dataset to `ClassificationAnnotation`
-  * `data_batch_file` - path to pickle file which contain dataset batch (e.g. test_batch)
+  * `data_batch_file` - path to pickle file which contain dataset batch (e.g. test_batch).
+  * `batch_meta_file` - path to pickle file which contains label names (e.g. batches.meta).
   * `has_background` - allows to add background label to original labels (Optional, default value is False).
   * `convert_images` - allows to convert images from pickle file to user specified directory (default value is False).
   * `converted_images_dir` - path to converted images location.
@@ -280,7 +281,8 @@ The main difference between this converter and `super_resolution` in data organi
   * `image_prefix` - prefix part for image file names. (Optional, default is empty).
   * `image_postfix` - postfix part for image file names (optional, default is `.png`).
   * `mask_prefix` - prefix part for mask file names. (Optional, default is empty).
-  * `image_postfix` - postfix part for mask file names (optional, default is `.png`).
+  * `image_postfix` - postfix part for mask file names (Optional, default is `.png`).
+  * `mask_to_gray`  - allows casting matting mask to gray scale (Optional, default `False`).
 * `camvid` - converts CamVid dataset with 12 classes to `SegmentationAnnotation`. Dataset can be found in the following [repository](https://github.com/alexgkendall/SegNet-Tutorial/tree/master/CamVid)
   * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space)
   * `dataset_meta_file` - path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.

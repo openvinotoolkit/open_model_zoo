@@ -1,6 +1,6 @@
 # Smart Classroom C++ Demo
 
-![example](./smart_classroom.gif)
+![](../smart_classroom.gif)
 
 The demo shows an example of joint usage of several neural networks to detect student actions (sitting, standing, raising hand for the `person-detection-action-recognition-0005` model and sitting, writing, raising hand, standing, turned around, lie on the desk for the `person-detection-action-recognition-0006` model) and recognize people by faces in the classroom environment. The demo uses Async API for action and face detection networks. It allows to parallelize execution of face recognition and detection: while face recognition is running on one accelerator, face and action detection could be performed on another. You can use a set of the following pre-trained models with the demo:
 
@@ -25,7 +25,7 @@ On startup, the application reads command line parameters and loads four network
 To recognize faces on a frame, the demo needs a gallery of reference images. Each image should contain a tight crop of face. You can create the gallery from an arbitrary list of images:
 
 1. Put images containing tight crops of frontal-oriented faces to a separate empty folder. Each identity must have only one image. Name images as `id_name0.png, id_name1.png, ...`.
-2. Run the `python3 create_list.py <path_to_folder_with_images>` command, which will create a `faces_gallery.json` file with list of files and identities.
+2. Run the `python3 <omz_dir>/demos/smart_classroom_demo/utils/create_list.py <path_to_folder_with_images>` command, which will create a `faces_gallery.json` file with list of files and identities.
 
 ## Preparing to Run
 
@@ -149,7 +149,7 @@ Example of a valid command line to run the application for recognizing actions o
     -teacher_id <ID of a teacher in the face gallery>
 ```
 
-> **NOTE**: To recognize actions of a teacher, use `person-detection-action-recognition-teacher-0002` model.
+> **NOTE**: To recognize actions of a teacher, use `person-detection-action-recognition-teacher-0002` model. See model description for more details on the list of recognized actions.
 
 Example of a valid command line to run the application for recognizing first raised-hand students:
 
@@ -162,13 +162,15 @@ Example of a valid command line to run the application for recognizing first rai
 
 > **NOTE**: To recognize raising hand action of students, use `person-detection-raisinghand-recognition-0001` model.
 
+>**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
+
 You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
 
 * To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
 * To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
 To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
 
->**NOTE**: Windows* systems may not have the Motion JPEG codec installed by default. If this is the case, OpenCV FFMPEG backend can be downloaded by the PowerShell script provided with the OpenVINO install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. Run the script with Administrative privileges. Alternatively, you can save results as images.
+>**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
 
 ## Demo Output
 

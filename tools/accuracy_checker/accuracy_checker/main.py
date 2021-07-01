@@ -225,6 +225,13 @@ def add_tool_settings_args(parser):
         help='file for additional logging results',
         required=False
     )
+    tool_settings_args.add_argument(
+        '--ignore_metric_reference',
+        help='allow to ignore comparison of metric with reference value',
+        type=cast_to_bool,
+        default=False,
+        required=False
+    )
 
 
 def add_openvino_specific_args(parser):
@@ -382,14 +389,7 @@ def main():
     progress_reporter = ProgressReporter.provide(progress_bar_provider, None, print_interval=args.progress_interval)
     if args.log_file:
         add_file_handler(args.log_file)
-    evaluator_kwargs = {}
-    if args.intermediate_metrics_results:
-        validate_print_interval(args.metrics_interval)
-        evaluator_kwargs['intermediate_metrics_results'] = args.intermediate_metrics_results
-        evaluator_kwargs['metrics_interval'] = args.metrics_interval
-        evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
-        evaluator_kwargs['csv_result'] = args.csv_result
-    evaluator_kwargs['store_only'] = args.store_only
+    evaluator_kwargs = configure_evaluator_kwargs(args)
     details = {
         'mode': "online" if not args.store_only else "offline",
         'metric_profiling': args.profile,
@@ -421,7 +421,8 @@ def main():
             )
             if not args.store_only:
                 metrics_results, metrics_meta = evaluator.extract_metrics_results(
-                    print_results=True, ignore_results_formatting=args.ignore_result_formatting
+                    print_results=True, ignore_results_formatting=args.ignore_result_formatting,
+                    ignore_metric_reference=args.ignore_metric_reference
                 )
                 if args.csv_result:
                     write_csv_result(
@@ -458,6 +459,19 @@ def setup_profiling(logs_dir, evaluator):
     profiler_dir = logs_dir / _timestamp
     print_info('Metric profiling activated. Profiler output will be stored in {}'.format(profiler_dir))
     evaluator.set_profiling_dir(profiler_dir)
+
+
+def configure_evaluator_kwargs(args):
+    evaluator_kwargs = {}
+    if args.intermediate_metrics_results:
+        validate_print_interval(args.metrics_interval)
+        evaluator_kwargs['intermediate_metrics_results'] = args.intermediate_metrics_results
+        evaluator_kwargs['metrics_interval'] = args.metrics_interval
+        evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
+        evaluator_kwargs['csv_result'] = args.csv_result
+    evaluator_kwargs['store_only'] = args.store_only
+    evaluator_kwargs['ignore_metric_reference'] = args.ignore_metric_reference
+    return evaluator_kwargs
 
 
 if __name__ == '__main__':

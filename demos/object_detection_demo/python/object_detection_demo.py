@@ -50,7 +50,7 @@ def build_argparser():
     args.add_argument('-at', '--architecture_type', help='Required. Specify model\' architecture type.',
                       type=str, required=True, choices=('ssd', 'yolo', 'yolov4', 'faceboxes', 'centernet', 'ctpn',
                                                         'retinaface', 'ultra_lightweight_face_detection',
-                                                        'retinaface-pytorch'))
+                                                        'retinaface-pytorch', 'detr'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -164,7 +164,8 @@ def get_model(ie, args):
         raise ValueError("{} model doesn't support input transforms.".format(args.architecture_type))
 
     if args.architecture_type == 'ssd':
-        return models.SSD(*common_args, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio)
+        return models.SSD(*common_args, labels=args.labels, keep_aspect_ratio_resize=args.keep_aspect_ratio,
+                          threshold=args.prob_threshold)
     elif args.architecture_type == 'ctpn':
         return models.CTPN(ie, args.model, input_size=args.input_size, threshold=args.prob_threshold)
     elif args.architecture_type == 'yolo':
@@ -183,45 +184,38 @@ def get_model(ie, args):
         return models.UltraLightweightFaceDetection(*common_args, threshold=args.prob_threshold)
     elif args.architecture_type == 'retinaface-pytorch':
         return models.RetinaFacePyTorch(ie, args.model, threshold=args.prob_threshold)
+    elif args.architecture_type == 'detr':
+        return models.DETR(*common_args, labels=args.labels, threshold=args.prob_threshold)
     else:
         raise RuntimeError('No model type or invalid model type (-at) provided: {}'.format(args.architecture_type))
 
 
-def draw_detections(frame, detections, palette, labels, threshold, output_transform):
-    size = frame.shape[:2]
+def draw_detections(frame, detections, palette, labels, output_transform):
     frame = output_transform.resize(frame)
     for detection in detections:
-        if detection.score > threshold:
-            class_id = int(detection.id)
-            color = palette[class_id]
-            det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
-            xmin = max(int(detection.xmin), 0)
-            ymin = max(int(detection.ymin), 0)
-            xmax = min(int(detection.xmax), size[1])
-            ymax = min(int(detection.ymax), size[0])
-            xmin, ymin, xmax, ymax = output_transform.scale([xmin, ymin, xmax, ymax])
-            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
-            cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
-                        (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
-            if isinstance(detection, models.DetectionWithLandmarks):
-                for landmark in detection.landmarks:
-                    landmark = output_transform.scale(landmark)
-                    cv2.circle(frame, (int(landmark[0]), int(landmark[1])), 2, (0, 255, 255), 2)
+        class_id = int(detection.id)
+        color = palette[class_id]
+        det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
+        xmin, ymin, xmax, ymax = detection.get_coords()
+        xmin, ymin, xmax, ymax = output_transform.scale([xmin, ymin, xmax, ymax])
+        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
+        cv2.putText(frame, '{} {:.1%}'.format(det_label, detection.score),
+                    (xmin, ymin - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
+        if isinstance(detection, models.DetectionWithLandmarks):
+            for landmark in detection.landmarks:
+                landmark = output_transform.scale(landmark)
+                cv2.circle(frame, (int(landmark[0]), int(landmark[1])), 2, (0, 255, 255), 2)
     return frame
 
 
-def print_raw_results(size, detections, labels, threshold):
+def print_raw_results(detections, labels):
     log.info(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
     for detection in detections:
-        if detection.score > threshold:
-            xmin = max(int(detection.xmin), 0)
-            ymin = max(int(detection.ymin), 0)
-            xmax = min(int(detection.xmax), size[1])
-            ymax = min(int(detection.ymax), size[0])
-            class_id = int(detection.id)
-            det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
-            log.info('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '
-                     .format(det_label, detection.score, xmin, ymin, xmax, ymax))
+        xmin, ymin, xmax, ymax = detection.get_coords()
+        class_id = int(detection.id)
+        det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
+        log.info('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '
+                 .format(det_label, detection.score, xmin, ymin, xmax, ymax))
 
 
 def main():
@@ -264,10 +258,10 @@ def main():
             start_time = frame_meta['start_time']
 
             if len(objects) and args.raw_output_message:
-                print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
+                print_raw_results(objects, model.labels)
 
             presenter.drawGraphs(frame)
-            frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, output_transform)
+            frame = draw_detections(frame, objects, palette, model.labels, output_transform)
             metrics.update(start_time, frame)
 
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
@@ -323,10 +317,10 @@ def main():
         start_time = frame_meta['start_time']
 
         if len(objects) and args.raw_output_message:
-            print_raw_results(frame.shape[:2], objects, model.labels, args.prob_threshold)
+            print_raw_results(objects, model.labels)
 
         presenter.drawGraphs(frame)
-        frame = draw_detections(frame, objects, palette, model.labels, args.prob_threshold, output_transform)
+        frame = draw_detections(frame, objects, palette, model.labels, output_transform)
         metrics.update(start_time, frame)
 
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):

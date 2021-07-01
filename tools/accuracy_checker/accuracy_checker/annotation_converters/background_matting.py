@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..config import PathField, StringField
+from ..config import PathField, StringField, BoolField
 from .format_converter import BaseFormatConverter, ConverterReturn
 from ..representation import BackgroundMattingAnnotation
 
@@ -33,6 +33,9 @@ class BackgroundMattingConverter(BaseFormatConverter):
                 'mask_prefix': StringField(optional=True, default='', description='prefix for gt masks'),
                 'image_postfix': StringField(optional=True, default='.png', description='prefix for images'),
                 'mask_postfix': StringField(optional=True, default='.png', description='prefix for gt masks'),
+                'mask_to_gray': BoolField(
+                    optional=True, default=False, description='allow converting mask to grayscale'
+                )
             }
         )
         return configuration_parameters
@@ -45,6 +48,7 @@ class BackgroundMattingConverter(BaseFormatConverter):
         self.mask_prefix = self.get_value_from_config('mask_prefix')
         self.mask_postfix = self.get_value_from_config('mask_postfix')
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
+        self.mask_to_gray = self.get_value_from_config('mask_to_gray')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
@@ -69,10 +73,10 @@ class BackgroundMattingConverter(BaseFormatConverter):
 
             mask_file = self.masks_dir / mask_name.format(base=base_name)
             if not mask_file.exists():
-                content_errors.append('{}: does not exist'.format(mask_file))
+                continue
 
             annotations.append(
-                BackgroundMattingAnnotation(identifier, mask_file.name)
+                BackgroundMattingAnnotation(identifier, mask_file.name, self.mask_to_gray)
             )
             if progress_callback is not None and idx % progress_interval == 0:
                 progress_callback(idx / num_iterations * 100)

@@ -18,7 +18,7 @@ import cv2
 import numpy as np
 
 from .model import Model
-from .utils import Detection, nms
+from .utils import Detection, nms, clip_detections
 
 
 class CTPN(Model):
@@ -115,7 +115,8 @@ class CTPN(Model):
             second_scales = meta['scales'].pop()
             boxes[:, 0:8:2] /= second_scales[0]
             boxes[:, 1:8:2] /= second_scales[1]
-        return [Detection(box[0], box[1], box[2], box[5], box[8], 0) for box in boxes]
+        detections = [Detection(box[0], box[1], box[2], box[5], box[8], 0) for box in boxes]
+        return clip_detections(detections, meta['original_shape'])
 
     @staticmethod
     def ctpn_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):

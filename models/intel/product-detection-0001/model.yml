@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/product-detection-0001.xml
-    size: 310341
-    sha256: 7b030bd2f92ac61b93ebd1cffa14d0994504e5d5436afec61eb280163f735e80
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/product-detection-0001/FP32/product-detection-0001.xml
+    size: 323305
+    sha256: 042dd5c526b60f7c76c60c4fa969e40d7f0ef597f670a47fc80ca58c4dc64969
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP32/product-detection-0001.xml
   - name: FP32/product-detection-0001.bin
     size: 12850024
-    sha256: 6a55f69975bf7ac945962f7428d2b90b278f0bd53ff1ce73f6122bd2dc5983ea
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/product-detection-0001/FP32/product-detection-0001.bin
+    sha256: 49a49dfdbff2f7a794fcad60e872fa2e2b3f95c1f12e33fd49b975f3fa91439d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP32/product-detection-0001.bin
   - name: FP16/product-detection-0001.xml
-    size: 310270
-    sha256: e8c6e506bdadeae4cc7448dbb4d8458970e8af3b8ba383acb4c374407dbf9a66
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/product-detection-0001/FP16/product-detection-0001.xml
+    size: 323127
+    sha256: a217c33a208d61606b1b18f8481fc29c6cc832b4c7abc622d7336494cccfc19a
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP16/product-detection-0001.xml
   - name: FP16/product-detection-0001.bin
     size: 6425058
-    sha256: 2e7a032dab80cd8531b9598581c31d1c0e6c8cf2a7af23c82d3b66a42ca92248
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/product-detection-0001/FP16/product-detection-0001.bin
+    sha256: 4952708beb67fb5c8ea97f28358045a31d358af22dd0b82431d649b2ee4e0f95
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP16/product-detection-0001.bin
   - name: FP16-INT8/product-detection-0001.xml
     size: 716994
     sha256: a79257a7fc5d560d76969d4403caee174cbeaf9823aea77b8e311465a55e4cda
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/product-detection-0001/FP16-INT8/product-detection-0001.xml
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP16-INT8/product-detection-0001.xml
   - name: FP16-INT8/product-detection-0001.bin
     size: 3364170
     sha256: 4fd5a44c98a68bb7b46cae5020c1ac94272407b010d615b02290dc918f23b936
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/2/product-detection-0001/FP16-INT8/product-detection-0001.bin
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/product-detection-0001/FP16-INT8/product-detection-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

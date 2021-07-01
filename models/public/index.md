@@ -123,6 +123,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | CTPN                                 | TensorFlow\*             | [ctpn](./ctpn/README.md) | 73.67% | 55.813 | 17.237 |
 | CenterNet (CTDET with DLAV0) 384x384 | ONNX\*                   | [ctdet_coco_dlav0_384](./ctdet_coco_dlav0_384/README.md)| 41.6105%| 34.994 | 17.911 |
 | CenterNet (CTDET with DLAV0) 512x512 | ONNX\*                   | [ctdet_coco_dlav0_512](./ctdet_coco_dlav0_512/README.md)| 44.2756%| 62.211 | 17.911 |
+| DETR-ResNet50                        | PyTorch\*                | [detr-resnet50](./detr-resnet50/README.md)| 39.27% / 42.36% | 174.4708 | 41.3293 |
 | EfficientDet-D0                      | TensorFlow\*             | [efficientdet-d0-tf](./efficientdet-d0-tf/README.md)| 31.95% | 2.54 | 3.9 |
 | EfficientDet-D1                      | TensorFlow\*             | [efficientdet-d1-tf](./efficientdet-d1-tf/README.md)| 37.54% | 6.1 | 6.6 |
 | FaceBoxes                            | PyTorch\*                | [faceboxes-pytorch](./faceboxes-pytorch/README.md)|83.565% | 1.8975 | 1.0059 |

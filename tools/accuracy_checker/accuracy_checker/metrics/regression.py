@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import copy
 import warnings
 from collections import OrderedDict
 from functools import singledispatch
@@ -229,7 +230,7 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
             self.magnitude = self.magnitude[1:-1]
 
         result = [[np.mean(values), np.std(values)] if values else [np.nan, np.nan] for values in self.magnitude]
-        result, self.meta['names'] = finalize_metric_result(np.reshape(result, -1), self.meta['names'])
+        result, self.meta['names'] = finalize_metric_result(np.reshape(result, -1), self.meta['orig_names'])
 
         if not result:
             warnings.warn("No values in given interval")
@@ -252,6 +253,7 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         if not self.ignore_out_of_range:
             self.meta['names'].append('mean: > ' + str(self.intervals[-1]))
             self.meta['names'].append('std: > ' + str(self.intervals[-1]))
+        self.meta['orig_names'] = copy.deepcopy(self.meta['names'])
 
     def reset(self):
         self.magnitude = [[] for _ in range(len(self.intervals) + 1)]
@@ -339,7 +341,7 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
             error = [np.sqrt(np.mean(values)), np.sqrt(np.std(values))] if values else [np.nan, np.nan]
             result.append(error)
 
-        result, self.meta['names'] = finalize_metric_result(np.reshape(result, -1), self.meta['names'])
+        result, self.meta['names'] = finalize_metric_result(np.reshape(result, -1), self.meta['orig_names'])
 
         if not result:
             warnings.warn("No values in given interval")
