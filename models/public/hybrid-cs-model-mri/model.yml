@@ -14,21 +14,20 @@
 
 description: >-
   A Hybrid Frequency-domain/Image-domain Deep Network for Magnetic Resonance Image Reconstruction.
-  Originally redistributed as a .hdf5 file (trained weights from Keras), was converted to frozen graph.
-task_type: image_processing
+task_type: image_inpainting
 files:
   - name: wnet_20.hdf5
     sha256: e901dacad8dd1e709a97668cc46bb21085e25546b8746e7599397f970ce66861
     size: 45478680
-    source: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/master/Models/wnet_20.hdf5
+    source: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/Models/wnet_20.hdf5
   - name: stats_fs_unet_norm_20.npy
     sha256: f14ef5d46b202f89b8b2e7fb3c13926ff15703dce0df3a8b06d7c8e4c7829614
     size: 160
-    source: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/master/Data/stats_fs_unet_norm_20.npy
+    source: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/Data/stats_fs_unet_norm_20.npy
   - name: frequency_spatial_network.py
     sha256: 5fb3bf346587a9ed0de66b27f347da046a64064708cdd25b587ec34b43c6a569
     size: 9735
-    source: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/master/Modules/frequency_spatial_network.py
+    source: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/Modules/frequency_spatial_network.py
 framework: tf
 postprocessing:
   - $type: regex_replace
@@ -54,4 +53,4 @@ postprocessing:
 model_optimizer_args:
   - --input_shape=[1,256,256,2]
   - --saved_model_dir=$conv_dir/saved_model
-license: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/master/LICENSE
+license: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/2ede2f96161ce70dcdc922371fe6b6b254aafcc8/LICENSE
