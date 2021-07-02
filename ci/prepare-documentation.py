@@ -127,8 +127,7 @@ def add_page(output_root, parent, *, id=None, path=None, title=None):
         if image_filename in all_images_paths and all_images_paths[image_filename] != image_abs_path:
             raise RuntimeError(f'{path}: Image with "{image_filename}" filename already exists. '
                                f'Rename "{image_rel_path}" to unique name.')
-        else:
-            all_images_paths[image_filename] = image_abs_path
+        all_images_paths[image_filename] = image_abs_path
 
     non_md_links = [ref.url for ref in page.external_references()
                     if ref.type == 'link' and not ref.url.endswith('.md')]
