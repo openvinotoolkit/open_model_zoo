@@ -240,7 +240,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
         * `images` - directory with converted images
         * `depth` -  directory with depth maps
 
-Note: If dataset is used in the first time, please set `allow_convert_data: True` in annotation conversion parameters for this dataset in `dataset_definitions.yml`  or use `<omz_dir>/tools/accuracy_checker/accuracy_checker/annotation_converters/convert.py` and  following command line to get converted data .
+Note: If dataset is used in the first time, please set `allow_convert_data: True` in annotation conversion parameters for this dataset in `dataset_definitions.yml`  or use `convert_annotation` command line interface:
 
 ```sh
 convert_annotation nyu_depth_v2 --data_dir <DATASET_DIR>/nyudepthv2/val/official --allow_convert_data True
