@@ -128,7 +128,7 @@ def main():
                 new_shapes[input_name] = [n, seq]
             try:
                 ie_encoder.reshape(new_shapes)
-                log.debug("\tReshaped input {} from {} to the {}".format(
+                log.debug("Reshape model {} from {} to the {}".format(
                     input_name, input_info.input_data.shape, new_shapes[input_name]))
             except RuntimeError:
                 log.error("Failed to reshape the network, please retry the demo without '-r' option")
@@ -141,12 +141,11 @@ def main():
     input_names = [i.strip() for i in args.input_names.split(',')]
     output_names = [o.strip() for o in args.output_names.split(',')]
     if ie_encoder.input_info.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
-        log.error("Input or Output names do not match")
-        log.error("    The demo expects input->output names: {}->{}. "
+        log.error("The demo expects input->output names: {}->{}. "
                   "Please use the --input_names and --output_names to specify the right names "
                   "(see actual values below)".format(input_names, output_names))
-        log.error("    Actual network input->output names: {}->{}".format(list(ie_encoder.input_info.keys()),
-                                                                          list(ie_encoder.outputs.keys())))
+        log.error("Actual network input->output names: {}->{}".format(list(ie_encoder.input_info.keys()),
+                                                                      list(ie_encoder.outputs.keys())))
         raise Exception("Unexpected network input or output names")
 
     # load model to the device

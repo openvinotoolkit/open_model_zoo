@@ -104,8 +104,8 @@ def main():
     ie_encoder_emb = ie.read_network(model=model_xml_emb, weights=model_bin_emb)
     input_names_model_emb = list(ie_encoder_emb.input_info.keys())
     input_names_emb = args.input_names_emb.split(',')
-    log.debug("\tExpected embedding input names: {}".format(input_names_emb))
-    log.debug("\tNetwork embedding input names: {}".format(input_names_model_emb))
+    log.debug("Expected embedding input names: {}".format(input_names_emb))
+    log.debug("Network embedding input names: {}".format(input_names_model_emb))
     # check input names
     if set(input_names_model_emb) != set(input_names_emb):
         log.error("Unexpected embedding network input names")
@@ -114,7 +114,7 @@ def main():
     # check outputs
     output_names_model_emb = list(ie_encoder_emb.outputs.keys())
     if len(output_names_model_emb)>1:
-        log.error("Expected only single output in embedding network but {} outputs detected".format(output_names_model_emb))
+        log.error("Expected only single output in embedding network, but {} outputs detected".format(output_names_model_emb))
         raise Exception("Unexpected number of embedding network outputs")
 
 
@@ -129,7 +129,7 @@ def main():
             new_shapes[i] = [1, length]
         try:
             ie_encoder_emb.reshape(new_shapes)
-            log.debug("\tReshaped input {} from {} to the {}".format(
+            log.debug("Reshape model {} from {} to the {}".format(
                 i,
                 input_info.input_data.shape,
                 new_shapes[i]))
@@ -152,12 +152,12 @@ def main():
 
         input_names_qa = args.input_names_qa.split(',')
         output_names_qa = args.output_names_qa.split(',')
-        log.debug("\tExpected input->output names: {}->{}".format(input_names_qa, output_names_qa))
+        log.debug("Expected input->output names: {}->{}".format(input_names_qa, output_names_qa))
 
         #check input and output names
         input_names_model_qa = list(ie_encoder_qa.input_info.keys())
         output_names_model_qa = list(ie_encoder_qa.outputs.keys())
-        log.debug("\tNetwork input->output names: {}->{}".format(input_names_model_qa, output_names_model_qa))
+        log.debug("Network input->output names: {}->{}".format(input_names_model_qa, output_names_model_qa))
         if set(input_names_model_qa) != set(input_names_qa) or set(output_names_model_qa) != set(output_names_qa):
             log.error("Unexpected network input or output names")
             raise Exception("Unexpected network input or output names")
