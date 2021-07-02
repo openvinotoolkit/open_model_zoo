@@ -105,13 +105,13 @@ def main():
     else:
         encoder_target_device = decoder_target_device
 
-    models = [IEModel(args.m_encoder, ie, log, encoder_target_device,
+    models = [IEModel(args.m_encoder, ie, encoder_target_device,
                 num_requests=(3 if args.device == 'MYRIAD' else 1))]
 
     if args.architecture_type == 'en-de':
         if args.m_decoder is None:
             raise RuntimeError('No decoder for encoder-decoder model type (-m_de) provided')
-        models.append(IEModel(args.m_decoder, ie, log, decoder_target_device, num_requests=2))
+        models.append(IEModel(args.m_decoder, ie, decoder_target_device, num_requests=2))
         seq_size = models[1].input_size[1]
     elif args.architecture_type == 'en-mean':
         models.append(DummyDecoder(num_requests=2))
@@ -123,7 +123,7 @@ def main():
     result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
     cap = open_images_capture(args.input, args.loop)
-    run_pipeline(cap, args.architecture_type, models, result_presenter.render_frame, log, args.raw_output_message,
+    run_pipeline(cap, args.architecture_type, models, result_presenter.render_frame, args.raw_output_message,
                  seq_size=seq_size, fps=cap.fps())
     print(presenter.reportMeans())
 

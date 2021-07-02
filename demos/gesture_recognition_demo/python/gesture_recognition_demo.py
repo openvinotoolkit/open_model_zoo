@@ -121,16 +121,11 @@ def main():
     version = ie.get_versions(args.device)[args.device].build_number
     log.info('IE version: {}'.format(version))
 
-    log.info('Reading model {}'.format(args.detection_model))
     person_detector = PersonDetector(args.detection_model, args.device, ie,
                                      num_requests=2, output_shape=DETECTOR_OUTPUT_SHAPE)
-    log.info('Loaded model {} to {}'.format(args.detection_model, args.device))
-
-    log.info('Reading model {}'.format(args.action_model))
     action_recognizer = ActionRecognizer(args.action_model, args.device, ie,
                                          num_requests=2, img_scale=ACTION_IMAGE_SCALE,
                                          num_classes=len(class_map))
-    log.info('Loaded model {} to {}'.format(args.action_model, args.device))
 
     person_tracker = Tracker(person_detector, TRACKER_SCORE_THRESHOLD, TRACKER_IOU_THRESHOLD)
 

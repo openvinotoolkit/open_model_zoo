@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import logging as log
 import os.path as osp
 
 import numpy as np
@@ -24,7 +25,7 @@ from utils.wav_processing import (
 
 
 class WaveRNNIE:
-    def __init__(self, model_upsample, model_rnn, ie, logger, target=11000, overlap=550, hop_length=275, bits=9, device='CPU',
+    def __init__(self, model_upsample, model_rnn, ie, target=11000, overlap=550, hop_length=275, bits=9, device='CPU',
                  verbose=False, upsampler_width=-1):
         """
         return class provided WaveRNN inference.
@@ -47,7 +48,6 @@ class WaveRNNIE:
         self.pad = 2
         self.batch_sizes = [1, 2, 4, 8, 16, 32, 64, 128, 256]
         self.ie = ie
-        self.logger = logger
 
         self.upsample_net = self.load_network(model_upsample)
         if upsampler_width > 0:
@@ -66,7 +66,7 @@ class WaveRNNIE:
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        self.logger.info('Reading model {}'.format(model_xml))
+        log.info('Reading model {}'.format(model_xml))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
         return net
 
@@ -78,7 +78,7 @@ class WaveRNNIE:
                 exec_net.append(self.ie.load_network(network=net, device_name=self.device))
         else:
             exec_net = self.ie.load_network(network=net, device_name=self.device)
-        self.logger.info('Loaded model {} to {}'.format(path, self.device))
+        log.info('Loaded model {} to {}'.format(path, self.device))
         return exec_net
 
     @staticmethod
@@ -189,7 +189,7 @@ class WaveRNNIE:
 
 
 class MelGANIE:
-    def __init__(self, model, ie, logger, device='CPU', default_width=800):
+    def __init__(self, model, ie, device='CPU', default_width=800):
         """
         return class provided MelGAN inference.
 
@@ -200,7 +200,6 @@ class MelGANIE:
         """
         self.device = device
         self.ie = ie
-        self.logger = logger
 
         self.scales = 4
         self.hop_length = 256
@@ -220,7 +219,7 @@ class MelGANIE:
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        self.logger.info('Reading model {}'.format(model_xml))
+        log.info('Reading model {}'.format(model_xml))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
         return net
 
@@ -235,7 +234,7 @@ class MelGANIE:
                 net.reshape({"mel": orig_shape})
         else:
             exec_net = self.ie.load_network(network=net, device_name=self.device)
-        self.logger.info('Loaded model {} to {}'.format(path, self.device))
+        log.info('Loaded model {} to {}'.format(path, self.device))
         return exec_net
 
     def forward(self, mel):

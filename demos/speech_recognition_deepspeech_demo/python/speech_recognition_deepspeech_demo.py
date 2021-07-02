@@ -81,7 +81,6 @@ def main():
     stt = DeepSpeechSeqPipeline(
         ie = ie,
         model = args.model,
-        logger = log,
         lm = args.lm,
         beam_width = args.beam_width,
         max_candidates = args.max_candidates,

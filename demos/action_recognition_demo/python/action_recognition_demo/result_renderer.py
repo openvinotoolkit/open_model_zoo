@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import logging as log
 from collections import Counter, defaultdict, deque
 from functools import partial
 from itertools import islice
@@ -54,7 +55,7 @@ class ResultRenderer:
             inference_time += self.meters[key].avg
         return inference_time
 
-    def render_frame(self, frame, logits, timers, frame_ind, log, raw_output, fps):
+    def render_frame(self, frame, logits, timers, frame_ind, raw_output, fps):
         inference_time = self.update_timers(timers)
 
         if logits is not None:

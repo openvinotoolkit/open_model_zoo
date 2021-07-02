@@ -275,7 +275,7 @@ def main():
 
         metrics.update(start_time, origin_image)
 
-    metrics.log_total(log)
+    metrics.log_total()
 
 
 if __name__ == '__main__':

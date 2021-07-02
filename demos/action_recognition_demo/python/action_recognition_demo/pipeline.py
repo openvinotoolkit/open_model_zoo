@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import logging as log
 import time
 from collections import OrderedDict
 from itertools import chain, cycle
@@ -138,7 +139,7 @@ class AsyncPipeline:
         for step in self.steps.values():
             step.join()
 
-    def print_statistics(self, log):
+    def print_statistics(self):
         log.info("Metrics report:")
         for name, step in chain(self.sync_steps.items(), self.steps.items(), ):
             log.info("\t{} total: {}".format(name, step.total_time))

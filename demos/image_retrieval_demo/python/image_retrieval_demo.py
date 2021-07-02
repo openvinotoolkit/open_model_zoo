@@ -121,11 +121,10 @@ def main():
     cap = open_images_capture(args.input, args.loop)
     if cap.get_type() not in ('VIDEO', 'CAMERA'):
         raise RuntimeError("The input should be a video file or a numeric camera ID")
-
     frames = RoiDetectorOnVideo(cap)
 
     img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE,
-                                   args.cpu_extension, log)
+                                   args.cpu_extension)
 
     compute_embeddings_times = []
     search_in_gallery_times = []

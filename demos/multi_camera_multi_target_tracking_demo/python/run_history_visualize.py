@@ -14,7 +14,7 @@
 import argparse
 import copy
 import json
-import logging
+import logging as log
 
 import cv2 as cv
 import motmetrics as mm
@@ -25,9 +25,6 @@ from run_evaluate import read_gt_tracks, get_detections_from_tracks
 from utils.misc import check_pressed_keys
 from utils.video import MulticamCapture
 from utils.visualization import visualize_multicam_detections, plot_timeline, get_target_size
-
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
 
 
 def find_max_id(all_tracks):

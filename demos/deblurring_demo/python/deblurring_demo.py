@@ -93,12 +93,12 @@ def main():
 
     log.info('Reading model {}'.format(args.model))
     model = Deblurring(ie, args.model, frame.shape)
-    log_blobs_info(log, model)
+    log_blobs_info(model)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
     log.info('Loaded model {} to {}'.format(args.model, args.device))
-    log_runtime_settings(log, pipeline.exec_net, args.device)
+    log_runtime_settings(pipeline.exec_net, args.device)
 
     pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
     next_frame_id = 1
@@ -176,7 +176,7 @@ def main():
         else:
             break
 
-    metrics.log_total(log)
+    metrics.log_total()
     print(presenter.reportMeans())
 
 

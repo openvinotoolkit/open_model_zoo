@@ -13,7 +13,7 @@
 
 import argparse
 import json
-import logging
+import logging as log
 
 import defusedxml.ElementTree as etree
 import motmetrics as mm
@@ -21,9 +21,6 @@ import numpy as np
 from tqdm import tqdm
 
 from mc_tracker.sct import TrackedObj
-
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
 
 
 def read_gt_tracks(gt_filenames, size_divisor=1, skip_frames=0, skip_heavy_occluded_objects=False):

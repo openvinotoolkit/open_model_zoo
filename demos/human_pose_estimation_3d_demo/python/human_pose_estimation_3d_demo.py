@@ -81,7 +81,7 @@ if __name__ == '__main__':
     cap = open_images_capture(args.input, args.loop)
 
     stride = 8
-    inference_engine = InferenceEngine(args.model, args.device, stride, log)
+    inference_engine = InferenceEngine(args.model, args.device, stride)
     canvas_3d = np.zeros((720, 1280, 3), dtype=np.uint8)
     plotter = Plotter3d(canvas_3d.shape[:2])
     canvas_3d_window_name = 'Canvas 3D'

@@ -123,12 +123,12 @@ def main():
     log.info('IE version: {}'.format(version))
 
     if args.model_melgan is not None:
-        vocoder = MelGANIE(args.model_melgan, ie, log, device=args.device)
+        vocoder = MelGANIE(args.model_melgan, ie, device=args.device)
     else:
-        vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, ie, log, device=args.device,
+        vocoder = WaveRNNIE(args.model_upsample, args.model_rnn, ie, device=args.device,
                             upsampler_width=args.upsampler_width)
 
-    forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, ie, log, args.device, verbose=False)
+    forward_tacotron = ForwardTacotronIE(args.model_duration, args.model_forward, ie, args.device, verbose=False)
 
     audio_res = np.array([], dtype=np.int16)
 

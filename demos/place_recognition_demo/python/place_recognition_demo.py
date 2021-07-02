@@ -92,7 +92,7 @@ def main():
     cap = open_images_capture(args.input, args.loop)
 
     place_recognition = PlaceRecognition(args.model, args.device, args.gallery_folder, args.cpu_extension,
-                                         log, args.gallery_size)
+                                         args.gallery_size)
 
     compute_embeddings_times = []
     search_in_gallery_times = []

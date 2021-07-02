@@ -231,13 +231,13 @@ def main():
 
     log.info('Reading model {}'.format(args.model))
     model = get_model(ie, args)
-    log_blobs_info(log, model)
+    log_blobs_info(model)
 
     detector_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
     log.info('Loaded model {} to {}'.format(args.model, args.device))
-    log_runtime_settings(log, detector_pipeline.exec_net, args.device)
+    log_runtime_settings(detector_pipeline.exec_net, args.device)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
@@ -337,7 +337,7 @@ def main():
                 break
             presenter.handleKey(key)
 
-    metrics.log_total(log)
+    metrics.log_total()
     print(presenter.reportMeans())
 
 

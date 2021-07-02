@@ -17,6 +17,7 @@
 from collections import deque
 from itertools import cycle
 
+import logging as log
 import cv2
 import numpy as np
 
@@ -79,7 +80,7 @@ class AsyncWrapper:
 
 
 class IEModel:
-    def __init__(self, model_path, ie_core, log, target_device, num_requests, batch_size=1):
+    def __init__(self, model_path, ie_core, target_device, num_requests, batch_size=1):
         log.info('Reading model {}'.format(model_path))
         self.net = ie_core.read_network(model_path)
         self.net.batch_size = batch_size

@@ -14,25 +14,28 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 
 
 class Module:
     def __init__(self, ie, model):
         self.ie = ie
+        log.info('Reading model {}'.format(model))
         self.model = ie.read_network(model, model.with_suffix('.bin'))
+        self.model_path = model
         self.active_requests = 0
         self.clear()
 
     def deploy(self, device, plugin_config, max_requests=1):
         self.max_requests = max_requests
         self.exec_net = self.ie.load_network(self.model, device, config=plugin_config, num_requests=max_requests)
+        log.info('Loaded model {} to {}'.format(self.model_path, device))
 
     def enqueue(self, input):
         self.clear()
 
         if self.max_requests <= self.active_requests:
-            logging.warning('Processing request rejected - too many requests')
+            log.warning('Processing request rejected - too many requests')
             return False
 
         self.exec_net.start_async(self.active_requests, input)

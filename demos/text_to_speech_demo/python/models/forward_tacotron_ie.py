@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import logging as log
 import os.path as osp
 
 import numpy as np
@@ -23,12 +24,10 @@ from utils.embeddings_processing import PCA
 
 
 class ForwardTacotronIE:
-    def __init__(self, model_duration, model_forward, ie, logger, device='CPU', verbose=False):
+    def __init__(self, model_duration, model_forward, ie, device='CPU', verbose=False):
         self.verbose = verbose
         self.device = device
-
         self.ie = ie
-        self.logger = logger
 
         self.duration_predictor_net = self.load_network(model_duration)
         self.duration_predictor_exec = self.create_exec_network(self.duration_predictor_net, model_duration)
@@ -107,13 +106,13 @@ class ForwardTacotronIE:
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        self.logger.info('Reading model {}'.format(model_xml))
+        log.info('Reading model {}'.format(model_xml))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
         return net
 
     def create_exec_network(self, net, path):
         exec_net = self.ie.load_network(network=net, device_name=self.device)
-        self.logger.info('Loaded model {} to {}'.format(path, self.device))
+        log.info('Loaded model {} to {}'.format(path, self.device))
         return exec_net
 
     def infer_duration(self, sequence, speaker_embedding=None, alpha=1.0, non_empty_symbols=None):

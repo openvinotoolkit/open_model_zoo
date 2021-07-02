@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import logging as log
 import numpy as np
 
 import cv2
@@ -28,19 +29,19 @@ from openvino.inference_engine import IECore # pylint: disable=no-name-in-module
 class IEModel(): # pylint: disable=too-few-public-methods
     """ Class that allows worknig with Inference Engine model. """
 
-    def __init__(self, model_path, device, cpu_extension, logger):
+    def __init__(self, model_path, device, cpu_extension):
         ie = IECore()
         if cpu_extension and device == 'CPU':
             ie.add_extension(cpu_extension, 'CPU')
         version = ie.get_versions(device)[device].build_number
-        logger.info('IE version: {}'.format(version))
+        log.info('IE version: {}'.format(version))
 
         path = '.'.join(model_path.split('.')[:-1])
-        logger.info('Reading model {}'.format(model_path))
+        log.info('Reading model {}'.format(model_path))
         self.net = ie.read_network(path + '.xml', path + '.bin')
         self.output_name = list(self.net.outputs.keys())[0]
         self.exec_net = ie.load_network(network=self.net, device_name=device)
-        logger.info('Loaded model {} to {}'.format(model_path, device))
+        log.info('Loaded model {} to {}'.format(model_path, device))
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
@@ -54,11 +55,11 @@ class IEModel(): # pylint: disable=too-few-public-methods
 class ImageRetrieval:
     """ Class representing Image Retrieval algorithm. """
 
-    def __init__(self, model_path, device, gallery_path, input_size, cpu_extension, logger):
+    def __init__(self, model_path, device, gallery_path, input_size, cpu_extension):
         self.impaths, self.gallery_classes, _, self.text_label_to_class_id = from_list(
             gallery_path, multiple_images_per_label=False)
         self.input_size = input_size
-        self.model = IEModel(model_path, device, cpu_extension, logger)
+        self.model = IEModel(model_path, device, cpu_extension)
         self.embeddings = self.compute_gallery_embeddings()
 
     def compute_embedding(self, image):

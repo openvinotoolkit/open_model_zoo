@@ -173,12 +173,12 @@ def main():
 
     model, visualizer = get_model(ie, args)
     log.info('Reading model {}'.format(args.model))
-    log_blobs_info(log, model)
+    log_blobs_info(model)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
     log.info('Loaded model {} to {}'.format(args.model, args.device))
-    log_runtime_settings(log, pipeline.exec_net, args.device)
+    log_runtime_settings(pipeline.exec_net, args.device)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
@@ -259,7 +259,7 @@ def main():
             cv2.imshow('Segmentation Results', frame)
             key = cv2.waitKey(1)
 
-    metrics.log_total(log)
+    metrics.log_total()
     print(presenter.reportMeans())
 
 

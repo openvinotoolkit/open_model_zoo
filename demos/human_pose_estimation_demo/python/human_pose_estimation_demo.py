@@ -182,12 +182,12 @@ def main():
 
     log.info('Reading model {}'.format(args.model))
     model = get_model(ie, args, frame.shape[1] / frame.shape[0])
-    log_blobs_info(log, model)
+    log_blobs_info(model)
 
     hpe_pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
     log.info('Loaded model {} to {}'.format(args.model, args.device))
-    log_runtime_settings(log, hpe_pipeline.exec_net, args.device)
+    log_runtime_settings(hpe_pipeline.exec_net, args.device)
 
     hpe_pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
     next_frame_id = 1
@@ -279,7 +279,7 @@ def main():
                 break
             presenter.handleKey(key)
 
-    metrics.log_total(log)
+    metrics.log_total()
     print(presenter.reportMeans())
 
 

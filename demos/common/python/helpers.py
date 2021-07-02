@@ -15,6 +15,8 @@
 """
 
 import cv2
+import logging as log
+
 
 def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
     cv2.putText(frame, message, position, font_face, font_scale, (255, 255, 255), thickness + 1) # white border
@@ -29,14 +31,14 @@ def resolution(value):
         raise RuntimeError('Сorrect format of --output_resolution parameter is "width"x"height".')
     return result
 
-def log_blobs_info(logger, model):
+def log_blobs_info(model):
     for name, layer in model.net.input_info.items():
-        logger.info('\tInput blob: {}, shape: {}, precision: {}'.format(name, layer.input_data.shape, layer.precision))
+        log.info('\tInput blob: {}, shape: {}, precision: {}'.format(name, layer.input_data.shape, layer.precision))
     for name, layer in model.net.outputs.items():
-        logger.info('\tOutput blob: {}, shape: {}, precision: {}'.format(name, layer.shape, layer.precision))
+        log.info('\tOutput blob: {}, shape: {}, precision: {}'.format(name, layer.shape, layer.precision))
 
-def log_runtime_settings(logger, exec_net, device):
+def log_runtime_settings(exec_net, device):
     nireq = len(exec_net.requests)
     nstreams = exec_net.get_config(device + '_THROUGHPUT_STREAMS')
-    logger.info('\tNumber of infer requests: {}'.format(nireq))
-    logger.info('\tNumber of streams: {}'.format(nstreams))
+    log.info('\tNumber of infer requests: {}'.format(nireq))
+    log.info('\tNumber of streams: {}'.format(nstreams))
