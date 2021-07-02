@@ -1,12 +1,17 @@
 # Copyright (C) 2018-2021 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
-import numpy as np
-import cv2 as cv
 import argparse
 import time
+import logging
+import sys
+
+import numpy as np
+import cv2 as cv
 from openvino.inference_engine import IECore
 
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
+logger = logging.getLogger('mri_reconstruction_demo')
 
 def kspace_to_image(kspace):
     assert(len(kspace.shape) == 3 and kspace.shape[-1] == 2)
@@ -16,18 +21,20 @@ def kspace_to_image(kspace):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='MRI reconstrution demo for network from https://github.com/rmsouza01/Hybrid-CS-Model-MRI (https://arxiv.org/abs/1810.12473)')
-    parser.add_argument('-i', '--input', dest='input', help='Path to input .npy file with MRI scan data.')
-    parser.add_argument('-p', '--pattern', dest='pattern', help='Path to sampling mask in .npy format.')
-    parser.add_argument('-m', '--model', dest='model', help='Path to .xml file of OpenVINO IR.')
+    parser = argparse.ArgumentParser(description='MRI reconstrution demo')
+    parser.add_argument('-i', '--input', dest='input', required=True,
+                        help='Path to input .npy file with MRI scan data.')
+    parser.add_argument('-p', '--pattern', dest='pattern', required=True,
+                        help='Path to sampling mask in .npy format.')
+    parser.add_argument('-m', '--model', dest='model', required=True,
+                        help='Path to .xml file of OpenVINO IR.')
     parser.add_argument('-d', '--device', dest='device', default='CPU',
                         help='Optional. Specify the target device to infer on; CPU, '
                              'GPU, HDDL or MYRIAD is acceptable. Default value is CPU.')
     args = parser.parse_args()
 
     xml_path = args.model
-    assert(xml_path.endswith('.xml'))
-    bin_path = xml_path[:xml_path.rfind('.xml')] + '.bin'
+    bin_path = xml_path.replace('.xml', '.bin')
 
     ie = IECore()
 
@@ -39,14 +46,14 @@ if __name__ == '__main__':
     stats = np.array([2.20295299e-01, 1.11048916e+03, 4.16997984e+00, 4.71741395e+00], dtype=np.float32)
     # Hybrid-CS-Model-MRI/Data/sampling_mask_20perc.npy
     var_sampling_mask = np.load(args.pattern)  # TODO: can we generate it in runtime?
-    print('Sampling ratio:', 1.0 - var_sampling_mask.sum() / var_sampling_mask.size)
+    logger.info('Sampling ratio:', 1.0 - var_sampling_mask.sum() / var_sampling_mask.size)
 
     data = np.load(args.input)
     num_slices, height, width = data.shape[0], data.shape[1], data.shape[2]
     pred = np.zeros((num_slices, height, width), dtype=np.uint8)
     data /= np.sqrt(height * width)
 
-    print('Compute...')
+    logger.info('Compute...')
     start = time.time()
     for slice_id, kspace in enumerate(data):
         kspace = kspace.copy()
@@ -64,7 +71,7 @@ if __name__ == '__main__':
         # Save predictions
         pred[slice_id] = cv.normalize(output, dst=None, alpha=255, beta=0, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
 
-    print('Elapsed time: %.1f seconds' % (time.time() - start))
+    logger.info('Elapsed time: %.1f seconds' % (time.time() - start))
 
     WIN_NAME = 'MRI reconstruction with OpenVINO'
 
@@ -94,7 +101,6 @@ if __name__ == '__main__':
         cv.waitKey(1)
 
     cv.namedWindow(WIN_NAME, cv.WINDOW_NORMAL)
-    print(num_slices)
     cv.createTrackbar('Slice', WIN_NAME, num_slices // 2, num_slices - 1, callback)
     callback(num_slices // 2)  # Trigger initial visualization
     cv.waitKey()

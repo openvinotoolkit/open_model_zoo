@@ -10,14 +10,11 @@ Reconstruction"](https://arxiv.org/pdf/1810.12473.pdf) network. See original [pr
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Type                            | Image inpainting                          |
+| Type                            | MRI Image Inpainting in k-Space           |
 | GFlops                          | 146.6037                                  |
 | MParams                         | 11.3313                                   |
 | Source framework                | TensorFlow\*                              |
-
-## Performance
-
-On [validation dataset](https://sites.google.com/view/calgary-campinas-dataset/home) it is reported to achieve `35.772 (mean) +/- 3.214 (std) Db` (PSNR).
+| Accuracy on [validation dataset](https://sites.google.com/view/calgary-campinas-dataset/home) | `35.772 (mean) +/- 3.214 (std) Db` (PSNR) |
 
 ## Legal Information
 
