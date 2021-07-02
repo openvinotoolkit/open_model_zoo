@@ -86,6 +86,7 @@ detect areas with complex shape.
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | -------- | ------ | ------- |
 | DeepLab V3                | TensorFlow\*   | [deeplabv3](./deeplabv3/README.md) | 66.85% | 11.469 | 23.819 |
+| DRN-D-38                  |  PyTorch\*     | [drn-d-38](./drn-d-38/README.md) | 71.31% | 1768.3276 | 25.9939 |
 | HRNet V2 C1 Segmentation  | PyTorch\*      | [hrnet-v2-c1-segmentation](./hrnet-v2-c1-segmentation/README.md) | 77.69% | 81.993 | 66.4768 |
 | Fastseg MobileV3Large LR-ASPP, F=128  | PyTorch\*      | [fastseg-large](./fastseg-large/README.md) | 72.67% | 140.9611 | 3.2 |
 | Fastseg MobileV3Small LR-ASPP, F=128  | PyTorch\*      | [fastseg-small](./fastseg-small/README.md) | 67.15% | 69.2204 | 1.1 |

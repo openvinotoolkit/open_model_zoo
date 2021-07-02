@@ -34,6 +34,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 
 * architecture_type = segmentation
   - deeplabv3
+  - drn-d-38
   - fastseg-large
   - fastseg-small
   - hrnet-v2-c1-segmentation
