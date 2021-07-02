@@ -14,8 +14,6 @@
 import cv2
 import numpy as np
 
-from inpainting import ImageInpainting
-from openvino.inference_engine import IECore
 
 class InpaintingGUI:
     def __init__(self, srcImg, inpainter):

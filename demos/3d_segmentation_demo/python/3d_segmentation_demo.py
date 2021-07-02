@@ -16,6 +16,7 @@
 """
 
 import os
+import sys
 import logging
 
 import numpy as np
@@ -26,7 +27,6 @@ from datetime import datetime
 from argparse import ArgumentParser, SUPPRESS
 from fnmatch import fnmatch
 from scipy.ndimage import interpolation
-from sys import stdout
 
 from openvino.inference_engine import IECore
 
