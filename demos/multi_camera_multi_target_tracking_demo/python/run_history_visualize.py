@@ -14,7 +14,7 @@
 import argparse
 import copy
 import json
-import logging as log
+import logging
 
 import cv2 as cv
 import motmetrics as mm
@@ -22,11 +22,12 @@ import numpy as np
 from tqdm import tqdm
 
 from run_evaluate import read_gt_tracks, get_detections_from_tracks
-from utils.misc import check_pressed_keys, set_log_config
+from utils.misc import check_pressed_keys
 from utils.video import MulticamCapture
 from utils.visualization import visualize_multicam_detections, plot_timeline, get_target_size
 
-set_log_config()
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def find_max_id(all_tracks):
@@ -38,7 +39,6 @@ def find_max_frame_num(tracks):
 
 
 def accumulate_mot_metrics(accs, gt_tracks, history):
-    log.info('Accumulating MOT metrics...')
     last_frame = find_max_frame_num(gt_tracks)
     for time in tqdm(range(last_frame), 'Processing...'):
         active_detections = get_detections_from_tracks(history, time)
@@ -62,7 +62,6 @@ def accumulate_mot_metrics(accs, gt_tracks, history):
 
 
 def match_gt_indices(gt_tracks, history, accs):
-    log.info('Assigning GT IDs to IDs from history...')
     hist_max_id = find_max_id(history)
     gt_max_id = find_max_id(gt_tracks)
     assignment_matrix = np.zeros((gt_max_id + 1, hist_max_id + 1), dtype='int32')
@@ -87,7 +86,7 @@ def match_gt_indices(gt_tracks, history, accs):
                 offset += 1
             gt_tracks[i][j]['id'] = assignment_indices[gt_tracks[i][j]['id']][offset]
             used_ids.append(gt_tracks[i][j]['id'])
-            log.info('Assigned GT ID: {} --> {}'.format(base_id, gt_tracks[i][j]['id']))
+            log.debug('Assigned GT ID: {} --> {}'.format(base_id, gt_tracks[i][j]['id']))
     return gt_tracks
 
 
@@ -214,11 +213,11 @@ def main():
 
     if len(args.timeline):
         for i in range(len(history)):
-            log.info('Source_{}: drawing timeline...'.format(i))
+            log.debug('Source_{}: drawing timeline...'.format(i))
             plot_timeline(i, time, history[i], save_path=args.timeline, name='SCT')
         if gt_tracks:
             for i in range(len(gt_tracks)):
-                log.info('GT_{}: drawing timeline...'.format(i))
+                log.debug('GT_{}: drawing timeline...'.format(i))
                 plot_timeline(i, time, gt_tracks[i], save_path=args.timeline, name='GT')
 
     if gt_tracks:

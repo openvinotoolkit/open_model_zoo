@@ -18,7 +18,7 @@ import time
 import queue
 from threading import Thread
 import json
-import logging as log
+import logging
 import os
 import random
 import sys
@@ -28,7 +28,7 @@ import cv2 as cv
 from utils.network_wrappers import Detector, VectorCNN, MaskRCNN, DetectionsFromFileReader
 from mc_tracker.mct import MultiCameraTracker
 from utils.analyzer import save_embeddings
-from utils.misc import read_py_config, check_pressed_keys, AverageEstimator, set_log_config
+from utils.misc import read_py_config, check_pressed_keys, AverageEstimator
 from utils.video import MulticamCapture, NormalizerCLAHE
 from utils.visualization import visualize_multicam_detections, get_target_size
 from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
@@ -37,8 +37,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.
                              'common/python'))
 import monitors
 
-
-set_log_config()
+logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
+log = logging.getLogger()
 
 
 def check_detectors(args):
@@ -186,7 +186,6 @@ def run(params, config, capture, detector, reid):
                             frame_number, fps, 1. / avg_latency.get()), end="")
         prev_frames, frames = frames, prev_frames
     print(presenter.reportMeans())
-    print('')
 
     thread_body.process = False
     frames_thread.join()
@@ -248,7 +247,7 @@ def main():
         sys.exit(1)
 
     if len(args.config):
-        log.info('Reading configuration file {}'.format(args.config))
+        log.info('Reading config from {}'.format(args.config))
         config = read_py_config(args.config)
     else:
         log.error('No configuration file specified. Please specify parameter \'--config\'')
@@ -257,8 +256,9 @@ def main():
     random.seed(config.random_seed)
     capture = MulticamCapture(args.input, args.loop)
 
-    log.info("Creating Inference Engine")
     ie = IECore()
+    version = ie.get_versions(args.device)[args.device].build_number
+    log.info('IE version: {}'.format(version))
 
     if args.detections:
         object_detector = DetectionsFromFileReader(args.detections, args.t_detector)
