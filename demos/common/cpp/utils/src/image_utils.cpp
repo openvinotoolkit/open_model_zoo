@@ -66,4 +66,3 @@ cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE re
     }
     return dst;
 }
-
