@@ -95,7 +95,7 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     parser.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     parser.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.', required=True)
-    parser.add_argument('-i', '--input', help="Path to an audio file in WAV PCM 16 kHz mono format", required=True)
+    parser.add_argument('-i', '--input', help="Required. Path to an audio file in WAV PCM 16 kHz mono format", required=True)
     parser.add_argument('-d', '--device', default='CPU',
                         help="Optional. Specify the target device to infer on, for example: "
                              "CPU, GPU, HDDL, MYRIAD or HETERO. "

@@ -151,7 +151,7 @@ def build_argparser():
                         help='Optional. Name of the models input node.')
     parser.add_argument('--output-name', type=str, default='quantiles',
                         help='Optional. Name of the models output node.')
-    parser.add_argument('-i', '--input', type=str,
+    parser.add_argument('-i', '--input', type=str, required=True,
                         help='Required. Path to the dataset file in .pickle format.')
     parser.add_argument('--quantiles', type=str, default='p10,p50,p90',
                         help='Optional. Names of predicted quantiles.')

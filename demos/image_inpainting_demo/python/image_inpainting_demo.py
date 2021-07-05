@@ -29,7 +29,7 @@ def build_arg_parser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model.",
                       required=True, type=Path)
-    args.add_argument("-i", "--input", type=str, default='', help="path to image.")
+    args.add_argument("-i", "--input", required=True, help="Required. Path to image.")
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is "
                            "acceptable. The demo will look for a suitable plugin for device specified. "
@@ -118,7 +118,7 @@ def main():
     # Loading source image
     img = cv2.imread(args.input, cv2.IMREAD_COLOR)
     if img is None:
-        print("Cannot load image " + args.input)
+        print("Error: cannot load image " + args.input)
         return -1
 
     if args.auto_mask_color and args.auto_mask_random:
