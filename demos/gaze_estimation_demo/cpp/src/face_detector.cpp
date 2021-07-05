@@ -67,6 +67,7 @@ std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
         double aspectRatioThreshold = 0.01;
 
          if (std::fabs(imageAspectRatio - networkAspectRatio) > aspectRatioThreshold) {
+             slog::dbg << "Face Detection network is reshaped" << slog::endl;
             // Fix height and change width to make networkAspectRatio equal to imageAspectRatio
             inputBlobDims[3] = static_cast<unsigned long>(inputBlobDims[2] * imageAspectRatio);
 

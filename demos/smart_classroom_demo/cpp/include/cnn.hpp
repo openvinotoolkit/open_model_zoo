@@ -154,7 +154,7 @@ public:
     }
 
     void printPerformanceCounts(const std::string &fullDeviceName) override {
-        slog::info << "Performance counts for " << topoName << slog::endl;
+        slog::dbg << "Performance counts for " << topoName << slog::endl;
         ::printPerformanceCounts(*request, slog::dbg, fullDeviceName, false);
     }
 };

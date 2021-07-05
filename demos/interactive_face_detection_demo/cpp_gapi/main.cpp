@@ -414,8 +414,6 @@ int main(int argc, char *argv[]) {
         Visualizer::Ptr visualizer;
         if (!FLAGS_no_show || !FLAGS_o.empty()) {
             visualizer = std::make_shared<Visualizer>(!FLAGS_m_ag.empty(), !FLAGS_m_em.empty(), !FLAGS_m_hp.empty(), !FLAGS_m_lm.empty());
-        } else {
-            slog::info<< "To close the application, press 'CTRL+C' here" << slog::endl;
         }
 
         std::list<Face::Ptr> faces;

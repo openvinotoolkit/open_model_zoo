@@ -75,7 +75,7 @@ void CnnDLSDKBase::InferBatch(
 }
 
 void CnnDLSDKBase::PrintPerformanceCounts(std::string fullDeviceName) const {
-    slog::info << "Performance counts for " << config_.path_to_model << slog::endl;
+    slog::dbg << "Performance counts for " << config_.path_to_model << slog::endl;
     ::printPerformanceCounts(infer_request_, slog::dbg, fullDeviceName, false);
 }
 

@@ -111,6 +111,9 @@ struct BaseDetection {
     bool enabled() const  {
         if (!enablingChecked) {
             _enabled = !commandLineFlag.empty();
+            if (!_enabled) {
+                slog::dbg << topoName << " detection DISABLED" << slog::endl;
+            }
             enablingChecked = true;
         }
         return _enabled;
@@ -724,7 +727,7 @@ int main(int argc, char *argv[]) {
                             if (resPersAttrAndColor.attributes_indicators[i]) {
                                 color = cv::Scalar(0, 200, 0); // has attribute
                             } else {
-                                color = cv::Scalar(0, 0, 255); // doesn't have has attribute
+                                color = cv::Scalar(0, 0, 255); // doesn't have attribute
                             }
                             putHighlightedText(frame,
                                     resPersAttrAndColor.attributes_strings[i],
@@ -814,16 +817,16 @@ int main(int argc, char *argv[]) {
         /** Show performance results **/
         if (FLAGS_pc) {
             std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, deviceNames);
-            slog::info << "Performance counts for person detection: " << slog::endl;
+            slog::dbg << "Performance counts for person detection: " << slog::endl;
             personDetection.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d));
 
             if (!FLAGS_m_pa.empty()) {
-                slog::info << "Performance counts for person attributes: " << slog::endl;
+                slog::dbg << "Performance counts for person attributes: " << slog::endl;
                 personAttribs.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_pa));
             }
 
             if (!FLAGS_m_reid.empty()) {
-                slog::info << "Performance counts for person re-identification: " << slog::endl;
+                slog::dbg << "Performance counts for person re-identification: " << slog::endl;
                 personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
             }
         }
