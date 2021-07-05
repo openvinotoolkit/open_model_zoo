@@ -394,13 +394,13 @@ def main():
     tiff_output_name = os.path.join(args.path_to_output, 'output.tiff')
     Image.new('RGB', (original_data.shape[3], original_data.shape[2])).save(tiff_output_name,
         append_images=list_img, save_all=True)
-    log.info("Result tiff file was saved to {}".format(tiff_output_name))
+    log.debug("Result tiff file was saved to {}".format(tiff_output_name))
 
     if args.output_nifti and is_nifti_data:
         for seg_res in list_seg_result:
             nii_filename = os.path.join(args.path_to_output, 'output_{}.nii.gz'.format(list_seg_result.index(seg_res)))
             nib.save(nib.Nifti1Image(seg_res, affine=affine), nii_filename)
-            log.info("Result nifti file was saved to {}".format(nii_filename))
+            log.debug("Result nifti file was saved to {}".format(nii_filename))
 
 if __name__ == "__main__":
     main()

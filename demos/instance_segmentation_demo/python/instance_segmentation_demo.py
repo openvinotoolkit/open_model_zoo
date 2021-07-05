@@ -209,12 +209,12 @@ def main():
         # Print performance counters.
         if args.perf_counts:
             perf_counts = exec_net.requests[0].get_perf_counts()
-            log.info('Performance counters:')
-            print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format('name', 'layer_type', 'exet_type', 'status',
-                                                              'real_time, us'))
+            log.debug('Performance counters:')
+            log.debug('{:<70} {:<15} {:<15} {:<15} {:<10}'.format('name', 'layer_type', 'exet_type', 'status',
+                                                                  'real_time, us'))
             for layer, stats in perf_counts.items():
-                print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
-                                                                  stats['status'], stats['real_time']))
+                log.debug('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
+                                                               stats['status'], stats['real_time']))
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(frame)

@@ -282,8 +282,8 @@ def main():
             video_writer.write(frame)
 
         if print_perf_stats:
-            log.info('Performance stats:')
-            log.info(frame_processor.get_performance_stats())
+            log.debug('Performance stats:')
+            log.debug(frame_processor.get_performance_stats())
         if not args.no_show:
             cv2.imshow('Face recognition demo', frame)
             key = cv2.waitKey(1)

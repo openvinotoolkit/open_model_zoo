@@ -75,7 +75,7 @@ def save_json_file(save_path, data, description=''):
     with open(save_path, 'w') as outfile:
         json.dump(data, outfile)
     if description:
-        log.info('{} saved to {}'.format(description, save_path))
+        log.debug('{} saved to {}'.format(description, save_path))
 
 
 class FramesThreadBody:
@@ -247,7 +247,7 @@ def main():
         sys.exit(1)
 
     if len(args.config):
-        log.info('Reading config from {}'.format(args.config))
+        log.debug('Reading config from {}'.format(args.config))
         config = read_py_config(args.config)
     else:
         log.error('No configuration file specified. Please specify parameter \'--config\'')

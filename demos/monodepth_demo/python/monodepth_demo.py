@@ -90,13 +90,13 @@ def main():
     out = 'disp.pfm'
     cv2.imwrite(out, disp)
 
-    log.info("Disparity map was saved to {}".format(out))
+    log.debug("Disparity map was saved to {}".format(out))
 
     # png
     out = 'disp.png'
     plt.imsave(out, disp, vmin=0, vmax=1, cmap='inferno')
 
-    log.info("Color-coded disparity image was saved to {}".format(out))
+    log.debug("Color-coded disparity image was saved to {}".format(out))
 
 
 if __name__ == '__main__':
