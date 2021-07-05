@@ -211,5 +211,5 @@ void ObjectDetector::waitAndFetchResults() {
 
 void ObjectDetector::PrintPerformanceCounts(std::string fullDeviceName) {
     slog::info << "Performance counts for object detector" << slog::endl;
-    ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
+    ::printPerformanceCounts(*request, slog::dbg, fullDeviceName, false);
 }

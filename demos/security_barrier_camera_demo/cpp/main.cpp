@@ -207,7 +207,7 @@ private:
 
 class ClassifiersAggregator {  // waits for all classifiers and recognisers accumulating results
 public:
-    std::string rawDetections;
+    std::vector<std::string> rawDetections;
     ConcurrentContainer<std::list<std::string>> rawAttributes;
     ConcurrentContainer<std::list<std::string>> rawDecodedPlates;
 
@@ -216,16 +216,15 @@ public:
     ~ClassifiersAggregator() {
         std::mutex& printMutex = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
-        if (rawDetections != "") {
-            slog::info << "Frame #" << sharedVideoFrame->frameId << "\n";
-            slog::info << rawDetections;
+        if (rawDetections.size() != 0) {
+            slog::dbg << "---------------------Frame #" << sharedVideoFrame->frameId << "---------------------" << slog::endl;
+            slog::dbg << rawDetections;
             for (const std::string& rawAttribute : rawAttributes.container) {  // destructor assures that none uses the container
-                slog::info << rawAttribute;
+                slog::dbg << rawAttribute << slog::endl;
             }
             for (const std::string& rawDecodedPlate : rawDecodedPlates.container) {
-                slog::info << rawDecodedPlate;
+                slog::dbg << rawDecodedPlate << slog::endl;
             }
-            slog::info << slog::endl;
         }
         printMutex.unlock();
         tryPush(static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.resAggregatorsWorker,
@@ -421,13 +420,7 @@ bool DetectionsProcessor::isReady() {
     if (requireGettingNumberOfDetections) {
         classifiersAggregator = std::make_shared<ClassifiersAggregator>(sharedVideoFrame);
         std::list<Detector::Result> results;
-        if (!(FLAGS_r && ((sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo))) {
-            results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size());
-        } else {
-            std::ostringstream rawResultsStream;
-            results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), &rawResultsStream);
-            classifiersAggregator->rawDetections = rawResultsStream.str();
-        }
+        results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), classifiersAggregator->rawDetections);
         for (Detector::Result result : results) {
             switch (result.label) {
                 case 1:
@@ -500,8 +493,8 @@ void DetectionsProcessor::process() {
                                 = context.detectionsProcessorsContext.vehicleAttributesClassifier.getResults(attributesRequest);
 
                             if (FLAGS_r && ((classifiersAggregator->sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
-                                classifiersAggregator->rawAttributes.lockedPushBack("\t Vehicle Attributes results:" + attributes.first + ';'
-                                                                                      + attributes.second + "\n");
+                                classifiersAggregator->rawAttributes.lockedPushBack("Vehicle Attributes results:" + attributes.first + ';'
+                                                                                      + attributes.second);
                             }
                             classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::VEHICLE, rect, attributes.first + ' ' + attributes.second});
                             context.attributesInfers.inferRequests.lockedPushBack(attributesRequest);
@@ -538,7 +531,7 @@ void DetectionsProcessor::process() {
                             std::string result = context.detectionsProcessorsContext.lpr.getResults(lprRequest);
 
                             if (FLAGS_r && ((classifiersAggregator->sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
-                                classifiersAggregator->rawDecodedPlates.lockedPushBack("\t License Plate Recognition results:" + result + "\n");
+                                classifiersAggregator->rawDecodedPlates.lockedPushBack("License Plate Recognition results:" + result);
                             }
                             classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::PLATE, rect, std::move(result)});
                             context.platesInfers.inferRequests.lockedPushBack(lprRequest);
@@ -831,7 +824,7 @@ int main(int argc, char* argv[]) {
             for (InferRequest& ir : net.first) {
                 ir.Wait(InferRequest::WaitMode::RESULT_READY);
                 if (FLAGS_pc) {  // Show performance results
-                    printPerformanceCounts(ir, std::cout, std::string::npos == net.second.find("MULTI") ? getFullDeviceName(mapDevices, net.second)
+                    printPerformanceCounts(ir, slog::dbg, std::string::npos == net.second.find("MULTI") ? getFullDeviceName(mapDevices, net.second)
                                                                                                         : net.second);
                 }
             }

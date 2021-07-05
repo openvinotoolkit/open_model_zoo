@@ -17,8 +17,8 @@
 using namespace InferenceEngine;
 
 namespace {
-template <typename StreamType>
-void SaveDetectionLogToStream(StreamType& stream,
+template <typename StreamType, typename EndlType>
+void SaveDetectionLogToStream(StreamType& stream, const EndlType& endl,
                               const DetectionLog& log) {
     for (const auto& entry : log) {
         std::vector<TrackedObject> objects(entry.objects.begin(),
@@ -33,7 +33,7 @@ void SaveDetectionLogToStream(StreamType& stream,
             stream << object.object_id << ','
                 << object.rect.x << ',' << object.rect.y << ','
                 << object.rect.width << ',' << object.rect.height;
-            stream << '\n';
+            stream << endl;
         }
     }
 }
@@ -56,11 +56,11 @@ void SaveDetectionLogToTrajFile(const std::string& path,
                                 const DetectionLog& log) {
     std::ofstream file(path.c_str());
     PT_CHECK(file.is_open());
-    SaveDetectionLogToStream(file, log);
+    SaveDetectionLogToStream(file, '\n', log);
 }
 
 void PrintDetectionLog(const DetectionLog& log) {
-    SaveDetectionLogToStream(std::cout, log);
+    SaveDetectionLogToStream(slog::dbg, slog::endl, log);
 }
 
 InferenceEngine::Core

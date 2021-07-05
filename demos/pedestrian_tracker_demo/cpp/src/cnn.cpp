@@ -84,7 +84,7 @@ void CnnBase::InferBatch(
 
 void CnnBase::PrintPerformanceCounts(std::string fullDeviceName) const {
     slog::info << "Performance counts for " << config_.path_to_model << '\n' << slog::endl;
-    ::printPerformanceCounts(infer_request_, std::cout, fullDeviceName, false);
+    ::printPerformanceCounts(infer_request_, slog::dbg, fullDeviceName, false);
 }
 
 void CnnBase::Infer(const cv::Mat& frame,

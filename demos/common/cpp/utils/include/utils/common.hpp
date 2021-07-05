@@ -166,11 +166,11 @@ perfCountersSorted(std::map<std::string, InferenceEngine::InferenceEngineProfile
 }
 
 static UNUSED void printPerformanceCounts(const std::map<std::string, InferenceEngine::InferenceEngineProfileInfo>& performanceMap,
-                                          std::ostream& stream, const std::string &deviceName, bool bshowHeader = true) {
+                                          slog::LogStream& stream, const std::string &deviceName, bool bshowHeader = true) {
     long long totalTime = 0;
     // Print performance counts
     if (bshowHeader) {
-        stream << "Performance counts:" << std::endl;
+        stream << "Performance counts:" << slog::endl;
     }
 
     auto performanceMapSorted = perfCountersSorted(performanceMap);
@@ -183,7 +183,6 @@ static UNUSED void printPerformanceCounts(const std::map<std::string, InferenceE
             toPrint  = it.first.substr(0, maxLayerName - 4);
             toPrint += "...";
         }
-
 
         stream << std::setw(maxLayerName) << std::left << toPrint;
         switch (it.second.status) {
@@ -200,16 +199,16 @@ static UNUSED void printPerformanceCounts(const std::map<std::string, InferenceE
         stream << std::setw(30) << std::left << "layerType: " + std::string(it.second.layer_type) + " ";
         stream << std::setw(20) << std::left << "realTime: " + std::to_string(it.second.realTime_uSec);
         stream << std::setw(20) << std::left << "cpu: "  + std::to_string(it.second.cpu_uSec);
-        stream << " execType: " << it.second.exec_type << std::endl;
+        stream << " execType: " << it.second.exec_type << slog::endl;
         if (it.second.realTime_uSec > 0) {
             totalTime += it.second.realTime_uSec;
         }
     }
-    stream << std::setw(20) << std::left << "Total time: " + std::to_string(totalTime) << " microseconds" << std::endl;
-    slog::info << "Full device name: " << deviceName << slog::endl;
+    stream << std::setw(20) << std::left << "Total time: " + std::to_string(totalTime) << " microseconds" << slog::endl;
+    stream << "Full device name: " << deviceName << slog::endl;
 }
 
-static UNUSED void printPerformanceCounts(InferenceEngine::InferRequest request, std::ostream &stream, std::string deviceName, bool bshowHeader = true) {
+static UNUSED void printPerformanceCounts(InferenceEngine::InferRequest request, slog::LogStream& stream, std::string deviceName, bool bshowHeader = true) {
     auto performanceMap = request.GetPerformanceCounts();
     printPerformanceCounts(performanceMap, stream, deviceName, bshowHeader);
 }

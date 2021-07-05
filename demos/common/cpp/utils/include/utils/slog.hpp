@@ -82,10 +82,10 @@ public:
         return *this;
     }
 
-    // Specializing for std::vector<T>
-    template<class T>
-    LogStream& operator<< (const std::vector<T>& vec) {
-        for (const auto& el : vec) {
+    // Specializing for std::vector and std::list
+    template<template<class, class> class Container, class T>
+    LogStream& operator<< (const Container<T, std::allocator<T>>& container) {
+        for (const auto& el : container) {
             *this << el << slog::endl;
         }
         return *this;
@@ -94,6 +94,7 @@ public:
 
 
 static LogStream info("INFO", std::cout);
+static LogStream dbg("DEBUG", std::cout);
 static LogStream warn("WARNING", std::cout);
 static LogStream err("ERROR", std::cerr);
 

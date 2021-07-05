@@ -277,18 +277,18 @@ int main(int argc, char *argv[]) {
 
                 if (FLAGS_r) {
                     for (size_t i = 0; i < points.size(); i++) {
-                        slog::info << clip(static_cast<int>(points[i].x), image.cols - 1) << "," <<
+                        slog::dbg << clip(static_cast<int>(points[i].x), image.cols - 1) << "," <<
                                      clip(static_cast<int>(points[i].y), image.rows - 1);
                         if (i != points.size() - 1)
-                            slog::info << ",";
+                            slog::dbg << ",";
                     }
 
                     if (text_recognition != nullptr) {
-                        slog::info << "," << res;
+                        slog::dbg << "," << res;
                     }
 
                     if (!points.empty()) {
-                        slog::info << slog::endl;
+                        slog::dbg << slog::endl;
                     }
                 }
 
@@ -332,7 +332,7 @@ int main(int argc, char *argv[]) {
             image = cap->read();
         } while (image.data);
 
-        if (text_detection != nullptr && text_detection->ncalls() && !FLAGS_r) {
+        if (text_detection != nullptr && text_detection->ncalls()) {
           // --------------------------- Report metrics -------------------------------------------------------
           slog::info << "Metric reports:" << slog::endl;
           slog::info << "Text detection model inference:" << slog::endl;
@@ -347,7 +347,7 @@ int main(int argc, char *argv[]) {
           }
         }
 
-        if (text_recognition != nullptr && text_recognition->ncalls() && !FLAGS_r) {
+        if (text_recognition != nullptr && text_recognition->ncalls()) {
             slog::info << "Text recognition model inference:" << slog::endl;
             slog::info << "\tLatency: "  << text_recognition->time_elapsed() / text_recognition->ncalls() << slog::endl;
             slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << text_recognition->ncalls() * 1000 / text_recognition->time_elapsed() << slog::endl;

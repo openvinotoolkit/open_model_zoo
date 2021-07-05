@@ -300,5 +300,5 @@ IEGraph::Stats IEGraph::getStats() const {
 }
 
 void IEGraph::printPerformanceCounts(std::string fullDeviceName) {
-    ::printPerformanceCounts(*availableRequests.front(), std::cout, fullDeviceName, false);
+    ::printPerformanceCounts(*availableRequests.front(), slog::dbg, fullDeviceName, false);
 }

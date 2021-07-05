@@ -237,8 +237,9 @@ public:
     ~ClassifiersAggregator() {
         std::mutex &printMutex = static_cast<ReborningVideoFrame *>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
-        if (rawDetections != "") {
-            slog::info << rawDetections << slog::endl;
+        if (rawDetections.size() != 0) {
+            slog::dbg << "---------------------Frame #" << sharedVideoFrame->frameId << "---------------------" << slog ::endl;
+            slog::dbg << rawDetections;
         }
         printMutex.unlock();
         tryPush(static_cast<ReborningVideoFrame *>(sharedVideoFrame.get())->context.resAggregatorsWorker,
@@ -254,7 +255,7 @@ public:
     }
 
     const VideoFrame::Ptr sharedVideoFrame;
-    std::string rawDetections;
+    std::vector<std::string> rawDetections;
 
 private:
     ConcurrentContainer<std::list<cv::Rect>> boxes;
@@ -487,15 +488,15 @@ bool DetectionsProcessor::isReady() {
         classifiersAggregator = std::make_shared<ClassifiersAggregator>(sharedVideoFrame);
         std::list<PersonDetector::Result> results;
 
-        if (FLAGS_r && ((sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
-            std::ostringstream rawResultsStream;
-            rawResultsStream << "Frame " << sharedVideoFrame->frameId << std::endl;
-            results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), &rawResultsStream);
-            classifiersAggregator->rawDetections = rawResultsStream.str();
-        } else {
-            results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size());
-        }
-
+        //if (FLAGS_r && ((sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
+        //    std::ostringstream rawResultsStream;
+        //    rawResultsStream << "Frame " << sharedVideoFrame->frameId << std::endl;
+        //    results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), &rawResultsStream);
+        //    classifiersAggregator->rawDetections = rawResultsStream.str();
+        //} else {
+        //    results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size());
+        //}
+        results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), classifiersAggregator->rawDetections);
         for (PersonDetector::Result result : results) {
             personRects.emplace_back(result.location & cv::Rect{ cv::Point(0, 0), sharedVideoFrame->frame.size() });
         }
@@ -825,7 +826,7 @@ int main(int argc, char* argv[]) {
             for (InferRequest& ir : net.first) {
                 ir.Wait(InferRequest::WaitMode::RESULT_READY);
                 if (FLAGS_pc) {  // Show performace results
-                    printPerformanceCounts(ir, std::cout, std::string::npos == net.second.find("MULTI") ? getFullDeviceName(mapDevices, net.second)
+                    printPerformanceCounts(ir, slog::dbg, std::string::npos == net.second.find("MULTI") ? getFullDeviceName(mapDevices, net.second)
                                                                                                         : net.second);
                 }
             }

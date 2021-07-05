@@ -117,7 +117,7 @@ struct BaseDetection {
     }
 
     void printPerformanceCounts(std::string fullDeviceName) const {
-        ::printPerformanceCounts(request, std::cout, fullDeviceName);
+        ::printPerformanceCounts(request, slog::dbg, fullDeviceName);
     }
 };
 
@@ -210,10 +210,6 @@ struct PersonDetection : BaseDetection{
         LockedMemory<const void> outputMapped = as<MemoryBlob>(request.GetBlob(outputName))->rmap();
         const float *detections = outputMapped.as<float *>();
         // pretty much regular SSD post-processing
-
-        if (FLAGS_r) {
-            slog::info << slog::endl;
-        }
         for (int i = 0; i < maxProposalCount; i++) {
             float image_id = detections[i * objectSize + 0];  // in case of batch
             if (image_id < 0) {  // indicates end of detections
@@ -230,7 +226,7 @@ struct PersonDetection : BaseDetection{
             r.location.height = static_cast<int>(detections[i * objectSize + 6] * height - r.location.y);
 
             if (FLAGS_r) {
-                slog::info << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
+                slog::dbg << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
                           "    (" << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
                           << r.location.height << ")"
                           << ((r.confidence > FLAGS_t) ? " WILL BE RENDERED!" : "") << slog::endl;
@@ -410,7 +406,7 @@ struct PersonReIdentification : BaseDetection {
         for (size_t i = 0; i < size; ++i) {
             float cosSim = cosineSimilarity(newReIdVec, globalReIdVec[i]);
             if (FLAGS_r) {
-                slog::info << "cosineSimilarity: " << cosSim << slog::endl;
+                slog::dbg << "cosineSimilarity: " << cosSim << slog::endl;
             }
             if (cosSim > FLAGS_t_reid) {
                 /* We substitute previous person's vector by a new one characterising
@@ -744,10 +740,10 @@ int main(int argc, char *argv[]) {
                             for (size_t i = 0; i < resPersAttrAndColor.attributes_strings.size(); ++i)
                                 if (resPersAttrAndColor.attributes_indicators[i])
                                     output_attribute_string += resPersAttrAndColor.attributes_strings[i] + ",";
-                            slog::info << "Person Attributes results: " << output_attribute_string << slog::endl;
+                            slog::dbg << "Person Attributes results: " << output_attribute_string << slog::endl;
                             if (shouldHandleTopBottomColors) {
-                                slog::info << "Person top color: " << resPersAttrAndColor.top_color << slog::endl;
-                                slog::info << "Person bottom color: " << resPersAttrAndColor.bottom_color << slog::endl;
+                                slog::dbg << "Person top color: " << resPersAttrAndColor.top_color << slog::endl;
+                                slog::dbg << "Person bottom color: " << resPersAttrAndColor.bottom_color << slog::endl;
                             }
                         }
                     }
@@ -760,7 +756,7 @@ int main(int argc, char *argv[]) {
                                     cv::Scalar(250, 10, 10), 1);
 
                         if (FLAGS_r) {
-                            slog::info << "Person Reidentification results: " << resPersReid << slog::endl;
+                            slog::dbg << "Person Reidentification results: " << resPersReid << slog::endl;
                         }
                     }
                     cv::rectangle(frame, result.location, cv::Scalar(0, 255, 0), 1);
@@ -784,7 +780,7 @@ int main(int argc, char *argv[]) {
                         << " ms (" << 1000.f / average_time << " fps)";
                     putHighlightedText(frame, out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
                     if (FLAGS_r) {
-                        slog::info << out.str() << slog::endl;;
+                        slog::dbg << out.str() << slog::endl;;
                     }
                 }
                 if (personReId.enabled() && personReIdInferred) {
@@ -794,7 +790,7 @@ int main(int argc, char *argv[]) {
                         << " ms (" << 1000.f / average_time << " fps)";
                     putHighlightedText(frame, out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
                     if (FLAGS_r) {
-                        slog::info << out.str() << slog::endl;;
+                        slog::dbg << out.str() << slog::endl;;
                     }
                 }
             }

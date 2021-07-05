@@ -520,8 +520,8 @@ int main(int argc, char* argv[]) {
                 lastTime = currTime;
 
                 averageFps = frameTime;
-                if (FLAGS_no_show) {
-                    slog::info << "Average Throughput : " << 1000.f/frameTime << " fps" << slog::endl;
+                if (FLAGS_show_stats) {
+                    slog::dbg << "Average Throughput : " << 1000.f/frameTime << " fps" << slog::endl;
                     if (++perfItersCounter >= FLAGS_n_sp) {
                         break;
                     }
@@ -533,32 +533,27 @@ int main(int argc, char* argv[]) {
                     auto outputStat = output.getStats();
 
                     std::unique_lock<std::mutex> lock(statMutex);
-                    statStream.str(std::string());
-                    statStream << std::fixed << std::setprecision(1);
-                    statStream << "Input reads: ";
+                    slog::dbg << "Avg time:" << slog::endl;
+                    slog::dbg << std::fixed << std::setprecision(1);
+                    slog::dbg << "\tInput reads: ";
                     for (size_t i = 0; i < inputStat.readTimes.size(); ++i) {
                         if (0 == (i % 4) && i != 0) {
-                            statStream << std::endl;
+                            slog::dbg << slog::endl;
                         }
-                        statStream << inputStat.readTimes[i] << "ms ";
+                        slog::dbg << inputStat.readTimes[i] << "ms ";
                     }
-                    statStream << std::endl;
-                    statStream << "HW decoding latency: "
-                               << inputStat.decodingLatency << "ms";
-                    statStream << std::endl;
-                    statStream << "Preprocess time: "
-                               << inferStat.preprocessTime << "ms";
-                    statStream << std::endl;
-                    statStream << "Plugin latency: "
-                               << inferStat.inferTime << "ms";
-                    statStream << std::endl;
-
-                    statStream << "Render time: " << outputStat.renderTime
-                               << "ms" << std::endl;
-
-                    if (FLAGS_no_show) {
-                        slog::info << statStream.str() << slog::endl;
-                    }
+                    slog::dbg << slog::endl;
+                    slog::dbg << "\tHW decoding latency: "
+                        << inputStat.decodingLatency << "ms";
+                    slog::dbg << slog::endl;
+                    slog::dbg << "\tPreprocess time: "
+                        << inferStat.preprocessTime << "ms";
+                    slog::dbg << slog::endl;
+                    slog::dbg << "\tPlugin latency: "
+                        << inferStat.inferTime << "ms";
+                    slog::dbg << slog::endl;
+                    slog::dbg << "\tRender time: " << outputStat.renderTime
+                        << "ms" << slog::endl;
                 }
             }
         }

@@ -88,7 +88,7 @@ public:
         }
     }
 
-    std::list<Result> getResults(InferenceEngine::InferRequest& inferRequest, cv::Size upscale, std::ostream* rawResults = nullptr) {
+    std::list<Result> getResults(InferenceEngine::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
         // there is no big difference if InferReq of detector from another device is passed because the processing is the same for the same topology
         std::list<Result> results;
         InferenceEngine::LockedMemory<const void> detectorOutputBlobMapped = InferenceEngine::as<
@@ -112,11 +112,10 @@ public:
             rect.width = static_cast<int>(detections[i * objectSize + 5] * upscale.width) - rect.x;
             rect.height = static_cast<int>(detections[i * objectSize + 6] * upscale.height) - rect.y;
             results.push_back(Result{label, confidence, rect});
-
-            if (rawResults) {
-                *rawResults << "\t [" << i << "," << label << "] element, prob = " << confidence
-                            << "    (" << rect.x << "," << rect.y << ")-(" << rect.width << "," << rect.height << ")\n";
-            }
+            std::ostringstream rawResultsStream;
+            rawResultsStream << "[" << i << "," << label << "] element, prob = " << confidence
+                        << "    (" << rect.x << "," << rect.y << ")-(" << rect.width << "," << rect.height << ")";
+            rawResults.push_back(rawResultsStream.str());
         }
         return results;
     }

@@ -145,7 +145,7 @@ void rawOutputDetections(const cv::Mat  &ssd_result,
         int width  = static_cast<int>(rc_right  * upscale.width)  - x;
         int height = static_cast<int>(rc_bottom * upscale.height) - y;
 
-        slog::info << "[" << i << "," << label << "] element, prob = " << confidence <<
+        slog::dbg << "[" << i << "," << label << "] element, prob = " << confidence <<
              "    (" << x << "," << y << ")-(" << width << "," << height << ")"
              << ((confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << slog::endl;
     }
@@ -158,7 +158,7 @@ void rawOutputAgeGender(const int idx, const cv::Mat &out_ages, const cv::Mat &o
     float maleProb = gender_data[1];
     float age      = age_data[0] * 100;
 
-    slog::info << "[" << idx << "] element, male prob = " << maleProb << ", age = " << age << slog::endl;
+    slog::dbg << "[" << idx << "] element, male prob = " << maleProb << ", age = " << age << slog::endl;
 }
 
 void rawOutputHeadpose(const int idx,
@@ -169,7 +169,7 @@ void rawOutputHeadpose(const int idx,
     const float *p_data = out_p_fc.ptr<float>();
     const float *r_data = out_r_fc.ptr<float>();
 
-    slog::info << "[" << idx << "] element, yaw = " << y_data[0] <<
+    slog::dbg << "[" << idx << "] element, yaw = " << y_data[0] <<
                  ", pitch = " << p_data[0] <<
                  ", roll = " << r_data[0]  << slog::endl;
 }
@@ -177,14 +177,14 @@ void rawOutputHeadpose(const int idx,
 void rawOutputLandmarks(const int idx, const cv::Mat &out_landmark) {
     const float *lm_data = out_landmark.ptr<float>();
 
-    slog::info << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << slog::endl;
+    slog::dbg << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << slog::endl;
 
     int n_lm = 70;
     for (int i_lm = 0; i_lm < n_lm / 2; ++i_lm) {
         float normed_x = lm_data[2 * i_lm];
         float normed_y = lm_data[2 * i_lm + 1];
 
-        slog::info << normed_x << ", " << normed_y << slog::endl;
+        slog::dbg << '\t' << normed_x << ", " << normed_y << slog::endl;
     }
 }
 
@@ -193,13 +193,13 @@ void rawOutputEmotions(const int idx, const cv::Mat &out_emotion) {
 
     const float *em_data = out_emotion.ptr<float>();
 
-    slog::info << "[" << idx << "] element, predicted emotions (name = prob):" << slog::endl;
+    slog::dbg << "[" << idx << "] element, predicted emotions (name = prob):" << slog::endl;
     for (size_t i = 0; i < emotionsVecSize; i++) {
-        slog::info << EMOTION_VECTOR[i] << " = " << em_data[i];
+        slog::dbg << EMOTION_VECTOR[i] << " = " << em_data[i];
         if (emotionsVecSize - 1 != i) {
-            slog::info << ", ";
+            slog::dbg << ", ";
         } else {
-            slog::info << slog::endl;
+            slog::dbg << slog::endl;
         }
     }
 }

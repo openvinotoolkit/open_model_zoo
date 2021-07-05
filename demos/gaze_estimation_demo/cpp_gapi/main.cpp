@@ -296,7 +296,7 @@ int main(int argc, char *argv[]) {
             /** Print logs **/
             if (FLAGS_r) {
                 for (auto& inferenceResult : inferenceResults) {
-                    slog::info << inferenceResult << slog::endl;
+                    slog::dbg << inferenceResult << slog::endl;
                 }
             }
 

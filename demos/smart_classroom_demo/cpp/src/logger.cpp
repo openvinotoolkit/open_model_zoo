@@ -25,7 +25,7 @@ std::string FrameIdxToString(const std::string& path, int frame_idx) {
 }
 }  // anonymous namespace
 
-DetectionsLogger::DetectionsLogger(std::ostream& stream, bool enabled,
+DetectionsLogger::DetectionsLogger(slog::LogStream& stream, bool enabled,
                                    const std::string& act_stat_log_file,
                                    const std::string& act_det_log_file)
     : log_stream_(stream) {
@@ -43,7 +43,7 @@ void DetectionsLogger::CreateNextFrameRecord(const std::string& path, const int 
                                              const size_t width, const size_t height) {
     if (write_logs_)
         log_stream_ << "Frame_name: " << path << "@" << frame_idx << " width: "
-                    << width << " height: " << height << std::endl;
+                    << width << " height: " << height << slog::endl;
 }
 
 void DetectionsLogger::AddFaceToFrame(const cv::Rect& rect, const std::string& id, const std::string& action) {
@@ -52,7 +52,7 @@ void DetectionsLogger::AddFaceToFrame(const cv::Rect& rect, const std::string& i
         if (!action.empty()) {
             log_stream_ << " action: " << action;
         }
-        log_stream_ << std::endl;
+        log_stream_ << slog::endl;
     }
 }
 
@@ -62,7 +62,7 @@ void DetectionsLogger::AddPersonToFrame(const cv::Rect& rect, const std::string&
         if (!id.empty()) {
             log_stream_ << " id: " << id;
         }
-        log_stream_ << std::endl;
+        log_stream_ << slog::endl;
     }
 }
 
@@ -77,7 +77,7 @@ void DetectionsLogger::AddDetectionToFrame(const TrackedObject& object, const in
 
 void DetectionsLogger::FinalizeFrameRecord() {
     if (write_logs_) {
-        log_stream_ << std::endl;
+        log_stream_ << slog::endl;
     }
 }
 
@@ -145,14 +145,14 @@ void DetectionsLogger::DumpTracks(const std::map<int, RangeEventsTrack>& obj_id_
             const auto& events = tup.second;
 
             std::string face_label = GetUnknownOrLabel(person_id_to_label, track_id_to_label_faces.at(obj_id));
-            log_stream_ << "Person: " << face_label << std::endl;
+            log_stream_ << "Person: " << face_label << slog::endl;
 
             for (const auto& event : events) {
                 std::string action_label = GetUnknownOrLabel(action_idx_to_label, event.action);
                 log_stream_ << "   - " << action_label
                             << ": from " << event.begin_frame_id
                             << " to " << event.end_frame_id
-                            << " frames" <<std::endl;
+                            << " frames" <<slog::endl;
             }
         }
     }

@@ -748,7 +748,7 @@ int main(int argc, char* argv[]) {
             throw std::runtime_error("Can't open video writer");
         }
         Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, FLAGS_limit, num_top_persons);
-        DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad, FLAGS_al);
+        DetectionsLogger logger(slog::dbg, FLAGS_r, FLAGS_ad, FLAGS_al);
 
         if (actions_type != TOP_K) {
             action_detector->enqueue(frame);
