@@ -54,9 +54,9 @@ OMZ_PREFIX = '<omz_dir>/'
 
 sys.path.append(str(OMZ_ROOT / 'ci/lib'))
 
-all_images_paths = {}
-
 import omzdocs
+
+all_images_paths = {}
 
 XML_ID_ATTRIBUTE = '{http://www.w3.org/XML/1998/namespace}id'
 
