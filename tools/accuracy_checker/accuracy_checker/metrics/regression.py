@@ -110,7 +110,11 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
                 return self.value_differ(next(iter(annotation.value.values())), prediction.value)
             diff_dict = OrderedDict()
             for key in annotation.value:
-                diff = self.value_differ(annotation.value[key], prediction.value[key])
+                annotation_val = annotation.value[key].astype(float) if np.issubdtype(annotation.value[key].dtype,
+                                                                                 np.integer) else annotation.value[key]
+                prediction_val = prediction.value[key].astype(float) if np.issubdtype(prediction.value[key].dtype,
+                                                                               np.integer) else prediction.value[key]
+                diff = self.value_differ(annotation_val, prediction_val)
                 if np.ndim(diff) > 1:
                     diff = np.mean(diff)
                 diff_dict[key] = diff
@@ -118,11 +122,20 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         if isinstance(prediction.value, dict):
             if len(prediction.value) != 1:
                 raise ConfigError('annotation for all predictions should be provided')
-            diff = self.value_differ(annotation.value, next(iter(prediction.value.values())))
+            annotation_val = annotation.value.astype(float) if np.issubdtype(annotation.value.dtype,
+                                                                             np.integer) else annotation.value
+            prediction_val = next(iter(prediction.value.values()))
+            prediction_val = prediction_val.astype(float) if np.issubdtype(prediction_val.dtype,
+                                                                           np.integer) else prediction_val
+            diff = self.value_differ(annotation_val, prediction_val)
             if not np.isscalar(diff) and np.ndim(diff) > 1:
                 diff = np.mean(diff)
             return diff
-        diff = self.value_differ(annotation.value, prediction.value)
+        annotation_val = annotation.value.astype(float) if np.issubdtype(annotation.value.dtype,
+                                                                         np.integer) else annotation.value
+        prediction_val = prediction.value.astype(float) if np.issubdtype(prediction.value.dtype,
+                                                                         np.integer) else prediction.value
+        diff = self.value_differ(annotation_val, prediction_val)
         if not np.isscalar(diff) and np.ndim(diff) > 1:
             diff = np.mean(diff)
         return diff
@@ -542,16 +555,10 @@ def calculate_distance(x_coords, y_coords, selected_points):
 
 
 def mae_differ(annotation_val, prediction_val):
-    annotation_val = annotation_val.astype(float) if annotation_val.dtype == np.uint8 else annotation_val
-    prediction_val = prediction_val.astype(float) if prediction_val.dtype == np.uint8 else prediction_val
     return np.abs(annotation_val - prediction_val)
 
-
 def mse_differ(annotation_val, prediction_val):
-    annotation_val = annotation_val.astype(float) if annotation_val.dtype == np.uint8 else annotation_val
-    prediction_val = prediction_val.astype(float) if prediction_val.dtype == np.uint8 else prediction_val
-    return np.power(annotation_val - prediction_val, 2)
-
+    return (annotation_val - prediction_val) ** 2
 
 def find_interval(value, intervals):
     for index, point in enumerate(intervals):
