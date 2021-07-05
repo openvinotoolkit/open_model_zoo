@@ -63,7 +63,7 @@ struct ActionDetectorConfig {
     /** @brief Default action class label */
     int default_action_id = 0;
     /** @brief Number of top-score bboxes in output */
-    int keep_top_k = 200;
+    size_t keep_top_k = 200;
     /** @brief Number of SSD anchors for the old network version */
     std::vector<int> old_anchors{4};
     /** @brief Number of SSD anchors for the new network version */
@@ -98,7 +98,6 @@ private:
     std::vector<cv::Size> head_blob_sizes_;
     std::vector<std::vector<int>> glob_anchor_map_;
     std::vector<std::string> glob_anchor_names_;
-    int num_glob_anchors_;
     cv::Size network_input_size_;
     int num_candidates_;
     bool binary_task_;
@@ -174,7 +173,7 @@ private:
     */
     void SoftNonMaxSuppression(const DetectedActions& detections,
                                const float sigma,
-                               const int top_k,
+                               size_t top_k,
                                const float min_det_conf,
                                std::vector<int>* out_indices) const;
 };
