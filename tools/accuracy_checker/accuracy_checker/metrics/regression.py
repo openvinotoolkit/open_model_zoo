@@ -542,11 +542,15 @@ def calculate_distance(x_coords, y_coords, selected_points):
 
 
 def mae_differ(annotation_val, prediction_val):
+    annotation_val = annotation_val.astype(float) if annotation_val.dtype == np.uint8 else annotation_val
+    prediction_val = prediction_val.astype(float) if prediction_val.dtype == np.uint8 else prediction_val
     return np.abs(annotation_val - prediction_val)
 
 
 def mse_differ(annotation_val, prediction_val):
-    return (annotation_val - prediction_val)**2
+    annotation_val = annotation_val.astype(float) if annotation_val.dtype == np.uint8 else annotation_val
+    prediction_val = prediction_val.astype(float) if prediction_val.dtype == np.uint8 else prediction_val
+    return np.power(annotation_val - prediction_val, 2)
 
 
 def find_interval(value, intervals):
