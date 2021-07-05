@@ -108,7 +108,7 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify the model\'s architecture type.',
-                      type=str, required=False, default='segmentation', choices=('segmentation', 'salient_object_detection'))
+                      type=str, required=True, choices=('segmentation', 'salient_object_detection'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')

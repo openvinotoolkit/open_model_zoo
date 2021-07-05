@@ -71,22 +71,22 @@ Speech recognition DeepSpeech demo
 optional arguments:
   -h, --help            show this help message and exit
   -i FILENAME, --input FILENAME
-                        Path to an audio file in WAV PCM 16 kHz mono format
+                        Required. Path to an audio file in WAV PCM 16 kHz mono format
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
                         example: CPU, GPU, HDDL, MYRIAD or HETERO. The
                         demo will look for a suitable IE plugin for this
                         device. (default is CPU)
   -m FILENAME, --model FILENAME
-                        Path to an .xml file with a trained model (required)
+                        Required. Path to an .xml file with a trained model
   -L FILENAME, --lm FILENAME
-                        path to language model file (optional)
+                        Optional. Path to language model file
   -p NAME, --profile NAME
-                        Choose pre/post-processing profile: mds06x_en for
-                        Mozilla DeepSpeech v0.6.x,
+                        Required. Choose pre/post-processing profile: mds06x_en
+                        for Mozilla DeepSpeech v0.6.x,
                         mds07x_en/mds08x_en/mds09x_en for Mozilla DeepSpeech
                         v0.7.x/v0.8.x/v0.9.x(English), other: filename of a
-                        YAML file (required)
+                        YAML file
   -b N, --beam-width N  Beam width for beam search in CTC decoder (default
                         500)
   -c N, --max-candidates N
