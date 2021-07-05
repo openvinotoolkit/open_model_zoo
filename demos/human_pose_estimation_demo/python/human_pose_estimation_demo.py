@@ -158,10 +158,10 @@ def draw_poses(img, poses, point_score_threshold, output_transform, skeleton=def
 
 
 def print_raw_results(poses, scores):
-    log.info('Poses:')
+    log.debug('Poses:')
     for pose, pose_score in zip(poses, scores):
         pose_str = ' '.join('({:.2f}, {:.2f}, {:.2f})'.format(p[0], p[1], p[2]) for p in pose)
-        log.info('{} | {:.2f}'.format(pose_str, pose_score))
+        log.debug('{} | {:.2f}'.format(pose_str, pose_score))
 
 
 def main():
@@ -171,7 +171,7 @@ def main():
 
     ie = IECore()
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 

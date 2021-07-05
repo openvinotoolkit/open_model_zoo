@@ -114,7 +114,7 @@ def main():
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, 'CPU')
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     # Read IR
     log.info('Reading model {}'.format(args.model))
@@ -188,10 +188,9 @@ def main():
         render_start = time.time()
 
         if len(boxes) and args.raw_output_message:
-            log.info('Detected boxes:')
-            log.info('  Class ID | Confidence |     XMIN |     YMIN |     XMAX |     YMAX ')
+            log.debug('  Class ID | Confidence |     XMIN |     YMIN |     XMAX |     YMAX ')
             for box, cls, score, mask in zip(boxes, classes, scores, masks):
-                log.info('{:>10} | {:>10f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} '.format(cls, score, *box))
+                log.debug('{:>10} | {:>10f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} '.format(cls, score, *box))
 
         # Get instance track IDs.
         masks_tracks_ids = None

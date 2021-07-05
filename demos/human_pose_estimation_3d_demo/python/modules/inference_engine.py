@@ -24,7 +24,7 @@ class InferenceEngine:
 
         self.ie = IECore()
         version = self.ie.get_versions(self.device)[self.device].build_number
-        log.info('IE version: {}'.format(version))
+        log.info('IE build: {}'.format(version))
 
         log.info('Reading model {}'.format(net_model_xml_path))
         self.net = self.ie.read_network(net_model_xml_path, net_model_xml_path.with_suffix('.bin'))

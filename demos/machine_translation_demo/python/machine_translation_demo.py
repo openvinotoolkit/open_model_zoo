@@ -73,7 +73,7 @@ class TranslationEngine:
     def __init__(self, model_xml, model_bin, device, output_name):
         ie = IECore()
         version = ie.get_versions(args.device)[args.device].build_number
-        log.info('IE version: {}'.format(version))
+        log.info('IE build: {}'.format(version))
 
         log.info('Reading model {}'.format(model_xml))
         self.net = ie.read_network(

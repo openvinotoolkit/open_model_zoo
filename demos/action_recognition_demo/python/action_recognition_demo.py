@@ -97,7 +97,7 @@ def main():
         ie.add_extension(args.cpu_extension, 'CPU')
 
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     decoder_target_device = 'CPU'
     if args.device != 'CPU':

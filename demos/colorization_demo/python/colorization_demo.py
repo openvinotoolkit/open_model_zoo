@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
     ie = IECore()
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     log.info('Reading model {}'.format(args.model))
     load_net = ie.read_network(args.model, args.model.with_suffix(".bin"))

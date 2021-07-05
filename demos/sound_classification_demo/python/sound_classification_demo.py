@@ -141,7 +141,7 @@ def main():
     if args.device == "CPU" and args.cpu_extension:
         ie.add_extension(args.cpu_extension, 'CPU')
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, args.model[:-4] + ".bin")

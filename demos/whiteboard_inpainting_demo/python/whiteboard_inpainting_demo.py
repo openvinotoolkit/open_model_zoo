@@ -122,7 +122,7 @@ def main():
 
     ie = IECore()
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     model_path = args.m_instance_segmentation if args.m_instance_segmentation else args.m_semantic_segmentation
     log.info('Reading model {}'.format(model_path))

@@ -209,13 +209,13 @@ def draw_detections(frame, detections, palette, labels, output_transform):
 
 
 def print_raw_results(detections, labels):
-    log.info(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
+    log.debug(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
     for detection in detections:
         xmin, ymin, xmax, ymax = detection.get_coords()
         class_id = int(detection.id)
         det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
-        log.info('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '
-                 .format(det_label, detection.score, xmin, ymin, xmax, ymax))
+        log.debug('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '
+                  .format(det_label, detection.score, xmin, ymin, xmax, ymax))
 
 
 def main():
@@ -225,7 +225,7 @@ def main():
 
     ie = IECore()
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 

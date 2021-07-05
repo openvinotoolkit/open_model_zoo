@@ -33,7 +33,7 @@ class IEModel: # pylint: disable=too-few-public-methods
         if cpu_extension and device == 'CPU':
             ie.add_extension(cpu_extension, 'CPU')
         version = ie.get_versions(device)[device].build_number
-        log.info('IE version: {}'.format(version))
+        log.info('IE build: {}'.format(version))
 
         log.info('Reading model {}'.format(model_path))
         self.net = ie.read_network(model_path, model_path.with_suffix('.bin'))

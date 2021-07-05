@@ -72,7 +72,7 @@ def main():
 
     ie = IECore()
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     # read IR
     model_xml = args.model

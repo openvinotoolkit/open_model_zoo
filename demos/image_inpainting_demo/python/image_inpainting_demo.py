@@ -128,7 +128,7 @@ def main():
 
     ie = IECore()
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     log.info('Reading model {}'.format(args.model))
     inpainting_processor = ImageInpainting(ie, args.model, args.device)

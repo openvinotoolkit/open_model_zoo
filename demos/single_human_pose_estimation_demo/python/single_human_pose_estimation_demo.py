@@ -48,7 +48,7 @@ def run_demo(args):
 
     ie = IECore()
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     log.info('Reading model {}'.format(args.model_od))
     detector_person = Detector(ie, args.model_od,

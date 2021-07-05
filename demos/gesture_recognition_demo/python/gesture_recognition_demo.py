@@ -119,7 +119,7 @@ def main():
 
     ie = load_ie_core(args.device, args.cpu_extension)
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     person_detector = PersonDetector(args.detection_model, args.device, ie,
                                      num_requests=2, output_shape=DETECTOR_OUTPUT_SHAPE)

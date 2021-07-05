@@ -120,7 +120,7 @@ def main():
 
     ie = IECore()
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     if args.model_melgan is not None:
         vocoder = MelGANIE(args.model_melgan, ie, device=args.device)

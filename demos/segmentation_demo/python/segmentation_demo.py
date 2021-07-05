@@ -167,7 +167,7 @@ def main():
 
     ie = IECore()
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 

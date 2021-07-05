@@ -40,5 +40,7 @@ def log_blobs_info(model):
 def log_runtime_settings(exec_net, device):
     nireq = len(exec_net.requests)
     nstreams = exec_net.get_config(device + '_THROUGHPUT_STREAMS')
-    log.info('\tNumber of infer requests: {}'.format(nireq))
+    nthreads = exec_net.get_config('CPU_THREADS_NUM')
+    log.info('\tNumber of threads: {}'.format(nthreads if int(nthreads) else 'AUTO'))
     log.info('\tNumber of streams: {}'.format(nstreams))
+    log.info('\tNumber of infer requests: {}'.format(nireq))

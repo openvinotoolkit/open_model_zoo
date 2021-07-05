@@ -136,7 +136,7 @@ class FrameProcessor:
         if args.cpu_lib and 'CPU' in {args.d_fd, args.d_lm, args.d_reid}:
             ie.add_extension(args.cpu_lib, 'CPU')
         version = ie.get_versions('CPU')['CPU'].build_number
-        log.info('IE version: {}'.format(version))
+        log.info('IE build: {}'.format(version))
 
         self.face_detector = FaceDetector(ie, args.m_fd,
                                           args.fd_input_size,

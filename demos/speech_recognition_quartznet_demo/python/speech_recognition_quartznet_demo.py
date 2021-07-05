@@ -124,7 +124,7 @@ def main():
 
     ie = IECore()
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     quartz_net = QuartzNet(ie, args.model, log_melspectrum.shape, args.device)
     character_probs = quartz_net.infer(log_melspectrum)

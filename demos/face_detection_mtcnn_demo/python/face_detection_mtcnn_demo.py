@@ -99,7 +99,7 @@ def main():
     # Plugin initialization for specified device and load extensions library if specified
     ie = IECore()
     version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE version: {}'.format(version))
+    log.info('IE build: {}'.format(version))
 
     # Read IR
     log.info('Reading model {}'.format(args.model_pnet))

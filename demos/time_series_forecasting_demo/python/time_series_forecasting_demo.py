@@ -40,7 +40,7 @@ class ForecastingEngine:
         device = "CPU"
         self.ie = IECore()
         version = self.ie.get_versions(device)[device].build_number
-        log.info('IE version: {}'.format(version))
+        log.info('IE build: {}'.format(version))
         log.info('Reading model {}'.format(model_xml))
         self.net = self.ie.read_network(
             model=model_xml,

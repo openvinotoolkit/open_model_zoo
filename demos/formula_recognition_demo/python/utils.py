@@ -161,7 +161,7 @@ class Model:
         self.ie.set_config(
             {"PERF_COUNT": "YES" if self.args.perf_counts else "NO"}, args.device)
         version = self.ie.get_versions(args.device)[args.device].build_number
-        log.info('IE version: {}'.format(version))
+        log.info('IE build: {}'.format(version))
         self.encoder = read_net(self.args.m_encoder, self.ie)
         self.dec_step = read_net(self.args.m_decoder, self.ie)
         self.exec_net_encoder = self.ie.load_network(network=self.encoder, device_name=self.args.device)
