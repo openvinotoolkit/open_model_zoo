@@ -9,7 +9,7 @@ This demo processes the image according to the selected type of processing. The 
 
 Exmaple for deblurring type (left - source image, right - image after deblurring):
 
-![](./assets/deblurred_image.png)
+![](./assets/image_processing_deblurred_image.png)
 
 All images on result frame will be marked one of these flags:
 
@@ -21,7 +21,7 @@ Example for super_resolution type:
 
 Low resolution:
 
-![](./assets/street_640x360.png)
+![](./assets/image_processing_street_640x360.png)
 
 Bicubic interpolation:
 
