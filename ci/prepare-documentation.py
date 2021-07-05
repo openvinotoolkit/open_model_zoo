@@ -129,6 +129,9 @@ def add_page(output_root, parent, *, id=None, path=None, title=None):
                                f'Rename "{image_rel_path}" to unique name.')
         all_images_paths[image_filename] = image_abs_path
 
+        (output_root / image_rel_path.parent).mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(image_abs_path, output_root / image_rel_path)
+
     non_md_links = [ref.url for ref in page.external_references()
                     if ref.type == 'link' and not ref.url.endswith('.md')]
 
@@ -146,9 +149,6 @@ def add_page(output_root, parent, *, id=None, path=None, title=None):
 
         raise RuntimeError(f'{path}: Relative link to non-markdown file "{non_md_link}". '
                            f'Replace it by `{suggested_path}`')
-
-        (output_root / image_rel_path.parent).mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(image_abs_path, output_root / image_rel_path)
 
     return element
 
