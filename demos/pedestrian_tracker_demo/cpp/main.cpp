@@ -66,7 +66,7 @@ CreatePedestrianTracker(const std::string& reid_model,
         tracker->set_descriptor_strong(descriptor_strong);
         tracker->set_distance_strong(distance_strong);
     } else {
-        slog::info << "WARNING: Reid model "
+        slog::warn << "Reid model "
             << "was not specified. "
             << "Only fast reidentification approach will be used." << slog::endl;
     }

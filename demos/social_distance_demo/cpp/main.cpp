@@ -487,15 +487,6 @@ bool DetectionsProcessor::isReady() {
     if (requireGettingNumberOfDetections) {
         classifiersAggregator = std::make_shared<ClassifiersAggregator>(sharedVideoFrame);
         std::list<PersonDetector::Result> results;
-
-        //if (FLAGS_r && ((sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
-        //    std::ostringstream rawResultsStream;
-        //    rawResultsStream << "Frame " << sharedVideoFrame->frameId << std::endl;
-        //    results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), &rawResultsStream);
-        //    classifiersAggregator->rawDetections = rawResultsStream.str();
-        //} else {
-        //    results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size());
-        //}
         results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), classifiersAggregator->rawDetections);
         for (PersonDetector::Result result : results) {
             personRects.emplace_back(result.location & cv::Rect{ cv::Point(0, 0), sharedVideoFrame->frame.size() });
