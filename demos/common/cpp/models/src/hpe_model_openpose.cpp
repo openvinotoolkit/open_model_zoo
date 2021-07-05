@@ -108,7 +108,7 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
     if (inputLayerSize.width < w)
         throw std::runtime_error("The image aspect ratio doesn't fit current model shape");
     if (!(inputLayerSize.width - stride < w && w <= inputLayerSize.width)) {
-        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
+        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
     }
     cv::Mat paddedImage;
     int right = inputLayerSize.width - w;

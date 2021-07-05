@@ -110,7 +110,7 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
     int w = resizedImage.cols;
     if (!(inputLayerSize.height - stride < h && h <= inputLayerSize.height
         && inputLayerSize.width - stride < w && w <= inputLayerSize.width)) {
-        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
+        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
     }
     cv::Mat paddedImage;
     int left = 0, right = 0, top = 0, bottom = 0;
