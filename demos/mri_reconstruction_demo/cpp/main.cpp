@@ -18,7 +18,7 @@ struct MRIData {
     cv::Mat samplingMask;
     cv::Mat reconstructed;
     // Hybrid-CS-Model-MRI/Data/stats_fs_unet_norm_20.npy
-    std::vector<double> stats = {2.20295299e-1, 1.11048916e+3, 4.16997984, 4.71741395};
+    std::vector<double> stats = {2.20295299e-1, 1.11048916e+3};
 };
 
 static const std::string kWinName = "MRI reconstruction with OpenVINO";
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
         cv::Mat kspace = cv::Mat(height, width, CV_64FC2, mri.data.ptr<double>(i)).clone();
 
         kspace.setTo(0, mri.samplingMask);
-        kspace = (kspace - mri.stats[0]) / mri.stats[1];
+        kspace = (kspace - cv::Scalar(mri.stats[0], mri.stats[0])) / cv::Scalar(mri.stats[1], mri.stats[1]);
         kspace.reshape(1, 1).convertTo(inputBlob.reshape(1, 1), CV_32F);
 
         // Forward pass
@@ -85,8 +85,8 @@ int main(int argc, char** argv) {
 
     // Visualization loop.
     int sliceId = numSlices / 2;
-    cv::namedWindow(kWinName, cv::WINDOW_NORMAL);
-    cv::createTrackbar("Slice", kWinName, &sliceId, numSlices - 1, callback, &mri);
+    cv::namedWindow(kWinName, cv::WINDOW_AUTOSIZE);
+    cv::createTrackbar("Slice", kWinName, nullptr, numSlices - 1, callback, &mri);
     callback(sliceId, &mri);  // Trigger initial visualization
     cv::waitKey();
     return 0;

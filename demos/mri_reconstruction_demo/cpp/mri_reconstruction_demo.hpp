@@ -15,12 +15,14 @@ static const char model_message[] = "Required. Path to an .xml file with a train
 static const char target_device_message[] = "Optional. Specify the target device to infer on; CPU, "
                                             "GPU, HDDL or MYRIAD is acceptable (CPU by default).";
 static const char pattern_message[] = "Required. Path to sampling mask in .npy format.";
+static const char no_show_message[] = "Optional. Disable results visualization.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", input_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(p, "", pattern_message);
+DEFINE_bool(no_show, false, no_show_message);
 
 /**
 * @brief This function show a help message
@@ -35,4 +37,5 @@ static void showUsage() {
     std::cout << "    -p \"<path>\"                       " << pattern_message << std::endl;
     std::cout << "    -m \"<path>\"                       " << model_message << std::endl;
     std::cout << "    -d \"<device>\"                     " << target_device_message << std::endl;
+    std::cout << "    --no_show                         " << no_show_message << std::endl;
 }

@@ -31,22 +31,20 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--device', dest='device', default='CPU',
                         help='Optional. Specify the target device to infer on; CPU, '
                              'GPU, HDDL or MYRIAD is acceptable. Default value is CPU.')
+    parser.add_argument('--no_show', action='store_true',
+                        help='Disable results visualization')
+
     args = parser.parse_args()
 
-    xml_path = args.model
-    bin_path = xml_path.replace('.xml', '.bin')
-
     ie = IECore()
-
-    net = ie.read_network(xml_path, bin_path)
-
+    net = ie.read_network(args.model)
     exec_net = ie.load_network(net, args.device)
 
     # Hybrid-CS-Model-MRI/Data/stats_fs_unet_norm_20.npy
-    stats = np.array([2.20295299e-01, 1.11048916e+03, 4.16997984e+00, 4.71741395e+00], dtype=np.float32)
+    stats = np.array([2.20295299e-01, 1.11048916e+03], dtype=np.float32)
     # Hybrid-CS-Model-MRI/Data/sampling_mask_20perc.npy
-    var_sampling_mask = np.load(args.pattern)  # TODO: can we generate it in runtime?
-    logger.info('Sampling ratio:', 1.0 - var_sampling_mask.sum() / var_sampling_mask.size)
+    var_sampling_mask = np.load(args.pattern)
+    logger.info(f'Sampling ratio: {1.0 - var_sampling_mask.sum() / var_sampling_mask.size}')
 
     data = np.load(args.input)
     num_slices, height, width = data.shape[0], data.shape[1], data.shape[2]
@@ -75,12 +73,7 @@ if __name__ == '__main__':
 
     WIN_NAME = 'MRI reconstruction with OpenVINO'
 
-    slice_id = 0
-
-    def callback(pos):
-        global slice_id
-        slice_id = pos
-
+    def callback(slice_id):
         kspace = data[slice_id]
         img = kspace_to_image(kspace)
 
@@ -100,7 +93,8 @@ if __name__ == '__main__':
         cv.imshow(WIN_NAME, render)
         cv.waitKey(1)
 
-    cv.namedWindow(WIN_NAME, cv.WINDOW_NORMAL)
-    cv.createTrackbar('Slice', WIN_NAME, num_slices // 2, num_slices - 1, callback)
-    callback(num_slices // 2)  # Trigger initial visualization
-    cv.waitKey()
+    if not args.no_show:
+        cv.namedWindow(WIN_NAME, cv.WINDOW_AUTOSIZE)
+        cv.createTrackbar('Slice', WIN_NAME, num_slices // 2, num_slices - 1, callback)
+        callback(num_slices // 2)  # Trigger initial visualization
+        cv.waitKey()
