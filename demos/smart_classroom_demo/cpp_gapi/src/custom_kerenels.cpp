@@ -7,7 +7,7 @@
 
 /** State parameters for RecognizeResultPostProc stateful kernel **/
 struct PostProcState {
-    PostProcState(const bool write) : logger(DetectionsLogger(write)), update_logs(write) {}
+    PostProcState(const bool write) : logger(write), update_logs(write) {}
     DetectionsLogger logger;
     int teacher_track_id = -1;
     std::vector<std::map<int, int>> face_obj_id_to_action_maps;
