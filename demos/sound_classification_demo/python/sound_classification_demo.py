@@ -193,7 +193,7 @@ def main():
                 log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(start_time, end_time, data[label],
                                                                  labels[label] if labels else "Class {}".format(label)))
 
-    logging.info("Average infer time - {:.1f} ms per clip".format(infer_time / clips * 1000))
+    log.info("Average infer time - {:.1f} ms per clip".format(infer_time / clips * 1000))
 
 
 if __name__ == '__main__':

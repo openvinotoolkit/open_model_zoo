@@ -141,7 +141,7 @@ def main():
     output_names = [o.strip() for o in args.output_names.split(',')]
     if ie_encoder.input_info.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
         raise RuntimeError("The demo expects input->output names: {}->{}, actual network input->output names: {}->{}".format(
-            input_names, output_names), list(ie_encoder.input_info.keys()), list(ie_encoder.outputs.keys()))
+            input_names, output_names, list(ie_encoder.input_info.keys()), list(ie_encoder.outputs.keys())))
 
     # load model to the device
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
