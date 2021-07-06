@@ -285,6 +285,23 @@ def main():
     ]:
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
+        with (md_path.parent / 'models.lst').open('r', encoding="utf-8") as models_lst:
+            raw_models_lines = models_lst.readlines()
+
+        with (md_path).open('r', encoding="utf-8") as demo_readme:
+            raw_readme_lines = demo_readme.read()
+
+        for line in raw_models_lines:
+            if line.startswith('#'):
+                continue
+
+            line = line.replace('\n', '')
+            regex_line = line.replace('?', '.').replace('*', '.*')
+
+            if not re.search(regex_line, raw_readme_lines):
+                raise RuntimeError(f'{md_path_rel}: model reference "{line}" is missing. '
+                    'Add it to README.md or update models.lst file.')
+
         # <name>_<implementation>
         demo_id = '_'.join(md_path_rel.parts[1:3])
 
