@@ -15,8 +15,6 @@ limitations under the License.
 """
 
 from pathlib import Path
-import pickle
-from functools import partial
 from collections import OrderedDict
 import numpy as np
 
@@ -43,7 +41,7 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
         self.postprocessor = None
         self.metric_executor = None
         self.launcher = launcher
-        self.srmodel = model
+        self.model = model
         self.config = orig_config
         self._metrics_results = []
 
@@ -88,23 +86,17 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
             _progress_reporter = None if not check_progress else self._create_progress_reporter(
                 check_progress, self.dataset.size
             )
-        self.srmodel.init_feedback(self.dataset.data_reader)
+        self.model.init_feedback(self.dataset.data_reader)
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
-            self.srmodel.fill_feedback(batch_inputs)
+            self.model.fill_feedback(batch_inputs)
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             batch_inputs_extr, _ = extract_image_representations(batch_inputs)
-            callback = None
-            if callback:
-                callback = partial(output_callback,
-                                   metrics_result=None,
-                                   element_identifiers=batch_identifiers,
-                                   dataset_indices=batch_input_ids)
 
-            batch_raw_prediction, batch_prediction = self.srmodel.predict(
-                batch_identifiers, batch_inputs_extr, callback=callback
+            batch_raw_prediction, batch_prediction = self.model.predict(
+                batch_identifiers, batch_inputs_extr
             )
             annotation, prediction = self.postprocessor.process_batch(batch_annotation, batch_prediction)
-            self.srmodel.feedback(prediction)
+            self.model.feedback(prediction)
 
             metrics_result = None
             if self.metric_executor and calculate_metrics:
@@ -133,9 +125,6 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
 
         if _progress_reporter:
             _progress_reporter.finish()
-
-        if self.srmodel.store_predictions:
-            self.srmodel.save_predictions()
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         if self._metrics_results:
@@ -183,7 +172,7 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
         return self.dataset.size
 
     def release(self):
-        self.srmodel.release()
+        self.model.release()
         self.launcher.release()
 
     def reset(self):
@@ -231,13 +220,13 @@ class SuperResolutionFeedbackEvaluator(BaseEvaluator):
         return compute_intermediate_metric_res, metric_interval, ignore_results_formatting, ignore_metric_reference
 
     def load_network(self, network=None):
-        self.srmodel.load_network(network, self.launcher)
+        self.model.load_network(network, self.launcher)
 
     def load_network_from_ir(self, models_list):
-        self.srmodel.load_model(models_list, self.launcher)
+        self.model.load_model(models_list, self.launcher)
 
     def get_network(self):
-        return self.srmodel.get_network()
+        return self.model.get_network()
 
     def get_metrics_attributes(self):
         if not self.metric_executor:
@@ -376,8 +365,6 @@ def create_model(model_config, launcher, delayed_model_loading=False):
         'tf': ModelTFModel,
     }
     framework = launcher.config['framework']
-    if 'predictions' in model_config and not model_config.get('store_predictions', False):
-        framework = 'dummy'
     model_class = launcher_model_mapping.get(framework)
     if not model_class:
         raise ValueError('model for framework {} is not supported'.format(framework))
@@ -399,34 +386,22 @@ class SRFModel(BaseModel):
         self.feedback = self.srmodel.feedback
         self.init_feedback = self.srmodel.init_feedback
         self.fill_feedback = self.srmodel.fill_feedback
-        self.store_predictions = network_info['srmodel'].get('store_predictions', False)
-        self._predictions = [] if self.store_predictions else None
         self._part_by_name = {'srmodel': self.srmodel}
         self._raw_outs = OrderedDict()
 
-    def predict(self, identifiers, input_data, callback=None):
+    def predict(self, identifiers, input_data):
         predictions, raw_outputs = [], []
         for data in input_data:
             output, prediction = self.srmodel.predict(identifiers, data)
-            if self.store_predictions:
-                self._predictions.append(prediction)
             raw_outputs.append(output)
             predictions.append(prediction)
         return raw_outputs, predictions
 
     def reset(self):
-        self.processing_frames_buffer = []
-        if self._predictions is not None:
-            self._predictions = []
+        pass
 
     def release(self):
         self.srmodel.release()
-
-    def save_predictions(self):
-        if self._predictions is not None:
-            prediction_file = Path(self.network_info['srmodel'].get('predictions', 'model_predictions.pickle'))
-            with prediction_file.open('wb') as file:
-                pickle.dump(self._predictions, file)
 
     def load_network(self, network_list, launcher):
         for network_dict in network_list:
@@ -541,6 +516,7 @@ class ModelDLSDKModel(BaseModel, BaseDLSDKModel, FeedbackMixin):
                                                                    self.network_info['adapter']['target_out']])
 
         self.with_prefix = with_prefix
+
 
 class ModelTFModel(BaseModel, FeedbackMixin):
     default_model_suffix = 'srmodel'
