@@ -104,6 +104,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - product-detection-0001
   - rfcn-resnet101-coco-tf
   - retinanet-tf
+  - retinaface-resnet50-pytorch
   - ssd300
   - ssd512
   - ssd-resnet34-1200-onnx
