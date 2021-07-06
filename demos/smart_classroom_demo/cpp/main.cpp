@@ -426,9 +426,6 @@ public:
     virtual std::vector<std::string> GetIDToLabelMap() const = 0;
 
     virtual std::vector<int> Recognize(const cv::Mat& frame, const detection::DetectedObjects& faces) = 0;
-
-    virtual void PrintPerformanceCounts(
-        const std::string &landmarks_device, const std::string &reid_device) = 0;
 };
 
 class FaceRecognizerNull : public FaceRecognizer {
@@ -444,9 +441,6 @@ public:
     std::vector<int> Recognize(const cv::Mat&, const detection::DetectedObjects& faces) override {
         return std::vector<int>(faces.size(), EmbeddingsGallery::unknown_id);
     }
-
-    void PrintPerformanceCounts(
-        const std::string &, const std::string &) override {}
 };
 
 class FaceRecognizerDefault : public FaceRecognizer {
@@ -499,12 +493,6 @@ public:
         AlignFaces(&face_rois, &landmarks);
         face_reid.Compute(face_rois, &embeddings);
         return face_gallery.GetIDsByEmbeddings(embeddings);
-    }
-
-    void PrintPerformanceCounts(
-            const std::string &landmarks_device, const std::string &reid_device) override {
-        landmarks_detector.PrintPerformanceCounts(landmarks_device);
-        face_reid.PrintPerformanceCounts(reid_device);
     }
 
 private:
@@ -601,9 +589,6 @@ int main(int argc, char* argv[]) {
             } else if (device.find("GPU") != std::string::npos) {
                 ie.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}}, "GPU");
             }
-
-            if (FLAGS_pc)
-                ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
 
             loadedDevices.insert(device);
         }
@@ -970,17 +955,6 @@ int main(int argc, char* argv[]) {
             logger.FinalizeFrameRecord();
         }
         sc_visualizer.Finalize();
-
-        if (FLAGS_pc) {
-            std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, devices);
-            face_detector->wait();
-            action_detector->wait();
-            action_detector->printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_act));
-            face_detector->printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_fd));
-            face_recognizer->PrintPerformanceCounts(
-                getFullDeviceName(mapDevices, FLAGS_d_lm),
-                getFullDeviceName(mapDevices, FLAGS_d_reid));
-        }
 
         if (actions_type == STUDENT) {
             auto face_tracks = tracker_reid.vector_tracks();

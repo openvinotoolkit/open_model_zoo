@@ -51,11 +51,6 @@ public:
      */
     void Load();
 
-    /**
-     * @brief Prints performance report
-     */
-    void PrintPerformanceCounts(std::string fullDeviceName) const;
-
 protected:
     /**
      * @brief Run network

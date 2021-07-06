@@ -55,10 +55,6 @@ void HeadPoseEstimator::estimate(const cv::Mat& image,
     }
 }
 
-void HeadPoseEstimator::printPerformanceCounts() const {
-    ieWrapper.printPerlayerPerformance();
-}
-
 HeadPoseEstimator::~HeadPoseEstimator() {
 }
 }  // namespace gaze_estimation

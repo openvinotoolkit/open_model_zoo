@@ -31,13 +31,12 @@ struct CnnConfig {
 
 class ConfigFactory {
 public:
-    static CnnConfig getUserConfig(const std::string& flags_d, const std::string& flags_l,
-        const std::string& flags_c, bool flags_pc,
+    static CnnConfig getUserConfig(const std::string& flags_d, const std::string& flags_l, const std::string& flags_c,
         uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads);
     static CnnConfig getMinLatencyConfig(const std::string& flags_d, const std::string& flags_l,
-        const std::string& flags_c, bool flags_pc, uint32_t flags_nireq);
+        const std::string& flags_c, uint32_t flags_nireq);
 
 protected:
     static CnnConfig getCommonConfig(const std::string& flags_d, const std::string& flags_l,
-        const std::string& flags_c, bool flags_pc, uint32_t flags_nireq);
+        const std::string& flags_c, uint32_t flags_nireq);
 };

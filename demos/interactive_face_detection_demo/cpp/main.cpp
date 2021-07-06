@@ -120,11 +120,6 @@ int main(int argc, char *argv[]) {
 
             loadedDevices.insert(deviceName);
         }
-
-        /** Per-layer metrics **/
-        if (FLAGS_pc) {
-            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-        }
         // ---------------------------------------------------------------------------------------------------
 
         // --------------------------- 2. Reading IR models and loading them to plugins ----------------------
@@ -321,17 +316,6 @@ int main(int argc, char *argv[]) {
                 presenter.handleKey(key);
             }
         }
-
-        // Showing performance results
-        if (FLAGS_pc) {
-            faceDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d));
-            ageGenderDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_ag));
-            headPoseDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_hp));
-            emotionsDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_em));
-            facialLandmarksDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_lm));
-            antispoofingClassifier.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_am));
-        }
-
         //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metric reports:" << slog::endl;
         slog::info << "\tNumber of processed frames: " << framesCounter << slog::endl;

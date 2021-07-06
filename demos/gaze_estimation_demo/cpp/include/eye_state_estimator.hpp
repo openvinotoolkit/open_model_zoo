@@ -19,7 +19,6 @@ public:
                       const std::string& modelPath,
                       const std::string& deviceName);
     void estimate(const cv::Mat& image, FaceInferenceResults& outputResults) override;
-    void printPerformanceCounts() const override;
     ~EyeStateEstimator() override;
 
 private:

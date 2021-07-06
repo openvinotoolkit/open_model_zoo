@@ -47,10 +47,6 @@ void LandmarksEstimator::estimate(const cv::Mat& image,
     }
 }
 
-void LandmarksEstimator::printPerformanceCounts() const {
-    ieWrapper.printPerlayerPerformance();
-}
-
 LandmarksEstimator::~LandmarksEstimator() {
 }
 }  // namespace gaze_estimation

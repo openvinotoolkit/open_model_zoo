@@ -89,10 +89,6 @@ void EyeStateEstimator::estimate(const cv::Mat& image, FaceInferenceResults& out
     }
 }
 
-void EyeStateEstimator::printPerformanceCounts() const {
-    ieWrapper.printPerlayerPerformance();
-}
-
 EyeStateEstimator::~EyeStateEstimator() {
 }
 }  // namespace gaze_estimation

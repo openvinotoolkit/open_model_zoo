@@ -118,10 +118,6 @@ struct BaseDetection {
         }
         return _enabled;
     }
-
-    void printPerformanceCounts(std::string fullDeviceName) const {
-        ::printPerformanceCounts(request, slog::dbg, fullDeviceName);
-    }
 };
 
 struct PersonDetection : BaseDetection{
@@ -553,11 +549,6 @@ int main(int argc, char *argv[]) {
 
             loadedDevices.insert(flag);
         }
-
-        /** Per layer metrics **/
-        if (FLAGS_pc) {
-            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-        }
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 2. Read IR models and load them to devices ------------------------------
@@ -814,22 +805,6 @@ int main(int argc, char *argv[]) {
         auto total_t1 = std::chrono::high_resolution_clock::now();
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
 
-        /** Show performance results **/
-        if (FLAGS_pc) {
-            std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, deviceNames);
-            slog::dbg << "Performance counts for person detection: " << slog::endl;
-            personDetection.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d));
-
-            if (!FLAGS_m_pa.empty()) {
-                slog::dbg << "Performance counts for person attributes: " << slog::endl;
-                personAttribs.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_pa));
-            }
-
-            if (!FLAGS_m_reid.empty()) {
-                slog::dbg << "Performance counts for person re-identification: " << slog::endl;
-                personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
-            }
-        }
         slog::info << "Total Inference time: " << total.count() << slog::endl;
         slog::info << presenter.reportMeans() << slog::endl;
         // -----------------------------------------------------------------------------------------------------

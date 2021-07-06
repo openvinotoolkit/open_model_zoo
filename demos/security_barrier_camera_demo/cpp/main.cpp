@@ -736,11 +736,6 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        /** Per layer metrics **/
-        if (FLAGS_pc) {
-            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-        }
-
         /** Graph tagging via config options**/
         auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
             std::map<std::string, std::string> config;
@@ -815,20 +810,6 @@ int main(int argc, char* argv[]) {
         worker->threadFunc();
         worker->join();
         const auto t1 = std::chrono::steady_clock::now();
-
-        std::map<std::string, std::string> mapDevices = getMapFullDevicesNames(ie, {FLAGS_d, FLAGS_d_va, FLAGS_d_lpr});
-        for (auto& net : std::array<std::pair<std::vector<InferRequest>, std::string>, 3>{
-            std::make_pair(context.detectorsInfers.getActualInferRequests(), FLAGS_d),
-                std::make_pair(context.attributesInfers.getActualInferRequests(), FLAGS_d_va),
-                std::make_pair(context.platesInfers.getActualInferRequests(), FLAGS_d_lpr)}) {
-            for (InferRequest& ir : net.first) {
-                ir.Wait(InferRequest::WaitMode::RESULT_READY);
-                if (FLAGS_pc) {  // Show performance results
-                    printPerformanceCounts(ir, slog::dbg, std::string::npos == net.second.find("MULTI") ? getFullDeviceName(mapDevices, net.second)
-                                                                                                        : net.second);
-                }
-            }
-        }
 
         uint32_t frameCounter = context.frameCounter;
         if (0 != frameCounter) {

@@ -115,9 +115,6 @@ public:
     void submitRequest() override;
     void enqueue(const cv::Mat &frame) override;
     void wait() override { BaseCnnDetection::wait(); }
-    void printPerformanceCounts(const std::string &fullDeviceName) override {
-        BaseCnnDetection::printPerformanceCounts(fullDeviceName);
-    }
     DetectedActions fetchResults() override;
 
 private:

@@ -24,11 +24,9 @@
 
 using namespace InferenceEngine;
 
-CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::string& flags_l,
-    const std::string& flags_c, bool flags_pc,
-    uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads)
-{
-    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_pc, flags_nireq);
+CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::string& flags_l, const std::string& flags_c,
+    uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads) {
+    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_nireq);
 
     std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(config.devices, flags_nstreams);
     for (const auto& device : config.devices) {
@@ -61,9 +59,9 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::st
 }
 
 CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, const std::string& flags_l,
-    const std::string& flags_c, bool flags_pc, uint32_t flags_nireq)
+    const std::string& flags_c, uint32_t flags_nireq)
 {
-    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_pc, flags_nireq);
+    auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_nireq);
     for (const auto& device : config.devices) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1");
@@ -76,7 +74,7 @@ CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, const s
 }
 
 CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, const std::string& flags_l,
-    const std::string& flags_c, bool flags_pc, uint32_t flags_nireq)
+    const std::string& flags_c, uint32_t flags_nireq)
 {
     CnnConfig config;
 
@@ -94,12 +92,7 @@ CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, const std::
     if (!flags_c.empty()) {
         config.clKernelsConfigPath = flags_c;
     }
-
     config.maxAsyncRequests = flags_nireq;
-    /** Per layer metrics **/
-    if (flags_pc) {
-        config.execNetworkConfig.emplace(CONFIG_KEY(PERF_COUNT), PluginConfigParams::YES);
-    }
 
     return config;
 }

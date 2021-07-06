@@ -28,8 +28,6 @@ public:
     // Get output blob content as a vector given its name
     void getOutputBlob(const std::string& blobName, std::vector<float>& output);
 
-    void printPerlayerPerformance() const;
-
     const std::map<std::string, std::vector<unsigned long>>& getInputBlobDimsInfo() const;
     const std::map<std::string, std::vector<unsigned long>>& getOutputBlobDimsInfo() const;
 

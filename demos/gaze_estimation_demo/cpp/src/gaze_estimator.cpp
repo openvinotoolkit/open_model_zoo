@@ -115,10 +115,6 @@ void GazeEstimator::estimate(const cv::Mat& image,
     outputResults.gazeVector = gazeVector;
 }
 
-void GazeEstimator::printPerformanceCounts() const {
-    ieWrapper.printPerlayerPerformance();
-}
-
 GazeEstimator::~GazeEstimator() {
 }
 }  // namespace gaze_estimation

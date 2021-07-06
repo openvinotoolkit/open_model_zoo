@@ -66,8 +66,7 @@ void PrintDetectionLog(const DetectionLog& log) {
 InferenceEngine::Core
 LoadInferenceEngine(const std::vector<std::string>& devices,
                     const std::string& custom_cpu_library,
-                    const std::string& custom_cldnn_kernels,
-                    bool should_use_perf_counter) {
+                    const std::string& custom_cldnn_kernels) {
     std::set<std::string> loadedDevices;
     Core ie;
 
@@ -87,9 +86,6 @@ LoadInferenceEngine(const std::vector<std::string>& devices,
             // Load Extensions for other plugins not CPU
             ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, custom_cldnn_kernels}}, "GPU");
         }
-
-        if (should_use_perf_counter)
-            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
 
         loadedDevices.insert(device);
     }

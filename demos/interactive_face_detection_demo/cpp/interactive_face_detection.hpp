@@ -55,7 +55,6 @@ static const char dyn_batch_hp_message[] = "Optional. Enable dynamic batch size 
 static const char dyn_batch_em_message[] = "Optional. Enable dynamic batch size for Emotions Recognition network";
 static const char dyn_batch_lm_message[] = "Optional. Enable dynamic batch size for Facial Landmarks Estimation network";
 static const char dyn_batch_am_message[] = "Optional. Enable dynamic batch size for Antispoofing Classification network";
-static const char performance_counter_message[] = "Optional. Enable per-layer performance report";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
                                            "Absolute path to an .xml file with the kernels description.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
@@ -95,7 +94,6 @@ DEFINE_uint32(n_lm, 16, num_batch_em_message);
 DEFINE_bool(dyn_lm, false, dyn_batch_em_message);
 DEFINE_uint32(n_am, 16, num_batch_am_message);
 DEFINE_bool(dyn_am, false, dyn_batch_am_message);
-DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
@@ -152,7 +150,6 @@ static void showUsage() {
     std::cout << "    -dyn_am                    " << dyn_batch_am_message << std::endl;
     std::cout << "    -async                     " << async_message << std::endl;
     std::cout << "    -no_show                   " << no_show_message << std::endl;
-    std::cout << "    -pc                        " << performance_counter_message << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;
     std::cout << "    -t                         " << thresh_output_message << std::endl;
     std::cout << "    -bb_enlarge_coef           " << bb_enlarge_coef_output_message << std::endl;

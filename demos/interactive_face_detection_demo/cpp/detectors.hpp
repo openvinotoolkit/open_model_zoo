@@ -53,7 +53,6 @@ struct BaseDetection {
     virtual void submitRequest();
     virtual void wait();
     bool enabled() const;
-    void printPerformanceCounts(std::string fullDeviceName);
 };
 
 struct FaceDetection : BaseDetection {

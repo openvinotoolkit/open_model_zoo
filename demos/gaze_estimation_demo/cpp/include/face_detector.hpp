@@ -23,7 +23,6 @@ public:
                  double detectionConfidenceThreshold,
                  bool enableReshape);
     std::vector<FaceInferenceResults> detect(const cv::Mat& image);
-    void printPerformanceCounts() const;
     ~FaceDetector();
 
 private:

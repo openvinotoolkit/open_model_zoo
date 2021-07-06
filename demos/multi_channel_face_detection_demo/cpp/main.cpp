@@ -60,7 +60,6 @@ void showUsage() {
     std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
     std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
     std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
-    std::cout << "    -pc                          " << performance_counter_message << std::endl;
     std::cout << "    -t                           " << thresh_output_message << std::endl;
     std::cout << "    -no_show                     " << no_show_message << std::endl;
     std::cout << "    -show_stats                  " << show_statistics << std::endl;
@@ -217,7 +216,6 @@ int main(int argc, char* argv[]) {
         graphParams.batchSize       = FLAGS_bs;
         graphParams.maxRequests     = FLAGS_nireq;
         graphParams.collectStats    = FLAGS_show_stats;
-        graphParams.reportPerf      = FLAGS_pc;
         graphParams.modelPath       = modelPath;
         graphParams.cpuExtPath      = FLAGS_l;
         graphParams.cldnnConfigPath = FLAGS_c;

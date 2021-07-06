@@ -45,7 +45,6 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 static const char custom_cpu_library_message[] = "Required for CPU custom layers."
                                                  "Absolute path to a shared library with the kernels implementation.";
 static const char input_resizable_message[] = "Optional. Enables resizable input.";
-static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
 static const char no_show_message[] = "Optional. Disable showing of processed images.";
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. "
                                              "Default is -1 (infinite time).";
@@ -65,7 +64,6 @@ DEFINE_string(res, "1280x720", image_grid_resolution_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
-DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_uint32(time, std::numeric_limits<gflags::uint32>::max(), execution_time_message);
 DEFINE_string(u, "", utilization_monitors_message);
@@ -81,7 +79,6 @@ static void showUsage() {
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
-    std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
     std::cout << "    -gt \"<path>\"              " << gt_message << std::endl;
@@ -211,7 +208,7 @@ int main(int argc, char *argv[]) {
         slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
         InferenceEngine::Core core;
         AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, FLAGS_auto_resize, labels)),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
 
         Presenter presenter(FLAGS_u, 0);

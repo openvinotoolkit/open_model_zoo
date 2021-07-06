@@ -72,15 +72,6 @@ bool BaseDetection::enabled() const  {
     return _enabled;
 }
 
-void BaseDetection::printPerformanceCounts(std::string fullDeviceName) {
-    if (!enabled()) {
-        return;
-    }
-    slog::dbg << "Performance counts for " << topoName << slog::endl;
-    ::printPerformanceCounts(*request, slog::dbg, fullDeviceName, false);
-}
-
-
 FaceDetection::FaceDetection(const std::string &pathToModel,
                              const std::string &deviceForInference,
                              int maxBatch, bool isBatchDynamic, bool isAsync,

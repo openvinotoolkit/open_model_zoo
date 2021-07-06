@@ -54,11 +54,6 @@ public:
    */
     void Load();
 
-    /**
-    * @brief Prints performance report
-    */
-    void PrintPerformanceCounts(std::string fullDeviceName) const;
-
 protected:
     /**
    * @brief Run network
@@ -110,7 +105,6 @@ public:
     virtual void enqueue(const cv::Mat &frame) = 0;
     virtual void submitRequest() = 0;
     virtual void wait() = 0;
-    virtual void printPerformanceCounts(const std::string &fullDeviceName) = 0;
 };
 
 template <typename T>
@@ -125,7 +119,6 @@ public:
     void enqueue(const cv::Mat &) override {}
     void submitRequest() override {}
     void wait() override {}
-    void printPerformanceCounts(const std::string &) override {}
     std::vector<T> fetchResults() override { return {}; }
 };
 
@@ -151,10 +144,5 @@ public:
     void wait() override {
         if (!request || !isAsync) return;
         request->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
-    }
-
-    void printPerformanceCounts(const std::string &fullDeviceName) override {
-        slog::dbg << "Performance counts for " << topoName << slog::endl;
-        ::printPerformanceCounts(*request, slog::dbg, fullDeviceName, false);
     }
 };

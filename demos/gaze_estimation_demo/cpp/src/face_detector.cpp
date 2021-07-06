@@ -115,10 +115,6 @@ std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
     return detectionResult;
 }
 
-void FaceDetector::printPerformanceCounts() const {
-    ieWrapper.printPerlayerPerformance();
-}
-
 FaceDetector::~FaceDetector() {
 }
 

@@ -815,9 +815,3 @@ cv::Mat PedestrianTracker::DrawActiveTracks(const cv::Mat &frame) {
 
     return out_frame;
 }
-
-void PedestrianTracker::PrintReidPerformanceCounts(std::string fullDeviceName) const {
-    if (descriptor_strong_) {
-        descriptor_strong_->PrintPerformanceCounts(fullDeviceName);
-    }
-}

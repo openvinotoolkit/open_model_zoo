@@ -21,7 +21,6 @@ public:
                   bool doRollAlign = true);
     void estimate(const cv::Mat& image,
                   FaceInferenceResults& outputResults) override;
-    void printPerformanceCounts() const override;
     ~GazeEstimator() override;
 
 private:

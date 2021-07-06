@@ -56,10 +56,6 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     if (!cldnnConfigPath.empty()) {
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, cldnnConfigPath}}, "GPU");
     }
-    /** Setting parameter for collecting per layer metrics **/
-    if (printPerfReport) {
-        ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_PERF_COUNT, InferenceEngine::PluginConfigParams::YES } });
-    }
 
     // Set batch size
     if (batchSize > 1) {
@@ -198,7 +194,6 @@ IEGraph::IEGraph(const InitParams& p):
     confidenceThreshold(0.5f), batchSize(p.batchSize),
     modelPath(p.modelPath),
     cpuExtensionPath(p.cpuExtPath), cldnnConfigPath(p.cldnnConfigPath),
-    printPerfReport(p.reportPerf), deviceName(p.deviceName),
     maxRequests(p.maxRequests) {
     assert(p.maxRequests > 0);
 
@@ -284,10 +279,6 @@ IEGraph::~IEGraph() {
                 ready = true;
             }
         }
-        if (printPerfReport) {
-            slog::info << "Performance counts report" << slog::endl << slog::endl;
-            printPerformanceCounts(getFullDeviceName(ie, deviceName));
-        }
         condVarAvailableRequests.notify_one();
     }
     if (getterThread.joinable()) {
@@ -297,8 +288,4 @@ IEGraph::~IEGraph() {
 
 IEGraph::Stats IEGraph::getStats() const {
     return Stats{perfTimerPreprocess.getValue(), perfTimerInfer.getValue()};
-}
-
-void IEGraph::printPerformanceCounts(std::string fullDeviceName) {
-    ::printPerformanceCounts(*availableRequests.front(), slog::dbg, fullDeviceName, false);
 }
