@@ -16,16 +16,15 @@
 """
 
 from argparse import ArgumentParser, SUPPRESS
-import logging
+import logging as log
 import sys
 import time
 import wave
 
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def type_overlap(arg):
@@ -137,11 +136,11 @@ def read_wav(file, as_float=False):
 def main():
     args = build_argparser()
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
     if args.device == "CPU" and args.cpu_extension:
         ie.add_extension(args.cpu_extension, 'CPU')
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, args.model[:-4] + ".bin")

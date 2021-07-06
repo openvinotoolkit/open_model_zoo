@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
@@ -23,7 +23,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
@@ -34,8 +34,7 @@ from instance_segmentation_demo.visualizer import Visualizer
 import monitors
 from images_capture import open_images_capture
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -110,11 +109,11 @@ def main():
         assert len(class_labels), 'The file with class labels is empty'
 
     # Plugin initialization for specified device and load extensions library if specified.
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, 'CPU')
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     # Read IR
     log.info('Reading model {}'.format(args.model))

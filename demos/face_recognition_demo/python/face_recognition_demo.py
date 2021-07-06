@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
@@ -23,7 +23,7 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
@@ -39,8 +39,7 @@ from images_capture import open_images_capture
 from models import OutputTransform
 from performance_metrics import PerformanceMetrics
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 DEVICE_KINDS = ['CPU', 'GPU', 'MYRIAD', 'HETERO', 'HDDL']
 
@@ -132,11 +131,11 @@ class FrameProcessor:
         self.perf_count = args.perf_stats
         self.allow_grow = args.allow_grow and not args.no_show
 
+        log.info('OpenVINO Inference Engine')
+        log.info('build: {}'.format(get_version()))
         ie = IECore()
         if args.cpu_lib and 'CPU' in {args.d_fd, args.d_lm, args.d_reid}:
             ie.add_extension(args.cpu_lib, 'CPU')
-        version = ie.get_versions('CPU')['CPU'].build_number
-        log.info('IE build: {}'.format(version))
 
         self.face_detector = FaceDetector(ie, args.m_fd,
                                           args.fd_input_size,

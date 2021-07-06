@@ -15,7 +15,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-import logging
+import logging as log
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
@@ -24,10 +24,9 @@ from pathlib import Path
 import numpy as np
 import wave
 
-from openvino.inference_engine import IECore, Blob
+from openvino.inference_engine import IECore, Blob, get_version
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -72,9 +71,9 @@ def wav_write(wav_name, x):
 def main():
     args = build_argparser().parse_args()
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     # read IR
     log.info("Reading model {}".format(args.model))

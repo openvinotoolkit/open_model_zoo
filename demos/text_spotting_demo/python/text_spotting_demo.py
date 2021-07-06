@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import os
 import sys
 import time
@@ -24,7 +24,7 @@ from argparse import ArgumentParser, SUPPRESS
 import cv2
 import numpy as np
 from scipy.special import softmax
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from text_spotting_demo.tracker import StaticIOUTracker
 from text_spotting_demo.visualizer import Visualizer
@@ -34,8 +34,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.
 import monitors
 from images_capture import open_images_capture
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 SOS_INDEX = 0
 EOS_INDEX = 1
@@ -170,11 +169,11 @@ def main():
     cap = open_images_capture(args.input, args.loop)
 
     # Plugin initialization for specified device and load extensions library if specified.
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, 'CPU')
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
     # Read IR
     log.info('Reading model {}'.format(args.mask_rcnn_model))
     mask_rcnn_net = ie.read_network(args.mask_rcnn_model, os.path.splitext(args.mask_rcnn_model)[0] + '.bin')

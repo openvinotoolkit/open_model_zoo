@@ -13,18 +13,17 @@
  limitations under the License.
 """
 import argparse
-import logging
+import logging as log
 import sys
 from pathlib import Path
 from collections import OrderedDict
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 from accuracy_checker.dataset import read_annotation
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 class ForecastingEngine:
@@ -38,9 +37,9 @@ class ForecastingEngine:
     """
     def __init__(self, model_xml, model_bin, input_name, output_name, quantiles):
         device = "CPU"
+        log.info('OpenVINO Inference Engine')
+        log.info('build: {}'.format(get_version()))
         self.ie = IECore()
-        version = self.ie.get_versions(device)[device].build_number
-        log.info('IE build: {}'.format(version))
         log.info('Reading model {}'.format(model_xml))
         self.net = self.ie.read_network(
             model=model_xml,

@@ -17,20 +17,19 @@
 """
 import sys
 import time
-import logging
+import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 import numpy as np
 
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -92,9 +91,9 @@ def main():
     vocab = load_vocab_file(args.vocab)
     log.debug("Loaded vocab file from {}, get {} tokens".format(args.vocab, len(vocab)))
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     #read model to calculate embedding
     model_xml_emb = args.model_emb

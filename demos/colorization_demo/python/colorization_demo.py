@@ -15,10 +15,10 @@
  limitations under the License.
 """
 
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 import cv2 as cv
 import numpy as np
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -27,8 +27,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_arg():
@@ -63,9 +62,9 @@ if __name__ == '__main__':
 
     cap = open_images_capture(args.input, args.loop)
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     log.info('Reading model {}'.format(args.model))
     load_net = ie.read_network(args.model, args.model.with_suffix(".bin"))

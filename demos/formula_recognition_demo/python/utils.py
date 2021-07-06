@@ -27,7 +27,7 @@ from types import SimpleNamespace as namespace
 import cv2 as cv
 import numpy as np
 import sympy
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 from tqdm import tqdm
 
 START_TOKEN = 0
@@ -157,11 +157,11 @@ class Model:
 
     def __init__(self, args, interactive_mode):
         self.args = args
+        log.info('OpenVINO Inference Engine')
+        log.info('build: {}'.format(get_version()))
         self.ie = IECore()
         self.ie.set_config(
             {"PERF_COUNT": "YES" if self.args.perf_counts else "NO"}, args.device)
-        version = self.ie.get_versions(args.device)[args.device].build_number
-        log.info('IE build: {}'.format(version))
         self.encoder = read_net(self.args.m_encoder, self.ie)
         self.dec_step = read_net(self.args.m_decoder, self.ie)
         self.exec_net_encoder = self.ie.load_network(network=self.encoder, device_name=self.args.device)

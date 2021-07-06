@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 from pathlib import Path
 import sys
 import time
@@ -34,8 +34,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
 
 INPUT_SIZE = 224
 

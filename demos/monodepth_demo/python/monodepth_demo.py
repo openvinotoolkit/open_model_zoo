@@ -6,12 +6,11 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-import logging
-from openvino.inference_engine import IECore
+import logging as log
+from openvino.inference_engine import IECore, get_version
 import matplotlib.pyplot as plt
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def main():
@@ -31,11 +30,11 @@ def main():
 
     args = parser.parse_args()
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
     if args.cpu_extension and "CPU" in args.device:
         ie.add_extension(args.cpu_extension, "CPU")
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, args.model.with_suffix(".bin"))

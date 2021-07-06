@@ -14,7 +14,7 @@
 
 import json
 import sys
-import logging
+import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
@@ -29,8 +29,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def rotate_poses(poses_3d, R, t):

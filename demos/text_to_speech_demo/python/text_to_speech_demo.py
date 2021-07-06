@@ -17,21 +17,20 @@
 """
 
 import sys
-import logging
+import logging as log
 import time
 from argparse import ArgumentParser, SUPPRESS
 
 from tqdm import tqdm
 import numpy as np
 import wave
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from models.forward_tacotron_ie import ForwardTacotronIE
 from models.mel2wave_ie import WaveRNNIE, MelGANIE
 from utils.gui import init_parameters_interactive
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def save_wav(x, path):
@@ -118,9 +117,9 @@ def main():
     if not is_correct_args(args):
         return 1
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     if args.model_melgan is not None:
         vocoder = MelGANIE(args.model_melgan, ie, device=args.device)

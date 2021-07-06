@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 import time
 import json
@@ -38,8 +38,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.
                              'common/python'))
 import monitors
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 DETECTOR_OUTPUT_SHAPE = -1, 5
 TRACKER_SCORE_THRESHOLD = 0.4
@@ -118,8 +117,6 @@ def main():
     assert class_map is not None
 
     ie = load_ie_core(args.device, args.cpu_extension)
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     person_detector = PersonDetector(args.detection_model, args.device, ie,
                                      num_requests=2, output_shape=DETECTOR_OUTPUT_SHAPE)

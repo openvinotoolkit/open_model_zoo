@@ -15,21 +15,20 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-import logging
+import logging as log
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -105,9 +104,9 @@ def main():
     # encode context into token ids list
     c_tokens_id, c_tokens_se = text_to_tokens(context.lower(), vocab)
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     # read IR
     model_xml = args.model
@@ -141,12 +140,8 @@ def main():
     input_names = [i.strip() for i in args.input_names.split(',')]
     output_names = [o.strip() for o in args.output_names.split(',')]
     if ie_encoder.input_info.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
-        log.error("The demo expects input->output names: {}->{}. "
-                  "Please use the --input_names and --output_names to specify the right names "
-                  "(see actual values below)".format(input_names, output_names))
-        log.error("Actual network input->output names: {}->{}".format(list(ie_encoder.input_info.keys()),
-                                                                      list(ie_encoder.outputs.keys())))
-        raise Exception("Unexpected network input or output names")
+        raise RuntimeError("The demo expects input->output names: {}->{}, actual network input->output names: {}->{}".format(
+            input_names, output_names), list(ie_encoder.input_info.keys()), list(ie_encoder.outputs.keys()))
 
     # load model to the device
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)

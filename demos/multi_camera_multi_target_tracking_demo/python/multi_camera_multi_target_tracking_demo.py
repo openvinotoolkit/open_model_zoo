@@ -18,7 +18,7 @@ import time
 import queue
 from threading import Thread
 import json
-import logging
+import logging as log
 import os
 import random
 import sys
@@ -31,14 +31,13 @@ from utils.analyzer import save_embeddings
 from utils.misc import read_py_config, check_pressed_keys, AverageEstimator
 from utils.video import MulticamCapture, NormalizerCLAHE
 from utils.visualization import visualize_multicam_detections, get_target_size
-from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                              'common/python'))
 import monitors
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def check_detectors(args):
@@ -256,9 +255,9 @@ def main():
     random.seed(config.random_seed)
     capture = MulticamCapture(args.input, args.loop)
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     if args.detections:
         object_detector = DetectionsFromFileReader(args.detections, args.t_detector)

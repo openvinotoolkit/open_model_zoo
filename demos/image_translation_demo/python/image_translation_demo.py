@@ -11,14 +11,14 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 import os
 from argparse import ArgumentParser, SUPPRESS
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from image_translation_demo.models import CocosnetModel, SegmentationModel
 from image_translation_demo.preprocessing import (
@@ -26,8 +26,7 @@ from image_translation_demo.preprocessing import (
 )
 from image_translation_demo.postprocessing import postprocess, save_result
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -82,9 +81,9 @@ def get_mask_from_image(image, model):
 def main():
     args = build_argparser().parse_args()
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     log.info('Reading model {}'.format(args.translation_model))
     gan_model = CocosnetModel(ie, args.translation_model,

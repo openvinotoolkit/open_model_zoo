@@ -3,10 +3,10 @@
 import argparse
 import os
 import sys
-import logging
+import logging as log
 import cv2
 
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from detector import Detector
 from estimator import HumanPoseEstimator
@@ -15,8 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.
 import monitors
 from images_capture import open_images_capture
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 def build_argparser():
     parser = argparse.ArgumentParser()
@@ -46,9 +45,9 @@ def build_argparser():
 def run_demo(args):
     cap = open_images_capture(args.input, args.loop)
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     log.info('Reading model {}'.format(args.model_od))
     detector_person = Detector(ie, args.model_od,

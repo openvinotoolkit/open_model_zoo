@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -24,7 +24,7 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 import mtcnn_utils as utils
 
@@ -34,8 +34,7 @@ import monitors
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 score_threshold = [0.6, 0.7, 0.7]
@@ -97,9 +96,9 @@ def main():
     cap = open_images_capture(args.input, args.loop)
 
     # Plugin initialization for specified device and load extensions library if specified
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     # Read IR
     log.info('Reading model {}'.format(args.model_pnet))

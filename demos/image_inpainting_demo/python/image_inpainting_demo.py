@@ -13,19 +13,18 @@
 """
 
 import sys
-import logging
+import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 import numpy as np
 import cv2
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from inpainting_gui import InpaintingGUI
 from inpainting import ImageInpainting
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_arg_parser():
@@ -126,9 +125,9 @@ def main():
         print("Error: -ar and -ac options cannot be used together...")
         return -1
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     log.info('Reading model {}'.format(args.model))
     inpainting_processor = ImageInpainting(ie, args.model, args.device)

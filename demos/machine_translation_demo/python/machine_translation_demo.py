@@ -14,17 +14,16 @@
 """
 import argparse
 import itertools
-import logging
+import logging as log
 import sys
 import time
 from pathlib import Path
 
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 from tokenizers import SentencePieceBPETokenizer
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 class Translator:
@@ -71,9 +70,9 @@ class TranslationEngine:
         output_name (str): name of output blob of model.
     """
     def __init__(self, model_xml, model_bin, device, output_name):
+        log.info('OpenVINO Inference Engine')
+        log.info('build: {}'.format(get_version()))
         ie = IECore()
-        version = ie.get_versions(args.device)[args.device].build_number
-        log.info('IE build: {}'.format(version))
 
         log.info('Reading model {}'.format(model_xml))
         self.net = ie.read_network(

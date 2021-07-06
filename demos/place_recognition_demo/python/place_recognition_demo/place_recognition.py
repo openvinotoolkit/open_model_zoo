@@ -22,18 +22,18 @@ from tqdm import tqdm
 
 from place_recognition_demo.common import crop_resize
 
-from openvino.inference_engine import IECore # pylint: disable=no-name-in-module
+from openvino.inference_engine import IECore, get_version
 
 
 class IEModel: # pylint: disable=too-few-public-methods
     """ Class that allows working with Inference Engine model. """
 
     def __init__(self, model_path, device, cpu_extension):
+        log.info('OpenVINO Inference Engine')
+        log.info('build: {}'.format(get_version()))
         ie = IECore()
         if cpu_extension and device == 'CPU':
             ie.add_extension(cpu_extension, 'CPU')
-        version = ie.get_versions(device)[device].build_number
-        log.info('IE build: {}'.format(version))
 
         log.info('Reading model {}'.format(model_path))
         self.net = ie.read_network(model_path, model_path.with_suffix('.bin'))

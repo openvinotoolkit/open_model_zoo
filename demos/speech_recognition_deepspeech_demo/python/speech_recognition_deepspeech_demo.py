@@ -8,7 +8,7 @@
 #
 
 import sys
-import logging
+import logging as log
 import time
 import wave
 import timeit
@@ -17,13 +17,12 @@ import argparse
 import yaml
 import numpy as np
 from tqdm import tqdm
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from asr_utils.profiles import PROFILES
 from asr_utils.deep_speech_seq_pipeline import DeepSpeechSeqPipeline
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -73,9 +72,9 @@ def main():
         sr = profile['model_sampling_rate']
         args.block_size = round(sr * 10) if not args.realtime else round(sr * profile['frame_stride_seconds'] * 16)
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     start_load_time = timeit.default_timer()
     stt = DeepSpeechSeqPipeline(

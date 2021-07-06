@@ -24,16 +24,15 @@ except OSError:
     sys.modules['soundfile'] = types.ModuleType('fake_soundfile')
     import librosa
 
-import logging
+import logging as log
 import numpy as np
 import scipy
 import wave
 
 from argparse import ArgumentParser, SUPPRESS
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 class QuartzNet:
@@ -122,9 +121,9 @@ def main():
 
     log_melspectrum = QuartzNet.audio_to_melspectrum(audio.flatten(), sampling_rate)
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     quartz_net = QuartzNet(ie, args.model, log_melspectrum.shape, args.device)
     character_probs = quartz_net.infer(log_melspectrum)

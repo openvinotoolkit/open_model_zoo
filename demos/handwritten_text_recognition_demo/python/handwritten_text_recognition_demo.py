@@ -16,18 +16,17 @@
 import os
 import sys
 import time
-import logging
+import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 from utils.codec import CTCCodec
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -75,9 +74,9 @@ def main():
     args = build_argparser().parse_args()
 
     # Plugin initialization
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     # Read IR
     log.info('Reading model {}'.format(args.model))

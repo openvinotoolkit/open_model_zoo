@@ -14,13 +14,13 @@
 
 import argparse
 import cv2
-import logging
+import logging as log
 import numpy as np
 import time
 import sys
 from os import path as osp
 
-from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
+from openvino.inference_engine import IECore, get_version
 
 from utils.network_wrappers import MaskRCNN, SemanticSegmentation
 from utils.misc import MouseClick, check_pressed_keys
@@ -29,8 +29,7 @@ sys.path.append(osp.join(osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file_
 import monitors
 from images_capture import open_images_capture
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 WINNAME = 'Whiteboard_inpainting_demo'
 
@@ -120,9 +119,9 @@ def main():
                                              cap.fps(), out_frame_size):
         raise RuntimeError("Can't open video writer")
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     model_path = args.m_instance_segmentation if args.m_instance_segmentation else args.m_semantic_segmentation
     log.info('Reading model {}'.format(model_path))

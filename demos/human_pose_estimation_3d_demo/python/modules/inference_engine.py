@@ -14,7 +14,7 @@
 import logging as log
 import numpy as np
 
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 
 class InferenceEngine:
@@ -22,9 +22,9 @@ class InferenceEngine:
         self.device = device
         self.stride = stride
 
+        log.info('OpenVINO Inference Engine')
+        log.info('build: {}'.format(get_version()))
         self.ie = IECore()
-        version = self.ie.get_versions(self.device)[self.device].build_number
-        log.info('IE build: {}'.format(version))
 
         log.info('Reading model {}'.format(net_model_xml_path))
         self.net = self.ie.read_network(net_model_xml_path, net_model_xml_path.with_suffix('.bin'))

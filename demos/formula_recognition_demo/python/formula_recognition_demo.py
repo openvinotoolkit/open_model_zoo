@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import os
 import sys
 from argparse import SUPPRESS, ArgumentParser
@@ -27,8 +27,7 @@ from utils import (COLOR_BLACK, COLOR_RED, COLOR_WHITE, DEFAULT_RESIZE_STEP,
                    PREPROCESSING, Model, calculate_probability, print_stats,
                    create_renderer, prerocess_crop, strip_internal_spaces)
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 class InteractiveDemo:

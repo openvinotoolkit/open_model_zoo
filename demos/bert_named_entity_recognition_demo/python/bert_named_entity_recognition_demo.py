@@ -16,7 +16,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import re
 import sys
 import time
@@ -24,14 +24,13 @@ from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 sentence_splitter = r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s'
 label_to_tag = ['O', 'B-MIS', 'I-MIS', 'B-PER', 'I-PER', 'B-ORG', 'I-ORG', 'B-LOC', 'I-LOC']
@@ -70,9 +69,9 @@ def main():
     preprocessed_sentences = [text_to_tokens(sentence, vocab) for sentence in sentences]
     max_sent_length = max([len(tokens) + 2 for tokens, _ in preprocessed_sentences])
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     # read IR
     model_xml = args.model
@@ -83,15 +82,10 @@ def main():
     # check input and output names
     input_names = [i.strip() for i in args.input_names.split(',')]
     if ie_encoder.input_info.keys() != set(input_names):
-        log.error("Input names do not match")
-        log.error("    The demo expects input names: {}. "
-                  "Please use the --input_names to specify the right names "
-                  "(see actual values below)".format(input_names))
-        log.error("    Actual network input names: {}".format(list(ie_encoder.input_info.keys())))
-        raise Exception("Unexpected network input names")
+        raise RuntimeError('The demo expects input names: {}, actual network input names: {}'.format(
+            input_names, list(ie_encoder.input_info.keys())))
     if len(ie_encoder.outputs) != 1:
-        log.error('Demo expects model with single output, while provided {}'.format(len(ie_encoder.outputs)))
-        raise Exception('Unexpected number of outputs')
+        raise RuntimeError('The demo expects model with single output, while provided {}'.format(len(ie_encoder.outputs)))
     output_names = list(ie_encoder.outputs)
     max_length = ie_encoder.input_info[input_names[0]].input_data.shape[1]
     if max_sent_length > max_length:

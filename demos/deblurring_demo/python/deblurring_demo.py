@@ -14,14 +14,14 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 from time import perf_counter
 
 import cv2
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
@@ -32,8 +32,7 @@ from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
 from helpers import log_blobs_info, log_runtime_settings
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -80,9 +79,9 @@ def main():
 
     cap = open_images_capture(args.input, args.loop)
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 

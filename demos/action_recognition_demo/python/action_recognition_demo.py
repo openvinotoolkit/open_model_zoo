@@ -16,11 +16,11 @@
 """
 
 import sys
-import logging
+import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from os import path
 
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from action_recognition_demo.models import IEModel, DummyDecoder
 from action_recognition_demo.result_renderer import ResultRenderer
@@ -30,8 +30,7 @@ sys.path.append(path.join(path.dirname(path.dirname(path.dirname(path.abspath(__
 import monitors
 from images_capture import open_images_capture
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.DEBUG, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -87,6 +86,8 @@ def main():
     else:
         labels = None
 
+    log.info('OpenVINO Inference Engine')
+    log.info('build: {}'.format(get_version()))
     ie = IECore()
 
     if 'MYRIAD' in args.device:
@@ -95,9 +96,6 @@ def main():
 
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, 'CPU')
-
-    version = ie.get_versions(args.device)[args.device].build_number
-    log.info('IE build: {}'.format(version))
 
     decoder_target_device = 'CPU'
     if args.device != 'CPU':
