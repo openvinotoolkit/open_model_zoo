@@ -1,18 +1,16 @@
-"""
- Copyright (c) 2018-2021 Intel Corporation
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
-"""
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import functools
 import hashlib
@@ -21,13 +19,12 @@ import ssl
 import time
 import types
 
-from open_model_zoo.model_tools.download_engine import utils
-
+from open_model_zoo.model_tools.download_engine import cache
 
 class Downloader:
     def __init__(self, output_dir=None, cache_dir=None, num_attempts=1):
         self.output_dir = output_dir
-        self.cache = utils.NullCache() if cache_dir is None else utils.DirCache(cache_dir)
+        self.cache = cache.NullCache() if cache_dir is None else cache.DirCache(cache_dir)
         self.num_attempts = num_attempts
 
     def _process_download(self, reporter, chunk_iterable, size, progress, file):
@@ -145,7 +142,7 @@ class Downloader:
         with destination.open('w+b') as f:
             actual_hash = self._try_download(reporter, f, start_download, model_file.size)
 
-        if actual_hash and utils.verify_hash(reporter, actual_hash, model_file.sha256, destination):
+        if actual_hash and cache.verify_hash(reporter, actual_hash, model_file.sha256, destination):
             self._try_update_cache(reporter, self.cache, model_file.sha256, destination)
             success = True
 
@@ -174,7 +171,7 @@ class Downloader:
             destination = output / model_file.name
 
             if not self._try_retrieve(model_file_reporter, destination, model_file,
-                    functools.partial(model_file.source.start_download, session, utils.CHUNK_SIZE)):
+                    functools.partial(model_file.source.start_download, session, cache.CHUNK_SIZE)):
                 try:
                     destination.unlink()
                 except FileNotFoundError:

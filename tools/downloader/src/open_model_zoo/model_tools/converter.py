@@ -180,8 +180,7 @@ def main():
     args = parser.parse_args()
 
     with _common.telemetry_session('Model Converter', 'converter') as telemetry:
-        _configuration.check_model_selection_args(parser, args)
-        models = _configuration.load_models_from_args(args, _common.MODEL_ROOT)
+        models = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)
 
         for mode in ['all', 'list', 'name']:
             if getattr(args, mode):

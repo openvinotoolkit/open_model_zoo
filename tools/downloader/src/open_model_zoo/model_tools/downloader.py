@@ -98,8 +98,7 @@ def main():
     reporter = make_reporter(_reporting.DirectOutputContext())
 
     with _common.telemetry_session('Model Downloader', 'downloader') as telemetry:
-        _configuration.check_model_selection_args(parser, args)
-        models = _configuration.load_models_from_args(args, _common.MODEL_ROOT)
+        models = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)
 
         for mode in ['all', 'list', 'name']:
             if getattr(args, mode):
@@ -131,7 +130,7 @@ def main():
             session_factory = ThreadSessionFactory(exit_stack)
             if args.jobs == 1:
                 results = [downloader.download_model(
-                        reporter, session_factory,requested_precisions, model, _common.KNOWN_PRECISIONS)
+                        reporter, session_factory, requested_precisions, model, _common.KNOWN_PRECISIONS)
                     for model in models]
             else:
                 results = _concurrency.run_in_parallel(args.jobs,

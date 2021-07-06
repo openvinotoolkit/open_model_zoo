@@ -44,8 +44,7 @@ def main():
     parser.add_argument('--print_all', action='store_true', help='print all available models')
     args = parser.parse_args()
 
-    _configuration.check_model_selection_args(parser, args)
-    models = _configuration.load_models_from_args(args, _common.MODEL_ROOT)
+    models = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)
 
     json.dump(list(map(to_info, models)), sys.stdout, indent=4)
     print() # add a final newline
