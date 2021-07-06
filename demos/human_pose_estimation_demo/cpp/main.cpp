@@ -261,7 +261,7 @@ int main(int argc, char *argv[]) {
             return -1;
         }
 
-        slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         InferenceEngine::Core core;
         AsyncPipeline pipeline(std::move(model),

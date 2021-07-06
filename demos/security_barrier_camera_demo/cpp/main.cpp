@@ -688,7 +688,7 @@ int main(int argc, char* argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load Inference Engine -------------------------------------
-        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core ie;
 
         std::set<std::string> devices;

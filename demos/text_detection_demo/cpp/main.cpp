@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
         double avg_time = 0;
         const double avg_time_decay = 0.8;
 
-        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *GetInferenceEngineVersion() << slog::endl;
         Core ie;
 
         std::set<std::string> loadedDevices;

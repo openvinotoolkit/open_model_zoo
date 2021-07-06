@@ -39,57 +39,13 @@ constexpr std::size_t arraySize(const T (&)[N]) noexcept {
     return N;
 }
 
-// Helpers to print IE version information.
-// We don't directly define operator<< for InferenceEngine::Version
-// and such, because that won't get picked up by argument-dependent lookup
-// due to not being in the same namespace as the Version class itself.
-// We need ADL to work in order to print these objects using slog.
-// So instead, we define wrapper classes and operator<< for those classes.
+// Redefine operator<< for LogStream to print IE version information.
+inline slog::LogStream& operator<<(slog::LogStream& os, const InferenceEngine::Version& version) {
+    os << "OpenVINO Inference Engine" << slog::endl;
+    os << "\tversion: " << IE_VERSION_MAJOR << "." << IE_VERSION_MINOR << "." << IE_VERSION_PATCH << slog::endl;
+    os << "\tbuild: " << version.buildNumber;
 
-class PrintableIeVersion {
-public:
-    using ref_type = const InferenceEngine::Version &;
-
-    PrintableIeVersion(ref_type version) : version(version) {}
-
-    friend std::ostream &operator<<(std::ostream &os, const PrintableIeVersion &p) {
-        ref_type version = p.version;
-
-        return os << version.description << " version " << IE_VERSION_MAJOR << "." << IE_VERSION_MINOR << "." << IE_VERSION_PATCH
-            << " (build " << version.buildNumber << ")";
-    }
-
-private:
-    ref_type version;
-};
-
-inline PrintableIeVersion printable(PrintableIeVersion::ref_type version) {
-    return { version };
-}
-
-class PrintableIeVersionMap {
-public:
-    using ref_type = const std::map<std::string, InferenceEngine::Version> &;
-
-    PrintableIeVersionMap(ref_type versions) : versions(versions) {}
-
-    friend std::ostream &operator<<(std::ostream &os, const PrintableIeVersionMap &p) {
-        ref_type versions = p.versions;
-
-        for (const auto &version : versions) {
-            os << "\t" << version.first << std::endl
-               << printable(version.second) << std::endl;
-        }
-
-        return os;
-    }
-
-private:
-    ref_type versions;
-};
-
-inline PrintableIeVersionMap printable(PrintableIeVersionMap::ref_type versions) {
-    return { versions };
+    return os;
 }
 
 /**

@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
         cv::Mat curr_frame;
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
-        slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         InferenceEngine::Core core;
         AsyncPipeline pipeline(

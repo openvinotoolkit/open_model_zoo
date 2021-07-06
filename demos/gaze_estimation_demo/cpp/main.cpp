@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Loading Inference Engine
-        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core ie;
 
         // Set up face detector and estimators

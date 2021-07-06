@@ -311,7 +311,7 @@ int main(int argc, char *argv[]) {
         if (FLAGS_m.empty())
             throw std::logic_error("Parameter -m is not set");
 
-        slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         cv::GComputation pipeline([=]() {
             cv::GMat in;
 

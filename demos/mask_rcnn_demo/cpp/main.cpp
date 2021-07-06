@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------Load inference engine------------------------------------------------
-        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *GetInferenceEngineVersion() << slog::endl;
         Core ie;
 
         if (!FLAGS_l.empty()) {

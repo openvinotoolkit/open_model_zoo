@@ -560,7 +560,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *GetInferenceEngineVersion() << slog::endl;
         Core ie;
 
         std::vector<std::string> devices = {FLAGS_d_act, FLAGS_d_fd, FLAGS_d_lm,

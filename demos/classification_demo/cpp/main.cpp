@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
                 }
         }
 
-        slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core core;
         AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, FLAGS_auto_resize, labels)),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),

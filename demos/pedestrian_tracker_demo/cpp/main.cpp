@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
         bool should_save_det_log = !detlog_out.empty();
 
         std::vector<std::string> devices{detector_mode, reid_mode};
-        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core ie =
             LoadInferenceEngine(devices, custom_cpu_library, path_to_custom_layers);
 

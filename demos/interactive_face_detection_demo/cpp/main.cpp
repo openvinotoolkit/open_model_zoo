@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
         }
 
         // --------------------------- 1. Loading Inference Engine -----------------------------
-        slog::info << printable(*GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *GetInferenceEngineVersion() << slog::endl;
         Core ie;
 
         std::set<std::string> loadedDevices;

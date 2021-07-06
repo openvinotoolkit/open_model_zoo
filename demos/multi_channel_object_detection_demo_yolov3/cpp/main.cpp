@@ -365,7 +365,7 @@ int main(int argc, char* argv[]) {
 
         std::map<std::string, YoloParams> yoloParams;
 
-        slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         IEGraph::InitParams graphParams;
         graphParams.batchSize       = FLAGS_bs;
         graphParams.maxRequests     = FLAGS_nireq;

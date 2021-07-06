@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------ Running ImageProcessing routines ----------------------------------------------
-        slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core core;
         std::unique_ptr<ImageModel> model = getModel(cv::Size(curr_frame.cols, curr_frame.rows), FLAGS_at);
         AsyncPipeline pipeline(std::move(model),

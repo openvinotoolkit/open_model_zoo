@@ -218,7 +218,7 @@ int main(int argc, char* argv[]) {
             throw std::logic_error("Invalid model name: " + modelPath + ". Expected to be <model_name>.xml");
         }
 
-        slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         IEGraph::InitParams graphParams;
         graphParams.batchSize       = FLAGS_bs;
         graphParams.maxRequests     = FLAGS_nireq;

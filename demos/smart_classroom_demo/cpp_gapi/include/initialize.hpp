@@ -175,7 +175,7 @@ std::tuple<ConstantParams, TrackerParams, TrackerParams> getGraphArgs(const std:
 }
 
 void printInfo(const NetsFlagsPack& flags, std::string& teacher_id, std::string& top_id) {
-    slog::info << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+    slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
     if (!teacher_id.empty() && !top_id.empty()) {
         slog::err << "Cannot run simultaneously teacher action and top-k students recognition."
                   << slog::endl;
