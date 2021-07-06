@@ -214,6 +214,10 @@ void configNets(const NetsFlagsPack& flags,
            flags.d_act,
        }.cfgOutputLayers(outputBlobList);
        networks += cv::gapi::networks(action_net);
+       slog::info << "Network " << flags.m_act << " is loaded to " << flags.d_act << " device." << slog::endl;
+    }
+    else {
+        slog::info << "Person/Action Detection DISABLED." << slog::endl;
     }
     if (!flags.m_fd.empty()) {
         /** Create face detector net's parameters **/
@@ -224,6 +228,10 @@ void configNets(const NetsFlagsPack& flags,
         }.cfgInputReshape("data",
                           {1u, 3u, static_cast<size_t>(flags.inh_fd), static_cast<size_t>(flags.inw_fd)});
         networks += cv::gapi::networks(det_net);
+        slog::info << "Network " << flags.m_fd << " is loaded to " << flags.d_fd << " device." << slog::endl;
+    }
+    else {
+        slog::info << "Face Detection DISABLED." << slog::endl;
     }
 
     if (!flags.m_fd.empty() && !flags.m_reid.empty() && !flags.m_lm.empty()) {
@@ -233,6 +241,12 @@ void configNets(const NetsFlagsPack& flags,
             fileNameNoExt(flags.m_lm) + ".bin",
             flags.d_lm,
         };
+        if (!flags.m_lm.empty()) {
+            slog::info << "Network " << flags.m_lm << " is loaded to " << flags.d_lm << " device." << slog::endl;
+        }
+        else {
+            slog::info << "Facial Landmarks Regression DISABLED." << slog::endl;
+        }
         /** Create reidentification net's parameters **/
         auto reident_net = cv::gapi::ie::Params<nets::FaceReidentificator>{
             flags.m_reid,
@@ -240,7 +254,12 @@ void configNets(const NetsFlagsPack& flags,
             flags.d_reid,
         };
         networks += cv::gapi::networks(landm_net, reident_net);
-
+        if (!flags.m_reid.empty()) {
+            slog::info << "Network " << flags.m_reid << " is loaded to " << flags.d_reid << " device." << slog::endl;
+        }
+        else {
+            slog::info << "Face Reidentification DISABLED." << slog::endl;
+        }
         InferenceEngine::Core ie;
         const auto layerData = ie.ReadNetwork(flags.m_reid).getInputsInfo().begin()->second;
         const auto layerDims = layerData->getTensorDesc().getDims();

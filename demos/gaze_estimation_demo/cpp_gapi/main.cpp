@@ -163,6 +163,8 @@ int main(int argc, char *argv[]) {
             fileNameNoExt(FLAGS_m_fd) + ".bin",  // path to weights
             FLAGS_d_fd,                          // device specifier
         };
+        slog::info << "Network " << FLAGS_m_fd << " is loaded to " << FLAGS_d_fd << " device." << slog::endl;
+
         /** Get information about frame from cv::VideoCapture **/
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
@@ -218,6 +220,7 @@ int main(int argc, char *argv[]) {
             FLAGS_d_es,                               // device specifier
         };
         slog::info << "Network " << FLAGS_m_es << " is loaded to " << FLAGS_d_es << " device." << slog::endl;
+
         /** Custom kernels **/
         auto kernels = custom::kernels();
         auto networks = cv::gapi::networks(face_net, head_net, landmarks_net, gaze_net, eyes_net);

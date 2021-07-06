@@ -65,7 +65,7 @@ bool BaseDetection::enabled() const  {
     if (!enablingChecked) {
         _enabled = !pathToModel.empty();
         if (!_enabled) {
-            slog::dbg << topoName << " DISABLED" << slog::endl;
+            slog::info << topoName << " DISABLED" << slog::endl;
         }
         enablingChecked = true;
     }

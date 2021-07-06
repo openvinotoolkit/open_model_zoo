@@ -68,10 +68,11 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         }
         cnnNetwork.reshape(inShapes);
     }
-    slog::info << "Network batch size is set to " << cnnNetwork.getBatchSize() << slog::endl;
     InferenceEngine::ExecutableNetwork executableNetwork;
     executableNetwork = ie.LoadNetwork(cnnNetwork, deviceName);
     printExecNetworkInfo(executableNetwork, modelPath, deviceName);
+    slog::info << "\tNumber of inference requests is set to " << maxRequests << slog::endl;
+    slog::info << "\tNetwork batch size is set to " << cnnNetwork.getBatchSize() << slog::endl;
 
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {

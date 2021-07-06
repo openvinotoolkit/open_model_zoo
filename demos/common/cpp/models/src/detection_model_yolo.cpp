@@ -15,7 +15,6 @@
 */
 
 #include "models/detection_model_yolo.h"
-#include <utils/slog.hpp>
 #include <utils/common.hpp>
 #include <ngraph/ngraph.hpp>
 

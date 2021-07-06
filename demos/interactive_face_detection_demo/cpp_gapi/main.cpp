@@ -320,10 +320,10 @@ int main(int argc, char *argv[]) {
             cv::GMat detections = cv::gapi::infer<Faces>(in);
 
             cv::GArray<cv::Rect> faces = PostProc::on(detections, in,
-                                                      FLAGS_t,
-                                                      FLAGS_bb_enlarge_coef,
-                                                      FLAGS_dx_coef,
-                                                      FLAGS_dy_coef);
+                FLAGS_t,
+                FLAGS_bb_enlarge_coef,
+                FLAGS_dx_coef,
+                FLAGS_dy_coef);
             auto outs = GOut(frame, detections, faces);
 
             cv::GArray<cv::GMat> ages, genders;
@@ -351,42 +351,62 @@ int main(int argc, char *argv[]) {
             }
 
             return cv::GComputation(cv::GIn(in), std::move(outs));
-        });
+            });
 
-        auto det_net = cv::gapi::ie::Params<Faces> {
+        auto det_net = cv::gapi::ie::Params<Faces>{
             FLAGS_m,                         // path to model
             fileNameNoExt(FLAGS_m) + ".bin", // path to weights
             FLAGS_d                          // device to use
         };
-        slog::info << "Network " << FLAGS_m << " is loaded to " << FLAGS_d << " device" << slog::endl;
+        slog::info << "Network " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
 
-        auto age_net = cv::gapi::ie::Params<AgeGender> {
+        auto age_net = cv::gapi::ie::Params<AgeGender>{
             FLAGS_m_ag,                         // path to model
             fileNameNoExt(FLAGS_m_ag) + ".bin", // path to weights
             FLAGS_d_ag                          // device to use
         }.cfgOutputLayers({ "age_conv3", "prob" });
-        slog::info << "Network " << FLAGS_m_ag << " is loaded  to " << FLAGS_d_ag << " device" << slog::endl;
+        if (!FLAGS_m_ag.empty()) {
+            slog::info << "Network " << FLAGS_m_ag << " is loaded to " << FLAGS_d_ag << " device." << slog::endl;
+        }
+        else {
+            slog::info << "Age/Gender Recognition DISABLED." << slog::endl;
+        }
 
-        auto hp_net = cv::gapi::ie::Params<HeadPose> {
+        auto hp_net = cv::gapi::ie::Params<HeadPose>{
             FLAGS_m_hp,                         // path to model
             fileNameNoExt(FLAGS_m_hp) + ".bin", // path to weights
             FLAGS_d_hp                          // device to use
         }.cfgOutputLayers({ "angle_y_fc", "angle_p_fc", "angle_r_fc" });
-        slog::info << "Network " << FLAGS_m_hp << " is loaded  to " << FLAGS_d_hp << " device" << slog::endl;
+        if (!FLAGS_m_hp.empty()) {
+            slog::info << "Network " << FLAGS_m_hp << " is loaded to " << FLAGS_d_hp << " device." << slog::endl;
+        }
+        else {
+            slog::info << "Head Pose Estimation DISABLED." << slog::endl;
+        }
 
         auto lm_net = cv::gapi::ie::Params<FacialLandmark> {
             FLAGS_m_lm,                        // path to model
             fileNameNoExt(FLAGS_m_lm) + ".bin",// path to weights
             FLAGS_d_lm                         // device to use
         }.cfgOutputLayers({ "align_fc3" });
-        slog::info << "Network " << FLAGS_m_lm << " is loaded  to " << FLAGS_d_lm << " device" << slog::endl;
+        if (!FLAGS_m_lm.empty()) {
+            slog::info << "Network " << FLAGS_m_lm << " is loaded to " << FLAGS_d_lm << " device." << slog::endl;
+        }
+        else {
+            slog::info << "Facial Landmarks Estimation DISABLED." << slog::endl;
+        }
 
         auto emo_net = cv::gapi::ie::Params<Emotions> {
             FLAGS_m_em,                         // path to model
             fileNameNoExt(FLAGS_m_em) + ".bin", // path to weights
             FLAGS_d_em                          // device to use
         };
-        slog::info << "Network " << FLAGS_m_em << " is loaded  to " << FLAGS_d_em << " device" << slog::endl;
+        if (!FLAGS_m_em.empty()) {
+            slog::info << "Network " << FLAGS_m_em << " is loaded to " << FLAGS_d_em << " device." << slog::endl;
+        }
+        else {
+            slog::info << "Emotions Recognition DISABLED." << slog::endl;
+        }
 
         // Form a kernel package (including an OpenCV-based implementation of our
         // post-processing) and a network package (holding our three networks).

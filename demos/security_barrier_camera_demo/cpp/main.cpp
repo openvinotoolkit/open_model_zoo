@@ -760,10 +760,16 @@ int main(int argc, char* argv[]) {
             nclassifiersireq = nireq * 3;
             slog::info << "\tNumber of inference requests is set to " << nclassifiersireq << slog::endl;
         }
+        else {
+            slog::info << "Vehicle Attributes Detection DISABLED." << slog::endl;
+        }
         if (!FLAGS_m_lpr.empty()) {
             lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));
             nrecognizersireq = nireq * 3;
             slog::info << "\tNumber of inference requests is set to " << nrecognizersireq << slog::endl;
+        }
+        else {
+            slog::info << "License Plate Recognition DISABLED." << slog::endl;
         }
         bool isVideo = imageSourcess.empty() ? true : false;
         int pause = imageSourcess.empty() ? 1 : 0;

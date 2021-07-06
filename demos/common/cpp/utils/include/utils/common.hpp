@@ -229,11 +229,10 @@ inline void printExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execN
         devices.insert(device);
     }
 
-    std::string nthreads = execNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>();
-    if (nthreads != "0" &&
-        (devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end() || devices.find("") != devices.end())) {
+    if ((devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end() || devices.find("") != devices.end())) {
+        std::string nthreads = execNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>();
         slog::info << "\tNumber of threads is set to "
-            << nthreads << " for CPU device." << slog::endl;
+            << (nthreads == "0" ? "AUTO" : nthreads) << " for CPU device." << slog::endl;
     }
 
     for (const auto& device : devices) {

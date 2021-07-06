@@ -112,7 +112,7 @@ struct BaseDetection {
         if (!enablingChecked) {
             _enabled = !commandLineFlag.empty();
             if (!_enabled) {
-                slog::dbg << topoName << " detection DISABLED" << slog::endl;
+                slog::info << topoName << " detection DISABLED" << slog::endl;
             }
             enablingChecked = true;
         }
