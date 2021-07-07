@@ -367,11 +367,11 @@ class TestPresenter:
         presenter.write_result(result)
         calls = [
             call(
-                result.evaluated_value[0], result.name,
+                result.evaluated_value[0], result.name, None, None, None,
                 postfix='%', scale=100, value_name=result.meta['names'][0], result_format='{:.2f}'
             ),
             call(
-                result.evaluated_value[1], result.name,
+                result.evaluated_value[1], result.name, None, None, None,
                 postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
@@ -396,11 +396,11 @@ class TestPresenter:
         presenter.write_result(result, ignore_results_formatting=True)
         calls = [
             call(
-                result.evaluated_value[0], result.name,
+                result.evaluated_value[0], result.name, None, None, None,
                 postfix=' ', scale=1, value_name=result.meta['names'][0], result_format='{}'
             ),
             call(
-                result.evaluated_value[1], result.name,
+                result.evaluated_value[1], result.name, None, None, None,
                 postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
             ),
             call(
@@ -425,11 +425,11 @@ class TestPresenter:
         presenter.write_result(result)
         calls = [
             call(
-                result.evaluated_value[0], result.name,
+                result.evaluated_value[0], result.name, None, None, None,
                 postfix='%', scale=100, value_name=result.meta['names'][0], result_format='{:.2f}'
             ),
             call(
-                result.evaluated_value[1], result.name,
+                result.evaluated_value[1], result.name, None, None, None,
                 postfix='%', scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
@@ -454,11 +454,11 @@ class TestPresenter:
         presenter.write_result(result, ignore_results_formatting=True)
         calls = [
             call(
-                result.evaluated_value[0], result.name,
+                result.evaluated_value[0], result.name, None, None, None,
                 postfix=' ', scale=1, value_name=result.meta['names'][0], result_format='{}'
             ),
             call(
-                result.evaluated_value[1], result.name,
+                result.evaluated_value[1], result.name, None, None, None,
                 postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
             ),
             call(
@@ -484,11 +484,11 @@ class TestPresenter:
         presenter.write_result(result, ignore_results_formatting=True)
         calls = [
             call(
-                result.evaluated_value[0], result.name,
+                result.evaluated_value[0], result.name, None, None, None,
                 postfix=' ', scale=1, value_name=result.meta['names'][0], result_format='{}'
             ),
             call(
-                result.evaluated_value[1], result.name,
+                result.evaluated_value[1], result.name, None, None, None,
                 postfix=' ', scale=1, value_name=result.meta['names'][1], result_format='{}'
             ),
             call(
@@ -513,11 +513,11 @@ class TestPresenter:
         presenter = VectorPrintPresenter()
         presenter.write_result(result)
         calls = [
-            call(result.evaluated_value[0], result.name,
+            call(result.evaluated_value[0], result.name, None, None, None,
                  postfix=result.meta['postfix'], scale=100, value_name=result.meta['names'][0], result_format='{:.2f}'
                  ),
             call(
-                result.evaluated_value[1], result.name,
+                result.evaluated_value[1], result.name, None, None, None,
                 postfix=result.meta['postfix'], scale=100, value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
@@ -542,11 +542,11 @@ class TestPresenter:
         presenter.write_result(result)
         calls = [
             call(
-                result.evaluated_value[0], result.name,
+                result.evaluated_value[0], result.name, None, None, None,
                 postfix='%', scale=result.meta['scale'], value_name=result.meta['names'][0], result_format='{:.2f}'
             ),
             call(
-                result.evaluated_value[1], result.name,
+                result.evaluated_value[1], result.name, None, None, None,
                 postfix='%', scale=result.meta['scale'], value_name=result.meta['names'][1], result_format='{:.2f}'
             ),
             call(
@@ -572,11 +572,11 @@ class TestPresenter:
         presenter.write_result(result)
         calls = [
             call(
-                result.evaluated_value[0], result.name,
+                result.evaluated_value[0], result.name, None, None, None,
                 postfix='%', scale=result.meta['scale'][0], result_format='{:.2f}', value_name=result.meta['names'][0]
             ),
             call(
-                result.evaluated_value[1], result.name, postfix='%',
+                result.evaluated_value[1], result.name, None, None, None, postfix='%',
                 scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1]
             ),
             call(
