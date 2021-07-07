@@ -141,7 +141,7 @@ class MetricsExecutor:
         threshold_v = metric_config_entry.get(threshold)
         abs_threshold_v = metric_config_entry.get(abs_threshold)
         reference_v = metric_config_entry.get(reference)
-        if reference is not None and not isinstance(reference, (int, float, dict)):
+        if reference_v is not None and not isinstance(reference_v, (int, float, dict)):
             raise ConfigError(
                 'reference value should be represented as number or dictionary with numbers for each submetric'
             )
