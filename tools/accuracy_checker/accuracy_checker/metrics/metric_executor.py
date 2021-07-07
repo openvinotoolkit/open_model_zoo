@@ -140,8 +140,8 @@ class MetricsExecutor:
         metric_presenter = BasePresenter.provide(metric_config_entry.get(presenter, 'print_scalar'))
         threshold_v = metric_config_entry.get(threshold)
         abs_threshold_v = metric_config_entry.get(abs_threshold)
-        reference = metric_config_entry.get(reference)
-        if reference is not None and not isinstance(reference, (int, float, dict)):
+        reference_v = metric_config_entry.get(reference)
+        if reference_v is not None and not isinstance(reference_v, (int, float, dict)):
             raise ConfigError(
                 'reference value should be represented as number or dictionary with numbers for each submetric'
             )
@@ -159,7 +159,7 @@ class MetricsExecutor:
             metric_identifier,
             metric_type,
             metric_fn,
-            reference,
+            reference_v,
             abs_threshold_v,
             metric_config_entry.get(rel_threshold),
             metric_presenter

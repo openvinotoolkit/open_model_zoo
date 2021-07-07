@@ -167,7 +167,7 @@ class VectorPrintPresenter(BasePresenter):
         per_value_meta = []
         target_per_value = meta.pop('target_per_value', {})
         target = meta.pop('target', 'higher-better')
-        for orig_name, v_name in zip(value_names, value_names_orig):
+        for orig_name in value_names_orig:
             target_for_value = target_per_value.get(orig_name, target)
             meta_for_value = deepcopy(meta)
             meta_for_value['target'] = target_for_value
