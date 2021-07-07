@@ -178,6 +178,54 @@ class TestPresenter:
             result_format='{}'
         )
 
+    def test_reference_value_for_scalar_presenter_with_ref_values_dict(self, mocker):
+        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        result = EvaluationResult(
+            name='vector_metric',
+            metric_type='metric',
+            evaluated_value=[0.456],
+            reference_value={'vector_metric': 45.6},
+            abs_threshold=None,
+            rel_threshold=None,
+            meta={},
+        )
+        presenter = ScalarPrintPresenter()
+        presenter.write_result(result)
+        mock_write_scalar_res.assert_called_once_with(
+            np.mean(result.evaluated_value),
+            result.name,
+            result.abs_threshold,
+            result.rel_threshold,
+            (0.0, 0.0),
+            postfix='%',
+            scale=100,
+            result_format='{:.2f}'
+        )
+
+    def test_reference_value_for_scalar_presenter_with_ref_values_dict_no_value(self, mocker):
+        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        result = EvaluationResult(
+            name='vector_metric',
+            metric_type='metric',
+            evaluated_value=[0.456],
+            reference_value={'other_metric': 45.6},
+            abs_threshold=None,
+            rel_threshold=None,
+            meta={},
+        )
+        presenter = ScalarPrintPresenter()
+        presenter.write_result(result)
+        mock_write_scalar_res.assert_called_once_with(
+            np.mean(result.evaluated_value),
+            result.name,
+            result.abs_threshold,
+            result.rel_threshold,
+            None,
+            postfix='%',
+            scale=100,
+            result_format='{:.2f}'
+        )
+
     def test_specific_format_for_scalar_presenter_with_ignore_formatting(self, mocker):
         mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
         result = EvaluationResult(
@@ -564,6 +612,66 @@ class TestPresenter:
             metric_type='metric',
             evaluated_value=[0.4, 0.6],
             reference_value=None,
+            abs_threshold=None,
+            rel_threshold=None,
+            meta={'names': ['class1', 'class2'], 'scale': [1, 2]}
+        )
+        presenter = VectorPrintPresenter()
+        presenter.write_result(result)
+        calls = [
+            call(
+                result.evaluated_value[0], result.name, None, None, None,
+                postfix='%', scale=result.meta['scale'][0], result_format='{:.2f}', value_name=result.meta['names'][0]
+            ),
+            call(
+                result.evaluated_value[1], result.name, None, None, None, postfix='%',
+                scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1]
+            ),
+            call(
+                np.mean(np.multiply(result.evaluated_value, result.meta['scale'])), result.name,
+                result.abs_threshold, result.rel_threshold,
+                None, result_format='{:.2f}', value_name='mean', postfix='%', scale=1
+            )
+        ]
+        mock_write_scalar_res.assert_has_calls(calls)
+
+    def test_vector_presenter_with_vector_data_with_dict_ref(self, mocker):
+        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        result = EvaluationResult(
+            name='scalar_metric',
+            metric_type='metric',
+            evaluated_value=[0.4, 0.6],
+            reference_value={'class1': 0.4, 'class2': 0.5},
+            abs_threshold=None,
+            rel_threshold=None,
+            meta={'names': ['class1', 'class2'], 'scale': [1, 2]}
+        )
+        presenter = VectorPrintPresenter()
+        presenter.write_result(result)
+        calls = [
+            call(
+                result.evaluated_value[0], result.name, None, None, (0, 0),
+                postfix='%', scale=result.meta['scale'][0], result_format='{:.2f}', value_name=result.meta['names'][0]
+            ),
+            call(
+                result.evaluated_value[1], result.name, None, None, (0.7, 1.4), postfix='%',
+                scale=result.meta['scale'][1], result_format='{:.2f}', value_name=result.meta['names'][1]
+            ),
+            call(
+                np.mean(np.multiply(result.evaluated_value, result.meta['scale'])), result.name,
+                result.abs_threshold, result.rel_threshold,
+                None, result_format='{:.2f}', value_name='mean', postfix='%', scale=1
+            )
+        ]
+        mock_write_scalar_res.assert_has_calls(calls)
+
+    def test_vector_presenter_with_vector_data_with_dict_ref_without_represented_classes(self, mocker):
+        mock_write_scalar_res = mocker.patch('accuracy_checker.presenters.write_scalar_result')  # type: MagicMock
+        result = EvaluationResult(
+            name='scalar_metric',
+            metric_type='metric',
+            evaluated_value=[0.4, 0.6],
+            reference_value={'class3': 0.4, 'class4': 0.5},
             abs_threshold=None,
             rel_threshold=None,
             meta={'names': ['class1', 'class2'], 'scale': [1, 2]}

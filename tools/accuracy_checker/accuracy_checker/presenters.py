@@ -111,7 +111,7 @@ class VectorPrintPresenter(BasePresenter):
             value_name = value_names[index] if value_names else None
 
             if reference and not ignore_metric_reference and isinstance(reference, dict):
-                difference = compare_with_ref(reference, value, value_scale, value_name)
+                difference = compare_with_ref(reference, res, value_scale, value_name)
             write_scalar_result(
                 res, name, abs_threshold, rel_threshold, difference,
                 value_name=value_name,

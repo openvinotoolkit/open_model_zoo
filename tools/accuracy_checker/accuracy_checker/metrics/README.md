@@ -8,6 +8,13 @@ In case when you use complicated representation located in representation contai
 select specific representation, another way metric calculation possible only if container has only one suitable representation and will be resolved automatically.
 `annotation_source` and `prediction_source` should contain only one annotation identifier and output layer name respectively.
 You may optionally provide `reference` field for metric, if you want calculated metric tested against specific value (i.e. reported in canonical paper) and acceptable `abs_threshold` and `rel_threshold` for absolute and relative metric deviation from reference value respectively.
+Reference can be specified as single floating-point value, then for vector metric representation it will be applied to average value (e.g. if metric returns values for each class, then comparing with reference should be performed for mean value) or as dictionary, where keys are metric component name and value is reference value.
+For example, if you use PSNR metric which consists of 2 values - mean and std, you can specify reference for both values as:
+```yaml
+reference:
+  mean: 42.56
+  std: 0.89
+```
 
 Every metric has parameters available for configuration. The metric and its parameters are set through the configuration file. Metrics are provided in `datasets` section of configuration file to use specific metric.
 
