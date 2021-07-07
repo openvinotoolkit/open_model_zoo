@@ -18,7 +18,7 @@ struct MRIData {
     cv::Mat samplingMask;
     cv::Mat reconstructed;
     // Hybrid-CS-Model-MRI/Data/stats_fs_unet_norm_20.npy
-    std::vector<double> stats = {2.20295299e-1, 1.11048916e+3};
+    static constexpr double stats[]{2.20295299e-1, 1.11048916e+3};
 };
 
 static const std::string kWinName = "MRI reconstruction with OpenVINO";
