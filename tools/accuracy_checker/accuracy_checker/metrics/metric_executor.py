@@ -159,7 +159,7 @@ class MetricsExecutor:
             metric_identifier,
             metric_type,
             metric_fn,
-            reference,
+            reference_v,
             abs_threshold_v,
             metric_config_entry.get(rel_threshold),
             metric_presenter
