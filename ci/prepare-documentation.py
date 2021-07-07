@@ -174,11 +174,20 @@ def add_model_pages(output_root, parent_element, group, group_title):
         id=f'omz_models_group_{group}', path=f'models/{group}/index.md')
 
     task_type_elements = {}
+    device_support_path = OMZ_ROOT / 'models' / group / 'device_support.md'
+
+    with (device_support_path).open('r', encoding="utf-8") as device_support_file:
+        raw_device_support = device_support_file.read()
 
     for md_path in sorted(OMZ_ROOT.glob(f'models/{group}/*/**/*.md')):
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
         model_name = md_path_rel.parts[2]
+
+        device_support_path_rel = device_support_path.relative_to(OMZ_ROOT)
+
+        if model_name not in raw_device_support:
+            raise RuntimeError(f'{device_support_path_rel}: missing "{model_name}" model.')
 
         expected_md_path = Path('models', group, model_name, 'README.md')
 
