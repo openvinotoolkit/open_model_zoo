@@ -103,6 +103,9 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         return diff
 
     def _calculate_diff_regression_rep(self, annotation, prediction):
+        def to_float(value):
+            return value.astype(float) if not np.isscalar(value) and np.issubdtype(value.dtype,
+                                                                                   np.integer) else value
         if isinstance(annotation.value, dict):
             if not isinstance(prediction.value, dict):
                 if len(annotation.value) != 1:
@@ -110,13 +113,9 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
                 return self.value_differ(next(iter(annotation.value.values())), prediction.value)
             diff_dict = OrderedDict()
             for key in annotation.value:
-                a_val = annotation.value[key]
-                p_val = prediction.value[key]
-                a_val = a_val.astype(float) if not np.isscalar(a_val) and np.issubdtype(a_val.dtype,
-                                                                                        np.integer) else a_val
-                p_val = p_val.astype(float) if not np.isscalar(p_val) and np.issubdtype(p_val.dtype,
-                                                                                        np.integer) else p_val
-                diff = self.value_differ(a_val, p_val)
+                annotation_val = to_float(annotation.value[key])
+                prediction_val = to_float(prediction.value[key])
+                diff = self.value_differ(annotation_val, prediction_val)
                 if np.ndim(diff) > 1:
                     diff = np.mean(diff)
                 diff_dict[key] = diff
@@ -124,23 +123,15 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         if isinstance(prediction.value, dict):
             if len(prediction.value) != 1:
                 raise ConfigError('annotation for all predictions should be provided')
-            a_val = annotation.value
-            a_val = a_val.astype(float) if not np.isscalar(a_val) and np.issubdtype(a_val.dtype,
-                                                                                    np.integer) else a_val
-            p_val = next(iter(prediction.value.values()))
-            p_val = p_val.astype(float) if not np.isscalar(p_val) and np.issubdtype(p_val.dtype,
-                                                                                    np.integer) else p_val
-            diff = self.value_differ(a_val, p_val)
+            annotation_val = to_float(annotation.value)
+            prediction_val = to_float(next(iter(prediction.value.values())))
+            diff = self.value_differ(annotation_val, prediction_val)
             if not np.isscalar(diff) and np.ndim(diff) > 1:
                 diff = np.mean(diff)
             return diff
-        a_val = annotation.value
-        p_val = prediction.value
-        a_val = a_val.astype(float) if not np.isscalar(a_val) and np.issubdtype(a_val.dtype,
-                                                                                np.integer) else a_val
-        p_val = p_val.astype(float) if not np.isscalar(p_val) and np.issubdtype(p_val.dtype,
-                                                                                np.integer) else p_val
-        diff = self.value_differ(a_val, p_val)
+        annotation_val = to_float(annotation.value)
+        prediction_val = to_float(prediction.value)
+        diff = self.value_differ(annotation_val, prediction_val)
         if not np.isscalar(diff) and np.ndim(diff) > 1:
             diff = np.mean(diff)
         return diff
