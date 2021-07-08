@@ -187,7 +187,7 @@ def add_model_pages(output_root, parent_element, group, group_title):
         device_support_path_rel = device_support_path.relative_to(OMZ_ROOT)
 
         if model_name not in raw_device_support:
-            raise RuntimeError(f'{device_support_path_rel}: missing "{model_name}" model.')
+            raise RuntimeError(f'{device_support_path_rel}: "{model_name}" model reference is missing.')
 
         expected_md_path = Path('models', group, model_name, 'README.md')
 
@@ -295,20 +295,20 @@ def main():
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
         with (md_path.parent / 'models.lst').open('r', encoding="utf-8") as models_lst:
-            raw_models_lines = models_lst.readlines()
+            models_lines = models_lst.readlines()
 
         with (md_path).open('r', encoding="utf-8") as demo_readme:
-            raw_readme_lines = demo_readme.read()
+            raw_demo_readme = demo_readme.read()
 
-        for line in raw_models_lines:
-            if line.startswith('#'):
+        for model_line in models_lines:
+            if model_line.startswith('#'):
                 continue
 
-            line = line.replace('\n', '')
-            regex_line = line.replace('?', '.').replace('*', '.*')
+            model_line = model_line.rstrip('\n')
+            regex_line = model_line.replace('?', '.').replace('*', '.*')
 
-            if not re.search(regex_line, raw_readme_lines):
-                raise RuntimeError(f'{md_path_rel}: model reference "{line}" is missing. '
+            if not re.search(regex_line, raw_demo_readme):
+                raise RuntimeError(f'{md_path_rel}: "{model_line}" model reference is missing. '
                     'Add it to README.md or update models.lst file.')
 
         # <name>_<implementation>
