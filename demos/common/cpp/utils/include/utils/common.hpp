@@ -237,6 +237,6 @@ inline void printExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execN
 
     for (const auto& device : devices) {
         slog::info << "\tNumber of streams is set to "
-            << execNetwork.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << slog::endl;
+            << execNetwork.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device." << slog::endl;
     }
 }

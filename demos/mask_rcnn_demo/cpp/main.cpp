@@ -119,7 +119,6 @@ int main(int argc, char *argv[]) {
             slog::warn << "Network batch size is less than number of images (" << imagePaths.size() <<
                        "), some input files will be ignored" << slog::endl;
         }
-        slog::info << "Network batch size is set to " << netBatchSize << slog::endl;
         for (size_t i = 0, inputIndex = 0; i < netBatchSize; i++, inputIndex++) {
             if (inputIndex >= imagePaths.size()) {
                 inputIndex = 0;
@@ -149,6 +148,7 @@ int main(int argc, char *argv[]) {
         // -------------------------Load model to the device----------------------------------------------------
         auto executableNetwork = ie.LoadNetwork(network, FLAGS_d);
         printExecNetworkInfo(executableNetwork, FLAGS_m, FLAGS_d);
+        slog::info << "\tBatch size is set to " << netBatchSize << slog::endl;
 
         // -------------------------Create Infer Request--------------------------------------------------------
         auto infer_request = executableNetwork.CreateInferRequest();

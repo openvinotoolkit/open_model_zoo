@@ -114,7 +114,6 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     auto network = ie.ReadNetwork(pathToModel);
     /** Set batch size to 1 **/
     network.setBatchSize(maxBatch);
-    slog::info << "Batch size is set to " << network.getBatchSize() << " for Face Detection network" << slog::endl;
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check inputs -------------------------------------------------------------
@@ -325,7 +324,6 @@ CNNNetwork AntispoofingClassifier::read(const InferenceEngine::Core& ie) {
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size to be used.
     network.setBatchSize(maxBatch);
-    slog::info << "Batch size is set to " << network.getBatchSize() << " for Antispoofing Classifier network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
     // Antispoofing Classifier network should have one input and one output
@@ -409,7 +407,6 @@ CNNNetwork AgeGenderDetection::read(const InferenceEngine::Core& ie) {
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size to be used.
     network.setBatchSize(maxBatch);
-    slog::info << "Batch size is set to " << network.getBatchSize() << " for Age/Gender Recognition network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
     // Age/Gender Recognition network should have one input and two outputs
@@ -501,7 +498,6 @@ CNNNetwork HeadPoseDetection::read(const InferenceEngine::Core& ie) {
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size
     network.setBatchSize(maxBatch);
-    slog::info << "Batch size is set to  " << network.getBatchSize() << " for Head Pose Estimation network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
     InputsDataMap inputInfo(network.getInputsInfo());
@@ -608,9 +604,8 @@ CNNNetwork EmotionsDetection::read(const InferenceEngine::Core& ie) {
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size
     network.setBatchSize(maxBatch);
-    slog::info << "Batch size is set to " << network.getBatchSize() << " for Emotions Recognition network" << slog::endl;
-    // -----------------------------------------------------------------------------------------------------
 
+    // -----------------------------------------------------------------------------------------------------
     // Emotions Recognition network should have one input and one output.
     // ---------------------------Check inputs -------------------------------------------------------------
     InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
@@ -708,7 +703,6 @@ CNNNetwork FacialLandmarksDetection::read(const InferenceEngine::Core& ie) {
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size
     network.setBatchSize(maxBatch);
-    slog::info << "Batch size is set to  " << network.getBatchSize() << " for Facial Landmarks Estimation network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
     InputsDataMap inputInfo(network.getInputsInfo());
@@ -755,6 +749,7 @@ void Load::into(InferenceEngine::Core & ie, const std::string & deviceName, bool
 
         detector.net = ie.LoadNetwork(detector.read(ie), deviceName, config);
         printExecNetworkInfo(detector.net, detector.pathToModel, deviceName);
+        slog::info << "\tBatch size is set to  " << detector.maxBatch << slog::endl;
     }
 }
 

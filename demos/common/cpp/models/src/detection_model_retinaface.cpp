@@ -16,7 +16,6 @@
 
 #include <ngraph/ngraph.hpp>
 #include <utils/common.hpp>
-#include <utils/slog.hpp>
 #include "models/detection_model_retinaface.h"
 
 ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)

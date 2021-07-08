@@ -18,7 +18,6 @@
 #include <opencv2/imgproc.hpp>
 #include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
 #include "models/detection_model_centernet.h"
 
 

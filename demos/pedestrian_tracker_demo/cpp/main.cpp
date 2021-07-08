@@ -53,7 +53,6 @@ CreatePedestrianTracker(const std::string& reid_model,
     if (!reid_model.empty()) {
         CnnConfig reid_config(reid_model);
         reid_config.max_batch_size = 16;   // defaulting to 16
-
         std::shared_ptr<IImageDescriptor> descriptor_strong =
             std::make_shared<DescriptorIE>(reid_config, ie, deviceName);
 

@@ -153,6 +153,7 @@ ObjectDetector::ObjectDetector(
 
     net_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
     printExecNetworkInfo(net_, config.path_to_model, deviceName_);
+    slog::info << "\tBatch size is set to "<< config.max_batch_size << slog::endl;
 }
 
 void ObjectDetector::wait() {

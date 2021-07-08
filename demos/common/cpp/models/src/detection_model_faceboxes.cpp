@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <ngraph/ngraph.hpp>
 #include <utils/common.hpp>
-#include <utils/slog.hpp>
 #include "models/detection_model_faceboxes.h"
 
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,

@@ -17,7 +17,6 @@
 #include "models/model_base.h"
 #include <inference_engine.hpp>
 #include <utils/common.hpp>
-#include <utils/slog.hpp>
 
 using namespace InferenceEngine;
 
