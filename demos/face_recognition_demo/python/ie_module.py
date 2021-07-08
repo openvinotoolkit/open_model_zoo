@@ -46,12 +46,10 @@ class Module:
         if self.active_requests <= 0:
             return
 
-        self.perf_stats = [None, ] * self.active_requests
         self.outputs = [None, ] * self.active_requests
         for i in range(self.active_requests):
             self.exec_net.requests[i].wait()
             self.outputs[i] = self.exec_net.requests[i].output_blobs
-            self.perf_stats[i] = self.exec_net.requests[i].get_perf_counts()
 
         self.active_requests = 0
 
@@ -59,11 +57,7 @@ class Module:
         self.wait()
         return self.outputs
 
-    def get_performance_stats(self):
-        return self.perf_stats
-
     def clear(self):
-        self.perf_stats = []
         self.outputs = []
 
     def infer(self, inputs):

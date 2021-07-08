@@ -126,15 +126,6 @@ def read_net(model_xml, ie):
     return ie.read_network(model_xml, model_bin)
 
 
-def print_stats(module):
-    perf_counts = module.requests[0].get_perf_counts()
-    print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format('name', 'layer_type', 'exet_type', 'status',
-                                                      'real_time, us'))
-    for layer, stats in perf_counts.items():
-        print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
-                                                          stats['status'], stats['real_time']))
-
-
 def change_layout(model_input):
     """
     Change layout of the image from [H, W, C] to [N, C, H, W]
@@ -160,8 +151,6 @@ class Model:
         log.info('OpenVINO Inference Engine')
         log.info('build: {}'.format(get_version()))
         self.ie = IECore()
-        self.ie.set_config(
-            {"PERF_COUNT": "YES" if self.args.perf_counts else "NO"}, args.device)
         self.encoder = read_net(self.args.m_encoder, self.ie)
         self.dec_step = read_net(self.args.m_decoder, self.ie)
         self.exec_net_encoder = self.ie.load_network(network=self.encoder, device_name=self.args.device)

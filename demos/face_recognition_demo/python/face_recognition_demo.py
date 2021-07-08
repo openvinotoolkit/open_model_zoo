@@ -111,8 +111,6 @@ def build_argparser():
                             'of the kernels.')
     infer.add_argument('-v', '--verbose', action='store_true',
                        help='Optional. Be more verbose.')
-    infer.add_argument('-pc', '--perf_stats', action='store_true',
-                       help='Optional. Output detailed per-layer performance stats.')
     infer.add_argument('-t_fd', metavar='[0..1]', type=float, default=0.6,
                        help='Optional. Probability threshold for face detections.')
     infer.add_argument('-t_id', metavar='[0..1]', type=float, default=0.3,
@@ -128,7 +126,6 @@ class FrameProcessor:
 
     def __init__(self, args):
         self.gpu_ext = args.gpu_lib
-        self.perf_count = args.perf_stats
         self.allow_grow = args.allow_grow and not args.no_show
 
         log.info('OpenVINO Inference Engine')
@@ -158,9 +155,7 @@ class FrameProcessor:
         log.info('Database is built, registered {} identities'.format(len(self.faces_database)))
 
     def get_config(self, device):
-        config = {
-            "PERF_COUNT": "YES" if self.perf_count else "NO",
-        }
+        config = {}
         if device == 'GPU' and self.gpu_ext:
             config['CONFIG_FILE'] = self.gpu_ext
         return config
@@ -190,14 +185,6 @@ class FrameProcessor:
                     face_identities[i].id = id
 
         return [rois, landmarks, face_identities]
-
-    def get_performance_stats(self):
-        stats = {
-            'face_detector': self.face_detector.get_performance_stats(),
-            'landmarks': self.landmarks_detector.get_performance_stats(),
-            'face_identifier': self.face_identifier.get_performance_stats(),
-        }
-        return stats
 
 
 def draw_detections(frame, frame_processor, detections, output_transform):
@@ -240,7 +227,6 @@ def main():
 
     frame_num = 0
     metrics = PerformanceMetrics()
-    print_perf_stats = args.perf_stats
     presenter = None
     output_transform = None
     input_crop = None
@@ -280,9 +266,6 @@ def main():
         if video_writer.isOpened() and (args.output_limit <= 0 or frame_num <= args.output_limit):
             video_writer.write(frame)
 
-        if print_perf_stats:
-            log.debug('Performance stats:')
-            log.debug(frame_processor.get_performance_stats())
         if not args.no_show:
             cv2.imshow('Face recognition demo', frame)
             key = cv2.waitKey(1)

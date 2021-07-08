@@ -24,7 +24,7 @@ import cv2 as cv
 from tqdm import tqdm
 from utils import (COLOR_BLACK, COLOR_RED, COLOR_WHITE, DEFAULT_RESIZE_STEP,
                    DEFAULT_WIDTH, MAX_HEIGHT, MAX_WIDTH, MIN_HEIGHT, MIN_WIDTH,
-                   PREPROCESSING, Model, calculate_probability, print_stats,
+                   PREPROCESSING, Model, calculate_probability,
                    create_renderer, prerocess_crop, strip_internal_spaces)
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
@@ -179,11 +179,6 @@ def non_interactive_demo(model, args):
                         cv.waitKey(0)
         else:
             log.info("Confidence score is low. The formula was not recognized.")
-    if args.perf_counts:
-        log.info("Encoder performance statistics")
-        print_stats(model.exec_net_encoder)
-        log.info("Decoder performance statistics")
-        print_stats(model.exec_net_decoder)
 
 
 def build_argparser():
@@ -221,8 +216,6 @@ def build_argparser():
                       help='Optional. Resolution of the demo application window. Default: 1280 720')
     args.add_argument('--preprocessing_type', choices=PREPROCESSING.keys(),
                       help="Optional. Type of the preprocessing", default='crop')
-    args.add_argument('-pc', '--perf_counts',
-                      action='store_true', default=False)
     args.add_argument('--imgs_layer', help='Optional. Encoder input name for images. See README for details.',
                       default='imgs')
     args.add_argument('--row_enc_out_layer',

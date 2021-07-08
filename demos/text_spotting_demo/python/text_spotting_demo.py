@@ -117,9 +117,6 @@ def build_argparser():
     args.add_argument('--show_boxes',
                       help='Optional. Show bounding boxes.',
                       action='store_true')
-    args.add_argument('-pc', '--perf_counts',
-                      help='Optional. Report performance counters.',
-                      action='store_true')
     args.add_argument('-r', '--raw_output_message',
                       help='Optional. Output inference results raw values.',
                       action='store_true')
@@ -335,15 +332,6 @@ def main():
         cv2.putText(frame, inf_time_message, (15, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
         cv2.putText(frame, render_time_message, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
 
-        # Print performance counters.
-        if args.perf_counts:
-            perf_counts = mask_rcnn_exec_net.requests[0].get_perf_counts()
-            log.debug('Performance counters:')
-            log.debug('{:<70} {:<15} {:<15} {:<15} {:<10}'.format('name', 'layer_type', 'exet_type', 'status',
-                                                                  'real_time, us'))
-            for layer, stats in perf_counts.items():
-                log.debug('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
-                                                                      stats['status'], stats['real_time']))
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(frame)
