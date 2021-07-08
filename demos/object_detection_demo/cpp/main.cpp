@@ -314,7 +314,8 @@ int main(int argc, char *argv[]) {
 
         InferenceEngine::Core core;
 
-        AsyncPipeline pipeline(std::move(model),
+        AsyncPipeline pipeline(
+            std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
@@ -342,8 +343,7 @@ int main(int argc, char *argv[]) {
                 if (curr_frame.empty()) {
                     if (frameNum == -1) {
                         throw std::logic_error("Can't read an image from the input");
-                    }
-                    else {
+                    } else {
                         // Input stream is over
                         break;
                     }
@@ -356,8 +356,7 @@ int main(int argc, char *argv[]) {
             if (frameNum == 0) {
                 if (found == std::string::npos) {
                     outputResolution = curr_frame.size();
-                }
-                else {
+                } else {
                     outputResolution = cv::Size{
                         std::stoi(FLAGS_output_resolution.substr(0, found)),
                         std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
@@ -402,32 +401,35 @@ int main(int argc, char *argv[]) {
                     int key = cv::waitKey(1);
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                         keepRunning = false;
-                    }
-                    else {
+                    } else {
                         presenter.handleKey(key);
                     }
                 }
             }
-        }
+        } // while(keepRunning)
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
+
         for (; framesProcessed <= frameNum; framesProcessed++) {
-            while (!(result = pipeline.getResult())) {}
-            auto renderingStart = std::chrono::steady_clock::now();
-            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
-            //--- Showing results and device information
-            presenter.drawGraphs(outFrame);
-            renderMetrics.update(renderingStart);
-            metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                videoWriter.write(outFrame);
-            }
-            if (!FLAGS_no_show) {
-                cv::imshow("Detection Results", outFrame);
-                //--- Updating output window
-                cv::waitKey(1);
+            result = pipeline.getResult();
+            if (result != nullptr)
+            {
+                auto renderingStart = std::chrono::steady_clock::now();
+                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
+                //--- Showing results and device information
+                presenter.drawGraphs(outFrame);
+                renderMetrics.update(renderingStart);
+                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
+                    videoWriter.write(outFrame);
+                }
+                if (!FLAGS_no_show) {
+                    cv::imshow("Detection Results", outFrame);
+                    //--- Updating output window
+                    cv::waitKey(1);
+                }
             }
         }
 
