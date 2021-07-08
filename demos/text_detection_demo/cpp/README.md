@@ -114,7 +114,7 @@ For example, use the following command line command to run the application:
   -tr_o_blb_nm "logits"
 ```
 
-For `text-recognition-resnet-fc` and `text-recognition-0015` you should use `simple` decoder (`text-recognition-0015-decoder`) for `-dt` option. For other models use `ctc` decoder (default decoder). In case of `text-recognition-0015` model, specify path to `text-recognition-0015-encoder` models for `-m_tr` key and decoder part will be found automatically as shown on example below:
+For `text-recognition-resnet-fc` and `text-recognition-0015` you should use `simple` decoder for `-dt` option. For other models use `ctc` decoder (default decoder). In case of `text-recognition-0015` model, specify path to `text-recognition-0015-encoder` models for `-m_tr` key and decoder part (`text-recognition-0015-decoder`) will be found automatically as shown on example below:
 
 ```sh
 ./text_detection_demo \
