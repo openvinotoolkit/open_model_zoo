@@ -156,8 +156,8 @@ def draw_poses(img, poses, point_score_threshold, output_transform, skeleton=def
     return img
 
 
-def print_raw_results(poses, scores):
-    log.debug('Poses:')
+def print_raw_results(poses, scores, frame_id):
+    log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
     for pose, pose_score in zip(poses, scores):
         pose_str = ' '.join('({:.2f}, {:.2f}, {:.2f})'.format(p[0], p[1], p[2]) for p in pose)
         log.debug('{} | {:.2f}'.format(pose_str, pose_score))
@@ -216,7 +216,7 @@ def main():
             start_time = frame_meta['start_time']
 
             if len(poses) and args.raw_output_message:
-                print_raw_results(poses, scores)
+                print_raw_results(poses, scores, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
             frame = draw_poses(frame, poses, args.prob_threshold, output_transform)
@@ -261,7 +261,7 @@ def main():
         start_time = frame_meta['start_time']
 
         if len(poses) and args.raw_output_message:
-            print_raw_results(poses, scores)
+            print_raw_results(poses, scores, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
         frame = draw_poses(frame, poses, args.prob_threshold, output_transform)

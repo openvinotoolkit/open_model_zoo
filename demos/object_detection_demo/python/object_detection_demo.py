@@ -207,7 +207,8 @@ def draw_detections(frame, detections, palette, labels, output_transform):
     return frame
 
 
-def print_raw_results(detections, labels):
+def print_raw_results(detections, labels, frame_id):
+    log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
     log.debug(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
     for detection in detections:
         xmin, ymin, xmax, ymax = detection.get_coords()
@@ -258,7 +259,7 @@ def main():
             start_time = frame_meta['start_time']
 
             if len(objects) and args.raw_output_message:
-                print_raw_results(objects, model.labels)
+                print_raw_results(objects, model.labels, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
             frame = draw_detections(frame, objects, palette, model.labels, output_transform)
@@ -317,7 +318,7 @@ def main():
         start_time = frame_meta['start_time']
 
         if len(objects) and args.raw_output_message:
-            print_raw_results(objects, model.labels)
+            print_raw_results(objects, model.labels, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
         frame = draw_detections(frame, objects, palette, model.labels, output_transform)

@@ -62,7 +62,7 @@ class ResultRenderer:
             labels, probs = decode_output(logits, self.labels, top_k=self.number_of_predictions,
                                           label_postprocessing=self.postprocessing)
             if raw_output:
-                log.debug("Frame {}: {} - {:.2f}% -- {:.2f}ms".format(frame_ind, labels[0], probs[0] * 100, inference_time))
+                log.debug("Frame # {}: {} - {:.2f}% -- {:.2f}ms".format(frame_ind, labels[0], probs[0] * 100, inference_time))
         else:
             labels = ['Preparing...']
             probs = [0.]
