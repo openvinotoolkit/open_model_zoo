@@ -103,7 +103,7 @@ void HpeAssociativeEmbedding::changeInputSize(CNNNetwork& cnnNetwork) {
 std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     cv::Rect roi;
-    auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, resizeMode,true,&roi);
+    auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, resizeMode, true, &roi);
     if (inputLayerSize.height - stride >= roi.height
         || inputLayerSize.width - stride >= roi.width) {
         slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
