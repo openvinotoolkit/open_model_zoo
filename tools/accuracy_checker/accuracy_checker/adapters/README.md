@@ -261,6 +261,8 @@ AccuracyChecker supports following set of adapters:
 * `simple_decoder` - the easiest decoder for text recognition models, converts indices of classes to given letters, slices output on the first entry of `eos_label`
   * `eos_label` - label which should finish decoding
   * `custom_label_map` - label map (if not provided by the dataset meta)
+  * `start_index` - start index in predicted data (Optional, default 0).
+  * `do_lower` - allows converting predicted data to lower case (Optional, default False).
 * `ctc_beam_search_decoder` - Python implementation of CTC beam search decoder without LM for speech recognition.
 * `ctc_greedy_decoder` - CTC greedy decoder for speech recognition.
 * `ctc_beam_search_decoder_with_lm` - Python implementation of CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition.
