@@ -84,7 +84,7 @@ class ImageRetrieval:
         for full_path in tqdm(self.impaths, desc='Reading gallery images.'):
             image = cv2.imread(full_path)
             if image is None:
-                print("ERROR: cannot find image, full_path =", full_path)
+                log.error("Cannot find image, full_path =", full_path)
             image = crop_resize(image, self.input_size)
             images.append(image)
 

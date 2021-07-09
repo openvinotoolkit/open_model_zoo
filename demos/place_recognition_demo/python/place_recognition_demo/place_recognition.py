@@ -83,7 +83,7 @@ class PlaceRecognition:
         for full_path in tqdm(self.impaths, desc='Reading gallery images.'):
             image = cv2.imread(str(full_path))
             if image is None:
-                print("ERROR: cannot process image, full_path =", str(full_path))
+                log.error("Cannot process image, full_path =", str(full_path))
                 continue
             image = crop_resize(image, self.input_size)
             images.append(image)

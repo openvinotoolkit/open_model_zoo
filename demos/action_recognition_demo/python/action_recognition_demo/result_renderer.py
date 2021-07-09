@@ -90,7 +90,7 @@ class ResultRenderer:
 
         if frame_ind == 0 and self.output and not self.video_writer.open(self.output,
             cv2.VideoWriter_fourcc(*'MJPG'), fps, (frame.shape[1], frame.shape[0])):
-            print("ERROR: Can't open video writer")
+            log.error("Can't open video writer")
             return -1
 
         if self.display_fps:

@@ -118,11 +118,15 @@ def main():
     # Loading source image
     img = cv2.imread(args.input, cv2.IMREAD_COLOR)
     if img is None:
+<<<<<<< HEAD
         print("Error: cannot load image " + args.input)
+=======
+        log.error("Cannot load image " + args.input)
+>>>>>>> 155a8d7cf (Add more log.error, log.debug)
         return -1
 
     if args.auto_mask_color and args.auto_mask_random:
-        print("Error: -ar and -ac options cannot be used together...")
+        log.error("-ar and -ac options cannot be used together")
         return -1
 
     log.info('OpenVINO Inference Engine')
@@ -144,7 +148,7 @@ def main():
     else:
         # Inpainting with GUI
         if args.no_show:
-            print("Error: --no_show argument cannot be used in GUI mode")
+            log.error("--no_show argument cannot be used in GUI mode")
             return -1
         InpaintingGUI(img, inpainting_processor).run()
     return 0

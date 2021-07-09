@@ -40,11 +40,10 @@ class ForwardTacotronIE:
         # fixed length of the input embeddings for forward
         self.forward_len = self.forward_net.input_info['data'].input_data.shape[1]
         if self.verbose:
-            print('Forward limitations : {0} symbols and {1} embeddings'.format(self.duration_len, self.forward_len))
+            log.debug('Forward limitations : {0} symbols and {1} embeddings'.format(self.duration_len, self.forward_len))
         self.is_attention = 'pos_mask' in self.forward_net.input_info
         if self.is_attention:
             self.init_pos_mask()
-            print("Load ForwardTacotron with attention")
         else:
             self.pos_mask = None
 
@@ -78,7 +77,7 @@ class ForwardTacotronIE:
     def seq_to_indexes(self, text):
         res = text_to_sequence(text)
         if self.verbose:
-            print(res)
+            log.debug(res)
         return res
 
     @staticmethod
@@ -138,8 +137,8 @@ class ForwardTacotronIE:
             preprocessed_embeddings = preprocessed_embeddings[:, :non_empty_symbols]
         indexes = self.build_index(duration, preprocessed_embeddings)
         if self.verbose:
-            print("Index: {0}, duration: {1}, embeddings: {2}, non_empty_symbols: {3}"
-                  .format(indexes.shape, duration.shape, preprocessed_embeddings.shape, non_empty_symbols))
+            log.debug("Index: {0}, duration: {1}, embeddings: {2}, non_empty_symbols: {3}"
+                      .format(indexes.shape, duration.shape, preprocessed_embeddings.shape, non_empty_symbols))
 
         return self.gather(preprocessed_embeddings, 1, indexes)
 
@@ -227,14 +226,14 @@ class ForwardTacotronIE:
                                          ((0, 0), (0, self.forward_len - sub_aligned_emb.shape[1]), (0, 0)),
                                          'constant', constant_values=0)
             if self.verbose:
-                print("SAEmb shape: {0}".format(sub_aligned_emb.shape))
+                log.debug("SAEmb shape: {0}".format(sub_aligned_emb.shape))
             mel = self.infer_mel(sub_aligned_emb, end_idx - start_idx, speaker_embedding)
             mels.append(mel)
             start_idx += self.forward_len
 
         res = np.concatenate(mels, axis=1)
         if self.verbose:
-            print("MEL shape :{0}".format(res.shape))
+            log.debug("MEL shape :{0}".format(res.shape))
 
         return res
 
