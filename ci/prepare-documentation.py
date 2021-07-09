@@ -326,7 +326,7 @@ def main():
 
             if not re.search(regex_line, raw_demo_readme):
                 raise RuntimeError(f'{md_path_rel}: "{model_line}" model reference is missing. '
-                    'Add it to README.md or update models.lst file.')
+                                   'Add it to README.md or update models.lst file.')
 
         # <name>_<implementation>
         demo_id = '_'.join(md_path_rel.parts[1:3])
