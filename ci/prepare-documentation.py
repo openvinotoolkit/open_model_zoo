@@ -179,6 +179,10 @@ def add_model_pages(output_root, parent_element, group, group_title):
     with (device_support_path).open('r', encoding="utf-8") as device_support_file:
         raw_device_support = device_support_file.read()
 
+    device_support_lines = re.findall(r'^\|\s\S+\s\|', raw_device_support, re.MULTILINE)
+    device_support_lines = [device_support_line.strip(' |')
+                            for device_support_line in device_support_lines]
+
     for md_path in sorted(OMZ_ROOT.glob(f'models/{group}/*/**/*.md')):
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
@@ -186,8 +190,21 @@ def add_model_pages(output_root, parent_element, group, group_title):
 
         device_support_path_rel = device_support_path.relative_to(OMZ_ROOT)
 
-        if model_name not in raw_device_support:
-            raise RuntimeError(f'{device_support_path_rel}: "{model_name}" model reference is missing.')
+        if model_name not in device_support_lines:
+            if not (md_path.parent / 'composite-model.yml').exists():
+                raise RuntimeError(f'{device_support_path_rel}: "{model_name}" '
+                                   'model reference is missing.')
+
+            model_subdirs = (subdir.name for subdir in md_path.parent.glob('*/**'))
+
+            for model_subdir in model_subdirs:
+                if not (md_path.parent / model_subdir / 'model.yml').exists():
+                    continue # non-model folder
+
+                if model_subdir not in device_support_lines:
+                    raise RuntimeError(f'{device_support_path_rel}: '
+                                       f'"{model_subdir}" part reference of '
+                                       f'"{model_name}" composite model is missing.')
 
         expected_md_path = Path('models', group, model_name, 'README.md')
 
@@ -305,7 +322,7 @@ def main():
                 continue
 
             model_line = model_line.rstrip('\n')
-            regex_line = model_line.replace('?', '.').replace('*', '.*')
+            regex_line = model_line.replace('?', '.').replace('*', '[^\s]+')
 
             if not re.search(regex_line, raw_demo_readme):
                 raise RuntimeError(f'{md_path_rel}: "{model_line}" model reference is missing. '
