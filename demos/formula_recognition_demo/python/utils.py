@@ -119,10 +119,10 @@ def prerocess_crop(crop, tgt_shape, preprocess_type='crop'):
     return preprocess_image(PREPROCESSING[preprocess_type], bin_crop, tgt_shape)
 
 
-def read_net(model_xml, ie):
+def read_net(model_xml, ie, model_type):
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
-    log.info('Reading model {}'.format(model_xml))
+    log.info('Reading {} model {}'.format(model_type, model_xml))
     return ie.read_network(model_xml, model_bin)
 
 
@@ -151,12 +151,12 @@ class Model:
         log.info('OpenVINO Inference Engine')
         log.info('build: {}'.format(get_version()))
         self.ie = IECore()
-        self.encoder = read_net(self.args.m_encoder, self.ie)
-        self.dec_step = read_net(self.args.m_decoder, self.ie)
+        self.encoder = read_net(self.args.m_encoder, self.ie, 'encoder')
+        self.dec_step = read_net(self.args.m_decoder, self.ie, 'decoder')
         self.exec_net_encoder = self.ie.load_network(network=self.encoder, device_name=self.args.device)
-        log.info('Loaded model {} to {}'.format(args.m_encoder, args.device))
+        log.info('The encoder model {} is loaded to {}'.format(args.m_encoder, args.device))
         self.exec_net_decoder = self.ie.load_network(network=self.dec_step, device_name=self.args.device)
-        log.info('Loaded model {} to {}'.format(args.m_decoder, args.device))
+        log.info('The decoder model {} is loaded to {}'.format(args.m_decoder, args.device))
         self.images_list = []
         self.vocab = Vocab(self.args.vocab_path)
         self.model_status = Model.Status.READY

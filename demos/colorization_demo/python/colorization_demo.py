@@ -83,7 +83,7 @@ if __name__ == '__main__':
     output_shape = load_net.outputs[output_blob].shape
 
     exec_net = ie.load_network(network=load_net, device_name=args.device)
-    log.info('Loaded model {} to {}'.format(args.model, args.device))
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     _, _, h_in, w_in = input_shape
 

@@ -145,7 +145,7 @@ def main():
 
     # load model to the device
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
-    log.info('Loaded model {} to {}'.format(args.model, args.device))
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     if args.questions:
         def questions():

@@ -99,7 +99,7 @@ def main():
     model_xml_emb = args.model_emb
     model_bin_emb = model_xml_emb.with_suffix(".bin")
 
-    log.info('Reading model {}'.format(model_xml_emb))
+    log.info('Reading embedding model {}'.format(model_xml_emb))
     ie_encoder_emb = ie.read_network(model=model_xml_emb, weights=model_bin_emb)
     input_names_model_emb = list(ie_encoder_emb.input_info.keys())
     input_names_emb = args.input_names_emb.split(',')
@@ -138,13 +138,13 @@ def main():
 
         # Loading model to the plugin
         ie_encoder_exec_emb_dict[length] = ie.load_network(network=ie_encoder_emb, device_name=args.device)
-    log.info('Loaded model {} to {}'.format(model_xml_emb, args.device))
+    log.info('The embedding model {} is loaded to {}'.format(model_xml_emb, args.device))
 
     # Read model for final exact qa
     if args.model_qa:
         model_xml = args.model_qa
         model_bin = model_xml.with_suffix(".bin")
-        log.info('Reading model {}'.format(model_xml))
+        log.info('Reading question model {}'.format(model_xml))
 
         ie_encoder_qa = ie.read_network(model=model_xml, weights=model_bin)
         ie_encoder_qa.batch_size = 1
@@ -163,7 +163,7 @@ def main():
 
         # Loading model to the plugin
         ie_encoder_qa_exec = ie.load_network(network=ie_encoder_qa, device_name=args.device)
-        log.info('Loaded model {} to {}'.format(model_xml, args.device))
+        log.info('The question model {} is loaded to {}'.format(model_xml, args.device))
 
         max_length_qc = ie_encoder_qa.input_info[input_names_qa[0]].input_data.shape[1]
 

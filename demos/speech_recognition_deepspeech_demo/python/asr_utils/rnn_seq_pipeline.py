@@ -36,7 +36,7 @@ class RnnSeqPipelineStage(BlockedSeqPipelineStage):
         log.info('Reading model {}'.format(model))
         net = ie.read_network(model=model)
         self.exec_net = ie.load_network(network=net, device_name=device)
-        log.info('Loaded model {} to {}'.format(model, device))
+        log.info('The model {} is loaded to {}'.format(model, device))
 
     def _reset_state(self):
         super()._reset_state()

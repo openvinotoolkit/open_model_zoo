@@ -26,7 +26,7 @@ class PersonDetector(IEModel):
     def __init__(self, model_path, device, ie_core, num_requests, output_shape=None):
         """Constructor"""
 
-        super().__init__(model_path, device, ie_core, num_requests, output_shape)
+        super().__init__(model_path, device, ie_core, num_requests, 'person detection', output_shape)
 
         _, _, h, w = self.input_size
         self.input_height = h

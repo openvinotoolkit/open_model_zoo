@@ -85,17 +85,17 @@ def main():
     log.info('build: {}'.format(get_version()))
     ie = IECore()
 
-    log.info('Reading model {}'.format(args.translation_model))
+    log.info('Reading translation model {}'.format(args.translation_model))
     gan_model = CocosnetModel(ie, args.translation_model,
                               args.translation_model.replace(".xml", ".bin"),
                               args.device)
-    log.info('Loaded model {} to {}'.format(args.translation_model, args.device))
+    log.info('The translation model {} is loaded to {}'.format(args.translation_model, args.device))
 
-    log.info('Reading model {}'.format(args.segmentation_model))
+    log.info('Reading semantic segmentation model {}'.format(args.segmentation_model))
     seg_model = SegmentationModel(ie, args.segmentation_model,
                                   args.segmentation_model.replace(".xml", ".bin"),
                                   args.device) if args.segmentation_model else None
-    log.info('Loaded model {} to {}'.format(args.segmentation_model, args.device))
+    log.info('The semantic segmentation model {} is loaded to {}'.format(args.segmentation_model, args.device))
 
     input_data = []
     use_seg = bool(args.input_images) and bool(args.segmentation_model)

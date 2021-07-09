@@ -36,7 +36,7 @@ class InferenceEngine:
             'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
 
         self.exec_net = self.ie.load_network(network=self.net, num_requests=1, device_name=device)
-        log.info('Loaded model {} to {}'.format(net_model_xml_path, device))
+        log.info('The model {} is loaded to {}'.format(net_model_xml_path, device))
 
     def infer(self, img):
         img = img[0:img.shape[0] - (img.shape[0] % self.stride),

@@ -101,7 +101,7 @@ def main():
 
     # Loading model to the plugin
     exec_net = ie.load_network(network=net, device_name=args.device)
-    log.info('Loaded model {} to {}'.format(args.model, args.device))
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     # Start sync inference
     infer_time = []

@@ -119,7 +119,7 @@ def main():
     args.no_keep_aspect_ratio = model_type == 'yolact' or args.no_keep_aspect_ratio
 
     exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)
-    log.info('Loaded model {} to {}'.format(args.model, args.device))
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     frame = cap.read()
     if frame is None:

@@ -101,17 +101,17 @@ def main():
     ie = IECore()
 
     # Read IR
-    log.info('Reading model {}'.format(args.model_pnet))
+    log.info('Reading proposal model {}'.format(args.model_pnet))
     p_net = ie.read_network(args.model_pnet)
     assert len(p_net.input_info.keys()) == 1, "Pnet supports only single input topologies"
     assert len(p_net.outputs) == 2, "Pnet supports two output topologies"
 
-    log.info('Reading model {}'.format(args.model_rnet))
+    log.info('Reading refine model {}'.format(args.model_rnet))
     r_net = ie.read_network(args.model_rnet)
     assert len(r_net.input_info.keys()) == 1, "Rnet supports only single input topologies"
     assert len(r_net.outputs) == 2, "Rnet supports two output topologies"
 
-    log.info('Reading model {}'.format(args.model_onet))
+    log.info('Reading output model {}'.format(args.model_onet))
     o_net = ie.read_network(args.model_onet)
     assert len(o_net.input_info.keys()) == 1, "Onet supports only single input topologies"
     assert len(o_net.outputs) == 3, "Onet supports three output topologies"
@@ -187,7 +187,7 @@ def main():
             p_net.reshape({pnet_input_blob: [1, 3, ws, hs]})  # Change weidth and height of input blob
             exec_pnet = ie.load_network(network=p_net, device_name=args.device)
             if i == 0 and not is_loaded_before:
-                log.info("Loaded model {} to {}".format(args.model_pnet, args.device))
+                log.info("The proposal model {} is loaded to {}".format(args.model_pnet, args.device))
 
             p_res = exec_pnet.infer(inputs={pnet_input_blob: image})
             pnet_res.append(p_res)
@@ -210,7 +210,7 @@ def main():
             r_net.reshape({rnet_input_blob: [len(rectangles), 3, 24, 24]})  # Change batch size of input blob
             exec_rnet = ie.load_network(network=r_net, device_name=args.device)
             if not is_loaded_before:
-                log.info("Loaded model {} to {}".format(args.model_rnet, args.device))
+                log.info("The refine model {} is loaded to {}".format(args.model_rnet, args.device))
 
             rnet_input = []
             for rectangle in rectangles:
@@ -230,7 +230,7 @@ def main():
             o_net.reshape({onet_input_blob: [len(rectangles), 3, 48, 48]})  # Change batch size of input blob
             exec_onet = ie.load_network(network=o_net, device_name=args.device)
             if not is_loaded_before:
-                log.info("Loaded model {} to {}".format(args.model_onet, args.device))
+                log.info("The output model {} is loaded to {}".format(args.model_onet, args.device))
                 is_loaded_before = True
 
             onet_input = []

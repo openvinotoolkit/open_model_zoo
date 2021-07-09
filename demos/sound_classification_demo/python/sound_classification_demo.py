@@ -165,7 +165,7 @@ def main():
         sys.exit(1)
 
     exec_net = ie.load_network(network=net, device_name=args.device)
-    log.info('Loaded model {} to {}'.format(args.model, args.device))
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     labels = []
     if args.labels:

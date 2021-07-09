@@ -32,18 +32,18 @@ def load_ie_core(device, cpu_extension=None):
 class IEModel:  # pylint: disable=too-few-public-methods
     """ Class that allows worknig with Inference Engine model. """
 
-    def __init__(self, model_path, device, ie_core, num_requests, output_shape=None):
+    def __init__(self, model_path, device, ie_core, num_requests, model_type, output_shape=None):
         """Constructor"""
         if model_path.endswith((".xml", ".bin")):
             model_path = model_path[:-4]
-        log.info('Reading model {}'.format(model_path + ".xml"))
+        log.info('Reading {} model {}'.format(model_type, model_path + ".xml"))
         self.net = ie_core.read_network(model_path + ".xml", model_path + ".bin")
         assert len(self.net.input_info) == 1, "One input is expected"
 
         self.exec_net = ie_core.load_network(network=self.net,
                                              device_name=device,
                                              num_requests=num_requests)
-        log.info('Loaded model {} to {}'.format(model_path + ".xml", device))
+        log.info('The {} model {} is loaded to {}'.format(model_type, model_path + ".xml", device))
 
         self.input_name = next(iter(self.net.input_info))
         if len(self.net.outputs) > 1:

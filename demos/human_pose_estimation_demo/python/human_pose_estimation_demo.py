@@ -185,7 +185,7 @@ def main():
 
     hpe_pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    log.info('Loaded model {} to {}'.format(args.model, args.device))
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
     log_runtime_settings(hpe_pipeline.exec_net, args.device)
 
     hpe_pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})

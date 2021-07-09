@@ -41,7 +41,7 @@ class FaceIdentifier(Module):
             self.descriptor = desc
 
     def __init__(self, ie, model, match_threshold=0.5, match_algo='HUNGARIAN'):
-        super(FaceIdentifier, self).__init__(ie, model)
+        super(FaceIdentifier, self).__init__(ie, model, 'face reidentification')
 
         assert len(self.model.input_info) == 1, 'Expected 1 input blob'
         assert len(self.model.outputs) == 1, 'Expected 1 output blob'

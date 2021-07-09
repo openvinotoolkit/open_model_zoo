@@ -41,7 +41,7 @@ class IEModel: # pylint: disable=too-few-public-methods
         self.output_name = next(iter(self.net.outputs))
         self.input_size = self.net.input_info[self.input_name].input_data.shape
         self.exec_net = ie.load_network(network=self.net, device_name=device)
-        log.info('Loaded model {} to {}'.format(model_path, device))
+        log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''

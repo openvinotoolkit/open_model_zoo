@@ -133,7 +133,7 @@ def main():
         labels_file = osp.join(root_dir, 'cityscapes_labels.txt')
         segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, labels_file,
                                             args.threshold, args.device, args.cpu_extension)
-    log.info('Loaded model {} to {}'.format(model_path, args.device))
+    log.info('The model {} is loaded to {}'.format(model_path, args.device))
 
     black_board = False
     output_frame = np.full((frame.shape[0], frame.shape[1], 3), 255, dtype='uint8')

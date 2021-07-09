@@ -80,7 +80,7 @@ class TranslationEngine:
             weights=model_bin
         )
         self.net_exec = ie.load_network(self.net, device)
-        log.info('Loaded model {} to {}'.format(model_xml, device))
+        log.info('The model {} is loaded to {}'.format(model_xml, device))
         self.output_name = output_name
         assert self.output_name != "", "there is not output in model"
 

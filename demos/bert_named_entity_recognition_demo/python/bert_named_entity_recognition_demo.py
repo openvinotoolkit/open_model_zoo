@@ -98,7 +98,7 @@ def main():
         max_length = max_sent_length
     # load model to the device
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
-    log.info('Loaded model {} to {}'.format(args.model, args.device))
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
     # maximum number of tokens that can be processed by network at once
     t0 = time.perf_counter()
     t_count = 0

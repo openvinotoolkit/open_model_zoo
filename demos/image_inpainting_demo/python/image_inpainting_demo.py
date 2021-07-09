@@ -131,7 +131,7 @@ def main():
 
     log.info('Reading model {}'.format(args.model))
     inpainting_processor = ImageInpainting(ie, args.model, args.device)
-    log.info('Loaded model {} to {}'.format(args.model, args.device))
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     if args.auto_mask_color or args.auto_mask_random:
         # Command-line inpaining for just one image

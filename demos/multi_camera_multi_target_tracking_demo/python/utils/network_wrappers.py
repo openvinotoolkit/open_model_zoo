@@ -38,7 +38,8 @@ class Detector(DetectorInterface):
 
     def __init__(self, ie, model_path, trg_classes, conf=.6,
                  device='CPU', ext_path='', max_num_frames=1):
-        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=max_num_frames)
+        self.net = load_ie_model(ie, model_path, device, None, 'object detection',
+                                 ext_path, num_reqs=max_num_frames)
         self.trg_classes = trg_classes
         self.confidence = conf
         self.expand_ratio = (1., 1.)
@@ -103,7 +104,8 @@ class VectorCNN:
 
     def __init__(self, ie, model_path, device='CPU', ext_path='', max_reqs=100):
         self.max_reqs = max_reqs
-        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
+        self.net = load_ie_model(ie, model_path, device, None, 'object reidentification',
+                                 ext_path, num_reqs=self.max_reqs)
 
     def forward(self, batch):
         """Performs forward of the underlying network on a given batch"""
@@ -132,7 +134,8 @@ class MaskRCNN(DetectorInterface):
         self.trg_classes = trg_classes
         self.max_reqs = max_reqs
         self.confidence = conf
-        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
+        self.net = load_ie_model(ie, model_path, device, None, 'instance segmentation',
+                                 ext_path, num_reqs=self.max_reqs)
 
         required_input_keys = {'image'}
         required_output_keys = {'boxes', 'labels', 'masks'}

@@ -66,7 +66,7 @@ class WaveRNNIE:
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        log.info('Reading model {}'.format(model_xml))
+        log.info('Reading WaveRNN model {}'.format(model_xml))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
         return net
 
@@ -78,7 +78,7 @@ class WaveRNNIE:
                 exec_net.append(self.ie.load_network(network=net, device_name=self.device))
         else:
             exec_net = self.ie.load_network(network=net, device_name=self.device)
-        log.info('Loaded model {} to {}'.format(path, self.device))
+        log.info('The WaveRNN model {} is loaded to {}'.format(path, self.device))
         return exec_net
 
     @staticmethod
@@ -219,7 +219,7 @@ class MelGANIE:
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        log.info('Reading model {}'.format(model_xml))
+        log.info('Reading MelGAN model {}'.format(model_xml))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
         return net
 
@@ -234,7 +234,7 @@ class MelGANIE:
                 net.reshape({"mel": orig_shape})
         else:
             exec_net = self.ie.load_network(network=net, device_name=self.device)
-        log.info('Loaded model {} to {}'.format(path, self.device))
+        log.info('The MelGAN model {} is loaded to {}'.format(path, self.device))
         return exec_net
 
     def forward(self, mel):

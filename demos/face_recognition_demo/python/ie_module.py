@@ -18,9 +18,10 @@ import logging as log
 
 
 class Module:
-    def __init__(self, ie, model):
+    def __init__(self, ie, model, model_type):
         self.ie = ie
-        log.info('Reading model {}'.format(model))
+        self.model_type = model_type
+        log.info('Reading {} model {}'.format(model_type, model))
         self.model = ie.read_network(model, model.with_suffix('.bin'))
         self.model_path = model
         self.active_requests = 0
@@ -29,7 +30,7 @@ class Module:
     def deploy(self, device, plugin_config, max_requests=1):
         self.max_requests = max_requests
         self.exec_net = self.ie.load_network(self.model, device, config=plugin_config, num_requests=max_requests)
-        log.info('Loaded model {} to {}'.format(self.model_path, device))
+        log.info('The {} model {} is loaded to {}'.format(self.model_type, self.model_path, device))
 
     def enqueue(self, input):
         self.clear()

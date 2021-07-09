@@ -80,8 +80,8 @@ class AsyncWrapper:
 
 
 class IEModel:
-    def __init__(self, model_path, ie_core, target_device, num_requests, batch_size=1):
-        log.info('Reading model {}'.format(model_path))
+    def __init__(self, model_path, ie_core, target_device, num_requests, model_type, batch_size=1):
+        log.info('Reading {} model {}'.format(model_type, model_path))
         self.net = ie_core.read_network(model_path)
         self.net.batch_size = batch_size
         assert len(self.net.input_info) == 1, "One input is expected"
@@ -93,7 +93,7 @@ class IEModel:
         self.input_size = self.net.input_info[self.input_name].input_data.shape
         self.output_size = self.exec_net.requests[0].output_blobs[self.output_name].buffer.shape
         self.num_requests = num_requests
-        log.info('Loaded model {} to {}'.format(model_path, target_device))
+        log.info('The {} model {} is loaded to {}'.format(model_type, model_path, target_device))
 
     def infer(self, frame):
         input_data = {self.input_name: frame}

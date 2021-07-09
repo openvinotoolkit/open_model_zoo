@@ -103,13 +103,13 @@ def main():
     else:
         encoder_target_device = decoder_target_device
 
-    models = [IEModel(args.m_encoder, ie, encoder_target_device,
-                num_requests=(3 if args.device == 'MYRIAD' else 1))]
+    models = [IEModel(args.m_encoder, ie, encoder_target_device, model_type='encoder',
+                      num_requests=(3 if args.device == 'MYRIAD' else 1))]
 
     if args.architecture_type == 'en-de':
         if args.m_decoder is None:
             raise RuntimeError('No decoder for encoder-decoder model type (-m_de) provided')
-        models.append(IEModel(args.m_decoder, ie, decoder_target_device, num_requests=2))
+        models.append(IEModel(args.m_decoder, ie, decoder_target_device, model_type='decoder', num_requests=2))
         seq_size = models[1].input_size[1]
     elif args.architecture_type == 'en-mean':
         models.append(DummyDecoder(num_requests=2))

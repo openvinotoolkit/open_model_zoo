@@ -57,13 +57,13 @@ class IEModel:
         return self.inputs_info[self.input_key].input_data.shape
 
 
-def load_ie_model(ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=1):
+def load_ie_model(ie, model_xml, device, plugin_dir, model_type, cpu_extension='', num_reqs=1):
     """Loads a model in the Inference Engine format"""
     # Plugin initialization for specified device and load extensions library if specified
     if cpu_extension and 'CPU' in device:
         ie.add_extension(cpu_extension, 'CPU')
     # Read IR
-    log.info('Reading model {}'.format(model_xml))
+    log.info('Reading {} model {}'.format(model_type, model_xml))
     net = ie.read_network(model_xml, os.path.splitext(model_xml)[0] + ".bin")
 
     assert len(net.input_info) == 1 or len(net.input_info) == 2, \
@@ -77,6 +77,6 @@ def load_ie_model(ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=
 
     # Loading model to the plugin
     exec_net = ie.load_network(network=net, device_name=device, num_requests=num_reqs)
-    log.info('Loaded model {} to {}'.format(model_xml, device))
+    log.info('The {} model {} is loaded to {}'.format(model_type, model_xml, device))
     model = IEModel(exec_net, net.input_info, input_blob, out_blob)
     return model

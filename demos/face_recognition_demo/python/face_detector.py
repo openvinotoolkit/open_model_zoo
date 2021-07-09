@@ -48,7 +48,7 @@ class FaceDetector(Module):
             self.size[:] = np.clip(self.size, min, max)
 
     def __init__(self, ie, model, input_size, confidence_threshold=0.5, roi_scale_factor=1.15):
-        super(FaceDetector, self).__init__(ie, model)
+        super(FaceDetector, self).__init__(ie, model, 'face detection')
 
         assert len(self.model.input_info) == 1, 'Expected 1 input blob'
         assert len(self.model.outputs) == 1, 'Expected 1 output blob'

@@ -62,7 +62,7 @@ class QuartzNet:
             raise RuntimeError(f'QuartzNet output third dimension size must be {len(self.alphabet) + 1}')
         network.reshape({next(iter(network.input_info)): input_shape})
         self.exec_net = self.ie.load_network(network, device)
-        log.info('Loaded model {} to {}'.format(model_path, device))
+        log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def infer(self, melspectrogram):
         return next(iter(self.exec_net.infer({next(iter(self.exec_net.input_info)): melspectrogram}).values()))
