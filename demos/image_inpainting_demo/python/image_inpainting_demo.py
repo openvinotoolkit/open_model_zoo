@@ -118,11 +118,7 @@ def main():
     # Loading source image
     img = cv2.imread(args.input, cv2.IMREAD_COLOR)
     if img is None:
-<<<<<<< HEAD
-        print("Error: cannot load image " + args.input)
-=======
         log.error("Cannot load image " + args.input)
->>>>>>> 155a8d7cf (Add more log.error, log.debug)
         return -1
 
     if args.auto_mask_color and args.auto_mask_random:
