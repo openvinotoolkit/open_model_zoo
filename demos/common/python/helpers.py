@@ -17,6 +17,7 @@
 import cv2
 import logging as log
 
+from pipelines import parse_devices
 
 def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
     cv2.putText(frame, message, position, font_face, font_scale, (255, 255, 255), thickness + 1) # white border
@@ -37,11 +38,17 @@ def log_blobs_info(model):
     for name, layer in model.net.outputs.items():
         log.info('\tOutput blob: {}, shape: {}, precision: {}'.format(name, layer.shape, layer.precision))
 
-def log_runtime_settings(exec_net, device):
-    nireq = len(exec_net.requests)
-    nstreams = exec_net.get_config(device + '_THROUGHPUT_STREAMS')
-    if device == 'CPU':
-        nthreads = exec_net.get_config('CPU_THREADS_NUM')
-        log.info('\tNumber of threads: {}'.format(nthreads if int(nthreads) else 'AUTO'))
-    log.info('\tNumber of streams: {}'.format(nstreams))
-    log.info('\tNumber of infer requests: {}'.format(nireq))
+def log_runtime_settings(exec_net, devices):
+    log.info('\tNumber of infer requests: {}'.format(len(exec_net.requests)))
+    if 'AUTO' in devices: return
+
+    for device in set(parse_devices(devices)):
+        try:
+            nstreams = exec_net.get_config(device + '_THROUGHPUT_STREAMS')
+            log.info('\t\t{} device'.format(device))
+            log.info('\tNumber of streams: {}'.format(nstreams))
+            if device == 'CPU':
+                nthreads = exec_net.get_config('CPU_THREADS_NUM')
+                log.info('\tNumber of threads: {}'.format(nthreads if int(nthreads) else 'AUTO'))
+        except RuntimeError:
+            pass
