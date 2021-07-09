@@ -322,7 +322,7 @@ def main():
                 continue
 
             model_line = model_line.rstrip('\n')
-            regex_line = model_line.replace('?', '.').replace('*', '[^\s]+')
+            regex_line = model_line.replace('?', '.').replace('*', '\S+')
 
             if not re.search(regex_line, raw_demo_readme):
                 raise RuntimeError(f'{md_path_rel}: "{model_line}" model reference is missing. '
