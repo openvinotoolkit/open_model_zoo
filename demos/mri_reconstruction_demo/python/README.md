@@ -1,4 +1,4 @@
-# Compressed Sensing Demo For Medical Images
+# MRI Reconstruction Python\* Demo
 
 This demo demonstrates MRI reconstruction model described in https://arxiv.org/abs/1810.12473 and implemented in https://github.com/rmsouza01/Hybrid-CS-Model-MRI/.
 The model is used to restore undersampled MRI scans which is useful for data compression.
