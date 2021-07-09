@@ -220,6 +220,7 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
             else:
                 average_precisions.append(np.nan)
             if profile_boxes:
+                labels_stat[label]['ap'] = average_precisions[-1]
                 labels_stat[label]['result'] = average_precisions[-1]
         if profile_boxes:
             self.profiler.update(annotations[0].identifier, labels_stat, self.name, np.nanmean(average_precisions))
@@ -530,6 +531,7 @@ def bbox_match(annotation: List[DetectionAnnotation], prediction: List[Detection
     fp = np.zeros_like(prediction_images)
     max_overlapped_dt = defaultdict(list)
     overlaps = np.array([])
+    full_iou = []
 
     for image in range(prediction_images.shape[0]):
         gt_img = annotation[prediction_images[image]]
@@ -545,6 +547,7 @@ def bbox_match(annotation: List[DetectionAnnotation], prediction: List[Detection
         annotation_boxes = gt_img.x_mins[idx], gt_img.y_mins[idx], gt_img.x_maxs[idx], gt_img.y_maxs[idx]
 
         overlaps = overlap_evaluator(prediction_box, annotation_boxes)
+        full_iou.append(overlaps)
         if ignore_difficult and allow_multiple_matches_per_ignored:
             ioa = IOA(include_boundaries)
             ignored = np.where(annotation_difficult == 1)[0]
@@ -587,7 +590,7 @@ def bbox_match(annotation: List[DetectionAnnotation], prediction: List[Detection
 
     return (
         tp, fp, prediction_boxes[:, 0], number_ground_truth,
-        max_overlapped_dt, prediction_boxes[:, 1:], overlaps
+        max_overlapped_dt, prediction_boxes[:, 1:], full_iou
     )
 
 
