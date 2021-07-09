@@ -34,25 +34,16 @@ cv::Mat resizeImageExt(const cv::Mat& mat, int width, int height, RESIZE_MODE re
         break;
     }
     case RESIZE_KEEP_ASPECT:
-    {
-        double scale = std::min(static_cast<double>(width) / mat.cols, static_cast<double>(height) / mat.rows);
-        cv::Mat resizedImage;
-        cv::resize(mat, resizedImage, cv::Size(0, 0), scale, scale, interpMode);
-        cv::copyMakeBorder(resizedImage, dst, 0, height - resizedImage.rows,
-            0, width - resizedImage.cols, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
-        if (roi) {
-            *roi = cv::Rect(0, 0, resizedImage.cols, resizedImage.rows);
-        }
-        break;
-    }
     case RESIZE_KEEP_ASPECT_LETTERBOX:
     {
         double scale = std::min(static_cast<double>(width) / mat.cols, static_cast<double>(height) / mat.rows);
         cv::Mat resizedImage;
         cv::resize(mat, resizedImage, cv::Size(0, 0), scale, scale, interpMode);
-        int dx = (width - resizedImage.cols) / 2;
-        int dy = (height - resizedImage.rows) / 2;
-        cv::copyMakeBorder(resizedImage, dst, dy, height-resizedImage.rows-dy,
+
+        int dx = resizeMode == RESIZE_KEEP_ASPECT ? 0 : (width - resizedImage.cols) / 2;
+        int dy = resizeMode == RESIZE_KEEP_ASPECT ? 0 : (height - resizedImage.rows) / 2;
+
+        cv::copyMakeBorder(resizedImage, dst, dy, height - resizedImage.rows - dy,
             dx, width - resizedImage.cols - dx, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
         if (roi) {
             *roi = cv::Rect(dx, dy, resizedImage.cols, resizedImage.rows);
