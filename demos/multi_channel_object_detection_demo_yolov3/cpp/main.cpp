@@ -519,7 +519,6 @@ int main(int argc, char* argv[]) {
 
                 averageFps = frameTime;
                 if (FLAGS_show_stats) {
-                    slog::dbg << "-------------------- Frame # " << "" << " --------------------"<<slog::endl;
                     slog::dbg << "Average Throughput : " << 1000.f/frameTime << " fps" << slog::endl;
                     if (++perfItersCounter >= FLAGS_n_sp) {
                         break;

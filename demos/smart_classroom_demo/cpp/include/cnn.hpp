@@ -20,11 +20,10 @@
 struct CnnConfig {
     explicit CnnConfig(const std::string& path_to_model, const std::string& model_type = "")
         : path_to_model(path_to_model), model_type(model_type) {}
-
-    /** @brief Model type*/
-    std::string model_type;
     /** @brief Path to model description */
     std::string path_to_model;
+    /** @brief Model type*/
+    std::string model_type;
     /** @brief Maximal size of batch */
     int max_batch_size{1};
 
