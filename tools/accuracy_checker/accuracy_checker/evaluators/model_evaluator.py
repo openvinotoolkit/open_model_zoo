@@ -551,9 +551,12 @@ class ModelEvaluator(BaseEvaluator):
         store_only = config.get('store_only', False)
         enable_profiling = config.get('profile', False)
         profile_type = 'json' if output_callback and enable_profiling else config.get('profile_report_type')
+        profile_log_dir = config.get('profiler_log_dir', self.dataset.config.get('_profiler_log_dir'))
         if enable_profiling:
             if not store_only:
                 self.metric_executor.enable_profiling(self.dataset, profile_type)
+                self.metric_executor.set_processing_info(self.get_processing_info(self.config))
+                self.metric_executor.set_profiling_dir(profile_log_dir or self.metric_executor.profiler_dir)
             else:
                 warning("Metric profiling disabled for prediction storing mode")
                 enable_profiling = False

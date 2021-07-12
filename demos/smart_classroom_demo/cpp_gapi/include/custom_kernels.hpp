@@ -41,17 +41,21 @@ struct FaceTrack {
     std::vector<Track> face_tracks;
 };
 
-template<> struct cv::detail::CompileArgTag<TrackerParamsPack> {
-    static const char* tag() {
-        return "custom.get_recognition_result_state_params";
-    }
-};
+namespace cv {
+    namespace detail {
+        template<> struct CompileArgTag<TrackerParamsPack> {
+            static const char* tag() {
+                return "custom.get_recognition_result_state_params";
+            }
+        };
 
-template<> struct cv::detail::CompileArgTag<bool> {
-    static const char* tag() {
-        return "custom.logger_state_params";
+        template<> struct CompileArgTag<bool> {
+            static const char* tag() {
+                return "custom.logger_state_params";
+            }
+        };
     }
-};
+}
 
 using GPrims = cv::GArray<cv::gapi::wip::draw::Prim>;
 template<typename T> using four = std::tuple<T, T, T, T>;

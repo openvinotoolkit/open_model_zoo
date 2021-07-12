@@ -40,10 +40,13 @@ class MetricsExecutor:
 
         self._dataset = dataset
         self.profile_metrics = False if dataset is None else dataset.config.get('_profile', False)
+        self.profiler_dir = None
         if self.profile_metrics:
             profiler_type = dataset.config.get('_report_type', 'csv')
             self.profiler = ProfilingExecutor(profile_report_type=profiler_type)
+            self.profiler_dir = dataset.config.get('_profiler_log_dir')
             self.profiler.set_dataset_meta(self._dataset.metadata)
+
 
         self.metrics = []
         self.need_store_predictions = False
@@ -194,10 +197,13 @@ class MetricsExecutor:
         }
 
     def set_profiling_dir(self, profiler_dir):
-        self.profiler.set_profiling_dir(profiler_dir)
+        if self.profiler:
+            self.profiler.set_profiling_dir(profiler_dir)
+        self.profiler_dir = profiler_dir
 
     def set_processing_info(self, processing_info):
-        self.profiler.set_executing_info(processing_info)
+        if self.profiler:
+            self.profiler.set_executing_info(processing_info)
 
     def reset(self):
         for metric in self.metrics:

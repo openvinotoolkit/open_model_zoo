@@ -21,6 +21,8 @@
 #include <utils/slog.hpp>
 #include "models/detection_model_centernet.h"
 
+#include <utils/image_utils.h>
+
 
 ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
     float confidenceThreshold, const std::vector<std::string>& labels)
@@ -110,17 +112,9 @@ cv::Mat getAffineTransform(float centerX, float centerY, int srcW, float rot, si
 
 std::shared_ptr<InternalModelData> ModelCenterNet::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
     auto& img = inputData.asRef<ImageInputData>().inputImage;
-
-    int imgWidth = img.cols;
-    int imgHeight = img.rows;
-    float centerX = imgWidth / 2.0f;
-    float centerY = imgHeight / 2.0f;
-    int scale = std::max(imgWidth, imgHeight);
-
-    auto transInput = getAffineTransform(centerX, centerY, scale, 0, netInputWidth, netInputHeight);
-    cv::Mat resizedImg;
-    cv::warpAffine(img, resizedImg, transInput, cv::Size(netInputWidth, netInputHeight), cv::INTER_LINEAR);
+    const auto& resizedImg = resizeImageExt(img, netInputWidth, netInputHeight, RESIZE_KEEP_ASPECT_LETTERBOX);
     request->SetBlob(inputsNames[0], wrapMat2Blob(resizedImg));
+
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
     return std::make_shared<InternalImageMatModelData>(resizedImg, img.cols, img.rows);
 }

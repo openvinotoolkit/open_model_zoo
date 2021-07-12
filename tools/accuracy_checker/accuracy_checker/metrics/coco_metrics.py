@@ -28,6 +28,7 @@ from ..representation import (
 from ..utils import get_or_parse_value, finalize_metric_result, UnsupportedPackage
 from .overlap import Overlap
 from .metric import PerImageEvaluationMetric
+from .detection import average_precision, APIntegralType
 
 try:
     import pycocotools.mask as maskUtils
@@ -118,13 +119,20 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
     def update(self, annotation, prediction):
         per_class_matching = super().update(annotation, prediction)
         per_class_result = [
-            compute_precision_recall(self.thresholds, [per_class_matching[i]])[0] for i, _ in enumerate(self.labels)
+            compute_precision_recall(self.thresholds, [per_class_matching[i]]) for i, _ in enumerate(self.labels)
         ]
+        precisions = [result[0] for result in per_class_result]
         if self.profiler:
-            for class_match, class_metric in zip(per_class_matching, per_class_result):
-                class_match['result'] = class_metric
-            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(per_class_result))
-        return per_class_result
+            for class_match, (precision, recall, all_precisions, all_recalls) in zip(
+                    per_class_matching, per_class_result
+            ):
+                class_match['result'] = precision
+                class_match['precision'] = precision
+                class_match['recall'] = recall
+                ap = average_precision(all_precisions, all_recalls, APIntegralType.voc_max)
+                class_match['ap'] = ap
+            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(precisions))
+        return precisions
 
     def evaluate(self, annotations, predictions):
         if self.profiler:
@@ -144,12 +152,18 @@ class MSCOCORecall(MSCOCOBaseMetric):
     def update(self, annotation, prediction):
         per_class_matching = super().update(annotation, prediction)
         per_class_result = [
-            compute_precision_recall(self.thresholds, [per_class_matching[i]])[1] for i, _ in enumerate(self.labels)
+            compute_precision_recall(self.thresholds, [per_class_matching[i]]) for i, _ in enumerate(self.labels)
         ]
+        recalls = [metric[1] for metric in per_class_result]
         if self.profiler:
-            for class_match, class_metric in zip(per_class_matching, per_class_result):
-                class_match['result'] = class_metric
-            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(per_class_result))
+            for class_match, (precision, recall, all_precisions, all_recalls) in zip(per_class_matching,
+                                                                                     per_class_result):
+                class_match['result'] = recall
+                class_match['precision'] = precision
+                class_match['recall'] = recall
+                ap = average_precision(all_precisions, all_recalls, APIntegralType.voc_max)
+                class_match['ap'] = ap
+            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(recalls))
         return per_class_result
 
     def evaluate(self, annotations, predictions):
@@ -393,7 +407,7 @@ def compute_precision_recall(thresholds, matching_results):
     tp_sum = np.cumsum(tps, axis=1).astype(dtype=float)
     fp_sum = np.cumsum(fps, axis=1).astype(dtype=float)
     if npig == 0:
-        return np.nan, np.nan
+        return np.nan, np.nan, np.array([]), np.array([])
     for t, (tp, fp) in enumerate(zip(tp_sum, fp_sum)):
         tp = np.array(tp)
         fp = np.array(fp)
@@ -426,7 +440,7 @@ def compute_precision_recall(thresholds, matching_results):
     mean_precision = 0 if np.size(precision[precision > -1]) == 0 else np.mean(precision[precision > -1])
     mean_recall = 0 if np.size(recall[recall > -1]) == 0 else np.mean(recall[recall > -1])
 
-    return mean_precision, mean_recall
+    return mean_precision, mean_recall, precision[precision > -1], recall[recall > -1]
 
 
 def compute_iou_boxes(annotation, prediction, *args, **kwargs):
