@@ -72,7 +72,7 @@ void FaceDetection::enqueue(const cv::Mat &frame) {
 
 FaceDetection::FaceDetection(const DetectorConfig& config) :
         BaseCnnDetection(config.is_async), config_(config) {
-    topoName = "face detector";
+    topoName = "Face Detection";
     auto cnnNetwork = config.ie.ReadNetwork(config.path_to_model);
 
     InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
@@ -112,7 +112,7 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
 
     input_name_ = inputInfo.begin()->first;
     net_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
-    printExecNetworkInfo(net_, config_.path_to_model, config_.deviceName);
+    printExecNetworkInfo(net_, config_.path_to_model, config_.deviceName, topoName);
 }
 
 DetectedObjects FaceDetection::fetchResults() {

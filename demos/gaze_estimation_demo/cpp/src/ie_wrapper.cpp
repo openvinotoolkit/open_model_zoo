@@ -15,8 +15,9 @@ namespace gaze_estimation {
 
 IEWrapper::IEWrapper(InferenceEngine::Core& ie,
                      const std::string& modelPath,
+                     const std::string& modelType,
                      const std::string& deviceName):
-           modelPath(modelPath), deviceName(deviceName), ie(ie) {
+           modelPath(modelPath), modelType(modelType), deviceName(deviceName), ie(ie) {
     network = ie.ReadNetwork(modelPath);
     setExecPart();
 }
@@ -56,7 +57,7 @@ void IEWrapper::setExecPart() {
     }
 
     executableNetwork = ie.LoadNetwork(network, deviceName);
-    printExecNetworkInfo(executableNetwork, modelPath, deviceName);
+    printExecNetworkInfo(executableNetwork, modelPath, deviceName, modelType);
     request = executableNetwork.CreateInferRequest();
 }
 

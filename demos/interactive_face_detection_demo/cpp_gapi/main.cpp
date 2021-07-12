@@ -358,7 +358,7 @@ int main(int argc, char *argv[]) {
             fileNameNoExt(FLAGS_m) + ".bin", // path to weights
             FLAGS_d                          // device to use
         };
-        slog::info << "Network " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
+        slog::info << "The Face Detection model  " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
 
         auto age_net = cv::gapi::ie::Params<AgeGender>{
             FLAGS_m_ag,                         // path to model
@@ -366,7 +366,7 @@ int main(int argc, char *argv[]) {
             FLAGS_d_ag                          // device to use
         }.cfgOutputLayers({ "age_conv3", "prob" });
         if (!FLAGS_m_ag.empty()) {
-            slog::info << "Network " << FLAGS_m_ag << " is loaded to " << FLAGS_d_ag << " device." << slog::endl;
+            slog::info << "The Age/Gender Recognition model " << FLAGS_m_ag << " is loaded to " << FLAGS_d_ag << " device." << slog::endl;
         }
         else {
             slog::info << "Age/Gender Recognition DISABLED." << slog::endl;
@@ -378,7 +378,7 @@ int main(int argc, char *argv[]) {
             FLAGS_d_hp                          // device to use
         }.cfgOutputLayers({ "angle_y_fc", "angle_p_fc", "angle_r_fc" });
         if (!FLAGS_m_hp.empty()) {
-            slog::info << "Network " << FLAGS_m_hp << " is loaded to " << FLAGS_d_hp << " device." << slog::endl;
+            slog::info << "The Head Pose Estimation model " << FLAGS_m_hp << " is loaded to " << FLAGS_d_hp << " device." << slog::endl;
         }
         else {
             slog::info << "Head Pose Estimation DISABLED." << slog::endl;
@@ -390,7 +390,7 @@ int main(int argc, char *argv[]) {
             FLAGS_d_lm                         // device to use
         }.cfgOutputLayers({ "align_fc3" });
         if (!FLAGS_m_lm.empty()) {
-            slog::info << "Network " << FLAGS_m_lm << " is loaded to " << FLAGS_d_lm << " device." << slog::endl;
+            slog::info << "The Facial Landmarks Estimation model " << FLAGS_m_lm << " is loaded to " << FLAGS_d_lm << " device." << slog::endl;
         }
         else {
             slog::info << "Facial Landmarks Estimation DISABLED." << slog::endl;
@@ -402,7 +402,7 @@ int main(int argc, char *argv[]) {
             FLAGS_d_em                          // device to use
         };
         if (!FLAGS_m_em.empty()) {
-            slog::info << "Network " << FLAGS_m_em << " is loaded to " << FLAGS_d_em << " device." << slog::endl;
+            slog::info << "The Emotions Recognition model " << FLAGS_m_em << " is loaded to " << FLAGS_d_em << " device." << slog::endl;
         }
         else {
             slog::info << "Emotions Recognition DISABLED." << slog::endl;

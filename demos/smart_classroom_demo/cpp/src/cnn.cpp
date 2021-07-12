@@ -45,7 +45,7 @@ void CnnDLSDKBase::Load() {
         cnnNetwork.setBatchSize(1);
         executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName, {{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::NO}});
     }
-    printExecNetworkInfo(executable_network_, config_.path_to_model, config_.deviceName);
+    printExecNetworkInfo(executable_network_, config_.path_to_model, config_.deviceName, config_.model_type);
     infer_request_ = executable_network_.CreateInferRequest();
 }
 

@@ -25,6 +25,7 @@ private:
     cv::Rect createEyeBoundingBox(const cv::Point2i& p1, const cv::Point2i& p2, float scale = 1.8) const;
     void rotateImageAroundCenter(const cv::Mat& srcImage, cv::Mat& dstImage, float angle) const;
 
+    const std::string modelType = "Eye State Estimation";
     IEWrapper ieWrapper;
     std::string inputBlobName, outputBlobName;
 };

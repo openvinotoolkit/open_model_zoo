@@ -23,6 +23,7 @@ public:
     ~HeadPoseEstimator() override;
 
 private:
+    const std::string modelType = "Head Pose Estimation";
     IEWrapper ieWrapper;
     std::string inputBlobName;
 };

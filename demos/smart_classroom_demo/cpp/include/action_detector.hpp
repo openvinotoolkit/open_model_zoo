@@ -55,8 +55,8 @@ using SSDHeads = std::vector<SSDHead>;
 * @brief Config for the Action Detection model
 */
 struct ActionDetectorConfig : public CnnConfig {
-    explicit ActionDetectorConfig(const std::string& path_to_model)
-        : CnnConfig(path_to_model) {}
+    explicit ActionDetectorConfig(const std::string& path_to_model, const std::string& model_type)
+        : CnnConfig(path_to_model, model_type) {}
 
     /** @brief Name of output blob with location info */
     std::string old_loc_blob_name{"mbox_loc1/out/conv/flat"};

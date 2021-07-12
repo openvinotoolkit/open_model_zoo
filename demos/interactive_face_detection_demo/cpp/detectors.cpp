@@ -354,7 +354,7 @@ CNNNetwork AntispoofingClassifier::read(const InferenceEngine::Core& ie) {
 AgeGenderDetection::AgeGenderDetection(const std::string &pathToModel,
                                        const std::string &deviceForInference,
                                        int maxBatch, bool isBatchDynamic, bool isAsync, bool doRawOutputMessages)
-    : BaseDetection("Age/Gender", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
+    : BaseDetection("Age/Gender Recognition", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
       enquedFaces(0) {
 }
 
@@ -440,7 +440,7 @@ CNNNetwork AgeGenderDetection::read(const InferenceEngine::Core& ie) {
 HeadPoseDetection::HeadPoseDetection(const std::string &pathToModel,
                                      const std::string &deviceForInference,
                                      int maxBatch, bool isBatchDynamic, bool isAsync, bool doRawOutputMessages)
-    : BaseDetection("Head Pose", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
+    : BaseDetection("Head Pose Estimation", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
       outputAngleR("angle_r_fc"), outputAngleP("angle_p_fc"), outputAngleY("angle_y_fc"), enquedFaces(0) {
 }
 
@@ -636,7 +636,7 @@ CNNNetwork EmotionsDetection::read(const InferenceEngine::Core& ie) {
 FacialLandmarksDetection::FacialLandmarksDetection(const std::string &pathToModel,
                                                    const std::string &deviceForInference,
                                                    int maxBatch, bool isBatchDynamic, bool isAsync, bool doRawOutputMessages)
-    : BaseDetection("Facial Landmarks", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
+    : BaseDetection("Facial Landmarks Estimation", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
       outputFacialLandmarksBlobName("align_fc3"), enquedFaces(0) {
 }
 
@@ -748,7 +748,7 @@ void Load::into(InferenceEngine::Core & ie, const std::string & deviceName, bool
         }
 
         detector.net = ie.LoadNetwork(detector.read(ie), deviceName, config);
-        printExecNetworkInfo(detector.net, detector.pathToModel, deviceName);
+        printExecNetworkInfo(detector.net, detector.pathToModel, deviceName, detector.topoName);
         slog::info << "\tBatch size is set to  " << detector.maxBatch << slog::endl;
     }
 }

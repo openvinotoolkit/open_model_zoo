@@ -59,4 +59,5 @@ public:
     void waitAndFetchResults();
 
     const TrackedObjects& getResults() const;
+    const std::string modelType = "Person Detection";
 };

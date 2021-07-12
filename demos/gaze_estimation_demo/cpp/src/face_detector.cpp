@@ -16,7 +16,7 @@ FaceDetector::FaceDetector(InferenceEngine::Core& ie,
                            const std::string& deviceName,
                            double detectionConfidenceThreshold,
                            bool enableReshape):
-             ieWrapper(ie, modelPath, deviceName),
+             ieWrapper(ie, modelPath, modelType, deviceName),
              detectionThreshold(detectionConfidenceThreshold),
              enableReshape(enableReshape) {
     const auto& inputInfo = ieWrapper.getInputBlobDimsInfo();

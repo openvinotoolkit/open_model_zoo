@@ -12,7 +12,7 @@ namespace gaze_estimation {
 EyeStateEstimator::EyeStateEstimator(InferenceEngine::Core& ie,
                                      const std::string& modelPath,
                                      const std::string& deviceName):
-                                     ieWrapper(ie, modelPath, deviceName) {
+                                     ieWrapper(ie, modelPath, modelType, deviceName) {
     inputBlobName = ieWrapper.expectSingleInput();
     ieWrapper.expectImageInput(inputBlobName);
     outputBlobName = ieWrapper.expectSingleOutput();

@@ -214,7 +214,7 @@ void configNets(const NetsFlagsPack& flags,
            flags.d_act,
        }.cfgOutputLayers(outputBlobList);
        networks += cv::gapi::networks(action_net);
-       slog::info << "Network " << flags.m_act << " is loaded to " << flags.d_act << " device." << slog::endl;
+       slog::info << "The Person/Action Detection model " << flags.m_act << " is loaded to " << flags.d_act << " device." << slog::endl;
     }
     else {
         slog::info << "Person/Action Detection DISABLED." << slog::endl;
@@ -228,7 +228,7 @@ void configNets(const NetsFlagsPack& flags,
         }.cfgInputReshape("data",
                           {1u, 3u, static_cast<size_t>(flags.inh_fd), static_cast<size_t>(flags.inw_fd)});
         networks += cv::gapi::networks(det_net);
-        slog::info << "Network " << flags.m_fd << " is loaded to " << flags.d_fd << " device." << slog::endl;
+        slog::info << "The Face Detection model" << flags.m_fd << " is loaded to " << flags.d_fd << " device." << slog::endl;
     }
     else {
         slog::info << "Face Detection DISABLED." << slog::endl;
@@ -242,7 +242,7 @@ void configNets(const NetsFlagsPack& flags,
             flags.d_lm,
         };
         if (!flags.m_lm.empty()) {
-            slog::info << "Network " << flags.m_lm << " is loaded to " << flags.d_lm << " device." << slog::endl;
+            slog::info << "The Facial Landmarks Regression model" << flags.m_lm << " is loaded to " << flags.d_lm << " device." << slog::endl;
         }
         else {
             slog::info << "Facial Landmarks Regression DISABLED." << slog::endl;
@@ -255,7 +255,7 @@ void configNets(const NetsFlagsPack& flags,
         };
         networks += cv::gapi::networks(landm_net, reident_net);
         if (!flags.m_reid.empty()) {
-            slog::info << "Network " << flags.m_reid << " is loaded to " << flags.d_reid << " device." << slog::endl;
+            slog::info << "The Face Reidentification model " << flags.m_reid << " is loaded to " << flags.d_reid << " device." << slog::endl;
         }
         else {
             slog::info << "Face Reidentification DISABLED." << slog::endl;

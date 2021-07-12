@@ -222,21 +222,26 @@ inline std::string fileNameNoExt(const std::string &filepath) {
 }
 
 inline void printExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNetwork, const std::string& modelName,
-    const std::string& deviceName) {
-    slog::info << "Network " << modelName << " is loaded to " << deviceName << " device." << slog::endl;
+    const std::string& deviceName, const std::string& modelType = "") {
+    slog::info << "The " << modelType << (modelType.empty() ? "" : " ")  << "model " << modelName << " is loaded to " << deviceName << " device." << slog::endl;
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(deviceName)) {
         devices.insert(device);
     }
 
-    if ((devices.find("CPU") != devices.end() || devices.find("AUTO") != devices.end() || devices.find("") != devices.end())) {
-        std::string nthreads = execNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>();
-        slog::info << "\tNumber of threads is set to "
-            << (nthreads == "0" ? "AUTO" : nthreads) << " for CPU device." << slog::endl;
-    }
+    try {
+        if (devices.find("AUTO") == devices.end()) { // do not print info for AUTO device
+            if ((devices.find("CPU") != devices.end() || devices.find("") != devices.end())) {
+                std::string nthreads = execNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>();
+                slog::info << "\tNumber of threads is set to "
+                    << (nthreads == "0" ? "AUTO" : nthreads) << " for CPU device." << slog::endl;
+            }
 
-    for (const auto& device : devices) {
-        slog::info << "\tNumber of streams is set to "
-            << execNetwork.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device." << slog::endl;
+            for (const auto& device : devices) {
+                slog::info << "\tNumber of streams is set to "
+                    << execNetwork.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device." << slog::endl;
+            }
+        }
     }
+    catch (...) {}
 }

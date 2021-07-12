@@ -761,7 +761,7 @@ int main(int argc, char* argv[]) {
             slog::info << "\tNumber of inference requests is set to " << nclassifiersireq << slog::endl;
         }
         else {
-            slog::info << "Vehicle Attributes Detection DISABLED." << slog::endl;
+            slog::info << "Vehicle Attributes Recognition DISABLED." << slog::endl;
         }
         if (!FLAGS_m_lpr.empty()) {
             lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));

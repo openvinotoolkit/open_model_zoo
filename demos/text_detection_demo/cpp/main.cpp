@@ -132,6 +132,7 @@ int main(int argc, char *argv[]) {
                 // 2 kPadSymbol stand for START_TOKEN and PAD_TOKEN, respectively
                 kAlphabet = std::string(3, kPadSymbol) + FLAGS_m_tr_ss;
                 text_recognition = std::unique_ptr<Cnn>(new EncoderDecoderCNN(FLAGS_m_tr,
+                                                            "Encoder-Decoder Text Recognition",
                                                             ie,
                                                             FLAGS_d_tr,
                                                             FLAGS_out_enc_hidden_name,
@@ -148,7 +149,7 @@ int main(int argc, char *argv[]) {
                     throw std::logic_error("Wrong decoder. Use --dt simple for composite model.");
             }
             catch (const DecoderNotFound&) {
-                text_recognition = std::unique_ptr<Cnn>(new Cnn(FLAGS_m_tr, ie, FLAGS_d_tr));
+                text_recognition = std::unique_ptr<Cnn>(new Cnn(FLAGS_m_tr, "Text Recognition", ie, FLAGS_d_tr));
                 if (FLAGS_tr_pt_first)
                     kAlphabet = kPadSymbol + FLAGS_m_tr_ss;
                 else
@@ -159,7 +160,7 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<Cnn> text_detection;
         if (!FLAGS_m_td.empty())
-            text_detection = std::unique_ptr<Cnn>(new Cnn(FLAGS_m_td, ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td)));
+            text_detection = std::unique_ptr<Cnn>(new Cnn(FLAGS_m_td, "Text Detection", ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td)));
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat image = cap->read();
         if (!image.data) {

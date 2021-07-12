@@ -11,7 +11,7 @@ namespace gaze_estimation {
 LandmarksEstimator::LandmarksEstimator(InferenceEngine::Core& ie,
                                        const std::string& modelPath,
                                        const std::string& deviceName):
-                    ieWrapper(ie, modelPath, deviceName) {
+                    ieWrapper(ie, modelPath, modelType, deviceName) {
     inputBlobName = ieWrapper.expectSingleInput();
     ieWrapper.expectImageInput(inputBlobName);
 

@@ -51,6 +51,8 @@ public:
      */
     void Load();
 
+    const std::string modelType = "Person Re-Identification";
+
 protected:
     /**
      * @brief Run network

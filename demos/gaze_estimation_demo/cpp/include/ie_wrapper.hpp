@@ -19,6 +19,7 @@ class IEWrapper {
 public:
     IEWrapper(InferenceEngine::Core& ie,
               const std::string& modelPath,
+              const std::string& modelType,
               const std::string& deviceName);
     // For setting input blobs containing images
     void setInputBlob(const std::string& blobName, const cv::Mat& image);
@@ -41,6 +42,7 @@ public:
     void infer();
 
 private:
+    std::string modelType;
     std::string modelPath;
     std::string deviceName;
     InferenceEngine::Core& ie;

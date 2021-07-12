@@ -24,6 +24,7 @@ public:
     ~GazeEstimator() override;
 
 private:
+    const std::string modelType = "Gaze Estimation";
     IEWrapper ieWrapper;
     std::string outputBlobName;
     bool rollAlign;

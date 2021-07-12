@@ -491,7 +491,7 @@ struct Load {
     void into(Core & ie, const std::string & deviceName) const {
         if (detector.enabled()) {
             detector.net = ie.LoadNetwork(detector.read(ie), deviceName);
-            printExecNetworkInfo(detector.net, detector.commandLineFlag, deviceName);
+            printExecNetworkInfo(detector.net, detector.commandLineFlag, deviceName, detector.topoName);
         }
     }
 };

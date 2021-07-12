@@ -596,7 +596,7 @@ int main(int argc, char* argv[]) {
         std::unique_ptr<AsyncDetection<DetectedAction>> action_detector;
         if (!ad_model_path.empty()) {
             // Load action detector
-            ActionDetectorConfig action_config(ad_model_path);
+            ActionDetectorConfig action_config(ad_model_path, "Person/Action Detection");
             action_config.deviceName = FLAGS_d_act;
             action_config.ie = ie;
             action_config.is_async = true;
@@ -606,6 +606,7 @@ int main(int argc, char* argv[]) {
             action_detector.reset(new ActionDetection(action_config));
         } else {
             action_detector.reset(new NullDetection<DetectedAction>);
+            slog::info << "Person/Action Detection DISABLED" << slog::endl;
         }
 
         std::unique_ptr<AsyncDetection<detection::DetectedObject>> face_detector;
@@ -638,7 +639,7 @@ int main(int argc, char* argv[]) {
             face_registration_det_config.increase_scale_x = static_cast<float>(FLAGS_exp_r_fd);
             face_registration_det_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
 
-            CnnConfig reid_config(fr_model_path);
+            CnnConfig reid_config(fr_model_path, "Face Re-Identification");
             reid_config.deviceName = FLAGS_d_reid;
             if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
                 reid_config.max_batch_size = 16;
@@ -646,7 +647,7 @@ int main(int argc, char* argv[]) {
                 reid_config.max_batch_size = 1;
             reid_config.ie = ie;
 
-            CnnConfig landmarks_config(lm_model_path);
+            CnnConfig landmarks_config(lm_model_path, "Facial Landmarks Regression");
             landmarks_config.deviceName = FLAGS_d_lm;
             if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
                 landmarks_config.max_batch_size = 16;
@@ -664,7 +665,7 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
         } else {
-            slog::warn << "Face recognition models are disabled!" << slog::endl;
+            slog::warn << "Face Recognition models are disabled!" << slog::endl;
             if (actions_type == TEACHER) {
                 slog::err << "Face recognition must be enabled to recognize teacher actions." << slog::endl;
                 return 1;

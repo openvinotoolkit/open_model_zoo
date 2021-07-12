@@ -25,6 +25,7 @@ public:
     std::vector<FaceInferenceResults> detect(const cv::Mat& image);
     ~FaceDetector();
 
+    const std::string modelType = "Face Detection";
 private:
     IEWrapper ieWrapper;
     std::string inputBlobName;

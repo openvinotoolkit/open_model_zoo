@@ -65,7 +65,7 @@ public:
         _output->setPrecision(InferenceEngine::Precision::FP32);
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
-        printExecNetworkInfo(net, xmlPath, deviceName);
+        printExecNetworkInfo(net, xmlPath, deviceName, "Person Detection");
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -167,7 +167,7 @@ public:
         _output->setPrecision(InferenceEngine::Precision::FP32);
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
-        printExecNetworkInfo(net, xmlPath, deviceName);
+        printExecNetworkInfo(net, xmlPath, deviceName, "Person Re-Identification");
     }
 
     InferenceEngine::InferRequest createInferRequest() {

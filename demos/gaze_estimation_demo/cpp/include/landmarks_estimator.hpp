@@ -23,6 +23,7 @@ public:
     ~LandmarksEstimator() override;
 
 private:
+    const std::string modelType = "Facial Landmarks Estimation";
     IEWrapper ieWrapper;
     std::string inputBlobName, outputBlobName;
 };

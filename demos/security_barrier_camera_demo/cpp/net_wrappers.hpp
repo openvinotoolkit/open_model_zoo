@@ -65,7 +65,7 @@ public:
         _output->setPrecision(InferenceEngine::Precision::FP32);
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
-        printExecNetworkInfo(net, xmlPath, deviceName);
+        printExecNetworkInfo(net, xmlPath, deviceName, "Vehicle And License Plate Detection");
 
     }
 
@@ -160,7 +160,7 @@ public:
         outputNameForType = (it)->second->getName();  // type is the second output.
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
-        printExecNetworkInfo(net, FLAGS_m_va, deviceName);
+        printExecNetworkInfo(net, FLAGS_m_va, deviceName, "Vehicle Attributes Recognition");
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -264,7 +264,7 @@ public:
         }
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
-        printExecNetworkInfo(net, FLAGS_m_lpr, deviceName);
+        printExecNetworkInfo(net, FLAGS_m_lpr, deviceName, "License Plate Recognition");
     }
 
     InferenceEngine::InferRequest createInferRequest() {

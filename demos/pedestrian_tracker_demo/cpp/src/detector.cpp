@@ -152,7 +152,7 @@ ObjectDetector::ObjectDetector(
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
     net_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
-    printExecNetworkInfo(net_, config.path_to_model, deviceName_);
+    printExecNetworkInfo(net_, config.path_to_model, deviceName_, modelType);
     slog::info << "\tBatch size is set to "<< config.max_batch_size << slog::endl;
 }
 
