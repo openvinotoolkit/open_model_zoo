@@ -317,7 +317,7 @@ int main(int argc, char *argv[]) {
             }
         }
         //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << "Metric reports:" << slog::endl;
+        slog::info << "Metrics report:" << slog::endl;
         slog::info << "\tNumber of processed frames: " << framesCounter << slog::endl;
         slog::info << "\tFPS: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << slog::endl;
     }

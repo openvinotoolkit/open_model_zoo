@@ -42,8 +42,8 @@ public:
     void infer();
 
 private:
-    std::string modelType;
     std::string modelPath;
+    std::string modelType;
     std::string deviceName;
     InferenceEngine::Core& ie;
     InferenceEngine::CNNNetwork network;

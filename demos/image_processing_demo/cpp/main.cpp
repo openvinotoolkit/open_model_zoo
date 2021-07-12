@@ -336,9 +336,8 @@ int main(int argc, char *argv[]) {
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << "Metric reports:" << slog::endl;
+        slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
-        slog::info << "Avg time:" << slog::endl;
         slog::info << "\tDecoding:\t" << std::fixed << std::setprecision(2) <<
             cap->getMetrics().getTotal().latency << " ms" << slog::endl;;
         slog::info << "\tPreprocessing:\t" << std::fixed << std::setprecision(2) <<

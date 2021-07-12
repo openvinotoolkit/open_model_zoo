@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
         std::sort(imageNames.begin(), imageNames.end());
         for (size_t i = 0; i < imageNames.size(); i++) {
             const std::string& name = imageNames[i];
-            auto readingStart= std::chrono::steady_clock::now();
+            auto readingStart = std::chrono::steady_clock::now();
             const cv::Mat& tmpImage = cv::imread(name);
             if (tmpImage.data == nullptr) {
                 std::cerr << "Could not read image " << name << '\n';
@@ -325,7 +325,7 @@ int main(int argc, char *argv[]) {
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << "Metric reports:" << slog::endl;
+        slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
         slog::info << "\tDecoding:\t" << std::fixed << std::setprecision(2) <<
             readerMetrics.getTotal().latency << " ms" << slog::endl;;

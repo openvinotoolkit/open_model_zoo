@@ -107,7 +107,7 @@ std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inpu
         throw std::runtime_error("The image aspect ratio doesn't fit current model shape");
 
     if (inputLayerSize.width - stride >= roi.width) {
-        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
+        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio\n";
     }
 
     request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));

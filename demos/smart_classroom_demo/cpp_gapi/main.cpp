@@ -367,7 +367,7 @@ int main(int argc, char* argv[]) {
         act_stat_log_stream << stat_log << std::endl;
         /** Results **/
         if ( work_num_frames > 0) {
-            slog::info << "Metric reports:" << slog::endl;
+            slog::info << "Metrics report:" << slog::endl;
             const float mean_time_ms = work_time_ms_all / static_cast<float>(work_num_frames);
             slog::info << "\tMean FPS: " << 1e3f / mean_time_ms << slog::endl;
         }

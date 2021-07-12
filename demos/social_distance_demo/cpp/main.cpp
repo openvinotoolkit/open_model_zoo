@@ -813,7 +813,7 @@ int main(int argc, char* argv[]) {
                 / (frameCounter * context.nireq) * 100;
 
             //// --------------------------- Report metrics -------------------------------------------------------
-            slog::info << "Metric reports:" << slog::endl;
+            slog::info << "Metrics report:" << slog::endl;
             slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << fps << slog::endl;
             slog::info << "\tDetection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
         }
