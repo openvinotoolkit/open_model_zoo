@@ -154,6 +154,15 @@ def parse_unsupported_device_list(path):
     return unsupported_devices
 
 
+def get_models(case, keys):
+    models = []
+    for key in keys:
+        model = case.options.get(key, None)
+        if model:
+            models.append(model.name if isinstance(model, ModelArg) else model.model_name)
+    return models
+
+
 def main():
     args = parse_args()
 
@@ -219,13 +228,6 @@ def main():
                 print()
                 device_args = demo.device_args(args.devices.split())
                 for test_case_index, test_case in enumerate(demo.test_cases):
-                    def get_models(case, keys):
-                        models = []
-                        for key in keys:
-                            model = case.options.get(key, None)
-                            if model:
-                                models.append(model.name if isinstance(model, ModelArg) else model.model_name)
-                        return models
                     test_case_models = get_models(test_case, demo.model_keys)
 
                     case_args = [demo_arg
@@ -247,7 +249,7 @@ def main():
                         skip = False
                         for model in test_case_models:
                             if unsupported_devices and device in unsupported_devices.get(model, []):
-                                print('Test case #{}/{}: Model {} is not supported by device'
+                                print('Test case #{}/{}: Model {} is suppressed on device'
                                       .format(test_case_index, device, model))
                                 print(flush=True)
                                 skip = True
