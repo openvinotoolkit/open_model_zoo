@@ -50,6 +50,7 @@ from .image_readers import (
     SkimageReader,
     RawpyReader
 )
+from .text_readers import JSONReader
 
 __all__ = [
     'BaseReader',
@@ -86,6 +87,7 @@ __all__ = [
     'ByteFileReader',
     'LMDBReader',
     'KaldiARKReader',
+    'JSONReader',
 
     'create_reader',
     'REQUIRES_ANNOTATIONS',
