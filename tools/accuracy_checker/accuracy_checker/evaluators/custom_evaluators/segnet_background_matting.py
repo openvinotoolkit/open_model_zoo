@@ -151,6 +151,9 @@ class OpenVINOFeedbackModel(FeedbackModel):
         input_info = self.exec_network.input_info if has_info else self.exec_network.inputs
         input_blob = next(iter(input_info))
         with_prefix = input_blob.startswith(self.default_model_suffix + '_')
+        if self.input_blob is None:
+            self.input_blob = input_blob
+            self.output_blob = next(iter(self.exec_network.outputs))
         if with_prefix != self.with_prefix:
             self.input_blob = generate_layer_name(self.input_blob, self.default_model_suffix, with_prefix)
             self.output_blob = generate_layer_name(self.output_blob, self.default_model_suffix, with_prefix)
