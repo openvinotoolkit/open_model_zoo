@@ -64,7 +64,7 @@ def parse_args():
     parser.add_argument('--report-file', type=Path,
         help='path to report file')
     parser.add_argument('--unsupported-devices', type=Path, required=False,
-                        help='path to file with unsupported devices for each model')
+        help='path to file with unsupported devices for each model')
     return parser.parse_args()
 
 
