@@ -24,7 +24,6 @@
 #include <inference_engine.hpp>
 
 #include <monitors/presenter.h>
-#include <utils/args_helper.hpp>
 #include <utils/images_capture.h>
 #include <utils/slog.hpp>
 #include <utils/ocv_common.hpp>
@@ -396,7 +395,7 @@ struct PersonAttribsDetection : BaseDetection {
 struct PersonReIdentification : BaseDetection {
     std::vector<std::vector<float>> globalReIdVec;  // contains vectors characterising all detected persons
 
-    PersonReIdentification() : BaseDetection(FLAGS_m_reid, "Person Reidentification Retail") {}
+    PersonReIdentification() : BaseDetection(FLAGS_m_reid, "Person Re-Identification Retail") {}
 
     unsigned long int findMatchingPerson(const std::vector<float> &newReIdVec) {
         auto size = globalReIdVec.size();
@@ -475,7 +474,7 @@ struct PersonReIdentification : BaseDetection {
         // ---------------------------Check outputs ------------------------------------------------------
         OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 1) {
-            throw std::logic_error("Person Reidentification Network should have 1 output");
+            throw std::logic_error("Person Re-Identification Model should have 1 output");
         }
         outputName = outputInfo.begin()->first;
 
@@ -750,7 +749,7 @@ int main(int argc, char *argv[]) {
                                     cv::Scalar(250, 10, 10), 1);
 
                         if (FLAGS_r) {
-                            slog::dbg << "Person Reidentification results: " << resPersReid << slog::endl;
+                            slog::dbg << "Person Re-Identification results: " << resPersReid << slog::endl;
                         }
                     }
                     cv::rectangle(frame, result.location, cv::Scalar(0, 255, 0), 1);
@@ -780,7 +779,7 @@ int main(int argc, char *argv[]) {
                 if (personReId.enabled() && personReIdInferred) {
                     float average_time = static_cast<float>(personReIdNetworktime.count() / personReIdInferred);
                     out.str("");
-                    out << "Reidentification time: " << std::fixed << std::setprecision(2) << average_time
+                    out << "Re-Identification time: " << std::fixed << std::setprecision(2) << average_time
                         << " ms (" << 1000.f / average_time << " fps)";
                     putHighlightedText(frame, out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
                     if (FLAGS_r) {

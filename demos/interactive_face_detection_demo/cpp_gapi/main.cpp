@@ -353,14 +353,14 @@ int main(int argc, char *argv[]) {
             return cv::GComputation(cv::GIn(in), std::move(outs));
             });
 
-        auto det_net = cv::gapi::ie::Params<Faces>{
+        auto det_net = cv::gapi::ie::Params<Faces> {
             FLAGS_m,                         // path to model
             fileNameNoExt(FLAGS_m) + ".bin", // path to weights
             FLAGS_d                          // device to use
         };
         slog::info << "The Face Detection model  " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
 
-        auto age_net = cv::gapi::ie::Params<AgeGender>{
+        auto age_net = cv::gapi::ie::Params<AgeGender> {
             FLAGS_m_ag,                         // path to model
             fileNameNoExt(FLAGS_m_ag) + ".bin", // path to weights
             FLAGS_d_ag                          // device to use
@@ -372,7 +372,7 @@ int main(int argc, char *argv[]) {
             slog::info << "Age/Gender Recognition DISABLED." << slog::endl;
         }
 
-        auto hp_net = cv::gapi::ie::Params<HeadPose>{
+        auto hp_net = cv::gapi::ie::Params<HeadPose> {
             FLAGS_m_hp,                         // path to model
             fileNameNoExt(FLAGS_m_hp) + ".bin", // path to weights
             FLAGS_d_hp                          // device to use

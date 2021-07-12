@@ -139,7 +139,6 @@ std::tuple<ConstantParams, TrackerParams, TrackerParams> getGraphArgs(const std:
     const auto num_top_persons = const_params.actions_type == TOP_K ? flags.a_top : -1;
     const_params.draw_ptr.reset(new DrawingHelper(flags.no_show, num_top_persons));
     const_params.video_path = video_path;
-    slog::info << "Reading video '" << video_path << "'" << slog::endl;
     const_params.smooth_window_size = int(fps * flags.d_ad);
     const_params.smooth_min_length = int(fps * flags.min_ad);
     const_params.top_flag = flags.a_top;
@@ -255,10 +254,10 @@ void configNets(const NetsFlagsPack& flags,
         };
         networks += cv::gapi::networks(landm_net, reident_net);
         if (!flags.m_reid.empty()) {
-            slog::info << "The Face Reidentification model " << flags.m_reid << " is loaded to " << flags.d_reid << " device." << slog::endl;
+            slog::info << "The Face Re-Identification model " << flags.m_reid << " is loaded to " << flags.d_reid << " device." << slog::endl;
         }
         else {
-            slog::info << "Face Reidentification DISABLED." << slog::endl;
+            slog::info << "Face Re-Identification DISABLED." << slog::endl;
         }
         InferenceEngine::Core ie;
         const auto layerData = ie.ReadNetwork(flags.m_reid).getInputsInfo().begin()->second;
@@ -360,7 +359,7 @@ std::shared_ptr<FaceRecognizer> processingFaceGallery(const cv::gapi::GNetPackag
                 }
             }
         }
-        slog::info << "Face reid gallery size: " << identities.size() << slog::endl;
+        slog::dbg << "Face reid gallery size: " << identities.size() << slog::endl;
     } else {
         slog::warn << "Face reid gallery is empty!" << slog::endl;
     }

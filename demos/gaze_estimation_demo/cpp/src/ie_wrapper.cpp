@@ -5,7 +5,7 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <utils/args_helper.hpp>
+#include <utils/common.hpp>
 
 #include "ie_wrapper.hpp"
 

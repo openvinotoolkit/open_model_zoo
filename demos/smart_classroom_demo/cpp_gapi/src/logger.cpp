@@ -31,7 +31,7 @@ void DetectionsLogger::CreateNextFrameRecord(const std::string& path, const int 
     if (write_logs_) {
         log_stream_.clear();
         log_stream_ << "Frame_name: " << path << "@" << frame_idx << " width: "
-                    << width << " height: " << height << std::endl;
+                    << width << " height: " << height << slog::endl;
     }
 }
 

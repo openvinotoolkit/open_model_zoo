@@ -348,7 +348,7 @@ int main(int argc, char* argv[]) {
                 videoWriter << proc;
             };
             /** Console log, if exists **/
-            std::cout << stream_log;
+            slog::dbg << stream_log;
         }
         auto elapsed = std::chrono::high_resolution_clock::now() - started_all;
         work_time_ms_all += std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();

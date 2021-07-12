@@ -10,9 +10,8 @@
 #include <opencv2/core/core.hpp>
 #include <inference_engine.hpp>
 #include <ngraph/ngraph.hpp>
-#include <utils/args_helper.hpp>
 #include <utils/slog.hpp>
-#include <utils/ocv_common.hpp>
+#include <utils/common.hpp>
 
 
 using namespace InferenceEngine;

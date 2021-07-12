@@ -85,12 +85,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_duplicate_num == 0) {
         throw std::logic_error("Parameter -duplicate_num must be positive");
     }
-    if (!FLAGS_l.empty()) {
-        slog::info << "\tCPU extension library:     " << FLAGS_l << slog::endl;
-    }
-    if (!FLAGS_c.empty()) {
-        slog::info << "\tCLDNN custom kernels map:  " << FLAGS_c << slog::endl;
-    }
 
     return true;
 }
@@ -519,7 +513,7 @@ int main(int argc, char* argv[]) {
 
                 averageFps = frameTime;
                 if (FLAGS_show_stats) {
-                    slog::dbg << "Average Throughput : " << 1000.f/frameTime << " fps" << slog::endl;
+                    slog::dbg << "FPS: " << 1000.f/frameTime << slog::endl;
                     if (++perfItersCounter >= FLAGS_n_sp) {
                         break;
                     }
@@ -531,7 +525,7 @@ int main(int argc, char* argv[]) {
                     auto outputStat = output.getStats();
 
                     std::unique_lock<std::mutex> lock(statMutex);
-                    slog::dbg << "Avg time:" << slog::endl;
+                    slog::dbg << "Latency:" << slog::endl;
                     slog::dbg << std::fixed << std::setprecision(1);
                     slog::dbg << "\tInput reads: ";
                     for (size_t i = 0; i < inputStat.readTimes.size(); ++i) {
@@ -541,16 +535,16 @@ int main(int argc, char* argv[]) {
                         slog::dbg << inputStat.readTimes[i] << "ms ";
                     }
                     slog::dbg << slog::endl;
-                    slog::dbg << "\tHW decoding latency: "
+                    slog::dbg << "\tDecoding: "
                         << inputStat.decodingLatency << "ms";
                     slog::dbg << slog::endl;
-                    slog::dbg << "\tPreprocess time: "
+                    slog::dbg << "\tPreprocess: "
                         << inferStat.preprocessTime << "ms";
                     slog::dbg << slog::endl;
-                    slog::dbg << "\tPlugin latency: "
+                    slog::dbg << "\tInference: "
                         << inferStat.inferTime << "ms";
                     slog::dbg << slog::endl;
-                    slog::dbg << "\tRender time: " << outputStat.renderTime
+                    slog::dbg << "\tRendering: " << outputStat.renderTime
                         << "ms" << slog::endl;
                 }
             }

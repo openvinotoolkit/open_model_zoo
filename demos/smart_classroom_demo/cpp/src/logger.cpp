@@ -153,7 +153,7 @@ void DetectionsLogger::DumpTracks(const std::map<int, RangeEventsTrack>& obj_id_
                 log_stream_ << "   - " << action_label
                             << ": from " << event.begin_frame_id
                             << " to " << event.end_frame_id
-                            << " frames" <<slog::endl;
+                            << " frames" << slog::endl;
             }
         }
     }
