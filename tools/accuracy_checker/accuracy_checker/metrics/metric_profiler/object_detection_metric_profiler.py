@@ -105,9 +105,6 @@ class DetectionProfiler(MetricProfiler):
             scores = per_class_result['scores']
             dt = per_class_result['dt']
             gt = per_class_result['gt']
-            matches_result = self.generate_result_matching(per_class_result, '')
-            dt_matched = matches_result['prediction_matches']
-            gt_matched = matches_result['annotation_matches']
             for dt_id, dt_box in enumerate(dt):
                 box_result = {
                     'identifier': identifier,
@@ -116,20 +113,16 @@ class DetectionProfiler(MetricProfiler):
                     'pred': dt_box,
                     'gt': ''
                 }
-                if dt_matched[dt_id]:
-                    gt_id = np.where(gt_matched == dt_id + 1)
-                    box_result['gt'] = gt[gt_id]
                 per_box_results.append(box_result)
-            for gt_id, gt_box in enumerate(gt):
-                if gt_matched[gt_id] == -1:
-                    box_result = {
-                        'identifier': identifier,
-                        'label': label_id,
-                        'score': '',
-                        'pred': '',
-                        'gt': gt_box
-                    }
-                    per_box_results.append(box_result)
+            for gt_box in gt:
+                box_result = {
+                    'identifier': identifier,
+                    'label': label_id,
+                    'score': '',
+                    'pred': '',
+                    'gt': gt_box
+                }
+                per_box_results.append(box_result)
 
         return per_box_results
 

@@ -152,8 +152,8 @@ class MetricProfiler(ClassProvider):
         self._reset_storage()
 
     def set_output_dir(self, out_dir):
-        self.out_dir = out_dir
-        if not out_dir.exists():
+        self.out_dir = Path(out_dir) if out_dir is not None else Path.cwd()
+        if not self.out_dir.exists():
             self.out_dir.mkdir(parents=True)
 
     def set_processing_info(self, processing_info):
