@@ -17,6 +17,7 @@ limitations under the License.
 from ..config import PathField, StringField, BoolField
 from .format_converter import BaseFormatConverter, ConverterReturn
 from ..representation import BackgroundMattingAnnotation
+from ..data_readers import VideoFrameIdentifier
 
 
 class BackgroundMattingConverter(BaseFormatConverter):
@@ -66,6 +67,48 @@ class BackgroundMattingConverter(BaseFormatConverter):
         for idx, image in enumerate(images_list):
             base_name = image.name
             identifier = base_name
+            if self.images_prefix:
+                base_name = base_name.split(self.images_prefix)[-1]
+            if self.images_postfix:
+                base_name = base_name.split(self.images_postfix)[0]
+
+            mask_file = self.masks_dir / mask_name.format(base=base_name)
+            if not mask_file.exists():
+                continue
+
+            annotations.append(
+                BackgroundMattingAnnotation(identifier, mask_file.name, self.mask_to_gray)
+            )
+            if progress_callback is not None and idx % progress_interval == 0:
+                progress_callback(idx / num_iterations * 100)
+
+        return ConverterReturn(
+            annotations, {'label_map': {'background': 0, 'foreground': list(range(1, 256))}}, content_errors
+        )
+
+
+class VideoBackgroundMatting(BackgroundMattingConverter):
+    __provider__ = 'video_background_matting'
+
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        annotations = []
+        mask_name = '{prefix}{base}{postfix}'.format(
+            prefix=self.mask_prefix, base='{base}', postfix=self.mask_postfix
+        )
+        image_pattern = '*'
+        if self.images_prefix:
+            image_pattern = self.images_prefix + image_pattern
+        if self.images_postfix:
+            image_pattern = image_pattern + self.images_postfix
+        images_list = sorted(self.images_dir.glob(image_pattern))
+        num_iterations = len(images_list)
+        content_errors = None if not check_content else []
+        for idx, image in enumerate(images_list):
+            base_name = image.name
+            if '.mp4' not in base_name:
+                continue
+            video_id = base_name.split('.mp4')[0]
+            identifier = VideoFrameIdentifier(video_id, base_name)
             if self.images_prefix:
                 base_name = base_name.split(self.images_prefix)[-1]
             if self.images_postfix:

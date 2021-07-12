@@ -414,7 +414,7 @@ def main():
             evaluator = evaluator_class.from_configs(config_entry)
             details.update(evaluator.send_processing_info(tm))
             if args.profile:
-                setup_profiling(args.profiler_log_dir, evaluator)
+                setup_profiling(args.profiler_logs_dir, evaluator)
             send_telemetry_event(tm, 'model_run', details)
             evaluator.process_dataset(
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs

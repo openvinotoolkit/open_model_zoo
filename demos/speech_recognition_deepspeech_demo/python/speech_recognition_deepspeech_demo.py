@@ -23,19 +23,19 @@ from asr_utils.deep_speech_seq_pipeline import DeepSpeechSeqPipeline
 def build_argparser():
     parser = argparse.ArgumentParser(description="Speech recognition DeepSpeech demo")
     parser.add_argument('-i', '--input', type=str, metavar="FILENAME", required=True,
-                        help="Path to an audio file in WAV PCM 16 kHz mono format")
+                        help="Required. Path to an audio file in WAV PCM 16 kHz mono format")
     parser.add_argument('-d', '--device', default='CPU', type=str,
                         help="Optional. Specify the target device to infer on, for example: CPU, GPU, HDDL, MYRIAD or HETERO. "
                              "The demo will look for a suitable IE plugin for this device. (default is CPU)")
     parser.add_argument('-m', '--model', type=str, metavar="FILENAME", required=True,
-                        help="Path to an .xml file with a trained model (required)")
+                        help="Required. Path to an .xml file with a trained model")
     parser.add_argument('-L', '--lm', type=str, metavar="FILENAME",
-                        help="path to language model file (optional)")
+                        help="Optional. Path to language model file")
     parser.add_argument('-p', '--profile', type=str, metavar="NAME", required=True,
-                        help="Choose pre/post-processing profile: "
+                        help="Required. Choose pre/post-processing profile: "
                              "mds06x_en for Mozilla DeepSpeech v0.6.x, "
                              "mds07x_en/mds08x_en/mds09x_en for Mozilla DeepSpeech v0.7.x/v0.8.x/v0.9.x(English), "
-                             "other: filename of a YAML file (required)")
+                             "other: filename of a YAML file")
     parser.add_argument('-b', '--beam-width', type=int, default=500, metavar="N",
                         help="Beam width for beam search in CTC decoder (default 500)")
     parser.add_argument('-c', '--max-candidates', type=int, default=1, metavar="N",

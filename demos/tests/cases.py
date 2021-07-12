@@ -386,11 +386,12 @@ NATIVE_DEMOS = [
                     ModelArg('fastseg-small'),
                     ModelArg('hrnet-v2-c1-segmentation'),
                     ModelArg('deeplabv3'),
-                    ModelArg('pspnet-pytorch'))),
+                    ModelArg('pspnet-pytorch'),
+                    ModelArg('drn-d-38'))),
         ],
     )),
 
-    CppDemo(name='smart_classroom_demo', implementation='cpp_gapi',
+    CppDemo(name='smart_classroom_demo',
             device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -900,7 +901,10 @@ PYTHON_DEMOS = [
                 '-at': 'segmentation',
             }),
             *combine_cases(
-                TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
+                TestCase(options={
+                    '-i': DataPatternArg('semantic-segmentation-adas'),
+                    '-at': 'segmentation',
+                }),
                 single_option_cases('-m',
                     ModelArg('semantic-segmentation-adas-0001'),
                     ModelArg('fastseg-large'),
@@ -911,7 +915,8 @@ PYTHON_DEMOS = [
                     ModelArg('icnet-camvid-ava-sparse-60-0001'),
                     ModelArg('unet-camvid-onnx-0001'),
                     ModelArg('deeplabv3'),
-                    ModelArg('pspnet-pytorch'))),
+                    ModelArg('pspnet-pytorch'),
+                    ModelArg('drn-d-38'))),
             TestCase(options={
                 '-m': ModelArg('f3net'),
                 '-i': DataPatternArg('road-segmentation-adas'),

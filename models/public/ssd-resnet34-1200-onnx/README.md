@@ -80,4 +80,4 @@ python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/mlcommons/inference/master/LICENSE.md).
-A copy of the license is provided in [APACHE-2.0-MLPerf.txt](../licenses/APACHE-2.0-MLPerf.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0-MLPerf.txt`.

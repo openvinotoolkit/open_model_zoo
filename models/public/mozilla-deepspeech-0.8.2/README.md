@@ -42,7 +42,7 @@ Increasing beam_width improves WER metric and slows down decoding. Speech Recogn
     - `T` - context frames: along with the current frame, the network expects 9 preceding frames and 9 succeeding frames. The absent context frames are filled with zeros.
     - `C` - 26 MFCC coefficients per each frame
 
-    See [`accuracy-check.yml`](accuracy-check.yml) for all audio preprocessing and feature extraction parameters.
+    See `<omz_dir>/models/public/mozilla-deepspeech-0.8.2/accuracy-check.yml` for all audio preprocessing and feature extraction parameters.
 
  2. Number of audio frames, INT32 value, name: `input_lengths`, shape `1`.
 
@@ -62,7 +62,7 @@ Chunk processing order must be from early to late audio positions.
     - `T` - context frames: along with the current frame, the network expects 9 preceding frames and 9 succeeding frames. The absent context frames are filled with zeros.
     - `C` - 26 MFCC coefficients in each frame
 
-    See [`accuracy-check.yml`](accuracy-check.yml) for all audio preprocessing and feature extraction parameters.
+    See `<omz_dir>/models/public/mozilla-deepspeech-0.8.2/accuracy-check.yml` for all audio preprocessing and feature extraction parameters.
 
  2. LSTM in-state vector, name: `previous_state_c`, shape: `1, 2048`, format: `B, C`.
 
@@ -125,4 +125,4 @@ python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
 
 The original model is distributed under the
 [Mozilla Public License, Version 2.0](https://raw.githubusercontent.com/mozilla/DeepSpeech/master/LICENSE).
-A copy of the license is provided in [MPL-2.0-Mozilla-Deepspeech.txt](../licenses/MPL-2.0-Mozilla-Deepspeech.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/MPL-2.0-Mozilla-Deepspeech.txt`.

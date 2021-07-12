@@ -52,7 +52,6 @@ void ModelRetinaFacePT::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     landmarksNum = 0;
 
-    std::vector<uint32_t> outputsSizes[OT_MAX];
     for (auto& output : outputInfo) {
         output.second->setPrecision(InferenceEngine::Precision::FP32);
         output.second->setLayout(output.second->getDims().size()==4 ? InferenceEngine::Layout::NCHW : InferenceEngine::Layout::CHW);

@@ -9,7 +9,7 @@ This demo processes the image according to the selected type of processing. The 
 
 Exmaple for deblurring type (left - source image, right - image after deblurring):
 
-![](./assets/deblurred_image.png)
+![](./assets/image_processing_deblurred_image.png)
 
 All images on result frame will be marked one of these flags:
 
@@ -21,7 +21,7 @@ Example for super_resolution type:
 
 Low resolution:
 
-![](./assets/street_640x360.png)
+![](./assets/image_processing_street_640x360.png)
 
 Bicubic interpolation:
 
@@ -92,7 +92,7 @@ Options:
 
 Running the application with the empty list of options yields an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/image_processing_demo/cpp/models.lst`.
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 

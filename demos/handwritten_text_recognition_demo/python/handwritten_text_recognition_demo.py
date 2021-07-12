@@ -33,7 +33,7 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS,
                       help='Show this help message and exit.')
     args.add_argument("-m", "--model", type=str, required=True,
-                      help="Path to an .xml file with a trained model.")
+                      help="Required. Path to an .xml file with a trained model.")
     args.add_argument("-i", "--input", type=str, required=True,
                       help="Required. Path to an image to infer")
     args.add_argument("-d", "--device", type=str, default="CPU",

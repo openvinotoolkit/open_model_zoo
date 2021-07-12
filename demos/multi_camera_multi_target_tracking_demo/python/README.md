@@ -93,8 +93,8 @@ Multi camera multi object tracking live demo script
 optional arguments:
   -h, --help            show this help message and exit
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
-                        Input sources (indexes of cameras or paths to video
-                        files)
+                        Required. Input sources (indexes of cameras or paths
+                        to video files)
   --loop                Optional. Enable reading the input in a loop
   --config CONFIG       Configuration file
   --detections DETECTIONS
@@ -107,7 +107,7 @@ optional arguments:
                         Path to the object instance segmentation model
   --t_segmentation T_SEGMENTATION
                         Threshold for object instance segmentation model
-  --m_reid M_REID       Path to the object re-identification model
+  --m_reid M_REID       Required. Path to the object re-identification model
   --output_video OUTPUT_VIDEO
                         Optional. Path to output video
   --history_file HISTORY_FILE

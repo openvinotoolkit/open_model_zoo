@@ -253,8 +253,7 @@ int main(int argc, char *argv[]) {
         }
         else if (FLAGS_at == "higherhrnet") {
             float delta = 0.5f;
-            std::string pad_mode = "center";
-            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, delta, pad_mode));
+            model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, delta, RESIZE_KEEP_ASPECT_LETTERBOX));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;

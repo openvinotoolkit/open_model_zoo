@@ -34,6 +34,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 
 * architecture_type = segmentation
   - deeplabv3
+  - drn-d-38
   - fastseg-large
   - fastseg-small
   - hrnet-v2-c1-segmentation
@@ -69,7 +70,7 @@ Options:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -at {segmentation, salient_object_detection}, --architecture_type {segmentation, salient_object_detection}
-                        Optional. Default value is segmentation. Specify model's architecture type.
+                        Required. Specify model's architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
