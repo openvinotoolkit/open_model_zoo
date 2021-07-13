@@ -26,12 +26,12 @@ import numpy as np
 import openvino.inference_engine as ie
 
 from .dlsdk_launcher_config import (
-    HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, FPGA_COMPILER_MODE_VAR, NIREQ_REGEX, VPU_PLUGINS, VPU_LOG_LEVELS,
-    CPUExtensionPathField,
+    HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, FPGA_COMPILER_MODE_VAR, NIREQ_REGEX, VPU_PLUGINS,
+    DLSDK_LAUNCHER_PARAMETERS,
     DLSDKLauncherConfigValidator
 )
 from .dlsdk_async_request import AsyncInferRequestWrapper
-from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField, BaseField
+from ..config import ConfigError
 from ..logging import warning
 from ..utils import (
     read_yaml,
@@ -79,58 +79,7 @@ class DLSDKLauncher(Launcher):
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
-        parameters.update({
-            'model': PathField(description="Path to model.", file_or_directory=True),
-            'weights': PathField(description="Path to weights.", optional=True, file_or_directory=True),
-            'device': StringField(description="Device name."),
-            'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
-            'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
-            'mxnet_weights': PathField(optional=True, description="Path to MXNet weights file."),
-            'tf_model': PathField(optional=True, description="Path to TF model file."),
-            'tf_meta': PathField(optional=True, description="Path to TF meta file."),
-            'onnx_model': PathField(optional=True, description="Path to ONNX model file."),
-            'kaldi_model': PathField(optional=True, description="Path to Kaldi model file."),
-            'cpu_extensions': CPUExtensionPathField(optional=True, description="Path to CPU extensions."),
-            'gpu_extensions': PathField(optional=True, description="Path to GPU extensions."),
-            'bitstream': PathField(optional=True, description="Bitream (FPGA only)."),
-            'mo_params': DictField(optional=True, description="Model Optimizer parameters."),
-            'mo_flags': ListField(optional=True, description="Model Optimizer flags."),
-            'outputs': ListField(optional=True, description="Outputs."),
-            'allow_reshape_input': BoolField(optional=True, default=False, description="Allows reshape input."),
-            'affinity_map': PathField(optional=True, description="Affinity map."),
-            'batch': NumberField(value_type=int, min_value=1, optional=True, default=1, description="Batch size."),
-            'should_log_cmd': BoolField(optional=True, description="Log Model Optimizer command."),
-            'async_mode': BoolField(optional=True, description="Allows asynchronous mode.", default=False),
-            'num_requests': BaseField(
-                optional=True,
-                description="Number of requests (for async mode only). "
-                            "In multi device mode allows setting comma-separated list for numbers "
-                            "or one value which will be used for all devices"
-            ),
-            'reset_memory_state': BoolField(
-                optional=True, default=False,
-                description='Reset infer request memory states after inference. '
-                            'State control essential for recurrent networks'),
-            'device_config': DictField(optional=True, description='device configuration'),
-            '_model_optimizer': PathField(optional=True, is_directory=True, description="Model optimizer."),
-            '_tf_obj_detection_api_config_dir': PathField(
-                optional=True, is_directory=True, description="TF Object Detection API Config."
-            ),
-            '_tf_custom_op_config_dir': PathField(
-                optional=True, is_directory=True, description="TF Custom Operation Config prefix."
-            ),
-            '_transformations_config_dir': PathField(
-                optional=True, is_directory=True, description="Transformation config prefix for Model Optimizer"),
-            '_tf_obj_detection_api_pipeline_config_path': PathField(
-                optional=True, is_directory=False, description="TF Custom Operation Pipeline Config."),
-            '_cpu_extensions_mode': StringField(optional=True, description="CPU extensions mode."),
-            '_aocl': PathField(optional=True, description="path to aocl (FPGA only)"),
-            '_vpu_log_level': StringField(
-                optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
-            ),
-            '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)"),
-            '_model_is_blob': BoolField(optional=True, description='hint for auto model search')
-        })
+        parameters.update(DLSDK_LAUNCHER_PARAMETERS)
 
         return parameters
 
@@ -222,8 +171,6 @@ class DLSDKLauncher(Launcher):
             if self._do_reshape:
                 input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
-                if self._dyn_input_layers:
-                    self._dyn_input_layers = self._get_dynamic_inputs()
             if self._use_set_blob:
                 has_info = hasattr(self.exec_network, 'input_info')
                 for key, input_data in infer_inputs.items():
@@ -558,6 +505,8 @@ class DLSDKLauncher(Launcher):
         if hasattr(self, 'exec_network'):
             del self.exec_network
         self.network.reshape(shapes)
+        if self._dyn_input_layers:
+            self._dyn_input_layers = self._get_dynamic_inputs()
         self.exec_network = self.ie_core.load_network(self.network, self.device, num_requests=self._num_requests)
 
     def _set_batch_size(self, batch_size):
