@@ -67,7 +67,6 @@ public:
         return *this;
     }
 
-
     // Specializing for LogStreamEndLine to support slog::endl
     LogStream& operator<< (const LogStreamEndLine &/*arg*/) {
         _new_line = true;

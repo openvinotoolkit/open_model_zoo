@@ -26,6 +26,7 @@ public:
     ~FaceDetector();
 
     const std::string modelType = "Face Detection";
+
 private:
     IEWrapper ieWrapper;
     std::string inputBlobName;

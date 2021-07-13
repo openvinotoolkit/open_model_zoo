@@ -22,8 +22,9 @@ public:
                   FaceInferenceResults& outputResults) override;
     ~HeadPoseEstimator() override;
 
-private:
     const std::string modelType = "Head Pose Estimation";
+
+private:
     IEWrapper ieWrapper;
     std::string inputBlobName;
 };

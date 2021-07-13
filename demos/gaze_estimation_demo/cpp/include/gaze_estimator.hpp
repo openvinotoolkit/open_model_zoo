@@ -23,8 +23,9 @@ public:
                   FaceInferenceResults& outputResults) override;
     ~GazeEstimator() override;
 
-private:
     const std::string modelType = "Gaze Estimation";
+
+private:
     IEWrapper ieWrapper;
     std::string outputBlobName;
     bool rollAlign;

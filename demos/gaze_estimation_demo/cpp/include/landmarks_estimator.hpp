@@ -22,8 +22,9 @@ public:
                   FaceInferenceResults& outputResults) override;
     ~LandmarksEstimator() override;
 
-private:
     const std::string modelType = "Facial Landmarks Estimation";
+
+private:
     IEWrapper ieWrapper;
     std::string inputBlobName, outputBlobName;
 };
