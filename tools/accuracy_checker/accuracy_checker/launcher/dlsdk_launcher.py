@@ -18,7 +18,6 @@ import subprocess
 import multiprocessing
 from pathlib import Path
 import os
-import platform
 import re
 import warnings
 from collections import OrderedDict
@@ -27,6 +26,7 @@ import openvino.inference_engine as ie
 
 from .dlsdk_launcher_config import (
     HETERO_KEYWORD, MULTI_DEVICE_KEYWORD, FPGA_COMPILER_MODE_VAR, NIREQ_REGEX, VPU_PLUGINS,
+    get_cpu_extension, mo_convert_model,
     DLSDK_LAUNCHER_PARAMETERS,
     DLSDKLauncherConfigValidator
 )
@@ -37,19 +37,13 @@ from ..utils import (
     read_yaml,
     get_path,
     contains_any,
-    get_parameter_value_from_config,
     string_to_tuple,
     get_or_parse_value,
     UnsupportedPackage
 )
 from .launcher import Launcher
-from .model_conversion import convert_model
 from ..logging import print_info
 from .input_feeder import PRECISION_TO_DTYPE, DIM_IDS_TO_LAYOUT
-try:
-    from cpuinfo import get_cpu_info
-except ImportError as import_error:
-    get_cpu_info = UnsupportedPackage("cpuinfo", import_error.msg)
 
 try:
     from openvino.inference_engine import Blob, TensorDesc
@@ -116,7 +110,7 @@ class DLSDKLauncher(Launcher):
 
         if not delayed_model_loading:
             if dlsdk_launcher_config.need_conversion:
-                self._model, self._weights = DLSDKLauncher.convert_model(self.config, dlsdk_launcher_config.framework)
+                self._model, self._weights = mo_convert_model(self.config, dlsdk_launcher_config.framework)
             else:
                 self._model, self._weights = self.automatic_model_search()
             self.load_network(log=True, preprocessing=preprocessor)
@@ -387,94 +381,6 @@ class DLSDKLauncher(Launcher):
                 os.environ[FPGA_COMPILER_MODE_VAR] = '3'
                 self._set_variable = True
 
-    @staticmethod
-    def get_cpu_extension(cpu_extensions, selection_mode):
-        def get_cpu_extensions_list(file_format, base_name, selection_mode):
-            if not selection_mode:
-                default_cpu_extension = file_format.format(base_name)
-                extension_list = list(extensions_path.glob(default_cpu_extension))
-
-                if extension_list:
-                    return extension_list
-
-                if isinstance(get_cpu_info, UnsupportedPackage):
-                    get_cpu_info.raise_error("CPU extensions automatic search")
-
-                cpu_info_flags = get_cpu_info()['flags']
-                supported_flags = ['avx512', 'avx2', 'sse4_1', 'sse4_2']
-                cpu_info_flag_to_suffix = {
-                    'avx512': 'avx512',
-                    'avx2': 'avx2',
-                    'sse4_1': 'sse4',
-                    'sse4_2': 'sse4'
-                }
-                for flag in supported_flags:
-                    selection_mode = cpu_info_flag_to_suffix[flag]
-                    if flag in cpu_info_flags:
-                        break
-
-            extension_list = list(extensions_path.glob(file_format.format('{}_{}'.format(base_name, selection_mode))))
-            return extension_list
-
-        os_specific_formats = {
-            'Darwin': ('lib{}.dylib', 'lib{}.so'),
-            'Linux': ('lib{}.so',),
-            'Windows': ('{}.dll',),
-        }
-        cpu_extensions_name = cpu_extensions.parts[-1]
-        if cpu_extensions_name != 'AUTO':
-            return cpu_extensions
-        extensions_path = cpu_extensions.parent
-        system_name = platform.system()
-        file_formats = os_specific_formats.get(system_name)
-        if not file_formats:
-            raise ConfigError(
-                'Accuracy Checker can not automatically find cpu extensions library '
-                'for {} platform. Please, set cpu extension library manually.'.format(system_name)
-            )
-        extension_list = []
-        for supported_format in file_formats:
-            extension_list = get_cpu_extensions_list(supported_format, 'cpu_extension', selection_mode)
-            if extension_list:
-                break
-        if not extension_list:
-            raise ConfigError('suitable CPU extension lib not found in {}'.format(extensions_path))
-        return extension_list[0]
-
-    @staticmethod
-    def convert_model(config, framework=None):
-        if framework is None:
-            framework = DLSDKLauncherConfigValidator.check_model_source(config)
-        config_model = config.get('{}_model'.format(framework.name), '')
-        config_weights = config.get('{}_weights'.format(framework.name), '')
-        config_meta = config.get('{}_meta'.format(framework.name), '')
-        mo_search_paths = []
-        model_optimizer = get_parameter_value_from_config(config, DLSDKLauncher.parameters(), '_model_optimizer')
-        if model_optimizer:
-            mo_search_paths.append(model_optimizer)
-        model_optimizer_directory_env = os.environ.get('MO_DIR')
-        if model_optimizer_directory_env:
-            mo_search_paths.append(model_optimizer_directory_env)
-        model_name = (
-            Path(config_model).name.rsplit('.', 1)[0] or
-            Path(config_weights).name.rsplit('.', 1)[0] or
-            Path(config_meta).name.rsplit('.', 1)[0]
-        )
-        should_log_mo_cmd = get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'should_log_cmd')
-
-        return convert_model(
-            model_name,
-            config_model, config_weights, config_meta, framework, mo_search_paths,
-            get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'mo_params'),
-            get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'mo_flags'),
-            get_parameter_value_from_config(config, DLSDKLauncher.parameters(), '_tf_custom_op_config_dir'),
-            get_parameter_value_from_config(
-                config, DLSDKLauncher.parameters(), '_tf_obj_detection_api_pipeline_config_path'
-            ),
-            get_parameter_value_from_config(config, DLSDKLauncher.parameters(), '_transformations_config_dir'),
-            should_log_cmd=should_log_mo_cmd
-        )
-
     @property
     def num_requests(self):
         return self._num_requests
@@ -574,7 +480,7 @@ class DLSDKLauncher(Launcher):
         if 'CPU' in self._devices_list():
             if cpu_extensions:
                 selection_mode = self.config.get('_cpu_extensions_mode')
-                cpu_extensions = DLSDKLauncher.get_cpu_extension(cpu_extensions, selection_mode)
+                cpu_extensions = get_cpu_extension(cpu_extensions, selection_mode)
                 self.ie_core.add_extension(str(cpu_extensions), 'CPU')
             self.ie_core.set_config({'CPU_BIND_THREAD': 'YES' if not self._is_multi() else 'NO'}, 'CPU')
         gpu_extensions = self.config.get('gpu_extensions')
