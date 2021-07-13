@@ -162,6 +162,7 @@ class DLSDKLauncher(Launcher):
         self._use_set_blob = False
         self._output_layouts = {}
         self._output_precisions = {}
+        self._dyn_input_layers = []
         self.preprocessor = preprocessor
 
         if not delayed_model_loading:
@@ -221,6 +222,8 @@ class DLSDKLauncher(Launcher):
             if self._do_reshape:
                 input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
+                if self._dyn_input_layers:
+                    self._dyn_input_layers = self._get_dynamic_inputs()
             if self._use_set_blob:
                 has_info = hasattr(self.exec_network, 'input_info')
                 for key, input_data in infer_inputs.items():
@@ -785,14 +788,18 @@ class DLSDKLauncher(Launcher):
             self._create_network()
         else:
             self.network = network
+        if self.network is not None:
+            self._dyn_input_layers = self._get_dynamic_inputs()
+
         if not self._postpone_input_configuration:
             self._set_precision()
             self._set_input_shape()
+            self._dyn_input_layers = self._get_dynamic_inputs()
             if log:
                 self._print_input_output_info()
             if preprocessing:
                 self._set_preprocess(preprocessing)
-            if self.network and not preprocessing:
+            if self.network and not preprocessing and not self._dyn_input_layers:
                 self.exec_network = self.ie_core.load_network(
                     self.network, self._device, num_requests=self.num_requests
                 )
@@ -801,6 +808,7 @@ class DLSDKLauncher(Launcher):
         self.config['inputs'] = input_config
         self._set_precision()
         self._set_input_shape()
+        self._dyn_input_layers = self._get_dynamic_inputs()
         self._print_input_output_info()
         if self.preprocessor:
             self._set_preprocess(self.preprocessor)
@@ -808,6 +816,14 @@ class DLSDKLauncher(Launcher):
             self.exec_network = self.ie_core.load_network(
                 self.network, self._device, num_requests=self.num_requests
             )
+
+    def _get_dynamic_inputs(self):
+        inputs_with_undefined_shapes = []
+        for input_name, input_info in self.network.input_info.items():
+            if -1 in input_info.input_data.shape or not input_info.input_data.shape:
+                inputs_with_undefined_shapes.append(input_name)
+
+        return inputs_with_undefined_shapes
 
     def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path
@@ -828,16 +844,30 @@ class DLSDKLauncher(Launcher):
         }
 
     def fit_to_input(self, data, layer_name, layout, precision):
-        layer_shape = tuple(self.inputs[layer_name].shape)
-        data = self._data_to_blob(layer_shape, data, layout)
+        if layer_name in self._dyn_input_layers:
+            data = self._data_to_blob_dyn(data, layout)
+            layer_shape = data.shape
+        else:
+            layer_shape = tuple(self.inputs[layer_name].shape)
+            data = self._data_to_blob(layer_shape, data, layout)
         if precision:
             data = data.astype(precision)
+        if layer_name in self._dyn_input_layers:
+            self._do_reshape = True
+            return data
         data_shape = np.shape(data)
         if data_shape != layer_shape:
             if self.allow_reshape_input:
                 self._do_reshape = True
                 return data
         return self._align_data_shape(data, layer_name, layout)
+
+    @staticmethod
+    def _data_to_blob_dyn(data, layout):
+        data_shape = np.shape(data)
+        if len(layout) == len(data_shape):
+            return np.transpose(data, layout)
+        return np.array(data)
 
     def _data_to_blob(self, layer_shape, data, layout): # pylint:disable=R0911,R0912
         data_shape = np.shape(data)
