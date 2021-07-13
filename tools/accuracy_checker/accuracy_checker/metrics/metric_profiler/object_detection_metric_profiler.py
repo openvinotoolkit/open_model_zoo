@@ -146,7 +146,7 @@ class DetectionProfiler(MetricProfiler):
                 metric_name: per_class_result['result']
             }
             if 'ap' in per_class_result:
-                matching_result['ap'] = per_class_result['ap'] if np.isnan(per_class_result['ap']) else -1,
+                matching_result['ap'] = per_class_result['ap'] if np.isnan(per_class_result['ap']) else -1
             return matching_result
         matches = per_class_result['matched']
         dt_matches = 0
