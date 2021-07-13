@@ -140,13 +140,13 @@ class DetectionProfiler(MetricProfiler):
             matching_result = {
                 'prediction_matches': int(dt_matches),
                 'annotation_matches': gt_matches,
-                'precision': per_class_result['precision'],
-                'recall': per_class_result['recall'],
+                'precision': per_class_result['precision'] if not np.isnan(per_class_result['precision']) else -1,
+                'recall': per_class_result['recall'] if not np.isnan(per_class_result['recall']) else -1,
 
                 metric_name: per_class_result['result']
             }
             if 'ap' in per_class_result:
-                matching_result['ap'] = per_class_result['ap']
+                matching_result['ap'] = per_class_result['ap'] if np.isnan(per_class_result['ap']) else -1,
             return matching_result
         matches = per_class_result['matched']
         dt_matches = 0
