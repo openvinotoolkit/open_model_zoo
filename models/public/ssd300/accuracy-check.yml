@@ -24,6 +24,7 @@ models:
   - name: ssd300
     launchers:
       - framework: dlsdk
+        model: /home/automation/ssd300.xml
         adapter: ssd
 
     datasets:
@@ -38,3 +39,4 @@ models:
             integral: 11point
             ignore_difficult: True
             presenter: print_scalar
+          - type: coco_precision
