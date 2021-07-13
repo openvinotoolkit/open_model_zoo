@@ -471,9 +471,6 @@ def configure_evaluator_kwargs(args):
         evaluator_kwargs['csv_result'] = args.csv_result
     evaluator_kwargs['store_only'] = args.store_only
     evaluator_kwargs['ignore_metric_reference'] = args.ignore_metric_reference
-    evaluator_kwargs['profile'] = True
-    evaluator_kwargs['profile_report_type'] = 'json'
-    evaluator_kwargs['profiler_log_dir'] = '/home/automation/eaidova/profile_logs'
     return evaluator_kwargs
 
 
