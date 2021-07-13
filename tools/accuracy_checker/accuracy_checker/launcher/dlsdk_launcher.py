@@ -106,11 +106,14 @@ class DLSDKLauncher(Launcher):
         self._output_layouts = {}
         self._output_precisions = {}
         self._dyn_input_layers = []
+        self._partial_shapes = {}
         self.preprocessor = preprocessor
 
         if not delayed_model_loading:
             if dlsdk_launcher_config.need_conversion:
-                self._model, self._weights = mo_convert_model(self.config, dlsdk_launcher_config.framework)
+                self._model, self._weights = mo_convert_model(
+                    self.config, self.parameters(), dlsdk_launcher_config.framework
+                )
             else:
                 self._model, self._weights = self.automatic_model_search()
             self.load_network(log=True, preprocessing=preprocessor)
@@ -412,7 +415,7 @@ class DLSDKLauncher(Launcher):
             del self.exec_network
         self.network.reshape(shapes)
         if self._dyn_input_layers:
-            self._dyn_input_layers = self._get_dynamic_inputs()
+            self._dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
         self.exec_network = self.ie_core.load_network(self.network, self.device, num_requests=self._num_requests)
 
     def _set_batch_size(self, batch_size):
@@ -644,12 +647,12 @@ class DLSDKLauncher(Launcher):
         else:
             self.network = network
         if self.network is not None:
-            self._dyn_input_layers = self._get_dynamic_inputs()
+            self._dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
 
         if not self._postpone_input_configuration:
             self._set_precision()
             self._set_input_shape()
-            self._dyn_input_layers = self._get_dynamic_inputs()
+            self._dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
             if log:
                 self._print_input_output_info()
             if preprocessing:
@@ -663,7 +666,7 @@ class DLSDKLauncher(Launcher):
         self.config['inputs'] = input_config
         self._set_precision()
         self._set_input_shape()
-        self._dyn_input_layers = self._get_dynamic_inputs()
+        self._dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
         self._print_input_output_info()
         if self.preprocessor:
             self._set_preprocess(self.preprocessor)
@@ -674,11 +677,19 @@ class DLSDKLauncher(Launcher):
 
     def _get_dynamic_inputs(self):
         inputs_with_undefined_shapes = []
+        partial_shapes = {}
         for input_name, input_info in self.network.input_info.items():
             if -1 in input_info.input_data.shape or not input_info.input_data.shape:
                 inputs_with_undefined_shapes.append(input_name)
+        if inputs_with_undefined_shapes and not isinstance(ng, UnsupportedPackage):
+            ng_function = ng.function_from_cnn(self.network)
+            for node in ng_function.get_ordered_ops():
+                node_name = node.get_friendly_name()
+                if node_name not in inputs_with_undefined_shapes:
+                    continue
+                partial_shapes[node_name] = node.get_partial_shape()
 
-        return inputs_with_undefined_shapes
+        return inputs_with_undefined_shapes, partial_shapes
 
     def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path
@@ -822,7 +833,11 @@ class DLSDKLauncher(Launcher):
         for name, input_info in network_inputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(input_info.precision))
-            print_info('\tshape {}\n'.format(input_info.shape))
+            print_info(
+                '\tshape {}\n'.format(
+                    input_info.shape if name not in self._dyn_input_layers else self._partial_shapes.get(name, [])
+                )
+            )
         print_info('Output info')
         for name, output_info in network_outputs.items():
             print_info('\tLayer name: {}'.format(name))
