@@ -176,7 +176,7 @@ def add_model_pages(output_root, parent_element, group, group_title):
     task_type_elements = {}
     device_support_path = OMZ_ROOT / 'models' / group / 'device_support.md'
 
-    with (device_support_path).open('r', encoding="utf-8") as device_support_file:
+    with device_support_path.open('r', encoding="utf-8") as device_support_file:
         raw_device_support = device_support_file.read()
 
     device_support_lines = re.findall(r'^\|\s\S+\s\|', raw_device_support, re.MULTILINE)
