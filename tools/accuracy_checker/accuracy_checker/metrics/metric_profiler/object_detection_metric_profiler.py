@@ -20,7 +20,7 @@ from ...utils import contains_all
 
 
 class DetectionProfiler(MetricProfiler):
-    __provider__ = 'detection_dict'
+    __provider__ = 'detection_voc'
 
     def __init__(self, dump_iterations=100, report_type='csv', name=None):
         self.names = []
@@ -175,7 +175,7 @@ class DetectionProfiler(MetricProfiler):
 
 
 class DetectionListProfiler(DetectionProfiler):
-    __provider__ = 'detection_list'
+    __provider__ = 'detection_coco'
 
     def generate_json_report(self, identifier, metric_result, metric_name):
         report = {'identifier': identifier, 'per_class_result': {}}
