@@ -30,7 +30,7 @@ def generate_expected_result(values, metric_name, labels=None):
     if labels:
         meta.update({'names': list(labels.values())})
 
-    return EvaluationResult(pytest.approx(values), None, metric_name, metric_name, None, None, meta)
+    return EvaluationResult(pytest.approx(values), None, metric_name, metric_name, None, None, meta, None)
 
 
 class TestPixelAccuracy:
