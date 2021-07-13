@@ -38,7 +38,7 @@ class ForecastingEngine:
     def __init__(self, model_xml, model_bin, input_name, output_name, quantiles):
         device = "CPU"
         log.info('OpenVINO Inference Engine')
-        log.info('build: {}'.format(get_version()))
+        log.info('\tbuild: {}'.format(get_version()))
         self.ie = IECore()
         log.info('Reading model {}'.format(model_xml))
         self.net = self.ie.read_network(

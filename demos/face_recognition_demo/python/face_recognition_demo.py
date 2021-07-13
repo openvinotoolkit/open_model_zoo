@@ -129,7 +129,7 @@ class FrameProcessor:
         self.allow_grow = args.allow_grow and not args.no_show
 
         log.info('OpenVINO Inference Engine')
-        log.info('build: {}'.format(get_version()))
+        log.info('\tbuild: {}'.format(get_version()))
         ie = IECore()
         if args.cpu_lib and 'CPU' in {args.d_fd, args.d_lm, args.d_reid}:
             ie.add_extension(args.cpu_lib, 'CPU')

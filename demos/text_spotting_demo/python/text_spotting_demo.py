@@ -167,7 +167,7 @@ def main():
 
     # Plugin initialization for specified device and load extensions library if specified.
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, 'CPU')
@@ -187,20 +187,20 @@ def main():
         f'Demo supports only topologies with the following output keys: {required_output_keys}' \
         f'Found: {mask_rcnn_net.outputs.keys()}.'
 
-    log.info('Reading encoder model {}'.format(args.text_enc_model))
+    log.info('Reading Text Recognition Encoder model {}'.format(args.text_enc_model))
     text_enc_net = ie.read_network(args.text_enc_model, os.path.splitext(args.text_enc_model)[0] + '.bin')
 
-    log.info('Reading decoder model {}'.format(args.text_dec_model))
+    log.info('Reading Text Recognition Decoder model {}'.format(args.text_dec_model))
     text_dec_net = ie.read_network(args.text_dec_model, os.path.splitext(args.text_dec_model)[0] + '.bin')
 
     mask_rcnn_exec_net = ie.load_network(network=mask_rcnn_net, device_name=args.device, num_requests=2)
     log.info('The Mask-RCNN model {} is loaded to {}'.format(args.mask_rcnn_model, args.device))
 
     text_enc_exec_net = ie.load_network(network=text_enc_net, device_name=args.device)
-    log.info('The encoder model {} is loaded to {}'.format(args.text_enc_model, args.device))
+    log.info('The Text Recognition Encoder model {} is loaded to {}'.format(args.text_enc_model, args.device))
 
     text_dec_exec_net = ie.load_network(network=text_dec_net, device_name=args.device)
-    log.info('The decoder model {} is loaded to {}'.format(args.text_dec_model, args.device))
+    log.info('The Text Recognition Decoder model {} is loaded to {}'.format(args.text_dec_model, args.device))
 
     hidden_shape = text_dec_net.input_info[args.trd_input_prev_hidden].input_data.shape
 

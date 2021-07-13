@@ -46,19 +46,19 @@ def run_demo(args):
     cap = open_images_capture(args.input, args.loop)
 
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
-    log.info('Reading object detection model {}'.format(args.model_od))
+    log.info('Reading Object Detection model {}'.format(args.model_od))
     detector_person = Detector(ie, args.model_od,
                                device=args.device,
                                label_class=args.person_label)
-    log.info('The object detection model {} is loaded to {}'.format(args.model_od, args.device))
+    log.info('The Object Detection model {} is loaded to {}'.format(args.model_od, args.device))
 
-    log.info('Reading human pose estimation model {}'.format(args.model_hpe))
+    log.info('Reading Human Pose Estimation model {}'.format(args.model_hpe))
     single_human_pose_estimator = HumanPoseEstimator(ie, args.model_hpe,
                                                      device=args.device)
-    log.info('The human pose estimation model {} is loaded to {}'.format(args.model_hpe, args.device))
+    log.info('The Human Pose Estimation model {} is loaded to {}'.format(args.model_hpe, args.device))
 
     frame = cap.read()
     if frame is None:

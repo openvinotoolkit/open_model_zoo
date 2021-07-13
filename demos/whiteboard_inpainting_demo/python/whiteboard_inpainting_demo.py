@@ -120,7 +120,7 @@ def main():
         raise RuntimeError("Can't open video writer")
 
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     model_path = args.m_instance_segmentation if args.m_instance_segmentation else args.m_semantic_segmentation

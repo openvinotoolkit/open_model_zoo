@@ -31,7 +31,7 @@ class IEModel(): # pylint: disable=too-few-public-methods
 
     def __init__(self, model_path, device, cpu_extension):
         log.info('OpenVINO Inference Engine')
-        log.info('build: {}'.format(get_version()))
+        log.info('\tbuild: {}'.format(get_version()))
         ie = IECore()
         if cpu_extension and device == 'CPU':
             ie.add_extension(cpu_extension, 'CPU')

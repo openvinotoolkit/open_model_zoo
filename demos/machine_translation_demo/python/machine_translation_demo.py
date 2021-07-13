@@ -71,7 +71,7 @@ class TranslationEngine:
     """
     def __init__(self, model_xml, model_bin, device, output_name):
         log.info('OpenVINO Inference Engine')
-        log.info('build: {}'.format(get_version()))
+        log.info('\tbuild: {}'.format(get_version()))
         ie = IECore()
 
         log.info('Reading model {}'.format(model_xml))

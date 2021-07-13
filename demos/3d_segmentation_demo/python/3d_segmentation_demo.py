@@ -247,7 +247,7 @@ def main():
 
     # --------------------------------- 1. Load Plugin for inference engine ---------------------------------
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     if 'CPU' in args.target_device:

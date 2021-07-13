@@ -256,7 +256,7 @@ def main():
     capture = MulticamCapture(args.input, args.loop)
 
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     if args.detections:

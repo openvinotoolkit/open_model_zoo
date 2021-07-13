@@ -63,7 +63,7 @@ if __name__ == '__main__':
     cap = open_images_capture(args.input, args.loop)
 
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     log.info('Reading model {}'.format(args.model))

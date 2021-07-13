@@ -137,7 +137,7 @@ def main():
     args = build_argparser()
 
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
     if args.device == "CPU" and args.cpu_extension:
         ie.add_extension(args.cpu_extension, 'CPU')

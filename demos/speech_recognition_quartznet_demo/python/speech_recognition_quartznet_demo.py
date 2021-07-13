@@ -122,7 +122,7 @@ def main():
     log_melspectrum = QuartzNet.audio_to_melspectrum(audio.flatten(), sampling_rate)
 
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     quartz_net = QuartzNet(ie, args.model, log_melspectrum.shape, args.device)

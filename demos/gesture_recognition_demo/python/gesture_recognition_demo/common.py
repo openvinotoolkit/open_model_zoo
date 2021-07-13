@@ -21,7 +21,7 @@ from openvino.inference_engine import IECore, get_version
 def load_ie_core(device, cpu_extension=None):
     """Loads IE Core"""
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
     if device == "CPU" and cpu_extension:
         ie.add_extension(cpu_extension, "CPU")

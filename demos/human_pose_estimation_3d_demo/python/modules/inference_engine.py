@@ -23,7 +23,7 @@ class InferenceEngine:
         self.stride = stride
 
         log.info('OpenVINO Inference Engine')
-        log.info('build: {}'.format(get_version()))
+        log.info('\tbuild: {}'.format(get_version()))
         self.ie = IECore()
 
         log.info('Reading model {}'.format(net_model_xml_path))

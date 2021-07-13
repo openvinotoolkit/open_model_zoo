@@ -75,7 +75,7 @@ def main():
 
     # Plugin initialization
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     # Read IR

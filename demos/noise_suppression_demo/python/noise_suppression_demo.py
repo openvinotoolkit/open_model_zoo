@@ -72,7 +72,7 @@ def main():
     args = build_argparser().parse_args()
 
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     # read IR

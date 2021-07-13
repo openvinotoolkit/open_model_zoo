@@ -149,14 +149,14 @@ class Model:
     def __init__(self, args, interactive_mode):
         self.args = args
         log.info('OpenVINO Inference Engine')
-        log.info('build: {}'.format(get_version()))
+        log.info('\tbuild: {}'.format(get_version()))
         self.ie = IECore()
-        self.encoder = read_net(self.args.m_encoder, self.ie, 'encoder')
-        self.dec_step = read_net(self.args.m_decoder, self.ie, 'decoder')
+        self.encoder = read_net(self.args.m_encoder, self.ie, 'Formula Recognition Encoder')
+        self.dec_step = read_net(self.args.m_decoder, self.ie, 'Formula Recognition Decoder')
         self.exec_net_encoder = self.ie.load_network(network=self.encoder, device_name=self.args.device)
-        log.info('The encoder model {} is loaded to {}'.format(args.m_encoder, args.device))
+        log.info('The Formula Recognition Encoder model {} is loaded to {}'.format(args.m_encoder, args.device))
         self.exec_net_decoder = self.ie.load_network(network=self.dec_step, device_name=self.args.device)
-        log.info('The decoder model {} is loaded to {}'.format(args.m_decoder, args.device))
+        log.info('The Formula Recognition Decoder model {} is loaded to {}'.format(args.m_decoder, args.device))
         self.images_list = []
         self.vocab = Vocab(self.args.vocab_path)
         self.model_status = Model.Status.READY

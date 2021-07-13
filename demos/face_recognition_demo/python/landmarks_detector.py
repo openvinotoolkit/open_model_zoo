@@ -24,7 +24,7 @@ class LandmarksDetector(Module):
     POINTS_NUMBER = 5
 
     def __init__(self, ie, model):
-        super(LandmarksDetector, self).__init__(ie, model, 'landmarks detection')
+        super(LandmarksDetector, self).__init__(ie, model, 'Landmarks Detection')
 
         assert len(self.model.input_info) == 1, 'Expected 1 input blob'
         assert len(self.model.outputs) == 1, 'Expected 1 output blob'

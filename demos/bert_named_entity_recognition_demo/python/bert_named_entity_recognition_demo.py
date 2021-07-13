@@ -70,7 +70,7 @@ def main():
     max_sent_length = max([len(tokens) + 2 for tokens, _ in preprocessed_sentences])
 
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     # read IR

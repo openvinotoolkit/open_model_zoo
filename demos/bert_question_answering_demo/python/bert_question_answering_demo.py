@@ -105,7 +105,7 @@ def main():
     c_tokens_id, c_tokens_se = text_to_tokens(context.lower(), vocab)
 
     log.info('OpenVINO Inference Engine')
-    log.info('build: {}'.format(get_version()))
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     # read IR
