@@ -281,7 +281,7 @@ def main():
 
         save_annotation(converted_annotation, meta, annotation_file, meta_file, dataset_config)
     except Exception as e: # pylint:disable=W0703
-        send_telemetry_event(tm, 'status', 'failure')
+        send_telemetry_event(tm, 'annotation_conversion_status', 'failure')
         exception(e)
         sys.exit(1)
     send_telemetry_event(tm, 'annotation_conversion_status', 'success')
