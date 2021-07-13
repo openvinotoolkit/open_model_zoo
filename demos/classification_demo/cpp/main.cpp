@@ -327,16 +327,9 @@ int main(int argc, char *argv[]) {
         //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
-        slog::info << "\tDecoding:\t" << std::fixed << std::setprecision(2) <<
-            readerMetrics.getTotal().latency << " ms" << slog::endl;;
-        slog::info << "\tPreprocessing:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getPreprocessMetrics().getTotal().latency << " ms" << slog::endl;;
-        slog::info << "\tInference:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getInferenceMetircs().getTotal().latency << " ms" << slog::endl;;
-        slog::info << "\tPostprocessing:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getPostprocessMetrics().getTotal().latency << " ms" << slog::endl;;
-        slog::info << "\tRendering:\t" << std::fixed << std::setprecision(2) <<
-            renderMetrics.getTotal().latency << " ms" << slog::endl;
+        printStagesLatency(readerMetrics.getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
+            pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
+            renderMetrics.getTotal().latency);
 
         if (!FLAGS_gt.empty()) {
             slog::info << "Accuracy (top " << FLAGS_nt << "): " << accuracy << slog::endl;

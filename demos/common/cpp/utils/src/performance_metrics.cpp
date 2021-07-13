@@ -98,3 +98,16 @@ void PerformanceMetrics::printTotal() const {
     slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms" << slog::endl;
     slog::info << "\tFPS: " << metrics.fps << slog::endl;
 }
+
+void printStagesLatency(double readLat, double preprocLat, double inferLat, double postprocLat, double renderLat) {
+    slog::info << "\tDecoding:\t" << std::fixed << std::setprecision(2) <<
+        readLat << " ms" << slog::endl;;
+    slog::info << "\tPreprocessing:\t" << std::fixed << std::setprecision(2) <<
+        preprocLat << " ms" << slog::endl;;
+    slog::info << "\tInference:\t" << std::fixed << std::setprecision(2) <<
+        inferLat << " ms" << slog::endl;;
+    slog::info << "\tPostprocessing:\t" << std::fixed << std::setprecision(2) <<
+        postprocLat << " ms" << slog::endl;;
+    slog::info << "\tRendering:\t" << std::fixed << std::setprecision(2) <<
+        renderLat << " ms" << slog::endl;
+}
