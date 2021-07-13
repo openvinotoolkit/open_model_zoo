@@ -103,6 +103,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - person-vehicle-bike-detection-2004
   - product-detection-0001
   - rfcn-resnet101-coco-tf
+  - retinaface-resnet50-pytorch
   - retinanet-tf
   - ssd300
   - ssd512
