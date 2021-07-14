@@ -212,7 +212,7 @@ void print_raw_results(const ImageResult& result, std::vector<std::string> label
         const int value = static_cast<int>(histogram.at<float>(i));
         if (value > 0)
         {
-            std::string label = i < labels.size() ? labels[i] : "#" + std::to_string(i);
+            std::string label = (size_t)i < labels.size() ? labels[i] : "#" + std::to_string(i);
             slog::info << " "
                 << std::setw(16) << std::left << label << " | "
                 << std::setw(6) << value << " | "
