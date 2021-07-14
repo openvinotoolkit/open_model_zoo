@@ -630,7 +630,7 @@ int main(int argc, char* argv[]) {
                 return 0;
             }
         } catch (std::logic_error& error) {
-            std::cerr << "[ ERROR ] " << error.what() << std::endl;
+            slog::err << error.what() << slog::endl;
             return 1;
         }
 

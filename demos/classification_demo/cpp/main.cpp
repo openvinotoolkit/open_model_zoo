@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
             auto readingStart = std::chrono::steady_clock::now();
             const cv::Mat& tmpImage = cv::imread(name);
             if (tmpImage.data == nullptr) {
-                std::cerr << "Could not read image " << name << '\n';
+                slog::err << "Could not read image " << name << slog::endl;
                 imageNames.erase(imageNames.begin() + i);
                 i--;
             } else {

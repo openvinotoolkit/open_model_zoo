@@ -16,7 +16,7 @@ slog::LogStream& operator<<(slog::LogStream& os, const FaceInferenceResults& fac
     os << "Facial landmarks: " << slog::endl;
     int lmCounter = 0;
     for (auto const& lm : faceInferenceResults.faceLandmarks) {
-        os << "\t landmark #" << lmCounter << ": " << lm << slog::endl;
+        os << "\tlandmark #" << lmCounter << ": " << lm << slog::endl;
         ++lmCounter;
     }
 

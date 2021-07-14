@@ -630,7 +630,7 @@ int main(int argc, char* argv[]) {
                 return 0;
             }
         } catch (std::logic_error& error) {
-            std::cerr << "[ ERROR ] " << error.what() << std::endl;
+            slog::err << error.what() << slog::endl;
             return 1;
         }
 
@@ -819,10 +819,10 @@ int main(int argc, char* argv[]) {
         }
         slog::info << context.drawersContext.presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
-        std::cerr << "[ ERROR ] " << error.what() << std::endl;
+        slog::err << error.what() << slog::endl;
         return 1;
     } catch (...) {
-        std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
+        slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
 

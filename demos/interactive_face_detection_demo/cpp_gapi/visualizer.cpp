@@ -180,7 +180,7 @@ void Visualizer::enableEmotionBar(const cv::Size inImgSize, std::vector<std::str
             ystep = imgSizePadded.height / nycells;
         } else {
             emotionVisualizer.reset();
-            std::cerr << "Disabling emotion bar due to small frame resolution to draw on\n";
+            slog::err << "Disabling emotion bar due to small frame resolution to draw on" << slog::endl;
         }
     }
 

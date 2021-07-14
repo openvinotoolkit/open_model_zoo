@@ -223,11 +223,11 @@ int main(int argc, char **argv) {
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
-        std::cerr << "[ ERROR ] " << error.what() << std::endl;
+        slog::err << error.what() << slog::endl;
         return 1;
     }
     catch (...) {
-        std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
+        slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
 
