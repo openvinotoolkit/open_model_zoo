@@ -45,6 +45,8 @@ mccabe==0.6.1
     # via flake8
 motmetrics==1.2.0
     # via -r demos/requirements.txt
+mpmath==1.2.1
+    # via sympy
 nibabel==3.2.1
     # via -r demos/requirements.txt
 numba==0.53.1
@@ -132,6 +134,8 @@ six==1.16.0
     #   resampy
 soundfile==0.10.3.post1
     # via librosa
+sympy==1.8
+    # via -r demos/requirements.txt
 tensorboardx==2.3
     # via -r demos/requirements.txt
 threadpoolctl==2.1.0

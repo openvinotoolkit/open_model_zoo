@@ -86,7 +86,7 @@ def create_renderer():
     of latex formula could be performed
     """
     command = subprocess.run(["pdflatex", "--version"], stdout=subprocess.DEVNULL,
-                             stderr=subprocess.DEVNULL, check=False)
+                             stderr=subprocess.DEVNULL, check=False, shell=True) # shell=True is used to process case with no pdflatex installed on Windows
     if command.returncode != 0:
         renderer = None
         log.warning("pdflatex not installed, please, install it to use rendering")
