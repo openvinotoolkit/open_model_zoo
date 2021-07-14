@@ -60,7 +60,7 @@ void SaveDetectionLogToTrajFile(const std::string& path,
 }
 
 void PrintDetectionLog(const DetectionLog& log) {
-    SaveDetectionLogToStream(slog::dbg, slog::endl, log);
+    SaveDetectionLogToStream(slog::debug, slog::endl, log);
 }
 
 InferenceEngine::Core

@@ -229,19 +229,22 @@ inline void printExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execN
         devices.insert(device);
     }
 
-    try {
-        if (devices.find("AUTO") == devices.end()) { // do not print info for AUTO device
-            if ((devices.find("CPU") != devices.end() || devices.find("") != devices.end())) {
+    if (devices.find("AUTO") == devices.end()) { // do not print info for AUTO device
+        if ((devices.find("CPU") != devices.end() || devices.find("") != devices.end())) {
+            try {
                 std::string nthreads = execNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>();
                 slog::info << "\tNumber of threads is set to "
                     << (nthreads == "0" ? "AUTO" : nthreads) << " for CPU device." << slog::endl;
             }
+            catch (const InferenceEngine::Exception&) {}
+        }
 
-            for (const auto& device : devices) {
+        for (const auto& device : devices) {
+            try {
                 slog::info << "\tNumber of streams is set to "
                     << execNetwork.GetConfig(device + "_THROUGHPUT_STREAMS").as<std::string>() << " for " << device << " device." << slog::endl;
             }
+            catch (const InferenceEngine::Exception&) {}
         }
     }
-    catch (...) {}
 }

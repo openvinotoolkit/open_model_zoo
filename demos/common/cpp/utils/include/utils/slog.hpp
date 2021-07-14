@@ -93,7 +93,7 @@ public:
 
 
 static LogStream info("INFO", std::cout);
-static LogStream dbg("DEBUG", std::cout);
+static LogStream debug("DEBUG", std::cout);
 static LogStream warn("WARNING", std::cout);
 static LogStream err("ERROR", std::cerr);
 

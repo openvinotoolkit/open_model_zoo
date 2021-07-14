@@ -224,7 +224,7 @@ struct PersonDetection : BaseDetection{
             r.location.height = static_cast<int>(detections[i * objectSize + 6] * height - r.location.y);
 
             if (FLAGS_r) {
-                slog::dbg << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
+                slog::debug << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
                           "    (" << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
                           << r.location.height << ")"
                           << ((r.confidence > FLAGS_t) ? " WILL BE RENDERED!" : "") << slog::endl;
@@ -404,7 +404,7 @@ struct PersonReIdentification : BaseDetection {
         for (size_t i = 0; i < size; ++i) {
             float cosSim = cosineSimilarity(newReIdVec, globalReIdVec[i]);
             if (FLAGS_r) {
-                slog::dbg << "cosineSimilarity: " << cosSim << slog::endl;
+                slog::debug << "cosineSimilarity: " << cosSim << slog::endl;
             }
             if (cosSim > FLAGS_t_reid) {
                 /* We substitute previous person's vector by a new one characterising
@@ -733,10 +733,10 @@ int main(int argc, char *argv[]) {
                             for (size_t i = 0; i < resPersAttrAndColor.attributes_strings.size(); ++i)
                                 if (resPersAttrAndColor.attributes_indicators[i])
                                     output_attribute_string += resPersAttrAndColor.attributes_strings[i] + ",";
-                            slog::dbg << "Person Attributes results: " << output_attribute_string << slog::endl;
+                            slog::debug << "Person Attributes results: " << output_attribute_string << slog::endl;
                             if (shouldHandleTopBottomColors) {
-                                slog::dbg << "Person top color: " << resPersAttrAndColor.top_color << slog::endl;
-                                slog::dbg << "Person bottom color: " << resPersAttrAndColor.bottom_color << slog::endl;
+                                slog::debug << "Person top color: " << resPersAttrAndColor.top_color << slog::endl;
+                                slog::debug << "Person bottom color: " << resPersAttrAndColor.bottom_color << slog::endl;
                             }
                         }
                     }
@@ -749,7 +749,7 @@ int main(int argc, char *argv[]) {
                                     cv::Scalar(250, 10, 10), 1);
 
                         if (FLAGS_r) {
-                            slog::dbg << "Person Re-Identification results: " << resPersReid << slog::endl;
+                            slog::debug << "Person Re-Identification results: " << resPersReid << slog::endl;
                         }
                     }
                     cv::rectangle(frame, result.location, cv::Scalar(0, 255, 0), 1);
@@ -773,7 +773,7 @@ int main(int argc, char *argv[]) {
                         << " ms (" << 1000.f / average_time << " fps)";
                     putHighlightedText(frame, out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
                     if (FLAGS_r) {
-                        slog::dbg << out.str() << slog::endl;;
+                        slog::debug << out.str() << slog::endl;;
                     }
                 }
                 if (personReId.enabled() && personReIdInferred) {
@@ -783,7 +783,7 @@ int main(int argc, char *argv[]) {
                         << " ms (" << 1000.f / average_time << " fps)";
                     putHighlightedText(frame, out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
                     if (FLAGS_r) {
-                        slog::dbg << out.str() << slog::endl;;
+                        slog::debug << out.str() << slog::endl;;
                     }
                 }
             }

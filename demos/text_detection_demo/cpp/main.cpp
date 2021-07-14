@@ -278,18 +278,18 @@ int main(int argc, char *argv[]) {
 
                 if (FLAGS_r) {
                     for (size_t i = 0; i < points.size(); i++) {
-                        slog::dbg << clip(static_cast<int>(points[i].x), image.cols - 1) << "," <<
+                        slog::debug << clip(static_cast<int>(points[i].x), image.cols - 1) << "," <<
                                      clip(static_cast<int>(points[i].y), image.rows - 1);
                         if (i != points.size() - 1)
-                            slog::dbg << ",";
+                            slog::debug << ",";
                     }
 
                     if (text_recognition != nullptr) {
-                        slog::dbg << "," << res;
+                        slog::debug << "," << res;
                     }
 
                     if (!points.empty()) {
-                        slog::dbg << slog::endl;
+                        slog::debug << slog::endl;
                     }
                 }
 

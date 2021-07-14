@@ -359,7 +359,7 @@ std::shared_ptr<FaceRecognizer> processingFaceGallery(const cv::gapi::GNetPackag
                 }
             }
         }
-        slog::dbg << "Face reid gallery size: " << identities.size() << slog::endl;
+        slog::debug << "Face reid gallery size: " << identities.size() << slog::endl;
     } else {
         slog::warn << "Face reid gallery is empty!" << slog::endl;
     }

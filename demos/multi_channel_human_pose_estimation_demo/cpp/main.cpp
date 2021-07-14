@@ -362,7 +362,7 @@ int main(int argc, char* argv[]) {
 
                 averageFps = frameTime;
                 if (FLAGS_show_stats) {
-                    slog::dbg << "FPS: " << 1000.f/frameTime << slog::endl;
+                    slog::debug << "FPS: " << 1000.f/frameTime << slog::endl;
                     if (++perfItersCounter >= FLAGS_n_sp) {
                         break;
                     }
@@ -374,26 +374,26 @@ int main(int argc, char* argv[]) {
                     auto outputStat = output.getStats();
 
                     std::unique_lock<std::mutex> lock(statMutex);
-                    slog::dbg << "Latency:" << slog::endl;
-                    slog::dbg << std::fixed << std::setprecision(1);
-                    slog::dbg << "\tInput reads: ";
+                    slog::debug << "Latency:" << slog::endl;
+                    slog::debug << std::fixed << std::setprecision(1);
+                    slog::debug << "\tInput reads: ";
                     for (size_t i = 0; i < inputStat.readTimes.size(); ++i) {
                         if (0 == (i % 4) && i != 0) {
-                            slog::dbg << slog::endl;
+                            slog::debug << slog::endl;
                         }
-                        slog::dbg << inputStat.readTimes[i] << "ms ";
+                        slog::debug << inputStat.readTimes[i] << "ms ";
                     }
-                    slog::dbg << slog::endl;
-                    slog::dbg << "\tDecoding: "
+                    slog::debug << slog::endl;
+                    slog::debug << "\tDecoding: "
                         << inputStat.decodingLatency << "ms";
-                    slog::dbg << slog::endl;
-                    slog::dbg << "\tPreprocess: "
+                    slog::debug << slog::endl;
+                    slog::debug << "\tPreprocess: "
                         << inferStat.preprocessTime << "ms";
-                    slog::dbg << slog::endl;
-                    slog::dbg << "\tInfrence: "
+                    slog::debug << slog::endl;
+                    slog::debug << "\tInfrence: "
                         << inferStat.inferTime << "ms";
-                    slog::dbg << slog::endl;
-                    slog::dbg << "\tRendering: " << outputStat.renderTime
+                    slog::debug << slog::endl;
+                    slog::debug << "\tRendering: " << outputStat.renderTime
                         << "ms" << slog::endl;
                 }
             }

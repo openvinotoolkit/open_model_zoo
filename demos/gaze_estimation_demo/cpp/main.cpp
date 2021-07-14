@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
 
             if (FLAGS_r) {
                 for (auto& inferenceResult : inferenceResults) {
-                    slog::dbg << inferenceResult << slog::endl;
+                    slog::debug << inferenceResult << slog::endl;
                 }
             }
 

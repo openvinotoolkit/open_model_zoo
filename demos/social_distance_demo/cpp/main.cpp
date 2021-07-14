@@ -238,8 +238,8 @@ public:
         std::mutex &printMutex = static_cast<ReborningVideoFrame *>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
         if (rawDetections.size() != 0) {
-            slog::dbg << "---------------------Frame #" << sharedVideoFrame->frameId << "---------------------" << slog ::endl;
-            slog::dbg << rawDetections;
+            slog::debug << "---------------------Frame #" << sharedVideoFrame->frameId << "---------------------" << slog ::endl;
+            slog::debug << rawDetections;
         }
         printMutex.unlock();
         tryPush(static_cast<ReborningVideoFrame *>(sharedVideoFrame.get())->context.resAggregatorsWorker,

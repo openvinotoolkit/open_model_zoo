@@ -277,14 +277,14 @@ GAPI_OCV_KERNEL_ST(OCVRecognizeResultPostProc, custom::RecognizeResultPostProc, 
                 post_proc.logger.SmoothTracks(face_obj_id_to_actions_track, start_frame, end_frame,
                                               params.smooth_window_size, params.smooth_min_length,
                                               default_action_index, &face_obj_id_to_events);
-                slog::dbg << " Final ID->events mapping" << slog::endl;
+                slog::debug << " Final ID->events mapping" << slog::endl;
                 post_proc.logger.DumpTracks(face_obj_id_to_events,
                                             params.actions_map, face_track_id_to_label,
                                             face_id_to_label_map);
                 std::vector<std::map<int, int>> face_obj_id_to_smoothed_action_maps;
                 post_proc.logger.ConvertRangeEventsTracksToActionMaps(end_frame, face_obj_id_to_events,
                                                                       &face_obj_id_to_smoothed_action_maps);
-                slog::dbg << " Final per-frame ID->action mapping" << slog::endl;
+                slog::debug << " Final per-frame ID->action mapping" << slog::endl;
                 post_proc.logger.DumpDetections(params.video_path, frame.size(), work_num_frames,
                                                 new_face_tracks,
                                                 face_track_id_to_label,

@@ -228,13 +228,13 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
     outputTransform.resize(outputImg);
     // Visualizing result data over source image
     if (FLAGS_r) {
-        slog::dbg << " -------------------- Frame # " << result.frameId << "--------------------" << slog::endl;
-        slog::dbg << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
+        slog::debug << " -------------------- Frame # " << result.frameId << "--------------------" << slog::endl;
+        slog::debug << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
     }
 
     for (auto& obj : result.objects) {
         if (FLAGS_r) {
-            slog::dbg << " "
+            slog::debug << " "
                 << std::left << std::setw(9) << obj.label << " | "
                 << std::setw(10) << obj.confidence << " | "
                 << std::setw(4) << std::max(int(obj.x), 0) << " | "

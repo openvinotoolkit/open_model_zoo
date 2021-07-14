@@ -217,13 +217,13 @@ public:
         std::mutex& printMutex = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
         if (rawDetections.size() != 0) {
-            slog::dbg << "---------------------Frame #" << sharedVideoFrame->frameId << "---------------------" << slog::endl;
-            slog::dbg << rawDetections;
+            slog::debug << "---------------------Frame #" << sharedVideoFrame->frameId << "---------------------" << slog::endl;
+            slog::debug << rawDetections;
             for (const std::string& rawAttribute : rawAttributes.container) {  // destructor assures that none uses the container
-                slog::dbg << rawAttribute << slog::endl;
+                slog::debug << rawAttribute << slog::endl;
             }
             for (const std::string& rawDecodedPlate : rawDecodedPlates.container) {
-                slog::dbg << rawDecodedPlate << slog::endl;
+                slog::debug << rawDecodedPlate << slog::endl;
             }
         }
         printMutex.unlock();
