@@ -183,7 +183,6 @@ def main():
 
         render_start = time.time()
 
-        frames_processed += 1
         if len(boxes) and args.raw_output_message:
             log.debug('  -------------------------- Frame # {} --------------------------  '.format(frames_processed))
             log.debug('  Class ID | Confidence |     XMIN |     YMIN |     XMAX |     YMAX ')
@@ -204,6 +203,7 @@ def main():
         cv2.putText(frame, inf_time_message, (15, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
         cv2.putText(frame, render_time_message, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
 
+        frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(frame)
 
