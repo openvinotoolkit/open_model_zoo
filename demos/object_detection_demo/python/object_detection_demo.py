@@ -69,6 +69,12 @@ def build_argparser():
                                    help='Optional. The first image size used for CTPN model reshaping. '
                                         'Default: 600 600. Note that submitted images should have the same resolution, '
                                         'otherwise predictions might be incorrect.')
+    common_model_args.add_argument('--anchors', default=None, type=float, nargs='+',
+                                   help='Optional. A space separated list of anchors. '
+                                        'By default used default anchors for model. Only for YOLOV4 architecture type.')
+    common_model_args.add_argument('--masks', default=None, type=int, nargs='+',
+                                   help='Optional. A space separated list of mask for anchors. '
+                                        'By default used default masks for model. Only for YOLOV4 architecture type.')
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests',
@@ -173,7 +179,8 @@ def get_model(ie, args):
                            threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
     elif args.architecture_type == 'yolov4':
         return models.YoloV4(ie, args.model, labels=args.labels,
-                             threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
+                             threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio,
+                             anchors=args.anchors, masks=args.masks)
     elif args.architecture_type == 'faceboxes':
         return models.FaceBoxes(*common_args, threshold=args.prob_threshold)
     elif args.architecture_type == 'centernet':
