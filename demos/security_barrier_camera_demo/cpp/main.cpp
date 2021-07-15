@@ -749,7 +749,7 @@ int main(int argc, char* argv[]) {
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
         Detector detector(ie, FLAGS_d, FLAGS_m,
             {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d, "Detect"));
-        slog::info << "\tNumber of inference requests is set to " << nireq << slog::endl;
+        slog::info << "\tNumber of network inference requests: " << nireq << slog::endl;
 
         VehicleAttributesClassifier vehicleAttributesClassifier;
         std::size_t nclassifiersireq{0};
@@ -758,7 +758,7 @@ int main(int argc, char* argv[]) {
         if (!FLAGS_m_va.empty()) {
             vehicleAttributesClassifier = VehicleAttributesClassifier(ie, FLAGS_d_va, FLAGS_m_va, FLAGS_auto_resize, makeTagConfig(FLAGS_d_va, "Attr"));
             nclassifiersireq = nireq * 3;
-            slog::info << "\tNumber of inference requests is set to " << nclassifiersireq << slog::endl;
+            slog::info << "\tNumber of network inference requests: " << nclassifiersireq << slog::endl;
         }
         else {
             slog::info << "Vehicle Attributes Recognition DISABLED." << slog::endl;
@@ -766,7 +766,7 @@ int main(int argc, char* argv[]) {
         if (!FLAGS_m_lpr.empty()) {
             lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));
             nrecognizersireq = nireq * 3;
-            slog::info << "\tNumber of inference requests is set to " << nrecognizersireq << slog::endl;
+            slog::info << "\tNumber of network inference requests: " << nrecognizersireq << slog::endl;
         }
         else {
             slog::info << "License Plate Recognition DISABLED." << slog::endl;

@@ -750,13 +750,13 @@ int main(int argc, char* argv[]) {
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
         PersonDetector detector(ie, FLAGS_d_det, FLAGS_m_det,
             {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d_det, "Detect"));
-        slog::info << "\tNumber of inference requests is set to " << nireq << slog::endl;
+        slog::info << "\tNumber of network inference requests: " << nireq << slog::endl;
         ReId reid;
         std::size_t nreidireq{0};
         if (!FLAGS_m_reid.empty()) {
             reid = ReId(ie, FLAGS_d_reid, FLAGS_m_reid, FLAGS_auto_resize, makeTagConfig(FLAGS_d_reid, "ReId"));
             nreidireq = nireq * 3;
-            slog::info << "\tNumber of inference requests is set to " << nreidireq << slog::endl;
+            slog::info << "\tNumber of network inference requests: " << nreidireq << slog::endl;
         }
 
         bool isVideo = imageSources.empty() ? true : false;

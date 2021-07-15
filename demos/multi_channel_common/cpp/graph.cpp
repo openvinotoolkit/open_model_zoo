@@ -70,7 +70,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     InferenceEngine::ExecutableNetwork executableNetwork;
     executableNetwork = ie.LoadNetwork(cnnNetwork, deviceName);
     printExecNetworkInfo(executableNetwork, modelPath, deviceName);
-    slog::info << "\tNumber of inference requests is set to " << maxRequests << slog::endl;
+    slog::info << "\tNumber of network inference requests: " << maxRequests << slog::endl;
     slog::info << "\tBatch size is set to " << cnnNetwork.getBatchSize() << slog::endl;
 
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
