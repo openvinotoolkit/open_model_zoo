@@ -223,7 +223,7 @@ inline std::string fileNameNoExt(const std::string &filepath) {
 
 inline void printExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNetwork, const std::string& modelName,
     const std::string& deviceName, const std::string& modelType = "") {
-    slog::info << "The " << modelType << (modelType.empty() ? "" : " ")  << "model " << modelName << " is loaded to " << deviceName << slog::endl;
+    slog::info << "The " << modelType << (modelType.empty() ? "" : " ") << "model " << modelName << " is loaded to " << deviceName << slog::endl;
     std::set<std::string> devices;
     for (const std::string& device : parseDevices(deviceName)) {
         devices.insert(device);
@@ -237,7 +237,7 @@ inline void printExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execN
                 slog::info << "\t\tNumber of streams: " << nstreams << slog::endl;
                 if (device == "CPU") {
                     std::string nthreads = execNetwork.GetConfig("CPU_THREADS_NUM").as<std::string>();
-                    slog::info << "\t\tNumber of threads: " << (nthreads == "0" ? "AUTO" : nthreads) <<slog::endl;
+                    slog::info << "\t\tNumber of threads: " << (nthreads == "0" ? "AUTO" : nthreads) << slog::endl;
                 }
             }
             catch (const InferenceEngine::Exception&) {}
