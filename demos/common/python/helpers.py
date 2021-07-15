@@ -39,16 +39,15 @@ def log_blobs_info(model):
         log.info('\tOutput blob: {}, shape: {}, precision: {}'.format(name, layer.shape, layer.precision))
 
 def log_runtime_settings(exec_net, devices):
-    log.info('\tNumber of infer requests: {}'.format(len(exec_net.requests)))
-    if 'AUTO' in devices: return
-
-    for device in set(parse_devices(devices)):
-        try:
-            nstreams = exec_net.get_config(device + '_THROUGHPUT_STREAMS')
-            log.info('\t\t{} device'.format(device))
-            log.info('\tNumber of streams: {}'.format(nstreams))
-            if device == 'CPU':
-                nthreads = exec_net.get_config('CPU_THREADS_NUM')
-                log.info('\tNumber of threads: {}'.format(nthreads if int(nthreads) else 'AUTO'))
-        except RuntimeError:
-            pass
+    if 'AUTO' not in devices:
+        for device in set(parse_devices(devices)):
+            try:
+                nstreams = exec_net.get_config(device + '_THROUGHPUT_STREAMS')
+                log.info('\tDevice: {}'.format(device))
+                log.info('\t\tNumber of streams: {}'.format(nstreams))
+                if device == 'CPU':
+                    nthreads = exec_net.get_config('CPU_THREADS_NUM')
+                    log.info('\t\tNumber of threads: {}'.format(nthreads if int(nthreads) else 'AUTO'))
+            except RuntimeError:
+                pass
+    log.info('\tNumber of network infer requests: {}'.format(len(exec_net.requests)))
