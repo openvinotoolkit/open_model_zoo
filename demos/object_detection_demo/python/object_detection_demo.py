@@ -227,6 +227,10 @@ def print_raw_results(detections, labels):
 
 def main():
     args = build_argparser().parse_args()
+    if args.architecture_type != 'yolov4' and args.anchors:
+        log.warning('The "--anchors" options works only for "-at==yolov4". Option will be omitted')
+    if args.architecture_type != 'yolov4' and args.masks:
+        log.warning('The "--masks" options works only for "-at==yolov4". Option will be omitted')
 
     log.info('Initializing Inference Engine...')
     ie = IECore()
