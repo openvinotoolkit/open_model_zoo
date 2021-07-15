@@ -71,7 +71,7 @@ from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxN
 from .retinaface import RetinaFaceAdapter, RetinaFacePyTorchAdapter
 from .retinanet import RetinaNetAdapter, MultiOutRetinaNet, RetinaNetTF2
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX, YoloV3TF2, YoloV5Adapter
-from .classification import ClassificationAdapter
+from .classification import ClassificationAdapter, MaskToBinaryClassification
 from .segmentation import (
     SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter, BackgroundMattingAdapter
 )
@@ -252,5 +252,7 @@ __all__ = [
     'GVADetectionAdapter',
     'GVAClassificationAdapter',
 
-    'QuantilesPredictorAdapter'
+    'QuantilesPredictorAdapter',
+
+    'MaskToBinaryClassification'
 ]
