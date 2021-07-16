@@ -250,6 +250,9 @@ class CaffeModelMixin:
             inputs_map[input_blob] = self.net.blobs[input_blob].data.shape
         return inputs_map
 
+    def input_shape(self, input_name):
+        return self.inputs[input_name]
+
     def release(self):
         del self.net
 
@@ -322,6 +325,9 @@ class DLSDKModelMixin:
         if not has_info:
             return self.exec_network.inputs
         return OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
+
+    def input_shape(self, input_name):
+        return self.inputs[input_name]
 
     def release(self):
         self.input_feeder.release()
@@ -410,14 +416,16 @@ class DLSDKModelMixin:
         self.network = network
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
         self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
 
     def load_model(self, network_info, launcher, model_prefix=None, log=False):
         self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         if log:
             self.print_input_output_info()
 
@@ -476,7 +484,7 @@ class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):
     def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher, *args, **kwargs):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
-        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         pnet_outs = model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         pnet_adapter_config.update({'regions_format': 'hw'})
@@ -487,14 +495,14 @@ class CaffeRefineStage(CaffeModelMixin, RefineBaseStage):
     def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher, *args, **kwargs):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
-        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
 
 
 class CaffeOutputStage(CaffeModelMixin, OutputBaseStage):
     def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
-        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
 
 
 class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
@@ -515,7 +523,8 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         self.network = network
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
         self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         pnet_outs = self.model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         self.adapter = create_adapter(pnet_adapter_config)
@@ -525,7 +534,9 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input
+        )
         pnet_outs = self.model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         self.adapter = create_adapter(pnet_adapter_config)
@@ -607,7 +618,7 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
 
 class MTCNNEvaluator(BaseEvaluator):
     def __init__(
-            self, dataset_config, launcher, stages
+            self, dataset_config, launcher, stages, orig_config
     ):
         self.dataset_config = dataset_config
         self.stages = stages
@@ -616,6 +627,7 @@ class MTCNNEvaluator(BaseEvaluator):
         self.postprocessor = None
         self.metric_executor = None
         self._annotations, self._predictions, self._metrics_results = [], [], []
+        self.config = orig_config
 
     def process_dataset(
             self, subset=None,
@@ -636,16 +648,15 @@ class MTCNNEvaluator(BaseEvaluator):
         if compute_intermediate_metric_res:
             metric_interval = kwargs.get('metrics_interval', 1000)
             ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
+            ignore_metric_reference = kwargs.get('ignore_metric_reference', False)
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_prediction = []
             batch_raw_prediction = []
             intermediate_callback = None
             if output_callback:
-                intermediate_callback = partial(output_callback,
-                                                metrics_result=None,
-                                                element_identifiers=batch_identifiers,
-                                                dataset_indices=batch_input_ids)
+                intermediate_callback = partial(output_callback, metrics_result=None,
+                                                element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
             batch_size = 1
             for stage in self.stages.values():
                 previous_stage_predictions = batch_prediction
@@ -671,34 +682,33 @@ class MTCNNEvaluator(BaseEvaluator):
             if output_callback:
                 output_callback(
                     list(self.stages.values())[-1].transform_for_callback(batch_size, batch_raw_prediction),
-                    metrics_result=metrics_result,
-                    element_identifiers=batch_identifiers,
+                    metrics_result=metrics_result, element_identifiers=batch_identifiers,
                     dataset_indices=batch_input_ids
                 )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
                 if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
-                    self.compute_metrics(
-                        print_results=True, ignore_results_formatting=ignore_results_formatting
-                    )
+                    self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting,
+                                         ignore_metric_reference=ignore_metric_reference)
+                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
         if _progress_reporter:
             _progress_reporter.finish()
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
-
         for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
         return self._metrics_results
 
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
+                                ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting)
+            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
@@ -710,19 +720,19 @@ class MTCNNEvaluator(BaseEvaluator):
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting)
+                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
         return extracted_results, extracted_meta
 
-    def print_metrics_results(self, ignore_results_formatting=False):
+    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting)
+            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
             return
         result_presenters = self.metrics_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting)
+            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False):
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config = config['datasets']
         launcher_config = config['launchers'][0]
         if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
@@ -730,7 +740,7 @@ class MTCNNEvaluator(BaseEvaluator):
         models_info = config['network_info']
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
         stages = build_stages(models_info, [], launcher, config.get('_models'), delayed_model_loading)
-        return cls(dataset_config, launcher, stages)
+        return cls(dataset_config, launcher, stages, orig_config)
 
     @staticmethod
     def get_processing_info(config):
@@ -884,18 +894,14 @@ def nms(prediction, threshold, iou_type):
 
 def bbreg(boundingbox, reg):
     reg = reg.T
-
     # calibrate bounding boxes
     w = boundingbox[:, 2] - boundingbox[:, 0] + 1
     h = boundingbox[:, 3] - boundingbox[:, 1] + 1
-
     bb0 = boundingbox[:, 0] + reg[:, 0] * w
     bb1 = boundingbox[:, 1] + reg[:, 1] * h
     bb2 = boundingbox[:, 2] + reg[:, 2] * w
     bb3 = boundingbox[:, 3] + reg[:, 3] * h
-
     boundingbox[:, 0:4] = np.array([bb0, bb1, bb2, bb3]).T
-
     return boundingbox
 
 def filter_valid(dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph):
@@ -935,7 +941,6 @@ def pad(boxesA, h, w):
     if tmp.shape[0] != 0:
         dx[tmp] = 2 - x[tmp]
         x[tmp] = np.ones_like(x[tmp])
-
     tmp = np.where(y < 1)[0]
     if tmp.shape[0] != 0:
         dy[tmp] = 2 - y[tmp]

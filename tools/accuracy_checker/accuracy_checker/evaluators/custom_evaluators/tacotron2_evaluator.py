@@ -292,6 +292,7 @@ class PostNetModel:
     default_model_suffix = 'postnet'
 
     def __init__(self, network_info, launcher, delayed_model_loading=False):
+        self.launcher = launcher
         self.network_info = network_info
         self.input_mapping = {'mel_outputs': 'mel_outputs'}
         self.output_mapping = {'postnet_outputs': 'postnet_outputs'}
@@ -444,6 +445,9 @@ class PostNetOpenVINOModel(PostNetModel, TTSDLSDKModel):
         return self.exec_network.infer(feed_dict)
 
     def prepare_inputs(self, feed_dict):
+        input_shape = next(iter(feed_dict.values())).shape
+        if input_shape != tuple(self.inputs[self.input_mapping['mel_outputs']].input_data.shape):
+            self.reshape({self.input_mapping['mel_outputs']: input_shape})
         if next(iter(self.input_mapping.values())) not in feed_dict:
             return {self.input_mapping[input_name]: data for input_name, data in feed_dict.items()}
         return feed_dict
@@ -494,7 +498,7 @@ def create_postnet(model_config, launcher, delayed_model_loading=False):
 
 class Tacotron2Evaluator(TextToSpeechEvaluator):
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False):
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config = config['datasets']
         launcher_config = config['launchers'][0]
         if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
@@ -505,4 +509,4 @@ class Tacotron2Evaluator(TextToSpeechEvaluator):
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
-        return cls(dataset_config, launcher, model)
+        return cls(dataset_config, launcher, model, orig_config)

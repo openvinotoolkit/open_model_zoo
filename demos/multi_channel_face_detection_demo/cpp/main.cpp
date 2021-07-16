@@ -26,6 +26,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <monitors/presenter.h>
+#include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 
 #include "input.hpp"
@@ -59,7 +60,6 @@ void showUsage() {
     std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
     std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
     std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
-    std::cout << "    -pc                          " << performance_counter_message << std::endl;
     std::cout << "    -t                           " << thresh_output_message << std::endl;
     std::cout << "    -no_show                     " << no_show_message << std::endl;
     std::cout << "    -show_stats                  " << show_statistics << std::endl;
@@ -75,7 +75,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_m.empty()) {
         throw std::logic_error("Parameter -m is not set");
@@ -86,17 +85,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_duplicate_num == 0) {
         throw std::logic_error("Parameter -duplicate_num must be positive");
     }
-    slog::info << "\tDetection model:           " << FLAGS_m << slog::endl;
-    slog::info << "\tDetection threshold:       " << FLAGS_t << slog::endl;
-    slog::info << "\tUtilizing device:          " << FLAGS_d << slog::endl;
-    if (!FLAGS_l.empty()) {
-        slog::info << "\tCPU extension library:     " << FLAGS_l << slog::endl;
-    }
-    if (!FLAGS_c.empty()) {
-        slog::info << "\tCLDNN custom kernels map:  " << FLAGS_c << slog::endl;
-    }
-    slog::info << "\tBatch size:                " << FLAGS_bs << slog::endl;
-    slog::info << "\tNumber of infer requests:  " << FLAGS_nireq << slog::endl;
 
     return true;
 }
@@ -174,7 +162,7 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
             size_t currPos = 0;
             while (true) {
                 auto newPos = stats.find('\n', currPos);
-                cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 0.8,  cv::Scalar(0, 0, 255), 1);
+                putHighlightedText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 0.8, cv::Scalar(0, 0, 255), 2);
                 if (newPos == std::string::npos) {
                     break;
                 }
@@ -200,8 +188,8 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
     drawStats();
 
     char str[256];
-    snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f/time));
-    cv::putText(windowImage, str, cv::Point(800, 100), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 255, 0), 2);
+    snprintf(str, sizeof(str), "FPS: %5.2f", static_cast<double>(1000.0f/time));
+    putHighlightedText(windowImage, str, cv::Point(10, 30), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 0.65, cv::Scalar(200, 10, 10), 2);
     cv::imshow(params.name, windowImage);
 }
 
@@ -212,9 +200,6 @@ int main(int argc, char* argv[]) {
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
-        slog::info << "InferenceEngine: "
-            << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
-
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -223,17 +208,14 @@ int main(int argc, char* argv[]) {
         std::string modelPath = FLAGS_m;
         std::size_t found = modelPath.find_last_of(".");
         if (found > modelPath.size()) {
-            slog::info << "Invalid model name: " << modelPath << slog::endl;
-            slog::info << "Expected to be <model_name>.xml" << slog::endl;
-            return -1;
+            throw std::logic_error("Invalid model name: " + modelPath + ". Expected to be <model_name>.xml");
         }
-        slog::info << "Model   path: " << modelPath << slog::endl;
 
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         IEGraph::InitParams graphParams;
         graphParams.batchSize       = FLAGS_bs;
         graphParams.maxRequests     = FLAGS_nireq;
         graphParams.collectStats    = FLAGS_show_stats;
-        graphParams.reportPerf      = FLAGS_pc;
         graphParams.modelPath       = modelPath;
         graphParams.cpuExtPath      = FLAGS_l;
         graphParams.cldnnConfigPath = FLAGS_c;
@@ -308,12 +290,6 @@ int main(int argc, char* argv[]) {
         std::mutex statMutex;
         std::stringstream statStream;
 
-        std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press ESC key";
-        }
-        std::cout << std::endl;
-
         cv::Size graphSize{static_cast<int>(params.windowSize.width / 4), 60};
         Presenter presenter(FLAGS_u, params.windowSize.height - graphSize.height - 10, graphSize);
 
@@ -374,19 +350,17 @@ int main(int argc, char* argv[]) {
             auto currTime = timer::now();
             auto deltaTime = (currTime - lastTime);
             if (deltaTime >= samplingTimeout) {
-                auto durMsec =
-                        std::chrono::duration_cast<duration>(deltaTime).count();
+                auto durMsec = std::chrono::duration_cast<duration>(deltaTime).count();
                 auto frameTime = durMsec / static_cast<float>(fpsCounter);
                 fpsCounter = 0;
                 lastTime = currTime;
 
-                if (FLAGS_no_show) {
-                    slog::info << "Average Throughput : " << 1000.f/frameTime << " fps" << slog::endl;
+                averageFps = frameTime;
+                if (FLAGS_show_stats) {
                     if (++perfItersCounter >= FLAGS_n_sp) {
                         break;
                     }
-                } else {
-                    averageFps = frameTime;
+                    slog::debug << "FPS: " << 1000.f / frameTime << slog::endl;
                 }
 
                 if (FLAGS_show_stats) {
@@ -395,39 +369,37 @@ int main(int argc, char* argv[]) {
                     auto outputStat = output.getStats();
 
                     std::unique_lock<std::mutex> lock(statMutex);
-                    statStream.str(std::string());
-                    statStream << std::fixed << std::setprecision(1);
-                    statStream << "Input reads: ";
+                    slog::debug << "Latency:" << slog::endl;
+                    slog::debug << std::fixed << std::setprecision(1);
+                    slog::debug << "\tInput reads: ";
                     for (size_t i = 0; i < inputStat.readTimes.size(); ++i) {
-                        if (0 == (i % 4)) {
-                            statStream << std::endl;
+                        if (0 == (i % 4) && i != 0) {
+                            slog::debug << slog::endl;
                         }
-                        statStream << inputStat.readTimes[i] << "ms ";
+                        slog::debug << inputStat.readTimes[i] << "ms ";
                     }
-                    statStream << std::endl;
-                    statStream << "HW decoding latency: "
-                               << inputStat.decodingLatency << "ms";
-                    statStream << std::endl;
-                    statStream << "Preprocess time: "
-                               << inferStat.preprocessTime << "ms";
-                    statStream << std::endl;
-                    statStream << "Plugin latency: "
-                               << inferStat.inferTime << "ms";
-                    statStream << std::endl;
-
-                    statStream << "Render time: " << outputStat.renderTime
-                               << "ms" << std::endl;
-
-                    if (FLAGS_no_show) {
-                        slog::info << statStream.str() << slog::endl;
-                    }
+                    slog::debug << slog::endl;
+                    slog::debug << "\tDecoding: "
+                        << inputStat.decodingLatency << "ms";
+                    slog::debug << slog::endl;
+                    slog::debug << "\tPreprocess: "
+                        << inferStat.preprocessTime << "ms";
+                    slog::debug << slog::endl;
+                    slog::debug << "\tInference: "
+                        << inferStat.inferTime << "ms";
+                    slog::debug << slog::endl;
+                    slog::debug << "\tRendering: " << outputStat.renderTime
+                        << "ms" << slog::endl;
                 }
             }
         }
 
         network.reset();
 
-        std::cout << presenter.reportMeans() << '\n';
+        //// --------------------------- Report metrics -------------------------------------------------------
+        slog::info << "Metrics report:" << slog::endl;
+        slog::info << "\tFPS: " << 1000.f / averageFps << slog::endl;
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -438,6 +410,5 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    slog::info << "Execution successful" << slog::endl;
     return 0;
 }

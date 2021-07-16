@@ -30,6 +30,7 @@ from .super_resolution_converter import (
 )
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
+from .rctw import RCTWPreprocessedConverter
 from .im2latex import Im2latexDatasetConverter
 from .unicode_character_recognition import (
     UnicodeCharacterRecognitionDatasetConverter, KondateNakayosiRecognitionDatasetConverter
@@ -63,7 +64,13 @@ from .text_classification import (
     BertXNLITFRecordConverter,
     IMDBConverter,
     MRPCConverter,
-    CoLAConverter
+    CoLAConverter,
+    MNLIDatasetConverter,
+    WNLIConverter,
+    QQPConverter,
+    QNLIConverter,
+    SST2Converter,
+    RTEConverter
 )
 from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
@@ -98,7 +105,7 @@ from .common_object_detection import CommonDetectionConverter
 from .wflw import WFLWConverter
 from .see_in_the_dark import SeeInTheDarkDatasetConverter
 from .conll_ner import CONLLDatasetConverter
-from .background_matting import BackgroundMattingConverter
+from .background_matting import BackgroundMattingConverter, VideoBackgroundMatting
 from .tacotron2_test_data_converter import TacotronDataConverter
 from .noise_suppression_dataset import NoiseSuppressionDatasetConverter
 from .vimeo90k_sr import Vimeo90KSuperResolutionDatasetConverter
@@ -110,6 +117,7 @@ from .label_me_converter import LabelMeDetectionConverter, LabelMeSegmentationCo
 from .dataset_folder import DatasetFolderConverter
 from .open_images_converter import OpenImagesDetectionConverter
 from .calgarycampinas import KSpaceMRIConverter
+from .amazon import AmazonProductData
 
 __all__ = [
     'BaseFormatConverter',
@@ -135,6 +143,7 @@ __all__ = [
     'SRDirectoryBased',
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
+    'RCTWPreprocessedConverter',
     'UnicodeCharacterRecognitionDatasetConverter',
     'KondateNakayosiRecognitionDatasetConverter',
     'MSCocoKeypointsConverter',
@@ -172,6 +181,12 @@ __all__ = [
     'IMDBConverter',
     'MRPCConverter',
     'CoLAConverter',
+    'MNLIDatasetConverter',
+    'QQPConverter',
+    'WNLIConverter',
+    'QNLIConverter',
+    'RTEConverter',
+    'SST2Converter',
     'CmuPanopticKeypointsConverter',
     'ActionRecognitionConverter',
     'MSASLContiniousConverter',
@@ -203,6 +218,7 @@ __all__ = [
     'SeeInTheDarkDatasetConverter',
     'CONLLDatasetConverter',
     'BackgroundMattingConverter',
+    'VideoBackgroundMatting',
     'TacotronDataConverter',
     'NoiseSuppressionDatasetConverter',
     'Vimeo90KSuperResolutionDatasetConverter',
@@ -216,5 +232,6 @@ __all__ = [
     'LabelMeSegmentationConverter',
     'DatasetFolderConverter',
     'OpenImagesDetectionConverter',
-    'KSpaceMRIConverter'
+    'KSpaceMRIConverter',
+    'AmazonProductData'
 ]

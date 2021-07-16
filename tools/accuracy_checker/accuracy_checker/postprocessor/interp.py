@@ -51,12 +51,7 @@ class Interpolation(Postprocessor):
         self.as_log = self.get_value_from_config('as_log')
 
     def process_image(self, annotation, prediction):
-        def cast_func(entry):
-            pass
-
-        @cast_func.register(ImageProcessingPrediction)
-        @cast_func.register(ImageProcessingAnnotation)
-        def _(entry):
+        def interpolate(entry):
             val = entry.value
             if self.as_log:
                 val_min = np.min(val)
@@ -65,9 +60,9 @@ class Interpolation(Postprocessor):
             entry.value = self.interp_func(val, (np.min(val), np.max(val)), (self.target_min, self.target_max))
 
         for annotation_ in annotation:
-            cast_func(annotation_)
+            interpolate(annotation_)
 
         for prediction_ in prediction:
-            cast_func(prediction_)
+            interpolate(prediction_)
 
         return annotation, prediction

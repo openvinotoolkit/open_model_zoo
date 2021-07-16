@@ -715,13 +715,13 @@ class DLSDKLauncher(Launcher):
         if not isinstance(device_config, dict):
             raise ConfigError('device configuration should be a dict-like')
         if all(not isinstance(value, dict) for value in device_config.values()):
-            self.ie_core.set_config(device_config, self.device)
+            self.ie_core.set_config(dict(device_config), self.device)
         else:
             for key, value in device_config.items():
                 if isinstance(value, dict):
                     if key not in self.ie_core.available_devices:
                         warnings.warn('{} device is unknown. Config loading may lead to error.'.format(key))
-                    self.ie_core.set_config(value, key)
+                    self.ie_core.set_config(dict(value), key)
                 else:
                     warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
                                   'applied is not specified or option is not a dict-like'.format(key=key, value=value))
@@ -839,8 +839,7 @@ class DLSDKLauncher(Launcher):
                 return data
         return self._align_data_shape(data, layer_name, layout)
 
-    @staticmethod
-    def _data_to_blob(layer_shape, data, layout): # pylint:disable=R0911
+    def _data_to_blob(self, layer_shape, data, layout): # pylint:disable=R0911,R0912
         data_shape = np.shape(data)
         if len(layer_shape) == 4:
             if len(data_shape) == 5:
@@ -859,6 +858,11 @@ class DLSDKLauncher(Launcher):
                     return np.resize(data, layer_shape)
         if len(layer_shape) == 3 and len(data_shape) == 4:
             return np.transpose(data, layout)[0] if layout is not None else data[0]
+        if len(layer_shape) == 1:
+            return np.resize(data, layer_shape)
+        if (len(data_shape) == 3) and (len(layer_shape) == 2) and (data_shape[0] == 1) and (
+                data_shape[1] == 1) and self.allow_reshape_input:
+            return data[0]
         if layout is not None and len(layer_shape) == len(layout):
             return np.transpose(data, layout)
         if (
@@ -981,6 +985,9 @@ class DLSDKLauncher(Launcher):
 
     def get_model_file_type(self):
         return self._model.suffix
+
+    def input_shape(self, input_name):
+        return self.inputs[input_name].shape
 
     def release(self):
         if 'network' in self.__dict__:

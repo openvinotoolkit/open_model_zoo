@@ -16,13 +16,15 @@
 """
 
 from argparse import ArgumentParser, SUPPRESS
-import logging
+import logging as log
 import sys
 import time
 import wave
 
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def type_overlap(arg):
@@ -134,16 +136,13 @@ def read_wav(file, as_float=False):
 def main():
     args = build_argparser()
 
-    logging.basicConfig(format="[ %(levelname)s ] %(message)s", level=logging.INFO, stream=sys.stdout)
-    log = logging.getLogger()
-
-    log.info("Creating Inference Engine")
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
-
     if args.device == "CPU" and args.cpu_extension:
         ie.add_extension(args.cpu_extension, 'CPU')
 
-    log.info("Loading model {}".format(args.model))
+    log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, args.model[:-4] + ".bin")
 
     if len(net.input_info) != 1:
@@ -156,28 +155,25 @@ def main():
         sys.exit(1)
     output_blob = next(iter(net.outputs))
 
-    log.info("Loading model to the plugin")
-    exec_net = ie.load_network(network=net, device_name=args.device)
-
-    log.info("Preparing input")
-
-    labels = []
-    if args.labels:
-        with open(args.labels, "r") as file:
-            labels = [line.rstrip() for line in file.readlines()]
-
     batch_size, channels, one, length = input_shape
     if one != 1:
         raise RuntimeError("Wrong third dimension size of model input shape - {} (expected 1)".format(one))
-
-    audio = AudioSource(args.input, channels=channels, samplerate=args.sample_rate)
 
     hop = length - args.overlap if isinstance(args.overlap, int) else int(length * (1.0 - args.overlap))
     if hop < 0:
         log.error("Wrong value for '-ol/--overlap' argument - overlapping more than clip length")
         sys.exit(1)
 
-    log.info("Starting inference")
+    exec_net = ie.load_network(network=net, device_name=args.device)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+
+    labels = []
+    if args.labels:
+        with open(args.labels, "r") as file:
+            labels = [line.rstrip() for line in file.readlines()]
+
+    audio = AudioSource(args.input, channels=channels, samplerate=args.sample_rate)
+
     outputs = []
     clips = 0
     infer_time = 0
@@ -197,7 +193,7 @@ def main():
                 log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(start_time, end_time, data[label],
                                                                  labels[label] if labels else "Class {}".format(label)))
 
-    logging.info("Average infer time - {:.1f} ms per clip".format(infer_time / clips * 1000))
+    log.info("Average infer time - {:.1f} ms per clip".format(infer_time / clips * 1000))
 
 
 if __name__ == '__main__':

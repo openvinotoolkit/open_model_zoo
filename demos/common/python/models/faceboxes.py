@@ -18,7 +18,7 @@ import math
 import numpy as np
 
 from .model import Model
-from .utils import Detection, resize_image, nms
+from .utils import Detection, resize_image, nms, clip_detections
 
 
 class FaceBoxes(Model):
@@ -116,7 +116,7 @@ class FaceBoxes(Model):
             detections = [Detection(*det, 0) for det in zip(x_mins, y_mins, x_maxs, y_maxs, filtered_score)]
 
         detections = self.resize_boxes(detections, meta['original_shape'][:2])
-        return detections
+        return clip_detections(detections, meta['original_shape'])
 
     @staticmethod
     def calculate_anchors(list_x, list_y, min_size, image_size, step):

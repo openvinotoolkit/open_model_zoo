@@ -17,6 +17,7 @@ py-cpuinfo>=7.0.0
 
 # text detection
 shapely>=1.7.1
+pyclipper>=1.2.1
 
 # brain tumor segmentation
 nibabel>=3.2.1
@@ -28,6 +29,7 @@ pydicom>=2.1.2
 # nlp, tokenization
 sentencepiece>=0.1.95
 tokenizers>=0.10.1
+transformers>=4.5
 nltk>=3.5
 
 # editdistance calculation

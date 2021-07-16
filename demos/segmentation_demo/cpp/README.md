@@ -33,6 +33,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 ### Supported Models
 
 * deeplabv3
+* drn-d-38
 * fastseg-large
 * fastseg-small
 * hrnet-v2-c1-segmentation
@@ -65,7 +66,8 @@ Options:
           Or
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
-    -pc                       Optional. Enables per-layer performance report.
+    -labels "<path>"          Optional. Path to a file with labels mapping.
+    -r                        Optional. Output inference results as mask histogram.
     -nireq "<integer>"        Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
     -nthreads "<integer>"     Optional. Number of threads.

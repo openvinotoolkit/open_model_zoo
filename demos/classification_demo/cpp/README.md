@@ -6,7 +6,7 @@ The demo visualize OpenVINO performance on inference of neural networks for imag
 
 On startup, the application reads command line parameters and loads a classification network to the Inference Engine for execution. It might take some time for demo to read all input images. Then the demo performs inference to classify the images and places them on grid.
 
-The demo starts in "Testing mode" with fixed grid size. After calculating the average FPS result, it will switch to normal mode and grid will be readjusted depending on model performance. Bigger grid means higher performance.
+The demo starts in "Testing mode" with fixed grid size. After calculating the average FPS result, it will switch to normal mode and grid will be readjusted depending on model performance. Bigger grid means higher performance. You can repeat testing by pressing "Space" or "R" button.
 
 When "ground truth" data applied, the color coding for the text, drawn above each image, shows whether the classification was correct: green means correct class prediction, red means wrong.
 
@@ -62,6 +62,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * hbonet-0.5
 * hbonet-1.0
 * inception-resnet-v2-tf
+* mixnet-l
 * mobilenet-v1-0.25-128
 * mobilenet-v1-0.50-160
 * mobilenet-v1-0.50-224
@@ -153,7 +154,6 @@ Options:
       -l "<absolute_path>"    Required for CPU custom layers.Absolute path to a shared library with the kernels implementation.
           Or
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with kernels description.
-    -pc                       Optional. Enables per-layer performance report.
     -auto_resize              Optional. Enables resizable input.
     -labels "<path>"          Required. Path to .txt file with labels.
     -gt "<path>"              Optional. Path to ground truth .txt file.

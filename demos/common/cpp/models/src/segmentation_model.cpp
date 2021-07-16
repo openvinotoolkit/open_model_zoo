@@ -22,6 +22,26 @@ using namespace InferenceEngine;
 SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useAutoResize) :
     ImageModel(modelFileName, useAutoResize) {}
 
+std::vector<std::string> SegmentationModel::loadLabels(const std::string & labelFilename)
+{
+    std::vector<std::string> labelsList;
+
+    /* Read labels (if any) */
+    if (!labelFilename.empty()) {
+        std::ifstream inputFile(labelFilename);
+        if (!inputFile.is_open())
+            throw std::runtime_error("Can't open the labels file: " + labelFilename);
+        std::string label;
+        while (std::getline(inputFile, label)) {
+            labelsList.push_back(label);
+        }
+        if (labelsList.empty())
+            throw std::logic_error("File is empty: " + labelFilename);
+    }
+
+    return labelsList;
+}
+
 void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork)
 {
     // --------------------------- Configure input & output ---------------------------------------------

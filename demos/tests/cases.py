@@ -293,6 +293,9 @@ NATIVE_DEMOS = [
             TestCase(options={'-at': 'faceboxes',
                               '-m': ModelArg('faceboxes-pytorch')}
             ),
+            TestCase(options={'-at': 'retinaface-pytorch',
+                              '-m': ModelArg('retinaface-resnet50-pytorch')}
+            ),
             *combine_cases(
                 TestCase(options={'-at': 'ssd'}),
                 single_option_cases('-m',
@@ -383,11 +386,46 @@ NATIVE_DEMOS = [
                     ModelArg('fastseg-small'),
                     ModelArg('hrnet-v2-c1-segmentation'),
                     ModelArg('deeplabv3'),
-                    ModelArg('pspnet-pytorch'))),
+                    ModelArg('pspnet-pytorch'),
+                    ModelArg('drn-d-38'))),
         ],
     )),
 
     CppDemo(name='smart_classroom_demo',
+            device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],
+            test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            **MONITORS,
+            '-i': DataPatternArg('smart-classroom-demo'),
+            '-m_fd': ModelArg('face-detection-adas-0001')}),
+        [
+            *combine_cases(
+                [
+                    TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0005')}),
+                    TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0006'),
+                        '-student_ac': 'sitting,writing,raising_hand,standing,turned_around,lie_on_the_desk'}),
+                    # person-detection-action-recognition-teacher-0002 is supposed to be provided with -teacher_id, but
+                    # this would require providing a gallery file with -fg key. Unless -teacher_id is provided
+                    # -teacher_ac is ignored thus run the test just with default actions pretending it's about students
+                    TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-teacher-0002')}),
+                ],
+                [
+                    TestCase(options={}),
+                    TestCase(options={
+                        '-m_lm': ModelArg('landmarks-regression-retail-0009'),
+                        '-m_reid': ModelArg('Sphereface'),
+                    }),
+                    TestCase(options={
+                        '-m_lm': ModelArg('landmarks-regression-retail-0009'),
+                        '-m_reid': ModelArg('face-recognition-resnet100-arcface-onnx'),
+                    }),
+                ],
+            ),
+            TestCase(options={'-m_act': ModelArg('person-detection-raisinghand-recognition-0001'), '-a_top': '5'}),
+        ],
+    )),
+
+    CppDemo(name='smart_classroom_demo', implementation='cpp_gapi',
             device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -580,6 +618,13 @@ PYTHON_DEMOS = [
        })
     )),
 
+    PythonDemo(name='deblurring_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': DataPatternArg('face-detection-adas'),
+                          **MONITORS,
+                          '--no_show': None,
+                          '-m': ModelArg('deblurgan-v2')}),
+    )),
+
     PythonDemo(name='face_detection_mtcnn_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
                           '-i': image_net_arg('00000002'),
@@ -607,6 +652,26 @@ PYTHON_DEMOS = [
         TestCase(options={'-m_reid': ModelArg('facenet-20180408-102900')}),
     )),
 
+    PythonDemo(name='formula_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None}),
+        [
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/'
+                                    'assets/formula-recognition-medium-scan-0001.png'),
+                '-m_encoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-encoder'),
+                '-m_decoder': ModelArg('formula-recognition-medium-scan-0001-im2latex-decoder'),
+                '--vocab': str(OMZ_DIR / 'models/intel/formula-recognition-medium-scan-0001/vocab.json')
+            }),
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/formula-recognition-polynomials-handwritten-0001/'
+                                    'assets/formula-recognition-polynomials-handwritten-0001.png'),
+                '-m_encoder': ModelArg('formula-recognition-polynomials-handwritten-0001-encoder'),
+                '-m_decoder': ModelArg('formula-recognition-polynomials-handwritten-0001-decoder'),
+                '--vocab': str(OMZ_DIR / 'models/intel/formula-recognition-polynomials-handwritten-0001/vocab.json'),
+            })
+        ],
+    )),
+
     PythonDemo(name='gesture_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
                           '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
@@ -617,6 +682,21 @@ PYTHON_DEMOS = [
                               '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
             TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
                               '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
+        ],
+    )),
+
+    PythonDemo(name='handwritten_text_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
+        [
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/handwritten-japanese-recognition-0001/assets/handwritten-japanese-recognition-0001.png'),
+                '-m': ModelArg('handwritten-japanese-recognition-0001'),
+                '-cl': str(OMZ_DIR / 'data/dataset_classes/kondate_nakayosi.txt')
+            }),
+            TestCase(options={
+                '-i': str(OMZ_DIR / 'models/intel/handwritten-simplified-chinese-recognition-0001/assets/handwritten-simplified-chinese-recognition-0001.png'),
+                '-m': ModelArg('handwritten-simplified-chinese-recognition-0001'),
+                '-cl': str(OMZ_DIR / 'data/dataset_classes/scut_ept.txt')
+            }),
         ],
     )),
 
@@ -714,6 +794,12 @@ PYTHON_DEMOS = [
             ModelArg('person-reidentification-retail-0286'),
             ModelArg('person-reidentification-retail-0287'),
             ModelArg('person-reidentification-retail-0288')),
+    )),
+
+    PythonDemo(name='noise_suppression_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
+                          '-m': ModelArg('noise-suppression-poconetlike-0001')}),
+
     )),
 
     PythonDemo(name='object_detection_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -837,10 +923,21 @@ PYTHON_DEMOS = [
                     ModelArg('yolo-v2-tiny-ava-sparse-60-0001'),
                     ModelArg('yolo-v2-tiny-tf'),
                     ModelArg('yolo-v2-tiny-vehicle-detection-0001'),
-                    ModelArg('yolo-v3-tf')),
+                    ModelArg('yolo-v3-tf'),
+                    ModelArg('yolo-v3-tiny-tf')),
             ),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tf')}),
             TestCase(options={'-at': 'yolov4', '-m': ModelArg('yolo-v4-tiny-tf')}),
+            *combine_cases(
+                TestCase(options={'--architecture_type': 'detr'}),
+                [
+                    TestCase(options={'-m': ModelArg('detr-resnet50')}),
+                    TestCase(options={'-m': ModelFileArg('detr-resnet50', 'detr-resnet50.onnx'),
+                                      '--reverse_input_channels': None,
+                                      '--mean_values': ['123.675', '116.28', '103.53'],
+                                      '--scale_values': ['58.395', '57.12', '57.375']}),
+                ]
+            ),
         ],
     )),
 
@@ -853,7 +950,10 @@ PYTHON_DEMOS = [
                 '-at': 'segmentation',
             }),
             *combine_cases(
-                TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
+                TestCase(options={
+                    '-i': DataPatternArg('semantic-segmentation-adas'),
+                    '-at': 'segmentation',
+                }),
                 single_option_cases('-m',
                     ModelArg('semantic-segmentation-adas-0001'),
                     ModelArg('fastseg-large'),
@@ -864,7 +964,8 @@ PYTHON_DEMOS = [
                     ModelArg('icnet-camvid-ava-sparse-60-0001'),
                     ModelArg('unet-camvid-onnx-0001'),
                     ModelArg('deeplabv3'),
-                    ModelArg('pspnet-pytorch'))),
+                    ModelArg('pspnet-pytorch'),
+                    ModelArg('drn-d-38'))),
             TestCase(options={
                 '-m': ModelArg('f3net'),
                 '-i': DataPatternArg('road-segmentation-adas'),
@@ -885,6 +986,11 @@ PYTHON_DEMOS = [
                     ModelArg('person-detection-retail-0013'),
                     ModelArg('ssd_mobilenet_v1_coco'))),
         ]
+    )),
+
+    PythonDemo(name='sound_classification_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav'),
+                          '-m': ModelArg('aclnet')}),
     )),
 
     PythonDemo(name='speech_recognition_deepspeech_demo', device_keys=['-d'], test_cases=combine_cases(
@@ -928,6 +1034,21 @@ PYTHON_DEMOS = [
                 '-m_td': ModelArg('text-spotting-0005-recognizer-decoder'),
                 '--no_track': None
             }),
+        ]
+    )),
+
+    PythonDemo(name='whiteboard_inpainting_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
+                          **MONITORS,
+                          '--no_show': None}),
+        [
+            *single_option_cases('-m_i',
+                ModelArg('instance-segmentation-security-0002'),
+                # ModelArg('instance-segmentation-security-0091'), # Slow model
+                ModelArg('instance-segmentation-security-0228'),
+                ModelArg('instance-segmentation-security-1039'),
+                ModelArg('instance-segmentation-security-1040')),
+            TestCase(options={'-m_s': ModelArg('semantic-segmentation-adas-0001')}),
         ]
     )),
 ]

@@ -33,6 +33,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 
 ### Supported Models
 
+* person-vehicle-bike-detection-crossroad-yolov3-1020
 * yolo-v3-tf
 * yolo-v3-tiny-tf
 
@@ -60,7 +61,6 @@ Options:
     -n_iqs                       Optional. Frame queue size for input channels
     -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
     -n_sp                        Optional. Number of sampling periods
-    -pc                          Optional. Enable per-layer performance report
     -t                           Optional. Probability threshold for detections
     -no_show                     Optional. Don't show output.
     -show_stats                  Optional. Enable statistics report

@@ -24,7 +24,10 @@ from pathlib import Path
 import numpy as np
 import wave
 
-from openvino.inference_engine import IECore, Blob
+from openvino.inference_engine import IECore, Blob, get_version
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -66,19 +69,16 @@ def wav_write(wav_name, x):
         wav.writeframes(x.tobytes())
 
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    log.info("Initializing Inference Engine")
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device]
-    version_str = "{}.{}.{}".format(version.major, version.minor, version.build_number)
-    log.info("Plugin version is {}".format(version_str))
 
     # read IR
+    log.info("Reading model {}".format(args.model))
     model_xml = args.model
     model_bin = model_xml.with_suffix(".bin")
-    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
     ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
 
     # check input and output names
@@ -90,11 +90,11 @@ def main():
     assert "output" in output_names, "'output' is not presented in model"
     state_inp_names = [n for n in input_names if "state" in n]
     state_param_num = sum(np.prod(input_shapes[n]) for n in state_inp_names)
-    log.info("state_param_num = {} ({:.1f}Mb)".format(state_param_num, state_param_num*4e-6))
+    log.debug("State_param_num = {} ({:.1f}Mb)".format(state_param_num, state_param_num*4e-6))
 
     # load model to the device
-    log.info("Loading model to the {}".format(args.device))
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     sample_inp = wav_read(args.input)
 

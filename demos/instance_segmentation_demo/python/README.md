@@ -76,7 +76,7 @@ usage: instance_segmentation_demo.py [-h] -m "<path>" --labels "<path>" -i INPUT
                                      [-d "<device>"] [-l "<absolute_path>"]
                                      [--delay "<num>"] [-pt "<num>"]
                                      [--no_keep_aspect_ratio] [--no_track]
-                                     [--show_scores] [--show_boxes] [-pc] [-r]
+                                     [--show_scores] [--show_boxes] [-r]
                                      [--no_show] [-u UTILIZATION_MONITORS]
 
 Options:
@@ -111,7 +111,6 @@ Options:
   --no_track            Optional. Disable tracking.
   --show_scores         Optional. Show detection scores.
   --show_boxes          Optional. Show bounding boxes.
-  -pc, --perf_counts    Optional. Report performance counters.
   -r, --raw_output_message
                         Optional. Output inference results raw values.
   --no_show             Optional. Don't show output

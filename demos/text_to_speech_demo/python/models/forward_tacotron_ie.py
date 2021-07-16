@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import logging as log
 import os.path as osp
 
 import numpy as np
@@ -26,25 +27,23 @@ class ForwardTacotronIE:
     def __init__(self, model_duration, model_forward, ie, device='CPU', verbose=False):
         self.verbose = verbose
         self.device = device
-
         self.ie = ie
 
         self.duration_predictor_net = self.load_network(model_duration)
-        self.duration_predictor_exec = self.create_exec_network(self.duration_predictor_net)
+        self.duration_predictor_exec = self.create_exec_network(self.duration_predictor_net, model_duration)
 
         self.forward_net = self.load_network(model_forward)
-        self.forward_exec = self.create_exec_network(self.forward_net)
+        self.forward_exec = self.create_exec_network(self.forward_net, model_forward)
 
         # fixed length of the sequence of symbols
         self.duration_len = self.duration_predictor_net.input_info['input_seq'].input_data.shape[1]
         # fixed length of the input embeddings for forward
         self.forward_len = self.forward_net.input_info['data'].input_data.shape[1]
         if self.verbose:
-            print('Forward limitations : {0} symbols and {1} embeddings'.format(self.duration_len, self.forward_len))
+            log.debug('Forward limitations : {0} symbols and {1} embeddings'.format(self.duration_len, self.forward_len))
         self.is_attention = 'pos_mask' in self.forward_net.input_info
         if self.is_attention:
             self.init_pos_mask()
-            print("Load ForwardTacotron with attention")
         else:
             self.pos_mask = None
 
@@ -78,7 +77,7 @@ class ForwardTacotronIE:
     def seq_to_indexes(self, text):
         res = text_to_sequence(text)
         if self.verbose:
-            print(res)
+            log.debug(res)
         return res
 
     @staticmethod
@@ -106,12 +105,13 @@ class ForwardTacotronIE:
     def load_network(self, model_xml):
         model_bin_name = ".".join(osp.basename(model_xml).split('.')[:-1]) + ".bin"
         model_bin = osp.join(osp.dirname(model_xml), model_bin_name)
-        print("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+        log.info('Reading ForwardTacotron model {}'.format(model_xml))
         net = self.ie.read_network(model=model_xml, weights=model_bin)
         return net
 
-    def create_exec_network(self, net):
+    def create_exec_network(self, net, path):
         exec_net = self.ie.load_network(network=net, device_name=self.device)
+        log.info('The ForwardTacotron model {} is loaded to {}'.format(path, self.device))
         return exec_net
 
     def infer_duration(self, sequence, speaker_embedding=None, alpha=1.0, non_empty_symbols=None):
@@ -137,8 +137,8 @@ class ForwardTacotronIE:
             preprocessed_embeddings = preprocessed_embeddings[:, :non_empty_symbols]
         indexes = self.build_index(duration, preprocessed_embeddings)
         if self.verbose:
-            print("Index: {0}, duration: {1}, embeddings: {2}, non_empty_symbols: {3}"
-                  .format(indexes.shape, duration.shape, preprocessed_embeddings.shape, non_empty_symbols))
+            log.debug("Index: {0}, duration: {1}, embeddings: {2}, non_empty_symbols: {3}"
+                      .format(indexes.shape, duration.shape, preprocessed_embeddings.shape, non_empty_symbols))
 
         return self.gather(preprocessed_embeddings, 1, indexes)
 
@@ -226,14 +226,14 @@ class ForwardTacotronIE:
                                          ((0, 0), (0, self.forward_len - sub_aligned_emb.shape[1]), (0, 0)),
                                          'constant', constant_values=0)
             if self.verbose:
-                print("SAEmb shape: {0}".format(sub_aligned_emb.shape))
+                log.debug("SAEmb shape: {0}".format(sub_aligned_emb.shape))
             mel = self.infer_mel(sub_aligned_emb, end_idx - start_idx, speaker_embedding)
             mels.append(mel)
             start_idx += self.forward_len
 
         res = np.concatenate(mels, axis=1)
         if self.verbose:
-            print("MEL shape :{0}".format(res.shape))
+            log.debug("MEL shape :{0}".format(res.shape))
 
         return res
 

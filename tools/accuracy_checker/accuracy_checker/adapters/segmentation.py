@@ -235,6 +235,6 @@ class BackgroundMattingAdapter(Adapter):
         self.select_output_blob(raw_outputs)
         for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
             output *= 255
-            result.append(BackgroundMattingPrediction(identifier, output.astype(np.uint8)))
+            result.append(BackgroundMattingPrediction(identifier, np.squeeze(output).astype(np.uint8)))
 
         return result

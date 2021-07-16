@@ -50,9 +50,13 @@ import yaml
 
 OMZ_ROOT = Path(__file__).resolve().parents[1]
 
+OMZ_PREFIX = '<omz_dir>/'
+
 sys.path.append(str(OMZ_ROOT / 'ci/lib'))
 
 import omzdocs
+
+all_images_paths = {}
 
 XML_ID_ATTRIBUTE = '{http://www.w3.org/XML/1998/namespace}id'
 
@@ -125,9 +129,34 @@ def add_page(output_root, parent, *, id=None, path=None, title=None, index=-1):
             continue # not a relative URL
 
         image_rel_path = path.parent / urllib.request.url2pathname(parsed_image_url.path)
+        image_filename = image_rel_path.name
+        image_abs_path = (OMZ_ROOT / image_rel_path).resolve()
+
+        if image_filename in all_images_paths and all_images_paths[image_filename] != image_abs_path:
+            raise RuntimeError(f'{path}: Image with "{image_filename}" filename already exists. '
+                               f'Rename "{image_rel_path}" to unique name.')
+        all_images_paths[image_filename] = image_abs_path
 
         (output_root / image_rel_path.parent).mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(OMZ_ROOT / image_rel_path, output_root / image_rel_path)
+        shutil.copyfile(image_abs_path, output_root / image_rel_path)
+
+    non_md_links = [ref.url for ref in page.external_references()
+                    if ref.type == 'link' and not ref.url.endswith('.md')]
+
+    for non_md_link in non_md_links:
+        parsed_non_md_link = urllib.parse.urlparse(non_md_link)
+
+        if parsed_non_md_link.scheme or parsed_non_md_link.netloc:
+            continue # not a relative URL
+
+        if parsed_non_md_link.fragment:
+            continue # link to markdown section
+
+        relative_path = (OMZ_ROOT / Path(path).parent / non_md_link).resolve().relative_to(OMZ_ROOT)
+        suggested_path = OMZ_PREFIX + Path(relative_path).as_posix()
+
+        raise RuntimeError(f'{path}: Relative link to non-markdown file "{non_md_link}". '
+                           f'Replace it by `{suggested_path}`')
 
     return element
 
@@ -163,11 +192,37 @@ def add_model_pages(output_root, parent_element, group, group_title):
         id=f'omz_models_group_{group}', path=f'models/{group}/index.md')
 
     task_type_elements = {}
+    device_support_path = OMZ_ROOT / 'models' / group / 'device_support.md'
+
+    with device_support_path.open('r', encoding="utf-8") as device_support_file:
+        raw_device_support = device_support_file.read()
+
+    device_support_lines = re.findall(r'^\|\s\S+\s\|', raw_device_support, re.MULTILINE)
+    device_support_lines = [device_support_line.strip(' |')
+                            for device_support_line in device_support_lines]
 
     for md_path in sorted(OMZ_ROOT.glob(f'models/{group}/*/**/*.md')):
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
         model_name = md_path_rel.parts[2]
+
+        device_support_path_rel = device_support_path.relative_to(OMZ_ROOT)
+
+        if model_name not in device_support_lines:
+            if not (md_path.parent / 'composite-model.yml').exists():
+                raise RuntimeError(f'{device_support_path_rel}: "{model_name}" '
+                                   'model reference is missing.')
+
+            model_subdirs = (subdir.name for subdir in md_path.parent.glob('*/**'))
+
+            for model_subdir in model_subdirs:
+                if not (md_path.parent / model_subdir / 'model.yml').exists():
+                    continue # non-model folder
+
+                if model_subdir not in device_support_lines:
+                    raise RuntimeError(f'{device_support_path_rel}: '
+                                       f'"{model_subdir}" part reference of '
+                                       f'"{model_name}" composite model is missing.')
 
         expected_md_path = Path('models', group, model_name, 'README.md')
 
@@ -278,6 +333,24 @@ def main():
         *OMZ_ROOT.glob('demos/*_demo_*/*/README.md'),
     ]:
         md_path_rel = md_path.relative_to(OMZ_ROOT)
+
+        with (md_path.parent / 'models.lst').open('r', encoding="utf-8") as models_lst:
+            models_lines = models_lst.readlines()
+
+        with (md_path).open('r', encoding="utf-8") as demo_readme:
+            raw_demo_readme = demo_readme.read()
+
+        for model_line in models_lines:
+            if model_line.startswith('#'):
+                continue
+
+            model_line = model_line.rstrip('\n')
+            regex_line = model_line.replace('?', r'.').replace('*', r'\S+')
+
+            if not re.search(regex_line, raw_demo_readme):
+                raise RuntimeError(f'{md_path_rel}: "{model_line}" model reference is missing. '
+                                   'Add it to README.md or update models.lst file.')
+
         # <name>_<implementation>
         demo_id = '_'.join(md_path_rel.parts[1:3])
 

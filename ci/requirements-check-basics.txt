@@ -1,12 +1,12 @@
 # use update-requirements.py to update this file
 
-flake8-comprehensions==3.4.0
-    # via -r ci/requirements-check-basics.in
-flake8==3.9.0
+flake8==3.9.2
     # via
     #   -r ci/requirements-check-basics.in
     #   flake8-comprehensions
-importlib-metadata==3.7.3
+flake8-comprehensions==3.5.0
+    # via -r ci/requirements-check-basics.in
+importlib-metadata==4.6.0
     # via
     #   flake8
     #   flake8-comprehensions
@@ -18,15 +18,15 @@ pathspec==0.8.1
     # via yamllint
 pycodestyle==2.7.0
     # via flake8
-pyflakes==2.3.0
+pyflakes==2.3.1
     # via flake8
 pyyaml==5.4.1
     # via
     #   -r ci/requirements-documentation.in
     #   yamllint
-typing-extensions==3.7.4.3
+typing-extensions==3.10.0.0
     # via importlib-metadata
-yamllint==1.26.0
+yamllint==1.26.1
     # via -r ci/requirements-check-basics.in
 zipp==3.4.1
     # via importlib-metadata

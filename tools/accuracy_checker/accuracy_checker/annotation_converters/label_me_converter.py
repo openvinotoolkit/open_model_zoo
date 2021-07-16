@@ -90,7 +90,7 @@ class LabelMeDetectionConverter(BaseFormatConverter):
                 x_maxs.append(max(x_coords))
                 y_mins.append(min(y_coords))
                 y_maxs.append(max(y_coords))
-                labels.append(label)
+                labels.append(int(label))
 
             if check_content:
                 if not check_file_existence(self.image_dir / identifier):
@@ -194,6 +194,8 @@ def get_label_map(labels, has_background=False):
         raise ValueError('label_map must be provided in dataset_meta_file')
 
     if isinstance(labels, dict):
+        if not isinstance(next(iter(labels)), int):
+            return {int(k): v for k, v in labels.items()}
         return labels
 
     labels_offset = int(has_background)

@@ -88,4 +88,4 @@ python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/5e91628ed98250989a7ddd20abfe27385e0493c1/LICENSE).
-A copy of the license is provided in [APACHE-2.0-PyTorch-EfficientNet.txt](../licenses/APACHE-2.0-PyTorch-EfficientNet.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0-PyTorch-EfficientNet.txt`.

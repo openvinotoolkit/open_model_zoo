@@ -1,6 +1,6 @@
 # Smart Classroom C++ Demo
 
-![example](./smart_classroom.gif)
+![](../smart_classroom.gif)
 
 The demo shows an example of joint usage of several neural networks to detect student actions (sitting, standing, raising hand for the `person-detection-action-recognition-0005` model and sitting, writing, raising hand, standing, turned around, lie on the desk for the `person-detection-action-recognition-0006` model) and recognize people by faces in the classroom environment. The demo uses Async API for action and face detection networks. It allows to parallelize execution of face recognition and detection: while face recognition is running on one accelerator, face and action detection could be performed on another. You can use a set of the following pre-trained models with the demo:
 
@@ -25,7 +25,7 @@ On startup, the application reads command line parameters and loads four network
 To recognize faces on a frame, the demo needs a gallery of reference images. Each image should contain a tight crop of face. You can create the gallery from an arbitrary list of images:
 
 1. Put images containing tight crops of frontal-oriented faces to a separate empty folder. Each identity must have only one image. Name images as `id_name0.png, id_name1.png, ...`.
-2. Run the `python3 create_list.py <path_to_folder_with_images>` command, which will create a `faces_gallery.json` file with list of files and identities.
+2. Run the `python3 <omz_dir>/demos/smart_classroom_demo/utils/create_list.py <path_to_folder_with_images>` command, which will create a `faces_gallery.json` file with list of files and identities.
 
 ## Preparing to Run
 
@@ -89,7 +89,6 @@ Options:
     -d_lm '<device>'               Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_reid '<device>'             Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -greedy_reid_matching          Optional. Use faster greedy matching algorithm in face reid.
-    -pc                            Optional. Enables per-layer performance statistics.
     -r                             Optional. Output Inference results as raw values.
     -ad                            Optional. Output file name to save per-person action statistics in.
     -t_ad                          Optional. Probability threshold for person/action detection.
@@ -149,7 +148,7 @@ Example of a valid command line to run the application for recognizing actions o
     -teacher_id <ID of a teacher in the face gallery>
 ```
 
-> **NOTE**: To recognize actions of a teacher, use `person-detection-action-recognition-teacher-0002` model.
+> **NOTE**: To recognize actions of a teacher, use `person-detection-action-recognition-teacher-0002` model. See model description for more details on the list of recognized actions.
 
 Example of a valid command line to run the application for recognizing first raised-hand students:
 

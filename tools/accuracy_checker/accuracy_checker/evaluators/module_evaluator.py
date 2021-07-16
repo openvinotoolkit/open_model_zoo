@@ -32,6 +32,7 @@ class ModuleEvaluator(BaseEvaluator):
         module = config['module']
         module_config = config.get('module_config')
         python_path = config.get('python_path')
+        kwargs['orig_config'] = config
 
         return cls(load_module(module, python_path).from_configs(module_config, *args, **kwargs), config)
 
@@ -40,14 +41,16 @@ class ModuleEvaluator(BaseEvaluator):
             *args, stored_predictions=stored_predictions, progress_reporter=progress_reporter, **kwargs
         )
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
-        return self._internal_module.compute_metrics(print_results, ignore_results_formatting)
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
+        return self._internal_module.compute_metrics(print_results, ignore_results_formatting, ignore_metric_reference)
 
-    def print_metrics_results(self, ignore_results_formatting=False):
-        self._internal_module.print_metrics(ignore_results_formatting)
+    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
+        self._internal_module.print_metrics(ignore_results_formatting, ignore_metric_reference)
 
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
-        return self._internal_module.extract_metrics_results(print_results, ignore_results_formatting)
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
+                                ignore_metric_reference=False):
+        return self._internal_module.extract_metrics_results(print_results, ignore_results_formatting,
+                                                             ignore_metric_reference)
 
     def release(self):
         self._internal_module.release()

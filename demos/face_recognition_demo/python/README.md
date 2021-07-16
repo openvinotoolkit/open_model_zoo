@@ -117,7 +117,7 @@ usage: face_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
                                 [-d_fd {CPU,GPU,MYRIAD,HETERO,HDDL}]
                                 [-d_lm {CPU,GPU,MYRIAD,HETERO,HDDL}]
                                 [-d_reid {CPU,GPU,MYRIAD,HETERO,HDDL}]
-                                [-l PATH] [-c PATH] [-v] [-pc] [-t_fd [0..1]]
+                                [-l PATH] [-c PATH] [-v] [-t_fd [0..1]]
                                 [-t_id [0..1]] [-exp_r_fd NUMBER]
 
 Optional arguments:
@@ -190,7 +190,6 @@ Inference options:
                         if any. Path to the XML file with descriptions
                         of the kernels.
   -v, --verbose         Optional. Be more verbose.
-  -pc, --perf_stats     Optional. Output detailed per-layer performance stats.
   -t_fd [0..1]          Optional. Probability threshold for face detections.
   -t_id [0..1]          Optional. Cosine distance threshold between two vectors
                         for face identification.

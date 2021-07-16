@@ -35,6 +35,7 @@
 #include <models/detection_model_centernet.h>
 #include <models/detection_model_faceboxes.h>
 #include <models/detection_model_retinaface.h>
+#include <models/detection_model_retinaface_pt.h>
 #include <models/detection_model_ssd.h>
 #include <models/detection_model_yolo.h>
 
@@ -42,13 +43,12 @@ DEFINE_INPUT_FLAGS
 DEFINE_OUTPUT_FLAGS
 
 static const char help_message[] = "Print a usage message.";
-static const char at_message[] = "Required. Architecture type: centernet, faceboxes, retinaface, ssd or yolo";
+static const char at_message[] = "Required. Architecture type: centernet, faceboxes, retinaface, retinaface-pytorch, ssd or yolo";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
-static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 "Absolute path to the .xml file with the kernel descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
@@ -73,7 +73,6 @@ DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(labels, "", labels_message);
-DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
@@ -107,7 +106,6 @@ static void showUsage() {
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
-    std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -iou_t                    " << iou_thresh_output_message << std::endl;
@@ -197,7 +195,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -231,12 +228,13 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
     outputTransform.resize(outputImg);
     // Visualizing result data over source image
     if (FLAGS_r) {
-        slog::info << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
+        slog::debug << " -------------------- Frame # " << result.frameId << "--------------------" << slog::endl;
+        slog::debug << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
     }
 
     for (auto& obj : result.objects) {
         if (FLAGS_r) {
-            slog::info << " "
+            slog::debug << " "
                 << std::left << std::setw(9) << obj.label << " | "
                 << std::setw(10) << obj.confidence << " | "
                 << std::setw(4) << std::max(int(obj.x), 0) << " | "
@@ -248,7 +246,7 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
         outputTransform.scaleRect(obj);
         std::ostringstream conf;
         conf << ":" << std::fixed << std::setprecision(1) << obj.confidence * 100 << '%';
-        auto color = palette[obj.labelID];
+        const auto& color = palette[obj.labelID];
         cv::putText(outputImg, obj.label + conf.str(),
             cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 230, 230, 230 }, 3);
         cv::putText(outputImg, obj.label + conf.str(),
@@ -272,7 +270,6 @@ int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
 
-        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -280,7 +277,6 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        slog::info << "Reading input" << slog::endl;
         auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat curr_frame;
 
@@ -300,6 +296,9 @@ int main(int argc, char *argv[]) {
         else if (FLAGS_at == "retinaface") {
             model.reset(new ModelRetinaFace(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
         }
+        else if (FLAGS_at == "retinaface-pytorch") {
+            model.reset(new ModelRetinaFacePT(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, (float)FLAGS_iou_t));
+        }
         else if (FLAGS_at == "ssd") {
             model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
@@ -311,10 +310,12 @@ int main(int argc, char *argv[]) {
             return -1;
         }
 
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+
         InferenceEngine::Core core;
 
         AsyncPipeline pipeline(std::move(model),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
 
@@ -431,19 +432,11 @@ int main(int argc, char *argv[]) {
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << slog::endl << "Metric reports:" << slog::endl;
+        slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
-        slog::info << slog::endl << "Avg time:\n";
-        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
-            cap->getMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Preprocessing:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Inference:\t\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getInferenceMetircs().getTotal().latency << " ms\n";
-        slog::info << "  * Postprocessing:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getPostprocessMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
-            renderMetrics.getTotal().latency << " ms" << slog::endl;
+        printStagesLatency(cap->getMetrics().getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
+            pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
+            renderMetrics.getTotal().latency);
 
         slog::info << presenter.reportMeans() << slog::endl;
     }
@@ -456,6 +449,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
     return 0;
 }

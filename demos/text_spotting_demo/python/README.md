@@ -80,7 +80,7 @@ usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>"
                              [--trd_output_symbols_distr TRD_OUTPUT_SYMBOLS_DISTR]
                              [--trd_output_cur_hidden TRD_OUTPUT_CUR_HIDDEN]
                              [--keep_aspect_ratio] [--no_track]
-                             [--show_scores] [--show_boxes] [-pc] [-r]
+                             [--show_scores] [--show_boxes] [-r]
                              [--no_show] [-u UTILIZATION_MONITORS]
 
 Options:
@@ -137,7 +137,6 @@ Options:
   --no_track            Optional. Disable tracking.
   --show_scores         Optional. Show detection scores.
   --show_boxes          Optional. Show bounding boxes.
-  -pc, --perf_counts    Optional. Report performance counters.
   -r, --raw_output_message
                         Optional. Output inference results raw values.
   --no_show             Optional. Don't show output

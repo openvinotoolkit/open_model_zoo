@@ -59,6 +59,5 @@ public:
     void waitAndFetchResults();
 
     const TrackedObjects& getResults() const;
-
-    void PrintPerformanceCounts(std::string fullDeviceName);
+    const std::string modelType = "Person Detection";
 };

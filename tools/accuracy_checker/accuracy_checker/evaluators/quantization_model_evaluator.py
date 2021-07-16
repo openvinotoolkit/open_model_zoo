@@ -348,7 +348,7 @@ class ModelEvaluator:
 
         return infer_requests_pool
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         if not self.metric_executor:
             return []
         if self._metrics_results:
@@ -365,20 +365,22 @@ class ModelEvaluator:
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting=ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting=ignore_results_formatting,
+                                              ignore_metric_reference=ignore_metric_reference)
         return self._metrics_results
 
-    def print_metrics_results(self, ignore_results_formatting=False):
+    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting)
+            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting)
+            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
+                                ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting)
+            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
 
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
@@ -391,7 +393,7 @@ class ModelEvaluator:
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting)
+                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
         return extracted_results, extracted_meta
 
@@ -406,7 +408,7 @@ class ModelEvaluator:
         network = next(iter(network_list))['model'] if network_list is not None else None
         self.launcher.load_network(network)
         self.input_feeder = InputFeeder(
-            self.launcher.config.get('inputs', []), self.launcher.inputs,
+            self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
             self.launcher.fit_to_input, self.launcher.default_layout
         )
         if self.adapter:
@@ -417,7 +419,7 @@ class ModelEvaluator:
         xml_path, bin_path = model_paths['model'], model_paths['weights']
         self.launcher.load_ir(xml_path, bin_path)
         self.input_feeder = InputFeeder(
-            self.launcher.config.get('inputs', []), self.launcher.inputs,
+            self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
             self.launcher.fit_to_input, self.launcher.default_layout
         )
         if self.adapter:

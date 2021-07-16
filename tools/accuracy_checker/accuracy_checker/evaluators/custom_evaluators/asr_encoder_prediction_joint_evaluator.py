@@ -29,7 +29,7 @@ from .asr_encoder_decoder_evaluator import AutomaticSpeechRecognitionEvaluator
 
 class ASREvaluator(AutomaticSpeechRecognitionEvaluator):
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False):
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config = config['datasets']
         launcher_config = config['launchers'][0]
         if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
@@ -40,7 +40,7 @@ class ASREvaluator(AutomaticSpeechRecognitionEvaluator):
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
-        return cls(dataset_config, launcher, model)
+        return cls(dataset_config, launcher, model, orig_config)
 
 
 class BaseModel:

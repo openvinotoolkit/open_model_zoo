@@ -111,7 +111,6 @@ Options:
     -dyn_am                    Optional. Enable dynamic batch size for Antispoofing Classification network
     -async                     Optional. Enable asynchronous mode
     -no_show                   Optional. Don't show output.
-    -pc                        Optional. Enable per-layer performance report
     -r                         Optional. Output inference results as raw values
     -t                         Optional. Probability threshold for detections
     -bb_enlarge_coef           Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face

@@ -55,7 +55,8 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
                 description="The number of classes with the highest probability, which will be used to decide "
                             "if prediction is correct."
             ),
-            'match': BoolField(optional=True, default=False)
+            'match': BoolField(optional=True, default=False),
+            'cast_to_int': BoolField(optional=True, default=False)
         })
 
         return parameters
@@ -63,6 +64,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
     def configure(self):
         self.top_k = self.get_value_from_config('top_k')
         self.match = self.get_value_from_config('match')
+        self.cast_to_int = self.get_value_from_config('cast_to_int')
 
         def loss(annotation_label, prediction_top_k_labels):
             return int(annotation_label in prediction_top_k_labels)
@@ -78,7 +80,9 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         if not self.match:
             accuracy = self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
         else:
-            accuracy = accuracy_score(annotation.label, prediction.label)
+            label = prediction.label if not self.cast_to_int else np.round(prediction.label)
+
+            accuracy = accuracy_score(annotation.label, label)
             self.accuracy.append(accuracy)
         if self.profiler:
             self.profiler.update(
@@ -114,7 +118,7 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     __provider__ = 'accuracy_per_class'
 
     annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
-    prediction_types = (ClassificationPrediction, )
+    prediction_types = (ClassificationPrediction, ArgMaxClassificationPrediction)
 
     @classmethod
     def parameters(cls):
@@ -244,12 +248,17 @@ class ClassificationF1Score(PerImageEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'label_map': StringField(optional=True, default='label_map', description="Label map.")
+            'label_map': StringField(optional=True, default='label_map', description="Label map."),
+            'pos_label': NumberField(
+                optional=True, value_type=int, min_value=0,
+                description="Return metric value for specified class during metric calculation."
+            )
         })
         return parameters
 
     def configure(self):
         label_map = self.get_value_from_config('label_map')
+        self.pos_label = self.get_value_from_config('pos_label')
         if self.dataset.metadata:
             self.labels = self.dataset.metadata.get(label_map)
             if not self.labels:
@@ -261,7 +270,7 @@ class ClassificationF1Score(PerImageEvaluationMetric):
         self.cm = np.zeros((len(self.labels), len(self.labels)))
 
     def update(self, annotation, prediction):
-        self.cm[prediction.label] += 1
+        self.cm[annotation.label][prediction.label] += 1
         result = annotation.label == prediction.label
         if self.profiler:
             self.profiler.update(annotation.identifier, annotation.label, prediction.label, self.name, result)
@@ -284,6 +293,12 @@ class ClassificationF1Score(PerImageEvaluationMetric):
         )
         if self.profiler:
             self.profiler.finish()
+
+        if self.pos_label is not None:
+            self.meta['names'] = [self.labels[self.pos_label]]
+            return f1_score[self.pos_label]
+
+        self.meta['names'] = list(self.labels.values())
         return f1_score if len(f1_score) == 2 else f1_score[0]
 
     def reset(self):
@@ -345,7 +360,7 @@ class RocAucScore(PerImageEvaluationMetric):
         return 0
 
     def evaluate(self, annotations, predictions):
-        all_results = np.concatenate([t.squeeze() for t in self.results])
+        all_results = np.concatenate(self.results)
         all_targets = np.concatenate(self.targets)
         roc_auc = roc_auc_score(all_targets, all_results)
         return roc_auc

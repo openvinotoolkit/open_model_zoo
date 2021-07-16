@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -23,7 +23,7 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
@@ -32,10 +32,9 @@ import monitors
 from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
-from helpers import resolution
+from helpers import resolution, log_blobs_info, log_runtime_settings
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 class SegmentationVisualizer:
@@ -66,8 +65,11 @@ class SegmentationVisualizer:
     def __init__(self, colors_path=None):
         if colors_path:
             self.color_palette = self.get_palette_from_file(colors_path)
+            log.debug('The palette is loaded from {}'.format(colors_path))
         else:
             self.color_palette = self.pascal_voc_palette
+            log.debug('The PASCAL VOC palette is used')
+        log.debug('Get {} colors'.format(len(self.color_palette)))
         self.color_map = self.create_color_map()
 
     def get_palette_from_file(self, colors_path):
@@ -108,7 +110,7 @@ def build_argparser():
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
     args.add_argument('-at', '--architecture_type', help='Required. Specify the model\'s architecture type.',
-                      type=str, required=False, default='segmentation', choices=('segmentation', 'salient_object_detection'))
+                      type=str, required=True, choices=('segmentation', 'salient_object_detection'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
@@ -120,6 +122,7 @@ def build_argparser():
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('-c', '--colors', type=Path,
                                    help='Optional. Path to a text file containing colors for classes.')
+    common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
@@ -147,39 +150,55 @@ def build_argparser():
                               'Input frame size used by default.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
+
+    debug_args = parser.add_argument_group('Debug options')
+    debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results as mask histogram.',
+                            default=False, action='store_true')
     return parser
 
 
 def get_model(ie, args):
     if args.architecture_type == 'segmentation':
-        return SegmentationModel(ie, args.model), SegmentationVisualizer(args.colors)
+        return SegmentationModel(ie, args.model, labels=args.labels), SegmentationVisualizer(args.colors)
     if args.architecture_type == 'salient_object_detection':
-        return SalientObjectDetectionModel(ie, args.model), SaliencyMapVisualizer()
+        return SalientObjectDetectionModel(ie, args.model, labels=args.labels), SaliencyMapVisualizer()
+
+
+def print_raw_results(mask, labels=None):
+    log.info('     Class ID     | Pixels | Percentage ')
+    max_classes = int(np.max(mask)) + 1 # We use +1 for only background case
+    histogram = cv2.calcHist([np.expand_dims(mask, axis=-1)], [0], None, [max_classes], [0, max_classes])
+    all = np.product(mask.shape)
+    for id, val in enumerate(histogram[:, 0]):
+        if val > 0:
+            label = labels[id] if labels and len(labels) >= id else '#{}'.format(id)
+            log.info(' {:<16} | {:6d} | {:5.2f}% '.format(label, int(val), val / all * 100))
 
 
 def main():
-    metrics = PerformanceMetrics()
     args = build_argparser().parse_args()
 
-    log.info('Initializing Inference Engine...')
+    cap = open_images_capture(args.input, args.loop)
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
-    log.info('Loading network...')
-
     model, visualizer = get_model(ie, args)
+    log.info('Reading model {}'.format(args.model))
+    log_blobs_info(model)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    cap = open_images_capture(args.input, args.loop)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+    log_runtime_settings(pipeline.exec_net, args.device)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
 
-    log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-
+    metrics = PerformanceMetrics()
     presenter = None
     output_transform = None
     video_writer = cv2.VideoWriter()
@@ -217,6 +236,8 @@ def main():
         results = pipeline.get_result(next_frame_id_to_show)
         if results:
             objects, frame_meta = results
+            if args.raw_output_message:
+                print_raw_results(objects, model.labels)
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
             frame = visualizer.overlay_masks(frame, objects, output_transform)
@@ -241,6 +262,8 @@ def main():
         while results is None:
             results = pipeline.get_result(next_frame_id_to_show)
         objects, frame_meta = results
+        if args.raw_output_message:
+            print_raw_results(objects, model.labels)
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
@@ -255,7 +278,7 @@ def main():
             cv2.imshow('Segmentation Results', frame)
             key = cv2.waitKey(1)
 
-    metrics.print_total()
+    metrics.log_total()
     print(presenter.reportMeans())
 
 

@@ -18,7 +18,7 @@ const std::pair<const char*, float cv::Point3f::*> OUTPUTS[] = {
 HeadPoseEstimator::HeadPoseEstimator(InferenceEngine::Core& ie,
                                      const std::string& modelPath,
                                      const std::string& deviceName):
-                   ieWrapper(ie, modelPath, deviceName) {
+                   ieWrapper(ie, modelPath, modelType, deviceName) {
     inputBlobName = ieWrapper.expectSingleInput();
     ieWrapper.expectImageInput(inputBlobName);
 
@@ -53,10 +53,6 @@ void HeadPoseEstimator::estimate(const cv::Mat& image,
         ieWrapper.getOutputBlob(output.first, outputValue);
         outputResults.headPoseAngles.*output.second = outputValue[0];
     }
-}
-
-void HeadPoseEstimator::printPerformanceCounts() const {
-    ieWrapper.printPerlayerPerformance();
 }
 
 HeadPoseEstimator::~HeadPoseEstimator() {

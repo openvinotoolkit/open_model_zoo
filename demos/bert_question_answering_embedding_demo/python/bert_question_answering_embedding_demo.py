@@ -23,11 +23,13 @@ from pathlib import Path
 
 import numpy as np
 
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -83,33 +85,33 @@ def build_argparser():
 
 
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    log.info("Creating Inference Engine")
+    # load vocabulary file for model
+    vocab = load_vocab_file(args.vocab)
+    log.debug("Loaded vocab file from {}, get {} tokens".format(args.vocab, len(vocab)))
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     #read model to calculate embedding
     model_xml_emb = args.model_emb
     model_bin_emb = model_xml_emb.with_suffix(".bin")
 
-    log.info("Loading embedding network files:\n\t{}\n\t{}".format(model_xml_emb, model_bin_emb))
+    log.info('Reading Embedding model {}'.format(model_xml_emb))
     ie_encoder_emb = ie.read_network(model=model_xml_emb, weights=model_bin_emb)
     input_names_model_emb = list(ie_encoder_emb.input_info.keys())
     input_names_emb = args.input_names_emb.split(',')
-    log.info("Expected embedding input names: {}".format(input_names_emb))
-    log.info("Network embedding input names: {}".format(input_names_model_emb))
     # check input names
     if set(input_names_model_emb) != set(input_names_emb):
-        log.error("Unexpected embedding network input names")
-        raise Exception("Unexpected embedding network input names")
+        raise RuntimeError('The demo expects Embedding input names: {}, actual Embedding network input names: {}'.format(
+            input_names_emb, input_names_model_emb))
 
     # check outputs
     output_names_model_emb = list(ie_encoder_emb.outputs.keys())
-    if len(output_names_model_emb)>1:
-        log.error("Expected only single output in embedding network but {} outputs detected".format(output_names_model_emb))
-        raise Exception("Unexpected number of embedding network outputs")
-
+    if len(output_names_model_emb) > 1:
+        raise RuntimeError("Expected only single output in Embedding network, but {} outputs detected".format(output_names_model_emb))
 
     #reshape embedding model to infer short questions and long contexts
     ie_encoder_exec_emb_dict = {}
@@ -120,54 +122,44 @@ def main():
         new_shapes = {}
         for i, input_info in ie_encoder_emb.input_info.items():
             new_shapes[i] = [1, length]
-            log.info("Reshaped input {} from {} to the {}".format(
+        try:
+            ie_encoder_emb.reshape(new_shapes)
+            log.debug("Reshape Embedding model {} from {} to the {}".format(
                 i,
                 input_info.input_data.shape,
                 new_shapes[i]))
-        log.info("Attempting to reshape the context embedding network to the modified inputs...")
-
-        try:
-            ie_encoder_emb.reshape(new_shapes)
-            log.info("Successful!")
         except RuntimeError:
-            log.error("Failed to reshape the embedding network")
+            log.error("Failed to reshape the Embedding network")
             raise
 
         # Loading model to the plugin
-        log.info("Loading model to the plugin")
         ie_encoder_exec_emb_dict[length] = ie.load_network(network=ie_encoder_emb, device_name=args.device)
+    log.info('The Embedding model {} is loaded to {}'.format(model_xml_emb, args.device))
 
     # Read model for final exact qa
     if args.model_qa:
         model_xml = args.model_qa
         model_bin = model_xml.with_suffix(".bin")
-        log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+        log.info('Reading Question model {}'.format(model_xml))
 
         ie_encoder_qa = ie.read_network(model=model_xml, weights=model_bin)
         ie_encoder_qa.batch_size = 1
 
         input_names_qa = args.input_names_qa.split(',')
         output_names_qa = args.output_names_qa.split(',')
-        log.info("Expected input->output names: {}->{}".format(input_names_qa, output_names_qa))
 
         #check input and output names
         input_names_model_qa = list(ie_encoder_qa.input_info.keys())
         output_names_model_qa = list(ie_encoder_qa.outputs.keys())
-        log.info("Network input->output names: {}->{}".format(input_names_model_qa, output_names_model_qa))
         if set(input_names_model_qa) != set(input_names_qa) or set(output_names_model_qa) != set(output_names_qa):
-            log.error("Unexpected network input or output names")
-            raise Exception("Unexpected network input or output names")
+            raise RuntimeError("The demo expects Question input->output names: {}->{}, actual Question network input->output names: {}->{}".format(
+                input_names_qa, output_names_qa, input_names_model_qa, output_names_model_qa))
 
         # Loading model to the plugin
-        log.info("Loading model to the plugin")
         ie_encoder_qa_exec = ie.load_network(network=ie_encoder_qa, device_name=args.device)
+        log.info('The Question model {} is loaded to {}'.format(model_xml, args.device))
 
         max_length_qc = ie_encoder_qa.input_info[input_names_qa[0]].input_data.shape[1]
-
-    #load vocabulary file for all models
-    log.info("Loading vocab file:\t{}".format(args.vocab))
-    vocab = load_vocab_file(args.vocab)
-    log.info("{} tokens loaded".format(len(vocab)))
 
     #define function to infer embedding
     def calc_emb(tokens_id, max_length):
@@ -193,7 +185,7 @@ def main():
         t_start = time.perf_counter()
         res = ie_encoder_exec_emb.infer(inputs=inputs)
         t_end = time.perf_counter()
-        log.info("embedding calculated for sequence of length {} with {:0.2f} requests/sec ({:0.2} sec per request)".format(
+        log.info("Embedding calculated for sequence of length {} with {:0.2f} requests/sec ({:0.2} sec per request)".format(
             max_length,
             1 / (t_end - t_start),
             t_end - t_start

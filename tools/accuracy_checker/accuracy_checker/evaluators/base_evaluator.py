@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from ..presenters import write_csv_result
+
 
 # base class for custom evaluators
 class BaseEvaluator:
@@ -32,15 +34,16 @@ class BaseEvaluator:
         raise NotImplementedError
 
     # finalize and get metrics results
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         raise NotImplementedError
 
     # delayed metrics results logging
-    def print_metrics_results(self, ignore_results_formatting=False):
+    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
         raise NotImplementedError
 
     # extract metrics results values prepared for printing
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
+                                ignore_metric_reference=False):
         raise NotImplementedError
 
     # destruction for entity, which can not be deleted automatically
@@ -55,3 +58,14 @@ class BaseEvaluator:
     @staticmethod
     def send_processing_info(sender):
         return {}
+
+    # helper for writing intermediate metric results to csv file
+    def write_results_to_csv(self, csv_file, ignore_results_formatting, metric_interval):
+        if csv_file:
+            metrics_results, metrics_meta = self.extract_metrics_results(
+                print_results=False, ignore_results_formatting=ignore_results_formatting
+            )
+            processing_info = self.get_processing_info(self.config)
+            write_csv_result(
+                csv_file, processing_info, metrics_results, metric_interval, metrics_meta
+            )

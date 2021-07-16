@@ -34,6 +34,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 
 * architecture_type = segmentation
   - deeplabv3
+  - drn-d-38
   - fastseg-large
   - fastseg-small
   - hrnet-v2-c1-segmentation
@@ -69,7 +70,7 @@ Options:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -at {segmentation, salient_object_detection}, --architecture_type {segmentation, salient_object_detection}
-                        Optional. Default value is segmentation. Specify model's architecture type.
+                        Required. Specify model's architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
                         single image, a folder of images, video file or camera id.
@@ -83,6 +84,7 @@ Common model options:
   -c COLORS, --colors COLORS
                         Optional. Path to a text file containing colors for
                         classes.
+  --labels LABELS       Optional. Labels mapping file.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
@@ -111,6 +113,10 @@ Input/output options:
                         Input frame size used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+
+Debug options:
+  -r, --raw_output_message
+                        Optional. Output inference results as mask histogram.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

@@ -14,14 +14,14 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 from time import perf_counter
 
 import cv2
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
@@ -30,9 +30,9 @@ import monitors
 from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
+from helpers import log_blobs_info, log_runtime_settings
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -77,30 +77,32 @@ def build_argparser():
 def main():
     args = build_argparser().parse_args()
 
-    log.info('Initializing Inference Engine...')
+    cap = open_images_capture(args.input, args.loop)
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
-    cap = open_images_capture(args.input, args.loop)
 
     start_time = perf_counter()
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
 
-    log.info('Loading network...')
+    log.info('Reading model {}'.format(args.model))
     model = Deblurring(ie, args.model, frame.shape)
+    log_blobs_info(model)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+    log_runtime_settings(pipeline.exec_net, args.device)
 
     pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
-
     next_frame_id = 1
     next_frame_id_to_show = 0
+
     metrics = PerformanceMetrics()
     presenter = monitors.Presenter(args.utilization_monitors, 55,
                                    (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
@@ -173,7 +175,7 @@ def main():
         else:
             break
 
-    metrics.print_total()
+    metrics.log_total()
     print(presenter.reportMeans())
 
 

@@ -6,6 +6,9 @@
 # This file is based in part on deepspeech_openvino_0.5.py by Feng Yen-Chang at
 # https://github.com/openvinotoolkit/open_model_zoo/pull/419, commit 529805d011d9b405f142b2b40f4d202bd403a4f1 on Sep 19, 2019.
 #
+
+import sys
+import logging as log
 import time
 import wave
 import timeit
@@ -14,28 +17,30 @@ import argparse
 import yaml
 import numpy as np
 from tqdm import tqdm
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from asr_utils.profiles import PROFILES
 from asr_utils.deep_speech_seq_pipeline import DeepSpeechSeqPipeline
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
     parser = argparse.ArgumentParser(description="Speech recognition DeepSpeech demo")
     parser.add_argument('-i', '--input', type=str, metavar="FILENAME", required=True,
-                        help="Path to an audio file in WAV PCM 16 kHz mono format")
+                        help="Required. Path to an audio file in WAV PCM 16 kHz mono format")
     parser.add_argument('-d', '--device', default='CPU', type=str,
                         help="Optional. Specify the target device to infer on, for example: CPU, GPU, HDDL, MYRIAD or HETERO. "
                              "The demo will look for a suitable IE plugin for this device. (default is CPU)")
     parser.add_argument('-m', '--model', type=str, metavar="FILENAME", required=True,
-                        help="Path to an .xml file with a trained model (required)")
+                        help="Required. Path to an .xml file with a trained model")
     parser.add_argument('-L', '--lm', type=str, metavar="FILENAME",
-                        help="path to language model file (optional)")
+                        help="Optional. Path to language model file")
     parser.add_argument('-p', '--profile', type=str, metavar="NAME", required=True,
-                        help="Choose pre/post-processing profile: "
+                        help="Required. Choose pre/post-processing profile: "
                              "mds06x_en for Mozilla DeepSpeech v0.6.x, "
                              "mds07x_en/mds08x_en/mds09x_en for Mozilla DeepSpeech v0.7.x/v0.8.x/v0.9.x(English), "
-                             "other: filename of a YAML file (required)")
+                             "other: filename of a YAML file")
     parser.add_argument('-b', '--beam-width', type=int, default=500, metavar="N",
                         help="Beam width for beam search in CTC decoder (default 500)")
     parser.add_argument('-c', '--max-candidates', type=int, default=1, metavar="N",
@@ -67,9 +72,13 @@ def main():
         sr = profile['model_sampling_rate']
         args.block_size = round(sr * 10) if not args.realtime else round(sr * profile['frame_stride_seconds'] * 16)
 
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
+    ie = IECore()
+
     start_load_time = timeit.default_timer()
     stt = DeepSpeechSeqPipeline(
-        ie = IECore(),
+        ie = ie,
         model = args.model,
         lm = args.lm,
         beam_width = args.beam_width,
@@ -78,7 +87,7 @@ def main():
         device = args.device,
         online_decoding = args.realtime,
     )
-    print("Loading, including network weights, IE initialization, LM, building LM vocabulary trie: {} s".format(timeit.default_timer() - start_load_time))
+    log.debug("Loading, including network weights, IE initialization, LM, building LM vocabulary trie: {} s".format(timeit.default_timer() - start_load_time))
 
     start_proc_time = timeit.default_timer()
     with wave.open(args.input, 'rb') as wave_read:
@@ -87,8 +96,7 @@ def main():
         assert compression_type == 'NONE', "Only linear PCM WAV files supported"
         assert channel_num == 1, "Only mono WAV PCM supported"
         assert abs(sampling_rate / profile['model_sampling_rate'] - 1) < 0.1, "Only {} kHz WAV PCM supported".format(profile['model_sampling_rate'] / 1e3)
-        print("Audio file length: {} s".format(pcm_length / sampling_rate))
-        print("")
+        log.debug("Audio file length: {} s".format(pcm_length / sampling_rate))
 
         audio_pos = 0
         play_start_time = timeit.default_timer()
@@ -123,7 +131,7 @@ def main():
             print('\r' + transcription[0].text[-args.realtime_window:])
     else:  #  not args.realtime
         # Only show processing time in offline mode because real-time mode is being slowed down by time.sleep()
-        print("Processing time (incl. loading audio, MFCC, RNN and beam search): {} s".format(timeit.default_timer() - start_proc_time))
+        log.info("Processing time (incl. loading audio, MFCC, RNN and beam search): {} s".format(timeit.default_timer() - start_proc_time))
 
     print("\nTranscription(s) and confidence score(s):")
     for candidate in transcription:

@@ -28,6 +28,8 @@ AccuracyChecker supports following set of adapters:
   * `argmax_output` - identifier that model output is ArgMax layer.
   * `block` - process whole batch as a single data block.
   * `classification_output` - target output layer name.
+  * `fixed_output` - in `block` mode enables gathering data from a part of full layer output
+  * `fixed_output_index` - index into layer output array to gather data from
 * `segmentation` - converting output of semantic segmentation model to `SeegmentationPrediction` representation.
   * `make_argmax` - allows applying argmax operation to output values.
 * `segmentation_one_class` - converting output of semantic segmentation to `SeegmentationPrediction` representation. It is suitable for situation when model's output is probability of belong each pixel to foreground class.
@@ -133,6 +135,9 @@ AccuracyChecker supports following set of adapters:
   * `cls_out` - the name of output layer with detected probabilities for each class. The layer shape is [num_boxes, num_classes], where `num_boxes` is number of predicted boxes, `num_classes` - number of classes in the dataset including background.
   * `bbox_out` - the name of output layer with detected boxes deltas. The layer shape is [num_boxes, 8] where  `num_boxes` is number of predicted boxes, 8 (4 for background + 4 for foreground) bounding boxes coordinates.
   * `roid_out` - the name of output layer with regions of interest.
+* `ppdetection` - converts output of PaddlePaddle object detection models to `DetectionPrediction`.
+  * `boxes_out` - the name of output layer with predicted boxes in format [[`label`, `score`, `x_min`, `y_min`, `x_max`, `y_max`] ...
+  * `num_boxes_out` - the name of output layer with number of predicted boxes for each image in batch.
 * `face_person_detection` - converting face person detection model output with 2 detection outputs to `ContainerPredition`, where value of parameters `face_out`and `person_out` are used for identification `DetectionPrediction` in container.
   * `face_out` -  face detection output layer name.
   * `person_out` - person detection output layer name.
@@ -227,6 +232,12 @@ AccuracyChecker supports following set of adapters:
   * `text_threshold` - text confidence threshold (Optional, default 0.7).
   * `link_threshold` - link confidence threshold (Optional, default 0.4).
   * `low_text` - text low-bound score (Optional, default 0.4).
+* `ppocr_det` - converting output PPOCR text detection model to `TextDetectionPrediction`
+  * `threshold` - segmentation bitmap threshold (Optional, default 0.3).
+  * `box_threshold` - predicted boxes filtering by confidence threshold (Optional, detault 0.7).
+  * `max_candidates` - maximum detected candidates for considering (Optional, default 1000).
+  * `unclip_ratio` - unclip ratio (Optional, default 2).
+  * `min_size` - minimum box size (Optional, default 3).
 * `human_pose_estimation` - converting output of model for human pose estimation to `PoseEstimationPrediction`.
   * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).
   * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
@@ -250,6 +261,8 @@ AccuracyChecker supports following set of adapters:
 * `simple_decoder` - the easiest decoder for text recognition models, converts indices of classes to given letters, slices output on the first entry of `eos_label`
   * `eos_label` - label which should finish decoding
   * `custom_label_map` - label map (if not provided by the dataset meta)
+  * `start_index` - start index in predicted data (Optional, default 0).
+  * `do_lower` - allows converting predicted data to lower case (Optional, default False).
 * `ctc_beam_search_decoder` - Python implementation of CTC beam search decoder without LM for speech recognition.
 * `ctc_greedy_decoder` - CTC greedy decoder for speech recognition.
 * `ctc_beam_search_decoder_with_lm` - Python implementation of CTC beam search decoder with n-gram language model in kenlm binary format for speech recognition.
@@ -273,6 +286,13 @@ AccuracyChecker supports following set of adapters:
   * `lm_file` - Path to LM in binary kenlm format, relative to --model_attributes or --models.  Default is beam search without LM.
   * `lm_alpha` - LM alpha: weight factor for LM score (required when using LM)
   * `lm_beta` - LM beta: score bonus for each additional word, in log_e units (required when using LM)
+* `wav2vec` - decodes output Wav2Vec model to `CharacterRecognitionPrediction`.
+  * `alphabet` - list of supported tokens for conversion token_ids.
+  * `pad_token` - token, which represents padding in an alphabet (wav2vec uses this token as CTC-blank) Optional, default `<pad>`.
+  * `words_delimeter` - token, which represents delimiter between words in sequence. Optional, default `|`.
+  * `group_tokens` - allow replacing repeated tokens by one. Optional, default `True`.
+  * `lower_case` - allow converting result to lower case. Optional, default `False`.
+  * `cleanup_whitespaces` - allow merge extra whitespaces to one. Optional, default `True`.
 * `gaze_estimation` - converting output of gaze estimation model to `GazeVectorPrediction`.
 * `hit_ratio_adapter` - converting output NCF model to `HitRatioPrediction`.
 * `brain_tumor_segmentation` - converting output of brain tumor segmentation model to `BrainTumorSegmentationPrediction`.
@@ -298,6 +318,7 @@ AccuracyChecker supports following set of adapters:
 * `bert_classification` - converting output of BERT model trained for text classification task to `ClassificationPrediction`.
   * `num_classes` - number of predicted classes.
   * `classification_out` - name of output layer with classification probabilities. (Optional, if not provided default first output blob will be used).
+  * `single_score` - highlight that model return single value representing class id or probability belonging to class 1 in binary classification case (Optional, default `False`).
 * `bert_ner` - converting output of BERT model trained for named entity recognition task to `SequenceClassificationPrediction`.
   * `classification_out` - name of output layer with classification probabilities. (Optional, if not provided default first output blob will be used).
 * `human_pose_estimation_3d` - converting output of model for 3D human pose estimation to `PoseEstimation3dPrediction`.
@@ -432,3 +453,5 @@ AccuracyChecker supports following set of adapters:
 * `quantiles_predictor` - converts output of Time Series Forecasting models to `TimeSeriesForecastingQuantilesPrediction`.
   * `quantiles` - predictions[i]->quantile[i] mapping.
   * `output_name` - name of output node to convert.
+* `mask_to_binary_classification` - converts output of model represented as segmentation mask to `ArgMaxClassificationPrediction`. Class label calculated as comparision maximal probability in mask with given threshold.
+  * `threshold` - probability threshold for label 1 (Optional, default 0.5).

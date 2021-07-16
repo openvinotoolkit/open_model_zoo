@@ -23,6 +23,7 @@ try:
 except ImportError as import_error:
     SentencePieceBPETokenizer = UnsupportedPackage("tokenizers", import_error.msg)
 
+
 class DecodeBySentencePieceBPETokenizer(Preprocessor):
     __provider__ = 'decode_by_sentence_piece_bpe_tokenizer'
 

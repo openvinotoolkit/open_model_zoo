@@ -20,17 +20,17 @@ import time
 import sys
 from os import path as osp
 
-from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
+from openvino.inference_engine import IECore, get_version
 
 from utils.network_wrappers import MaskRCNN, SemanticSegmentation
-from utils.misc import MouseClick, set_log_config, check_pressed_keys
+from utils.misc import MouseClick, check_pressed_keys
 
 sys.path.append(osp.join(osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__)))), 'common/python'))
 import monitors
 from images_capture import open_images_capture
 
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
-set_log_config()
 WINNAME = 'Whiteboard_inpainting_demo'
 
 
@@ -119,8 +119,12 @@ def main():
                                              cap.fps(), out_frame_size):
         raise RuntimeError("Can't open video writer")
 
-    log.info("Initializing Inference Engine")
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
+
+    model_path = args.m_instance_segmentation if args.m_instance_segmentation else args.m_semantic_segmentation
+    log.info('Reading model {}'.format(model_path))
     if args.m_instance_segmentation:
         labels_file = osp.join(root_dir, 'coco_labels.txt')
         segmentation = MaskRCNN(ie, args.m_instance_segmentation, labels_file,
@@ -129,6 +133,7 @@ def main():
         labels_file = osp.join(root_dir, 'cityscapes_labels.txt')
         segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, labels_file,
                                             args.threshold, args.device, args.cpu_extension)
+    log.info('The model {} is loaded to {}'.format(model_path, args.device))
 
     black_board = False
     output_frame = np.full((frame.shape[0], frame.shape[1], 3), 255, dtype='uint8')
@@ -183,14 +188,12 @@ def main():
                 cv2.imshow('Board', board)
 
         end = time.time()
-        print('\rProcessing frame: {}, fps = {:.3}'
-            .format(frame_number, 1. / (end - start)), end="")
+        log.info('Processing frame: {}, fps = {:.3}'.format(frame_number, 1. / (end - start)))
         frame_number += 1
         start = time.time()
         frame = cap.read()
-    print('')
 
-    log.info(presenter.reportMeans())
+    presenter.reportMeans()
 
 
 if __name__ == '__main__':

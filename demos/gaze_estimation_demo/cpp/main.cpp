@@ -61,7 +61,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
+
     if (FLAGS_i.empty())
         throw std::logic_error("Parameter -i is not set");
     if (FLAGS_m.empty())
@@ -81,24 +81,17 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
-
         // ------------------------------ Parsing and validating of input arguments --------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
 
         // Loading Inference Engine
+        slog::info << *GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core ie;
-
-        // Enable per-layer metrics
-        if (FLAGS_pc) {
-            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-        }
 
         // Set up face detector and estimators
         FaceDetector faceDetector(ie, FLAGS_m_fd, FLAGS_d_fd, FLAGS_t, FLAGS_fd_reshape);
-
         HeadPoseEstimator headPoseEstimator(ie, FLAGS_m_hp, FLAGS_d_hp);
         LandmarksEstimator landmarksEstimator(ie, FLAGS_m_lm, FLAGS_d_lm);
         EyeStateEstimator eyeStateEstimator(ie, FLAGS_m_es, FLAGS_d_es);
@@ -160,21 +153,13 @@ int main(int argc, char *argv[]) {
             double inferenceTime = (tInferenceEnds - tInferenceBegins) * 1000. / cv::getTickFrequency();
             inferenceTimeAverager.updateValue(inferenceTime);
 
-            if (FLAGS_pc) {
-                faceDetector.printPerformanceCounts();
-                for (auto const estimator : estimators) {
-                    estimator->printPerformanceCounts();
-                }
-            }
-
             if (FLAGS_r) {
                 for (auto& inferenceResult : inferenceResults) {
-                    std::cout << inferenceResult << std::endl;
+                    slog::debug << inferenceResult << slog::endl;
                 }
             }
 
             presenter.drawGraphs(frame);
-
             // Display the results
             for (auto const& inferenceResult : inferenceResults) {
                 resultsMarker.mark(frame, inferenceResult);
@@ -202,7 +187,8 @@ int main(int argc, char *argv[]) {
             }
             frame = cap->read();
         } while (frame.data);
-        std::cout << presenter.reportMeans() << '\n';
+
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -212,6 +198,5 @@ int main(int argc, char *argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-    slog::info << "Execution successful" << slog::endl;
     return 0;
 }

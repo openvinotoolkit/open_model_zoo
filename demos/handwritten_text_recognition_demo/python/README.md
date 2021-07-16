@@ -58,7 +58,7 @@ usage: handwritten_text_recognition_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Path to an .xml file with a trained model.
+                        Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
                         Required. Path to an image to infer
   -d DEVICE, --device DEVICE

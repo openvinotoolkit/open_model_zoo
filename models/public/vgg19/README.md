@@ -83,4 +83,4 @@ python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
 
 The original model is distributed under the
 [Creative Commons Attribution 4.0 International Public License](https://creativecommons.org/licenses/by/4.0/legalcode.txt).
-A copy of the license is provided in [CC-BY-4.0.txt](../licenses/CC-BY-4.0.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/CC-BY-4.0.txt`.

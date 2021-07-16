@@ -8,6 +8,13 @@ In case when you use complicated representation located in representation contai
 select specific representation, another way metric calculation possible only if container has only one suitable representation and will be resolved automatically.
 `annotation_source` and `prediction_source` should contain only one annotation identifier and output layer name respectively.
 You may optionally provide `reference` field for metric, if you want calculated metric tested against specific value (i.e. reported in canonical paper) and acceptable `abs_threshold` and `rel_threshold` for absolute and relative metric deviation from reference value respectively.
+Reference can be specified as single floating-point value, then for vector metric representation it will be applied to average value (e.g. if metric returns values for each class, then comparing with reference should be performed for mean value) or as dictionary, where keys are metric component name and value is reference value.
+For example, if you use PSNR metric which consists of 2 values - mean and std, you can specify reference for both values as:
+```yaml
+reference:
+  mean: 42.56
+  std: 0.89
+```
 
 Every metric has parameters available for configuration. The metric and its parameters are set through the configuration file. Metrics are provided in `datasets` section of configuration file to use specific metric.
 
@@ -19,6 +26,7 @@ Accuracy Checker supports following set of metrics:
 Supported representations: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`, `ArgMaxClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
   * `match` - Batch-oriented binary classification metric. Metric value calculated for each record in batch. Parameter `top_k` ignored in this mode.
+  * `cast_to_int` - in `match` mode predictions rounded to nearest integer before calculating metric value.
 * `accuracy_per_class` - classification accuracy metric which represents results for each class.  Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `ClassificationAnnotation`, `ClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
@@ -27,6 +35,7 @@ Supported representations: `ClassificationAnnotation`, `TextClassificationAnnota
 * `label_level_recognition_accuracy` - [label level recognition accuracy](https://dl.acm.org/doi/abs/10.1145/1143844.1143891) metric for text line character recognition task using [editdistance](https://pypi.org/project/editdistance/). Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
 * `classification_f1-score` - [F1 score](https://en.wikipedia.org/wiki/F1_score) metric for classification task. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
+  * `pos_label` - class to report during metric calculation (Optional). If argument is not specified, metric for each class and mean will be reported.
 * `metthews_correlation_coef` - [Matthews correlation coefficient (MCC)](https://en.wikipedia.org/wiki/Matthews_correlation_coefficient) for binary classification. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
 * `roc_auc_score` - [ROC AUC score](https://en.wikipedia.org/wiki/Receiver_operating_characteristic) for binary classification. Metric is calculated as a percentage. Direction of metric's growth is higher-better. Supported representations: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction` `ArgMaxClassificationPrediction`.
 * `acer_score` - metric for the classification tasks. Can be obtained from the following formula: `ACER = (APCER + BPCER)/2 = ((fp / (tn + fp)) + (fn / (fn + tp)))/2`. For more details about metrics see the section 9.3: <https://arxiv.org/abs/2007.12342>. Metric is calculated as a percentage. Direction of metric's growth is higher-worse. Supported representations: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.

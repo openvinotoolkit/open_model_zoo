@@ -162,6 +162,12 @@ class Dataset:
 
         return annotation, meta
 
+    @property
+    def annotation(self):
+        if self.data_provider.annotation_provider is None:
+            return []
+        return [self.data_provider.annotation_provider[idx] for idx in self.data_provider.identifiers]
+
     def send_annotation_info(self, config):
         info = {
             'convert_annotation': False,
