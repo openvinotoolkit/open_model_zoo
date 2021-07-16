@@ -41,11 +41,13 @@ static const char model_message[] = "Required. Path to an .xml file with a train
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
+static const char labels_message[] = "Optional. Path to a file with labels mapping.";
 static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 "Absolute path to the .xml file with the kernel descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
 "Absolute path to a shared library with the kernel implementations.";
+static const char raw_output_message[] = "Optional. Output inference results as mask histogram.";
 static const char nireq_message[] = "Optional. Number of infer requests. If this option is omitted, number of infer requests is determined automatically.";
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 static const char num_threads_message[] = "Optional. Number of threads.";
@@ -60,9 +62,11 @@ static const char output_resolution_message[] = "Optional. Specify the maximum o
 DEFINE_bool(h, false, help_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
+DEFINE_string(labels, "", labels_message);
 DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
+DEFINE_bool(r, false, raw_output_message);
 DEFINE_uint32(nireq, 0, nireq_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
@@ -88,7 +92,9 @@ static void showUsage() {
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
+    std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
     std::cout << "    -pc                       " << performance_counter_message << std::endl;
+    std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
@@ -189,6 +195,34 @@ cv::Mat renderSegmentationData(const ImageResult& result, OutputTransform& outpu
     return output;
 }
 
+void print_raw_results(const ImageResult& result, std::vector<std::string> labels)
+{
+    slog::info << "     Class ID     | Pixels | Percentage " << slog::endl;
+
+    double min_val, max_val;
+    cv::minMaxLoc(result.resultImage, &min_val, &max_val);
+    int max_classes = static_cast<int>(max_val) + 1; // We use +1 for only background case
+    const float range[] = { 0, static_cast<float>(max_classes) };
+    const float * ranges[] = { range };
+    cv::Mat histogram;
+    cv::calcHist(&result.resultImage, 1, 0, cv::Mat(), histogram, 1, &max_classes, ranges);
+
+    const double all = result.resultImage.cols * result.resultImage.rows;
+    for (int i = 0; i < max_classes; ++i)
+    {
+        const int value = static_cast<int>(histogram.at<float>(i));
+        if (value > 0)
+        {
+            std::string label = (size_t)i < labels.size() ? labels[i] : "#" + std::to_string(i);
+            slog::info << " "
+                << std::setw(16) << std::left << label << " | "
+                << std::setw(6) << value << " | "
+                << std::setw(5) << std::setprecision(2) << std::fixed << std::right << value / all * 100 << "%"
+                << slog::endl;
+        }
+    }
+}
+
 int main(int argc, char* argv[])
 {
     try
@@ -214,6 +248,10 @@ int main(int argc, char* argv[])
             ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
+
+        std::vector<std::string> labels;
+        if (!FLAGS_labels.empty())
+            labels = SegmentationModel::loadLabels(FLAGS_labels);
 
         bool keepRunning = true;
         int64_t frameNum = -1;
@@ -276,6 +314,8 @@ int main(int argc, char* argv[])
             while (keepRunning && (result = pipeline.getResult())) {
                 cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
+                if (FLAGS_r)
+                    print_raw_results(result->asRef<ImageResult>(), labels);
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
@@ -307,6 +347,8 @@ int main(int argc, char* argv[])
             {
                 cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
+                if (FLAGS_r)
+                    print_raw_results(result->asRef<ImageResult>(), labels);
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
