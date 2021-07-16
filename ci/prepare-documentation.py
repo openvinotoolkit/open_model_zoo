@@ -281,7 +281,7 @@ def add_model_pages(output_root, parent_element, group, group_title):
         else 'Public Pre-Trained Models Device Support'
     add_page(output_root, group_element,
              id=f'omz_models_{group}_device_support', path=f'models/{group}/device_support.md',
-             title=title, index=0)
+             title=device_support_title, index=0)
 
 
 def main():
