@@ -97,7 +97,7 @@ std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult & infResult) 
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
     for (auto& output : infResult.outputsData) {
-        this->parseYOLOV3Output(output.first, output.second, netInputHeight, netInputWidth,
+        this->parseYOLOOutput(output.first, output.second, netInputHeight, netInputWidth,
             internalData.inputImgHeight, internalData.inputImgWidth, objects);
     }
 
@@ -134,7 +134,7 @@ std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult & infResult) 
     return std::unique_ptr<ResultBase>(result);
 }
 
-void ModelYolo::parseYOLOV3Output(const std::string& output_name,
+void ModelYolo::parseYOLOOutput(const std::string& output_name,
     const InferenceEngine::Blob::Ptr& blob, const unsigned long resized_im_h,
     const unsigned long resized_im_w, const unsigned long original_im_h,
     const unsigned long original_im_w,
@@ -147,19 +147,14 @@ void ModelYolo::parseYOLOV3Output(const std::string& output_name,
     }
     auto& region = it->second;
 
-    auto& dims = blob->getTensorDesc().getDims();
     int sideW = 0;
     int sideH = 0;
     unsigned long scaleH;
     unsigned long scaleW;
     if (isYoloV3) {
-        const int out_blob_h = static_cast<int>(dims[dims.size() - 2]);
-        const int out_blob_w = static_cast<int>(dims[dims.size() - 1]);
-        if (out_blob_h != out_blob_w) {
-            throw std::runtime_error("Invalid size of output " + output_name +
-                " It should be in NCHW layout and H should be equal to W. Current H = " + std::to_string(out_blob_h) +
-                ", current W = " + std::to_string(out_blob_h));
-        }
+        auto& dims = blob->getTensorDesc().getDims();
+        const int out_blob_h = static_cast<int>(dims[2]);
+        const int out_blob_w = static_cast<int>(dims[3]);
         sideH = out_blob_h;
         sideW = out_blob_w;
         scaleW = resized_im_w;
@@ -216,10 +211,10 @@ void ModelYolo::parseYOLOV3Output(const std::string& output_name,
     }
 }
 
-int ModelYolo::calculateEntryIndex(int entiresNum, int lcoords, int lclasses, int location, int entry) {
-    int n = location / entiresNum;
-    int loc = location % entiresNum;
-    return (n * (lcoords + lclasses + 1) + entry) * entiresNum + loc;
+int ModelYolo::calculateEntryIndex(int totalCells, int lcoords, int lclasses, int location, int entry) {
+    int n = location / totalCells;
+    int loc = location % totalCells;
+    return (n * (lcoords + lclasses + 1) + entry) * totalCells + loc;
 }
 
 double ModelYolo::intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2) {
@@ -257,10 +252,8 @@ ModelYolo::Region::Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionY
         anchors = regionYolo->get_anchors();
         if (anchors.empty()) {
             anchors.insert(anchors.end(),
-                { 10.0, 13.0, 16.0, 30.0, 33.0, 23.0,
-                30.0, 61.0, 62.0, 45.0, 59.0, 119.0,
-                116.0, 90.0, 156.0, 198.0, 373.0, 326.0 });
-            num = 9;
+                { 0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828 });
+            num = 5;
         }
     }
 }
