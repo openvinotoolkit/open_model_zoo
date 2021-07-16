@@ -191,9 +191,9 @@ cv::Mat renderSegmentationData(const ImageResult& result, OutputTransform& outpu
     return output;
 }
 
-void print_raw_results(const ImageResult& result, std::vector<std::string> labels)
-{
-    slog::info << "     Class ID     | Pixels | Percentage " << slog::endl;
+void printRawResults(const ImageResult& result, std::vector<std::string> labels) {
+    slog::debug << " --------------- Frame # " << result.frameId << " ---------------" << slog::endl;
+    slog::debug << "     Class ID     | Pixels | Percentage " << slog::endl;
 
     double min_val, max_val;
     cv::minMaxLoc(result.resultImage, &min_val, &max_val);
@@ -204,13 +204,11 @@ void print_raw_results(const ImageResult& result, std::vector<std::string> label
     cv::calcHist(&result.resultImage, 1, 0, cv::Mat(), histogram, 1, &max_classes, ranges);
 
     const double all = result.resultImage.cols * result.resultImage.rows;
-    for (int i = 0; i < max_classes; ++i)
-    {
+    for (int i = 0; i < max_classes; ++i) {
         const int value = static_cast<int>(histogram.at<float>(i));
-        if (value > 0)
-        {
+        if (value > 0) {
             std::string label = (size_t)i < labels.size() ? labels[i] : "#" + std::to_string(i);
-            slog::info << " "
+            slog::debug << " "
                 << std::setw(16) << std::left << label << " | "
                 << std::setw(6) << value << " | "
                 << std::setw(5) << std::setprecision(2) << std::fixed << std::right << value / all * 100 << "%"
@@ -219,10 +217,8 @@ void print_raw_results(const ImageResult& result, std::vector<std::string> label
     }
 }
 
-int main(int argc, char* argv[])
-{
-    try
-    {
+int main(int argc, char* argv[]) {
+    try {
         PerformanceMetrics metrics, renderMetrics;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
@@ -310,8 +306,9 @@ int main(int argc, char* argv[])
                 auto renderingStart = std::chrono::steady_clock::now();
                 cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
-                if (FLAGS_r)
-                    print_raw_results(result->asRef<ImageResult>(), labels);
+                if (FLAGS_r) {
+                    printRawResults(result->asRef<ImageResult>(), labels);
+                }
                 presenter.drawGraphs(outFrame);
                 renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
@@ -342,8 +339,9 @@ int main(int argc, char* argv[])
             if (result != nullptr) {
                 cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
-                if (FLAGS_r)
-                    print_raw_results(result->asRef<ImageResult>(), labels);
+                if (FLAGS_r) {
+                    printRawResults(result->asRef<ImageResult>(), labels);
+                }
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
