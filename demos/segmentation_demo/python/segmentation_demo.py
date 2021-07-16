@@ -164,15 +164,16 @@ def get_model(ie, args):
         return SalientObjectDetectionModel(ie, args.model, labels=args.labels), SaliencyMapVisualizer()
 
 
-def print_raw_results(mask, labels=None):
-    log.info('     Class ID     | Pixels | Percentage ')
+def print_raw_results(mask, frame_id, labels=None):
+    log.debug(' ---------------- Frame # {} ---------------- '.format(frame_id))
+    log.debug('     Class ID     | Pixels | Percentage ')
     max_classes = int(np.max(mask)) + 1 # We use +1 for only background case
     histogram = cv2.calcHist([np.expand_dims(mask, axis=-1)], [0], None, [max_classes], [0, max_classes])
     all = np.product(mask.shape)
     for id, val in enumerate(histogram[:, 0]):
         if val > 0:
             label = labels[id] if labels and len(labels) >= id else '#{}'.format(id)
-            log.info(' {:<16} | {:6d} | {:5.2f}% '.format(label, int(val), val / all * 100))
+            log.debug(' {:<16} | {:6d} | {:5.2f}% '.format(label, int(val), val / all * 100))
 
 
 def main():
@@ -237,7 +238,7 @@ def main():
         if results:
             objects, frame_meta = results
             if args.raw_output_message:
-                print_raw_results(objects, model.labels)
+                print_raw_results(objects, next_frame_id_to_show, model.labels)
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
             frame = visualizer.overlay_masks(frame, objects, output_transform)
@@ -263,7 +264,7 @@ def main():
             results = pipeline.get_result(next_frame_id_to_show)
         objects, frame_meta = results
         if args.raw_output_message:
-            print_raw_results(objects, model.labels)
+            print_raw_results(objects, next_frame_id_to_show, model.labels)
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
