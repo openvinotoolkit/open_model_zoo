@@ -74,8 +74,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     preprocessMetrics.update(startTime);
 
     request->SetCompletionCallback(
-        [this, frameID, request, internalModelData, metaData, startTime]()
-        {
+        [this, frameID, request, internalModelData, metaData, startTime]() {
             {
                 const std::lock_guard<std::mutex> lock(mtx);
                 inferenceMetrics.update(startTime);
