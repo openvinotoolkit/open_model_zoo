@@ -715,13 +715,13 @@ class DLSDKLauncher(Launcher):
         if not isinstance(device_config, dict):
             raise ConfigError('device configuration should be a dict-like')
         if all(not isinstance(value, dict) for value in device_config.values()):
-            self.ie_core.set_config(device_config, self.device)
+            self.ie_core.set_config(dict(device_config), self.device)
         else:
             for key, value in device_config.items():
                 if isinstance(value, dict):
                     if key not in self.ie_core.available_devices:
                         warnings.warn('{} device is unknown. Config loading may lead to error.'.format(key))
-                    self.ie_core.set_config(value, key)
+                    self.ie_core.set_config(dict(value), key)
                 else:
                     warnings.warn('Option {key}: {value} will be skipped because device to which it should be '
                                   'applied is not specified or option is not a dict-like'.format(key=key, value=value))

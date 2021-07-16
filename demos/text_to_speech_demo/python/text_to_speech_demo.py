@@ -17,17 +17,20 @@
 """
 
 import sys
+import logging as log
 import time
 from argparse import ArgumentParser, SUPPRESS
 
 from tqdm import tqdm
 import numpy as np
 import wave
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from models.forward_tacotron_ie import ForwardTacotronIE
 from models.mel2wave_ie import WaveRNNIE, MelGANIE
 from utils.gui import init_parameters_interactive
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def save_wav(x, path):
@@ -96,13 +99,13 @@ def build_argparser():
 def is_correct_args(args):
     if not ((args.model_melgan is None and args.model_rnn is not None and args.model_upsample is not None) or
             (args.model_melgan is not None and args.model_rnn is None and args.model_upsample is None)):
-        print('Can not use m_rnn and m_upsample with m_melgan. Define m_melgan or [m_rnn, m_upsample]')
+        log.error('Can not use m_rnn and m_upsample with m_melgan. Define m_melgan or [m_rnn, m_upsample]')
         return False
     if args.alpha < 0.5 or args.alpha > 2.0:
-        print('Can not use time coefficient less than 0.5 or greater than 2.0')
+        log.error('Can not use time coefficient less than 0.5 or greater than 2.0')
         return False
     if args.speaker_id < -1 or args.speaker_id > 39:
-        print('Mistake in the range of args.speaker_id. Speaker_id should be -1 (GUI regime) or in range [0,39]')
+        log.error('Mistake in the range of args.speaker_id. Speaker_id should be -1 (GUI regime) or in range [0,39]')
         return False
 
     return True
@@ -114,6 +117,8 @@ def main():
     if not is_correct_args(args):
         return 1
 
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     if args.model_melgan is not None:
@@ -147,7 +152,7 @@ def main():
         for line in f:
             count += 1
             line = line.rstrip()
-            print("Process line {0} with length {1}.".format(count, len(line)))
+            log.info("Process line {0} with length {1}.".format(count, len(line)))
 
             if len(line) > len_th:
                 texts = []
@@ -174,11 +179,11 @@ def main():
                 audio_res = np.append(audio_res, audio)
 
             if count % 5 == 0:
-                print('Vocoder time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'.format(time_wavernn, time_forward))
+                log.info('Vocoder time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'.format(time_wavernn, time_forward))
     time_e_all = time.perf_counter()
 
-    print('All time {:.3f}ms. Vocoder time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'
-          .format((time_e_all - time_s_all) * 1000, time_wavernn, time_forward))
+    log.info('All time {:.3f}ms. Vocoder time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'
+             .format((time_e_all - time_s_all) * 1000, time_wavernn, time_forward))
 
     save_wav(audio_res, args.out)
 

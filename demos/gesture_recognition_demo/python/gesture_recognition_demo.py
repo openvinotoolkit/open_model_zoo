@@ -38,6 +38,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.
                              'common/python'))
 import monitors
 
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
+
 DETECTOR_OUTPUT_SHAPE = -1, 5
 TRACKER_SCORE_THRESHOLD = 0.4
 TRACKER_IOU_THRESHOLD = 0.3
@@ -109,19 +111,19 @@ def load_class_map(file_path):
 
 
 def main():
-    log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
     class_map = load_class_map(args.class_map)
     assert class_map is not None
 
-    ie_core = load_ie_core(args.device, args.cpu_extension)
+    ie = load_ie_core(args.device, args.cpu_extension)
 
-    person_detector = PersonDetector(args.detection_model, args.device, ie_core,
+    person_detector = PersonDetector(args.detection_model, args.device, ie,
                                      num_requests=2, output_shape=DETECTOR_OUTPUT_SHAPE)
-    action_recognizer = ActionRecognizer(args.action_model, args.device, ie_core,
+    action_recognizer = ActionRecognizer(args.action_model, args.device, ie,
                                          num_requests=2, img_scale=ACTION_IMAGE_SCALE,
                                          num_classes=len(class_map))
+
     person_tracker = Tracker(person_detector, TRACKER_SCORE_THRESHOLD, TRACKER_IOU_THRESHOLD)
 
     video_stream = VideoStream(args.input, ACTION_NET_INPUT_FPS, action_recognizer.input_length)

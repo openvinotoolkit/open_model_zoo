@@ -453,3 +453,5 @@ AccuracyChecker supports following set of adapters:
 * `quantiles_predictor` - converts output of Time Series Forecasting models to `TimeSeriesForecastingQuantilesPrediction`.
   * `quantiles` - predictions[i]->quantile[i] mapping.
   * `output_name` - name of output node to convert.
+* `mask_to_binary_classification` - converts output of model represented as segmentation mask to `ArgMaxClassificationPrediction`. Class label calculated as comparision maximal probability in mask with given threshold.
+  * `threshold` - probability threshold for label 1 (Optional, default 0.5).

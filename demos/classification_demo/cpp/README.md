@@ -62,6 +62,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * hbonet-0.5
 * hbonet-1.0
 * inception-resnet-v2-tf
+* mixnet-l
 * mobilenet-v1-0.25-128
 * mobilenet-v1-0.50-160
 * mobilenet-v1-0.50-224

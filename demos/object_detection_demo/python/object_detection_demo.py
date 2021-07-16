@@ -16,7 +16,7 @@
 """
 
 import colorsys
-import logging
+import logging as log
 import random
 import sys
 from argparse import ArgumentParser, SUPPRESS
@@ -25,7 +25,7 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
@@ -35,10 +35,9 @@ import monitors
 from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
-from helpers import resolution
+from helpers import resolution, log_blobs_info, log_runtime_settings
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -208,38 +207,40 @@ def draw_detections(frame, detections, palette, labels, output_transform):
     return frame
 
 
-def print_raw_results(detections, labels):
-    log.info(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
+def print_raw_results(detections, labels, frame_id):
+    log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
+    log.debug(' Class ID | Confidence | XMIN | YMIN | XMAX | YMAX ')
     for detection in detections:
         xmin, ymin, xmax, ymax = detection.get_coords()
         class_id = int(detection.id)
         det_label = labels[class_id] if labels and len(labels) >= class_id else '#{}'.format(class_id)
-        log.info('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '
-                 .format(det_label, detection.score, xmin, ymin, xmax, ymax))
+        log.debug('{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} '
+                  .format(det_label, detection.score, xmin, ymin, xmax, ymax))
 
 
 def main():
     args = build_argparser().parse_args()
 
-    log.info('Initializing Inference Engine...')
+    cap = open_images_capture(args.input, args.loop)
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
-    log.info('Loading network...')
-
+    log.info('Reading model {}'.format(args.model))
     model = get_model(ie, args)
+    log_blobs_info(model)
 
     detector_pipeline = AsyncPipeline(ie, model, plugin_config,
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
-    cap = open_images_capture(args.input, args.loop)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+    log_runtime_settings(detector_pipeline.exec_net, args.device)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
-
-    log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     palette = ColorPalette(len(model.labels) if model.labels else 100)
     metrics = PerformanceMetrics()
@@ -258,7 +259,7 @@ def main():
             start_time = frame_meta['start_time']
 
             if len(objects) and args.raw_output_message:
-                print_raw_results(objects, model.labels)
+                print_raw_results(objects, model.labels, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
             frame = draw_detections(frame, objects, palette, model.labels, output_transform)
@@ -317,7 +318,7 @@ def main():
         start_time = frame_meta['start_time']
 
         if len(objects) and args.raw_output_message:
-            print_raw_results(objects, model.labels)
+            print_raw_results(objects, model.labels, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
         frame = draw_detections(frame, objects, palette, model.labels, output_transform)
@@ -336,7 +337,7 @@ def main():
                 break
             presenter.handleKey(key)
 
-    metrics.print_total()
+    metrics.log_total()
     print(presenter.reportMeans())
 
 

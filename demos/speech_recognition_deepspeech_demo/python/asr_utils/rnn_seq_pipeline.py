@@ -5,6 +5,8 @@
 # This file is based in part on deepspeech_openvino_0.5.py by Feng Yen-Chang at
 # https://github.com/openvinotoolkit/open_model_zoo/pull/419, commit 529805d011d9b405f142b2b40f4d202bd403a4f1 on Sep 19, 2019.
 #
+
+import logging as log
 from copy import deepcopy
 
 import numpy as np
@@ -31,8 +33,10 @@ class RnnSeqPipelineStage(BlockedSeqPipelineStage):
             left_padding_len=padding_len, right_padding_len=padding_len,
             padding_shape=(self.p['num_mfcc_dct_coefs'],), cut_alignment=True)
 
+        log.info('Reading model {}'.format(model))
         net = ie.read_network(model=model)
         self.exec_net = ie.load_network(network=net, device_name=device)
+        log.info('The model {} is loaded to {}'.format(model, device))
 
     def _reset_state(self):
         super()._reset_state()

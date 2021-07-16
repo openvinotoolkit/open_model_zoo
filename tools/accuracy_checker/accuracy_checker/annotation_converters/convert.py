@@ -16,6 +16,7 @@ limitations under the License.
 
 import warnings
 import platform
+import sys
 
 import copy
 import json
@@ -37,6 +38,7 @@ from ..utils import (
 )
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
+from ..logging import exception
 
 DatasetConversionInfo = namedtuple('DatasetConversionInfo',
                                    [
@@ -224,6 +226,7 @@ def make_subset_kaldi(annotation, size, shuffle=True):
 def main():
     main_argparser = build_argparser()
     tm = start_telemetry()
+    send_telemetry_event(tm, 'annotation_conversion_status', 'started')
 
     args, _ = main_argparser.parse_known_args()
     converter, converter_argparser, converter_args = get_converter_arguments(args)
@@ -235,48 +238,55 @@ def main():
         'dataset_analysis': args.analyze_dataset
     }
 
-    main_argparser = ArgumentParser(parents=[main_argparser, converter_argparser])
-    args = main_argparser.parse_args()
+    try:
+        main_argparser = ArgumentParser(parents=[main_argparser, converter_argparser])
+        args = main_argparser.parse_args()
 
-    converter, converter_config = configure_converter(converter_args, args, converter)
-    out_dir = args.output_dir or Path.cwd()
+        converter, converter_config = configure_converter(converter_args, args, converter)
+        out_dir = args.output_dir or Path.cwd()
 
-    results = converter.convert()
-    converted_annotation = results.annotations
-    meta = results.meta
-    errors = results.content_check_errors
-    if errors:
-        warnings.warn('Following problems were found during conversion:'
-                      '\n{}'.format('\n'.join(errors)))
-        details['conversion_errors'] = str(len(errors))
+        results = converter.convert()
+        converted_annotation = results.annotations
+        meta = results.meta
+        errors = results.content_check_errors
+        if errors:
+            warnings.warn('Following problems were found during conversion:'
+                          '\n{}'.format('\n'.join(errors)))
+            details['conversion_errors'] = str(len(errors))
 
-    subsample = args.subsample
-    if subsample:
-        if subsample.endswith('%'):
-            subsample_ratio = float(subsample[:-1]) / 100
-            subsample_size = int(len(converted_annotation) * subsample_ratio)
-        else:
-            subsample_size = int(args.subsample)
+        subsample = args.subsample
+        if subsample:
+            if subsample.endswith('%'):
+                subsample_ratio = float(subsample[:-1]) / 100
+                subsample_size = int(len(converted_annotation) * subsample_ratio)
+            else:
+                subsample_size = int(args.subsample)
 
-        converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed, args.shuffle)
-        details['dataset_size'] = len(converted_annotation)
-    send_telemetry_event(tm, 'annotation_conversion', json.dumps(details))
-    if args.analyze_dataset:
-        analyze_dataset(converted_annotation, meta)
+            converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed, args.shuffle)
+            details['dataset_size'] = len(converted_annotation)
+        send_telemetry_event(tm, 'annotation_conversion', json.dumps(details))
+        if args.analyze_dataset:
+            analyze_dataset(converted_annotation, meta)
 
-    converter_name = converter.get_name()
-    annotation_name = args.annotation_name or "{}.pickle".format(converter_name)
-    meta_name = args.meta_name or "{}.json".format(converter_name)
+        converter_name = converter.get_name()
+        annotation_name = args.annotation_name or "{}.pickle".format(converter_name)
+        meta_name = args.meta_name or "{}.json".format(converter_name)
 
-    annotation_file = out_dir / annotation_name
-    meta_file = out_dir / meta_name
-    dataset_config = {
-        'name': annotation_name,
-        'annotation_conversion': converter_config,
-    }
+        annotation_file = out_dir / annotation_name
+        meta_file = out_dir / meta_name
+        dataset_config = {
+            'name': annotation_name,
+            'annotation_conversion': converter_config,
+        }
 
-    save_annotation(converted_annotation, meta, annotation_file, meta_file, dataset_config)
+        save_annotation(converted_annotation, meta, annotation_file, meta_file, dataset_config)
+    except Exception as e: # pylint:disable=W0703
+        send_telemetry_event(tm, 'annotation_conversion_status', 'failure')
+        exception(e)
+        sys.exit(1)
+    send_telemetry_event(tm, 'annotation_conversion_status', 'success')
     end_telemetry(tm)
+    sys.exit(0)
 
 
 def save_annotation(annotation, meta, annotation_file, meta_file, dataset_config=None):
