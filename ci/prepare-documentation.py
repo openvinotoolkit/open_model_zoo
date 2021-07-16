@@ -278,7 +278,7 @@ def add_model_pages(output_root, parent_element, group, group_title):
     sort_titles(group_element)
 
     title = 'Intel\'s Pre-Trained Models Device Support' if group == 'intel' else 'Public Pre-Trained Models Device Support'
-    add_page(output_root, group_element, 
+    add_page(output_root, group_element,
              id=f'omz_models_{group}_device_support', path=f'models/{group}/device_support.md',
              title=title, index=0)
 
