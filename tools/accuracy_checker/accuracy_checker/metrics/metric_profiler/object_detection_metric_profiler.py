@@ -43,14 +43,17 @@ class DetectionProfiler(MetricProfiler):
 
         if self.report_type == 'json':
             report = self.generate_json_report(identifier, metric_result, metric_name)
-            report['{}_result'.format(metric_name)] = final_score
+            report['{}_result'.format(metric_name)] = final_score if not np.isnan(final_score) else -1
             return report
 
         if isinstance(report, list):
             for string in report:
-                string['{}_result'.format(metric_name)] = metric_result[string['label']]['result']
+                res = metric_result[string['label']]['result']
+                string['{}_result'.format(metric_name)] = res if not np.isnan(res) else -1
         else:
-            report['{}_result'.format(metric_name)] = metric_result['result']
+            report['{}_result'.format(metric_name)] = (
+                metric_result['result'] if not np.isnan(metric_result['result']) else -1
+            )
 
         return report
 
@@ -143,10 +146,10 @@ class DetectionProfiler(MetricProfiler):
                 'precision': per_class_result['precision'] if not np.isnan(per_class_result['precision']) else -1,
                 'recall': per_class_result['recall'] if not np.isnan(per_class_result['recall']) else -1,
 
-                metric_name: per_class_result['result']
+                metric_name: per_class_result['result'] if not np.isnan(per_class_result['result']) else -1
             }
             if 'ap' in per_class_result:
-                matching_result['ap'] = per_class_result['ap'] if np.isnan(per_class_result['ap']) else -1
+                matching_result['ap'] = per_class_result['ap'] if not np.isnan(per_class_result['ap']) else -1
             return matching_result
         matches = per_class_result['matched']
         dt_matches = 0
@@ -180,6 +183,7 @@ class DetectionListProfiler(DetectionProfiler):
     def generate_json_report(self, identifier, metric_result, metric_name):
         report = {'identifier': identifier, 'per_class_result': {}}
         per_class_results = {}
+        totat_pred_boxes, total_gt_boxes, total_gt_matches, total_pred_matches = 0, 0, 0, 0
         for idx, class_result in enumerate(metric_result):
             if not np.size(class_result['scores']):
                 continue
@@ -195,9 +199,19 @@ class DetectionListProfiler(DetectionProfiler):
             per_class_results[label_id] = {
                 'annotation_boxes': gt,
                 'prediction_boxes': dt,
+                'num_prediction_boxes': len(dt),
+                'num_annotation_boxes': len(gt),
                 'prediction_scores': scores,
                 'iou': iou,
             }
+            total_gt_boxes += len(gt)
+            totat_pred_boxes += len(dt)
             per_class_results[label_id].update(self.generate_result_matching(class_result, metric_name))
+            total_pred_matches += per_class_results[label_id]['prediction_matches']
+            total_gt_matches += per_class_results[label_id]['annotation_matches']
         report['per_class_result'] = per_class_results
+        report['num_prediction_boxes'] = totat_pred_boxes
+        report['num_annotation_boxes'] = total_gt_boxes
+        report['total_annotation_matches'] = total_gt_matches
+        report['total_prediction_matches'] = total_pred_matches
         return report
