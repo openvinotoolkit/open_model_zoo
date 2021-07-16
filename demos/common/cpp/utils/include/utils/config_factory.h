@@ -27,8 +27,7 @@ struct CnnConfig {
     unsigned int maxAsyncRequests;
     std::map<std::string, std::string> execNetworkConfig;
 
-    void parseDevices();
-    std::set<std::string> getDevices() { return devices; }
+    std::set<std::string> getDevices();
 
 protected:
     std::set<std::string> devices;
