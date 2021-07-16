@@ -22,11 +22,16 @@
 
 struct CnnConfig {
     std::string deviceName;
-    std::set<std::string> devices;
     std::string cpuExtensionsPath;
     std::string clKernelsConfigPath;
     unsigned int maxAsyncRequests;
     std::map<std::string, std::string> execNetworkConfig;
+
+    void parseDevices();
+    std::set<std::string> getDevices() { return devices; }
+
+protected:
+    std::set<std::string> devices;
 };
 
 class ConfigFactory {

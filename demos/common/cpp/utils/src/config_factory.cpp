@@ -24,12 +24,18 @@
 
 using namespace InferenceEngine;
 
+void CnnConfig::parseDevices() {
+    for (const std::string& device : ::parseDevices(deviceName)) {
+        devices.insert(device);
+    }
+}
+
 CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::string& flags_l, const std::string& flags_c,
     uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads) {
     auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_nireq);
 
-    std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(config.devices, flags_nstreams);
-    for (const auto& device : config.devices) {
+    std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(config.getDevices(), flags_nstreams);
+    for (const auto& device : config.getDevices()) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             // limit threading for CPU portion of inference
             if (flags_nthreads != 0)
@@ -48,7 +54,7 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::st
                     : CONFIG_VALUE(GPU_THROUGHPUT_AUTO)));
 
             if (flags_d.find("MULTI") != std::string::npos
-                && config.devices.find("CPU") != config.devices.end()) {
+                && config.getDevices().find("CPU") != config.getDevices().end()) {
                 // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                 // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
                 config.execNetworkConfig.emplace(GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1");
@@ -59,10 +65,9 @@ CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::st
 }
 
 CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, const std::string& flags_l,
-    const std::string& flags_c, uint32_t flags_nireq)
-{
+    const std::string& flags_c, uint32_t flags_nireq) {
     auto config = getCommonConfig(flags_d, flags_l, flags_c, flags_nireq);
-    for (const auto& device : config.devices) {
+    for (const auto& device : config.getDevices()) {
         if (device == "CPU") {  // CPU supports a few special performance-oriented keys
             config.execNetworkConfig.emplace(CONFIG_KEY(CPU_THROUGHPUT_STREAMS), "1");
         }
@@ -74,15 +79,12 @@ CnnConfig ConfigFactory::getMinLatencyConfig(const std::string& flags_d, const s
 }
 
 CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, const std::string& flags_l,
-    const std::string& flags_c, uint32_t flags_nireq)
-{
+    const std::string& flags_c, uint32_t flags_nireq) {
     CnnConfig config;
 
     if (!flags_d.empty()) {
         config.deviceName = flags_d;
-        for (const std::string& device : parseDevices(flags_d)) {
-            config.devices.insert(device);
-        }
+        config.parseDevices();
     }
 
     if (!flags_l.empty()) {
