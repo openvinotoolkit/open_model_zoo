@@ -15,7 +15,6 @@
 */
 
 #include "models/detection_model_yolo.h"
-#include <utils/slog.hpp>
 #include <utils/common.hpp>
 #include <ngraph/ngraph.hpp>
 
@@ -31,7 +30,6 @@ ModelYolo3::ModelYolo3(const std::string& modelFileName, float confidenceThresho
 void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
@@ -54,7 +52,6 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     netInputWidth = getTensorWidth(inputDesc);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
     OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     for (auto& output : outputInfo) {
         output.second->setPrecision(Precision::FP32);

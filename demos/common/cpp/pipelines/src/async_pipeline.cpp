@@ -22,9 +22,7 @@ using namespace InferenceEngine;
 
 AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& core) :
     model(std::move(modelInstance)) {
-
     execNetwork = model->loadExecutableNetwork(cnnConfig, core);
-
     // --------------------------- Create infer requests ------------------------------------------------
     unsigned int nireq = cnnConfig.maxAsyncRequests;
     if (nireq == 0) {
@@ -36,8 +34,8 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
                 "OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. Failed to query the metric with error: ") + ex.what());
         }
     }
+    slog::info << "\tNumber of network inference requests: " << nireq << slog::endl;
     requestsPool.reset(new RequestsPool(execNetwork, nireq));
-
     // --------------------------- Call onLoadCompleted to complete initialization of model -------------
     model->onLoadCompleted(requestsPool->getInferRequestsList());
 }

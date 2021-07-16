@@ -55,10 +55,6 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     if (!cldnnConfigPath.empty()) {
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, cldnnConfigPath}}, "GPU");
     }
-    /** Setting parameter for collecting per layer metrics **/
-    if (printPerfReport) {
-        ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_PERF_COUNT, InferenceEngine::PluginConfigParams::YES } });
-    }
 
     // Set batch size
     if (batchSize > 1) {
@@ -71,9 +67,11 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         }
         cnnNetwork.reshape(inShapes);
     }
-
-    InferenceEngine::ExecutableNetwork network;
-    network = ie.LoadNetwork(cnnNetwork, deviceName);
+    InferenceEngine::ExecutableNetwork executableNetwork;
+    executableNetwork = ie.LoadNetwork(cnnNetwork, deviceName);
+    printExecNetworkInfo(executableNetwork, modelPath, deviceName);
+    slog::info << "\tNumber of network inference requests: " << maxRequests << slog::endl;
+    slog::info << "\tBatch size is set to " << cnnNetwork.getBatchSize() << slog::endl;
 
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
@@ -88,7 +86,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     }
 
     for (size_t i = 0; i < maxRequests; ++i) {
-        auto req = std::make_shared<InferenceEngine::InferRequest>(network.CreateInferRequest());
+        auto req = std::make_shared<InferenceEngine::InferRequest>(executableNetwork.CreateInferRequest());
         availableRequests.push(req);
     }
 
@@ -196,7 +194,6 @@ IEGraph::IEGraph(const InitParams& p):
     confidenceThreshold(0.5f), batchSize(p.batchSize),
     modelPath(p.modelPath),
     cpuExtensionPath(p.cpuExtPath), cldnnConfigPath(p.cldnnConfigPath),
-    printPerfReport(p.reportPerf), deviceName(p.deviceName),
     maxRequests(p.maxRequests) {
     assert(p.maxRequests > 0);
 
@@ -282,10 +279,6 @@ IEGraph::~IEGraph() {
                 ready = true;
             }
         }
-        if (printPerfReport) {
-            slog::info << "Performance counts report" << slog::endl << slog::endl;
-            printPerformanceCounts(getFullDeviceName(ie, deviceName));
-        }
         condVarAvailableRequests.notify_one();
     }
     if (getterThread.joinable()) {
@@ -295,8 +288,4 @@ IEGraph::~IEGraph() {
 
 IEGraph::Stats IEGraph::getStats() const {
     return Stats{perfTimerPreprocess.getValue(), perfTimerInfer.getValue()};
-}
-
-void IEGraph::printPerformanceCounts(std::string fullDeviceName) {
-    ::printPerformanceCounts(*availableRequests.front(), std::cout, fullDeviceName, false);
 }

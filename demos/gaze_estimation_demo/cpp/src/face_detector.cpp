@@ -16,7 +16,7 @@ FaceDetector::FaceDetector(InferenceEngine::Core& ie,
                            const std::string& deviceName,
                            double detectionConfidenceThreshold,
                            bool enableReshape):
-             ieWrapper(ie, modelPath, deviceName),
+             ieWrapper(ie, modelPath, modelType, deviceName),
              detectionThreshold(detectionConfidenceThreshold),
              enableReshape(enableReshape) {
     const auto& inputInfo = ieWrapper.getInputBlobDimsInfo();
@@ -67,8 +67,7 @@ std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
         double aspectRatioThreshold = 0.01;
 
          if (std::fabs(imageAspectRatio - networkAspectRatio) > aspectRatioThreshold) {
-            std::cout << "Face Detection network is reshaped" << std::endl;
-
+             slog::debug << "Face Detection network is reshaped" << slog::endl;
             // Fix height and change width to make networkAspectRatio equal to imageAspectRatio
             inputBlobDims[3] = static_cast<unsigned long>(inputBlobDims[2] * imageAspectRatio);
 
@@ -114,10 +113,6 @@ std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
     }
 
     return detectionResult;
-}
-
-void FaceDetector::printPerformanceCounts() const {
-    ieWrapper.printPerlayerPerformance();
 }
 
 FaceDetector::~FaceDetector() {

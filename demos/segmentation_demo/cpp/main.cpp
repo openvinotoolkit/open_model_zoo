@@ -42,7 +42,6 @@ static const char target_device_message[] = "Optional. Specify the target device
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
-static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 "Absolute path to the .xml file with the kernel descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
@@ -63,7 +62,6 @@ DEFINE_bool(h, false, help_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(labels, "", labels_message);
-DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
@@ -93,7 +91,6 @@ static void showUsage() {
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
-    std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -nireq \"<integer>\"        " << nireq_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
@@ -114,7 +111,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -195,9 +191,9 @@ cv::Mat renderSegmentationData(const ImageResult& result, OutputTransform& outpu
     return output;
 }
 
-void print_raw_results(const ImageResult& result, std::vector<std::string> labels)
-{
-    slog::info << "     Class ID     | Pixels | Percentage " << slog::endl;
+void printRawResults(const ImageResult& result, std::vector<std::string> labels) {
+    slog::debug << " --------------- Frame # " << result.frameId << " ---------------" << slog::endl;
+    slog::debug << "     Class ID     | Pixels | Percentage " << slog::endl;
 
     double min_val, max_val;
     cv::minMaxLoc(result.resultImage, &min_val, &max_val);
@@ -208,13 +204,11 @@ void print_raw_results(const ImageResult& result, std::vector<std::string> label
     cv::calcHist(&result.resultImage, 1, 0, cv::Mat(), histogram, 1, &max_classes, ranges);
 
     const double all = result.resultImage.cols * result.resultImage.rows;
-    for (int i = 0; i < max_classes; ++i)
-    {
+    for (int i = 0; i < max_classes; ++i) {
         const int value = static_cast<int>(histogram.at<float>(i));
-        if (value > 0)
-        {
+        if (value > 0) {
             std::string label = (size_t)i < labels.size() ? labels[i] : "#" + std::to_string(i);
-            slog::info << " "
+            slog::debug << " "
                 << std::setw(16) << std::left << label << " | "
                 << std::setw(6) << value << " | "
                 << std::setw(5) << std::setprecision(2) << std::fixed << std::right << value / all * 100 << "%"
@@ -223,13 +217,9 @@ void print_raw_results(const ImageResult& result, std::vector<std::string> label
     }
 }
 
-int main(int argc, char* argv[])
-{
-    try
-    {
-        PerformanceMetrics metrics;
-
-        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+int main(int argc, char* argv[]) {
+    try {
+        PerformanceMetrics metrics, renderMetrics;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -237,15 +227,16 @@ int main(int argc, char* argv[])
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        slog::info << "Reading input" << slog::endl;
         auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat curr_frame;
 
         //------------------------------ Running Segmentation routines ----------------------------------------------
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+
         InferenceEngine::Core core;
         AsyncPipeline pipeline(
             std::unique_ptr<SegmentationModel>(new SegmentationModel(FLAGS_m, FLAGS_auto_resize)),
-            ConfigFactory::getUserConfig(FLAGS_d,FLAGS_l,FLAGS_c,FLAGS_pc,FLAGS_nireq,FLAGS_nstreams,FLAGS_nthreads),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
 
@@ -312,11 +303,14 @@ int main(int argc, char* argv[])
             //--- If you need just plain data without rendering - cast result's underlying pointer to ImageResult*
             //    and use your own processing instead of calling renderSegmentationData().
             while (keepRunning && (result = pipeline.getResult())) {
+                auto renderingStart = std::chrono::steady_clock::now();
                 cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
-                if (FLAGS_r)
-                    print_raw_results(result->asRef<ImageResult>(), labels);
+                if (FLAGS_r) {
+                    printRawResults(result->asRef<ImageResult>(), labels);
+                }
                 presenter.drawGraphs(outFrame);
+                renderMetrics.update(renderingStart);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
@@ -340,15 +334,14 @@ int main(int argc, char* argv[])
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
 
-        for (; framesProcessed <= frameNum; framesProcessed++)
-        {
+        for (; framesProcessed <= frameNum; framesProcessed++) {
             result = pipeline.getResult();
-            if (result != nullptr)
-            {
+            if (result != nullptr) {
                 cv::Mat outFrame = renderSegmentationData(result->asRef<ImageResult>(), outputTransform);
                 //--- Showing results and device information
-                if (FLAGS_r)
-                    print_raw_results(result->asRef<ImageResult>(), labels);
+                if (FLAGS_r) {
+                    printRawResults(result->asRef<ImageResult>(), labels);
+                }
                 presenter.drawGraphs(outFrame);
                 metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
                     outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
@@ -364,8 +357,11 @@ int main(int argc, char* argv[])
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << slog::endl << "Metric reports:" << slog::endl;
+        slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
+        printStagesLatency(cap->getMetrics().getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
+            pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
+            renderMetrics.getTotal().latency);
 
         slog::info << presenter.reportMeans() << slog::endl;
     }
@@ -377,8 +373,6 @@ int main(int argc, char* argv[])
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-
-    slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
 
     return 0;
 }

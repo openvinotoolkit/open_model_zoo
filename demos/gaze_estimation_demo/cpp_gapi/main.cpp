@@ -27,7 +27,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
     if (FLAGS_i.empty())
         throw std::logic_error("Parameter -i is not set");
     if (FLAGS_m.empty())
@@ -56,7 +55,7 @@ int main(int argc, char *argv[]) {
     try {
         using namespace gaze_estimation;
         /** Print info about Inference Engine **/
-        std::cout << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << std::endl;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         // ---------- Parsing and validating of input arguments ----------
         if (!util::ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -164,6 +163,8 @@ int main(int argc, char *argv[]) {
             fileNameNoExt(FLAGS_m_fd) + ".bin",  // path to weights
             FLAGS_d_fd,                          // device specifier
         };
+        slog::info << "The Face Detection model " << FLAGS_m_fd << " is loaded to " << FLAGS_d_fd << " device." << slog::endl;
+
         /** Get information about frame from cv::VideoCapture **/
         std::shared_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
@@ -175,6 +176,7 @@ int main(int argc, char *argv[]) {
         cv::Size frame_size = cv::Size{tmp.cols, tmp.rows};
         cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
+
         if (FLAGS_fd_reshape) {
             InferenceEngine::Core ie;
             const auto network = ie.ReadNetwork(FLAGS_m_fd);
@@ -187,7 +189,6 @@ int main(int argc, char *argv[]) {
             const double aspectRatioThreshold = 0.01;
 
             if (std::fabs(imageAspectRatio - networkAspectRatio) > aspectRatioThreshold) {
-                std::cout << "Face Detection network is reshaped" << std::endl;
                 layerDims[3] = static_cast<unsigned long>(layerDims[2] * imageAspectRatio);
                 face_net.cfgInputReshape(layerName, layerDims);
             }
@@ -197,21 +198,28 @@ int main(int argc, char *argv[]) {
             fileNameNoExt(FLAGS_m_hp) + ".bin",       // path to weights
             FLAGS_d_hp,                               // device specifier
         }.cfgOutputLayers({"angle_y_fc", "angle_p_fc", "angle_r_fc"});
+        slog::info << "The Head Pose Estimation model " << FLAGS_m_hp << " is loaded to " << FLAGS_d_hp << " device." << slog::endl;
+
         auto landmarks_net = cv::gapi::ie::Params<nets::Landmarks> {
             FLAGS_m_lm,                               // path to topology IR
             fileNameNoExt(FLAGS_m_lm) + ".bin",       // path to weights
             FLAGS_d_lm,                               // device specifier
         };
+        slog::info << "The Facial Landmarks Estimation model " << FLAGS_m_lm << " is loaded to " << FLAGS_d_lm << " device." << slog::endl;
+
         auto gaze_net = cv::gapi::ie::Params<nets::Gaze> {
             FLAGS_m,                                  // path to topology IR
             fileNameNoExt(FLAGS_m) + ".bin",          // path to weights
             FLAGS_d,                                  // device specifier
         }.cfgInputLayers({"left_eye_image", "right_eye_image", "head_pose_angles"});
+        slog::info << "The Gaze Estimation model " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
+
         auto eyes_net = cv::gapi::ie::Params<nets::Eyes> {
             FLAGS_m_es,                               // path to topology IR
             fileNameNoExt(FLAGS_m_es) + ".bin",       // path to weights
             FLAGS_d_es,                               // device specifier
         };
+        slog::info << "The Eye State Estimation model " << FLAGS_m_es << " is loaded to " << FLAGS_d_es << " device." << slog::endl;
 
         /** Custom kernels **/
         auto kernels = custom::kernels();
@@ -291,7 +299,7 @@ int main(int argc, char *argv[]) {
             /** Print logs **/
             if (FLAGS_r) {
                 for (auto& inferenceResult : inferenceResults) {
-                    std::cout << inferenceResult << std::endl;
+                    slog::debug << inferenceResult << slog::endl;
                 }
             }
 
@@ -328,7 +336,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        std::cout << presenter.reportMeans() << '\n';
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -338,6 +346,5 @@ int main(int argc, char *argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-    slog::info << "Execution successful" << slog::endl;
     return 0;
 }

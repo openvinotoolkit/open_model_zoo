@@ -16,7 +16,6 @@
 
 #include "models/detection_model.h"
 #include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
 
 using namespace InferenceEngine;
 

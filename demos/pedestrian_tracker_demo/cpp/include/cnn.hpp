@@ -51,10 +51,7 @@ public:
      */
     void Load();
 
-    /**
-     * @brief Prints performance report
-     */
-    void PrintPerformanceCounts(std::string fullDeviceName) const;
+    const std::string modelType = "Person Re-Identification";
 
 protected:
     /**

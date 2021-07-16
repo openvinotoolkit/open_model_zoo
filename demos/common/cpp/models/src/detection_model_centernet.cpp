@@ -18,7 +18,6 @@
 #include <opencv2/imgproc.hpp>
 #include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
 #include "models/detection_model_centernet.h"
 
 #include <utils/image_utils.h>
@@ -32,7 +31,6 @@ ModelCenterNet::ModelCenterNet(const std::string& modelFileName,
 void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
@@ -54,8 +52,6 @@ void ModelCenterNet::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     netInputWidth = getTensorWidth(inputDesc);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     if (outputInfo.size() != 3) {
         throw std::logic_error("This demo expect networks that have 3 outputs blobs");

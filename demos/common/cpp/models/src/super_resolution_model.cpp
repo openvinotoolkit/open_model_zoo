@@ -99,7 +99,7 @@ std::shared_ptr<InternalModelData> SuperResolutionModel::preprocess(const InputD
         cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
 
     if (static_cast<size_t>(img.cols) != netInputWidth || static_cast<size_t>(img.rows) != netInputHeight)
-        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
+        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
     matU8ToBlob<float_t>(img, lrInputBlob);
 
     if (inputsNames.size() == 2) {

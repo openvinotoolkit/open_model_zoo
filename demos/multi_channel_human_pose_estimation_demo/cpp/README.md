@@ -59,7 +59,6 @@ Options:
     -n_iqs                       Optional. Frame queue size for input channels
     -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
     -n_sp                        Optional. Number of sampling periods
-    -pc                          Optional. Enable per-layer performance report
     -no_show                     Optional. Don't show output.
     -show_stats                  Optional. Enable statistics report
     -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline

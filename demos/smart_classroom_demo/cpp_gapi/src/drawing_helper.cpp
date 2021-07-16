@@ -63,10 +63,10 @@ std::string DrawingHelper::GetActionTextLabel(const unsigned label, const std::v
 }
 
 void DrawingHelper::DrawFPS(const cv::Mat& frame, const float fps, const cv::Scalar& color) {
-    cv::putText(frame,
-                std::to_string(static_cast<int>(fps)) + " fps",
-                cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 1,
-                color, 2, cv::LINE_AA);
+    putHighlightedText(frame,
+                "FPS: " + std::to_string(static_cast<int>(fps)),
+                cv::Point(10, 30), cv::FONT_HERSHEY_SIMPLEX, 0.85,
+                color, 2);
 }
 
 void DrawingHelper::GetNewFrameSize(const cv::Size& frame_size) {

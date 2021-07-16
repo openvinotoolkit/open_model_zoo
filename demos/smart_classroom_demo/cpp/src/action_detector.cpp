@@ -71,6 +71,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
     new_network_ = outputInfo.find(config_.new_loc_blob_name) != outputInfo.end();
     input_name_ = inputInfo.begin()->first;
     net_ = config_.ie.LoadNetwork(network, config_.deviceName);
+    printExecNetworkInfo(net_, config_.path_to_model, config_.deviceName, config_.model_type);
 
     const auto& head_anchors = new_network_ ? config_.new_anchors : config_.old_anchors;
     const int num_heads = head_anchors.size();

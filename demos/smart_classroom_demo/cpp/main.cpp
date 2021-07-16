@@ -166,10 +166,10 @@ public:
 
     void DrawFPS(const float fps, const cv::Scalar& color) {
         if (enabled_ && !writer_.isOpened()) {
-            cv::putText(frame_,
-                        std::to_string(static_cast<int>(fps)) + " fps",
-                        cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 1,
-                        color, 2, cv::LINE_AA);
+            putHighlightedText(frame_,
+                "FPS: " + std::to_string(static_cast<int>(fps)),
+                cv::Point(10, 30), cv::FONT_HERSHEY_SIMPLEX, 0.85,
+                color, 2);
         }
     }
 
@@ -426,9 +426,6 @@ public:
     virtual std::vector<std::string> GetIDToLabelMap() const = 0;
 
     virtual std::vector<int> Recognize(const cv::Mat& frame, const detection::DetectedObjects& faces) = 0;
-
-    virtual void PrintPerformanceCounts(
-        const std::string &landmarks_device, const std::string &reid_device) = 0;
 };
 
 class FaceRecognizerNull : public FaceRecognizer {
@@ -444,9 +441,6 @@ public:
     std::vector<int> Recognize(const cv::Mat&, const detection::DetectedObjects& faces) override {
         return std::vector<int>(faces.size(), EmbeddingsGallery::unknown_id);
     }
-
-    void PrintPerformanceCounts(
-        const std::string &, const std::string &) override {}
 };
 
 class FaceRecognizerDefault : public FaceRecognizer {
@@ -501,12 +495,6 @@ public:
         return face_gallery.GetIDsByEmbeddings(embeddings);
     }
 
-    void PrintPerformanceCounts(
-            const std::string &landmarks_device, const std::string &reid_device) override {
-        landmarks_detector.PrintPerformanceCounts(landmarks_device);
-        face_reid.PrintPerformanceCounts(reid_device);
-    }
-
 private:
     VectorCNN landmarks_detector;
     VectorCNN face_reid;
@@ -523,8 +511,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         return false;
     }
 
-    slog::info << "Parsing input parameters" << slog::endl;
-
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
     }
@@ -540,7 +526,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 int main(int argc, char* argv[]) {
     try {
         /** This demo covers 4 certain topologies and cannot be generalized **/
-        slog::info << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << slog::endl;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -575,20 +560,16 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        slog::info << "Loading Inference Engine" << slog::endl;
+        slog::info << *GetInferenceEngineVersion() << slog::endl;
         Core ie;
 
         std::vector<std::string> devices = {FLAGS_d_act, FLAGS_d_fd, FLAGS_d_lm,
                                             FLAGS_d_reid};
         std::set<std::string> loadedDevices;
 
-        slog::info << "Device info: " << slog::endl;
-
         for (const auto &device : devices) {
             if (loadedDevices.find(device) != loadedDevices.end())
                 continue;
-
-            slog::info << printable(ie.GetVersions(device)) << slog::endl;
 
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
@@ -609,16 +590,13 @@ int main(int argc, char* argv[]) {
                 ie.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}}, "GPU");
             }
 
-            if (FLAGS_pc)
-                ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-
             loadedDevices.insert(device);
         }
 
         std::unique_ptr<AsyncDetection<DetectedAction>> action_detector;
         if (!ad_model_path.empty()) {
             // Load action detector
-            ActionDetectorConfig action_config(ad_model_path);
+            ActionDetectorConfig action_config(ad_model_path, "Person/Action Detection");
             action_config.deviceName = FLAGS_d_act;
             action_config.ie = ie;
             action_config.is_async = true;
@@ -628,6 +606,7 @@ int main(int argc, char* argv[]) {
             action_detector.reset(new ActionDetection(action_config));
         } else {
             action_detector.reset(new NullDetection<DetectedAction>);
+            slog::info << "Person/Action Detection DISABLED" << slog::endl;
         }
 
         std::unique_ptr<AsyncDetection<detection::DetectedObject>> face_detector;
@@ -660,7 +639,7 @@ int main(int argc, char* argv[]) {
             face_registration_det_config.increase_scale_x = static_cast<float>(FLAGS_exp_r_fd);
             face_registration_det_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
 
-            CnnConfig reid_config(fr_model_path);
+            CnnConfig reid_config(fr_model_path, "Face Re-Identification");
             reid_config.deviceName = FLAGS_d_reid;
             if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
                 reid_config.max_batch_size = 16;
@@ -668,7 +647,7 @@ int main(int argc, char* argv[]) {
                 reid_config.max_batch_size = 1;
             reid_config.ie = ie;
 
-            CnnConfig landmarks_config(lm_model_path);
+            CnnConfig landmarks_config(lm_model_path, "Facial Landmarks Regression");
             landmarks_config.deviceName = FLAGS_d_lm;
             if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
                 landmarks_config.max_batch_size = 16;
@@ -686,7 +665,7 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
         } else {
-            slog::warn << "Face recognition models are disabled!" << slog::endl;
+            slog::warn << "Face Recognition models are disabled!" << slog::endl;
             if (actions_type == TEACHER) {
                 slog::err << "Face recognition must be enabled to recognize teacher actions." << slog::endl;
                 return 1;
@@ -755,13 +734,7 @@ int main(int argc, char* argv[]) {
             throw std::runtime_error("Can't open video writer");
         }
         Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, FLAGS_limit, num_top_persons);
-        DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad, FLAGS_al);
-
-        std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press ESC key";
-        }
-        std::cout << std::endl;
+        DetectionsLogger logger(slog::debug, FLAGS_r, FLAGS_ad, FLAGS_al);
 
         if (actions_type != TOP_K) {
             action_detector->enqueue(frame);
@@ -984,23 +957,6 @@ int main(int argc, char* argv[]) {
         }
         sc_visualizer.Finalize();
 
-        slog::info << slog::endl;
-        if (work_num_frames > 0) {
-            const float mean_time_ms = work_time_ms / static_cast<float>(work_num_frames);
-            slog::info << "Mean FPS: " << 1e3f / mean_time_ms << slog::endl;
-        }
-        slog::info << "Frames processed: " << total_num_frames << slog::endl;
-        if (FLAGS_pc) {
-            std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, devices);
-            face_detector->wait();
-            action_detector->wait();
-            action_detector->printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_act));
-            face_detector->printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_fd));
-            face_recognizer->PrintPerformanceCounts(
-                getFullDeviceName(mapDevices, FLAGS_d_lm),
-                getFullDeviceName(mapDevices, FLAGS_d_reid));
-        }
-
         if (actions_type == STUDENT) {
             auto face_tracks = tracker_reid.vector_tracks();
 
@@ -1042,7 +998,15 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        std::cout << presenter.reportMeans() << '\n';
+        //// --------------------------- Report metrics -------------------------------------------------------
+        if (work_num_frames > 0) {
+            slog::info << "Metrics report:" << slog::endl;
+            const float mean_time_ms = work_time_ms / static_cast<float>(work_num_frames);
+            slog::info << "\tFPS: " << 1e3f / mean_time_ms << slog::endl;
+            slog::info << "\tFrames processed: " << total_num_frames << slog::endl;
+        }
+
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -1052,8 +1016,6 @@ int main(int argc, char* argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-
-    slog::info << "Execution successful" << slog::endl;
 
     return 0;
 }

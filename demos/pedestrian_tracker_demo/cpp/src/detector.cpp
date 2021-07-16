@@ -9,8 +9,10 @@
 #include <map>
 #include <opencv2/core/core.hpp>
 #include <inference_engine.hpp>
-
 #include <ngraph/ngraph.hpp>
+#include <utils/slog.hpp>
+#include <utils/common.hpp>
+
 
 using namespace InferenceEngine;
 
@@ -149,6 +151,8 @@ ObjectDetector::ObjectDetector(
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
     net_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
+    printExecNetworkInfo(net_, config.path_to_model, deviceName_, modelType);
+    slog::info << "\tBatch size is set to "<< config.max_batch_size << slog::endl;
 }
 
 void ObjectDetector::wait() {
@@ -203,9 +207,4 @@ void ObjectDetector::fetchResults() {
 void ObjectDetector::waitAndFetchResults() {
     wait();
     fetchResults();
-}
-
-void ObjectDetector::PrintPerformanceCounts(std::string fullDeviceName) {
-    std::cout << "Performance counts for object detector" << std::endl << std::endl;
-    ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
 }

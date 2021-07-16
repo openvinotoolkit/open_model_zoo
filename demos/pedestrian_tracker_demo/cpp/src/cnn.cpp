@@ -15,6 +15,9 @@
 
 #include <inference_engine.hpp>
 
+#include <utils/slog.hpp>
+#include <utils/common.hpp>
+
 using namespace InferenceEngine;
 
 CnnBase::CnnBase(const Config& config,
@@ -54,6 +57,8 @@ void CnnBase::Load() {
     }
 
     executable_network_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
+    printExecNetworkInfo(executable_network_, config_.path_to_model, deviceName_, modelType);
+    slog::info << "\tBatch size is set to " << config_.max_batch_size << slog::endl;
     infer_request_ = executable_network_.CreateInferRequest();
     infer_request_.SetInput(inputs);
     infer_request_.SetOutput(outputs_);
@@ -75,11 +80,6 @@ void CnnBase::InferBatch(
 
         fetch_results(outputs_, current_batch_size);
     }
-}
-
-void CnnBase::PrintPerformanceCounts(std::string fullDeviceName) const {
-    std::cout << "Performance counts for " << config_.path_to_model << std::endl << std::endl;
-    ::printPerformanceCounts(infer_request_, std::cout, fullDeviceName, false);
 }
 
 void CnnBase::Infer(const cv::Mat& frame,
