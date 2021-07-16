@@ -175,7 +175,9 @@ def main():
 
         if key == 27:
             break
-    print(presenter.reportMeans())
+
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
     if positions:
         compute_metrics(positions)

@@ -184,7 +184,9 @@ def run(params, config, capture, detector, reid):
         print('\rProcessing frame: {}, fps = {} (avg_fps = {:.3})'.format(
                             frame_number, fps, 1. / avg_latency.get()), end="")
         prev_frames, frames = frames, prev_frames
-    print(presenter.reportMeans())
+
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
     thread_body.process = False
     frames_thread.join()

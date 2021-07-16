@@ -221,7 +221,8 @@ def main():
             presenter.handleKey(key)
         frame = cap.read()
 
-    print(presenter.reportMeans())
+    for rep in presenter.reportMeans():
+        log.info(rep)
     cv2.destroyAllWindows()
 
 

@@ -105,7 +105,9 @@ def run_demo(args):
                 break
             presenter.handleKey(key)
         frame = cap.read()
-    print(presenter.reportMeans())
+
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == "__main__":

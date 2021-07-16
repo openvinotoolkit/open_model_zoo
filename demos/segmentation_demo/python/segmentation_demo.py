@@ -279,7 +279,8 @@ def main():
             key = cv2.waitKey(1)
 
     metrics.log_total()
-    print(presenter.reportMeans())
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

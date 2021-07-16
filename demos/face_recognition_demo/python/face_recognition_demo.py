@@ -275,7 +275,8 @@ def main():
             presenter.handleKey(key)
 
     metrics.log_total()
-    print(presenter.reportMeans())
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

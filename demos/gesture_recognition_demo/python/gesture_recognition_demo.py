@@ -248,7 +248,9 @@ def main():
         samples_library.release()
     visualizer.release()
     video_stream.release()
-    print(presenter.reportMeans())
+
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':
