@@ -315,7 +315,7 @@ def main():
     add_model_pages(output_root, trained_models_group_element,
         'public', "Public Pre-trained Models")
 
-    datasets_element = add_page(output_root, navindex_element, 
+    datasets_element = add_page(output_root, navindex_element,
         id='omz_data_datasets', path='data/datasets.md', title='Dataset Preparation Guide')
 
     # The xml:id here is omz_data rather than omz_data_datasets, because
