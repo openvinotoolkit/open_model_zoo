@@ -25,7 +25,8 @@ from .logging import print_info
 
 EvaluationResult = namedtuple(
     'EvaluationResult', [
-        'evaluated_value', 'reference_value', 'name', 'metric_type', 'abs_threshold', 'rel_threshold', 'meta'
+        'evaluated_value', 'reference_value', 'name', 'metric_type', 'abs_threshold', 'rel_threshold', 'meta',
+        'profiling_file'
     ]
 )
 
@@ -45,7 +46,7 @@ class ScalarPrintPresenter(BasePresenter):
 
     def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False,
                      ignore_metric_reference=False):
-        value, reference, name, _, abs_threshold, rel_threshold, meta = evaluation_result
+        value, reference, name, _, abs_threshold, rel_threshold, meta, _ = evaluation_result
         value = np.mean(value)
         postfix, scale, result_format = get_result_format_parameters(meta, ignore_results_formatting)
         difference = None
@@ -58,7 +59,7 @@ class ScalarPrintPresenter(BasePresenter):
         )
 
     def extract_result(self, evaluation_result):
-        value, ref, name, metric_type, abs_threshold, rel_threshold, meta = evaluation_result
+        value, ref, name, metric_type, abs_threshold, rel_threshold, meta, _ = evaluation_result
         if isinstance(ref, dict):
             ref = ref.get(name)
         result_dict = {
@@ -77,7 +78,7 @@ class VectorPrintPresenter(BasePresenter):
 
     def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False,
                      ignore_metric_reference=False):
-        value, reference, name, _, abs_threshold, rel_threshold, meta = evaluation_result
+        value, reference, name, _, abs_threshold, rel_threshold, meta, _ = evaluation_result
         if abs_threshold:
             abs_threshold = float(abs_threshold)
         if rel_threshold:
@@ -133,7 +134,7 @@ class VectorPrintPresenter(BasePresenter):
             )
 
     def extract_result(self, evaluation_result):
-        value, reference, name, metric_type, abs_threshold, rel_threshold, meta = evaluation_result
+        value, reference, name, metric_type, abs_threshold, rel_threshold, meta, _ = evaluation_result
         len_value = len(value) if not np.isscalar(value) and np.ndim(value) > 0 else 1
         value_names_orig = meta.get('names', range(0, len_value))
         value_names = ['{}@{}'.format(name, value_name) for value_name in value_names_orig]

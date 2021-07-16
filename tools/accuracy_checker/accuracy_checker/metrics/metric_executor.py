@@ -41,6 +41,7 @@ class MetricsExecutor:
         self._dataset = dataset
         self.profile_metrics = False if dataset is None else dataset.config.get('_profile', False)
         self.profiler_dir = None
+        self.profiler = None
         if self.profile_metrics:
             profiler_type = dataset.config.get('_report_type', 'csv')
             self.profiler = ProfilingExecutor(profile_report_type=profiler_type)
@@ -102,6 +103,7 @@ class MetricsExecutor:
 
     def iterate_metrics(self, annotations, predictions):
         for name, metric_type, functor, reference, abs_threshold, rel_threshold, presenter in self.metrics:
+            profiling_file = None if functor.profiler is None else functor.profiler.report_file
             yield presenter, EvaluationResult(
                 name=name,
                 metric_type=metric_type,
@@ -110,6 +112,7 @@ class MetricsExecutor:
                 abs_threshold=abs_threshold,
                 rel_threshold=rel_threshold,
                 meta=functor.meta,
+                profiling_file=profiling_file
             )
 
     def register_metric(self, metric_config_entry):

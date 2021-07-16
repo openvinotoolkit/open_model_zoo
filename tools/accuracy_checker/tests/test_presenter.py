@@ -68,6 +68,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={},
+            profiling_file=None
         )
         presenter = ScalarPrintPresenter()
         presenter.write_result(result)
@@ -92,6 +93,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={},
+            profiling_file=None
         )
         presenter = ScalarPrintPresenter()
         presenter.write_result(result)
@@ -116,6 +118,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={},
+            profiling_file=None
         )
         presenter = ScalarPrintPresenter()
         presenter.write_result(result, ignore_results_formatting=True)
@@ -140,6 +143,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={},
+            profiling_file=None
         )
         presenter = ScalarPrintPresenter()
         presenter.write_result(result)
@@ -164,6 +168,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={},
+            profiling_file=None
         )
         presenter = ScalarPrintPresenter()
         presenter.write_result(result, ignore_results_formatting=True)
@@ -188,6 +193,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={},
+            profiling_file=None
         )
         presenter = ScalarPrintPresenter()
         presenter.write_result(result)
@@ -212,6 +218,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={},
+            profiling_file=None
         )
         presenter = ScalarPrintPresenter()
         presenter.write_result(result)
@@ -236,6 +243,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={'scale': 0.5, 'postfix': 'km/h', 'data_format': '{:.4f}'},
+            profiling_file=None
         )
         presenter = ScalarPrintPresenter()
         presenter.write_result(result, ignore_results_formatting=True)
@@ -260,6 +268,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result)
@@ -285,6 +294,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result)
@@ -310,6 +320,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result, ignore_results_formatting=True)
@@ -334,7 +345,8 @@ class TestPresenter:
             reference_value=None,
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['prediction']}
+            meta={'names': ['prediction']},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result)
@@ -360,6 +372,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result)
@@ -385,6 +398,7 @@ class TestPresenter:
             abs_threshold=None,
             rel_threshold=None,
             meta={},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result, ignore_results_formatting=True)
@@ -409,7 +423,8 @@ class TestPresenter:
             reference_value=None,
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['class1', 'class2']}
+            meta={'names': ['class1', 'class2']},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result)
@@ -438,7 +453,8 @@ class TestPresenter:
             reference_value=None,
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['class1', 'class2']}
+            meta={'names': ['class1', 'class2']},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result, ignore_results_formatting=True)
@@ -467,7 +483,8 @@ class TestPresenter:
             reference_value=49,
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['class1', 'class2']}
+            meta={'names': ['class1', 'class2']},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result)
@@ -496,7 +513,8 @@ class TestPresenter:
             reference_value=49,
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['class1', 'class2']}
+            meta={'names': ['class1', 'class2']},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result, ignore_results_formatting=True)
@@ -526,7 +544,8 @@ class TestPresenter:
             reference_value=None,
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['class1', 'class2'], 'scale': 0.5, 'postfix': 'km/h', 'data_format': '{:.4f}'}
+            meta={'names': ['class1', 'class2'], 'scale': 0.5, 'postfix': 'km/h', 'data_format': '{:.4f}'},
+            profiling_file = None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result, ignore_results_formatting=True)
@@ -556,7 +575,8 @@ class TestPresenter:
             reference_value=None,
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['class1', 'class2'], 'postfix': '_'}
+            meta={'names': ['class1', 'class2'], 'postfix': '_'},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result)
@@ -584,7 +604,8 @@ class TestPresenter:
             reference_value=None,
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['class1', 'class2'], 'scale': 10}
+            meta={'names': ['class1', 'class2'], 'scale': 10},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result)
@@ -614,7 +635,8 @@ class TestPresenter:
             reference_value=None,
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['class1', 'class2'], 'scale': [1, 2]}
+            meta={'names': ['class1', 'class2'], 'scale': [1, 2]},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result)
@@ -644,7 +666,8 @@ class TestPresenter:
             reference_value={'class1': 0.4, 'class2': 0.5},
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['class1', 'class2'], 'scale': [1, 2]}
+            meta={'names': ['class1', 'class2'], 'scale': [1, 2]},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result)
@@ -674,7 +697,8 @@ class TestPresenter:
             reference_value={'class3': 0.4, 'class4': 0.5},
             abs_threshold=None,
             rel_threshold=None,
-            meta={'names': ['class1', 'class2'], 'scale': [1, 2]}
+            meta={'names': ['class1', 'class2'], 'scale': [1, 2]},
+            profiling_file=None
         )
         presenter = VectorPrintPresenter()
         presenter.write_result(result)

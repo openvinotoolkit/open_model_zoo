@@ -20,8 +20,10 @@ from collections import OrderedDict
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 from accuracy_checker.dataset import read_annotation
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 class ForecastingEngine:
@@ -34,19 +36,17 @@ class ForecastingEngine:
         output_name (str): name of output blob of model.
     """
     def __init__(self, model_xml, model_bin, input_name, output_name, quantiles):
-        self.logger = log.getLogger("ForecastingEngine")
-        self.logger.info("loading network")
-        self.logger.info(f"model_xml: {model_xml}")
-        self.logger.info(f"model_bin: {model_bin}")
-        self.logger.info(f"input_name: {input_name}")
-        self.logger.info(f"output_name: {output_name}")
-        self.logger.info(f"quantiles: {quantiles}")
+        device = "CPU"
+        log.info('OpenVINO Inference Engine')
+        log.info('\tbuild: {}'.format(get_version()))
         self.ie = IECore()
+        log.info('Reading model {}'.format(model_xml))
         self.net = self.ie.read_network(
             model=model_xml,
             weights=model_bin
         )
-        self.net_exec = self.ie.load_network(self.net, "CPU")
+        self.net_exec = self.ie.load_network(self.net, device)
+        log.info('The model {} is loaded to {}'.format(model_xml, device))
         self.input_name = input_name
         self.output_name = output_name
         self.quantiles = quantiles
@@ -159,10 +159,6 @@ def build_argparser():
 
 
 def main(args):
-    log.basicConfig(format="[ %(levelname)s ] [ %(name)s ] %(message)s", level=log.INFO, stream=sys.stdout)
-    logger = log.getLogger("main")
-    logger.info("creating model")
-
     quantiles = args.quantiles.split(",")
     model = ForecastingEngine(
         model_xml=args.model,

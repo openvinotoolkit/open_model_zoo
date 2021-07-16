@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import logging as log
 from time import perf_counter
 import cv2
 from helpers import put_highlighted_text
@@ -85,7 +86,8 @@ class PerformanceMetrics:
                 if frame_count != 0
                 else None)
 
-    def print_total(self):
+    def log_total(self):
         total_latency, total_fps = self.get_total()
-        print("Latency: {:.1f} ms".format(total_latency * 1e3) if total_latency is not None else "Latency: N/A")
-        print("FPS: {:.1f}".format(total_fps) if total_fps is not None else "FPS: N/A")
+        log.info('Metrics report:')
+        log.info("\tLatency: {:.1f} ms".format(total_latency * 1e3) if total_latency is not None else "\tLatency: N/A")
+        log.info("\tFPS: {:.1f}".format(total_fps) if total_fps is not None else "\tFPS: N/A")

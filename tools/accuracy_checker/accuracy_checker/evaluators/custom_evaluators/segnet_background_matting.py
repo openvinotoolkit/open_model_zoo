@@ -132,7 +132,7 @@ class OpenVINOFeedbackModel(FeedbackModel):
     def infer(self, data, identifiers):
         raw_result = self.exec_network.infer(self.fit_to_input(data))
         result = self.adapter.process([raw_result], identifiers, [{}])
-        return raw_result, result
+        return raw_result, result[0]
 
     def fit_to_input(self, input_data):
         if self.feedback is None:

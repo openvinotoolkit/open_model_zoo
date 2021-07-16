@@ -118,7 +118,7 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     __provider__ = 'accuracy_per_class'
 
     annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
-    prediction_types = (ClassificationPrediction, )
+    prediction_types = (ClassificationPrediction, ArgMaxClassificationPrediction)
 
     @classmethod
     def parameters(cls):

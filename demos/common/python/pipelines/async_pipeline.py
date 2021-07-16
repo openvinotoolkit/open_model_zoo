@@ -14,7 +14,6 @@
  limitations under the License.
 """
 
-import logging
 import threading
 from collections import deque
 from typing import Dict, Set
@@ -83,9 +82,7 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
 class AsyncPipeline:
     def __init__(self, ie, model, plugin_config, device='CPU', max_num_requests=1):
         self.model = model
-        self.logger = logging.getLogger()
 
-        self.logger.info('Loading network to {} plugin...'.format(device))
         self.exec_net = ie.load_network(network=self.model.net, device_name=device,
                                         config=plugin_config, num_requests=max_num_requests)
         if max_num_requests == 0:

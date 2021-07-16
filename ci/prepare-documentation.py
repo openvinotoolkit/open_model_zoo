@@ -184,11 +184,37 @@ def add_model_pages(output_root, parent_element, group, group_title):
         id=f'omz_models_group_{group}', path=f'models/{group}/index.md')
 
     task_type_elements = {}
+    device_support_path = OMZ_ROOT / 'models' / group / 'device_support.md'
+
+    with device_support_path.open('r', encoding="utf-8") as device_support_file:
+        raw_device_support = device_support_file.read()
+
+    device_support_lines = re.findall(r'^\|\s\S+\s\|', raw_device_support, re.MULTILINE)
+    device_support_lines = [device_support_line.strip(' |')
+                            for device_support_line in device_support_lines]
 
     for md_path in sorted(OMZ_ROOT.glob(f'models/{group}/*/**/*.md')):
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
         model_name = md_path_rel.parts[2]
+
+        device_support_path_rel = device_support_path.relative_to(OMZ_ROOT)
+
+        if model_name not in device_support_lines:
+            if not (md_path.parent / 'composite-model.yml').exists():
+                raise RuntimeError(f'{device_support_path_rel}: "{model_name}" '
+                                   'model reference is missing.')
+
+            model_subdirs = (subdir.name for subdir in md_path.parent.glob('*/**'))
+
+            for model_subdir in model_subdirs:
+                if not (md_path.parent / model_subdir / 'model.yml').exists():
+                    continue # non-model folder
+
+                if model_subdir not in device_support_lines:
+                    raise RuntimeError(f'{device_support_path_rel}: '
+                                       f'"{model_subdir}" part reference of '
+                                       f'"{model_name}" composite model is missing.')
 
         expected_md_path = Path('models', group, model_name, 'README.md')
 
@@ -294,6 +320,23 @@ def main():
         *OMZ_ROOT.glob('demos/*_demo_*/*/README.md'),
     ]:
         md_path_rel = md_path.relative_to(OMZ_ROOT)
+
+        with (md_path.parent / 'models.lst').open('r', encoding="utf-8") as models_lst:
+            models_lines = models_lst.readlines()
+
+        with (md_path).open('r', encoding="utf-8") as demo_readme:
+            raw_demo_readme = demo_readme.read()
+
+        for model_line in models_lines:
+            if model_line.startswith('#'):
+                continue
+
+            model_line = model_line.rstrip('\n')
+            regex_line = model_line.replace('?', r'.').replace('*', r'\S+')
+
+            if not re.search(regex_line, raw_demo_readme):
+                raise RuntimeError(f'{md_path_rel}: "{model_line}" model reference is missing. '
+                                   'Add it to README.md or update models.lst file.')
 
         # <name>_<implementation>
         demo_id = '_'.join(md_path_rel.parts[1:3])

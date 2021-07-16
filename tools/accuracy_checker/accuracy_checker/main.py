@@ -404,6 +404,7 @@ def main():
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
         details.update({'status': 'started', "error": None})
+        send_telemetry_event(tm, 'status', 'started')
         config_entry.update({
             '_store_only': args.store_only,
             '_stored_data': args.stored_predictions
@@ -430,12 +431,14 @@ def main():
                     )
             evaluator.release()
             details['status'] = 'finished'
+            send_telemetry_event(tm, 'status', 'success')
             send_telemetry_event(tm, 'model_run', details)
 
         except Exception as e:  # pylint:disable=W0703
             details['status'] = 'error'
             details['error'] = str(type(e))
             send_telemetry_event(tm, 'model_run', json.dumps(details))
+            send_telemetry_event(tm, 'status', 'failure')
             exception(e)
             return_code = 1
             continue

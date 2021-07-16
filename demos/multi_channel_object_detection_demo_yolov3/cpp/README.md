@@ -33,6 +33,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 
 ### Supported Models
 
+* person-vehicle-bike-detection-crossroad-yolov3-1020
 * yolo-v3-tf
 * yolo-v3-tiny-tf
 

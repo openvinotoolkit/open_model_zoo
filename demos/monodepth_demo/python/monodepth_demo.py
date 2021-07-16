@@ -7,8 +7,10 @@ from pathlib import Path
 import cv2
 import numpy as np
 import logging as log
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 import matplotlib.pyplot as plt
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def main():
@@ -28,22 +30,18 @@ def main():
 
     args = parser.parse_args()
 
-    # logging
-    log.basicConfig(format="[ %(levelname)s ] %(message)s",
-                    level=log.INFO, stream=sys.stdout)
-
-    log.info("creating inference engine")
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
     if args.cpu_extension and "CPU" in args.device:
         ie.add_extension(args.cpu_extension, "CPU")
 
-    log.info("Loading network")
+    log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, args.model.with_suffix(".bin"))
 
     assert len(net.input_info) == 1, "Expected model with only 1 input blob"
     assert len(net.outputs) == 1, "Expected model with only 1 output blob"
 
-    log.info("preparing input blobs")
     input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
     net.batch_size = 1
@@ -56,7 +54,7 @@ def main():
 
     # resize
     if (input_height, input_width) != (height, width):
-        log.info("Image is resized from {} to {}".format(
+        log.debug("Image is resized from {} to {}".format(
             image.shape[:-1], (height, width)))
         image = cv2.resize(image, (width, height), cv2.INTER_CUBIC)
 
@@ -66,15 +64,13 @@ def main():
     image_input = np.expand_dims(image, 0)
 
     # loading model to the plugin
-    log.info("loading model to the plugin")
     exec_net = ie.load_network(network=net, device_name=args.device)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     # start sync inference
-    log.info("starting inference")
     res = exec_net.infer(inputs={input_blob: image_input})
 
     # processing output blob
-    log.info("processing output blob")
     disp = np.squeeze(res[out_blob][0])
 
     # resize disp to input resolution
@@ -93,16 +89,13 @@ def main():
     out = 'disp.pfm'
     cv2.imwrite(out, disp)
 
-    log.info("Disparity map was saved to {}".format(out))
+    log.debug("Disparity map was saved to {}".format(out))
 
     # png
     out = 'disp.png'
     plt.imsave(out, disp, vmin=0, vmax=1, cmap='inferno')
 
-    log.info("Color-coded disparity image was saved to {}".format(out))
-
-    log.info("This demo is an API example, for any performance measurements please use "
-             "the dedicated benchmark_app tool from the openVINO toolkit\n")
+    log.debug("Color-coded disparity image was saved to {}".format(out))
 
 
 if __name__ == '__main__':

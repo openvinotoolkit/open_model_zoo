@@ -54,8 +54,9 @@ class CTPN(Model):
 
         self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, input_size[1], input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
-        input_shape = {self.image_blob_name: (1, 3, self.h2, self.w2)}
-        self.logger.info('Reshape net to {}'.format(input_shape))
+        default_input_shape = self.net.input_info[self.image_blob_name].input_data.shape
+        input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h2, self.w2])}
+        self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
         self.net.reshape(input_shape)
 
     def prepare_inputs(self):
