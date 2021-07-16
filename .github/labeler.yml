@@ -1,5 +1,5 @@
 # See help here: https://github.com/marketplace/actions/labeler
 
-dependency_changes:
-- *requirements*
-- *setup.py
+dependencies:
+  - '*requirements*'
+  - '*setup.py'
