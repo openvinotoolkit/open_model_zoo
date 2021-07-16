@@ -23,8 +23,10 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 from utils.codec import CTCCodec
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -69,19 +71,20 @@ def preprocess_input(image_name, height, width):
 
 
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
     # Plugin initialization
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
+
     # Read IR
-    log.info("Loading network")
+    log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, os.path.splitext(args.model)[0] + ".bin")
 
     assert len(net.input_info) == 1, "Demo supports only single input topologies"
     assert len(net.outputs) == 1, "Demo supports only single output topologies"
 
-    log.info("Preparing input/output blobs")
     input_blob = next(iter(net.input_info))
     out_blob = next(iter(net.outputs))
 
@@ -97,11 +100,10 @@ def main():
     assert input_channel == input_image.shape[1], "The net's input channel should equal the input image's channel"
 
     # Loading model to the plugin
-    log.info("Loading model to the plugin")
     exec_net = ie.load_network(network=net, device_name=args.device)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     # Start sync inference
-    log.info("Starting inference ({} iterations)".format(args.number_iter))
     infer_time = []
     for i in range(args.number_iter):
         t0 = time.time()

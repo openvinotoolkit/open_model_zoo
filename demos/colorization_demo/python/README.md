@@ -61,7 +61,6 @@ Options:
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
   --no_show             Optional. Don't show output.
-  -v, --verbose         Optional. Enable display of processing logs on screen.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```

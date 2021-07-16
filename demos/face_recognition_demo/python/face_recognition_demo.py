@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
@@ -23,7 +23,7 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
@@ -39,8 +39,7 @@ from images_capture import open_images_capture
 from models import OutputTransform
 from performance_metrics import PerformanceMetrics
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 DEVICE_KINDS = ['CPU', 'GPU', 'MYRIAD', 'HETERO', 'HDDL']
 
@@ -112,8 +111,6 @@ def build_argparser():
                             'of the kernels.')
     infer.add_argument('-v', '--verbose', action='store_true',
                        help='Optional. Be more verbose.')
-    infer.add_argument('-pc', '--perf_stats', action='store_true',
-                       help='Optional. Output detailed per-layer performance stats.')
     infer.add_argument('-t_fd', metavar='[0..1]', type=float, default=0.6,
                        help='Optional. Probability threshold for face detections.')
     infer.add_argument('-t_id', metavar='[0..1]', type=float, default=0.3,
@@ -129,16 +126,14 @@ class FrameProcessor:
 
     def __init__(self, args):
         self.gpu_ext = args.gpu_lib
-        self.perf_count = args.perf_stats
         self.allow_grow = args.allow_grow and not args.no_show
 
-        log.info('Initializing Inference Engine...')
+        log.info('OpenVINO Inference Engine')
+        log.info('\tbuild: {}'.format(get_version()))
         ie = IECore()
         if args.cpu_lib and 'CPU' in {args.d_fd, args.d_lm, args.d_reid}:
-            log.info('Using CPU extensions library "{}"'.format(args.cpu_lib))
             ie.add_extension(args.cpu_lib, 'CPU')
 
-        log.info('Loading networks...')
         self.face_detector = FaceDetector(ie, args.m_fd,
                                           args.fd_input_size,
                                           confidence_threshold=args.t_fd,
@@ -147,11 +142,12 @@ class FrameProcessor:
         self.face_identifier = FaceIdentifier(ie, args.m_reid,
                                               match_threshold=args.t_id,
                                               match_algo=args.match_algo)
+
         self.face_detector.deploy(args.d_fd, self.get_config(args.d_fd))
         self.landmarks_detector.deploy(args.d_lm, self.get_config(args.d_lm), self.QUEUE_SIZE)
         self.face_identifier.deploy(args.d_reid, self.get_config(args.d_reid), self.QUEUE_SIZE)
 
-        log.info('Building faces database using images from "{}"'.format(args.fg))
+        log.debug('Building faces database using images from {}'.format(args.fg))
         self.faces_database = FacesDatabase(args.fg, self.face_identifier,
                                             self.landmarks_detector,
                                             self.face_detector if args.run_detector else None, args.no_show)
@@ -159,9 +155,7 @@ class FrameProcessor:
         log.info('Database is built, registered {} identities'.format(len(self.faces_database)))
 
     def get_config(self, device):
-        config = {
-            "PERF_COUNT": "YES" if self.perf_count else "NO",
-        }
+        config = {}
         if device == 'GPU' and self.gpu_ext:
             config['CONFIG_FILE'] = self.gpu_ext
         return config
@@ -191,14 +185,6 @@ class FrameProcessor:
                     face_identities[i].id = id
 
         return [rois, landmarks, face_identities]
-
-    def get_performance_stats(self):
-        stats = {
-            'face_detector': self.face_detector.get_performance_stats(),
-            'landmarks': self.landmarks_detector.get_performance_stats(),
-            'face_identifier': self.face_identifier.get_performance_stats(),
-        }
-        return stats
 
 
 def draw_detections(frame, frame_processor, detections, output_transform):
@@ -239,12 +225,8 @@ def main():
     cap = open_images_capture(args.input, args.loop)
     frame_processor = FrameProcessor(args)
 
-    log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-
     frame_num = 0
     metrics = PerformanceMetrics()
-    print_perf_stats = args.perf_stats
     presenter = None
     output_transform = None
     input_crop = None
@@ -284,9 +266,6 @@ def main():
         if video_writer.isOpened() and (args.output_limit <= 0 or frame_num <= args.output_limit):
             video_writer.write(frame)
 
-        if print_perf_stats:
-            log.info('Performance stats:')
-            log.info(frame_processor.get_performance_stats())
         if not args.no_show:
             cv2.imshow('Face recognition demo', frame)
             key = cv2.waitKey(1)
@@ -295,7 +274,7 @@ def main():
                 break
             presenter.handleKey(key)
 
-    metrics.print_total()
+    metrics.log_total()
     print(presenter.reportMeans())
 
 

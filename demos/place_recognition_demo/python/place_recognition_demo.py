@@ -32,6 +32,8 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
 
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
+
 
 def build_argparser():
     """ Returns argument parser. """
@@ -84,13 +86,12 @@ def time_elapsed(func, *args):
 
 
 def main():
-    log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
+
+    cap = open_images_capture(args.input, args.loop)
 
     place_recognition = PlaceRecognition(args.model, args.device, args.gallery_folder, args.cpu_extension,
                                          args.gallery_size)
-
-    cap = open_images_capture(args.input, args.loop)
 
     compute_embeddings_times = []
     search_in_gallery_times = []

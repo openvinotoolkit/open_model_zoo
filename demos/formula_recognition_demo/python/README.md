@@ -147,7 +147,7 @@ usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder
                                    [--max_formula_len MAX_FORMULA_LEN]
                                    [-t CONF_THRESH] [-d DEVICE]
                                    [--resolution RESOLUTION RESOLUTION]
-                                   [--preprocessing_type {crop,resize}] [-pc]
+                                   [--preprocessing_type {crop,resize}]
                                    [--imgs_layer IMGS_LAYER]
                                    [--row_enc_out_layer ROW_ENC_OUT_LAYER]
                                    [--hidden_layer HIDDEN_LAYER]
@@ -196,7 +196,6 @@ Options:
                         Default: 1280 720
   --preprocessing_type {crop,resize}
                         Optional. Type of the preprocessing
-  -pc, --perf_counts
   --imgs_layer IMGS_LAYER
                         Optional. Encoder input name for images. See README
                         for details.

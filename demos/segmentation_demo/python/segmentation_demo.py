@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -23,7 +23,7 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
@@ -32,10 +32,9 @@ import monitors
 from pipelines import get_user_config, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
-from helpers import resolution
+from helpers import resolution, log_blobs_info, log_runtime_settings
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 class SegmentationVisualizer:
@@ -66,8 +65,11 @@ class SegmentationVisualizer:
     def __init__(self, colors_path=None):
         if colors_path:
             self.color_palette = self.get_palette_from_file(colors_path)
+            log.debug('The palette is loaded from {}'.format(colors_path))
         else:
             self.color_palette = self.pascal_voc_palette
+            log.debug('The PASCAL VOC palette is used')
+        log.debug('Get {} colors'.format(len(self.color_palette)))
         self.color_map = self.create_color_map()
 
     def get_palette_from_file(self, colors_path):
@@ -174,28 +176,29 @@ def print_raw_results(mask, labels=None):
 
 
 def main():
-    metrics = PerformanceMetrics()
     args = build_argparser().parse_args()
 
-    log.info('Initializing Inference Engine...')
+    cap = open_images_capture(args.input, args.loop)
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
-    log.info('Loading network...')
-
     model, visualizer = get_model(ie, args)
+    log.info('Reading model {}'.format(args.model))
+    log_blobs_info(model)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    cap = open_images_capture(args.input, args.loop)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+    log_runtime_settings(pipeline.exec_net, args.device)
 
     next_frame_id = 0
     next_frame_id_to_show = 0
 
-    log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-
+    metrics = PerformanceMetrics()
     presenter = None
     output_transform = None
     video_writer = cv2.VideoWriter()
@@ -275,7 +278,7 @@ def main():
             cv2.imshow('Segmentation Results', frame)
             key = cv2.waitKey(1)
 
-    metrics.print_total()
+    metrics.log_total()
     print(presenter.reportMeans())
 
 

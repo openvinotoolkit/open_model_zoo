@@ -12,15 +12,19 @@
  limitations under the License.
 """
 
+import sys
+import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 import numpy as np
 import cv2
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from inpainting_gui import InpaintingGUI
 from inpainting import ImageInpainting
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_arg_parser():
@@ -82,11 +86,7 @@ def create_random_mask(parts, max_vertex, max_length, max_brush_width, h, w, max
     return mask
 
 
-def inpaint_auto(img, args):
-    ie = IECore()
-
-    inpainting_processor = ImageInpainting(ie, args.model, args.device)
-
+def inpaint_auto(img, inpainting_processor, args):
     #--- Generating mask
     if args.auto_mask_random:
         mask = create_random_mask(args.parts, args.max_vertex, args.max_length, args.max_brush_width,
@@ -118,16 +118,24 @@ def main():
     # Loading source image
     img = cv2.imread(args.input, cv2.IMREAD_COLOR)
     if img is None:
-        print("Error: cannot load image " + args.input)
+        log.error("Cannot load image " + args.input)
         return -1
 
     if args.auto_mask_color and args.auto_mask_random:
-        print("Error: -ar and -ac options cannot be used together...")
+        log.error("-ar and -ac options cannot be used together")
         return -1
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
+    ie = IECore()
+
+    log.info('Reading model {}'.format(args.model))
+    inpainting_processor = ImageInpainting(ie, args.model, args.device)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     if args.auto_mask_color or args.auto_mask_random:
         # Command-line inpaining for just one image
-        concat_image, result = inpaint_auto(img, args)
+        concat_image, result = inpaint_auto(img, inpainting_processor, args)
         if args.output != "":
             cv2.imwrite(args.output, result)
         if not args.no_show:
@@ -136,10 +144,10 @@ def main():
     else:
         # Inpainting with GUI
         if args.no_show:
-            print("Error: --no_show argument cannot be used in GUI mode")
+            log.error("--no_show argument cannot be used in GUI mode")
             return -1
-        InpaintingGUI(img, args.model, args.device).run()
+        InpaintingGUI(img, inpainting_processor).run()
     return 0
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main() or 0)

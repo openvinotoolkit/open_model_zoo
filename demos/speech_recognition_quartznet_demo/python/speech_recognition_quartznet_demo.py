@@ -24,12 +24,15 @@ except OSError:
     sys.modules['soundfile'] = types.ModuleType('fake_soundfile')
     import librosa
 
+import logging as log
 import numpy as np
 import scipy
 import wave
 
 from argparse import ArgumentParser, SUPPRESS
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 class QuartzNet:
@@ -39,6 +42,7 @@ class QuartzNet:
     def __init__(self, ie, model_path, input_shape, device):
         assert not input_shape[2] % self.pad_to, f"{self.pad_to} must be a divisor of input_shape's third dimension"
         self.ie = ie
+        log.info('Reading model {}'.format(model_path))
         network = self.ie.read_network(model_path)
         if len(network.input_info) != 1:
             raise RuntimeError('QuartzNet must have one input')
@@ -58,6 +62,7 @@ class QuartzNet:
             raise RuntimeError(f'QuartzNet output third dimension size must be {len(self.alphabet) + 1}')
         network.reshape({next(iter(network.input_info)): input_shape})
         self.exec_net = self.ie.load_network(network, device)
+        log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def infer(self, melspectrogram):
         return next(iter(self.exec_net.infer({next(iter(self.exec_net.input_info)): melspectrogram}).values()))
@@ -115,7 +120,12 @@ def main():
         audio = np.frombuffer(wave_read.readframes(pcm_length * channel_num), dtype=np.int16).reshape((pcm_length, channel_num))
 
     log_melspectrum = QuartzNet.audio_to_melspectrum(audio.flatten(), sampling_rate)
-    quartz_net = QuartzNet(IECore(), args.model, log_melspectrum.shape, args.device)
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
+    ie = IECore()
+
+    quartz_net = QuartzNet(ie, args.model, log_melspectrum.shape, args.device)
     character_probs = quartz_net.infer(log_melspectrum)
     transcription = QuartzNet.ctc_greedy_decode(character_probs)
     print(transcription)
