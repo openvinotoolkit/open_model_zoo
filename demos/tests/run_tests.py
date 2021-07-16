@@ -63,8 +63,8 @@ def parse_args():
         help='list of devices to test')
     parser.add_argument('--report-file', type=Path,
         help='path to report file')
-    parser.add_argument('--unsupported-devices', type=Path, required=False,
-        help='path to file with unsupported devices for each model')
+    parser.add_argument('--suppressed-devices', type=Path, required=False,
+        help='path to file with suppressed devices for each model')
     return parser.parse_args()
 
 
@@ -141,17 +141,17 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
     return dl_dir
 
 
-def parse_unsupported_device_list(path):
+def parse_suppressed_device_list(path):
     if not path:
         return None
-    unsupported_devices = {}
+    suppressed_devices = {}
     with open(path, "r") as f:
         for line in f:
             if line.startswith('#'):
                 continue
             parsed = line.rstrip('\n').split(sep=',')
-            unsupported_devices[parsed[0]] = parsed[1:]
-    return unsupported_devices
+            suppressed_devices[parsed[0]] = parsed[1:]
+    return suppressed_devices
 
 
 def get_models(case, keys):
@@ -166,7 +166,7 @@ def get_models(case, keys):
 def main():
     args = parse_args()
 
-    unsupported_devices = parse_unsupported_device_list(args.unsupported_devices)
+    suppressed_devices = parse_suppressed_device_list(args.suppressed_devices)
 
     omz_dir = (Path(__file__).parent / '../..').resolve()
     demos_dir = omz_dir / 'demos'
@@ -248,7 +248,7 @@ def main():
                     for device, dev_arg in device_args.items():
                         skip = False
                         for model in test_case_models:
-                            if unsupported_devices and device in unsupported_devices.get(model, []):
+                            if suppressed_devices and device in suppressed_devices.get(model, []):
                                 print('Test case #{}/{}: Model {} is suppressed on device'
                                       .format(test_case_index, device, model))
                                 print(flush=True)
