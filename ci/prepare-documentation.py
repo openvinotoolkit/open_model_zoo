@@ -278,7 +278,6 @@ def main():
         *OMZ_ROOT.glob('demos/*_demo_*/*/README.md'),
     ]:
         md_path_rel = md_path.relative_to(OMZ_ROOT)
-
         # <name>_<implementation>
         demo_id = '_'.join(md_path_rel.parts[1:3])
 
