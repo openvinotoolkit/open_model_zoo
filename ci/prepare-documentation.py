@@ -72,8 +72,8 @@ HUMAN_READABLE_TASK_TYPES = {
 }
 
 def add_page(output_root, parent, *, id=None, path=None, title=None, index=-1):
-    if type(index) != int:
-        raise ValueError('index must be a number')
+    if not isinstance(index, int):
+        raise ValueError('index must be an integer')
     if parent.tag == 'tab':
         parent.attrib['type'] = 'usergroup'
 
