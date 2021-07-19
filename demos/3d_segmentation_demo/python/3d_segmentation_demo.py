@@ -18,12 +18,12 @@
 import os
 import sys
 import logging as log
+from time import perf_counter
 
 import numpy as np
 import nibabel as nib
 
 from PIL import Image, ImageSequence
-from datetime import datetime
 from argparse import ArgumentParser, SUPPRESS
 from fnmatch import fnmatch
 from scipy.ndimage import interpolation
@@ -280,14 +280,19 @@ def main():
         ie_network.reshape({input_name: args.shape})
         input_info = ie_network.input_info
 
-    # ---------------------------------------- 4. Preparing input data ----------------------------------------
-
     if len(input_info[input_name].input_data.shape) != 5:
         raise AttributeError("Incorrect shape {} for 3d convolution network".format(args.shape))
 
     n, c, d, h, w = input_info[input_name].input_data.shape
     ie_network.batch_size = n
 
+    # ------------------------------------ 3. Loading model to the plugin -------------------------------------
+    executable_network = ie.load_network(network=ie_network, device_name=args.target_device)
+    log.info('The model {} is loaded to {}'.format(args.path_to_model, args.target_device))
+    del ie_network
+
+    # --------------------------------------- 4. Preparing input data -----------------------------------------
+    start_time = perf_counter()
     if not os.path.exists(args.path_to_input_data):
         raise AttributeError("Path to input data: '{}' does not exist".format(args.path_to_input_data))
 
@@ -316,17 +321,8 @@ def main():
 
     test_im = {input_name: data_crop}
 
-    # ------------------------------------- 4. Loading model to the plugin -------------------------------------
-    executable_network = ie.load_network(network=ie_network, device_name=args.target_device)
-    log.info('The model {} is loaded to {}'.format(args.path_to_model, args.target_device))
-    del ie_network
-
     # ---------------------------------------------- 5. Do inference --------------------------------------------
-    start_time = datetime.now()
     res = executable_network.infer(test_im)
-    infer_time = datetime.now() - start_time
-    log.info("Inference time is {}".format(infer_time))
-
     # ---------------------------- 6. Processing of the received inference results ------------------------------
     result = res[out_name]
     batch, channels, out_d, out_h, out_w = result.shape
@@ -334,7 +330,6 @@ def main():
     list_img = []
     list_seg_result = []
 
-    start_time = datetime.now()
     for batch, data in enumerate(result):
         seg_result = np.zeros(shape=original_size, dtype=np.uint8)
         if data.shape[1:] != original_size:
@@ -386,9 +381,9 @@ def main():
         if args.output_nifti and is_nifti_data:
             list_seg_result.append(seg_result)
 
-    result_processing_time = datetime.now() - start_time
-    log.info("Processing time is {}".format(result_processing_time))
-
+    total_latency = (perf_counter() - start_time) * 1e3
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
     # --------------------------------------------- 7. Save output -----------------------------------------------
     tiff_output_name = os.path.join(args.path_to_output, 'output.tiff')
     Image.new('RGB', (original_data.shape[3], original_data.shape[2])).save(tiff_output_name,

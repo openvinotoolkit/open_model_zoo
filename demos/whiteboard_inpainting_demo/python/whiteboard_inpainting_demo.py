@@ -16,7 +16,7 @@ import argparse
 import cv2
 import logging as log
 import numpy as np
-import time
+from time import perf_counter
 import sys
 from os import path as osp
 
@@ -28,6 +28,7 @@ from utils.misc import MouseClick, check_pressed_keys
 sys.path.append(osp.join(osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__)))), 'common/python'))
 import monitors
 from images_capture import open_images_capture
+from performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -95,6 +96,8 @@ def main():
     cap = open_images_capture(args.input, args.loop)
     if cap.get_type() not in ('VIDEO', 'CAMERA'):
         raise RuntimeError("The input should be a video file or a numeric camera ID")
+
+    start_time = perf_counter()
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
@@ -135,11 +138,11 @@ def main():
                                             args.threshold, args.device, args.cpu_extension)
     log.info('The model {} is loaded to {}'.format(model_path, args.device))
 
+    metrics = PerformanceMetrics()
     black_board = False
     output_frame = np.full((frame.shape[0], frame.shape[1], 3), 255, dtype='uint8')
     frame_number = 0
     key = -1
-    start = time.time()
 
     while frame is not None:
         mask = None
@@ -160,6 +163,8 @@ def main():
         output_frame = np.where(mask, output_frame, clear_frame)
         merged_frame = np.vstack([frame, output_frame])
         merged_frame = cv2.resize(merged_frame, out_frame_size)
+
+        metrics.update(start_time, merged_frame)
 
         if video_writer.isOpened() and (args.output_limit <= 0 or frame_number <= args.output_limit-1):
             video_writer.write(merged_frame)
@@ -187,12 +192,11 @@ def main():
                 cv2.namedWindow('Board', cv2.WINDOW_KEEPRATIO)
                 cv2.imshow('Board', board)
 
-        end = time.time()
-        log.info('Processing frame: {}, fps = {:.3}'.format(frame_number, 1. / (end - start)))
         frame_number += 1
-        start = time.time()
+        start_time = perf_counter()
         frame = cap.read()
 
+    metrics.log_total()
     presenter.reportMeans()
 
 

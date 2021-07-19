@@ -17,6 +17,7 @@
 
 from argparse import ArgumentParser, SUPPRESS
 import logging as log
+from time import perf_counter
 import sys
 
 # Workaround to import librosa on Linux without installed libsndfile.so
@@ -113,6 +114,7 @@ def main():
     args = build_argparser().parse_args()
 
     with wave.open(args.input, 'rb') as wave_read:
+        start_time = perf_counter()
         channel_num, sample_width, sampling_rate, pcm_length, compression_type, _ = wave_read.getparams()
         assert sample_width == 2, "Only 16-bit WAV PCM supported"
         assert compression_type == 'NONE', "Only linear PCM WAV files supported"
@@ -129,6 +131,9 @@ def main():
     quartz_net = QuartzNet(ie, args.model, log_melspectrum.shape, args.device)
     character_probs = quartz_net.infer(log_melspectrum)
     transcription = QuartzNet.ctc_greedy_decode(character_probs)
+    total_latency = (perf_counter() - start_time) * 1e3
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
     print(transcription)
 
 if __name__ == '__main__':

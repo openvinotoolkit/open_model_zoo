@@ -3,6 +3,7 @@
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
+from time import perf_counter
 
 import cv2
 import numpy as np
@@ -49,6 +50,7 @@ def main():
     # read and pre-process input image
     _, _, height, width = net.input_info[input_blob].input_data.shape
 
+    start_time = perf_counter()
     image = cv2.imread(args.input, cv2.IMREAD_COLOR)
     (input_height, input_width) = image.shape[:-1]
 
@@ -85,6 +87,9 @@ def main():
     else:
         disp.fill(0.5)
 
+    total_latency = (perf_counter() - start_time) * 1e3
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
     # pfm
     out = 'disp.pfm'
     cv2.imwrite(out, disp)

@@ -16,6 +16,7 @@ import sys
 import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 import cv2
@@ -87,6 +88,7 @@ def create_random_mask(parts, max_vertex, max_length, max_brush_width, h, w, max
 
 
 def inpaint_auto(img, inpainting_processor, args):
+    start_time = perf_counter()
     #--- Generating mask
     if args.auto_mask_random:
         mask = create_random_mask(args.parts, args.max_vertex, args.max_length, args.max_brush_width,
@@ -106,10 +108,12 @@ def inpaint_auto(img, inpainting_processor, args):
     #--- Inpaint and show results
     output_image = inpainting_processor.process(masked_image, mask)
     concat_imgs = np.hstack((masked_image, output_image))
-    cv2.putText(concat_imgs, 'Performance: {:.1f} FPS'.format(float(1 / inpainting_processor.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+    total_latency = (perf_counter() - start_time) * 1e3
     cv2.putText(concat_imgs, 'original', (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 100))
-    cv2.putText(concat_imgs, 'result', (concat_imgs.shape[1]-5-cv2.getTextSize('result', cv2.FONT_HERSHEY_COMPLEX, 0.5, 1)[0][0], 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 100))
-    cv2.putText(concat_imgs, 'summary: {:.1f} FPS'.format(float(1 / inpainting_processor.infer_time)), (5, 35), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+    cv2.putText(concat_imgs, 'result',(concat_imgs.shape[1] - 5 - cv2.getTextSize('result', cv2.FONT_HERSHEY_COMPLEX, 0.5, 1)[0][0], 15),
+                cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 100))
+    log.info("Metrics report:")
+    log.info("Latency: {:.1f} ms".format(total_latency))
     return concat_imgs, output_image
 
 def main():

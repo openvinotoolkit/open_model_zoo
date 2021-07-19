@@ -18,7 +18,7 @@
 
 import sys
 import logging as log
-import time
+from time import perf_counter
 from argparse import ArgumentParser, SUPPRESS
 
 from tqdm import tqdm
@@ -146,7 +146,7 @@ def main():
     time_forward = 0
     time_wavernn = 0
 
-    time_s_all = time.perf_counter()
+    time_s_all = perf_counter()
     with open(args.input, 'r') as f:
         count = 0
         for line in f:
@@ -166,24 +166,21 @@ def main():
                 texts = [line]
 
             for text in tqdm(texts):
-                time_s = time.perf_counter()
+                time_s = perf_counter()
                 mel = forward_tacotron.forward(text, alpha=args.alpha, speaker_emb=speaker_emb)
-                time_e = time.perf_counter()
-                time_forward += (time_e - time_s) * 1000
+                time_forward += perf_counter() - time_s
 
-                time_s = time.perf_counter()
+                time_s = perf_counter()
                 audio = vocoder.forward(mel)
-                time_e = time.perf_counter()
-                time_wavernn += (time_e - time_s) * 1000
+                time_wavernn += perf_counter() - time_s
 
                 audio_res = np.append(audio_res, audio)
 
-            if count % 5 == 0:
-                log.info('Vocoder time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'.format(time_wavernn, time_forward))
-    time_e_all = time.perf_counter()
-
-    log.info('All time {:.3f}ms. Vocoder time: {:.3f}ms. ForwardTacotronTime {:.3f}ms'
-             .format((time_e_all - time_s_all) * 1000, time_wavernn, time_forward))
+    total_latency = (perf_counter() - time_s_all) * 1e3
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
+    log.debug("\tVocoder time: {:.1f} ms".format(time_wavernn * 1e3))
+    log.debug("\tForwardTacotronTime: {:.1f} ms".format(time_forward * 1e3))
 
     save_wav(audio_res, args.out)
 

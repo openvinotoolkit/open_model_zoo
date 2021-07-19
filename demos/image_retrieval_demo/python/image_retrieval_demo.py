@@ -18,7 +18,7 @@
 import logging as log
 from pathlib import Path
 import sys
-import time
+from time import perf_counter
 from argparse import ArgumentParser, SUPPRESS
 
 import cv2
@@ -33,6 +33,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 import monitors
 from images_capture import open_images_capture
+from performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
 
@@ -108,9 +109,9 @@ def compute_metrics(positions):
 def time_elapsed(func, *args):
     """ Auxiliary function that helps measure elapsed time. """
 
-    start_time = time.perf_counter()
+    start_time = perf_counter()
     res = func(*args)
-    elapsed = time.perf_counter() - start_time
+    elapsed = perf_counter() - start_time
     return elapsed, res
 
 
@@ -133,8 +134,10 @@ def main():
     frames_processed = 0
     presenter = monitors.Presenter(args.utilization_monitors, 0)
     video_writer = cv2.VideoWriter()
+    metrics = PerformanceMetrics()
 
     for image, view_frame in frames:
+        start_time = perf_counter()
         position = None
         sorted_indexes = []
 
@@ -165,6 +168,7 @@ def main():
                         img_retrieval.input_size, np.mean(compute_embeddings_times),
                         np.mean(search_in_gallery_times), imshow_delay=3, presenter=presenter, no_show=args.no_show)
 
+        metrics.update(start_time, image, draw_metrics=False)
         if frames_processed == 0:
             if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
                                                      cap.fps(), (image.shape[1], image.shape[0])):
@@ -175,6 +179,7 @@ def main():
 
         if key == 27:
             break
+    metrics.log_total()
     print(presenter.reportMeans())
 
     if positions:

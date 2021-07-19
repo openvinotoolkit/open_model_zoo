@@ -11,7 +11,6 @@ import sys
 import logging as log
 import time
 import wave
-import timeit
 import argparse
 
 import yaml
@@ -76,7 +75,7 @@ def main():
     log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
-    start_load_time = timeit.default_timer()
+    start_load_time = time.perf_counter()
     stt = DeepSpeechSeqPipeline(
         ie = ie,
         model = args.model,
@@ -87,9 +86,8 @@ def main():
         device = args.device,
         online_decoding = args.realtime,
     )
-    log.debug("Loading, including network weights, IE initialization, LM, building LM vocabulary trie: {} s".format(timeit.default_timer() - start_load_time))
-
-    start_proc_time = timeit.default_timer()
+    log.debug("Loading, including network weights, IE initialization, LM, building LM vocabulary trie: {} s".format(time.perf_counter() - start_load_time))
+    start_time = time.perf_counter()
     with wave.open(args.input, 'rb') as wave_read:
         channel_num, sample_width, sampling_rate, pcm_length, compression_type, _ = wave_read.getparams()
         assert sample_width == 2, "Only 16-bit WAV PCM supported"
@@ -99,7 +97,7 @@ def main():
         log.debug("Audio file length: {} s".format(pcm_length / sampling_rate))
 
         audio_pos = 0
-        play_start_time = timeit.default_timer()
+        play_start_time = time.perf_counter()
         iter_wrapper = tqdm if not args.realtime else (lambda x: x)
         for audio_iter in iter_wrapper(range(0, pcm_length, args.block_size)):
             audio_block = np.frombuffer(wave_read.readframes(args.block_size * channel_num), dtype=np.int16).reshape((-1, channel_num))
@@ -120,7 +118,7 @@ def main():
             if args.realtime:
                 if partial_transcr is not None and len(partial_transcr) > 0:
                     print('\r' + partial_transcr[0].text[-args.realtime_window:], end='')
-                to_wait = play_start_time + audio_pos/sampling_rate - timeit.default_timer()
+                to_wait = play_start_time + audio_pos/sampling_rate - time.perf_counter()
                 if to_wait > 0:
                     time.sleep(to_wait)
 
@@ -131,7 +129,10 @@ def main():
             print('\r' + transcription[0].text[-args.realtime_window:])
     else:  #  not args.realtime
         # Only show processing time in offline mode because real-time mode is being slowed down by time.sleep()
-        log.info("Processing time (incl. loading audio, MFCC, RNN and beam search): {} s".format(timeit.default_timer() - start_proc_time))
+
+        total_latency = (time.perf_counter() - start_time) * 1e3
+        log.info("Metrics report:")
+        log.info("\tLatency: {:.1f} ms".format(total_latency))
 
     print("\nTranscription(s) and confidence score(s):")
     for candidate in transcription:

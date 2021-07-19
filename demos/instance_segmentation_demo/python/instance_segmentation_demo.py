@@ -17,7 +17,7 @@
 
 import logging as log
 import sys
-import time
+from time import perf_counter
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
@@ -33,6 +33,7 @@ from instance_segmentation_demo.visualizer import Visualizer
 
 import monitors
 from images_capture import open_images_capture
+from performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -121,6 +122,7 @@ def main():
     exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
+    start_time = perf_counter()
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
@@ -137,6 +139,7 @@ def main():
 
     frames_processed = 0
     out_frame_size = (frame.shape[1], frame.shape[0])
+    metrics = PerformanceMetrics()
     presenter = monitors.Presenter(args.utilization_monitors, 45,
                 (round(out_frame_size[0] / 4), round(out_frame_size[1] / 8)))
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
@@ -144,8 +147,6 @@ def main():
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
                                              cap.fps(), out_frame_size):
         raise RuntimeError("Can't open video writer")
-
-    render_time = 0
 
     while frame is not None:
         if args.no_keep_aspect_ratio:
@@ -169,19 +170,14 @@ def main():
         input_image_info = np.asarray([[input_image_size[0], input_image_size[1], 1]], dtype=np.float32)
 
         # Run the net.
-        inf_start = time.time()
         feed_dict = {image_input: input_image}
         if image_info_input:
             feed_dict[image_info_input] = input_image_info
         outputs = exec_net.infer(feed_dict)
-        inf_end = time.time()
-        det_time = inf_end - inf_start
 
         # Parse detection results of the current request
         scores, classes, boxes, masks = postprocessor(
             outputs, scale_x, scale_y, *frame.shape[:2], h, w, args.prob_threshold)
-
-        render_start = time.time()
 
         if len(boxes) and args.raw_output_message:
             log.debug('  -------------------------- Frame # {} --------------------------  '.format(frames_processed))
@@ -197,11 +193,7 @@ def main():
         # Visualize masks.
         frame = visualizer(frame, boxes, classes, scores, presenter, masks, masks_tracks_ids)
 
-        # Draw performance stats.
-        inf_time_message = 'Inference time: {:.3f} ms'.format(det_time * 1000)
-        render_time_message = 'OpenCV rendering time: {:.3f} ms'.format(render_time * 1000)
-        cv2.putText(frame, inf_time_message, (15, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
-        cv2.putText(frame, render_time_message, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
+        metrics.update(start_time, frame)
 
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
@@ -210,8 +202,6 @@ def main():
         if not args.no_show:
             # Show resulting image.
             cv2.imshow('Results', frame)
-        render_end = time.time()
-        render_time = render_end - render_start
 
         if not args.no_show:
             key = cv2.waitKey(delay)
@@ -219,10 +209,11 @@ def main():
             if key == esc_code:
                 break
             presenter.handleKey(key)
+        start_time = perf_counter()
         frame = cap.read()
 
+    metrics.log_total()
     print(presenter.reportMeans())
-    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':

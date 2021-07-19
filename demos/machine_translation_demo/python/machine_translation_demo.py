@@ -16,7 +16,7 @@ import argparse
 import itertools
 import logging as log
 import sys
-import time
+from time import perf_counter
 from pathlib import Path
 
 import numpy as np
@@ -231,6 +231,8 @@ def main(args):
     if args.output:
         open(args.output, 'w').close()
 
+    total_latency = 0
+
     def sentences():
         if input_data:
             for sentence in input_data:
@@ -248,17 +250,18 @@ def main(args):
             break
 
         try:
-            start = time.perf_counter()
+            start_time = perf_counter()
             translation = model(sentence)
-            stop = time.perf_counter()
+            total_latency += perf_counter() - start_time
             print(translation)
-            log.info("time: {} s.".format(stop - start))
             if args.output:
                 with open(args.output, 'a', encoding='utf8') as f:
                     print(translation, file=f)
         except Exception:
             log.error("an error occurred", exc_info=True)
 
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency * 1e3))
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()

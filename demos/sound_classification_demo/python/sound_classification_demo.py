@@ -18,7 +18,7 @@
 from argparse import ArgumentParser, SUPPRESS
 import logging as log
 import sys
-import time
+from time import perf_counter
 import wave
 
 import numpy as np
@@ -176,12 +176,11 @@ def main():
 
     outputs = []
     clips = 0
-    infer_time = 0
+    total_latency = 0
     for idx, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
         chunk.shape = input_shape
-        infer_start_time = time.perf_counter()
+        processing_start_time = perf_counter()
         output = exec_net.infer(inputs={input_blob: chunk})
-        infer_time += time.perf_counter() - infer_start_time
         clips += batch_size
         output = output[output_blob]
         for batch, data in enumerate(output):
@@ -192,9 +191,10 @@ def main():
             if start_time < audio.duration():
                 log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(start_time, end_time, data[label],
                                                                  labels[label] if labels else "Class {}".format(label)))
+        total_latency += perf_counter() - processing_start_time
 
-    log.info("Average infer time - {:.1f} ms per clip".format(infer_time / clips * 1000))
-
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency * 1e3))
 
 if __name__ == '__main__':
     main()
