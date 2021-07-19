@@ -193,7 +193,6 @@ def main():
                     last_caption = 'Last gesture: {} '.format(action_class_label)
 
         presenter.drawGraphs(frame)
-        metrics.update(start_time, frame)
 
         if detections is not None:
             tracker_labels = {det.id for det in detections}
@@ -210,6 +209,9 @@ def main():
         if last_caption is not None:
             cv2.putText(frame, last_caption, (10, frame.shape[0] - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+        metrics.update(start_time, frame)
+
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(frame)

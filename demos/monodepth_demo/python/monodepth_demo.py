@@ -47,6 +47,10 @@ def main():
     out_blob = next(iter(net.outputs))
     net.batch_size = 1
 
+    # loading model to the plugin
+    exec_net = ie.load_network(network=net, device_name=args.device)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+
     # read and pre-process input image
     _, _, height, width = net.input_info[input_blob].input_data.shape
 
@@ -64,10 +68,6 @@ def main():
     image = image.astype(np.float32)
     image = image.transpose((2, 0, 1))
     image_input = np.expand_dims(image, 0)
-
-    # loading model to the plugin
-    exec_net = ie.load_network(network=net, device_name=args.device)
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     # start sync inference
     res = exec_net.infer(inputs={input_blob: image_input})
