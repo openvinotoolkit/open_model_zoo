@@ -207,6 +207,7 @@ Accuracy Checker supports following set of preprocessors:
 * `context_window` - add context window padding to input signal.
   * `cw_l` - left side context window padding.
   * `cw_r` - right side context window padding.
+  * `to_multi_infer` - prepare data for multi inference (Optional, default `False`).
 * `similarity_transform_box` - apply to image similarity transformation to get rectangle region stored in annotation metadata/
     * `box_scale` - box scale factor (Optional, default 1).
     * `dst_width` and `dst_height` are destination width and height for transformed image respectively.
