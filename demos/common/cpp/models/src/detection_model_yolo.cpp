@@ -244,15 +244,14 @@ ModelYolo::Region::Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionY
             anchors[i * 2] = regionYolo->get_anchors()[mask[i] * 2];
             anchors[i * 2 + 1] = regionYolo->get_anchors()[mask[i] * 2 + 1];
         }
-    }
-    else {
+    } else {
 
         // Parsing YoloV2 parameters
         num = regionYolo->get_num_regions();
         anchors = regionYolo->get_anchors();
         if (anchors.empty()) {
             anchors.insert(anchors.end(),
-                { 0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828 });
+                { 0.57273f, 0.677385f, 1.87446f, 2.06253f, 3.33843f, 5.47434f, 7.88282f, 3.52778f, 9.77052f, 9.16828f });
             num = 5;
         }
     }
