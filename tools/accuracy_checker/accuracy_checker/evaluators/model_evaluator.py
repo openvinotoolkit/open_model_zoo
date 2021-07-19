@@ -206,7 +206,7 @@ class ModelEvaluator(BaseEvaluator):
         framework = launcher_config['framework']
         device = launcher_config.get('device', 'CPU')
         details = {
-            'platform': platform.system,
+            'platform': platform.system(),
             'framework': framework if framework != 'dlsdk' else 'openvino',
             'device': device.upper(),
             'inference_model': 'sync' if not self.async_mode else 'async'

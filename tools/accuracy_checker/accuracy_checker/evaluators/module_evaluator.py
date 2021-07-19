@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 from contextlib import contextmanager
+import json
 import sys
 import importlib
 from pathlib import Path
@@ -119,7 +120,7 @@ class ModuleEvaluator(BaseEvaluator):
     def send_processing_info(self, sender):
         if sender is None:
             return {}
-        return {'custom_evaluator': self._config['module']}
+        return {'custom_evaluator': json.dumps(self._config['module'])}
 
     def set_profiling_dir(self, profiler_dir):
         self._internal_module.set_profiling_dir(profiler_dir)

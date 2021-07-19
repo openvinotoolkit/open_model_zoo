@@ -416,7 +416,7 @@ def main():
             details.update(evaluator.send_processing_info(tm))
             if args.profile:
                 setup_profiling(args.profiler_logs_dir, evaluator)
-            send_telemetry_event(tm, 'model_run', details)
+            send_telemetry_event(tm, 'model_run', json.dumps(details))
             evaluator.process_dataset(
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
             )
@@ -432,7 +432,7 @@ def main():
             evaluator.release()
             details['status'] = 'finished'
             send_telemetry_event(tm, 'status', 'success')
-            send_telemetry_event(tm, 'model_run', details)
+            send_telemetry_event(tm, 'model_run', json.dumps(details))
 
         except Exception as e:  # pylint:disable=W0703
             details['status'] = 'error'
