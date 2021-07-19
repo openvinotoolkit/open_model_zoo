@@ -31,11 +31,6 @@ files:
     sha256: e1738caa72b6ad173ea4727a439cfb9bef513d5a010488f6c4c3e86c963d5a61
     source: https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/yolo_pb2ir.json
 
-postprocessing: 
-  - $type: unpack_archive
-    file: VOCdevkit0829.zip
-    format: zip
-
 model_optimizer_args:
   - --input_model=$dl_dir/mobilenet-yolo-syg.pb
   - --input_shape=[1,416,416,3]
