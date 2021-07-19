@@ -28,7 +28,7 @@ import cv2 as cv
 from utils.network_wrappers import Detector, VectorCNN, MaskRCNN, DetectionsFromFileReader
 from mc_tracker.mct import MultiCameraTracker
 from utils.analyzer import save_embeddings
-from utils.misc import read_py_config, check_pressed_keys, AverageEstimator
+from utils.misc import read_py_config, check_pressed_keys
 from utils.video import MulticamCapture, NormalizerCLAHE
 from utils.visualization import visualize_multicam_detections, get_target_size
 from openvino.inference_engine import IECore, get_version
@@ -101,7 +101,6 @@ class FramesThreadBody:
 def run(params, config, capture, detector, reid):
     win_name = 'Multi camera tracking'
     frame_number = 0
-    avg_latency = AverageEstimator()
     output_detections = [[] for _ in range(capture.get_num_sources())]
     key = -1
 
