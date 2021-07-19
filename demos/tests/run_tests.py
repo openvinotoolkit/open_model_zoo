@@ -63,6 +63,8 @@ def parse_args():
         help='list of devices to test')
     parser.add_argument('--report-file', type=Path,
         help='path to report file')
+    parser.add_argument('--suppressed-devices', type=Path, required=False,
+        help='path to file with suppressed devices for each model')
     return parser.parse_args()
 
 
@@ -139,8 +141,32 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
     return dl_dir
 
 
+def parse_suppressed_device_list(path):
+    if not path:
+        return None
+    suppressed_devices = {}
+    with open(path, "r") as f:
+        for line in f:
+            if line.startswith('#'):
+                continue
+            parsed = line.rstrip('\n').split(sep=',')
+            suppressed_devices[parsed[0]] = parsed[1:]
+    return suppressed_devices
+
+
+def get_models(case, keys):
+    models = []
+    for key in keys:
+        model = case.options.get(key, None)
+        if model:
+            models.append(model.name if isinstance(model, ModelArg) else model.model_name)
+    return models
+
+
 def main():
     args = parse_args()
+
+    suppressed_devices = parse_suppressed_device_list(args.suppressed_devices)
 
     omz_dir = (Path(__file__).parent / '../..').resolve()
     demos_dir = omz_dir / 'demos'
@@ -202,6 +228,7 @@ def main():
                 print()
                 device_args = demo.device_args(args.devices.split())
                 for test_case_index, test_case in enumerate(demo.test_cases):
+                    test_case_models = get_models(test_case, demo.model_keys)
 
                     case_args = [demo_arg
                         for key, value in sorted(test_case.options.items())
@@ -219,6 +246,14 @@ def main():
                         continue
 
                     for device, dev_arg in device_args.items():
+                        skip = False
+                        for model in test_case_models:
+                            if suppressed_devices and device in suppressed_devices.get(model, []):
+                                print('Test case #{}/{}: Model {} is suppressed on device'
+                                      .format(test_case_index, device, model))
+                                print(flush=True)
+                                skip = True
+                        if skip: continue
                         print('Test case #{}/{}:'.format(test_case_index, device),
                             ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
                         print(flush=True)
