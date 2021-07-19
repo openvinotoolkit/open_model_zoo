@@ -59,10 +59,9 @@ class CustomBuild(distutils.command.build.build):
         super().run()
 
         package_build_dir = Path(self.build_lib, 'open_model_zoo/model_tools')
-        (package_build_dir / 'data').mkdir(exist_ok=True)
 
-        shutil.copy(
-            str(OMZ_ROOT / 'data/dataset_definitions.yml'),
+        shutil.copytree(
+            str(OMZ_ROOT / 'data'),
             str(package_build_dir / 'data'),
         )
 
