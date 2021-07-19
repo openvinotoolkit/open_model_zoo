@@ -85,7 +85,7 @@ You can also build demos manually using Inference Engine built from the [openvin
 Please refer to the Inference Engine [build instructions](https://github.com/openvinotoolkit/openvino/wiki/BuildingCode)
 for details. Please also add path to built Inference Engine libraries to `LD_LIBRARY_PATH` (Linux*) or `PATH` (Windows*) variable before building the demos.
 
-### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*
+### <a name="build_demos_linux"></a>Build the Demo Applications on Linux or MacOS*
 
 The officially supported Linux* build environment is the following:
 
