@@ -15,11 +15,14 @@
  limitations under the License.
 """
 
+from argparse import ArgumentParser, SUPPRESS
+import logging as log
+import sys
+
 # Workaround to import librosa on Linux without installed libsndfile.so
 try:
     import librosa
 except OSError:
-    import sys
     import types
     sys.modules['soundfile'] = types.ModuleType('fake_soundfile')
     import librosa
@@ -28,8 +31,9 @@ import numpy as np
 import scipy
 import wave
 
-from argparse import ArgumentParser, SUPPRESS
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 class QuartzNet:
