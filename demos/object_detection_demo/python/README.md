@@ -185,6 +185,12 @@ Common model options:
                         reshaping. Default: 600 600. Note that submitted
                         images should have the same resolution, otherwise
                         predictions might be incorrect.
+  --anchors ANCHORS [ANCHORS ...]
+                        Optional. A space separated list of anchors. By default used default anchors for model. Only
+                        for YOLOV4 architecture type.
+  --masks MASKS [MASKS ...]
+                        Optional. A space separated list of mask for anchors. By default used default masks for model.
+                        Only for YOLOV4 architecture type.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
