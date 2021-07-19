@@ -1233,3 +1233,9 @@ datasets:
       input_suffix: blur.png
       target_suffix: sharp.png
     annotation: GOPRO.pickle
+
+  - name: SYGData0829
+    data_source: SYGData0829/dataset_format_VOC2007/JPEGImages/
+    annotation_conversion:
+      converter: voc_detection
+      images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages/
