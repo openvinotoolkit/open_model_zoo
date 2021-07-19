@@ -20,14 +20,15 @@
 
 using namespace InferenceEngine;
 
-ModelYolo3::ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
+ModelYolo::ModelYolo(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
     bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels) :
     DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels),
     boxIOUThreshold(boxIOUThreshold),
-    useAdvancedPostprocessing(useAdvancedPostprocessing) {
+    useAdvancedPostprocessing(useAdvancedPostprocessing),
+    isYoloV3(true){
 }
 
-void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
     InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
@@ -55,7 +56,9 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     for (auto& output : outputInfo) {
         output.second->setPrecision(Precision::FP32);
-        output.second->setLayout(Layout::NCHW);
+        if (output.second->getDims().size() == 4) {
+            output.second->setLayout(Layout::NCHW);
+        }
         outputsNames.push_back(output.first);
     }
 
@@ -64,9 +67,14 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
             auto outputLayer = outputInfo.find(op->get_friendly_name());
             if (outputLayer != outputInfo.end()) {
                 auto regionYolo = std::dynamic_pointer_cast<ngraph::op::RegionYolo>(op);
+
                 if (!regionYolo) {
                     throw std::runtime_error("Invalid output type: " +
                         std::string(op->get_type_info().name) + ". RegionYolo expected");
+                }
+
+                if(!regionYolo->get_mask().size()) {
+                    isYoloV3 = false;
                 }
 
                 regions.emplace(outputLayer->first, Region(regionYolo));
@@ -78,7 +86,7 @@ void ModelYolo3::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     }
 }
 
-std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult) {
+std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult & infResult) {
     DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     std::vector<DetectedObject> objects;
 
@@ -86,7 +94,7 @@ std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult)
     const auto& internalData = infResult.internalModelData->asRef<InternalImageModelData>();
 
     for (auto& output : infResult.outputsData) {
-        this->parseYOLOV3Output(output.first, output.second, netInputHeight, netInputWidth,
+        this->parseYOLOOutput(output.first, output.second, netInputHeight, netInputWidth,
             internalData.inputImgHeight, internalData.inputImgWidth, objects);
     }
 
@@ -123,57 +131,68 @@ std::unique_ptr<ResultBase> ModelYolo3::postprocess(InferenceResult & infResult)
     return std::unique_ptr<ResultBase>(result);
 }
 
-void ModelYolo3::parseYOLOV3Output(const std::string& output_name,
+void ModelYolo::parseYOLOOutput(const std::string& output_name,
     const InferenceEngine::Blob::Ptr& blob, const unsigned long resized_im_h,
     const unsigned long resized_im_w, const unsigned long original_im_h,
     const unsigned long original_im_w,
     std::vector<DetectedObject>& objects) {
 
-    const int out_blob_h = static_cast<int>(blob->getTensorDesc().getDims()[2]);
-    const int out_blob_w = static_cast<int>(blob->getTensorDesc().getDims()[3]);
-    if (out_blob_h != out_blob_w) {
-        throw std::runtime_error("Invalid size of output " + output_name +
-            " It should be in NCHW layout and H should be equal to W. Current H = " + std::to_string(out_blob_h) +
-            ", current W = " + std::to_string(out_blob_h));
-    }
-
     // --------------------------- Extracting layer parameters -------------------------------------
     auto it = regions.find(output_name);
-    if(it == regions.end()) {
+    if (it == regions.end()) {
         throw std::runtime_error(std::string("Can't find output layer with name ") + output_name);
     }
     auto& region = it->second;
 
-    auto side = out_blob_h;
-    auto side_square = side * side;
+    int sideW = 0;
+    int sideH = 0;
+    unsigned long scaleH;
+    unsigned long scaleW;
+    if (isYoloV3) {
+        auto& dims = blob->getTensorDesc().getDims();
+        const int out_blob_h = static_cast<int>(dims[2]);
+        const int out_blob_w = static_cast<int>(dims[3]);
+        sideH = out_blob_h;
+        sideW = out_blob_w;
+        scaleW = resized_im_w;
+        scaleH = resized_im_h;
+    }
+    else {
+        sideH = region.outputHeight;
+        sideW = region.outputWidth;
+        scaleW = region.outputWidth;
+        scaleH = region.outputHeight;
+    }
+
+    auto entriesNum = sideW * sideH;
     const float* output_blob = blob->buffer().as<PrecisionTrait<Precision::FP32>::value_type*>();
 
     // --------------------------- Parsing YOLO Region output -------------------------------------
-    for (int i = 0; i < side_square; ++i) {
-        int row = i / side;
-        int col = i % side;
+    for (int i = 0; i < entriesNum; ++i) {
+        int row = i / sideW;
+        int col = i % sideW;
         for (int n = 0; n < region.num; ++n) {
             //--- Getting region data from blob
-            int obj_index = calculateEntryIndex(side, region.coords, region.classes, n * side * side + i, region.coords);
-            int box_index = calculateEntryIndex(side, region.coords, region.classes, n * side * side + i, 0);
+            int obj_index = calculateEntryIndex(entriesNum, region.coords, region.classes, n * entriesNum + i, region.coords);
+            int box_index = calculateEntryIndex(entriesNum, region.coords, region.classes, n * entriesNum + i, 0);
             float scale = output_blob[obj_index];
 
             //--- Preliminary check for confidence threshold conformance
             if (scale >= confidenceThreshold){
                 //--- Calculating scaled region's coordinates
-                double x = (col + output_blob[box_index + 0 * side_square]) / side * original_im_w;
-                double y = (row + output_blob[box_index + 1 * side_square]) / side * original_im_h;
-                double height = std::exp(output_blob[box_index + 3 * side_square]) * region.anchors[2 * n + 1] * original_im_h / resized_im_h;
-                double width = std::exp(output_blob[box_index + 2 * side_square]) * region.anchors[2 * n] * original_im_w / resized_im_w;
+                double x = (col + output_blob[box_index + 0 * entriesNum]) / sideW * original_im_w;
+                double y = (row + output_blob[box_index + 1 * entriesNum]) / sideH * original_im_h;
+                double height = std::exp(output_blob[box_index + 3 * entriesNum]) * region.anchors[2 * n + 1] * original_im_h / scaleH;
+                double width = std::exp(output_blob[box_index + 2 * entriesNum]) * region.anchors[2 * n] * original_im_w / scaleW;
 
                 DetectedObject obj;
-                obj.x = (float)(x-width/2);
-                obj.y = (float)(y-height/2);
-                obj.width = (float)(width);
-                obj.height = (float)(height);
+                obj.x = (float)std::max((x-width/2), 0.);
+                obj.y = (float)std::max((y-height/2), 0.);
+                obj.width = std::min((float)width, original_im_w - obj.x);
+                obj.height = std::min((float)height, original_im_h - obj.y);
 
                 for (int j = 0; j < region.classes; ++j) {
-                    int class_index = calculateEntryIndex(side, region.coords, region.classes, n * side_square + i, region.coords + 1 + j);
+                    int class_index = calculateEntryIndex(entriesNum, region.coords, region.classes, n * entriesNum + i, region.coords + 1 + j);
                     float prob = scale * output_blob[class_index];
 
                     //--- Checking confidence threshold conformance and adding region to the list
@@ -189,13 +208,13 @@ void ModelYolo3::parseYOLOV3Output(const std::string& output_name,
     }
 }
 
-int ModelYolo3::calculateEntryIndex(int side, int lcoords, int lclasses, int location, int entry) {
-    int n = location / (side * side);
-    int loc = location % (side * side);
-    return n * side * side * (lcoords + lclasses + 1) + entry * side * side + loc;
+int ModelYolo::calculateEntryIndex(int totalCells, int lcoords, int lclasses, int location, int entry) {
+    int n = location / totalCells;
+    int loc = location % totalCells;
+    return (n * (lcoords + lclasses + 1) + entry) * totalCells + loc;
 }
 
-double ModelYolo3::intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2) {
+double ModelYolo::intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2) {
     double overlappingWidth = fmin(o1.x + o1.width, o2.x + o2.width) - fmax(o1.x, o2.x);
     double overlappingHeight = fmin(o1.y + o1.height, o2.y + o2.height) - fmax(o1.y, o2.y);
     double intersectionArea = (overlappingWidth < 0 || overlappingHeight < 0) ? 0 : overlappingHeight * overlappingWidth;
@@ -203,15 +222,34 @@ double ModelYolo3::intersectionOverUnion(const DetectedObject& o1, const Detecte
     return intersectionArea / unionArea;
 }
 
-ModelYolo3::Region::Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo) {
+ModelYolo::Region::Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo) {
     coords = regionYolo->get_num_coords();
     classes = regionYolo->get_num_classes();
     auto mask = regionYolo->get_mask();
     num = mask.size();
-    anchors.resize(num * 2);
 
-    for (int i = 0; i < num; ++i) {
-        anchors[i * 2] = regionYolo->get_anchors()[mask[i] * 2];
-        anchors[i * 2 + 1] = regionYolo->get_anchors()[mask[i] * 2 + 1];
+    auto shape = regionYolo->get_input_shape(0);
+    outputWidth = shape[3];
+    outputHeight = shape[2];
+
+    if (num) {
+
+        // Parsing YoloV3 parameters
+        anchors.resize(num * 2);
+
+        for (int i = 0; i < num; ++i) {
+            anchors[i * 2] = regionYolo->get_anchors()[mask[i] * 2];
+            anchors[i * 2 + 1] = regionYolo->get_anchors()[mask[i] * 2 + 1];
+        }
+    } else {
+
+        // Parsing YoloV2 parameters
+        num = regionYolo->get_num_regions();
+        anchors = regionYolo->get_anchors();
+        if (anchors.empty()) {
+            anchors.insert(anchors.end(),
+                { 0.57273f, 0.677385f, 1.87446f, 2.06253f, 3.33843f, 5.47434f, 7.88282f, 3.52778f, 9.77052f, 9.16828f });
+            num = 5;
+        }
     }
 }

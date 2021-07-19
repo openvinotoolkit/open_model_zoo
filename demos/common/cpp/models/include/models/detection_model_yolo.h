@@ -26,7 +26,7 @@ namespace ngraph {
     }
 }
 
-class ModelYolo3 : public DetectionModel {
+class ModelYolo : public DetectionModel {
 protected:
     class Region {
     public:
@@ -34,6 +34,8 @@ protected:
         int classes = 0;
         int coords = 0;
         std::vector<float> anchors;
+        int outputWidth = 0;
+        int outputHeight = 0;
 
         Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo);
     };
@@ -51,7 +53,7 @@ public:
     /// during postprocessing (only one of them should stay). The default value is 0.5
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
-    ModelYolo3(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
+    ModelYolo(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
         bool useAdvancedPostprocessing = true, float boxIOUThreshold = 0.5, const std::vector<std::string>& labels = std::vector<std::string>());
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
@@ -59,14 +61,15 @@ public:
 protected:
     void prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) override;
 
-    void parseYOLOV3Output(const std::string& output_name, const InferenceEngine::Blob::Ptr& blob,
+    void parseYOLOOutput(const std::string& output_name, const InferenceEngine::Blob::Ptr& blob,
         const unsigned long resized_im_h, const unsigned long resized_im_w, const unsigned long original_im_h,
         const unsigned long original_im_w, std::vector<DetectedObject>& objects);
 
-    static int calculateEntryIndex(int side, int lcoords, int lclasses, int location, int entry);
+    static int calculateEntryIndex(int entriesNum, int lcoords, int lclasses, int location, int entry);
     static double intersectionOverUnion(const DetectedObject& o1, const DetectedObject& o2);
 
     std::map<std::string, Region> regions;
     double boxIOUThreshold;
     bool useAdvancedPostprocessing;
+    bool isYoloV3;
 };
