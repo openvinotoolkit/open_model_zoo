@@ -30,14 +30,6 @@ files:
     size: 384
     sha256: e1738caa72b6ad173ea4727a439cfb9bef513d5a010488f6c4c3e86c963d5a61
     source: https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/yolo_pb2ir.json
-  - name: VOCdevkit0829.zip
-    size: 1796812125
-    sha256: 442ff73b0fea7148fefacc7a37dbadf93a15037ef22839ddb71e5a84c7832a61
-    source: https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/VOCdevkit0829.zip
-  - name: mobilenet-yolo-syg.h5
-    size: 42753056
-    sha256: 763f059f5ece0accec13c104a80020c582ab001157aebf7079baf32bcfdeecc9
-    source: https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/mobilenet-yolo-syg.h5
 
 postprocessing: 
   - $type: unpack_archive
