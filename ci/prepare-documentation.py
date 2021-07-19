@@ -57,6 +57,8 @@ sys.path.append(str(OMZ_ROOT / 'ci/lib'))
 import omzdocs
 
 all_images_paths = {}
+all_md_paths = {}
+documentation_md_paths = set()
 
 XML_ID_ATTRIBUTE = '{http://www.w3.org/XML/1998/namespace}id'
 
@@ -90,6 +92,8 @@ def add_page(output_root, parent, *, id=None, path=None, title=None, index=-1):
 
         element.attrib['title'] = title
         return element
+
+    documentation_md_paths.add(Path(path))
 
     output_path = output_root / path
 
@@ -140,23 +144,26 @@ def add_page(output_root, parent, *, id=None, path=None, title=None, index=-1):
         (output_root / image_rel_path.parent).mkdir(parents=True, exist_ok=True)
         shutil.copyfile(image_abs_path, output_root / image_rel_path)
 
-    non_md_links = [ref.url for ref in page.external_references()
-                    if ref.type == 'link' and not ref.url.endswith('.md')]
+    links = [ref.url for ref in page.external_references() if ref.type == 'link']
 
-    for non_md_link in non_md_links:
-        parsed_non_md_link = urllib.parse.urlparse(non_md_link)
+    for link in links:
+        parsed_link = urllib.parse.urlparse(link)
 
-        if parsed_non_md_link.scheme or parsed_non_md_link.netloc:
+        if parsed_link.scheme or parsed_link.netloc:
             continue # not a relative URL
 
-        if parsed_non_md_link.fragment:
+        if parsed_link.fragment:
             continue # link to markdown section
 
-        relative_path = (OMZ_ROOT / Path(path).parent / non_md_link).resolve().relative_to(OMZ_ROOT)
-        suggested_path = OMZ_PREFIX + Path(relative_path).as_posix()
+        relative_path = (OMZ_ROOT / Path(path).parent / link).resolve().relative_to(OMZ_ROOT)
+        relative_posix_path = Path(relative_path).as_posix()
 
-        raise RuntimeError(f'{path}: Relative link to non-markdown file "{non_md_link}". '
-                           f'Replace it by `{suggested_path}`')
+        if link.endswith('.md'):
+            all_md_paths[relative_path] = Path(path)
+        else:
+            suggested_path = OMZ_PREFIX + relative_posix_path
+            raise RuntimeError(f'{path}: Relative link to non-markdown file "{link}". '
+                               f'Replace it by `{suggested_path}`')
 
     return element
 
@@ -362,6 +369,14 @@ def main():
             raise RuntimeError(f'{md_path_rel}: title must contain "Demo"')
 
     sort_titles(demos_group_element)
+
+    non_documentation_md_paths = set(all_md_paths.keys()) - documentation_md_paths
+
+    if non_documentation_md_paths:
+        non_documentation_md_path = non_documentation_md_paths.pop()
+        raise RuntimeError(f'{all_md_paths[non_documentation_md_path]}: '
+                           f'"{non_documentation_md_path}" is not in the online documentation. '
+                           f'Replace the link to this file by `{OMZ_PREFIX + non_documentation_md_path.as_posix()}`')
 
     with (output_root / 'DoxygenLayout.xml').open('wb') as layout_file:
         ET.ElementTree(doxygenlayout_element).write(layout_file)
