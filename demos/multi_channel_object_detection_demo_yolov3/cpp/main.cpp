@@ -169,7 +169,7 @@ double IntersectionOverUnion(const DetectionObject &box_1, const DetectionObject
     return area_of_overlap / area_of_union;
 }
 
-void ParseYOLOV3Output(InferenceEngine::InferRequest::Ptr req,
+void parseYOLOOutput(InferenceEngine::InferRequest::Ptr req,
                        const std::string &outputName,
                        const YoloParams &yoloParams, const unsigned long resized_im_h,
                        const unsigned long resized_im_w, const unsigned long original_im_h,
@@ -433,7 +433,7 @@ int main(int argc, char* argv[]) {
             std::vector<DetectionObject> objects;
             // Parsing outputs
             for (auto &output_name :outputDataBlobNames) {
-                ParseYOLOV3Output(req, output_name, yoloParams[output_name], resized_im_h, resized_im_w, frameSize.height, frameSize.width, FLAGS_t, objects);
+                parseYOLOOutput(req, output_name, yoloParams[output_name], resized_im_h, resized_im_w, frameSize.height, frameSize.width, FLAGS_t, objects);
             }
             // Filtering overlapping boxes and lower confidence object
             std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());
