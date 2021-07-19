@@ -117,3 +117,31 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 * `VOC2012` used for evaluation models on VOC2012 dataset for object detection task. Background label + label map with 20 object categories are used. (model examples: [`mobilenet-ssd`](../models/public/mobilenet-ssd/mobilenet-ssd.md), [`ssd300`](../models/public/ssd300/ssd300.md))
 * `VOC2012_without_background` used for evaluation models on VOC2012 dataset for object detection tasks. Label map with 20 object categories is used.(model examples: [`yolo-v2-ava-0001`](../models/intel/yolo-v2-ava-0001/description/yolo-v2-ava-0001.md), [`yolo-v2-tiny-ava-0001`](../models/intel/yolo-v2-tiny-ava-0001/description/yolo-v2-tiny-ava-0001.md))
 * `VOC2012_Segmentation` used for evaluation models on VOC2012 dataset for segmentation tasks. Background label + label map with 20 object categories are used.(model examples: [`deeplabv3`](../models/public/deeplabv3/deeplabv3.md))
+
+
+
+
+## [SYGData0829](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
+
+### How download dataset
+
+To download SYGData0829 dataset, you need to follow the steps below:
+1. Go to the [github repo](https://github.com/ermubuzhiming/OMZ-files-download/releases/tag/v1-ly)
+2. Select [`SYGData0829.zip.001`](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip.001) 、
+[`SYGData0829.zip.002`](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip.002) 、
+[`SYGData0829.zip.003`](https://github.com/ermubuzhiming/OMZ-files -download/releases/download/v1-ly/SYGData0829.zip.003) 、
+[`SYGData0829.zip.004`](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/SYGData0829.zip.004) and download archive
+3. Unpack archive
+
+### Files layout
+
+To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the following:
+
+* `SYGData0829/dataset_format_VOC2007` - directory containing annotations, images, segmentation masks and image sets files directories
+    * `Annotations` - directory containing the SYGData0829 annotation files
+    * `JPEGImages` - directory containing the SYGData0829 validation images
+    * `ImageSets` - directory containing the SYGData0829 text files specifying lists of images for different tasks
+        * `Main/val.txt` - image sets file for detection tasks
+
+### Datasets in dataset_definitions.yml
+* `SYGData0829` used for evaluation models on SYGData0829 dataset for object detection task. Label map with 9 object categories are used. (model examples: [`mobilenet-yolo-syg`](../models/public/mobilenet-yolo-syg/mobilenet-yolo-syg.md))
