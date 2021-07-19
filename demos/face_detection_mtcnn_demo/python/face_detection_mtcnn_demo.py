@@ -177,7 +177,6 @@ def main():
         # Pnet stage
         # *************************************
 
-        t0 = cv2.getTickCount()
         pnet_res = []
         for i, scale in enumerate(scales):
             hs = int(oh*scale)
