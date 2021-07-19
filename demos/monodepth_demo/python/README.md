@@ -68,6 +68,9 @@ Running the application with the empty list of options yields the usage message 
 ## Demo Output
 
 The application outputs are the floating disparity map (PFM) as well as a color-coded version (PNG).
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

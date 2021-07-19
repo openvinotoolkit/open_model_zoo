@@ -125,6 +125,12 @@ The demo outputs original video with the processed one. Usage:
 * Select a part of the frame to be shown in a separate window by using your left mouse button.
 * Exit the demo by pressing `Esc`.
 
+The demo reports
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+You can use both of these metrics to measure application-level performance.
+
 ## See Also
 
 * [Open Model Zoo Demos](../../README.md)

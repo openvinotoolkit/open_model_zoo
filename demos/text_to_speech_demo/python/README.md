@@ -143,6 +143,9 @@ python3 text_to_speech_demo.py \
 ## Demo Output
 
 The application outputs WAV file with generated audio.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

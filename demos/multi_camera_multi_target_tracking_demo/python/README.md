@@ -189,6 +189,12 @@ Such file with detections can be saved from the demo. Specify the argument `--sa
 ## Demo Output
 
 The demo displays bounding boxes of tracked objects and unique IDs of those objects.
+The demo reports
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+You can use both of these metrics to measure application-level performance.
+
 To save output video with the result please use the option  `--output_video`,
 to change configuration parameters please open the `configs/person.py` (or `configs/vehicle.py` for vehicle tracking demo) file and edit it.
 

@@ -242,7 +242,11 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 ## Demo output
 
 The demo uses OpenCV window to display the resulting video frame and detections.
-If specified, it also writes output to a file. It outputs logs to the terminal.
+The demo reports
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+You can use both of these metrics to measure application-level performance.
 
 ## See also
 

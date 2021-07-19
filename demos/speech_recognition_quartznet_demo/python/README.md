@@ -62,6 +62,9 @@ An example audio file can be taken from `<openvino_dir>/deployment_tools/demo/ho
 ## Demo Output
 
 The application prints the decoded text for the audio file.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

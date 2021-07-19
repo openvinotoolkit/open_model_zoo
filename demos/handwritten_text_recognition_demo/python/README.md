@@ -104,7 +104,10 @@ python handwritten_text_recognition_demo.py \
 
 ## Demo Output
 
-The application uses the terminal to show resulting recognition text and inference performance.
+The application uses the terminal to show resulting recognition text.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

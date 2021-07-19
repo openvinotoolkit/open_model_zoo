@@ -116,6 +116,9 @@ python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/bra
 ## Demo Output
 
 The demo outputs a multipage TIFF image and a NIFTI archive.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 
