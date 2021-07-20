@@ -392,7 +392,7 @@ def main():
     evaluator_kwargs = configure_evaluator_kwargs(args)
     details = {
         'mode': "online" if not args.store_only else "offline",
-        'metric_profiling': args.profile,
+        'metric_profiling': args.profile or False,
         'error': None
     }
 

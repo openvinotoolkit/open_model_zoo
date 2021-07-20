@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from contextlib import contextmanager
-import json
+import platform
 import sys
 import importlib
 from pathlib import Path
@@ -120,7 +120,19 @@ class ModuleEvaluator(BaseEvaluator):
     def send_processing_info(self, sender):
         if sender is None:
             return {}
-        return {'custom_evaluator': json.dumps(self._config['module'])}
+        module_config = self._config['module_config']
+        launcher_config = module_config['launchers'][0]
+        framework = launcher_config['framework']
+        device = launcher_config.get('device', 'CPU')
+        details = {
+            'custom_evaluator': self._config['module'],
+            'platform': platform.system(),
+            'framework': framework if framework != 'dlsdk' else 'openvino',
+            'device': device.upper(),
+            'inference_model': 'sync'
+        }
+        details.update(self._internal_module.send_processing_info(sender))
+        return details
 
     def set_profiling_dir(self, profiler_dir):
         self._internal_module.set_profiling_dir(profiler_dir)

@@ -327,7 +327,6 @@ class VideoBackgroundMatting(SuperResolutionFeedbackEvaluator):
             _progress_reporter.finish()
 
 
-
 class SegnetModel:
     def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         if models_args and not delayed_model_loading:

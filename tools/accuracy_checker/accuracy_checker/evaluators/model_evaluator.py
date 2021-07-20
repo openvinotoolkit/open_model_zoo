@@ -209,7 +209,7 @@ class ModelEvaluator(BaseEvaluator):
             'platform': platform.system(),
             'framework': framework if framework != 'dlsdk' else 'openvino',
             'device': device.upper(),
-            'inference_model': 'sync' if not self.async_mode else 'async'
+            'inference_mode': 'sync' if not self.async_mode else 'async'
         }
         model_type = None
 
