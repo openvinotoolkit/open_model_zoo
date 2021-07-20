@@ -151,21 +151,28 @@ class ContextWindow(Preprocessor):
         params = super().parameters()
         params.update({
             'cw_l': NumberField(value_type=int, min_value=0, description='Context window left'),
-            'cw_r': NumberField(value_type=int, min_value=0, description='Context window right')
+            'cw_r': NumberField(value_type=int, min_value=0, description='Context window right'),
+            'to_multi_infer': BoolField(optional=True, default=False)
         })
         return params
 
     def configure(self):
         self.cw_l = self.get_value_from_config('cw_l')
         self.cw_r = self.get_value_from_config('cw_r')
+        self.to_multi_infer = self.get_value_from_config('to_multi_infer')
 
     def process(self, image, annotation_meta=None):
         def process_single(signal):
-            borders = (self.cw_l, self.cw_r) if signal.ndim == 1 else ((0, 0), (self.cw_l, self.cw_r))
+            borders = (self.cw_l, self.cw_r) if signal.ndim == 1 else ((self.cw_l, self.cw_r), (0, 0))
             return np.pad(signal, borders, mode='edge')
         image.data = (
             process_single(image.data) if not isinstance(image.data, list)
             else [process_single(elem) for elem in image.data]
         )
+        image.metadata['context_left'] = self.cw_l
+        image.metadata['context_right'] = self.cw_r
+        if self.to_multi_infer:
+            image.data = list(image.data)
+            image.metadata['multi_infer'] = True
 
         return image
