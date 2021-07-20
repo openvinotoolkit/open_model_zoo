@@ -170,6 +170,7 @@ class Dataset:
             'annotation_saving': False,
             'dataset_size': self.size
         }
+        convert_annotation = True
         subsample_size = config.get('subsample_size')
         subsample_meta = {'subset': False, 'shuffle': False}
         if not ignore_subset_settings(config):
@@ -184,14 +185,16 @@ class Dataset:
         info['subset_info'] = subsample_meta
         if 'annotation' in config:
             annotation_file = Path(config['annotation'])
-            if annotation_file.exists():
-                return info
+            if 'annotation_conversion' in config:
+                info['annotation_saving'] = True
+                convert_annotation = True
+            elif annotation_file.exists():
+                convert_annotation = False
 
         if 'annotation_conversion' in config:
             info['converter'] = config['annotation_conversion'].get('converter')
 
-        if contains_all(config, ['annotation', 'annotation_conversion']):
-            info['annotation_saving'] = True
+        info['convert_annotation'] = convert_annotation
 
         return info
 
