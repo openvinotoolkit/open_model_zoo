@@ -19,8 +19,10 @@ import numpy as np
 from ..config import BoolField, NumberField
 from ..preprocessor import Preprocessor
 
+
 class SpliceFrame(Preprocessor):
     __provider__ = 'audio_splice'
+    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -35,7 +37,6 @@ class SpliceFrame(Preprocessor):
 
         self.frames = self.get_value_from_config('frames')
         self.axis = self.get_value_from_config('axis')
-
 
     def process(self, image, annotation_meta=None):
         if self.frames > 1:
@@ -74,6 +75,7 @@ class DitherFrame(Preprocessor):
 
 class PreemphFrame(Preprocessor):
     __provider__ = 'audio_preemph'
+    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -118,6 +120,8 @@ class DitherSpectrum(Preprocessor):
 
 class SignalPatching(Preprocessor):
     __provider__ = 'audio_patches'
+    shape_modificator = True
+    _dynamic_output = False
 
     @classmethod
     def parameters(cls):
@@ -142,9 +146,14 @@ class SignalPatching(Preprocessor):
         image.metadata['multi_infer'] = True
         return image
 
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_output
+
 
 class ContextWindow(Preprocessor):
     __provider__ = 'context_window'
+    shape_modificator = True
 
     @classmethod
     def parameters(cls):

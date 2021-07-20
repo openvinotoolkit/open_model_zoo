@@ -101,6 +101,8 @@ class DecodeByVocabulary(Preprocessor):
 
 class PadWithEOS(Preprocessor):
     __provider__ = 'pad_with_eos'
+    shape_modificator = True
+    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -152,3 +154,7 @@ class PadWithEOS(Preprocessor):
         image.data = ' '.join(words)
 
         return image
+
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes
