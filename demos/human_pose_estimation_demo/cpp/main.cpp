@@ -69,7 +69,7 @@ DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_double(t, 0.1, thresh_output_message);
-DEFINE_uint32(nireq, 2, nireq_message);
+DEFINE_uint32(nireq, 8, nireq_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
 DEFINE_string(nstreams, "", num_streams_message);
 DEFINE_bool(no_show, false, no_show_message);
