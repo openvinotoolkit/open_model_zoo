@@ -246,12 +246,15 @@ int main(int argc, char *argv[]) {
         double aspectRatio = curr_frame.cols / static_cast<double>(curr_frame.rows);
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
+            slog::debug << "Init openpose model" << slog::endl;
             model.reset(new HPEOpenPose(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
         }
         else if (FLAGS_at == "ae") {
+            slog::debug << "Init AssociativeEmbedding model" << slog::endl;
             model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t));
         }
         else if (FLAGS_at == "higherhrnet") {
+            slog::debug << "Init higherhrnet model" << slog::endl;
             float delta = 0.5f;
             model.reset(new HpeAssociativeEmbedding(FLAGS_m, aspectRatio, FLAGS_tsize, (float)FLAGS_t, delta, RESIZE_KEEP_ASPECT_LETTERBOX));
         }
@@ -270,7 +273,7 @@ int main(int argc, char *argv[]) {
 
         int64_t frameNum = pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
-
+        slog::debug << "frameNum: " << frameNum << slog::endl;
         uint32_t framesProcessed = 0;
         bool keepRunning = true;
         std::unique_ptr<ResultBase> result;

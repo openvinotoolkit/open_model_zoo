@@ -42,13 +42,18 @@ HpeAssociativeEmbedding::HpeAssociativeEmbedding(const std::string& modelFileNam
     confidenceThreshold(confidenceThreshold),
     delta(delta),
     resizeMode(resizeMode) {
+    slog::debug << "HpeAssociativeEmbedding constructor" << slog::endl;
+    slog::debug << "aspectRatio: " << aspectRatio << slog::endl;
+    slog::debug << "targetSize: " << targetSize << slog::endl;
+    slog::debug << "resizeMod: " << resizeMode << slog::endl;
+    slog::debug << "stride: " << stride << slog::endl;
 }
 
 void HpeAssociativeEmbedding::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
+    slog::debug << "HpeAssociativeEmbedding Preparing Inputs Outputs" << slog::endl;
     changeInputSize(cnnNetwork);
-
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     if (inputShapes.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 input");
@@ -84,15 +89,21 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
 }
 
 void HpeAssociativeEmbedding::changeInputSize(CNNNetwork& cnnNetwork) {
+    slog::debug << "HpeAssociativeEmbedding Change Input Size" << slog::endl;
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     SizeVector& inputDims = inputShapes.begin()->second;
+    slog::debug << "inputDims: " << inputDims << slog::endl;
     if (!targetSize) {
         targetSize =  static_cast<int>(std::min(inputDims[2], inputDims[3]));
     }
     int inputHeight = aspectRatio >= 1.0 ? targetSize : static_cast<int>(std::round(targetSize / aspectRatio));
+    slog::debug << "inputHeight: " << inputHeight << slog::endl;
     int inputWidth = aspectRatio >= 1.0 ? static_cast<int>(std::round(targetSize * aspectRatio)) : targetSize;
+    slog::debug << "inputWidth: " << inputWidth << slog::endl;
     int height = static_cast<int>((inputHeight + stride - 1) / stride) * stride;
+    slog::debug << "height: " << height << slog::endl;
     int width = static_cast<int>((inputWidth + stride - 1) / stride) * stride;
+    slog::debug << "width: " << width << slog::endl;
     inputDims[0] = 1;
     inputDims[2] = height;
     inputDims[3] = width;
@@ -101,12 +112,15 @@ void HpeAssociativeEmbedding::changeInputSize(CNNNetwork& cnnNetwork) {
 }
 
 std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
+    slog::debug << "HpeAssociativeEmbedding preprocess" << slog::endl;
     auto& image = inputData.asRef<ImageInputData>().inputImage;
     cv::Rect roi;
     auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, resizeMode, true, &roi);
+    slog::debug << "roi.height: " << roi.height << slog::endl;
+    slog::debug << "roi.width: " << roi.width << slog::endl;
     if (inputLayerSize.height - stride >= roi.height
         || inputLayerSize.width - stride >= roi.width) {
-        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio\n";
+        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
     }
     request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
@@ -115,6 +129,7 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
 }
 
 std::unique_ptr<ResultBase> HpeAssociativeEmbedding::postprocess(InferenceResult& infResult) {
+    slog::debug << "HpeAssociativeEmbedding postprocess" << slog::endl;
     HumanPoseResult* result = new HumanPoseResult(infResult.frameId, infResult.metaData);
 
     auto aembds = infResult.outputsData[embeddingsBlobName];

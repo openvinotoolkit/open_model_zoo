@@ -70,12 +70,14 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
         return -1;
 
     auto startTime = std::chrono::steady_clock::now();
+    slog::debug << "Submit Frame ID: " << frameID << slog::endl;
     auto internalModelData = model->preprocess(inputData, request);
     preprocessMetrics.update(startTime);
 
     request->SetCompletionCallback(
         [this, frameID, request, internalModelData, metaData, startTime]() {
             {
+                slog::debug << "Inference done for frameID: " << frameID <<  slog::endl;
                 const std::lock_guard<std::mutex> lock(mtx);
                 inferenceMetrics.update(startTime);
                 try {
