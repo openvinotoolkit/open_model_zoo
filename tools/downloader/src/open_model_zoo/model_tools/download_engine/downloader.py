@@ -21,11 +21,14 @@ import types
 
 from open_model_zoo.model_tools.download_engine import cache
 
+DOWNLOAD_TIMEOUT = 5 * 60
+
 class Downloader:
-    def __init__(self, output_dir=None, cache_dir=None, num_attempts=1):
+    def __init__(self, output_dir=None, cache_dir=None, num_attempts=1, timeout=DOWNLOAD_TIMEOUT):
         self.output_dir = output_dir
         self.cache = cache.NullCache() if cache_dir is None else cache.DirCache(cache_dir)
         self.num_attempts = num_attempts
+        self.timeout = timeout
 
     def _process_download(self, reporter, chunk_iterable, size, progress, file):
         start_time = time.monotonic()
@@ -70,12 +73,12 @@ class Downloader:
 
             try:
                 reporter.job_context.check_interrupted()
-                chunk_iterable, continue_offset = start_download(offset=progress.size)
+                chunk_iterable, continue_offset = start_download(offset=progress.size, timeout=self.timeout)
 
                 if continue_offset not in {0, progress.size}:
                     # Somehow we neither restarted nor continued from where we left off.
                     # Try to restart.
-                    chunk_iterable, continue_offset = start_download(offset=0)
+                    chunk_iterable, continue_offset = start_download(offset=0, timeout=self.timeout)
                     if continue_offset != 0:
                         reporter.log_error("Remote server refuses to send whole file, aborting")
                         return None

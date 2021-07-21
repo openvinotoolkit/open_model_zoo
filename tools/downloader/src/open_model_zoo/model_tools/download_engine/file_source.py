@@ -17,7 +17,6 @@ import requests
 
 from open_model_zoo.model_tools.download_engine import validation
 
-DOWNLOAD_TIMEOUT = 5 * 60
 
 class TaggedBase:
     @classmethod
@@ -76,8 +75,8 @@ class FileSourceHttp(FileSource):
     def deserialize(cls, source):
         return cls(validation.validate_string('"url"', source['url']))
 
-    def start_download(self, session, chunk_size, offset):
-        response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT,
+    def start_download(self, session, chunk_size, offset, timeout):
+        response = session.get(self.url, stream=True, timeout=timeout,
             headers=self.http_range_headers(offset))
         response.raise_for_status()
 
@@ -93,18 +92,18 @@ class FileSourceGoogleDrive(FileSource):
     def deserialize(cls, source):
         return cls(validation.validate_string('"id"', source['id']))
 
-    def start_download(self, session, chunk_size, offset):
+    def start_download(self, session, chunk_size, offset, timeout):
         range_headers = self.http_range_headers(offset)
         URL = 'https://docs.google.com/uc?export=download'
         response = session.get(URL, params={'id': self.id}, headers=range_headers,
-            stream=True, timeout=DOWNLOAD_TIMEOUT)
+            stream=True, timeout=timeout)
         response.raise_for_status()
 
         for key, value in response.cookies.items():
             if key.startswith('download_warning'):
                 params = {'id': self.id, 'confirm': value}
                 response = session.get(URL, params=params, headers=range_headers,
-                    stream=True, timeout=DOWNLOAD_TIMEOUT)
+                    stream=True, timeout=timeout)
                 response.raise_for_status()
 
         return self.handle_http_response(response, chunk_size)

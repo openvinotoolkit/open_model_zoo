@@ -22,8 +22,6 @@ import yaml
 from open_model_zoo.model_tools import _common
 from open_model_zoo.model_tools.download_engine import file_source, postprocessing, validation
 
-DOWNLOAD_TIMEOUT = 5 * 60
-
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
 RE_SHA256SUM = re.compile(r'[0-9a-fA-F]{64}')
 
