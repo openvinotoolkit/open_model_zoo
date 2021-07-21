@@ -161,6 +161,6 @@ InferenceResult AsyncPipeline::getInferenceResult(bool shouldKeepOrder) {
             outputFrameId = 0;
     }
 
-    slog::debug << "getInferenceResult for frameID: " << retVal.frameId << slog::endl; slog::endl;
+    slog::debug << "getInferenceResult for frameID: " << retVal.frameId << slog::endl;
     return retVal;
 }
