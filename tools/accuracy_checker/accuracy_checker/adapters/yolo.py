@@ -601,3 +601,65 @@ class YoloV5Adapter(YoloV3Adapter):
                                                  size_correct=lambda x: (2.0 / (1.0 + np.exp(-x))) ** 2,
                                                  conf_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
                                                  prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
+
+
+class YolorAdapter(Adapter):
+    __provider__ = 'yolor'
+    prediction_types = (DetectionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'classes': NumberField(
+                value_type=int, optional=True, min_value=1, default=80, description="Number of detection classes."
+            ),
+            'coords': NumberField(
+                value_type=int, optional=True, min_value=1, default=4, description="Number of bbox coordinates."
+            ),
+            'num': NumberField(
+                value_type=int, optional=True, min_value=1, default=3,
+                description="Num parameter from configuration file."
+            ),
+            'anchors': StringField(
+                optional=False, choices=YoloV3Adapter.PRECOMPUTED_ANCHORS.keys(), allow_own_choice=True,
+                description="Anchor values provided as comma-separated list"
+            ),
+            'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
+                                     description="Minimal objectiveness score value for valid detections."),
+            'anchor_masks': ListField(optional=False, description='per layer used anchors mask')
+        })
+        return parameters
+
+    def configure(self):
+        self.classes = self.get_value_from_config('classes')
+        self.coords = self.get_value_from_config('coords')
+        self.num = self.get_value_from_config('num')
+        self.anchors = self.get_value_from_config('anchors')
+        self.threshold = self.get_value_from_config('threshold')
+        self.anchor_masks = self.get_value_from_config('anchor_masks')
+
+    def xywh2xyxy(self, x):
+        y = np.copy(x)
+        y[:, 0] = x[:, 0] - x[:, 2] / 2  # top left x
+        y[:, 1] = x[:, 1] - x[:, 3] / 2  # top left y
+        y[:, 2] = x[:, 0] + x[:, 2] / 2  # bottom right x
+        y[:, 3] = x[:, 1] + x[:, 3] / 2  # bottom right y
+        return y
+
+    def process(self, raw, identifiers, frame_meta):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+
+        for identifier, output, meta in zip(identifiers, raw_outputs, frame_meta):
+            min_wh, max_wh = 2, 4096
+            valid_predictions = output[output[..., 4] > self.threshold]
+            valid_predictions[:, 5:] *= valid_predictions[:, 4:5]
+
+            boxes = self.xywh2xyxy(valid_predictions[:, :4])
+
+            i, j = (valid_predictions[:, 5:] > self.threshold).nonzero(as_tuple=False).T
+            valid_predictions = np.concatenate((boxes[i], valid_predictions[i, j + 5, None], j[:, None]), 1)
+
+            c = valid_predictions[:, 5:6] * max_wh  # classes
+            boxes, scores = valid_predictions[:, :4] + c, valid_predictions[:, 4]
