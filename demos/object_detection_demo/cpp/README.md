@@ -124,10 +124,12 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - yolo-v3-tiny-tf
   - yolo-v1-tiny-tf
   - yolo-v2-ava-0001
-  - yolo-v2-ava-sparse-??-0001
+  - yolo-v2-ava-sparse-35-0001
+  - yolo-v2-ava-sparse-70-0001
   - yolo-v2-tf
   - yolo-v2-tiny-ava-0001
-  - yolo-v2-tiny-ava-sparse-??-0001
+  - yolo-v2-tiny-ava-sparse-30-0001
+  - yolo-v2-tiny-ava-sparse-60-0001
   - yolo-v2-tiny-tf
   - yolo-v2-tiny-vehicle-detection-0001
 
