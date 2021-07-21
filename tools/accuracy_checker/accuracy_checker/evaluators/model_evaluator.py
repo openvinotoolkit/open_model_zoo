@@ -231,7 +231,7 @@ class ModelEvaluator(BaseEvaluator):
 
     def _initialize_input_shape(self):
         _, batch_annotation, batch_input, _ = self.dataset[0]
-        filled_inputs, batch_meta = self._get_batch_input(batch_annotation, batch_input)
+        filled_inputs, _ = self._get_batch_input(batch_annotation, batch_input)
         self.launcher.initialize_undefined_shapes(filled_inputs)
 
     def _get_batch_input(self, batch_annotation, batch_input):
@@ -585,16 +585,14 @@ class ModelEvaluator(BaseEvaluator):
             print_info("File {} will be cleared for storing predictions".format(stored_predictions))
 
     def _switch_to_sync(self):
-        print(self.launcher.allow_reshape_input)
         if (
-            self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
-            self.preprocessor.has_multi_infer_transformations or self.dataset.multi_infer
+                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
+                self.preprocessor.has_multi_infer_transformations or self.dataset.multi_infer
         ):
             return True
 
-        if hasattr(self.launcher, '_dyn_input_layers') and self.launcher._dyn_input_layers:
-            if self.preprocessor.dynamic_shapes():
-                print(self.preprocessor.dynamic_shapes())
+        if hasattr(self.launcher, 'dyn_input_layers') and self.launcher.dyn_input_layers:
+            if self.preprocessor.dynamic_shapes:
                 return True
             self._initialize_input_shape()
 

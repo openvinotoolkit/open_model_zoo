@@ -113,6 +113,7 @@ class PreprocessingExecutor:
 
         return errors
 
+    @property
     def dynamic_shapes(self):
         shape_modification = []
         for processor in self.processors:

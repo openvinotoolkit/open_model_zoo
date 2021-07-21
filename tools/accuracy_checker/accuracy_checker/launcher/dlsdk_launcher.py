@@ -105,7 +105,7 @@ class DLSDKLauncher(Launcher):
         self._use_set_blob = False
         self._output_layouts = {}
         self._output_precisions = {}
-        self._dyn_input_layers = []
+        self.dyn_input_layers = []
         self._partial_shapes = {}
         self.preprocessor = preprocessor
 
@@ -414,8 +414,8 @@ class DLSDKLauncher(Launcher):
         if hasattr(self, 'exec_network'):
             del self.exec_network
         self.network.reshape(shapes)
-        if self._dyn_input_layers:
-            self._dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
+        if self.dyn_input_layers:
+            self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
         self.exec_network = self.ie_core.load_network(self.network, self.device, num_requests=self._num_requests)
 
     def _set_batch_size(self, batch_size):
@@ -647,17 +647,17 @@ class DLSDKLauncher(Launcher):
         else:
             self.network = network
         if self.network is not None:
-            self._dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
+            self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
 
         if not self._postpone_input_configuration:
             self._set_precision()
             self._set_input_shape()
-            self._dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
+            self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
             if log:
                 self._print_input_output_info()
             if preprocessing:
                 self._set_preprocess(preprocessing)
-            if self.network and not preprocessing and not self._dyn_input_layers:
+            if self.network and not preprocessing and not self.dyn_input_layers:
                 self.exec_network = self.ie_core.load_network(
                     self.network, self._device, num_requests=self.num_requests
                 )
@@ -666,7 +666,7 @@ class DLSDKLauncher(Launcher):
         self.config['inputs'] = input_config
         self._set_precision()
         self._set_input_shape()
-        self._dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
+        self.dyn_input_layers, self._partial_shapes = self._get_dynamic_inputs()
         self._print_input_output_info()
         if self.preprocessor:
             self._set_preprocess(self.preprocessor)
@@ -714,7 +714,7 @@ class DLSDKLauncher(Launcher):
         self._reshape_input(input_shapes)
 
     def fit_to_input(self, data, layer_name, layout, precision):
-        if layer_name in self._dyn_input_layers:
+        if layer_name in self.dyn_input_layers:
             data = self._data_to_blob_dyn(data, layout)
             layer_shape = data.shape
         else:
@@ -722,7 +722,7 @@ class DLSDKLauncher(Launcher):
             data = self._data_to_blob(layer_shape, data, layout)
         if precision:
             data = data.astype(precision)
-        if layer_name in self._dyn_input_layers:
+        if layer_name in self.dyn_input_layers:
             self._do_reshape = True
             return data
         data_shape = np.shape(data)
@@ -839,7 +839,7 @@ class DLSDKLauncher(Launcher):
             print_info('\tprecision: {}'.format(input_info.precision))
             print_info(
                 '\tshape {}\n'.format(
-                    input_info.shape if name not in self._dyn_input_layers else self._partial_shapes.get(name, [])
+                    input_info.shape if name not in self.dyn_input_layers else self._partial_shapes.get(name, [])
                 )
             )
         print_info('Output info')

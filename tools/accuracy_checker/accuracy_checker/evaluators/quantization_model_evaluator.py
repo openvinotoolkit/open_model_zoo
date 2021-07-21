@@ -110,11 +110,7 @@ class ModelEvaluator:
 
         self._prepare_to_evaluation(dataset_tag, dump_prediction_to_annotation)
 
-        if (
-                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
-                self.preprocessor.has_multi_infer_transformations or
-                self.dataset.multi_infer
-        ):
+        if self._switch_to_sync():
             warning('Model can not to be processed in async mode. Switched to sync.')
             return self.process_dataset(
                 subset,
@@ -347,6 +343,25 @@ class ModelEvaluator:
             async_request.set_completion_callback(completion_callback)
 
         return infer_requests_pool
+
+    def _switch_to_sync(self):
+        if (
+                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
+                self.preprocessor.has_multi_infer_transformations or self.dataset.multi_infer
+        ):
+            return True
+
+        if hasattr(self.launcher, 'dyn_input_layers') and self.launcher.dyn_input_layers:
+            if self.preprocessor.dynamic_shapes:
+                return True
+            self._initialize_input_shape()
+
+        return False
+
+    def _initialize_input_shape(self):
+        _, batch_annotation, batch_input, _ = self.dataset[0]
+        filled_inputs, _ = self._get_batch_input(batch_input, batch_annotation)
+        self.launcher.initialize_undefined_shapes(filled_inputs)
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         if not self.metric_executor:
