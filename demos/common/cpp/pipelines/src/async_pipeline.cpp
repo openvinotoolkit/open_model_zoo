@@ -120,6 +120,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
 
 std::unique_ptr<ResultBase> AsyncPipeline::getResult(bool shouldKeepOrder) {
     auto infResult = AsyncPipeline::getInferenceResult(shouldKeepOrder);
+    slog::debug << "getResult for frameID: " << infResult.frameId << slog::endl;
     if (infResult.IsEmpty()) {
         return std::unique_ptr<ResultBase>();
     }
@@ -132,6 +133,7 @@ std::unique_ptr<ResultBase> AsyncPipeline::getResult(bool shouldKeepOrder) {
 }
 
 InferenceResult AsyncPipeline::getInferenceResult(bool shouldKeepOrder) {
+    slog::debug << "start getInferenceResult" << slog::endl;
     InferenceResult retVal;
     {
         const std::lock_guard<std::mutex> lock(mtx);
@@ -153,5 +155,6 @@ InferenceResult AsyncPipeline::getInferenceResult(bool shouldKeepOrder) {
             outputFrameId = 0;
     }
 
+    slog::debug << "getInferenceResult for frameID: " << retVal.frameId << slog::endl; slog::endl;
     return retVal;
 }
