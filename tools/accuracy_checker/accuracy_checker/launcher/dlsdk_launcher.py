@@ -709,6 +709,10 @@ class DLSDKLauncher(Launcher):
             if layer_name not in self.const_inputs + self.image_info_inputs
         }
 
+    def initialize_undefined_shapes(self, input_data):
+        input_shapes = {layer_name: data.shape for layer_name, data in input_data[0].items()}
+        self._reshape_input(input_shapes)
+
     def fit_to_input(self, data, layer_name, layout, precision):
         if layer_name in self._dyn_input_layers:
             data = self._data_to_blob_dyn(data, layout)

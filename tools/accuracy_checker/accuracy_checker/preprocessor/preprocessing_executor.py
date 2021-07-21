@@ -118,7 +118,7 @@ class PreprocessingExecutor:
         for processor in self.processors:
             if not processor.shape_modificator:
                 continue
-            shape_modification.append(processor.dynamic_result_shapes)
+            shape_modification.append(processor.dynamic_result_shape)
         if not shape_modification:
             return False
         return shape_modification[-1]
