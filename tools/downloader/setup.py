@@ -60,6 +60,9 @@ class CustomBuild(distutils.command.build.build):
 
         package_build_dir = Path(self.build_lib, 'open_model_zoo/model_tools')
 
+        if (package_build_dir / 'data').exists():
+            shutil.rmtree(str(package_build_dir / 'data'))
+
         shutil.copytree(
             str(OMZ_ROOT / 'data'),
             str(package_build_dir / 'data'),
