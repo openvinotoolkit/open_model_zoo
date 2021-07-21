@@ -14,11 +14,14 @@
 // limitations under the License.
 */
 
-#include "pipelines/requests_pool.h"
+#include <utils/slog.hpp>
 
+#include "pipelines/requests_pool.h"
 RequestsPool::RequestsPool(InferenceEngine::ExecutableNetwork& execNetwork, unsigned int size) :
     numRequestsInUse(0) {
+    slog::debug << "Request Pool Constructor" << slog::endl;
     for (unsigned int infReqId = 0; infReqId < size; ++infReqId) {
+        slog::debug << "Create Infer Request " << infReqId <<  slog::endl;
         requests.emplace(std::make_shared<InferenceEngine::InferRequest>(execNetwork.CreateInferRequest()), false);
     }
 }

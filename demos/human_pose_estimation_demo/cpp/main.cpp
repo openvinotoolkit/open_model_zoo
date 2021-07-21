@@ -265,7 +265,11 @@ int main(int argc, char *argv[]) {
 
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
+        slog::debug << "Create IE core" << slog::endl;
+
         InferenceEngine::Core core;
+
+        slog::debug << "Create Async Pipeline" << slog::endl;
         AsyncPipeline pipeline(std::move(model),
             ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
@@ -273,11 +277,10 @@ int main(int argc, char *argv[]) {
 
         int64_t frameNum = pipeline.submitData(ImageInputData(curr_frame),
                     std::make_shared<ImageMetaData>(curr_frame, startTime));
-        slog::debug << "frameNum: " << frameNum << slog::endl;
         uint32_t framesProcessed = 0;
         bool keepRunning = true;
         std::unique_ptr<ResultBase> result;
-
+        slog::debug << "-------------------------------------------start pipeline-------------------------------------------" << slog::endl;
         while (keepRunning) {
             if (pipeline.isReadyToProcess()) {
                 //--- Capturing frame

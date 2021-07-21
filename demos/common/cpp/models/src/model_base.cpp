@@ -21,6 +21,7 @@
 using namespace InferenceEngine;
 
 InferenceEngine::CNNNetwork ModelBase::prepareNetwork(InferenceEngine::Core& core) {
+    slog::debug << "Start Preparing Network" << slog::endl;
     // --------------------------- Load inference engine ------------------------------------------------
     /** Load extensions for the plugin **/
     if (!cnnConfig.cpuExtensionsPath.empty()) {
@@ -45,6 +46,7 @@ InferenceEngine::CNNNetwork ModelBase::prepareNetwork(InferenceEngine::Core& cor
 }
 
 ExecutableNetwork ModelBase::loadExecutableNetwork(const CnnConfig& cnnConfig, InferenceEngine::Core& core) {
+    slog::debug << "Start Loading ExecNetwork" << slog::endl;
     this->cnnConfig = cnnConfig;
     auto cnnNetwork = prepareNetwork(core);
     execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.deviceName, cnnConfig.execNetworkConfig);

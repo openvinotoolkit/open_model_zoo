@@ -240,7 +240,9 @@ inline void printExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execN
                     slog::info << "\t\tNumber of threads: " << (nthreads == "0" ? "AUTO" : nthreads) << slog::endl;
                 }
             }
-            catch (const InferenceEngine::Exception&) {}
+            catch (const InferenceEngine::Exception& ex) {
+                slog::debug << ex.what() << slog::endl;
+            }
         }
     }
 }

@@ -22,6 +22,7 @@ using namespace InferenceEngine;
 
 AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& core) :
     model(std::move(modelInstance)) {
+    slog::debug << "Async Pipeline constructor" << slog::endl;
     execNetwork = model->loadExecutableNetwork(cnnConfig, core);
     // --------------------------- Create infer requests ------------------------------------------------
     unsigned int nireq = cnnConfig.maxAsyncRequests;
@@ -35,6 +36,7 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
         }
     }
     slog::info << "\tNumber of network inference requests: " << nireq << slog::endl;
+    slog::debug << "Reset Request Pool" << slog::endl;
     requestsPool.reset(new RequestsPool(execNetwork, nireq));
     // --------------------------- Call onLoadCompleted to complete initialization of model -------------
     model->onLoadCompleted(requestsPool->getInferRequestsList());
@@ -45,6 +47,7 @@ AsyncPipeline::~AsyncPipeline() {
 }
 
 void AsyncPipeline::waitForData(bool shouldKeepOrder) {
+    slog::debug << "waitForData" << slog::endl;
     std::unique_lock<std::mutex> lock(mtx);
 
     condVar.wait(
@@ -58,8 +61,10 @@ void AsyncPipeline::waitForData(bool shouldKeepOrder) {
                        !completedInferenceResults.empty());
         });
 
-    if (callbackException)
+    if (callbackException) {
+        slog::debug << "callback_exception" << slog::endl;
         std::rethrow_exception(callbackException);
+    }
 }
 
 int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_ptr<MetaData>& metaData) {
@@ -101,6 +106,7 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                     requestsPool->setRequestIdle(request);
                 }
                 catch (...) {
+                    slog::debug << "exception in callback" << slog::endl;
                     if (!callbackException) {
                         callbackException = std::current_exception();
                     }
