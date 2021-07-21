@@ -203,7 +203,7 @@ def add_tool_settings_args(parser):
     )
     tool_settings_args.add_argument(
         '--intermediate_metrics_results',
-        help='enables intermediate metrics results printing',
+        help='enables intermediate metrics results printing or saving',
         type=cast_to_bool,
         default=False,
         required=False
@@ -383,16 +383,10 @@ def main():
     progress_reporter = ProgressReporter.provide(progress_bar_provider, None, print_interval=args.progress_interval)
     if args.log_file:
         add_file_handler(args.log_file)
-    evaluator_kwargs = {}
-    if args.intermediate_metrics_results:
-        validate_print_interval(args.metrics_interval)
-        evaluator_kwargs['intermediate_metrics_results'] = args.intermediate_metrics_results
-        evaluator_kwargs['metrics_interval'] = args.metrics_interval
-        evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
-    evaluator_kwargs['store_only'] = args.store_only
+    evaluator_kwargs = configure_evaluator_kwargs(args)
     details = {
         'mode': "online" if not args.store_only else "offline",
-        'metric_profiling': args.profile,
+        'metric_profiling': args.profile or False,
         'error': None
     }
 
@@ -404,6 +398,7 @@ def main():
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
         details.update({'status': 'started', "error": None})
+        send_telemetry_event(tm, 'status', 'started')
         config_entry.update({
             '_store_only': args.store_only,
             '_stored_data': args.stored_predictions
@@ -414,14 +409,15 @@ def main():
             evaluator = evaluator_class.from_configs(config_entry)
             details.update(evaluator.send_processing_info(tm))
             if args.profile:
-                setup_profiling(args.profiler_log_dir, evaluator)
-            send_telemetry_event(tm, 'model_run', details)
+                setup_profiling(args.profiler_logs_dir, evaluator)
+            send_telemetry_event(tm, 'model_run', json.dumps(details))
             evaluator.process_dataset(
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
             )
             if not args.store_only:
                 metrics_results, metrics_meta = evaluator.extract_metrics_results(
-                    print_results=True, ignore_results_formatting=args.ignore_result_formatting
+                    print_results=True, ignore_results_formatting=args.ignore_result_formatting,
+                    ignore_metric_reference=args.ignore_metric_reference
                 )
                 if args.csv_result:
                     write_csv_result(
@@ -429,11 +425,13 @@ def main():
                     )
             evaluator.release()
             details['status'] = 'finished'
-            send_telemetry_event(tm, 'model_run', details)
+            send_telemetry_event(tm, 'status', 'success')
+            send_telemetry_event(tm, 'model_run', json.dumps(details))
 
         except Exception as e:  # pylint:disable=W0703
             details['status'] = 'error'
             details['error'] = str(type(e))
+            send_telemetry_event(tm, 'status', 'failure')
             send_telemetry_event(tm, 'model_run', json.dumps(details))
             exception(e)
             return_code = 1
@@ -493,6 +491,19 @@ def setup_profiling(logs_dir, evaluator):
     profiler_dir = logs_dir / _timestamp
     print_info('Metric profiling activated. Profiler output will be stored in {}'.format(profiler_dir))
     evaluator.set_profiling_dir(profiler_dir)
+
+
+def configure_evaluator_kwargs(args):
+    evaluator_kwargs = {}
+    if args.intermediate_metrics_results:
+        validate_print_interval(args.metrics_interval)
+        evaluator_kwargs['intermediate_metrics_results'] = args.intermediate_metrics_results
+        evaluator_kwargs['metrics_interval'] = args.metrics_interval
+        evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
+        evaluator_kwargs['csv_result'] = args.csv_result
+    evaluator_kwargs['store_only'] = args.store_only
+    evaluator_kwargs['ignore_metric_reference'] = args.ignore_metric_reference
+    return evaluator_kwargs
 
 
 if __name__ == '__main__':
