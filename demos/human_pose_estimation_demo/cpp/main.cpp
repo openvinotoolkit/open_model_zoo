@@ -243,7 +243,11 @@ int main(int argc, char *argv[]) {
 
         //------------------------------ Running Human Pose Estimation routines ----------------------------------------------
 
+        slog::debug << "first frame:" << slog::endl;
+        slog::debug << "\twidth: " << curr_frame.cols << slog::endl;
+        slog::debug << "\theight: " << curr_frame.rows << slog::endl;
         double aspectRatio = curr_frame.cols / static_cast<double>(curr_frame.rows);
+        slog::debug << "\taspectRatio: " << aspectRatio << slog::endl;
         std::unique_ptr<ModelBase> model;
         if (FLAGS_at == "openpose") {
             slog::debug << "Init openpose model" << slog::endl;

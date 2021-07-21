@@ -100,10 +100,10 @@ void HpeAssociativeEmbedding::changeInputSize(CNNNetwork& cnnNetwork) {
     slog::debug << "inputHeight: " << inputHeight << slog::endl;
     int inputWidth = aspectRatio >= 1.0 ? static_cast<int>(std::round(targetSize * aspectRatio)) : targetSize;
     slog::debug << "inputWidth: " << inputWidth << slog::endl;
-    int height = static_cast<int>((inputHeight + stride - 1) / stride) * stride;
-    slog::debug << "height: " << height << slog::endl;
     int width = static_cast<int>((inputWidth + stride - 1) / stride) * stride;
     slog::debug << "width: " << width << slog::endl;
+    int height = static_cast<int>((inputHeight + stride - 1) / stride) * stride;
+    slog::debug << "height: " << height << slog::endl;
     inputDims[0] = 1;
     inputDims[2] = height;
     inputDims[3] = width;
@@ -114,10 +114,14 @@ void HpeAssociativeEmbedding::changeInputSize(CNNNetwork& cnnNetwork) {
 std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
     slog::debug << "HpeAssociativeEmbedding preprocess" << slog::endl;
     auto& image = inputData.asRef<ImageInputData>().inputImage;
+    slog::debug << "image before preprocessing:" << slog::endl;
+    slog::debug << "\twidth: " << image.cols << slog::endl;
+    slog::debug << "\theight: " << image.rows << slog::endl;
     cv::Rect roi;
     auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, resizeMode, true, &roi);
-    slog::debug << "roi.height: " << roi.height << slog::endl;
-    slog::debug << "roi.width: " << roi.width << slog::endl;
+    slog::debug << "image after preprocessing:" << slog::endl;
+    slog::debug << "\twidth: " << paddedImage.cols << slog::endl;
+    slog::debug << "\theight: " << paddedImage.rows << slog::endl;
     if (inputLayerSize.height - stride >= roi.height
         || inputLayerSize.width - stride >= roi.width) {
         slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
