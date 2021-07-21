@@ -38,7 +38,7 @@ InferenceEngine::CNNNetwork ModelBase::prepareNetwork(InferenceEngine::Core& cor
     /** Read network model **/
     InferenceEngine::CNNNetwork cnnNetwork = core.ReadNetwork(modelFileName);
     /** Set batch size to 1 **/
-    setBatchOne(cnnNetwork);
+    //setBatchOne(cnnNetwork);
 
     // -------------------------- Reading all outputs names and customizing I/O blobs (in inherited classes)
     prepareInputsOutputs(cnnNetwork);
