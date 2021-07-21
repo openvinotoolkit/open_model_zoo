@@ -63,7 +63,7 @@ void HpeAssociativeEmbedding::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
     InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
     inputInfo.setPrecision(Precision::U8);
-    inputInfo.getInputData()->setLayout(Layout::NCHW);
+    inputInfo.getInputData()->setLayout(Layout::NHWC);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
     const OutputsDataMap& outputInfo = cnnNetwork.getOutputsInfo();
