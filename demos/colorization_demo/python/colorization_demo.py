@@ -153,4 +153,6 @@ if __name__ == '__main__':
                 break
             presenter.handleKey(key)
         original_frame = cap.read()
-    print(presenter.reportMeans())
+
+    for rep in presenter.reportMeans():
+        log.info(rep)

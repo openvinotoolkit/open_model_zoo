@@ -193,7 +193,8 @@ def main():
         start = time.time()
         frame = cap.read()
 
-    presenter.reportMeans()
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

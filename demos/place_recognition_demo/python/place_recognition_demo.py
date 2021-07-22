@@ -131,7 +131,8 @@ def main():
         if key == 27:
             break
 
-    print(presenter.reportMeans())
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

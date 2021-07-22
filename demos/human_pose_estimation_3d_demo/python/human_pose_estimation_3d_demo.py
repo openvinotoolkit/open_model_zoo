@@ -180,4 +180,6 @@ if __name__ == '__main__':
                 else:
                     delay = 1
         frame = cap.read()
-    print(presenter.reportMeans())
+
+    for rep in presenter.reportMeans():
+        log.info(rep)
