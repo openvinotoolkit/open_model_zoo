@@ -10,7 +10,7 @@ models:
             shape: 1,416,416,3
         adapter:
           type: yolo_v3
-          classes: 9
+          classes: 4
           anchors: "12,16, 19,36, 40,28, 36,75, 76,55, 72,146, 142,110, 192,243, 459,401"
           coords: 4
           num: 9
@@ -27,16 +27,16 @@ models:
           # raw_output: True
     datasets: 
       - name: SYGData0829
-        data_source: SYGData0829/dataset_format_VOC2007/JPEGImages
-        annotation: voc_detection.pickle
-        dataset_meta: voc_detection.json
-        annotation_conversion:
-          converter: voc_detection
-          annotations_dir: SYGData0829/dataset_format_VOC2007/Annotations
-          images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
-          imageset_file: SYGData0829/dataset_format_VOC2007/ImageSets/Main/val.txt
-          dataset_meta_file: SYGData0829/voc_label.json 
-          
+        # data_source: SYGData0829/dataset_format_VOC2007/JPEGImages
+        # annotation: voc_detection.pickle
+        # dataset_meta: voc_detection.json
+        # annotation_conversion:
+          # converter: voc_detection
+          # annotations_dir: SYGData0829/dataset_format_VOC2007/Annotations
+          # images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
+          # imageset_file: SYGData0829/dataset_format_VOC2007/ImageSets/Main/val.txt
+          # dataset_meta_file: SYGData0829/voc_label.json 
+        
         preprocessing:
           # - type: bgr_to_rgb
           - type: resize
@@ -75,7 +75,7 @@ models:
           classes: 9
           anchors: "12,16, 19,36, 40,28, 36,75, 76,55, 72,146, 142,110, 192,243, 459,401"
           coords: 4
-          num: 9
+          num: 4
           anchor_masks: [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
           threshold: 0.001
           outputs:
@@ -87,28 +87,23 @@ models:
 
     datasets: 
       - name: SYGData0829
-        data_source: SYGData0829/dataset_format_VOC2007/JPEGImages
-        annotation: voc_detection.pickle
-        dataset_meta: voc_detection.json
-        annotation_conversion:
-          converter: voc_detection
-          annotations_dir: SYGData0829/dataset_format_VOC2007/Annotations
-          images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
-          imageset_file: SYGData0829/dataset_format_VOC2007/ImageSets/Main/val.txt
-          dataset_meta_file: SYGData0829/voc_label.json  
-    # datasets:
-      # - name: VOCdevkit
-        # data_source: VOCdevkit/VOC2007/JPEGImages
+        # data_source: SYGData0829/dataset_format_VOC2007/JPEGImages
         # annotation: voc_detection.pickle
         # dataset_meta: voc_detection.json
-      # - name: VOCdevkit
-       # data_source: VOCdevkit/VOC2007/JPEGImages
-       # annotation_conversion:
-         # converter: voc_detection
-        # annotations_dir: /opt/intel/openvino_2021.2.185/deployment_tools/open_model_zoo/tools/downloader/public/mobilenet-yolo-syg/VOCdevkit/VOC2007/Annotations
-         # images_dir: /opt/intel/openvino_2021.2.185/deployment_tools/open_model_zoo/tools/downloader/public/mobilenet-yolo-syg/VOCdevkit/VOC2007/JPEGImages
-         # imageset_file: /opt/intel/openvino_2021.2.185/deployment_tools/open_model_zoo/tools/downloader/public/mobilenet-yolo-syg/VOCdevkit/VOC2007/ImageSets/Main/val.txt
-         # dataset_meta_file: /opt/intel/openvino_2021.2.185/deployment_tools/open_model_zoo/tools/downloader/public/mobilenet-yolo-syg/VOCdevkit/voc_label.json
+        # annotation_conversion:
+          # converter: voc_detection
+          # annotations_dir: SYGData0829/dataset_format_VOC2007/Annotations
+          # images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
+          # imageset_file: SYGData0829/dataset_format_VOC2007/ImageSets/Main/val.txt
+          # dataset_meta_file: SYGData0829/voc_label.json
+                        
+        # annotation_conversion:
+         # - converter: voc_detection
+         # - imageset_file: SYGData0829/dataset_format_VOC2007/ImageSets/Main/val.txt
+         # - annotations_dir: SYGData0829/dataset_format_VOC2007/Annotations
+         # - images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
+         # - has_background: False
+         # - dataset_meta_file: SYGData0829/voc_label.json
 
         preprocessing:
           # - type: bgr_to_rgb
