@@ -75,7 +75,7 @@ models:
           classes: 4
           anchors: "12,16, 19,36, 40,28, 36,75, 76,55, 72,146, 142,110, 192,243, 459,401"
           coords: 4
-          num: 9
+          num: 4
           anchor_masks: [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
           threshold: 0.001
           outputs:
@@ -126,9 +126,9 @@ models:
             integral: 11point
             ignore_difficult: true
             presenter: print_scalar
-          # - type: coco_precision
-            # max_detections: 100
-            # threshold: 0.5
-            # presenter: print_vector
+          - type: coco_precision
+            max_detections: 100
+            threshold: 0.5
+            presenter: print_vector
 
 # global_definitions: /opt/intel/openvino_2021.2.185/deployment_tools/open_model_zoo/tools/accuracy_checker/dataset_definitions.yml
