@@ -108,12 +108,13 @@ def inpaint_auto(img, inpainting_processor, args):
     #--- Inpaint and show results
     output_image = inpainting_processor.process(masked_image, mask)
     concat_imgs = np.hstack((masked_image, output_image))
+    total_latency = (perf_counter() - start_time) * 1e3
     cv2.putText(concat_imgs, 'original', (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 100))
     cv2.putText(concat_imgs, 'result', (concat_imgs.shape[1] - 5 - cv2.getTextSize('result', cv2.FONT_HERSHEY_COMPLEX, 0.5, 1)[0][0], 15),
                 cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 100))
-    total_latency = (perf_counter() - start_time) * 1e3
+    cv2.putText(concat_imgs, 'Latency: {:.1f} ms'.format(total_latency), (5, 35), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
     log.info("Metrics report:")
-    log.info("Latency: {:.1f} ms".format(total_latency))
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
     return concat_imgs, output_image
 
 def main():

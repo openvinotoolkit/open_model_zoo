@@ -96,9 +96,8 @@ def main():
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
-    preprocessing_start_time = perf_counter()
+    start_time = perf_counter()
     sample_inp = wav_read(args.input)
-    total_latency = perf_counter() - preprocessing_start_time
 
     input_size = input_shapes["input"][1]
     res = None
@@ -135,11 +134,11 @@ def main():
         infer_request_ptr.infer()
         res = infer_request_ptr.output_blobs
 
-        total_latency += perf_counter() - start_time
         samples_out.append(res["output"].buffer.squeeze(0))
 
+    total_latency = (perf_counter() - start_time) * 1e3
     log.info("Metrics report:")
-    log.info("\tLatency: {:.1f} ms".format(total_latency * 1e3))
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
     sample_out = np.concatenate(samples_out, 0)
     wav_write(args.output, sample_out)
 

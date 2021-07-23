@@ -106,17 +106,13 @@ def main():
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     # Start sync inference
-    total_latency = 0
-
+    start_time = perf_counter()
     for i in range(args.number_iter):
-        start_time = perf_counter()
         preds = exec_net.infer(inputs={input_blob: input_image})
         preds = preds[out_blob]
         result = codec.decode(preds)
         print(result)
-        total_latency += perf_counter() - start_time
-
-    total_latency = (total_latency / args.number_iter + preprocessing_total_time) * 1e3
+    total_latency = ((perf_counter() - start_time) / args.number_iter + preprocessing_total_time) * 1e3
     log.info("Metrics report:")
     log.info("\tLatency: {:.1f} ms".format(total_latency))
 

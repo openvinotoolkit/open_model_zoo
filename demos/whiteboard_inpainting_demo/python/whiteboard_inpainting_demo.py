@@ -97,18 +97,9 @@ def main():
     if cap.get_type() not in ('VIDEO', 'CAMERA'):
         raise RuntimeError("The input should be a video file or a numeric camera ID")
 
-    start_time = perf_counter()
-    frame = cap.read()
-    if frame is None:
-        raise RuntimeError("Can't read an image from the input")
-
     if bool(args.m_instance_segmentation) == bool(args.m_semantic_segmentation):
         raise ValueError('Set up exactly one of segmentation models: '
                          '--m_instance_segmentation or --m_semantic_segmentation')
-
-    out_frame_size = (frame.shape[1], frame.shape[0] * 2)
-    presenter = monitors.Presenter(args.utilization_monitors, 20,
-                                   (out_frame_size[0] // 4, out_frame_size[1] // 16))
 
     root_dir = osp.dirname(osp.abspath(__file__))
 
@@ -116,11 +107,6 @@ def main():
     if not args.no_show:
         cv2.namedWindow(WINNAME)
         cv2.setMouseCallback(WINNAME, mouse.get_points)
-
-    video_writer = cv2.VideoWriter()
-    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                             cap.fps(), out_frame_size):
-        raise RuntimeError("Can't open video writer")
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
@@ -139,10 +125,23 @@ def main():
     log.info('The model {} is loaded to {}'.format(model_path, args.device))
 
     metrics = PerformanceMetrics()
+    video_writer = cv2.VideoWriter()
     black_board = False
-    output_frame = np.full((frame.shape[0], frame.shape[1], 3), 255, dtype='uint8')
     frame_number = 0
     key = -1
+
+    start_time = perf_counter()
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
+
+    out_frame_size = (frame.shape[1], frame.shape[0] * 2)
+    output_frame = np.full((frame.shape[0], frame.shape[1], 3), 255, dtype='uint8')
+    presenter = monitors.Presenter(args.utilization_monitors, 20,
+                                   (out_frame_size[0] // 4, out_frame_size[1] // 16))
+    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                             cap.fps(), out_frame_size):
+        raise RuntimeError("Can't open video writer")
 
     while frame is not None:
         mask = None

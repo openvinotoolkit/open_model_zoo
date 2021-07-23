@@ -89,11 +89,6 @@ if __name__ == '__main__':
 
     _, _, h_in, w_in = input_shape
 
-    start_time = perf_counter()
-    original_frame = cap.read()
-    if original_frame is None:
-        raise RuntimeError("Can't read an image from the input")
-
     frames_processed = 0
     imshow_size = (640, 480)
     graph_size = (imshow_size[0] // 2, imshow_size[1] // 4)
@@ -104,6 +99,11 @@ if __name__ == '__main__':
     if args.output and not video_writer.open(args.output, cv.VideoWriter_fourcc(*'MJPG'),
                                              cap.fps(), (imshow_size[0] * 2, imshow_size[1] * 2)):
         raise RuntimeError("Can't open video writer")
+
+    start_time = perf_counter()
+    original_frame = cap.read()
+    if original_frame is None:
+        raise RuntimeError("Can't read an image from the input")
 
     while original_frame is not None:
         (h_orig, w_orig) = original_frame.shape[:2]

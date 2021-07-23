@@ -122,11 +122,6 @@ def main():
     exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
-    start_time = perf_counter()
-    frame = cap.read()
-    if frame is None:
-        raise RuntimeError("Can't read an image from the input")
-
     if args.no_track:
         tracker = None
     else:
@@ -138,12 +133,18 @@ def main():
         delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
 
     frames_processed = 0
-    out_frame_size = (frame.shape[1], frame.shape[0])
     metrics = PerformanceMetrics()
-    presenter = monitors.Presenter(args.utilization_monitors, 45,
-                (round(out_frame_size[0] / 4), round(out_frame_size[1] / 8)))
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
     video_writer = cv2.VideoWriter()
+
+    start_time = perf_counter()
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
+
+    out_frame_size = (frame.shape[1], frame.shape[0])
+    presenter = monitors.Presenter(args.utilization_monitors, 45,
+                (round(out_frame_size[0] / 4), round(out_frame_size[1] / 8)))
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
                                              cap.fps(), out_frame_size):
         raise RuntimeError("Can't open video writer")

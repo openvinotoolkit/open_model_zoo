@@ -78,6 +78,11 @@ def main():
     args = build_argparser().parse_args()
 
     cap = open_images_capture(args.input, args.loop)
+    next_frame_id = 1
+    next_frame_id_to_show = 0
+
+    metrics = PerformanceMetrics()
+    video_writer = cv2.VideoWriter()
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
@@ -100,13 +105,9 @@ def main():
     log_runtime_settings(pipeline.exec_net, args.device)
 
     pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
-    next_frame_id = 1
-    next_frame_id_to_show = 0
 
-    metrics = PerformanceMetrics()
     presenter = monitors.Presenter(args.utilization_monitors, 55,
                                    (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
-    video_writer = cv2.VideoWriter()
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
                                              cap.fps(), (2 * frame.shape[1], frame.shape[0])):
         raise RuntimeError("Can't open video writer")

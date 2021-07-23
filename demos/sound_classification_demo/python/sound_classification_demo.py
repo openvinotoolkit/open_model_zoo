@@ -176,10 +176,9 @@ def main():
 
     outputs = []
     clips = 0
-    total_latency = 0
+    start_time = perf_counter()
     for idx, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
         chunk.shape = input_shape
-        processing_start_time = perf_counter()
         output = exec_net.infer(inputs={input_blob: chunk})
         clips += batch_size
         output = output[output_blob]
@@ -191,10 +190,9 @@ def main():
             if start_time < audio.duration():
                 log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(start_time, end_time, data[label],
                                                                  labels[label] if labels else "Class {}".format(label)))
-        total_latency += perf_counter() - processing_start_time
-
+    total_latency = (perf_counter() - start_time) * 1e3
     log.info("Metrics report:")
-    log.info("\tLatency: {:.1f} ms".format(total_latency * 1e3))
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
 
 if __name__ == '__main__':
     main()

@@ -209,11 +209,6 @@ def main():
     del text_enc_net
     del text_dec_net
 
-    start_time = perf_counter()
-    frame = cap.read()
-    if frame is None:
-        raise RuntimeError("Can't read an image from the input")
-
     if args.no_track:
         tracker = None
     else:
@@ -229,8 +224,14 @@ def main():
     frames_processed = 0
 
     metrics = PerformanceMetrics()
-    presenter = monitors.Presenter(args.utilization_monitors, 45, (frame.shape[1] // 4, frame.shape[0] // 8))
     video_writer = cv2.VideoWriter()
+
+    start_time = perf_counter()
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
+
+    presenter = monitors.Presenter(args.utilization_monitors, 45, (frame.shape[1] // 4, frame.shape[0] // 8))
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
                                              cap.fps(), (frame.shape[1], frame.shape[0])):
         raise RuntimeError("Can't open video writer")

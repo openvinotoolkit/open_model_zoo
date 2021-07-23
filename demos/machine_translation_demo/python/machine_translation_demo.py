@@ -231,8 +231,6 @@ def main(args):
     if args.output:
         open(args.output, 'w').close()
 
-    total_latency = 0
-
     def sentences():
         if input_data:
             for sentence in input_data:
@@ -244,15 +242,14 @@ def main(args):
             while True:
                 yield input("> ")
 
+    start_time = perf_counter()
     # loop on user's or prepared questions
     for sentence in sentences():
         if not sentence.strip():
             break
 
         try:
-            start_time = perf_counter()
             translation = model(sentence)
-            total_latency += perf_counter() - start_time
             print(translation)
             if args.output:
                 with open(args.output, 'a', encoding='utf8') as f:
@@ -260,8 +257,9 @@ def main(args):
         except Exception:
             log.error("an error occurred", exc_info=True)
 
+    total_latency = (perf_counter() - start_time) * 1e3
     log.info("Metrics report:")
-    log.info("\tLatency: {:.1f} ms".format(total_latency * 1e3))
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()

@@ -100,17 +100,6 @@ if __name__ == '__main__':
 
     is_video = cap.get_type() in ('VIDEO', 'CAMERA')
 
-    start_time = perf_counter()
-    frame = cap.read()
-    if frame is None:
-        raise RuntimeError("Can't read an image from the input")
-
-    metrics = PerformanceMetrics()
-    video_writer = cv2.VideoWriter()
-    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                             cap.fps(), (frame.shape[1], frame.shape[0])):
-        raise RuntimeError("Can't open video writer")
-
     base_height = args.height_size
     fx = args.fx
 
@@ -121,6 +110,17 @@ if __name__ == '__main__':
     space_code = 32
     mean_time = 0
     presenter = monitors.Presenter(args.utilization_monitors, 0)
+    metrics = PerformanceMetrics()
+    video_writer = cv2.VideoWriter()
+
+    start_time = perf_counter()
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
+
+    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                             cap.fps(), (frame.shape[1], frame.shape[0])):
+        raise RuntimeError("Can't open video writer")
 
     while frame is not None:
         current_time = cv2.getTickCount()

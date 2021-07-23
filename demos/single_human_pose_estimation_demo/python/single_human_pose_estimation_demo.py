@@ -62,20 +62,22 @@ def run_demo(args):
                                                      device=args.device)
     log.info('The Human Pose Estimation model {} is loaded to {}'.format(args.model_hpe, args.device))
 
-    start_time = perf_counter()
-    frame = cap.read()
-    if frame is None:
-        raise RuntimeError("Can't read an image from the input")
     delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
-
     video_writer = cv2.VideoWriter()
-    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                             cap.fps(), (frame.shape[1], frame.shape[0])):
-        raise RuntimeError("Can't open video writer")
 
     frames_processed = 0
     presenter = monitors.Presenter(args.utilization_monitors, 25)
     metrics = PerformanceMetrics()
+
+    start_time = perf_counter()
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
+
+    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                             cap.fps(), (frame.shape[1], frame.shape[0])):
+        raise RuntimeError("Can't open video writer")
+
     while frame is not None:
         bboxes = detector_person.detect(frame)
         human_poses = [single_human_pose_estimator.estimate(frame, bbox) for bbox in bboxes]
