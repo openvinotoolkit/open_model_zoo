@@ -2,12 +2,11 @@
 
 ## Use Case and High-Level Description
 
-  This is a Keras\* version of `mobilenet-yolov4` model, one of the YOLO group of models
-  designed to perform real-time object detection mainly to vehicles.
-  The weights are pretrained by [BDD100k](https://bdd-data.berkeley.edu/#download-section) 
-  and retrained by our own dataset.
+  This is a Keras\* version of `mobilenet-yolov4` model designed to perform real-time vehicle detection
+  on FFmpeg-OpenVINO. It can realize illegal lane change detection and speed detection by developing FFmpeg.
+  The weights are pretrained by BDD100k and retrained by our own dataset.
   For details see repository <https://github.com/ermubuzhiming/OMZ-files-download/>,
-  paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
+  paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>                                                                                
 
 ## Specification
 
@@ -23,10 +22,9 @@
 Accuracy metrics obtained on [VOCdevkit](https://github.com/ermubuzhiming/OMZ-files-download/releases/download/v1-ly/VOCdevkit0829.zip)
 which is our own made\* validation dataset for converted model.
 
-| Metric | Value |
-| ------ | ------|
-| mAP    | 35.38% |
-| [COCO\* mAP (0.5)](http://cocodataset.org/#detection-eval) | 75.36% |
+| Metric |  Value |
+| ------ | -------|
+| mAP    | 81.42% |
 
 ## Input：
 
@@ -72,7 +70,8 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get relative to the cell coordinates
 - `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
 - `box_score` - confidence of detection box, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
-- `class_no_1`,...,`class_no_9` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) and multiply by obtained confidence value to get confidence of each class
+- `class_no_1`,...,`class_no_9` - probability distribution over the classes in logits format, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) 
+								  and multiply by obtained confidence value to get confidence of each class
 
 ### Converted model
 
@@ -88,6 +87,13 @@ Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_
 - `box_score` - confidence of detection box in [0,1] range
 - `class_no_1`,...,`class_no_9` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
 
+## Download a Model and Convert it into Inference Engine Format
+You can download models and if necessary convert them into Inference Engine format using the Model Downloader and other automation tools as shown in the examples below.
+An example of using the Model Downloader:
+python3 <omz_dir>/tools/downloader/downloader.py --name <model_name>
+An example of using the Model Converter:
+python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
+
 ## Legal Information
 
 The original model is distributed under the following
@@ -96,7 +102,6 @@ The original model is distributed under the following
 
 ```
 MIT License
-
 Copyright (c) 2019 BJUT-SYG
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
