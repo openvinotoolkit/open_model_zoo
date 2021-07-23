@@ -17,6 +17,7 @@ import sys
 import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
+from time import perf_counter
 
 import cv2
 import numpy as np
@@ -28,6 +29,7 @@ from modules.parse_poses import parse_poses
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
+from performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -97,14 +99,6 @@ if __name__ == '__main__':
     t = np.array(extrinsics['t'], dtype=np.float32)
 
     is_video = cap.get_type() in ('VIDEO', 'CAMERA')
-    frame = cap.read()
-    if frame is None:
-        raise RuntimeError("Can't read an image from the input")
-
-    video_writer = cv2.VideoWriter()
-    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                             cap.fps(), (frame.shape[1], frame.shape[0])):
-        raise RuntimeError("Can't open video writer")
 
     base_height = args.height_size
     fx = args.fx
@@ -116,6 +110,17 @@ if __name__ == '__main__':
     space_code = 32
     mean_time = 0
     presenter = monitors.Presenter(args.utilization_monitors, 0)
+    metrics = PerformanceMetrics()
+    video_writer = cv2.VideoWriter()
+
+    start_time = perf_counter()
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
+
+    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                             cap.fps(), (frame.shape[1], frame.shape[0])):
+        raise RuntimeError("Can't open video writer")
 
     while frame is not None:
         current_time = cv2.getTickCount()
@@ -141,13 +146,7 @@ if __name__ == '__main__':
 
         presenter.drawGraphs(frame)
         draw_poses(frame, poses_2d)
-        current_time = (cv2.getTickCount() - current_time) / cv2.getTickFrequency()
-        if mean_time == 0:
-            mean_time = current_time
-        else:
-            mean_time = mean_time * 0.95 + current_time * 0.05
-        cv2.putText(frame, 'FPS: {}'.format(int(1 / mean_time * 10) / 10),
-                    (40, 80), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255))
+        metrics.update(start_time, frame)
 
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
@@ -179,7 +178,9 @@ if __name__ == '__main__':
                     break
                 else:
                     delay = 1
+        start_time = perf_counter()
         frame = cap.read()
 
+    metrics.log_total()
     for rep in presenter.reportMeans():
         log.info(rep)

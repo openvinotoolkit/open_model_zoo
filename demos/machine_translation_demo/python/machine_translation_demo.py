@@ -16,7 +16,7 @@ import argparse
 import itertools
 import logging as log
 import sys
-import time
+from time import perf_counter
 from pathlib import Path
 
 import numpy as np
@@ -242,23 +242,24 @@ def main(args):
             while True:
                 yield input("> ")
 
+    start_time = perf_counter()
     # loop on user's or prepared questions
     for sentence in sentences():
         if not sentence.strip():
             break
 
         try:
-            start = time.perf_counter()
             translation = model(sentence)
-            stop = time.perf_counter()
             print(translation)
-            log.info("time: {} s.".format(stop - start))
             if args.output:
                 with open(args.output, 'a', encoding='utf8') as f:
                     print(translation, file=f)
         except Exception:
             log.error("an error occurred", exc_info=True)
 
+    total_latency = (perf_counter() - start_time) * 1e3
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()

@@ -17,7 +17,7 @@
 """
 import logging as log
 import sys
-import time
+from time import perf_counter
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
@@ -96,13 +96,13 @@ def main():
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
+    start_time = perf_counter()
     sample_inp = wav_read(args.input)
 
     input_size = input_shapes["input"][1]
     res = None
 
     samples_out = []
-    samples_times = []
     while sample_inp is not None and sample_inp.shape[0] > 0:
         if sample_inp.shape[0] > input_size:
             input = sample_inp[:input_size]
@@ -122,7 +122,6 @@ def main():
                 #on the first iteration fill states by zeros
                 inputs[n] = np.zeros(input_shapes[n], dtype=np.float32)
 
-        t0 = time.perf_counter()
         # Set inputs manually through InferRequest functionality to speedup
         infer_request_ptr = ie_encoder_exec.requests[0]
         for n, data in inputs.items():
@@ -134,16 +133,11 @@ def main():
         infer_request_ptr.infer()
         res = infer_request_ptr.output_blobs
 
-        t1 = time.perf_counter()
-
-        samples_times.append(t1-t0)
         samples_out.append(res["output"].buffer.squeeze(0))
 
-    log.info("Sequence of length {:0.2f}s is processed by {:0.2f}s".format(
-        sum(s.shape[0] for s in samples_out)/16000,
-        sum(samples_times),
-
-    ))
+    total_latency = (perf_counter() - start_time) * 1e3
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
     sample_out = np.concatenate(samples_out, 0)
     wav_write(args.output, sample_out)
 

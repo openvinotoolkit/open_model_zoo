@@ -15,7 +15,7 @@
 
 import os
 import sys
-import time
+from time import perf_counter
 import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -95,7 +95,9 @@ def main():
     input_batch_size, input_channel, input_height, input_width= net.input_info[input_blob].input_data.shape
 
     # Read and pre-process input image (NOTE: one image only)
+    preprocessing_start_time = perf_counter()
     input_image = preprocess_input(args.input, height=input_height, width=input_width)[None, :, :, :]
+    preprocessing_total_time = perf_counter() - preprocessing_start_time
     assert input_batch_size == input_image.shape[0], "The net's input batch size should equal the input image's batch size "
     assert input_channel == input_image.shape[1], "The net's input channel should equal the input image's channel"
 
@@ -104,15 +106,15 @@ def main():
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     # Start sync inference
-    infer_time = []
+    start_time = perf_counter()
     for i in range(args.number_iter):
-        t0 = time.time()
         preds = exec_net.infer(inputs={input_blob: input_image})
         preds = preds[out_blob]
         result = codec.decode(preds)
         print(result)
-        infer_time.append((time.time() - t0) * 1000)
-    log.info("Average throughput: {} ms".format(np.average(np.asarray(infer_time))))
+    total_latency = ((perf_counter() - start_time) / args.number_iter + preprocessing_total_time) * 1e3
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
 
     sys.exit()
 

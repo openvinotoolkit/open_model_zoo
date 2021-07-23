@@ -19,6 +19,7 @@ from openvino.inference_engine import IECore, get_version
 import cv2 as cv
 import numpy as np
 import logging as log
+from time import perf_counter
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -26,6 +27,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import monitors
 from images_capture import open_images_capture
+from performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -87,19 +89,21 @@ if __name__ == '__main__':
 
     _, _, h_in, w_in = input_shape
 
-    original_frame = cap.read()
-    if original_frame is None:
-        raise RuntimeError("Can't read an image from the input")
-
     frames_processed = 0
     imshow_size = (640, 480)
     graph_size = (imshow_size[0] // 2, imshow_size[1] // 4)
     presenter = monitors.Presenter(args.utilization_monitors, imshow_size[1] * 2 - graph_size[1], graph_size)
+    metrics = PerformanceMetrics()
 
     video_writer = cv.VideoWriter()
     if args.output and not video_writer.open(args.output, cv.VideoWriter_fourcc(*'MJPG'),
                                              cap.fps(), (imshow_size[0] * 2, imshow_size[1] * 2)):
         raise RuntimeError("Can't open video writer")
+
+    start_time = perf_counter()
+    original_frame = cap.read()
+    if original_frame is None:
+        raise RuntimeError("Can't read an image from the input")
 
     while original_frame is not None:
         (h_orig, w_orig) = original_frame.shape[:2]
@@ -141,6 +145,8 @@ if __name__ == '__main__':
                     cv.hconcat([lab_image, colorize_image])]
         final_image = cv.vconcat(ir_image)
 
+        metrics.update(start_time, final_image)
+
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(final_image)
@@ -152,7 +158,9 @@ if __name__ == '__main__':
             if key in {ord("q"), ord("Q"), 27}:
                 break
             presenter.handleKey(key)
+        start_time = perf_counter()
         original_frame = cap.read()
 
+    metrics.log_total()
     for rep in presenter.reportMeans():
         log.info(rep)

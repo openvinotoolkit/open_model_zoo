@@ -4,6 +4,7 @@ import argparse
 import os
 import sys
 import logging as log
+from time import perf_counter
 import cv2
 
 from openvino.inference_engine import IECore, get_version
@@ -14,6 +15,7 @@ from estimator import HumanPoseEstimator
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'common/python'))
 import monitors
 from images_capture import open_images_capture
+from performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -60,18 +62,22 @@ def run_demo(args):
                                                      device=args.device)
     log.info('The Human Pose Estimation model {} is loaded to {}'.format(args.model_hpe, args.device))
 
+    delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
+    video_writer = cv2.VideoWriter()
+
+    frames_processed = 0
+    presenter = monitors.Presenter(args.utilization_monitors, 25)
+    metrics = PerformanceMetrics()
+
+    start_time = perf_counter()
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
-    delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
 
-    video_writer = cv2.VideoWriter()
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
                                              cap.fps(), (frame.shape[1], frame.shape[0])):
         raise RuntimeError("Can't open video writer")
 
-    frames_processed = 0
-    presenter = monitors.Presenter(args.utilization_monitors, 25)
     while frame is not None:
         bboxes = detector_person.detect(frame)
         human_poses = [single_human_pose_estimator.estimate(frame, bbox) for bbox in bboxes]
@@ -89,10 +95,7 @@ def run_demo(args):
             for id_kpt, kpt in enumerate(pose):
                 cv2.circle(frame, (int(kpt[0]), int(kpt[1])), 3, colors[id_kpt], -1)
 
-        cv2.putText(frame, 'summary: {:.1f} FPS (estimation: {:.1f} FPS / detection: {:.1f} FPS)'.format(
-            float(1 / (detector_person.infer_time + single_human_pose_estimator.infer_time * len(human_poses))),
-            float(1 / single_human_pose_estimator.infer_time),
-            float(1 / detector_person.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+        metrics.update(start_time, frame)
 
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
@@ -104,8 +107,11 @@ def run_demo(args):
             if key == 27:
                 break
             presenter.handleKey(key)
+
+        start_time = perf_counter()
         frame = cap.read()
 
+    metrics.log_total()
     for rep in presenter.reportMeans():
         log.info(rep)
 

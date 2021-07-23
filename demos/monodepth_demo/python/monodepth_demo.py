@@ -3,6 +3,7 @@
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
+from time import perf_counter
 
 import cv2
 import numpy as np
@@ -46,9 +47,14 @@ def main():
     out_blob = next(iter(net.outputs))
     net.batch_size = 1
 
+    # loading model to the plugin
+    exec_net = ie.load_network(network=net, device_name=args.device)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+
     # read and pre-process input image
     _, _, height, width = net.input_info[input_blob].input_data.shape
 
+    start_time = perf_counter()
     image = cv2.imread(args.input, cv2.IMREAD_COLOR)
     (input_height, input_width) = image.shape[:-1]
 
@@ -62,10 +68,6 @@ def main():
     image = image.astype(np.float32)
     image = image.transpose((2, 0, 1))
     image_input = np.expand_dims(image, 0)
-
-    # loading model to the plugin
-    exec_net = ie.load_network(network=net, device_name=args.device)
-    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     # start sync inference
     res = exec_net.infer(inputs={input_blob: image_input})
@@ -85,6 +87,9 @@ def main():
     else:
         disp.fill(0.5)
 
+    total_latency = (perf_counter() - start_time) * 1e3
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
     # pfm
     out = 'disp.pfm'
     cv2.imwrite(out, disp)

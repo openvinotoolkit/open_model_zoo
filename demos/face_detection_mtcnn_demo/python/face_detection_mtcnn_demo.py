@@ -177,7 +177,6 @@ def main():
         # Pnet stage
         # *************************************
 
-        t0 = cv2.getTickCount()
         pnet_res = []
         for i, scale in enumerate(scales):
             hs = int(oh*scale)
@@ -258,9 +257,7 @@ def main():
             for i in range(5, 15, 2):
                 cv2.circle(origin_image, (int(rectangle[i+0]), int(rectangle[i+1])), 2, (0, 255, 0))
 
-        infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()  # Record infer time
-        cv2.putText(origin_image, 'summary: {:.1f} FPS'.format(1.0 / infer_time),
-                    (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+        metrics.update(start_time, origin_image)
 
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id <= args.output_limit):
             video_writer.write(origin_image)
@@ -271,8 +268,6 @@ def main():
             if key in {ord('q'), ord('Q'), 27}:
                 break
             presenter.handleKey(key)
-
-        metrics.update(start_time, origin_image)
 
     metrics.log_total()
 

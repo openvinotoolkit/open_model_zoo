@@ -73,7 +73,10 @@ python3 sound_classification_demo.py -i <path_to_wav>/input_audio.wav -m <path_t
 
 ## Demo Output
 
-The demo uses console to display the predictions. It shows classification of each clip with timing of it and total prediction of whole audio.
+The demo uses console to display the predictions. It shows classification of each clip and total prediction of whole audio.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

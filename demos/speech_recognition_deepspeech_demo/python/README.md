@@ -135,6 +135,9 @@ Optional (but highly recommended) language model files, `deepspeech-0.8.2-models
 ## Demo Output
 
 The application shows time taken by the initialization and processing stages, and the decoded text for the audio file. In real-time mode the current recognition result is shown while the app is running as well.
+In offline mode the demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

@@ -110,7 +110,10 @@ If Backpace, C or R keys are pressed while demo is showing original image, demo 
 
 ## Demo Output
 
-In auto mode this demo uses OpenCV to display the resulting image and image with mask applied and reports performance in the format of summary inference FPS. Processed image can be also written to file.
+In auto mode the demo uses OpenCV to display the resulting image and image with mask applied. Processed image can be also written to file.
+In auto mode the demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 In interactive mode this demo provides interactive means to apply mask and see the result of processing instantly (see hotkeys above).
 

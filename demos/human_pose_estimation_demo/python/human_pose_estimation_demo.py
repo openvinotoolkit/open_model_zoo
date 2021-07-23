@@ -167,6 +167,11 @@ def main():
     args = build_argparser().parse_args()
 
     cap = open_images_capture(args.input, args.loop)
+    next_frame_id = 1
+    next_frame_id_to_show = 0
+
+    metrics = PerformanceMetrics()
+    video_writer = cv2.VideoWriter()
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
@@ -189,10 +194,7 @@ def main():
     log_runtime_settings(hpe_pipeline.exec_net, args.device)
 
     hpe_pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
-    next_frame_id = 1
-    next_frame_id_to_show = 0
 
-    metrics = PerformanceMetrics()
     output_transform = models.OutputTransform(frame.shape[:2], args.output_resolution)
     if args.output_resolution:
         output_resolution = output_transform.new_resolution
@@ -200,7 +202,6 @@ def main():
         output_resolution = (frame.shape[1], frame.shape[0])
     presenter = monitors.Presenter(args.utilization_monitors, 55,
                                    (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
-    video_writer = cv2.VideoWriter()
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
             output_resolution):
         raise RuntimeError("Can't open video writer")

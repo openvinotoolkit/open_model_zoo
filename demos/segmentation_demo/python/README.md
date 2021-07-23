@@ -146,6 +146,11 @@ Available colors files located in the `<omz_dir>/data/palettes` folder. If you w
 ## Demo Output
 
 The demo uses OpenCV to display the resulting images with blended segmentation mask.
+The demo reports
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+You can use both of these metrics to measure application-level performance.
 
 ## See Also
 

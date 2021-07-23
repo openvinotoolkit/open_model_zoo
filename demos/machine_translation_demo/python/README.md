@@ -83,6 +83,9 @@ python3 ./machine_translation_demo \
 ## Demo Output
 
 The application outputs translated sentences from source to target language.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

@@ -28,7 +28,7 @@ import cv2 as cv
 from utils.network_wrappers import Detector, VectorCNN, MaskRCNN, DetectionsFromFileReader
 from mc_tracker.mct import MultiCameraTracker
 from utils.analyzer import save_embeddings
-from utils.misc import read_py_config, check_pressed_keys, AverageEstimator
+from utils.misc import read_py_config, check_pressed_keys
 from utils.video import MulticamCapture, NormalizerCLAHE
 from utils.visualization import visualize_multicam_detections, get_target_size
 from openvino.inference_engine import IECore, get_version
@@ -36,6 +36,7 @@ from openvino.inference_engine import IECore, get_version
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                              'common/python'))
 import monitors
+from performance_metrics import PerformanceMetrics
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -100,7 +101,6 @@ class FramesThreadBody:
 def run(params, config, capture, detector, reid):
     win_name = 'Multi camera tracking'
     frame_number = 0
-    avg_latency = AverageEstimator()
     output_detections = [[] for _ in range(capture.get_num_sources())]
     key = -1
 
@@ -124,6 +124,7 @@ def run(params, config, capture, detector, reid):
 
     prev_frames = thread_body.frames_queue.get()
     detector.run_async(prev_frames, frame_number)
+    metrics = PerformanceMetrics()
     presenter = monitors.Presenter(params.utilization_monitors, 0)
 
     while thread_body.process:
@@ -132,7 +133,7 @@ def run(params, config, capture, detector, reid):
             if key == 27:
                 break
             presenter.handleKey(key)
-        start = time.perf_counter()
+        start_time = time.perf_counter()
         try:
             frames = thread_body.frames_queue.get_nowait()
             frames_read = True
@@ -156,12 +157,9 @@ def run(params, config, capture, detector, reid):
         tracker.process(prev_frames, all_detections, all_masks)
         tracked_objects = tracker.get_tracked_objects()
 
-        latency = max(time.perf_counter() - start, sys.float_info.epsilon)
-        avg_latency.update(latency)
-        fps = round(1. / latency, 1)
-
-        vis = visualize_multicam_detections(prev_frames, tracked_objects, fps,
+        vis = visualize_multicam_detections(prev_frames, tracked_objects,
                                             **vars(config.visualization_config))
+        metrics.update(start_time, vis)
         presenter.drawGraphs(vis)
         if not params.no_show:
             cv.imshow(win_name, vis)
@@ -181,10 +179,9 @@ def run(params, config, capture, detector, reid):
         if set_output_params and output_video:
             output_video.write(cv.resize(vis, video_output_size))
 
-        print('\rProcessing frame: {}, fps = {} (avg_fps = {:.3})'.format(
-                            frame_number, fps, 1. / avg_latency.get()), end="")
         prev_frames, frames = frames, prev_frames
 
+    metrics.log_total()
     for rep in presenter.reportMeans():
         log.info(rep)
 
