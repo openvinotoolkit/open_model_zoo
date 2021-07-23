@@ -370,13 +370,12 @@ def main():
 
     sort_titles(demos_group_element)
 
-    non_documentation_md_paths = set(all_md_paths.keys()) - documentation_md_paths
-
-    if non_documentation_md_paths:
-        non_documentation_md_path = non_documentation_md_paths.pop()
-        raise RuntimeError(f'{all_md_paths[non_documentation_md_path]}: '
-                           f'"{non_documentation_md_path}" is not in the online documentation. '
-                           f'Replace the link to this file by `{OMZ_PREFIX + non_documentation_md_path.as_posix()}`')
+    for md_path in all_md_paths:
+        if md_path not in documentation_md_paths:
+            raise RuntimeError(f'{all_md_paths[md_path]}: '
+                               f'"{md_path}" is not in the online documentation. '
+                               'Replace the link to this file by '
+                               f'`{OMZ_PREFIX + md_path.as_posix()}`')
 
     with (output_root / 'DoxygenLayout.xml').open('wb') as layout_file:
         ET.ElementTree(doxygenlayout_element).write(layout_file)
