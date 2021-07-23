@@ -13,9 +13,8 @@
 # limitations under the License.
 
 description: >-
-  This is a Keras\* version of `mobilenet-yolov4` model, one of the YOLO group of models
-  designed to perform real-time object detection mainly to vehicles, For details see repository
-  <https://github.com/ermubuzhiming/OMZ-model-download/>.
+  This is a Keras\* version of `mobilenet-yolov4` model designed to perform real-time vehicle detection
+  on FFmpeg-OpenVINO. It can realize illegal lane change detection and speed detection by developing FFmpeg.
   The weights are pretrained by BDD100k and retrained by our own dataset.
   For details see repository <https://github.com/ermubuzhiming/OMZ-files-download/>,
   paper of MobileNetV2<https://arxiv.org/abs/1801.04381> and YOLOv4<https://arxiv.org/abs/2004.10934>
@@ -39,6 +38,7 @@ model_optimizer_args:
   - --transformations_config=$dl_dir/yolo_pb2ir.json
   - --data_type=FP16
   - --reverse_input_channels
+  - --output_dir=$dl_dir/
 
 framework: tf
 quantizable: yes
