@@ -113,8 +113,8 @@ def build_argparser():
 def main():
     args = build_argparser().parse_args()
 
+    start_time = perf_counter()
     with wave.open(args.input, 'rb') as wave_read:
-        start_time = perf_counter()
         channel_num, sample_width, sampling_rate, pcm_length, compression_type, _ = wave_read.getparams()
         assert sample_width == 2, "Only 16-bit WAV PCM supported"
         assert compression_type == 'NONE', "Only linear PCM WAV files supported"

@@ -172,11 +172,11 @@ def main():
         with open(args.labels, "r") as file:
             labels = [line.rstrip() for line in file.readlines()]
 
+    start_time = perf_counter()
     audio = AudioSource(args.input, channels=channels, samplerate=args.sample_rate)
 
     outputs = []
     clips = 0
-    start_time = perf_counter()
     for idx, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
         chunk.shape = input_shape
         output = exec_net.infer(inputs={input_blob: chunk})
