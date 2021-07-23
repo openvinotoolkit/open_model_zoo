@@ -166,9 +166,9 @@ struct Context {  // stores all global data for tasks
         std::vector<PersonTrackers> personTracker;
         std::vector<int> minW;
         std::vector<int> maxW;
-        std::vector<std::atomic<int64_t>> lastProcessedIds;
+        std::vector<std::atomic<int32_t>> lastProcessedIds;
 
-        //manual definition of constructor is needed only for creating vector<std::atomic<int64_t>>
+        //manual definition of constructor is needed only for creating vector<std::atomic<int32_t>>
         TrackersContext(std::vector<PersonTrackers>&& personTracker, std::vector<int>&& minW, std::vector<int>&& maxW)
             : personTracker(personTracker), minW(minW), maxW(maxW), lastProcessedIds(personTracker.size()) {
             for (size_t i = 0; i < lastProcessedIds.size(); ++i) {
@@ -183,7 +183,7 @@ struct Context {  // stores all global data for tasks
     bool isVideo;
     std::chrono::steady_clock::time_point t0;
     std::atomic<std::vector<InferRequest>::size_type> freeDetectionInfersCount;
-    std::atomic<uint64_t> frameCounter;
+    std::atomic<uint32_t> frameCounter;
     InferRequestsContainer detectorsInfers, reidInfers;
 };
 
@@ -376,7 +376,7 @@ void Drawer::process() {
         cv::Rect usage(15, 90, 370, 20);
         cv::rectangle(mat, usage, {0, 255, 0}, 2);
         uint64_t nireq = context.nireq;
-        uint64_t frameCounter = context.frameCounter;
+        uint32_t frameCounter = context.frameCounter;
         usage.width = static_cast<int>(usage.width * static_cast<float>(frameCounter * nireq - context.freeDetectionInfersCount) / (frameCounter * nireq));
         cv::rectangle(mat, usage, {0, 255, 0}, cv::FILLED);
 
@@ -805,7 +805,7 @@ int main(int argc, char* argv[]) {
         worker->join();
         const auto t1 = std::chrono::steady_clock::now();
 
-        uint64_t frameCounter = context.frameCounter;
+        uint32_t frameCounter = context.frameCounter;
         if (0 != frameCounter) {
             const float fps = static_cast<float>(frameCounter) / std::chrono::duration_cast<Sec>(t1 - context.t0).count()
                 / context.readersContext.inputChannels.size();
