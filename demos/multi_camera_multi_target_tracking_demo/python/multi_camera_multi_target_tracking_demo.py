@@ -182,7 +182,8 @@ def run(params, config, capture, detector, reid):
         prev_frames, frames = frames, prev_frames
 
     metrics.log_total()
-    print(presenter.reportMeans())
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
     thread_body.process = False
     frames_thread.join()

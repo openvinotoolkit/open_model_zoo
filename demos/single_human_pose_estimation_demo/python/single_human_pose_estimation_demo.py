@@ -110,7 +110,8 @@ def run_demo(args):
         frame = cap.read()
 
     metrics.log_total()
-    print(presenter.reportMeans())
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == "__main__":

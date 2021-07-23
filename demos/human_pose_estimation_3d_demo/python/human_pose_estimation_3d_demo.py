@@ -182,4 +182,5 @@ if __name__ == '__main__':
         frame = cap.read()
 
     metrics.log_total()
-    print(presenter.reportMeans())
+    for rep in presenter.reportMeans():
+        log.info(rep)

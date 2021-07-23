@@ -123,7 +123,9 @@ def main():
     cap = open_images_capture(args.input, args.loop)
     run_pipeline(cap, args.architecture_type, models, result_presenter.render_frame, args.raw_output_message,
                  seq_size=seq_size, fps=cap.fps())
-    print(presenter.reportMeans())
+
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

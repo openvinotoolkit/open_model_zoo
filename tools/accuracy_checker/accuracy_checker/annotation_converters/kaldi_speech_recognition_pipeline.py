@@ -112,7 +112,7 @@ class KaldiFeatureRegressionConverter(BaseFormatConverter):
         self.ref_data_dir = self.get_value_from_config('ref_data_dir')
         if self.ref_data_dir is None:
             self.ref_data_dir = self.data_dir
-        self.ref_file_suffix = self.get_value_from_config('ref_file_siffix')
+        self.ref_file_suffix = self.get_value_from_config('ref_file_suffix')
         self.vectors_mode = self.get_value_from_config('vectors_mode')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):

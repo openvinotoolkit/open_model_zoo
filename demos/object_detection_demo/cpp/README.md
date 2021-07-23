@@ -123,6 +123,14 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - person-vehicle-bike-detection-crossroad-yolov3-1020
   - yolo-v3-tf
   - yolo-v3-tiny-tf
+  - yolo-v1-tiny-tf
+  - yolo-v2-ava-0001
+  - yolo-v2-ava-sparse-??-0001
+  - yolo-v2-tf
+  - yolo-v2-tiny-ava-0001
+  - yolo-v2-tiny-ava-sparse-??-0001
+  - yolo-v2-tiny-tf
+  - yolo-v2-tiny-vehicle-detection-0001
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 

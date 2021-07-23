@@ -17,6 +17,7 @@
 #include "utils/config_factory.h"
 
 #include <set>
+#include <string>
 
 #include <gpu/gpu_config.hpp>
 #include <utils/args_helper.hpp>
@@ -24,10 +25,14 @@
 
 using namespace InferenceEngine;
 
-void CnnConfig::parseDevices() {
-    for (const std::string& device : ::parseDevices(deviceName)) {
-        devices.insert(device);
+std::set<std::string> CnnConfig::getDevices() {
+    if (devices.empty()) {
+        for (const std::string& device : ::parseDevices(deviceName)) {
+            devices.insert(device);
+        }
     }
+
+    return devices;
 }
 
 CnnConfig ConfigFactory::getUserConfig(const std::string& flags_d, const std::string& flags_l, const std::string& flags_c,
@@ -84,7 +89,6 @@ CnnConfig ConfigFactory::getCommonConfig(const std::string& flags_d, const std::
 
     if (!flags_d.empty()) {
         config.deviceName = flags_d;
-        config.parseDevices();
     }
 
     if (!flags_l.empty()) {
