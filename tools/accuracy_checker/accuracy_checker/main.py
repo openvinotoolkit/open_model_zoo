@@ -437,6 +437,7 @@ def main():
         except Exception as e:  # pylint:disable=W0703
             details['status'] = 'error'
             details['error'] = str(type(e))
+            send_telemetry_event(tm, 'status', 'failure')
             send_telemetry_event(tm, 'model_run', json.dumps(details))
             send_telemetry_event(tm, 'status', 'failure')
             exception(e)
