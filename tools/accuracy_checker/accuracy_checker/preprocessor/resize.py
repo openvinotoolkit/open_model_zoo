@@ -326,6 +326,7 @@ def create_resizer(config):
 
 class Resize(Preprocessor):
     __provider__ = 'resize'
+    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -439,9 +440,17 @@ class Resize(Preprocessor):
 
         return image
 
+    @property
+    def dynamic_result_shape(self):
+        if self.scaling_func:
+            return True
+        return False
+
 
 class AutoResize(Preprocessor):
     __provider__ = 'auto_resize'
+    shape_modificator = True
+    _dynamic_shapes = False
 
     def __init__(self, config, name=None):
         super().__init__(config, name)
@@ -504,3 +513,7 @@ class AutoResize(Preprocessor):
         )
 
         return image
+
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes

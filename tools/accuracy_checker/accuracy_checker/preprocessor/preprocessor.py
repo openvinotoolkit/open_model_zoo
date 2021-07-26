@@ -24,6 +24,7 @@ MULTI_INFER_PREPROCESSORS = ['tiling', 'normalize3d', 'image_pyramid', 'clip_aud
 
 class Preprocessor(ClassProvider):
     __provider_type__ = 'preprocessor'
+    shape_modificator = False
 
     def __init__(self, config, name=None):
         self.config = config
@@ -96,3 +97,7 @@ class Preprocessor(ClassProvider):
                 full_scheme.append(cls.resolve(provider_).validation_scheme())
             return full_scheme
         return cls.parameters()
+
+    @property
+    def dynamic_result_shape(self):
+        return self.shape_modificator
