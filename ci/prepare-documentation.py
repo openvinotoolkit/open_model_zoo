@@ -156,12 +156,11 @@ def add_page(output_root, parent, *, id=None, path=None, title=None, index=-1):
             continue # link to markdown section
 
         relative_path = (OMZ_ROOT / Path(path).parent / link).resolve().relative_to(OMZ_ROOT)
-        relative_posix_path = Path(relative_path).as_posix()
 
         if link.endswith('.md'):
             all_md_paths[relative_path] = Path(path)
         else:
-            suggested_path = OMZ_PREFIX + relative_posix_path
+            suggested_path = OMZ_PREFIX + Path(relative_path).as_posix()
             raise RuntimeError(f'{path}: Relative link to non-markdown file "{link}". '
                                f'Replace it by `{suggested_path}`')
 
