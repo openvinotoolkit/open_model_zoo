@@ -617,9 +617,7 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
 
 
 class MTCNNEvaluator(BaseEvaluator):
-    def __init__(
-            self, dataset_config, launcher, stages, orig_config
-    ):
+    def __init__(self, dataset_config, launcher, stages, orig_config):
         self.dataset_config = dataset_config
         self.stages = stages
         self.launcher = launcher
@@ -851,6 +849,24 @@ class MTCNNEvaluator(BaseEvaluator):
     def dataset_size(self):
         return self.dataset.size
 
+    def send_processing_info(self, sender):
+        if not sender:
+            return {}
+        model_type = None
+        details = {}
+        metrics = self.dataset_config[0].get('metrics', [])
+        metric_info = [metric['type'] for metric in metrics]
+        adapter_type = next(iter(self.stages.values())).adapter.__provider__
+        details.update({
+            'metrics': metric_info,
+            'model_file_type': model_type,
+            'adapter': adapter_type,
+        })
+        if self.dataset is None:
+            self.select_dataset('')
+        details.update(self.dataset.send_annotation_info(self.dataset_config[0]))
+        return details
+
 
 def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_mapping, iou_type=None):
     score = out[0][outputs_mapping['probability_out']][:, 1]
@@ -872,25 +888,18 @@ def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_ma
             previous_stage_predictions[0].scores
         ]
         mv = mv[np.sort(peek).astype(int)]
-    bboxes = bbreg(bboxes, mv.T)
-    x_mins, y_mins, x_maxs, y_maxs, _ = bboxes.T
+    x_mins, y_mins, x_maxs, y_maxs, _ = bbreg(bboxes, mv.T).T
     previous_stage_predictions[0].x_mins = x_mins
     previous_stage_predictions[0].y_mins = y_mins
     previous_stage_predictions[0].x_maxs = x_maxs
     previous_stage_predictions[0].y_maxs = y_maxs
     return previous_stage_predictions
 
-
 def nms(prediction, threshold, iou_type):
-    bboxes = np.c_[
-        prediction.x_mins, prediction.y_mins,
-        prediction.x_maxs, prediction.y_maxs,
-        prediction.scores
-    ]
+    bboxes = np.c_[prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs, prediction.scores]
     peek = MTCNNPAdapter.nms(bboxes, threshold, iou_type)
     prediction.remove([i for i in range(prediction.size) if i not in peek])
     return prediction, peek
-
 
 def bbreg(boundingbox, reg):
     reg = reg.T
@@ -956,7 +965,6 @@ def pad(boxesA, h, w):
     ex = np.maximum(0, ex - 1)
     return filter_valid(dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph)
 
-
 def rerec(bboxA):
     w = bboxA[:, 2] - bboxA[:, 0]
     h = bboxA[:, 3] - bboxA[:, 1]
@@ -966,13 +974,8 @@ def rerec(bboxA):
     bboxA[:, 2:4] = bboxA[:, 0:2] + np.repeat([max_side], 2, axis=0).T
     return bboxA
 
-
 def cut_roi(image, prediction, dst_size, include_bound=True):
-    bboxes = np.c_[
-        prediction.x_mins, prediction.y_mins,
-        prediction.x_maxs, prediction.y_maxs,
-        prediction.scores
-    ]
+    bboxes = np.c_[prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs, prediction.scores]
     img = image.data
     bboxes = rerec(bboxes)
     bboxes[:, 0:4] = np.fix(bboxes[:, 0:4])

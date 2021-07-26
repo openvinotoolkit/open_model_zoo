@@ -176,6 +176,7 @@ class Dataset:
             'annotation_saving': False,
             'dataset_size': self.size
         }
+        convert_annotation = True
         subsample_size = config.get('subsample_size')
         subsample_meta = {'subset': False, 'shuffle': False}
         if not ignore_subset_settings(config):
@@ -190,14 +191,13 @@ class Dataset:
         info['subset_info'] = subsample_meta
         if 'annotation' in config:
             annotation_file = Path(config['annotation'])
-            if annotation_file.exists():
-                return info
+            if 'annotation_conversion' in config:
+                info['annotation_saving'] = True
+                convert_annotation = True
+            elif annotation_file.exists():
+                convert_annotation = False
 
-        if 'annotation_conversion' in config:
-            info['converter'] = config['annotation_conversion'].get('converter')
-
-        if contains_all(config, ['annotation', 'annotation_conversion']):
-            info['annotation_saving'] = True
+        info['convert_annotation'] = convert_annotation
 
         return info
 
@@ -688,6 +688,42 @@ class DataProvider:
                 del meta['segmentation_masks_source']
         self.annotation_provider = AnnotationProvider(annotation, meta)
         self.create_data_list()
+
+    def send_annotation_info(self, config):
+        info = {
+            'convert_annotation': False,
+            'converter': None,
+            'dataset_analysis': config.get('analyze_dataset', False),
+            'annotation_saving': False,
+            'dataset_size': self.size
+        }
+        subsample_size = config.get('subsample_size')
+        subsample_meta = {'subset': False, 'shuffle': False}
+        convert_annotation = True
+        if not ignore_subset_settings(config):
+
+            if subsample_size is not None:
+                shuffle = config.get('shuffle', True)
+                subsample_meta = {
+                    'shuffle': shuffle,
+                    'subset': True
+                }
+
+        info['subset_info'] = subsample_meta
+        if 'annotation' in config:
+            annotation_file = Path(config['annotation'])
+            if 'annotation_conversion' in config:
+                info['annotation_saving'] = True
+                convert_annotation = True
+            elif annotation_file.exists():
+                convert_annotation = False
+
+        if 'annotation_conversion' in config:
+            info['converter'] = config['annotation_conversion'].get('converter')
+
+        info['convert_annotation'] = convert_annotation
+
+        return info
 
 
 class DatasetWrapper(DataProvider):

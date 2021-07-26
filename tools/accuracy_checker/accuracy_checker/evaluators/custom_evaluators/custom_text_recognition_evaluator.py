@@ -258,6 +258,24 @@ class TextRecognitionWithAttentionEvaluator(BaseEvaluator):
 
         return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
 
+    def send_processing_info(self, sender):
+        if not sender:
+            return {}
+        model_type = None
+        details = {}
+        metrics = self.dataset_config[0].get('metrics', [])
+        metric_info = [metric['type'] for metric in metrics]
+        details.update({
+            'metrics': metric_info,
+            'model_file_type': model_type,
+            'adapter': None,
+        })
+        if self.dataset is None:
+            self.select_dataset('')
+
+        details.update(self.dataset.send_annotation_info(self.dataset_config[0]))
+        return details
+
 
 class BaseModel:
     def __init__(self, network_info, launcher, default_model_suffix):
