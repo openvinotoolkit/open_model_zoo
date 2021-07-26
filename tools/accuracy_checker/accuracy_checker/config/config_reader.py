@@ -61,6 +61,7 @@ ANNOTATION_CONVERSION_PATHS = {
     'merges_file': ['model_attributes', 'source', 'models'],
     'mask_file': ['model_attributes', 'source', 'models'],
     'stats_file': ['model_attributes', 'source', 'models'],
+    'tokenizer_dir': ['model_attributes', 'models', 'source']
 }
 
 LIST_ENTRIES_PATHS = {
