@@ -439,7 +439,6 @@ def main():
             details['error'] = str(type(e))
             send_telemetry_event(tm, 'status', 'failure')
             send_telemetry_event(tm, 'model_run', json.dumps(details))
-            send_telemetry_event(tm, 'status', 'failure')
             exception(e)
             return_code = 1
             continue
