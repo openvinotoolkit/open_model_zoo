@@ -129,7 +129,7 @@ class ModuleEvaluator(BaseEvaluator):
             'platform': platform.system(),
             'framework': framework if framework != 'dlsdk' else 'openvino',
             'device': device.upper(),
-            'inference_model': 'sync'
+            'inference_mode': 'sync'
         }
         details.update(self._internal_module.send_processing_info(sender))
         return details
