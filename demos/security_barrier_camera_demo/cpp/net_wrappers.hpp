@@ -317,8 +317,7 @@ public:
 
         InferenceEngine::Precision precision = inferRequest.GetBlob(LprOutputName)->getTensorDesc().getPrecision();
 
-        switch (precision)
-        {
+        switch (precision) {
             case InferenceEngine::Precision::I32:
             {
                 const auto data = lprOutputMapped.as<int32_t*>();
