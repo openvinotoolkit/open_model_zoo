@@ -134,7 +134,7 @@ is an integer number encoding a character according to this dictionary:
 
 ### Converted Model
 
-Encoded vector of integerss, name: `d_predictions:0`, shape: `1, 88`. Each value
+Encoded vector of integers, name: `d_predictions:0`, shape: `1, 88`. Each value
 is an integer number encoding a character according to this dictionary:
 
         0 0
