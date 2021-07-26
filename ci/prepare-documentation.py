@@ -373,9 +373,8 @@ def main():
     for md_path in all_md_paths:
         if md_path not in documentation_md_paths:
             raise RuntimeError(f'{all_md_paths[md_path]}: '
-                               f'"{md_path}" is not in the online documentation. '
-                               'Replace the link to this file by '
-                               f'`{OMZ_PREFIX + md_path.as_posix()}`')
+                               f'Relative link to non-online documentation file "{md_path}". '
+                               f'Replace it by `{OMZ_PREFIX + md_path.as_posix()}`')
 
     with (output_root / 'DoxygenLayout.xml').open('wb') as layout_file:
         ET.ElementTree(doxygenlayout_element).write(layout_file)
