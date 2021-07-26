@@ -197,6 +197,9 @@ class Dataset:
             elif annotation_file.exists():
                 convert_annotation = False
 
+        if 'annotation_conversion' in config:
+            info['converter'] = config['annotation_conversion'].get('converter')
+
         info['convert_annotation'] = convert_annotation
 
         return info
