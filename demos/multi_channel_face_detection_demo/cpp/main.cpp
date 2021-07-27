@@ -27,6 +27,7 @@
 
 #include <monitors/presenter.h>
 #include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
 #include "input.hpp"
@@ -197,6 +198,8 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
 
 int main(int argc, char* argv[]) {
     try {
+        PerformanceMetrics metrics;
+
 #if USE_TBB
         TbbArenaWrapper arena;
 #endif
