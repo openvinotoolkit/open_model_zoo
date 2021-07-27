@@ -44,23 +44,43 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: monodepth_demo.py [-h] -m MODEL -i INPUT [-l CPU_EXTENSION] [-d DEVICE]
+usage: monodepth_demo.py [-h] -m MODEL -i INPUT [-d DEVICE] [-nireq NUM_INFER_REQUESTS] [-nstreams NUM_STREAMS]
+                         [-nthreads NUM_THREADS] [--loop] [-o OUTPUT] [-limit OUTPUT_LIMIT] [--no_show]
+                         [--output_resolution OUTPUT_RESOLUTION] [-u UTILIZATION_MONITORS]
 
-optional arguments:
-  -h, --help            show this help message and exit
+Options:
+  -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Required. Path to an .xml file with a trained model
+                        Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
-                        Required. Path to a input image file
-  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
-                        Optional. Required for CPU custom layers. Absolute
-                        MKLDNN (CPU)-targeted custom layers. Absolute path to
-                        a shared library with the kernels implementations
+                        Required. An input to process. The input must be a single image, a folder of images, video
+                        file or camera id.
   -d DEVICE, --device DEVICE
-                        Optional. Specify the target device to infer on; CPU,
-                        GPU, HDDL or MYRIAD is acceptable. The demo will
-                        look for a suitable plugin for device specified.
-                        Default value is CPU
+                        Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is acceptable. The
+                        demo will look for a suitable plugin for device specified. Default value is CPU.
+
+Inference options:
+  -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
+                        Optional. Number of infer requests.
+  -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
+                        Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for
+                        HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just
+                        <nstreams>).
+  -nthreads NUM_THREADS, --num_threads NUM_THREADS
+                        Optional. Number of threads to use for inference on CPU (including HETERO cases).
+
+Input/output options:
+  --loop                Optional. Enable reading the input in a loop.
+  -o OUTPUT, --output OUTPUT
+                        Optional. Name of the output file(s) to save.
+  -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
+                        Optional. Number of frames to store in output. If 0 is set, all frames are stored.
+  --no_show             Optional. Don't show output.
+  --output_resolution OUTPUT_RESOLUTION
+                        Optional. Specify the maximum output window resolution in (width x height) format. Example:
+                        1280x720. Input frame size used by default.
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
