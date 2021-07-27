@@ -22,7 +22,6 @@ shapely>=1.7.1
 pyclipper>=1.2.1
 
 # brain tumor segmentation
-
 nibabel>=3.2.1
 scipy~=1.5.4
 

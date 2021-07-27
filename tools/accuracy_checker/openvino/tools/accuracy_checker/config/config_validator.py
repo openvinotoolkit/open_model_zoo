@@ -504,6 +504,7 @@ class PathField(BaseField):
         error_stack = super().validate(entry, field_uri, fetch_only, validation_scheme)
         if entry is None:
             return error_stack
+
         field_uri = field_uri or self.field_uri
         try:
             get_path(entry, self.is_directory, self.check_exists, self.file_or_directory)

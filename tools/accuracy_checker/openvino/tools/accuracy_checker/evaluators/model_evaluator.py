@@ -374,6 +374,7 @@ class ModelEvaluator(BaseEvaluator):
         if self.adapter:
             self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
             batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
+
         annotations, predictions = self.postprocessor.process_batch(
             batch_annotations, batch_predictions, batch_meta
         )
