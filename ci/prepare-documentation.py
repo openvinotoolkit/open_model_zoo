@@ -42,7 +42,7 @@ import shutil
 import sys
 import urllib.parse
 import urllib.request
-import defusedxml.ElementTree as ET
+import xml.etree.ElementTree as ET # nosec - disable B405:import-xml-etree check
 
 from pathlib import Path
 

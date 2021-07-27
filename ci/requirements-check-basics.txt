@@ -5,9 +5,6 @@ bandit==1.7.0
     # -r ci/requirements-check-basics.in
 colorama==0.4.4
     # via bandit
-defusedxml==0.7.1
-    # via
-    # -r ci/requirements-documentation.in
 flake8==3.9.2
     # via
     #   -r ci/requirements-check-basics.in
