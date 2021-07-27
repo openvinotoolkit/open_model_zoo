@@ -60,7 +60,7 @@ else()
     set(COMPILER_IS_GCC_LIKE FALSE)
 endif()
 
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm.*|ARM.*)" AND NOT CMAKE_CROSSCOMPILING)
+if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^(arm.*|ARM.*)" AND NOT CMAKE_CROSSCOMPILING)
     add_compile_options(-march=armv7-a)
 endif()
 
