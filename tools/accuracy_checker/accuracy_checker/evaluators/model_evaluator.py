@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 import copy
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 import platform
 
 from ..utils import get_path, extract_image_representations, is_path

@@ -34,7 +34,7 @@ import json
 import os
 import platform
 import shlex
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 import sys
 import tempfile
 import timeit

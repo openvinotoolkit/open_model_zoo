@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 import abc
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 
 
 class BaseRepresentation(abc.ABC):

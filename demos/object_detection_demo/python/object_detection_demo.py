@@ -125,7 +125,7 @@ class ColorPalette:
         assert n > 0
 
         if rng is None:
-            rng = random.Random(0xACE)
+            rng = random.Random(0xACE) # nosec - disable B311:random check
 
         candidates_num = 100
         hsv_colors = [(1.0, 1.0, 1.0)]

@@ -19,7 +19,7 @@ import errno
 import itertools
 import json
 import os
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 import struct
 import sys
 import zlib

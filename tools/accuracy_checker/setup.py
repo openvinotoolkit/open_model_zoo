@@ -20,7 +20,7 @@ import re
 import sys
 import warnings
 import platform
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 from setuptools import find_packages, setup
 from setuptools.command.test import test as test_command
 from setuptools.command.install import install as install_command

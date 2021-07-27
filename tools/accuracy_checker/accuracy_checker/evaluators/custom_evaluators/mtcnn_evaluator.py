@@ -17,7 +17,7 @@ limitations under the License.
 import copy
 from functools import partial
 from collections import OrderedDict
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 from pathlib import Path
 import numpy as np
 import cv2

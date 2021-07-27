@@ -18,7 +18,7 @@ from copy import deepcopy
 from pathlib import Path
 from collections import OrderedDict
 import warnings
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 import numpy as np
 import yaml
 

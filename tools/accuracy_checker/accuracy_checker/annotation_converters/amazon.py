@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 from pathlib import Path
 import numpy as np
 
