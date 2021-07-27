@@ -25,8 +25,9 @@
 
 #include <monitors/presenter.h>
 #include <utils/images_capture.h>
-#include <utils/slog.hpp>
 #include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 #include "crossroad_camera_demo.hpp"
 
 using namespace InferenceEngine;
@@ -499,6 +500,7 @@ struct Load {
 
 int main(int argc, char *argv[]) {
     try {
+        PerformanceMetrics metrics;
         /** This demo covers 3 certain topologies and cannot be generalized **/
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -566,6 +568,7 @@ int main(int argc, char *argv[]) {
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
         auto total_t0 = std::chrono::high_resolution_clock::now();
 
+        auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
         if (!frame.data) {
             throw std::logic_error("Can't read an image from the input");
@@ -757,7 +760,7 @@ int main(int argc, char *argv[]) {
             }
 
             presenter.drawGraphs(frame);
-
+            metrics.update(startTime);
             // --------------------------- Execution statistics ------------------------------------------------
             std::ostringstream out;
             out << "Detection time : " << std::fixed << std::setprecision(2) << detection.count()
@@ -798,13 +801,16 @@ int main(int argc, char *argv[]) {
                     break;
                 presenter.handleKey(key);
             }
+            startTime = std::chrono::steady_clock::now();
             frame = cap->read();
         } while (frame.data);
 
         auto total_t1 = std::chrono::high_resolution_clock::now();
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
 
-        slog::info << "Total Inference time: " << total.count() << slog::endl;
+        //// --------------------------- Report metrics -------------------------------------------------------
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.printTotal();
         slog::info << presenter.reportMeans() << slog::endl;
         // -----------------------------------------------------------------------------------------------------
     }
