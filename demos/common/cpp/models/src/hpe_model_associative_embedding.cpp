@@ -106,7 +106,7 @@ std::shared_ptr<InternalModelData> HpeAssociativeEmbedding::preprocess(const Inp
     auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, resizeMode, true, &roi);
     if (inputLayerSize.height - stride >= roi.height
         || inputLayerSize.width - stride >= roi.width) {
-        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio\n";
+        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
     }
     request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */

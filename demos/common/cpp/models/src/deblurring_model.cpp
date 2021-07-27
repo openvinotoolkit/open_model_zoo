@@ -85,7 +85,7 @@ std::shared_ptr<InternalModelData> DeblurringModel::preprocess(const InputData& 
         cv::copyMakeBorder(image, resizedImage, 0, bottom, 0, right,
                            cv::BORDER_CONSTANT, 0);
     } else {
-        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio\n";
+        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::warn;
         cv::resize(image, resizedImage, cv::Size(netInputWidth, netInputHeight));
     }
     Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
