@@ -47,6 +47,9 @@ pbr==5.5.1
     # via stevedore
 colorama==0.4.4
     # via bandit
+defusedxml==0.7.1
+    # via
+    # -r ci/requirements-documentation.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
