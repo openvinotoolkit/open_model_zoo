@@ -287,7 +287,7 @@ int main(int argc, char *argv[]) {
             }
         } // while(keepRunning)
 
-        //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
+        // ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
 
         for (; framesProcessed <= frameNum; framesProcessed++) {
@@ -335,7 +335,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        //// --------------------------- Report metrics -------------------------------------------------------
+        // --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
         printStagesLatency(cap->getMetrics().getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,

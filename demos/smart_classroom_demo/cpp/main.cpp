@@ -998,7 +998,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        //// --------------------------- Report metrics -------------------------------------------------------
+        // --------------------------- Report metrics -------------------------------------------------------
         if (work_num_frames > 0) {
             slog::info << "Metrics report:" << slog::endl;
             const float mean_time_ms = work_time_ms / static_cast<float>(work_num_frames);

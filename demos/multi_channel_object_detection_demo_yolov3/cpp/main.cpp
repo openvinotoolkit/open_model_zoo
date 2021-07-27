@@ -552,7 +552,7 @@ int main(int argc, char* argv[]) {
 
         network.reset();
 
-        //// --------------------------- Report metrics -------------------------------------------------------
+        // --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
         slog::info << "\tFPS: " << 1000.f / averageFps << slog::endl;
         slog::info << presenter.reportMeans() << slog::endl;

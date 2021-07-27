@@ -15,6 +15,7 @@
 #include <ie_version.hpp>
 
 #include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
 #include <opencv2/gapi.hpp>
@@ -298,6 +299,8 @@ void setInput(cv::GStreamingCompiled stream, const std::string& input ) {
 
 int main(int argc, char *argv[]) {
     try {
+        PerformanceMetrics metrics;
+
         // ------------------------------ Parsing and validating of input arguments --------------------------
         gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
         if (FLAGS_h) {
@@ -445,7 +448,6 @@ int main(int argc, char *argv[]) {
         const cv::Point THROUGHPUT_METRIC_POSITION{10, 30};
         std::unique_ptr<Presenter> presenter;
 
-        Timer timer;
         do {
             try {
                 setInput(stream, FLAGS_i);
@@ -456,7 +458,7 @@ int main(int argc, char *argv[]) {
                 throw std::invalid_argument(msg.str());
             }
 
-            timer.start("total");
+            auto startTime = std::chrono::steady_clock::now();
             stream.start();
             while (stream.pull(cv::GRunArgsP(out_vector))) {
                 if (!FLAGS_no_show && !FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
@@ -519,20 +521,14 @@ int main(int argc, char *argv[]) {
                     faces.push_back(face);
                 }
 
+                // drawing faces
+                visualizer->draw(frame, faces);
+
                 presenter->drawGraphs(frame);
+                metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
                 //  Visualizing results
                 if (!FLAGS_no_show || !FLAGS_o.empty()) {
-                    out.str("");
-                    out << "FPS: " << std::fixed << std::setprecision(1)
-                        << 1000.0 / (timer["total"].getSmoothedDuration());
-
-                    putHighlightedText(frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_COMPLEX, 0.65,
-                        cv::Scalar(255, 0, 0), 2);
-
-                    // drawing faces
-                    visualizer->draw(frame, faces);
-
                     cv::imshow("Detection results", frame);
 
                     int key = cv::waitKey(1);
@@ -542,6 +538,7 @@ int main(int argc, char *argv[]) {
                         presenter->handleKey(key);
                     }
                 }
+
                 if (!FLAGS_o.empty() && framesCounter == 0 &&
                     !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 25, frame.size())) {
                     throw std::runtime_error("Can't open video writer");
@@ -550,15 +547,12 @@ int main(int argc, char *argv[]) {
                     videoWriter.write(frame);
                 }
 
-                timer["total"].calculateDuration();
                 framesCounter++;
             }
-            timer.finish("total");
 
-            //// --------------------------- Report metrics -------------------------------------------------------
+            // --------------------------- Report metrics -------------------------------------------------------
             slog::info << "Metrics report:" << slog::endl;
-            slog::info << "\tNumber of processed frames: " << framesCounter << slog::endl;
-            slog::info << "\tFPS: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << slog::endl;
+            metrics.printTotal();
             slog::info << presenter->reportMeans() << slog::endl;
         } while (FLAGS_loop);
 

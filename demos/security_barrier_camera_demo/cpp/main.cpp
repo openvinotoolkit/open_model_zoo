@@ -824,7 +824,7 @@ int main(int argc, char* argv[]) {
             const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
                 / (frameCounter * context.nireq) * 100;
 
-            //// --------------------------- Report metrics -------------------------------------------------------
+            // --------------------------- Report metrics -------------------------------------------------------
             slog::info << "Metrics report:" << slog::endl;
             slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << fps << slog::endl;
             slog::info << "\tDetection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;

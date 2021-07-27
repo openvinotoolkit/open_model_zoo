@@ -324,7 +324,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        //// --------------------------- Report metrics -------------------------------------------------------
+        // --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
         printStagesLatency(readerMetrics.getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
