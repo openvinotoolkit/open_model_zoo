@@ -25,7 +25,7 @@ class BaseRepresentation(abc.ABC):
 
     @classmethod
     def load(cls, file):
-        obj = pickle.load(file)
+        obj = pickle.load(file) # nosec - disable B301:pickle check
 
         if cls != BaseRepresentation:
             assert isinstance(obj, cls)

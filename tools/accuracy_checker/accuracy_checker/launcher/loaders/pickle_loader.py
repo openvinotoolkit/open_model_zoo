@@ -54,7 +54,7 @@ class PickleLoader(DictLoaderMixin, Loader):
         with open(data_path, 'rb') as content:
             while True:
                 try:
-                    result.append(pickle.load(content))
+                    result.append(pickle.load(content)) # nosec - disable B301:pickle check
                 except EOFError:
                     break
         return result

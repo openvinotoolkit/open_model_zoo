@@ -38,7 +38,8 @@ class DataIterator:
         self.source = open(source, 'r')
         self.source_dicts = []
         for source_dict in [uid_voc, mid_voc, cat_voc]:
-            self.source_dicts.append(pickle.load(open(source_dict, 'rb'), encoding='UTF-8'))
+            # disable B301:pickle check
+            self.source_dicts.append(pickle.load(open(source_dict, 'rb'), encoding='UTF-8')) # nosec
 
         f_meta = open(item_info, "r")
         meta_map = {}

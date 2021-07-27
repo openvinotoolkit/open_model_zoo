@@ -298,7 +298,7 @@ def read_json(file: Union[str, Path], *args, **kwargs):
 
 def read_pickle(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open('rb') as content:
-        return pickle.load(content, *args, **kwargs)
+        return pickle.load(content, *args, **kwargs) # nosec - disable B301:pickle check
 
 
 def read_yaml(file: Union[str, Path], *args, **kwargs):

@@ -364,7 +364,7 @@ def read_annotation(annotation_file: Path):
     result = []
     with annotation_file.open('rb') as file:
         try:
-            first_obj = pickle.load(file)
+            first_obj = pickle.load(file) # nosec - disable B301:pickle check
             if isinstance(first_obj, DatasetConversionInfo):
                 describe_cached_dataset(first_obj)
             else:
