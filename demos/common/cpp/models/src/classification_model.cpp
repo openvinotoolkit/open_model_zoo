@@ -107,7 +107,7 @@ void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnN
         throw std::runtime_error("The model provides " + std::to_string(outSizeVector[1]) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
     if (outSizeVector[1] == labels.size() + 1) {
         labels.insert(labels.begin(), "other");
-        slog::warn << "\tInserted 'other' label as first.\n";
+        slog::warn << "\tInserted 'other' label as first." << slog::endl;
     }
     else if (outSizeVector[1] != labels.size())
         throw std::logic_error("Model's number of classes and parsed labels must match (" + std::to_string(outSizeVector[1]) + " and " + std::to_string(labels.size()) + ')');
