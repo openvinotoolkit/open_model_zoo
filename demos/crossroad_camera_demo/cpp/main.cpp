@@ -501,6 +501,7 @@ struct Load {
 int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
+
         /** This demo covers 3 certain topologies and cannot be generalized **/
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -808,7 +809,7 @@ int main(int argc, char *argv[]) {
         auto total_t1 = std::chrono::high_resolution_clock::now();
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
 
-        //// --------------------------- Report metrics -------------------------------------------------------
+        // --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
         slog::info << presenter.reportMeans() << slog::endl;

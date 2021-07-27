@@ -270,7 +270,6 @@ int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
 
-
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;

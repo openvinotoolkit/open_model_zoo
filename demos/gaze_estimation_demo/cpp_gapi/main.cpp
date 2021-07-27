@@ -54,6 +54,8 @@ G_API_NET(Eyes,      <cv::GMat(cv::GMat)>, "l-open-closed-eyes");
 int main(int argc, char *argv[]) {
     try {
         using namespace gaze_estimation;
+        PerformanceMetrics metrics;
+
         /** Print info about Inference Engine **/
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         // ---------- Parsing and validating of input arguments ----------
@@ -237,6 +239,7 @@ int main(int argc, char *argv[]) {
         std::vector<cv::Point3f> out_gazes;
 
         /** ---------------- The execution part ---------------- **/
+        auto startTime = std::chrono::steady_clock::now();
         pipeline.setSource<custom::CustomCapSource>(cap);
         ResultsMarker resultsMarker(false, false, false, true, true);
         int delay = 1;
@@ -305,6 +308,7 @@ int main(int argc, char *argv[]) {
 
             /** Display system parameters **/
             presenter.drawGraphs(frame);
+            metrics.update(startTime);
 
             /** Display the results **/
             for (auto const& inferenceResult : inferenceResults) {
@@ -334,8 +338,12 @@ int main(int argc, char *argv[]) {
                 else
                     presenter.handleKey(key);
             }
+            startTime = std::chrono::steady_clock::now();
         }
 
+        // --------------------------- Report metrics -------------------------------------------------------
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.printTotal();
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

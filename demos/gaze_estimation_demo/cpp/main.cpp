@@ -31,6 +31,7 @@
 #include <utils/args_helper.hpp>
 #include <utils/images_capture.h>
 #include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
 #include "gaze_estimation_demo.hpp"
@@ -81,6 +82,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
+        PerformanceMetrics metrics;
+
         // ------------------------------ Parsing and validating of input arguments --------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -114,6 +117,8 @@ int main(int argc, char *argv[]) {
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0,
             std::numeric_limits<size_t>::max(), stringToSize(FLAGS_res));
+
+        auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
         if (!frame.data) {
             throw std::runtime_error("Can't read an image from the input");
@@ -160,6 +165,7 @@ int main(int argc, char *argv[]) {
             }
 
             presenter.drawGraphs(frame);
+            metrics.update(startTime);
             // Display the results
             for (auto const& inferenceResult : inferenceResults) {
                 resultsMarker.mark(frame, inferenceResult);
@@ -185,9 +191,13 @@ int main(int argc, char *argv[]) {
                 else
                     presenter.handleKey(key);
             }
+            startTime = std::chrono::steady_clock::now();
             frame = cap->read();
         } while (frame.data);
 
+        // --------------------------- Report metrics -------------------------------------------------------
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.printTotal();
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
