@@ -678,6 +678,9 @@ class DLSDKLauncher(Launcher):
     def _get_dynamic_inputs(self):
         inputs_with_undefined_shapes = []
         partial_shapes = {}
+        if self.network is None:
+            return inputs_with_undefined_shapes, partial_shapes
+
         for input_name, input_info in self.network.input_info.items():
             if -1 in input_info.input_data.shape or not input_info.input_data.shape:
                 inputs_with_undefined_shapes.append(input_name)
