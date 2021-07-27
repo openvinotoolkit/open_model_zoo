@@ -18,9 +18,10 @@
 
 #include <inference_engine.hpp>
 
-#include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
 #include <utils/args_helper.hpp>
+#include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 
 #include "mask_rcnn_demo.h"
 
@@ -48,6 +49,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
+        PerformanceMetrics metrics;
+
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -119,6 +122,7 @@ int main(int argc, char *argv[]) {
             slog::warn << "Network batch size is less than number of images (" << imagePaths.size() <<
                        "), some input files will be ignored" << slog::endl;
         }
+        auto startTime = std::chrono::steady_clock::now();
         for (size_t i = 0, inputIndex = 0; i < netBatchSize; i++, inputIndex++) {
             if (inputIndex >= imagePaths.size()) {
                 inputIndex = 0;
@@ -255,12 +259,15 @@ int main(int argc, char *argv[]) {
                 cv::rectangle(output_images[batch], roi, cv::Scalar(0, 0, 1), 1);
             }
         }
+        metrics.update(startTime);
         for (size_t i = 0; i < output_images.size(); i++) {
             std::string imgName = "out" + std::to_string(i) + ".png";
             cv::imwrite(imgName, output_images[i]);
             slog::info << "Image " << imgName << " created!" << slog::endl;
         }
-        // -----------------------------------------------------------------------------------------------------
+        // --------------------------- Report metrics -------------------------------------------------------
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.printTotal();
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
