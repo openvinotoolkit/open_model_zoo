@@ -567,7 +567,6 @@ int main(int argc, char *argv[]) {
 
         /** Start inference & calc performance **/
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
-        auto total_t0 = std::chrono::high_resolution_clock::now();
 
         auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
@@ -805,9 +804,6 @@ int main(int argc, char *argv[]) {
             startTime = std::chrono::steady_clock::now();
             frame = cap->read();
         } while (frame.data);
-
-        auto total_t1 = std::chrono::high_resolution_clock::now();
-        ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
 
         // --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;

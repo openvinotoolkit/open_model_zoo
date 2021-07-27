@@ -239,7 +239,6 @@ int main(int argc, char *argv[]) {
         std::vector<cv::Point3f> out_gazes;
 
         /** ---------------- The execution part ---------------- **/
-        auto startTime = std::chrono::steady_clock::now();
         pipeline.setSource<custom::CustomCapSource>(cap);
         ResultsMarker resultsMarker(false, false, false, true, true);
         int delay = 1;
@@ -261,6 +260,7 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Can't open video writer");
         }
 
+        auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
         while (pipeline.pull(cv::gout(frame,
                                       out_cofidence,

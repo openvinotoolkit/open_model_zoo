@@ -66,6 +66,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
+        PerformanceMetrics metrics;
 
         // ------------------------------ Parsing and validating of input arguments --------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -148,8 +149,7 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Can't read an image from the input");
         }
 
-        const cv::Point THROUGHPUT_METRIC_POSITION{10, 30};
-        Presenter presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, {frame.cols / 4, 60});
+        Presenter presenter(FLAGS_u, 60, {frame.cols / 4, 60});
 
         Visualizer visualizer{frame.size()};
         if (!FLAGS_no_show_emotion_bar && emotionsDetector.enabled()) {
@@ -168,9 +168,9 @@ int main(int argc, char *argv[]) {
         faceDetector.submitRequest();
 
         cv::Mat next_frame = cap->read();
-
         while (frame.data) {
             timer.start("total");
+            auto startTime = std::chrono::steady_clock::now();
             cv::Mat prev_frame = std::move(frame);
             frame = std::move(next_frame);
             framesCounter++;
@@ -289,18 +289,13 @@ int main(int argc, char *argv[]) {
                 faces.push_back(face);
             }
 
-            presenter.drawGraphs(prev_frame);
-
             // drawing faces
             visualizer.draw(prev_frame, faces);
 
-            timer.finish("total");
-            out.str("");
-            out << "FPS: " << std::fixed << std::setprecision(1)
-                << 1000.0 / (timer["total"].getSmoothedDuration());
+            presenter.drawGraphs(prev_frame);
+            metrics.update(startTime, prev_frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
-            putHighlightedText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_COMPLEX, 0.65,
-                cv::Scalar(255, 0, 0), 2);
+            timer.finish("total");
 
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesCounter <= FLAGS_limit)) {
                 videoWriter.write(prev_frame);
@@ -318,8 +313,8 @@ int main(int argc, char *argv[]) {
         }
         //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
-        slog::info << "\tNumber of processed frames: " << framesCounter << slog::endl;
-        slog::info << "\tFPS: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << slog::endl;
+        metrics.printTotal();
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
