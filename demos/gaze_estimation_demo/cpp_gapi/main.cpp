@@ -9,7 +9,6 @@
 #include "gaze_estimation_demo_gapi.hpp"
 #include "face_inference_results.hpp"
 #include "results_marker.hpp"
-#include "exponential_averager.hpp"
 #include "utils.hpp"
 #include "custom_kernels.hpp"
 #include "kernel_packages.hpp"
@@ -248,11 +247,6 @@ int main(int argc, char *argv[]) {
         cv::Size graphSize{static_cast<int>(frame_size.width / 4), 60};
         Presenter presenter(FLAGS_u, frame_size.height - graphSize.height - 10, graphSize);
 
-        /** Exponential averagers for times **/
-        double smoothingFactor = 0.1;
-        ExponentialAverager overallTimeAverager(smoothingFactor, 30.);
-        auto tIterationBegins = cv::getTickCount();
-
         /** Save output result **/
         cv::VideoWriter videoWriter;
         if (!FLAGS_o.empty() && !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
@@ -293,11 +287,19 @@ int main(int argc, char *argv[]) {
                 inferenceResults.push_back(inferenceResult);
             }
 
-            /** Measure FPS **/
-            auto tIterationEnds = cv::getTickCount();
-            double overallTime = (tIterationEnds - tIterationBegins) * 1000. / cv::getTickFrequency();
-            overallTimeAverager.updateValue(overallTime);
-            tIterationBegins = tIterationEnds;
+            /** FlipImage **/
+            if (flipImage) {
+                cv::flip(frame, frame, 1);
+            }
+
+            /** Display the results **/
+            for (auto const& inferenceResult : inferenceResults) {
+                resultsMarker.mark(frame, inferenceResult);
+            }
+
+            /** Display system parameters **/
+            presenter.drawGraphs(frame);
+            metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
             /** Print logs **/
             if (FLAGS_r) {
@@ -306,21 +308,6 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            /** Display system parameters **/
-            presenter.drawGraphs(frame);
-            metrics.update(startTime);
-
-            /** Display the results **/
-            for (auto const& inferenceResult : inferenceResults) {
-                resultsMarker.mark(frame, inferenceResult);
-            }
-
-            /** FlipImage **/
-            if (flipImage) {
-                cv::flip(frame, frame, 1);
-            }
-
-            putTimingInfoOnFrame(frame, overallTimeAverager.getAveragedValue());
             if (videoWriter.isOpened()) {
                 videoWriter.write(frame);
             }

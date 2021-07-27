@@ -47,7 +47,6 @@
 #include "gaze_estimator.hpp"
 
 #include "results_marker.hpp"
-#include "exponential_averager.hpp"
 
 #include "utils.hpp"
 
@@ -105,11 +104,6 @@ int main(int argc, char *argv[]) {
         // Each element of the vector contains inference results on one face
         std::vector<FaceInferenceResults> inferenceResults;
 
-        // Exponential averagers for times
-        double smoothingFactor = 0.1;
-        ExponentialAverager overallTimeAverager(smoothingFactor, 30.);
-        ExponentialAverager inferenceTimeAverager(smoothingFactor, 30.);
-
         bool flipImage = false;
         ResultsMarker resultsMarker(false, false, false, true, true);
         int delay = 1;
@@ -133,30 +127,26 @@ int main(int argc, char *argv[]) {
         cv::Size graphSize{frame.cols / 4, 60};
         Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
 
-        auto tIterationBegins = cv::getTickCount();
         do {
             if (flipImage) {
                 cv::flip(frame, frame, 1);
             }
 
             // Infer results
-            auto tInferenceBegins = cv::getTickCount();
             auto inferenceResults = faceDetector.detect(frame);
             for (auto& inferenceResult : inferenceResults) {
                 for (auto estimator : estimators) {
                     estimator->estimate(frame, inferenceResult);
                 }
             }
-            auto tInferenceEnds = cv::getTickCount();
 
-            // Measure FPS
-            auto tIterationEnds = cv::getTickCount();
-            double overallTime = (tIterationEnds - tIterationBegins) * 1000. / cv::getTickFrequency();
-            overallTimeAverager.updateValue(overallTime);
-            tIterationBegins = tIterationEnds;
+            // Display the results
+            for (auto const& inferenceResult : inferenceResults) {
+                resultsMarker.mark(frame, inferenceResult);
+            }
 
-            double inferenceTime = (tInferenceEnds - tInferenceBegins) * 1000. / cv::getTickFrequency();
-            inferenceTimeAverager.updateValue(inferenceTime);
+            presenter.drawGraphs(frame);
+            metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
             if (FLAGS_r) {
                 for (auto& inferenceResult : inferenceResults) {
@@ -164,14 +154,6 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            presenter.drawGraphs(frame);
-            metrics.update(startTime);
-            // Display the results
-            for (auto const& inferenceResult : inferenceResults) {
-                resultsMarker.mark(frame, inferenceResult);
-            }
-            putTimingInfoOnFrame(frame, overallTimeAverager.getAveragedValue(),
-                                 inferenceTimeAverager.getAveragedValue());
             framesProcessed++;
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
                 videoWriter.write(frame);
