@@ -294,48 +294,8 @@ def add_model_pages(output_root, parent_element, group, group_title):
              title=device_support_title, index=0)
 
 
-def main():
-    logging.basicConfig()
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('output_dir', type=Path,
-        help='directory to output prepared documentation files into')
-
-    args = parser.parse_args()
-
-    output_root = args.output_dir
-
-    output_root.mkdir(parents=True, exist_ok=True)
-
-    doxygenlayout_element = ET.Element('doxygenlayout', version='1.0')
-    navindex_element = ET.SubElement(doxygenlayout_element, 'navindex')
-
-    add_accuracy_checker_pages(output_root, navindex_element)
-
-    downloader_element = add_page(output_root, navindex_element,
-        id='omz_tools_downloader', path='tools/downloader/README.md', title='Model Downloader')
-    downloader_element.attrib[XML_ID_ATTRIBUTE] = 'omz_tools_downloader'
-
-    trained_models_group_element = add_page(output_root, navindex_element,
-        title="Trained Models")
-    trained_models_group_element.attrib[XML_ID_ATTRIBUTE] = 'omz_models'
-
-    add_model_pages(output_root, trained_models_group_element,
-        'intel', "Intel's Pre-trained Models")
-    add_model_pages(output_root, trained_models_group_element,
-        'public', "Public Pre-trained Models")
-
-    datasets_element = add_page(output_root, navindex_element,
-        id='omz_data_datasets', path='data/datasets.md', title='Dataset Preparation Guide')
-
-    # The xml:id here is omz_data rather than omz_data_datasets, because
-    # later we might want to have other pages in the "data" directory. If
-    # that happens, we'll create a parent page with ID "omz_data" and move
-    # the xml:id to that page, thus integrating the new pages without having
-    # to change the upstream OpenVINO documentation building process.
-    datasets_element.attrib[XML_ID_ATTRIBUTE] = 'omz_data'
-
-    demos_group_element = add_page(output_root, navindex_element,
+def add_demos_pages(output_root, parent_element):
+    demos_group_element = add_page(output_root, parent_element,
         title="Demos", id='omz_demos', path='demos/README.md')
     demos_group_element.attrib[XML_ID_ATTRIBUTE] = 'omz_demos'
 
@@ -372,6 +332,40 @@ def main():
             raise RuntimeError(f'{md_path_rel}: title must contain "Demo"')
 
     sort_titles(demos_group_element)
+
+
+def main():
+    logging.basicConfig()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('output_dir', type=Path,
+        help='directory to output prepared documentation files into')
+
+    args = parser.parse_args()
+
+    output_root = args.output_dir
+
+    output_root.mkdir(parents=True, exist_ok=True)
+
+    doxygenlayout_element = ET.Element('doxygenlayout', version='1.0')
+    navindex_element = ET.SubElement(doxygenlayout_element, 'navindex')
+
+    add_accuracy_checker_pages(output_root, navindex_element)
+
+    downloader_element = add_page(output_root, navindex_element,
+        id='omz_tools_downloader', path='tools/downloader/README.md', title='Model Downloader')
+    downloader_element.attrib[XML_ID_ATTRIBUTE] = 'omz_tools_downloader'
+
+    trained_models_group_element = add_page(output_root, navindex_element,
+        title="Trained Models")
+    trained_models_group_element.attrib[XML_ID_ATTRIBUTE] = 'omz_models'
+
+    add_model_pages(output_root, trained_models_group_element,
+        'intel', "Intel's Pre-trained Models")
+    add_model_pages(output_root, trained_models_group_element,
+        'public', "Public Pre-trained Models")
+
+    add_demos_pages(output_root, navindex_element)
 
     for md_path in all_md_paths:
         if md_path not in documentation_md_paths:
