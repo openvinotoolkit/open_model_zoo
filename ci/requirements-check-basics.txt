@@ -30,6 +30,23 @@ yamllint==1.26.1
     # via -r ci/requirements-check-basics.in
 zipp==3.4.1
     # via importlib-metadata
+bandit==1.7.0
+    # via
+    # -r ci/requirements-check-basics.in
+six==1.15.0
+    # via bandit
+gitpython==3.1.18
+    # via bandit
+gitdb==4.0.7
+    # via gitpython
+smmap==4.0.0
+    # via gitdb
+stevedore==3.3.0
+    # via bandit
+pbr==5.5.1
+    # via stevedore
+colorama==0.4.4
+    # via bandit
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

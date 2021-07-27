@@ -149,6 +149,10 @@ def main():
     if subprocess.run([sys.executable, '-m', 'flake8', '--config=.flake8'], cwd=OMZ_ROOT).returncode != 0:
         all_passed = False
 
+    print('running bandit...', flush=True)
+    if subprocess.run([sys.executable, '-m', 'bandit', '.', '-r', '-c', '.bandit'], cwd=OMZ_ROOT).returncode != 0:
+        all_passed = False
+
     print('running documentation checks...', flush=True)
     if subprocess.run([sys.executable, '--', str(OMZ_ROOT / 'ci/check-documentation.py')]).returncode != 0:
         all_passed = False
