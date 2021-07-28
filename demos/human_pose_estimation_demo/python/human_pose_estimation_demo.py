@@ -285,8 +285,12 @@ def main():
             presenter.handleKey(key)
 
     metrics.log_total()
-    log_latency_per_stage(cap.reader_metrics, hpe_pipeline.preprocess_metrics, hpe_pipeline.inference_metrics,
-                          hpe_pipeline.postprocess_metrics, render_metrics)
+    pipeline_metrics = {'Decoding': cap.reader_metrics,
+                        'Preprocessing': hpe_pipeline.preprocess_metrics,
+                        'Inference': hpe_pipeline.inference_metrics,
+                        'Postprocessing': hpe_pipeline.postprocess_metrics,
+                        'Rendering':render_metrics}
+    log_latency_per_stage(pipeline_metrics)
     for rep in presenter.reportMeans():
         log.info(rep)
 

@@ -182,8 +182,12 @@ def main():
             break
 
     metrics.log_total()
-    log_latency_per_stage(cap.reader_metrics, pipeline.preprocess_metrics, pipeline.inference_metrics,
-                          pipeline.postprocess_metrics, render_metrics)
+    pipeline_metrics = {'Decoding': cap.reader_metrics,
+                        'Preprocessing': pipeline.preprocess_metrics,
+                        'Inference': pipeline.inference_metrics,
+                        'Postprocessing': pipeline.postprocess_metrics,
+                        'Rendering':render_metrics}
+    log_latency_per_stage(pipeline_metrics)
     for rep in presenter.reportMeans():
         log.info(rep)
 
