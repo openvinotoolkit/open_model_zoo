@@ -63,7 +63,7 @@ class PerformanceMetrics:
         if frame is not None:
             self.paint_metrics(frame)
 
-    def paint_metrics(self, frame, position=(15,30), font_scale=0.75, color=(200,10,10), thickness=2):
+    def paint_metrics(self, frame, position=(15, 30), font_scale=0.75, color=(200, 10, 10), thickness=2):
         # Draw performance stats over frame
         current_latency, current_fps = self.get_last()
         if current_latency is not None:
