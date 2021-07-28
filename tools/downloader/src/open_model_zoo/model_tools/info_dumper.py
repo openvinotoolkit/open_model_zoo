@@ -18,7 +18,7 @@ import sys
 
 from pathlib import Path
 
-from open_model_zoo.model_tools import _configuration
+from open_model_zoo.model_tools import _configuration, _common
 
 def to_info(model):
     return {
@@ -44,7 +44,7 @@ def main():
     parser.add_argument('--print_all', action='store_true', help='print all available models')
     args = parser.parse_args()
 
-    models = _configuration.load_models_from_args(parser, args)
+    models = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)
 
     json.dump(list(map(to_info, models)), sys.stdout, indent=4)
     print() # add a final newline
