@@ -186,7 +186,7 @@ def main():
                         'Preprocessing': pipeline.preprocess_metrics,
                         'Inference': pipeline.inference_metrics,
                         'Postprocessing': pipeline.postprocess_metrics,
-                        'Rendering':render_metrics}
+                        'Rendering': render_metrics}
     log_latency_per_stage(pipeline_metrics)
     for rep in presenter.reportMeans():
         log.info(rep)
