@@ -95,15 +95,15 @@ PerformanceMetrics::Metrics PerformanceMetrics::getTotal() const {
 void PerformanceMetrics::printTotal() const {
     Metrics metrics = getTotal();
 
-    slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms" << slog::endl;
+    slog::info << "\tLatency: " << std::fixed << std::setprecision(2) << metrics.latency << " ms" << slog::endl;
     slog::info << "\tFPS: " << metrics.fps << slog::endl;
 }
 
 void printStagesLatency(double readLat, double preprocLat, double inferLat, double postprocLat, double renderLat) {
     slog::info << "\tDecoding:\t" << std::fixed << std::setprecision(2) <<
         readLat << " ms" << slog::endl;;
-    slog::info << "\tPreprocessing:\t" << preprocLat << " ms" << slog::endl;;
-    slog::info << "\tInference:\t" << inferLat << " ms" << slog::endl;;
-    slog::info << "\tPostprocessing:\t" << postprocLat << " ms" << slog::endl;;
+    slog::info << "\tPreprocessing:\t" << preprocLat << " ms" << slog::endl;
+    slog::info << "\tInference:\t" << inferLat << " ms" << slog::endl;
+    slog::info << "\tPostprocessing:\t" << postprocLat << " ms" << slog::endl;
     slog::info << "\tRendering:\t" << renderLat << " ms" << slog::endl;
 }

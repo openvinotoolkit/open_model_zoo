@@ -29,9 +29,9 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import models
 import monitors
 from images_capture import open_images_capture
-from pipelines import get_user_config, AsyncPipeline
+from pipelines import get_user_config, parse_devices, AsyncPipeline
 from performance_metrics import PerformanceMetrics
-from helpers import resolution, log_blobs_info, log_runtime_settings
+from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -171,6 +171,7 @@ def main():
     next_frame_id_to_show = 0
 
     metrics = PerformanceMetrics()
+    render_metrics = PerformanceMetrics()
     video_writer = cv2.VideoWriter()
 
     log.info('OpenVINO Inference Engine')
@@ -191,7 +192,7 @@ def main():
     hpe_pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(hpe_pipeline.exec_net, args.device)
+    log_runtime_settings(hpe_pipeline.exec_net, set(parse_devices(args.device)))
 
     hpe_pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
 
@@ -220,7 +221,9 @@ def main():
                 print_raw_results(poses, scores, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
+            rendering_start_time = perf_counter()
             frame = draw_poses(frame, poses, args.prob_threshold, output_transform)
+            render_metrics.update(rendering_start_time)
             metrics.update(start_time, frame)
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
@@ -265,7 +268,9 @@ def main():
             print_raw_results(poses, scores, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
+        rendering_start_time = perf_counter()
         frame = draw_poses(frame, poses, args.prob_threshold, output_transform)
+        render_metrics.update(rendering_start_time)
         metrics.update(start_time, frame)
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
             video_writer.write(frame)
@@ -280,6 +285,8 @@ def main():
             presenter.handleKey(key)
 
     metrics.log_total()
+    log_latency_per_stage(cap.reader_metrics, hpe_pipeline.preprocess_metrics, hpe_pipeline.inference_metrics,
+                          hpe_pipeline.postprocess_metrics, render_metrics)
     for rep in presenter.reportMeans():
         log.info(rep)
 

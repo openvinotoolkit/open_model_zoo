@@ -122,7 +122,7 @@ def main():
                                np.mean(compute_embeddings_times), np.mean(search_in_gallery_times),
                                imshow_delay=3, presenter=presenter, no_show=args.no_show)
 
-        metrics.update(start_time, image, draw_metrics=False)
+        metrics.update(start_time)
         if frames_processed == 0:
             if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
                                                      (image.shape[1], image.shape[0])):

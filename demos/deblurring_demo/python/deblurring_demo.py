@@ -27,10 +27,10 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from models import Deblurring
 import monitors
-from pipelines import get_user_config, AsyncPipeline
+from pipelines import get_user_config, parse_devices, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
-from helpers import log_blobs_info, log_runtime_settings
+from helpers import log_blobs_info, log_runtime_settings, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -82,6 +82,7 @@ def main():
     next_frame_id_to_show = 0
 
     metrics = PerformanceMetrics()
+    render_metrics = PerformanceMetrics()
     video_writer = cv2.VideoWriter()
 
     log.info('OpenVINO Inference Engine')
@@ -102,7 +103,7 @@ def main():
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(pipeline.exec_net, args.device)
+    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
 
     pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
 
@@ -136,9 +137,11 @@ def main():
             input_frame = frame_meta['frame']
             start_time = frame_meta['start_time']
 
+            rendering_start_time = perf_counter()
             if input_frame.shape != result_frame.shape:
                 input_frame = cv2.resize(input_frame, (result_frame.shape[1], result_frame.shape[0]))
             final_image = cv2.hconcat([input_frame, result_frame])
+            render_metrics.update(rendering_start_time)
 
             presenter.drawGraphs(final_image)
             metrics.update(start_time, final_image)
@@ -161,9 +164,11 @@ def main():
             input_frame = frame_meta['frame']
             start_time = frame_meta['start_time']
 
+            rendering_start_time = perf_counter()
             if input_frame.shape != result_frame.shape:
                 input_frame = cv2.resize(input_frame, (result_frame.shape[1], result_frame.shape[0]))
             final_image = cv2.hconcat([input_frame, result_frame])
+            render_metrics.update(rendering_start_time)
 
             presenter.drawGraphs(final_image)
             metrics.update(start_time, final_image)
@@ -177,6 +182,8 @@ def main():
             break
 
     metrics.log_total()
+    log_latency_per_stage(cap.reader_metrics, pipeline.preprocess_metrics, pipeline.inference_metrics,
+                          pipeline.postprocess_metrics, render_metrics)
     for rep in presenter.reportMeans():
         log.info(rep)
 

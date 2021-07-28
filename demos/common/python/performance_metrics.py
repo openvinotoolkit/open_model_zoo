@@ -17,6 +17,7 @@
 import logging as log
 from time import perf_counter
 import cv2
+
 from helpers import put_highlighted_text
 
 
@@ -40,14 +41,14 @@ class PerformanceMetrics:
         self.current_moving_statistic = Statistic()
         self.total_statistic = Statistic()
         self.last_update_time = None
+        self.first_frame_processed = False
 
-    def update(self, last_request_start_time, frame, draw_metrics=True, position=(15, 30),
-               font_scale=0.75, color=(200, 10, 10), thickness=2):
+    def update(self, last_request_start_time, frame=None):
         current_time = perf_counter()
 
-        if self.last_update_time is None:
-            self.last_update_time = current_time
-            return
+        if not self.first_frame_processed:
+            self.last_update_time = last_request_start_time
+            self.first_frame_processed = True
 
         self.current_moving_statistic.latency += current_time - last_request_start_time
         self.current_moving_statistic.period = current_time - self.last_update_time
@@ -57,16 +58,19 @@ class PerformanceMetrics:
             self.last_moving_statistic = self.current_moving_statistic
             self.total_statistic.combine(self.last_moving_statistic)
             self.current_moving_statistic = Statistic()
-
             self.last_update_time = current_time
 
+        if frame is not None:
+            self.paint_metrics(frame)
+
+    def paint_metrics(self, frame, position=(15,30), font_scale=0.75, color=(200,10,10), thickness=2):
         # Draw performance stats over frame
         current_latency, current_fps = self.get_last()
-        if current_latency is not None and draw_metrics:
-            put_highlighted_text(frame, "Latency: {:.1f} ms".format(current_latency * 1e3),
+        if current_latency is not None:
+            put_highlighted_text(frame, "Latency: {:.2f} ms".format(current_latency * 1e3),
                                  position, cv2.FONT_HERSHEY_COMPLEX, font_scale, color, thickness)
-        if current_fps is not None and draw_metrics:
-            put_highlighted_text(frame, "FPS: {:.1f}".format(current_fps),
+        if current_fps is not None:
+            put_highlighted_text(frame, "FPS: {:.2f}".format(current_fps),
                                  (position[0], position[1]+30), cv2.FONT_HERSHEY_COMPLEX, font_scale, color, thickness)
 
     def get_last(self):
@@ -89,5 +93,5 @@ class PerformanceMetrics:
     def log_total(self):
         total_latency, total_fps = self.get_total()
         log.info('Metrics report:')
-        log.info("\tLatency: {:.1f} ms".format(total_latency * 1e3) if total_latency is not None else "\tLatency: N/A")
-        log.info("\tFPS: {:.1f}".format(total_fps) if total_fps is not None else "\tFPS: N/A")
+        log.info("\tLatency: {:.2f} ms".format(total_latency * 1e3) if total_latency is not None else "\tLatency: N/A")
+        log.info("\tFPS: {:.2f}".format(total_fps) if total_fps is not None else "\tFPS: N/A")
