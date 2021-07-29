@@ -447,6 +447,7 @@ int main(int argc, char *argv[]) {
 
         const cv::Point THROUGHPUT_METRIC_POSITION{10, 30};
         std::unique_ptr<Presenter> presenter;
+        bool stop = false;
 
         do {
             try {
@@ -534,6 +535,7 @@ int main(int argc, char *argv[]) {
                     int key = cv::waitKey(1);
                     if (27 == key || 'Q' == key || 'q' == key) {
                         stream.stop();
+                        stop = true;
                     } else {
                         presenter->handleKey(key);
                     }
@@ -549,14 +551,14 @@ int main(int argc, char *argv[]) {
 
                 framesCounter++;
             }
-
-            // --------------------------- Report metrics -------------------------------------------------------
-            slog::info << "Metrics report:" << slog::endl;
-            metrics.printTotal();
-            slog::info << presenter->reportMeans() << slog::endl;
-        } while (FLAGS_loop);
+        } while (FLAGS_loop && !stop);
 
         cv::destroyAllWindows();
+
+        // --------------------------- Report metrics -------------------------------------------------------
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.printTotal();
+        slog::info << presenter->reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
