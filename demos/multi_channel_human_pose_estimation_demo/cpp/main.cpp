@@ -23,7 +23,6 @@
 #include <utility>
 
 #include <mutex>
-#include <atomic>
 #include <queue>
 #include <chrono>
 #include <sstream>
@@ -200,7 +199,7 @@ void writeStats(StreamType& stream, EndlType endl, const VideoSources::Stats& in
             stream << endl;
         }
         stream << inputStat.readTimes[i] << " ms ";
-}
+    }
     stream << endl;
     stream << "Decoding: "
         << inputStat.decodingLatency << " ms";
@@ -343,8 +342,7 @@ int main(int argc, char* argv[]) {
 
         while (sources.isRunning() || network->isRunning()) {
             bool readData = true;
-            auto startTime = std::chrono::steady_clock::now();
-            batchRes.second = startTime;
+            batchRes.second = std::chrono::steady_clock::now();  // frame time stamp
             while (readData) {
                 auto br = network->getBatchData(params.frameSize);
                 if (br.empty()) {

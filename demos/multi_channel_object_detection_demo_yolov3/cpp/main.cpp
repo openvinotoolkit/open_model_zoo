@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <mutex>
-#include <atomic>
 #include <queue>
 #include <chrono>
 #include <sstream>
@@ -283,15 +282,15 @@ std::map<std::string, YoloParams> GetYoloParams(const std::vector<std::string>& 
     return __yoloParams;
 }
 
-void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
-                     float time,
+void displayNSources(const VideoFrame::FramesWithTimeStamp& data,
                      const std::string& stats,
                      const DisplayParams& params,
                      const std::vector<cv::Scalar> &colors,
-                     Presenter& presenter) {
+                     Presenter& presenter,
+                     PerformanceMetrics& metrics) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
-        auto& elem = data[i];
+        auto& elem = data.first[i];
         if (!elem->frame.empty()) {
             cv::Rect rectFrame = cv::Rect(params.points[i], params.frameSize);
             cv::Mat windowPart = windowImage(rectFrame);
@@ -326,7 +325,7 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
         });
     });
 #else
-    for (size_t i = 0; i < data.size(); ++i) {
+    for (size_t i = 0; i < data.first.size(); ++i) {
         loopBody(i);
     }
 #endif
@@ -335,8 +334,34 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
 
     char str[256];
     snprintf(str, sizeof(str), "FPS: %5.2f ", static_cast<double>(1000.0f / time));
-    putHighlightedText(windowImage, str, cv::Point(10, 30), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 0.65, cv::Scalar(200, 10, 10), 2);
+    putHighlightedText(windowImage, str, cv::Point(10, 100), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 0.65, cv::Scalar(200, 10, 10), 2);
+    metrics.update(data.second, windowImage, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
     cv::imshow(params.name, windowImage);
+}
+
+template<class StreamType, class EndlType>
+void writeStats(StreamType& stream, EndlType endl, const VideoSources::Stats& inputStat,
+    const IEGraph::Stats& inferStat, const AsyncOutput::Stats& outputStat) {
+    stream << std::fixed << std::setprecision(2);
+    stream << "Input reading: ";
+    for (size_t i = 0; i < inputStat.readTimes.size(); ++i) {
+        if (0 == (i % 4) && i != 0) {
+            stream << endl;
+        }
+        stream << inputStat.readTimes[i] << " ms ";
+    }
+    stream << endl;
+    stream << "Decoding: "
+        << inputStat.decodingLatency << " ms";
+    stream << endl;
+    stream << "Preprocess: "
+        << inferStat.preprocessTime << " ms";
+    stream << endl;
+    stream << "Inference: "
+        << inferStat.inferTime << " ms";
+    stream << endl;
+    stream << "Rendering: " << outputStat.renderTime
+        << " ms" << endl;
 }
 
 }  // namespace
@@ -440,25 +465,24 @@ int main(int argc, char* argv[]) {
 
         network->setDetectionConfidence(static_cast<float>(FLAGS_t));
 
-        std::atomic<float> averageFps = {0.0f};
-
-        std::vector<std::shared_ptr<VideoFrame>> batchRes;
+        VideoFrame::FramesWithTimeStamp batchRes;
 
         std::mutex statMutex;
         std::stringstream statStream;
 
         cv::Size graphSize{static_cast<int>(params.windowSize.width / 4), 60};
         Presenter presenter(FLAGS_u, params.windowSize.height - graphSize.height - 10, graphSize);
+        PerformanceMetrics metrics;
 
         const size_t outputQueueSize = 1;
         AsyncOutput output(FLAGS_show_stats, outputQueueSize,
-        [&](const std::vector<std::shared_ptr<VideoFrame>>& result) {
+        [&](const VideoFrame::FramesWithTimeStamp& result) {
             std::string str;
             if (FLAGS_show_stats) {
                 std::unique_lock<std::mutex> lock(statMutex);
                 str = statStream.str();
             }
-            displayNSources(result, averageFps, str, params, colors, presenter);
+            displayNSources(result, str, params, colors, presenter, metrics);
             int key = cv::waitKey(1);
             presenter.handleKey(key);
 
@@ -472,12 +496,11 @@ int main(int argc, char* argv[]) {
         timer::time_point lastTime = timer::now();
         duration samplingTimeout(FLAGS_fps_sp);
 
-        size_t fpsCounter = 0;
-
         size_t perfItersCounter = 0;
 
         while (sources.isRunning() || network->isRunning()) {
             bool readData = true;
+            batchRes.second = std::chrono::steady_clock::now();  // frame time stamp
             while (readData) {
                 auto br = network->getBatchData(params.frameSize);
                 if (br.empty()) {
@@ -485,18 +508,17 @@ int main(int argc, char* argv[]) {
                 }
                 for (size_t i = 0; i < br.size(); i++) {
                     auto val = static_cast<unsigned int>(br[i]->sourceIdx);
-                    auto it = find_if(batchRes.begin(), batchRes.end(), [val] (const std::shared_ptr<VideoFrame>& vf) { return vf->sourceIdx == val; } );
-                    if (it != batchRes.end()) {
+                    auto it = find_if(batchRes.first.begin(), batchRes.first.end(), [val] (const std::shared_ptr<VideoFrame>& vf) { return vf->sourceIdx == val; } );
+                    if (it != batchRes.first.end()) {
                         if (!FLAGS_no_show) {
                             output.push(std::move(batchRes));
                         }
-                        batchRes.clear();
+                        batchRes.first.clear();
                         readData = false;
                     }
-                    batchRes.push_back(std::move(br[i]));
+                    batchRes.first.push_back(std::move(br[i]));
                 }
             }
-            ++fpsCounter;
 
             if (!output.isAlive()) {
                 break;
@@ -505,15 +527,9 @@ int main(int argc, char* argv[]) {
             auto currTime = timer::now();
             auto deltaTime = (currTime - lastTime);
             if (deltaTime >= samplingTimeout) {
-                auto durMsec =
-                        std::chrono::duration_cast<duration>(deltaTime).count();
-                auto frameTime = durMsec / static_cast<float>(fpsCounter);
-                fpsCounter = 0;
                 lastTime = currTime;
 
-                averageFps = frameTime;
                 if (FLAGS_show_stats) {
-                    slog::debug << "FPS: " << 1000.f/frameTime << slog::endl;
                     if (++perfItersCounter >= FLAGS_n_sp) {
                         break;
                     }
@@ -525,27 +541,10 @@ int main(int argc, char* argv[]) {
                     auto outputStat = output.getStats();
 
                     std::unique_lock<std::mutex> lock(statMutex);
-                    slog::debug << "Latency:" << slog::endl;
-                    slog::debug << std::fixed << std::setprecision(1);
-                    slog::debug << "\tInput reads: ";
-                    for (size_t i = 0; i < inputStat.readTimes.size(); ++i) {
-                        if (0 == (i % 4) && i != 0) {
-                            slog::debug << slog::endl;
-                        }
-                        slog::debug << inputStat.readTimes[i] << "ms ";
-                    }
-                    slog::debug << slog::endl;
-                    slog::debug << "\tDecoding: "
-                        << inputStat.decodingLatency << "ms";
-                    slog::debug << slog::endl;
-                    slog::debug << "\tPreprocess: "
-                        << inferStat.preprocessTime << "ms";
-                    slog::debug << slog::endl;
-                    slog::debug << "\tInference: "
-                        << inferStat.inferTime << "ms";
-                    slog::debug << slog::endl;
-                    slog::debug << "\tRendering: " << outputStat.renderTime
-                        << "ms" << slog::endl;
+                    slog::debug << "------------------- Frame # " << perfItersCounter << "------------------" << slog::endl;
+                    writeStats(slog::debug, slog::endl, sources.getStats(), network->getStats(), output.getStats());
+                    statStream.str(std::string());
+                    writeStats(statStream, '\n', sources.getStats(), network->getStats(), output.getStats());
                 }
             }
         }
@@ -554,7 +553,7 @@ int main(int argc, char* argv[]) {
 
         // --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
-        slog::info << "\tFPS: " << 1000.f / averageFps << slog::endl;
+        metrics.printTotal();
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
