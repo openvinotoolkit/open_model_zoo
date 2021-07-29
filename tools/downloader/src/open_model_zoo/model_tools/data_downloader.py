@@ -14,6 +14,7 @@
 
 import argparse
 import shutil
+import sys
 
 from pathlib import Path
 
@@ -21,8 +22,8 @@ from open_model_zoo.model_tools import _common
 
 def copy_data(output_dir):
     data_path = output_dir / 'data'
-    if data_path.exists():
-        shutil.rmtree(str(data_path))
+
+    print('Copying fies from {} to {}'.format(_common.PACKAGE_DIR / 'data', data_path))
 
     shutil.copytree(
         str(_common.PACKAGE_DIR / 'data'),
@@ -32,12 +33,13 @@ def copy_data(output_dir):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
-        default=Path.cwd(), help='path where to save dataset data')
+        default=Path.cwd(), help='Path where to save dataset files')
     args = parser.parse_args()
 
-    print('Copying fies from {} to {}'.format(_common.PACKAGE_DIR / 'data', args.output_dir / 'data'))
-
-    copy_data(args.output_dir)
+    try:
+        copy_data(args.output_dir)
+    except Exception as exp:
+        sys.exit('Errors occurred: ' + str(exp))
 
 if __name__ == '__main__':
     main()
