@@ -44,6 +44,9 @@ class ClassificationAdapter(Adapter):
             'block': BoolField(
                 optional=True, default=False, description="process whole batch as a single data block"
             ),
+            'label_as_array': BoolField(
+                optional=True, default=False, description="produce ClassificationPrediction's label as array"
+            ),
             'classification_output': StringField(optional=True, description='target output layer name')
         })
 
@@ -55,6 +58,7 @@ class ClassificationAdapter(Adapter):
         self.classification_out = self.get_value_from_config('classification_output')
         self.fixed_output = self.get_value_from_config('fixed_output')
         self.fixed_output_index = int(self.get_value_from_config('fixed_output_index'))
+        self.label_as_array = self.get_value_from_config('label_as_array')
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -85,7 +89,7 @@ class ClassificationAdapter(Adapter):
                 single_prediction = ArgMaxClassificationPrediction(identifiers[0],
                                                                    prediction[:, self.fixed_output_index])
             else:
-                single_prediction = ClassificationPrediction(identifiers[0], prediction)
+                single_prediction = ClassificationPrediction(identifiers[0], prediction, self.label_as_array)
 
             result.append(single_prediction)
         else:
