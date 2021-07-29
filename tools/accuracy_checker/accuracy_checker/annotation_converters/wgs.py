@@ -32,7 +32,7 @@ class WGSTFRecords(BaseFormatConverter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'annotation_file': PathField(description='path to predict.tf_record format'),
+            'annotation_file': PathField(description='path to Deepvariant WGS preprocessed dataset file'),
             "preprocessed_dir": PathField(optional=False, is_directory=True, check_exists=True,
                                           description="Preprocessed dataset location"),
             "skip_dump": BoolField(optional=True, default=True, description='Annotate without saving features')
