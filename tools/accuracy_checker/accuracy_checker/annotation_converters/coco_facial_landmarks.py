@@ -62,7 +62,7 @@ class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
             bbox = ann["bbox"]
             keypoints = np.array(ann["keypoints"]).reshape(-1, 3)
             landmarks_x, landmarks_y = self.get_landmarks(keypoints, num_landmarks)
-            landmarks_annotation = Face98LandmarksAnnotation(identifier, np.array(landmarks_x), np.array(landmarks_y))
+            landmarks_annotation = FaceLandmarksHeatMapAnnotation(identifier, np.array(landmarks_x), np.array(landmarks_y))
             landmarks_annotation.metadata['rect'] = (bbox[0], bbox[1], bbox[0] + bbox[2], bbox[1] + bbox[3])
             annotations.append(landmarks_annotation)
             if progress_callback is not None and ann_id % progress_interval == 0:
