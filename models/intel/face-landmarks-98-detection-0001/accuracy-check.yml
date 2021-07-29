@@ -1,5 +1,5 @@
 models:
-  - name: face_98_landmarks_detection
+  - name: face-landmarks-98-detection-0001
 
     launchers:
       - framework: dlsdk
