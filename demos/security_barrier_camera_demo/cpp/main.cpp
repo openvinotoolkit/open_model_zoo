@@ -167,10 +167,10 @@ struct Context {  // stores all global data for tasks
     std::mutex classifiersAggregatorPrintMutex;
     uint64_t nireq;
     bool isVideo;
-    PerformanceMetrics metrics;
     std::atomic<std::vector<InferRequest>::size_type> freeDetectionInfersCount;
     std::atomic<uint32_t> frameCounter;
     InferRequestsContainer detectorsInfers, attributesInfers, platesInfers;
+    PerformanceMetrics metrics;
 };
 
 class ReborningVideoFrame: public VideoFrame {
