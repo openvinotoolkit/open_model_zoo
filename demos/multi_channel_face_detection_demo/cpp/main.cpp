@@ -140,10 +140,11 @@ DisplayParams prepareDisplayParams(size_t count) {
     return params;
 }
 
-void displayNSources(const std::pair<std::vector<std::shared_ptr<VideoFrame>>, PerformanceMetrics::TimePoint>& data,
+void displayNSources(const VideoFrame::FramesWithTimeStamp& data,
                      const std::string& stats,
                      DisplayParams params,
-                     Presenter& presenter, PerformanceMetrics& metrics) {
+                     Presenter& presenter,
+                     PerformanceMetrics& metrics) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
         auto& elem = data.first[i];
@@ -304,22 +305,18 @@ int main(int argc, char* argv[]) {
         });
 
         network->setDetectionConfidence(static_cast<float>(FLAGS_t));
-
-        std::atomic<float> averageFps = {0.0f};
-
-        std::pair<std::vector<std::shared_ptr<VideoFrame>>, PerformanceMetrics::TimePoint> batchRes;
+        VideoFrame::FramesWithTimeStamp batchRes;
 
         std::mutex statMutex;
         std::stringstream statStream;
 
         cv::Size graphSize{static_cast<int>(params.windowSize.width / 4), 60};
         Presenter presenter(FLAGS_u, params.windowSize.height - graphSize.height - 10, graphSize);
-
         PerformanceMetrics metrics;
 
         const size_t outputQueueSize = 1;
         AsyncOutput output(FLAGS_show_stats, outputQueueSize,
-        [&](const std::pair<std::vector<std::shared_ptr<VideoFrame>>, PerformanceMetrics::TimePoint>& result) {
+        [&](const VideoFrame::FramesWithTimeStamp& result) {
             std::string str;
             if (FLAGS_show_stats) {
                 std::unique_lock<std::mutex> lock(statMutex);
