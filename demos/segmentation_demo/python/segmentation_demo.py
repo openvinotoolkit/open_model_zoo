@@ -96,12 +96,25 @@ class SegmentationVisualizer:
         # Visualizing result data over source image
         return output_transform.resize(np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2))
 
+    def only_masks(self, objects, output_transform):
+        # Visualizing masks only
+        return output_transform.resize(self.apply_color_map(objects))
+
 
 class SaliencyMapVisualizer:
-    def overlay_masks(self, frame, objects, output_transform):
-        saliency_map = (objects * 255).astype(np.uint8)
+    def apply_color_map(self, input):
+        saliency_map = (input * 255.0).astype(np.uint8)
         saliency_map = cv2.merge([saliency_map, saliency_map, saliency_map])
-        return output_transform.resize(np.floor_divide(frame, 2) + np.floor_divide(saliency_map, 2))
+        return saliency_map
+
+    def overlay_masks(self, frame, objects, output_transform):
+        # Visualizing result data over source image
+        return output_transform.resize(np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2))
+
+    def only_masks(self, objects, output_transform):
+        # Visualizing masks only
+        return output_transform.resize(self.apply_color_map(objects))
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -150,6 +163,8 @@ def build_argparser():
                               'Input frame size used by default.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
+    io_args.add_argument('--only_masks', default=False, action='store_true',
+                         help='Optional. Display only masks. Could be switched by TAB key.')
 
     debug_args = parser.add_argument_group('Debug options')
     debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results as mask histogram.',
@@ -204,7 +219,7 @@ def main():
     presenter = None
     output_transform = None
     video_writer = cv2.VideoWriter()
-
+    only_masks = args.only_masks
     while True:
         if pipeline.is_ready():
             # Get new image/frame
@@ -243,7 +258,7 @@ def main():
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
             rendering_start_time = perf_counter()
-            frame = visualizer.overlay_masks(frame, objects, output_transform)
+            frame = visualizer.only_masks(objects, output_transform) if only_masks else visualizer.overlay_masks(frame, objects, output_transform)
             render_metrics.update(rendering_start_time)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
@@ -257,6 +272,8 @@ def main():
                 key = cv2.waitKey(1)
                 if key == 27 or key == 'q' or key == 'Q':
                     break
+                if key == 9:
+                    only_masks = not only_masks
                 presenter.handleKey(key)
 
     pipeline.await_all()
