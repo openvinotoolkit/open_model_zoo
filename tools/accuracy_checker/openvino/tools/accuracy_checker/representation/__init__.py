@@ -70,7 +70,7 @@ from .regression_representation import (
     FeaturesRegressionAnnotation,
     NiftiRegressionAnnotation,
 )
-from .face_98_landmarks_representation import Face98LandmarksAnnotation, Face98LandmarksPrediction
+from .face_landmarks_heatmap_representation import FaceLandmarksHeatMapAnnotation, FaceLandmarksHeatMapPrediction
 from .multilabel_recognition import MultiLabelRecognitionAnnotation, MultiLabelRecognitionPrediction
 from .super_resolution_representation import SuperResolutionAnnotation, SuperResolutionPrediction
 from .text_detection_representation import TextDetectionAnnotation, TextDetectionPrediction
@@ -161,8 +161,8 @@ __all__ = [
 
     'RegressionAnnotation',
     'RegressionPrediction',
-    'Face98LandmarksAnnotation',
-    'Face98LandmarksPrediction',
+    'FaceLandmarksHeatMapAnnotation',
+    'FaceLandmarksHeatMapPrediction',
     'FacialLandmarksAnnotation',
     'FacialLandmarksPrediction',
     'FacialLandmarks3DAnnotation',

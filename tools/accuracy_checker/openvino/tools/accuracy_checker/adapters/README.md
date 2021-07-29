@@ -250,7 +250,7 @@ AccuracyChecker supports following set of adapters:
   * `max_candidates` - maximum detected candidates for considering (Optional, default 1000).
   * `unclip_ratio` - unclip ratio (Optional, default 2).
   * `min_size` - minimum box size (Optional, default 3).
-* `face_landmarks_detection` - converting output of model for face landmark detection to `Face98LandmarksPrediction`.
+* `face_landmarks_detection` - converting output of model for face landmark detection to `FaceLandmarksHeatMapPrediction`.
 * `human_pose_estimation` - converting output of model for human pose estimation to `PoseEstimationPrediction`.
   * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).
   * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
