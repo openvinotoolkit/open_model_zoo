@@ -2,7 +2,7 @@
 
 import os
 import sys
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 import shutil
 
 CMAKE            = '@CMAKE_COMMAND@'

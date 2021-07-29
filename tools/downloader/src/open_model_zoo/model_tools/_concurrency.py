@@ -14,7 +14,7 @@
 
 import concurrent.futures
 import queue
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 import sys
 
 from open_model_zoo.model_tools import _reporting

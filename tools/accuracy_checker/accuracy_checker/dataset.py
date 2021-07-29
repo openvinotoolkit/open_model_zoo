@@ -18,7 +18,7 @@ from copy import deepcopy
 from pathlib import Path
 from collections import OrderedDict
 import warnings
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 import numpy as np
 import yaml
 
@@ -364,7 +364,7 @@ def read_annotation(annotation_file: Path):
     result = []
     with annotation_file.open('rb') as file:
         try:
-            first_obj = pickle.load(file)
+            first_obj = pickle.load(file) # nosec - disable B301:pickle check
             if isinstance(first_obj, DatasetConversionInfo):
                 describe_cached_dataset(first_obj)
             else:

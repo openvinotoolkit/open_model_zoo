@@ -20,7 +20,7 @@ import sys
 import copy
 import json
 from pathlib import Path
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 from argparse import ArgumentParser
 from collections import namedtuple
 from functools import partial

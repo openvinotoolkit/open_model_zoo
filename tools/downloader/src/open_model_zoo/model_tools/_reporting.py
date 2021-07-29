@@ -14,7 +14,7 @@
 
 import json
 import signal
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 import sys
 import threading
 import traceback

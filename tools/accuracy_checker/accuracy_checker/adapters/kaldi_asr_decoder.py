@@ -16,7 +16,7 @@ limitations under the License.
 
 import os
 import struct
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 import tempfile
 from pathlib import Path
 import numpy as np

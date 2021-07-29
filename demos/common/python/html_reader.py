@@ -28,7 +28,7 @@ def get_paragraphs(url_list):
     paragraphs_all = []
     for url in url_list:
         log.debug("Get paragraphs from {}".format(url))
-        with urllib.request.urlopen(url) as response:
+        with urllib.request.urlopen(url) as response: # nosec - disable B310:urllib-urlopen check
             parser = HTMLDataExtractor(['title', 'p'])
             charset='utf-8'
             if 'Content-type' in response.headers:

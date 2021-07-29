@@ -8,7 +8,7 @@
 #
 import sys
 import argparse
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 
 from pathlib import Path
 
