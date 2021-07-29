@@ -82,7 +82,8 @@ class WGSTFRecords(BaseFormatConverter):
         if not self.skip_dump and not preprocessed_folder.exists():
             preprocessed_folder.mkdir(exist_ok=True, parents=True)
         for iteration, example in enumerate(examples):
-            image, label, locus, sequencing_type, variant_type, variant_encoded, alt_allele_indices_encoded = example
+            image = example[0]
+            label = example[1]
             c_input = preprocessed_folder / "{:06d}.npy".format(iteration)
             if not self.skip_dump:
                 np.save(str(c_input), image)
