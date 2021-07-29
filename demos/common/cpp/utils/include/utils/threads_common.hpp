@@ -17,6 +17,7 @@
 #include <vector>
 
 #include <opencv2/core/core.hpp>
+#include <utils/performance_metrics.hpp>
 
 class VideoFrame {  // VideoFrame can represent not a single image but the whole grid
 public:
@@ -29,6 +30,8 @@ public:
     const unsigned sourceID;
     const int64_t frameId;
     cv::Mat frame;
+
+    PerformanceMetrics::TimePoint timeStamp;
 };
 
 class Worker;
