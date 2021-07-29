@@ -1,4 +1,4 @@
-# face-98-landmarks-detection-0001
+# face-landmarks-98-detection-0001
 
 ## Use Case and High-Level Description
 
