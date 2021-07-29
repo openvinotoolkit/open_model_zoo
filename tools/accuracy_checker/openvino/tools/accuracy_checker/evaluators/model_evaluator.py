@@ -346,7 +346,6 @@ class ModelEvaluator(BaseEvaluator):
         for batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta, _ = self._get_batch_input(batch_annotation, batch_input)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
-
             if stored_predictions:
                 self.prepare_prediction_to_store(batch_predictions, batch_identifiers, batch_meta, stored_predictions)
             if not store_only:
