@@ -18,6 +18,7 @@
 #include <inference_engine.hpp>
 
 #include <utils/common.hpp>
+#include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 #include "perf_timer.hpp"
 #include "input.hpp"

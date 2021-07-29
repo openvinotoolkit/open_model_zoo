@@ -212,7 +212,7 @@ InferenceEngine::SizeVector IEGraph::getInputDims() const {
     return inputBlob->getTensorDesc().getDims();
 }
 
-std::vector<std::shared_ptr<VideoFrame> > IEGraph::getBatchData(cv::Size frameSize) {
+std::vector<std::shared_ptr<VideoFrame>> IEGraph::getBatchData(cv::Size frameSize) {
     std::vector<std::shared_ptr<VideoFrame>> vframes;
     InferenceEngine::InferRequest::Ptr req;
     std::chrono::high_resolution_clock::time_point startTime;

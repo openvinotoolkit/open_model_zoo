@@ -18,11 +18,11 @@
 
 class AsyncOutput{
 public:
-    using DrawFunc = std::function<bool(const std::vector<std::shared_ptr<VideoFrame>>&)>;
+    using DrawFunc = std::function<bool(const std::pair<std::vector<std::shared_ptr<VideoFrame>>, PerformanceMetrics::TimePoint> &)>;
 
     AsyncOutput(bool collectStats, size_t queueSize, DrawFunc drawFunc);
     ~AsyncOutput();
-    void push(std::vector<std::shared_ptr<VideoFrame>>&& item);
+    void push(std::pair<std::vector<std::shared_ptr<VideoFrame>>, PerformanceMetrics::TimePoint>&& item);
     void start();
     bool isAlive() const;
     struct Stats {
@@ -33,7 +33,7 @@ public:
 private:
     const size_t queueSize;
     DrawFunc drawFunc;
-    std::queue<std::vector<std::shared_ptr<VideoFrame>>> queue;
+    std::queue<std::pair<std::vector<std::shared_ptr<VideoFrame>>, PerformanceMetrics::TimePoint>> queue;
     std::atomic_bool terminate = {false};
     std::thread thread;
     std::mutex mutex;

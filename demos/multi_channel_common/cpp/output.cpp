@@ -22,7 +22,7 @@ AsyncOutput::~AsyncOutput() {
     }
 }
 
-void AsyncOutput::push(std::vector<std::shared_ptr<VideoFrame> > &&item) {
+void AsyncOutput::push(std::pair<std::vector<std::shared_ptr<VideoFrame>>, PerformanceMetrics::TimePoint> &&item) {
     std::unique_lock<std::mutex> lock(mutex);
     while (queue.size() >= queueSize) {
         queue.pop();
@@ -34,7 +34,7 @@ void AsyncOutput::push(std::vector<std::shared_ptr<VideoFrame> > &&item) {
 
 void AsyncOutput::start() {
     thread = std::thread([&]() {
-        std::vector<std::shared_ptr<VideoFrame>> elem;
+        std::pair<std::vector<std::shared_ptr<VideoFrame>>, PerformanceMetrics::TimePoint> elem;
         while (!terminate) {
             std::unique_lock<std::mutex> lock(mutex);
             condVar.wait(lock, [&]() {
