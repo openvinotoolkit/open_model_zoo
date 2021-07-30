@@ -126,5 +126,6 @@ setup(
     python_requires='>=3.5',
     install_requires=requirements if not is_arm else '',
     tests_require=[read("requirements-test.in")],
-    cmdclass={'test': PyTest, 'install_core': CoreInstall}
+    cmdclass={'test': PyTest, 'install_core': CoreInstall},
+    extras_require={'extra': [read("requirements-extra.in")]}
 )

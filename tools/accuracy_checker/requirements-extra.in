@@ -1,0 +1,12 @@
+# Python API that assists in loading, parsing and visualizing the annotations in COCO
+pycocotools>=2.0.2
+
+# LPIPS dependencies
+torch>=0.4.0
+torchvision>=0.2.1
+
+# Learned Perceptual Image Patch Similarity (LPIPS) metric support
+lpips
+
+# KenLM library to support models in binary kenlm format
+kenlm @ git+https://github.com/kpu/kenlm.git#egg=kenlm
