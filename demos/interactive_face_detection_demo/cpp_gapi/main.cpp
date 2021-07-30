@@ -434,10 +434,7 @@ int main(int argc, char *argv[]) {
         std::vector<cv::Mat> out_landmarks;
         if (!FLAGS_m_lm.empty()) out_vector += cv::gout(out_landmarks);
 
-        Visualizer::Ptr visualizer;
-        if (!FLAGS_no_show || !FLAGS_o.empty()) {
-            visualizer = std::make_shared<Visualizer>(!FLAGS_m_ag.empty(), !FLAGS_m_em.empty(), !FLAGS_m_hp.empty(), !FLAGS_m_lm.empty());
-        }
+        Visualizer::Ptr visualizer = std::make_shared<Visualizer>(!FLAGS_m_ag.empty(), !FLAGS_m_em.empty(), !FLAGS_m_hp.empty(), !FLAGS_m_lm.empty());
 
         std::list<Face::Ptr> faces;
         std::ostringstream out;
@@ -462,7 +459,7 @@ int main(int argc, char *argv[]) {
             auto startTime = std::chrono::steady_clock::now();
             stream.start();
             while (stream.pull(cv::GRunArgsP(out_vector))) {
-                if (!FLAGS_no_show && !FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
+                if (!FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
                     visualizer->enableEmotionBar(frame.size(), EMOTION_VECTOR);
                 }
 
@@ -482,8 +479,9 @@ int main(int argc, char *argv[]) {
                 faces.clear();
 
                 // Raw output of detected faces
-                if (FLAGS_r)
+                if (FLAGS_r) {
                     rawOutputDetections(ssd_res, frame.size(), FLAGS_t);
+                }
 
                 // For every detected face
                 for (size_t i = 0; i < face_hub.size(); i++) {
