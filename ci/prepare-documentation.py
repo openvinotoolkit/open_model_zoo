@@ -241,6 +241,7 @@ def add_model_pages(output_root, parent_element, group, group_title):
         # dumper doesn't support composite models yet.
         model_yml_path = OMZ_ROOT / 'models' / group / model_name / 'model.yml'
         composite_model_yml_path = model_yml_path.with_name('composite-model.yml')
+        is_new_intel_model = False
 
         if model_yml_path.exists():
             expected_title = model_name
@@ -260,7 +261,10 @@ def add_model_pages(output_root, parent_element, group, group_title):
             logging.warning(
                 '{}: no corresponding model.yml or composite-model.yml found; skipping'
                     .format(md_path_rel))
-            continue
+            if group == 'intel':
+                is_new_intel_model = True
+            else:
+                continue
 
         if task_type not in task_type_elements:
             human_readable_task_type = HUMAN_READABLE_TASK_TYPES.get(task_type,
@@ -278,7 +282,7 @@ def add_model_pages(output_root, parent_element, group, group_title):
         model_element = add_page(output_root, task_type_elements[task_type],
             id=page_id, path=md_path_rel)
 
-        if model_element.attrib['title'] != expected_title:
+        if model_element.attrib['title'] != expected_title and not is_new_intel_model:
             raise RuntimeError(f'{md_path_rel}: should have title "{expected_title}"')
 
     sort_titles(group_element)
