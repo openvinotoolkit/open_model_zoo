@@ -710,8 +710,6 @@ int main(int argc, char* argv[]) {
         int teacher_track_id = -1;
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop, 0, FLAGS_read_limit);
-
-        auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
         if (!frame.data) {
             throw std::runtime_error("Can't read an image from the input");
@@ -739,7 +737,7 @@ int main(int argc, char* argv[]) {
 
         bool is_last_frame = false;
         while (!is_last_frame) {
-            startTime = std::chrono::steady_clock::now();
+            auto startTime = std::chrono::steady_clock::now();
             cv::Mat prev_frame = std::move(frame);
             frame = cap->read();
             if (frame.data && frame.size() != prev_frame.size()) {
