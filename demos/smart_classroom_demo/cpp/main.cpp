@@ -951,7 +951,7 @@ int main(int argc, char* argv[]) {
                              smooth_window_size, smooth_min_length, default_action_index,
                              &face_obj_id_to_events);
 
-                slog::info << "Final ID->events mapping" << slog::endl;
+                slog::debug << "Final ID->events mapping" << slog::endl;
                 logger.DumpTracks(face_obj_id_to_events,
                                   actions_map, face_track_id_to_label,
                                   face_id_to_label_map);
@@ -960,7 +960,7 @@ int main(int argc, char* argv[]) {
                 ConvertRangeEventsTracksToActionMaps(end_frame, face_obj_id_to_events,
                                                      &face_obj_id_to_smoothed_action_maps);
 
-                slog::info << "Final per-frame ID->action mapping" << slog::endl;
+                slog::debug << "Final per-frame ID->action mapping" << slog::endl;
                 logger.DumpDetections(FLAGS_i, frame.size(), work_num_frames,
                                       new_face_tracks,
                                       face_track_id_to_label,

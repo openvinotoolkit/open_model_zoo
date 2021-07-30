@@ -247,10 +247,7 @@ int main(int argc, char* argv[]) {
         stream.setSource<custom::CustomCapSource>(cap);
 
         /** Service constants **/
-        size_t wait_num_frames = 0;
         size_t work_num_frames = 0;
-        size_t total_num_frames = 0;
-        size_t work_time_ms_all = 0;
         const char SPACE_KEY = 32;
         const char ESC_KEY = 27;
         bool monitoring_enabled = const_params.actions_type == TOP_K ? false : true;
@@ -324,13 +321,11 @@ int main(int argc, char* argv[]) {
                 /** TOP_K part. monitoring is enabled and graph is started **/
                 const_params.draw_ptr->Show(proc);
                 const_params.draw_ptr->ShowCrop(top_k);
-                total_num_frames = work_num_frames + wait_num_frames;
             } else if (const_params.actions_type != TOP_K) {
                 /** Main part. Processing is always on **/
                 presenter.drawGraphs(proc);
                 metrics.update(startTime, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 const_params.draw_ptr->Show(proc);
-                total_num_frames = work_num_frames;
             }
             if (videoWriter.isOpened()) {
                 videoWriter << proc;

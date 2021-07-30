@@ -376,10 +376,6 @@ int main(int argc, char* argv[]) {
                 }
 
                 if (FLAGS_show_stats) {
-                    auto inputStat = sources.getStats();
-                    auto inferStat = network->getStats();
-                    auto outputStat = output.getStats();
-
                     std::unique_lock<std::mutex> lock(statMutex);
                     slog::debug << "------------------- Frame # " << perfItersCounter << "------------------" << slog::endl;
                     writeStats(slog::debug, slog::endl, sources.getStats(), network->getStats(), output.getStats());

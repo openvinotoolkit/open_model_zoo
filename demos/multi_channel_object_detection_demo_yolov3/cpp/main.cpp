@@ -331,10 +331,6 @@ void displayNSources(const VideoFrame::FramesWithTimeStamp& data,
 #endif
     presenter.drawGraphs(windowImage);
     drawStats();
-
-    char str[256];
-    snprintf(str, sizeof(str), "FPS: %5.2f ", static_cast<double>(1000.0f / time));
-    putHighlightedText(windowImage, str, cv::Point(10, 100), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 0.65, cv::Scalar(200, 10, 10), 2);
     metrics.update(data.second, windowImage, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
     cv::imshow(params.name, windowImage);
 }
@@ -536,10 +532,6 @@ int main(int argc, char* argv[]) {
                 }
 
                 if (FLAGS_show_stats) {
-                    auto inputStat = sources.getStats();
-                    auto inferStat = network->getStats();
-                    auto outputStat = output.getStats();
-
                     std::unique_lock<std::mutex> lock(statMutex);
                     slog::debug << "------------------- Frame # " << perfItersCounter << "------------------" << slog::endl;
                     writeStats(slog::debug, slog::endl, sources.getStats(), network->getStats(), output.getStats());
