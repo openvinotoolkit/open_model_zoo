@@ -127,5 +127,6 @@ setup(
     install_requires=requirements if not is_arm else '',
     tests_require=[read("requirements-test.in")],
     cmdclass={'test': PyTest, 'install_core': CoreInstall},
-    extras_require={'extra': [read("requirements-extra.in")]}
+    extras_require={'extra': ['pycocotools>=2.0.2', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips',
+                              'kenlm @ git+https://github.com/kpu/kenlm.git#egg=kenlm']}
 )
