@@ -139,9 +139,11 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
 
 * `SYGData0829/dataset_format_VOC2007` - directory containing annotations, images, segmentation masks and image sets files directories
     * `Annotations` - directory containing the SYGData0829 annotation files
-    * `JPEGImages` - directory containing the SYGData0829 validation images
+    * `JPEGImages` - directory containing the SYGData0829 images
     * `ImageSets` - directory containing the SYGData0829 text files specifying lists of images for different tasks
-        * `Main/val.txt` - image sets file for detection tasks
-
+        * `Main/train.txt` - image sets file for training of detection tasks
+		* `Main/test.txt` - image sets file for test of detection tasks
+		* `Main/val.txt` - image sets file for validation of detection tasks
+		* `Main/trainval.txt` - image sets file for training and validation of detection tasks
 ### Datasets in dataset_definitions.yml
-* `SYGData0829` used for evaluation models on SYGData0829 dataset for object detection task. Label map with 9 object categories are used. (model examples: [`mobilenet-yolo-syg`](../models/public/mobilenet-yolo-syg/mobilenet-yolo-syg.md))
+* `SYGData0829` used for evaluation models on SYGData0829 dataset for object detection task. Label map with 4 object categories are used. (model examples: [`mobilenet-yolo-syg`](../models/public/mobilenet-yolo-syg/mobilenet-yolo-syg.md))
