@@ -1357,3 +1357,17 @@ datasets:
     annotation_conversion:
       converter: electricity
       data_path_file: LD2011_2014.txt
+
+  - name: CalgaryCampinasSingleChannel_20perc_downsample
+    data_source: Calgary-Campinas/CC359
+    reader:
+      type: numpy_reader
+    annotation: Calgary-Campinas/CC359/accuracy_checker_annotations/full/Calgary_Campinas_Single_Channel.pickle
+    annotation_conversion:
+      converter: k_space_mri
+      data_dir: Calgary-Campinas/CC359
+      image_folder: Raw-data/Single-channel/Val
+      reconstructed_folder: accuracy_checker_preprocess/Single-channel/Reconstructed
+      sampled_folder: accuracy_checker_preprocess/Single-channel/Sampled
+      mask_file: sampling_mask_20perc.npy
+      stats_file: stats_fs_unet_norm_20.npy

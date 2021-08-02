@@ -20,7 +20,7 @@ def kspace_to_image(kspace):
     return cv.normalize(img, dst=None, alpha=255, beta=0, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
 
 
-if __name__ == '__main__':
+def build_argparser():
     parser = argparse.ArgumentParser(description='MRI reconstrution demo')
     parser.add_argument('-i', '--input', dest='input', required=True,
                         help='Path to input .npy file with MRI scan data.')
@@ -33,8 +33,10 @@ if __name__ == '__main__':
                              'GPU, HDDL or MYRIAD is acceptable. Default value is CPU.')
     parser.add_argument('--no_show', action='store_true',
                         help='Disable results visualization')
+    return parser
 
-    args = parser.parse_args()
+def main():
+    args = build_parser().parse_args()
 
     ie = IECore()
     net = ie.read_network(args.model)
@@ -98,3 +100,6 @@ if __name__ == '__main__':
         cv.createTrackbar('Slice', WIN_NAME, num_slices // 2, num_slices - 1, callback)
         callback(num_slices // 2)  # Trigger initial visualization
         cv.waitKey()
+
+if __name__ == '__main__':
+    main()
