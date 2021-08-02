@@ -313,7 +313,7 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << "Metrics report:" << slog::endl;
-        metrics.printTotal();
+        metrics.logTotal();
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

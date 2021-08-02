@@ -92,7 +92,7 @@ PerformanceMetrics::Metrics PerformanceMetrics::getTotal() const {
     return metrics;
 }
 
-void PerformanceMetrics::printTotal() const {
+void PerformanceMetrics::logTotal() const {
     Metrics metrics = getTotal();
 
     slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms" << slog::endl;

@@ -329,7 +329,7 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << "Metrics report:" << slog::endl;
-        metrics.printTotal();
+        metrics.logTotal();
         printStagesLatency(readerMetrics.getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
             pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
             renderMetrics.getTotal().latency);

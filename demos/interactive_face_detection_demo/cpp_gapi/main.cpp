@@ -554,7 +554,7 @@ int main(int argc, char *argv[]) {
         cv::destroyAllWindows();
 
         slog::info << "Metrics report:" << slog::endl;
-        metrics.printTotal();
+        metrics.logTotal();
         slog::info << presenter->reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

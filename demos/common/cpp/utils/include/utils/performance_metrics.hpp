@@ -54,7 +54,7 @@ public:
 
     Metrics getLast() const;
     Metrics getTotal() const;
-    void printTotal() const;
+    void logTotal() const;
 
 private:
     struct Statistic {

@@ -351,7 +351,7 @@ int main(int argc, char* argv[]) {
         act_stat_log_stream << stat_log << std::endl;
 
         slog::info << "Metrics report:" << slog::endl;
-        metrics.printTotal();
+        metrics.logTotal();
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

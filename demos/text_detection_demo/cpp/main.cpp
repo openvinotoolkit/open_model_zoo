@@ -327,7 +327,7 @@ int main(int argc, char *argv[]) {
         } while (image.data);
 
         slog::info << "Metrics report:" << slog::endl;
-        metrics.printTotal();
+        metrics.logTotal();
 
         if (text_detection != nullptr && text_detection->ncalls()) {
             slog::info << "\tText detection inference: " << std::fixed << std::setprecision(1) << text_detection->time_elapsed() / text_detection->ncalls() << " ms" << slog::endl;

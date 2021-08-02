@@ -806,7 +806,7 @@ int main(int argc, char* argv[]) {
         }
 
         slog::info << "Metrics report:" << slog::endl;
-        context.metrics.printTotal();
+        context.metrics.logTotal();
         slog::info << "\tDetection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
         slog::info << context.drawersContext.presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {

@@ -806,7 +806,7 @@ int main(int argc, char *argv[]) {
         } while (frame.data);
 
         slog::info << "Metrics report:" << slog::endl;
-        metrics.printTotal();
+        metrics.logTotal();
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

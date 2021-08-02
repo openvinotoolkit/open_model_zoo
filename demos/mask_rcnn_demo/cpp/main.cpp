@@ -267,7 +267,7 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << "Metrics report:" << slog::endl;
-        metrics.printTotal();
+        metrics.logTotal();
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
