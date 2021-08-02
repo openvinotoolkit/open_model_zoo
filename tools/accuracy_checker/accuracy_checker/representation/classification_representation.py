@@ -32,14 +32,16 @@ class ClassificationAnnotation(Classification):
 
 
 class ClassificationPrediction(Classification):
-    def __init__(self, identifier='', scores=None):
+    def __init__(self, identifier='', scores=None, label_as_array=False):
         super().__init__(identifier)
 
         self.scores = np.array(scores) if scores is not None else np.array([])
+        self.label_as_array = label_as_array
 
     @property
     def label(self):
-        return np.argmax(self.scores)
+        val = np.argmax(self.scores)
+        return val if not self.label_as_array or not np.isscalar(val) else [val, ]
 
     def top_k(self, k):
         return np.argpartition(self.scores, -k)[-k:]
