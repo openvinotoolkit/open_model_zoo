@@ -354,12 +354,11 @@ def main():
             presenter.handleKey(key)
 
     metrics.log_total()
-    pipeline_metrics = {'Decoding': cap.reader_metrics.get_latency(),
-                        'Preprocessing': detector_pipeline.preprocess_metrics.get_latency(),
-                        'Inference': detector_pipeline.inference_metrics.get_latency(),
-                        'Postprocessing': detector_pipeline.postprocess_metrics.get_latency(),
-                        'Rendering': render_metrics.get_latency()}
-    log_latency_per_stage(pipeline_metrics)
+    log_latency_per_stage(cap.reader_metrics.get_latency(),
+                          detector_pipeline.preprocess_metrics.get_latency(),
+                          detector_pipeline.inference_metrics.get_latency(),
+                          detector_pipeline.postprocess_metrics.get_latency(),
+                          render_metrics.get_latency())
     for rep in presenter.reportMeans():
         log.info(rep)
 

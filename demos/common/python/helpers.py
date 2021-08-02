@@ -51,6 +51,7 @@ def log_runtime_settings(exec_net, devices):
                 pass
     log.info('\tNumber of network infer requests: {}'.format(len(exec_net.requests)))
 
-def log_latency_per_stage(pipeline_metrics):
-    for name, latency in pipeline_metrics.items():
-        log.info('\t{}:\t{:.1f} ms'.format(name, latency))
+def log_latency_per_stage(*pipeline_metrics):
+    stages = ('Decoding', 'Preprocessing', 'Inference', 'Postprocessing', 'Rendering')
+    for stage, latency in zip(stages, pipeline_metrics):
+        log.info('\t{}:\t{:.1f} ms'.format(stage, latency))
