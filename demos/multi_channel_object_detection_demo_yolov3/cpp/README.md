@@ -123,7 +123,12 @@ To connect to IP cameras, use RTSP URIs:
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frames with detections rendered as bounding boxes.
-On the top of the screen, the demo reports throughput in frames per second. You can also enable more detailed statistics in the output using the `-show_stats` option while running the demos.
+On the top of the screen, the demo reports throughput in frames per second. You can also enable more detailed statistics in the output using the `-show_stats` option while running the demos.  The demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 

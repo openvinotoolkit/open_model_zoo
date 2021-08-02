@@ -122,7 +122,11 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
-The demo reports total image throughput which includes frame decoding time, inference time, time to render bounding boxes and labels, and time to display the results.
+The demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+
+You can use this metric to measure application-level performance.
 
 ## See Also
 

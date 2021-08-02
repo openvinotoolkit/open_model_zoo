@@ -138,7 +138,12 @@ For example, to run the sample on one Intel® Vision Accelerator Design with Int
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
+The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text. The demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
 * [Open Model Zoo Demos](../../README.md)
