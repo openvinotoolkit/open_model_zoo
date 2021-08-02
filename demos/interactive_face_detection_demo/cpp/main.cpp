@@ -311,7 +311,7 @@ int main(int argc, char *argv[]) {
                 presenter.handleKey(key);
             }
         }
-        // --------------------------- Report metrics -------------------------------------------------------
+
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
         slog::info << presenter.reportMeans() << slog::endl;

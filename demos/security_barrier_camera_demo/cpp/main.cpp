@@ -798,13 +798,13 @@ int main(int argc, char* argv[]) {
         worker->threadFunc();
         worker->join();
 
-        // --------------------------- Report metrics -------------------------------------------------------
         uint32_t frameCounter = context.frameCounter;
         double detectionsInfersUsage = 0;
         if (0 != frameCounter) {
             detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
                 / (frameCounter * context.nireq) * 100;
         }
+
         slog::info << "Metrics report:" << slog::endl;
         context.metrics.printTotal();
         slog::info << "\tDetection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;

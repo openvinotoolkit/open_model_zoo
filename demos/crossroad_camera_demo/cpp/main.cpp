@@ -805,11 +805,9 @@ int main(int argc, char *argv[]) {
             frame = cap->read();
         } while (frame.data);
 
-        // --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
         slog::info << presenter.reportMeans() << slog::endl;
-        // -----------------------------------------------------------------------------------------------------
     }
     catch (const std::exception& error) {
         slog ::err << error.what() << slog::endl;

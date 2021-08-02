@@ -326,9 +326,9 @@ int main(int argc, char *argv[]) {
             image = cap->read();
         } while (image.data);
 
-        // --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
+
         if (text_detection != nullptr && text_detection->ncalls()) {
             slog::info << "\tText detection inference: " << std::fixed << std::setprecision(1) << text_detection->time_elapsed() / text_detection->ncalls() << " ms" << slog::endl;
             slog::info << "\tText detection postprocessing: " << text_detection_postproc_time / text_detection->ncalls() << " ms" << slog::endl;
@@ -341,12 +341,10 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << presenter.reportMeans() << slog::endl;
-        // ---------------------------------------------------------------------------------------------------
     } catch (const std::exception & ex) {
         slog::err << ex.what() << slog::endl;
         return EXIT_FAILURE;
-    }
-    catch (...) {
+    } catch (...) {
         slog::err << "Unknown/internal exception happened.\n";
         return EXIT_FAILURE;
     }

@@ -225,7 +225,6 @@ int main(int argc, char **argv) {
                 PrintDetectionLog(log);
         }
 
-        // --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
         slog::info << presenter.reportMeans() << slog::endl;

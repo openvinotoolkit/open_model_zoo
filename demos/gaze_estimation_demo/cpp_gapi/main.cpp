@@ -328,7 +328,6 @@ int main(int argc, char *argv[]) {
             startTime = std::chrono::steady_clock::now();
         }
 
-        // --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
         slog::info << presenter.reportMeans() << slog::endl;

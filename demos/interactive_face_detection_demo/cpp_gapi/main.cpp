@@ -553,7 +553,6 @@ int main(int argc, char *argv[]) {
 
         cv::destroyAllWindows();
 
-        // --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
         slog::info << presenter->reportMeans() << slog::endl;

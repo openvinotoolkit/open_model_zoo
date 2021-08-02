@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
             cv::imwrite(imgName, output_images[i]);
             slog::info << "Image " << imgName << " created!" << slog::endl;
         }
-        // --------------------------- Report metrics -------------------------------------------------------
+
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
     }

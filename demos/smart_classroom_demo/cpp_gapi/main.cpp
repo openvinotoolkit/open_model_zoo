@@ -350,7 +350,6 @@ int main(int argc, char* argv[]) {
         act_stat_log_stream.open(FLAGS_ad, std::fstream::out);
         act_stat_log_stream << stat_log << std::endl;
 
-        // --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
         slog::info << presenter.reportMeans() << slog::endl;

@@ -324,16 +324,15 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        // --------------------------- Report metrics -------------------------------------------------------
+        if (!FLAGS_gt.empty()) {
+            slog::info << "Accuracy (top " << FLAGS_nt << "): " << accuracy << slog::endl;
+        }
+
         slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
         printStagesLatency(readerMetrics.getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
             pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
             renderMetrics.getTotal().latency);
-
-        if (!FLAGS_gt.empty()) {
-            slog::info << "Accuracy (top " << FLAGS_nt << "): " << accuracy << slog::endl;
-        }
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
