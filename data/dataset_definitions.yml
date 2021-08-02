@@ -1235,11 +1235,11 @@ datasets:
     annotation: GOPRO.pickle
 
   - name: SYGData0829
-    data_source: SYGData0829
-    dataset_meta_file: voc_label.json
+    data_source: SYGData0829/dataset_format_VOC2007/JPEGImages/
+    dataset_meta_file: SYGData0829/voc_label.json
     annotation_conversion:
         converter: syg_detection
-        imageset_file: val.txt
-        annotations_dir: Annotations
-        images_dir: JPEGImages
+        imageset_file: SYGData0829/dataset_format_VOC2007/ImageSets/Main/val.txt
+        annotations_dir: SYGData0829/dataset_format_VOC2007/Annotations
+        images_dir: SYGData0829/dataset_format_VOC2007/JPEGImages
         has_background: False
