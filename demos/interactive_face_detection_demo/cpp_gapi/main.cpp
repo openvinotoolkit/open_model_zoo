@@ -458,7 +458,7 @@ int main(int argc, char *argv[]) {
 
             auto startTime = std::chrono::steady_clock::now();
             stream.start();
-            while (stream.pull(cv::GRunArgsP(out_vector))) {
+            while (startTime = std::chrono::steady_clock::now(), stream.pull(cv::GRunArgsP(out_vector))) {
                 if (!FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
                     visualizer->enableEmotionBar(frame.size(), EMOTION_VECTOR);
                 }

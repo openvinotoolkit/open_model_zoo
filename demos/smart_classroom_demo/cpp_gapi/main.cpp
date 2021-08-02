@@ -278,7 +278,7 @@ int main(int argc, char* argv[]) {
 
         /** Main cycle **/
         while (true) {
-            auto startTime = std::chrono::steady_clock::now();
+            const auto startTime = std::chrono::steady_clock::now();
             char key = cv::waitKey(1);
             presenter.handleKey(key);
             if (key == ESC_KEY) {
