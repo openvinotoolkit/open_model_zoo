@@ -347,17 +347,30 @@ void Drawer::process() {
 
         context.drawersContext.presenter.drawGraphs(mat);
         context.metrics.update(sharedVideoFrame->timeStamp, mat, { 15, 35 }, cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{ 255, 255, 255 }, 0);
-        cv::imshow("Detection results", firstGridIt->second.getMat());
-        context.drawersContext.prevShow = std::chrono::steady_clock::now();
-        const int key = cv::waitKey(context.drawersContext.pause);
-        if (key == 27 || 'q' == key || 'Q' == key || !context.isVideo) {
-            try {
-                std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
-            } catch (const std::bad_weak_ptr&) {}
-        } else if (key == 32) {
-            context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
-        } else {
-            context.drawersContext.presenter.handleKey(key);
+        if (!FLAGS_no_show) {
+            cv::imshow("Detection results", firstGridIt->second.getMat());
+            context.drawersContext.prevShow = std::chrono::steady_clock::now();
+            const int key = cv::waitKey(context.drawersContext.pause);
+            if (key == 27 || 'q' == key || 'Q' == key || !context.isVideo) {
+                try {
+                    std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+                }
+                catch (const std::bad_weak_ptr&) {}
+            }
+            else if (key == 32) {
+                context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
+            }
+            else {
+                context.drawersContext.presenter.handleKey(key);
+            }
+        }
+        else {
+            if (!context.isVideo) {
+                try {
+                    std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+                }
+                catch (const std::bad_weak_ptr&) {}
+            }
         }
         firstGridIt->second.clear();
         gridMats.emplace((--gridMats.end())->first + 1, firstGridIt->second);
@@ -370,33 +383,25 @@ void ResAggregator::process() {
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     context.freeDetectionInfersCount += context.detectorsInfers.inferRequests.lockedSize();
     context.frameCounter++;
-    if (!FLAGS_no_show) {
-        for (const BboxAndDescr& bboxAndDescr : boxesAndDescrs) {
-            switch (bboxAndDescr.objectType) {
-                case BboxAndDescr::ObjectType::NONE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {255, 255, 0},  4);
-                                                     break;
-                case BboxAndDescr::ObjectType::VEHICLE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
-                                                        putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
-                                                                     cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y + 35},
-                                                                     cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 2);
-                                                         break;
-                case BboxAndDescr::ObjectType::PLATE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 0, 255},  4);
-                                                      putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
-                                                                  cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y - 10},
-                                                                  cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 0, 255), 2);
-                                                      break;
-                default: throw std::exception();  // must never happen
-                          break;
-            }
-        }
-        tryPush(context.drawersContext.drawersWorker, std::make_shared<Drawer>(sharedVideoFrame));
-    } else {
-        if (!context.isVideo) {
-           try {
-                std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
-            } catch (const std::bad_weak_ptr&) {}
+    for (const BboxAndDescr& bboxAndDescr : boxesAndDescrs) {
+        switch (bboxAndDescr.objectType) {
+            case BboxAndDescr::ObjectType::NONE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {255, 255, 0},  4);
+                                                    break;
+            case BboxAndDescr::ObjectType::VEHICLE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
+                                                    putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
+                                                                    cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y + 35},
+                                                                    cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 2);
+                                                        break;
+            case BboxAndDescr::ObjectType::PLATE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 0, 255},  4);
+                                                    putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
+                                                                cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y - 10},
+                                                                cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 0, 255), 2);
+                                                    break;
+            default: throw std::exception();  // must never happen
+                        break;
         }
     }
+    tryPush(context.drawersContext.drawersWorker, std::make_shared<Drawer>(sharedVideoFrame));
 }
 
 bool DetectionsProcessor::isReady() {
