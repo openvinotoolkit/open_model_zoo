@@ -83,4 +83,4 @@ private:
     bool firstFrameProcessed;
 };
 
-void printStagesLatency(double readLat, double preprocLat, double inferLat, double postprocLat, double renderLat);
+void logLatencyPerStage(double readLat, double preprocLat, double inferLat, double postprocLat, double renderLat);

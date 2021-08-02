@@ -99,11 +99,11 @@ void PerformanceMetrics::logTotal() const {
     slog::info << "\tFPS: " << metrics.fps << slog::endl;
 }
 
-void printStagesLatency(double readLat, double preprocLat, double inferLat, double postprocLat, double renderLat) {
+void logLatencyPerStage(double readLat, double preprocLat, double inferLat, double postprocLat, double renderLat) {
     slog::info << "\tDecoding:\t" << std::fixed << std::setprecision(1) <<
-        readLat << " ms" << slog::endl;
-    slog::info << "\tPreprocessing:\t" << preprocLat << " ms" << slog::endl;
-    slog::info << "\tInference:\t" << inferLat << " ms" << slog::endl;
-    slog::info << "\tPostprocessing:\t" << postprocLat << " ms" << slog::endl;
+        readLat << " ms" << slog::endl;;
+    slog::info << "\tPreprocessing:\t" << preprocLat << " ms" << slog::endl;;
+    slog::info << "\tInference:\t" << inferLat << " ms" << slog::endl;;
+    slog::info << "\tPostprocessing:\t" << postprocLat << " ms" << slog::endl;;
     slog::info << "\tRendering:\t" << renderLat << " ms" << slog::endl;
 }

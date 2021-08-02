@@ -330,7 +330,7 @@ int main(int argc, char *argv[]) {
 
         slog::info << "Metrics report:" << slog::endl;
         metrics.logTotal();
-        printStagesLatency(readerMetrics.getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
+        logLatencyPerStage(readerMetrics.getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
             pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
             renderMetrics.getTotal().latency);
         slog::info << presenter.reportMeans() << slog::endl;
