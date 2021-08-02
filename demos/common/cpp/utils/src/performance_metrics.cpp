@@ -18,9 +18,10 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime,
     int fontFace,
     double fontScale,
     cv::Scalar color,
-    int thickness) {
+    int thickness,
+    MetricTypes metricType) {
     update(lastRequestStartTime);
-    paintMetrics(frame, position, fontFace, fontScale, color, thickness);
+    paintMetrics(frame, position, fontFace, fontScale, color, thickness, metricType);
 }
 
 void PerformanceMetrics::update(TimePoint lastRequestStartTime) {
@@ -44,19 +45,22 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime) {
     }
 }
 
-void PerformanceMetrics::paintMetrics(cv::Mat & frame, cv::Point position, int fontFace, double fontScale, cv::Scalar color, int thickness) const {
+void PerformanceMetrics::paintMetrics(cv::Mat & frame, cv::Point position, int fontFace, double fontScale, cv::Scalar color, int thickness, MetricTypes metricType) const {
     // Draw performance stats over frame
     Metrics metrics = getLast();
 
     std::ostringstream out;
-    if (!std::isnan(metrics.latency)) {
+    if (!std::isnan(metrics.latency) &&
+        (metricType == PerformanceMetrics::MetricTypes::LATENCY || metricType == PerformanceMetrics::MetricTypes::ALL)) {
         out << "Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms";
         putHighlightedText(frame, out.str(), position, fontFace, fontScale, color, thickness);
     }
-    if (!std::isnan(metrics.fps)) {
+    if (!std::isnan(metrics.fps) &&
+        (metricType == PerformanceMetrics::MetricTypes::FPS || metricType == PerformanceMetrics::MetricTypes::ALL)) {
         out.str("");
         out << "FPS: " << std::fixed << std::setprecision(1) << metrics.fps;
-        putHighlightedText(frame, out.str(), {position.x, position.y + 30}, fontFace, fontScale, color, thickness);
+        int offset = metricType == PerformanceMetrics::MetricTypes::ALL ? 30 : 0;
+        putHighlightedText(frame, out.str(), {position.x, position.y + offset}, fontFace, fontScale, color, thickness);
     }
 }
 

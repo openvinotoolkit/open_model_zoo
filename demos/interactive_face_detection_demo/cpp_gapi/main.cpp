@@ -458,7 +458,7 @@ int main(int argc, char *argv[]) {
 
             auto startTime = std::chrono::steady_clock::now();
             stream.start();
-            while (startTime = std::chrono::steady_clock::now(), stream.pull(cv::GRunArgsP(out_vector))) {
+            while (stream.pull(cv::GRunArgsP(out_vector))) {
                 if (!FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
                     visualizer->enableEmotionBar(frame.size(), EMOTION_VECTOR);
                 }
@@ -524,7 +524,8 @@ int main(int argc, char *argv[]) {
                 visualizer->draw(frame, faces);
 
                 presenter->drawGraphs(frame);
-                metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                    0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
 
                 //  Visualizing results
                 if (!FLAGS_no_show || !FLAGS_o.empty()) {
@@ -548,13 +549,14 @@ int main(int argc, char *argv[]) {
                 }
 
                 framesCounter++;
+                startTime = std::chrono::steady_clock::now();
             }
         } while (FLAGS_loop && !stop);
 
         cv::destroyAllWindows();
 
         slog::info << "Metrics report:" << slog::endl;
-        metrics.logTotal();
+        slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << metrics.getTotal().fps << slog::endl;
         slog::info << presenter->reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

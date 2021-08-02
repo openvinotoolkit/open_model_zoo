@@ -278,12 +278,13 @@ int main(int argc, char* argv[]) {
 
         /** Main cycle **/
         while (true) {
-            const auto startTime = std::chrono::steady_clock::now();
             char key = cv::waitKey(1);
             presenter.handleKey(key);
             if (key == ESC_KEY) {
                 break;
             }
+
+            const auto startTime = std::chrono::steady_clock::now();
             if (const_params.actions_type == TOP_K) {
                 if ((key == SPACE_KEY && !monitoring_enabled) ||
                     (key == SPACE_KEY && monitoring_enabled)) {
@@ -313,7 +314,9 @@ int main(int argc, char* argv[]) {
                 const auto new_width = cvRound(out_frame.cols * const_params.draw_ptr->rect_scale_x_);
                 cv::resize(out_frame, out_frame, cv::Size(new_width, new_height));
                 presenter.drawGraphs(out_frame);
-                metrics.update(startTime, out_frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                metrics.update(startTime, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                    0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+
                 const_params.draw_ptr->Show(out_frame);
                 const_params.draw_ptr->ShowCrop();
             }
@@ -324,7 +327,8 @@ int main(int argc, char* argv[]) {
             } else if (const_params.actions_type != TOP_K) {
                 /** Main part. Processing is always on **/
                 presenter.drawGraphs(proc);
-                metrics.update(startTime, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                metrics.update(startTime, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                    0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
                 const_params.draw_ptr->Show(proc);
             }
             if (videoWriter.isOpened()) {
@@ -351,7 +355,7 @@ int main(int argc, char* argv[]) {
         act_stat_log_stream << stat_log << std::endl;
 
         slog::info << "Metrics report:" << slog::endl;
-        metrics.logTotal();
+        slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << metrics.getTotal().fps << slog::endl;
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

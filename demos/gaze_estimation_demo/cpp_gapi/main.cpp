@@ -299,7 +299,8 @@ int main(int argc, char *argv[]) {
 
             /** Display system parameters **/
             presenter.drawGraphs(frame);
-            metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+            metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
 
             /** Print logs **/
             if (FLAGS_r) {
@@ -329,7 +330,7 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << "Metrics report:" << slog::endl;
-        metrics.logTotal();
+        slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << metrics.getTotal().fps << slog::endl;
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
