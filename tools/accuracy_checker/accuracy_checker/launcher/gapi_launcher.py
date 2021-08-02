@@ -24,9 +24,6 @@ from ..logging import print_info
 from .launcher import Launcher, LauncherConfigValidator
 from ..utils import get_or_parse_value, get_path
 
-DEVICE_REGEX = r'(?P<device>cpu$|gpu|gpu_fp16)?'
-BACKEND_REGEX = r'(?P<backend>ocv|ie)?'
-
 
 class OpenCVLauncherConfigValidator(LauncherConfigValidator):
     def validate(self, entry, field_uri=None, fetch_only=False):
@@ -69,9 +66,10 @@ class GAPILauncher(Launcher):
         self.comp = None
         self.network_args = None
         self.output_names = self.get_value_from_config('outputs')
-        self.get_inputs_from_config(self.config)
+        self._inputs_shapes = self.get_inputs_from_config(self.config)
 
         if not self._delayed_model_loading:
+            self.model, self.weights = self.automatic_model_search()
             self.prepare_net()
 
     @classmethod
@@ -92,15 +90,11 @@ class GAPILauncher(Launcher):
         outputs = cv2.gapi.infer("net", inputs)
         g_outputs = [outputs.at(out_name) for out_name in self.output_names]
         self.comp = cv2.GComputation(cv2.GIn(*g_inputs), cv2.GOut(*g_outputs))
-        pp = cv2.gapi.ie.params("net", self.model, self.weights, self.device.upper())
-        self.network_args = cv2.gapi.compile_args(cv2.gapi.networks(pp))
+        pp = cv2.gapi.ie.params("net", str(self.model), str(self.weights), self.device.upper())
+        self.network_args = cv2.GCompileArg(cv2.gapi.networks(pp))
 
     @property
     def inputs(self):
-        """
-        Returns:
-            inputs in NCHW format.
-        """
         return self._inputs_shapes
 
     @property
