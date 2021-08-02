@@ -122,7 +122,6 @@ By default, it shows only gaze estimation results. To see inference results of a
 The demo reports:
 
 * **FPS**: average rate of video frame processing (frames per second).
-* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
 
 You can use these metrics to measure application-level performance.
 

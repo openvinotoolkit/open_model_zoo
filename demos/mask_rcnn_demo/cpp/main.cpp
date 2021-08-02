@@ -267,7 +267,7 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << "Metrics report:" << slog::endl;
-        metrics.logTotal();
+        slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.getTotal().latency << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
