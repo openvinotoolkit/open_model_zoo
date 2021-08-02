@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2019 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -17,7 +17,7 @@
 struct TrackedObject {
     cv::Rect rect;       ///< Detected object ROI (zero area if N/A).
     double confidence;   ///< Detection confidence level (-1 if N/A).
-    int frame_idx;       ///< Frame index where object was detected (-1 if N/A).
+    int64_t frame_idx;       ///< Frame index where object was detected (-1 if N/A).
     int object_id;       ///< Unique object identifier (-1 if N/A).
     uint64_t timestamp;  ///< Timestamp in milliseconds.
 
@@ -37,7 +37,7 @@ struct TrackedObject {
     /// \param frame_idx Index of frame.
     /// \param object_id Object ID.
     ///
-    TrackedObject(const cv::Rect &rect, float confidence, int frame_idx,
+    TrackedObject(const cv::Rect &rect, float confidence, int64_t frame_idx,
                   int object_id)
         : rect(rect),
         confidence(confidence),

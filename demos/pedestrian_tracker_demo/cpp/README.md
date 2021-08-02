@@ -40,12 +40,58 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 
 ### Supported Models
 
-* person-detection-retail-0002
-* person-detection-retail-0013
-* person-reidentification-retail-0277
-* person-reidentification-retail-0286
-* person-reidentification-retail-0287
-* person-reidentification-retail-0288
+* architecture_type = centernet
+  - ctdet_coco_dlav0_384
+  - ctdet_coco_dlav0_512
+* architecture_type = ssd
+  - efficientdet-d0-tf
+  - efficientdet-d1-tf
+  - faster-rcnn-resnet101-coco-sparse-60-0001
+  - pedestrian-and-vehicle-detector-adas-0001
+  - pedestrian-detection-adas-0002
+  - pelee-coco
+  - person-detection-0106
+  - person-detection-0200
+  - person-detection-0201
+  - person-detection-0202
+  - person-detection-0203
+  - person-detection-retail-0002
+  - person-detection-retail-0013
+  - person-vehicle-bike-detection-2000
+  - person-vehicle-bike-detection-2001
+  - person-vehicle-bike-detection-2002
+  - person-vehicle-bike-detection-2003
+  - person-vehicle-bike-detection-2004
+  - rfcn-resnet101-coco-tf
+  - retinanet-tf
+  - ssd300
+  - ssd512
+  - ssd-resnet34-1200-onnx
+  - ssd_mobilenet_v1_coco
+  - ssd_mobilenet_v1_fpn_coco
+  - ssd_mobilenet_v2_coco
+  - ssd_resnet50_v1_fpn_coco
+  - ssdlite_mobilenet_v2
+  - vehicle-detection-adas-0002
+* architecture_type = yolo
+  - person-vehicle-bike-detection-crossroad-yolov3-1020
+  - yolo-v3-tf
+  - yolo-v3-tiny-tf
+  - yolo-v1-tiny-tf
+  - yolo-v2-ava-0001
+  - yolo-v2-ava-sparse-35-0001
+  - yolo-v2-ava-sparse-70-0001
+  - yolo-v2-tf
+  - yolo-v2-tiny-ava-0001
+  - yolo-v2-tiny-ava-sparse-30-0001
+  - yolo-v2-tiny-ava-sparse-60-0001
+  - yolo-v2-tiny-tf
+  - yolo-v2-tiny-vehicle-detection-0001
+* reidentification models
+  - person-reidentification-retail-0277
+  - person-reidentification-retail-0286
+  - person-reidentification-retail-0287
+  - person-reidentification-retail-0288
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -69,6 +115,7 @@ Options:
     -o "<path>"                  Optional. Name of the output file(s) to save.
     -limit "<num>"               Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m_det "<path>"              Required. Path to the Pedestrian Detection Retail model (.xml) file.
+    -at \"<type>\"                  Required. Architecture type for detector model: centernet, ssd or yolo.
     -m_reid "<path>"             Required. Path to the Pedestrian Reidentification Retail model (.xml) file.
     -l "<absolute_path>"         Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels implementation.
           Or
@@ -80,6 +127,15 @@ Options:
     -delay                       Optional. Delay between frames used for visualization. If negative, the visualization is turned off (like with the option 'no_show'). If zero, the visualization is made frame-by-frame.
     -out "<path>"                Optional. The file name to write output log file with results of pedestrian tracking. The format of the log file is compatible with MOTChallenge format.
     -u                           Optional. List of monitors to show initially.
+	 -t                           Optional. Probability threshold for detections.
+    -auto_resize                 Optional. Enables resizable input with support of ROI crop & auto resize.
+    -iou_t                       Optional. Filtering intersection over union threshold for overlapping boxes.
+    -yolo_af                     Optional. Use advanced postprocessing/filtering algorithm for YOLO.
+    -labels \"<path>\"           Optional. Path to a file with labels mapping.
+    -nireq \"<integer>\"         Optional. Number of infer requests for detector model. If this option is omitted, number of infer requests is determined automatically.
+    -nstreams                    Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode for detector model (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
+    -nthreads \"<integer>\"      Optional. Number of threads for detector model.
+    -person_label                Optional. Label of class person for detector. Default -1 for tracking all objects
 ```
 
 For example, to run the application with the OpenVINO&trade; toolkit pre-trained models with inferencing pedestrian detector on a GPU and pedestrian reidentification on a CPU, run the following command:
