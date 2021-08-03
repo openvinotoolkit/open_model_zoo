@@ -170,7 +170,6 @@ int main(int argc, char *argv[]) {
         cv::Mat next_frame = cap->read();
         while (frame.data) {
             timer.start("total");
-            auto startTime = std::chrono::steady_clock::now();
             cv::Mat prev_frame = std::move(frame);
             frame = std::move(next_frame);
             framesCounter++;
@@ -212,6 +211,7 @@ int main(int argc, char *argv[]) {
             }
 
             // Read the next frame while waiting for inference results
+            auto startTime = std::chrono::steady_clock::now();
             next_frame = cap->read();
 
             if (isFaceAnalyticsEnabled) {
