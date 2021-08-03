@@ -17,6 +17,16 @@
 import unicodedata
 import string
 
+
+# Small class to store context as text, its tokens and embedding vector
+class ContextData:
+    def __init__(self, c_tokens_id, c_tokens_se, context=None, c_emb=None):
+        self.c_tokens_id = c_tokens_id
+        self.c_tokens_se = c_tokens_se
+        self.context = context
+        self.c_emb = c_emb
+
+
 # load vocabulary file for encoding
 def load_vocab_file(vocab_file_name):
     with open(vocab_file_name, "r", encoding="utf-8") as r:

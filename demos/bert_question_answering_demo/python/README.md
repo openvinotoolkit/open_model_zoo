@@ -123,20 +123,15 @@ Please see general [reshape intro and limitations](https://docs.openvinotoolkit.
 ## Demo Outputs
 
 The application outputs found answers to the same console.
+The application reports
+
+* **Latency**: total processing time required to process input data (from loading the vocab and processing the context as tokens to displaying the results).
 
 ## Classifying Documents with Long Texts
 
 Notice that when the original "context" (text from the url) together with the question do not fit the model input
 (usually 384 tokens for the Bert-Large, or 128 for the Bert-Base), the demo splits the context into overlapping segments.
 Thus, for the long texts, the network is called multiple times. The results are then sorted by the probabilities.
-
-## Demo Performance
-
-Even though the demo reports inference performance (by measuring wall-clock time for individual inference calls),
-it is only baseline performance, as certain tricks like batching,
-[throughput mode](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Intro_to_Performance.html) can be applied.
-Please use the full-blown [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
-for any actual performance measurements.
 
 ## See Also
 

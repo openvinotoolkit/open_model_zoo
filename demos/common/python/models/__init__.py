@@ -15,6 +15,7 @@
 """
 
 
+from .bert import BertEmbedding, NamedEntityRecognition, QuestionAnswering
 from .centernet import CenterNet
 from .deblurring import Deblurring
 from .detr import DETR
@@ -30,21 +31,24 @@ from .utils import DetectionWithLandmarks, InputTransform, OutputTransform
 from .yolo import YOLO, YoloV4
 
 __all__ = [
-    'CenterNet',
+    'BertEmbedding',
     'CTPN',
-    'DetectionWithLandmarks',
-    'Deblurring',
+    'CenterNet',
     'DETR',
+    'Deblurring',
+    'DetectionWithLandmarks',
     'FaceBoxes',
     'HpeAssociativeEmbedding',
     'InputTransform',
+    'NamedEntityRecognition',
     'OpenPose',
     'OutputTransform',
+    'QuestionAnswering',
     'RetinaFace',
     'RetinaFacePyTorch',
+    'SSD',
     'SalientObjectDetectionModel',
     'SegmentationModel',
-    'SSD',
     'UltraLightweightFaceDetection',
     'YOLO',
     'YoloV4',

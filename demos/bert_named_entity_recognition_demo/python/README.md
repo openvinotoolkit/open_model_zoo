@@ -65,8 +65,10 @@ from the command-line match the actual network inputs.
 
 ## Demo Outputs
 
-The application outputs recognized named entities (`LOC` - location, `PER` - person, `ORG` - organization, `MISC` - miscellaneous)
-for each sentence in input text.
+The application outputs recognized named entities (`LOC` - location, `PER` - person, `ORG` - organization, `MISC` - miscellaneous) for each sentence in input text.
+The application reports
+
+* **Latency**: total processing time required to process input data (from loading the vocab and processing the context as tokens to displaying the results).
 
 ## Example Demo Cmd-Line
 
@@ -85,14 +87,6 @@ You can use the following command to try the demo (assuming the model from the O
 
 Notice that when the original "context" (text from the url) do not fit the model input
 (128 for the Bert-Base), the demo reshapes model to maximum sentence length in the "context".
-
-## Demo Performance
-
-Even though the demo reports inference performance (by measuring wall-clock time for individual inference calls),
-it is only baseline performance, as certain tricks like batching,
-[throughput mode](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Intro_to_Performance.html) can be applied.
-Please use the full-blown [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
-for any actual performance measurements.
 
 ## See Also
 

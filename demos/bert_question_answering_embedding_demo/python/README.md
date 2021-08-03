@@ -88,6 +88,8 @@ Options:
   --output_names_qa OUTPUT_NAMES_QA
                         Optional. Names for outputs in MODEL_QA network. For
                         example 'output_s,output_e'
+  --model_squad_ver MODEL_SQUAD_VER
+                        Optional. SQUAD version used for model fine tuning
   -a MAX_ANSWER_TOKEN_NUM, --max_answer_token_num MAX_ANSWER_TOKEN_NUM
                         Optional. Maximum number of tokens in exact answer
   -d DEVICE, --device DEVICE
@@ -131,20 +133,16 @@ Please see general [reshape intro and limitations](https://docs.openvinotoolkit.
 ## Demo Outputs
 
 The application outputs contexts with answers to the same console.
+The application reports
+
+* **Latency (all stages)**: total processing time required to process input data (from loading the vocab and processing the context as tokens to displaying the results).
+* **Context embeddings latency (stage 1)**: total processing time required to calculate all context embeddings.
 
 ## Classifying Documents with Long Texts
 
 Notice that when the original "context" (paragraph text from the url) alone or together with the question do not fit the model input
 (usually 384 tokens for the Bert-Large, or 128 for the Bert-Base), the demo splits the paragraph into overlapping segments.
 Thus, for the long paragraph texts, the network is called multiple times as for separate contexts.
-
-## Demo Performance
-
-Even though the demo reports inference performance (by measuring wall-clock time for individual inference calls),
-it is only baseline performance, as certain tricks like batching,
-[throughput mode](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Intro_to_Performance.html) can be applied.
-Please use the full-blown [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
-for any actual performance measurements.
 
 ## See Also
 

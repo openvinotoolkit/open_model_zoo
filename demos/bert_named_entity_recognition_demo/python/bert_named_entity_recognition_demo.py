@@ -19,21 +19,23 @@
 import logging as log
 import re
 import sys
-import time
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
+from time import perf_counter
 
-import numpy as np
 from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
+
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
+from models import NamedEntityRecognition
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 sentence_splitter = r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s'
 label_to_tag = ['O', 'B-MIS', 'I-MIS', 'B-PER', 'I-PER', 'B-ORG', 'I-ORG', 'B-LOC', 'I-LOC']
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -55,121 +57,59 @@ def build_argparser():
                            "Default value is CPU", default="CPU", type=str)
     return parser
 
+
 def main():
     args = build_argparser().parse_args()
 
-    # load vocabulary file for model
+    paragraphs = get_paragraphs(args.input)
+
+    preprocessing_start_time = perf_counter()
     vocab = load_vocab_file(args.vocab)
     log.debug("Loaded vocab file from {}, get {} tokens".format(args.vocab, len(vocab)))
 
-    # get context as a string (as we might need it's length for the sequence reshape)
-    paragraphs = get_paragraphs(args.input)
+    # Get context as a string (as we might need it's length for the sequence reshape)
     context = '\n'.join(paragraphs)
     sentences = re.split(sentence_splitter, context)
     preprocessed_sentences = [text_to_tokens(sentence, vocab) for sentence in sentences]
-    max_sent_length = max([len(tokens) + 2 for tokens, _ in preprocessed_sentences])
+    max_sentence_length = max([len(tokens) + 2 for tokens, _ in preprocessed_sentences])
+    preprocessing_total_time = (perf_counter() - preprocessing_start_time) * 1e3
 
     log.info('OpenVINO Inference Engine')
     log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
-    # read IR
-    model_xml = args.model
-    model_bin = model_xml.with_suffix(".bin")
     log.info('Reading model {}'.format(args.model))
-    ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
+    model = NamedEntityRecognition(ie, args.model, vocab, args.input_names)
+    if max_sentence_length > model.max_length:
+        model.reshape(max_sentence_length)
 
-    # check input and output names
-    input_names = [i.strip() for i in args.input_names.split(',')]
-    if ie_encoder.input_info.keys() != set(input_names):
-        raise RuntimeError('The demo expects input names: {}, actual network input names: {}'.format(
-            input_names, list(ie_encoder.input_info.keys())))
-    if len(ie_encoder.outputs) != 1:
-        raise RuntimeError('The demo expects model with single output, while provided {}'.format(len(ie_encoder.outputs)))
-    output_names = list(ie_encoder.outputs)
-    max_length = ie_encoder.input_info[input_names[0]].input_data.shape[1]
-    if max_sent_length > max_length:
-        input_shapes = {
-            input_names[0]: [1, max_sent_length],
-            input_names[1]: [1, max_sent_length],
-            input_names[2]: [1, max_sent_length]
-        }
-        ie_encoder.reshape(input_shapes)
-        max_length = max_sent_length
-    # load model to the device
-    ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
+    model_exec = ie.load_network(model.net, args.device)
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    # maximum number of tokens that can be processed by network at once
-    t0 = time.perf_counter()
-    t_count = 0
 
-    def get_score(name):
-        out = np.exp(res[name][0])
-        return out / out.sum(axis=-1, keepdims=True)
-
+    start_time = perf_counter()
     for sentence, (c_tokens_id, c_token_s_e) in zip(sentences, preprocessed_sentences):
-        # form the request
-        tok_cls = vocab['[CLS]']
-        tok_sep = vocab['[SEP]']
-        input_ids = [tok_cls] + c_tokens_id + [tok_sep]
-        token_type_ids = [0] * len(input_ids)
-        attention_mask = [1] * len(input_ids)
+        inputs, meta = model.preprocess(c_tokens_id)
+        raw_result = model_exec.infer(inputs)
+        score, filtered_labels_id = model.postprocess(raw_result, meta)
 
-        # pad the rest of the request
-        pad_len = max_length - len(input_ids)
-        input_ids += [0] * pad_len
-        token_type_ids += [0] * pad_len
-        attention_mask += [0] * pad_len
-
-        # create numpy inputs for IE
-        inputs = {
-            input_names[0]: np.array([input_ids], dtype=np.int32),
-            input_names[1]: np.array([attention_mask], dtype=np.int32),
-            input_names[2]: np.array([token_type_ids], dtype=np.int32),
-        }
-        if len(input_names)>3:
-            inputs[input_names[3]] = np.arange(len(input_ids), dtype=np.int32)[None, :]
-
-        t_start = time.perf_counter()
-        # infer by IE
-        res = ie_encoder_exec.infer(inputs=inputs)
-        t_end = time.perf_counter()
-        t_count += 1
-        log.info("Sequence of length {} is processed with {:0.2f} requests/sec ({:0.2} sec per request)".format(
-            max_length,
-            1 / (t_end - t_start),
-            t_end - t_start
-        ))
-
-
-        score = get_score(output_names[0])
-        labels_idx = score.argmax(-1)
-        filtered_labels_idx = [
-            (idx, label_idx)
-            for idx, label_idx in enumerate(labels_idx)
-            if label_idx != 0 and 0 < idx < max_length - pad_len
-        ]
-
-        if not filtered_labels_idx:
+        if not filtered_labels_id:
             continue
 
-        log.info('Sentence: \n\t{}'.format(sentence))
+        log.info('\t\tSentence: \n\t{}'.format(sentence))
         visualized = set()
-        for idx, label_idx in filtered_labels_idx:
+        for idx, label_idx in filtered_labels_id:
             word_s, word_e = c_token_s_e[idx - 1]
             if (word_s, word_e) in visualized:
                 continue
             visualized.add((word_s, word_e))
             word = sentence[word_s:word_e]
-            log.info('\n\tWord: {}\n\tConfidence: {}\n\tTag: {}'.format(word, score[idx][label_idx], label_to_tag[label_idx]))
+            confidence = score[idx][label_idx]
+            tag = label_to_tag[label_idx]
+            log.info('\n\tWord: {}\n\tConfidence: {}\n\tTag: {}'.format(word, confidence, tag))
 
-    t1 = time.perf_counter()
-    log.info("{} requests of {} length were processed in {:0.2f}sec ({:0.2}sec per request)".format(
-        t_count,
-        max_length,
-        t1 - t0,
-        (t1 - t0) / t_count
-    ))
+    total_latency = (perf_counter() - start_time) * 1e3 + preprocessing_total_time
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
 
 
 if __name__ == '__main__':
