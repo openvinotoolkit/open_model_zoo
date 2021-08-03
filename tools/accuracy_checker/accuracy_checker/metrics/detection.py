@@ -94,6 +94,7 @@ class BaseDetectionMetricMixin(Metric):
         self.labels = list(labels.keys())
         valid_labels = list(filter(lambda x: x != self.dataset.metadata.get('background_label'), self.labels))
         self.meta['names'] = [labels[name] for name in valid_labels]
+        self.meta['orig_label_names'] = [labels[name] for name in valid_labels]
 
     def per_class_detection_statistics(self, annotations, predictions, labels, profile_boxes=False):
         labels_stat = {}
@@ -196,7 +197,9 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
     def evaluate(self, annotations, predictions):
         super().evaluate(annotations, predictions)
         average_precisions = self._calculate_map(annotations, predictions)
-        average_precisions, self.meta['names'] = finalize_metric_result(average_precisions, self.meta['names'])
+        average_precisions, self.meta['names'] = finalize_metric_result(
+            average_precisions, self.meta['orig_label_names']
+        )
         if not average_precisions:
             warnings.warn("No detections to compute mAP")
             average_precisions.append(0)
@@ -217,6 +220,7 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
             else:
                 average_precisions.append(np.nan)
             if profile_boxes:
+                labels_stat[label]['ap'] = average_precisions[-1]
                 labels_stat[label]['result'] = average_precisions[-1]
         if profile_boxes:
             self.profiler.update(annotations[0].identifier, labels_stat, self.name, np.nanmean(average_precisions))
@@ -300,7 +304,7 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEval
     def evaluate(self, annotations, predictions):
         super().evaluate(annotations, predictions)
         recalls = self._calculate_recall(annotations, predictions)
-        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['names'])
+        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['orig_label_names'])
         if not recalls:
             warnings.warn("No detections to compute mAP")
             recalls.append(0)
@@ -527,6 +531,7 @@ def bbox_match(annotation: List[DetectionAnnotation], prediction: List[Detection
     fp = np.zeros_like(prediction_images)
     max_overlapped_dt = defaultdict(list)
     overlaps = np.array([])
+    full_iou = []
 
     for image in range(prediction_images.shape[0]):
         gt_img = annotation[prediction_images[image]]
@@ -542,6 +547,7 @@ def bbox_match(annotation: List[DetectionAnnotation], prediction: List[Detection
         annotation_boxes = gt_img.x_mins[idx], gt_img.y_mins[idx], gt_img.x_maxs[idx], gt_img.y_maxs[idx]
 
         overlaps = overlap_evaluator(prediction_box, annotation_boxes)
+        full_iou.append(overlaps)
         if ignore_difficult and allow_multiple_matches_per_ignored:
             ioa = IOA(include_boundaries)
             ignored = np.where(annotation_difficult == 1)[0]
@@ -584,7 +590,7 @@ def bbox_match(annotation: List[DetectionAnnotation], prediction: List[Detection
 
     return (
         tp, fp, prediction_boxes[:, 0], number_ground_truth,
-        max_overlapped_dt, prediction_boxes[:, 1:], overlaps
+        max_overlapped_dt, prediction_boxes[:, 1:], full_iou
     )
 
 

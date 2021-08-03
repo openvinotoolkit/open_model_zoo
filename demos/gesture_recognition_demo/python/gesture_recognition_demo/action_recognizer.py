@@ -26,7 +26,7 @@ class ActionRecognizer(IEModel):
     def __init__(self, model_path, device, ie_core, num_requests, img_scale, num_classes):
         """Constructor"""
 
-        super().__init__(model_path, device, ie_core, num_requests)
+        super().__init__(model_path, device, ie_core, num_requests, 'Action Recognition')
 
         _, _, t, h, w = self.input_size
         self.input_height = h

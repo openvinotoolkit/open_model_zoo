@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -23,21 +23,21 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
-from models import SegmentationModel
+from models import OutputTransform, SegmentationModel, SalientObjectDetectionModel
 import monitors
-from pipelines import AsyncPipeline
+from pipelines import get_user_config, parse_devices, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
+from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
-class Visualizer(object):
+class SegmentationVisualizer:
     pascal_voc_palette = [
         (0,   0,   0),
         (128, 0,   0),
@@ -65,8 +65,11 @@ class Visualizer(object):
     def __init__(self, colors_path=None):
         if colors_path:
             self.color_palette = self.get_palette_from_file(colors_path)
+            log.debug('The palette is loaded from {}'.format(colors_path))
         else:
             self.color_palette = self.pascal_voc_palette
+            log.debug('The PASCAL VOC palette is used')
+        log.debug('Get {} colors'.format(len(self.color_palette)))
         self.color_map = self.create_color_map()
 
     def get_palette_from_file(self, colors_path):
@@ -89,10 +92,16 @@ class Visualizer(object):
         input_3d = cv2.merge([input, input, input])
         return cv2.LUT(input_3d, self.color_map)
 
-    def overlay_masks(self, frame, objects):
+    def overlay_masks(self, frame, objects, output_transform):
         # Visualizing result data over source image
-        return np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2)
+        return output_transform.resize(np.floor_divide(frame, 2) + np.floor_divide(self.apply_color_map(objects), 2))
 
+
+class SaliencyMapVisualizer:
+    def overlay_masks(self, frame, objects, output_transform):
+        saliency_map = (objects * 255).astype(np.uint8)
+        saliency_map = cv2.merge([saliency_map, saliency_map, saliency_map])
+        return output_transform.resize(np.floor_divide(frame, 2) + np.floor_divide(saliency_map, 2))
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -100,17 +109,20 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.',
                       required=True, type=Path)
+    args.add_argument('-at', '--architecture_type', help='Required. Specify the model\'s architecture type.',
+                      type=str, required=True, choices=('segmentation', 'salient_object_detection'))
     args.add_argument('-i', '--input', required=True,
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images, video file or camera id.')
     args.add_argument('-d', '--device', default='CPU', type=str,
-                      help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
+                      help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
 
     common_model_args = parser.add_argument_group('Common model options')
     common_model_args.add_argument('-c', '--colors', type=Path,
                                    help='Optional. Path to a text file containing colors for classes.')
+    common_model_args.add_argument('--labels', help='Optional. Labels mapping file.', default=None, type=str)
 
     infer_args = parser.add_argument_group('Inference options')
     infer_args.add_argument('-nireq', '--num_infer_requests', help='Optional. Number of infer requests.',
@@ -127,67 +139,70 @@ def build_argparser():
     io_args.add_argument('--loop', default=False, action='store_true',
                          help='Optional. Enable reading the input in a loop.')
     io_args.add_argument('-o', '--output', required=False,
-                         help='Optional. Name of output to save.')
+                         help='Optional. Name of the output file(s) to save.')
     io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')
     io_args.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
+    io_args.add_argument('--output_resolution', default=None, type=resolution,
+                         help='Optional. Specify the maximum output window resolution '
+                              'in (width x height) format. Example: 1280x720. '
+                              'Input frame size used by default.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
+
+    debug_args = parser.add_argument_group('Debug options')
+    debug_args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results as mask histogram.',
+                            default=False, action='store_true')
     return parser
 
 
-def get_plugin_configs(device, num_streams, num_threads):
-    config_user_specified = {}
+def get_model(ie, args):
+    if args.architecture_type == 'segmentation':
+        return SegmentationModel(ie, args.model, labels=args.labels), SegmentationVisualizer(args.colors)
+    if args.architecture_type == 'salient_object_detection':
+        return SalientObjectDetectionModel(ie, args.model, labels=args.labels), SaliencyMapVisualizer()
 
-    devices_nstreams = {}
-    if num_streams:
-        devices_nstreams = {device: num_streams for device in ['CPU', 'GPU'] if device in device} \
-            if num_streams.isdigit() \
-            else dict(device.split(':', 1) for device in num_streams.split(','))
 
-    if 'CPU' in device:
-        if num_threads is not None:
-            config_user_specified['CPU_THREADS_NUM'] = str(num_threads)
-        if 'CPU' in devices_nstreams:
-            config_user_specified['CPU_THROUGHPUT_STREAMS'] = devices_nstreams['CPU'] \
-                if int(devices_nstreams['CPU']) > 0 \
-                else 'CPU_THROUGHPUT_AUTO'
-
-    if 'GPU' in device:
-        if 'GPU' in devices_nstreams:
-            config_user_specified['GPU_THROUGHPUT_STREAMS'] = devices_nstreams['GPU'] \
-                if int(devices_nstreams['GPU']) > 0 \
-                else 'GPU_THROUGHPUT_AUTO'
-
-    return config_user_specified
+def print_raw_results(mask, frame_id, labels=None):
+    log.debug(' ---------------- Frame # {} ---------------- '.format(frame_id))
+    log.debug('     Class ID     | Pixels | Percentage ')
+    max_classes = int(np.max(mask)) + 1 # We use +1 for only background case
+    histogram = cv2.calcHist([np.expand_dims(mask, axis=-1)], [0], None, [max_classes], [0, max_classes])
+    all = np.product(mask.shape)
+    for id, val in enumerate(histogram[:, 0]):
+        if val > 0:
+            label = labels[id] if labels and len(labels) >= id else '#{}'.format(id)
+            log.debug(' {:<16} | {:6d} | {:5.2f}% '.format(label, int(val), val / all * 100))
 
 
 def main():
-    metrics = PerformanceMetrics()
     args = build_argparser().parse_args()
 
-    log.info('Initializing Inference Engine...')
+    cap = open_images_capture(args.input, args.loop)
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
-    plugin_config = get_plugin_configs(args.device, args.num_streams, args.num_threads)
+    plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
 
-    log.info('Loading network...')
-
-    model = SegmentationModel(ie, args.model)
+    model, visualizer = get_model(ie, args)
+    log.info('Reading model {}'.format(args.model))
+    log_blobs_info(model)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    cap = open_images_capture(args.input, args.loop)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
 
     next_frame_id = 0
     next_frame_id_to_show = 0
 
-    log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
-
-    visualizer = Visualizer(args.colors)
+    metrics = PerformanceMetrics()
+    render_metrics = PerformanceMetrics()
     presenter = None
+    output_transform = None
     video_writer = cv2.VideoWriter()
 
     while True:
@@ -200,10 +215,15 @@ def main():
                     raise ValueError("Can't read an image from the input")
                 break
             if next_frame_id == 0:
+                output_transform = OutputTransform(frame.shape[:2], args.output_resolution)
+                if args.output_resolution:
+                    output_resolution = output_transform.new_resolution
+                else:
+                    output_resolution = (frame.shape[1], frame.shape[0])
                 presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                               (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
+                                               (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
                 if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                                         cap.fps(), (frame.shape[1], frame.shape[0])):
+                                                         cap.fps(), output_resolution):
                     raise RuntimeError("Can't open video writer")
             # Submit for inference
             pipeline.submit_data(frame, next_frame_id, {'frame': frame, 'start_time': start_time})
@@ -218,15 +238,19 @@ def main():
         results = pipeline.get_result(next_frame_id_to_show)
         if results:
             objects, frame_meta = results
+            if args.raw_output_message:
+                print_raw_results(objects, next_frame_id_to_show, model.labels)
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
-
-            frame = visualizer.overlay_masks(frame, objects)
+            rendering_start_time = perf_counter()
+            frame = visualizer.overlay_masks(frame, objects, output_transform)
+            render_metrics.update(rendering_start_time)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
 
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
+            next_frame_id_to_show += 1
 
             if not args.no_show:
                 cv2.imshow('Segmentation Results', frame)
@@ -234,33 +258,40 @@ def main():
                 if key == 27 or key == 'q' or key == 'Q':
                     break
                 presenter.handleKey(key)
-            next_frame_id_to_show += 1
 
     pipeline.await_all()
     # Process completed requests
-    while pipeline.has_completed_request():
+    for next_frame_id_to_show in range(next_frame_id_to_show, next_frame_id):
         results = pipeline.get_result(next_frame_id_to_show)
-        if results:
-            objects, frame_meta = results
-            frame = frame_meta['frame']
-            start_time = frame_meta['start_time']
+        while results is None:
+            results = pipeline.get_result(next_frame_id_to_show)
+        objects, frame_meta = results
+        if args.raw_output_message:
+            print_raw_results(objects, next_frame_id_to_show, model.labels)
+        frame = frame_meta['frame']
+        start_time = frame_meta['start_time']
 
-            frame = visualizer.overlay_masks(frame, objects)
-            presenter.drawGraphs(frame)
-            metrics.update(start_time, frame)
+        rendering_start_time = perf_counter()
+        frame = visualizer.overlay_masks(frame, objects, output_transform)
+        render_metrics.update(rendering_start_time)
+        presenter.drawGraphs(frame)
+        metrics.update(start_time, frame)
 
-            if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
-                video_writer.write(frame)
+        if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
+            video_writer.write(frame)
 
-            if not args.no_show:
-                cv2.imshow('Segmentation Results', frame)
-                key = cv2.waitKey(1)
-            next_frame_id_to_show += 1
-        else:
-            break
+        if not args.no_show:
+            cv2.imshow('Segmentation Results', frame)
+            key = cv2.waitKey(1)
 
-    metrics.print_total()
-    print(presenter.reportMeans())
+    metrics.log_total()
+    log_latency_per_stage(cap.reader_metrics.get_latency(),
+                          pipeline.preprocess_metrics.get_latency(),
+                          pipeline.inference_metrics.get_latency(),
+                          pipeline.postprocess_metrics.get_latency(),
+                          render_metrics.get_latency())
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

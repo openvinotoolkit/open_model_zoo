@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  This is a TensorFlow* version of "densenet-169" model, one of the DenseNet* group
+  This is a TensorFlow* version of "densenet-169" model, one of the DenseNet group
   of models designed to perform image classification. For details, see TensorFlow*
   API docs <https://www.tensorflow.org/api_docs/python/tf/keras/applications/DenseNet169>,
   repository <https://github.com/tensorflow/tensorflow> and paper <https://arxiv.org/abs/1608.06993>.

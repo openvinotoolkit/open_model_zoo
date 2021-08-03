@@ -1,28 +1,51 @@
 # use update-requirements.py to update this file
 
-flake8==3.8.4
+bandit==1.7.0
+    # via
+    # -r ci/requirements-check-basics.in
+colorama==0.4.4
+    # via bandit
+flake8==3.9.2
+    # via
+    #   -r ci/requirements-check-basics.in
+    #   flake8-comprehensions
+flake8-comprehensions==3.5.0
     # via -r ci/requirements-check-basics.in
-importlib-metadata==3.4.0
-    # via flake8
+gitdb==4.0.7
+    # via gitpython
+gitpython==3.1.18
+    # via bandit
+importlib-metadata==4.6.0
+    # via
+    #   flake8
+    #   flake8-comprehensions
 mccabe==0.6.1
     # via flake8
 mistune==2.0.0a6
     # via -r ci/requirements-documentation.in
 pathspec==0.8.1
     # via yamllint
-pycodestyle==2.6.0
+pbr==5.5.1
+    # via stevedore
+pycodestyle==2.7.0
     # via flake8
-pyflakes==2.2.0
+pyflakes==2.3.1
     # via flake8
 pyyaml==5.4.1
     # via
     #   -r ci/requirements-documentation.in
     #   yamllint
-typing-extensions==3.7.4.3
+six==1.15.0
+    # via bandit
+smmap==4.0.0
+    # via gitdb
+stevedore==3.3.0
+    # via bandit
+typing-extensions==3.10.0.0
     # via importlib-metadata
-yamllint==1.26.0
+yamllint==1.26.1
     # via -r ci/requirements-check-basics.in
-zipp==3.4.0
+zipp==3.4.1
     # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:

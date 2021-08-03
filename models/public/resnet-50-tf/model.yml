@@ -13,9 +13,10 @@
 # limitations under the License.
 
 description: >-
-  resnet-50-tf is a TensorFlow\* implementation of ResNet-50 - an image classification model
-  pretrained on the ImageNet dataset. For details see paper <https://arxiv.org/abs/1512.03385>,
-  repository <https://github.com/tensorflow/models/tree/v2.2.0/official/r1/resnet>.
+  "resnet-50-tf" is a TensorFlow* implementation of ResNet-50 - an image classification
+  model pre-trained on the ImageNet dataset. Originally redistributed in Saved model
+  format, converted to frozen graph using "tf.graph_util" module. For details see
+  paper <https://arxiv.org/abs/1512.03385>, repository <https://github.com/tensorflow/models/tree/v2.2.0/official/r1/resnet>.
 task_type: classification
 files:
   - name: resnet_v1-50.pb

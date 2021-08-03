@@ -75,6 +75,8 @@ class Flip(Preprocessor):
 
 class PointAligner(Preprocessor):
     __provider__ = 'point_alignment'
+    shape_modificator = True
+    _dynamic_shapes = False
 
     ref_landmarks = np.array([
         30.2946 / 96, 51.6963 / 112,
@@ -172,9 +174,18 @@ class PointAligner(Preprocessor):
 
         return np.hstack((points_std_ratio * r, c2.T - points_std_ratio * r @ c1.T))
 
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes
 
-def center_padding(dst_width, dst_height, width, height):
-    pad = [int(math.floor((dst_height - height) / 2.0)), int(math.floor((dst_width - width) / 2.0))]
+
+def center_padding(dst_width, dst_height, width, height, left_top_extend=False):
+    delta = [int(math.floor((dst_height - height) / 2.0)), int(math.floor((dst_width - width) / 2.0))]
+    ost = [(dst_height - height) % 2, (dst_width - width) % 2]
+    if left_top_extend:
+        pad = [delta[0] + ost[0], delta[1] + ost[1]]
+    else:
+        pad = delta
     pad.extend([dst_height - height - pad[0], dst_width - width - pad[1]])
 
     return pad
@@ -197,6 +208,7 @@ padding_func = {
 
 class Padding(Preprocessor):
     __provider__ = 'padding'
+    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -231,6 +243,10 @@ class Padding(Preprocessor):
             ),
             'enable_resize': BoolField(
                 optional=True, default=False, description='allow resize images if source image large then padding size'
+            ),
+            'left_top_extend': BoolField(
+                optional=True, default=False,
+                description='allow to use left-top extend instead of right-bottom for center padding'
             )
         })
 
@@ -244,20 +260,26 @@ class Padding(Preprocessor):
         if isinstance(pad_val, str):
             self.pad_value = string_to_tuple(pad_val, float)
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
-        self.pad_func = padding_func[self.get_value_from_config('pad_type')]
+        self.pad_type = self.get_value_from_config('pad_type')
+        self.pad_func = padding_func[self.pad_type]
         self.use_numpy = self.get_value_from_config('use_numpy')
         self.numpy_pad_mode = self.get_value_from_config('numpy_pad_mode')
         self.enable_resize = self.get_value_from_config('enable_resize')
+        self.left_top_extend = self.get_value_from_config('left_top_extend')
 
     def process(self, image, annotation_meta=None):
         height, width, _ = image.data.shape
         pref_height = self.dst_height or image.metadata.get('preferable_height', height)
         pref_width = self.dst_width or image.metadata.get('preferable_width', width)
         height = min(height, pref_height)
+        width_pref_init = pref_width
         pref_height = math.ceil(pref_height / float(self.stride)) * self.stride
         pref_width = max(pref_width, width)
         pref_width = math.ceil(pref_width / float(self.stride)) * self.stride
-        pad = self.pad_func(pref_width, pref_height, width, height)
+        if self.pad_type == 'center':
+            pad = self.pad_func(pref_width, pref_height, width, height, self.left_top_extend)
+        else:
+            pad = self.pad_func(pref_width, pref_height, width, height)
         image.metadata['padding'] = pad
         padding_realization_func = self._opencv_padding if not self.use_numpy else self._numpy_padding
         image.data = padding_realization_func(image.data, pad)
@@ -271,9 +293,10 @@ class Padding(Preprocessor):
             'height': height,
             'resized': False
         }
-        if image.data.shape[:2] != (pref_height, pref_width):
-            image.data = cv2.resize(image.data, (pref_height, pref_width))
+        if self.enable_resize and image.data.shape[:2] != (pref_height, width_pref_init):
+            image.data = cv2.resize(image.data, (width_pref_init, pref_height))
             meta['resized'] = True
+            meta['pref_width'] = width_pref_init
 
         image.metadata.setdefault('geometric_operations', []).append(
             GeometricOperationMetadata('padding', meta))
@@ -301,9 +324,17 @@ class Padding(Preprocessor):
             mode=self.numpy_pad_mode, constant_values=pad_values
         )
 
+    @property
+    def dynamic_result_shape(self):
+        if self.stride:
+            return True
+        return False
+
 
 class Tiling(Preprocessor):
     __provider__ = 'tiling'
+    shape_modificator = True
+    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -352,9 +383,14 @@ class Tiling(Preprocessor):
 
         return image
 
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes
+
 
 class ImagePyramid(Preprocessor):
     __provider__ = 'pyramid'
+    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -398,6 +434,7 @@ class ImagePyramid(Preprocessor):
 
 class FaceDetectionImagePyramid(Preprocessor):
     __provider__ = 'face_detection_image_pyramid'
+    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -492,6 +529,8 @@ class FaceDetectionImagePyramid(Preprocessor):
 
 class WarpAffine(Preprocessor):
     __provider__ = 'warp_affine'
+    shape_modificator = True
+    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -551,8 +590,15 @@ class WarpAffine(Preprocessor):
         image.data = [process_data(images) for images in image.data]
         return image
 
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes
+
+
 class SimilarityTransfom(Preprocessor):
     __provider__ = 'similarity_transform_box'
+    shape_modificator = True
+    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -634,3 +680,7 @@ class SimilarityTransfom(Preprocessor):
         T[:dim, :dim] *= scale
 
         return T
+
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes

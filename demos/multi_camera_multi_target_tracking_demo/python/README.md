@@ -4,19 +4,15 @@ This demo demonstrates how to run Multi Camera Multi Target (e.g. person or vehi
 
 ## How It Works
 
-The demo expects the next models in the Intermediate Representation (IR) format:
+The demo expects the following models in the Intermediate Representation (IR) format:
 
-   * Object detection model (or object instance segmentation model)
-   * Object re-identification model
-
-It can be your own models or pre-trained model from OpenVINO Open Model Zoo.
-In the `models.lst` are the list of appropriate models for this demo
-that can be obtained via `Model downloader`.
-Please see more information about `Model downloader` [here](../../../tools/downloader/README.md).
+* object detection model or object instance segmentation model
+* object re-identification model
 
 As input, the demo application takes:
-* paths to several video files specified with a command line argument `--videos`
-* indexes of web cameras specified with a command line argument `--cam_ids`
+
+* paths to one or several video files
+* numerical indexes of web cameras
 
 The demo workflow is the following:
 
@@ -26,17 +22,53 @@ and then for each detected object it extracts embeddings using re-identification
 2. All embeddings are passed to tracker which assigns an ID to each object.
 3. The demo visualizes the resulting bounding boxes and unique object IDs assigned during tracking.
 
-## Running
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
-### Installation of dependencies
+## Preparing to Run
 
-To install required dependencies run
+### Installation of Dependencies
+
+To install required dependencies, run
 
 ```bash
 pip3 install -r requirements.txt
 ```
 
-### Command line arguments
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+The list of models supported by the demo is in `<omz_dir>/demos/multi_camera_multi_target_tracking_demo/python/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
+### Supported Models
+
+* instance-segmentation-security-0002
+* instance-segmentation-security-0091
+* instance-segmentation-security-0228
+* instance-segmentation-security-1039
+* instance-segmentation-security-1040
+* person-detection-retail-0013
+* person-reidentification-retail-0277
+* person-reidentification-retail-0286
+* person-reidentification-retail-0287
+* person-reidentification-retail-0288
+* vehicle-reid-0001
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
+## Running
+
+### Command Line Arguments
 
 Run the application with the `-h` option to see the following usage message:
 
@@ -61,8 +93,8 @@ Multi camera multi object tracking live demo script
 optional arguments:
   -h, --help            show this help message and exit
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
-                        Input sources (indexes of cameras or paths to video
-                        files)
+                        Required. Input sources (indexes of cameras or paths
+                        to video files)
   --loop                Optional. Enable reading the input in a loop
   --config CONFIG       Configuration file
   --detections DETECTIONS
@@ -75,7 +107,7 @@ optional arguments:
                         Path to the object instance segmentation model
   --t_segmentation T_SEGMENTATION
                         Threshold for object instance segmentation model
-  --m_reid M_REID       Path to the object re-identification model
+  --m_reid M_REID       Required. Path to the object re-identification model
   --output_video OUTPUT_VIDEO
                         Optional. Path to output video
   --history_file HISTORY_FILE
@@ -92,28 +124,29 @@ optional arguments:
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
 ```
+
 Minimum command examples to run the demo for person tracking (for vehicle tracking the commands are the same with appropriate vehicle detection/re-identification models):
 
-```
+```sh
 # videos
 python multi_camera_multi_target_tracking_demo.py \
     -i <path_to_video>/video_1.avi <path_to_video>/video_2.avi \
     --m <path_to_model>/person-detection-retail-0013.xml \
-    --m_reid <path_to_model>/person-reidentification-retail-0103.xml \
+    --m_reid <path_to_model>/person-reidentification-retail-0277.xml \
     --config configs/person.py
 
 # videos with instance segmentation model
-python multi_camera_multi_person_tracking.py \
+python multi_camera_multi_target_tracking_demo.py \
     -i <path_to_video>/video_1.avi <path_to_video>/video_2.avi \
     --m_segmentation <path_to_model>/instance-segmentation-security-0228.xml \
-    --m_reid <path_to_model>/person-reidentification-retail-0107.xml \
+    --m_reid <path_to_model>/person-reidentification-retail-0277.xml \
     --config configs/person.py
 
-# web-cameras
-python multi_camera_multi_person_tracking.py \
+# webcam
+python multi_camera_multi_target_tracking_demo.py \
     -i 0 1 \
     --m_detector <path_to_model>/person-detection-retail-0013.xml \
-    --m_reid <path_to_model>/person-reidentification-retail-0103.xml \
+    --m_reid <path_to_model>/person-reidentification-retail-0277.xml \
     --config configs/person.py
 ```
 
@@ -150,26 +183,34 @@ The structure of this file should be as follows:
     ...
 ]
 ```
-Such file with detections can be saved from the demo. Specify the argument
-`--save_detections` with path to an output file.
+
+Such file with detections can be saved from the demo. Specify the argument `--save_detections` with path to an output file.
 
 ## Demo Output
 
 The demo displays bounding boxes of tracked objects and unique IDs of those objects.
+The demo reports
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+You can use both of these metrics to measure application-level performance.
+
 To save output video with the result please use the option  `--output_video`,
 to change configuration parameters please open the `configs/person.py` (or `configs/vehicle.py` for vehicle tracking demo) file and edit it.
 
 Visualization can be controlled using the following keys:
- * `space` - pause or next frame
- * `enter` - resume video
- * `esc` - exit
+
+* `space` - pause or next frame
+* `enter` - resume video
+* `esc` - exit
 
 Also demo can dump resulting tracks to a json file. To specify the file use the
 `--history_file` argument.
 
-## Quality measuring
+## Quality Measuring
 
 The demo provides tools for measure quality of the multi camera multi target tracker:
+
 * Evaluation MOT metrics
 * Visualize the demo results from a history file
 
@@ -177,6 +218,7 @@ For MOT metrics evaluation we use [py-motmetrics](https://github.com/cheind/py-m
 It is necessary to have ground truth annotation file for the evaluation. Supported format
 of the ground truth annotation can be obtained via the annotation tool [CVAT](https://github.com/openvinotoolkit/cvat).
 The annotation must includes the following labels and attributes:
+
 ```json
 [
   {
@@ -198,6 +240,7 @@ The annotation must includes the following labels and attributes:
 ```
 
 To run evaluation MOT metrics use the following command:
+
 ```bash
 python run_evaluate.py \
     --history_file <path_to_file>/file.json \
@@ -205,18 +248,20 @@ python run_evaluate.py \
       <path_to_file>/source_0.xml \
       <path_to_file>/source_1.xml \
 ```
+
 Number of ground truth files depends on the number of used video sources.
 
 For the visualization of the demo results please use the next command:
-```
+
+```sh
 python run_history_visualize.py \
     -i <path_to_video>/video_1.avi <path_to_video>/video_2.avi \
     --history_file <path_to_file>/file.json \
 ```
-This a minimum arguments set for the script. To show all available arguments
-run the command:
+
+This a minimum arguments set for the script. To show all available arguments run the command with `-h` option:
+
 ```
-python3 run_history_visualize.py -h
 usage: run_history_visualize.py [-h] [-i I [I ...]] --history_file
                                 HISTORY_FILE [--output_video OUTPUT_VIDEO]
                                 [--gt_files GT_FILES [GT_FILES ...]]
@@ -238,18 +283,28 @@ optional arguments:
   --match_gt_ids        Match GT ids to ids from history
   --merge_outputs       Merge GT and history tracks into one frame
 ```
-Ground truth files have the same format was described in the MOT metrics evaluation part.
 
-## Process analysis
+Ground truth files have the same format that was described in the MOT metrics evaluation part.
 
-During the demo execution are available two options for analysis the process:
+## Process Analysis
+
+Two options are available during the demo execution:
+
 1. Visualize distances between embeddings that are criterion for matching tracks.
 2. Save and visualize embeddings (via `tensorboard`).
 
 By default these options are disabled.
 To enable the first one please set in configuration file for `analyzer` parameter
-`enable` to `True`, for the second one for `embeddings` specify parameter `path`
+`enable` to `True`.
+
+For the second one, install TensorBoard (for example, with `pip install tensorboard`).
+Then, for `embeddings` specify parameter `save_path`
 that is a directory where data related to embeddings will be saved
-(if it is an empty string the option is disabled). In `embeddings` is a parameter
-`use_images`. If it is `True` for every embedding will be drawn an image with an object
-instead a point.
+(if it is an empty string the option is disabled). There is paramater `use_images` in `embeddings`.
+If it is `True` an image with object will be drawn for every embedding instead of point.
+
+## See Also
+
+* [Open Model Zoo Demos](../../README.md)
+* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](../../../tools/downloader/README.md)

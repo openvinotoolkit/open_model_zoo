@@ -234,6 +234,13 @@ class YoloV2Adapter(Adapter):
         predictions = self._extract_predictions(raw, frame_meta)
         self.select_output_blob(predictions)
         predictions = predictions[self.output_blob]
+        out_precision = frame_meta[0].get('output_precision', {})
+        out_layout = frame_meta[0].get('outpupt_layout', {})
+        if self.output_blob in out_precision and predictions.dtype != out_precision[self.output_blob]:
+            predictions = predictions.view(out_precision[self.output_blob])
+        if self.output_blob in out_layout and out_layout[self.output_blob] == 'NHWC':
+            shape = predictions.shape
+            predictions = np.transpose(predictions, (0, 3, 1, 2)).reshape(shape)
 
         result = []
         box_size = self.classes + self.coords + 1
@@ -387,10 +394,9 @@ class YoloV3Adapter(Adapter):
 
         raw_outputs = self._extract_predictions(raw, frame_meta)
         batch = len(identifiers)
-        predictions = [[] for _ in range(batch)]
-        for blob in self.outputs:
-            for b in range(batch):
-                predictions[b].append(raw_outputs[blob][b])
+        out_precision = frame_meta[0].get('output_precision', {})
+        out_layout = frame_meta[0].get('output_layout', {})
+        predictions = self.prepare_predictions(batch, raw_outputs, out_precision, out_layout)
 
         box_size = self.coords + 1 + self.classes
         for identifier, prediction, meta in zip(identifiers, predictions, frame_meta):
@@ -441,6 +447,22 @@ class YoloV3Adapter(Adapter):
             ))
 
         return result
+
+    def prepare_predictions(self, batch, raw_outputs, out_precision, out_layout):
+        predictions = [[] for _ in range(batch)]
+        for blob in self.outputs:
+            out_blob = raw_outputs[blob]
+            if blob in out_precision and out_blob.dtype != out_precision[blob]:
+                out_blob = out_blob.view(out_precision[blob])
+            if blob in out_layout and out_layout[blob] == 'NHWC':
+                shape = out_blob.shape
+                out_blob = np.transpose(out_blob, (0, 3, 1, 2)).reshape(shape)
+            if batch == 1 and out_blob.shape[0] != batch:
+                out_blob = np.expand_dims(out_blob, 0)
+
+            for b in range(batch):
+                predictions[b].append(out_blob[b])
+        return predictions
 
 
 class YoloV3ONNX(Adapter):

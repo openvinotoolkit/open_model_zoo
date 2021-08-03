@@ -19,7 +19,7 @@ from collections import namedtuple
 from ..representation import ContainerRepresentation
 from ..utils import is_single_metric_source, get_supported_representations
 from ..presenters import BasePresenter
-from ..config import ConfigValidator, NumberField, StringField, ConfigError
+from ..config import ConfigValidator, NumberField, StringField, ConfigError, BaseField
 from ..dependency import ClassProvider, UnregisteredProviderException
 from ..utils import zipped_transform, get_parameter_value_from_config, contains_any
 
@@ -69,14 +69,22 @@ class Metric(ClassProvider):
             'type': StringField(
                 description="Metric type.", default=cls.__provider__ if hasattr(cls, '__provider__') else None),
             'name': StringField(optional=True, description="Metric name."),
-            'reference': NumberField(
+            'reference': BaseField(
                 optional=True,
                 description="Reference field for metric, if you want calculated metric tested against specific value "
                             "(i.e. reported in canonical paper)."
             ),
-            'threshold': NumberField(
+            'rel_threshold': NumberField(
                 optional=True, min_value=0,
-                description="Acceptable threshold for metric deviation from reference value."
+                description="Acceptable relative threshold for metric deviation from reference value."
+            ),
+            'threshold': NumberField(
+                optional=True,
+                description="Deprecated. Acceptable absolute threshold for metric deviation from reference value."
+            ),
+            'abs_threshold': NumberField(
+                optional=True, min_value=0,
+                description="Acceptable absolute threshold for metric deviation from reference value."
             ),
             'presenter': StringField(optional=True, choices=BasePresenter.providers, description="Presenter."),
             'annotation_source': StringField(

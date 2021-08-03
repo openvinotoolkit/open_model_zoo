@@ -22,6 +22,7 @@ from ..representation import (MachineTranslationPrediction,
                               QuestionAnsweringPrediction,
                               QuestionAnsweringEmbeddingPrediction,
                               ClassificationPrediction,
+                              ArgMaxClassificationPrediction,
                               SequenceClassificationPrediction,
                               LanguageModelingPrediction)
 from ..config import PathField, NumberField, StringField, BoolField
@@ -271,6 +272,10 @@ class BertTextClassification(Adapter):
             'classification_out': StringField(
                 optional=True,
                 description='Classification output layer name. If not provided, first output will be used.'
+            ),
+            'single_score': BoolField(
+                optional=True, default=False, description='flag that highlight that model return single value '
+                'representing class id or probability belonging to class 1 in binary classification case'
             )
         })
 
@@ -279,6 +284,7 @@ class BertTextClassification(Adapter):
     def configure(self):
         self.num_classes = self.get_value_from_config('num_classes')
         self.classification_out = self.get_value_from_config('classification_out')
+        self.single_score = self.get_value_from_config('single_score')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         outputs = self._extract_predictions(raw, frame_meta)
@@ -286,17 +292,22 @@ class BertTextClassification(Adapter):
             self.select_output_blob(outputs)
             self.classification_out = self.output_blob
         outputs = outputs[self.classification_out]
-        if outputs.shape[1] != self.num_classes:
+        if not self.single_score and outputs.shape[1] != self.num_classes:
             _, hidden_size = outputs.shape
             output_weights = np.random.normal(scale=0.02, size=(self.num_classes, hidden_size))
             output_bias = np.zeros(self.num_classes)
             predictions = np.matmul(outputs, output_weights.T)
             predictions += output_bias
+        elif self.single_score:
+            predictions = (outputs > 0.5).astype(int) if self.num_classes == 2 else outputs.astype(int)
         else:
             predictions = outputs
         result = []
         for identifier, output in zip(identifiers, predictions):
-            result.append(ClassificationPrediction(identifier, output))
+            pred = (
+                ClassificationPrediction(identifier, output) if not self.single_score
+                else ArgMaxClassificationPrediction(identifier, output))
+            result.append(pred)
 
         return result
 

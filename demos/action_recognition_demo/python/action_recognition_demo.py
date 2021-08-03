@@ -16,10 +16,11 @@
 """
 
 import sys
+import logging as log
 from argparse import ArgumentParser, SUPPRESS
 from os import path
 
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from action_recognition_demo.models import IEModel, DummyDecoder
 from action_recognition_demo.result_renderer import ResultRenderer
@@ -28,6 +29,8 @@ from action_recognition_demo.steps import run_pipeline
 sys.path.append(path.join(path.dirname(path.dirname(path.dirname(path.abspath(__file__)))), 'common/python'))
 import monitors
 from images_capture import open_images_capture
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -40,7 +43,7 @@ def build_argparser():
     args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
     args.add_argument('-o', '--output', required=False,
-                      help='Optional. Name of output to save.')
+                      help='Optional. Name of the output file(s) to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
@@ -58,7 +61,7 @@ def build_argparser():
                       help='Optional. For CPU custom layers, if any. Absolute path to a shared library with the '
                            'kernels implementation.', type=str, default=None)
     args.add_argument('-d', '--device',
-                      help='Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is '
+                      help='Optional. Specify a target device to infer on. CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for the device specified. '
                            'Default value is CPU.',
                       default='CPU', type=str)
@@ -68,6 +71,8 @@ def build_argparser():
                       default=30, type=int)
     args.add_argument('-u', '--utilization-monitors', default='', type=str,
                       help='Optional. List of monitors to show initially.')
+    args.add_argument('-r', '--raw_output_message', help='Optional. Output inference results raw values showing.',
+                      default=False, action='store_true')
 
     return parser
 
@@ -81,6 +86,8 @@ def main():
     else:
         labels = None
 
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     if 'MYRIAD' in args.device:
@@ -96,17 +103,13 @@ def main():
     else:
         encoder_target_device = decoder_target_device
 
-    encoder_xml = args.m_encoder
-    encoder_bin = args.m_encoder.replace('.xml', '.bin')
-    models = [IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
-                num_requests=(3 if args.device == 'MYRIAD' else 1))]
+    models = [IEModel(args.m_encoder, ie, encoder_target_device, model_type='Action Recognition Encoder',
+                      num_requests=(3 if args.device == 'MYRIAD' else 1))]
 
     if args.architecture_type == 'en-de':
         if args.m_decoder is None:
             raise RuntimeError('No decoder for encoder-decoder model type (-m_de) provided')
-        decoder_xml = args.m_decoder
-        decoder_bin = args.m_decoder.replace('.xml', '.bin')
-        models.append(IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2))
+        models.append(IEModel(args.m_decoder, ie, decoder_target_device, model_type='Action Recognition Decoder', num_requests=2))
         seq_size = models[1].input_size[1]
     elif args.architecture_type == 'en-mean':
         models.append(DummyDecoder(num_requests=2))
@@ -118,8 +121,11 @@ def main():
     result_presenter = ResultRenderer(no_show=args.no_show, presenter=presenter, output=args.output, limit=args.output_limit, labels=labels,
                                       label_smoothing_window=args.label_smoothing)
     cap = open_images_capture(args.input, args.loop)
-    run_pipeline(cap, args.architecture_type, models, result_presenter.render_frame, seq_size=seq_size, fps=cap.fps())
-    print(presenter.reportMeans())
+    run_pipeline(cap, args.architecture_type, models, result_presenter.render_frame, args.raw_output_message,
+                 seq_size=seq_size, fps=cap.fps())
+
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

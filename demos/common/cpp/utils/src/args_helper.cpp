@@ -46,15 +46,6 @@ void readInputFilesArguments(std::vector<std::string>& files, const std::string&
     } else {
         files.push_back(arg);
     }
-
-    if (files.size() < 20) {
-        slog::info << "Files were added: " << files.size() << slog::endl;
-        for (std::string filePath : files) {
-            slog::info << "    " << filePath << slog::endl;
-        }
-    } else {
-        slog::info << "Files were added: " << files.size() << ". Too many to display each of them." << slog::endl;
-    }
 }
 
 void parseInputFilesArguments(std::vector<std::string>& files) {
@@ -101,9 +92,9 @@ std::vector<std::string> parseDevices(const std::string& device_string) {
     return {device_string};
 }
 
+// Format: <device1>:<value1>,<device2>:<value2> or just <value>
 std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>& devices,
                                                     const std::string& values_string) {
-    //  Format: <device1>:<value1>,<device2>:<value2> or just <value>
     auto values_string_upper = values_string;
     std::transform(values_string_upper.begin(),
                    values_string_upper.end(),
@@ -120,7 +111,7 @@ std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>&
             }
         } else if (device_value_vec.size() == 1) {
             uint32_t value = std::stoi(device_value_vec.at(0));
-            for (auto& device : devices) {
+            for (const auto& device : devices) {
                 result[device] = value;
             }
         } else if (device_value_vec.size() != 0) {

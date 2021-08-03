@@ -14,17 +14,17 @@
 #include <vector>
 #include <set>
 
-#include <cldnn/cldnn_config.hpp>
+#include <gpu/gpu_config.hpp>
 #include <inference_engine.hpp>
 #include <vpu/hddl_config.hpp>
 #include <monitors/presenter.h>
 #include <utils/args_helper.hpp>
+#include <utils/grid_mat.hpp>
+#include <utils/input_wrappers.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
+#include <utils/threads_common.hpp>
 
-#include "common.hpp"
-#include "grid_mat.hpp"
-#include "input_wrappers.hpp"
 #include "security_barrier_camera_demo.hpp"
 #include "net_wrappers.hpp"
 
@@ -40,7 +40,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-
     if (FLAGS_m.empty()) {
         throw std::logic_error("Parameter -m is not set");
     }
@@ -208,7 +207,7 @@ private:
 
 class ClassifiersAggregator {  // waits for all classifiers and recognisers accumulating results
 public:
-    std::string rawDetections;
+    std::vector<std::string> rawDetections;
     ConcurrentContainer<std::list<std::string>> rawAttributes;
     ConcurrentContainer<std::list<std::string>> rawDecodedPlates;
 
@@ -217,19 +216,22 @@ public:
     ~ClassifiersAggregator() {
         std::mutex& printMutex = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
-        std::cout << rawDetections;
-        for (const std::string& rawAttribute : rawAttributes.container) {  // destructor assures that none uses the container
-            std::cout << rawAttribute;
-        }
-        for (const std::string& rawDecodedPlate : rawDecodedPlates.container) {
-            std::cout << rawDecodedPlate;
+        if (rawDetections.size() != 0) {
+            slog::debug << "---------------------Frame #" << sharedVideoFrame->frameId << "---------------------" << slog::endl;
+            slog::debug << rawDetections;
+            for (const std::string& rawAttribute : rawAttributes.container) {  // destructor assures that none uses the container
+                slog::debug << rawAttribute << slog::endl;
+            }
+            for (const std::string& rawDecodedPlate : rawDecodedPlates.container) {
+                slog::debug << rawDecodedPlate << slog::endl;
+            }
         }
         printMutex.unlock();
         tryPush(static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.resAggregatorsWorker,
                 std::make_shared<ResAggregator>(sharedVideoFrame, std::move(boxesAndDescrs)));
     }
     void push(BboxAndDescr&& bboxAndDescr) {
-        boxesAndDescrs.lockedPush_back(std::move(bboxAndDescr));
+        boxesAndDescrs.lockedPushBack(std::move(bboxAndDescr));
     }
     const VideoFrame::Ptr sharedVideoFrame;
 
@@ -390,14 +392,14 @@ void ResAggregator::process() {
                 case BboxAndDescr::ObjectType::NONE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {255, 255, 0},  4);
                                                      break;
                 case BboxAndDescr::ObjectType::VEHICLE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
-                                                         cv::putText(sharedVideoFrame->frame, bboxAndDescr.descr,
+                                                        putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
                                                                      cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y + 35},
-                                                                     cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 4);
+                                                                     cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 2);
                                                          break;
                 case BboxAndDescr::ObjectType::PLATE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 0, 255},  4);
-                                                      cv::putText(sharedVideoFrame->frame, bboxAndDescr.descr,
+                                                      putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
                                                                   cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y - 10},
-                                                                  cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 0, 255), 4);
+                                                                  cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 0, 255), 2);
                                                       break;
                 default: throw std::exception();  // must never happen
                           break;
@@ -418,13 +420,7 @@ bool DetectionsProcessor::isReady() {
     if (requireGettingNumberOfDetections) {
         classifiersAggregator = std::make_shared<ClassifiersAggregator>(sharedVideoFrame);
         std::list<Detector::Result> results;
-        if (!(FLAGS_r && ((sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo))) {
-            results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size());
-        } else {
-            std::ostringstream rawResultsStream;
-            results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), &rawResultsStream);
-            classifiersAggregator->rawDetections = rawResultsStream.str();
-        }
+        results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), classifiersAggregator->rawDetections);
         for (Detector::Result result : results) {
             switch (result.label) {
                 case 1:
@@ -446,7 +442,7 @@ bool DetectionsProcessor::isReady() {
                          break;
             }
         }
-        context.detectorsInfers.inferRequests.lockedPush_back(*inferRequest);
+        context.detectorsInfers.inferRequests.lockedPushBack(*inferRequest);
         requireGettingNumberOfDetections = false;
     }
 
@@ -497,11 +493,11 @@ void DetectionsProcessor::process() {
                                 = context.detectionsProcessorsContext.vehicleAttributesClassifier.getResults(attributesRequest);
 
                             if (FLAGS_r && ((classifiersAggregator->sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
-                                classifiersAggregator->rawAttributes.lockedPush_back("Vehicle Attributes results:" + attributes.first + ';'
-                                                                                      + attributes.second + '\n');
+                                classifiersAggregator->rawAttributes.lockedPushBack("Vehicle Attributes results:" + attributes.first + ';'
+                                                                                      + attributes.second);
                             }
                             classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::VEHICLE, rect, attributes.first + ' ' + attributes.second});
-                            context.attributesInfers.inferRequests.lockedPush_back(attributesRequest);
+                            context.attributesInfers.inferRequests.lockedPushBack(attributesRequest);
                         }, classifiersAggregator,
                            std::ref(attributesRequest),
                            vehicleRect,
@@ -535,10 +531,10 @@ void DetectionsProcessor::process() {
                             std::string result = context.detectionsProcessorsContext.lpr.getResults(lprRequest);
 
                             if (FLAGS_r && ((classifiersAggregator->sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
-                                classifiersAggregator->rawDecodedPlates.lockedPush_back("License Plate Recognition results:" + result + '\n');
+                                classifiersAggregator->rawDecodedPlates.lockedPushBack("License Plate Recognition results:" + result);
                             }
                             classifiersAggregator->push(BboxAndDescr{BboxAndDescr::ObjectType::PLATE, rect, std::move(result)});
-                            context.platesInfers.inferRequests.lockedPush_back(lprRequest);
+                            context.platesInfers.inferRequests.lockedPushBack(lprRequest);
                         }, classifiersAggregator,
                            std::ref(lprRequest),
                            plateRect,
@@ -628,15 +624,13 @@ void Reader::process() {
 
 int main(int argc, char* argv[]) {
     try {
-        slog::info << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << slog::endl;
-
         // ------------------------------ Parsing and validation of input args ---------------------------------
         try {
             if (!ParseAndCheckCommandLine(argc, argv)) {
                 return 0;
             }
         } catch (std::logic_error& error) {
-            std::cerr << "[ ERROR ] " << error.what() << std::endl;
+            slog::err << error.what() << slog::endl;
             return 1;
         }
 
@@ -694,6 +688,7 @@ int main(int argc, char* argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load Inference Engine -------------------------------------
+        slog::info << *GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core ie;
 
         std::set<std::string> devices;
@@ -708,17 +703,11 @@ int main(int argc, char* argv[]) {
         std::map<std::string, uint32_t> device_nstreams = parseValuePerDevice(devices, FLAGS_nstreams);
 
         for (const std::string& device : devices) {
-            slog::info << "Loading device " << device << slog::endl;
-
-            /** Printing device version **/
-            slog::info << printable(ie.GetVersions(device)) << slog::endl;
-
             if ("CPU" == device) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
+                    auto extension_ptr = std::make_shared<Extension>(FLAGS_l);
                     ie.AddExtension(extension_ptr, "CPU");
-                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
                 if (FLAGS_nthreads != 0) {
                     ie.SetConfig({{ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }}, "CPU");
@@ -742,18 +731,9 @@ int main(int argc, char* argv[]) {
                 if (devices.end() != devices.find("CPU")) {
                     // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
                     // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
-                    ie.SetConfig({{ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
+                    ie.SetConfig({{ GPU_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
                 }
             }
-
-            if ("FPGA" == device) {
-                ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_DEVICE_ID, FLAGS_fpga_device_ids } }, "FPGA");
-            }
-        }
-
-        /** Per layer metrics **/
-        if (FLAGS_pc) {
-            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
         }
 
         /** Graph tagging via config options**/
@@ -767,22 +747,29 @@ int main(int argc, char* argv[]) {
 
         // -----------------------------------------------------------------------------------------------------
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
-        slog::info << "Loading detection model to the "<< FLAGS_d << " plugin" << slog::endl;
         Detector detector(ie, FLAGS_d, FLAGS_m,
             {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d, "Detect"));
+        slog::info << "\tNumber of network inference requests: " << nireq << slog::endl;
+
         VehicleAttributesClassifier vehicleAttributesClassifier;
         std::size_t nclassifiersireq{0};
         Lpr lpr;
         std::size_t nrecognizersireq{0};
         if (!FLAGS_m_va.empty()) {
-            slog::info << "Loading Vehicle Attribs model to the "<< FLAGS_d_va << " plugin" << slog::endl;
             vehicleAttributesClassifier = VehicleAttributesClassifier(ie, FLAGS_d_va, FLAGS_m_va, FLAGS_auto_resize, makeTagConfig(FLAGS_d_va, "Attr"));
             nclassifiersireq = nireq * 3;
+            slog::info << "\tNumber of network inference requests: " << nclassifiersireq << slog::endl;
+        }
+        else {
+            slog::info << "Vehicle Attributes Recognition DISABLED." << slog::endl;
         }
         if (!FLAGS_m_lpr.empty()) {
-            slog::info << "Loading Licence Plate Recognition (LPR) model to the "<< FLAGS_d_lpr << " plugin" << slog::endl;
             lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));
             nrecognizersireq = nireq * 3;
+            slog::info << "\tNumber of network inference requests: " << nrecognizersireq << slog::endl;
+        }
+        else {
+            slog::info << "License Plate Recognition DISABLED." << slog::endl;
         }
         bool isVideo = imageSourcess.empty() ? true : false;
         int pause = imageSourcess.empty() ? 1 : 0;
@@ -796,19 +783,6 @@ int main(int argc, char* argv[]) {
         size_t found = FLAGS_display_resolution.find("x");
         cv::Size displayResolution = cv::Size{std::stoi(FLAGS_display_resolution.substr(0, found)),
                                               std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()))};
-
-        slog::info << "Number of InferRequests: " << nireq << " (detection), " << nclassifiersireq << " (classification), " << nrecognizersireq << " (recognition)" << slog::endl;
-        std::ostringstream device_ss;
-        for (const auto& nstreams : device_nstreams) {
-            if (!device_ss.str().empty()) {
-                device_ss << ", ";
-            }
-            device_ss << nstreams.second << " streams for " << nstreams.first;
-        }
-        if (!device_ss.str().empty()) {
-            slog::info << device_ss.str() << slog::endl;
-        }
-        slog::info << "Display resolution: " << FLAGS_display_resolution << slog::endl;
 
         Context context{inputChannels,
                         detector,
@@ -833,12 +807,6 @@ int main(int argc, char* argv[]) {
                 worker->push(std::make_shared<Reader>(sharedVideoFrame));
             }
         }
-        slog::info << "Number of allocated frames: " << FLAGS_n_iqs * (inputChannels.size()) << slog::endl;
-        if (FLAGS_auto_resize) {
-            slog::info << "Resizable input with support of ROI crop and auto resize is enabled" << slog::endl;
-        } else {
-            slog::info << "Resizable input with support of ROI crop and auto resize is disabled" << slog::endl;
-        }
 
         // Running
         const std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
@@ -849,39 +817,26 @@ int main(int argc, char* argv[]) {
         worker->join();
         const auto t1 = std::chrono::steady_clock::now();
 
-        std::map<std::string, std::string> mapDevices = getMapFullDevicesNames(ie, {FLAGS_d, FLAGS_d_va, FLAGS_d_lpr});
-        for (auto& net : std::array<std::pair<std::vector<InferRequest>, std::string>, 3>{
-            std::make_pair(context.detectorsInfers.getActualInferRequests(), FLAGS_d),
-                std::make_pair(context.attributesInfers.getActualInferRequests(), FLAGS_d_va),
-                std::make_pair(context.platesInfers.getActualInferRequests(), FLAGS_d_lpr)}) {
-            for (InferRequest& ir : net.first) {
-                ir.Wait(IInferRequest::WaitMode::RESULT_READY);
-                if (FLAGS_pc) {  // Show performance results
-                    printPerformanceCounts(ir, std::cout, std::string::npos == net.second.find("MULTI") ? getFullDeviceName(mapDevices, net.second)
-                                                                                                        : net.second);
-                }
-            }
-        }
-
         uint32_t frameCounter = context.frameCounter;
         if (0 != frameCounter) {
             const float fps = static_cast<float>(frameCounter) / std::chrono::duration_cast<Sec>(t1 - context.t0).count()
                 / context.readersContext.inputChannels.size();
-            std::cout << std::fixed << std::setprecision(1) << fps << "FPS for (" << frameCounter << " / "
-                 << inputChannels.size() << ") frames\n";
             const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
                 / (frameCounter * context.nireq) * 100;
-            std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
-        }
 
-        std::cout << context.drawersContext.presenter.reportMeans() << '\n';
+            //// --------------------------- Report metrics -------------------------------------------------------
+            slog::info << "Metrics report:" << slog::endl;
+            slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << fps << slog::endl;
+            slog::info << "\tDetection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
+        }
+        slog::info << context.drawersContext.presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
-        std::cerr << "[ ERROR ] " << error.what() << std::endl;
+        slog::err << error.what() << slog::endl;
         return 1;
     } catch (...) {
-        std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
+        slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-    slog::info << "Execution successful" << slog::endl;
+
     return 0;
 }

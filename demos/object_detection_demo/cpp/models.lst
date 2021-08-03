@@ -4,10 +4,6 @@ ctdet_coco_dlav0_384
 ctdet_coco_dlav0_512
 # For -at faceboxes
 faceboxes-pytorch
-# For -at retinaface
-retinaface-anti-cov
-retinaface-resnet50
-ssh-mxnet
 # For -at ssd
 efficientdet-d0-tf
 efficientdet-d1-tf
@@ -23,8 +19,10 @@ person-vehicle-bike-detection-????
 product-detection-0001
 rfcn-resnet101-coco-tf
 retinanet-tf
+retinaface-resnet50-pytorch
 ssd300
 ssd512
+ssd-resnet34-1200-onnx
 ssd_mobilenet_v1_coco
 ssd_mobilenet_v1_fpn_coco
 ssd_mobilenet_v2_coco
@@ -37,3 +35,11 @@ vehicle-license-plate-detection-barrier-????
 person-vehicle-bike-detection-crossroad-yolov3-1020
 yolo-v3-tf
 yolo-v3-tiny-tf
+yolo-v1-tiny-tf
+yolo-v2-ava-0001
+yolo-v2-ava-sparse-??-0001
+yolo-v2-tf
+yolo-v2-tiny-ava-0001
+yolo-v2-tiny-ava-sparse-??-0001
+yolo-v2-tiny-tf
+yolo-v2-tiny-vehicle-detection-0001

@@ -27,9 +27,8 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime) {
     TimePoint currentTime = Clock::now();
 
     if (!firstFrameProcessed) {
-        lastUpdateTime = currentTime;
+        lastUpdateTime = lastRequestStartTime;
         firstFrameProcessed = true;
-        return;
     }
 
     currentMovingStatistic.latency += currentTime - lastRequestStartTime;
@@ -96,7 +95,15 @@ PerformanceMetrics::Metrics PerformanceMetrics::getTotal() const {
 void PerformanceMetrics::printTotal() const {
     Metrics metrics = getTotal();
 
-    std::ostringstream out;
-    out << "Latency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms\nFPS: " << metrics.fps << '\n';
-    std::cout << out.str();
+    slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.latency << " ms" << slog::endl;
+    slog::info << "\tFPS: " << metrics.fps << slog::endl;
+}
+
+void printStagesLatency(double readLat, double preprocLat, double inferLat, double postprocLat, double renderLat) {
+    slog::info << "\tDecoding:\t" << std::fixed << std::setprecision(1) <<
+        readLat << " ms" << slog::endl;
+    slog::info << "\tPreprocessing:\t" << preprocLat << " ms" << slog::endl;
+    slog::info << "\tInference:\t" << inferLat << " ms" << slog::endl;
+    slog::info << "\tPostprocessing:\t" << postprocLat << " ms" << slog::endl;
+    slog::info << "\tRendering:\t" << renderLat << " ms" << slog::endl;
 }

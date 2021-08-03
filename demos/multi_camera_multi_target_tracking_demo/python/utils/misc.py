@@ -12,10 +12,10 @@
 """
 
 import cv2 as cv
-import logging as log
 import os.path as osp
 import sys
 from importlib import import_module
+from types import SimpleNamespace as namespace
 
 
 class AverageEstimator(object):
@@ -66,13 +66,12 @@ def read_py_config(filename):
     sys.path.insert(0, config_dir)
     mod = import_module(module_name)
     sys.path.pop(0)
-    cfg_dict = {
+
+    return namespace(**{
         name: value
         for name, value in mod.__dict__.items()
         if not name.startswith('__')
-    }
-
-    return cfg_dict
+    })
 
 
 def check_pressed_keys(key):
@@ -84,11 +83,6 @@ def check_pressed_keys(key):
     else:
         key = cv.waitKey(1)
     return key
-
-
-def set_log_config():
-    log.basicConfig(stream=sys.stdout, format='%(levelname)s: %(asctime)s: %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S', level=log.DEBUG)
 
 
 COLOR_PALETTE = [[0, 113, 188],

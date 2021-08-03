@@ -21,11 +21,19 @@ from ..representation import (
     DetectionPrediction,
     DetectionAnnotation,
     PoseEstimationPrediction,
-    PoseEstimationAnnotation
+    PoseEstimationAnnotation,
+    CoCoInstanceSegmentationPrediction,
+    CoCoInstanceSegmentationAnnotation
 )
-from ..utils import get_or_parse_value, finalize_metric_result
+from ..utils import get_or_parse_value, finalize_metric_result, UnsupportedPackage
 from .overlap import Overlap
 from .metric import PerImageEvaluationMetric
+from .detection import average_precision, APIntegralType
+
+try:
+    import pycocotools.mask as maskUtils
+except ImportError as import_error:
+    maskUtils = UnsupportedPackage("pycocotools", import_error.msg)
 
 COCO_THRESHOLDS = {
     '0.5': [0.5],
@@ -73,6 +81,7 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
             raise ConfigError('coco metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerate annotation')
         self.meta['names'] = [label_map[label] for label in self.labels]
+        self.meta['orig_label_names'] = [label_map[label] for label in self.labels]
         self.matching_results = [[] for _ in self.labels]
 
     def update(self, annotation, prediction):
@@ -83,7 +92,7 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
         for label_id, label in enumerate(self.labels):
             detections, scores, dt_difficult = prepare_predictions(prediction, label, self.max_detections)
             ground_truth, gt_difficult, iscrowd, boxes, areas = prepare_annotations(annotation, label, create_boxes)
-            iou = compute_iou(ground_truth, detections, boxes, areas)
+            iou = compute_iou(ground_truth, detections, annotation_boxes=boxes, annotation_areas=areas, iscrowd=iscrowd)
             eval_result = evaluate_image(
                 ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, self.thresholds,
                 profile_boxes
@@ -110,13 +119,20 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
     def update(self, annotation, prediction):
         per_class_matching = super().update(annotation, prediction)
         per_class_result = [
-            compute_precision_recall(self.thresholds, [per_class_matching[i]])[0] for i, _ in enumerate(self.labels)
+            compute_precision_recall(self.thresholds, [per_class_matching[i]]) for i, _ in enumerate(self.labels)
         ]
+        precisions = [result[0] for result in per_class_result]
         if self.profiler:
-            for class_match, class_metric in zip(per_class_matching, per_class_result):
-                class_match['result'] = class_metric
-            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(per_class_result))
-        return per_class_result
+            for class_match, (precision, recall, all_precisions, all_recalls) in zip(
+                    per_class_matching, per_class_result
+            ):
+                class_match['result'] = precision
+                class_match['precision'] = precision
+                class_match['recall'] = recall
+                ap = average_precision(all_precisions, all_recalls, APIntegralType.voc_max)
+                class_match['ap'] = ap
+            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(precisions))
+        return precisions
 
     def evaluate(self, annotations, predictions):
         if self.profiler:
@@ -125,7 +141,7 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
             compute_precision_recall(self.thresholds, self.matching_results[i])[0]
             for i, _ in enumerate(self.labels)
         ]
-        precision, self.meta['names'] = finalize_metric_result(precision, self.meta['names'])
+        precision, self.meta['names'] = finalize_metric_result(precision, self.meta['orig_label_names'])
 
         return precision
 
@@ -136,12 +152,18 @@ class MSCOCORecall(MSCOCOBaseMetric):
     def update(self, annotation, prediction):
         per_class_matching = super().update(annotation, prediction)
         per_class_result = [
-            compute_precision_recall(self.thresholds, [per_class_matching[i]])[1] for i, _ in enumerate(self.labels)
+            compute_precision_recall(self.thresholds, [per_class_matching[i]]) for i, _ in enumerate(self.labels)
         ]
+        recalls = [metric[1] for metric in per_class_result]
         if self.profiler:
-            for class_match, class_metric in zip(per_class_matching, per_class_result):
-                class_match['result'] = class_metric
-            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(per_class_result))
+            for class_match, (precision, recall, all_precisions, all_recalls) in zip(per_class_matching,
+                                                                                     per_class_result):
+                class_match['result'] = recall
+                class_match['precision'] = precision
+                class_match['recall'] = recall
+                ap = average_precision(all_precisions, all_recalls, APIntegralType.voc_max)
+                class_match['ap'] = ap
+            self.profiler.update(annotation.identifier, per_class_matching, self.name, np.nanmean(recalls))
         return per_class_result
 
     def evaluate(self, annotations, predictions):
@@ -151,7 +173,7 @@ class MSCOCORecall(MSCOCOBaseMetric):
             compute_precision_recall(self.thresholds, self.matching_results[i])[1]
             for i, _ in enumerate(self.labels)
         ]
-        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['names'])
+        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['orig_label_names'])
 
         return recalls
 
@@ -182,6 +204,8 @@ class MSCOCOKeypointsBaseMetric(MSCOCOBaseMetric):
 
         def _prepare_annotations(annotation, label):
             annotation_ids = annotation.labels == label
+            if not np.size(annotation_ids):
+                return [], [], [], [], []
             difficult_box_mask = np.full(annotation.size, False)
             difficult_box_indices = annotation.metadata.get("difficult_boxes", [])
             iscrowd = np.array(annotation.metadata.get('iscrowd', [0] * annotation.size))
@@ -232,7 +256,7 @@ class MSCOCOKeypointsPrecision(MSCOCOKeypointsBaseMetric):
             compute_precision_recall(self.thresholds, self.matching_results[i])[0]
             for i, _ in enumerate(self.labels)
         ]
-        precision, self.meta['names'] = finalize_metric_result(precision, self.meta['names'])
+        precision, self.meta['names'] = finalize_metric_result(precision, self.meta['orig_label_names'])
 
         return precision
 
@@ -251,9 +275,33 @@ class MSCOCOKeypointsRecall(MSCOCOKeypointsBaseMetric):
             compute_precision_recall(self.thresholds, self.matching_results[i])[1]
             for i, _ in enumerate(self.labels)
         ]
-        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['names'])
+        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['orig_label_names'])
 
         return recalls
+
+
+class MSCOCOSegmAveragePrecision(MSCOCOAveragePrecision):
+    __provider__ = 'coco_segm_precision'
+
+    annotation_types = (CoCoInstanceSegmentationAnnotation, )
+    prediction_types = (CoCoInstanceSegmentationPrediction, )
+
+    def configure(self):
+        super().configure()
+        if isinstance(maskUtils, UnsupportedPackage):
+            maskUtils.raise_error(self.__provider__)
+
+
+class MSCOCOSegmRecall(MSCOCORecall):
+    __provider__ = 'coco_segm_recall'
+
+    annotation_types = (CoCoInstanceSegmentationAnnotation, )
+    prediction_types = (CoCoInstanceSegmentationPrediction, )
+
+    def configure(self):
+        super().configure()
+        if isinstance(maskUtils, UnsupportedPackage):
+            maskUtils.raise_error(self.__provider__)
 
 
 @singledispatch
@@ -264,6 +312,11 @@ def select_specific_parameters(annotation):
 @select_specific_parameters.register(PoseEstimationAnnotation)
 def pose_estimation_params(annotation):
     return compute_oks, True
+
+
+@select_specific_parameters.register(CoCoInstanceSegmentationAnnotation)
+def instance_segmentation_params(annotation):
+    return compute_iou_masks, False
 
 
 @singledispatch
@@ -283,10 +336,16 @@ def prepare_keypoints(entry, order):
     return np.concatenate((entry.x_values[order], entry.y_values[order], entry.visibility[order]), axis=-1)
 
 
+@prepare.register(CoCoInstanceSegmentationPrediction)
+@prepare.register(CoCoInstanceSegmentationAnnotation)
+def prepare_masks(entry, order):
+    return np.array([entry.mask[idx] for idx in order])
+
+
 def prepare_predictions(prediction, label, max_detections):
     if prediction.size == 0:
         return [], [], []
-    prediction_ids = prediction.labels == label
+    prediction_ids = np.argwhere(prediction.labels == label).reshape(-1)
     scores = prediction.scores[prediction_ids]
     if np.size(scores) == 0:
         return [], [], []
@@ -303,7 +362,11 @@ def prepare_predictions(prediction, label, max_detections):
 
 
 def prepare_annotations(annotation, label, create_boxes=False):
-    annotation_ids = annotation.labels == label
+    annotation_ids = np.argwhere(np.array(annotation.labels) == label).reshape(-1)
+    if not np.size(annotation_ids):
+        boxes = None if not create_boxes else np.array([])
+        areas = None if not create_boxes else np.array([])
+        return [], [], [], boxes, areas
     difficult_box_mask = np.full(annotation.size, False)
     difficult_box_indices = annotation.metadata.get("difficult_boxes", [])
     iscrowd = np.array(annotation.metadata.get('iscrowd', [0]*annotation.size))
@@ -341,10 +404,10 @@ def compute_precision_recall(thresholds, matching_results):
     npig = np.count_nonzero(gt_ignored == 0)
     tps = np.logical_and(dtm, np.logical_not(dt_ignored))
     fps = np.logical_and(np.logical_not(dtm), np.logical_not(dt_ignored))
-    tp_sum = np.cumsum(tps, axis=1).astype(dtype=np.float)
-    fp_sum = np.cumsum(fps, axis=1).astype(dtype=np.float)
+    tp_sum = np.cumsum(tps, axis=1).astype(dtype=float)
+    fp_sum = np.cumsum(fps, axis=1).astype(dtype=float)
     if npig == 0:
-        return np.nan, np.nan
+        return np.nan, np.nan, np.array([]), np.array([])
     for t, (tp, fp) in enumerate(zip(tp_sum, fp_sum)):
         tp = np.array(tp)
         fp = np.array(fp)
@@ -377,7 +440,7 @@ def compute_precision_recall(thresholds, matching_results):
     mean_precision = 0 if np.size(precision[precision > -1]) == 0 else np.mean(precision[precision > -1])
     mean_recall = 0 if np.size(recall[recall > -1]) == 0 else np.mean(recall[recall > -1])
 
-    return mean_precision, mean_recall
+    return mean_precision, mean_recall, precision[precision > -1], recall[recall > -1]
 
 
 def compute_iou_boxes(annotation, prediction, *args, **kwargs):
@@ -392,7 +455,7 @@ def compute_iou_boxes(annotation, prediction, *args, **kwargs):
     return iou
 
 
-def compute_oks(annotation_points, prediction_points, annotation_boxes, annotation_areas):
+def compute_oks(annotation_points, prediction_points, annotation_boxes, annotation_areas, *args, **kwargs):
     if np.size(prediction_points) == 0 or np.size(annotation_points) == 0:
         return []
     oks = np.zeros((len(prediction_points), len(annotation_points)))
@@ -431,6 +494,14 @@ def compute_oks(annotation_points, prediction_points, annotation_boxes, annotati
             oks[dt_idx, gt_idx] = np.sum(np.exp(- evaluation)) / evaluation.shape[0]
 
     return oks
+
+
+def compute_iou_masks(annotation, prediction, iscrowd, *args, **kwargs):
+    if np.size(annotation) == 0 or np.size(prediction) == 0:
+        return []
+    iou = maskUtils.iou(list(prediction), list(annotation), iscrowd)
+
+    return iou
 
 
 def evaluate_image(

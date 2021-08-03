@@ -1,6 +1,6 @@
 # use update-requirements.py to update this file
 
-certifi==2020.12.5
+certifi==2021.5.30
     # via requests
 chardet==4.0.0
     # via requests
@@ -10,5 +10,5 @@ pyyaml==5.4.1
     # via -r tools/downloader/requirements.in
 requests==2.25.1
     # via -r tools/downloader/requirements.in
-urllib3==1.26.3
+urllib3==1.26.6
     # via requests

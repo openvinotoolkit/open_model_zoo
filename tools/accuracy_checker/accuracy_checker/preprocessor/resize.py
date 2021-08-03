@@ -90,6 +90,27 @@ def east_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
     return resize_w, resize_h
 
 
+def ppocr_aspect_ratio(dst_width, dst_height, image_width, image_height):
+    ratio = image_width / image_height
+    tmp_w = int(32 * ratio)
+    if np.ceil(dst_height * ratio) > dst_width:
+        resize_w = tmp_w
+    else:
+        resize_w = int(np.ceil(dst_height * ratio))
+    return resize_w, dst_height
+
+
+def ppocr_max_aspect_ratio(dst_width, dst_height, image_width, image_height):
+    limit_side = max(dst_width, dst_height)
+    ratio = 1
+    if max(image_width, image_height) > limit_side:
+        if image_width > image_height:
+            ratio = limit_side / image_width
+        else:
+            ratio = limit_side / image_height
+    return int(image_width * ratio), int(image_height * ratio)
+
+
 class ScaleFactor:
     def __init__(self, config, parameters):
         self.scale = get_parameter_value_from_config(config, parameters, 'scale')
@@ -111,7 +132,6 @@ def mask_rcnn_benchmark_ratio(dst_width, dst_height, image_width, image_height):
     return int(image_width * ratio), int(image_height * ratio)
 
 
-
 ASPECT_RATIO_SCALE = {
     'width': scale_width,
     'height': scale_height,
@@ -123,6 +143,8 @@ ASPECT_RATIO_SCALE = {
     'min_ratio': min_ratio,
     'mask_rcnn_benchmark_aspect_ratio': mask_rcnn_benchmark_ratio,
     'scale_factor': ScaleFactor,
+    'ppcrnn_ratio': ppocr_aspect_ratio,
+    'ppocr_max_ratio': ppocr_max_aspect_ratio
 }
 
 
@@ -304,6 +326,7 @@ def create_resizer(config):
 
 class Resize(Preprocessor):
     __provider__ = 'resize'
+    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -348,6 +371,9 @@ class Resize(Preprocessor):
                 optional=True, min_value=1,
                 description='destination size must be divisible by a given number without remainder, '
                             'when aspect ratio resize used', value_type=int
+            ),
+            'include_boundary': BoolField(
+                optional=True, default=False, description='include boundary for calculation strided size'
             )
         })
 
@@ -359,6 +385,7 @@ class Resize(Preprocessor):
         self.resizer = create_resizer(self.config)
         self.scaling_func = ASPECT_RATIO_SCALE.get(self.get_value_from_config('aspect_ratio_scale'))
         self.factor = self.get_value_from_config('factor')
+        self.include_boundary = self.get_value_from_config('include_boundary')
         if inspect.isclass(self.scaling_func):
             self.scaling_func = self.scaling_func(self.config, self.parameters())
 
@@ -374,8 +401,8 @@ class Resize(Preprocessor):
             if scale_func:
                 dst_width, dst_height = scale_func(new_width, new_height, image_w, image_h)
                 if self.factor:
-                    dst_width -= (dst_width - 1) % self.factor
-                    dst_height -= (dst_height - 1) % self.factor
+                    dst_width -= (dst_width - int(not self.include_boundary)) % self.factor
+                    dst_height -= (dst_height - int(not self.include_boundary)) % self.factor
                 if new_height is None:
                     new_height = dst_height
                 if new_width is None:
@@ -413,9 +440,17 @@ class Resize(Preprocessor):
 
         return image
 
+    @property
+    def dynamic_result_shape(self):
+        if self.scaling_func:
+            return True
+        return False
+
 
 class AutoResize(Preprocessor):
     __provider__ = 'auto_resize'
+    shape_modificator = True
+    _dynamic_shapes = False
 
     def __init__(self, config, name=None):
         super().__init__(config, name)
@@ -478,3 +513,7 @@ class AutoResize(Preprocessor):
         )
 
         return image
+
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes

@@ -138,7 +138,7 @@ class ConfigValidator(BaseValidator):
                 self.fields[key].validate(entry[key], fetch_only=fetch_only, validation_scheme=field_valid_scheme)
             )
 
-        required_fields = set(name for name, value in self.fields.items() if value.required())
+        required_fields = {name for name, value in self.fields.items() if value.required()}
         missing_arguments = required_fields.difference(entry)
 
         if missing_arguments:
@@ -368,7 +368,9 @@ class ListField(BaseField):
 
 
 class InputField(BaseField):
-    INPUTS_TYPES = ('CONST_INPUT', 'INPUT', 'IMAGE_INFO', 'ORIG_IMAGE_INFO', 'LSTM_INPUT', 'IGNORE_INPUT')
+    INPUTS_TYPES = (
+        'CONST_INPUT', 'INPUT', 'IMAGE_INFO', 'ORIG_IMAGE_INFO', 'LSTM_INPUT', 'IGNORE_INPUT', 'SCALE_FACTOR'
+    )
     LAYOUT_TYPES = ('NCHW', 'NHWC', 'NCWH', 'NWHC')
     PRECISIONS = ('FP32', 'FP16', 'U8', 'U16', 'I8', 'I16', 'I32', 'I64')
 

@@ -14,6 +14,7 @@
 import json
 import logging as log
 from abc import ABC, abstractmethod
+from types import SimpleNamespace as namespace
 
 import cv2
 import numpy as np
@@ -37,7 +38,8 @@ class Detector(DetectorInterface):
 
     def __init__(self, ie, model_path, trg_classes, conf=.6,
                  device='CPU', ext_path='', max_num_frames=1):
-        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=max_num_frames)
+        self.net = load_ie_model(ie, model_path, device, None, 'Object Detection',
+                                 ext_path, num_reqs=max_num_frames)
         self.trg_classes = trg_classes
         self.confidence = conf
         self.expand_ratio = (1., 1.)
@@ -102,7 +104,8 @@ class VectorCNN:
 
     def __init__(self, ie, model_path, device='CPU', ext_path='', max_reqs=100):
         self.max_reqs = max_reqs
-        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
+        self.net = load_ie_model(ie, model_path, device, None, 'Object Reidentification',
+                                 ext_path, num_reqs=self.max_reqs)
 
     def forward(self, batch):
         """Performs forward of the underlying network on a given batch"""
@@ -131,7 +134,8 @@ class MaskRCNN(DetectorInterface):
         self.trg_classes = trg_classes
         self.max_reqs = max_reqs
         self.confidence = conf
-        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
+        self.net = load_ie_model(ie, model_path, device, None, 'Instance Segmentation',
+                                 ext_path, num_reqs=self.max_reqs)
 
         required_input_keys = {'image'}
         required_output_keys = {'boxes', 'labels', 'masks'}
@@ -162,12 +166,15 @@ class MaskRCNN(DetectorInterface):
         processed_image = cv2.resize(frame, None, fx=scale, fy=scale)
         processed_image = processed_image.astype('float32').transpose(2, 0, 1)
 
-        sample = dict(original_image=frame,
-                      meta=dict(original_size=frame.shape[:2],
-                                processed_size=processed_image.shape[1:3]),
-                      im_data=processed_image,
-                      im_info=np.array([processed_image.shape[1], processed_image.shape[2], 1.0], dtype='float32'))
-        return sample
+        return namespace(
+            original_image=frame,
+            meta=namespace(
+                original_size=frame.shape[:2],
+                processed_size=processed_image.shape[1:3],
+            ),
+            im_data=processed_image,
+            im_info=np.array([processed_image.shape[1], processed_image.shape[2], 1.0], dtype='float32'),
+        )
 
     def forward(self, im_data, im_info):
         input_name = 'im_data' if self.segmentoly_type else 'image'
@@ -202,16 +209,16 @@ class MaskRCNN(DetectorInterface):
         outputs = []
         for frame in frames:
             data_batch = self.preprocess(frame)
-            im_data = data_batch['im_data']
-            im_info = data_batch['im_info'] if self.segmentoly_type else None
-            meta = data_batch['meta']
+            im_data = data_batch.im_data
+            im_info = data_batch.im_info if self.segmentoly_type else None
+            meta = data_batch.meta
 
             boxes, classes, scores, _, masks = self.forward(im_data, im_info)
             scores, classes, boxes, masks = postprocess(scores, classes, boxes, masks,
-                                                        im_h=meta['original_size'][0],
-                                                        im_w=meta['original_size'][1],
-                                                        im_scale_y=meta['processed_size'][0] / meta['original_size'][0],
-                                                        im_scale_x=meta['processed_size'][1] / meta['original_size'][1],
+                                                        im_h=meta.original_size[0],
+                                                        im_w=meta.original_size[1],
+                                                        im_scale_y=meta.processed_size[0] / meta.original_size[0],
+                                                        im_scale_x=meta.processed_size[1] / meta.original_size[1],
                                                         full_image_masks=True, encode_masks=False,
                                                         confidence_threshold=self.confidence,
                                                         segmentoly_type=self.segmentoly_type)

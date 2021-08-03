@@ -27,14 +27,13 @@ static const char target_device_detection_message[] = "Optional. Specify the tar
 static const char target_device_reid_message[] = "Optional. Specify the target device for pedestrian reidentification "
                                                  "(the list of available devices is shown below). Default value is CPU. "
                                                  "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin.";
-static const char performance_counter_message[] = "Optional. Enable per-layer performance statistics.";
 static const char custom_cldnn_message[] = "Optional. For GPU custom kernels, if any. "
                                             "Absolute path to the .xml file with the kernels description.";
 static const char custom_cpu_library_message[] = "Optional. For CPU custom layers, if any. "
                                                   "Absolute path to a shared library with the kernels implementation.";
 static const char raw_output_message[] = "Optional. Output pedestrian tracking results in a raw format "
                                           "(compatible with MOTChallenge format).";
-static const char no_show_processed_video[] = "Optional. Do not show processed video.";
+static const char no_show_message[] = "Optional. Don't show output.";
 static const char delay_message[] = "Optional. Delay between frames used for visualization. "
                                      "If negative, the visualization is turned off (like with the option 'no_show'). "
                                      "If zero, the visualization is made frame-by-frame.";
@@ -50,11 +49,10 @@ DEFINE_string(m_det, "", pedestrian_detection_model_message);
 DEFINE_string(m_reid, "", pedestrian_reid_model_message);
 DEFINE_string(d_det, "CPU", target_device_detection_message);
 DEFINE_string(d_reid, "CPU", target_device_reid_message);
-DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
-DEFINE_bool(no_show, false, no_show_processed_video);
+DEFINE_bool(no_show, false, no_show_message);
 DEFINE_int32(delay, 3, delay_message);
 DEFINE_string(out, "", output_log_message);
 DEFINE_string(u, "", utilization_monitors_message);
@@ -73,8 +71,8 @@ static void showUsage() {
     std::cout << "    -loop                        " << loop_message << std::endl;
     std::cout << "    -first                       " << first_frame_message << std::endl;
     std::cout << "    -read_limit                  " << read_limit_message << std::endl;
-    std::cout << "    -o \"<path>\"                " << output_message << std::endl;
-    std::cout << "    -limit \"<num>\"             " << limit_message << std::endl;
+    std::cout << "    -o \"<path>\"                  " << output_message << std::endl;
+    std::cout << "    -limit \"<num>\"               " << limit_message << std::endl;
     std::cout << "    -m_det \"<path>\"              " << pedestrian_detection_model_message << std::endl;
     std::cout << "    -m_reid \"<path>\"             " << pedestrian_reid_model_message << std::endl;
     std::cout << "    -l \"<absolute_path>\"         " << custom_cpu_library_message << std::endl;
@@ -83,8 +81,7 @@ static void showUsage() {
     std::cout << "    -d_det \"<device>\"            " << target_device_detection_message << std::endl;
     std::cout << "    -d_reid \"<device>\"           " << target_device_reid_message << std::endl;
     std::cout << "    -r                           " << raw_output_message << std::endl;
-    std::cout << "    -pc                          " << performance_counter_message << std::endl;
-    std::cout << "    -no_show                     " << no_show_processed_video << std::endl;
+    std::cout << "    -no_show                     " << no_show_message << std::endl;
     std::cout << "    -delay                       " << delay_message << std::endl;
     std::cout << "    -out \"<path>\"                " << output_log_message << std::endl;
     std::cout << "    -u                           " << utilization_monitors_message << std::endl;

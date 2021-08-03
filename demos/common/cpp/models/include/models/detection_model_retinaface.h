@@ -17,6 +17,7 @@
 #pragma once
 #include <vector>
 #include "detection_model.h"
+#include <utils/nms.hpp>
 
 class ModelRetinaFace
     : public DetectionModel {
@@ -55,9 +56,9 @@ protected:
 
     bool shouldDetectMasks;
     bool shouldDetectLandmarks;
-    float landmarkStd;
     const float boxIOUThreshold;
     const float maskThreshold;
+    float landmarkStd;
 
     enum EOutputType {
         OT_BBOX,

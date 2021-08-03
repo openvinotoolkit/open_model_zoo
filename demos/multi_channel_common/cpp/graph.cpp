@@ -49,15 +49,11 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_GPU_THROUGHPUT_STREAMS, InferenceEngine::PluginConfigParams::GPU_THROUGHPUT_AUTO}}, "GPU");
     }
     if (!cpuExtensionPath.empty()) {
-        auto extension_ptr = InferenceEngine::make_so_pointer<InferenceEngine::IExtension>(cpuExtensionPath);
+        auto extension_ptr = std::make_shared<InferenceEngine::Extension>(cpuExtensionPath);
         ie.AddExtension(extension_ptr, "CPU");
     }
     if (!cldnnConfigPath.empty()) {
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, cldnnConfigPath}}, "GPU");
-    }
-    /** Setting parameter for collecting per layer metrics **/
-    if (printPerfReport) {
-        ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_PERF_COUNT, InferenceEngine::PluginConfigParams::YES } });
     }
 
     // Set batch size
@@ -71,9 +67,11 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         }
         cnnNetwork.reshape(inShapes);
     }
-
-    InferenceEngine::ExecutableNetwork network;
-    network = ie.LoadNetwork(cnnNetwork, deviceName);
+    InferenceEngine::ExecutableNetwork executableNetwork;
+    executableNetwork = ie.LoadNetwork(cnnNetwork, deviceName);
+    printExecNetworkInfo(executableNetwork, modelPath, deviceName);
+    slog::info << "\tNumber of network inference requests: " << maxRequests << slog::endl;
+    slog::info << "\tBatch size is set to " << cnnNetwork.getBatchSize() << slog::endl;
 
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
@@ -88,7 +86,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     }
 
     for (size_t i = 0; i < maxRequests; ++i) {
-        auto req = network.CreateInferRequestPtr();
+        auto req = std::make_shared<InferenceEngine::InferRequest>(executableNetwork.CreateInferRequest());
         availableRequests.push(req);
     }
 
@@ -96,7 +94,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         postLoad(outputDataBlobNames, cnnNetwork);
 
     availableRequests.front()->StartAsync();
-    availableRequests.front()->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
+    availableRequests.front()->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
 }
 
 void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc) {
@@ -196,7 +194,6 @@ IEGraph::IEGraph(const InitParams& p):
     confidenceThreshold(0.5f), batchSize(p.batchSize),
     modelPath(p.modelPath),
     cpuExtensionPath(p.cpuExtPath), cldnnConfigPath(p.cldnnConfigPath),
-    printPerfReport(p.reportPerf), deviceName(p.deviceName),
     maxRequests(p.maxRequests) {
     assert(p.maxRequests > 0);
 
@@ -234,7 +231,7 @@ std::vector<std::shared_ptr<VideoFrame> > IEGraph::getBatchData(cv::Size frameSi
         busyBatchRequests.pop();
     }
 
-    if (nullptr != req && InferenceEngine::OK == req->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY)) {
+    if (nullptr != req && InferenceEngine::OK == req->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY)) {
         auto detections = postprocessing(req, outputDataBlobNames, frameSize);
         for (decltype(detections.size()) i = 0; i < detections.size(); i ++) {
             vframes[i]->detections = std::move(detections[i]);
@@ -273,7 +270,7 @@ IEGraph::~IEGraph() {
             if (!busyBatchRequests.empty()) {
                 auto& req = busyBatchRequests.front().req;
                 if (nullptr != req) {
-                    req->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
+                    req->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
                     availableRequests.push(std::move(req));
                 }
                 busyBatchRequests.pop();
@@ -281,10 +278,6 @@ IEGraph::~IEGraph() {
             if (availableRequests.size() == maxRequests) {
                 ready = true;
             }
-        }
-        if (printPerfReport) {
-            slog::info << "Performance counts report" << slog::endl << slog::endl;
-            printPerformanceCounts(getFullDeviceName(ie, deviceName));
         }
         condVarAvailableRequests.notify_one();
     }
@@ -295,8 +288,4 @@ IEGraph::~IEGraph() {
 
 IEGraph::Stats IEGraph::getStats() const {
     return Stats{perfTimerPreprocess.getValue(), perfTimerInfer.getValue()};
-}
-
-void IEGraph::printPerformanceCounts(std::string fullDeviceName) {
-    ::printPerformanceCounts(*availableRequests.front(), std::cout, fullDeviceName, false);
 }

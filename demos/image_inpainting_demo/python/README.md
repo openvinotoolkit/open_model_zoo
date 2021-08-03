@@ -2,12 +2,40 @@
 
 This demo showcases Image Inpainting with GMCNN. The task is to estimate suitable pixel information
 to fill holes in images.
+![example](./car_1_example.png)
 
 ## How It Works
+
 This demo can work in 2 modes:
 
-* GUI mode: areas for inpainting can be marked interactively using mouse painting
+* Interactive mode: areas for inpainting can be marked interactively using mouse painting
 * Auto mode (use -ac or -ar option for it): image will be processed automatically using randomly applied mask (-ar option) or using specific color-based mask (-ac option)
+
+## Preparing to Run
+
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+The list of models supported by the demo is in `<omz_dir>/demos/image_inpainting_demo/python/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
+### Supported Models
+
+* gmcnn-places2-tf
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
+
+## Running
 
 Running the application with the `-h` option yields the following usage message:
 
@@ -22,10 +50,10 @@ Options:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
-                        path to image.
+                        Required. Path to image.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
-                        GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
+                        GPU, HDDL or MYRIAD is acceptable. The demo will
                         look for a suitable plugin for device specified.
                         Default value is CPU
   -p PARTS, --parts PARTS
@@ -56,29 +84,41 @@ Options:
                         -mbw, -mk and -mv). Cannot be used together with -ac.
 ```
 
-To run the demo, you can use public or pretrained models. You can download the pretrained models with the OpenVINO&trade; [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in [models.lst](./models.lst).
+Running the application with an empty list of options yields the usage message given above and an error message.
 
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
+### Auto Mode
 
-## GUI Mode operation
-In GUI mode user can draw mask using mouse (holding left mouse button). The brush size is adjustable using slider on the top of the screen. After the mask painting is done, inpainting processing can be started by pressing Space or Enter key.
+An example command to run inpainting demo in auto mode with inference on a CPU:
+
+```sh
+python3 ./image_inpainting_demo.py -d CPU -i <path_to_image>/car_1.bmp -m <path_to_model>/gmcnn-places2-tf.xml -ar
+```
+
+### Interactive Mode
+
+In interactive mode user can draw mask using mouse (holding left mouse button). The brush size is adjustable using slider on the top of the screen. After the mask painting is done, inpainting processing can be started by pressing Space or Enter key.
 
 Also, these hot keys are available:
 
 * **Backspace or C** to clear current mask
 * **Space or Enter** to inpaint
 * **R** to reset all changes
-* **Tab** to show original image
+* **Tab** to show/hide original image
 * **Esc or Q** to quit
+
+If Backpace, C or R keys are pressed while demo is showing original image, demo will hide original image and return back to editing mode.
 
 ## Demo Output
 
-In auto mode this demo uses OpenCV to display the resulting image and image with mask applied and reports performance in the format of summary inference FPS. Processed image can be also written to file.
+In auto mode the demo uses OpenCV to display the resulting image and image with mask applied. Processed image can be also written to file.
+In auto mode the demo reports
 
-In GUI mode this demo provides interactive means to apply mask and see the result of processing instantly (see hotkeys above).
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
+
+In interactive mode this demo provides interactive means to apply mask and see the result of processing instantly (see hotkeys above).
 
 ## See Also
 
-* [Using Open Model Zoo Demos](../../README.md)
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

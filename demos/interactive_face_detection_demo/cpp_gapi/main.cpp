@@ -12,6 +12,8 @@
 #include <list>
 #include <memory>
 
+#include <ie_version.hpp>
+
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
 
@@ -143,9 +145,9 @@ void rawOutputDetections(const cv::Mat  &ssd_result,
         int width  = static_cast<int>(rc_right  * upscale.width)  - x;
         int height = static_cast<int>(rc_bottom * upscale.height) - y;
 
-        std::cout << "[" << i << "," << label << "] element, prob = " << confidence <<
+        slog::debug << "[" << i << "," << label << "] element, prob = " << confidence <<
              "    (" << x << "," << y << ")-(" << width << "," << height << ")"
-             << ((confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << std::endl;
+             << ((confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << slog::endl;
     }
 }
 
@@ -156,7 +158,7 @@ void rawOutputAgeGender(const int idx, const cv::Mat &out_ages, const cv::Mat &o
     float maleProb = gender_data[1];
     float age      = age_data[0] * 100;
 
-    std::cout << "[" << idx << "] element, male prob = " << maleProb << ", age = " << age << std::endl;
+    slog::debug << "[" << idx << "] element, male prob = " << maleProb << ", age = " << age << slog::endl;
 }
 
 void rawOutputHeadpose(const int idx,
@@ -167,22 +169,22 @@ void rawOutputHeadpose(const int idx,
     const float *p_data = out_p_fc.ptr<float>();
     const float *r_data = out_r_fc.ptr<float>();
 
-    std::cout << "[" << idx << "] element, yaw = " << y_data[0] <<
+    slog::debug << "[" << idx << "] element, yaw = " << y_data[0] <<
                  ", pitch = " << p_data[0] <<
-                 ", roll = " << r_data[0]  << std::endl;
+                 ", roll = " << r_data[0]  << slog::endl;
 }
 
 void rawOutputLandmarks(const int idx, const cv::Mat &out_landmark) {
     const float *lm_data = out_landmark.ptr<float>();
 
-    std::cout << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << std::endl;
+    slog::debug << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << slog::endl;
 
     int n_lm = 70;
     for (int i_lm = 0; i_lm < n_lm / 2; ++i_lm) {
         float normed_x = lm_data[2 * i_lm];
         float normed_y = lm_data[2 * i_lm + 1];
 
-        std::cout << normed_x << ", " << normed_y << std::endl;
+        slog::debug << '\t' << normed_x << ", " << normed_y << slog::endl;
     }
 }
 
@@ -191,13 +193,13 @@ void rawOutputEmotions(const int idx, const cv::Mat &out_emotion) {
 
     const float *em_data = out_emotion.ptr<float>();
 
-    std::cout << "[" << idx << "] element, predicted emotions (name = prob):" << std::endl;
+    slog::debug << "[" << idx << "] element, predicted emotions (name = prob):" << slog::endl;
     for (size_t i = 0; i < emotionsVecSize; i++) {
-        std::cout << EMOTION_VECTOR[i] << " = " << em_data[i];
+        slog::debug << EMOTION_VECTOR[i] << " = " << em_data[i];
         if (emotionsVecSize - 1 != i) {
-            std::cout << ", ";
+            slog::debug << ", ";
         } else {
-            std::cout << std::endl;
+            slog::debug << slog::endl;
         }
     }
 }
@@ -294,17 +296,9 @@ void setInput(cv::GStreamingCompiled stream, const std::string& input ) {
     }
 }
 
-static std::string fileNameNoExt(const std::string &filepath) {
-    auto pos = filepath.rfind('.');
-    if (pos == std::string::npos) return filepath;
-    return filepath.substr(0, pos);
-}
-
 int main(int argc, char *argv[]) {
     try {
         // ------------------------------ Parsing and validating of input arguments --------------------------
-
-        slog::info << "Parsing input parameters" << slog::endl;
         gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
         if (FLAGS_h) {
             showUsage();
@@ -317,83 +311,102 @@ int main(int argc, char *argv[]) {
         if (FLAGS_m.empty())
             throw std::logic_error("Parameter -m is not set");
 
-        std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press any key";
-        }
-        std::cout << std::endl;
-
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         cv::GComputation pipeline([=]() {
-                cv::GMat in;
+            cv::GMat in;
 
-                cv::GMat frame = cv::gapi::copy(in);
+            cv::GMat frame = cv::gapi::copy(in);
 
-                cv::GMat detections = cv::gapi::infer<Faces>(in);
+            cv::GMat detections = cv::gapi::infer<Faces>(in);
 
-                cv::GArray<cv::Rect> faces = PostProc::on(detections, in,
-                                                          FLAGS_t,
-                                                          FLAGS_bb_enlarge_coef,
-                                                          FLAGS_dx_coef,
-                                                          FLAGS_dy_coef);
-                auto outs = GOut(frame, detections, faces);
+            cv::GArray<cv::Rect> faces = PostProc::on(detections, in,
+                FLAGS_t,
+                FLAGS_bb_enlarge_coef,
+                FLAGS_dx_coef,
+                FLAGS_dy_coef);
+            auto outs = GOut(frame, detections, faces);
 
-                cv::GArray<cv::GMat> ages, genders;
-                if (!FLAGS_m_ag.empty()) {
-                    std::tie(ages, genders) = cv::gapi::infer<AgeGender>(faces, in);
-                    outs += GOut(ages, genders);
-                }
+            cv::GArray<cv::GMat> ages, genders;
+            if (!FLAGS_m_ag.empty()) {
+                std::tie(ages, genders) = cv::gapi::infer<AgeGender>(faces, in);
+                outs += GOut(ages, genders);
+            }
 
-                cv::GArray<cv::GMat> y_fc, p_fc, r_fc;
-                if (!FLAGS_m_hp.empty()) {
-                    std::tie(y_fc, p_fc, r_fc) = cv::gapi::infer<HeadPose>(faces, in);
-                    outs += GOut(y_fc, p_fc, r_fc);
-                }
+            cv::GArray<cv::GMat> y_fc, p_fc, r_fc;
+            if (!FLAGS_m_hp.empty()) {
+                std::tie(y_fc, p_fc, r_fc) = cv::gapi::infer<HeadPose>(faces, in);
+                outs += GOut(y_fc, p_fc, r_fc);
+            }
 
-                cv::GArray<cv::GMat> emotions;
-                if (!FLAGS_m_em.empty()) {
-                    emotions = cv::gapi::infer<Emotions>(faces, in);
-                    outs += GOut(emotions);
-                }
+            cv::GArray<cv::GMat> emotions;
+            if (!FLAGS_m_em.empty()) {
+                emotions = cv::gapi::infer<Emotions>(faces, in);
+                outs += GOut(emotions);
+            }
 
-                cv::GArray<cv::GMat> landmarks;
-                if (!FLAGS_m_lm.empty()) {
-                    landmarks = cv::gapi::infer<FacialLandmark>(faces, in);
-                    outs += GOut(landmarks);
-                }
+            cv::GArray<cv::GMat> landmarks;
+            if (!FLAGS_m_lm.empty()) {
+                landmarks = cv::gapi::infer<FacialLandmark>(faces, in);
+                outs += GOut(landmarks);
+            }
 
-                return cv::GComputation(cv::GIn(in), std::move(outs));
-        });
+            return cv::GComputation(cv::GIn(in), std::move(outs));
+            });
 
         auto det_net = cv::gapi::ie::Params<Faces> {
             FLAGS_m,                         // path to model
             fileNameNoExt(FLAGS_m) + ".bin", // path to weights
             FLAGS_d                          // device to use
         };
+        slog::info << "The Face Detection model  " << FLAGS_m << " is loaded to " << FLAGS_d << " device." << slog::endl;
 
         auto age_net = cv::gapi::ie::Params<AgeGender> {
             FLAGS_m_ag,                         // path to model
             fileNameNoExt(FLAGS_m_ag) + ".bin", // path to weights
             FLAGS_d_ag                          // device to use
         }.cfgOutputLayers({ "age_conv3", "prob" });
-
+        if (!FLAGS_m_ag.empty()) {
+            slog::info << "The Age/Gender Recognition model " << FLAGS_m_ag << " is loaded to " << FLAGS_d_ag << " device." << slog::endl;
+        }
+        else {
+            slog::info << "Age/Gender Recognition DISABLED." << slog::endl;
+        }
 
         auto hp_net = cv::gapi::ie::Params<HeadPose> {
             FLAGS_m_hp,                         // path to model
             fileNameNoExt(FLAGS_m_hp) + ".bin", // path to weights
             FLAGS_d_hp                          // device to use
         }.cfgOutputLayers({ "angle_y_fc", "angle_p_fc", "angle_r_fc" });
+        if (!FLAGS_m_hp.empty()) {
+            slog::info << "The Head Pose Estimation model " << FLAGS_m_hp << " is loaded to " << FLAGS_d_hp << " device." << slog::endl;
+        }
+        else {
+            slog::info << "Head Pose Estimation DISABLED." << slog::endl;
+        }
 
         auto lm_net = cv::gapi::ie::Params<FacialLandmark> {
             FLAGS_m_lm,                        // path to model
             fileNameNoExt(FLAGS_m_lm) + ".bin",// path to weights
             FLAGS_d_lm                         // device to use
         }.cfgOutputLayers({ "align_fc3" });
+        if (!FLAGS_m_lm.empty()) {
+            slog::info << "The Facial Landmarks Estimation model " << FLAGS_m_lm << " is loaded to " << FLAGS_d_lm << " device." << slog::endl;
+        }
+        else {
+            slog::info << "Facial Landmarks Estimation DISABLED." << slog::endl;
+        }
 
         auto emo_net = cv::gapi::ie::Params<Emotions> {
             FLAGS_m_em,                         // path to model
             fileNameNoExt(FLAGS_m_em) + ".bin", // path to weights
             FLAGS_d_em                          // device to use
         };
+        if (!FLAGS_m_em.empty()) {
+            slog::info << "The Emotions Recognition model " << FLAGS_m_em << " is loaded to " << FLAGS_d_em << " device." << slog::endl;
+        }
+        else {
+            slog::info << "Emotions Recognition DISABLED." << slog::endl;
+        }
 
         // Form a kernel package (including an OpenCV-based implementation of our
         // post-processing) and a network package (holding our three networks).
@@ -421,8 +434,6 @@ int main(int argc, char *argv[]) {
         Visualizer::Ptr visualizer;
         if (!FLAGS_no_show || !FLAGS_o.empty()) {
             visualizer = std::make_shared<Visualizer>(!FLAGS_m_ag.empty(), !FLAGS_m_em.empty(), !FLAGS_m_hp.empty(), !FLAGS_m_lm.empty());
-        } else {
-            std::cout<< "To close the application, press 'CTRL+C' here" << std::endl;
         }
 
         std::list<Face::Ptr> faces;
@@ -431,21 +442,19 @@ int main(int argc, char *argv[]) {
         size_t id = 0;
         cv::VideoWriter videoWriter;
 
-        const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
+        const cv::Point THROUGHPUT_METRIC_POSITION{10, 30};
         std::unique_ptr<Presenter> presenter;
 
         Timer timer;
         do {
-            slog::info << "Setting media source" << slog::endl;
             try {
                 setInput(stream, FLAGS_i);
             } catch (const std::exception& error) {
                 std::stringstream msg;
-                msg << "Can't open source {" << FLAGS_i << "}" << std::endl <<
-                    error.what() << std::endl;
+                msg << "Can't open source {" << FLAGS_i << "}" <<
+                    std::endl << error.what() << std::endl;
                 throw std::invalid_argument(msg.str());
             }
-            slog::info << "Start inference " << slog::endl;
 
             timer.start("total");
             stream.start();
@@ -515,10 +524,11 @@ int main(int argc, char *argv[]) {
                 //  Visualizing results
                 if (!FLAGS_no_show || !FLAGS_o.empty()) {
                     out.str("");
-                    out << "Total image throughput: " << std::fixed << std::setprecision(2)
-                        << 1000.f / (timer["total"].getSmoothedDuration()) << " fps";
-                    cv::putText(frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_TRIPLEX, 1,
-                                cv::Scalar(255, 0, 0), 2);
+                    out << "FPS: " << std::fixed << std::setprecision(1)
+                        << 1000.0 / (timer["total"].getSmoothedDuration());
+
+                    putHighlightedText(frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_COMPLEX, 0.65,
+                        cv::Scalar(255, 0, 0), 2);
 
                     // drawing faces
                     visualizer->draw(frame, faces);
@@ -532,11 +542,11 @@ int main(int argc, char *argv[]) {
                         presenter->handleKey(key);
                     }
                 }
-
-                if (!FLAGS_o.empty() && !videoWriter.isOpened()) {
-                    videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'), 25, cv::Size(frame.size()));
+                if (!FLAGS_o.empty() && framesCounter == 0 &&
+                    !videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 25, frame.size())) {
+                    throw std::runtime_error("Can't open video writer");
                 }
-                if (!FLAGS_o.empty()) {
+                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesCounter <= FLAGS_limit - 1)) {
                     videoWriter.write(frame);
                 }
 
@@ -545,17 +555,12 @@ int main(int argc, char *argv[]) {
             }
             timer.finish("total");
 
-            slog::info << "Number of processed frames: " << framesCounter << slog::endl;
-            slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
-
-            std::cout << presenter->reportMeans() << '\n';
+            //// --------------------------- Report metrics -------------------------------------------------------
+            slog::info << "Metrics report:" << slog::endl;
+            slog::info << "\tNumber of processed frames: " << framesCounter << slog::endl;
+            slog::info << "\tFPS: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << slog::endl;
+            slog::info << presenter->reportMeans() << slog::endl;
         } while (FLAGS_loop);
-
-        slog::info << "No more frames to process!" << slog::endl;
-
-        if (!FLAGS_o.empty()) {
-            videoWriter.release();
-        }
 
         cv::destroyAllWindows();
     }
@@ -568,6 +573,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << "Execution successful" << slog::endl;
     return 0;
 }

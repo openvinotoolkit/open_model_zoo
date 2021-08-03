@@ -15,6 +15,9 @@
 
 #include <inference_engine.hpp>
 
+#include <utils/slog.hpp>
+#include <utils/common.hpp>
+
 using namespace InferenceEngine;
 
 CnnBase::CnnBase(const Config& config,
@@ -32,7 +35,7 @@ void CnnBase::Load() {
     InferenceEngine::InputsDataMap in;
     in = cnnNetwork.getInputsInfo();
     if (in.size() != 1) {
-        THROW_IE_EXCEPTION << "Network should have only one input";
+        throw std::runtime_error("Network should have only one input");
     }
 
     SizeVector inputDims = in.begin()->second->getTensorDesc().getDims();
@@ -54,6 +57,8 @@ void CnnBase::Load() {
     }
 
     executable_network_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
+    printExecNetworkInfo(executable_network_, config_.path_to_model, deviceName_, modelType);
+    slog::info << "\tBatch size is set to " << config_.max_batch_size << slog::endl;
     infer_request_ = executable_network_.CreateInferRequest();
     infer_request_.SetInput(inputs);
     infer_request_.SetOutput(outputs_);
@@ -77,11 +82,6 @@ void CnnBase::InferBatch(
     }
 }
 
-void CnnBase::PrintPerformanceCounts(std::string fullDeviceName) const {
-    std::cout << "Performance counts for " << config_.path_to_model << std::endl << std::endl;
-    ::printPerformanceCounts(infer_request_, std::cout, fullDeviceName, false);
-}
-
 void CnnBase::Infer(const cv::Mat& frame,
                     const std::function<void(const InferenceEngine::BlobMap&, size_t)>& fetch_results) const {
     InferBatch({frame}, fetch_results);
@@ -94,7 +94,7 @@ VectorCNN::VectorCNN(const Config& config,
     Load();
 
     if (outputs_.size() != 1) {
-        THROW_IE_EXCEPTION << "Demo supports topologies only with 1 output";
+        throw std::runtime_error("Demo supports topologies only with 1 output");
     }
 
     InferenceEngine::SizeVector dims = outInfo_.begin()->second->getTensorDesc().getDims();
@@ -118,7 +118,7 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
         for (auto&& item : outputs) {
             InferenceEngine::Blob::Ptr blob = item.second;
             if (blob == nullptr) {
-                THROW_IE_EXCEPTION << "VectorCNN::Compute() Invalid blob '" << item.first << "'";
+                throw std::runtime_error("VectorCNN::Compute() Invalid blob '" + item.first + "'");
             }
             InferenceEngine::SizeVector ie_output_dims = blob->getTensorDesc().getDims();
             std::vector<int> blob_sizes(ie_output_dims.size(), 0);

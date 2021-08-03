@@ -43,11 +43,6 @@ public:
     virtual void Compute(const std::vector<cv::Mat> &mats,
                          std::vector<cv::Mat> *descrs) = 0;
 
-    ///
-    /// \brief Prints performance counts for CNN-based descriptors
-    ///
-    virtual void PrintPerformanceCounts(std::string fullDeviceName) const {}
-
     virtual ~IImageDescriptor() {}
 };
 
@@ -142,9 +137,5 @@ public:
     void Compute(const std::vector<cv::Mat> &mats,
                  std::vector<cv::Mat> *descrs) override {
         handler.Compute(mats, descrs);
-    }
-
-    void PrintPerformanceCounts(std::string fullDeviceName) const override {
-        handler.PrintPerformanceCounts(fullDeviceName);
     }
 };

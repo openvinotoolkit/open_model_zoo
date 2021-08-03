@@ -40,6 +40,8 @@ class GTMaskLoader(Enum):
     NUMPY = 4
     NIFTI_CHANNELS_FIRST = 5
     PILLOW_CONVERT_TO_RGB = 6
+    OPENCV_UNCHANGED = 7
+    OPENCV_GRAY = 8
 
 
 LOADERS_MAPPING = {
@@ -49,7 +51,9 @@ LOADERS_MAPPING = {
     'scipy': GTMaskLoader.SCIPY,
     'nifti': GTMaskLoader.NIFTI,
     'nifti_channels_first': GTMaskLoader.NIFTI_CHANNELS_FIRST,
-    'numpy': GTMaskLoader.NUMPY
+    'numpy': GTMaskLoader.NUMPY,
+    'opencv_unchanged': GTMaskLoader.OPENCV_UNCHANGED,
+    'opencv_gray': GTMaskLoader.OPENCV_GRAY
 }
 
 
@@ -65,7 +69,9 @@ class SegmentationAnnotation(SegmentationRepresentation):
         GTMaskLoader.SCIPY: 'scipy_imread',
         GTMaskLoader.NIFTI: 'nifti_reader',
         GTMaskLoader.NIFTI_CHANNELS_FIRST: {'type': 'nifti_reader', 'channels_first': True},
-        GTMaskLoader.NUMPY: 'numpy_reader'
+        GTMaskLoader.NUMPY: 'numpy_reader',
+        GTMaskLoader.OPENCV_UNCHANGED: {'type': 'opencv_imread', 'reading_flag': 'unchanged'},
+        GTMaskLoader.OPENCV_GRAY: {'type': 'opencv_imread', 'reading_flag': 'gray'}
     }
 
     def __init__(self, identifier, path_to_mask, mask_loader=GTMaskLoader.PILLOW):
@@ -317,7 +323,7 @@ class CoCoInstanceSegmentationAnnotation(CoCoInstanceSegmentationRepresentation)
     pass
 
 
-class CoCocInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation):
+class CoCoInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation):
 
     def __init__(self, identifier, mask, labels, scores):
         super().__init__(identifier, mask, labels)
@@ -364,5 +370,30 @@ class OAR3DTilingSegmentationAnnotation(SegmentationAnnotation):
 class SalientRegionAnnotation(SegmentationAnnotation):
     pass
 
+
 class SalientRegionPrediction(SegmentationPrediction):
     pass
+
+
+class BackgroundMattingAnnotation(SegmentationAnnotation):
+    def __init__(self, identifier, path_to_mask, mask_to_gray=False):
+        super().__init__(
+            identifier, path_to_mask,
+            GTMaskLoader.OPENCV_UNCHANGED if not mask_to_gray else GTMaskLoader.OPENCV_GRAY
+        )
+
+    def _load_mask(self):
+        mask = super()._load_mask()
+        if np.ndim(mask) == 3 and mask.shape[-1] == 4:
+            mask = mask[:, :, -1]
+        return mask
+
+    @property
+    def value(self):
+        return self.mask
+
+
+class BackgroundMattingPrediction(SegmentationPrediction):
+    @property
+    def value(self):
+        return self.mask

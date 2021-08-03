@@ -57,7 +57,7 @@ void FaceDetection::submitRequest() {
 
 void FaceDetection::enqueue(const cv::Mat &frame) {
     if (!request) {
-        request = net_.CreateInferRequestPtr();
+        request = std::make_shared<InferenceEngine::InferRequest>(net_.CreateInferRequest());
     }
 
     width_ = static_cast<float>(frame.cols);
@@ -72,12 +72,12 @@ void FaceDetection::enqueue(const cv::Mat &frame) {
 
 FaceDetection::FaceDetection(const DetectorConfig& config) :
         BaseCnnDetection(config.is_async), config_(config) {
-    topoName = "face detector";
+    topoName = "Face Detection";
     auto cnnNetwork = config.ie.ReadNetwork(config.path_to_model);
 
     InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
-        THROW_IE_EXCEPTION << "Face Detection network should have only one input";
+        throw std::runtime_error("Face Detection network should have only one input");
     }
     InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
     inputInfoFirst->setPrecision(Precision::U8);
@@ -92,7 +92,7 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
 
     OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     if (outputInfo.size() != 1) {
-        THROW_IE_EXCEPTION << "Face Detection network should have only one output";
+        throw std::runtime_error("Face Detection network should have only one output");
     }
     DataPtr& _output = outputInfo.begin()->second;
     output_name_ = outputInfo.begin()->first;
@@ -101,17 +101,18 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
     max_detections_count_ = outputDims[2];
     object_size_ = outputDims[3];
     if (object_size_ != 7) {
-        THROW_IE_EXCEPTION << "Face Detection network output layer should have 7 as a last dimension";
+        throw std::runtime_error("Face Detection network output layer should have 7 as a last dimension");
     }
     if (outputDims.size() != 4) {
-        THROW_IE_EXCEPTION << "Face Detection network output dimensions not compatible shoulld be 4, but was " +
-                              std::to_string(outputDims.size());
+        throw std::runtime_error("Face Detection network output should have 4 dimensions, but had " +
+                              std::to_string(outputDims.size()));
     }
     _output->setPrecision(Precision::FP32);
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
     input_name_ = inputInfo.begin()->first;
     net_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
+    printExecNetworkInfo(net_, config_.path_to_model, config_.deviceName, topoName);
 }
 
 DetectedObjects FaceDetection::fetchResults() {

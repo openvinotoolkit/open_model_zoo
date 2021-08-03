@@ -5,8 +5,7 @@
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 
-ie_add_sample(NAME security_barrier_camera_demo
-              SOURCES ${SOURCES}
-              HEADERS ${HEADERS}
-              DEPENDENCIES monitors
-              OPENCV_DEPENDENCIES core highgui videoio)
+add_demo(NAME security_barrier_camera_demo
+    SOURCES ${SOURCES}
+    HEADERS ${HEADERS}
+    DEPENDENCIES monitors utils)

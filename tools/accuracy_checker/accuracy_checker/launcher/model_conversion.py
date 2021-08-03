@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 import sys
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 from pathlib import Path
 from typing import Union
 from collections import namedtuple

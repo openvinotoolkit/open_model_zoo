@@ -17,6 +17,7 @@
 from collections import deque
 from itertools import cycle
 
+import logging as log
 import cv2
 import numpy as np
 
@@ -79,20 +80,20 @@ class AsyncWrapper:
 
 
 class IEModel:
-    def __init__(self, model_xml, model_bin, ie_core, target_device, num_requests, batch_size=1):
-        print("Reading IR...")
-        self.net = ie_core.read_network(model_xml, model_bin)
+    def __init__(self, model_path, ie_core, target_device, num_requests, model_type, batch_size=1):
+        log.info('Reading {} model {}'.format(model_type, model_path))
+        self.net = ie_core.read_network(model_path)
         self.net.batch_size = batch_size
         assert len(self.net.input_info) == 1, "One input is expected"
         assert len(self.net.outputs) == 1, "One output is expected"
 
-        print("Loading IR to the plugin...")
         self.exec_net = ie_core.load_network(network=self.net, device_name=target_device, num_requests=num_requests)
         self.input_name = next(iter(self.net.input_info))
         self.output_name = next(iter(self.net.outputs))
         self.input_size = self.net.input_info[self.input_name].input_data.shape
         self.output_size = self.exec_net.requests[0].output_blobs[self.output_name].buffer.shape
         self.num_requests = num_requests
+        log.info('The {} model {} is loaded to {}'.format(model_type, model_path, target_device))
 
     def infer(self, frame):
         input_data = {self.input_name: frame}
@@ -112,7 +113,7 @@ class IEModel:
 class DummyDecoder:
     def __init__(self, num_requests=2):
         self.num_requests = num_requests
-        self.requests = dict()
+        self.requests = {}
 
     @staticmethod
     def _average(model_input):

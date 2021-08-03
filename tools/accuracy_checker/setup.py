@@ -20,7 +20,7 @@ import re
 import sys
 import warnings
 import platform
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 from setuptools import find_packages, setup
 from setuptools.command.test import test as test_command
 from setuptools.command.install import install as install_command
@@ -48,7 +48,7 @@ class PyTest(test_command):
 
 def read(*path):
     input_file = os.path.join(here, *path)
-    with open(str(input_file)) as file:
+    with open(str(input_file), encoding='utf-8') as file:
         return file.read()
 
 
@@ -59,12 +59,14 @@ def check_and_update_numpy(min_acceptable='1.15'):
     except ImportError:
         update_required = True
     if update_required:
-        subprocess.call(['pip3', 'install', 'numpy>={}'.format(min_acceptable)])
+        subprocess.call([sys.executable, '-m', 'pip', 'install', 'numpy>={}'.format(min_acceptable)])
 
 
 def install_dependencies_with_pip(dependencies):
     for dep in dependencies:
-        subprocess.call(['pip3', 'install', str(dep)])
+        if dep.startswith('#'):
+            continue
+        subprocess.call([sys.executable, '-m', 'pip', 'install', str(dep)])
 
 
 class CoreInstall(install_command):
@@ -124,5 +126,7 @@ setup(
     python_requires='>=3.5',
     install_requires=requirements if not is_arm else '',
     tests_require=[read("requirements-test.in")],
-    cmdclass={'test': PyTest, 'install_core': CoreInstall}
+    cmdclass={'test': PyTest, 'install_core': CoreInstall},
+    extras_require={'extra': ['pycocotools>=2.0.2', 'torch>=0.4.0', 'torchvision>=0.2.1', 'lpips',
+                              'kenlm @ git+https://github.com/kpu/kenlm.git#egg=kenlm']}
 )

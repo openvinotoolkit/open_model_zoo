@@ -11,7 +11,6 @@
  limitations under the License.
 """
 
-import cv2
 import numpy as np
 
 
@@ -27,7 +26,6 @@ class ImageInpainting:
 
         self._ie = ie
         self._exec_model = self._ie.load_network(model, device)
-        self.infer_time = -1
 
         _, channels, input_height, input_width = model.input_info[self._input_layer_names[0]].input_data.shape
         assert channels == 3, "Expected 3-channel input"
@@ -41,9 +39,7 @@ class ImageInpainting:
 
 
     def infer(self, image, mask):
-        t0 = cv2.getTickCount()
         output = self._exec_model.infer(inputs={self._input_layer_names[0]: image, self._input_layer_names[1]: mask})
-        self.infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()
         return output[self._output_layer_name]
 
 

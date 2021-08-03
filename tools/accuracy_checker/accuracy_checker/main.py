@@ -14,21 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import json
 import sys
 from datetime import datetime
 from pathlib import Path
 from argparse import ArgumentParser
 from functools import partial
-from csv import DictWriter
 
 import cv2
 
 from .config import ConfigReader
 from .logging import print_info, add_file_handler, exception
 from .evaluators import ModelEvaluator, ModuleEvaluator
+from .presenters import write_csv_result
 from .progress_reporters import ProgressReporter
-from .utils import get_path, cast_to_bool, check_file_existence, validate_print_interval
+from .utils import (
+    get_path,
+    cast_to_bool,
+    validate_print_interval,
+    start_telemetry,
+    end_telemetry,
+    send_telemetry_event
+)
 from . import __version__
+
 
 EVALUATION_MODE = {
     'models': ModelEvaluator,
@@ -53,7 +62,7 @@ def add_common_args(parser):
     common_args.add_argument(
         '-m', '--models',
         help='prefix path to the models and weights',
-        type=partial(get_path, is_directory=True),
+        type=partial(get_path, file_or_directory=True),
         required=False,
         nargs='+'
     )
@@ -193,7 +202,7 @@ def add_tool_settings_args(parser):
     )
     tool_settings_args.add_argument(
         '--intermediate_metrics_results',
-        help='enables intermediate metrics results printing',
+        help='enables intermediate metrics results printing or saving',
         type=cast_to_bool,
         default=False,
         required=False
@@ -214,6 +223,13 @@ def add_tool_settings_args(parser):
     tool_settings_args.add_argument(
         '-l', '--log_file',
         help='file for additional logging results',
+        required=False
+    )
+    tool_settings_args.add_argument(
+        '--ignore_metric_reference',
+        help='allow to ignore comparison of metric with reference value',
+        type=cast_to_bool,
+        default=False,
         required=False
     )
 
@@ -336,6 +352,14 @@ def add_openvino_specific_args(parser):
         help='the number of infer requests',
         required=False
     )
+    openvino_specific_args.add_argument(
+        '--kaldi_bin_dir', help='directory with Kaldi utility binaries. Required only for Kaldi models decoding.',
+        required=False, type=partial(get_path, is_directory=True)
+    )
+    openvino_specific_args.add_argument(
+        '--kaldi_log_file', help='path for saving logs from Kaldi tools', type=partial(get_path, check_exists=False),
+        required=False
+    )
 
 
 def build_arguments_parser():
@@ -360,49 +384,65 @@ def build_arguments_parser():
 def main():
     return_code = 0
     args = build_arguments_parser().parse_args()
+    tm = start_telemetry()
     progress_bar_provider = args.progress if ':' not in args.progress else args.progress.split(':')[0]
     progress_reporter = ProgressReporter.provide(progress_bar_provider, None, print_interval=args.progress_interval)
     if args.log_file:
         add_file_handler(args.log_file)
-    intermdeiate_metrics = args.intermediate_metrics_results
-    evaluator_kwargs = {}
-    if intermdeiate_metrics:
-        validate_print_interval(args.metrics_interval)
-        evaluator_kwargs['intermediate_metrics_results'] = intermdeiate_metrics
-        evaluator_kwargs['metrics_interval'] = args.metrics_interval
-        evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
-    evaluator_kwargs['store_only'] = args.store_only
+    evaluator_kwargs = configure_evaluator_kwargs(args)
+    details = {
+        'mode': "online" if not args.store_only else "offline",
+        'metric_profiling': args.profile or False,
+        'error': None
+    }
 
     config, mode = ConfigReader.merge(args)
     evaluator_class = EVALUATION_MODE.get(mode)
     if not evaluator_class:
+        send_telemetry_event(tm, 'error', 'Unknown evaluation mode')
+        end_telemetry(tm)
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
-        config_entry['_store_only'] = args.store_only
-        config_entry['_stored_data'] = args.stored_predictions
+        details.update({'status': 'started', "error": None})
+        send_telemetry_event(tm, 'status', 'started')
+        config_entry.update({
+            '_store_only': args.store_only,
+            '_stored_data': args.stored_predictions
+        })
         try:
             processing_info = evaluator_class.get_processing_info(config_entry)
             print_processing_info(*processing_info)
             evaluator = evaluator_class.from_configs(config_entry)
+            details.update(evaluator.send_processing_info(tm))
             if args.profile:
-                _timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-                profiler_dir = args.profiler_logs_dir / _timestamp
-                print_info('Metric profiling activated. Profiler output will be stored in {}'.format(profiler_dir))
-                evaluator.set_profiling_dir(profiler_dir)
+                setup_profiling(args.profiler_logs_dir, evaluator)
+            send_telemetry_event(tm, 'model_run', json.dumps(details))
             evaluator.process_dataset(
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
             )
             if not args.store_only:
-                metrics_results, _ = evaluator.extract_metrics_results(
-                    print_results=True, ignore_results_formatting=args.ignore_result_formatting
+                metrics_results, metrics_meta = evaluator.extract_metrics_results(
+                    print_results=True, ignore_results_formatting=args.ignore_result_formatting,
+                    ignore_metric_reference=args.ignore_metric_reference
                 )
                 if args.csv_result:
-                    write_csv_result(args.csv_result, processing_info, metrics_results)
+                    write_csv_result(
+                        args.csv_result, processing_info, metrics_results, evaluator.dataset_size, metrics_meta
+                    )
             evaluator.release()
+            details['status'] = 'finished'
+            send_telemetry_event(tm, 'status', 'success')
+            send_telemetry_event(tm, 'model_run', json.dumps(details))
+
         except Exception as e:  # pylint:disable=W0703
+            details['status'] = 'error'
+            details['error'] = str(type(e))
+            send_telemetry_event(tm, 'status', 'failure')
+            send_telemetry_event(tm, 'model_run', json.dumps(details))
             exception(e)
             return_code = 1
             continue
+        end_telemetry(tm)
     sys.exit(return_code)
 
 
@@ -417,29 +457,24 @@ def print_processing_info(model, launcher, device, tags, dataset):
     print_info('OpenCV version: {}'.format(cv2.__version__))
 
 
-def write_csv_result(csv_file, processing_info, metric_results):
-    new_file = not check_file_existence(csv_file)
-    field_names = ['model', 'launcher', 'device', 'dataset', 'tags', 'metric_name', 'metric_type', 'metric_value']
-    model, launcher, device, tags, dataset = processing_info
-    main_info = {
-        'model': model,
-        'launcher': launcher,
-        'device': device.upper(),
-        'tags': ' '.join(tags) if tags else '',
-        'dataset': dataset
-    }
+def setup_profiling(logs_dir, evaluator):
+    _timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    profiler_dir = logs_dir / _timestamp
+    print_info('Metric profiling activated. Profiler output will be stored in {}'.format(profiler_dir))
+    evaluator.set_profiling_dir(profiler_dir)
 
-    with open(csv_file, 'a+', newline='') as f:
-        writer = DictWriter(f, fieldnames=field_names)
-        if new_file:
-            writer.writeheader()
-        for metric_result in metric_results:
-            writer.writerow({
-                **main_info,
-                'metric_name': metric_result['name'],
-                'metric_type': metric_result['type'],
-                'metric_value': metric_result['value']
-            })
+
+def configure_evaluator_kwargs(args):
+    evaluator_kwargs = {}
+    if args.intermediate_metrics_results:
+        validate_print_interval(args.metrics_interval)
+        evaluator_kwargs['intermediate_metrics_results'] = args.intermediate_metrics_results
+        evaluator_kwargs['metrics_interval'] = args.metrics_interval
+        evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
+        evaluator_kwargs['csv_result'] = args.csv_result
+    evaluator_kwargs['store_only'] = args.store_only
+    evaluator_kwargs['ignore_metric_reference'] = args.ignore_metric_reference
+    return evaluator_kwargs
 
 
 if __name__ == '__main__':

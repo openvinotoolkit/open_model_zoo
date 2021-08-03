@@ -16,7 +16,6 @@
 #include <inference_engine.hpp>
 #include <gflags/gflags.h>
 #include <pipelines/async_pipeline.h>
-#include <pipelines/config_factory.h>
 #include <pipelines/metadata.h>
 #include <models/classification_model.h>
 #include <utils/common.hpp>
@@ -34,7 +33,7 @@ static const char labels_message[] = "Required. Path to .txt file with labels.";
 static const char gt_message[] = "Optional. Path to ground truth .txt file.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available "
                                             "devices is shown below). Default value is CPU. "
-                                            "Sample will look for a suitable plugin for device specified.";
+                                            "The demo will look for a suitable plugin for device specified.";
 static const char num_threads_message[] = "Optional. Specify count of threads.";
 static const char num_streams_message[] = "Optional. Specify count of streams.";
 static const char num_inf_req_message[] = "Optional. Number of infer requests.";
@@ -45,8 +44,7 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
                                            "Absolute path to the .xml file with kernels description.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers."
                                                  "Absolute path to a shared library with the kernels implementation.";
-static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
-static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
+static const char input_resizable_message[] = "Optional. Enables resizable input.";
 static const char no_show_message[] = "Optional. Disable showing of processed images.";
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. "
                                              "Default is -1 (infinite time).";
@@ -66,7 +64,6 @@ DEFINE_string(res, "1280x720", image_grid_resolution_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
-DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_uint32(time, std::numeric_limits<gflags::uint32>::max(), execution_time_message);
 DEFINE_string(u, "", utilization_monitors_message);
@@ -82,7 +79,6 @@ static void showUsage() {
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
-    std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
     std::cout << "    -gt \"<path>\"              " << gt_message << std::endl;
@@ -105,7 +101,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -131,9 +126,7 @@ cv::Mat centerSquareCrop(const cv::Mat& image) {
 
 int main(int argc, char *argv[]) {
     try {
-        PerformanceMetrics metrics;
-
-        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+        PerformanceMetrics metrics, readerMetrics, renderMetrics;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -141,7 +134,6 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        slog::info << "Reading input" << slog::endl;
         std::vector<std::string> imageNames;
         std::vector<cv::Mat> inputImages;
         parseInputFilesArguments(imageNames);
@@ -149,13 +141,16 @@ int main(int argc, char *argv[]) {
         std::sort(imageNames.begin(), imageNames.end());
         for (size_t i = 0; i < imageNames.size(); i++) {
             const std::string& name = imageNames[i];
+            auto readingStart = std::chrono::steady_clock::now();
             const cv::Mat& tmpImage = cv::imread(name);
             if (tmpImage.data == nullptr) {
-                std::cerr << "Could not read image " << name << '\n';
+                slog::err << "Could not read image " << name << slog::endl;
                 imageNames.erase(imageNames.begin() + i);
                 i--;
             } else {
-                inputImages.push_back(tmpImage);
+                readerMetrics.update(readingStart);
+                // Clone cropped image to keep memory layout dense to enable -auto_resize
+                inputImages.push_back(centerSquareCrop(tmpImage).clone());
                 size_t lastSlashIdx = name.find_last_of("/\\");
                 if (lastSlashIdx != std::string::npos) {
                     imageNames[i] = name.substr(lastSlashIdx + 1);
@@ -210,9 +205,10 @@ int main(int argc, char *argv[]) {
                 }
         }
 
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core core;
         AsyncPipeline pipeline(std::unique_ptr<ModelBase>(new ClassificationModel(FLAGS_m, FLAGS_nt, FLAGS_auto_resize, labels)),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
 
         Presenter presenter(FLAGS_u, 0);
@@ -226,7 +222,6 @@ int main(int argc, char *argv[]) {
             height = std::stoi(gridMatRowsCols[1]);
         }
         GridMat gridMat(presenter, cv::Size(width, height));
-
         bool keepRunning = true;
         std::unique_ptr<ResultBase> result;
         double accuracy = 0;
@@ -259,10 +254,9 @@ int main(int argc, char *argv[]) {
 
             if (pipeline.isReadyToProcess()) {
                 auto imageStartTime = std::chrono::steady_clock::now();
-                cv::Mat curr_frame = centerSquareCrop(inputImages[nextImageIndex]);
 
-                pipeline.submitData(ImageInputData(curr_frame),
-                    std::make_shared<ClassificationImageMetaData>(curr_frame, imageStartTime, classIndices[nextImageIndex]));
+                pipeline.submitData(ImageInputData(inputImages[nextImageIndex]),
+                    std::make_shared<ClassificationImageMetaData>(inputImages[nextImageIndex], imageStartTime, classIndices[nextImageIndex]));
                 nextImageIndex++;
                 if (nextImageIndex == imageNames.size()) {
                     nextImageIndex = 0;
@@ -274,6 +268,7 @@ int main(int argc, char *argv[]) {
 
             //--- Checking for results and rendering data if it's ready
             while ((result = pipeline.getResult(false)) && keepRunning) {
+                auto renderingStart = std::chrono::steady_clock::now();
                 const ClassificationResult& classificationResult = result->asRef<ClassificationResult>();
                 if (!classificationResult.metaData) {
                     throw std::invalid_argument("Renderer: metadata is null");
@@ -304,6 +299,7 @@ int main(int argc, char *argv[]) {
                 accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
                 gridMat.textUpdate(metrics, classificationResult.metaData->asRef<ImageMetaData>().timeStamp, accuracy, FLAGS_nt, isTestMode,
                                    !FLAGS_gt.empty(), presenter);
+                renderMetrics.update(renderingStart);
                 elapsedSeconds = std::chrono::steady_clock::now() - startTime;
                 if (!FLAGS_no_show) {
                     cv::imshow("classification_demo", gridMat.outImg);
@@ -311,6 +307,15 @@ int main(int argc, char *argv[]) {
                     int key = cv::waitKey(1);
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                         keepRunning = false;
+                    }
+                    else if (32 == key || 'r' == key || 'R' == key) {  // press space or r to restart testing if needed
+                        isTestMode = true;
+                        framesNum = 0;
+                        framesNumOnCalculationStart = 0;
+                        correctPredictionsCount = 0;
+                        accuracy = 0;
+                        elapsedSeconds = std::chrono::steady_clock::duration(0);
+                        startTime = std::chrono::steady_clock::now();
                     }
                     else {
                         presenter.handleKey(key);
@@ -320,13 +325,15 @@ int main(int argc, char *argv[]) {
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << slog::endl << "Metric reports:" << slog::endl;
+        slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
-        if (!FLAGS_gt.empty()) {
-            std::cout << "Accuracy (top " << FLAGS_nt << "): " << accuracy << std::endl;
-        }
-        std::cout << presenter.reportMeans() << std::endl;
+        printStagesLatency(readerMetrics.getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
+            pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
+            renderMetrics.getTotal().latency);
 
+        if (!FLAGS_gt.empty()) {
+            slog::info << "Accuracy (top " << FLAGS_nt << "): " << accuracy << slog::endl;
+        }
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
@@ -338,6 +345,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
     return 0;
 }

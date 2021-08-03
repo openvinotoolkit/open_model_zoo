@@ -18,14 +18,20 @@ import cv2
 import numpy as np
 
 from .model import Model
+from .utils import load_labels
 
 
 class SegmentationModel(Model):
-    def __init__(self, ie, model_path):
+    def __init__(self, ie, model_path, labels=None):
         super().__init__(ie, model_path)
 
         self.input_blob_name = self.prepare_inputs()
         self.out_blob_name = self.prepare_outputs()
+
+        if isinstance(labels, (list, tuple)):
+            self.labels = labels
+        else:
+            self.labels = load_labels(labels) if labels else None
 
     def prepare_inputs(self):
         if len(self.net.input_info) != 1:
@@ -50,7 +56,6 @@ class SegmentationModel(Model):
 
         blob_name = next(iter(self.net.outputs))
         blob = self.net.outputs[blob_name]
-        blob.precision = "FP32"
 
         out_size = blob.shape
         if len(out_size) == 3:
@@ -82,5 +87,16 @@ class SegmentationModel(Model):
         else:
             result = np.argmax(predictions, axis=0).astype(np.uint8)
 
+        result = cv2.resize(result, (input_image_width, input_image_height), 0, 0, interpolation=cv2.INTER_NEAREST)
+        return result
+
+
+class SalientObjectDetectionModel(SegmentationModel):
+
+    def postprocess(self, outputs, meta):
+        input_image_height = meta['original_shape'][0]
+        input_image_width = meta['original_shape'][1]
+        result = outputs[self.out_blob_name].squeeze()
+        result = 1/(1 + np.exp(-result))
         result = cv2.resize(result, (input_image_width, input_image_height), 0, 0, interpolation=cv2.INTER_NEAREST)
         return result

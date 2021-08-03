@@ -13,16 +13,16 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-
 import numpy as np
 
 from .model import Model
-from .utils import Detection, resize_image, load_labels
+from .utils import Detection, resize_image, load_labels, clip_detections
 
 
 class SSD(Model):
-    def __init__(self, ie, model_path, labels=None, keep_aspect_ratio_resize=False):
-        super().__init__(ie, model_path)
+    def __init__(self, ie, model_path, input_transform, labels=None,
+        keep_aspect_ratio_resize=False, threshold=0.5):
+        super().__init__(ie, model_path, input_transform)
 
         self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
         if isinstance(labels, (list, tuple)):
@@ -30,6 +30,7 @@ class SSD(Model):
         else:
             self.labels = load_labels(labels) if labels else None
 
+        self.threshold = threshold
         self.image_blob_name, self.image_info_blob_name = self._get_inputs()
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
 
@@ -53,21 +54,21 @@ class SSD(Model):
     def _get_output_parser(self, net, image_blob_name, bboxes='bboxes', labels='labels', scores='scores'):
         try:
             parser = SingleOutputParser(net.outputs)
-            self.logger.info('Use SingleOutputParser')
+            self.logger.debug('\tUsing SSD model with single output parser')
             return parser
         except ValueError:
             pass
 
         try:
             parser = MultipleOutputParser(net.outputs, bboxes, scores, labels)
-            self.logger.info('Use MultipleOutputParser')
+            self.logger.debug('\tUsing SSD model with multiple output parser')
             return parser
         except ValueError:
             pass
 
         try:
             parser = BoxesLabelsParser(net.outputs, net.input_info[image_blob_name].input_data.shape[2:][::-1])
-            self.logger.info('Use BoxesLabelsParser')
+            self.logger.debug('\tUsing SSD model with "boxes-labels" output parser')
             return parser
         except ValueError:
             pass
@@ -84,6 +85,7 @@ class SSD(Model):
         if h != self.h or w != self.w:
             resized_image = np.pad(resized_image, ((0, self.h - h), (0, self.w - w), (0, 0)),
                                    mode='constant', constant_values=0)
+        resized_image = self.input_transform(resized_image)
         resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
         resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
 
@@ -94,6 +96,7 @@ class SSD(Model):
 
     def postprocess(self, outputs, meta):
         detections = self.output_parser(outputs)
+        detections = [d for d in detections if d.score > self.threshold]
         orginal_image_shape = meta['original_shape']
         resized_image_shape = meta['resized_shape']
         scale_x = self.w / resized_image_shape[1] * orginal_image_shape[1]
@@ -103,7 +106,7 @@ class SSD(Model):
             detection.xmax *= scale_x
             detection.ymin *= scale_y
             detection.ymax *= scale_y
-        return detections
+        return clip_detections(detections, orginal_image_shape)
 
 
 def find_layer_by_name(name, layers):

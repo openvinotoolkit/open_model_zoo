@@ -18,12 +18,18 @@ import unicodedata
 
 from collections import OrderedDict
 from ..config import ConfigError
-from ..utils import contains_all, UnsupportedPackage
+from ..utils import contains_all, UnsupportedPackage, contains_any
 
 try:
     import sentencepiece as spm
 except ImportError as import_error:
     spm = UnsupportedPackage("sentencepiece", import_error.msg)
+
+
+try:
+    from transformers import AutoTokenizer
+except ImportError as import_error:
+    AutoTokenizer = UnsupportedPackage('transformers', import_error.msg)
 
 
 SPIECE_UNDERLINE = '\N{LOWER ONE EIGHTH BLOCK}'
@@ -49,33 +55,12 @@ CLS_ID = special_symbols["<cls>"]
 SEP_ID = special_symbols["<sep>"]
 MASK_ID = special_symbols["<mask>"]
 EOD_ID = special_symbols["<eod>"]
-
+SOS_ID = special_symbols['<s>']
+EOS_ID = special_symbols['</s>']
 
 WORD_PIECE_PARAMETERS = ['vocab_file']
 SENTENCE_PIECE_PARAMETERS = ['sentence_piece_model_file']
-
-
-def get_tokenizer(config, lower_case):
-    tokenizer = None
-    if contains_all(config, WORD_PIECE_PARAMETERS + SENTENCE_PIECE_PARAMETERS):
-        raise ConfigError(
-            'tokenization method can not be understood correctly from parameters, please provide: \n'
-            'for WordPiece tokenization - {}\nfor SentencePiece tokenization - {}\n'.format(
-                ', '.join(WORD_PIECE_PARAMETERS), ', '.join(SENTENCE_PIECE_PARAMETERS))
-        )
-    if contains_all(config, WORD_PIECE_PARAMETERS):
-        tokenizer = WordPieceTokenizer(config['vocab_file'], lower_case)
-
-    if contains_all(config, SENTENCE_PIECE_PARAMETERS):
-        tokenizer = SentencePieceTokenizer(config['sentence_piece_model_file'], lower_case)
-
-    if tokenizer is None:
-        raise ConfigError(
-            'tokenization parameters is not found, please provide: \n'
-            'for WordPiece tokenization - {}\nfor SentencePiece tokenization - {}\n'.format(
-                ', '.join(WORD_PIECE_PARAMETERS), ', '.join(SENTENCE_PIECE_PARAMETERS))
-        )
-    return tokenizer
+HUGGINGFACE_PARAMETERS = ['model_id', 'tokenizer_dir']
 
 
 class WordPieceTokenizer:
@@ -120,7 +105,6 @@ class WordPieceTokenizer:
             i += 1
 
         return ["".join(x) for x in output]
-
 
     @staticmethod
     def basic_tokenizer(text, lower_case=True, tokenize_chinese_chars=True, never_split=None):
@@ -522,7 +506,6 @@ class SquadWordPieseTokenizer(WordPieceTokenizer):
             tokens.append(self._convert_id_to_token(index))
         return tokens
 
-
     def _convert_id_to_token(self, index):
         """Converts an index (integer) in a token (string/unicode) using the vocab."""
         return self.ids_to_tokens.get(index, self.unk_token)
@@ -644,6 +627,7 @@ class SentencePieceTokenizer:
         text = self.preprocess_text(text)
         return self.encode_ids(text)
 
+
 def whitespace_tokenize(text):
     """Runs basic whitespace cleaning and splitting on a piece of text."""
     text = text.strip()
@@ -651,6 +635,7 @@ def whitespace_tokenize(text):
         return []
     tokens = text.split()
     return tokens
+
 
 def _clean_text(text):
     """Performs invalid character removal and whitespace cleanup on text."""
@@ -677,6 +662,7 @@ def _is_control(char):
         return True
     return False
 
+
 def _is_whitespace(char):
     """Checks whether `chars` is a whitespace character."""
     # \t, \n, and \r are technically control characters but we treat them
@@ -687,6 +673,7 @@ def _is_whitespace(char):
     if cat == "Zs":
         return True
     return False
+
 
 def _is_punctuation(char):
     """Checks whether `chars` is a punctuation character."""
@@ -728,3 +715,39 @@ def pad_left(
         encoded_inputs["special_tokens_mask"] = [1] * difference + encoded_inputs["special_tokens_mask"]
     encoded_inputs["input_ids"] = [pad_token_id] * difference + encoded_inputs["input_ids"]
     return encoded_inputs
+
+
+def get_tokenizer(config, lower_case):
+    tokenizer = None
+    external = False
+    if contains_all(config, WORD_PIECE_PARAMETERS + SENTENCE_PIECE_PARAMETERS):
+        raise ConfigError(
+            'tokenization method can not be understood correctly from parameters, please provide: \n'
+            'for WordPiece tokenization - {}\nfor SentencePiece tokenization - {}\n'.format(
+                ', '.join(WORD_PIECE_PARAMETERS), ', '.join(SENTENCE_PIECE_PARAMETERS))
+        )
+    if contains_all(config, WORD_PIECE_PARAMETERS):
+        tokenizer = WordPieceTokenizer(config['vocab_file'], lower_case)
+
+    if contains_any(config, HUGGINGFACE_PARAMETERS):
+        if isinstance(AutoTokenizer, UnsupportedPackage):
+            AutoTokenizer.raise_error('tokenization')
+        if contains_all(config, HUGGINGFACE_PARAMETERS):
+            raise ConfigError(
+                'model_id or tokenizer_dir should be provided'
+            )
+        model_id = config.get('model_id')
+        tokenizer_dir = config.get('tokenizer_dir')
+        tokenizer = AutoTokenizer.from_pretrained(model_id if model_id else tokenizer_dir)
+        external = True
+
+    if contains_all(config, SENTENCE_PIECE_PARAMETERS):
+        tokenizer = SentencePieceTokenizer(config['sentence_piece_model_file'], lower_case)
+
+    if tokenizer is None:
+        raise ConfigError(
+            'tokenization parameters is not found, please provide: \n'
+            'for WordPiece tokenization - {}\nfor SentencePiece tokenization - {}\n'.format(
+                ', '.join(WORD_PIECE_PARAMETERS), ', '.join(SENTENCE_PIECE_PARAMETERS))
+        )
+    return tokenizer, external

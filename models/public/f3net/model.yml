@@ -1,0 +1,73 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  F3Net: Fusion, Feedback and Focus for Salient Object Detection. For details see
+  the repository <https://github.com/weijun88/F3Net>, paper <https://arxiv.org/abs/1911.11445>
+task_type: salient_object_detection
+files:
+  - name: f3net/net.py
+    size: 8656
+    sha256: e2afbe93d900a518c1e46ba260a73810641f174a80fd7fa022d3f514166b5a6e
+    source: https://raw.githubusercontent.com/weijun88/F3Net/eecace3adf1e8946b571a4f4397681252f9dc1b8/src/net.py
+  - name: f3net/dataset.py
+    size: 4497
+    sha256: 9394eb1efc31d20610c31408fd08a567d7c89f394ceffcd745b6aad18ff0b7a9
+    source: https://raw.githubusercontent.com/weijun88/F3Net/eecace3adf1e8946b571a4f4397681252f9dc1b8/src/dataset.py
+  - name: f3net/model-32
+    size: 102506472
+    sha256: 88e567f915fb7d22db6922102e147d0401123d3600cd0de6c74a200c4fc69b36
+    source:
+      $type: google_drive
+      id: 1jcsmxZHL6DGwDplLp93H4VeN2ZjqBsOF
+postprocessing:
+  - $type: regex_replace
+    file: f3net/net.py
+    pattern: 'torch.load\(self.cfg.snapshot\)'
+    replacement: "torch.load(self.cfg.snapshot, map_location=torch.device('cpu'))"
+  - $type: regex_replace
+    file: f3net/net.py
+    pattern: 'import matplotlib.pyplot as plt'
+    replacement: ''
+  - $type: regex_replace
+    file: f3net/net.py
+    # remove extra feature maps used for calculation loss during training
+    pattern: 'return pred1, pred2, out2h, out3h, out4h, out5h'
+    replacement: "return pred2"
+  - $type: regex_replace
+    file: f3net/dataset.py
+    pattern: 'import cv2'
+    replacement: ''
+
+conversion_to_onnx_args:
+  - --model-name=f3net
+  - --model-path=$config_dir
+  - --model-path=$dl_dir
+  - --import-module=model
+  - --input-shape=1,3,352,352
+  - --output-file=$conv_dir/f3net.onnx
+  - --model-param=weights=r"$dl_dir/f3net/model-32"
+  - --input-names=input.1
+  - --output-names="saliency_map"
+model_optimizer_args:
+  - --input_shape=[1,3,352,352]
+  - --input=input.1
+  - --input_model=$conv_dir/f3net.onnx
+  - --mean_values=input.1[124.55,118.90,102.94]
+  - --scale_values=input.1[56.77,55.97,57.50]
+  - --reverse_input_channels
+  - --output="saliency_map"
+framework: pytorch
+quantizable: yes
+license: https://github.com/weijun88/F3Net/blob/master/LICENSE

@@ -21,36 +21,17 @@
 using namespace InferenceEngine;
 
 ClassificationModel::ClassificationModel(const std::string& modelFileName, size_t nTop, bool useAutoResize, const std::vector<std::string>& labels) :
-    ModelBase(modelFileName),
+    ImageModel(modelFileName, useAutoResize),
     nTop(nTop),
-    useAutoResize(useAutoResize),
     labels(labels) {
-}
-
-std::shared_ptr<InternalModelData> ClassificationModel::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
-    auto& img = inputData.asRef<ImageInputData>().inputImage;
-
-    if (useAutoResize) {
-        /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
-        request->SetBlob(inputsNames[0], wrapMat2Blob(img));
-    }
-    else {
-        /* Resize and copy data from the image to the input blob */
-        Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-        matU8ToBlob<uint8_t>(img, frameBlob);
-    }
-
-    return nullptr;
 }
 
 std::unique_ptr<ResultBase> ClassificationModel::postprocess(InferenceResult& infResult) {
     InferenceEngine::LockedMemory<const void> outputMapped = infResult.getFirstOutputBlob()->rmap();
     const float *classificationData = outputMapped.as<float*>();
 
-    ClassificationResult* result = new ClassificationResult;
+    ClassificationResult* result = new ClassificationResult(infResult.frameId, infResult.metaData);
     auto retVal = std::unique_ptr<ResultBase>(result);
-
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
 
     std::vector<unsigned> indices(infResult.getFirstOutputBlob()->size());
     std::iota(std::begin(indices), std::end(indices), 0);
@@ -126,7 +107,7 @@ void ClassificationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnN
         throw std::runtime_error("The model provides " + std::to_string(outSizeVector[1]) + " classes, but " + std::to_string(nTop) + " labels are requested to be predicted");
     if (outSizeVector[1] == labels.size() + 1) {
         labels.insert(labels.begin(), "other");
-        slog::warn << "Inserted 'other' label as first.\n";
+        slog::warn << "\tInserted 'other' label as first." << slog::endl;
     }
     else if (outSizeVector[1] != labels.size())
         throw std::logic_error("Model's number of classes and parsed labels must match (" + std::to_string(outSizeVector[1]) + " and " + std::to_string(labels.size()) + ')');

@@ -28,6 +28,7 @@
 class RequestsPool {
 public:
     RequestsPool(InferenceEngine::ExecutableNetwork& execNetwork, unsigned int size);
+    ~RequestsPool();
 
     /// Returns idle request from the pool. Returned request is automatically marked as In Use (this status will be reset after request processing completion)
     /// This function is thread safe as long as request is used only until setRequestIdle call

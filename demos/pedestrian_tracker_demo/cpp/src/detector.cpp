@@ -9,8 +9,10 @@
 #include <map>
 #include <opencv2/core/core.hpp>
 #include <inference_engine.hpp>
-
 #include <ngraph/ngraph.hpp>
+#include <utils/slog.hpp>
+#include <utils/common.hpp>
+
 
 using namespace InferenceEngine;
 
@@ -66,7 +68,7 @@ const TrackedObjects& ObjectDetector::getResults() const {
 
 void ObjectDetector::enqueue(const cv::Mat &frame) {
     if (!request) {
-        request = net_.CreateInferRequestPtr();
+        request = std::make_shared<InferenceEngine::InferRequest>(net_.CreateInferRequest());
     }
 
     width_ = static_cast<float>(frame.cols);
@@ -115,14 +117,14 @@ ObjectDetector::ObjectDetector(
                 inputInfo->setPrecision(Precision::FP32);
                 im_info_name_ = input.first;
             } else {
-                THROW_IE_EXCEPTION << "Unknown input for Person Detection network";
+                throw std::runtime_error("Unknown input for Person Detection network");
             }
         }
         if (input_name_.empty()) {
-            THROW_IE_EXCEPTION << "No image input for Person Detection network found";
+            throw std::runtime_error("No image input for Person Detection network found");
         }
     } else {
-        THROW_IE_EXCEPTION << "Person Detection network should have one or two inputs";
+        throw std::runtime_error("Person Detection network should have one or two inputs");
     }
     InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
     inputInfoFirst->setPrecision(Precision::U8);
@@ -130,30 +132,32 @@ ObjectDetector::ObjectDetector(
 
     OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     if (outputInfo.size() != 1) {
-        THROW_IE_EXCEPTION << "Person Detection network should have only one output";
+        throw std::runtime_error("Person Detection network should have only one output");
     }
     DataPtr& _output = outputInfo.begin()->second;
     output_name_ = outputInfo.begin()->first;
 
     const SizeVector outputDims = _output->getTensorDesc().getDims();
     if (outputDims.size() != 4) {
-        THROW_IE_EXCEPTION << "Person Detection network output dimensions not compatible shoulld be 4, but was " +
-            std::to_string(outputDims.size());
+        throw std::runtime_error("Person Detection network output should have 4 dimensions, but had " +
+            std::to_string(outputDims.size()));
     }
     max_detections_count_ = outputDims[2];
     object_size_ = outputDims[3];
     if (object_size_ != 7) {
-        THROW_IE_EXCEPTION << "Person Detection network output layer should have 7 as a last dimension";
+        throw std::runtime_error("Person Detection network output layer should have 7 as a last dimension");
     }
     _output->setPrecision(Precision::FP32);
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
     net_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
+    printExecNetworkInfo(net_, config.path_to_model, deviceName_, modelType);
+    slog::info << "\tBatch size is set to "<< config.max_batch_size << slog::endl;
 }
 
 void ObjectDetector::wait() {
     if (!request || !config_.is_async) return;
-    request->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
+    request->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
 }
 
 void ObjectDetector::fetchResults() {
@@ -203,9 +207,4 @@ void ObjectDetector::fetchResults() {
 void ObjectDetector::waitAndFetchResults() {
     wait();
     fetchResults();
-}
-
-void ObjectDetector::PrintPerformanceCounts(std::string fullDeviceName) {
-    std::cout << "Performance counts for object detector" << std::endl << std::endl;
-    ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
 }

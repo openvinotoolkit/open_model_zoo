@@ -27,6 +27,8 @@ from ..utils import get_size_from_config, get_size_3d_from_config
 
 class CornerCrop(Preprocessor):
     __provider__ = 'corner_crop'
+    shape_modificator = True
+    _dynamic_shape = False
 
     @classmethod
     def parameters(cls):
@@ -64,6 +66,10 @@ class CornerCrop(Preprocessor):
                 image.data, self.dst_height, self.dst_width, self.corner_type)
 
         return image
+
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shape
 
     @staticmethod
     def process_data(data, dst_height, dst_width, corner_type):
@@ -110,6 +116,7 @@ class CornerCrop(Preprocessor):
 
 class Crop(Preprocessor):
     __provider__ = 'crop'
+    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -210,9 +217,16 @@ class Crop(Preprocessor):
 
         return data[start_height:start_height + new_height, start_width:start_width + new_width]
 
+    @property
+    def dynamic_result_shape(self):
+        if self.max_square or self.central_fraction:
+            return True
+        return False
+
 
 class CropRect(Preprocessor):
     __provider__ = 'crop_rect'
+    shape_modificator = True
 
     def process(self, image, annotation_meta=None):
         if not annotation_meta:
@@ -314,6 +328,8 @@ class ExtendAroundRect(Preprocessor):
 
 class Crop3D(Preprocessor):
     __provider__ = 'crop3d'
+    shape_modificator = True
+    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -361,9 +377,15 @@ class Crop3D(Preprocessor):
 
         return img[startz:endz, starty:endy, startx:endx, :]
 
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes
+
 
 class TransformedCropWithAutoScale(Preprocessor):
     __provider__ = 'transformed_crop_with_auto_scale'
+    shape_modificator = True
+    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -439,9 +461,14 @@ class TransformedCropWithAutoScale(Preprocessor):
             trans = cv2.getAffineTransform(np.float32(transformed_points), np.float32(points))
         return trans
 
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes
+
 
 class CandidateCrop(Preprocessor):
     __provider__ = 'candidate_crop'
+    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -508,6 +535,8 @@ class CandidateCrop(Preprocessor):
 
 class CropOrPad(Preprocessor):
     __provider__ = 'crop_or_pad'
+    shape_modificator = True
+    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -568,9 +597,15 @@ class CropOrPad(Preprocessor):
             data, offset_h, after_padding_height, offset_w, after_padding_width, cv2.BORDER_CONSTANT, value=0
         ), meta
 
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes
+
 
 class CropWithPadSize(Preprocessor):
     __provider__ = 'crop_image_with_padding'
+    shape_modificator = True
+    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -597,9 +632,15 @@ class CropWithPadSize(Preprocessor):
         image.data = cv2.resize(cropped_data, (self.size, self.size))
         return image
 
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes
+
 
 class ObjectCropWithScale(Preprocessor):
     __provider__ = 'object_crop_with_scale'
+    shape_modificator = True
+    _dynamic_shape = False
 
     @classmethod
     def parameters(cls):
@@ -647,8 +688,8 @@ class ObjectCropWithScale(Preprocessor):
             new_width = int(np.math.floor(width / sf))
             if new_size < 2:
                 return (
-                    np.zeros((self.dst_width, self.dst_height, img.shape[2])) if len(img.shape) > 2
-                    else np.zeros(self.dst_width, self.dst_height)
+                    np.zeros((self.dst_width, self.dst_height, img.shape[2]), dtype=np.float32) if len(img.shape) > 2
+                    else np.zeros((self.dst_width, self.dst_height), dtype=np.float32)
                 )
             img = cv2.resize(img, dsize=(new_width, new_height), interpolation=cv2.INTER_LINEAR)
             center = center * 1.0 / sf
@@ -666,7 +707,7 @@ class ObjectCropWithScale(Preprocessor):
 
         if len(img.shape) > 2:
             new_shape += [img.shape[2]]
-        new_img = np.zeros(new_shape)
+        new_img = np.zeros(new_shape, dtype=np.float32)
         new_x = [max(0, -ul[0]), min(br[0], img.shape[1]) - ul[0]]
         new_y = [max(0, -ul[1]), min(br[1], img.shape[0]) - ul[1]]
         old_x = [max(0, ul[0]), min(img.shape[1], br[0])]
@@ -699,3 +740,7 @@ class ObjectCropWithScale(Preprocessor):
         new_pt = np.array([pt[0] - 1, pt[1] - 1, 1.]).T
         new_pt = np.dot(transform_matrix, new_pt)
         return new_pt[:2].astype(int) + 1
+
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shape

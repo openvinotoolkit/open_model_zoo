@@ -19,30 +19,6 @@
 using namespace InferenceEngine;
 
 namespace gaze_estimation {
-void initializeIEObject(InferenceEngine::Core& ie,
-                        const std::vector<std::pair<std::string, std::string>>& cmdOptions) {
-    std::set<std::string> loadedDevices;
-    for (auto && option : cmdOptions) {
-        auto deviceName = option.first;
-        auto networkName = option.second;
-
-        if (deviceName.empty() || networkName.empty()) {
-            continue;
-        }
-
-        if (loadedDevices.find(deviceName) != loadedDevices.end()) {
-            continue;
-        }
-        slog::info << "Loading device " << deviceName << slog::endl;
-        slog::info << printable(ie.GetVersions(deviceName)) << slog::endl;
-
-        /** Loading extensions for the CPU device **/
-        if ((deviceName.find("CPU") != std::string::npos)) {
-            loadedDevices.insert(deviceName);
-        }
-    }
-}
-
 void gazeVectorToGazeAngles(const cv::Point3f& gazeVector, cv::Point2f& gazeAngles) {
     auto r = cv::norm(gazeVector);
 
@@ -63,8 +39,8 @@ void putTimingInfoOnFrame(cv::Mat& image, double overallTime, double inferenceTi
     double overallFPS = 1000. / overallTime;
     double inferenceFPS = 1000. / inferenceTime;
 
-    cv::putText(image,
-                cv::format("Overall FPS: %0.0f, Inference FPS: %0.0f", overallFPS, inferenceFPS),
-                cv::Point(10, static_cast<int>(30 * fontScale / 1.6)), cv::FONT_HERSHEY_PLAIN, fontScale, fontColor, thickness);
+    putHighlightedText(image,
+        cv::format("Overall FPS: %0.0f, Inference FPS: %0.0f", overallFPS, inferenceFPS),
+        cv::Point(10, static_cast<int>(30 * fontScale / 1.6)), cv::FONT_HERSHEY_PLAIN, fontScale, fontColor, thickness);
 }
 }  // namespace gaze_estimation

@@ -18,7 +18,7 @@ import cv2
 import numpy as np
 
 from .model import Model
-from .utils import Detection
+from .utils import Detection, nms, clip_detections
 
 
 class CTPN(Model):
@@ -54,8 +54,9 @@ class CTPN(Model):
 
         self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, input_size[1], input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
-        input_shape = {self.image_blob_name: (1, 3, self.h2, self.w2)}
-        self.logger.info('Reshape net to {}'.format(input_shape))
+        default_input_shape = self.net.input_info[self.image_blob_name].input_data.shape
+        input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h2, self.w2])}
+        self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
         self.net.reshape(input_shape)
 
     def prepare_inputs(self):
@@ -115,7 +116,8 @@ class CTPN(Model):
             second_scales = meta['scales'].pop()
             boxes[:, 0:8:2] /= second_scales[0]
             boxes[:, 1:8:2] /= second_scales[1]
-        return [Detection(box[0], box[1], box[2], box[5], box[8], 0) for box in boxes]
+        detections = [Detection(box[0], box[1], box[2], box[5], box[8], 0) for box in boxes]
+        return clip_detections(detections, meta['original_shape'])
 
     @staticmethod
     def ctpn_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
@@ -189,7 +191,8 @@ class CTPN(Model):
         proposals, scores = proposals[order, :], scores[order]
 
         # apply nms
-        keep = self.nms(proposals[:, 0], proposals[:, 1], proposals[:, 2], proposals[:, 3], scores.reshape(-1), self.nms_threshold)
+        keep = nms(proposals[:, 0], proposals[:, 1], proposals[:, 2], proposals[:, 3], scores.reshape(-1),
+                   self.nms_threshold, include_boundaries=True)
         if self.post_nms_top_n > 0:
             keep = keep[:self.post_nms_top_n]
         proposals, scores = proposals[keep, :], scores[keep]
@@ -211,37 +214,6 @@ class CTPN(Model):
                              (widths > self.min_width))[0]
 
         return text_recs[keep_inds]
-
-    @staticmethod
-    def nms(x1, y1, x2, y2, scores, thresh, include_boundaries=True, keep_top_k=None):
-        b = 1 if include_boundaries else 0
-
-        areas = (x2 - x1 + b) * (y2 - y1 + b)
-        order = scores.argsort()[::-1]
-
-        if keep_top_k:
-            order = order[:keep_top_k]
-
-        keep = []
-        while order.size > 0:
-            i = order[0]
-            keep.append(i)
-
-            xx1 = np.maximum(x1[i], x1[order[1:]])
-            yy1 = np.maximum(y1[i], y1[order[1:]])
-            xx2 = np.minimum(x2[i], x2[order[1:]])
-            yy2 = np.minimum(y2[i], y2[order[1:]])
-
-            w = np.maximum(0.0, xx2 - xx1 + b)
-            h = np.maximum(0.0, yy2 - yy1 + b)
-            intersection = w * h
-
-            union = (areas[i] + areas[order[1:]] - intersection)
-            overlap = np.divide(intersection, union, out=np.zeros_like(intersection, dtype=float), where=union != 0)
-
-            order = order[np.where(overlap <= thresh)[0] + 1]  # pylint: disable=W0143
-
-        return keep
 
     @staticmethod
     def bbox_transform_inv(boxes, deltas):

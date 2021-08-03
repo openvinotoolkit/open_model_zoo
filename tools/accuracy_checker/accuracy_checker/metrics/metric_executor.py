@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import warnings
 from collections import namedtuple, OrderedDict
 
 from ..config import ConfigValidator, ConfigError, StringField
@@ -22,7 +23,7 @@ from .metric import Metric, FullDatasetEvaluationMetric
 from .metric_profiler import ProfilingExecutor
 
 MetricInstance = namedtuple(
-    'MetricInstance', ['name', 'metric_type', 'metric_fn', 'reference', 'threshold', 'presenter']
+    'MetricInstance', ['name', 'metric_type', 'metric_fn', 'reference', 'abs_threshold', 'rel_threshold', 'presenter']
 )
 
 
@@ -39,10 +40,14 @@ class MetricsExecutor:
 
         self._dataset = dataset
         self.profile_metrics = False if dataset is None else dataset.config.get('_profile', False)
+        self.profiler_dir = None
+        self.profiler = None
         if self.profile_metrics:
             profiler_type = dataset.config.get('_report_type', 'csv')
             self.profiler = ProfilingExecutor(profile_report_type=profiler_type)
+            self.profiler_dir = dataset.config.get('_profiler_log_dir')
             self.profiler.set_dataset_meta(self._dataset.metadata)
+
 
         self.metrics = []
         self.need_store_predictions = False
@@ -97,21 +102,26 @@ class MetricsExecutor:
         return results, profile_results
 
     def iterate_metrics(self, annotations, predictions):
-        for name, metric_type, functor, reference, threshold, presenter in self.metrics:
+        for name, metric_type, functor, reference, abs_threshold, rel_threshold, presenter in self.metrics:
+            profiling_file = None if functor.profiler is None else functor.profiler.report_file
             yield presenter, EvaluationResult(
                 name=name,
                 metric_type=metric_type,
                 evaluated_value=functor(annotations, predictions),
                 reference_value=reference,
-                threshold=threshold,
+                abs_threshold=abs_threshold,
+                rel_threshold=rel_threshold,
                 meta=functor.meta,
+                profiling_file=profiling_file
             )
 
     def register_metric(self, metric_config_entry):
         type_ = 'type'
         identifier = 'name'
         reference = 'reference'
+        abs_threshold = 'abs_threshold'
         threshold = 'threshold'
+        rel_threshold = 'rel_threshold'
         presenter = 'presenter'
         metric_config_validator = ConfigValidator(
             "metrics", on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT,
@@ -134,13 +144,30 @@ class MetricsExecutor:
             metric_type, metric_config_entry, self.dataset, metric_identifier, state=self.state, **metric_kwargs
         )
         metric_presenter = BasePresenter.provide(metric_config_entry.get(presenter, 'print_scalar'))
+        threshold_v = metric_config_entry.get(threshold)
+        abs_threshold_v = metric_config_entry.get(abs_threshold)
+        reference_v = metric_config_entry.get(reference)
+        if reference_v is not None and not isinstance(reference_v, (int, float, dict)):
+            raise ConfigError(
+                'reference value should be represented as number or dictionary with numbers for each submetric'
+            )
+        if threshold_v is not None and abs_threshold_v is not None:
+            warnings.warn(
+                f'both threshold and abs_threshold are provided for metric {metric_identifier}. '
+                f'threshold will be ignored'
+            )
+        if abs_threshold_v is None:
+            abs_threshold_v = threshold_v
+        if threshold_v is not None:
+            warnings.warn('threshold option is deprecated. Please use abs_threshold instead', DeprecationWarning)
 
         self.metrics.append(MetricInstance(
             metric_identifier,
             metric_type,
             metric_fn,
-            metric_config_entry.get(reference),
-            metric_config_entry.get(threshold),
+            reference_v,
+            abs_threshold_v,
+            metric_config_entry.get(rel_threshold),
             metric_presenter
         ))
         if isinstance(metric_fn, FullDatasetEvaluationMetric):
@@ -173,10 +200,13 @@ class MetricsExecutor:
         }
 
     def set_profiling_dir(self, profiler_dir):
-        self.profiler.set_profiling_dir(profiler_dir)
+        if self.profiler:
+            self.profiler.set_profiling_dir(profiler_dir)
+        self.profiler_dir = profiler_dir
 
     def set_processing_info(self, processing_info):
-        self.profiler.set_executing_info(processing_info)
+        if self.profiler:
+            self.profiler.set_executing_info(processing_info)
 
     def reset(self):
         for metric in self.metrics:

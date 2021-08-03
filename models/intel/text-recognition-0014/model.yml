@@ -1,0 +1,45 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Recognizes alphanumeric text. Architecture: ResNeXt101 stage2 + BiLSTM as an encoder
+  -  BiLSTM as a decoder.
+task_type: optical_character_recognition
+files:
+  - name: FP32/text-recognition-0014.xml
+    size: 220869
+    sha256: 468afc78bb9406ed75eee5fa351ee9a48e4d7c61f528e4a4362e12d32d01a82d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0014/FP32/text-recognition-0014.xml
+  - name: FP32/text-recognition-0014.bin
+    size: 36555752
+    sha256: 9ba8eb0d0e1349aced468557cfbc5b71f56f65d619f97fdbe8658237743e4c8c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0014/FP32/text-recognition-0014.bin
+  - name: FP16/text-recognition-0014.xml
+    size: 220711
+    sha256: 36979a919341ccf9eaf0ed2d30deb61c8b7a8a80023954bdd2579e7f3f5e5b8c
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0014/FP16/text-recognition-0014.xml
+  - name: FP16/text-recognition-0014.bin
+    size: 18278038
+    sha256: 1555bb0481dcd0c9a0d2ae92196b2a3a57505de46874d1132f0de12881649fba
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0014/FP16/text-recognition-0014.bin
+  - name: FP16-INT8/text-recognition-0014.xml
+    size: 346571
+    sha256: 60cd35ce26288ec429f26edafc4128c80b6a410fe72b1030fa669139fa734d32
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0014/FP16-INT8/text-recognition-0014.xml
+  - name: FP16-INT8/text-recognition-0014.bin
+    size: 15485590
+    sha256: 06d587d2bccd540b4371443b37193bf05344a89c7b318f357fc3d67aa00d8ff8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-recognition-0014/FP16-INT8/text-recognition-0014.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

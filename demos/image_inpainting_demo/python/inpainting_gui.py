@@ -14,17 +14,15 @@
 import cv2
 import numpy as np
 
-from inpainting import ImageInpainting
-from openvino.inference_engine import IECore
 
 class InpaintingGUI:
-    def __init__(self, srcImg, modelPath, device="CPU"):
+    def __init__(self, srcImg, inpainter):
         self.wnd_name = "Inpainting demo (press H for help)"
         self.mask_color = (255, 0, 0)
         self.radius = 10
         self.old_point = None
 
-        self.inpainter = ImageInpainting(IECore(), modelPath, device)
+        self.inpainter = inpainter
 
         self.img = cv2.resize(srcImg, (self.inpainter.input_width, self.inpainter.input_height))
         self.original_img = self.img.copy()
@@ -38,6 +36,7 @@ class InpaintingGUI:
 
         self.is_help_shown = False
         self.is_original_shown = False
+        self.is_inpainted = False
 
 
     def on_mouse(self, _event, x, y, flags, _param):
@@ -66,6 +65,7 @@ class InpaintingGUI:
 
                 self.show_info("")
                 self.mask[:, :, :] = 0
+                self.is_inpainted=True
                 self.update_window()
             elif key in (8, ord('c'), ord('C')): # Backspace or c
                 self.is_original_shown = False
@@ -75,6 +75,7 @@ class InpaintingGUI:
                 self.is_original_shown = False
                 self.mask[:, :, :] = 0
                 self.img = self.original_img.copy()
+                self.is_inpainted=False
                 self.update_window()
             elif key == ord('\t'):
                 self.is_original_shown = not self.is_original_shown
@@ -109,16 +110,21 @@ class InpaintingGUI:
     def update_window(self):
         pad = 10
         margin = 10
+
         if self.is_original_shown:
             backbuffer = self.original_img.copy()
-            sz = cv2.getTextSize("Original", cv2.FONT_HERSHEY_COMPLEX, 0.75, 1)[0]
-            img_width = backbuffer.shape[1]
-            label_area = backbuffer[margin:sz[1]+pad*2+margin, img_width-margin-(sz[0]+pad*2):img_width-margin]
-            label_area //= 2
-            cv2.putText(backbuffer, "Original", (img_width-margin-sz[0]-pad, margin+sz[1]+pad), cv2.FONT_HERSHEY_COMPLEX, 0.75, (128, 255, 128))
+            lbl_txt = "Original"
         else:
             backbuffer = self.img.copy()
             backbuffer[np.squeeze(self.mask, -1) > 0] = self.mask_color
+            lbl_txt = ("Editing" if np.any(self.mask) else "Result") if self.is_inpainted else "Original"
+
+        if self.label != "Processing...":
+            sz = cv2.getTextSize(lbl_txt, cv2.FONT_HERSHEY_COMPLEX, 0.75, 1)[0]
+            img_width = backbuffer.shape[1]
+            label_area = backbuffer[margin:sz[1]+pad*2+margin, img_width-margin-(sz[0]+pad*2):img_width-margin]
+            label_area //= 2
+            cv2.putText(backbuffer, lbl_txt, (img_width-margin-sz[0]-pad, margin+sz[1]+pad), cv2.FONT_HERSHEY_COMPLEX, 0.75, (128, 255, 128))
 
         if self.label is not None and self.label != "":
             lines = self.label.split("\n")

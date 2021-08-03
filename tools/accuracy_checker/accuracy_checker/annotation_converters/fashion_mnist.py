@@ -66,8 +66,8 @@ class FashionMnistConverter(BaseFormatConverter):
         self.convert_images = self.get_value_from_config('convert_images')
         if self.convert_images and not self.converted_images_dir:
             self.converted_images_dir = self.test_anno_file.parent / 'converted_images'
-            if not self.converted_images_dir.exists():
-                self.converted_images_dir.mkdir(parents=True)
+        if self.convert_images and not self.converted_images_dir.exists():
+            self.converted_images_dir.mkdir(parents=True)
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):

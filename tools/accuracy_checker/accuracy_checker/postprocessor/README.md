@@ -1,13 +1,15 @@
 # Postprocessors
 
-Postprocessor is function which processes prediction and/or annotation data after model infer and before metric calculation. For correct work postprocessors require specific representation format.
+Postprocessor is a class which processes prediction and/or annotation data after model inference and before metric calculation. Unlike adapters, postprocessors do not work with raw model output, but with specific representation format.
 (e. g. clip boxes postprocessor expects detection annotation and detection prediction for processing).
 
 In case when you use complicated representation located in representation container, you can add options `annotation_source` and `prediction_source` in configuration file,
 if you want process only specific representations, another way postprocessor will be used for all suitable representations. `annotation_source` and `prediction_source` should contain
 comma separated list of annotation identifiers and output layer names respectively.
 
-Every postprocessor has parameters available for configuration.
+Every postprocessor has parameters available for configuration. The postprocessor and its parameters are set through the configuration file. Postprocessors are provided in `datasets` section of configuration file to use specific postprocessor.
+
+## Supported Postprocessors
 
 Accuracy Checker supports following set of postprocessors:
 
@@ -44,9 +46,9 @@ Accuracy Checker supports following set of postprocessors:
   Filtering by `height_range`, `width_range` are also available for `TextDetectionAnnotation`, `TextDetectionPrediction`, `area_range`  - for `PoseEstimationAnnotation`, `PoseEstimationPrediction` and `TextDetectionAnnotation`, `TextDetectionPrediction`.
 * `normalize_landmarks_points` - normalizing ground truth landmarks points. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`.
   * `use_annotation_rect` - allows to use size of rectangle saved in annotation metadata for point scaling instead source image size.
- `encode_segmentation_mask` - encoding segmentation label image as segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
+* `encode_segmentation_mask` - encoding segmentation label image as segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
-  **Note:** this postprocessing requires specific dataset meta: `segmentation_colors` for annotations and `prediction_to_gt_labels` for predictions.
+  **Note:** this postprocessing requires a specific dataset meta: `segmentation_colors` for annotations and `prediction_to_gt_labels` for predictions.
 * `resize_segmentation_mask` - resizing segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resize respectively. You can also use `size` instead in case when destination sizes are equal.
     For resizing to final input size without padding, you can use `to_dst_image_size` flag with value `True`. If any of these parameters are not specified, original image size will be used as default.
@@ -65,7 +67,7 @@ Accuracy Checker supports following set of postprocessors:
   * `min_value` - lower bound of range.
   * `max_value` - upper bound of range.
 * `segmentation_prediction_resample` - resamples output prediction in two steps: 1) resizes it to bounding box size; 2) extends to annotation size. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`. For correct bounding box size must be set via tag `boxes_file` in `brats_numpy` [converter](../annotation_converters/README.md) or `crop_brats` [preprocessor](../preprocessor/README.md).
-  * `make_argmax` - applies argmax operation to prediction mask after resampling (by default `False`). Must be specified only one option `make_argmax`.
+  * `make_argmax` - applies argmax operation to prediction mask after the resampling (by default `False`). Must be specified only one option `make_argmax`.
 * `transform_brats_prediction` - transforms prediction from `WT-TC-ET` format to `NCR/NET-ED-ET`. Sequentially fills one-channel mask with specified `values` for elements passing the threshold (threshold is `0.5`) from each prediction channel in specified `order`.
   * `order` - specifies filling order for channels
   * `values` - specifies values for each channel according to new order
@@ -91,7 +93,7 @@ Accuracy Checker supports following set of postprocessors:
     * `bottom-left`
     * `bottom-right`
   Default choice is `top-left`
-* `resize` - resizing image or segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`, `StyleTransferAnotation`, `StyleTransferPrediction`, `SuperResolutionAnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `SalientRegionAnnotation`, `SalientRegionPrediction`.
+* `resize` - resizing image or segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`, `StyleTransferAnotation`, `StyleTransferPrediction`, `SuperResolutionAnotation`, `SuperResolutionPrediction`, `ImageProcessingAnnotation`, `ImageProcessingPrediction`, `SalientRegionAnnotation`, `SalientRegionPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resize respectively. You can also use `size` instead in case when destination sizes are equal.
     If any of these parameters are not specified, image size will be used as default.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
@@ -113,3 +115,16 @@ Accuracy Checker supports following set of postprocessors:
   * `min` - minimal value in range, optional, default 0.
   * `max`- maximal value in range.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
+* `pad_signal` - add left padding to reference signal if it was done for input data. Supported representations: `NoiseSuppressionAnnotation`, `NoiseSuppressionPrediction`.
+* `time_series_denormalize` - apply denormalization to predicted and ground truth curves. Supported representations: `TimeSeriesForecastingAnnotation`, `TimeSeriesForecastingQuantilesPrediction`.
+* `interpolation` - Interpolates values into target range. Supported representation: `ImageProcessingPrediction`, `ImageProcessingAnnotation`.
+  * `mode` - interpolation mode. Currently, only `linear` mode available. (Optional, default value is `linear`)
+  * `target_min` - Minimum of target range. (Optional, default value is 0)
+  * `target_max` - Maximum of target range. (Optional, default value is 255)
+  * `as_log` - Operates over logarithmic scale of source values. (Optional, default value is False)
+* `invert_mask` - inverts segmentation or background matting mask. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`, `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
+  * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
+* `rescale_mask` - rescale mask data range to have specified `min` and `max` values. Supported representations: `BackgroundMattingAnnotation`, `BackgroundMattingPrediction`.
+  * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
+  * `min` - minimal value in range, optional, default 0.
+  * `max`- maximal value in range.

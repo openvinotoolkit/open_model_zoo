@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 import abc
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 
 
 class BaseRepresentation(abc.ABC):
@@ -25,7 +25,7 @@ class BaseRepresentation(abc.ABC):
 
     @classmethod
     def load(cls, file):
-        obj = pickle.load(file)
+        obj = pickle.load(file) # nosec - disable B301:pickle check
 
         if cls != BaseRepresentation:
             assert isinstance(obj, cls)

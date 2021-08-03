@@ -1,0 +1,37 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Neural machine translation model based on Non-Autoregressive Transformer topology
+  (en-de).
+task_type: machine_translation
+files:
+  - name: FP32/machine-translation-nar-en-de-0002.xml
+    size: 912660
+    sha256: 612a0b0cd97327798f074e585e7715c7de4b2f3be1cfa2ce58e722a0badd1014
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-en-de-0002/FP32/machine-translation-nar-en-de-0002.xml
+  - name: FP32/machine-translation-nar-en-de-0002.bin
+    size: 284547188
+    sha256: bf909c837dd320f19c85c1d5b737d9cf5a13cdf81459b82f73946e20bdbf0fa7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-en-de-0002/FP32/machine-translation-nar-en-de-0002.bin
+  - name: FP16/machine-translation-nar-en-de-0002.xml
+    size: 912717
+    sha256: a09a5d4e2852ce1eacb55ac013834c5c2922e01e4885da36b07de3907f628020
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-en-de-0002/FP16/machine-translation-nar-en-de-0002.xml
+  - name: FP16/machine-translation-nar-en-de-0002.bin
+    size: 142274522
+    sha256: 855de4b7f6cc30daf1981d33ff50bb3412661e9c52c177e1e31d2969b0b3734f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/machine-translation-nar-en-de-0002/FP16/machine-translation-nar-en-de-0002.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

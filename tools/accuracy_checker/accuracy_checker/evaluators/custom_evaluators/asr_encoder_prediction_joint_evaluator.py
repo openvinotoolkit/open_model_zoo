@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from pathlib import Path
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 from collections import OrderedDict
 import numpy as np
 
@@ -29,7 +29,7 @@ from .asr_encoder_decoder_evaluator import AutomaticSpeechRecognitionEvaluator
 
 class ASREvaluator(AutomaticSpeechRecognitionEvaluator):
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False):
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config = config['datasets']
         launcher_config = config['launchers'][0]
         if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
@@ -40,7 +40,7 @@ class ASREvaluator(AutomaticSpeechRecognitionEvaluator):
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
-        return cls(dataset_config, launcher, model)
+        return cls(dataset_config, launcher, model, orig_config)
 
 
 class BaseModel:
@@ -112,10 +112,16 @@ class BaseDLSDKModel:
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
-            print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
+        accepted_suffixes = ['.blob', '.xml']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
         if model.suffix == '.blob':
             return model, None
         weights = get_path(network_info.get('weights', model.parent / model.name.replace('xml', 'bin')))
+        accepted_weights_suffixes = ['.bin']
+        if weights.suffix not in accepted_weights_suffixes:
+            raise ConfigError('Weights with following suffixes are allowed: {}'.format(accepted_weights_suffixes))
         print_info('{} - Found weights: {}'.format(self.default_model_suffix, weights))
         return model, weights
 
@@ -129,7 +135,7 @@ class BaseDLSDKModel:
         input_blob = next(iter(input_info))
         with_prefix = input_blob.startswith(self.default_model_suffix)
         if self.input_blob is None or with_prefix != self.with_prefix:
-            if self.input_blob is None:
+            if self.output_blob is None:
                 output_blob = next(iter(self.exec_network.outputs))
             else:
                 output_blob = (
@@ -361,7 +367,8 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         self.with_prefix = None
-        self.output_blob = None
+        if not hasattr(self, 'output_blob'):
+            self.output_blob = None
         self.input_blob = None
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
@@ -403,6 +410,7 @@ class CommonDLSDKModel(BaseModel, BaseDLSDKModel):
 
 class EncoderDLSDKModel(CommonDLSDKModel):
     default_model_suffix = 'encoder'
+    output_blob = '472'
 
 
 class PredictionDLSDKModel(CommonDLSDKModel):
@@ -448,6 +456,10 @@ class CommonONNXModel(BaseModel):
             if len(model_list) > 1:
                 raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
             model = model_list[0]
+        accepted_suffixes = ['.onnx']
+        if model.suffix not in accepted_suffixes:
+            raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
+        print_info('{} - Found model: {}'.format(self.default_model_suffix, model))
 
         return model
 

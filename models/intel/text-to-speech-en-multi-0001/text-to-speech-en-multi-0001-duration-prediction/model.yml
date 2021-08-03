@@ -1,0 +1,37 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  ForwardTacotron is a model for the text-to-speech task. This model represents a
+  duration prediction part.
+task_type: text_to_speech
+files:
+  - name: FP32/text-to-speech-en-multi-0001-duration-prediction.xml
+    size: 650961
+    sha256: 5fe49dcd2384b24324a90e53016fe663131edb95deb164abdd36694489e00750
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.xml
+  - name: FP32/text-to-speech-en-multi-0001-duration-prediction.bin
+    size: 104707900
+    sha256: 5f8ea26062796fcffe1ecfa00c12c27a830d8a7fd18479fcdb8e1b82959551b4
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP32/text-to-speech-en-multi-0001-duration-prediction.bin
+  - name: FP16/text-to-speech-en-multi-0001-duration-prediction.xml
+    size: 650523
+    sha256: 529e11b6eff429fb96e2138724d944c19f358f02f5c7a60d9df8b67b2e457109
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.xml
+  - name: FP16/text-to-speech-en-multi-0001-duration-prediction.bin
+    size: 52354022
+    sha256: 666423308bd632768e2e95d5a8d6f7fe8dcae271bfe151a3be34e0026e364a15
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-to-speech-en-multi-0001/text-to-speech-en-multi-0001-duration-prediction/FP16/text-to-speech-en-multi-0001-duration-prediction.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -19,7 +19,7 @@ import errno
 import itertools
 import json
 import os
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 import struct
 import sys
 import zlib
@@ -31,13 +31,11 @@ from warnings import warn
 from collections.abc import MutableSet, Sequence
 from io import BytesIO
 
+import defusedxml.ElementTree as et
 import numpy as np
 import yaml
 
-try:
-    import lxml.etree as et
-except ImportError:
-    import xml.etree.cElementTree as et
+from . import __version__
 
 try:
     from shapely.geometry.polygon import Polygon
@@ -77,7 +75,7 @@ def contains_all(container, *args):
     sequence = set(container)
 
     for arg in args:
-        if len(sequence.intersection(arg)) != len(arg):
+        if sequence.intersection(arg) != set(arg):
             return False
 
     return True
@@ -99,7 +97,7 @@ def string_to_tuple(string, casting_type=float):
     processed = processed.replace(')', '')
     processed = processed.split(',')
 
-    return tuple([casting_type(entry) for entry in processed]) if casting_type else tuple(processed)
+    return tuple(map(casting_type, processed)) if casting_type else tuple(processed)
 
 
 def string_to_list(string):
@@ -108,7 +106,7 @@ def string_to_list(string):
     processed = processed.replace(']', '')
     processed = processed.split(',')
 
-    return list(entry for entry in processed)
+    return processed
 
 
 def validate_print_interval(value, min_value=0, max_value=None):
@@ -300,7 +298,7 @@ def read_json(file: Union[str, Path], *args, **kwargs):
 
 def read_pickle(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open('rb') as content:
-        return pickle.load(content, *args, **kwargs)
+        return pickle.load(content, *args, **kwargs) # nosec - disable B301:pickle check
 
 
 def read_yaml(file: Union[str, Path], *args, **kwargs):
@@ -308,14 +306,18 @@ def read_yaml(file: Union[str, Path], *args, **kwargs):
         return yaml.safe_load(content, *args, **kwargs)
 
 
-def read_csv(file: Union[str, Path], *args, **kwargs):
-    with get_path(file).open() as content:
-        return list(csv.DictReader(content, *args, **kwargs))
+def read_csv(file: Union[str, Path], *args, is_dict=True, **kwargs):
+    with get_path(file).open(encoding='utf-8') as content:
+        if is_dict:
+            return list(csv.DictReader(content, *args, **kwargs))
+        return list(csv.reader(content, *args, **kwargs))
 
 
-def extract_image_representations(image_representations):
-    images = [rep.data for rep in image_representations]
+def extract_image_representations(image_representations, meta_only=False):
     meta = [rep.metadata for rep in image_representations]
+    if meta_only:
+        return meta
+    images = [rep.data for rep in image_representations]
 
     return images, meta
 
@@ -529,8 +531,8 @@ def color_format(s, color=Color.PASSED):
     return "\x1b[0;31m{}\x1b[0m".format(s)
 
 
-def softmax(x):
-    return np.exp(x) / sum(np.exp(x))
+def softmax(x, axis=0):
+    return np.exp(x) / np.sum(np.exp(x), axis=axis, keepdims=True)
 
 
 def is_iterable(maybe_iterable):
@@ -565,7 +567,7 @@ class MatlabDataReader():
             'miUTF16': {'n': 17, 'fmt': 's'},
             'miUTF32': {'n': 18, 'fmt': 's'}
         }
-        self.inv_etypes = dict((v['n'], k) for k, v in self.etypes.items())
+        self.inv_etypes = {v['n']: k for k, v in self.etypes.items()}
         self.mclasses = {
             'mxCELL_CLASS': 1,
             'mxSTRUCT_CLASS': 2,
@@ -598,7 +600,7 @@ class MatlabDataReader():
             'mxINT64_CLASS': 'miINT64',
             'mxUINT64_CLASS': 'miUINT64'
         }
-        self.inv_mclasses = dict((v, k) for k, v in self.mclasses.items())
+        self.inv_mclasses = {v: k for k, v in self.mclasses.items()}
         self.compressed_numeric = ['miINT32', 'miUINT16', 'miINT16', 'miUINT8']
 
     def read_var_header(self, fd, endian):
@@ -713,12 +715,12 @@ class MatlabDataReader():
             return data
         rowcount = header['dims'][0]
         colcount = header['dims'][1]
-        array = [list(data[c * rowcount + r] for c in range(colcount))
+        array = [[data[c * rowcount + r] for c in range(colcount)]
                  for r in range(rowcount)]
         return self._squeeze(array)
 
     def _read_cell_array(self, fd, endian, header):
-        array = [list() for i in range(header['dims'][0])]
+        array = [[] for i in range(header['dims'][0])]
         for row in range(header['dims'][0]):
             for _col in range(header['dims'][1]):
                 vheader, next_pos, fd_var = self.read_var_header(fd, endian)
@@ -833,3 +835,58 @@ class UnsupportedPackage:
 
     def __call__(self, *args, **kwargs):
         self.raise_error('')
+
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+
+def generate_layer_name(layer_name, prefix, with_prefix):
+    return prefix + layer_name if with_prefix else layer_name.split(prefix, 1)[-1]
+
+
+def convert_xctr_yctr_w_h_to_x1y1x2y2(x, y, width, height):
+    x1, y1 = (x - width / 2), (y - height / 2)
+    x2, y2 = (x + width / 2), (y + height / 2)
+    return x1, y1, x2, y2
+
+
+def init_telemetry():
+    try:
+        import openvino_telemetry as tm # pylint:disable=C0415
+    except ImportError:
+        return None
+    try:
+        telemetry = tm.Telemetry('Accuracy Checker', app_version=__version__)
+        return telemetry
+    except Exception: # pylint:disable=W0703
+        return None
+
+
+def send_telemetry_event(tm, *args, **kwargs):
+    if tm is None:
+        return
+    try:
+        tm.send_event('ac', *args, **kwargs)
+    except Exception: # pylint:disable=W0703
+        pass
+    return
+
+
+def start_telemetry():
+    tm = init_telemetry()
+    if tm:
+        try:
+            tm.start_session('ac')
+        except Exception:  # pylint:disable=W0703
+            pass
+    return tm
+
+
+def end_telemetry(tm):
+    if tm:
+        try:
+            tm.end_session()
+            tm.force_shutdown(1.0)
+        except Exception: # pylint:disable=W0703
+            pass

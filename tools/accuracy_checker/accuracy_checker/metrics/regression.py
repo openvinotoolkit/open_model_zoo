@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import copy
 import warnings
-import math
 from collections import OrderedDict
 from functools import singledispatch
 import numpy as np
@@ -27,35 +27,35 @@ from ..representation import (
     FacialLandmarksPrediction,
     FacialLandmarks3DAnnotation,
     FacialLandmarks3DPrediction,
-    SuperResolutionAnnotation,
-    SuperResolutionPrediction,
     GazeVectorAnnotation,
     GazeVectorPrediction,
     DepthEstimationAnnotation,
     DepthEstimationPrediction,
-    ImageInpaintingAnnotation,
-    ImageInpaintingPrediction,
     ImageProcessingAnnotation,
     ImageProcessingPrediction,
-    StyleTransferAnnotation,
-    StyleTransferPrediction,
     FeaturesRegressionAnnotation,
     PoseEstimationAnnotation,
     PoseEstimationPrediction,
     OpticalFlowAnnotation,
-    OpticalFlowPrediction
+    OpticalFlowPrediction,
+    BackgroundMattingAnnotation,
+    BackgroundMattingPrediction,
+    NiftiRegressionAnnotation,
 )
 
 from .metric import PerImageEvaluationMetric
-from ..config import BaseField, NumberField, BoolField, ConfigError, StringField
+from ..config import BaseField, NumberField, BoolField, ConfigError
 from ..utils import string_to_tuple, finalize_metric_result, contains_all
 
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
     annotation_types = (
-        RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation, ImageProcessingAnnotation
+        RegressionAnnotation, FeaturesRegressionAnnotation, DepthEstimationAnnotation, ImageProcessingAnnotation,
+        BackgroundMattingAnnotation, NiftiRegressionAnnotation,
     )
-    prediction_types = (RegressionPrediction, DepthEstimationPrediction, ImageProcessingPrediction)
+    prediction_types = (
+        RegressionPrediction, DepthEstimationPrediction, ImageProcessingPrediction, BackgroundMattingPrediction,
+    )
 
     def __init__(self, value_differ, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -63,9 +63,19 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         self.calculate_diff = singledispatch(self._calculate_diff_regression_rep)
         self.calculate_diff.register(DepthEstimationAnnotation, self._calculate_diff_depth_estimation_rep)
 
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'max_error': BoolField(optional=True, default=False, description='Calculate max error in magnitude')
+        })
+        return params
+
     def configure(self):
+        self.max_error = self.get_value_from_config('max_error')
         self.meta.update({
-            'names': ['mean', 'std'], 'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse'
+            'names': ['mean', 'std'] if not self.max_error else ['mean', 'std', 'max_error'],
+            'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse'
         })
         self.magnitude = []
 
@@ -93,6 +103,9 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         return diff
 
     def _calculate_diff_regression_rep(self, annotation, prediction):
+        def to_float(value):
+            return value.astype(float) if not np.isscalar(value) and np.issubdtype(value.dtype,
+                                                                                   np.integer) else value
         if isinstance(annotation.value, dict):
             if not isinstance(prediction.value, dict):
                 if len(annotation.value) != 1:
@@ -100,7 +113,9 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
                 return self.value_differ(next(iter(annotation.value.values())), prediction.value)
             diff_dict = OrderedDict()
             for key in annotation.value:
-                diff = self.value_differ(annotation.value[key], prediction.value[key])
+                annotation_val = to_float(annotation.value[key])
+                prediction_val = to_float(prediction.value[key])
+                diff = self.value_differ(annotation_val, prediction_val)
                 if np.ndim(diff) > 1:
                     diff = np.mean(diff)
                 diff_dict[key] = diff
@@ -108,12 +123,16 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         if isinstance(prediction.value, dict):
             if len(prediction.value) != 1:
                 raise ConfigError('annotation for all predictions should be provided')
-            diff = self.value_differ(annotation.value, next(iter(prediction.value.values())))
-            if not np.isscalar(diff) and np.size(diff) > 1:
+            annotation_val = to_float(annotation.value)
+            prediction_val = to_float(next(iter(prediction.value.values())))
+            diff = self.value_differ(annotation_val, prediction_val)
+            if not np.isscalar(diff) and np.ndim(diff) > 1:
                 diff = np.mean(diff)
             return diff
-        diff = self.value_differ(annotation.value, prediction.value)
-        if not np.isscalar(diff) and np.size(diff) > 1:
+        annotation_val = to_float(annotation.value)
+        prediction_val = to_float(prediction.value)
+        diff = self.value_differ(annotation_val, prediction_val)
+        if not np.isscalar(diff) and np.ndim(diff) > 1:
             diff = np.mean(diff)
         return diff
 
@@ -132,12 +151,19 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         if isinstance(self.magnitude, dict):
             names, result = [], []
             for key, values in self.magnitude.items():
-                names.extend(['{}@mean'.format(key), '{}@std'.format(key)])
+                names.extend(
+                    ['{}@mean'.format(key), '{}@std'.format(key)]
+                    if not self.max_error else ['{}@mean'.format(key), '{}@std'.format(key), '{}@max_errir'.format(key)]
+                )
                 result.extend([np.mean(values), np.std(values)])
+                if self.max_error:
+                    result.append(np.max(values))
             self.meta['names'] = names
             return result
 
-        return np.mean(self.magnitude), np.std(self.magnitude)
+        if not self.max_error:
+            return np.mean(self.magnitude), np.std(self.magnitude)
+        return np.mean(self.magnitude), np.std(self.magnitude), np.max(self.magnitude)
 
     def reset(self):
         self.magnitude = []
@@ -213,7 +239,7 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
             self.magnitude = self.magnitude[1:-1]
 
         result = [[np.mean(values), np.std(values)] if values else [np.nan, np.nan] for values in self.magnitude]
-        result, self.meta['names'] = finalize_metric_result(np.reshape(result, -1), self.meta['names'])
+        result, self.meta['names'] = finalize_metric_result(np.reshape(result, -1), self.meta['orig_names'])
 
         if not result:
             warnings.warn("No values in given interval")
@@ -236,6 +262,7 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         if not self.ignore_out_of_range:
             self.meta['names'].append('mean: > ' + str(self.intervals[-1]))
             self.meta['names'].append('std: > ' + str(self.intervals[-1]))
+        self.meta['orig_names'] = copy.deepcopy(self.meta['names'])
 
     def reset(self):
         self.magnitude = [[] for _ in range(len(self.intervals) + 1)]
@@ -323,7 +350,7 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
             error = [np.sqrt(np.mean(values)), np.sqrt(np.std(values))] if values else [np.nan, np.nan]
             result.append(error)
 
-        result, self.meta['names'] = finalize_metric_result(np.reshape(result, -1), self.meta['names'])
+        result, self.meta['names'] = finalize_metric_result(np.reshape(result, -1), self.meta['orig_names'])
 
         if not result:
             warnings.warn("No values in given interval")
@@ -339,7 +366,8 @@ def relative_err(target, pred):
         target = target.flatten()
     if len(pred.shape) > 2:
         pred = pred.flatten()
-    return np.linalg.norm(target - pred, 2) / (np.linalg.norm(target, 2) + np.finfo(float).eps)
+    size = min(target.size, pred.size)
+    return np.linalg.norm(target[:size] - pred[:size], 2) / (np.linalg.norm(target[:size], 2) + np.finfo(float).eps)
 
 
 class RelativeL2Error(BaseRegressionMetric):
@@ -525,10 +553,8 @@ def calculate_distance(x_coords, y_coords, selected_points):
 def mae_differ(annotation_val, prediction_val):
     return np.abs(annotation_val - prediction_val)
 
-
 def mse_differ(annotation_val, prediction_val):
-    return (annotation_val - prediction_val)**2
-
+    return (annotation_val - prediction_val) ** 2
 
 def find_interval(value, intervals):
     for index, point in enumerate(intervals):
@@ -545,76 +571,6 @@ def point_regression_differ(annotation_val_x, annotation_val_y, prediction_val_x
     loss = np.subtract(list(zip(annotation_val_x, annotation_val_y)), list(zip(prediction_val_x, prediction_val_y)))
     return np.linalg.norm(loss, 2, axis=1)
 
-
-class PeakSignalToNoiseRatio(BaseRegressionMetric):
-    __provider__ = 'psnr'
-
-    annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, ImageProcessingAnnotation,
-                        StyleTransferAnnotation)
-    prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, ImageProcessingPrediction,
-                        StyleTransferPrediction)
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'scale_border': NumberField(
-                optional=True, min_value=0, default=4, description="Scale border.", value_type=int
-            ),
-            'color_order': StringField(
-                optional=True, choices=['BGR', 'RGB'], default='RGB',
-                description="The field specified which color order BGR or RGB will be used during metric calculation."
-            ),
-            'normalized_images': BoolField(optional=True, default=False, description='images in [0, 1] range or not')
-        })
-
-        return parameters
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(self._psnr_differ, *args, **kwargs)
-        self.meta['target'] = 'higher-better'
-
-    def configure(self):
-        super().configure()
-        self.scale_border = self.get_value_from_config('scale_border')
-        color_order = self.get_value_from_config('color_order')
-        channel_order = {
-            'BGR': [2, 1, 0],
-            'RGB': [0, 1, 2],
-        }
-        self.meta['postfix'] = 'Db'
-        self.channel_order = channel_order[color_order]
-        self.normalized_images = self.get_value_from_config('normalized_images')
-        self.color_scale = 255 if not self.normalized_images else 1
-
-    def _psnr_differ(self, annotation_image, prediction_image):
-        prediction = np.asarray(prediction_image).astype(np.float)
-        ground_truth = np.asarray(annotation_image).astype(np.float)
-
-        height, width = prediction.shape[:2]
-        prediction = prediction[
-            self.scale_border:height - self.scale_border,
-            self.scale_border:width - self.scale_border
-        ]
-        ground_truth = ground_truth[
-            self.scale_border:height - self.scale_border,
-            self.scale_border:width - self.scale_border
-        ]
-        image_difference = (prediction - ground_truth) / self.color_scale
-        if len(ground_truth.shape) == 3 and ground_truth.shape[2] == 3:
-            r_channel_diff = image_difference[:, :, self.channel_order[0]]
-            g_channel_diff = image_difference[:, :, self.channel_order[1]]
-            b_channel_diff = image_difference[:, :, self.channel_order[2]]
-
-            channels_diff = (r_channel_diff * 65.738 + g_channel_diff * 129.057 + b_channel_diff * 25.064) / 256
-
-            mse = np.mean(channels_diff ** 2)
-            if mse == 0:
-                return np.Infinity
-        else:
-            mse = np.mean(image_difference ** 2)
-
-        return -10 * math.log10(mse)
 
 
 def angle_differ(gt_gaze_vector, predicted_gaze_vector):
@@ -640,34 +596,6 @@ class AngleError(BaseRegressionMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(angle_differ, *args, **kwargs)
-
-
-def _ssim(annotation_image, prediction_image):
-    prediction = np.asarray(prediction_image)
-    ground_truth = np.asarray(annotation_image)
-    if len(ground_truth.shape) < len(prediction.shape) and prediction.shape[-1] == 1:
-        prediction = np.squeeze(prediction)
-    mu_x = np.mean(prediction)
-    mu_y = np.mean(ground_truth)
-    var_x = np.var(prediction)
-    var_y = np.var(ground_truth)
-    sig_xy = np.mean((prediction - mu_x)*(ground_truth - mu_y))
-    c1 = (0.01 * 2**8-1)**2
-    c2 = (0.03 * 2**8-1)**2
-    mssim = (2*mu_x*mu_y + c1)*(2*sig_xy + c2)/((mu_x**2 + mu_y**2 + c1)*(var_x + var_y + c2))
-    return mssim
-
-
-class StructuralSimilarity(BaseRegressionMetric):
-    __provider__ = 'ssim'
-    annotation_types = (ImageInpaintingAnnotation, ImageProcessingAnnotation, SuperResolutionAnnotation,
-                        StyleTransferAnnotation)
-    prediction_types = (ImageInpaintingPrediction, ImageProcessingPrediction, SuperResolutionPrediction,
-                        StyleTransferPrediction)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(_ssim, *args, **kwargs)
-        self.meta['target'] = 'higher-better'
 
 
 class PercentageCorrectKeypoints(PerImageEvaluationMetric):

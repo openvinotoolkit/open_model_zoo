@@ -7,6 +7,7 @@
 # so allow it.
 *.patch whitespace=-blank-at-eol
 
+.bandit -omz.package
 .editorconfig -omz.package
 .flake8 -omz.package
 .git* -omz.package
@@ -17,6 +18,15 @@
 /demos/tests/** -omz.package
 /tools/downloader/tests/** -omz.package
 
+* omz.package.component=dev
+/LICENSE omz.package.component=tools
+/data/dataset_definitions.yml omz.package.component=tools
+/models/**/*.py omz.package.component=tools
+/models/**/*.yml omz.package.component=tools
+/tools/**/* omz.package.component=tools
+
+/ci/dependencies.yml omz.ci.job-for-change.ac omz.ci.job-for-change.demos omz.ci.job-for-change.models
+
 /ci/requirements-ac.txt omz.ci.job-for-change.ac
 /ci/requirements-ac-test.txt omz.ci.job-for-change.ac
 /ci/requirements-conversion.txt omz.ci.job-for-change.demos omz.ci.job-for-change.models
@@ -25,11 +35,9 @@
 /ci/requirements-quantization.txt omz.ci.job-for-change.downloader
 
 /demos/** omz.ci.job-for-change.demos
-/demos/**/*.md -omz.ci.job-for-change.demos
-
-/models/** omz.ci.job-for-change.documentation
-/models/**/*.yml -omz.ci.job-for-change.documentation
 
 /tools/accuracy_checker/** omz.ci.job-for-change.ac
+/tools/accuracy_checker/configs/*.yml -omz.ci.job-for-change.ac
 /tools/downloader/** omz.ci.job-for-change.downloader
-/tools/**/*.md -omz.ci.job-for-change.ac -omz.ci.job-for-change.downloader
+
+*.md omz.ci.job-for-change.documentation -omz.ci.job-for-change.ac -omz.ci.job-for-change.demos -omz.ci.job-for-change.downloader

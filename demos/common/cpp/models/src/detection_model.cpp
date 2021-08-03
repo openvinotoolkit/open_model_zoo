@@ -16,30 +16,13 @@
 
 #include "models/detection_model.h"
 #include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
 
 using namespace InferenceEngine;
 
 DetectionModel::DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, const std::vector<std::string>& labels) :
-    ModelBase(modelFileName),
+    ImageModel(modelFileName, useAutoResize),
     confidenceThreshold(confidenceThreshold),
-    useAutoResize(useAutoResize),
     labels(labels) {
-}
-
-std::shared_ptr<InternalModelData> DetectionModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
-    auto& img = inputData.asRef<ImageInputData>().inputImage;
-
-    if (useAutoResize) {
-        /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
-        request->SetBlob(inputsNames[0], wrapMat2Blob(img));
-        /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-        return std::make_shared<InternalImageMatModelData>(img);
-    }
-    /* Resize and copy data from the image to the input blob */
-    Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-    matU8ToBlob<uint8_t>(img, frameBlob);
-    return std::make_shared<InternalImageModelData>(img.cols, img.rows);
 }
 
 std::vector<std::string> DetectionModel::loadLabels(const std::string& labelFilename) {

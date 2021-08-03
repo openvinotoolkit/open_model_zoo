@@ -27,7 +27,7 @@ void CnnDLSDKBase::Load() {
 
     InferenceEngine::InputsDataMap in = cnnNetwork.getInputsInfo();
     if (in.size() != 1) {
-        THROW_IE_EXCEPTION << "Network should have only one input";
+        throw std::runtime_error("Network should have only one input");
     }
     in.begin()->second->setPrecision(Precision::U8);
     in.begin()->second->setLayout(Layout::NCHW);
@@ -41,10 +41,11 @@ void CnnDLSDKBase::Load() {
 
     try {
         executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
-    } catch (const details::InferenceEngineException&) {  // face-recognition-mobilefacenet-arcface may not work with dynamic batch
+    } catch (const Exception&) {  // in case the model does not work with dynamic batch
         cnnNetwork.setBatchSize(1);
         executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName, {{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::NO}});
     }
+    printExecNetworkInfo(executable_network_, config_.path_to_model, config_.deviceName, config_.model_type);
     infer_request_ = executable_network_.CreateInferRequest();
 }
 
@@ -73,11 +74,6 @@ void CnnDLSDKBase::InferBatch(
     }
 }
 
-void CnnDLSDKBase::PrintPerformanceCounts(std::string fullDeviceName) const {
-    std::cout << "Performance counts for " << config_.path_to_model << std::endl << std::endl;
-    ::printPerformanceCounts(infer_request_, std::cout, fullDeviceName, false);
-}
-
 void CnnDLSDKBase::Infer(const cv::Mat& frame,
                          const std::function<void(const InferenceEngine::BlobMap&, size_t)>& fetch_results) const {
     InferBatch({frame}, fetch_results);
@@ -87,7 +83,7 @@ VectorCNN::VectorCNN(const Config& config)
         : CnnDLSDKBase(config) {
     Load();
     if (output_blobs_names_.size() != 1) {
-        THROW_IE_EXCEPTION << "Demo supports topologies only with 1 output";
+        throw std::runtime_error("Demo supports topologies only with 1 output");
     }
 }
 
@@ -108,7 +104,7 @@ void VectorCNN::Compute(const std::vector<cv::Mat>& images, std::vector<cv::Mat>
         for (auto&& item : outputs) {
             InferenceEngine::Blob::Ptr blob = item.second;
             if (blob == nullptr) {
-                THROW_IE_EXCEPTION << "VectorCNN::Compute() Invalid blob '" << item.first << "'";
+                throw std::runtime_error("VectorCNN::Compute() Invalid blob '" + item.first + "'");
             }
             InferenceEngine::SizeVector ie_output_dims = blob->getTensorDesc().getDims();
             std::vector<int> blob_sizes(ie_output_dims.size(), 0);

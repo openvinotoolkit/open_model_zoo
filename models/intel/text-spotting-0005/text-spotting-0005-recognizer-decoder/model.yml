@@ -1,0 +1,45 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Decoder part of text recognition head that takes encoder features from text-spotting-0005-text-recognizer-encoder
+  as input.
+task_type: optical_character_recognition
+files:
+  - name: FP32/text-spotting-0005-recognizer-decoder.xml
+    size: 52801
+    sha256: a0307653701bee62b602b3cb543a6c9150f0ddf6213699121b7332c10fcb672f
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.xml
+  - name: FP32/text-spotting-0005-recognizer-decoder.bin
+    size: 2707724
+    sha256: 7c78bc3fd99924fb467d11e6b63b5e91e0ee4bbec5b330ec6aefcf028bc80777
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP32/text-spotting-0005-recognizer-decoder.bin
+  - name: FP16/text-spotting-0005-recognizer-decoder.xml
+    size: 52793
+    sha256: 809d22fab87fa9b45ef44b182e66609294dc3a9e0d3603bfde6e01cf83bf0205
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.xml
+  - name: FP16/text-spotting-0005-recognizer-decoder.bin
+    size: 1353920
+    sha256: 6e5ea2b18df8ef7e43f8ceace2532adfc3b974dd765d2be7fa21fa4bbf6e49a9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16/text-spotting-0005-recognizer-decoder.bin
+  - name: FP16-INT8/text-spotting-0005-recognizer-decoder.xml
+    size: 80802
+    sha256: 2042ef2d1c1a9daf73bb22e5bcfa90109196e1a29450ef0a592065c2ab2d0b54
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16-INT8/text-spotting-0005-recognizer-decoder.xml
+  - name: FP16-INT8/text-spotting-0005-recognizer-decoder.bin
+    size: 1085540
+    sha256: 191f0f9d50409de2e49f67a7cba1524965d09ac3c91d70eba3fe48207867af13
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/text-spotting-0005/text-spotting-0005-recognizer-decoder/FP16-INT8/text-spotting-0005-recognizer-decoder.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

@@ -113,6 +113,17 @@ class PreprocessingExecutor:
 
         return errors
 
+    @property
+    def dynamic_shapes(self):
+        shape_modification = []
+        for processor in self.processors:
+            if not processor.shape_modificator:
+                continue
+            shape_modification.append(processor.dynamic_result_shape)
+        if not shape_modification:
+            return False
+        return shape_modification[-1]
+
 
 class PreprocessorConfig(ConfigValidator):
     type = StringField(choices=Preprocessor.providers)

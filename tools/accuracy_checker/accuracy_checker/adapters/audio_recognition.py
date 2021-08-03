@@ -15,6 +15,7 @@ limitations under the License.
 """
 import math
 import string
+from itertools import groupby
 
 import numpy as np
 
@@ -52,7 +53,7 @@ def require_ctcdecode_numpy():
         except ImportError:
             raise ValueError(
                 "To use ctc_beam_search_decoder_with_lm adapter you need ctcdecode_numpy installed. "
-                "Please see open_model_zoo/demos/python_demos/speech_recognition_demo/README.md for instructions."
+                "Please see open_model_zoo/demos/speech_recognition_deepspeech_demo/python/README.md for instructions."
             )
         ctcdecode_numpy = ctcdecode_numpy_imported
 
@@ -442,7 +443,7 @@ class FastCTCBeamSearchDecoderWithLm(CTCBeamSearchDecoderWithLm):
             )
         if self.sep not in [' ', '']:
             raise ValueError("fast_ctc_beam_search_decoder_with_lm does not support non-default value of sep")
-        self.ctcdecoder_state = ctcdecode_numpy.CTCBeamDecoder(
+        self.ctcdecoder_state = ctcdecode_numpy.BatchedCtcLmDecoder(
             self.alphabet,
             model_path=str(lm_file) if lm_file is not None else None,
             alpha=self.alpha,
@@ -679,6 +680,7 @@ class CtcBeamSearchCandidate:
     def logp_total(self):
         return log_sum_exp(self.logp_blank, self.logp_non_blank)
 
+
 class DumbDecoder(Adapter):
     __provider__ = 'dumb_decoder'
     prediction_types = (CharacterRecognitionPrediction, )
@@ -705,6 +707,7 @@ class DumbDecoder(Adapter):
         if self.uppercase:
             decoded = decoded.upper()
         return [CharacterRecognitionPrediction(identifiers[0], decoded.upper())]
+
 
 class TextState:
     __slots__ = ('text', 'last_word', 'last_char_index')
@@ -800,3 +803,45 @@ def read_vocabulary_prefixes(lm_filename, vocab_offset, vocab_length):
         yield ''
 
     return set(all_prefixes_vocab(vocab_list))
+
+
+class Wav2VecDecoder(Adapter):
+    __provider__ = 'wav2vec'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'alphabet': ListField(allow_empty=False, description='supported tokens'),
+            'pad_token': StringField(optional=True, default='<pad>', description='padding token'),
+            'words_delimiter': StringField(optional=True, default='|', description='words delimiter tokens'),
+            'group_tokens': BoolField(optional=True, default=True, description='allow grouping repeated tokens'),
+            'lower_case': BoolField(optional=True, default=False, description='converts output to lower case'),
+            'cleanup_whitespaces': BoolField(optional=True, default=True, description='clean up extra white spaces')
+        })
+        return params
+
+    def configure(self):
+        self.alphabet = self.get_value_from_config('alphabet')
+        self.pad_token = self.get_value_from_config('pad_token')
+        self.words_delimiter = self.get_value_from_config('words_delimiter')
+        self.group_tokens = self.get_value_from_config('group_tokens')
+        self.lower_case = self.get_value_from_config('lower_case')
+        self.cleanup_whitespaces = self.get_value_from_config('cleanup_whitespaces')
+
+    def process(self, raw, identifiers, frame_meta):
+        out_logits = self._extract_predictions(raw, frame_meta)
+        results = []
+        for identifier, logits in zip(identifiers, out_logits[self.output_blob]):
+            token_ids = np.argmax(logits, -1)
+            tokens = [self.alphabet[idx] for idx in token_ids if self.alphabet[idx]]
+            if self.group_tokens:
+                tokens = [token_group[0] for token_group in groupby(tokens)]
+            tokens = [t for t in tokens if t != self.pad_token]
+            res_string = ''.join([t if t != self.words_delimiter else ' ' for t in tokens]).strip()
+            if self.cleanup_whitespaces:
+                res_string = ' '.join(res_string.split(' '))
+            if self.lower_case:
+                res_string = res_string.lower()
+            results.append(CharacterRecognitionPrediction(identifier, res_string))
+        return results

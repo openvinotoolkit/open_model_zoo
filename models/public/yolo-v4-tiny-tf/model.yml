@@ -1,0 +1,79 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  YOLO v4 Tiny is a real-time object detection model based on "YOLOv4: Optimal Speed
+  and Accuracy of Object Detection" <https://arxiv.org/abs/2004.10934> paper. It was
+  implemented in Keras* framework and converted to TensorFlow* framework. For details
+  see repository <https://github.com/david8862/keras-YOLOv3-model-set>. This model
+  was pre-trained on Common Objects in Context (COCO) <https://cocodataset.org/#home>
+  dataset with 80 classes.
+task_type: detection
+files:
+  - name: yolov4-tiny.weights
+    size: 24251276
+    sha256: cf9fbfd0f6d4869b35762f56100f50ed05268084078805f0e7989efe5bb8ca87
+    source: https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v4_pre/yolov4-tiny.weights
+  - name: keras-YOLOv3-model-set/tools/model_converter/convert.py
+    size: 16060
+    sha256: 3604f84547ce4fd3073cb6283f9d66e249526b0ad22da1a46c27ce1caf5a9b5f
+    source: https://github.com/david8862/keras-YOLOv3-model-set/raw/6b4a0ee63771262363e8224b0ee915cad6c5e93e/tools/model_converter/convert.py
+  - name: keras-YOLOv3-model-set/tools/model_converter/keras_to_tensorflow.py
+    size: 8370
+    sha256: 1cc02cf4ec76760c05bc1635654247ba56b9a1864b63fd05534b836bc93e44e7
+    source: https://github.com/david8862/keras-YOLOv3-model-set/raw/d38c3d865f7190ee9b19a30e91f2b750a31320c1/tools/model_converter/keras_to_tensorflow.py
+  - name: keras-YOLOv3-model-set/common/utils.py
+    size: 5002
+    sha256: 90146775879f294e1f1a82c7e35a5be29d815b7a9b14dbe12ba29dd16b3d10a8
+    source: https://github.com/david8862/keras-YOLOv3-model-set/raw/d38c3d865f7190ee9b19a30e91f2b750a31320c1/common/utils.py
+  - name: keras-YOLOv3-model-set/yolo4/models/layers.py
+    size: 15171
+    sha256: 569f5d4353c2a514a1fe63442a3f891cd83614c28cdd2d5cfb25b2bfcaf56286
+    source: https://github.com/david8862/keras-YOLOv3-model-set/raw/d38c3d865f7190ee9b19a30e91f2b750a31320c1/yolo4/models/layers.py
+  - name: keras-YOLOv3-model-set/cfg/yolov4-tiny.cfg
+    size: 3028
+    sha256: 92e2805d3fa67ffef969f44281714c96cd5ce7968425003948b7bcd0d03e6871
+    source: https://github.com/david8862/keras-YOLOv3-model-set/raw/6b4a0ee63771262363e8224b0ee915cad6c5e93e/cfg/yolov4-tiny.cfg
+postprocessing:
+  # disable imports that aren't needed for this model and code that uses them
+  - $type: regex_replace
+    file: keras-YOLOv3-model-set/common/utils.py
+    pattern: 'import cv2,|from (matplotlib|PIL|common\.backbones)\b'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: keras-YOLOv3-model-set/common/utils.py
+    pattern: '''(swish|hard_\w+)'''
+    replacement: '# \g<0>'
+
+  # patch TensorFlow 2 compatibility
+  - $type: regex_replace
+    file: keras-YOLOv3-model-set/tools/model_converter/keras_to_tensorflow.py
+    pattern: 'import tensorflow as tf'
+    replacement: 'import tensorflow.compat.v1 as tf\ntf.disable_v2_behavior()'
+  - $type: regex_replace
+    file: keras-YOLOv3-model-set/tools/model_converter/keras_to_tensorflow.py
+    pattern: 'from tensorflow\.keras\b'
+    replacement: 'from tensorflow.compat.v1.keras'
+  - $type: regex_replace
+    file: keras-YOLOv3-model-set/yolo4/models/layers.py
+    pattern: 'tensorflow\.keras'
+    replacement: 'tensorflow.compat.v1.keras'
+model_optimizer_args:
+  - --input_shape=[1,416,416,3]
+  - --input=image_input
+  - --scale_values=image_input[255]
+  - --reverse_input_channels
+  - --input_model=$conv_dir/yolo-v4-tiny.pb
+framework: tf
+license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

@@ -18,13 +18,15 @@ from argparse import ArgumentParser, SUPPRESS
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 from image_translation_demo.models import CocosnetModel, SegmentationModel
 from image_translation_demo.preprocessing import (
     preprocess_for_seg_model, preprocess_image, preprocess_semantics,
 )
 from image_translation_demo.postprocessing import postprocess, save_result
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -53,7 +55,7 @@ def build_argparser():
     args.add_argument("-o", "--output_dir", help="Required. Path to a folder where output files will be saved",
                       required=True, type=str)
     args.add_argument("-d", "--device",
-                      help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
+                      help="Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is "
                            "acceptable. Default value is CPU",
                       default="CPU", type=str)
     return parser
@@ -77,20 +79,24 @@ def get_mask_from_image(image, model):
 
 
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    log.info("Creating CoCosNet Model")
-    ie_core = IECore()
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
+    ie = IECore()
 
-    gan_model = CocosnetModel(ie_core, args.translation_model,
+    log.info('Reading Translation model {}'.format(args.translation_model))
+    gan_model = CocosnetModel(ie, args.translation_model,
                               args.translation_model.replace(".xml", ".bin"),
                               args.device)
-    seg_model = SegmentationModel(ie_core, args.segmentation_model,
+    log.info('The Translation model {} is loaded to {}'.format(args.translation_model, args.device))
+
+    log.info('Reading Semantic Segmentation model {}'.format(args.segmentation_model))
+    seg_model = SegmentationModel(ie, args.segmentation_model,
                                   args.segmentation_model.replace(".xml", ".bin"),
                                   args.device) if args.segmentation_model else None
+    log.info('The Semantic Segmentation model {} is loaded to {}'.format(args.segmentation_model, args.device))
 
-    log.info("Preparing input data")
     input_data = []
     use_seg = bool(args.input_images) and bool(args.segmentation_model)
     assert use_seg ^ (bool(args.input_semantics) and bool(args.reference_semantics)), "Don't know where to get data"
@@ -137,10 +143,8 @@ def main():
         }
         input_data.append(input_dict)
 
-    log.info("Inference for input")
     outs = [gan_model.infer(**data) for data in input_data]
 
-    log.info("Postprocessing for result")
     results = [postprocess(out) for out in outs]
 
     save_result(results, args.output_dir)

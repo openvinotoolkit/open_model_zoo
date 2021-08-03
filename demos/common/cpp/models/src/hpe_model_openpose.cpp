@@ -26,6 +26,7 @@
 #include <utils/common.hpp>
 #include <utils/ocv_common.hpp>
 #include <utils/slog.hpp>
+#include <utils/image_utils.h>
 #include <ngraph/ngraph.hpp>
 
 using namespace InferenceEngine;
@@ -37,7 +38,7 @@ const float HPEOpenPose::foundMidPointsRatioThreshold = 0.8f;
 const float HPEOpenPose::minSubsetScore = 0.2f;
 
 HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, int targetSize, float confidenceThreshold) :
-    ModelBase(modelFileName),
+    ImageModel(modelFileName, false),
     aspectRatio(aspectRatio),
     targetSize(targetSize),
     confidenceThreshold(confidenceThreshold) {
@@ -46,6 +47,8 @@ HPEOpenPose::HPEOpenPose(const std::string& modelFileName, double aspectRatio, i
 void HPEOpenPose::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
+    changeInputSize(cnnNetwork);
+
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     if (inputShapes.size() != 1)
         throw std::runtime_error("Demo supports topologies only with 1 input");
@@ -80,7 +83,7 @@ void HPEOpenPose::prepareInputsOutputs(CNNNetwork& cnnNetwork) {
         throw std::runtime_error("output and heatmap are expected to have matching last two dimensions");
 }
 
-void HPEOpenPose::reshape(CNNNetwork& cnnNetwork) {
+void HPEOpenPose::changeInputSize(CNNNetwork& cnnNetwork) {
     ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
     SizeVector& inputDims = inputShapes.begin()->second;
     if (!targetSize) {
@@ -98,28 +101,22 @@ void HPEOpenPose::reshape(CNNNetwork& cnnNetwork) {
 
 std::shared_ptr<InternalModelData> HPEOpenPose::preprocess(const InputData& inputData, InferRequest::Ptr& request) {
     auto& image = inputData.asRef<ImageInputData>().inputImage;
-    cv::Mat resizedImage;
-    double scale = inputLayerSize.height / static_cast<double>(image.rows);
-    cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
-    int h = resizedImage.rows;
-    int w = resizedImage.cols;
-    if (inputLayerSize.width < w)
+    cv::Rect roi;
+    auto paddedImage = resizeImageExt(image, inputLayerSize.width, inputLayerSize.height, RESIZE_KEEP_ASPECT, true, &roi);
+    if (inputLayerSize.width < roi.width)
         throw std::runtime_error("The image aspect ratio doesn't fit current model shape");
-    if (!(inputLayerSize.width - stride < w && w <= inputLayerSize.width)) {
-        slog::warn << "Chosen model aspect ratio doesn't match image aspect ratio\n";
+
+    if (inputLayerSize.width - stride >= roi.width) {
+        slog::warn << "\tChosen model aspect ratio doesn't match image aspect ratio" << slog::endl;
     }
-    cv::Mat paddedImage;
-    int right = inputLayerSize.width - w;
-    cv::copyMakeBorder(resizedImage, paddedImage, 0, 0, 0, right,
-                       cv::BORDER_CONSTANT, meanPixel);
+
     request->SetBlob(inputsNames[0], wrapMat2Blob(paddedImage));
     /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-    return std::make_shared<InternalScaleMatData>(image.cols / static_cast<float>(w), image.rows / static_cast<float>(h), std::move(paddedImage));
+    return std::make_shared<InternalScaleMatData>(image.cols / static_cast<float>(roi.width), image.rows / static_cast<float>(roi.height), std::move(paddedImage));
 }
 
 std::unique_ptr<ResultBase> HPEOpenPose::postprocess(InferenceResult& infResult) {
-    HumanPoseResult* result = new HumanPoseResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    HumanPoseResult* result = new HumanPoseResult(infResult.frameId, infResult.metaData);
 
     auto outputMapped = infResult.outputsData[outputsNames[0]];
     auto heatMapsMapped = infResult.outputsData[outputsNames[1]];
@@ -189,8 +186,8 @@ public:
 private:
     const std::vector<cv::Mat>& heatMaps;
     float minPeaksDistance;
-    float confidenceThreshold;
     std::vector<std::vector<Peak> >& peaksFromHeatMap;
+    float confidenceThreshold;
 };
 
 std::vector<HumanPose> HPEOpenPose::extractPoses(

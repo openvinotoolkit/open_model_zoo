@@ -108,7 +108,7 @@ class PyTorchSSDDecoder(Adapter):
         feat_size = self.get_value_from_config('feat_size')
 
         # Set default values according to:
-        # https://github.com/mlperf/inference/tree/master/cloud/single_stage_detector
+        # https://github.com/mlcommons/inference/tree/master/cloud/single_stage_detector
         self.aspect_ratios = [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
         self.feat_size = [[50, 50], [25, 25], [13, 13], [7, 7], [3, 3], [3, 3]] if feat_size is None else feat_size
         self.scales = [21, 45, 99, 153, 207, 261, 315]

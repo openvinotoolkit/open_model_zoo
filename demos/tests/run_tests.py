@@ -22,8 +22,9 @@ For the tests to work, the test data directory must contain:
   https://drive.google.com/open?id=1A2IU8Sgea1h3fYLpYtFb2v7NYdMjvEhU);
 * a "ILSVRC2012_img_val" subdirectory with the ILSVRC2012 dataset;
 * a "Image_Retrieval" subdirectory with image retrieval dataset (images, videos) (see https://github.com/19900531/test)
-  and list of images (see https://github.com/openvinotoolkit/training_extensions/blob/develop/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt)
+  and list of images (see https://github.com/openvinotoolkit/training_extensions/blob/089de2f/misc/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt)
 * a "msasl" subdirectory with the MS-ASL dataset (https://www.microsoft.com/en-us/research/project/ms-asl/)
+* a file how_are_you_doing.wav from <openvino_dir>/deployment_tools/demo/how_are_you_doing.wav
 """
 
 import argparse
@@ -31,17 +32,19 @@ import contextlib
 import csv
 import json
 import os
+import platform
 import shlex
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 import sys
 import tempfile
 import timeit
 
 from pathlib import Path
 
-from args import ArgContext, ModelArg
+from args import ArgContext, Arg, ModelArg
 from cases import DEMOS
 from data_sequences import DATA_SEQUENCES
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -60,7 +63,10 @@ def parse_args():
         help='list of devices to test')
     parser.add_argument('--report-file', type=Path,
         help='path to report file')
+    parser.add_argument('--suppressed-devices', type=Path, required=False,
+        help='path to file with suppressed devices for each model')
     return parser.parse_args()
+
 
 def collect_result(demo_name, device, pipeline, execution_time, report_file):
     first_time = not report_file.exists()
@@ -71,20 +77,27 @@ def collect_result(demo_name, device, pipeline, execution_time, report_file):
             testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime"])
         testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time])
 
+
 @contextlib.contextmanager
 def temp_dir_as_path():
     with tempfile.TemporaryDirectory() as temp_dir:
         yield Path(temp_dir)
 
-def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_dir, demos_to_test):
-    model_args = [arg
-        for demo in demos_to_test
-        for case in demo.test_cases
-        for arg in case.options.values()
-        if isinstance(arg, ModelArg)]
 
-    model_names = {arg.name for arg in model_args}
-    model_precisions = {arg.precision for arg in model_args}
+def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_dir, demos_to_test):
+    model_names = set()
+    model_precisions = set()
+
+    for demo in demos_to_test:
+        for case in demo.test_cases:
+            for arg in list(case.options.values()) + case.extra_models:
+                if isinstance(arg, Arg):
+                    for model_request in arg.required_models:
+                        model_names.add(model_request.name)
+                        model_precisions.update(model_request.precisions)
+
+    if not model_precisions:
+        model_precisions.add('FP32')
 
     dl_dir = global_temp_dir / 'models'
     complete_models_lst_path = global_temp_dir / 'models.lst'
@@ -127,8 +140,33 @@ def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_di
 
     return dl_dir
 
+
+def parse_suppressed_device_list(path):
+    if not path:
+        return None
+    suppressed_devices = {}
+    with open(path, "r") as f:
+        for line in f:
+            if line.startswith('#'):
+                continue
+            parsed = line.rstrip('\n').split(sep=',')
+            suppressed_devices[parsed[0]] = parsed[1:]
+    return suppressed_devices
+
+
+def get_models(case, keys):
+    models = []
+    for key in keys:
+        model = case.options.get(key, None)
+        if model:
+            models.append(model.name if isinstance(model, ModelArg) else model.model_name)
+    return models
+
+
 def main():
     args = parse_args()
+
+    suppressed_devices = parse_suppressed_device_list(args.suppressed_devices)
 
     omz_dir = (Path(__file__).parent / '../..').resolve()
     demos_dir = omz_dir / 'demos'
@@ -150,9 +188,10 @@ def main():
 
         num_failures = 0
 
+        python_module_subdir = "" if platform.system() == "Windows" else "/lib"
         demo_environment = {**os.environ,
             'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir),
+            'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{python_module_subdir}",
         }
 
         for demo in demos_to_test:
@@ -189,12 +228,13 @@ def main():
                 print()
                 device_args = demo.device_args(args.devices.split())
                 for test_case_index, test_case in enumerate(demo.test_cases):
+                    test_case_models = get_models(test_case, demo.model_keys)
 
                     case_args = [demo_arg
                         for key, value in sorted(test_case.options.items())
                         for demo_arg in option_to_args(key, value)]
 
-                    case_model_names = {arg.name for arg in test_case.options.values() if isinstance(arg, ModelArg)}
+                    case_model_names = {arg.name for arg in list(test_case.options.values()) + test_case.extra_models if isinstance(arg, ModelArg)}
 
                     undeclared_case_model_names = case_model_names - declared_model_names
                     if undeclared_case_model_names:
@@ -206,6 +246,14 @@ def main():
                         continue
 
                     for device, dev_arg in device_args.items():
+                        skip = False
+                        for model in test_case_models:
+                            if suppressed_devices and device in suppressed_devices.get(model, []):
+                                print('Test case #{}/{}: Model {} is suppressed on device'
+                                      .format(test_case_index, device, model))
+                                print(flush=True)
+                                skip = True
+                        if skip: continue
                         print('Test case #{}/{}:'.format(test_case_index, device),
                             ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
                         print(flush=True)
@@ -229,6 +277,7 @@ def main():
     print("Failures: {}".format(num_failures))
 
     sys.exit(0 if num_failures == 0 else 1)
+
 
 if __name__ == '__main__':
     main()

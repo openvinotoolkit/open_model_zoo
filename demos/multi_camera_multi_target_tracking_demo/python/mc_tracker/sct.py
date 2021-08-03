@@ -43,7 +43,7 @@ class ClusterFeature:
             self.clusters.append(feature_vec)
             self.clusters_sizes.append(1)
         elif sum(self.clusters_sizes) < 2*self.feature_len:
-            idx = random.randint(0, self.feature_len - 1)
+            idx = random.randint(0, self.feature_len - 1) # nosec - disable B311:random check
             self.clusters_sizes[idx] += 1
             self.clusters[idx] += (feature_vec - self.clusters[idx]) / \
                                             self.clusters_sizes[idx]
@@ -259,8 +259,8 @@ class SingleCameraTracker:
         self.analyzer = None
         self.current_detections = None
 
-        if visual_analyze is not None and 'enable' in visual_analyze and visual_analyze['enable']:
-            self.analyzer = Analyzer(self.id, **visual_analyze)
+        if visual_analyze is not None and visual_analyze.enable:
+            self.analyzer = Analyzer(self.id, **vars(visual_analyze))
 
     def process(self, frame, detections, mask=None):
         reid_features = [None]*len(detections)

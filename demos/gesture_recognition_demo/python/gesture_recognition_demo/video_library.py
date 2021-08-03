@@ -50,7 +50,7 @@ class VideoLibrary:
     def parse_source_paths(input_dir, valid_names):
         """Returns the list of valid video sources"""
 
-        valid_names = set(n.lower() for n in valid_names)
+        valid_names = {n.lower() for n in valid_names}
         all_file_paths = [f for f in listdir(input_dir) if isfile(join(input_dir, f))]
         all_file_paths.sort()
 
