@@ -19,15 +19,30 @@ from collections import OrderedDict
 import numpy as np
 
 import cv2
+from openvino.inference_engine import IECore, known_plugins
 
 from ..config import PathField, StringField, ConfigError, ListInputsField, ListField
-from ..logging import print_info
+from ..logging import print_info, warning
 from .launcher import Launcher, LauncherConfigValidator
+from .dlsdk_launcher_config import MULTI_DEVICE_KEYWORD, HETERO_KEYWORD, NIREQ_REGEX
 from ..utils import get_or_parse_value, get_path
 
 
-class OpenCVLauncherConfigValidator(LauncherConfigValidator):
-    def validate(self, entry, field_uri=None, fetch_only=False):
+class GAPILauncherConfigValidator(LauncherConfigValidator):
+    def create_device_regex(self, available_devices):
+        self.regular_device_regex = r"(?:^(?P<device>{devices})$)".format(devices="|".join(available_devices))
+        self.hetero_regex = r"(?:^{hetero}(?P<devices>(?:{devices})(?:,(?:{devices}))*)$)".format(
+            hetero=HETERO_KEYWORD, devices="|".join(available_devices)
+        )
+        self.multi_device_regex = r"(?:^{multi}(?P<devices_ireq>(?:{devices_ireq})(?:,(?:{devices_ireq}))*)$)".format(
+            multi=MULTI_DEVICE_KEYWORD, devices_ireq="{}?|".format(NIREQ_REGEX).join(available_devices)
+        )
+        self.supported_device_regex = r"{multi}|{hetero}|{regular}".format(
+            multi=self.multi_device_regex, hetero=self.hetero_regex, regular=self.regular_device_regex
+        )
+        self.fields['device'].set_regex(self.supported_device_regex)
+
+    def validate(self, entry, field_uri=None, ie_core=None, fetch_only=False, validation_scheme=None):
         self.fields['inputs'].optional = self.delayed_model_loading
         error_stack = super().validate(entry, field_uri)
         if not self.delayed_model_loading:
@@ -37,6 +52,27 @@ class OpenCVLauncherConfigValidator(LauncherConfigValidator):
                     if not fetch_only:
                         raise ConfigError('input value should have shape field')
                     error_stack.extend(self.build_error(entry, field_uri, 'input value should have shape field'))
+        self.create_device_regex(known_plugins)
+        if 'device' not in entry:
+            return error_stack
+        try:
+            self.fields['device'].validate(
+                entry['device'], field_uri, validation_scheme=(validation_scheme or {}).get('device')
+            )
+        except ConfigError as error:
+            if ie_core is not None:
+                self.create_device_regex(ie_core.available_devices)
+                try:
+                    self.fields['device'].validate(
+                        entry['device'], field_uri, validation_scheme=(validation_scheme or {}).get('device')
+                    )
+                except ConfigError:
+                    # workaround for devices where this metric is non implemented
+                    warning('unknown device: {}'.format(entry['device']))
+            else:
+                if not fetch_only:
+                    raise error
+                error_stack.append(error)
         return error_stack
 
 
@@ -47,10 +83,10 @@ class GAPILauncher(Launcher):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'model': PathField(description="Path to model file."),
-            'weights': PathField(description="Path to weights file.", optional=True, default='', check_exists=False),
+            'model': PathField(description="Path to model file.", file_or_directory=True),
+            'weights': PathField(description="Path to weights file.",
+                                 optional=True, file_or_directory=True),
             'device': StringField(
-                choices=['CPU', 'MYRIAD'],
                 description="Device name"
             ),
             'inputs': ListInputsField(optional=False, description="Inputs."),
@@ -75,10 +111,10 @@ class GAPILauncher(Launcher):
 
     @classmethod
     def validate_config(cls, config, fetch_only=False, delayed_model_loading=False, uri_prefix=''):
-        return OpenCVLauncherConfigValidator(
+        return GAPILauncherConfigValidator(
             uri_prefix or 'launcher.{}'.format(cls.__provider__),
             fields=cls.parameters(), delayed_model_loading=delayed_model_loading
-        ).validate(config, fetch_only=fetch_only)
+        ).validate(config, ie_core=IECore(), fetch_only=fetch_only)
 
     def prepare_net(self):
         def compile_args(*args):
@@ -94,7 +130,11 @@ class GAPILauncher(Launcher):
         outputs = cv2.gapi.infer("net", inputs)
         g_outputs = [outputs.at(out_name) for out_name in self.output_names]
         self.comp = cv2.GComputation(cv2.GIn(*g_inputs), cv2.GOut(*g_outputs))
-        pp = cv2.gapi.ie.params("net", str(self.model), str(self.weights), self.device.upper())
+        args = ['net', str(self.model)]
+        if self.weights is not None:
+            args.append(str(self.weights))
+        args.append(self.device.upper())
+        pp = cv2.gapi.ie.params(*args)
         self.network_args = compile_args(cv2.gapi.networks(pp))
 
     @property
@@ -110,11 +150,11 @@ class GAPILauncher(Launcher):
         return next(iter(self.output_names))
 
     def fit_to_input(self, data, layer_name, layout, precision):
-        if len(self.inputs) == 1 and self.batch == 1:
+        if np.ndim(data) == 4:
             if data[0].dtype in [float, np.float64]:
                 return data[0].astype(np.float32)
             return data[0]
-        raise ConfigError('this case is not supported')
+        raise ConfigError('This case is not supported currently')
 
     def automatic_model_search(self):
         def get_xml(model_dir):
@@ -129,17 +169,11 @@ class GAPILauncher(Launcher):
                 blobs_list = list(Path(model_dir).glob('*.blob'))
             return blobs_list
 
-        def get_onnx(model_dir):
-            onnx_list = list(Path(model_dir).glob('{}.onnx'.format(self._model_name)))
-            if not onnx_list:
-                onnx_list = list(Path(model_dir).glob('*.onnx'))
-            return onnx_list
-
         def get_model():
             model = Path(self.get_value_from_config('model'))
             model_is_blob = self.get_value_from_config('_model_is_blob')
             if not model.is_dir():
-                accepted_suffixes = ['.blob', '.onnx', '.xml']
+                accepted_suffixes = ['.blob', '.xml']
                 if model.suffix not in accepted_suffixes:
                     raise ConfigError('Models with following suffixes are allowed: {}'.format(accepted_suffixes))
                 print_info('Found model {}'.format(model))
@@ -150,8 +184,6 @@ class GAPILauncher(Launcher):
                 model_list = get_xml(model)
                 if not model_list and model_is_blob is None:
                     model_list = get_blob(model)
-                if not model_list:
-                    model_list = get_onnx(model)
             if not model_list:
                 raise ConfigError('suitable model is not found')
             if len(model_list) != 1:
@@ -164,7 +196,7 @@ class GAPILauncher(Launcher):
         if is_blob:
             return model, None
         weights = self.get_value_from_config('weights')
-        if (weights is None or Path(weights).is_dir()) and model.suffix != '.onnx':
+        if weights is None or Path(weights).is_dir():
             weights_dir = weights or model.parent
             weights = Path(weights_dir) / model.name.replace('xml', 'bin')
         if weights is not None:
