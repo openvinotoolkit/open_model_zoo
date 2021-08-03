@@ -34,7 +34,7 @@ At the end of the sequence, the `VideoFrame` is destroyed and the sequence start
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/social_distance_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -81,7 +81,6 @@ Options:
       -c "<absolute_path>"     Required for GPU custom kernels. Absolute path to an .xml file with the kernels description.
     -d_det "<device>"          Optional. Specify the target device for Person Detection (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_reid "<device>"         Optional. Specify the target device for Person Re-Identification (the list of available devices is shown below). Default value is CPU. Use "-d_reid HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -pc                        Optional. Enables per-layer performance statistics.
     -r                         Optional. Output inference results as raw values.
     -t                         Optional. Probability threshold for person detections.
     -no_show                   Optional. Do not show processed video.

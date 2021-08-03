@@ -12,12 +12,13 @@
 #include <string>
 #include <set>
 #include <memory>
+#include <utils/slog.hpp>
 
 using namespace InferenceEngine;
 
 namespace {
-template <typename StreamType>
-void SaveDetectionLogToStream(StreamType& stream,
+template <typename StreamType, typename EndlType>
+void SaveDetectionLogToStream(StreamType& stream, const EndlType& endl,
                               const DetectionLog& log) {
     for (const auto& entry : log) {
         std::vector<TrackedObject> objects(entry.objects.begin(),
@@ -32,7 +33,7 @@ void SaveDetectionLogToStream(StreamType& stream,
             stream << object.object_id << ','
                 << object.rect.x << ',' << object.rect.y << ','
                 << object.rect.width << ',' << object.rect.height;
-            stream << '\n';
+            stream << endl;
         }
     }
 }
@@ -55,18 +56,17 @@ void SaveDetectionLogToTrajFile(const std::string& path,
                                 const DetectionLog& log) {
     std::ofstream file(path.c_str());
     PT_CHECK(file.is_open());
-    SaveDetectionLogToStream(file, log);
+    SaveDetectionLogToStream(file, '\n', log);
 }
 
 void PrintDetectionLog(const DetectionLog& log) {
-    SaveDetectionLogToStream(std::cout, log);
+    SaveDetectionLogToStream(slog::debug, slog::endl, log);
 }
 
 InferenceEngine::Core
 LoadInferenceEngine(const std::vector<std::string>& devices,
                     const std::string& custom_cpu_library,
-                    const std::string& custom_cldnn_kernels,
-                    bool should_use_perf_counter) {
+                    const std::string& custom_cldnn_kernels) {
     std::set<std::string> loadedDevices;
     Core ie;
 
@@ -74,9 +74,6 @@ LoadInferenceEngine(const std::vector<std::string>& devices,
         if (loadedDevices.find(device) != loadedDevices.end()) {
             continue;
         }
-
-        std::cout << "Loading device " << device << std::endl;
-        std::cout << printable(ie.GetVersions(device)) << std::endl;
 
         /** Load extensions for the CPU device **/
         if ((device.find("CPU") != std::string::npos)) {
@@ -89,9 +86,6 @@ LoadInferenceEngine(const std::vector<std::string>& devices,
             // Load Extensions for other plugins not CPU
             ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, custom_cldnn_kernels}}, "GPU");
         }
-
-        if (should_use_perf_counter)
-            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
 
         loadedDevices.insert(device);
     }

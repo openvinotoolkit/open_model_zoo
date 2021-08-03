@@ -49,7 +49,6 @@ static const char target_device_message[] = "Optional. Specify the target device
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
 "The demo will look for a suitable plugin for a specified device.";
 static const char labels_message[] = "Optional. Path to a file with labels mapping.";
-static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
 "Absolute path to the .xml file with the kernel descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
@@ -74,7 +73,6 @@ DEFINE_string(at, "", at_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(labels, "", labels_message);
-DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(r, false, raw_output_message);
@@ -108,7 +106,6 @@ static void showUsage() {
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
-    std::cout << "    -pc                       " << performance_counter_message << std::endl;
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -iou_t                    " << iou_thresh_output_message << std::endl;
@@ -198,7 +195,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
-    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -232,12 +228,13 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
     outputTransform.resize(outputImg);
     // Visualizing result data over source image
     if (FLAGS_r) {
-        slog::info << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
+        slog::debug << " -------------------- Frame # " << result.frameId << "--------------------" << slog::endl;
+        slog::debug << " Class ID  | Confidence | XMIN | YMIN | XMAX | YMAX " << slog::endl;
     }
 
     for (auto& obj : result.objects) {
         if (FLAGS_r) {
-            slog::info << " "
+            slog::debug << " "
                 << std::left << std::setw(9) << obj.label << " | "
                 << std::setw(10) << obj.confidence << " | "
                 << std::setw(4) << std::max(int(obj.x), 0) << " | "
@@ -249,7 +246,7 @@ cv::Mat renderDetectionData(DetectionResult& result, const ColorPalette& palette
         outputTransform.scaleRect(obj);
         std::ostringstream conf;
         conf << ":" << std::fixed << std::setprecision(1) << obj.confidence * 100 << '%';
-        auto color = palette[obj.labelID];
+        const auto& color = palette[obj.labelID];
         cv::putText(outputImg, obj.label + conf.str(),
             cv::Point2f(obj.x, obj.y - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, { 230, 230, 230 }, 3);
         cv::putText(outputImg, obj.label + conf.str(),
@@ -273,7 +270,6 @@ int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
 
-        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -281,7 +277,6 @@ int main(int argc, char *argv[]) {
         }
 
         //------------------------------- Preparing Input ------------------------------------------------------
-        slog::info << "Reading input" << slog::endl;
         auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat curr_frame;
 
@@ -308,17 +303,20 @@ int main(int argc, char *argv[]) {
             model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
         else if (FLAGS_at == "yolo") {
-            model.reset(new ModelYolo3(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
+            model.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;
             return -1;
         }
 
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+
         InferenceEngine::Core core;
 
-        AsyncPipeline pipeline(std::move(model),
-            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_pc, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
+        AsyncPipeline pipeline(
+            std::move(model),
+            ConfigFactory::getUserConfig(FLAGS_d, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads),
             core);
         Presenter presenter(FLAGS_u);
 
@@ -345,8 +343,7 @@ int main(int argc, char *argv[]) {
                 if (curr_frame.empty()) {
                     if (frameNum == -1) {
                         throw std::logic_error("Can't read an image from the input");
-                    }
-                    else {
+                    } else {
                         // Input stream is over
                         break;
                     }
@@ -359,8 +356,7 @@ int main(int argc, char *argv[]) {
             if (frameNum == 0) {
                 if (found == std::string::npos) {
                     outputResolution = curr_frame.size();
-                }
-                else {
+                } else {
                     outputResolution = cv::Size{
                         std::stoi(FLAGS_output_resolution.substr(0, found)),
                         std::stoi(FLAGS_output_resolution.substr(found + 1, FLAGS_output_resolution.length()))
@@ -405,49 +401,44 @@ int main(int argc, char *argv[]) {
                     int key = cv::waitKey(1);
                     if (27 == key || 'q' == key || 'Q' == key) {  // Esc
                         keepRunning = false;
-                    }
-                    else {
+                    } else {
                         presenter.handleKey(key);
                     }
                 }
             }
-        }
+        } // while(keepRunning)
 
         //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
+
         for (; framesProcessed <= frameNum; framesProcessed++) {
-            while (!(result = pipeline.getResult())) {}
-            auto renderingStart = std::chrono::steady_clock::now();
-            cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
-            //--- Showing results and device information
-            presenter.drawGraphs(outFrame);
-            renderMetrics.update(renderingStart);
-            metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
-                outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
-            if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
-                videoWriter.write(outFrame);
-            }
-            if (!FLAGS_no_show) {
-                cv::imshow("Detection Results", outFrame);
-                //--- Updating output window
-                cv::waitKey(1);
+            result = pipeline.getResult();
+            if (result != nullptr)
+            {
+                auto renderingStart = std::chrono::steady_clock::now();
+                cv::Mat outFrame = renderDetectionData(result->asRef<DetectionResult>(), palette, outputTransform);
+                //--- Showing results and device information
+                presenter.drawGraphs(outFrame);
+                renderMetrics.update(renderingStart);
+                metrics.update(result->metaData->asRef<ImageMetaData>().timeStamp,
+                    outFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+                if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit - 1)) {
+                    videoWriter.write(outFrame);
+                }
+                if (!FLAGS_no_show) {
+                    cv::imshow("Detection Results", outFrame);
+                    //--- Updating output window
+                    cv::waitKey(1);
+                }
             }
         }
 
         //// --------------------------- Report metrics -------------------------------------------------------
-        slog::info << slog::endl << "Metric reports:" << slog::endl;
+        slog::info << "Metrics report:" << slog::endl;
         metrics.printTotal();
-        slog::info << slog::endl << "Avg time:\n";
-        slog::info << "  * Decoding:\t\t" << std::fixed << std::setprecision(2) <<
-            cap->getMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Preprocessing:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getPreprocessMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Inference:\t\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getInferenceMetircs().getTotal().latency << " ms\n";
-        slog::info << "  * Postprocessing:\t" << std::fixed << std::setprecision(2) <<
-            pipeline.getPostprocessMetrics().getTotal().latency << " ms\n";
-        slog::info << "  * Rendering:\t\t" << std::fixed << std::setprecision(2) <<
-            renderMetrics.getTotal().latency << " ms" << slog::endl;
+        printStagesLatency(cap->getMetrics().getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
+            pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
+            renderMetrics.getTotal().latency);
 
         slog::info << presenter.reportMeans() << slog::endl;
     }
@@ -460,6 +451,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << slog::endl << "The execution has completed successfully" << slog::endl;
     return 0;
 }

@@ -22,9 +22,7 @@ using namespace InferenceEngine;
 
 AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& core) :
     model(std::move(modelInstance)) {
-
     execNetwork = model->loadExecutableNetwork(cnnConfig, core);
-
     // --------------------------- Create infer requests ------------------------------------------------
     unsigned int nireq = cnnConfig.maxAsyncRequests;
     if (nireq == 0) {
@@ -36,8 +34,8 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
                 "OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. Failed to query the metric with error: ") + ex.what());
         }
     }
+    slog::info << "\tNumber of network inference requests: " << nireq << slog::endl;
     requestsPool.reset(new RequestsPool(execNetwork, nireq));
-
     // --------------------------- Call onLoadCompleted to complete initialization of model -------------
     model->onLoadCompleted(requestsPool->getInferRequestsList());
 }
@@ -49,12 +47,16 @@ AsyncPipeline::~AsyncPipeline() {
 void AsyncPipeline::waitForData(bool shouldKeepOrder) {
     std::unique_lock<std::mutex> lock(mtx);
 
-    condVar.wait(lock, [&] {return callbackException != nullptr ||
-        requestsPool->isIdleRequestAvailable() ||
-        (shouldKeepOrder ?
-            completedInferenceResults.find(outputFrameId) != completedInferenceResults.end() :
-            !completedInferenceResults.empty());
-    });
+    condVar.wait(
+        lock,
+        [&]()
+        {
+            return callbackException != nullptr ||
+                   requestsPool->isIdleRequestAvailable() ||
+                   (shouldKeepOrder ?
+                       completedInferenceResults.find(outputFrameId) != completedInferenceResults.end() :
+                       !completedInferenceResults.empty());
+        });
 
     if (callbackException)
         std::rethrow_exception(callbackException);
@@ -72,12 +74,10 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
     preprocessMetrics.update(startTime);
 
     request->SetCompletionCallback(
-        [this, frameID, request, internalModelData, metaData, startTime] {
-            request->SetCompletionCallback([]{});
-
+        [this, frameID, request, internalModelData, metaData, startTime]() {
             {
-                std::lock_guard<std::mutex> lock(mtx);
-                this->inferenceMetrics.update(startTime);
+                const std::lock_guard<std::mutex> lock(mtx);
+                inferenceMetrics.update(startTime);
                 try {
                     InferenceResult result;
 
@@ -89,22 +89,21 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                     {
                         auto blobPtr = request->GetBlob(outName);
 
-                        if(Precision::I32 == blobPtr->getTensorDesc().getPrecision())
+                        if (Precision::I32 == blobPtr->getTensorDesc().getPrecision())
                             result.outputsData.emplace(outName, std::make_shared<TBlob<int>>(*as<TBlob<int>>(blobPtr)));
                         else
                             result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(blobPtr)));
                     }
 
                     completedInferenceResults.emplace(frameID, result);
-                    this->requestsPool->setRequestIdle(request);
+                    requestsPool->setRequestIdle(request);
                 }
                 catch (...) {
-                    if (!this->callbackException) {
-                        this->callbackException = std::current_exception();
+                    if (!callbackException) {
+                        callbackException = std::current_exception();
                     }
                 }
             }
-
             condVar.notify_one();
     });
 
@@ -133,7 +132,7 @@ std::unique_ptr<ResultBase> AsyncPipeline::getResult(bool shouldKeepOrder) {
 InferenceResult AsyncPipeline::getInferenceResult(bool shouldKeepOrder) {
     InferenceResult retVal;
     {
-        std::lock_guard<std::mutex> lock(mtx);
+        const std::lock_guard<std::mutex> lock(mtx);
 
         const auto& it = shouldKeepOrder ?
             completedInferenceResults.find(outputFrameId) :

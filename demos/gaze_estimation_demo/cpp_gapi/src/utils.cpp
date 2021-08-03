@@ -27,8 +27,7 @@ void putTimingInfoOnFrame(cv::Mat& image, double overallTime) {
     double overallFPS = 1000. / overallTime;
 
     const auto format = cv::format("Overall FPS: %0.0f", overallFPS);
-    cv::putText(image,
-                format,
-                cv::Point(10, static_cast<int>(30 * fontScale / 1.6)), cv::FONT_HERSHEY_PLAIN, fontScale, fontColor, thickness);
+    putHighlightedText(image, format,
+        cv::Point(10, static_cast<int>(30 * fontScale / 1.6)), cv::FONT_HERSHEY_PLAIN, fontScale, fontColor, thickness);
 }
 }  // namespace gaze_estimation

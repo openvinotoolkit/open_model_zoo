@@ -63,8 +63,8 @@ Options:
                         Required. Path to ForwardTacotron`s mel-spectrogram
                         regression part (*.xml format).
   -i INPUT, --input INPUT
-                        Text file with text.
-  -o OUT, --out OUT     Required. Path to an output .wav file
+                        Required. Text file with text.
+  -o OUT, --out OUT     Optional. Path to an output .wav file
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, HDDL, MYRIAD or HETERO is acceptable. The
@@ -143,6 +143,9 @@ python3 text_to_speech_demo.py \
 ## Demo Output
 
 The application outputs WAV file with generated audio.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

@@ -146,7 +146,7 @@ class CocosnetEvaluator(BaseEvaluator):
                 check_progress, self.dataset.size
             )
 
-        metric_config = self.configure_intermediate_metrics_results(kwargs)
+        metric_config = self._configure_intermediate_metrics_results(kwargs)
         (compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
          ignore_metric_reference) = metric_config
 
@@ -325,7 +325,7 @@ class CocosnetEvaluator(BaseEvaluator):
         return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
 
     @staticmethod
-    def configure_intermediate_metrics_results(config):
+    def _configure_intermediate_metrics_results(config):
         compute_intermediate_metric_res = config.get('intermediate_metrics_results', False)
         metric_interval, ignore_results_formatting, ignore_metric_reference = None, None, None
         if compute_intermediate_metric_res:
@@ -337,6 +337,25 @@ class CocosnetEvaluator(BaseEvaluator):
     @property
     def dataset_size(self):
         return self.dataset.size
+
+    def send_processing_info(self, sender):
+        if not sender:
+            return {}
+        model_type = None
+        details = {}
+        metrics = self.dataset_config[0].get('metrics', [])
+        metric_info = [metric['type'] for metric in metrics]
+        adapter_type = self.test_model.adapter.__provider__
+        details.update({
+            'metrics': metric_info,
+            'model_file_type': model_type,
+            'adapter': adapter_type,
+        })
+        if self.dataset is None:
+            self.select_dataset('')
+
+        details.update(self.dataset.send_annotation_info(self.dataset_config[0]))
+        return details
 
 
 class BaseModel:

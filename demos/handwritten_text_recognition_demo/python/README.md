@@ -58,7 +58,7 @@ usage: handwritten_text_recognition_demo.py [-h] -m MODEL -i INPUT [-d DEVICE]
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
-                        Path to an .xml file with a trained model.
+                        Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
                         Required. Path to an image to infer
   -d DEVICE, --device DEVICE
@@ -104,7 +104,10 @@ python handwritten_text_recognition_demo.py \
 
 ## Demo Output
 
-The application uses the terminal to show resulting recognition text and inference performance.
+The application uses the terminal to show resulting recognition text.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

@@ -71,22 +71,22 @@ Speech recognition DeepSpeech demo
 optional arguments:
   -h, --help            show this help message and exit
   -i FILENAME, --input FILENAME
-                        Path to an audio file in WAV PCM 16 kHz mono format
+                        Required. Path to an audio file in WAV PCM 16 kHz mono format
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
                         example: CPU, GPU, HDDL, MYRIAD or HETERO. The
                         demo will look for a suitable IE plugin for this
                         device. (default is CPU)
   -m FILENAME, --model FILENAME
-                        Path to an .xml file with a trained model (required)
+                        Required. Path to an .xml file with a trained model
   -L FILENAME, --lm FILENAME
-                        path to language model file (optional)
+                        Optional. Path to language model file
   -p NAME, --profile NAME
-                        Choose pre/post-processing profile: mds06x_en for
-                        Mozilla DeepSpeech v0.6.x,
+                        Required. Choose pre/post-processing profile: mds06x_en
+                        for Mozilla DeepSpeech v0.6.x,
                         mds07x_en/mds08x_en/mds09x_en for Mozilla DeepSpeech
                         v0.7.x/v0.8.x/v0.9.x(English), other: filename of a
-                        YAML file (required)
+                        YAML file
   -b N, --beam-width N  Beam width for beam search in CTC decoder (default
                         500)
   -c N, --max-candidates N
@@ -111,7 +111,7 @@ source <openvino_dir>/bin/setupvars.sh
 
 python3 speech_recognition_deepspeech_demo.py \
     -p mds08x_en \
-    -m <path_to_model>/mozilla_deepspeech_0.8.2.xml \
+    -m <path_to_model>/mozilla-deepspeech-0.8.2.xml \
     -L <path_to_file>/deepspeech-0.8.2-models.kenlm \
     -i <path_to_audio>/audio.wav
 ```
@@ -121,7 +121,7 @@ For version 0.6.1 it is:
 ```shell
 python3 speech_recognition_deepspeech_demo.py \
     -p mds06x_en \
-    -m <path_to_model>/mozilla_deepspeech_0.6.1.xml \
+    -m <path_to_model>/mozilla-deepspeech0-0.6.1.xml \
     -L <path_to_file>/lm.binary \
     -i <path_to_audio>/audio.wav
 ```
@@ -135,6 +135,9 @@ Optional (but highly recommended) language model files, `deepspeech-0.8.2-models
 ## Demo Output
 
 The application shows time taken by the initialization and processing stages, and the decoded text for the audio file. In real-time mode the current recognition result is shown while the app is running as well.
+In offline mode the demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

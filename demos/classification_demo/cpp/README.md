@@ -62,6 +62,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * hbonet-0.5
 * hbonet-1.0
 * inception-resnet-v2-tf
+* mixnet-l
 * mobilenet-v1-0.25-128
 * mobilenet-v1-0.50-160
 * mobilenet-v1-0.50-224
@@ -153,7 +154,6 @@ Options:
       -l "<absolute_path>"    Required for CPU custom layers.Absolute path to a shared library with the kernels implementation.
           Or
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with kernels description.
-    -pc                       Optional. Enables per-layer performance report.
     -auto_resize              Optional. Enables resizable input.
     -labels "<path>"          Required. Path to .txt file with labels.
     -gt "<path>"              Optional. Path to ground truth .txt file.

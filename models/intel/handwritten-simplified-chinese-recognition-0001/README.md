@@ -6,7 +6,7 @@ This is a network for handwritten simplified Chinese text recognition scenario. 
 
 ## Example
 
-![](./assets/test.png) -> 的人不一了是他有为在责新中任自之我们
+![](./assets/handwritten-simplified-chinese-recognition-0001.png) -> 的人不一了是他有为在责新中任自之我们
 
 ## Specification
 

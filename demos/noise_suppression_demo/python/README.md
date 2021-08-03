@@ -10,7 +10,7 @@ The output of network is also sequence of audio patches with clean speech. The p
 
 ## Preparing to Run
 
-The list of models supported by the demo is in <omz_dir>/demos/noise_suppression_demo/python/models.lst file.
+The list of models supported by the demo is in `<omz_dir>/demos/noise_suppression_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
 An example of using the Model Downloader:
@@ -69,13 +69,9 @@ The model is also required demo arguments.
 
 ## Demo Outputs
 The application outputs cleaned wave to output file.
+The demo reports
 
-## Demo Performance
-Even though the demo reports inference performance (by measuring wall-clock time for individual inference calls),
-it is only baseline performance.
-Please use the full-blown [Benchmark C++ Sample](https://docs.openvinotoolkit.org/latest/_inference_engine_samples_benchmark_app_README.html)
-for any actual performance measurements.
-
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 * [Open Model Zoo Demos](../../README.md)

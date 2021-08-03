@@ -36,7 +36,7 @@ You can change the value of `num_requests` in `action_recognition_demo.py` to fi
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/action_recognition_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -78,6 +78,7 @@ usage: action_recognition_demo.py [-h] -i INPUT [--loop] [-o OUTPUT]
                                   [-l CPU_EXTENSION] [-d DEVICE] [-lb LABELS]
                                   [--no_show] [-s LABEL_SMOOTHING]
                                   [-u UTILIZATION_MONITORS]
+                                  [-r RAW_OUTPUT_MESSAGE]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -115,6 +116,8 @@ Options:
                         Optional. Number of frames used for output label
                         smoothing.
   -u UTILIZATION_MONITORS, --utilization-monitors UTILIZATION_MONITORS
+  -r, --raw_output_message
+                        Optional. Output inference results raw values showing.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.

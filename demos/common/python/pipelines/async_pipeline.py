@@ -14,10 +14,12 @@
  limitations under the License.
 """
 
-import logging
+from time import perf_counter
 import threading
 from collections import deque
 from typing import Dict, Set
+
+from performance_metrics import PerformanceMetrics
 
 
 def parse_devices(device_string):
@@ -83,9 +85,7 @@ def get_user_config(flags_d: str, flags_nstreams: str, flags_nthreads: int)-> Di
 class AsyncPipeline:
     def __init__(self, ie, model, plugin_config, device='CPU', max_num_requests=1):
         self.model = model
-        self.logger = logging.getLogger()
 
-        self.logger.info('Loading network to {} plugin...'.format(device))
         self.exec_net = ie.load_network(network=self.model.net, device_name=device,
                                         config=plugin_config, num_requests=max_num_requests)
         if max_num_requests == 0:
@@ -99,11 +99,16 @@ class AsyncPipeline:
         self.callback_exceptions = {}
         self.event = threading.Event()
 
+        self.inference_metrics = PerformanceMetrics()
+        self.preprocess_metrics = PerformanceMetrics()
+        self.postprocess_metrics = PerformanceMetrics()
+
     def inference_completion_callback(self, status, callback_args):
         try:
-            request, id, meta, preprocessing_meta = callback_args
+            request, id, meta, preprocessing_meta, start_time = callback_args
             if status != 0:
                 raise RuntimeError('Infer Request has returned status code {}'.format(status))
+            self.inference_metrics.update(start_time)
             raw_outputs = {key: blob.buffer for key, blob in request.output_blobs.items()}
             self.completed_request_results[id] = (raw_outputs, meta, preprocessing_meta)
             self.empty_requests.append(request)
@@ -115,9 +120,11 @@ class AsyncPipeline:
         request = self.empty_requests.popleft()
         if len(self.empty_requests) == 0:
             self.event.clear()
+        start_time = perf_counter()
         inputs, preprocessing_meta = self.model.preprocess(inputs)
+        self.preprocess_metrics.update(start_time)
         request.set_completion_callback(py_callback=self.inference_completion_callback,
-                                        py_data=(request, id, meta, preprocessing_meta))
+                                        py_data=(request, id, meta, preprocessing_meta, perf_counter()))
         request.async_infer(inputs=inputs)
 
     def get_raw_result(self, id):
@@ -129,7 +136,10 @@ class AsyncPipeline:
         result = self.get_raw_result(id)
         if result:
             raw_result, meta, preprocess_meta = result
-            return self.model.postprocess(raw_result, preprocess_meta), meta
+            start_time = perf_counter()
+            result = self.model.postprocess(raw_result, preprocess_meta), meta
+            self.postprocess_metrics.update(start_time)
+            return result
         return None
 
     def is_ready(self):

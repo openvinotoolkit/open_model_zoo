@@ -64,6 +64,12 @@ Ubuntu:
 `apt-get update && apt-get install texlive`
 MacOS:
 `brew install texlive`
+
+If you face the `RuntimeError: dvipng is not installed` error, you need to install this library. For Linux, you can do it via
+`apt-get update && apt-get install dvipng`.
+You might also face the missing `standalone.cls` file problem, which could be fixed with the installation of `texlive-latex-extra` package. For Linux, it can be done using this command:
+`apt-get install texlive-latex-extra`.
+
 > Note: Other LaTeX systems should also work.
 
 ### Interactive mode
@@ -141,7 +147,7 @@ usage: formula_recognition_demo.py [-h] -m_encoder M_ENCODER -m_decoder
                                    [--max_formula_len MAX_FORMULA_LEN]
                                    [-t CONF_THRESH] [-d DEVICE]
                                    [--resolution RESOLUTION RESOLUTION]
-                                   [--preprocessing_type {crop,resize}] [-pc]
+                                   [--preprocessing_type {crop,resize}]
                                    [--imgs_layer IMGS_LAYER]
                                    [--row_enc_out_layer ROW_ENC_OUT_LAYER]
                                    [--hidden_layer HIDDEN_LAYER]
@@ -190,7 +196,6 @@ Options:
                         Default: 1280 720
   --preprocessing_type {crop,resize}
                         Optional. Type of the preprocessing
-  -pc, --perf_counts
   --imgs_layer IMGS_LAYER
                         Optional. Encoder input name for images. See README
                         for details.

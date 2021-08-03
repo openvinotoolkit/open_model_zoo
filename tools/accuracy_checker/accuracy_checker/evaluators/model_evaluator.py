@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 import copy
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 import platform
 
 from ..utils import get_path, extract_image_representations, is_path
@@ -206,10 +206,10 @@ class ModelEvaluator(BaseEvaluator):
         framework = launcher_config['framework']
         device = launcher_config.get('device', 'CPU')
         details = {
-            'platform': platform.system,
+            'platform': platform.system(),
             'framework': framework if framework != 'dlsdk' else 'openvino',
             'device': device.upper(),
-            'inference_model': 'sync' if not self.async_mode else 'async'
+            'inference_mode': 'sync' if not self.async_mode else 'async'
         }
         model_type = None
 
@@ -228,6 +228,11 @@ class ModelEvaluator(BaseEvaluator):
         })
         details.update(self.dataset.send_annotation_info(dataset_config))
         return details
+
+    def _initialize_input_shape(self):
+        _, batch_annotation, batch_input, _ = self.dataset[0]
+        filled_inputs, _ = self._get_batch_input(batch_annotation, batch_input)
+        self.launcher.initialize_undefined_shapes(filled_inputs)
 
     def _get_batch_input(self, batch_annotation, batch_input):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
@@ -257,11 +262,7 @@ class ModelEvaluator(BaseEvaluator):
         store_only = kwargs.get('store_only', False)
         prepare_dataset(store_only)
 
-        if (
-                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
-                self.preprocessor.has_multi_infer_transformations or
-                self.dataset.multi_infer
-        ):
+        if self._switch_to_sync():
             warning('Model can not to be processed in async mode. Switched to sync.')
             return self.process_dataset_sync(stored_predictions, progress_reporter, *args, **kwargs)
 
@@ -551,9 +552,12 @@ class ModelEvaluator(BaseEvaluator):
         store_only = config.get('store_only', False)
         enable_profiling = config.get('profile', False)
         profile_type = 'json' if output_callback and enable_profiling else config.get('profile_report_type')
+        profile_log_dir = config.get('profiler_log_dir', self.dataset.config.get('_profiler_log_dir'))
         if enable_profiling:
             if not store_only:
                 self.metric_executor.enable_profiling(self.dataset, profile_type)
+                self.metric_executor.set_processing_info(self.get_processing_info(self.config))
+                self.metric_executor.set_profiling_dir(profile_log_dir or self.metric_executor.profiler_dir)
             else:
                 warning("Metric profiling disabled for prediction storing mode")
                 enable_profiling = False
@@ -579,6 +583,20 @@ class ModelEvaluator(BaseEvaluator):
     def _reset_stored_predictions(stored_predictions):
         with open(stored_predictions, 'wb'):
             print_info("File {} will be cleared for storing predictions".format(stored_predictions))
+
+    def _switch_to_sync(self):
+        if (
+                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
+                self.preprocessor.has_multi_infer_transformations or self.dataset.multi_infer
+        ):
+            return True
+
+        if hasattr(self.launcher, 'dyn_input_layers') and self.launcher.dyn_input_layers:
+            if self.preprocessor.dynamic_shapes:
+                return True
+            self._initialize_input_shape()
+
+        return False
 
     @property
     def dataset_size(self):

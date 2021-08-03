@@ -17,8 +17,8 @@ void ThrowNameNotFound(const std::string &name) {
 };
 }
 
-Cnn::Cnn(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution)
-    : time_elapsed_(0), ncalls_(0) {
+Cnn::Cnn(const std::string &model_path, const std::string& model_type, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution)
+    : model_type(model_type), time_elapsed_(0), ncalls_(0) {
     // ---------------------------------------------------------------------------------------------------
     // --------------------------- 1. Reading network ----------------------------------------------------
     auto network = ie.ReadNetwork(model_path);
@@ -63,6 +63,7 @@ Cnn::Cnn(const std::string &model_path, Core & ie, const std::string & deviceNam
 
     // --------------------------- Loading model to the device -------------------------------------------
     ExecutableNetwork executable_network = ie.LoadNetwork(network, deviceName);
+    printExecNetworkInfo(executable_network, model_path, deviceName, model_type);
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Creating infer request ------------------------------------------------
@@ -117,7 +118,7 @@ void EncoderDecoderCNN::check_net_names(const OutputsDataMap &output_info_decode
  }
 
 
-EncoderDecoderCNN::EncoderDecoderCNN(std::string model_path,
+EncoderDecoderCNN::EncoderDecoderCNN(std::string model_path, std::string model_type,
                                      Core &ie, const std::string &deviceName,
                                      const std::string &out_enc_hidden_name,
                                      const std::string &out_dec_hidden_name,
@@ -127,7 +128,7 @@ EncoderDecoderCNN::EncoderDecoderCNN(std::string model_path,
                                      const std::string &out_dec_symbol_name,
                                      const std::string &logits_name,
                                      size_t end_token
-                        ) : Cnn(model_path, ie, deviceName),
+                        ) : Cnn(model_path, model_type, ie, deviceName),
                         features_name_(features_name),
                         out_enc_hidden_name_(out_enc_hidden_name),
                         out_dec_hidden_name_(out_dec_hidden_name),
@@ -148,6 +149,7 @@ EncoderDecoderCNN::EncoderDecoderCNN(std::string model_path,
 
     // --------------------------- Loading model to the device -------------------------------------------
     ExecutableNetwork executable_network_decoder = ie.LoadNetwork(network_decoder, deviceName);
+    printExecNetworkInfo(executable_network_decoder, model_path, deviceName, model_type);
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Creating infer request ------------------------------------------------

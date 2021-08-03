@@ -41,7 +41,7 @@ Async API operates with a notion of the "Infer Request" that encapsulates the in
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/object_detection_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -64,6 +64,8 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - ctdet_coco_dlav0_512
 * architecture_type = ctpn
   - ctpn
+* architecture_type = detr
+  - detr-resnet50
 * architecture_type = faceboxes
   - faceboxes-pytorch
 * architecture_type = retinaface-pytorch
@@ -142,7 +144,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: object_detection_demo.py [-h] -m MODEL -at
-                                {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}
+                                {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}
                                 -i INPUT [-d DEVICE] [--labels LABELS]
                                 [-t PROB_THRESHOLD] [--keep_aspect_ratio]
                                 [--input_size INPUT_SIZE INPUT_SIZE]
@@ -161,7 +163,7 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -at {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}, --architecture_type {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch}
+  -at {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}, --architecture_type {ssd,yolo,yolov4,faceboxes,centernet,ctpn,retinaface,ultra_lightweight_face_detection,retinaface-pytorch,detr}
                         Required. Specify model' architecture type.
   -i INPUT, --input INPUT
                         Required. An input to process. The input must be a
@@ -183,6 +185,12 @@ Common model options:
                         reshaping. Default: 600 600. Note that submitted
                         images should have the same resolution, otherwise
                         predictions might be incorrect.
+  --anchors ANCHORS [ANCHORS ...]
+                        Optional. A space separated list of anchors. By default used default anchors for model. Only
+                        for YOLOV4 architecture type.
+  --masks MASKS [MASKS ...]
+                        Optional. A space separated list of mask for anchors. By default used default masks for model.
+                        Only for YOLOV4 architecture type.
 
 Inference options:
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS

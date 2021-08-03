@@ -37,7 +37,6 @@ static const char target_device_message_face_reid[] = "Optional. Specify the tar
                                                       "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                       "The application looks for a suitable plugin for the specified device.";
 static const char greedy_reid_matching_message[] = "Optional. Use faster greedy matching algorithm in face reid.";
-static const char performance_counter_message[] = "Optional. Enables per-layer performance statistics.";
 static const char custom_cldnn_message[] = "Optional. For GPU custom kernels, if any. "
                                            "Absolute path to an .xml file with the kernels description.";
 static const char custom_cpu_library_message[] = "Optional. For CPU custom layers, if any. "
@@ -80,7 +79,6 @@ DEFINE_string(d_fd, "CPU", target_device_message_face_detection);
 DEFINE_string(d_lm, "CPU", target_device_message_landmarks_regression);
 DEFINE_string(d_reid, "CPU", target_device_message_face_reid);
 DEFINE_bool(greedy_reid_matching, false, greedy_reid_matching_message);
-DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_string(ad, "", act_stat_output_message);
@@ -135,7 +133,6 @@ static void showUsage() {
     std::cout << "    -d_lm '<device>'               " << target_device_message_landmarks_regression << std::endl;
     std::cout << "    -d_reid '<device>'             " << target_device_message_face_reid << std::endl;
     std::cout << "    -greedy_reid_matching          " << greedy_reid_matching_message << std::endl;
-    std::cout << "    -pc                            " << performance_counter_message << std::endl;
     std::cout << "    -r                             " << raw_output_message << std::endl;
     std::cout << "    -ad                            " << act_stat_output_message << std::endl;
     std::cout << "    -t_ad                          " << person_threshold_output_message << std::endl;

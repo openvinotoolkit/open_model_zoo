@@ -16,7 +16,7 @@ The demo dependencies should be installed before run. That can be achieved with 
 python3 -mpip install --user -r <omz_dir>/demos/3d_segmentation_demo/python/requirements.txt
 ```
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/3d_segmentation_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -116,6 +116,9 @@ python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/bra
 ## Demo Output
 
 The demo outputs a multipage TIFF image and a NIFTI archive.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

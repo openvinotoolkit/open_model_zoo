@@ -118,7 +118,7 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     __provider__ = 'accuracy_per_class'
 
     annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
-    prediction_types = (ClassificationPrediction, )
+    prediction_types = (ClassificationPrediction, ArgMaxClassificationPrediction)
 
     @classmethod
     def parameters(cls):
@@ -248,12 +248,17 @@ class ClassificationF1Score(PerImageEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'label_map': StringField(optional=True, default='label_map', description="Label map.")
+            'label_map': StringField(optional=True, default='label_map', description="Label map."),
+            'pos_label': NumberField(
+                optional=True, value_type=int, min_value=0,
+                description="Return metric value for specified class during metric calculation."
+            )
         })
         return parameters
 
     def configure(self):
         label_map = self.get_value_from_config('label_map')
+        self.pos_label = self.get_value_from_config('pos_label')
         if self.dataset.metadata:
             self.labels = self.dataset.metadata.get(label_map)
             if not self.labels:
@@ -265,7 +270,7 @@ class ClassificationF1Score(PerImageEvaluationMetric):
         self.cm = np.zeros((len(self.labels), len(self.labels)))
 
     def update(self, annotation, prediction):
-        self.cm[prediction.label] += 1
+        self.cm[annotation.label][prediction.label] += 1
         result = annotation.label == prediction.label
         if self.profiler:
             self.profiler.update(annotation.identifier, annotation.label, prediction.label, self.name, result)
@@ -288,6 +293,12 @@ class ClassificationF1Score(PerImageEvaluationMetric):
         )
         if self.profiler:
             self.profiler.finish()
+
+        if self.pos_label is not None:
+            self.meta['names'] = [self.labels[self.pos_label]]
+            return f1_score[self.pos_label]
+
+        self.meta['names'] = list(self.labels.values())
         return f1_score if len(f1_score) == 2 else f1_score[0]
 
     def reset(self):

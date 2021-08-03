@@ -71,7 +71,7 @@ from .ssd import SSDAdapter, PyTorchSSDDecoder, FacePersonAdapter, SSDAdapterMxN
 from .retinaface import RetinaFaceAdapter, RetinaFacePyTorchAdapter
 from .retinanet import RetinaNetAdapter, MultiOutRetinaNet, RetinaNetTF2
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter, YoloV3ONNX, YoloV3TF2, YoloV5Adapter
-from .classification import ClassificationAdapter
+from .classification import ClassificationAdapter, MaskToBinaryClassification
 from .segmentation import (
     SegmentationAdapter, BrainTumorSegmentationAdapter, DUCSegmentationAdapter, BackgroundMattingAdapter
 )
@@ -109,7 +109,7 @@ from .audio_recognition import (
     Wav2VecDecoder
 )
 from .kaldi_asr_decoder import KaldiLatGenDecoder
-from .regression import RegressionAdapter, MultiOutputRegression
+from .regression import RegressionAdapter, MultiOutputRegression, KaldiFeatsRegression
 from .mixed_adapter import MixedAdapter
 from .face_recognition_quality_assessment import QualityAssessmentAdapter
 from .dna_seq_recognition import DNASeqRecognition
@@ -232,6 +232,7 @@ __all__ = [
 
     'RegressionAdapter',
     'MultiOutputRegression',
+    'KaldiFeatsRegression',
     'MixedAdapter',
 
     'CTCBeamSearchDecoder',
@@ -252,5 +253,7 @@ __all__ = [
     'GVADetectionAdapter',
     'GVAClassificationAdapter',
 
-    'QuantilesPredictorAdapter'
+    'QuantilesPredictorAdapter',
+
+    'MaskToBinaryClassification'
 ]

@@ -8,7 +8,7 @@ On startup the demo application reads command line parameters and loads a networ
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/sound_classification_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -73,7 +73,10 @@ python3 sound_classification_demo.py -i <path_to_wav>/input_audio.wav -m <path_t
 
 ## Demo Output
 
-The demo uses console to display the predictions. It shows classification of each clip with timing of it and total prediction of whole audio.
+The demo uses console to display the predictions. It shows classification of each clip and total prediction of whole audio.
+The demo reports
+
+* **Latency**: total processing time required to process input data (from reading the data to displaying the results).
 
 ## See Also
 

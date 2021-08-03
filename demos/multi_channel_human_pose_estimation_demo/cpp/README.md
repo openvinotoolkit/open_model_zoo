@@ -15,7 +15,7 @@ On startup, the application reads command line parameters and loads the specifie
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_channel_human_pose_estimation_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -59,7 +59,6 @@ Options:
     -n_iqs                       Optional. Frame queue size for input channels
     -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
     -n_sp                        Optional. Number of sampling periods
-    -pc                          Optional. Enable per-layer performance report
     -no_show                     Optional. Don't show output.
     -show_stats                  Optional. Enable statistics report
     -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline

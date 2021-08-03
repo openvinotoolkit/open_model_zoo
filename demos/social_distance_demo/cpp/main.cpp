@@ -166,9 +166,9 @@ struct Context {  // stores all global data for tasks
         std::vector<PersonTrackers> personTracker;
         std::vector<int> minW;
         std::vector<int> maxW;
-        std::vector<std::atomic<int64_t>> lastProcessedIds;
+        std::vector<std::atomic<int32_t>> lastProcessedIds;
 
-        //manual definition of constructor is needed only for creating vector<std::atomic<int64_t>>
+        //manual definition of constructor is needed only for creating vector<std::atomic<int32_t>>
         TrackersContext(std::vector<PersonTrackers>&& personTracker, std::vector<int>&& minW, std::vector<int>&& maxW)
             : personTracker(personTracker), minW(minW), maxW(maxW), lastProcessedIds(personTracker.size()) {
             for (size_t i = 0; i < lastProcessedIds.size(); ++i) {
@@ -183,7 +183,7 @@ struct Context {  // stores all global data for tasks
     bool isVideo;
     std::chrono::steady_clock::time_point t0;
     std::atomic<std::vector<InferRequest>::size_type> freeDetectionInfersCount;
-    std::atomic<uint64_t> frameCounter;
+    std::atomic<uint32_t> frameCounter;
     InferRequestsContainer detectorsInfers, reidInfers;
 };
 
@@ -237,7 +237,10 @@ public:
     ~ClassifiersAggregator() {
         std::mutex &printMutex = static_cast<ReborningVideoFrame *>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
-        std::cout << rawDetections;
+        if (rawDetections.size() != 0) {
+            slog::debug << "---------------------Frame #" << sharedVideoFrame->frameId << "---------------------" << slog ::endl;
+            slog::debug << rawDetections;
+        }
         printMutex.unlock();
         tryPush(static_cast<ReborningVideoFrame *>(sharedVideoFrame.get())->context.resAggregatorsWorker,
                 std::make_shared<ResAggregator>(sharedVideoFrame, std::move(boxes), std::move(trackables)));
@@ -252,7 +255,7 @@ public:
     }
 
     const VideoFrame::Ptr sharedVideoFrame;
-    std::string rawDetections;
+    std::vector<std::string> rawDetections;
 
 private:
     ConcurrentContainer<std::list<cv::Rect>> boxes;
@@ -373,7 +376,7 @@ void Drawer::process() {
         cv::Rect usage(15, 90, 370, 20);
         cv::rectangle(mat, usage, {0, 255, 0}, 2);
         uint64_t nireq = context.nireq;
-        uint64_t frameCounter = context.frameCounter;
+        uint32_t frameCounter = context.frameCounter;
         usage.width = static_cast<int>(usage.width * static_cast<float>(frameCounter * nireq - context.freeDetectionInfersCount) / (frameCounter * nireq));
         cv::rectangle(mat, usage, {0, 255, 0}, cv::FILLED);
 
@@ -484,15 +487,7 @@ bool DetectionsProcessor::isReady() {
     if (requireGettingNumberOfDetections) {
         classifiersAggregator = std::make_shared<ClassifiersAggregator>(sharedVideoFrame);
         std::list<PersonDetector::Result> results;
-
-        if (FLAGS_r && ((sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
-            std::ostringstream rawResultsStream;
-            results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), &rawResultsStream);
-            classifiersAggregator->rawDetections = rawResultsStream.str();
-        } else {
-            results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size());
-        }
-
+        results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), classifiersAggregator->rawDetections);
         for (PersonDetector::Result result : results) {
             personRects.emplace_back(result.location & cv::Rect{ cv::Point(0, 0), sharedVideoFrame->frame.size() });
         }
@@ -629,15 +624,13 @@ void Reader::process() {
 
 int main(int argc, char* argv[]) {
     try {
-        slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
-
         // ------------------------------ Parsing and validation of input args ---------------------------------
         try {
             if (!ParseAndCheckCommandLine(argc, argv)) {
                 return 0;
             }
         } catch (std::logic_error& error) {
-            std::cerr << "[ ERROR ] " << error.what() << std::endl;
+            slog::err << error.what() << slog::endl;
             return 1;
         }
 
@@ -695,6 +688,7 @@ int main(int argc, char* argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load Inference Engine -------------------------------------
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core ie;
 
         std::set<std::string> devices;
@@ -709,11 +703,6 @@ int main(int argc, char* argv[]) {
         std::map<std::string, uint32_t> deviceNStreams = parseValuePerDevice(devices, FLAGS_nstreams);
 
         for (const std::string& device : devices) {
-            slog::info << "Loading device " << device << slog::endl;
-
-            /** Printing device version **/
-            std::cout << printable(ie.GetVersions(device)) << std::endl;
-
             if ("CPU" == device) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -748,11 +737,6 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        /** Per layer metrics **/
-        if (FLAGS_pc) {
-            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-        }
-
         /** Graph tagging via config options**/
         auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
             std::map<std::string, std::string> config;
@@ -764,16 +748,15 @@ int main(int argc, char* argv[]) {
 
         // -----------------------------------------------------------------------------------------------------
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
-        slog::info << "Loading person detection model to the "<< FLAGS_d_det << " plugin" << slog::endl;
         PersonDetector detector(ie, FLAGS_d_det, FLAGS_m_det,
             {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d_det, "Detect"));
-
+        slog::info << "\tNumber of network inference requests: " << nireq << slog::endl;
         ReId reid;
         std::size_t nreidireq{0};
         if (!FLAGS_m_reid.empty()) {
-            slog::info << "Loading person re-identicifation (Re-ID) model to the "<< FLAGS_d_reid << " plugin" << slog::endl;
             reid = ReId(ie, FLAGS_d_reid, FLAGS_m_reid, FLAGS_auto_resize, makeTagConfig(FLAGS_d_reid, "ReId"));
             nreidireq = nireq * 3;
+            slog::info << "\tNumber of network inference requests: " << nreidireq << slog::endl;
         }
 
         bool isVideo = imageSources.empty() ? true : false;
@@ -788,19 +771,6 @@ int main(int argc, char* argv[]) {
         size_t found = FLAGS_display_resolution.find("x");
         cv::Size displayResolution = cv::Size{std::stoi(FLAGS_display_resolution.substr(0, found)),
                                               std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()))};
-
-        slog::info << "Number of InferRequests: " << nireq << " (detection), " << nreidireq << " (re-identification)" << slog::endl;
-        std::ostringstream deviceSS;
-        for (const auto& nstreams : deviceNStreams) {
-            if (!deviceSS.str().empty()) {
-                deviceSS << ", ";
-            }
-            deviceSS << nstreams.second << " streams for " << nstreams.first;
-        }
-        if (!deviceSS.str().empty()) {
-            slog::info << deviceSS.str() << slog::endl;
-        }
-        slog::info << "Display resolution: " << FLAGS_display_resolution << slog::endl;
 
         Context context{inputChannels,
                         detector,
@@ -825,12 +795,6 @@ int main(int argc, char* argv[]) {
                 worker->push(std::make_shared<Reader>(sharedVideoFrame));
             }
         }
-        slog::info << "Number of allocated frames: " << FLAGS_n_iqs * (inputChannels.size()) << slog::endl;
-        if (FLAGS_auto_resize) {
-            slog::info << "Resizable input with support of ROI crop and auto resize is enabled" << slog::endl;
-        } else {
-            slog::info << "Resizable input with support of ROI crop and auto resize is disabled" << slog::endl;
-        }
 
         // Running
         const std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
@@ -841,38 +805,26 @@ int main(int argc, char* argv[]) {
         worker->join();
         const auto t1 = std::chrono::steady_clock::now();
 
-        std::map<std::string, std::string> mapDevices = getMapFullDevicesNames(ie, {FLAGS_d_det, FLAGS_d_reid});
-        for (auto& net : std::array<std::pair<std::vector<InferRequest>, std::string>, 2>{
-                std::make_pair(context.detectorsInfers.getActualInferRequests(), FLAGS_d_det),
-                std::make_pair(context.reidInfers.getActualInferRequests(), FLAGS_d_reid)}) {
-            for (InferRequest& ir : net.first) {
-                ir.Wait(InferRequest::WaitMode::RESULT_READY);
-                if (FLAGS_pc) {  // Show performace results
-                    printPerformanceCounts(ir, std::cout, std::string::npos == net.second.find("MULTI") ? getFullDeviceName(mapDevices, net.second)
-                                                                                                        : net.second);
-                }
-            }
-        }
-
-        uint64_t frameCounter = context.frameCounter;
+        uint32_t frameCounter = context.frameCounter;
         if (0 != frameCounter) {
             const float fps = static_cast<float>(frameCounter) / std::chrono::duration_cast<Sec>(t1 - context.t0).count()
                 / context.readersContext.inputChannels.size();
-            std::cout << std::fixed << std::setprecision(1) << fps << "FPS for (" << frameCounter << " / "
-                 << inputChannels.size() << ") frames\n";
             const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
                 / (frameCounter * context.nireq) * 100;
-            std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
-        }
 
-        std::cout << context.drawersContext.presenter.reportMeans() << '\n';
+            //// --------------------------- Report metrics -------------------------------------------------------
+            slog::info << "Metrics report:" << slog::endl;
+            slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << fps << slog::endl;
+            slog::info << "\tDetection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
+        }
+        slog::info << context.drawersContext.presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
-        std::cerr << "[ ERROR ] " << error.what() << std::endl;
+        slog::err << error.what() << slog::endl;
         return 1;
     } catch (...) {
-        std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
+        slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-    slog::info << "Execution successful" << slog::endl;
+
     return 0;
 }

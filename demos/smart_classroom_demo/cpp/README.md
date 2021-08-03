@@ -29,7 +29,7 @@ To recognize faces on a frame, the demo needs a gallery of reference images. Eac
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/smart_classroom_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -89,7 +89,6 @@ Options:
     -d_lm '<device>'               Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_reid '<device>'             Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -greedy_reid_matching          Optional. Use faster greedy matching algorithm in face reid.
-    -pc                            Optional. Enables per-layer performance statistics.
     -r                             Optional. Output Inference results as raw values.
     -ad                            Optional. Output file name to save per-person action statistics in.
     -t_ad                          Optional. Probability threshold for person/action detection.

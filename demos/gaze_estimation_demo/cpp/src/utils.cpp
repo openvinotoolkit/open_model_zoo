@@ -39,8 +39,8 @@ void putTimingInfoOnFrame(cv::Mat& image, double overallTime, double inferenceTi
     double overallFPS = 1000. / overallTime;
     double inferenceFPS = 1000. / inferenceTime;
 
-    cv::putText(image,
-                cv::format("Overall FPS: %0.0f, Inference FPS: %0.0f", overallFPS, inferenceFPS),
-                cv::Point(10, static_cast<int>(30 * fontScale / 1.6)), cv::FONT_HERSHEY_PLAIN, fontScale, fontColor, thickness);
+    putHighlightedText(image,
+        cv::format("Overall FPS: %0.0f, Inference FPS: %0.0f", overallFPS, inferenceFPS),
+        cv::Point(10, static_cast<int>(30 * fontScale / 1.6)), cv::FONT_HERSHEY_PLAIN, fontScale, fontColor, thickness);
 }
 }  // namespace gaze_estimation

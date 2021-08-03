@@ -15,7 +15,7 @@ using namespace InferenceEngine;
 
 class Cnn {
   public:
-    Cnn(const std::string &model_path, Core & ie, const std::string & deviceName,
+    Cnn(const std::string &model_path, const  std::string& model_type, Core & ie, const std::string & deviceName,
               const cv::Size &new_input_resolution = cv::Size());
 
     virtual InferenceEngine::BlobMap Infer(const cv::Mat &frame);
@@ -23,7 +23,7 @@ class Cnn {
     size_t ncalls() const {return ncalls_;}
     double time_elapsed() const {return time_elapsed_;}
     const cv::Size& input_size() const {return input_size_;}
-
+    const std::string model_type;
   protected:
     cv::Size input_size_;
     int channels_;
@@ -37,7 +37,7 @@ class Cnn {
 
 class EncoderDecoderCNN : public Cnn {
   public:
-    EncoderDecoderCNN(std::string model_path,
+    EncoderDecoderCNN(std::string model_path, std::string model_type,
                       Core &ie, const std::string &deviceName,
                       const std::string &out_enc_hidden_name,
                       const std::string &out_dec_hidden_name,

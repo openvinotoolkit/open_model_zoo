@@ -105,7 +105,7 @@ from .common_object_detection import CommonDetectionConverter
 from .wflw import WFLWConverter
 from .see_in_the_dark import SeeInTheDarkDatasetConverter
 from .conll_ner import CONLLDatasetConverter
-from .background_matting import BackgroundMattingConverter
+from .background_matting import BackgroundMattingConverter, VideoBackgroundMatting
 from .tacotron2_test_data_converter import TacotronDataConverter
 from .noise_suppression_dataset import NoiseSuppressionDatasetConverter
 from .vimeo90k_sr import Vimeo90KSuperResolutionDatasetConverter
@@ -118,6 +118,7 @@ from .dataset_folder import DatasetFolderConverter
 from .open_images_converter import OpenImagesDetectionConverter
 from .calgarycampinas import KSpaceMRIConverter
 from .amazon import AmazonProductData
+from .wgs import WGSTFRecords
 
 __all__ = [
     'BaseFormatConverter',
@@ -218,6 +219,7 @@ __all__ = [
     'SeeInTheDarkDatasetConverter',
     'CONLLDatasetConverter',
     'BackgroundMattingConverter',
+    'VideoBackgroundMatting',
     'TacotronDataConverter',
     'NoiseSuppressionDatasetConverter',
     'Vimeo90KSuperResolutionDatasetConverter',
@@ -232,5 +234,6 @@ __all__ = [
     'DatasetFolderConverter',
     'OpenImagesDetectionConverter',
     'KSpaceMRIConverter',
-    'AmazonProductData'
+    'AmazonProductData',
+    'WGSTFRecords'
 ]

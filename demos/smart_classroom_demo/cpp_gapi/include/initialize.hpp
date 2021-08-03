@@ -139,7 +139,6 @@ std::tuple<ConstantParams, TrackerParams, TrackerParams> getGraphArgs(const std:
     const auto num_top_persons = const_params.actions_type == TOP_K ? flags.a_top : -1;
     const_params.draw_ptr.reset(new DrawingHelper(flags.no_show, num_top_persons));
     const_params.video_path = video_path;
-    slog::info << "Reading video '" << video_path << "'" << slog::endl;
     const_params.smooth_window_size = int(fps * flags.d_ad);
     const_params.smooth_min_length = int(fps * flags.min_ad);
     const_params.top_flag = flags.a_top;
@@ -175,21 +174,12 @@ std::tuple<ConstantParams, TrackerParams, TrackerParams> getGraphArgs(const std:
 }
 
 void printInfo(const NetsFlagsPack& flags, std::string& teacher_id, std::string& top_id) {
-    slog::info << "InferenceEngine: " << printable(*InferenceEngine::GetInferenceEngineVersion()) << slog::endl;
+    slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
     if (!teacher_id.empty() && !top_id.empty()) {
         slog::err << "Cannot run simultaneously teacher action and top-k students recognition."
                   << slog::endl;
     }
     InferenceEngine::Core ie;
-    std::vector<std::string> devices = {flags.d_act, flags.d_fd, flags.d_lm, flags.d_reid};
-    std::set<std::string> loadedDevices;
-    slog::info << "Device info: " << slog::endl;
-    for (const auto &device : devices) {
-        if (loadedDevices.find(device) != loadedDevices.end())
-            continue;
-        std::cout << printable(ie.GetVersions(device)) << std::endl;
-        loadedDevices.insert(device);
-    }
 }
 
 void configNets(const NetsFlagsPack& flags,
@@ -223,6 +213,10 @@ void configNets(const NetsFlagsPack& flags,
            flags.d_act,
        }.cfgOutputLayers(outputBlobList);
        networks += cv::gapi::networks(action_net);
+       slog::info << "The Person/Action Detection model " << flags.m_act << " is loaded to " << flags.d_act << " device." << slog::endl;
+    }
+    else {
+        slog::info << "Person/Action Detection DISABLED." << slog::endl;
     }
     if (!flags.m_fd.empty()) {
         /** Create face detector net's parameters **/
@@ -233,6 +227,10 @@ void configNets(const NetsFlagsPack& flags,
         }.cfgInputReshape("data",
                           {1u, 3u, static_cast<size_t>(flags.inh_fd), static_cast<size_t>(flags.inw_fd)});
         networks += cv::gapi::networks(det_net);
+        slog::info << "The Face Detection model" << flags.m_fd << " is loaded to " << flags.d_fd << " device." << slog::endl;
+    }
+    else {
+        slog::info << "Face Detection DISABLED." << slog::endl;
     }
 
     if (!flags.m_fd.empty() && !flags.m_reid.empty() && !flags.m_lm.empty()) {
@@ -242,6 +240,12 @@ void configNets(const NetsFlagsPack& flags,
             fileNameNoExt(flags.m_lm) + ".bin",
             flags.d_lm,
         };
+        if (!flags.m_lm.empty()) {
+            slog::info << "The Facial Landmarks Regression model" << flags.m_lm << " is loaded to " << flags.d_lm << " device." << slog::endl;
+        }
+        else {
+            slog::info << "Facial Landmarks Regression DISABLED." << slog::endl;
+        }
         /** Create reidentification net's parameters **/
         auto reident_net = cv::gapi::ie::Params<nets::FaceReidentificator>{
             flags.m_reid,
@@ -249,7 +253,12 @@ void configNets(const NetsFlagsPack& flags,
             flags.d_reid,
         };
         networks += cv::gapi::networks(landm_net, reident_net);
-
+        if (!flags.m_reid.empty()) {
+            slog::info << "The Face Re-Identification model " << flags.m_reid << " is loaded to " << flags.d_reid << " device." << slog::endl;
+        }
+        else {
+            slog::info << "Face Re-Identification DISABLED." << slog::endl;
+        }
         InferenceEngine::Core ie;
         const auto layerData = ie.ReadNetwork(flags.m_reid).getInputsInfo().begin()->second;
         const auto layerDims = layerData->getTensorDesc().getDims();
@@ -350,7 +359,7 @@ std::shared_ptr<FaceRecognizer> processingFaceGallery(const cv::gapi::GNetPackag
                 }
             }
         }
-        slog::info << "Face reid gallery size: " << identities.size() << slog::endl;
+        slog::debug << "Face reid gallery size: " << identities.size() << slog::endl;
     } else {
         slog::warn << "Face reid gallery is empty!" << slog::endl;
     }

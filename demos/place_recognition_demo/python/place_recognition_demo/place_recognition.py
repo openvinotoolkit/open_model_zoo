@@ -14,6 +14,7 @@
  limitations under the License.
 """
 
+import logging as log
 import numpy as np
 
 import cv2
@@ -21,22 +22,26 @@ from tqdm import tqdm
 
 from place_recognition_demo.common import crop_resize
 
-from openvino.inference_engine import IECore # pylint: disable=no-name-in-module
+from openvino.inference_engine import IECore, get_version
 
 
 class IEModel: # pylint: disable=too-few-public-methods
     """ Class that allows working with Inference Engine model. """
 
     def __init__(self, model_path, device, cpu_extension):
+        log.info('OpenVINO Inference Engine')
+        log.info('\tbuild: {}'.format(get_version()))
         ie = IECore()
         if cpu_extension and device == 'CPU':
             ie.add_extension(cpu_extension, 'CPU')
 
+        log.info('Reading model {}'.format(model_path))
         self.net = ie.read_network(model_path, model_path.with_suffix('.bin'))
         self.input_name = next(iter(self.net.input_info))
         self.output_name = next(iter(self.net.outputs))
         self.input_size = self.net.input_info[self.input_name].input_data.shape
         self.exec_net = ie.load_network(network=self.net, device_name=device)
+        log.info('The model {} is loaded to {}'.format(model_path, device))
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
@@ -78,7 +83,7 @@ class PlaceRecognition:
         for full_path in tqdm(self.impaths, desc='Reading gallery images.'):
             image = cv2.imread(str(full_path))
             if image is None:
-                print("ERROR: cannot process image, full_path =", str(full_path))
+                log.error("Cannot process image, full_path =", str(full_path))
                 continue
             image = crop_resize(image, self.input_size)
             images.append(image)

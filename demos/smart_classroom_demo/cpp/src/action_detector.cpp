@@ -16,7 +16,6 @@ using namespace InferenceEngine;
 #define SSD_PRIORBOX_RECORD_SIZE 4
 #define NUM_DETECTION_CLASSES 2
 #define POSITIVE_DETECTION_IDX 1
-#define INVALID_TOP_K_IDX -1
 
 template <typename T>
 bool SortScorePairDescend(const std::pair<float, T>& pair1,
@@ -72,6 +71,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
     new_network_ = outputInfo.find(config_.new_loc_blob_name) != outputInfo.end();
     input_name_ = inputInfo.begin()->first;
     net_ = config_.ie.LoadNetwork(network, config_.deviceName);
+    printExecNetworkInfo(net_, config_.path_to_model, config_.deviceName, config_.model_type);
 
     const auto& head_anchors = new_network_ ? config_.new_anchors : config_.old_anchors;
     const int num_heads = head_anchors.size();
@@ -80,7 +80,6 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
     glob_anchor_map_.resize(num_heads);
     head_step_sizes_.resize(num_heads);
 
-    num_glob_anchors_ = 0;
     head_ranges_[0] = 0;
     int head_shift = 0;
     for (int head_id = 0; head_id < num_heads; ++head_id) {
@@ -332,7 +331,7 @@ DetectedActions ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat
 }
 
 void ActionDetection::SoftNonMaxSuppression(const DetectedActions& detections,
-        const float sigma, const int top_k, const float min_det_conf,
+        const float sigma, size_t top_k, const float min_det_conf,
         std::vector<int>* out_indices) const {
     /** Store input bbox scores **/
     std::vector<float> scores(detections.size());
@@ -340,47 +339,43 @@ void ActionDetection::SoftNonMaxSuppression(const DetectedActions& detections,
         scores[i] = detections[i].detection_conf;
     }
 
-    /** Estimate maximum number of algorithm iterations **/
-    size_t max_queue_size = top_k > INVALID_TOP_K_IDX
-                               ? std::min(static_cast<size_t>(top_k), scores.size())
-                               : scores.size();
+    top_k = std::min(top_k, scores.size());
 
     /** Select top-k score indices **/
     std::vector<size_t> score_idx(scores.size());
     std::iota(score_idx.begin(), score_idx.end(), 0);
-    std::partial_sort(score_idx.begin(), score_idx.begin() + max_queue_size, score_idx.end(),
+    std::nth_element(score_idx.begin(), score_idx.begin() + top_k, score_idx.end(),
         [&scores](size_t i1, size_t i2) {return scores[i1] > scores[i2];});
 
     /** Extract top-k score values **/
-    std::vector<size_t> valid_score_idx(score_idx.begin(), score_idx.begin() + max_queue_size);
-    std::vector<float> valid_scores(max_queue_size);
-    for (size_t i = 0; i < valid_score_idx.size(); ++i) {
-        valid_scores[i] = scores[valid_score_idx[i]];
+    std::vector<float> top_scores(top_k);
+    for (size_t i = 0; i < top_scores.size(); ++i) {
+        top_scores[i] = scores[score_idx[i]];
     }
 
     /** Carry out Soft Non-Maximum Suppression algorithm **/
     out_indices->clear();
-    for (size_t step = 0; step < valid_scores.size(); ++step) {
-        auto best_score_itr = std::max_element(valid_scores.begin(), valid_scores.end());
+    for (size_t step = 0; step < top_scores.size(); ++step) {
+        auto best_score_itr = std::max_element(top_scores.begin(), top_scores.end());
         if (*best_score_itr < min_det_conf) {
             break;
         }
 
         /** Add current bbox to output list **/
-        const size_t local_anchor_idx = std::distance(valid_scores.begin(), best_score_itr);
-        const int anchor_idx = valid_score_idx[local_anchor_idx];
+        const size_t local_anchor_idx = std::distance(top_scores.begin(), best_score_itr);
+        const int anchor_idx = score_idx[local_anchor_idx];
         out_indices->emplace_back(anchor_idx);
         *best_score_itr = 0.f;
 
-        /** Update valid_scores of the rest bboxes **/
-        for (size_t local_reference_idx = 0; local_reference_idx < valid_scores.size(); ++local_reference_idx) {
+        /** Update top_scores of the rest bboxes **/
+        for (size_t local_reference_idx = 0; local_reference_idx < top_scores.size(); ++local_reference_idx) {
             /** Skip updating step for the low-confidence bbox **/
-            if (valid_scores[local_reference_idx] < min_det_conf) {
+            if (top_scores[local_reference_idx] < min_det_conf) {
                 continue;
             }
 
             /** Calculate the Intersection over Union metric between two bboxes**/
-            const size_t reference_idx = valid_score_idx[local_reference_idx];
+            const size_t reference_idx = score_idx[local_reference_idx];
             const auto& rect1 = detections[anchor_idx].rect;
             const auto& rect2 = detections[reference_idx].rect;
             const auto intersection = rect1 & rect2;
@@ -391,7 +386,7 @@ void ActionDetection::SoftNonMaxSuppression(const DetectedActions& detections,
             }
 
             /** Scale bbox score using the exponential rule **/
-            valid_scores[local_reference_idx] *= std::exp(-overlap * overlap / sigma);
+            top_scores[local_reference_idx] *= std::exp(-overlap * overlap / sigma);
         }
     }
 }

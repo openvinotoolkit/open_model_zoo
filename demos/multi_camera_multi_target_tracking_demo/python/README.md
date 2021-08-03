@@ -34,7 +34,7 @@ To install required dependencies, run
 pip3 install -r requirements.txt
 ```
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_camera_multi_target_tracking_demo/python/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -93,8 +93,8 @@ Multi camera multi object tracking live demo script
 optional arguments:
   -h, --help            show this help message and exit
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
-                        Input sources (indexes of cameras or paths to video
-                        files)
+                        Required. Input sources (indexes of cameras or paths
+                        to video files)
   --loop                Optional. Enable reading the input in a loop
   --config CONFIG       Configuration file
   --detections DETECTIONS
@@ -107,7 +107,7 @@ optional arguments:
                         Path to the object instance segmentation model
   --t_segmentation T_SEGMENTATION
                         Threshold for object instance segmentation model
-  --m_reid M_REID       Path to the object re-identification model
+  --m_reid M_REID       Required. Path to the object re-identification model
   --output_video OUTPUT_VIDEO
                         Optional. Path to output video
   --history_file HISTORY_FILE
@@ -189,6 +189,12 @@ Such file with detections can be saved from the demo. Specify the argument `--sa
 ## Demo Output
 
 The demo displays bounding boxes of tracked objects and unique IDs of those objects.
+The demo reports
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+You can use both of these metrics to measure application-level performance.
+
 To save output video with the result please use the option  `--output_video`,
 to change configuration parameters please open the `configs/person.py` (or `configs/vehicle.py` for vehicle tracking demo) file and edit it.
 

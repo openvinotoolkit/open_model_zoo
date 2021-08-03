@@ -16,26 +16,31 @@
 
 #pragma once
 #include <map>
+#include <set>
 #include <string>
 #include "gflags/gflags.h"
 
 struct CnnConfig {
-    std::string devices;
+    std::string deviceName;
     std::string cpuExtensionsPath;
     std::string clKernelsConfigPath;
     unsigned int maxAsyncRequests;
     std::map<std::string, std::string> execNetworkConfig;
+
+    std::set<std::string> getDevices();
+
+protected:
+    std::set<std::string> devices;
 };
 
 class ConfigFactory {
 public:
-    static CnnConfig getUserConfig(const std::string& flags_d, const std::string& flags_l,
-        const std::string& flags_c, bool flags_pc,
+    static CnnConfig getUserConfig(const std::string& flags_d, const std::string& flags_l, const std::string& flags_c,
         uint32_t flags_nireq, const std::string& flags_nstreams, uint32_t flags_nthreads);
     static CnnConfig getMinLatencyConfig(const std::string& flags_d, const std::string& flags_l,
-        const std::string& flags_c, bool flags_pc, uint32_t flags_nireq);
+        const std::string& flags_c, uint32_t flags_nireq);
 
 protected:
     static CnnConfig getCommonConfig(const std::string& flags_d, const std::string& flags_l,
-        const std::string& flags_c, bool flags_pc, uint32_t flags_nireq);
+        const std::string& flags_c, uint32_t flags_nireq);
 };

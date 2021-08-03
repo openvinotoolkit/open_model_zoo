@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <utils/common.hpp>
 
 #include "ie_wrapper.hpp"
 
@@ -14,8 +15,9 @@ namespace gaze_estimation {
 
 IEWrapper::IEWrapper(InferenceEngine::Core& ie,
                      const std::string& modelPath,
+                     const std::string& modelType,
                      const std::string& deviceName):
-           modelPath(modelPath), deviceName(deviceName), ie(ie) {
+           modelPath(modelPath), modelType(modelType), deviceName(deviceName), ie(ie) {
     network = ie.ReadNetwork(modelPath);
     setExecPart();
 }
@@ -55,6 +57,7 @@ void IEWrapper::setExecPart() {
     }
 
     executableNetwork = ie.LoadNetwork(network, deviceName);
+    printExecNetworkInfo(executableNetwork, modelPath, deviceName, modelType);
     request = executableNetwork.CreateInferRequest();
 }
 
@@ -158,12 +161,5 @@ void IEWrapper::reshape(const std::map<std::string, std::vector<unsigned long> >
     }
     network.reshape(inputShapes);
     setExecPart();
-}
-
-void IEWrapper::printPerlayerPerformance() const {
-    std::cout << "\n-----------------START-----------------" << std::endl;
-    std::cout << "Performance for " << modelPath << " model\n" << std::endl;
-    printPerformanceCounts(request, std::cout, getFullDeviceName(ie, deviceName), false);
-    std::cout << "------------------END------------------\n" << std::endl;
 }
 }  // namespace gaze_estimation

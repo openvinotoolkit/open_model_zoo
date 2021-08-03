@@ -8,7 +8,7 @@ The network is able to recognize Japanese text consisting of characters in the [
 
 ## Example
 
-![](./assets/test.png) -> 菊池朋子
+![](./assets/handwritten-japanese-recognition-0001.png) -> 菊池朋子
 
 ## Specification
 

@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from pathlib import Path
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 from functools import partial
 from collections import OrderedDict
 import numpy as np
@@ -265,6 +265,25 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
     @property
     def dataset_size(self):
         return self.dataset.size
+
+    def send_processing_info(self, sender):
+        if not sender:
+            return {}
+        model_type = None
+        details = {}
+        metrics = self.dataset_config[0].get('metrics', [])
+        metric_info = [metric['type'] for metric in metrics]
+        adapter_type = self.model.decoder.adapter.__provider__
+        details.update({
+            'metrics': metric_info,
+            'model_file_type': model_type,
+            'adapter': adapter_type,
+        })
+        if self.dataset is None:
+            self.select_dataset('')
+
+        details.update(self.dataset.send_annotation_info(self.dataset_config[0]))
+        return details
 
 
 class BaseModel:

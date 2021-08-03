@@ -23,7 +23,7 @@ If text recognition model is provided, the demo prints recognized text as well.
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/text_detection_demo/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
 
@@ -114,7 +114,7 @@ For example, use the following command line command to run the application:
   -tr_o_blb_nm "logits"
 ```
 
-For `text-recognition-resnet-fc` and `text-recognition-0015` you should use `simple` decoder for `-dt` option. For other models use `ctc` decoder (default decoder). In case of `text-recognition-0015` model, specify path to `text-recognition-0015-encoder` models for `-m_tr` key and decoder part will be found automatically as shown on example below:
+For `text-recognition-resnet-fc` and `text-recognition-0015` you should use `simple` decoder for `-dt` option. For other models use `ctc` decoder (default decoder). In case of `text-recognition-0015` model, specify path to `text-recognition-0015-encoder` models for `-m_tr` key and decoder part (`text-recognition-0015-decoder`) will be found automatically as shown on example below:
 
 ```sh
 ./text_detection_demo \

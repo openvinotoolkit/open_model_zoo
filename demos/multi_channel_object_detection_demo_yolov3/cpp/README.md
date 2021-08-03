@@ -15,7 +15,7 @@ On startup, the application reads command line parameters and loads the specifie
 
 ## Preparing to Run
 
-For demo input image or video files you may refer to [Media Files Available for Demos](../../README.md#Media-Files-Available-for-Demos).
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
 The list of models supported by the demo is in `<omz_dir>/demos/multi_channel_object_detection_demo_yolov3/cpp/models.lst` file.
 This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin). You can also review OpenVINO [article](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) to see how to convert the YOLO V3 and tiny YOLO V3 into IR model and execute this demo with converted IR model.
 
@@ -33,6 +33,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 
 ### Supported Models
 
+* person-vehicle-bike-detection-crossroad-yolov3-1020
 * yolo-v3-tf
 * yolo-v3-tiny-tf
 
@@ -60,7 +61,6 @@ Options:
     -n_iqs                       Optional. Frame queue size for input channels
     -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
     -n_sp                        Optional. Number of sampling periods
-    -pc                          Optional. Enable per-layer performance report
     -t                           Optional. Probability threshold for detections
     -no_show                     Optional. Don't show output.
     -show_stats                  Optional. Enable statistics report
