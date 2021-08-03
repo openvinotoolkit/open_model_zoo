@@ -31,7 +31,7 @@ def get_gapi_test_model(models_dir):
         "model": str(models_dir / "SampLeNet.xml"),
         "adapter": "classification",
         "device": "cpu",
-        "inputs": [{"name": "input", "type": "INPUT", "shape": "(3, 32, 32)"}],
+        "inputs": [{"name": "data", "type": "INPUT", "shape": "(3, 32, 32)"}],
         'outputs': ['fc3']
     }
     return create_launcher(config)
@@ -39,14 +39,14 @@ def get_gapi_test_model(models_dir):
 
 class TestGAPILauncher:
     def test_launcher_creates(self, models_dir):
-        assert get_gapi_test_model(models_dir).inputs['input'] == (1, 3, 32, 32)
+        assert get_gapi_test_model(models_dir).inputs['data'] == (1, 3, 32, 32)
 
     def test_infer_model(self, data_dir, models_dir):
         test_model = get_gapi_test_model(models_dir)
-        _, _, h, w = test_model.inputs['input']
+        _, _, h, w = test_model.inputs['data']
         img_raw = cv2.imread(str(data_dir / '1.jpg'))
         img_resized = cv2.resize(img_raw, (w, h))
-        res = test_model.predict([{'input': img_resized.astype(np.float32)}], [{}])
+        res = test_model.predict([{'data': img_resized}], [{}])
         assert np.argmax(res[0]['fc3']) == 7
 
 

@@ -16,6 +16,7 @@ limitations under the License.
 
 from pathlib import Path
 from collections import OrderedDict
+import numpy as np
 
 import cv2
 
@@ -80,6 +81,9 @@ class GAPILauncher(Launcher):
         ).validate(config, fetch_only=fetch_only)
 
     def prepare_net(self):
+        def compile_args(*args):
+            return list(map(cv2.GCompileArg, args))
+
         inputs = cv2.GInferInputs()
         g_inputs = []
         for input_name in self.inputs:
@@ -91,7 +95,7 @@ class GAPILauncher(Launcher):
         g_outputs = [outputs.at(out_name) for out_name in self.output_names]
         self.comp = cv2.GComputation(cv2.GIn(*g_inputs), cv2.GOut(*g_outputs))
         pp = cv2.gapi.ie.params("net", str(self.model), str(self.weights), self.device.upper())
-        self.network_args = cv2.GCompileArg(cv2.gapi.networks(pp))
+        self.network_args = compile_args(cv2.gapi.networks(pp))
 
     @property
     def inputs(self):
@@ -107,6 +111,8 @@ class GAPILauncher(Launcher):
 
     def fit_to_input(self, data, layer_name, layout, precision):
         if len(self.inputs) == 1 and self.batch == 1:
+            if data[0].dtype in [float, np.float64]:
+                return data[0].astype(np.float32)
             return data[0]
         raise ConfigError('this case is not supported')
 
