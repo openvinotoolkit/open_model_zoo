@@ -32,10 +32,10 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 import models
 import monitors
-from pipelines import get_user_config, AsyncPipeline
+from pipelines import get_user_config, parse_devices, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
-from helpers import resolution, log_blobs_info, log_runtime_settings
+from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -248,13 +248,14 @@ def main():
                                       device=args.device, max_num_requests=args.num_infer_requests)
 
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(detector_pipeline.exec_net, args.device)
+    log_runtime_settings(detector_pipeline.exec_net, set(parse_devices(args.device)))
 
     next_frame_id = 0
     next_frame_id_to_show = 0
 
     palette = ColorPalette(len(model.labels) if model.labels else 100)
     metrics = PerformanceMetrics()
+    render_metrics = PerformanceMetrics()
     presenter = None
     output_transform = None
     video_writer = cv2.VideoWriter()
@@ -273,7 +274,9 @@ def main():
                 print_raw_results(objects, model.labels, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
+            rendering_start_time = perf_counter()
             frame = draw_detections(frame, objects, palette, model.labels, output_transform)
+            render_metrics.update(rendering_start_time)
             metrics.update(start_time, frame)
 
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
@@ -332,7 +335,9 @@ def main():
             print_raw_results(objects, model.labels, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
+        rendering_start_time = perf_counter()
         frame = draw_detections(frame, objects, palette, model.labels, output_transform)
+        render_metrics.update(rendering_start_time)
         metrics.update(start_time, frame)
 
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
@@ -349,6 +354,11 @@ def main():
             presenter.handleKey(key)
 
     metrics.log_total()
+    log_latency_per_stage(cap.reader_metrics.get_latency(),
+                          detector_pipeline.preprocess_metrics.get_latency(),
+                          detector_pipeline.inference_metrics.get_latency(),
+                          detector_pipeline.postprocess_metrics.get_latency(),
+                          render_metrics.get_latency())
     for rep in presenter.reportMeans():
         log.info(rep)
 

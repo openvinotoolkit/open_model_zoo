@@ -29,10 +29,10 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from models import OutputTransform, SegmentationModel, SalientObjectDetectionModel
 import monitors
-from pipelines import get_user_config, AsyncPipeline
+from pipelines import get_user_config, parse_devices, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
-from helpers import resolution, log_blobs_info, log_runtime_settings
+from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -194,12 +194,13 @@ def main():
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
     log.info('The model {} is loaded to {}'.format(args.model, args.device))
-    log_runtime_settings(pipeline.exec_net, args.device)
+    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
 
     next_frame_id = 0
     next_frame_id_to_show = 0
 
     metrics = PerformanceMetrics()
+    render_metrics = PerformanceMetrics()
     presenter = None
     output_transform = None
     video_writer = cv2.VideoWriter()
@@ -241,7 +242,9 @@ def main():
                 print_raw_results(objects, next_frame_id_to_show, model.labels)
             frame = frame_meta['frame']
             start_time = frame_meta['start_time']
+            rendering_start_time = perf_counter()
             frame = visualizer.overlay_masks(frame, objects, output_transform)
+            render_metrics.update(rendering_start_time)
             presenter.drawGraphs(frame)
             metrics.update(start_time, frame)
 
@@ -268,7 +271,9 @@ def main():
         frame = frame_meta['frame']
         start_time = frame_meta['start_time']
 
+        rendering_start_time = perf_counter()
         frame = visualizer.overlay_masks(frame, objects, output_transform)
+        render_metrics.update(rendering_start_time)
         presenter.drawGraphs(frame)
         metrics.update(start_time, frame)
 
@@ -280,6 +285,11 @@ def main():
             key = cv2.waitKey(1)
 
     metrics.log_total()
+    log_latency_per_stage(cap.reader_metrics.get_latency(),
+                          pipeline.preprocess_metrics.get_latency(),
+                          pipeline.inference_metrics.get_latency(),
+                          pipeline.postprocess_metrics.get_latency(),
+                          render_metrics.get_latency())
     for rep in presenter.reportMeans():
         log.info(rep)
 
