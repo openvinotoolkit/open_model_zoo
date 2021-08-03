@@ -155,7 +155,7 @@ To download SYGData0829 dataset, you need to follow the steps below:
 3. Unpack archive
 
 ### Files layout
-* `SYGData0829/dataset_format_VOC2007` - directory containing annotations, images, segmentation masks and image sets files directories
+* `SYGData0829/dataset_format_VOC2007` - directory containing annotations, images and image sets files directories
     * `Annotations` - directory containing the SYGData0829 annotation files
     * `JPEGImages` - directory containing the SYGData0829 images
     * `ImageSets` - directory containing the SYGData0829 text files specifying lists of images for different tasks
