@@ -254,7 +254,7 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Can't open video writer");
         }
 
-        auto startTime = std::chrono::steady_clock::now();
+        metrics.update(std::chrono::steady_clock::now());
         pipeline.start();
         while (pipeline.pull(cv::gout(frame,
                                       out_cofidence,
@@ -287,19 +287,20 @@ int main(int argc, char *argv[]) {
                 inferenceResults.push_back(inferenceResult);
             }
 
-            /** FlipImage **/
-            if (flipImage) {
-                cv::flip(frame, frame, 1);
-            }
 
             /** Display the results **/
             for (auto const& inferenceResult : inferenceResults) {
                 resultsMarker.mark(frame, inferenceResult);
             }
 
+            /** FlipImage **/
+            if (flipImage) {
+                cv::flip(frame, frame, 1);
+            }
+
             /** Display system parameters **/
             presenter.drawGraphs(frame);
-            metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+            metrics.update({}, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
                 0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
 
             /** Print logs **/
@@ -326,7 +327,6 @@ int main(int argc, char *argv[]) {
                 else
                     presenter.handleKey(key);
             }
-            startTime = std::chrono::steady_clock::now();
         }
 
         slog::info << "Metrics report:" << slog::endl;
