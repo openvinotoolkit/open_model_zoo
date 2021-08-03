@@ -16,8 +16,6 @@ This demo workflow mainly has two parts:
 - The second part uses the cell images detected in the first part for handwritten text recognition with OpenVINO. It first reads a cell image and performs the preprocessing such as further binarization, resize and padding, and then the inference will start. After decoding the returned indexes into characters, the demo will display the predicted text. Optionally, you can generate the predicted text into a docx file.
 
 ## Installation and dependencies
-### OS Requirement
-Ubuntu 18.04 or above.
 
 ### OpenVINO Requirement
 
@@ -26,16 +24,7 @@ You should install OpenVINO Toolkit (version >= 2020.3).
 For more OpenVINO toolkit installation information, please refer to [here](https://docs.openvinotoolkit.org/latest/openvino_docs_install_guides_installing_openvino_linux.html).
 
 ### Other Dependencies
-This project requires Python 3.7.
-
-Required python modules：
-- scipy==1.5.1
-- numpy==1.19.0
-- opencv-python==4.2.0.34
-- PySide2==5.15.0
-- tqdm==4.46.0
-- scikit-image==0.17.2
-- python-docx==0.8.10
+This project requires Python 3.6.
 
 The required Python modules can be installed using pip as follows:
 
