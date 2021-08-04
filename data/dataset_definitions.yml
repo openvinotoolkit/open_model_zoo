@@ -1362,7 +1362,7 @@ datasets:
     data_source: Calgary-Campinas/CC359
     reader:
       type: numpy_reader
-    annotation: Calgary-Campinas/CC359/accuracy_checker_annotations/full/Calgary_Campinas_Single_Channel.pickle
+    annotation: Calgary_Campinas_Single_Channel.pickle
     annotation_conversion:
       converter: k_space_mri
       data_dir: Calgary-Campinas/CC359

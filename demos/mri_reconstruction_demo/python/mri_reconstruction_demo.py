@@ -36,7 +36,7 @@ def build_argparser():
     return parser
 
 def main():
-    args = build_parser().parse_args()
+    args = build_argparser().parse_args()
 
     ie = IECore()
     net = ie.read_network(args.model)
