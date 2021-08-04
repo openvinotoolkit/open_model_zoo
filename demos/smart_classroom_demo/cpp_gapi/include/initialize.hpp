@@ -214,8 +214,7 @@ void configNets(const NetsFlagsPack& flags,
        }.cfgOutputLayers(outputBlobList);
        networks += cv::gapi::networks(action_net);
        slog::info << "The Person/Action Detection model " << flags.m_act << " is loaded to " << flags.d_act << " device." << slog::endl;
-    }
-    else {
+    } else {
         slog::info << "Person/Action Detection DISABLED." << slog::endl;
     }
     if (!flags.m_fd.empty()) {
@@ -228,8 +227,7 @@ void configNets(const NetsFlagsPack& flags,
                           {1u, 3u, static_cast<size_t>(flags.inh_fd), static_cast<size_t>(flags.inw_fd)});
         networks += cv::gapi::networks(det_net);
         slog::info << "The Face Detection model" << flags.m_fd << " is loaded to " << flags.d_fd << " device." << slog::endl;
-    }
-    else {
+    } else {
         slog::info << "Face Detection DISABLED." << slog::endl;
     }
 
@@ -242,8 +240,7 @@ void configNets(const NetsFlagsPack& flags,
         };
         if (!flags.m_lm.empty()) {
             slog::info << "The Facial Landmarks Regression model" << flags.m_lm << " is loaded to " << flags.d_lm << " device." << slog::endl;
-        }
-        else {
+        } else {
             slog::info << "Facial Landmarks Regression DISABLED." << slog::endl;
         }
         /** Create reidentification net's parameters **/
@@ -255,8 +252,7 @@ void configNets(const NetsFlagsPack& flags,
         networks += cv::gapi::networks(landm_net, reident_net);
         if (!flags.m_reid.empty()) {
             slog::info << "The Face Re-Identification model " << flags.m_reid << " is loaded to " << flags.d_reid << " device." << slog::endl;
-        }
-        else {
+        } else {
             slog::info << "Face Re-Identification DISABLED." << slog::endl;
         }
         InferenceEngine::Core ie;
