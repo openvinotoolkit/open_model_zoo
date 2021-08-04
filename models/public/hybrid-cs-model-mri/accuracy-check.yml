@@ -1,0 +1,18 @@
+models:
+  - name: wnet_20
+
+    launchers:
+      - framework: dlsdk
+        adapter:
+          type: image_processing
+          std: 1
+          cast_to_uint8: False
+
+    datasets:
+      - name: CalgaryCampinasSingleChannel_20perc_downsample
+        postprocessing:
+          - type: interpolation
+        metrics:
+          - type: psnr
+            scale_border: 0
+            presenter: print_vector

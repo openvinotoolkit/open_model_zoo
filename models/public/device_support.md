@@ -69,6 +69,7 @@
 | higher-hrnet-w32-human-pose-estimation | YES | YES |    |
 | hrnet-v2-c1-segmentation | YES | YES |    |
 | human-pose-estimation-3d-0001 | YES | YES | YES |
+| hybrid-cs-model-mri | YES |    |    |
 | i3d-rgb-tf | YES | YES |    |
 | inception-resnet-v2-tf | YES | YES | YES |
 | license-plate-recognition-barrier-0007 | YES |    |    |
