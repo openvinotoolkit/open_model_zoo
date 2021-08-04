@@ -21,7 +21,7 @@ import numpy as np
 import cv2
 from openvino.inference_engine import IECore, known_plugins
 
-from ..config import PathField, StringField, ConfigError, ListInputsField, ListField
+from ..config import PathField, StringField, ConfigError, ListInputsField, ListField, BoolField
 from ..logging import print_info, warning
 from .launcher import Launcher, LauncherConfigValidator
 from .dlsdk_launcher_config import MULTI_DEVICE_KEYWORD, HETERO_KEYWORD, NIREQ_REGEX
@@ -95,9 +95,8 @@ class GAPILauncher(Launcher):
             'model': PathField(description="Path to model file.", file_or_directory=True),
             'weights': PathField(description="Path to weights file.",
                                  optional=True, file_or_directory=True),
-            'device': StringField(
-                description="Device name"
-            ),
+            'device': StringField(description="Device name"),
+            '_model_is_blob': BoolField(optional=True, description='hint for auto model search'),
             'inputs': ListInputsField(optional=False, description="Inputs."),
             'outputs': ListField(value_type=str, allow_empty=False, description='Outputs.')
         })
