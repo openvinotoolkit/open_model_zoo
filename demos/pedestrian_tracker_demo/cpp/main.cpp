@@ -162,6 +162,7 @@ int main(int argc, char **argv) {
         InferenceEngine::Core ie;
 
         auto execNet = detectionModel->loadExecutableNetwork(
+
             ConfigFactory::getUserConfig(FLAGS_d_det, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), ie);
         auto req = std::make_shared<InferenceEngine::InferRequest>(execNet.CreateInferRequest());
         bool should_keep_tracking_info = should_save_det_log || should_print_out;
