@@ -27,6 +27,15 @@ from .launcher import Launcher, LauncherConfigValidator
 from .dlsdk_launcher_config import MULTI_DEVICE_KEYWORD, HETERO_KEYWORD, NIREQ_REGEX
 from ..utils import get_or_parse_value, get_path
 
+try:
+    compile_args = cv2.compile_args
+except AttributeError:
+    try:
+        compile_args = cv2.gapi.compile_args
+    except AttributeError:
+        def compile_args(*args):
+            return list(map(cv2.GCompileArg, args))
+
 
 class GAPILauncherConfigValidator(LauncherConfigValidator):
     def create_device_regex(self, available_devices):
@@ -113,6 +122,13 @@ class GAPILauncher(Launcher):
                     break
                 if shape[1] not in [1, 3, 4]:
                     self.non_image_inputs = True
+        if self.non_image_inputs:
+            nhwc_shapes = {}
+            for input_name, input_shape in self._inputs_shapes.items():
+                if len(input_shape) == 4 and input_shape[1] in [1, 3, 4]:
+                    nhwc_shapes[input_name] = [input_shape[0], input_shape[2], input_shape[3], input_shape[1]]
+                self._inputs_shapes.update(nhwc_shapes)
+            self.default_layout = 'NHWC'
 
         if not self._delayed_model_loading:
             self.model, self.weights = self.automatic_model_search()
@@ -126,9 +142,6 @@ class GAPILauncher(Launcher):
         ).validate(config, ie_core=IECore(), fetch_only=fetch_only)
 
     def prepare_net(self):
-        def compile_args(*args):
-            return list(map(cv2.GCompileArg, args))
-
         inputs = cv2.GInferInputs()
         g_inputs = []
         for input_name in self.inputs:

@@ -41,7 +41,6 @@ class TestGAPILauncher:
     def test_launcher_creates(self, models_dir):
         assert get_gapi_test_model(models_dir).inputs['data'] == (1, 3, 32, 32)
 
-    @pytest.mark.skip('issue with opencv')
     def test_infer_model(self, data_dir, models_dir):
         test_model = get_gapi_test_model(models_dir)
         _, _, h, w = test_model.inputs['data']
