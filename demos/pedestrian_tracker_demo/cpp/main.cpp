@@ -21,7 +21,6 @@
 #include <memory>
 #include <string>
 #include <gflags/gflags.h>
-#include "../../../../../open_model_zoo/demos/common/cpp/utils/include/utils/common.hpp"
 
 #include <models/detection_model_centernet.h>
 #include <models/detection_model_ssd.h>
@@ -162,7 +161,6 @@ int main(int argc, char **argv) {
         InferenceEngine::Core ie;
 
         auto execNet = detectionModel->loadExecutableNetwork(
-
             ConfigFactory::getUserConfig(FLAGS_d_det, FLAGS_l, FLAGS_c, FLAGS_nireq, FLAGS_nstreams, FLAGS_nthreads), ie);
         auto req = std::make_shared<InferenceEngine::InferRequest>(execNet.CreateInferRequest());
         bool should_keep_tracking_info = should_save_det_log || should_print_out;
