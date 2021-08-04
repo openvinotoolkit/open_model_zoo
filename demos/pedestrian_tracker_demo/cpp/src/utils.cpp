@@ -14,6 +14,7 @@
 #include <memory>
 #include <utils/slog.hpp>
 
+
 namespace {
 template <typename StreamType, typename EndlType>
 void SaveDetectionLogToStream(StreamType& stream, const EndlType& endl,

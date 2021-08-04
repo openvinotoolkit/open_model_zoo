@@ -21,6 +21,7 @@
 #include <memory>
 #include <string>
 #include <gflags/gflags.h>
+#include "../../../../../open_model_zoo/demos/common/cpp/utils/include/utils/common.hpp"
 
 #include <models/detection_model_centernet.h>
 #include <models/detection_model_ssd.h>
