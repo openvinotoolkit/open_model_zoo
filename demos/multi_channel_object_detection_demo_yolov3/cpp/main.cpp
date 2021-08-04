@@ -282,7 +282,7 @@ std::map<std::string, YoloParams> GetYoloParams(const std::vector<std::string>& 
     return __yoloParams;
 }
 
-void displayNSources(const VideoFrame::FramesWithTimeStamp& data,
+void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
                      const std::string& stats,
                      const DisplayParams& params,
                      const std::vector<cv::Scalar> &colors,
@@ -290,7 +290,7 @@ void displayNSources(const VideoFrame::FramesWithTimeStamp& data,
                      PerformanceMetrics& metrics) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
-        auto& elem = data.first[i];
+        auto& elem = data[i];
         if (!elem->frame.empty()) {
             cv::Rect rectFrame = cv::Rect(params.points[i], params.frameSize);
             cv::Mat windowPart = windowImage(rectFrame);
@@ -325,13 +325,16 @@ void displayNSources(const VideoFrame::FramesWithTimeStamp& data,
         });
     });
 #else
-    for (size_t i = 0; i < data.first.size(); ++i) {
+    for (size_t i = 0; i < data.size(); ++i) {
         loopBody(i);
     }
 #endif
     presenter.drawGraphs(windowImage);
     drawStats();
-    metrics.update(data.second, windowImage, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+    for (size_t i = 0; i < data.size() - 1; ++i) {
+        metrics.update(data[i]->timestamp);
+    }
+    metrics.update(data.back()->timestamp, windowImage, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
     cv::imshow(params.name, windowImage);
 }
 }  // namespace
@@ -435,7 +438,7 @@ int main(int argc, char* argv[]) {
 
         network->setDetectionConfidence(static_cast<float>(FLAGS_t));
 
-        VideoFrame::FramesWithTimeStamp batchRes;
+        std::vector<std::shared_ptr<VideoFrame>> batchRes;
 
         std::mutex statMutex;
         std::stringstream statStream;
@@ -446,7 +449,7 @@ int main(int argc, char* argv[]) {
 
         const size_t outputQueueSize = 1;
         AsyncOutput output(FLAGS_show_stats, outputQueueSize,
-        [&](const VideoFrame::FramesWithTimeStamp& result) {
+        [&](const std::vector<std::shared_ptr<VideoFrame>>& result) {
             std::string str;
             if (FLAGS_show_stats) {
                 std::unique_lock<std::mutex> lock(statMutex);
@@ -470,7 +473,6 @@ int main(int argc, char* argv[]) {
 
         while (sources.isRunning() || network->isRunning()) {
             bool readData = true;
-            batchRes.second = std::chrono::steady_clock::now();  // frame time stamp
             while (readData) {
                 auto br = network->getBatchData(params.frameSize);
                 if (br.empty()) {
@@ -478,15 +480,15 @@ int main(int argc, char* argv[]) {
                 }
                 for (size_t i = 0; i < br.size(); i++) {
                     auto val = static_cast<unsigned int>(br[i]->sourceIdx);
-                    auto it = find_if(batchRes.first.begin(), batchRes.first.end(), [val] (const std::shared_ptr<VideoFrame>& vf) { return vf->sourceIdx == val; } );
-                    if (it != batchRes.first.end()) {
+                    auto it = find_if(batchRes.begin(), batchRes.end(), [val] (const std::shared_ptr<VideoFrame>& vf) { return vf->sourceIdx == val; } );
+                    if (it != batchRes.end()) {
                         if (!FLAGS_no_show) {
                             output.push(std::move(batchRes));
                         }
-                        batchRes.first.clear();
+                        batchRes.clear();
                         readData = false;
                     }
-                    batchRes.first.push_back(std::move(br[i]));
+                    batchRes.push_back(std::move(br[i]));
                 }
             }
 

@@ -18,11 +18,11 @@
 
 class AsyncOutput{
 public:
-    using DrawFunc = std::function<bool(const VideoFrame::FramesWithTimeStamp&)>;
+    using DrawFunc = std::function<bool(const std::vector<std::shared_ptr<VideoFrame>>&)>;
 
     AsyncOutput(bool collectStats, size_t queueSize, DrawFunc drawFunc);
     ~AsyncOutput();
-    void push(VideoFrame::FramesWithTimeStamp&& item);
+    void push(std::vector<std::shared_ptr<VideoFrame>>&& item);
     void start();
     bool isAlive() const;
     struct Stats {
@@ -33,7 +33,7 @@ public:
 private:
     const size_t queueSize;
     DrawFunc drawFunc;
-    std::queue<VideoFrame::FramesWithTimeStamp> queue;
+    std::queue<std::vector<std::shared_ptr<VideoFrame>>> queue;
     std::atomic_bool terminate = {false};
     std::thread thread;
     std::mutex mutex;
