@@ -174,7 +174,7 @@ def main():
             c_e = min(c_s + context_window_len, len(c_tokens_id))
 
         def mark(txt):
-                return "\033[91m" + txt + "\033[0m" if args.colors else "*" + txt + "*"
+            return "\033[91m" + txt + "\033[0m" if args.colors else "*" + txt + "*"
 
         log.info("\t\tShow top 3 answers")
         answers = sorted(answers, key=lambda x: -x[0])[:3]
