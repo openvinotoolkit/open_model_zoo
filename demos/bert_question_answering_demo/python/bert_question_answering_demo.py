@@ -165,7 +165,7 @@ def main():
             else:
                 assert len(same) == 1
                 prev_score = answers[same[0]][0]
-                answers[same[0]] = (max(output[0], prev_score), output[1:])
+                answers[same[0]] = (max(output[0], prev_score), *output[1:])
 
             if c_e == len(c_tokens_id):
                 break

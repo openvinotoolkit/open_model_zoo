@@ -217,7 +217,7 @@ def main():
                 else:
                     assert len(same) == 1
                     prev_score = answers[same[0]][0]
-                    answers[same[0]] = (max(output[0], prev_score), output[1:], c_data.context)
+                    answers[same[0]] = (max(output[0], prev_score), *output[1:], c_data.context)
 
             def mark(txt):
                 return "\033[91m" + txt + "\033[0m" if args.colors else "*" + txt + "*"
