@@ -104,6 +104,15 @@ class GAPILauncher(Launcher):
         self.network_args = None
         self.output_names = self.get_value_from_config('outputs')
         self._inputs_shapes = self.get_inputs_from_config(self.config)
+        multi_input = len(self._inputs_shapes)
+        self.non_image_inputs = False
+        if multi_input:
+            for shape in self._inputs_shapes.values():
+                if len(shape) != 4:
+                    self.non_image_inputs = True
+                    break
+                if shape[1] not in [1, 3, 4]:
+                    self.non_image_inputs = True
 
         if not self._delayed_model_loading:
             self.model, self.weights = self.automatic_model_search()
@@ -150,11 +159,67 @@ class GAPILauncher(Launcher):
         return next(iter(self.output_names))
 
     def fit_to_input(self, data, layer_name, layout, precision):
+        if self.non_image_inputs:
+            return self._fit_to_input(data, layer_name, layout, precision)
         if np.ndim(data) == 4:
             if data[0].dtype in [float, np.float64]:
                 return data[0].astype(np.float32)
             return data[0]
-        raise ConfigError('This case is not supported currently')
+        data = np.array(data)
+        if data.dtype in [float, np.float64]:
+            data = data.astype(np.float32)
+
+        return data
+
+    def _fit_to_input(self, data, layer_name, layout, precision):
+        layer_shape = self.inputs[layer_name]
+        data = self._data_to_blob(layer_shape, data, layout)
+        if precision:
+            data = data.astype(precision)
+        return self._align_data_shape(data, layer_name)
+
+    @staticmethod
+    def _data_to_blob(layer_shape, data, layout): # pylint:disable=R0911
+        data_shape = np.shape(data)
+        if len(layer_shape) == 4:
+            if len(data_shape) == 5:
+                data = data[0]
+            if len(data_shape) < 4:
+                if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
+                    return np.resize(data, layer_shape)
+            return np.transpose(data, layout) if layout is not None else data
+        if len(layer_shape) == 2:
+            if len(data_shape) == 1:
+                return np.transpose([data])
+            if len(data_shape) > 2:
+                if all(dim == 1 for dim in layer_shape) and all(dim == 1 for dim in data_shape):
+                    return np.resize(data, layer_shape)
+                if len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape))):
+                    return np.resize(data, layer_shape)
+        if len(layer_shape) == 3 and len(data_shape) == 4:
+            return np.transpose(data, layout)[0] if layout is not None else data[0]
+        if layout is not None and len(layer_shape) == len(layout):
+            return np.transpose(data, layout)
+        if (
+                len(layer_shape) == 1 and len(data_shape) > 1 and
+                len(np.squeeze(np.zeros(layer_shape))) == len(np.squeeze(np.zeros(data_shape)))
+        ):
+            return np.resize(data, layer_shape)
+        return np.array(data)
+
+    def _align_data_shape(self, data, input_blob):
+        input_shape = self.inputs[input_blob]
+        data_batch_size = data.shape[0]
+        input_batch_size = input_shape[0]
+        if data_batch_size < input_batch_size:
+            warning_message = 'data batch {} is not equal model input batch_size {}.'.format(
+                data_batch_size, input_batch_size
+            )
+            warning(warning_message)
+            diff_number = input_batch_size - data_batch_size
+            filled_part = [data[-1]] * diff_number
+            data = np.concatenate([data, filled_part])
+        return data.reshape(input_shape)
 
     def automatic_model_search(self):
         def get_xml(model_dir):
