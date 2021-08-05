@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
         Presenter presenter(FLAGS_u);
 
         int64_t frameNum = pipeline.submitData(ImageInputData(curr_frame),
-            std::make_shared<ImageMetaData>(curr_frame, startTime));;
+            std::make_shared<ImageMetaData>(curr_frame, startTime));
 
         bool keepRunning = true;
         std::unique_ptr<ResultBase> result;

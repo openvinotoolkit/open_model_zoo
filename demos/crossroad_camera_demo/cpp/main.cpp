@@ -776,7 +776,7 @@ int main(int argc, char *argv[]) {
                         << " ms (" << 1000.f / average_time << " fps)";
                     putHighlightedText(frame, out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
                     if (FLAGS_r) {
-                        slog::debug << out.str() << slog::endl;;
+                        slog::debug << out.str() << slog::endl;
                     }
                 }
                 if (personReId.enabled() && personReIdInferred) {
@@ -786,7 +786,7 @@ int main(int argc, char *argv[]) {
                         << " ms (" << 1000.f / average_time << " fps)";
                     putHighlightedText(frame, out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
                     if (FLAGS_r) {
-                        slog::debug << out.str() << slog::endl;;
+                        slog::debug << out.str() << slog::endl;
                     }
                 }
             }
