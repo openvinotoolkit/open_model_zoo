@@ -48,6 +48,6 @@ ExecutableNetwork ModelBase::loadExecutableNetwork(const CnnConfig& cnnConfig, I
     this->cnnConfig = cnnConfig;
     auto cnnNetwork = prepareNetwork(core);
     execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.deviceName, cnnConfig.execNetworkConfig);
-    printExecNetworkInfo(execNetwork, modelFileName, cnnConfig.deviceName);
+    logExecNetworkInfo(execNetwork, modelFileName, cnnConfig.deviceName);
     return execNetwork;
 }

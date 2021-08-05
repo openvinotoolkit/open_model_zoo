@@ -747,7 +747,7 @@ void Load::into(InferenceEngine::Core & ie, const std::string & deviceName, bool
         }
 
         detector.net = ie.LoadNetwork(detector.read(ie), deviceName, config);
-        printExecNetworkInfo(detector.net, detector.pathToModel, deviceName, detector.topoName);
+        logExecNetworkInfo(detector.net, detector.pathToModel, deviceName, detector.topoName);
         slog::info << "\tBatch size is set to " << detector.maxBatch << slog::endl;
     }
 }

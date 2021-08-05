@@ -57,7 +57,7 @@ void IEWrapper::setExecPart() {
     }
 
     executableNetwork = ie.LoadNetwork(network, deviceName);
-    printExecNetworkInfo(executableNetwork, modelPath, deviceName, modelType);
+    logExecNetworkInfo(executableNetwork, modelPath, deviceName, modelType);
     request = executableNetwork.CreateInferRequest();
 }
 

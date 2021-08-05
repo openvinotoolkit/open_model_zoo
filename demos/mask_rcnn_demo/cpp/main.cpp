@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
 
         // -------------------------Load model to the device----------------------------------------------------
         auto executableNetwork = ie.LoadNetwork(network, FLAGS_d);
-        printExecNetworkInfo(executableNetwork, FLAGS_m, FLAGS_d);
+        logExecNetworkInfo(executableNetwork, FLAGS_m, FLAGS_d);
         slog::info << "\tBatch size is set to " << netBatchSize << slog::endl;
 
         // -------------------------Create Infer Request--------------------------------------------------------

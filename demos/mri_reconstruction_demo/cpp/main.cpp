@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     net.getInputsInfo().begin()->second->setLayout(Layout::NHWC);
 
     ExecutableNetwork execNet = ie.LoadNetwork(net, FLAGS_d);
-    printExecNetworkInfo(execNet, FLAGS_m, FLAGS_d);
+    logExecNetworkInfo(execNet, FLAGS_m, FLAGS_d);
 
     InferRequest infReq = execNet.CreateInferRequest();
 

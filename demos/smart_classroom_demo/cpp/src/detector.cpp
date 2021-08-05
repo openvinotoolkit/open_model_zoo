@@ -112,7 +112,7 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
 
     input_name_ = inputInfo.begin()->first;
     net_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
-    printExecNetworkInfo(net_, config_.path_to_model, config_.deviceName, topoName);
+    logExecNetworkInfo(net_, config_.path_to_model, config_.deviceName, topoName);
 }
 
 DetectedObjects FaceDetection::fetchResults() {
