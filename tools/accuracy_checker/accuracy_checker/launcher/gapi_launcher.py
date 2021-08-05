@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 from pathlib import Path
-from collections import OrderedDict
 import numpy as np
 
 import cv2
@@ -111,11 +110,13 @@ class GAPILauncher(Launcher):
         self.comp = None
         self.network_args = None
         self.output_names = self.get_value_from_config('outputs')
-        self._inputs_shapes = self.get_inputs_from_config(self.config)
-        multi_input = len(self._inputs_shapes)
+        self._inputs_shapes, self._const_inputs = self.get_inputs_from_config(self.config)
+        multi_input = (len(self._inputs_shapes) - len(self.const_inputs)) > 1
         self.non_image_inputs = False
         if multi_input:
-            for shape in self._inputs_shapes.values():
+            for name, shape in self._inputs_shapes.items():
+                if name in self.const_inputs:
+                    continue
                 if len(shape) != 4:
                     self.non_image_inputs = True
                     break
@@ -144,6 +145,8 @@ class GAPILauncher(Launcher):
         inputs = cv2.GInferInputs()
         g_inputs = []
         for input_name in self.inputs:
+            if input_name in self.const_inputs:
+                continue
             g_in = cv2.GMat()
             inputs.setInput(input_name, g_in)
             g_inputs.append(g_in)
@@ -156,6 +159,8 @@ class GAPILauncher(Launcher):
             args.append(str(self.weights))
         args.append(self.device.upper())
         pp = cv2.gapi.ie.params(*args)
+        for input_name, value in self._const_inputs.items():
+            pp.constInput(input_name, value)
         self.network_args = compile_args(cv2.gapi.networks(pp))
 
     @property
@@ -294,7 +299,7 @@ class GAPILauncher(Launcher):
         """
         results = []
         for input_blobs in inputs:
-            input_data = [input_blobs[input_name] for input_name in self.inputs]
+            input_data = [input_blobs[input_name] for input_name in self.inputs if input_name not in self.const_inputs]
             outputs = self.comp.apply(cv2.gin(*input_data), args=self.network_args)
             dict_result = dict(zip(self.output_names, outputs))
             results.append(dict_result)
@@ -316,8 +321,16 @@ class GAPILauncher(Launcher):
 
         def parse_shape_value(shape):
             return (1, *map(int, get_or_parse_value(shape, ())))
+        input_shapes, const_inputs = {}, {}
+        for input_param in inputs:
+            if input_param['type'] == 'CONST_INPUT':
+                const_val = np.array(input_param['value'])
+                if const_val.dtype in [float, np.float]:
+                    const_val = const_val.astype(np.float32)
+                const_inputs[input_param['name']] = const_val
+            input_shapes[input_param['name']] = parse_shape_value(input_param.get('shape', []))
 
-        return OrderedDict([(elem.get('name'), parse_shape_value(elem.get('shape'))) for elem in inputs])
+        return input_shapes, const_inputs
 
     def release(self):
         """
