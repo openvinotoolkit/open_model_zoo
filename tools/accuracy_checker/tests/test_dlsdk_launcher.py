@@ -40,11 +40,7 @@ except ImportError:
 
 
 def no_available_myriad():
-    try:
-        from openvino.inference_engine import IECore
-        return 'MYRIAD' not in IECore().available_devices
-    except Exception:
-        return True
+    return True
 
 
 def has_layers():
