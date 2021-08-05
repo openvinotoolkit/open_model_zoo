@@ -23,7 +23,6 @@
 #include <string>
 #include <gflags/gflags.h>
 
-using namespace InferenceEngine;
 using ImageWithFrameIndex = std::pair<cv::Mat, int>;
 
 std::unique_ptr<PedestrianTracker>
@@ -128,7 +127,7 @@ int main(int argc, char **argv) {
         bool should_save_det_log = !detlog_out.empty();
 
         std::vector<std::string> devices{detector_mode, reid_mode};
-        slog::info << *GetInferenceEngineVersion() << slog::endl;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core ie =
             LoadInferenceEngine(devices, custom_cpu_library, path_to_custom_layers);
 

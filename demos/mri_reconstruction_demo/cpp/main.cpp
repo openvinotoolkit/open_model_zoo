@@ -7,11 +7,9 @@
 #include "mri_reconstruction_demo.hpp"
 #include "npy_reader.hpp"
 
-using namespace InferenceEngine;
-
 bool ParseAndCheckCommandLine(int argc, char *argv[]);
 
-static cv::Mat infEngineBlobToMat(const Blob::Ptr& blob);
+static cv::Mat infEngineBlobToMat(const InferenceEngine::Blob::Ptr& blob);
 
 struct MRIData {
     cv::Mat data;
@@ -35,13 +33,13 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    Core ie;
+    InferenceEngine::Core ie;
 
-    CNNNetwork net = ie.ReadNetwork(FLAGS_m);
-    net.getInputsInfo().begin()->second->setLayout(Layout::NHWC);
+    InferenceEngine::CNNNetwork net = ie.ReadNetwork(FLAGS_m);
+    net.getInputsInfo().begin()->second->setLayout(InferenceEngine::Layout::NHWC);
 
-    ExecutableNetwork execNet = ie.LoadNetwork(net, FLAGS_d);
-    InferRequest infReq = execNet.CreateInferRequest();
+    InferenceEngine::ExecutableNetwork execNet = ie.LoadNetwork(net, FLAGS_d);
+    InferenceEngine::InferRequest infReq = execNet.CreateInferRequest();
 
     // Hybrid-CS-Model-MRI/Data/sampling_mask_20perc.npy
     MRIData mri;
@@ -92,7 +90,7 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-cv::Mat infEngineBlobToMat(const Blob::Ptr& blob) {
+cv::Mat infEngineBlobToMat(const InferenceEngine::Blob::Ptr& blob) {
     // NOTE: Inference Engine sizes are reversed.
     std::vector<size_t> dims = blob->getTensorDesc().getDims();
     std::vector<int> size(dims.begin(), dims.end());
