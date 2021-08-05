@@ -31,7 +31,7 @@ public:
     const int64_t frameId;
     cv::Mat frame;
 
-    PerformanceMetrics::TimePoint timeStamp;
+    PerformanceMetrics::TimePoint timestamp;
 };
 
 class Worker;

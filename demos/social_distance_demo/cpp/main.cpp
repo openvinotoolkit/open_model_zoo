@@ -377,7 +377,7 @@ void Drawer::process() {
         cv::rectangle(mat, usage, {0, 255, 0}, cv::FILLED);
 
         context.drawersContext.presenter.drawGraphs(mat);
-        context.metrics.update(sharedVideoFrame->timeStamp, mat, { 15, 35 }, cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{ 255, 255, 255 }, 0);
+        context.metrics.update(sharedVideoFrame->timestamp, mat, { 15, 35 }, cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{ 255, 255, 255 }, 0);
         if (!FLAGS_no_show) {
             cv::imshow("Detection results", firstGridIt->second.getMat());
             context.drawersContext.prevShow = std::chrono::steady_clock::now();
@@ -592,7 +592,7 @@ bool Reader::isReady() {
 
 void Reader::process() {
     unsigned sourceID = sharedVideoFrame->sourceID;
-    sharedVideoFrame->timeStamp = std::chrono::steady_clock::now();
+    sharedVideoFrame->timestamp = std::chrono::steady_clock::now();
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     const std::vector<std::shared_ptr<InputChannel>>& inputChannels = context.readersContext.inputChannels;
     if (inputChannels[sourceID]->read(sharedVideoFrame->frame)) {

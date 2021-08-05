@@ -45,7 +45,8 @@ void PerformanceMetrics::update(TimePoint lastRequestStartTime) {
     }
 }
 
-void PerformanceMetrics::paintMetrics(cv::Mat & frame, cv::Point position, int fontFace, double fontScale, cv::Scalar color, int thickness, MetricTypes metricType) const {
+void PerformanceMetrics::paintMetrics(cv::Mat & frame, cv::Point position, int fontFace,
+    double fontScale, cv::Scalar color, int thickness, MetricTypes metricType) const {
     // Draw performance stats over frame
     Metrics metrics = getLast();
 

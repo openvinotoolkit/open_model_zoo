@@ -3,6 +3,7 @@
 //
 #include <inference_engine.hpp>
 #include <opencv2/opencv.hpp>
+#include <utils/common.hpp>
 #include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
@@ -46,6 +47,8 @@ int main(int argc, char** argv) {
     net.getInputsInfo().begin()->second->setLayout(Layout::NHWC);
 
     ExecutableNetwork execNet = ie.LoadNetwork(net, FLAGS_d);
+    printExecNetworkInfo(execNet, FLAGS_m, FLAGS_d);
+
     InferRequest infReq = execNet.CreateInferRequest();
 
     // Hybrid-CS-Model-MRI/Data/sampling_mask_20perc.npy

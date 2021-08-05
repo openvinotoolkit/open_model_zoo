@@ -128,6 +128,7 @@ The demo uses OpenCV to display the resulting frame with detections rendered as 
 In the default mode, during the demo's run it reports **Person Detection time** - inference time for the Person/Vehicle/Bike Detection network.
 
 If Person Attributes Recognition or Person Reidentification Retail are enabled, the additional info below is reported also:
+
 * **Person Attributes Recognition time** - Inference time of Person Attributes Recognition averaged by the number of detected persons.
 * **Person Reidentification time** - Inference time of Person Reidentification averaged by the number of detected persons.
 
