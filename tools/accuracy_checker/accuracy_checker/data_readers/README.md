@@ -39,6 +39,7 @@ AccuracyChecker supports following list of data readers:
 * `opencv_imread` - read images using OpenCV library. Default color space is BGR.
    * `reading_flag` - (Optional) flag which specifies the way image should be read: `color` - default, loads color image, `gray` - loads image in grayscale mode, `unchanged` - loads image as such including alpha channel.
 * `pillow_imread` - read images using Pillow library. Default color space is RGB.
+   * `to_rgb` - allow conversion image to RGB (Optional, default `True`).
 * `scipy_imread` - read images using similar approach as in `scipy.misc.imread`
 ```
 Note: since 1.3.0 version the image processing module is not a part of scipy library. This reader does not use scipy anymore.
