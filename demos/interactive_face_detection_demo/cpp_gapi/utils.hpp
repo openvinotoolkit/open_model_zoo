@@ -1,13 +1,8 @@
-// Copyright (C) 2020 Intel Corporation
+// Copyright (C) 2020-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
-# pragma once
-
-#include <chrono>
-#include <map>
-#include <stdexcept>
-#include <string>
+#pragma once
 
 class CallStat {
 public:

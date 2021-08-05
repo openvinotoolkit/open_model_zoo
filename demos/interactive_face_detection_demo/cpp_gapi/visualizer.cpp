@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <iostream>
 #include <utils/ocv_common.hpp>
 #include "visualizer.hpp"
 

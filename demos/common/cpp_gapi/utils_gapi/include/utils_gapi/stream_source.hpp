@@ -5,6 +5,7 @@
 #pragma once
 
 #include <utils/images_capture.h>
+#include <opencv2/gapi.hpp>
 
 namespace custom {
 class CustomCapSource : public cv::gapi::wip::IStreamSource

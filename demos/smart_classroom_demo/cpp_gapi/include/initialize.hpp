@@ -203,10 +203,9 @@ void configNets(const NetsFlagsPack& flags,
             "ActionNet/action_heads/out_head_2_anchor_3",
             "ActionNet/action_heads/out_head_2_anchor_4"};
        /** Create action detector net's parameters **/
-       std::array<std::string, 7> outputBlobList;
-          outputBlobList = isNetForSixActions(flags.m_act)
-              ? outputBlobList = action_detector_6
-              : outputBlobList =  action_detector_5;
+       std::array<std::string, 7> outputBlobList = isNetForSixActions(flags.m_act)
+           ? action_detector_6
+           : action_detector_5;
        auto action_net = cv::gapi::ie::Params<nets::PersonDetActionRec>{
            flags.m_act,
            fileNameNoExt(flags.m_act) + ".bin",

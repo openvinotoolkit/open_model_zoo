@@ -129,7 +129,7 @@ macro(add_demo)
     endif()
 
     target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
-                                                    ${IE_SAMPLE_DEPENDENCIES} ngraph::ngraph utils gflags)
+                                                    ${IE_SAMPLE_DEPENDENCIES} ngraph::ngraph utils utils_gapi gflags)
 
     if(UNIX)
         target_link_libraries(${IE_SAMPLE_NAME} PRIVATE pthread)
@@ -142,6 +142,7 @@ find_package(ngraph REQUIRED)
 
 add_subdirectory(thirdparty/gflags)
 add_subdirectory(common/cpp)
+add_subdirectory(common/cpp_gapi)
 add_subdirectory(multi_channel_common/cpp)
 
 # collect all samples subdirectories

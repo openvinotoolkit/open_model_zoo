@@ -7,13 +7,13 @@
 #include <gflags/gflags.h>
 #include <monitors/presenter.h>
 #include <utils/performance_metrics.hpp>
+#include <utils_gapi/stream_source.hpp>
 #include <ie_iextension.h>
 
 #include <opencv2/gapi/render.hpp>
 #include <opencv2/gapi/core.hpp>
 
 #include "initialize.hpp"
-#include "stream_source.hpp"
 #include "smart_classroom_demo_gapi.hpp"
 
 namespace util {

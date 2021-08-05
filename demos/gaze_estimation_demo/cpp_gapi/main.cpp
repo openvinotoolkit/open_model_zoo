@@ -4,7 +4,7 @@
 
 #include <monitors/presenter.h>
 #include <utils/args_helper.hpp>
-#include <utils/slog.hpp>
+#include <utils_gapi/stream_source.hpp>
 
 #include "gaze_estimation_demo_gapi.hpp"
 #include "face_inference_results.hpp"
@@ -12,7 +12,6 @@
 #include "utils.hpp"
 #include "custom_kernels.hpp"
 #include "kernel_packages.hpp"
-#include "stream_source.hpp"
 
 #include <opencv2/gapi/infer/ie.hpp>
 #include <opencv2/gapi/core.hpp>
