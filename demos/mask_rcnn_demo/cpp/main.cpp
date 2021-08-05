@@ -122,6 +122,7 @@ int main(int argc, char *argv[]) {
             slog::warn << "Network batch size is less than number of images (" << imagePaths.size() <<
                        "), some input files will be ignored" << slog::endl;
         }
+
         auto startTime = std::chrono::steady_clock::now();
         for (size_t i = 0, inputIndex = 0; i < netBatchSize; i++, inputIndex++) {
             if (inputIndex >= imagePaths.size()) {
@@ -267,7 +268,7 @@ int main(int argc, char *argv[]) {
         }
 
         slog::info << "Metrics report:" << slog::endl;
-        slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.getTotal().latency << slog::endl;
+        slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.getTotal().latency << " ms" << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

@@ -3,6 +3,8 @@
 //
 #include <inference_engine.hpp>
 #include <opencv2/opencv.hpp>
+#include <utils/performance_metrics.hpp>
+#include <utils/slog.hpp>
 
 #include "mri_reconstruction_demo.hpp"
 #include "npy_reader.hpp"
@@ -30,11 +32,14 @@ cv::Mat kspaceToImage(const cv::Mat& kspace);
 float psnr(const cv::Mat& data0, const cv::Mat& data1, float maxVal);
 
 int main(int argc, char** argv) {
+    PerformanceMetrics metrics;
+
     // ------------------------------ Parsing and validation of input args ---------------------------------
     if (!ParseAndCheckCommandLine(argc, argv)) {
         return 0;
     }
 
+    slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
     Core ie;
 
     CNNNetwork net = ie.ReadNetwork(FLAGS_m);
@@ -46,7 +51,7 @@ int main(int argc, char** argv) {
     // Hybrid-CS-Model-MRI/Data/sampling_mask_20perc.npy
     MRIData mri;
     mri.samplingMask = blobFromNPY(FLAGS_p);
-    std::cout << "Sampling ratio: " << 1.0 - cv::mean(mri.samplingMask)[0] << std::endl;
+    slog::info << "Sampling ratio: " << 1.0 - cv::mean(mri.samplingMask)[0] << slog::endl;
 
     mri.data = blobFromNPY(FLAGS_i);
     CV_Assert(mri.data.depth() == CV_64F);
@@ -55,16 +60,15 @@ int main(int argc, char** argv) {
     const int width = mri.data.size[2];
     mri.data /= sqrt(height * width);
 
-    mri.reconstructed.create({numSlices, height, width}, CV_8U);
+    mri.reconstructed.create({ numSlices, height, width }, CV_8U);
 
-    std::cout << "Compute..." << std::endl;
+    slog::info << "Compute..." << slog::endl;
 
     cv::Mat inputBlob = infEngineBlobToMat(infReq.GetBlob(net.getInputsInfo().begin()->first));
     cv::Mat outputBlob = infEngineBlobToMat(infReq.GetBlob(net.getOutputsInfo().begin()->first));
     outputBlob = outputBlob.reshape(1, height);
 
-    cv::TickMeter tm;
-    tm.start();
+    const auto startTime = std::chrono::steady_clock::now();
     for (int i = 0; i < numSlices; ++i) {
         // Prepare input
         cv::Mat kspace = cv::Mat(height, width, CV_64FC2, mri.data.ptr<double>(i)).clone();
@@ -80,15 +84,20 @@ int main(int argc, char** argv) {
         cv::Mat slice(height, width, CV_8UC1, mri.reconstructed.ptr<uint8_t>(i));
         cv::normalize(outputBlob, slice, 255, 0, cv::NORM_MINMAX, CV_8U);
     }
-    tm.stop();
-    std::cout << cv::format("Elapsed time: %.1f seconds", tm.getTimeSec()) << std::endl;
+
+    metrics.update(startTime);
+    slog::info << "Metrics report:" << slog::endl;
+    slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << metrics.getTotal().latency << " ms" << slog::endl;
 
     // Visualization loop.
-    int sliceId = numSlices / 2;
-    cv::namedWindow(kWinName, cv::WINDOW_AUTOSIZE);
-    cv::createTrackbar("Slice", kWinName, nullptr, numSlices - 1, callback, &mri);
-    callback(sliceId, &mri);  // Trigger initial visualization
-    cv::waitKey();
+    if (!FLAGS_no_show) {
+        int sliceId = numSlices / 2;
+        cv::namedWindow(kWinName, cv::WINDOW_AUTOSIZE);
+        cv::createTrackbar("Slice", kWinName, nullptr, numSlices - 1, callback, &mri);
+        callback(sliceId, &mri);  // Trigger initial visualization
+        cv::waitKey();
+    }
+
     return 0;
 }
 
