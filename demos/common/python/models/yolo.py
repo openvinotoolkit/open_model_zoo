@@ -28,7 +28,9 @@ ANCHORS = {
                36.0, 75.0, 76.0, 55.0, 72.0, 146.0,
                142.0, 110.0, 192.0, 243.0, 459.0, 401.0],
     'YOLOV4-TINY': [10.0, 14.0, 23.0, 27.0, 37.0, 58.0,
-                    81.0, 82.0, 135.0, 169.0, 344.0, 319.0]
+                    81.0, 82.0, 135.0, 169.0, 344.0, 319.0],
+    'YOLOF': [16, 16, 32, 32, 64, 64,
+              128, 128, 256, 256, 512, 512]
 }
 
 class YOLO(Model):
@@ -325,7 +327,7 @@ class YOLOF(YOLO):
 
     def _get_output_info(self):
         num = 6
-        anchors = [16, 16, 32, 32, 64, 64, 128, 128, 256, 256, 512, 512]
+        anchors = ANCHORS['YOLOF']
 
         output_info = {}
         for i, (name, layer) in enumerate(self.net.outputs.items()):
@@ -391,8 +393,8 @@ class YOLOF(YOLO):
                     height = np.exp(height)
                 except OverflowError:
                     continue
-                width = width * params.anchors[2 * n] # / input_size[0]
-                height = height * params.anchors[2 * n + 1] # / input_size[1]
+                width = width * params.anchors[2 * n]
+                height = height * params.anchors[2 * n + 1]
 
                 # Define class_label and cofidence
                 label = class_idx[ind]
