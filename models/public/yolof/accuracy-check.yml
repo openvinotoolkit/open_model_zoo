@@ -22,7 +22,7 @@ models:
         postprocessing:
           - type: resize_prediction_boxes
             rescale: True
-          - type: batched_nms
+          - type: label_aware_nms
             overlap: 0.6
           - type: clip_boxes
             apply_to: prediction

@@ -131,8 +131,8 @@ class NMS(Postprocessor):
 
         return keep
 
-class BatchedNMS(NMS):
-    __provider__ = 'batched_nms'
+class LabelAwareNMS(NMS):
+    __provider__ = 'label_aware_nms'
 
     prediction_types = (DetectionPrediction, ActionDetectionPrediction)
     annotation_types = (DetectionAnnotation, ActionDetectionPrediction)

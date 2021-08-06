@@ -52,22 +52,18 @@ class YoloOutputProcessor:
         return DetectionBox(x, y, w, h, confidence, probabilities)
 
 
-class YolofOutputProcessor:
+class YolofOutputProcessor(YoloOutputProcessor):
     def __init__(self, coord_correct=None, size_correct=None, conf_correct=None,
                  prob_correct=None, coord_normalizer=(1, 1), size_normalizer=(1, 1)):
-        self.coord_correct = coord_correct if coord_correct else lambda x: x
-        self.size_correct = size_correct if size_correct else np.exp
-        self.conf_correct = conf_correct if conf_correct else lambda x: x
-        self.prob_correct = prob_correct if prob_correct else lambda x: x
-        self.x_normalizer, self.y_normalizer = coord_normalizer
-        self.width_normalizer, self.height_normalizer = size_normalizer
+        super().__init__(coord_correct, size_correct, conf_correct,
+                         prob_correct, coord_normalizer, size_normalizer)
 
     def __call__(self, bbox, i, j, anchors=None):
         if anchors is None:
             anchors = [1, 1]
 
-        x = self.coord_correct(bbox.x) * anchors[0] + i * 16
-        y = self.coord_correct(bbox.y) * anchors[1] + j * 16
+        x = self.coord_correct(bbox.x) * anchors[0] + i * self.x_normalizer
+        y = self.coord_correct(bbox.y) * anchors[1] + j * self.y_normalizer
 
         w = self.size_correct(bbox.w) * anchors[0]
         h = self.size_correct(bbox.h) * anchors[1]
@@ -669,7 +665,8 @@ class YolofAdapter(YoloV3Adapter):
 
         results = []
         cells = self.cells[0]
-        for identifier, prediction in zip(identifiers, predictions):
+        for identifier, prediction, meta in zip(identifiers, predictions, frame_meta):
+            input_shape = list(meta.get('input_shape', {'data': (1, 3, 608, 608)}).values())[0]
             prob = prediction[:, self.coords:].flatten()
             prob = self.processor.prob_correct(prob)
 
@@ -693,7 +690,9 @@ class YolofAdapter(YoloV3Adapter):
                 row = obj_ind // (cells * self.num)
                 col = (obj_ind - row * cells * self.num) // self.num
                 n = (obj_ind - row * cells * self.num) % self.num
-                processed_box = self.processor(raw_bbox, col, row, self.anchors[2*n:2*n+2])
+                self.processor.x_normalizer = input_shape[3] // cells
+                self.processor.y_normalizer = input_shape[2] // cells
+                processed_box = self.processor(raw_bbox, col, row, self.anchors[2 * n:2 * n + 2])
 
                 label = class_idx[ind]
 

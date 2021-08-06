@@ -72,28 +72,11 @@ files:
     size: 15620
     sha256: e8b20ba9b70203d4ec0dec93272da16799b5877006caa5b075d2b7beef086add
     source: https://raw.githubusercontent.com/megvii-model/YOLOF/main/cvpods/structures/boxes.py
-  #  configs
-  - name: cvpods/configs/base_detection_config.py
-    size: 4104
-    sha256: 4ef9f5819c31e7c33a9ea640cd5807b8866750580c0d5ba038693329635a5712
-    source: https://raw.githubusercontent.com/megvii-model/YOLOF/main/cvpods/configs/base_detection_config.py
-  - name: cvpods/configs/base_config.py
-    size: 14938
-    sha256: 6126b9994c208f4db1d01449299721cd5a2907c229b42420ef14c12f82fdfdff
-    source: https://raw.githubusercontent.com/megvii-model/YOLOF/main/cvpods/configs/base_config.py
-  - name: cvpods/configs/config_helper.py
-    size: 8287
-    sha256: 7c2a08ce43aa649dc860cf8dc8f41af049c8e130c9393067206a034fcb9d25a2
-    source: https://raw.githubusercontent.com/megvii-model/YOLOF/main/cvpods/configs/config_helper.py
   # models
   - name: models/cspdarknet.py
     size: 11889
     sha256: 6eae2826c76a51faf34744495c82d79d3680772775fbc603929749c1a1eee63b
     source: https://raw.githubusercontent.com/megvii-model/YOLOF/main/playground/detection/coco/yolof/yolof.cspdarknet53.DC5.9x.stage2.3x/cspdarknet.py
-  - name: models/config.py
-    size: 3206
-    sha256: d29cfa8a776cf4419bbf9e316b3d1449862d9fe1333d659383c8c8e442cad296
-    source: https://raw.githubusercontent.com/megvii-model/YOLOF/main/playground/detection/coco/yolof/yolof.cspdarknet53.DC5.9x.stage2.3x/config.py
   # yolof_base
   - name: yolof_base/__init__.py
     size: 156
@@ -172,11 +155,6 @@ postprocessing:
     pattern: 'from cvpods\.utils import env|if env\.TORCH_VERSION <= \(\n.*1, 5\)
       else nn\.SyncBatchNorm,'
     replacement: ','
-  # models
-  - $type: regex_replace
-    file: models/config.py
-    pattern: 'SyncBN'
-    replacement: 'BN'
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir

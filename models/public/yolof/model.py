@@ -15,11 +15,7 @@
 import torch
 from torch import nn
 
-from models.config import config
-from cvpods.layers import ShapeSpec
 from cvpods.modeling.backbone import Backbone
-from cvpods.modeling.anchor_generator import DefaultAnchorGenerator
-
 from models.cspdarknet import build_darknet_backbone
 from yolof_base import build_encoder, build_decoder
 
@@ -35,11 +31,6 @@ def build_backbone(cfg, input_shape=None):
     assert isinstance(backbone, Backbone)
     return backbone
 
-
-def build_anchor_generator(cfg, input_shape):
-    return DefaultAnchorGenerator(cfg, input_shape)
-
-
 def permute_to_N_HWA_K(tensor, K):
     """
     Transpose/reshape a tensor from (N, (A x K), H, W) to (N, (HxWxA), K)
@@ -53,38 +44,21 @@ def permute_to_N_HWA_K(tensor, K):
 
 
 class YOLOF(nn.Module):
-    """
-    Implementation of YOLOF.
-    """
     def __init__(self, cfg):
         super().__init__()
 
         self.device = 'cpu'
 
-        # fmt: off
         self.num_classes = cfg.MODEL.YOLOF.DECODER.NUM_CLASSES
         self.in_features = cfg.MODEL.YOLOF.ENCODER.IN_FEATURES
 
-        # fmt: on
-        self.backbone = cfg.build_backbone(
-            cfg, input_shape=ShapeSpec(channels=len(cfg.MODEL.PIXEL_MEAN)))
+        self.backbone = cfg.build_backbone(cfg)
 
         backbone_shape = self.backbone.output_shape()
-        feature_shapes = [backbone_shape[f] for f in self.in_features]
         self.encoder = cfg.build_encoder(
             cfg, backbone_shape
         )
         self.decoder = cfg.build_decoder(cfg)
-        self.anchor_generator = cfg.build_anchor_generator(cfg, feature_shapes)
-
-        self.register_buffer(
-            "pixel_mean",
-            torch.Tensor(cfg.MODEL.PIXEL_MEAN).to(self.device).view(3, 1, 1)
-        )
-        self.register_buffer(
-            "pixel_std",
-            torch.Tensor(cfg.MODEL.PIXEL_STD).to(self.device).view(3, 1, 1)
-        )
         self.to(self.device)
 
     def forward(self, images):
@@ -92,7 +66,7 @@ class YOLOF(nn.Module):
         Args:
             inputs[Tensor]: [BxCxHxW]
         Returns:
-            outputs[Tensor]: [Bx(H*W*A=6)x(K+4(boxes)+4(anhors))]
+            outputs[Tensor]: [Bx(H*W*A=6)x(K(classes)+4(boxes))]
         """
         h, w = images.shape[2:]
 
@@ -113,15 +87,59 @@ class YOLOF(nn.Module):
 
         return result
 
+class ConfigDict(dict):
+    def __init__(self, d={}):
+        for k, v in d.items():
+            setattr(self, k, v)
+
+    def __setattr__(self, name, value):
+        if isinstance(value, (list, tuple)):
+            value = [self.__class__(x) if isinstance(x, dict) else x for x in value]
+        elif isinstance(value, dict) and not isinstance(value, self.__class__):
+            value = self.__class__(value)
+        super().__setattr__(name, value)
+        super().__setitem__(name, value)
+
+model_parameters = {
+    'MODEL': {
+        'DARKNET': {
+            'DEPTH': 53,
+            'WITH_CSP': True,
+            'NORM': "BN",
+            'OUT_FEATURES': ["res5"],
+            'RES5_DILATION': 2
+        },
+        'YOLOF': {
+            'ENCODER': {
+                'IN_FEATURES': ["res5"],
+                'NUM_CHANNELS': 512,
+                'BLOCK_MID_CHANNELS': 128,
+                'NUM_RESIDUAL_BLOCKS': 8,
+                'BLOCK_DILATIONS': [1, 2, 3, 4, 5, 6, 7, 8],
+                'NORM': "BN",
+                'ACTIVATION': "LeakyReLU"
+            },
+            'DECODER': {
+                'IN_CHANNELS': 512,
+                'NUM_CLASSES': 80,
+                'NUM_ANCHORS': 6,
+                'CLS_NUM_CONVS': 2,
+                'REG_NUM_CONVS': 4,
+                'NORM': "BN",
+                'ACTIVATION': "LeakyReLU",
+                'PRIOR_PROB': 0.01
+            }
+        }
+    }
+}
 
 def get_model(weights):
-    cfg = config
-
+    cfg = ConfigDict(model_parameters)
     cfg.build_backbone = build_backbone
-    cfg.build_anchor_generator = build_anchor_generator
     cfg.build_encoder = build_encoder
     cfg.build_decoder = build_decoder
+
     model = YOLOF(cfg)
     checkpoint = torch.load(weights, map_location='cpu')
-    model.load_state_dict(checkpoint['model'])
+    model.load_state_dict(checkpoint['model'], strict=False)
     return model
