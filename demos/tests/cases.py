@@ -366,6 +366,7 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('person-detection-retail')}),
         *combine_cases(
+<<<<<<< HEAD
             TestCase(options={'-at': 'ssd'}),
             single_option_cases('-m_det',
                 ModelArg('person-detection-retail-0002'),
@@ -402,6 +403,17 @@ NATIVE_DEMOS = [
                 ModelArg('person-reidentification-retail-0286'),
                 ModelArg('person-reidentification-retail-0287'),
                 ModelArg('person-reidentification-retail-0288')),
+=======
+                TestCase(options={'-at': 'ssd'}),
+        single_option_cases('-m_det',
+            ModelArg('person-detection-retail-0002'),
+            ModelArg('person-detection-retail-0013'))),
+        single_option_cases('-m_reid',
+            ModelArg('person-reidentification-retail-0277'),
+            ModelArg('person-reidentification-retail-0286'),
+            ModelArg('person-reidentification-retail-0287'),
+            ModelArg('person-reidentification-retail-0288')),
+>>>>>>> c9d021884 (solve mistakes)
     )),
 
     CppDemo(name='security_barrier_camera_demo',
