@@ -75,6 +75,8 @@ AccuracyChecker supports following set of adapters:
   * `outputs` - the list of output layers names.
   * `score_threshold` - minimal accepted score for valid boxes (Optional, default 0).
 * `yolo_v5` - converting output of YOLO v5 family models to `DetectionPrediction` representation. The parameters are the same as for the `yolo_v3` models.
+* `yolof` - converting output of YOLOF model to `DetectionPrediction` representation. The parameters are the same as for the `yolo_v3` models.
+  * `topk` - max number of detection candidates.
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `aocr` - converting output of attention-ocr model to `CharacterRecognitionPrediction`.
   * `output_blob` - name of output layer with predicted labels or string (Optional, if not provided, first founded output will be used).

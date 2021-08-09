@@ -68,8 +68,8 @@ class YolofOutputProcessor(YoloOutputProcessor):
         w = self.size_correct(bbox.w) * anchors[0]
         h = self.size_correct(bbox.h) * anchors[1]
 
-        probabilities = bbox.probabilities
-        confidence = self.conf_correct(bbox.probabilities)
+        confidence = self.conf_correct(bbox.confidence)
+        probabilities = self.prob_correct(bbox.probabilities)
 
         return DetectionBox(x, y, w, h, confidence, probabilities)
 
@@ -627,7 +627,6 @@ class YoloV5Adapter(YoloV3Adapter):
 class YolofAdapter(YoloV3Adapter):
     __provider__ = 'yolof'
 
-
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
@@ -686,7 +685,7 @@ class YolofAdapter(YoloV3Adapter):
             labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
             for ind, obj_ind in enumerate(obj_indx):
                 bbox = prediction[:, :self.coords][obj_ind]
-                raw_bbox = DetectionBox(bbox[0], bbox[1], bbox[2], bbox[3], 1, prob[ind])
+                raw_bbox = DetectionBox(bbox[0], bbox[1], bbox[2], bbox[3], prob[ind], prob[ind])
                 row = obj_ind // (cells * self.num)
                 col = (obj_ind - row * cells * self.num) // self.num
                 n = (obj_ind - row * cells * self.num) % self.num

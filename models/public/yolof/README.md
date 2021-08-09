@@ -27,12 +27,12 @@ Accuracy metrics obtained on [Common Objects in Context (COCO)](https://cocodata
 
 ### Original model
 
-Image, name - `image_input`, shape - `1, 3, 608, 608`, format is `B, H, W, C`, where:
+Image, name - `image_input`, shape - `1, 3, 608, 608`, format is `B, C, H, W`, where:
 
 - `B` - batch size
+- `C` - channel
 - `H` - height
 - `W` - width
-- `C` - channel
 
 Channel order is `BGR`.
 Mean values - [103.53, 116.28, 123.675].
@@ -52,25 +52,30 @@ Channel order is `BGR`.
 
 ### Original model
 
+The detected boxes, scores and labels for each box. The postprocessing is implemented inside the model and is performed while inference of model.
 
+Detection box has format [`x1`, `y1`, `x2`, `y2`], where:
+
+- (`x1`, `y1`) - left-bottom corner
+- (`x2`, `y2`) - right-top corner
 
 ### Converted model
 
-1. The array of detection summary info, name - `boxes`, shape - `1, 8664, 85`. The anchor values are `16,16,  32,32,  64,64,  128,128,  256,256,  512,512`.
+The array of detection summary info, name - `boxes`, shape - `1, 8664, 84`. The anchor values are `16,16,  32,32,  64,64,  128,128,  256,256,  512,512`.
 
-For each case format is `B,N*Cx*Cy,85`, where
+For each case format is `B, N*Cx*Cy, 84`, where
+
 - `B` - batch size
-- `N` - number of detection boxes for cell
+- `N` - number of detection boxes for cell (N = 6)
 - `Cx`, `Cy` - cell index
 
-Detection box has format [`x`,`y`,`h`,`w`,`box_score`,`class_no_1`, ..., `class_no_80`], where:
-- (`x`,`y`) - coordinates of box center relative to the cell
-- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
-- `box_score` - confidence of detection box in [0,1] range
+Detection box has format [`x`, `y`, `h`, `w`, `class_no_1`, ..., `class_no_80`], where:
+
+- (`x`, `y`) - coordinates of box center relative to the cell
+- `h`, `w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get absolute height and width values
 - `class_no_1`,...,`class_no_80` - probability distribution over the classes in the [0,1] range, multiply by confidence value to get confidence of each class
 
-
-The model was trained on Microsoft\* COCO dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
+The model was trained on [Common Objects in Context (COCO)](https://cocodataset.org/#home) dataset version with 80 categories of object. Mapping to class names provided in `<omz_dir>/data/dataset_classes/coco_80cl.txt` file.
 
 ## Download a Model and Convert it into Inference Engine Format
 

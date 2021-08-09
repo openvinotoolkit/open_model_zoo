@@ -178,7 +178,8 @@ def get_model(ie, args):
                            threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
     elif args.architecture_type == 'yolov4':
         return models.YoloV4(ie, args.model, labels=args.labels,
-                             threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
+                             threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio,
+                             anchors=args.anchors, masks=args.masks)
     elif args.architecture_type == 'yolof':
         return models.YOLOF(ie, args.model, labels=args.labels,
                             threshold=args.prob_threshold, keep_aspect_ratio=args.keep_aspect_ratio)
