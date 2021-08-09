@@ -35,7 +35,7 @@ DetectionLog ConvertTracksToDetectionLog(const ObjectTracks& tracks) {
     DetectionLog log;
 
     // Combine detected objects by respective frame indices.
-    std::map<int64_t, TrackedObjects> objects;
+    std::map<int, TrackedObjects> objects;
     for (const auto& track : tracks)
         for (const auto& object : track.second) {
             auto itr = objects.find(object.frame_idx);
