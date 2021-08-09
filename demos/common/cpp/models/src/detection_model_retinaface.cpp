@@ -211,7 +211,7 @@ void filterScores(std::vector<float>& scores, const std::vector<size_t>& indices
     auto start = sz[2] * sz[3] * anchorNum;
 
     for (auto i : indices) {
-        auto offset = (i % anchorNum) * sz[2] * sz[3] + i / anchorNum;;
+        auto offset = (i % anchorNum) * sz[2] * sz[3] + i / anchorNum;
         scores.push_back(memPtr[start + offset]);
     }
 }
@@ -351,5 +351,5 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         }
     }
 
-    return std::unique_ptr<ResultBase>(result);;
+    return std::unique_ptr<ResultBase>(result);
 }

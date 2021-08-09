@@ -14,8 +14,6 @@
 #include <memory>
 #include <utils/slog.hpp>
 
-using namespace InferenceEngine;
-
 namespace {
 template <typename StreamType, typename EndlType>
 void SaveDetectionLogToStream(StreamType& stream, const EndlType& endl,
@@ -68,7 +66,7 @@ LoadInferenceEngine(const std::vector<std::string>& devices,
                     const std::string& custom_cpu_library,
                     const std::string& custom_cldnn_kernels) {
     std::set<std::string> loadedDevices;
-    Core ie;
+    InferenceEngine::Core ie;
 
     for (const auto &device : devices) {
         if (loadedDevices.find(device) != loadedDevices.end()) {
@@ -79,12 +77,12 @@ LoadInferenceEngine(const std::vector<std::string>& devices,
         if ((device.find("CPU") != std::string::npos)) {
             if (!custom_cpu_library.empty()) {
                 // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                auto extension_ptr = std::make_shared<Extension>(custom_cpu_library);
-                ie.AddExtension(std::static_pointer_cast<Extension>(extension_ptr), "CPU");
+                auto extension_ptr = std::make_shared<InferenceEngine::Extension>(custom_cpu_library);
+                ie.AddExtension(std::static_pointer_cast<InferenceEngine::Extension>(extension_ptr), "CPU");
             }
         } else if (!custom_cldnn_kernels.empty()) {
             // Load Extensions for other plugins not CPU
-            ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, custom_cldnn_kernels}}, "GPU");
+            ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, custom_cldnn_kernels}}, "GPU");
         }
 
         loadedDevices.insert(device);

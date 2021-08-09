@@ -32,8 +32,6 @@
 
 #include "text_detection_demo.hpp"
 
-using namespace InferenceEngine;
-
 std::string str_tolower(std::string s) {
     std::transform(s.begin(), s.end(), s.begin(),
                    [](unsigned char c){ return std::tolower(c); }
@@ -87,8 +85,8 @@ int main(int argc, char *argv[]) {
         double text_recognition_postproc_time = 0;
         double text_crop_time = 0;
 
-        slog::info << *GetInferenceEngineVersion() << slog::endl;
-        Core ie;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        InferenceEngine::Core ie;
 
         std::set<std::string> loadedDevices;
         std::vector<std::string> devices = {FLAGS_m_td.empty() ? "" : FLAGS_d_td, FLAGS_m_tr.empty() ? "" : FLAGS_d_tr};
@@ -103,12 +101,12 @@ int main(int argc, char *argv[]) {
             if ((device.find("CPU") != std::string::npos)) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = std::make_shared<Extension>(FLAGS_l);
+                    auto extension_ptr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
                     ie.AddExtension(extension_ptr, "CPU");
                 }
             } else if (!FLAGS_c.empty()) {
                 // Load Extensions for GPU
-                ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
+                ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
             }
 
             loadedDevices.insert(device);
@@ -249,7 +247,8 @@ int main(int argc, char *argv[]) {
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
                     }
 
-                    LockedMemory<const void> blobMapped = as<MemoryBlob>(out_blob)->rmap();
+                    InferenceEngine::LockedMemory<const void> blobMapped =
+                        InferenceEngine::as<InferenceEngine::MemoryBlob>(out_blob)->rmap();
                     float *output_data_pointer = blobMapped.as<float *>();
                     std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[1] * output_shape[2]);
 

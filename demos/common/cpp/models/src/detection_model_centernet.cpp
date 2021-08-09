@@ -234,7 +234,7 @@ void transform(std::vector<ModelCenterNet::BBox>& bboxes, const InferenceEngine:
 std::unique_ptr<ResultBase> ModelCenterNet::postprocess(InferenceResult& infResult) {
     // --------------------------- Filter data and get valid indices ---------------------------------
     auto heatInfRes = infResult.outputsData[outputsNames[0]];
-    auto sz = heatInfRes->getTensorDesc().getDims();;
+    auto sz = heatInfRes->getTensorDesc().getDims();
     auto chSize = sz[2] * sz[3];
     auto scores = filterScores(heatInfRes, confidenceThreshold);
 

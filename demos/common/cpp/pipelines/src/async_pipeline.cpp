@@ -18,8 +18,6 @@
 #include <utils/common.hpp>
 #include <utils/slog.hpp>
 
-using namespace InferenceEngine;
-
 AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const CnnConfig& cnnConfig, InferenceEngine::Core& core) :
     model(std::move(modelInstance)) {
     execNetwork = model->loadExecutableNetwork(cnnConfig, core);
@@ -29,7 +27,7 @@ AsyncPipeline::AsyncPipeline(std::unique_ptr<ModelBase>&& modelInstance, const C
         try {
             // +1 to use it as a buffer of the pipeline
             nireq = execNetwork.GetMetric(METRIC_KEY(OPTIMAL_NUMBER_OF_INFER_REQUESTS)).as<unsigned int>() + 1;
-        } catch (const Exception& ex) {
+        } catch (const InferenceEngine::Exception& ex) {
             throw std::runtime_error(std::string("Every device used with the demo should support "
                 "OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. Failed to query the metric with error: ") + ex.what());
         }
@@ -58,8 +56,9 @@ void AsyncPipeline::waitForData(bool shouldKeepOrder) {
                        !completedInferenceResults.empty());
         });
 
-    if (callbackException)
+    if (callbackException) {
         std::rethrow_exception(callbackException);
+    }
 }
 
 int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_ptr<MetaData>& metaData) {
@@ -85,14 +84,17 @@ int64_t AsyncPipeline::submitData(const InputData& inputData, const std::shared_
                     result.metaData = std::move(metaData);
                     result.internalModelData = std::move(internalModelData);
 
-                    for (const auto& outName : model->getOutputsNames())
-                    {
+                    for (const auto& outName : model->getOutputsNames()) {
                         auto blobPtr = request->GetBlob(outName);
 
-                        if (Precision::I32 == blobPtr->getTensorDesc().getPrecision())
-                            result.outputsData.emplace(outName, std::make_shared<TBlob<int>>(*as<TBlob<int>>(blobPtr)));
-                        else
-                            result.outputsData.emplace(outName, std::make_shared<TBlob<float>>(*as<TBlob<float>>(blobPtr)));
+                        if (InferenceEngine::Precision::I32 == blobPtr->getTensorDesc().getPrecision()) {
+                            result.outputsData.emplace(outName,
+                                std::make_shared<InferenceEngine::TBlob<int>>(*InferenceEngine::as<InferenceEngine::TBlob<int>>(blobPtr)));
+                        }
+                        else {
+                            result.outputsData.emplace(outName,
+                                std::make_shared<InferenceEngine::TBlob<float>>(*InferenceEngine::as<InferenceEngine::TBlob<float>>(blobPtr)));
+                        }
                     }
 
                     completedInferenceResults.emplace(frameID, result);
@@ -147,8 +149,9 @@ InferenceResult AsyncPipeline::getInferenceResult(bool shouldKeepOrder) {
     if(!retVal.IsEmpty()) {
         outputFrameId = retVal.frameId;
         outputFrameId++;
-        if (outputFrameId < 0)
+        if (outputFrameId < 0) {
             outputFrameId = 0;
+        }
     }
 
     return retVal;
