@@ -50,7 +50,6 @@
 
 #include "utils.hpp"
 
-using namespace InferenceEngine;
 using namespace gaze_estimation;
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -89,7 +88,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Loading Inference Engine
-        slog::info << *GetInferenceEngineVersion() << slog::endl;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core ie;
 
         // Set up face detector and estimators

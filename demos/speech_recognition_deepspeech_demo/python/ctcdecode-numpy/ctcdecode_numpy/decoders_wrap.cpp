@@ -3001,7 +3001,7 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 
 
 
-  #define SWIG_exception(code, msg) do { SWIG_Error(code, msg); SWIG_fail;; } while(0) 
+  #define SWIG_exception(code, msg) do { SWIG_Error(code, msg); SWIG_fail; } while(0) 
 
 
 /* -------- TYPES TABLE (BEGIN) -------- */

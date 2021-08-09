@@ -23,8 +23,6 @@
 #include <utils/args_helper.hpp>
 #include <utils/common.hpp>
 
-using namespace InferenceEngine;
-
 std::set<std::string> CnnConfig::getDevices() {
     if (devices.empty()) {
         for (const std::string& device : ::parseDevices(deviceName)) {

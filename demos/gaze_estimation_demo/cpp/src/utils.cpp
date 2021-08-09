@@ -16,8 +16,6 @@
 
 #include "utils.hpp"
 
-using namespace InferenceEngine;
-
 namespace gaze_estimation {
 void gazeVectorToGazeAngles(const cv::Point3f& gazeVector, cv::Point2f& gazeAngles) {
     auto r = cv::norm(gazeVector);
