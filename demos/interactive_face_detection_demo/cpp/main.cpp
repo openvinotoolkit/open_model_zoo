@@ -167,11 +167,13 @@ int main(int argc, char *argv[]) {
         faceDetector.enqueue(frame);
         faceDetector.submitRequest();
 
-        cv::Mat next_frame = cap->read();
+        auto startTimeNextFrame = std::chrono::steady_clock::now();
+        cv::Mat nextFrame = cap->read();
         while (frame.data) {
             timer.start("total");
-            cv::Mat prev_frame = std::move(frame);
-            frame = std::move(next_frame);
+            const auto startTimePrevFrame = startTimeNextFrame;
+            cv::Mat prevFrame = std::move(frame);
+            frame = std::move(nextFrame);
             framesCounter++;
 
             // Retrieving face detection results for the previous frame
@@ -181,7 +183,7 @@ int main(int argc, char *argv[]) {
 
             // No valid frame to infer if previous frame is the last
             if (frame.data) {
-                if (frame.size() != prev_frame.size()) {
+                if (frame.size() != prevFrame.size()) {
                     throw std::runtime_error("Images of different size are not supported");
                 }
                 faceDetector.enqueue(frame);
@@ -191,8 +193,8 @@ int main(int argc, char *argv[]) {
             // Filling inputs of face analytics networks
             for (auto &&face : prev_detection_results) {
                 if (isFaceAnalyticsEnabled) {
-                    cv::Rect clippedRect = face.location & cv::Rect({0, 0}, prev_frame.size());
-                    cv::Mat face = prev_frame(clippedRect);
+                    cv::Rect clippedRect = face.location & cv::Rect({0, 0}, prevFrame.size());
+                    cv::Mat face = prevFrame(clippedRect);
                     ageGenderDetector.enqueue(face);
                     headPoseDetector.enqueue(face);
                     emotionsDetector.enqueue(face);
@@ -211,8 +213,8 @@ int main(int argc, char *argv[]) {
             }
 
             // Read the next frame while waiting for inference results
-            auto startTime = std::chrono::steady_clock::now();
-            next_frame = cap->read();
+            startTimeNextFrame = std::chrono::steady_clock::now();
+            nextFrame = cap->read();
 
             if (isFaceAnalyticsEnabled) {
                 ageGenderDetector.wait();
@@ -234,12 +236,12 @@ int main(int argc, char *argv[]) {
             // For every detected face
             for (size_t i = 0; i < prev_detection_results.size(); i++) {
                 auto& result = prev_detection_results[i];
-                cv::Rect rect = result.location & cv::Rect({0, 0}, prev_frame.size());
+                cv::Rect rect = result.location & cv::Rect({0, 0}, prevFrame.size());
 
                 Face::Ptr face;
                 if (!FLAGS_no_smooth) {
                     face = matchFace(rect, prev_faces);
-                    float intensity_mean = calcMean(prev_frame(rect));
+                    float intensity_mean = calcMean(prevFrame(rect));
 
                     if ((face == nullptr) ||
                         ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f)) {
@@ -290,20 +292,20 @@ int main(int argc, char *argv[]) {
             }
 
             // drawing faces
-            visualizer.draw(prev_frame, faces);
+            visualizer.draw(prevFrame, faces);
 
-            presenter.drawGraphs(prev_frame);
-            metrics.update(startTime, prev_frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
+            presenter.drawGraphs(prevFrame);
+            metrics.update(startTimePrevFrame, prevFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
             timer.finish("total");
 
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesCounter <= FLAGS_limit)) {
-                videoWriter.write(prev_frame);
+                videoWriter.write(prevFrame);
             }
 
             int delay = std::max(1, static_cast<int>(msrate - timer["total"].getLastCallDuration()));
             if (!FLAGS_no_show) {
-                cv::imshow("Detection results", prev_frame);
+                cv::imshow("Detection results", prevFrame);
                 int key = cv::waitKey(delay);
                 if (27 == key || 'Q' == key || 'q' == key) {
                     break;
