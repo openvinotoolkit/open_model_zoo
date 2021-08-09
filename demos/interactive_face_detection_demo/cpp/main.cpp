@@ -141,6 +141,8 @@ int main(int argc, char *argv[]) {
         size_t id = 0;
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+
+        auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
         if (!frame.data) {
             throw std::runtime_error("Can't read an image from the input");
@@ -168,8 +170,9 @@ int main(int argc, char *argv[]) {
         cv::Mat nextFrame = cap->read();
         while (frame.data) {
             timer.start("total");
-            const auto startTimePrevFrame = startTimeNextFrame;
+            const auto startTimePrevFrame = startTime;
             cv::Mat prevFrame = std::move(frame);
+            startTime = startTimeNextFrame;
             frame = std::move(nextFrame);
             framesCounter++;
 
