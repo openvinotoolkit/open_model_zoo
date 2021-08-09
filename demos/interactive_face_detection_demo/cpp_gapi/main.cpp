@@ -456,7 +456,8 @@ int main(int argc, char *argv[]) {
                 throw std::invalid_argument(msg.str());
             }
 
-            metrics.update(std::chrono::steady_clock::now());
+            bool isStart = true;
+            const auto startTime = std::chrono::steady_clock::now();
             stream.start();
             while (stream.pull(cv::GRunArgsP(out_vector))) {
                 if (!FLAGS_m_em.empty() && !FLAGS_no_show_emotion_bar) {
@@ -524,8 +525,15 @@ int main(int argc, char *argv[]) {
                 visualizer->draw(frame, faces);
 
                 presenter->drawGraphs(frame);
-                metrics.update({}, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
-                    0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                if (isStart) {
+                    metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                        0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                    isStart = false;
+                }
+                else {
+                    metrics.update({}, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                        0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                }
 
                 //  Visualizing results
                 if (!FLAGS_no_show || !FLAGS_o.empty()) {

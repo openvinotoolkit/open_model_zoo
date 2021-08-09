@@ -276,7 +276,8 @@ int main(int argc, char* argv[]) {
         /** TOP_K case starts without processing **/
         if (const_params.actions_type != TOP_K) stream.start();
 
-        metrics.update(std::chrono::steady_clock::now());
+        bool isStart = true;
+        const auto startTime = std::chrono::steady_clock::now();
         /** Main cycle **/
         while (true) {
             char key = cv::waitKey(1);
@@ -314,8 +315,15 @@ int main(int argc, char* argv[]) {
                 const auto new_width = cvRound(out_frame.cols * const_params.draw_ptr->rect_scale_x_);
                 cv::resize(out_frame, out_frame, cv::Size(new_width, new_height));
                 presenter.drawGraphs(out_frame);
-                metrics.update({}, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
-                    0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                if (isStart) {
+                    metrics.update(startTime, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                        0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                    isStart = false;
+                }
+                else {
+                    metrics.update({}, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                        0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                }
 
                 const_params.draw_ptr->Show(out_frame);
                 const_params.draw_ptr->ShowCrop();
@@ -327,8 +335,15 @@ int main(int argc, char* argv[]) {
             } else if (const_params.actions_type != TOP_K) {
                 /** Main part. Processing is always on **/
                 presenter.drawGraphs(proc);
-                metrics.update({}, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
-                    0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                if (isStart) {
+                    metrics.update(startTime, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                        0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                    isStart = false;
+                }
+                else {
+                    metrics.update({}, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                        0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                }
                 const_params.draw_ptr->Show(proc);
             }
             if (videoWriter.isOpened()) {

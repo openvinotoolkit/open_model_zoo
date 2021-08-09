@@ -254,7 +254,8 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Can't open video writer");
         }
 
-        metrics.update(std::chrono::steady_clock::now());
+        bool isStart = true;
+        const auto startTime = std::chrono::steady_clock::now();
         pipeline.start();
         while (pipeline.pull(cv::gout(frame,
                                       out_cofidence,
@@ -300,8 +301,15 @@ int main(int argc, char *argv[]) {
 
             /** Display system parameters **/
             presenter.drawGraphs(frame);
-            metrics.update({}, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
-                0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+            if (isStart) {
+                metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                    0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                isStart = false;
+            }
+            else {
+                metrics.update({}, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                    0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+            }
 
             /** Print logs **/
             if (FLAGS_r) {
