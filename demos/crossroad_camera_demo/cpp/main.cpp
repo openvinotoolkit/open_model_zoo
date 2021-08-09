@@ -29,8 +29,6 @@
 #include <utils/ocv_common.hpp>
 #include "crossroad_camera_demo.hpp"
 
-using namespace InferenceEngine;
-
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
 
@@ -55,23 +53,23 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 // -------------------------Generic routines for detection networks-------------------------------------------------
 
 struct BaseDetection {
-    ExecutableNetwork net;
-    InferRequest request;
+    InferenceEngine::ExecutableNetwork net;
+    InferenceEngine::InferRequest request;
     std::string & commandLineFlag;
     std::string topoName;
-    Blob::Ptr inputBlob;
+    InferenceEngine::Blob::Ptr inputBlob;
     std::string inputName;
     std::string outputName;
 
     BaseDetection(std::string &commandLineFlag, const std::string &topoName)
             : commandLineFlag(commandLineFlag), topoName(topoName) {}
 
-    ExecutableNetwork * operator ->() {
+    InferenceEngine::ExecutableNetwork * operator ->() {
         return &net;
     }
-    virtual CNNNetwork read(const Core& ie)  = 0;
+    virtual InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie)  = 0;
 
-    virtual void setRoiBlob(const Blob::Ptr &roiBlob) {
+    virtual void setRoiBlob(const InferenceEngine::Blob::Ptr &roiBlob) {
         if (!enabled())
             return;
         if (!request)
@@ -102,7 +100,7 @@ struct BaseDetection {
 
     virtual void wait() {
         if (!enabled()|| !request) return;
-        request.Wait(InferRequest::WaitMode::RESULT_READY);
+        request.Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
     }
     mutable bool enablingChecked = false;
     mutable bool _enabled = false;
@@ -140,7 +138,7 @@ struct PersonDetection : BaseDetection{
         BaseDetection::submitRequest();
     }
 
-    void setRoiBlob(const Blob::Ptr &frameBlob) override {
+    void setRoiBlob(const InferenceEngine::Blob::Ptr &frameBlob) override {
         height = static_cast<float>(frameBlob->getTensorDesc().getDims()[2]);
         width = static_cast<float>(frameBlob->getTensorDesc().getDims()[3]);
         BaseDetection::setRoiBlob(frameBlob);
@@ -153,7 +151,7 @@ struct PersonDetection : BaseDetection{
     }
 
     PersonDetection() : BaseDetection(FLAGS_m, "Person Detection"), maxProposalCount(0), objectSize(0) {}
-    CNNNetwork read(const Core& ie) override {
+    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override {
         /** Read network model **/
         auto network = ie.ReadNetwork(FLAGS_m);
         /** Set batch size to 1 **/
@@ -162,29 +160,29 @@ struct PersonDetection : BaseDetection{
 
         /** SSD-based network should have one input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
-        InputsDataMap inputInfo(network.getInputsInfo());
+        InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Detection network should have only one input");
         }
-        InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-        inputInfoFirst->setPrecision(Precision::U8);
+        InferenceEngine::InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
+        inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
 
         if (FLAGS_auto_resize) {
-            inputInfoFirst->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-            inputInfoFirst->getInputData()->setLayout(Layout::NHWC);
+            inputInfoFirst->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+            inputInfoFirst->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
         } else {
-            inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
+            inputInfoFirst->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
         }
         inputName = inputInfo.begin()->first;
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
-        OutputsDataMap outputInfo(network.getOutputsInfo());
+        InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("Person Detection network should have only one output");
         }
-        DataPtr& _output = outputInfo.begin()->second;
-        const SizeVector outputDims = _output->getTensorDesc().getDims();
+        InferenceEngine::DataPtr& _output = outputInfo.begin()->second;
+        const InferenceEngine::SizeVector outputDims = _output->getTensorDesc().getDims();
         outputName = outputInfo.begin()->first;
         maxProposalCount = outputDims[2];
         objectSize = outputDims[3];
@@ -194,8 +192,8 @@ struct PersonDetection : BaseDetection{
         if (outputDims.size() != 4) {
             throw std::logic_error("Incorrect output dimensions for SSD");
         }
-        _output->setPrecision(Precision::FP32);
-        _output->setLayout(Layout::NCHW);
+        _output->setPrecision(InferenceEngine::Precision::FP32);
+        _output->setLayout(InferenceEngine::Layout::NCHW);
 
         return network;
     }
@@ -205,7 +203,8 @@ struct PersonDetection : BaseDetection{
         results.clear();
         if (resultsFetched) return;
         resultsFetched = true;
-        LockedMemory<const void> outputMapped = as<MemoryBlob>(request.GetBlob(outputName))->rmap();
+        InferenceEngine::LockedMemory<const void> outputMapped =
+            InferenceEngine::as<InferenceEngine::MemoryBlob>(request.GetBlob(outputName))->rmap();
         const float *detections = outputMapped.as<float *>();
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
@@ -288,7 +287,7 @@ struct PersonAttribsDetection : BaseDetection {
                 "is male", "has_bag", "has_backpack" , "has hat", "has longsleeves", "has longpants", "has longhair", "has coat_jacket"
         };
 
-        Blob::Ptr attribsBlob = request.GetBlob(outputNameForAttributes);
+        InferenceEngine::Blob::Ptr attribsBlob = request.GetBlob(outputNameForAttributes);
         size_t numOfAttrChannels = attribsBlob->getTensorDesc().getDims().at(1);
 
         const char *const *attributeStrings;
@@ -307,7 +306,8 @@ struct PersonAttribsDetection : BaseDetection {
 
         AttributesAndColorPoints returnValue;
 
-        LockedMemory<const void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rmap();
+        InferenceEngine::LockedMemory<const void> attribsBlobMapped =
+            InferenceEngine::as<InferenceEngine::MemoryBlob>(attribsBlob)->rmap();
         auto outputAttrValues = attribsBlobMapped.as<float*>();
         for (size_t i = 0; i < numOfAttrChannels; i++) {
             returnValue.attributes_strings.push_back(attributeStrings[i]);
@@ -315,8 +315,8 @@ struct PersonAttribsDetection : BaseDetection {
         }
 
         if (hasTopBottomColor) {
-            Blob::Ptr topColorPointBlob = request.GetBlob(outputNameForTopColorPoint);
-            Blob::Ptr bottomColorPointBlob = request.GetBlob(outputNameForBottomColorPoint);
+            InferenceEngine::Blob::Ptr topColorPointBlob = request.GetBlob(outputNameForTopColorPoint);
+            InferenceEngine::Blob::Ptr bottomColorPointBlob = request.GetBlob(outputNameForBottomColorPoint);
 
             size_t numOfTCPointChannels = topColorPointBlob->getTensorDesc().getDims().at(1);
             size_t numOfBCPointChannels = bottomColorPointBlob->getTensorDesc().getDims().at(1);
@@ -329,9 +329,11 @@ struct PersonAttribsDetection : BaseDetection {
                                        "Person Attributes Recognition network is not equal to point coordinates (2)");
             }
 
-            LockedMemory<const void> topColorPointBlobMapped = as<MemoryBlob>(topColorPointBlob)->rmap();
+            InferenceEngine::LockedMemory<const void> topColorPointBlobMapped =
+                InferenceEngine::as<InferenceEngine::MemoryBlob>(topColorPointBlob)->rmap();
             auto outputTCPointValues = topColorPointBlobMapped.as<float*>();
-            LockedMemory<const void> bottomColorPointBlobMapped = as<MemoryBlob>(bottomColorPointBlob)->rmap();
+            InferenceEngine::LockedMemory<const void> bottomColorPointBlobMapped =
+                InferenceEngine::as<InferenceEngine::MemoryBlob>(bottomColorPointBlob)->rmap();
             auto outputBCPointValues = bottomColorPointBlobMapped.as<float*>();
 
             returnValue.top_color_point.x = outputTCPointValues[0];
@@ -348,7 +350,7 @@ struct PersonAttribsDetection : BaseDetection {
         return hasTopBottomColor;
     }
 
-    CNNNetwork read(const Core& ie) override {
+    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override {
         /** Read network model **/
         auto network = ie.ReadNetwork(FLAGS_m_pa);
         /** Extract model name and load it's weights **/
@@ -357,23 +359,23 @@ struct PersonAttribsDetection : BaseDetection {
 
         /** Person Attribs network should have one input two outputs **/
         // ---------------------------Check inputs ------------------------------------------------------
-        InputsDataMap inputInfo(network.getInputsInfo());
+        InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Attribs topology should have only one input");
         }
-        InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-        inputInfoFirst->setPrecision(Precision::U8);
+        InferenceEngine::InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
+        inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
         if (FLAGS_auto_resize) {
-            inputInfoFirst->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-            inputInfoFirst->getInputData()->setLayout(Layout::NHWC);
+            inputInfoFirst->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+            inputInfoFirst->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
         } else {
-            inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
+            inputInfoFirst->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
         }
         inputName = inputInfo.begin()->first;
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
-        OutputsDataMap outputInfo(network.getOutputsInfo());
+        InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
         if ((outputInfo.size() != 1) && (outputInfo.size() != 3)) {
              throw std::logic_error("Person Attribs Network expects either a network having one output (person attributes), "
                                     "or a network having three outputs (person attributes, top color point, bottom color point)");
@@ -418,10 +420,11 @@ struct PersonReIdentification : BaseDetection {
     }
 
     std::vector<float> getReidVec() {
-        Blob::Ptr attribsBlob = request.GetBlob(outputName);
+        InferenceEngine::Blob::Ptr attribsBlob = request.GetBlob(outputName);
 
         auto numOfChannels = attribsBlob->getTensorDesc().getDims().at(1);
-        LockedMemory<const void> attribsBlobMapped = as<MemoryBlob>(attribsBlob)->rmap();
+        InferenceEngine::LockedMemory<const void> attribsBlobMapped =
+            InferenceEngine::as<InferenceEngine::MemoryBlob>(attribsBlob)->rmap();
         auto outputValues = attribsBlobMapped.as<float*>();
         return std::vector<float>(outputValues, outputValues + numOfChannels);
     }
@@ -450,29 +453,29 @@ struct PersonReIdentification : BaseDetection {
         return mul / (sqrt(denomA) * sqrt(denomB));
     }
 
-    CNNNetwork read(const Core& ie) override {
+    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override {
         /** Read network model **/
         auto network = ie.ReadNetwork(FLAGS_m_reid);
         network.setBatchSize(1);
         /** Person Reidentification network should have 1 input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
-        InputsDataMap inputInfo(network.getInputsInfo());
+        InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Reidentification Retail should have 1 input");
         }
-        InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-        inputInfoFirst->setPrecision(Precision::U8);
+        InferenceEngine::InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
+        inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
         if (FLAGS_auto_resize) {
-            inputInfoFirst->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-            inputInfoFirst->getInputData()->setLayout(Layout::NHWC);
+            inputInfoFirst->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+            inputInfoFirst->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
         } else {
-            inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
+            inputInfoFirst->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
         }
         inputName = inputInfo.begin()->first;
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
-        OutputsDataMap outputInfo(network.getOutputsInfo());
+        InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("Person Re-Identification Model should have 1 output");
         }
@@ -487,7 +490,7 @@ struct Load {
     BaseDetection& detector;
     explicit Load(BaseDetection& detector) : detector(detector) { }
 
-    void into(Core & ie, const std::string & deviceName) const {
+    void into(InferenceEngine::Core & ie, const std::string & deviceName) const {
         if (detector.enabled()) {
             detector.net = ie.LoadNetwork(detector.read(ie), deviceName);
             printExecNetworkInfo(detector.net, detector.commandLineFlag, deviceName, detector.topoName);
@@ -509,8 +512,8 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load inference engine -------------------------------------
-        slog::info << *GetInferenceEngineVersion() << slog::endl;
-        Core ie;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        InferenceEngine::Core ie;
 
         std::set<std::string> loadedDevices;
 
@@ -536,14 +539,14 @@ int main(int argc, char *argv[]) {
             if ((flag.find("CPU") != std::string::npos)) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = std::make_shared<Extension>(FLAGS_l);
+                    auto extension_ptr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
                     ie.AddExtension(extension_ptr, "CPU");
                 }
             }
 
             if ((flag.find("GPU") != std::string::npos) && !FLAGS_c.empty()) {
                 // Load any user-specified clDNN Extensions
-                ie.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
+                ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
             }
 
             loadedDevices.insert(flag);
@@ -557,9 +560,9 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 3. Do inference ---------------------------------------------------------
-        Blob::Ptr frameBlob;  // Blob to be used to keep processed frame data
-        ROI cropRoi;  // cropped image coordinates
-        Blob::Ptr roiBlob;  // This blob contains data from cropped image (vehicle or license plate)
+        InferenceEngine::Blob::Ptr frameBlob;  // Blob to be used to keep processed frame data
+        InferenceEngine::ROI cropRoi;  // cropped image coordinates
+        InferenceEngine::Blob::Ptr roiBlob;  // This blob contains data from cropped image (vehicle or license plate)
         cv::Mat person;  // Mat object containing person data cropped by openCV
 
         /** Start inference & calc performance **/
@@ -773,7 +776,7 @@ int main(int argc, char *argv[]) {
                         << " ms (" << 1000.f / average_time << " fps)";
                     putHighlightedText(frame, out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
                     if (FLAGS_r) {
-                        slog::debug << out.str() << slog::endl;;
+                        slog::debug << out.str() << slog::endl;
                     }
                 }
                 if (personReId.enabled() && personReIdInferred) {
@@ -783,7 +786,7 @@ int main(int argc, char *argv[]) {
                         << " ms (" << 1000.f / average_time << " fps)";
                     putHighlightedText(frame, out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, { 200, 10, 10 }, 2);
                     if (FLAGS_r) {
-                        slog::debug << out.str() << slog::endl;;
+                        slog::debug << out.str() << slog::endl;
                     }
                 }
             }

@@ -34,9 +34,6 @@
 #include "face.hpp"
 #include "visualizer.hpp"
 
-using namespace InferenceEngine;
-
-
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validating input arguments--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
@@ -73,8 +70,8 @@ int main(int argc, char *argv[]) {
         }
 
         // --------------------------- 1. Loading Inference Engine -----------------------------
-        slog::info << *GetInferenceEngineVersion() << slog::endl;
-        Core ie;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        InferenceEngine::Core ie;
 
         std::set<std::string> loadedDevices;
         std::pair<std::string, std::string> cmdOptions[] = {
@@ -110,12 +107,12 @@ int main(int argc, char *argv[]) {
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = std::make_shared<Extension>(FLAGS_l);
+                    auto extension_ptr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
                     ie.AddExtension(extension_ptr, "CPU");
                 }
             } else if (!FLAGS_c.empty()) {
                 // Loading extensions for GPU
-                ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
+                ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
             }
 
             loadedDevices.insert(deviceName);

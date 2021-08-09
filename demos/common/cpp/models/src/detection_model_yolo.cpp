@@ -18,8 +18,6 @@
 #include <utils/common.hpp>
 #include <ngraph/ngraph.hpp>
 
-using namespace InferenceEngine;
-
 ModelYolo::ModelYolo(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
     bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels) :
     DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels),
@@ -31,33 +29,33 @@ ModelYolo::ModelYolo(const std::string& modelFileName, float confidenceThreshold
 void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
     }
 
-    InputInfo::Ptr& input = inputInfo.begin()->second;
+    InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
     inputsNames.push_back(inputInfo.begin()->first);
-    input->setPrecision(Precision::U8);
+    input->setPrecision(InferenceEngine::Precision::U8);
     if (useAutoResize) {
-        input->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-        input->getInputData()->setLayout(Layout::NHWC);
+        input->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+        input->getInputData()->setLayout(InferenceEngine::Layout::NHWC);
     }
     else {
-        input->getInputData()->setLayout(Layout::NCHW);
+        input->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
     }
 
     //--- Reading image input parameters
-    const TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
+    const InferenceEngine::TensorDesc& inputDesc = inputInfo.begin()->second->getTensorDesc();
     netInputHeight = getTensorHeight(inputDesc);
     netInputWidth = getTensorWidth(inputDesc);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
+    InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     for (auto& output : outputInfo) {
-        output.second->setPrecision(Precision::FP32);
+        output.second->setPrecision(InferenceEngine::Precision::FP32);
         if (output.second->getDims().size() == 4) {
-            output.second->setLayout(Layout::NCHW);
+            output.second->setLayout(InferenceEngine::Layout::NCHW);
         }
         outputsNames.push_back(output.first);
     }
@@ -165,7 +163,7 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
     }
 
     auto entriesNum = sideW * sideH;
-    const float* output_blob = blob->buffer().as<PrecisionTrait<Precision::FP32>::value_type*>();
+    const float* output_blob = blob->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type*>();
 
     // --------------------------- Parsing YOLO Region output -------------------------------------
     for (int i = 0; i < entriesNum; ++i) {

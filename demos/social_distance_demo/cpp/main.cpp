@@ -30,8 +30,6 @@
 #include "person_trackers.hpp"
 #include "social_distance_demo.hpp"
 
-using namespace InferenceEngine;
-
 typedef std::chrono::duration<float, std::chrono::seconds::period> Sec;
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -63,7 +61,7 @@ struct InferRequestsContainer {
     InferRequestsContainer(const InferRequestsContainer&) = delete;
     InferRequestsContainer& operator=(const InferRequestsContainer&) = delete;
 
-    void assign(const std::vector<InferRequest>& inferRequests) {
+    void assign(const std::vector<InferenceEngine::InferRequest>& inferRequests) {
         actualInferRequests = inferRequests;
         this->inferRequests.container.clear();
 
@@ -72,13 +70,13 @@ struct InferRequestsContainer {
         }
     }
 
-    std::vector<InferRequest> getActualInferRequests() {
+    std::vector<InferenceEngine::InferRequest> getActualInferRequests() {
         return actualInferRequests;
     }
-    ConcurrentContainer<std::vector<std::reference_wrapper<InferRequest>>> inferRequests;
+    ConcurrentContainer<std::vector<std::reference_wrapper<InferenceEngine::InferRequest>>> inferRequests;
 
 private:
-    std::vector<InferRequest> actualInferRequests;
+    std::vector<InferenceEngine::InferRequest> actualInferRequests;
 };
 
 struct Context {  // stores all global data for tasks
@@ -105,8 +103,8 @@ struct Context {  // stores all global data for tasks
         frameCounter{0}
     {
         assert(inputChannels.size() == gridParam.size());
-        std::vector<InferRequest> detectorInferRequests;
-        std::vector<InferRequest> reidInferRequests;
+        std::vector<InferenceEngine::InferRequest> detectorInferRequests;
+        std::vector<InferenceEngine::InferRequest> reidInferRequests;
         detectorInferRequests.reserve(nireq);
         reidInferRequests.reserve(nreidireq);
         std::generate_n(std::back_inserter(detectorInferRequests), nireq, [&]{
@@ -182,7 +180,7 @@ struct Context {  // stores all global data for tasks
     uint64_t nireq;
     bool isVideo;
     std::chrono::steady_clock::time_point t0;
-    std::atomic<std::vector<InferRequest>::size_type> freeDetectionInfersCount;
+    std::atomic<std::vector<InferenceEngine::InferRequest>::size_type> freeDetectionInfersCount;
     std::atomic<uint32_t> frameCounter;
     InferRequestsContainer detectorsInfers, reidInfers;
 };
@@ -265,7 +263,7 @@ private:
 // extracts detections from blob InferRequests and runs Re-Id
 class DetectionsProcessor : public Task {
 public:
-    DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, InferRequest *inferRequest)
+    DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, InferenceEngine::InferRequest *inferRequest)
             : Task{sharedVideoFrame, 1.0},
               inferRequest{inferRequest},
               requireGettingNumberOfDetections{true} {}
@@ -284,10 +282,10 @@ public:
 
 private:
     std::shared_ptr<ClassifiersAggregator> classifiersAggregator; // when no one stores this object we will draw
-    InferRequest *inferRequest;
+    InferenceEngine::InferRequest *inferRequest;
     std::list<cv::Rect> personRects;
     std::vector<TrackableObject> personTrackers;
-    std::vector<std::reference_wrapper<InferRequest>> reservedReIdRequests;
+    std::vector<std::reference_wrapper<InferenceEngine::InferRequest>> reservedReIdRequests;
     bool requireGettingNumberOfDetections;
 };
 
@@ -521,12 +519,12 @@ void DetectionsProcessor::process() {
 
             for (auto reidRequestsIt = reservedReIdRequests.begin(); reidRequestsIt != reservedReIdRequests.end(); personRectsIt++, reidRequestsIt++) {
                 const cv::Rect personRect = *personRectsIt;
-                InferRequest& reidRequest = *reidRequestsIt;
+                InferenceEngine::InferRequest& reidRequest = *reidRequestsIt;
                 context.detectionsProcessorsContext.reid.setImage(reidRequest, sharedVideoFrame->frame, personRect);
 
                 reidRequest.SetCompletionCallback(
                     std::bind([](std::shared_ptr<ClassifiersAggregator> classifiersAggregator,
-                                InferRequest &reidRequest, cv::Rect rect, Context &context) {
+                        InferenceEngine::InferRequest &reidRequest, cv::Rect rect, Context &context) {
                                     reidRequest.SetCompletionCallback([] {}); // destroy the stored bind object
                                     std::vector<float> result = context.detectionsProcessorsContext.reid.getResults(reidRequest);
 
@@ -573,7 +571,7 @@ bool InferTask::isReady() {
 void InferTask::process() {
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     InferRequestsContainer& detectorsInfers = context.detectorsInfers;
-    std::reference_wrapper<InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
+    std::reference_wrapper<InferenceEngine::InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
     detectorsInfers.inferRequests.container.pop_back();
     detectorsInfers.inferRequests.mutex.unlock();
 
@@ -582,7 +580,7 @@ void InferTask::process() {
     inferRequest.get().SetCompletionCallback(
         std::bind(
             [](VideoFrame::Ptr sharedVideoFrame,
-               InferRequest& inferRequest,
+                InferenceEngine::InferRequest& inferRequest,
                Context& context) {
                     inferRequest.SetCompletionCallback([]{});  // destroy the stored bind object
                     tryPush(context.detectionsProcessorsContext.reidTasksWorker,
@@ -706,7 +704,7 @@ int main(int argc, char* argv[]) {
             if ("CPU" == device) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extensionPtr = std::make_shared<Extension>(FLAGS_l);
+                    auto extensionPtr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
                     ie.AddExtension(extensionPtr, "CPU");
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
@@ -723,7 +721,7 @@ int main(int argc, char* argv[]) {
             if ("GPU" == device) {
                 // Load any user-specified clDNN Extensions
                 if (!FLAGS_c.empty()) {
-                    ie.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
+                    ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
                 }
                 ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
                                 (deviceNStreams.count("GPU") > 0 ? std::to_string(deviceNStreams.at("GPU")) :
@@ -741,7 +739,7 @@ int main(int argc, char* argv[]) {
         auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
             std::map<std::string, std::string> config;
             if (FLAGS_tag && deviceName == "HDDL") {
-                config[HDDL_GRAPH_TAG] = "tag" + suffix;
+                config[InferenceEngine::HDDL_GRAPH_TAG] = "tag" + suffix;
             }
             return config;
         };

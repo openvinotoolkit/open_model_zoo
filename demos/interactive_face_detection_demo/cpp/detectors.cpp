@@ -24,8 +24,6 @@
 
 #include "detectors.hpp"
 
-using namespace InferenceEngine;
-
 BaseDetection::BaseDetection(const std::string &topoName,
                              const std::string &pathToModel,
                              const std::string &deviceForInference,
@@ -41,7 +39,7 @@ BaseDetection::BaseDetection(const std::string &topoName,
 
 BaseDetection::~BaseDetection() {}
 
-ExecutableNetwork* BaseDetection::operator ->() {
+InferenceEngine::ExecutableNetwork* BaseDetection::operator ->() {
     return &net;
 }
 
@@ -57,7 +55,7 @@ void BaseDetection::submitRequest() {
 void BaseDetection::wait() {
     if (!enabled()|| !request || !isAsync)
         return;
-    request->Wait(InferRequest::WaitMode::RESULT_READY);
+    request->Wait(InferenceEngine::InferRequest::WaitMode::RESULT_READY);
 }
 
 bool BaseDetection::enabled() const  {
@@ -101,14 +99,14 @@ void FaceDetection::enqueue(const cv::Mat &frame) {
     width = static_cast<float>(frame.cols);
     height = static_cast<float>(frame.rows);
 
-    Blob::Ptr  inputBlob = request->GetBlob(input);
+    InferenceEngine::Blob::Ptr  inputBlob = request->GetBlob(input);
 
     matU8ToBlob<uint8_t>(frame, inputBlob);
 
     enquedFrames = 1;
 }
 
-CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
+InferenceEngine::CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     /** Read network model **/
     auto network = ie.ReadNetwork(pathToModel);
     /** Set batch size to 1 **/
@@ -116,25 +114,25 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check inputs -------------------------------------------------------------
-    InputsDataMap inputInfo(network.getInputsInfo());
+    InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Face Detection network should have only one input");
     }
-    InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
-    inputInfoFirst->setPrecision(Precision::U8);
+    InferenceEngine::InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
+    inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
 
-    const SizeVector inputDims = inputInfoFirst->getTensorDesc().getDims();
+    const InferenceEngine::SizeVector inputDims = inputInfoFirst->getTensorDesc().getDims();
     network_input_height = inputDims[2];
     network_input_width = inputDims[3];
 
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
-    OutputsDataMap outputInfo(network.getOutputsInfo());
+    InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
     if (outputInfo.size() == 1) {
-        DataPtr& _output = outputInfo.begin()->second;
+        InferenceEngine::DataPtr& _output = outputInfo.begin()->second;
         output = outputInfo.begin()->first;
-        const SizeVector outputDims = _output->getTensorDesc().getDims();
+        const InferenceEngine::SizeVector outputDims = _output->getTensorDesc().getDims();
         maxProposalCount = outputDims[2];
         objectSize = outputDims[3];
         if (objectSize != 7) {
@@ -144,16 +142,16 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
             throw std::logic_error("Face Detection network output should have 4 dimentions, but had " +
                                    std::to_string(outputDims.size()));
         }
-        _output->setPrecision(Precision::FP32);
+        _output->setPrecision(InferenceEngine::Precision::FP32);
     } else {
         for (const auto& outputLayer: outputInfo) {
-            const SizeVector outputDims = outputLayer.second->getTensorDesc().getDims();
+            const InferenceEngine::SizeVector outputDims = outputLayer.second->getTensorDesc().getDims();
             if (outputDims.size() == 2 && outputDims.back() == 5) {
                 output = outputLayer.first;
                 maxProposalCount = outputDims[0];
                 objectSize = outputDims.back();
-                outputLayer.second->setPrecision(Precision::FP32);
-            } else if (outputDims.size() == 1 && outputLayer.second->getPrecision() == Precision::I32) {
+                outputLayer.second->setPrecision(InferenceEngine::Precision::FP32);
+            } else if (outputDims.size() == 1 && outputLayer.second->getPrecision() == InferenceEngine::Precision::I32) {
                 labels_output = outputLayer.first;
             }
         }
@@ -172,10 +170,12 @@ void FaceDetection::fetchResults() {
     results.clear();
     if (resultsFetched) return;
     resultsFetched = true;
-    LockedMemory<const void> outputMapped = as<MemoryBlob>(request->GetBlob(output))->rmap();
+    InferenceEngine::LockedMemory<const void> outputMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(request->GetBlob(output))->rmap();
     const float *detections = outputMapped.as<float *>();
     if (!labels_output.empty()) {
-        LockedMemory<const void> labelsMapped = as<MemoryBlob>(request->GetBlob(labels_output))->rmap();
+        InferenceEngine::LockedMemory<const void> labelsMapped =
+            InferenceEngine::as<InferenceEngine::MemoryBlob>(request->GetBlob(labels_output))->rmap();
         const int32_t *labels = labelsMapped.as<int32_t *>();
 
         for (int i = 0; i < maxProposalCount && objectSize == 5; i++) {
@@ -299,7 +299,7 @@ void AntispoofingClassifier::enqueue(const cv::Mat& face) {
         request = std::make_shared<InferenceEngine::InferRequest>(net.CreateInferRequest());
     }
 
-    Blob::Ptr  inputBlob = request->GetBlob(input);
+    InferenceEngine::Blob::Ptr  inputBlob = request->GetBlob(input);
 
     matU8ToBlob<uint8_t>(face, inputBlob, enquedFaces);
 
@@ -307,8 +307,9 @@ void AntispoofingClassifier::enqueue(const cv::Mat& face) {
 }
 
 float AntispoofingClassifier::operator[] (int idx) const {
-    Blob::Ptr  ProbBlob = request->GetBlob(prob_output);
-    LockedMemory<const void> ProbBlobMapped = as<MemoryBlob>(ProbBlob)->rmap();
+    InferenceEngine::Blob::Ptr  ProbBlob = request->GetBlob(prob_output);
+    InferenceEngine::LockedMemory<const void> ProbBlobMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(ProbBlob)->rmap();
     // use prediction for real face only
     float r = ProbBlobMapped.as<float*>()[2 * idx] * 100;
     if (doRawOutputMessages) {
@@ -318,7 +319,7 @@ float AntispoofingClassifier::operator[] (int idx) const {
     return r;
 }
 
-CNNNetwork AntispoofingClassifier::read(const InferenceEngine::Core& ie) {
+InferenceEngine::CNNNetwork AntispoofingClassifier::read(const InferenceEngine::Core& ie) {
     // Read network
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size to be used.
@@ -326,23 +327,23 @@ CNNNetwork AntispoofingClassifier::read(const InferenceEngine::Core& ie) {
 
     // ---------------------------Check inputs -------------------------------------------------------------
     // Antispoofing Classifier network should have one input and one output
-    InputsDataMap inputInfo(network.getInputsInfo());
+    InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Antispoofing Classifier network should have only one input");
     }
-    InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-    inputInfoFirst->setPrecision(Precision::U8);
+    InferenceEngine::InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
+    inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
     input = inputInfo.begin()->first;
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
-    OutputsDataMap outputInfo(network.getOutputsInfo());
+    InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
     if (outputInfo.size() != 1) {
         throw std::logic_error("Antispoofing Classifier network should have one output layers");
     }
     auto it = outputInfo.begin();
 
-    DataPtr ptrProbOutput = (it++)->second;
+    InferenceEngine::DataPtr ptrProbOutput = (it++)->second;
 
     prob_output = ptrProbOutput->getName();
 
@@ -379,7 +380,7 @@ void AgeGenderDetection::enqueue(const cv::Mat &face) {
         request = std::make_shared<InferenceEngine::InferRequest>(net.CreateInferRequest());
     }
 
-    Blob::Ptr  inputBlob = request->GetBlob(input);
+    InferenceEngine::Blob::Ptr  inputBlob = request->GetBlob(input);
 
     matU8ToBlob<uint8_t>(face, inputBlob, enquedFaces);
 
@@ -387,11 +388,13 @@ void AgeGenderDetection::enqueue(const cv::Mat &face) {
 }
 
 AgeGenderDetection::Result AgeGenderDetection::operator[] (int idx) const {
-    Blob::Ptr  genderBlob = request->GetBlob(outputGender);
-    Blob::Ptr  ageBlob    = request->GetBlob(outputAge);
+    InferenceEngine::Blob::Ptr  genderBlob = request->GetBlob(outputGender);
+    InferenceEngine::Blob::Ptr  ageBlob    = request->GetBlob(outputAge);
 
-    LockedMemory<const void> ageBlobMapped = as<MemoryBlob>(ageBlob)->rmap();
-    LockedMemory<const void> genderBlobMapped = as<MemoryBlob>(genderBlob)->rmap();
+    InferenceEngine::LockedMemory<const void> ageBlobMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(ageBlob)->rmap();
+    InferenceEngine::LockedMemory<const void> genderBlobMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(genderBlob)->rmap();
     AgeGenderDetection::Result r = {ageBlobMapped.as<float*>()[idx] * 100,
                                     genderBlobMapped.as<float*>()[idx * 2 + 1]};
     if (doRawOutputMessages) {
@@ -401,7 +404,7 @@ AgeGenderDetection::Result AgeGenderDetection::operator[] (int idx) const {
     return r;
 }
 
-CNNNetwork AgeGenderDetection::read(const InferenceEngine::Core& ie) {
+InferenceEngine::CNNNetwork AgeGenderDetection::read(const InferenceEngine::Core& ie) {
     // Read network
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size to be used.
@@ -409,24 +412,24 @@ CNNNetwork AgeGenderDetection::read(const InferenceEngine::Core& ie) {
 
     // ---------------------------Check inputs -------------------------------------------------------------
     // Age/Gender Recognition network should have one input and two outputs
-    InputsDataMap inputInfo(network.getInputsInfo());
+    InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Age/Gender Recognition network should have only one input");
     }
-    InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-    inputInfoFirst->setPrecision(Precision::U8);
+    InferenceEngine::InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
+    inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
     input = inputInfo.begin()->first;
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
-    OutputsDataMap outputInfo(network.getOutputsInfo());
+    InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
     if (outputInfo.size() != 2) {
         throw std::logic_error("Age/Gender Recognition network should have two output layers");
     }
     auto it = outputInfo.begin();
 
-    DataPtr ptrAgeOutput = (it++)->second;
-    DataPtr ptrGenderOutput = (it++)->second;
+    InferenceEngine::DataPtr ptrAgeOutput = (it++)->second;
+    InferenceEngine::DataPtr ptrGenderOutput = (it++)->second;
 
     outputAge = ptrAgeOutput->getName();
     outputGender = ptrGenderOutput->getName();
@@ -464,7 +467,7 @@ void HeadPoseDetection::enqueue(const cv::Mat &face) {
         request = std::make_shared<InferenceEngine::InferRequest>(net.CreateInferRequest());
     }
 
-    Blob::Ptr inputBlob = request->GetBlob(input);
+    InferenceEngine::Blob::Ptr inputBlob = request->GetBlob(input);
 
     matU8ToBlob<uint8_t>(face, inputBlob, enquedFaces);
 
@@ -472,13 +475,16 @@ void HeadPoseDetection::enqueue(const cv::Mat &face) {
 }
 
 HeadPoseDetection::Results HeadPoseDetection::operator[] (int idx) const {
-    Blob::Ptr  angleR = request->GetBlob(outputAngleR);
-    Blob::Ptr  angleP = request->GetBlob(outputAngleP);
-    Blob::Ptr  angleY = request->GetBlob(outputAngleY);
+    InferenceEngine::Blob::Ptr  angleR = request->GetBlob(outputAngleR);
+    InferenceEngine::Blob::Ptr  angleP = request->GetBlob(outputAngleP);
+    InferenceEngine::Blob::Ptr  angleY = request->GetBlob(outputAngleY);
 
-    LockedMemory<const void> angleRMapped = as<MemoryBlob>(angleR)->rmap();
-    LockedMemory<const void> anglePMapped = as<MemoryBlob>(angleP)->rmap();
-    LockedMemory<const void> angleYMapped = as<MemoryBlob>(angleY)->rmap();
+    InferenceEngine::LockedMemory<const void> angleRMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(angleR)->rmap();
+    InferenceEngine::LockedMemory<const void> anglePMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(angleP)->rmap();
+    InferenceEngine::LockedMemory<const void> angleYMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(angleY)->rmap();
     HeadPoseDetection::Results r = {angleRMapped.as<float*>()[idx],
                                     anglePMapped.as<float*>()[idx],
                                     angleYMapped.as<float*>()[idx]};
@@ -492,26 +498,26 @@ HeadPoseDetection::Results HeadPoseDetection::operator[] (int idx) const {
     return r;
 }
 
-CNNNetwork HeadPoseDetection::read(const InferenceEngine::Core& ie) {
+InferenceEngine::CNNNetwork HeadPoseDetection::read(const InferenceEngine::Core& ie) {
     // Read network model
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size
     network.setBatchSize(maxBatch);
 
     // ---------------------------Check inputs -------------------------------------------------------------
-    InputsDataMap inputInfo(network.getInputsInfo());
+    InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Head Pose Estimation network should have only one input");
     }
-    InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-    inputInfoFirst->setPrecision(Precision::U8);
+    InferenceEngine::InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
+    inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
     input = inputInfo.begin()->first;
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
-    OutputsDataMap outputInfo(network.getOutputsInfo());
+    InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
     for (auto& output : outputInfo) {
-        output.second->setPrecision(Precision::FP32);
+        output.second->setPrecision(InferenceEngine::Precision::FP32);
     }
     for (const std::string& outName : {outputAngleR, outputAngleP, outputAngleY}) {
         if (outputInfo.find(outName) == outputInfo.end()) {
@@ -551,7 +557,7 @@ void EmotionsDetection::enqueue(const cv::Mat &face) {
         request = std::make_shared<InferenceEngine::InferRequest>(net.CreateInferRequest());
     }
 
-    Blob::Ptr inputBlob = request->GetBlob(input);
+    InferenceEngine::Blob::Ptr inputBlob = request->GetBlob(input);
 
     matU8ToBlob<uint8_t>(face, inputBlob, enquedFaces);
 
@@ -561,7 +567,7 @@ void EmotionsDetection::enqueue(const cv::Mat &face) {
 std::map<std::string, float> EmotionsDetection::operator[] (int idx) const {
     auto emotionsVecSize = emotionsVec.size();
 
-    Blob::Ptr emotionsBlob = request->GetBlob(outputEmotions);
+    InferenceEngine::Blob::Ptr emotionsBlob = request->GetBlob(outputEmotions);
 
     /* emotions vector must have the same size as number of channels
      * in model output. Default output format is NCHW, so index 1 is checked */
@@ -573,7 +579,8 @@ std::map<std::string, float> EmotionsDetection::operator[] (int idx) const {
                                std::to_string(emotionsVec.size()) + ")");
     }
 
-    LockedMemory<const void> emotionsBlobMapped = as<MemoryBlob>(emotionsBlob)->rmap();
+    InferenceEngine::LockedMemory<const void> emotionsBlobMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(emotionsBlob)->rmap();
     auto emotionsValues = emotionsBlobMapped.as<float *>();
     auto outputIdxPos = emotionsValues + idx * emotionsVecSize;
     std::map<std::string, float> emotions;
@@ -598,7 +605,7 @@ std::map<std::string, float> EmotionsDetection::operator[] (int idx) const {
     return emotions;
 }
 
-CNNNetwork EmotionsDetection::read(const InferenceEngine::Core& ie) {
+InferenceEngine::CNNNetwork EmotionsDetection::read(const InferenceEngine::Core& ie) {
     // Read network model
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size
@@ -612,7 +619,7 @@ CNNNetwork EmotionsDetection::read(const InferenceEngine::Core& ie) {
         throw std::logic_error("Emotions Recognition network should have only one input");
     }
     auto& inputInfoFirst = inputInfo.begin()->second;
-    inputInfoFirst->setPrecision(Precision::U8);
+    inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
     input = inputInfo.begin()->first;
     // -----------------------------------------------------------------------------------------------------
 
@@ -622,7 +629,7 @@ CNNNetwork EmotionsDetection::read(const InferenceEngine::Core& ie) {
         throw std::logic_error("Emotions Recognition network should have one output layer");
     }
     for (auto& output : outputInfo) {
-        output.second->setPrecision(Precision::FP32);
+        output.second->setPrecision(InferenceEngine::Precision::FP32);
     }
 
     outputEmotions = outputInfo.begin()->first;
@@ -660,7 +667,7 @@ void FacialLandmarksDetection::enqueue(const cv::Mat &face) {
         request = std::make_shared<InferenceEngine::InferRequest>(net.CreateInferRequest());
     }
 
-    Blob::Ptr inputBlob = request->GetBlob(input);
+    InferenceEngine::Blob::Ptr inputBlob = request->GetBlob(input);
 
     matU8ToBlob<uint8_t>(face, inputBlob, enquedFaces);
 
@@ -672,8 +679,8 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
 
     auto landmarksBlob = request->GetBlob(outputFacialLandmarksBlobName);
     auto n_lm = getTensorChannels(landmarksBlob->getTensorDesc());
-    LockedMemory<const void> facialLandmarksBlobMapped =
-        as<MemoryBlob>(request->GetBlob(outputFacialLandmarksBlobName))->rmap();
+    InferenceEngine::LockedMemory<const void> facialLandmarksBlobMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(request->GetBlob(outputFacialLandmarksBlobName))->rmap();
     const float *normed_coordinates = facialLandmarksBlobMapped.as<float *>();
 
     if (doRawOutputMessages) {
@@ -697,32 +704,32 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
     return normedLandmarks;
 }
 
-CNNNetwork FacialLandmarksDetection::read(const InferenceEngine::Core& ie) {
+InferenceEngine::CNNNetwork FacialLandmarksDetection::read(const InferenceEngine::Core& ie) {
     // Read network model
     auto network = ie.ReadNetwork(pathToModel);
     // Set maximum batch size
     network.setBatchSize(maxBatch);
 
     // ---------------------------Check inputs -------------------------------------------------------------
-    InputsDataMap inputInfo(network.getInputsInfo());
+    InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Facial Landmarks Estimation network should have only one input");
     }
-    InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-    inputInfoFirst->setPrecision(Precision::U8);
+    InferenceEngine::InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
+    inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
     input = inputInfo.begin()->first;
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
-    OutputsDataMap outputInfo(network.getOutputsInfo());
+    InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
     const std::string outName = outputInfo.begin()->first;
     if (outName != outputFacialLandmarksBlobName) {
         throw std::logic_error("Facial Landmarks Estimation network output layer unknown: " + outName
                                + ", should be " + outputFacialLandmarksBlobName);
     }
-    Data& data = *outputInfo.begin()->second;
-    data.setPrecision(Precision::FP32);
-    const SizeVector& outSizeVector = data.getTensorDesc().getDims();
+    InferenceEngine::Data& data = *outputInfo.begin()->second;
+    data.setPrecision(InferenceEngine::Precision::FP32);
+    const InferenceEngine::SizeVector& outSizeVector = data.getTensorDesc().getDims();
     if (outSizeVector.size() != 2 && outSizeVector.back() != 70) {
         throw std::logic_error("Facial Landmarks Estimation network output layer should have 2 dimensions and 70 as"
                                " the last dimension");
@@ -743,7 +750,7 @@ void Load::into(InferenceEngine::Core & ie, const std::string & deviceName, bool
                                   deviceName.find("GPU") != std::string::npos;
 
         if (enable_dynamic_batch && isPossibleDynBatch) {
-            config[PluginConfigParams::KEY_DYN_BATCH_ENABLED] = PluginConfigParams::YES;
+            config[InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED] = InferenceEngine::PluginConfigParams::YES;
         }
 
         detector.net = ie.LoadNetwork(detector.read(ie), deviceName, config);
