@@ -39,15 +39,15 @@ int main(int argc, char** argv) {
     }
 
     slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
-    Core ie;
+    InferenceEngine::Core ie;
 
     InferenceEngine::CNNNetwork net = ie.ReadNetwork(FLAGS_m);
     net.getInputsInfo().begin()->second->setLayout(InferenceEngine::Layout::NHWC);
 
-    ExecutableNetwork execNet = ie.LoadNetwork(net, FLAGS_d);
+    InferenceEngine::ExecutableNetwork execNet = ie.LoadNetwork(net, FLAGS_d);
     logExecNetworkInfo(execNet, FLAGS_m, FLAGS_d);
 
-    InferRequest infReq = execNet.CreateInferRequest();
+    InferenceEngine::InferRequest infReq = execNet.CreateInferRequest();
 
     // Hybrid-CS-Model-MRI/Data/sampling_mask_20perc.npy
     MRIData mri;
