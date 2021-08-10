@@ -1043,6 +1043,13 @@ PYTHON_DEMOS = [
             ModelFileArg('quartznet-15x5-en', 'quartznet.onnx'))
     )),
 
+    PythonDemo(name='speech_recognition_wav2vec_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
+        single_option_cases('-m',
+            ModelArg('wav2vec2-base'),
+            ModelFileArg('wav2vec2-base', 'wav2vec2-base.onnx'))
+    )),
+
     PythonDemo(name='text_spotting_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None, '--delay': '1', **MONITORS,
                           '-i': DataPatternArg('text-detection')}),
