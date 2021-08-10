@@ -289,7 +289,7 @@ datasets:
     postprocessing:
       - type: normalize_landmarks_points
 
-  - name: face_98_landmarks_db
+  - name: face_landmarks_98_db
     data_source: 98_landmarks
     annotation_conversion:
       converter: coco_facial_landmarks

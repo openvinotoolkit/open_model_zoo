@@ -8,7 +8,7 @@ models:
           output_blob: 3851
 
     datasets:
-      - name: face_98_landmarks_db
+      - name: face_landmarks_98_db
 
         preprocessing:
 

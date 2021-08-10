@@ -8,7 +8,7 @@ The landmarks contain 98 keypoints.
 
 ## Example
 
-![](./assets/face-98-landmarks-detection-0001_1.jpg)
+![](./assets/face-landmarks-98-detection-0001_1.jpg)
 
 ## Specification
 
