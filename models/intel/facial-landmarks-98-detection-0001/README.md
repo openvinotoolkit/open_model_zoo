@@ -1,8 +1,8 @@
-# face-landmarks-98-detection-0001
+# facial-landmarks-98-detection-0001
 
 ## Use Case and High-Level Description
 
-This is a 2D face landmarks detection network based on the HRNet approach.
+This is a 2D facial landmarks detection network based on the HRNet approach.
 For face in an image, the network detects landmarks (look at image below).
 The landmarks contain 98 keypoints.
 
@@ -12,7 +12,7 @@ Network is trained and validated on the custom dataset based on WiderFace and VG
 
 ## Example
 
-![](./assets/face-landmarks-98-detection-0001_1.jpg)
+![](./assets/facial-landmarks-98-detection-0001_1.jpg)
 
 ## Specification
 

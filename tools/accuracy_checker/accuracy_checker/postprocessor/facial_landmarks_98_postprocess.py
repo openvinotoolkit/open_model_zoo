@@ -17,14 +17,14 @@ limitations under the License.
 import numpy as np
 import cv2
 from ..postprocessor.postprocessor import Postprocessor
-from ..representation import FaceLandmarksHeatMapAnnotation, FaceLandmarksHeatMapPrediction
+from ..representation import FacialLandmarksHeatMapAnnotation, FacialLandmarksHeatMapPrediction
 
 
 class Heatmap2Keypoints(Postprocessor):
     __provider__ = 'heatmap2keypoints'
 
-    annotation_types = (FaceLandmarksHeatMapAnnotation, )
-    prediction_types = (FaceLandmarksHeatMapPrediction, )
+    annotation_types = (FacialLandmarksHeatMapAnnotation, )
+    prediction_types = (FacialLandmarksHeatMapPrediction, )
 
     @classmethod
     def parameters(cls):

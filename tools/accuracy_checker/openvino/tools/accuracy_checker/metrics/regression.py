@@ -23,8 +23,8 @@ import numpy as np
 from ..representation import (
     RegressionAnnotation,
     RegressionPrediction,
-    FaceLandmarksHeatMapAnnotation,
-    FaceLandmarksHeatMapPrediction,
+    FacialLandmarksHeatMapAnnotation,
+    FacialLandmarksHeatMapPrediction,
     FacialLandmarksAnnotation,
     FacialLandmarksPrediction,
     FacialLandmarks3DAnnotation,
@@ -382,8 +382,8 @@ class RelativeL2Error(BaseRegressionMetric):
 class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
     __provider__ = 'per_point_normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation, FaceLandmarksHeatMapAnnotation)
-    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FaceLandmarksHeatMapAnnotation)
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FacialLandmarksHeatMapAnnotation)
 
     def configure(self):
         self.meta.update({
@@ -428,8 +428,8 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
     __provider__ = 'normed_error'
 
-    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation, FaceLandmarksHeatMapAnnotation)
-    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FaceLandmarksHeatMapPrediction)
+    annotation_types = (FacialLandmarksAnnotation, FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
+    prediction_types = (FacialLandmarksPrediction, FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction)
 
     @classmethod
     def parameters(cls):
@@ -503,8 +503,8 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
 
 class NormalizedMeanError(PerImageEvaluationMetric):
     __provider__ = 'nme'
-    annotation_types = (FacialLandmarks3DAnnotation, FaceLandmarksHeatMapAnnotation)
-    prediction_types = (FacialLandmarks3DPrediction, FaceLandmarksHeatMapPrediction)
+    annotation_types = (FacialLandmarks3DAnnotation, FacialLandmarksHeatMapAnnotation)
+    prediction_types = (FacialLandmarks3DPrediction, FacialLandmarksHeatMapPrediction)
 
     @classmethod
     def parameters(cls):

@@ -18,7 +18,7 @@ import numpy as np
 from .base_representation import BaseRepresentation
 
 
-class FaceLandmarksHeatMapRepresentation(BaseRepresentation):
+class FacialLandmarksHeatMapRepresentation(BaseRepresentation):
     def __init__(self, identifier='', x_values=None, y_values=None, heatmap=None):
         super().__init__(identifier)
         self.x_values = x_values if np.size(x_values) > 0 else []
@@ -29,13 +29,13 @@ class FaceLandmarksHeatMapRepresentation(BaseRepresentation):
     def size(self):
         return len(self.x_values)
 
-class FaceLandmarksHeatMapAnnotation(FaceLandmarksHeatMapRepresentation):
+class FacialLandmarksHeatMapAnnotation(FacialLandmarksHeatMapRepresentation):
     def normalization_coef(self, is_2d=False):
         min_x, max_x = np.min(self.x_values), np.max(self.x_values)
         min_y, max_y = np.min(self.y_values), np.max(self.y_values)
         return np.sqrt((max_x - min_x) ** 2 + (max_y - min_y) ** 2)
 
-class FaceLandmarksHeatMapPrediction(FaceLandmarksHeatMapRepresentation):
+class FacialLandmarksHeatMapPrediction(FacialLandmarksHeatMapRepresentation):
 
     def to_annotation(self, **kwargs):
-        return FaceLandmarksHeatMapAnnotation(self.identifier, self.x_values, self.y_values)
+        return FacialLandmarksHeatMapPrediction(self.identifier, self.x_values, self.y_values)

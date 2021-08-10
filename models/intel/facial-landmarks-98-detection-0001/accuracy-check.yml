@@ -1,5 +1,5 @@
 models:
-  - name: face-landmarks-98-detection-0001
+  - name: facial-landmarks-98-detection-0001
 
     launchers:
       - framework: dlsdk
@@ -8,7 +8,7 @@ models:
           output_blob: 3851
 
     datasets:
-      - name: face_landmarks_98_db
+      - name: facial_landmarks_98_db
 
         preprocessing:
 
