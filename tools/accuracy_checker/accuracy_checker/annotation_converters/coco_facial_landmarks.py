@@ -16,13 +16,13 @@ limitations under the License.
 import json
 import numpy as np
 from .format_converter import FileBasedAnnotationConverter, ConverterReturn
-from ..representation import FaceLandmarksHeatMapAnnotation
+from ..representation import FacialLandmarksHeatMapAnnotation
 from ..config import PathField
 
 
 class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
     __provider__ = 'coco_facial_landmarks'
-    annotation_types = (FaceLandmarksHeatMapAnnotation, )
+    annotation_types = (FacialLandmarksHeatMapAnnotation, )
 
     @classmethod
     def parameters(cls):
@@ -62,7 +62,7 @@ class COCOFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
             bbox = ann["bbox"]
             keypoints = np.array(ann["keypoints"]).reshape(-1, 3)
             landmarks_x, landmarks_y = self.get_landmarks(keypoints, num_landmarks)
-            landmarks_annotation = FaceLandmarksHeatMapAnnotation(identifier,
+            landmarks_annotation = FacialLandmarksHeatMapAnnotation(identifier,
                                                                   np.array(landmarks_x),
                                                                   np.array(landmarks_y))
             landmarks_annotation.metadata['rect'] = (bbox[0], bbox[1], bbox[0] + bbox[2], bbox[1] + bbox[3])
