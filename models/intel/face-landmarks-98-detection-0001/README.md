@@ -6,6 +6,10 @@ This is a 2D face landmarks detection network based on the HRNet approach.
 For face in an image, the network detects landmarks (look at image below).
 The landmarks contain 98 keypoints.
 
+## Dataset (training and validation) - Internal
+
+Network is trained and validated on the custom dataset based on WiderFace and VGG2 subsets.
+
 ## Example
 
 ![](./assets/face-landmarks-98-detection-0001_1.jpg)
