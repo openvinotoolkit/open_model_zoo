@@ -293,6 +293,9 @@ NATIVE_DEMOS = [
             TestCase(options={'-at': 'faceboxes',
                               '-m': ModelArg('faceboxes-pytorch')}
             ),
+            TestCase(options={'-at': 'retinaface-pytorch',
+                              '-m': ModelArg('retinaface-resnet50-pytorch')}
+            ),
             *combine_cases(
                 TestCase(options={'-at': 'ssd'}),
                 single_option_cases('-m',

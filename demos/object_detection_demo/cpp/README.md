@@ -148,7 +148,7 @@ object_detection_demo [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -at "<type>"              Required. Architecture type: centernet, faceboxes, retinaface, ssd or yolo
+    -at "<type>"              Required. Architecture type: centernet, faceboxes, retinaface, retinaface-pytorch, ssd or yolo
     -i                        Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -m "<path>"               Required. Path to an .xml file with a trained model.
     -o "<path>"               Optional. Name of the output file(s) to save.
