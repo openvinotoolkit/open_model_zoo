@@ -47,8 +47,10 @@ class PersonDetector(IEModel):
 
         return in_frame, initial_h, initial_w, scale_h, scale_w
 
-    def _process_output(self, result, initial_h, initial_w, scale_h, scale_w, ):
+    def _process_output(self, result):
         """Converts network output to the internal format"""
+
+        scale_h, scale_w = self.last_scales
 
         if result.shape[-1] == 5:  # format: [xmin, ymin, xmax, ymax, conf]
             return np.array([[scale_w, scale_h, scale_w, scale_h, 1.0]]) * result
@@ -78,19 +80,8 @@ class PersonDetector(IEModel):
         if result is None:
             return None
 
-        initial_h, initial_w = self.last_sizes
         scale_h, scale_w = self.last_scales
 
-        out = self._process_output(result, initial_h, initial_w, scale_h, scale_w)
-
-        return out
-
-
-    def __call__(self, frame):
-        """Runs model on the specified input"""
-
-        in_frame, initial_h, initial_w, scale_h, scale_w = self._prepare_frame(frame)
-        result = self.infer(in_frame)
-        out = self._process_output(result, initial_h, initial_w, scale_h, scale_w)
+        out = self._process_output(result)
 
         return out
