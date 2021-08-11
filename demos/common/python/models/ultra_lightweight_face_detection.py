@@ -15,29 +15,22 @@
 """
 import numpy as np
 
-from .model import Model
-from .utils import Detection, resize_image, nms, clip_detections
+from .detection_model import DetectionModel
+from .utils import Detection, nms
 
 
-class UltraLightweightFaceDetection(Model):
-    def __init__(self, ie, model_path, threshold=0.5):
-        super().__init__(ie, model_path)
-
-        assert len(self.net.input_info) == 1, "Expected 1 input blob"
-        self.image_blob_name = next(iter(self.net.input_info))
-
-        assert len(self.net.outputs) == 2, "Expected 2 output blobs"
-        self.bboxes_blob_name, self.scores_blob_name = self._parse_outputs()
+class UltraLightweightFaceDetection(DetectionModel):
+    def __init__(self, ie, model_path, input_transform=None, resize_type='default', 
+                 labels=None, threshold=0.5, iou_threshold=0.5):
+        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type, 
+                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
 
         self.labels = ['Face']
 
-        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
-        assert self.c == 3, "Expected 3-channel input"
+        assert len(self.net.outputs) == 2, "Expected 2 output blobs"
+        self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
 
-        self.confidence_threshold = threshold
-        self.nms_threshold = 0.5
-
-    def _parse_outputs(self):
+    def _get_outputs(self):
         bboxes_blob_name = None
         scores_blob_name = None
         for name, layer in self.net.outputs.items():
@@ -52,37 +45,18 @@ class UltraLightweightFaceDetection(Model):
             "Expected the same dimension for boxes and scores"
         return bboxes_blob_name, scores_blob_name
 
-    def preprocess(self, inputs):
-        image = inputs
-
-        resized_image = resize_image(image, (self.w, self.h))
-        meta = {'original_shape': image.shape,
-                'resized_shape': resized_image.shape}
-        resized_image = self.input_transform(resized_image)
-        resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
-
-        dict_inputs = {self.image_blob_name: resized_image}
-        return dict_inputs, meta
-
-    def postprocess(self, outputs, meta):
+    def _parse_outputs(self, outputs, meta):
         boxes = outputs[self.bboxes_blob_name][0]
         scores = outputs[self.scores_blob_name][0]
 
         score = np.transpose(scores)[1]
 
-        mask = score > self.confidence_threshold
+        mask = score > self.threshold
         filtered_boxes, filtered_score = boxes[mask, :], score[mask]
 
         x_mins, y_mins, x_maxs, y_maxs = filtered_boxes.T
 
-        keep = nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.nms_threshold)
+        keep = nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.iou_threshold)
 
         filtered_score = filtered_score[keep]
-        x_mins = x_mins[keep] * meta['original_shape'][1]
-        y_mins = y_mins[keep] * meta['original_shape'][0]
-        x_maxs = x_maxs[keep] * meta['original_shape'][1]
-        y_maxs = y_maxs[keep] * meta['original_shape'][0]
-
-        detections = [Detection(*det, 0) for det in zip(x_mins, y_mins, x_maxs, y_maxs, filtered_score)]
-        return clip_detections(detections, meta['original_shape'])
+        return [Detection(*det, 0) for det in zip(x_mins, y_mins, x_maxs, y_maxs, filtered_score)]

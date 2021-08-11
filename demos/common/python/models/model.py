@@ -22,6 +22,8 @@ class Model:
     def __init__(self, ie, model_path):
         self.logger = log.getLogger()
         self.net = ie.read_network(model_path)
+        self.inputs = self.net.input_info
+        self.outputs = self.net.outputs
         self.set_batch_size(1)
         self.input_transform = InputTransform()
 

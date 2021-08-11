@@ -15,26 +15,34 @@
 """
 import numpy as np
 
-from .model import Model
-from .utils import Detection, resize_image, load_labels, clip_detections
+from .detection_model import DetectionModel
+from .utils import Detection
 
 
-class SSD(Model):
-    def __init__(self, ie, model_path, labels=None,
-        keep_aspect_ratio_resize=False, threshold=0.5):
-        super().__init__(ie, model_path)
-
-        self.keep_aspect_ratio_resize = keep_aspect_ratio_resize
-        if isinstance(labels, (list, tuple)):
-            self.labels = labels
-        else:
-            self.labels = load_labels(labels) if labels else None
-
-        self.threshold = threshold
-        self.image_blob_name, self.image_info_blob_name = self._get_inputs()
-        self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
+class SSD(DetectionModel):
+    def __init__(self, ie, model_path, input_transform=None, resize_type='default', 
+                 labels=None, threshold=0.5, iou_threshold=0.5):
+        print(resize_type)
+        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type, 
+                         labels=labels, threshold=threshold, iou_threshold=iou_threshold)
+        print(self.resize_type)
+        
+        if len(self.inputs) != 1:
+            self.image_info_blob_name = self._get_image_info_input()
 
         self.output_parser = self._get_output_parser(self.net, self.image_blob_name)
+
+    def _get_image_info_input(self):
+        image_info_blob_name = None
+        for blob_name, blob in self.net.input_info.items():
+            if len(blob.input_data.shape) == 2:
+                if not image_info_blob_name:
+                    image_info_blob_name = blob_name
+                else:
+                    raise RuntimeError('Failed to identify the input for image info: more than one 2D input layer found')
+        if image_info_blob_name is None:
+            raise RuntimeError('Failed to identify the input for the image info: no 2D input layer found')
+        return  image_info_blob_name
 
     def _get_inputs(self):
         image_blob_name = None
@@ -73,40 +81,13 @@ class SSD(Model):
         except ValueError:
             pass
         raise RuntimeError('Unsupported model outputs')
-
-    def preprocess(self, inputs):
-        image = inputs
-
-        resized_image = resize_image(image, (self.w, self.h), self.keep_aspect_ratio_resize)
-        meta = {'original_shape': image.shape,
-                'resized_shape': resized_image.shape}
-
-        h, w = resized_image.shape[:2]
-        if h != self.h or w != self.w:
-            resized_image = np.pad(resized_image, ((0, self.h - h), (0, self.w - w), (0, 0)),
-                                   mode='constant', constant_values=0)
-        resized_image = self.input_transform(resized_image)
-        resized_image = resized_image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        resized_image = resized_image.reshape((self.n, self.c, self.h, self.w))
-
-        dict_inputs = {self.image_blob_name: resized_image}
-        if self.image_info_blob_name:
-            dict_inputs[self.image_info_blob_name] = [self.h, self.w, 1]
-        return dict_inputs, meta
-
-    def postprocess(self, outputs, meta):
+    
+    def _parse_outputs(self, outputs, meta):
         detections = self.output_parser(outputs)
+
         detections = [d for d in detections if d.score > self.threshold]
-        orginal_image_shape = meta['original_shape']
-        resized_image_shape = meta['resized_shape']
-        scale_x = self.w / resized_image_shape[1] * orginal_image_shape[1]
-        scale_y = self.h / resized_image_shape[0] * orginal_image_shape[0]
-        for detection in detections:
-            detection.xmin *= scale_x
-            detection.xmax *= scale_x
-            detection.ymin *= scale_y
-            detection.ymax *= scale_y
-        return clip_detections(detections, orginal_image_shape)
+
+        return detections
 
 
 def find_layer_by_name(name, layers):

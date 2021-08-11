@@ -113,6 +113,18 @@ def resize_image(image, size, keep_aspect_ratio=False):
     return resized_frame
 
 
+def resize_image_with_aspect(image, size):
+    return resize_image(image, size, keep_aspect_ratio=True)
+
+
+def pad_image(image, size):
+    h, w = image.shape[:2]
+    if h != size[1] or w != size[0]:
+        image = np.pad(image, ((0, size[1] - h), (0, size[0] - w), (0, 0)),
+                               mode='constant', constant_values=0)
+    return image
+
+
 def resize_image_letterbox(image, size):
     ih, iw = image.shape[0:2]
     w, h = size
