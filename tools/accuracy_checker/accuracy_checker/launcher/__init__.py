@@ -62,6 +62,8 @@ except ImportError as import_error:
 
 from .opencv_launcher import OpenCVLauncher
 
+from .gapi_launcher import GAPILauncher
+
 try:
     from .onnx_launcher import ONNXLauncher
 except ImportError as import_error:
@@ -87,6 +89,7 @@ __all__ = [
     'TFLiteLauncher',
     'DLSDKLauncher',
     'OpenCVLauncher',
+    'GAPILauncher',
     'ONNXLauncher',
     'PyTorchLauncher',
     'PaddlePaddleLauncher',
