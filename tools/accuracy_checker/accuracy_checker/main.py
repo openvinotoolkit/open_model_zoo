@@ -423,7 +423,6 @@ def main():
             if not args.store_only:
                 metrics_results, metrics_meta = evaluator.extract_metrics_results(
                     print_results=True, ignore_results_formatting=args.ignore_result_formatting,
-                    ignore_metric_reference=args.ignore_metric_reference
                 )
                 if args.csv_result:
                     write_csv_result(
@@ -473,7 +472,6 @@ def configure_evaluator_kwargs(args):
         evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
         evaluator_kwargs['csv_result'] = args.csv_result
     evaluator_kwargs['store_only'] = args.store_only
-    evaluator_kwargs['ignore_metric_reference'] = args.ignore_metric_reference
     return evaluator_kwargs
 
 
