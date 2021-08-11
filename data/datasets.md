@@ -4,7 +4,7 @@ If you want to use prepared configs to run the Accuracy Checker tool and the Mod
 
 Each dataset description consists of the following sections:
 * instruction for downloading the dataset
-* structure of `<DATASET_DIR>` that matches the dataset definition in the existing global configuration file ([dataset_definitions.yml](./dataset_definitions.yml))
+* structure of `<DATASET_DIR>` that matches the dataset definition in the existing global configuration file (`<omz_dir>/data/dataset_definitions.yml`)
 * examples of using and presenting the dataset in the global configuration file
 
 More detailed information about using predefined configuration files you can find [here](../tools/accuracy_checker/configs/README.md).
@@ -240,7 +240,7 @@ To use this dataset with OMZ tools, make sure `<DATASET_DIR>` contains the follo
         * `images` - directory with converted images
         * `depth` -  directory with depth maps
 
-Note: If dataset is used in the first time, please set `allow_convert_data: True` in annotation conversion parameters for this dataset in `dataset_definitions.yml`  or use [convert.py](../tools/accuracy_checker/accuracy_checker/annotation_converters/convert.py) and  following command line to get converted data .
+Note: If dataset is used in the first time, please set `allow_convert_data: True` in annotation conversion parameters for this dataset in `dataset_definitions.yml`  or use `<omz_dir>/tools/accuracy_checker/accuracy_checker/annotation_converters/convert.py` and  following command line to get converted data .
 
 ```sh
 convert_annotation nyu_depth_v2 --data_dir <DATASET_DIR>/nyudepthv2/val/official --allow_convert_data True

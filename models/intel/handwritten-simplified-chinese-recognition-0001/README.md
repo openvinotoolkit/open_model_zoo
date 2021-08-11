@@ -8,7 +8,7 @@ The network is able to recognize simplified Chinese text consisting of character
 
 ## Example
 
-![](./assets/test.png) -> 的人不一了是他有为在责新中任自之我们
+![](./assets/test-2.png) -> 的人不一了是他有为在责新中任自之我们
 
 ## Specification
 
