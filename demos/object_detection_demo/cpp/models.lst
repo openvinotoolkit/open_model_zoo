@@ -4,7 +4,7 @@ ctdet_coco_dlav0_384
 ctdet_coco_dlav0_512
 # For -at faceboxes
 faceboxes-pytorch
-# For --architecture_type=retinaface-pytorch
+# For -at retinaface-pytorch
 retinaface-resnet50-pytorch
 # For -at ssd
 efficientdet-d0-tf
