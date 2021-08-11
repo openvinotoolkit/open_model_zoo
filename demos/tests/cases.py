@@ -107,7 +107,8 @@ NATIVE_DEMOS = [
             ModelArg('repvgg-a0'),
             ModelArg('repvgg-b1'),
             ModelArg('repvgg-b3'),
-            ModelArg('resnet-50-caffe2')),
+            ModelArg('resnet-50-caffe2'),
+            ModelArg('shufflenet-v2-x0.5')),
     )),
 
     CppDemo(name='crossroad_camera_demo',
