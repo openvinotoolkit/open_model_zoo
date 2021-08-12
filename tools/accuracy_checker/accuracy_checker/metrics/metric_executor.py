@@ -48,9 +48,9 @@ class MetricsExecutor:
             self.profiler_dir = dataset.config.get('_profiler_log_dir')
             self.profiler.set_dataset_meta(self._dataset.metadata)
 
-
         self.metrics = []
         self.need_store_predictions = False
+        self._metric_names = set()
         for metric_config_entry in metrics_config:
             self.register_metric(metric_config_entry)
 
@@ -131,6 +131,12 @@ class MetricsExecutor:
         metric_config_validator.validate(metric_config_entry, type_)
 
         metric_identifier = metric_config_entry.get(identifier, metric_type)
+        if metric_identifier in self._metric_names:
+            raise ConfigError(
+                'non-unique metric identifier {}, please define metric name field with unique value'.format(
+                    metric_identifier)
+            )
+        self._metric_names.add(metric_identifier)
         annotation_source = metric_config_entry.get('annotation_source', '')
         prediction_source = metric_config_entry.get('prediction_source', '')
         metric_kwargs = {}
@@ -222,8 +228,20 @@ class MetricsExecutor:
                 )
                 return [ConfigError("Metrics are not provided", metrics, upper_level_uri)]
         errors = []
+        metric_ids = set()
         for metric_id, metric in enumerate(metrics):
             metric_uri = '{}.{}'.format(metrics_uri, metric_id)
             errors.extend(Metric.validate_config(metric, fetch_only=fetch_only, uri_prefix=metric_uri))
+            if 'type' not in metric:
+                continue
+            metric_name = metric.get('name', metric['type'])
+            if metric_name in metric_ids:
+                error = ConfigError(f'non-unique metric identifier {metric_name}, '
+                                    f'please define metric name field with unique value', metric, metric_uri
+                                    )
+                if not fetch_only:
+                    raise error
+                errors.append(error)
+            metric_ids.add(metric_name)
 
         return errors

@@ -9,7 +9,7 @@ from .segmentation_metric_profiler import SegmentationMetricProfiler
 from .object_detection_metric_profiler import DetectionProfiler
 from .instance_segmentation_metric_profiler import InstanceSegmentationProfiler
 from .base_profiler import create_profiler
-from .profiling_executor import ProfilingExecutor
+from .profiling_executor import ProfilingExecutor, write_summary_result
 
 __all__ = [
     'ClipAccuracyProfiler',
@@ -28,5 +28,6 @@ __all__ = [
     'InstanceSegmentationProfiler',
 
     'ProfilingExecutor',
-    'create_profiler'
+    'create_profiler',
+    'write_summary_result'
 ]

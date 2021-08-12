@@ -101,6 +101,31 @@ class MetricProfiler(ClassProvider):
         if self.storage:
             self.write_result()
 
+    def write_summary(self, summary):
+        if self.report_type == 'json':
+            out_path = self.out_dir / self.report_file
+            new_file = not out_path.exists()
+            if not new_file:
+                with open(str(out_path), 'r') as f:
+                    out_dict = json.load(f)
+                out_dict['summary'] = summary
+            else:
+                out_dict = {
+                    'processing_info': {
+                        'model': self.model_name,
+                        'dataset': self.dataset,
+                        'framework': self.framework,
+                        'device': self.device,
+                        'tags': self.tags
+                    },
+                    'report': list(self.storage.values()),
+                    'report_type': self.__provider__,
+                    'dataset_meta': self.dataset_meta,
+                    'summary': summary
+                }
+            with open(str(out_path), 'w') as f:
+                json.dump(out_dict, f)
+
     def reset(self):
         self._reset_storage()
 
