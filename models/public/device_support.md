@@ -131,6 +131,7 @@
 | se-resnet-50 | YES | YES | YES |
 | se-resnext-101 | YES | YES | YES |
 | se-resnext-50 | YES | YES | YES |
+| shufflenet-v2-x0.5 | YES | YES |    |
 | shufflenet-v2-x1.0 | YES | YES | YES |
 | single-human-pose-estimation-0001 | YES | YES | YES |
 | Sphereface | YES | YES | YES |
