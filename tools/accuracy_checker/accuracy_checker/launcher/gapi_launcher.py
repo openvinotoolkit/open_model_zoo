@@ -18,7 +18,7 @@ from pathlib import Path
 import numpy as np
 
 import cv2
-from openvino.inference_engine import IECore, known_plugins
+import openvino.inference_engine as ie
 
 from ..config import PathField, StringField, ConfigError, ListInputsField, ListField, BoolField
 from ..logging import print_info, warning
@@ -34,6 +34,12 @@ except AttributeError:
     except AttributeError:
         def compile_args(*args):
             return list(map(cv2.GCompileArg, args))
+
+
+try:
+    from openvino.inference_engine import known_plugins
+except ImportError:
+    known_plugins = []
 
 
 class GAPILauncherConfigValidator(LauncherConfigValidator):
@@ -139,7 +145,7 @@ class GAPILauncher(Launcher):
         return GAPILauncherConfigValidator(
             uri_prefix or 'launcher.{}'.format(cls.__provider__),
             fields=cls.parameters(), delayed_model_loading=delayed_model_loading
-        ).validate(config, ie_core=IECore(), fetch_only=fetch_only)
+        ).validate(config, ie_core=ie.IECore(), fetch_only=fetch_only)
 
     def prepare_net(self):
         inputs = cv2.GInferInputs()
