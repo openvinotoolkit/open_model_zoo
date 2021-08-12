@@ -113,6 +113,7 @@ Input/output options:
                         Input frame size used by default.
   -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
                         Optional. List of monitors to show initially.
+  --only_masks          Optional. Display only masks. Could be switched by TAB key.
 
 Debug options:
   -r, --raw_output_message
@@ -145,7 +146,10 @@ Available colors files located in the `<omz_dir>/data/palettes` folder. If you w
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting images with blended segmentation mask.
+The demo uses OpenCV to display the resulting images with blended segmentation mask by default. By setting `--only_mask` option (or pressing the `TAB` key during demo running) the resulting image would contain only masks.
+
+> **NOTE**: the output file contains the same image as displayed one.
+
 The demo reports
 
 * **FPS**: average rate of video frame processing (frames per second).

@@ -76,6 +76,7 @@ Options:
     -no_show                  Optional. Don't show output.
     -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
     -u                        Optional. List of monitors to show initially.
+    -only_masks               Optional. Display only masks. Could be switched by TAB key.
 ```
 
 Running the application with the empty list of options yields an error message.
@@ -98,7 +99,9 @@ To avoid disk space overrun in case of continuous input stream, like camera, you
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting images with blended segmentation mask.
+The demo uses OpenCV to display the resulting images with blended segmentation mask by default. By setting `-only_mask` option (or pressing the `TAB` key during demo running) the resulting image would contain only masks.
+
+> **NOTE**: the output file contains the same image as displayed one.
 
 ## See Also
 
