@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Shufflenet V2 x0.5 is a light-weight classification model based on `channel split` and `channel shuffle` operations. This is Caffe\* implementation based on architecture described in paper ["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"](https://arxiv.org/abs/1807.11164). For details about implementation, check out the ["ShuffleNet_V2_pytorch_caffe"](https://github.com/miaow1988/ShuffleNet_V2_pytorch_caffe) repository. The model was pre-trained on the ImageNet dataset.
+Shufflenet V2 x0.5 is a light-weight classification model based on `channel split` and `channel shuffle` operations. This is Caffe\* implementation based on architecture described in paper ["ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design"](https://arxiv.org/abs/1807.11164). For details about implementation, check out the [repository](https://github.com/miaow1988/ShuffleNet_V2_pytorch_caffe). The model was pre-trained on the ImageNet dataset.
 
 The model input is a blob that consists of a single image of `1, 3, 224, 224` in `RGB` order.
 
