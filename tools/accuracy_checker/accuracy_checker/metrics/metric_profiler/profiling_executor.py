@@ -14,10 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import json
 from collections import OrderedDict, namedtuple
 from .base_profiler import PROFILERS_MAPPING, MetricProfiler, PROFILERS_WITH_DATA_IS_LIST
 
 PorfilerID = namedtuple('ProfilerID', ['type', 'annotation_source', 'prediction_source', 'name'])
+
+
+def write_summary_result(result, meta, out_path):
+    summary = {
+        'metric_name': result['name'], 'result': result['value'], 'metric_type': result['type'],
+        'result_scale': meta.get('scale', 100), 'result_postfix': meta.get('postfix', '%'),
+        'metric_target': meta['target']
+    }
+    with open(str(out_path), 'r') as f:
+        out_dict = json.load(f)
+
+    final_summary = out_dict.get('summary_result', {})
+    final_summary.update(summary)
+    out_dict['summary_result'] = final_summary
+
+    with open(str(out_path), 'w') as f:
+        json.dump(out_dict, f)
 
 
 class ProfilingExecutor:
@@ -30,7 +48,7 @@ class ProfilingExecutor:
         profiler = None
         for metric_types, profiler_type in PROFILERS_MAPPING.items():
             if metric_type in metric_types:
-                if profiler_type in PROFILERS_WITH_DATA_IS_LIST:
+                if profiler_type in PROFILERS_WITH_DATA_IS_LIST or self.profile_report_type == 'json':
                     profiler_id = PorfilerID(profiler_type, annotation_source, prediction_source, metric_name)
                 else:
                     profiler_id = PorfilerID(profiler_type, annotation_source, prediction_source, None)

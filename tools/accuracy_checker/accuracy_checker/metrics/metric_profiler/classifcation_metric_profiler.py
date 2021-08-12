@@ -20,16 +20,15 @@ from .base_profiler import MetricProfiler
 
 def preprocess_prediction_list(prediction_label, data_type=int):
     if np.isscalar(prediction_label):
-        pred_label = data_type(prediction_label)
+        pred_label = [data_type(prediction_label)]
     else:
         if np.shape(prediction_label):
             pred_label = (
                 prediction_label.astype(data_type).tolist()
-                if np.size(prediction_label) > 1 else data_type(prediction_label[0])
             )
         else:
             pred_label = prediction_label.astype(data_type)
-            pred_label = pred_label.tolist() if isinstance(prediction_label, type(np.array(0))) else ''
+            pred_label = [pred_label.tolist()] if isinstance(prediction_label, type(np.array(0))) else ''
     return pred_label
 
 
