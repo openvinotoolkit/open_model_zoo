@@ -38,9 +38,17 @@ protected:
         int outputHeight = 0;
 
         Region(const std::shared_ptr<ngraph::op::RegionYolo>& regionYolo);
+        Region(int classes, int coords, const std::vector<float>& anchors, const std::vector<int64_t>& masks, int outputWidth, int outputHeight);
     };
 
 public:
+    enum YoloVersion {
+        YOLO_V1V2,
+        YOLO_V3,
+        YOLO_V4,
+        YOLO_V4_TINY
+    };
+
     /// Constructor.
     /// @param modelFileName name of model to load
     /// @param confidenceThreshold - threshold to eliminate low-confidence detections.
@@ -53,8 +61,11 @@ public:
     /// during postprocessing (only one of them should stay). The default value is 0.5
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
+    /// @param rawAnchors - vector of anchors coordinates. Required for YOLOv4, for other versions it may be omitted.
+    /// @param rawMasks - vector of masks values. Required for YOLOv4, for other versions it may be omitted.
     ModelYolo(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
-        bool useAdvancedPostprocessing = true, float boxIOUThreshold = 0.5, const std::vector<std::string>& labels = std::vector<std::string>());
+        bool useAdvancedPostprocessing = true, float boxIOUThreshold = 0.5, const std::vector<std::string>& labels = std::vector<std::string>(),
+        const std::vector<float>& rawAnchors = std::vector<float>(), const std::vector<int64_t>& rawMasks = std::vector<int64_t>());
 
     std::unique_ptr<ResultBase> postprocess(InferenceResult& infResult) override;
 
@@ -71,5 +82,14 @@ protected:
     std::map<std::string, Region> regions;
     double boxIOUThreshold;
     bool useAdvancedPostprocessing;
-    bool isYoloV3;
+    YoloVersion yoloVersion;
+    const std::vector<float> presetAnchors;
+    const std::vector<int64_t> presetMasks;
+
+    static float sigmoid(float x) {
+        return 1.f / (1.f + exp(-x));
+    }
+    static float linear (float x) {
+        return x;
+    }
 };
