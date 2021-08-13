@@ -37,7 +37,6 @@ class APIntegralType(enum.Enum):
     voc_max = 'max'
 
 
-
 class BaseDetectionMetricMixin(Metric):
     @classmethod
     def parameters(cls):
