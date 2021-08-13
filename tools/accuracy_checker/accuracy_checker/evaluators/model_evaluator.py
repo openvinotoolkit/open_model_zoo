@@ -17,6 +17,7 @@ limitations under the License.
 import copy
 import pickle # nosec - disable B403:import-pickle check
 import platform
+from pathlib import Path
 
 from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
@@ -491,7 +492,9 @@ class ModelEvaluator(BaseEvaluator):
                 result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
             if evaluated_metric.profiling_file and str(evaluated_metric.profiling_file).endswith('.json'):
                 result, meta = result_presenter.extract_result(evaluated_metric)
-                write_summary_result(result, meta, self.metric_executor.profiler_dir / evaluated_metric.profiling_file)
+                write_summary_result(
+                    result, meta, Path(self.metric_executor.profiler_dir) / evaluated_metric.profiling_file
+                )
 
         return self._metrics_results
 

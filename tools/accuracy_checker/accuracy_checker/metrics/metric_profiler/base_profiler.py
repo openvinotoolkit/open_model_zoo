@@ -108,7 +108,6 @@ class MetricProfiler(ClassProvider):
             if not new_file:
                 with open(str(out_path), 'r') as f:
                     out_dict = json.load(f)
-                out_dict['summary'] = summary
             else:
                 out_dict = {
                     'processing_info': {
@@ -121,8 +120,8 @@ class MetricProfiler(ClassProvider):
                     'report': list(self.storage.values()),
                     'report_type': self.__provider__,
                     'dataset_meta': self.dataset_meta,
-                    'summary': summary
                 }
+            out_dict.update(summary)
             with open(str(out_path), 'w') as f:
                 json.dump(out_dict, f)
 
