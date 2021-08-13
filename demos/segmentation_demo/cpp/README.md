@@ -112,7 +112,7 @@ The demo reports:
   * **Rendering** — generating output image.
 
 You can use these metrics to measure application-level performance.
- **NOTE**: the output file contains the same image as displayed one.
+> **NOTE**: the output file contains the same image as displayed one.
 
 ## See Also
 
