@@ -66,7 +66,7 @@ try:
     from .gapi_launcher import GAPILauncher
 except ImportError as import_error:
     GAPILauncher = unsupported_launcher(
-        'g-apa',
+        'g-api',
         "OpenVINO isn't installed. Please, install it before using. \n{}".format(import_error.msg)
     )
 
