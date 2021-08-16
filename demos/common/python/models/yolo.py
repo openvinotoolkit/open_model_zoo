@@ -29,8 +29,8 @@ ANCHORS = {
                142.0, 110.0, 192.0, 243.0, 459.0, 401.0],
     'YOLOV4-TINY': [10.0, 14.0, 23.0, 27.0, 37.0, 58.0,
                     81.0, 82.0, 135.0, 169.0, 344.0, 319.0],
-    'YOLOF': [16, 16, 32, 32, 64, 64,
-              128, 128, 256, 256, 512, 512]
+    'YOLOF': [16.0, 16.0, 32.0, 32.0, 64.0, 64.0,
+              128.0, 128.0, 256.0, 256.0, 512.0, 512.0]
 }
 
 class YOLO(Model):
@@ -336,21 +336,6 @@ class YOLOF(YOLO):
             output_info[name] = (shape, yolo_params)
         return output_info
 
-    def postprocess(self, outputs, meta):
-        detections = []
-
-        for layer_name in self.yolo_layer_params.keys():
-            out_blob = outputs[layer_name]
-            layer_params = self.yolo_layer_params[layer_name]
-            out_blob.shape = layer_params[0]
-            detections += self._parse_yolo_region(out_blob, meta['resized_shape'], layer_params[1], self.threshold)
-
-        detections = self._filter(detections, self.iou_threshold)
-
-        detections = self._resize_detections(detections, meta['original_shape'][1::-1], meta['resized_shape'][1::-1])
-
-        return clip_detections(detections, meta['original_shape'])
-
     @staticmethod
     def _parse_yolo_region(predictions, input_size, params, threshold, multiple_labels=False):
         def sigmoid(x):
@@ -383,9 +368,10 @@ class YOLOF(YOLO):
                 n = (obj_ind - row * params.cells * params.num) % params.num
 
                 # Get relative coords
-                stride = (input_size[0] / params.cells, input_size[1] / params.cells)
-                x = x * params.anchors[2 * n] + col * stride[1]
-                y = y * params.anchors[2 * n + 1] + row * stride[0]
+                anchor_x = params.anchors[2 * n] / input_size[1]
+                anchor_y = params.anchors[2 * n + 1] / input_size[0]
+                x = x * anchor_x + col / params.cells
+                y = y * anchor_y + row / params.cells
 
                 # Value for exp is very big number in some cases so following construction is using here
                 try:
@@ -393,8 +379,8 @@ class YOLOF(YOLO):
                     height = np.exp(height)
                 except OverflowError:
                     continue
-                width = width * params.anchors[2 * n]
-                height = height * params.anchors[2 * n + 1]
+                width *= anchor_x
+                height *= anchor_y
 
                 # Define class_label and cofidence
                 label = class_idx[ind]

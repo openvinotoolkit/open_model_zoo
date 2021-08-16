@@ -89,6 +89,39 @@ class YOLOF(nn.Module):
 
 class ConfigDict(dict):
     def __init__(self, d={}):
+        if d == {}:
+            d = {
+                'MODEL': {
+                    'DARKNET': {
+                        'DEPTH': 53,
+                        'WITH_CSP': True,
+                        'NORM': "BN",
+                        'OUT_FEATURES': ["res5"],
+                        'RES5_DILATION': 2
+                    },
+                    'YOLOF': {
+                        'ENCODER': {
+                            'IN_FEATURES': ["res5"],
+                            'NUM_CHANNELS': 512,
+                            'BLOCK_MID_CHANNELS': 128,
+                            'NUM_RESIDUAL_BLOCKS': 8,
+                            'BLOCK_DILATIONS': [1, 2, 3, 4, 5, 6, 7, 8],
+                            'NORM': "BN",
+                            'ACTIVATION': "LeakyReLU"
+                        },
+                        'DECODER': {
+                            'IN_CHANNELS': 512,
+                            'NUM_CLASSES': 80,
+                            'NUM_ANCHORS': 6,
+                            'CLS_NUM_CONVS': 2,
+                            'REG_NUM_CONVS': 4,
+                            'NORM': "BN",
+                            'ACTIVATION': "LeakyReLU",
+                            'PRIOR_PROB': 0.01
+                        }
+                    }
+                }
+            }
         for k, v in d.items():
             setattr(self, k, v)
 
@@ -100,41 +133,8 @@ class ConfigDict(dict):
         super().__setattr__(name, value)
         super().__setitem__(name, value)
 
-model_parameters = {
-    'MODEL': {
-        'DARKNET': {
-            'DEPTH': 53,
-            'WITH_CSP': True,
-            'NORM': "BN",
-            'OUT_FEATURES': ["res5"],
-            'RES5_DILATION': 2
-        },
-        'YOLOF': {
-            'ENCODER': {
-                'IN_FEATURES': ["res5"],
-                'NUM_CHANNELS': 512,
-                'BLOCK_MID_CHANNELS': 128,
-                'NUM_RESIDUAL_BLOCKS': 8,
-                'BLOCK_DILATIONS': [1, 2, 3, 4, 5, 6, 7, 8],
-                'NORM': "BN",
-                'ACTIVATION': "LeakyReLU"
-            },
-            'DECODER': {
-                'IN_CHANNELS': 512,
-                'NUM_CLASSES': 80,
-                'NUM_ANCHORS': 6,
-                'CLS_NUM_CONVS': 2,
-                'REG_NUM_CONVS': 4,
-                'NORM': "BN",
-                'ACTIVATION': "LeakyReLU",
-                'PRIOR_PROB': 0.01
-            }
-        }
-    }
-}
-
 def get_model(weights):
-    cfg = ConfigDict(model_parameters)
+    cfg = ConfigDict()
     cfg.build_backbone = build_backbone
     cfg.build_encoder = build_encoder
     cfg.build_decoder = build_decoder
