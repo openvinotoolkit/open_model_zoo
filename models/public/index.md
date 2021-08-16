@@ -66,6 +66,7 @@ You can download models and convert them into Inference Engine format (\*.xml + 
 | SE-ResNet 152               | Caffe\*                            | [se-resnet-152](./se-resnet-152/README.md) | 78.506%/94.45% | 22.709 | 66.746 |
 | SE-ResNeXt 50               | Caffe\*                            | [se-resnext-50](./se-resnext-50/README.md) | 78.968%/94.63% | 8.533 | 27.526|
 | SE-ResNeXt 101              | Caffe\*                            | [se-resnext-101](./se-resnext-101/README.md) | 80.168%/95.19% | 16.054 | 48.886 |
+| Shufflenet V2 x0.5          | Caffe\*                            | [shufflenet-v2-x0.5](./shufflenet-v2-x0.5/README.md) | 58.80%/81.13% | 0.08465 | 1.363 |
 | Shufflenet V2 x1.0          | PyTorch\*                          | [shufflenet-v2-x1.0](./shufflenet-v2-x1.0/README.md) | 69.36%/88.32% | 0.2957 | 2.2705 |
 | SqueezeNet v1.0             | Caffe\*                            | [squeezenet1.0](./squeezenet1.0/README.md)| 57.684%/80.38%| 1.737 | 1.248 |
 | SqueezeNet v1.1             | Caffe\*<br>Caffe2\*                | [squeezenet1.1](./squeezenet1.1/README.md)<br>[squeezenet1.1-caffe2](./squeezenet1.1-caffe2/README.md)| 58.382%/81%<br>56.502%/79.576% | 0.785 | 1.236 |

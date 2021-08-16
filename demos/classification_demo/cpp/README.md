@@ -99,6 +99,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * se-resnet-50
 * se-resnext-101
 * se-resnext-50
+* shufflenet-v2-x0.5
 * shufflenet-v2-x1.0
 * squeezenet1.0
 * squeezenet1.1
