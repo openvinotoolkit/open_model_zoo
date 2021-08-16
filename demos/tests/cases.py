@@ -367,6 +367,9 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('person-detection-retail')}),
         *combine_cases(
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> ab78d96a8 (add key person_label and tests)
             TestCase(options={'-at': 'ssd'}),
             single_option_cases('-m_det',
                 ModelArg('person-detection-retail-0002'),
@@ -377,7 +380,11 @@ NATIVE_DEMOS = [
                 ModelArg('person-reidentification-retail-0287'),
                 ModelArg('person-reidentification-retail-0288')),
         *combine_cases(
+<<<<<<< HEAD
             TestCase(options={'-at': 'yolo', '-person_label': '0'}),
+=======
+            TestCase(options={'-at': 'yolo','-person_label':0}),
+>>>>>>> ab78d96a8 (add key person_label and tests)
             single_option_cases('-m_det',
                 ModelArg('yolo-v3-tf'))),
             single_option_cases('-m_reid',
@@ -386,7 +393,11 @@ NATIVE_DEMOS = [
                 ModelArg('person-reidentification-retail-0287'),
                 ModelArg('person-reidentification-retail-0288')),
         *combine_cases(
+<<<<<<< HEAD
             TestCase(options={'-at': 'ssd', '-person_label': '1'}),
+=======
+            TestCase(options={'-at': 'ssd','-person_label':1}),
+>>>>>>> ab78d96a8 (add key person_label and tests)
             single_option_cases('-m_det',
                 ModelArg('retinanet-tf'))),
             single_option_cases('-m_reid',
@@ -395,7 +406,11 @@ NATIVE_DEMOS = [
                 ModelArg('person-reidentification-retail-0287'),
                 ModelArg('person-reidentification-retail-0288')),
         *combine_cases(
+<<<<<<< HEAD
             TestCase(options={'-at': 'centernet', '-person_label': '0'}),
+=======
+            TestCase(options={'-at': 'centernet','-person_label':0}),
+>>>>>>> ab78d96a8 (add key person_label and tests)
             single_option_cases('-m_det',
                 ModelArg('ctdet_coco_dlav0_512'))),
             single_option_cases('-m_reid',
@@ -403,6 +418,7 @@ NATIVE_DEMOS = [
                 ModelArg('person-reidentification-retail-0286'),
                 ModelArg('person-reidentification-retail-0287'),
                 ModelArg('person-reidentification-retail-0288')),
+<<<<<<< HEAD
 =======
                 TestCase(options={'-at': 'ssd'}),
         single_option_cases('-m_det',
@@ -414,6 +430,8 @@ NATIVE_DEMOS = [
             ModelArg('person-reidentification-retail-0287'),
             ModelArg('person-reidentification-retail-0288')),
 >>>>>>> c9d021884 (solve mistakes)
+=======
+>>>>>>> ab78d96a8 (add key person_label and tests)
     )),
 
     CppDemo(name='security_barrier_camera_demo',
