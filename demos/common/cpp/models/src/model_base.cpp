@@ -46,6 +46,6 @@ InferenceEngine::ExecutableNetwork ModelBase::loadExecutableNetwork(const CnnCon
     this->cnnConfig = cnnConfig;
     auto cnnNetwork = prepareNetwork(core);
     execNetwork = core.LoadNetwork(cnnNetwork, cnnConfig.deviceName, cnnConfig.execNetworkConfig);
-    printExecNetworkInfo(execNetwork, modelFileName, cnnConfig.deviceName);
+    logExecNetworkInfo(execNetwork, modelFileName, cnnConfig.deviceName);
     return execNetwork;
 }

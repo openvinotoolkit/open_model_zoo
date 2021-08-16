@@ -6,6 +6,7 @@
 
 #include <gflags/gflags.h>
 #include <monitors/presenter.h>
+#include <utils/performance_metrics.hpp>
 #include <ie_iextension.h>
 
 #include <opencv2/gapi/render.hpp>
@@ -71,6 +72,8 @@ std::tuple<NetsFlagsPack, ArgsFlagsPack, preparation::FGFlagsPack> packDemoFlags
 
 int main(int argc, char* argv[]) {
     try {
+        PerformanceMetrics metrics;
+
         /** This demo covers 4 certain topologies and cannot be generalized **/
         if (!util::ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -244,12 +247,7 @@ int main(int argc, char* argv[]) {
         stream.setSource<custom::CustomCapSource>(cap);
 
         /** Service constants **/
-        float wait_time_ms = 0.f;
-        float work_time_ms = 0.f;
-        size_t wait_num_frames = 0;
         size_t work_num_frames = 0;
-        size_t total_num_frames = 0;
-        size_t work_time_ms_all = 0;
         const char SPACE_KEY = 32;
         const char ESC_KEY = 27;
         bool monitoring_enabled = const_params.actions_type == TOP_K ? false : true;
@@ -278,15 +276,16 @@ int main(int argc, char* argv[]) {
         /** TOP_K case starts without processing **/
         if (const_params.actions_type != TOP_K) stream.start();
 
+        bool isStart = true;
+        const auto startTime = std::chrono::steady_clock::now();
         /** Main cycle **/
-        auto started_all = std::chrono::high_resolution_clock::now();
         while (true) {
-            auto started = std::chrono::high_resolution_clock::now();
             char key = cv::waitKey(1);
             presenter.handleKey(key);
             if (key == ESC_KEY) {
                 break;
             }
+
             if (const_params.actions_type == TOP_K) {
                 if ((key == SPACE_KEY && !monitoring_enabled) ||
                     (key == SPACE_KEY && monitoring_enabled)) {
@@ -315,34 +314,37 @@ int main(int argc, char* argv[]) {
                 const auto new_height = cvRound(out_frame.rows * const_params.draw_ptr->rect_scale_y_);
                 const auto new_width = cvRound(out_frame.cols * const_params.draw_ptr->rect_scale_x_);
                 cv::resize(out_frame, out_frame, cv::Size(new_width, new_height));
-                auto elapsed = std::chrono::high_resolution_clock::now() - started;
-                wait_time_ms += std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
-                const_params.draw_ptr->DrawFPS(out_frame, 1e3f / (wait_time_ms / static_cast<float>(++wait_num_frames) + 1e-6f),
-                                               CV_RGB(0, 255, 0));
                 presenter.drawGraphs(out_frame);
+                if (isStart) {
+                    metrics.update(startTime, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                        0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                    isStart = false;
+                }
+                else {
+                    metrics.update({}, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                        0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                }
+
                 const_params.draw_ptr->Show(out_frame);
                 const_params.draw_ptr->ShowCrop();
             }
             if (const_params.actions_type == TOP_K && monitoring_enabled) {
                 /** TOP_K part. monitoring is enabled and graph is started **/
-                auto elapsed = std::chrono::high_resolution_clock::now() - started;
-                work_time_ms += std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
-                const_params.draw_ptr->DrawFPS(proc, 1e3f / (work_time_ms / static_cast<float>(++work_num_frames) + 1e-6f),
-                                               CV_RGB(255, 0, 0));
                 const_params.draw_ptr->Show(proc);
                 const_params.draw_ptr->ShowCrop(top_k);
-                total_num_frames = work_num_frames + wait_num_frames;
             } else if (const_params.actions_type != TOP_K) {
                 /** Main part. Processing is always on **/
-                auto elapsed = std::chrono::high_resolution_clock::now() - started;
-                work_time_ms += std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
-                if (!videoWriter.isOpened()) {
-                    const_params.draw_ptr->DrawFPS(proc, 1e3f / (work_time_ms / static_cast<float>(work_num_frames) + 1e-6f),
-                                                   CV_RGB(255, 0, 0));
-                }
                 presenter.drawGraphs(proc);
+                if (isStart) {
+                    metrics.update(startTime, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                        0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                    isStart = false;
+                }
+                else {
+                    metrics.update({}, proc, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX,
+                        0.65, { 200, 10, 10 }, 2, PerformanceMetrics::MetricTypes::FPS);
+                }
                 const_params.draw_ptr->Show(proc);
-                total_num_frames = work_num_frames;
             }
             if (videoWriter.isOpened()) {
                 videoWriter << proc;
@@ -352,12 +354,11 @@ int main(int argc, char* argv[]) {
                 slog::debug << stream_log << slog::endl;
             }
         }
-        auto elapsed = std::chrono::high_resolution_clock::now() - started_all;
-        work_time_ms_all += std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
         if (videoWriter.isOpened()) {
             videoWriter.release();
         };
         const_params.draw_ptr->Finalize();
+
         /** Print logs to files **/
         std::ofstream act_stat_log_stream, act_det_log_stream;
         if (!FLAGS_al.empty()) {
@@ -367,13 +368,9 @@ int main(int argc, char* argv[]) {
         }
         act_stat_log_stream.open(FLAGS_ad, std::fstream::out);
         act_stat_log_stream << stat_log << std::endl;
-        /** Results **/
-        if ( work_num_frames > 0) {
-            slog::info << "Metrics report:" << slog::endl;
-            const float mean_time_ms = work_time_ms_all / static_cast<float>(work_num_frames);
-            slog::info << "\tMean FPS: " << 1e3f / mean_time_ms << slog::endl;
-        }
-        slog::info << "\tFrames processed: " << total_num_frames << slog::endl;
+
+        slog::info << "Metrics report:" << slog::endl;
+        slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << metrics.getTotal().fps << slog::endl;
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

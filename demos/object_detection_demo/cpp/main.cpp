@@ -270,7 +270,6 @@ int main(int argc, char *argv[]) {
     try {
         PerformanceMetrics metrics;
 
-
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -408,7 +407,7 @@ int main(int argc, char *argv[]) {
             }
         } // while(keepRunning)
 
-        //// ------------ Waiting for completion of data processing and rendering the rest of results ---------
+        // ------------ Waiting for completion of data processing and rendering the rest of results ---------
         pipeline.waitForTotalCompletion();
 
         for (; framesProcessed <= frameNum; framesProcessed++) {
@@ -433,13 +432,11 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
-        metrics.printTotal();
-        printStagesLatency(cap->getMetrics().getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
+        metrics.logTotal();
+        logLatencyPerStage(cap->getMetrics().getTotal().latency, pipeline.getPreprocessMetrics().getTotal().latency,
             pipeline.getInferenceMetircs().getTotal().latency, pipeline.getPostprocessMetrics().getTotal().latency,
             renderMetrics.getTotal().latency);
-
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

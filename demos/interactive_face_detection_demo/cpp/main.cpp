@@ -63,6 +63,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
+        PerformanceMetrics metrics;
 
         // ------------------------------ Parsing and validating of input arguments --------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -140,13 +141,14 @@ int main(int argc, char *argv[]) {
         size_t id = 0;
 
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+
+        auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
         if (!frame.data) {
             throw std::runtime_error("Can't read an image from the input");
         }
 
-        const cv::Point THROUGHPUT_METRIC_POSITION{10, 30};
-        Presenter presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, {frame.cols / 4, 60});
+        Presenter presenter(FLAGS_u, 60, {frame.cols / 4, 60});
 
         Visualizer visualizer{frame.size()};
         if (!FLAGS_no_show_emotion_bar && emotionsDetector.enabled()) {
@@ -164,12 +166,14 @@ int main(int argc, char *argv[]) {
         faceDetector.enqueue(frame);
         faceDetector.submitRequest();
 
-        cv::Mat next_frame = cap->read();
-
+        auto startTimeNextFrame = std::chrono::steady_clock::now();
+        cv::Mat nextFrame = cap->read();
         while (frame.data) {
             timer.start("total");
-            cv::Mat prev_frame = std::move(frame);
-            frame = std::move(next_frame);
+            const auto startTimePrevFrame = startTime;
+            cv::Mat prevFrame = std::move(frame);
+            startTime = startTimeNextFrame;
+            frame = std::move(nextFrame);
             framesCounter++;
 
             // Retrieving face detection results for the previous frame
@@ -179,7 +183,7 @@ int main(int argc, char *argv[]) {
 
             // No valid frame to infer if previous frame is the last
             if (frame.data) {
-                if (frame.size() != prev_frame.size()) {
+                if (frame.size() != prevFrame.size()) {
                     throw std::runtime_error("Images of different size are not supported");
                 }
                 faceDetector.enqueue(frame);
@@ -189,8 +193,8 @@ int main(int argc, char *argv[]) {
             // Filling inputs of face analytics networks
             for (auto &&face : prev_detection_results) {
                 if (isFaceAnalyticsEnabled) {
-                    cv::Rect clippedRect = face.location & cv::Rect({0, 0}, prev_frame.size());
-                    cv::Mat face = prev_frame(clippedRect);
+                    cv::Rect clippedRect = face.location & cv::Rect({0, 0}, prevFrame.size());
+                    cv::Mat face = prevFrame(clippedRect);
                     ageGenderDetector.enqueue(face);
                     headPoseDetector.enqueue(face);
                     emotionsDetector.enqueue(face);
@@ -209,7 +213,8 @@ int main(int argc, char *argv[]) {
             }
 
             // Read the next frame while waiting for inference results
-            next_frame = cap->read();
+            startTimeNextFrame = std::chrono::steady_clock::now();
+            nextFrame = cap->read();
 
             if (isFaceAnalyticsEnabled) {
                 ageGenderDetector.wait();
@@ -231,12 +236,12 @@ int main(int argc, char *argv[]) {
             // For every detected face
             for (size_t i = 0; i < prev_detection_results.size(); i++) {
                 auto& result = prev_detection_results[i];
-                cv::Rect rect = result.location & cv::Rect({0, 0}, prev_frame.size());
+                cv::Rect rect = result.location & cv::Rect({0, 0}, prevFrame.size());
 
                 Face::Ptr face;
                 if (!FLAGS_no_smooth) {
                     face = matchFace(rect, prev_faces);
-                    float intensity_mean = calcMean(prev_frame(rect));
+                    float intensity_mean = calcMean(prevFrame(rect));
 
                     if ((face == nullptr) ||
                         ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f)) {
@@ -286,26 +291,21 @@ int main(int argc, char *argv[]) {
                 faces.push_back(face);
             }
 
-            presenter.drawGraphs(prev_frame);
-
             // drawing faces
-            visualizer.draw(prev_frame, faces);
+            visualizer.draw(prevFrame, faces);
+
+            presenter.drawGraphs(prevFrame);
+            metrics.update(startTimePrevFrame, prevFrame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
             timer.finish("total");
-            out.str("");
-            out << "FPS: " << std::fixed << std::setprecision(1)
-                << 1000.0 / (timer["total"].getSmoothedDuration());
-
-            putHighlightedText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_COMPLEX, 0.65,
-                cv::Scalar(255, 0, 0), 2);
 
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesCounter <= FLAGS_limit)) {
-                videoWriter.write(prev_frame);
+                videoWriter.write(prevFrame);
             }
 
             int delay = std::max(1, static_cast<int>(msrate - timer["total"].getLastCallDuration()));
             if (!FLAGS_no_show) {
-                cv::imshow("Detection results", prev_frame);
+                cv::imshow("Detection results", prevFrame);
                 int key = cv::waitKey(delay);
                 if (27 == key || 'Q' == key || 'q' == key) {
                     break;
@@ -313,10 +313,10 @@ int main(int argc, char *argv[]) {
                 presenter.handleKey(key);
             }
         }
-        //// --------------------------- Report metrics -------------------------------------------------------
+
         slog::info << "Metrics report:" << slog::endl;
-        slog::info << "\tNumber of processed frames: " << framesCounter << slog::endl;
-        slog::info << "\tFPS: " << framesCounter * (1000.0 / timer["total"].getTotalDuration()) << slog::endl;
+        metrics.logTotal();
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

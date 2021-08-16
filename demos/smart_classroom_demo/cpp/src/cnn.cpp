@@ -44,7 +44,7 @@ void CnnDLSDKBase::Load() {
         executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName,
             {{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED, InferenceEngine::PluginConfigParams::NO}});
     }
-    printExecNetworkInfo(executable_network_, config_.path_to_model, config_.deviceName, config_.model_type);
+    logExecNetworkInfo(executable_network_, config_.path_to_model, config_.deviceName, config_.model_type);
     infer_request_ = executable_network_.CreateInferRequest();
 }
 

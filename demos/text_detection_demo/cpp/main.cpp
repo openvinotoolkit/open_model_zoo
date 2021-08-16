@@ -23,6 +23,7 @@
 #include <monitors/presenter.h>
 #include <utils/common.hpp>
 #include <utils/images_capture.h>
+#include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
 #include "cnn.hpp"
@@ -73,6 +74,7 @@ int clip(int x, int max_val) {
 
 int main(int argc, char *argv[]) {
     try {
+        PerformanceMetrics metrics;
         /** This demo covers one certain topology and cannot be generalized **/
         // ----------------------------- Parsing and validating input arguments ------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -82,8 +84,6 @@ int main(int argc, char *argv[]) {
         double text_detection_postproc_time = 0;
         double text_recognition_postproc_time = 0;
         double text_crop_time = 0;
-        double avg_time = 0;
-        const double avg_time_decay = 0.8;
 
         slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core ie;
@@ -160,6 +160,8 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_m_td.empty())
             text_detection = std::unique_ptr<Cnn>(new Cnn(FLAGS_m_td, "Text Detection", ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td)));
         std::unique_ptr<ImagesCapture> cap = openImagesCapture(FLAGS_i, FLAGS_loop);
+
+        auto startTime = std::chrono::steady_clock::now();
         cv::Mat image = cap->read();
         if (!image.data) {
             throw std::runtime_error("Can't read an image from the input");
@@ -175,9 +177,8 @@ int main(int argc, char *argv[]) {
         Presenter presenter(FLAGS_u, image.rows - graphSize.height - 10, graphSize);
 
         do {
-            cv::Mat demo_image = image.clone();
+            cv::Mat demoImage = image.clone();
 
-            std::chrono::steady_clock::time_point begin_frame = std::chrono::steady_clock::now();
             std::vector<cv::RotatedRect> rects;
             if (text_detection != nullptr) {
                 auto blobs = text_detection->Infer(image);
@@ -217,7 +218,7 @@ int main(int argc, char *argv[]) {
                         int h = static_cast<int>(w * 0.5);
                         cv::Rect r(static_cast<int>(image.cols * 0.5 - w * 0.5), static_cast<int>(image.rows * 0.5 - h * 0.5), w, h);
                         cropped_text = image(r).clone();
-                        cv::rectangle(demo_image, r, cv::Scalar(0, 0, 255), 2);
+                        cv::rectangle(demoImage, r, cv::Scalar(0, 0, 255), 2);
                         points.emplace_back(r.tl());
                     } else {
                         cropped_text = image;
@@ -294,83 +295,55 @@ int main(int argc, char *argv[]) {
 
                 if (!FLAGS_no_show && (!res.empty() || text_recognition == nullptr)) {
                     for (size_t i = 0; i < points.size() ; i++) {
-                        cv::line(demo_image, points[i], points[(i+1) % points.size()], cv::Scalar(50, 205, 50), 2);
+                        cv::line(demoImage, points[i], points[(i+1) % points.size()], cv::Scalar(50, 205, 50), 2);
                     }
 
                     if (!points.empty() && !res.empty()) {
-                        setLabel(demo_image, res, points[static_cast<size_t>(top_left_point_idx)]);
+                        setLabel(demoImage, res, points[static_cast<size_t>(top_left_point_idx)]);
                     }
                 }
             }
 
-            std::chrono::steady_clock::time_point end_frame = std::chrono::steady_clock::now();
+            putHighlightedText(demoImage, "Found: " + std::to_string(num_found),
+                cv::Point(10, 80), cv::FONT_HERSHEY_COMPLEX, 0.65, cv::Scalar(0, 0, 255), 2);
 
-            if (avg_time == 0.0) {
-                avg_time = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end_frame - begin_frame).count());
-            } else {
-                auto cur_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_frame - begin_frame).count();
-                avg_time = avg_time * avg_time_decay + (1.0 - avg_time_decay) * cur_time;
-            }
-            int fps = static_cast<int>(1000 / avg_time);
-            putHighlightedText(demo_image, "FPS: " + std::to_string(fps),
-                cv::Point(10, 30), cv::FONT_HERSHEY_COMPLEX, 0.65, cv::Scalar(0, 0, 255), 2);
-            putHighlightedText(demo_image, "Found: " + std::to_string(num_found),
-                cv::Point(10, 60), cv::FONT_HERSHEY_COMPLEX, 0.65, cv::Scalar(0, 0, 255), 2);
+            presenter.drawGraphs(demoImage);
+            metrics.update(startTime, demoImage, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
-            presenter.drawGraphs(demo_image);
             framesProcessed++;
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
-                videoWriter.write(demo_image);
+                videoWriter.write(demoImage);
             }
             if (!FLAGS_no_show) {
-                cv::imshow("Press ESC or Q to exit", demo_image);
+                cv::imshow("Press ESC or Q to exit", demoImage);
                 int key = cv::waitKey(1);
                 if ('q' == key || 'Q' == key || key == 27) break;
                 presenter.handleKey(key);
             }
 
+            startTime = std::chrono::steady_clock::now();
             image = cap->read();
         } while (image.data);
 
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.logTotal();
+
         if (text_detection != nullptr && text_detection->ncalls()) {
-          // --------------------------- Report metrics -------------------------------------------------------
-          slog::info << "Metrics report:" << slog::endl;
-          slog::info << "Text detection model inference:" << slog::endl;
-          slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << text_detection->time_elapsed() / text_detection->ncalls() << slog::endl;
-          slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << text_detection->ncalls() * 1000 / text_detection->time_elapsed() << slog::endl;
-          if (std::fabs(text_detection_postproc_time) < std::numeric_limits<double>::epsilon()) {
-              slog::info << "Text detection postprocessing: took no time " << slog::endl;
-          } else {
-              slog::info << "Text detection postprocessing:" << slog::endl;
-              slog::info << "\tLatency: " << std::fixed << std::setprecision(1) << text_detection_postproc_time / text_detection->ncalls() << slog::endl;
-              slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << text_detection->ncalls() * 1000 / text_detection_postproc_time << slog::endl;
-          }
+            slog::info << "\tText detection inference: " << std::fixed << std::setprecision(1) << text_detection->time_elapsed() / text_detection->ncalls() << " ms" << slog::endl;
+            slog::info << "\tText detection postprocessing: " << text_detection_postproc_time / text_detection->ncalls() << " ms" << slog::endl;
         }
 
         if (text_recognition != nullptr && text_recognition->ncalls()) {
-            slog::info << "Text recognition model inference:" << slog::endl;
-            slog::info << "\tLatency: "  << text_recognition->time_elapsed() / text_recognition->ncalls() << slog::endl;
-            slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << text_recognition->ncalls() * 1000 / text_recognition->time_elapsed() << slog::endl;
-          if (std::fabs(text_recognition_postproc_time) < std::numeric_limits<double>::epsilon()) {
-              throw std::logic_error("text_recognition_postproc_time can't be equal to zero");
-          }
-          slog::info << "Text recognition postprocessing:" << slog::endl;
-          slog::info << "\tLatency: "  << text_recognition_postproc_time / text_recognition->ncalls() / 1000 << slog::endl;
-          slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << text_recognition->ncalls() * 1000000 / text_recognition_postproc_time << slog::endl;
-          if (std::fabs(text_crop_time) > std::numeric_limits<double>::epsilon()) {
-              slog::info << "Text crop:" << slog::endl;
-              slog::info << "\tLatency: " << text_crop_time / text_recognition->ncalls() / 1000 << slog::endl;
-              slog::info << "\tFPS: " << text_recognition->ncalls() * 1000000 / text_crop_time << slog::endl;
-          }
+            slog::info << "\tText recognition inference : "  << text_recognition->time_elapsed() / text_recognition->ncalls() << " ms" << slog::endl;
+            slog::info << "\tText recognition postprocessing: "  << text_recognition_postproc_time / text_recognition->ncalls() / 1000 << " ms" << slog::endl;
+            slog::info << "\tText crop: " << text_crop_time / text_recognition->ncalls() / 1000 << " ms" << slog::endl;
         }
 
         slog::info << presenter.reportMeans() << slog::endl;
-        // ---------------------------------------------------------------------------------------------------
     } catch (const std::exception & ex) {
         slog::err << ex.what() << slog::endl;
         return EXIT_FAILURE;
-    }
-    catch (...) {
+    } catch (...) {
         slog::err << "Unknown/internal exception happened.\n";
         return EXIT_FAILURE;
     }

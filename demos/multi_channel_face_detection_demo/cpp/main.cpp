@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <mutex>
-#include <atomic>
 #include <queue>
 #include <chrono>
 #include <sstream>
@@ -27,6 +26,7 @@
 
 #include <monitors/presenter.h>
 #include <utils/ocv_common.hpp>
+#include <utils/performance_metrics.hpp>
 #include <utils/slog.hpp>
 
 #include "input.hpp"
@@ -140,10 +140,10 @@ DisplayParams prepareDisplayParams(size_t count) {
 }
 
 void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
-                     float time,
                      const std::string& stats,
                      DisplayParams params,
-                     Presenter& presenter) {
+                     Presenter& presenter,
+                     PerformanceMetrics& metrics) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
         auto& elem = data[i];
@@ -186,13 +186,12 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
 #endif
     presenter.drawGraphs(windowImage);
     drawStats();
-
-    char str[256];
-    snprintf(str, sizeof(str), "FPS: %5.2f", static_cast<double>(1000.0f/time));
-    putHighlightedText(windowImage, str, cv::Point(10, 30), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 0.65, cv::Scalar(200, 10, 10), 2);
+    for (size_t i = 0; i < data.size() - 1; ++i) {
+        metrics.update(data[i]->timestamp);
+    }
+    metrics.update(data.back()->timestamp, windowImage, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
     cv::imshow(params.name, windowImage);
 }
-
 }  // namespace
 
 int main(int argc, char* argv[]) {
@@ -282,9 +281,6 @@ int main(int argc, char* argv[]) {
         });
 
         network->setDetectionConfidence(static_cast<float>(FLAGS_t));
-
-        std::atomic<float> averageFps = {0.0f};
-
         std::vector<std::shared_ptr<VideoFrame>> batchRes;
 
         std::mutex statMutex;
@@ -292,6 +288,7 @@ int main(int argc, char* argv[]) {
 
         cv::Size graphSize{static_cast<int>(params.windowSize.width / 4), 60};
         Presenter presenter(FLAGS_u, params.windowSize.height - graphSize.height - 10, graphSize);
+        PerformanceMetrics metrics;
 
         const size_t outputQueueSize = 1;
         AsyncOutput output(FLAGS_show_stats, outputQueueSize,
@@ -301,7 +298,7 @@ int main(int argc, char* argv[]) {
                 std::unique_lock<std::mutex> lock(statMutex);
                 str = statStream.str();
             }
-            displayNSources(result, averageFps, str, params, presenter);
+            displayNSources(result, str, params, presenter, metrics);
             int key = cv::waitKey(1);
             presenter.handleKey(key);
 
@@ -314,8 +311,6 @@ int main(int argc, char* argv[]) {
         using duration = std::chrono::duration<float, std::milli>;
         timer::time_point lastTime = timer::now();
         duration samplingTimeout(FLAGS_fps_sp);
-
-        size_t fpsCounter = 0;
 
         size_t perfItersCounter = 0;
 
@@ -341,7 +336,6 @@ int main(int argc, char* argv[]) {
                     batchRes.push_back(std::move(br[i]));
                 }
             }
-            ++fpsCounter;
 
             if (!output.isAlive()) {
                 break;
@@ -350,55 +344,26 @@ int main(int argc, char* argv[]) {
             auto currTime = timer::now();
             auto deltaTime = (currTime - lastTime);
             if (deltaTime >= samplingTimeout) {
-                auto durMsec = std::chrono::duration_cast<duration>(deltaTime).count();
-                auto frameTime = durMsec / static_cast<float>(fpsCounter);
-                fpsCounter = 0;
                 lastTime = currTime;
-
-                averageFps = frameTime;
                 if (FLAGS_show_stats) {
                     if (++perfItersCounter >= FLAGS_n_sp) {
                         break;
                     }
-                    slog::debug << "FPS: " << 1000.f / frameTime << slog::endl;
                 }
 
                 if (FLAGS_show_stats) {
-                    auto inputStat = sources.getStats();
-                    auto inferStat = network->getStats();
-                    auto outputStat = output.getStats();
-
                     std::unique_lock<std::mutex> lock(statMutex);
-                    slog::debug << "Latency:" << slog::endl;
-                    slog::debug << std::fixed << std::setprecision(1);
-                    slog::debug << "\tInput reads: ";
-                    for (size_t i = 0; i < inputStat.readTimes.size(); ++i) {
-                        if (0 == (i % 4) && i != 0) {
-                            slog::debug << slog::endl;
-                        }
-                        slog::debug << inputStat.readTimes[i] << "ms ";
-                    }
-                    slog::debug << slog::endl;
-                    slog::debug << "\tDecoding: "
-                        << inputStat.decodingLatency << "ms";
-                    slog::debug << slog::endl;
-                    slog::debug << "\tPreprocess: "
-                        << inferStat.preprocessTime << "ms";
-                    slog::debug << slog::endl;
-                    slog::debug << "\tInference: "
-                        << inferStat.inferTime << "ms";
-                    slog::debug << slog::endl;
-                    slog::debug << "\tRendering: " << outputStat.renderTime
-                        << "ms" << slog::endl;
+                    slog::debug << "------------------- Frame # " << perfItersCounter << "------------------" << slog::endl;
+                    writeStats(slog::debug, slog::endl, sources.getStats(), network->getStats(), output.getStats());
+                    statStream.str(std::string());
+                    writeStats(statStream, '\n', sources.getStats(), network->getStats(), output.getStats());
                 }
             }
         }
-
         network.reset();
 
-        //// --------------------------- Report metrics -------------------------------------------------------
         slog::info << "Metrics report:" << slog::endl;
-        slog::info << "\tFPS: " << 1000.f / averageFps << slog::endl;
+        metrics.logTotal();
         slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {

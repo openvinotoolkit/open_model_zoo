@@ -103,7 +103,6 @@ struct Context {  // stores all global data for tasks
         videoFramesContext{std::vector<uint64_t>(inputChannels.size(), lastFrameId), std::vector<std::mutex>(inputChannels.size())},
         nireq{nireq},
         isVideo{isVideo},
-        t0{std::chrono::steady_clock::time_point()},
         freeDetectionInfersCount{0},
         frameCounter{0}
     {
@@ -143,7 +142,7 @@ struct Context {  // stores all global data for tasks
         DrawersContext(int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
                        const std::string& monitorsStr):
             pause{pause}, gridParam{gridParam}, displayResolution{displayResolution}, showPeriod{showPeriod},
-            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()}, framesAfterUpdate{0}, updateTime{std::chrono::steady_clock::time_point()},
+            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()},
             presenter{monitorsStr,
                 GridMat(gridParam, displayResolution).outimg.rows - 70,
                 cv::Size{GridMat(gridParam, displayResolution).outimg.cols / 4, 60}} {}
@@ -156,9 +155,6 @@ struct Context {  // stores all global data for tasks
         std::chrono::steady_clock::time_point prevShow;  // time stamp of previous imshow
         std::map<int64_t, GridMat> gridMats;
         std::mutex drawerMutex;
-        std::ostringstream outThroughput;
-        unsigned framesAfterUpdate;
-        std::chrono::steady_clock::time_point updateTime;
         Presenter presenter;
     } drawersContext;
     struct {
@@ -169,10 +165,10 @@ struct Context {  // stores all global data for tasks
     std::mutex classifiersAggregatorPrintMutex;
     uint64_t nireq;
     bool isVideo;
-    std::chrono::steady_clock::time_point t0;
     std::atomic<std::vector<InferenceEngine::InferRequest>::size_type> freeDetectionInfersCount;
     std::atomic<uint32_t> frameCounter;
     InferRequestsContainer detectorsInfers, attributesInfers, platesInfers;
+    PerformanceMetrics metrics;
 };
 
 class ReborningVideoFrame: public VideoFrame {
@@ -214,7 +210,7 @@ public:
     ~ClassifiersAggregator() {
         std::mutex& printMutex = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.classifiersAggregatorPrintMutex;
         printMutex.lock();
-        if (rawDetections.size() != 0) {
+        if (FLAGS_r && !rawDetections.empty()) {
             slog::debug << "---------------------Frame #" << sharedVideoFrame->frameId << "---------------------" << slog::endl;
             slog::debug << rawDetections;
             for (const std::string& rawAttribute : rawAttributes.container) {  // destructor assures that none uses the container
@@ -338,40 +334,41 @@ void Drawer::process() {
         cv::Mat mat = firstGridIt->second.getMat();
 
         constexpr float OPACITY = 0.6f;
-        fillROIColor(mat, cv::Rect(5, 5, 390, 115), cv::Scalar(255, 0, 0), OPACITY);
-        cv::putText(mat, "Detection InferRequests usage", cv::Point2f(15, 70), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
-        cv::Rect usage(15, 90, 370, 20);
+        fillROIColor(mat, cv::Rect(5, 5, 390, 125), cv::Scalar(255, 0, 0), OPACITY);
+        cv::putText(mat, "Detection InferRequests usage:", cv::Point2f(15, 95), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
+        cv::Rect usage(15, 105, 370, 20);
         cv::rectangle(mat, usage, {0, 255, 0}, 2);
         uint64_t nireq = context.nireq;
         uint32_t frameCounter = context.frameCounter;
         usage.width = static_cast<int>(usage.width * static_cast<float>(frameCounter * nireq - context.freeDetectionInfersCount) / (frameCounter * nireq));
         cv::rectangle(mat, usage, {0, 255, 0}, cv::FILLED);
 
-        context.drawersContext.framesAfterUpdate++;
-        const std::chrono::steady_clock::time_point localT1 = std::chrono::steady_clock::now();
-        const Sec timeDuration = localT1 - context.drawersContext.updateTime;
-        if (Sec{1} <= timeDuration || context.drawersContext.updateTime == context.t0) {
-            context.drawersContext.outThroughput.str("");
-            context.drawersContext.outThroughput << std::fixed << std::setprecision(1)
-                << static_cast<float>(context.drawersContext.framesAfterUpdate) / timeDuration.count() << "FPS";
-            context.drawersContext.framesAfterUpdate = 0;
-            context.drawersContext.updateTime = localT1;
-        }
-        cv::putText(mat, context.drawersContext.outThroughput.str(), cv::Point2f(15, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
-
         context.drawersContext.presenter.drawGraphs(mat);
-
-        cv::imshow("Detection results", firstGridIt->second.getMat());
-        context.drawersContext.prevShow = std::chrono::steady_clock::now();
-        const int key = cv::waitKey(context.drawersContext.pause);
-        if (key == 27 || 'q' == key || 'Q' == key || !context.isVideo) {
-            try {
-                std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
-            } catch (const std::bad_weak_ptr&) {}
-        } else if (key == 32) {
-            context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
-        } else {
-            context.drawersContext.presenter.handleKey(key);
+        context.metrics.update(sharedVideoFrame->timestamp, mat, { 15, 35 }, cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{ 255, 255, 255 }, 0);
+        if (!FLAGS_no_show) {
+            cv::imshow("Detection results", firstGridIt->second.getMat());
+            context.drawersContext.prevShow = std::chrono::steady_clock::now();
+            const int key = cv::waitKey(context.drawersContext.pause);
+            if (key == 27 || 'q' == key || 'Q' == key || !context.isVideo) {
+                try {
+                    std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+                }
+                catch (const std::bad_weak_ptr&) {}
+            }
+            else if (key == 32) {
+                context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
+            }
+            else {
+                context.drawersContext.presenter.handleKey(key);
+            }
+        }
+        else {
+            if (!context.isVideo) {
+                try {
+                    std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+                }
+                catch (const std::bad_weak_ptr&) {}
+            }
         }
         firstGridIt->second.clear();
         gridMats.emplace((--gridMats.end())->first + 1, firstGridIt->second);
@@ -384,33 +381,25 @@ void ResAggregator::process() {
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     context.freeDetectionInfersCount += context.detectorsInfers.inferRequests.lockedSize();
     context.frameCounter++;
-    if (!FLAGS_no_show) {
-        for (const BboxAndDescr& bboxAndDescr : boxesAndDescrs) {
-            switch (bboxAndDescr.objectType) {
-                case BboxAndDescr::ObjectType::NONE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {255, 255, 0},  4);
-                                                     break;
-                case BboxAndDescr::ObjectType::VEHICLE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
-                                                        putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
-                                                                     cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y + 35},
-                                                                     cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 2);
-                                                         break;
-                case BboxAndDescr::ObjectType::PLATE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 0, 255},  4);
-                                                      putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
-                                                                  cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y - 10},
-                                                                  cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 0, 255), 2);
-                                                      break;
-                default: throw std::exception();  // must never happen
-                          break;
-            }
-        }
-        tryPush(context.drawersContext.drawersWorker, std::make_shared<Drawer>(sharedVideoFrame));
-    } else {
-        if (!context.isVideo) {
-           try {
-                std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
-            } catch (const std::bad_weak_ptr&) {}
+    for (const BboxAndDescr& bboxAndDescr : boxesAndDescrs) {
+        switch (bboxAndDescr.objectType) {
+            case BboxAndDescr::ObjectType::NONE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {255, 255, 0},  4);
+                                                    break;
+            case BboxAndDescr::ObjectType::VEHICLE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
+                                                    putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
+                                                                    cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y + 35},
+                                                                    cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 2);
+                                                        break;
+            case BboxAndDescr::ObjectType::PLATE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 0, 255},  4);
+                                                    putHighlightedText(sharedVideoFrame->frame, bboxAndDescr.descr,
+                                                                cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y - 10},
+                                                                cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 0, 255), 2);
+                                                    break;
+            default: throw std::exception();  // must never happen
+                        break;
         }
     }
+    tryPush(context.drawersContext.drawersWorker, std::make_shared<Drawer>(sharedVideoFrame));
 }
 
 bool DetectionsProcessor::isReady() {
@@ -605,6 +594,7 @@ bool Reader::isReady() {
 
 void Reader::process() {
     unsigned sourceID = sharedVideoFrame->sourceID;
+    sharedVideoFrame->timestamp = std::chrono::steady_clock::now();
     Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
     const std::vector<std::shared_ptr<InputChannel>>& inputChannels = context.readersContext.inputChannels;
     if (inputChannels[sourceID]->read(sharedVideoFrame->frame)) {
@@ -807,26 +797,20 @@ int main(int argc, char* argv[]) {
         }
 
         // Running
-        const std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
-        context.t0 = t0;
-        context.drawersContext.updateTime = t0;
         worker->runThreads();
         worker->threadFunc();
         worker->join();
-        const auto t1 = std::chrono::steady_clock::now();
 
         uint32_t frameCounter = context.frameCounter;
+        double detectionsInfersUsage = 0;
         if (0 != frameCounter) {
-            const float fps = static_cast<float>(frameCounter) / std::chrono::duration_cast<Sec>(t1 - context.t0).count()
-                / context.readersContext.inputChannels.size();
-            const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
+            detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
                 / (frameCounter * context.nireq) * 100;
-
-            //// --------------------------- Report metrics -------------------------------------------------------
-            slog::info << "Metrics report:" << slog::endl;
-            slog::info << "\tFPS: " << std::fixed << std::setprecision(1) << fps << slog::endl;
-            slog::info << "\tDetection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
         }
+
+        slog::info << "Metrics report:" << slog::endl;
+        context.metrics.logTotal();
+        slog::info << "\tDetection InferRequests usage: " << detectionsInfersUsage << "%" << slog::endl;
         slog::info << context.drawersContext.presenter.reportMeans() << slog::endl;
     } catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

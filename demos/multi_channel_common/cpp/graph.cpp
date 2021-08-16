@@ -69,7 +69,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     }
     InferenceEngine::ExecutableNetwork executableNetwork;
     executableNetwork = ie.LoadNetwork(cnnNetwork, deviceName);
-    printExecNetworkInfo(executableNetwork, modelPath, deviceName);
+    logExecNetworkInfo(executableNetwork, modelPath, deviceName);
     slog::info << "\tNumber of network inference requests: " << maxRequests << slog::endl;
     slog::info << "\tBatch size is set to " << cnnNetwork.getBatchSize() << slog::endl;
 
@@ -212,7 +212,7 @@ InferenceEngine::SizeVector IEGraph::getInputDims() const {
     return inputBlob->getTensorDesc().getDims();
 }
 
-std::vector<std::shared_ptr<VideoFrame> > IEGraph::getBatchData(cv::Size frameSize) {
+std::vector<std::shared_ptr<VideoFrame>> IEGraph::getBatchData(cv::Size frameSize) {
     std::vector<std::shared_ptr<VideoFrame>> vframes;
     InferenceEngine::InferRequest::Ptr req;
     std::chrono::high_resolution_clock::time_point startTime;

@@ -221,7 +221,7 @@ inline std::string fileNameNoExt(const std::string &filepath) {
     return filepath.substr(0, pos);
 }
 
-inline void printExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNetwork, const std::string& modelName,
+inline void logExecNetworkInfo(const InferenceEngine::ExecutableNetwork& execNetwork, const std::string& modelName,
     const std::string& deviceName, const std::string& modelType = "") {
     slog::info << "The " << modelType << (modelType.empty() ? "" : " ") << "model " << modelName << " is loaded to " << deviceName << slog::endl;
     std::set<std::string> devices;

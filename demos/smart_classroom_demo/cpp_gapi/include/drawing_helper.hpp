@@ -29,7 +29,6 @@ public:
     cv::Rect DecreaseRectByRelBorders(const cv::Rect& r);
     int GetIndexOfTheNearestPerson(const TrackedObject& face, const std::vector<TrackedObject>& tracked_persons);
     std::string GetActionTextLabel(const unsigned label, const std::vector<std::string>& actions_map);
-    void DrawFPS(const cv::Mat& frame, const float fps, const cv::Scalar& color);
     void GetNewFrameSize(const cv::Size& frame_size);
     void CreateTopWindow();
     void ClearTopWindow();
