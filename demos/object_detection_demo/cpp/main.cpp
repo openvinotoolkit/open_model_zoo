@@ -288,8 +288,8 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        auto& strAnchors = split(FLAGS_anchors, ',');
-        auto& strMasks = split(FLAGS_masks, ',');
+        const auto& strAnchors = split(FLAGS_anchors, ',');
+        const auto& strMasks = split(FLAGS_masks, ',');
 
         std::vector<float> anchors;
         std::vector<int64_t> masks;

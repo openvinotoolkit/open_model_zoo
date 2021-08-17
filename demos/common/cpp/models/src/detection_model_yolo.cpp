@@ -183,7 +183,7 @@ std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult & infResult) 
             }
             if (isGoodResult) {
                 result->objects.push_back(obj1);
-            } 
+            }
         }
     } else {
         // Classic postprocessing
