@@ -223,6 +223,7 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
         per_class_summary = {}
         tp_fp_rate = []
         total_objects_cnt = 0
+        approx_pr_recall, approx_fppi_miss_rate = [], []
         for label_idx, stat in label_stats.items():
             if stat['num_images'] == 0:
                 lamrs.append(0)
@@ -234,8 +235,14 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
             recall_v.append(recall[-1][-1])
             precision.append(stat['precision'])
             precision_v.append(precision[-1][-1])
+            approx_recall = np.linspace(0, 1, 100, endpoint=True)
+            approx_precision = np.interp(approx_recall, recall[-1], precision[-1])
+            approx_pr_recall.append([approx_precision, approx_recall])
             fppi = 1 - precision[-1]
             mr = stat['miss_rate']
+            approx_fppi = np.linspace(0, 1, 100, endpoint=True)
+            approx_mr = np.interp(approx_fppi, fppi, mr)
+            approx_fppi_miss_rate.append([approx_fppi, approx_mr])
             pr = np.array([precision[-1], recall[-1]]).T
             fm = np.array([fppi, mr]).T
             fppi_tmp = np.insert(fppi, 0, -1.0)
@@ -277,7 +284,11 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
                 'charts': {
                     'ap': [0 if np.isnan(ap_) else ap_ for ap_ in ap],
                     'log_miss_rate': lamrs,
-                    'tp_fp_rate': tp_fp_rate
+                    'tp_fp_rate': tp_fp_rate,
+                    'precision_recall': np.mean(approx_pr_recall, 0).T.tolist() if np.size(approx_pr_recall) else [],
+                    'fppi_miss_rate': (
+                        np.mean(approx_fppi_miss_rate, 0).T.tolist() if np.size(approx_fppi_miss_rate) else []
+                    )
                 },
                 'objects_count': total_objects_cnt
 
@@ -765,6 +776,7 @@ def calc_iou(gt_box, dt_box):
     dt_area = (dt_box[2] - dt_box[0]) * (dt_box[3] - dt_box[1])
 
     return [intersect_area, dt_area, gt_area]
+
 
 class YoutubeFacesAccuracy(FullDatasetEvaluationMetric):
     __provider__ = 'youtube_faces_accuracy'

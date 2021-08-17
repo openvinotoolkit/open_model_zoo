@@ -155,6 +155,7 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
         per_class_summary = {}
         tp_fp_rate = []
         total_objects_cnt = 0
+        approx_pr_recall, approx_fppi_miss_rate = [], []
         for label_idx, stat in enumerate(label_stats):
             precision_v_, recall_v_, precisions, recalls, fps, tps, num_img = stat
             if num_img == 0:
@@ -174,6 +175,12 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
             mr = 1 - recalls[0]
             pr = np.array([precisions[0], recalls[0]]).T
             fm = np.array([fppi, mr]).T
+            approx_recall = np.linspace(0, 1, 100, endpoint=True)
+            approx_precision = np.interp(approx_recall, recalls[0], precisions[0])
+            approx_pr_recall.append([approx_precision, approx_recall])
+            approx_fppi = np.linspace(0, 1, 100, endpoint=True)
+            approx_mr = np.interp(approx_fppi, fppi, mr)
+            approx_fppi_miss_rate.append([approx_fppi, approx_mr])
             fppi_tmp = np.insert(fppi, 0, -1.0)
             mr_tmp = np.insert(mr, 0, 1.0)
             ref = np.logspace(-2.0, 0.0, num=9)
@@ -215,7 +222,11 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
                 'charts': {
                     'ap': [0 if np.isnan(ap_) else ap_ for ap_ in ap],
                     'log_miss_rate': lamrs,
-                    'tp_fp_rate': tp_fp_rate
+                    'tp_fp_rate': tp_fp_rate,
+                    'precision_recall': np.mean(approx_pr_recall, 0).T.tolist() if np.size(approx_pr_recall) else [],
+                    'fppi_miss_rate': (
+                        np.mean(approx_fppi_miss_rate, 0).T.tolist() if np.size(approx_fppi_miss_rate) else []
+                    )
                 },
                 'objects_count': total_objects_cnt
 
