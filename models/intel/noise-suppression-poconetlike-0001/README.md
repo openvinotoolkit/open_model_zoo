@@ -3,11 +3,11 @@
 ## Use Case and High-Level Description
 
 This is a PoCoNet like model for noise suppression to make speech cleaner.
-The model is based on [PoCoNet](https://arxiv.org/abs/2008.04470) architecure and trained on subset of [DNS-Challenge dataset](https://github.com/microsoft/DNS-Challenge/blob/master/README.md#dataset-licenses) [paper](https://arxiv.org/abs/2101.01902). The subset consists of data derived from [LibriVox](https://librivox.org/),  [VocalSet](https://zenodo.org/record/1203819#.YKZq3b5LiF4), [CREMA-D](https://github.com/CheyneyComputerScience/CREMA-D), [M-AILABS](https://www.caito.de/2019/01/the-m-ailabs-speech-dataset), [AudioSet](https://research.google.com/audioset/download.html), [Freesound](https://freesound.org/), [DEMAND](https://zenodo.org/record/1227121#.YKZtZb5LiF5) datasets.
+The model is based on [PoCoNet](https://arxiv.org/abs/2008.04470) architecure and trained on [DNS-Challenge dataset](https://github.com/microsoft/DNS-Challenge/blob/master/README.md) [paper](https://arxiv.org/abs/2101.01902).
 The network works with mono audio sampled on 16kHz.
 The audio processed iterative by patches with 2048 size.
 On each iteration it takes 2048 (128ms) samples as input and returns 2048 (128ms) samples as output with 640 (40ms) samples delay.
-In addition the network required 52 state tensors to make processing seamless.
+In addition the network required 50 state tensors to make processing seamless.
 On the first iteration these state tensors have to be filled with 0.
 On the consequences iterations theses tensors have to be taken from corresponding outputs of previous iteration.
 You can try [Noise Suppression Python\* Demo](../../../demos/noise_suppression_demo/python/README.md) to see how it works.
@@ -29,8 +29,8 @@ The [SISDR](https://arxiv.org/abs/1811.02508) quality metric was calculated on t
 | Metric                          | Value         |
 |---------------------------------|---------------|
 | SISDR for input noisy signal    |    11.73   dB |
-| SISDR for output cleaned signal |    19.84   dB |
-| SISDR increase                  |    +8.10   dB |
+| SISDR for output cleaned signal |    20.54   dB |
+| SISDR increase                  |    +8.81   dB |
 
 
 ## Input
