@@ -101,7 +101,10 @@ class KaldiFeatureRegressionConverter(BaseFormatConverter):
             'features_subset_file': PathField(description='file with list testing ark files', optional=True),
             'ivectors': BoolField(optional=True, default=False, description='include ivectors features'),
             'ref_file_suffix': StringField(optional=True, default='_kaldi_score'),
-            'vectors_mode': BoolField(optional=True, default=True, description='Split data to vectors')
+            'vectors_mode': BoolField(optional=True, default=True, description='Split data to vectors'),
+            'utterance_name_agnostic': BoolField(
+                optional=True, default=False, description='do not match names per utterance'
+            )
         })
         return params
 
@@ -114,34 +117,71 @@ class KaldiFeatureRegressionConverter(BaseFormatConverter):
             self.ref_data_dir = self.data_dir
         self.ref_file_suffix = self.get_value_from_config('ref_file_suffix')
         self.vectors_mode = self.get_value_from_config('vectors_mode')
+        self.utt_agnostic = self.get_value_from_config('utterance_name_agnostic')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         ark_list = self.select_subset()
         annotation = []
         for files in ark_list:
             input_files, ref_ark = files[:-1], files[-1]
-            utterances = KaldiARKReader.read_frames(input_files[0])
-            ref_scores = KaldiARKReader.read_frames(ref_ark)
-            for utt, matrix in utterances.items():
-                if utt not in ref_scores:
-                    continue
-                ref_matrix = ref_scores[utt]
-                if self.vectors_mode:
-                    for vector_id, _ in enumerate(matrix):
-                        if len(input_files) == 1:
-                            identifier = KaldiFrameIdentifier(input_files[0].name, utt, vector_id)
-                        else:
-                            identifier = [KaldiFrameIdentifier(in_file.name, utt, vector_id) for in_file in input_files]
-                        ref_vector = ref_matrix[vector_id]
-                        annotation.append(RegressionAnnotation(identifier, ref_vector))
-                else:
-                    if len(input_files) == 1:
-                        identifier = KaldiMatrixIdentifier(input_files[0].name, utt)
-                    else:
-                        identifier = [KaldiMatrixIdentifier(in_file.name, utt) for in_file in input_files]
-                    annotation.append(RegressionAnnotation(identifier, ref_matrix))
+            if not self.utt_agnostic:
+                annotation = self._convert_utt_specific(input_files, ref_ark, annotation)
+            else:
+                annotation = self._convert_utt_agnostic(input_files, ref_ark, annotation)
 
         return ConverterReturn(annotation, None, None)
+
+    def _convert_utt_agnostic(self, input_files, ref_ark, annotation):
+        input_utts = [KaldiARKReader.read_frames(in_file) for in_file in input_files]
+        utt_ids = [list(in_utt.keys()) for in_utt in input_utts]
+        ref_scores = KaldiARKReader.read_frames(ref_ark)
+        for idx, (_, ref_matrix) in enumerate(ref_scores.items()):
+            current_utts = [u[idx] for u in utt_ids]
+            if self.vectors_mode:
+                for v_idx, ref_v in enumerate(ref_matrix):
+                    if len(input_files) == 1:
+                        identifier = KaldiFrameIdentifier(input_files[0].name, current_utts[0], v_idx)
+                    else:
+                        identifier = [
+                            KaldiFrameIdentifier(in_file.name, utt, v_idx)
+                            for in_file, utt in zip(input_files, current_utts)
+                        ]
+                    annotation.append(RegressionAnnotation(identifier, ref_v))
+            else:
+                if len(input_files) == 1:
+                    identifier = KaldiMatrixIdentifier(input_files[0].name, current_utts[0])
+                else:
+                    identifier = [
+                        KaldiMatrixIdentifier(in_file.name, utt)
+                        for in_file, utt in zip(input_files, current_utts)
+                    ]
+                annotation.append(RegressionAnnotation(identifier, ref_matrix))
+        return annotation
+
+    def _convert_utt_specific(self, input_files, ref_ark, annotation):
+        utterances = KaldiARKReader.read_frames(input_files[0])
+        ref_scores = KaldiARKReader.read_frames(ref_ark)
+        for utt, matrix in utterances.items():
+            if utt not in ref_scores:
+                continue
+            ref_matrix = ref_scores[utt]
+            if self.vectors_mode:
+                for vector_id, _ in enumerate(matrix):
+                    if len(input_files) == 1:
+                        identifier = KaldiFrameIdentifier(input_files[0].name, utt, vector_id)
+                    else:
+                        identifier = [
+                            KaldiFrameIdentifier(in_file.name, utt, vector_id) for in_file in input_files
+                        ]
+                    ref_vector = ref_matrix[vector_id]
+                    annotation.append(RegressionAnnotation(identifier, ref_vector))
+            else:
+                if len(input_files) == 1:
+                    identifier = KaldiMatrixIdentifier(input_files[0].name, utt)
+                else:
+                    identifier = [KaldiMatrixIdentifier(in_file.name, utt) for in_file in input_files]
+                annotation.append(RegressionAnnotation(identifier, ref_matrix))
+        return annotation
 
     def select_subset(self):
         if self.feat_list_file:

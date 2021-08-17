@@ -671,6 +671,7 @@ The main difference between this converter and `super_resolution` in data organi
   * `ref_data_dir` - directory with reference ark files (Optional, if not provided `data_dir` will be used instead).
   * `vectors_mode` - allow usage each vector in utterance as independent data.
   * `ref_file_suffix` - suffix for search reference files (Optional, default `_kaldi_score`).
+  * `utterance_name_agnostic`  - allow ignoring utterance name during conversion. Optional, default required utterance keys matching.
 * `electricity` - converts Electricity dataset to `TimeSeriesForecastingAnnotation`.
   * `data_path_file` - Path to dataset file in .csv format.
   * `num_encoder_steps` - The maximum number of historical timestamps that model use.
