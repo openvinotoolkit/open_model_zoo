@@ -623,7 +623,8 @@ class DataProvider:
 
     @property
     def labels(self):
-        return self.annotation_provider.metadata.get('label_map', {})
+        meta = self.annotation_provider.metadata or {}
+        return meta.get('label_map', {})
 
     @property
     def metadata(self):

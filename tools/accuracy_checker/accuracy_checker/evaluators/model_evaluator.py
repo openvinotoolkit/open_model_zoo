@@ -15,8 +15,9 @@ limitations under the License.
 """
 
 import copy
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 import platform
+from pathlib import Path
 
 from ..utils import get_path, extract_image_representations, is_path
 from ..dataset import Dataset
@@ -31,6 +32,7 @@ from ..config import ConfigError, StringField
 from ..data_readers import BaseReader, DataRepresentation
 from .base_evaluator import BaseEvaluator
 from .quantization_model_evaluator import create_dataset_attributes
+from ..metrics.metric_profiler import write_summary_result
 
 
 # pylint: disable=W0223,R0904
@@ -209,7 +211,7 @@ class ModelEvaluator(BaseEvaluator):
             'platform': platform.system(),
             'framework': framework if framework != 'dlsdk' else 'openvino',
             'device': device.upper(),
-            'inference_model': 'sync' if not self.async_mode else 'async'
+            'inference_mode': 'sync' if not self.async_mode else 'async'
         }
         model_type = None
 
@@ -228,6 +230,11 @@ class ModelEvaluator(BaseEvaluator):
         })
         details.update(self.dataset.send_annotation_info(dataset_config))
         return details
+
+    def _initialize_input_shape(self):
+        _, batch_annotation, batch_input, _ = self.dataset[0]
+        filled_inputs, _ = self._get_batch_input(batch_annotation, batch_input)
+        self.launcher.initialize_undefined_shapes(filled_inputs)
 
     def _get_batch_input(self, batch_annotation, batch_input):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
@@ -257,11 +264,7 @@ class ModelEvaluator(BaseEvaluator):
         store_only = kwargs.get('store_only', False)
         prepare_dataset(store_only)
 
-        if (
-                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
-                self.preprocessor.has_multi_infer_transformations or
-                self.dataset.multi_infer
-        ):
+        if self._switch_to_sync():
             warning('Model can not to be processed in async mode. Switched to sync.')
             return self.process_dataset_sync(stored_predictions, progress_reporter, *args, **kwargs)
 
@@ -270,7 +273,8 @@ class ModelEvaluator(BaseEvaluator):
 
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
-        _, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
+        (_, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
+         ignore_metric_reference) = metric_config
         dataset_iterator = iter(enumerate(self.dataset))
         infer_requests_pool = {ir.request_id: ir for ir in self.launcher.get_async_requests()}
         free_irs = list(infer_requests_pool)
@@ -302,8 +306,11 @@ class ModelEvaluator(BaseEvaluator):
                         progress_reporter.update(batch_id, len(batch_identifiers))
                         if compute_intermediate_metric_res and progress_reporter.current % metric_interval == 0:
                             self.compute_metrics(
-                                print_results=True, ignore_results_formatting=ignore_results_formatting
+                                print_results=True, ignore_results_formatting=ignore_results_formatting,
+                                ignore_metric_reference=ignore_metric_reference
                             )
+                            self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting,
+                                                      metric_interval)
 
         if progress_reporter:
             progress_reporter.finish()
@@ -329,7 +336,7 @@ class ModelEvaluator(BaseEvaluator):
             self._reset_stored_predictions(stored_predictions)
         output_callback = kwargs.get('output_callback')
         metric_config = self._configure_metrics(kwargs, output_callback)
-        enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting = metric_config
+        enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting, _ = metric_config
         for batch_id, (batch_input_ids, batch_annotation, batch_input, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_annotation, batch_input)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
@@ -470,7 +477,7 @@ class ModelEvaluator(BaseEvaluator):
         if self.dataset.annotation_provider and self.dataset.annotation_provider.metadata:
             self.adapter.label_map = self.dataset.annotation_provider.metadata.get('label_map')
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
@@ -479,12 +486,20 @@ class ModelEvaluator(BaseEvaluator):
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
+            if evaluated_metric.profiling_file and str(evaluated_metric.profiling_file).endswith('.json'):
+                result, meta = result_presenter.extract_result(evaluated_metric)
+                write_summary_result(
+                    result, meta, Path(self.metric_executor.profiler_dir) / evaluated_metric.profiling_file,
+                    self.dataset.labels
+                )
+
         return self._metrics_results
 
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
+                                ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting)
+            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
 
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
@@ -497,17 +512,17 @@ class ModelEvaluator(BaseEvaluator):
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting)
+                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
         return extracted_results, extracted_meta
 
-    def print_metrics_results(self, ignore_results_formatting=False):
+    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting)
+            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting)
+            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
     def load(self, stored_predictions, progress_reporter):
         launcher = self.launcher
@@ -543,9 +558,12 @@ class ModelEvaluator(BaseEvaluator):
         store_only = config.get('store_only', False)
         enable_profiling = config.get('profile', False)
         profile_type = 'json' if output_callback and enable_profiling else config.get('profile_report_type')
+        profile_log_dir = config.get('profiler_log_dir', self.dataset.config.get('_profiler_log_dir'))
         if enable_profiling:
             if not store_only:
                 self.metric_executor.enable_profiling(self.dataset, profile_type)
+                self.metric_executor.set_processing_info(self.get_processing_info(self.config))
+                self.metric_executor.set_profiling_dir(profile_log_dir or self.metric_executor.profiler_dir)
             else:
                 warning("Metric profiling disabled for prediction storing mode")
                 enable_profiling = False
@@ -557,7 +575,9 @@ class ModelEvaluator(BaseEvaluator):
         if compute_intermediate_metric_res:
             metric_interval = config.get('metrics_interval', 1000)
             ignore_results_formatting = config.get('ignore_results_formatting', False)
-        return enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting
+        ignore_metric_reference = config.get('ignore_metric_reference', False)
+        return (enable_profiling, compute_intermediate_metric_res, metric_interval, ignore_results_formatting,
+                ignore_metric_reference)
 
     @staticmethod
     def store_predictions(stored_predictions, predictions):
@@ -569,6 +589,15 @@ class ModelEvaluator(BaseEvaluator):
     def _reset_stored_predictions(stored_predictions):
         with open(stored_predictions, 'wb'):
             print_info("File {} will be cleared for storing predictions".format(stored_predictions))
+
+    def _switch_to_sync(self):
+        if (
+                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
+                self.preprocessor.has_multi_infer_transformations or self.dataset.multi_infer
+        ):
+            return True
+
+        return False
 
     @property
     def dataset_size(self):
