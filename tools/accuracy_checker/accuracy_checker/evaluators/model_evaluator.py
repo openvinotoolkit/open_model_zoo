@@ -493,7 +493,8 @@ class ModelEvaluator(BaseEvaluator):
             if evaluated_metric.profiling_file and str(evaluated_metric.profiling_file).endswith('.json'):
                 result, meta = result_presenter.extract_result(evaluated_metric)
                 write_summary_result(
-                    result, meta, Path(self.metric_executor.profiler_dir) / evaluated_metric.profiling_file
+                    result, meta, Path(self.metric_executor.profiler_dir) / evaluated_metric.profiling_file,
+                    self.dataset.labels
                 )
 
         return self._metrics_results

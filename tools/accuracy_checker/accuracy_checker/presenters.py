@@ -174,6 +174,7 @@ class VectorPrintPresenter(BasePresenter):
             target_for_value = target_per_value.get(orig_name, target)
             meta_for_value = deepcopy(meta)
             meta_for_value['target'] = target_for_value
+            meta_for_value['class_name'] = orig_name
             per_value_meta.append(meta_for_value)
         results = []
         for idx, value_item in enumerate(value):

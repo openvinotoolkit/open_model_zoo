@@ -79,6 +79,9 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         if self.profiler:
             self.summary_helper = ClassificationProfilingSummaryHelper()
 
+    def set_profiler(self, profiler):
+        self.profiler = profiler
+        self.summary_helper = ClassificationProfilingSummaryHelper()
 
     def update(self, annotation, prediction):
         if not self.match:
@@ -187,7 +190,7 @@ class ClassificationProfilingSummaryHelper:
         return summary
 
     def cm(self):
-        num_labels = np.max(self.gt) + 1
+        num_labels = max(np.max(self.gt) + 1, np.max(self.pred) + 1)
         cm = np.zeros((num_labels, num_labels))
         for gt, pred in zip(self.gt, self.pred):
             cm[gt][pred] += 1
@@ -229,9 +232,7 @@ class ClassificationProfilingSummaryHelper:
         return plot.T, area
 
     def pr_curve(self, gt, pred):
-        chart, area = self.roc_curve(
-            gt, pred
-        )
+        chart, area = self.roc_curve(gt, pred)
         fps, tps, _ = chart.T
 
         precision = tps / (tps + fps)
@@ -334,6 +335,9 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
             self.profiler.reset()
         self.accuracy.reset()
 
+    def set_profiler(self, profiler):
+        self.profiler = profiler
+        self.summary_helper = ClassificationProfilingSummaryHelper()
 
 class AverageProbMeter(AverageMeter):
     def __init__(self):
@@ -459,6 +463,10 @@ class ClassificationF1Score(PerImageEvaluationMetric):
         self.cm = np.zeros((len(self.labels), len(self.labels)))
         if self.profiler:
             self.profiler.reset()
+
+    def set_profiler(self, profiler):
+        self.profiler = profiler
+        self.summary_helper = ClassificationProfilingSummaryHelper()
 
 
 class MetthewsCorrelation(PerImageEvaluationMetric):
