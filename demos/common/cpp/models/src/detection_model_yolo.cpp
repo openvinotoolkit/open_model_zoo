@@ -119,7 +119,7 @@ void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 
     if(!isRegionFound)
     {
-        yoloVersion = this->modelFileName.find("_tiny") != std::string::npos ? YOLO_V4_TINY : YOLO_V4;
+        yoloVersion = this->modelFileName.find("-tiny") != std::string::npos ? YOLO_V4_TINY : YOLO_V4;
 
         int num = 3;
         int i = 0;
