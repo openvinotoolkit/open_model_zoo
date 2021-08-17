@@ -248,6 +248,7 @@ class ClassificationProfilingSummaryHelper:
         precision = tps / (tps + fps)
         precision[np.isnan(precision)] = 0
         recall = tps / tps[-1]
+        recall[np.isnan(recall)] = 0
         last_ind = tps.searchsorted(tps[-1])
         sl = slice(last_ind, None, -1)
         area = self.precision_recall_auc(np.r_[precision[sl], 1], np.r_[recall[sl], 0])

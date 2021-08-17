@@ -51,7 +51,7 @@ class ClassificationMetricProfiler(MetricProfiler):
             return self._last_profile
         if 'prediction_scores' not in self.fields and self.report_type == 'json' and prediction_scores is not None:
             self.fields.append('prediction_scores')
-        result_name = '{}_result'.format(metric_name) if not self.report_type == 'json' else 'result'
+        result_name = '{}_result'.format(metric_name) if self.report_type != 'json' else 'result'
         result = {
             'identifier': identifier,
             'annotation_label': int(annotation_label),
