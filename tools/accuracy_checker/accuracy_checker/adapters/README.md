@@ -452,6 +452,7 @@ AccuracyChecker supports following set of adapters:
   * `inverse_acoustic_scale` - inverse acoustic scale for lattice scaling (Optional, default `0`).
   * `word_insertion_penalty` - add word insertion penalty to the lattice. Penalties are negative log-probs, base e, and are added to the language model' part of the cost (Optional, `0`).
 * `kaldi_feat_regression` - converts output features from kaldi models to `RegressionPrediction` with merging whole matrix features and making deprocessing according context window size, if it is necessary.
+  * `target_out` - name of target output layer for regression (Optional, if not provided, the first output will be used).
 * `quantiles_predictor` - converts output of Time Series Forecasting models to `TimeSeriesForecastingQuantilesPrediction`.
   * `quantiles` - predictions[i]->quantile[i] mapping.
   * `output_name` - name of output node to convert.
