@@ -381,10 +381,14 @@ NATIVE_DEMOS = [
                 ModelArg('person-reidentification-retail-0288')),
         *combine_cases(
 <<<<<<< HEAD
+<<<<<<< HEAD
             TestCase(options={'-at': 'yolo', '-person_label': '0'}),
 =======
             TestCase(options={'-at': 'yolo','-person_label':0}),
 >>>>>>> ab78d96a8 (add key person_label and tests)
+=======
+            TestCase(options={'-at': 'yolo', '-person_label': 0}),
+>>>>>>> 58eee205d (missing whitespace)
             single_option_cases('-m_det',
                 ModelArg('yolo-v3-tf'))),
             single_option_cases('-m_reid',
@@ -394,10 +398,14 @@ NATIVE_DEMOS = [
                 ModelArg('person-reidentification-retail-0288')),
         *combine_cases(
 <<<<<<< HEAD
+<<<<<<< HEAD
             TestCase(options={'-at': 'ssd', '-person_label': '1'}),
 =======
             TestCase(options={'-at': 'ssd','-person_label':1}),
 >>>>>>> ab78d96a8 (add key person_label and tests)
+=======
+            TestCase(options={'-at': 'ssd', '-person_label': 1}),
+>>>>>>> 58eee205d (missing whitespace)
             single_option_cases('-m_det',
                 ModelArg('retinanet-tf'))),
             single_option_cases('-m_reid',
@@ -407,10 +415,14 @@ NATIVE_DEMOS = [
                 ModelArg('person-reidentification-retail-0288')),
         *combine_cases(
 <<<<<<< HEAD
+<<<<<<< HEAD
             TestCase(options={'-at': 'centernet', '-person_label': '0'}),
 =======
             TestCase(options={'-at': 'centernet','-person_label':0}),
 >>>>>>> ab78d96a8 (add key person_label and tests)
+=======
+            TestCase(options={'-at': 'centernet', '-person_label': 0}),
+>>>>>>> 58eee205d (missing whitespace)
             single_option_cases('-m_det',
                 ModelArg('ctdet_coco_dlav0_512'))),
             single_option_cases('-m_reid',
