@@ -233,6 +233,10 @@ class ClassificationProfilingSummaryHelper:
         threshold_idxs = np.r_[distinct_value_indices, y_true.size - 1]
         tps = np.cumsum(y_true)[threshold_idxs]
         fps = 1 + threshold_idxs - tps
+        if max(fps) > 0:
+            fps /= fps[-1]
+        if max(tps) > 0:
+            tps /= tps[-1]
         plot = np.array([fps, tps, y_score[threshold_idxs]])
         area = self.roc_auc_score(fps, tps)
         return plot.T, area
