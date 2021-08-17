@@ -498,7 +498,7 @@ def compute_precision_recall(thresholds, matching_results):
     fps = np.logical_and(np.logical_not(dtm), np.logical_not(dt_ignored))
     tp_sum = np.cumsum(tps, axis=1).astype(dtype=float)
     fp_sum = np.cumsum(fps, axis=1).astype(dtype=float)
-    num_images = np.sum([np.size(e['gt']) != 0 for e in matching_results])
+    num_images = np.sum([np.size(e['gt_ignore']) != 0 for e in matching_results])
     if npig == 0:
         return np.nan, np.nan, np.array([]), np.array([]), [False], [False], num_images
     precisions, recalls = [], []
