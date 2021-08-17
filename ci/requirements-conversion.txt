@@ -54,7 +54,7 @@ keras-preprocessing==1.1.2
     # via tensorflow
 markdown==3.3.4
     # via tensorboard
-mxnet==1.7.0.post2 ; sys_platform != "win32"
+mxnet==1.7.0.post2
     # via -r ${INTEL_OPENVINO_DIR}/deployment_tools/model_optimizer/requirements_mxnet.txt
 networkx==2.5.1
     # via
