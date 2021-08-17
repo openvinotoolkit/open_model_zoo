@@ -41,7 +41,7 @@ class InstanceSegmentationProfiler(MetricProfiler):
 
         if self.report_type == 'json':
             report = self.generate_json_report(identifier, metric_result, metric_name)
-            report['{}_result'.format(metric_name)] = final_score
+            report['result'] = final_score
             return report
 
         if isinstance(report, list):

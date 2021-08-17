@@ -43,7 +43,7 @@ class DetectionProfiler(MetricProfiler):
 
         if self.report_type == 'json':
             report = self.generate_json_report(identifier, metric_result, metric_name)
-            report['{}_result'.format(metric_name)] = final_score if not np.isnan(final_score) else -1
+            report['result'] = final_score if not np.isnan(final_score) else -1
             return report
 
         if isinstance(report, list):
