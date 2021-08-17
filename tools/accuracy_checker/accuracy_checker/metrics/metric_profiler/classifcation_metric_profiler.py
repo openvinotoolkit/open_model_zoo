@@ -18,16 +18,23 @@ import numpy as np
 from .base_profiler import MetricProfiler
 
 
-def preprocess_prediction_list(prediction_label, data_type=int):
+def preprocess_prediction_list(prediction_label, data_type=int, to_scalar=False):
     if np.isscalar(prediction_label):
-        pred_label = [data_type(prediction_label)]
+        pred_label = [data_type(prediction_label)] if not to_scalar else data_type(prediction_label)
     else:
         if np.shape(prediction_label):
+            if to_scalar and np.size(prediction_label) == 1:
+                return data_type(prediction_label[0])
             pred_label = (
                 prediction_label.astype(data_type).tolist()
             )
         else:
             pred_label = prediction_label.astype(data_type)
+            if np.size(prediction_label) == 1 and to_scalar:
+                if np.ndim(prediction_label) == 0:
+                    return prediction_label.tolist()
+                return prediction_label[0]
+
             pred_label = [pred_label.tolist()] if isinstance(prediction_label, type(np.array(0))) else ''
     return pred_label
 
@@ -44,11 +51,12 @@ class ClassificationMetricProfiler(MetricProfiler):
             return self._last_profile
         if 'prediction_scores' not in self.fields and self.report_type == 'json' and prediction_scores is not None:
             self.fields.append('prediction_scores')
+        result_name = '{}_result'.format(metric_name) if not self.report_type == 'json' else 'result'
         result = {
             'identifier': identifier,
             'annotation_label': int(annotation_label),
             'prediction_label': preprocess_prediction_list(prediction_label),
-            '{}_result'.format(metric_name): preprocess_prediction_list(metric_result, float)
+            result_name: preprocess_prediction_list(metric_result, float, to_scalar=True)
         }
         if self.report_type == 'json':
             result['prediction_scores'] = preprocess_prediction_list(prediction_scores, float)
@@ -67,7 +75,7 @@ class CharRecognitionMetricProfiler(MetricProfiler):
             'identifier': identifier,
             'annotation_label': int(annotation_label),
             'prediction_label': preprocess_prediction_list(prediction_label),
-            '{}_result'.format(metric_name): preprocess_prediction_list(metric_result, float)
+            '{}_result'.format(metric_name): preprocess_prediction_list(metric_result, float, to_scalar=True)
         }
 
 

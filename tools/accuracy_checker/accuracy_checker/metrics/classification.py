@@ -165,9 +165,12 @@ class ClassificationProfilingSummaryHelper:
                 'precision': precision.mean(),
                 'recall': recall.mean(),
                 'f1_score': f1_score.mean(),
-                'roc_auc': avg_roc_auc,
-                'precision_recall_area': average_pr_area,
-                'charts': {'roc': average_roc.tolist(), 'precision_recall': average_pr_chart.tolist()},
+                'charts': {
+                    'roc': average_roc.tolist(),
+                    'precision_recall': average_pr_chart.tolist(),
+                    'roc_auc': avg_roc_auc,
+                    'precision_recall_area': average_pr_area,
+                },
                 'num_objects': np.sum(cm_horizontal_sum)
             },
             'per_class_result': {}
@@ -179,12 +182,15 @@ class ClassificationProfilingSummaryHelper:
                 'precision': precision[i],
                 'recall': recall[i],
                 'f1_score': f1_score[i],
-                'roc_auc': per_class_auc[i],
-                'precision_recall_area': per_class_pr_area[i],
                 'result_scale': 100,
                 'result_postfix': '%',
                 'num_objects': cm_horizontal_sum[i],
-                'charts': {'roc': per_class_roc[i].tolist(), 'precision_recall': per_class_pr_chart[i].tolist()}
+                'charts': {
+                    'roc': per_class_roc[i].tolist(),
+                    'precision_recall': per_class_pr_chart[i].tolist(),
+                    'roc_auc': per_class_auc[i],
+                    'precision_recall_area': per_class_pr_area[i]
+                }
             }
         summary['per_class_result'].update(per_class_result)
         return summary
