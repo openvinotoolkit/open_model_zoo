@@ -235,14 +235,15 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
             recall_v.append(recall[-1][-1])
             precision.append(stat['precision'])
             precision_v.append(precision[-1][-1])
-            approx_recall = np.linspace(0, 1, 100, endpoint=True)
-            approx_precision = np.interp(approx_recall, recall[-1], precision[-1])
-            approx_pr_recall.append([approx_precision, approx_recall])
             fppi = 1 - precision[-1]
             mr = stat['miss_rate']
-            approx_fppi = np.linspace(0, 1, 100, endpoint=True)
-            approx_mr = np.interp(approx_fppi, fppi, mr)
-            approx_fppi_miss_rate.append([approx_fppi, approx_mr])
+            if np.size(recall[-1]) and np.size(precision[-1]):
+                approx_recall = np.linspace(0, 1, 100, endpoint=True)
+                approx_precision = np.interp(approx_recall, recall[-1], precision[-1])
+                approx_pr_recall.append([approx_precision, approx_recall])
+                approx_fppi = np.linspace(0, 1, 100, endpoint=True)
+                approx_mr = np.interp(approx_fppi, fppi, mr)
+                approx_fppi_miss_rate.append([approx_fppi, approx_mr])
             pr = np.array([precision[-1], recall[-1]]).T
             fm = np.array([fppi, mr]).T
             fppi_tmp = np.insert(fppi, 0, -1.0)

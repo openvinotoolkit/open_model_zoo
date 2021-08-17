@@ -175,12 +175,13 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
             mr = 1 - recalls[0]
             pr = np.array([precisions[0], recalls[0]]).T
             fm = np.array([fppi, mr]).T
-            approx_recall = np.linspace(0, 1, 100, endpoint=True)
-            approx_precision = np.interp(approx_recall, recalls[0], precisions[0])
-            approx_pr_recall.append([approx_precision, approx_recall])
-            approx_fppi = np.linspace(0, 1, 100, endpoint=True)
-            approx_mr = np.interp(approx_fppi, fppi, mr)
-            approx_fppi_miss_rate.append([approx_fppi, approx_mr])
+            if np.size(recalls[0]) and np.size(precisions[0]):
+                approx_recall = np.linspace(0, 1, 100, endpoint=True)
+                approx_precision = np.interp(approx_recall, recalls[0], precisions[0])
+                approx_pr_recall.append([approx_precision, approx_recall])
+                approx_fppi = np.linspace(0, 1, 100, endpoint=True)
+                approx_mr = np.interp(approx_fppi, fppi, mr)
+                approx_fppi_miss_rate.append([approx_fppi, approx_mr])
             fppi_tmp = np.insert(fppi, 0, -1.0)
             mr_tmp = np.insert(mr, 0, 1.0)
             ref = np.logspace(-2.0, 0.0, num=9)
@@ -497,7 +498,7 @@ def compute_precision_recall(thresholds, matching_results):
     fps = np.logical_and(np.logical_not(dtm), np.logical_not(dt_ignored))
     tp_sum = np.cumsum(tps, axis=1).astype(dtype=float)
     fp_sum = np.cumsum(fps, axis=1).astype(dtype=float)
-    num_images = np.sum([np.size(e['gt']) != 0 for e in matching_results])
+    num_images = np.sum([np.size(e['gt_ignore']) != 0 for e in matching_results])
     if npig == 0:
         return np.nan, np.nan, np.array([]), np.array([]), [False], [False], num_images
     precisions, recalls = [], []

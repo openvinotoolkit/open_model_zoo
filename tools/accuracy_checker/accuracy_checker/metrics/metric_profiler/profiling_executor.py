@@ -34,7 +34,7 @@ def write_summary_result(result, meta, out_path, label_map):
                     continue
                 class_name = r_meta.get('class_name', res['name'])
                 class_id = reversed_label_map.get(class_name, class_name)
-                per_class_result[class_id] = {
+                per_class_result[str(class_id)] = {
                     'result': res['value'],
                     'result_scale': r_meta.get('scale', 100), 'result_postfix': r_meta.get('postfix', '%'),
                     'metric_target': r_meta['target']
