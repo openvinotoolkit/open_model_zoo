@@ -48,13 +48,13 @@ const std::vector<int64_t> defaultMasks[] = {
 
 ModelYolo::ModelYolo(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
     bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels,
-    const std::vector<float>& rawAnchors, const std::vector<int64_t>& rawMasks) :
+    const std::vector<float>& anchors, const std::vector<int64_t>& masks) :
     DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels),
     boxIOUThreshold(boxIOUThreshold),
     useAdvancedPostprocessing(useAdvancedPostprocessing),
     yoloVersion(YOLO_V3),
-    presetAnchors(rawAnchors),
-    presetMasks(rawMasks) {
+    presetAnchors(anchors),
+    presetMasks(masks) {
 }
 
 void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
@@ -119,7 +119,7 @@ void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 
     if(!isRegionFound)
     {
-        yoloVersion = YOLO_V4_TINY;
+        yoloVersion = this->modelFileName.find("_tiny") != std::string::npos ? YOLO_V4_TINY : YOLO_V4;
 
         int num = 3;
         int i = 0;
@@ -131,7 +131,7 @@ void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
         }
 
         std::sort(outputsNames.begin(), outputsNames.end(),
-            [&outputInfo](auto& x, auto& y) {return outputInfo[x]->getDims()[2] > outputInfo[y]->getDims()[2];});
+            [&outputInfo](const std::string& x, const std::string&  y) {return outputInfo[x]->getDims()[2] > outputInfo[y]->getDims()[2];});
 
         for (const auto& name : outputsNames) {
             auto& output = outputInfo[name];
@@ -145,6 +145,13 @@ void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
                 std::vector<int64_t>(chosenMasks.begin() + i*num, chosenMasks.begin() + (i+1)*num),
                 shape[3], shape[2]));
             i++;
+        }
+    }
+    else {
+        // Currently externally set anchors and masks are supported only for YoloV4
+        if(presetAnchors.size() || presetMasks.size()){
+            slog::warn << "Preset anchors and mask can be set for YoloV4 model only. "
+                "This model is not YoloV4, so these options will be ignored." << slog::endl;
         }
     }
 }
@@ -176,7 +183,7 @@ std::unique_ptr<ResultBase> ModelYolo::postprocess(InferenceResult & infResult) 
             }
             if (isGoodResult) {
                 result->objects.push_back(obj1);
-            }
+            } 
         }
     } else {
         // Classic postprocessing
@@ -250,9 +257,6 @@ void ModelYolo::parseYOLOOutput(const std::string& output_name,
                 double y = (row + postprocessRawData(output_blob[box_index + 1 * entriesNum])) / sideH * original_im_h;
                 double height = std::exp(output_blob[box_index + 3 * entriesNum]) * region.anchors[2 * n + 1] * original_im_h / scaleH;
                 double width = std::exp(output_blob[box_index + 2 * entriesNum]) * region.anchors[2 * n] * original_im_w / scaleW;
-
-                double height2 = std::exp(output_blob[box_index + 3 * entriesNum]) * region.anchors[2 * n + 1] / scaleH;
-                double width2 = std::exp(output_blob[box_index + 2 * entriesNum]) * region.anchors[2 * n] / scaleW;
 
                 DetectedObject obj;
                 obj.x = (float)std::max((x-width/2), 0.);
