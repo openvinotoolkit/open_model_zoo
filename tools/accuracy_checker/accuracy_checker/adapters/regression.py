@@ -96,12 +96,14 @@ class KaldiFeatsRegression(Adapter):
     def parameters(cls):
         params = super().parameters()
         params.update({
-            'target_out': StringField(optional=True, description='target output name')
+            'target_out': StringField(optional=True, description='target output name'),
+            'flattenize': BoolField(optional=True, description='make output flatten')
         })
         return params
 
     def configure(self):
         self.target_out = self.get_value_from_config('target_out')
+        self.flattenize = self.get_value_from_config('flattenize')
 
     def process(self, raw, identifiers, frame_meta):
         """
@@ -118,6 +120,8 @@ class KaldiFeatsRegression(Adapter):
 
         result = []
         for identifier, output in zip(identifiers, predictions):
+            if self.flattenize:
+                output = output.flatten()
             prediction = RegressionPrediction(identifier, output)
             result.append(prediction)
 
