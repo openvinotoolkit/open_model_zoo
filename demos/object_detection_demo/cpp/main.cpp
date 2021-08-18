@@ -127,8 +127,8 @@ static void showUsage() {
     std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
     std::cout << "    -yolo_af                  " << yolo_af_message << std::endl;
-    std::cout << "    -anchors             "      << anchors_message << std::endl;
-    std::cout << "    -masks               "      << masks_message << std::endl;
+    std::cout << "    -anchors                  "      << anchors_message << std::endl;
+    std::cout << "    -masks                    "      << masks_message << std::endl;
 }
 
 class ColorPalette {
