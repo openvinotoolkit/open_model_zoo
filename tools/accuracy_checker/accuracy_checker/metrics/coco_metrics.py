@@ -196,10 +196,10 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
             lamrs.append(lamr)
             total_objects_cnt += len(recall[-1])
             per_class_summary[label_idx] = {
-                'precision': precision_v_,
-                'recall': recall_v_,
-                'result': precision_v_,
-                'ap': ap_v,
+                'precision': precision_v_ if not np.isnan(precision_v_) else -1,
+                'result': precision_v_ if not np.isnan(precision_v_) else -1,
+                'recall': recall_v_ if not np.isnan(recall_v_) else -1,
+                'ap': ap_v if not np.isnan(ap_v) else -1,
                 "scale": 100,
                 "result_postfix": "%",
                 'objects_count': len(recall[-1]),
@@ -214,10 +214,10 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
         precision_res = np.nanmean(precision_v)
         return {
             'summary_result': {
-                'result': precision_res,
-                'precision': precision_res,
-                'recall': recall_res,
-                'ap': ap_res,
+                'result': precision_res if not np.isnan(precision_res) else -1,
+                'precision': precision_res if not np.isnan(precision_res) else -1,
+                'recall': recall_res if not np.isnan(recall_res) else -1,
+                'ap': ap_res if not np.isnan(ap_res) else -1,
                 'result_scale': 100,
                 'result_postfix': '%',
                 'charts': {

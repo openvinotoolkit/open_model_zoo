@@ -232,9 +232,9 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
                 continue
             ap.append(stat['result'])
             recall.append(stat['recall'])
-            recall_v.append(recall[-1][-1])
+            recall_v.append(recall[-1][-1] if np.size(recall[-1]) else np.NAN),
             precision.append(stat['precision'])
-            precision_v.append(precision[-1][-1])
+            precision_v.append(precision[-1][-1] if np.size(precision[-1]) else np.NAN),
             fppi = 1 - precision[-1]
             mr = stat['miss_rate']
             if np.size(recall[-1]) and np.size(precision[-1]):
@@ -260,9 +260,9 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
             lamrs.append(lamr)
             total_objects_cnt += len(recall[-1])
             per_class_summary[label_idx] = {
-                'precision': precision[-1][-1],
-                'recall': recall[-1][-1],
-                'result': ap[-1],
+                'precision': precision[-1][-1] if np.size(precision[-1]) else -1,
+                'recall': recall[-1][-1] if np.size(recall[-1]) else -1,
+                'result': ap[-1] if not np.isnan(ap[-1]) else -1,
                 "scale": 100,
                 "result_postfix": "%",
                 'objects_count': len(recall[-1]),
