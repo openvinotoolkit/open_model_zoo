@@ -197,6 +197,7 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
             total_objects_cnt += len(recall[-1])
             per_class_summary[label_idx] = {
                 'precision': precision_v_ if not np.isnan(precision_v_) else -1,
+                'result': precision_v_ if not np.isnan(precision_v_) else -1,
                 'recall': recall_v_ if not np.isnan(recall_v_) else -1,
                 'ap': ap_v if not np.isnan(ap_v) else -1,
                 "scale": 100,
