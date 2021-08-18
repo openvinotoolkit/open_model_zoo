@@ -22,3 +22,5 @@ models:
         metrics:
           - type: mean_iou
             use_argmax: false
+            ignore_label: 11
+            presenter: print_vector
