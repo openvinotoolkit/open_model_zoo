@@ -68,9 +68,9 @@ static const char iou_thresh_output_message[] = "Optional. Filtering intersectio
 static const char yolo_af_message[] = "Optional. Use advanced postprocessing/filtering algorithm for YOLO.";
 static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
     "in (width x height) format. Example: 1280x720. Input frame size used by default.";
-static const char anchors_message[] = "Optional. A space separated list of anchors. "
+static const char anchors_message[] = "Optional. A comma separated list of anchors. "
     "By default used default anchors for model. Only for YOLOV4 architecture type.";
-static const char masks_message[] = "Optional. A space separated list of mask for anchors. "
+static const char masks_message[] = "Optional. A comma separated list of mask for anchors. "
     "By default used default masks for model. Only for YOLOV4 architecture type.";
 
 DEFINE_bool(h, false, help_message);

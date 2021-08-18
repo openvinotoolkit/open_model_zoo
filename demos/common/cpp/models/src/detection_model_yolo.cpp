@@ -25,14 +25,14 @@ std::vector<float> defaultAnchors[] = {
     // YOLOv3
     { 10.0f, 13.0f, 16.0f, 30.0f, 33.0f, 23.0f,
       30.0f, 61.0f, 62.0f, 45.0f, 59.0f, 119.0f,
-      116.0, 90.0, 156.0, 198.0, 373.0, 326.0},
+      116.0f, 90.0f, 156.0f, 198.0f, 373.0f, 326.0f},
     // YOLOv4
-    { 12.0, 16.0, 19.0, 36.0, 40.0, 28.0,
-      36.0, 75.0, 76.0, 55.0, 72.0, 146.0,
-      142.0, 110.0, 192.0, 243.0, 459.0, 401.0},
+    { 12.0f, 16.0f, 19.0f, 36.0f, 40.0f, 28.0f,
+      36.0f, 75.0f, 76.0f, 55.0f, 72.0f, 146.0f,
+      142.0f, 110.0f, 192.0f, 243.0f, 459.0f, 401.0f},
     // YOLOv4_Tiny
-    { 10.0, 14.0, 23.0, 27.0, 37.0, 58.0,
-      81.0, 82.0, 135.0, 169.0, 344.0, 319.0}
+    { 10.0f, 14.0f, 23.0f, 27.0f, 37.0f, 58.0f,
+      81.0f, 82.0f, 135.0f, 169.0f, 344.0f, 319.0f}
 };
 
 const std::vector<int64_t> defaultMasks[] = {
@@ -45,6 +45,14 @@ const std::vector<int64_t> defaultMasks[] = {
     // YOLOv4_Tiny
     {1, 2, 3, 3, 4, 5}
 };
+
+static inline float sigmoid(float x) {
+    return 1.f / (1.f + exp(-x));
+}
+static inline float linear(float x) {
+    return x;
+}
+
 
 ModelYolo::ModelYolo(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
     bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels,
@@ -119,7 +127,7 @@ void ModelYolo::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
 
     if(!isRegionFound)
     {
-        yoloVersion = this->modelFileName.find("-tiny") != std::string::npos ? YOLO_V4_TINY : YOLO_V4;
+        yoloVersion = outputsNames.size() == 2 ? YOLO_V4_TINY : YOLO_V4;
 
         int num = 3;
         int i = 0;
