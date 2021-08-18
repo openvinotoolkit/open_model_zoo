@@ -234,7 +234,7 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
             recall.append(stat['recall'])
             recall_v.append(recall[-1][-1] if np.size(recall[-1]) else np.NAN)
             precision.append(stat['precision'])
-            precision_v.append(precision[-1][-1] if np.size(precision[-1]) else np.NAN),
+            precision_v.append(precision[-1][-1] if np.size(precision[-1]) else np.NAN)
             fppi = 1 - precision[-1]
             mr = stat['miss_rate']
             if np.size(recall[-1]) and np.size(precision[-1]):
