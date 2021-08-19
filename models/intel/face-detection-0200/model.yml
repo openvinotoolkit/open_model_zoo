@@ -16,29 +16,132 @@ description: >-
   Face Detection based on MobileNetV2 (SSD).
 task_type: detection
 files:
-  - name: FP32/face-detection-0200.xml
-    size: 200411
-    sha256: d2febaf2d9a7b12fe624af356e0d4e69721183b3d243b909c70490167b712869
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-0200/FP32/face-detection-0200.xml
-  - name: FP32/face-detection-0200.bin
-    size: 7269168
-    sha256: 7d95167a92652b22e11f5894c3a089d1559f18788ac93fb4aa4f292c33e8da22
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-0200/FP32/face-detection-0200.bin
-  - name: FP16/face-detection-0200.xml
-    size: 200348
-    sha256: 9be21e3c2052c0c065ead53e1752b3758f3e115f905006672869c80dbfa28540
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-0200/FP16/face-detection-0200.xml
-  - name: FP16/face-detection-0200.bin
-    size: 3634626
-    sha256: 74faab1e2d7b7133ea1141d5004b1ebb2c1f0a4bfcbfff536750dca4ed29ef0a
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-0200/FP16/face-detection-0200.bin
-  - name: FP16-INT8/face-detection-0200.xml
-    size: 482487
-    sha256: 6137d4d3a12c68aefebfe521bf68847c53e395d9e0e234aadac9bfb93834c85b
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-0200/FP16-INT8/face-detection-0200.xml
-  - name: FP16-INT8/face-detection-0200.bin
-    size: 1921614
-    sha256: f5ebdefda7fe9efc2ed0192ed118b3f8281cc310298bb440ce9f6b697af9ced8
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-detection-0200/FP16-INT8/face-detection-0200.bin
-framework: dldt
+  - name: model/export.py
+    size: 1526
+    sha256: 24dd06701d54feec4e4c5f8a81ad0b0c956cd99e07ea6857fb0c71083a8bdc9d
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/tools/export.py
+  # configuration of model
+  - name: model/modules.yaml
+    size: 214
+    sha256: 6ef37f55b166bf55f4cf91f270cf4ed293501d2f4c5a95158b0e5c6321e7a44c
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/models/object_detection/model_templates/face-detection/face-detection-0200/modules.yaml
+  - name: model/template.yaml
+    size: 1982
+    sha256: 5b0f0947e3b1986788d6838d5854aadb8d9f74df9e26bc0f9df451df18152319
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/models/object_detection/model_templates/face-detection/face-detection-0200/template.yaml
+  - name: model/model.py
+    size: 4348
+    sha256: e8a13d959ad9c3c8c2efa1c33c905e62c6cea0862a48b7f8cbb6892efaed23b4
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/models/object_detection/model_templates/face-detection/face-detection-0200/model.py
+  # ote lib
+  - name: model/ote/__init__.py
+    size: 745
+    sha256: cee512a1827e8ee4edd26ef4c12c20aebd0bd9a4824aea4bbf0035d6ec2a3db3
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/__init__.py
+  - name: model/ote/api.py
+    size: 7373
+    sha256: a4b1ab8105f7550fe9ece40ec1b749e6fd1429c90ddf9f55603aac6f37fad47a
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/api.py
+  - name: model/ote/modules/__init__.py
+    size: 2201
+    sha256: ef5a895ec029a6caca140d3eca5d1e4f342409864514a778e418455a282dab4b
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/__init__.py
+  - name: model/ote/modules/registry.py
+    size: 850
+    sha256: 0ee49715a752e7498604225590d9b350005d1b8fcd3938ed9eb76f55d758dc51
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/registry.py
+  - name: model/ote/modules/builder.py
+    size: 1783
+    sha256: 4393691a5b4014c21c16198136ef161eb63a01430d3b90a937f3a57daef0b6e6
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/builder.py
+  - name: model/ote/modules/arg_converters/__init__.py
+    size: 481
+    sha256: 3e6f38a06d9707003802a5fd1fa90872dcbb439a598c40ee0a7cfb0bf77e619a
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/arg_converters/__init__.py
+  - name: model/ote/modules/arg_converters/base.py
+    size: 10592
+    sha256: 3115ff461e4182d3dbef8d19e34fea6f6e6c539aa32a39a2a342c2f93e3d5f0c
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/arg_converters/base.py
+  - name: model/ote/modules/arg_converters/mmdetection.py
+    size: 6646
+    sha256: 88b8a3f1bc2386830eaf842ac922e1dc96adf56cc468b8e08d2bc8211b27816c
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/arg_converters/mmdetection.py
+  - name: model/ote/modules/arg_converters/face_detection.py
+    size: 958
+    sha256: 5ab16290c8d8ece6572c368c887f9ab8bd620e39207ca069d93d87f6b648f704
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/arg_converters/face_detection.py
+  - name: model/ote/modules/arg_parsers/__init__.py
+    size: 289
+    sha256: b83178e4ce2a06d66e5ca402f50bb50e2d8509a966656e42ebf1a970bb7d107c
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/arg_parsers/__init__.py
+  - name: model/ote/modules/arg_parsers/face_detector.py
+    size: 1121
+    sha256: bd7046349fa6b35cbe989228dd343646bc8b310caf87b06ac35c478ee28374b9
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/arg_parsers/face_detector.py
+  - name: model/ote/modules/arg_parsers/default.py
+    size: 1221
+    sha256: a7b4a6716dcb50e919b4593212fc652a53619fb94922605559ee16b66b82e6ba
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/arg_parsers/default.py
+  - name: model/ote/modules/exporters/__init__.py
+    size: 426
+    sha256: 02ce06f438edcd6b54516ac72174e34b71c42bd8d6f685e9c8708fe9ad6fd3bc
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/exporters/__init__.py
+  - name: model/ote/modules/exporters/base.py
+    size: 1769
+    sha256: 1ef0d18a7acaa04b248fb88c3e13a7fce95d89f3072d4e75ab7e122d1a419ebc
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/exporters/base.py
+  - name: model/ote/modules/exporters/mmdetection.py
+    size: 4758
+    sha256: 3e83fd510a256c33ced99624df79eae84db5f3264954ae70ad186aceee5ac98b
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/modules/exporters/mmdetection.py
+  - name: model/ote/utils/__init__.py
+    size: 326
+    sha256: 08d460f33866553146bbbb3eb7bb4385b56097391113568bc1be7e1d9f14c5b6
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/utils/__init__.py
+  - name: model/ote/utils/loaders.py
+    size: 736
+    sha256: f4a6d086bef21b578dfaf7feb6127b2273de71bfa95c47ce320f49298d4f355c
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/utils/loaders.py
+  - name: model/ote/utils/misc.py
+    size: 6066
+    sha256: ebc5c7134c281a48ca18e7096d366e4e15d07f401d5ce278f9d31464e326327e
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/utils/misc.py
+  - name: model/ote/utils/runners.py
+    size: 2645
+    sha256: 2014bedaf266477309bc8048106d6bf13bf5c191af1e6b3dea0b17e5e246ad01
+    source: https://raw.githubusercontent.com/openvinotoolkit/training_extensions/develop/ote/ote/utils/runners.py
+  # requirments libs
+  - name: model/mmcv-1.3.9.tar.gz
+    size: 313337
+    sha256: 0cde6c6652c80479b66f15575113fec985459dde78f4ea65a2fdbaae5fc1502b
+    source: https://files.pythonhosted.org/packages/7c/76/c32c5bf7eb4a05efd43528dd054c079a43ce0fe14897bd493beb0feac6d2/mmcv-1.3.9.tar.gz
+  # weights
+  # - name: model/snapshot.pth
+  #   size: 14904296
+  #   sha256: 122e194b95ef631f578fac0dc88ba2be7b2ef9d06263ff6e7a69c846990a85f7
+  #   source: https://download.01.org/opencv/openvino_training_extensions/models/object_detection/v2/face-detection-0200.pth
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: model/mmcv-1.3.9.tar.gz
+  
+conversion_to_onnx_args:
+  - --model-path=$config_dir
+  - --model-path=$dl_dir
+  - --model-path=$dl_dir/model/mmcv-1.3.9
+  - --model-name=get_onnx_model
+  - --import-module=model
+  - --model-param=work_dir=r"$dl_dir/model"
+  - --model-param=weights=r"$dl_dir/model/snapshot.pth"
+  - --model-param=onnx_path=r"$conv_dir/face-detection-0200.onnx"
+  - --input-shape=1,1,256,256
+  - --output-file=$conv_dir/colorization-v2-eccv16.onnx
+  - --input-names=data_l
+  - --output-names=color_ab
+model_optimizer_args:
+  - --input_shape=[1,1,256,256]
+  - --input=data_l
+  - --output=color_ab
+  - --input_model=$conv_dir/colorization-v2-eccv16.onnx
+framework: pytorch
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

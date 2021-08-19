@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import git
 import re
 import requests
 
@@ -108,4 +109,9 @@ class FileSourceGoogleDrive(FileSource):
 
         return self.handle_http_response(response, chunk_size)
 
+class FileSourceGit(FileSourceHttp):
+    def start_download(self, session, chunk_size, offset, timeout):
+        git.Repo.clone_from(self.url)
+        return super().start_download(session, chunk_size, offset, timeout)
+    
 FileSource.types['google_drive'] = FileSourceGoogleDrive
