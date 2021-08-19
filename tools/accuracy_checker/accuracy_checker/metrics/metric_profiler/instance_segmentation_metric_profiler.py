@@ -17,6 +17,7 @@ limitations under the License.
 import numpy as np
 from .base_profiler import MetricProfiler
 
+
 class InstanceSegmentationProfiler(MetricProfiler):
     __provider__ = 'instance_segmentation'
 

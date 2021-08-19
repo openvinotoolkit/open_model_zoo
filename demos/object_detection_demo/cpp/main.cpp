@@ -67,6 +67,10 @@ static const char iou_thresh_output_message[] = "Optional. Filtering intersectio
 static const char yolo_af_message[] = "Optional. Use advanced postprocessing/filtering algorithm for YOLO.";
 static const char output_resolution_message[] = "Optional. Specify the maximum output window resolution "
     "in (width x height) format. Example: 1280x720. Input frame size used by default.";
+static const char anchors_message[] = "Optional. A comma separated list of anchors. "
+    "By default used default anchors for model. Only for YOLOV4 architecture type.";
+static const char masks_message[] = "Optional. A comma separated list of mask for anchors. "
+    "By default used default masks for model. Only for YOLOV4 architecture type.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(at, "", at_message);
@@ -86,6 +90,8 @@ DEFINE_bool(no_show, false, no_show_message);
 DEFINE_string(u, "", utilization_monitors_message);
 DEFINE_bool(yolo_af, true, yolo_af_message);
 DEFINE_string(output_resolution, "", output_resolution_message);
+DEFINE_string(anchors, "", anchors_message);
+DEFINE_string(masks, "", masks_message);
 
 /**
 * \brief This function shows a help message
@@ -118,6 +124,8 @@ static void showUsage() {
     std::cout << "    -output_resolution        " << output_resolution_message << std::endl;
     std::cout << "    -u                        " << utilization_monitors_message << std::endl;
     std::cout << "    -yolo_af                  " << yolo_af_message << std::endl;
+    std::cout << "    -anchors                  "      << anchors_message << std::endl;
+    std::cout << "    -masks                    "      << masks_message << std::endl;
 }
 
 class ColorPalette {
@@ -275,6 +283,28 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
+        const auto& strAnchors = split(FLAGS_anchors, ',');
+        const auto& strMasks = split(FLAGS_masks, ',');
+
+        std::vector<float> anchors;
+        std::vector<int64_t> masks;
+        try {
+            for (auto& str : strAnchors) {
+                anchors.push_back(std::stof(str));
+            }
+        } catch(...) {
+            throw std::runtime_error("Invalid anchors list is provided.");
+        }
+
+        try {
+            for (auto& str : strMasks) {
+                masks.push_back(std::stoll(str));
+            }
+        }
+        catch (...) {
+            throw std::runtime_error("Invalid masks list is provided.");
+        }
+
         //------------------------------- Preparing Input ------------------------------------------------------
         auto cap = openImagesCapture(FLAGS_i, FLAGS_loop);
         cv::Mat curr_frame;
@@ -302,7 +332,7 @@ int main(int argc, char *argv[]) {
             model.reset(new ModelSSD(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, labels));
         }
         else if (FLAGS_at == "yolo") {
-            model.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels));
+            model.reset(new ModelYolo(FLAGS_m, (float)FLAGS_t, FLAGS_auto_resize, FLAGS_yolo_af, (float)FLAGS_iou_t, labels, anchors, masks));
         }
         else {
             slog::err << "No model type or invalid model type (-at) provided: " + FLAGS_at << slog::endl;

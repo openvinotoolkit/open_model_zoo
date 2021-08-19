@@ -133,6 +133,8 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
   - yolo-v2-tiny-ava-sparse-60-0001
   - yolo-v2-tiny-tf
   - yolo-v2-tiny-vehicle-detection-0001
+  - yolo-v4-tf
+  - yolo-v4-tiny-tf
 
 > **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
@@ -171,6 +173,8 @@ Options:
     -output_resolution        Optional. Specify the maximum output window resolution in (width x height) format. Example: 1280x720. Input frame size used by default.
     -u                        Optional. List of monitors to show initially.
     -yolo_af                  Optional. Use advanced postprocessing/filtering algorithm for YOLO.
+    -anchors                  Optional. A comma separated list of anchors. By default used default anchors for model. Only for YOLOV4 architecture type.
+    -masks                    Optional. A comma separated list of mask for anchors. By default used default masks for model. Only for YOLOV4 architecture type.                                   [
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
