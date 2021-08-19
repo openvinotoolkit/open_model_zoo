@@ -6,9 +6,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / '../../tools/downloader/src'))
 
-import open_model_zoo.model_tools.common as common
-import open_model_zoo.model_tools.downloader as downloader
-import open_model_zoo.model_tools.converter as converter
+#import open_model_zoo.model_tools.common as common
+#import open_model_zoo.model_tools.downloader as downloader
+#import open_model_zoo.model_tools.converter as converter
 
 class Model:
     def __init__(self, model_name, precision, *, download_dir='models', cache_dir=None):
