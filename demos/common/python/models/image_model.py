@@ -1,5 +1,5 @@
 from .model import Model
-from .utils import resize_image,resize_image_with_aspect, resize_image_letterbox, pad_image
+from .utils import resize_image, resize_image_with_aspect, resize_image_letterbox, pad_image
 
 
 class ImageModel(Model):
@@ -7,7 +7,7 @@ class ImageModel(Model):
         'default': resize_image,
         'keep_aspect_ratio': resize_image_with_aspect,
         'letterbox': resize_image_letterbox,
-        }
+    }
 
     def __init__(self, ie, model_path, input_transform=None, resize_type='default'):
         super().__init__(ie, model_path, input_transform=input_transform)
@@ -44,7 +44,7 @@ class ImageModel(Model):
         if self.resize_type == 'keep_aspect_ratio':
             resized_image = pad_image(resized_image, (self.w, self.h))
         if self.input_transform:
-            resized_image = self.input_transform(resized_image)       
+            resized_image = self.input_transform(resized_image)
         resized_image = self._change_layout(resized_image)
         dict_inputs = {self.image_blob_name: resized_image}
         return dict_inputs, meta
@@ -52,7 +52,7 @@ class ImageModel(Model):
     def _preprocess_single_image(self, image):
         meta = {'original_shape': image.shape}
         resized_image = self.resize(image, (self.w, self.h))
-        resized_image = self.input_transform(resized_image)       
+        resized_image = self.input_transform(resized_image)
         resized_image = self._change_layout(resized_image)
         meta.update({'resized_shape': resized_image.shape})
         dict_inputs = {self.image_blob_name: image}

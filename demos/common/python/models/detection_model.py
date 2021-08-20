@@ -3,7 +3,7 @@ from .utils import Detection, load_labels, clip_detections
 
 
 class DetectionModel(ImageModel):
-    def __init__(self, ie, model_path, input_transform=None, resize_type='default', 
+    def __init__(self, ie, model_path, input_transform=None, resize_type='default',
                  labels=None, threshold=None, iou_threshold=None):
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type)
         if isinstance(labels, (list, tuple)):

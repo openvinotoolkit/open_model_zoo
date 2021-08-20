@@ -15,9 +15,8 @@
 """
 import numpy as np
 
-from .model import Model
 from .detection_model import DetectionModel
-from .utils import Detection, resize_image, load_labels, clip_detections
+from .utils import Detection
 
 
 class DETR(DetectionModel):
@@ -25,13 +24,10 @@ class DETR(DetectionModel):
                  labels=None, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
-
-        
         assert len(self.net.input_info) == 1, "Expected 1 input blob"
-
         assert len(self.net.outputs) == 2, "Expected 2 output blobs"
         self.bboxes_blob_name, self.scores_blob_name = self._get_outputs()
-        
+
     def _get_outputs(self):
         (bboxes_blob_name, bboxes_layer), (scores_blob_name, scores_layer) = self.net.outputs.items()
 

@@ -24,7 +24,7 @@ from .utils import DetectionWithLandmarks, Detection, nms, clip_detections
 
 
 class RetinaFace(DetectionModel):
-    def __init__(self, ie, model_path, input_transform=None, resize_type='default', 
+    def __init__(self, ie, model_path, input_transform=None, resize_type='default',
                  labels=None, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
@@ -44,7 +44,6 @@ class RetinaFace(DetectionModel):
         self._output_layer_names = self.net.outputs
         self.n, self.c, self.h, self.w = self.net.input_info[self.image_blob_name].input_data.shape
 
-    
     def postprocess(self, outputs, meta):
         scale_x = meta['resized_shape'][1] / meta['original_shape'][1]
         scale_y = meta['resized_shape'][0] / meta['original_shape'][0]
@@ -54,7 +53,7 @@ class RetinaFace(DetectionModel):
 
 
 class RetinaFacePyTorch(DetectionModel):
-    def __init__(self, ie, model_path, input_transform=None, resize_type='default', 
+    def __init__(self, ie, model_path, input_transform=None, resize_type='default',
                  labels=None, threshold=0.5, iou_threshold=0.5):
         super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)

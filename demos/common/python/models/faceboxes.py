@@ -22,9 +22,9 @@ from .utils import Detection, nms
 
 
 class FaceBoxes(DetectionModel):
-    def __init__(self, ie, model_path, input_transform=None, resize_type='default', 
+    def __init__(self, ie, model_path, input_transform=None, resize_type='default',
                  labels=None, threshold=0.5, iou_threshold=0.3):
-        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type, 
+        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
 
         if not self.labels:

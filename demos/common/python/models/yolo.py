@@ -65,9 +65,9 @@ class YOLO(DetectionModel):
 
                 self.isYoloV3 = True  # Weak way to determine but the only one.
 
-    def __init__(self, ie, model_path, input_transform=None, resize_type='default', 
+    def __init__(self, ie, model_path, input_transform=None, resize_type='letterbox',
                  labels=None, threshold=0.5, iou_threshold=0.5):
-        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type, 
+        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
         self.is_tiny = self.net.name.lower().find('tiny') != -1  # Weak way to distinguish between YOLOv4 and YOLOv4-tiny
 
@@ -200,12 +200,12 @@ class YoloV4(YOLO):
                 masked_anchors += [anchors[idx * 2], anchors[idx * 2 + 1]]
             self.anchors = masked_anchors
 
-    def __init__(self, ie, model_path, input_transform=None, resize_type='letterbox', 
+    def __init__(self, ie, model_path, input_transform=None, resize_type='letterbox',
                  labels=None, threshold=0.5, iou_threshold=0.5,
                  anchors=None, masks=None):
         self.anchors = anchors
         self.masks = masks
-        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type, 
+        super().__init__(ie, model_path, input_transform=input_transform, resize_type=resize_type,
                          labels=labels, threshold=threshold, iou_threshold=iou_threshold)
 
     def _get_output_info(self):
