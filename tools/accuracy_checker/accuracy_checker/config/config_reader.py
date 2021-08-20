@@ -312,6 +312,7 @@ class ConfigReader:
         for argument, env_var in COMMAND_LINE_ARGS_AS_ENV_VARS.items():
             if argument not in args or args[argument] is None:
                 env_var_value = os.environ.get(env_var)
+                warnings.warn(f'{env_var}: {env_var_value}')
                 if env_var_value is not None:
                     args[argument] = Path(env_var_value)
 
