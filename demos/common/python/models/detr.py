@@ -41,6 +41,11 @@ class DETR(DetectionModel):
             raise RuntimeError("Expected shape [:,:,4] for bboxes output, but got {} and {}"
                                .format(*[output.shape for output in self.net.outputs]))
 
+    def postprocess(self, outputs, meta):
+        detections = self._parse_outputs(outputs)
+        detections = self._resize_detections(detections, meta)
+        return detections
+
     def _parse_outputs(self, outputs, meta):
         boxes = outputs[self.bboxes_blob_name][0]
         scores = outputs[self.scores_blob_name][0]

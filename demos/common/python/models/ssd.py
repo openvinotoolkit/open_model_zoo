@@ -34,6 +34,11 @@ class SSD(DetectionModel):
             dict_inputs[self.image_info_blob_name] = [self.h, self.w, 1]
         return dict_inputs, meta
 
+    def postprocess(self, outputs, meta):
+        detections = self._parse_outputs(outputs, meta)
+        detections = self._resize_detections(detections)
+        return detections
+
     def _get_image_info_input(self):
         image_info_blob_name = None
         for blob_name, blob in self.net.input_info.items():

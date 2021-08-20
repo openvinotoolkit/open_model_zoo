@@ -98,6 +98,11 @@ class YOLO(DetectionModel):
             output_info[layer_name] = (shape, yolo_params)
         return output_info
 
+    def postprocess(self, outputs, meta):
+        detections = self._parse_outputs(outputs, meta)
+        detections = self._resize_detections(detections, meta)
+        return detections
+
     @staticmethod
     def _parse_yolo_region(predictions, input_size, params, threshold):
         # ------------------------------------------ Extracting layer parameters ---------------------------------------
