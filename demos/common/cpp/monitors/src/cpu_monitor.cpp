@@ -200,7 +200,7 @@ std::vector<double> CpuMonitor::getMeanCpuLoad() const {
     std::vector<double> meanCpuLoad;
     meanCpuLoad.reserve(cpuLoadSum.size());
     for (double coreLoad : cpuLoadSum) {
-        meanCpuLoad.push_back(coreLoad / samplesNumber);
+        meanCpuLoad.push_back(samplesNumber ? coreLoad / samplesNumber : 0);
     }
     return meanCpuLoad;
 }
