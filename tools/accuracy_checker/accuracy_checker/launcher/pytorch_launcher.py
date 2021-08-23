@@ -48,7 +48,7 @@ class PyTorchLauncher(Launcher):
                 description='keyword arguments for network module'
             ),
             'device': StringField(default='cpu', regex=DEVICE_REGEX),
-            'batch': NumberField(value_type=float, min_value=1, optional=True, description="Batch size.", default=1),
+            'batch': NumberField(value_type=int, min_value=1, optional=True, description="Batch size.", default=1),
             'output_names': ListField(
                 optional=True, value_type=str, description='output tensor names'
             )
@@ -67,7 +67,8 @@ class PyTorchLauncher(Launcher):
         self.validate_config(config_entry)
         module_args = config_entry.get("module_args", ())
         module_kwargs = config_entry.get("module_kwargs", {})
-        self.cuda = 'cuda' in self.get_value_from_config('device')
+        self.device = self.get_value_from_config('device')
+        self.cuda = 'cuda' in self.device
         self.module = self.load_module(
             config_entry['module'],
             module_args,
@@ -112,14 +113,12 @@ class PyTorchLauncher(Launcher):
             model_cls = importlib.import_module(model_path).__getattribute__(model_cls)
             module = model_cls(*module_args, **module_kwargs)
             if checkpoint:
-                checkpoint = self._torch.load(checkpoint,
-                                              map_location=None if self.cuda else self._torch.device('cpu'))
+                checkpoint = self._torch.load(
+                    checkpoint, map_location=None if self.cuda else self._torch.device('cpu')
+                )
                 state = checkpoint if not state_key else checkpoint[state_key]
                 module.load_state_dict(state, strict=False)
-            if self.cuda:
-                module.cuda()
-            else:
-                module.cpu()
+            module.to(self.device)
             module.eval()
             return module
 
@@ -127,22 +126,21 @@ class PyTorchLauncher(Launcher):
         if layout is not None:
             data = np.transpose(data, layout)
         tensor = self._torch.from_numpy(data.astype(np.float32 if not precision else precision))
-        if self.cuda:
-            tensor = tensor.cuda()
-        with self._torch.no_grad():
-            return self._torch.autograd.Variable(tensor)
+        tensor = tensor.to(self.device)
+        return tensor
 
     def predict(self, inputs, metadata=None, **kwargs):
         results = []
-        for batch_input in inputs:
-            outputs = list(self.module(*batch_input.values()))
-            result_dict = {
-                output_name: res.data.cpu().numpy() if self.cuda else res.data.numpy()
-                for output_name, res in zip(self.output_names, outputs)
-            }
-            results.append(result_dict)
-            for meta_ in metadata:
-                meta_['input_shape'] = {key: list(data.shape) for key, data in batch_input.items()}
+        with self._torch.no_grad():
+            for batch_input in inputs:
+                outputs = list(self.module(*batch_input.values()))
+                result_dict = {
+                    output_name: res.data.cpu().numpy() if self.cuda else res.data.numpy()
+                    for output_name, res in zip(self.output_names, outputs)
+                }
+                results.append(result_dict)
+                for meta_ in metadata:
+                    meta_['input_shape'] = {key: list(data.shape) for key, data in batch_input.items()}
 
         return results
 
