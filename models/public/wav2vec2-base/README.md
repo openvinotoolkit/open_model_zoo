@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Wav2Vec2.0-base is model, which pretrained to learn speech representations on unlabeled data as described in [wav2vec 2.0: A Framework for Self-Supervised Learning of Speech Representations](https://arxiv.org/abs/2006.11477) paper and fine-tuned for speech recognition task  with a Connectionist Temporal Classification (CTC) loss on LibriSpeech dataset containing 960 hours of audio.
+Wav2Vec2.0-base is a model, which pre-trained to learn speech representations on unlabeled data as described in [wav2vec 2.0: A Framework for Self-Supervised Learning of Speech Representations](https://arxiv.org/abs/2006.11477) paper and fine-tuned for speech recognition task with a Connectionist Temporal Classification (CTC) loss on LibriSpeech dataset containing 960 hours of audio.
 The model is composed of a multi-layer convolutional feature encoder which takes as input raw audio and outputs latent speech representations, then fed to a Transformer to build representations capturing information from the entire sequence. For base model Transformer consists of 12 transformer layers and has 768 as feature dimension.
 For details please also check [repository](https://github.com/pytorch/fairseq/tree/master/examples/wav2vec#wav2vec-20) and [model card](https://huggingface.co/facebook/wav2vec2-base-960h).
 
