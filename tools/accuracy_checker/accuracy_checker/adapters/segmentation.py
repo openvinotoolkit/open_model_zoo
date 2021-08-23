@@ -89,7 +89,7 @@ class SegmentationAdapter(Adapter):
             restore_output.append(image.squeeze())
             offset = next_offset
 
-        return {self.output_blob: restore_output}
+        return {self.output_blob: np.array(restore_output)}
 
 
 class SegmentationOneClassAdapter(Adapter):
