@@ -42,9 +42,9 @@ The converted model has the same parameters as the original model.
 
 Per-token probabilities (after LogSoftmax) for every symbol in the alphabet, name - `logits`,  shape - `1, 95, 32`, output data format is `B, N, C`, where:
 
-- B - batch size
-- N - number of recognized tokens
-- C - alphabet size
+- `B` - batch size
+- `N` - number of recognized tokens
+- `C` - alphabet size
 
 Model alphabet: "[pad]", "[s]", "[s]", "[unk]", "|", "E", "T", "A", "O", "N", "I", "H", "S", "R", "D", "L", "U", "M", "W", "C", "F", "G", "Y", "P", "B", "V", "K", "'", "X", "J", "Q", "Z",
 where:
