@@ -56,7 +56,7 @@ std::vector<float> transpose4d(const std::vector<float>& data, const std::vector
     return new_data;
 }
 
-std::vector<size_t> ieSizeToVector(const SizeVector& ie_output_dims) {
+std::vector<size_t> ieSizeToVector(const InferenceEngine::SizeVector& ie_output_dims) {
     std::vector<size_t> blob_sizes(ie_output_dims.size(), 0);
     for (size_t i = 0; i < blob_sizes.size(); ++i) {
         blob_sizes[i] = ie_output_dims[i];

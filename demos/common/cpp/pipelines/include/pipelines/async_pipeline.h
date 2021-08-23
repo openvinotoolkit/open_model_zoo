@@ -23,6 +23,7 @@
 #include "pipelines/requests_pool.h"
 #include "models/results.h"
 #include "models/model_base.h"
+#include <utils/performance_metrics.hpp>
 
 /// This is base class for asynchronous pipeline
 /// Derived classes should add functions for data submission and output processing
@@ -62,6 +63,10 @@ public:
     /// ready (so results can be extracted in the same order as they were submitted). Otherwise, function will return if any result is ready.
     virtual std::unique_ptr<ResultBase> getResult(bool shouldKeepOrder = true);
 
+    PerformanceMetrics getInferenceMetircs(){ return inferenceMetrics;}
+    PerformanceMetrics getPreprocessMetrics(){ return preprocessMetrics;}
+    PerformanceMetrics getPostprocessMetrics() { return postprocessMetrics;}
+
 protected:
     /// Returns processed result, if available
     /// @param shouldKeepOrder if true, function will return processed data sequentially,
@@ -83,4 +88,7 @@ protected:
     std::exception_ptr callbackException = nullptr;
 
     std::unique_ptr<ModelBase> model;
+    PerformanceMetrics inferenceMetrics;
+    PerformanceMetrics preprocessMetrics;
+    PerformanceMetrics postprocessMetrics;
 };

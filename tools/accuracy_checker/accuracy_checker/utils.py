@@ -19,7 +19,7 @@ import errno
 import itertools
 import json
 import os
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 import struct
 import sys
 import zlib
@@ -34,6 +34,8 @@ from io import BytesIO
 import defusedxml.ElementTree as et
 import numpy as np
 import yaml
+
+from . import __version__
 
 try:
     from shapely.geometry.polygon import Polygon
@@ -296,7 +298,7 @@ def read_json(file: Union[str, Path], *args, **kwargs):
 
 def read_pickle(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open('rb') as content:
-        return pickle.load(content, *args, **kwargs)
+        return pickle.load(content, *args, **kwargs) # nosec - disable B301:pickle check
 
 
 def read_yaml(file: Union[str, Path], *args, **kwargs):
@@ -304,14 +306,18 @@ def read_yaml(file: Union[str, Path], *args, **kwargs):
         return yaml.safe_load(content, *args, **kwargs)
 
 
-def read_csv(file: Union[str, Path], *args, **kwargs):
+def read_csv(file: Union[str, Path], *args, is_dict=True, **kwargs):
     with get_path(file).open(encoding='utf-8') as content:
-        return list(csv.DictReader(content, *args, **kwargs))
+        if is_dict:
+            return list(csv.DictReader(content, *args, **kwargs))
+        return list(csv.reader(content, *args, **kwargs))
 
 
-def extract_image_representations(image_representations):
-    images = [rep.data for rep in image_representations]
+def extract_image_representations(image_representations, meta_only=False):
     meta = [rep.metadata for rep in image_representations]
+    if meta_only:
+        return meta
+    images = [rep.data for rep in image_representations]
 
     return images, meta
 
@@ -837,3 +843,50 @@ def sigmoid(x):
 
 def generate_layer_name(layer_name, prefix, with_prefix):
     return prefix + layer_name if with_prefix else layer_name.split(prefix, 1)[-1]
+
+
+def convert_xctr_yctr_w_h_to_x1y1x2y2(x, y, width, height):
+    x1, y1 = (x - width / 2), (y - height / 2)
+    x2, y2 = (x + width / 2), (y + height / 2)
+    return x1, y1, x2, y2
+
+
+def init_telemetry():
+    try:
+        import openvino_telemetry as tm # pylint:disable=C0415
+    except ImportError:
+        return None
+    try:
+        telemetry = tm.Telemetry('Accuracy Checker', app_version=__version__)
+        return telemetry
+    except Exception: # pylint:disable=W0703
+        return None
+
+
+def send_telemetry_event(tm, *args, **kwargs):
+    if tm is None:
+        return
+    try:
+        tm.send_event('ac', *args, **kwargs)
+    except Exception: # pylint:disable=W0703
+        pass
+    return
+
+
+def start_telemetry():
+    tm = init_telemetry()
+    if tm:
+        try:
+            tm.start_session('ac')
+        except Exception:  # pylint:disable=W0703
+            pass
+    return tm
+
+
+def end_telemetry(tm):
+    if tm:
+        try:
+            tm.end_session()
+            tm.force_shutdown(1.0)
+        except Exception: # pylint:disable=W0703
+            pass

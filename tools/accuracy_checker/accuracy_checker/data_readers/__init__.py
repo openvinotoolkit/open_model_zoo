@@ -18,31 +18,16 @@ from .data_reader import (
     BaseReader,
     DataReaderField,
     ReaderCombiner,
-    OpenCVFrameReader,
-    OpenCVImageReader,
-    PillowImageReader,
-    ScipyImageReader,
-    NiftiImageReader,
-    NumPyReader,
-    NumpyTXTReader,
-    NumpyDictReader,
-    NumpyBinReader,
-    TensorflowImageReader,
-    AnnotationFeaturesReader,
-    WavReader,
-    DicomReader,
-    PickleReader,
-    SkimageReader,
-    RawpyReader,
-    ByteFileReader,
-    LMDBReader,
-
     DataRepresentation,
     ClipIdentifier,
     MultiFramesInputIdentifier,
     ImagePairIdentifier,
     ListIdentifier,
     MultiInstanceIdentifier,
+    KaldiFrameIdentifier,
+    KaldiMatrixIdentifier,
+    ParametricImageIdentifier,
+    VideoFrameIdentifier,
 
     serialize_identifier,
     deserialize_identifier,
@@ -51,12 +36,38 @@ from .data_reader import (
     create_reader,
     REQUIRES_ANNOTATIONS
 )
+from .annotation_readers import AnnotationFeaturesReader
+from .binary_data_readers import PickleReader, ByteFileReader, LMDBReader
+from .medical_imaging_readers import NiftiImageReader, DicomReader
+from .audio_readers import WavReader, KaldiARKReader
+from .numpy_readers import NumPyReader, NumpyTXTReader, NumpyDictReader, NumpyBinReader
+from .image_readers import (
+    OpenCVImageReader,
+    PillowImageReader,
+    ScipyImageReader,
+    OpenCVFrameReader,
+    TensorflowImageReader,
+    SkimageReader,
+    RawpyReader
+)
+from .text_readers import JSONReader
 
 __all__ = [
     'BaseReader',
     'DataReaderField',
     'DataRepresentation',
     'ReaderCombiner',
+    'DataRepresentation',
+    'ClipIdentifier',
+    'MultiFramesInputIdentifier',
+    'ImagePairIdentifier',
+    'ListIdentifier',
+    'MultiInstanceIdentifier',
+    'KaldiMatrixIdentifier',
+    'KaldiFrameIdentifier',
+    'ParametricImageIdentifier',
+    'VideoFrameIdentifier',
+
     'OpenCVFrameReader',
     'OpenCVImageReader',
     'PillowImageReader',
@@ -75,13 +86,9 @@ __all__ = [
     'RawpyReader',
     'ByteFileReader',
     'LMDBReader',
+    'KaldiARKReader',
+    'JSONReader',
 
-    'DataRepresentation',
-    'ClipIdentifier',
-    'MultiFramesInputIdentifier',
-    'ImagePairIdentifier',
-    'ListIdentifier',
-    'MultiInstanceIdentifier',
     'create_reader',
     'REQUIRES_ANNOTATIONS',
 

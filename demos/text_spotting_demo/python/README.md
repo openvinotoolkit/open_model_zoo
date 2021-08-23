@@ -1,5 +1,7 @@
 # Text Spotting Python\* Demo
 
+![example](text_spotting_demo.jpg)
+
 This demo shows how to run Text Spotting models. Text Spotting models allow us to simultaneously detect and recognize text.
 
 > **NOTE**: Only batch size of 1 is supported.
@@ -12,11 +14,11 @@ First model is Mask-RCNN like text detector with the following constraints:
 
 * Two inputs: `im_data` for input image and `im_info` for meta-information about the image (actual height, width and scale).
 * At least five outputs including:
-    * `boxes` with absolute bounding box coordinates of the input image
-    * `scores` with confidence scores for all bounding boxes
-    * `classes` with object class IDs for all bounding boxes
-    * `raw_masks` with fixed-size segmentation heat maps for all classes of all bounding boxes
-    * `text_features` with text features which are fed to Text Recognition Head further
+  * `boxes` with absolute bounding box coordinates of the input image
+  * `scores` with confidence scores for all bounding boxes
+  * `classes` with object class IDs for all bounding boxes
+  * `raw_masks` with fixed-size segmentation heat maps for all classes of all bounding boxes
+  * `text_features` with text features which are fed to Text Recognition Head further
 
 Second model is Text Recognition Encoder that takes `text_features` as input and produces `encoded text`.
 
@@ -35,7 +37,33 @@ The demo workflow is the following:
     * By default, tracking is used to show text instance with the same color throughout the whole video.
       It assumes more or less static scene with instances in two frames being a part of the same track if intersection over union of the masks is greater than the 0.5 threshold. To disable tracking, specify the `--no_track` argument.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+
+## Preparing to Run
+
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+The list of models supported by the demo is in `<omz_dir>/demos/text_spotting_demo/python/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
+### Supported Models
+
+* text-spotting-0005-detector
+* text-spotting-0005-recognizer-decoder
+* text-spotting-0005-recognizer-encoder
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
@@ -52,7 +80,7 @@ usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>"
                              [--trd_output_symbols_distr TRD_OUTPUT_SYMBOLS_DISTR]
                              [--trd_output_cur_hidden TRD_OUTPUT_CUR_HIDDEN]
                              [--keep_aspect_ratio] [--no_track]
-                             [--show_scores] [--show_boxes] [-pc] [-r]
+                             [--show_scores] [--show_boxes] [-r]
                              [--no_show] [-u UTILIZATION_MONITORS]
 
 Options:
@@ -71,7 +99,7 @@ Options:
                         a folder of images, video file or camera id.
   --loop                Optional. Enable reading the input in a loop.
   -o OUTPUT, --output OUTPUT
-                        Optional. Name of output to save.
+                        Optional. Name of the output file(s) to save.
   -limit OUTPUT_LIMIT, --output_limit OUTPUT_LIMIT
                         Optional. Number of frames to store in output.
                         If 0 is set, all frames are stored.
@@ -109,7 +137,6 @@ Options:
   --no_track            Optional. Disable tracking.
   --show_scores         Optional. Show detection scores.
   --show_boxes          Optional. Show bounding boxes.
-  -pc, --perf_counts    Optional. Report performance counters.
   -r, --raw_output_message
                         Optional. Output inference results raw values.
   --no_show             Optional. Don't show output
@@ -119,24 +146,37 @@ Options:
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/text_spotting_demo/python/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
-
 To run the demo, please provide paths to the model in the IR format and to an input with images:
+
 ```bash
 python3 text_spotting_demo.py \
--m_m <path_to_model>/text-spotting-0004-detector.xml \
--m_te <path_to_model>/text-spotting-0004-recognizer-encoder.xml \
--m_td <path_to_model>/text-spotting-0004-recognizer-decoder.xml \
+-m_m <path_to_model>/text-spotting-0005-detector.xml \
+-m_te <path_to_model>/text-spotting-0005-recognizer-encoder.xml \
+-m_td <path_to_model>/text-spotting-0005-recognizer-decoder.xml \
 -i 0
 ```
 
+>**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
+
+You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
+
+* To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
+* To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
+To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
+
+>**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
+
 ## Demo Output
 
-The application uses OpenCV to display resulting text instances and current inference performance.
+The application uses OpenCV to display resulting text instances.
+The demo reports
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+You can use both of these metrics to measure application-level performance.
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

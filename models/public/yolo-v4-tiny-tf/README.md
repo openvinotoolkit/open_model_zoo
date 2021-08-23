@@ -19,9 +19,9 @@ Accuracy metrics obtained on [Common Objects in Context (COCO)](https://cocodata
 
 | Metric                                                               | Value |
 | -------------------------------------------------------------------- | ------|
-| mAP                                                                  | %     |
-| [COCO mAP (0.5)](http://cocodataset.org/#detection-eval)             | %     |
-| [COCO mAP (0.5:0.05:0.95)](http://cocodataset.org/#detection-eval)   | %     |
+| mAP                                                                  | 0.403 |
+| [COCO mAP (0.5)](http://cocodataset.org/#detection-eval)             | 0.463 |
+| [COCO mAP (0.5:0.05:0.95)](http://cocodataset.org/#detection-eval)   | 0.226 |
 
 ## Input
 

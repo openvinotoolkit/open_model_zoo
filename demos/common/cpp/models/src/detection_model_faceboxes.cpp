@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <ngraph/ngraph.hpp>
 #include <utils/common.hpp>
-#include <utils/slog.hpp>
 #include "models/detection_model_faceboxes.h"
 
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
@@ -30,7 +29,6 @@ ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
 void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
 
     if (inputInfo.size() != 1) {
@@ -60,8 +58,6 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
     netInputWidth = getTensorWidth(inputDesc);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
 
     if (outputInfo.size() != 2) {
@@ -149,7 +145,7 @@ void ModelFaceBoxes::priorBoxes(const std::vector<std::pair<size_t, size_t>>& fe
         for (size_t i = 0; i < featureMaps[k].first; ++i) {
             for (size_t j = 0; j < featureMaps[k].second; ++j) {
                 if (k == 0) {
-                    calculateAnchorsZeroLevel(anchors, j, i,  minSizes[k], steps[k]);;
+                    calculateAnchorsZeroLevel(anchors, j, i,  minSizes[k], steps[k]);
                 }
                 else {
                     calculateAnchors(anchors, { j + 0.5f }, { i + 0.5f }, minSizes[k][0], steps[k]);
@@ -222,8 +218,7 @@ std::unique_ptr<ResultBase> ModelFaceBoxes::postprocess(InferenceResult& infResu
     std::vector<int> keep = nms(bboxes, scores.second, boxIOUThreshold);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
-    DetectionResult* result = new DetectionResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    DetectionResult* result = new DetectionResult(infResult.frameId, infResult.metaData);
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
     float scaleX = static_cast<float>(netInputWidth) / imgWidth;

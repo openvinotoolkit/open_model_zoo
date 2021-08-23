@@ -36,9 +36,21 @@ class OpenPose(Model):
 
         function = ng.function_from_cnn(self.net)
         paf = function.get_output_op(0)
+        paf_shape = paf.outputs()[0].get_shape()
+        heatmap = function.get_output_op(1)
+        heatmap_shape = heatmap.outputs()[0].get_shape()
+        if len(paf_shape) != 4 and len(heatmap_shape) != 4:
+            raise RuntimeError('OpenPose outputs must be 4-dimensional')
+        if paf_shape[2] != heatmap_shape[2] and paf_shape[3] != heatmap_shape[3]:
+            raise RuntimeError('Last two dimensions of OpenPose outputs must match')
+        if paf_shape[1] * 2 == heatmap_shape[1]:
+            paf, heatmap = heatmap, paf
+        elif paf_shape[1] != heatmap_shape[1] * 2:
+            raise RuntimeError('Size of second dimension of OpenPose of one output must be two times larger then size '
+                'of second dimension of another output')
+
         paf = paf.inputs()[0].get_source_output().get_node()
         paf.set_friendly_name(self.pafs_blob_name)
-        heatmap = function.get_output_op(1)
         heatmap = heatmap.inputs()[0].get_source_output().get_node()
         heatmap.set_friendly_name(self.heatmaps_blob_name)
 
@@ -64,7 +76,7 @@ class OpenPose(Model):
         self.w = (input_width + size_divisor - 1) // size_divisor * size_divisor
         default_input_shape = self.net.input_info[self.image_blob_name].input_data.shape
         input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h, self.w])}
-        self.logger.info('Reshape net to {}'.format(input_shape))
+        self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
         self.net.reshape(input_shape)
 
         num_joints = self.net.outputs[self.heatmaps_blob_name].shape[1] - 1  # The last channel is for background
@@ -100,7 +112,7 @@ class OpenPose(Model):
         if self.w < w:
             raise RuntimeError("The image aspect ratio doesn't fit current model shape")
         if not (self.w - self.size_divisor < w <= self.w):
-            self.logger.warn("Chosen model aspect ratio doesn't match image aspect ratio")
+            self.logger.warn("\tChosen model aspect ratio doesn't match image aspect ratio")
         resize_img_scale = np.array((inputs.shape[1] / w, inputs.shape[0] / h), np.float32)
 
         img = np.pad(img, ((0, 0), (0, self.w - w), (0, 0)),

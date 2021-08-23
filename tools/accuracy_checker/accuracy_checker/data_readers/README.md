@@ -1,14 +1,19 @@
 # Data Readers
 
-Data Reader is a function for reading input data.
-You can use 2 ways to set data_reader for dataset:
+Data Reader is a class for reading input data in a specific format. Readers may have parameters available for configuration. The reader and its parameters, if necessary, are set through the configuration file.
+
+## Describing how to set data reader in Configuration File
+
+Data readers can be provided in `datasets` section of configuration file to use specific reader. If reader is not specified, `opencv_imread` reader will be used by default.
+
+You can use 2 ways to set data reader for dataset:
 * Define reader as a string.
 
 ```yml
 reader: opencv_imread
 ```
 
-* Define reader as a dictionary, using `type:` for setting reader name. This approach gives opportunity to set additional parameters for adapter if it is required.
+* Define reader as a dictionary, using `type:` for setting reader name. This approach gives opportunity to set additional parameters for reader if it is required.
 
 ```yml
 reader:
@@ -27,10 +32,14 @@ reader:
     *.jpeg: opencv_imread
 ```
 
+## Supported Data Readers
+
 AccuracyChecker supports following list of data readers:
+
 * `opencv_imread` - read images using OpenCV library. Default color space is BGR.
    * `reading_flag` - (Optional) flag which specifies the way image should be read: `color` - default, loads color image, `gray` - loads image in grayscale mode, `unchanged` - loads image as such including alpha channel.
 * `pillow_imread` - read images using Pillow library. Default color space is RGB.
+   * `to_rgb` - allow conversion image to RGB (Optional, default `True`).
 * `scipy_imread` - read images using similar approach as in `scipy.misc.imread`
 ```
 Note: since 1.3.0 version the image processing module is not a part of scipy library. This reader does not use scipy anymore.
@@ -57,7 +66,8 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
   * `to_4D` - controls expanding of read results to 4D dimension (optional, default `True`)
 * `wav_reader` - read WAV file into NumPy array. Also gets the samplerate.
   * `mono` - get mean along channels if multichannel audio loaded (Optional, default `False`).
-  * `to_float` - converts audio signal to float32 (Optional, default `False`).
+  * `to_float` - converts audio signal to float (Optional, default `False`). Float data type can be selected using `float_dtype` parameter.
+  * `float_dtype` - specifies data type for `to_float` conversion. Supported values: `float16`, `float32`, `float64`. Optional, default `float32`.
 * `dicom_reader` - read images stored in DICOM format.
 * `pickle_reader` - read data stored in pickle file. Supported formats of pickle content:
   1. numeric data array
@@ -66,3 +76,4 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
   * `postprocess` - allow image postprocessing and normalization (Optional, default `True`).
 * `byte_reader` - read raw binary data and wrap them to numpy-array.
 * `lmdb_reader` - extract image on a given index from LMDB database.
+* `kaldi_ark_reader` - read Kaldi\* archive format (ark).

@@ -13,7 +13,7 @@ Chinese license plates in traffic.
 
 **Note:** The license plates on the image were modified to protect the owners' privacy.
 
-![](./license-plate-recognition-barrier-0007.png)
+![](./assets/license-plate-recognition-barrier-0007.png)
 
 ## Specification
 
@@ -134,7 +134,7 @@ is an integer number encoding a character according to this dictionary:
 
 ### Converted Model
 
-Encoded vector of floats, name: `d_predictions:0`, shape: `1, 88`. Each float
+Encoded vector of integers, name: `d_predictions:0`, shape: `1, 88`. Each value
 is an integer number encoding a character according to this dictionary:
 
         0 0
@@ -225,6 +225,6 @@ python3 <omz_dir>/tools/downloader/converter.py --name <model_name>
 ## Legal Information
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE).
-A copy of the license is provided in [APACHE-2.0](../licenses/APACHE-2.0.txt).
+A copy of the license is provided in `<omz_dir>/models/public/licenses/APACHE-2.0.txt`.
 
 [*] Other names and brands may be claimed as the property of others.

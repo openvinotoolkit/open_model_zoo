@@ -39,12 +39,47 @@ def find_md_files():
 def main():
     all_passed = True
 
+    index_file_paths = (
+        OMZ_ROOT / 'models/intel/index.md',
+        OMZ_ROOT / 'models/public/index.md',
+        OMZ_ROOT / 'demos/README.md',
+    )
+
+    all_md_files = tuple(find_md_files())
+
     def complain(message):
         nonlocal all_passed
         all_passed = False
         print(message, file=sys.stderr)
 
-    for md_path in sorted(find_md_files()):
+    index_child_md_links = {}
+    for index_file_path in index_file_paths:
+        if not index_file_path.exists():
+            complain(f'{index_file_path}: file not found')
+            continue
+
+        required_md_links = []
+        for md_file in all_md_files:
+            if md_file.name == "README.md" and md_file.parent != index_file_path.parent:
+                try:
+                    md_rel_path = md_file.relative_to(index_file_path.parent)
+                except ValueError:
+                    continue
+
+                md_intermediate_parents = list(md_rel_path.parents)[1:-1] # removed root and first parent dirs
+
+                if not any((index_file_path.parent / parent_dir / 'README.md').exists()
+                        for parent_dir in md_intermediate_parents):
+                    required_md_links.append(md_file)
+
+        index_child_md_links[index_file_path] = sorted(required_md_links)
+
+    omz_reference_prefix = '<omz_dir>/'
+    omz_github_url = 'https://github.com/openvinotoolkit/open_model_zoo/'
+
+    for md_path in sorted(all_md_files):
+        referenced_md_files = set()
+
         md_path_rel = md_path.relative_to(OMZ_ROOT)
 
         doc_page = omzdocs.DocumentationPage(md_path.read_text(encoding='UTF-8'))
@@ -52,6 +87,32 @@ def main():
         # check local link validity
 
         for url in sorted([ref.url for ref in doc_page.external_references()]):
+            if url.startswith(omz_github_url):
+                omz_relative_url = url[len(omz_github_url):]
+                omz_relative_path = Path(urllib.request.url2pathname(omz_relative_url))
+
+                if omz_relative_url.startswith(('blob/', 'tree/')):
+                    omz_relative_path = Path(*omz_relative_path.parts[1:]) # removed blob/ or tree/
+                    omz_relative_posix_path = omz_relative_path.as_posix()
+
+                    if url.endswith('.md'):
+                        distance_to_md_parent_dir = 0
+
+                        for parent in md_path_rel.parents:
+                            try:
+                                omz_relative_posix_path = omz_relative_path.relative_to(parent).as_posix()
+                                break
+                            except ValueError:
+                                distance_to_md_parent_dir += 1
+                        suggested_path = '../' * distance_to_md_parent_dir + omz_relative_posix_path
+                        suggested_url = urllib.request.pathname2url(suggested_path)
+                    else:
+                        suggested_url = omz_reference_prefix + omz_relative_posix_path
+
+                    complain(f'{md_path_rel}: non-local OMZ Repo reference "{url}"'
+                        f' (replace it by `{suggested_url}`)')
+                    continue
+
             try:
                 components = urllib.parse.urlparse(url)
             except ValueError:
@@ -78,6 +139,32 @@ def main():
                 complain(f'{md_path_rel}: URL reference "{url}" target'
                     ' does not exist or is not a file')
                 continue
+
+            if md_path in index_child_md_links:
+                referenced_md_files.add(target_path)
+
+        # check <omz_dir> reference validity
+
+        for code_span in doc_page.code_spans():
+            if code_span.startswith(omz_reference_prefix):
+                target_path_rel = Path(code_span[len(omz_reference_prefix):])
+                target_path = OMZ_ROOT / target_path_rel
+
+                if ".." in target_path_rel.parts:
+                    complain(f'{md_path_rel}: OMZ reference "{code_span}"'
+                        ' contains a ".." component.')
+                    continue
+
+                if not target_path.exists():
+                    complain(f'{md_path_rel}: OMZ reference "{code_span}" target'
+                        ' does not exist')
+
+        # check for existence of links to README.md files of models and demos
+
+        if md_path in index_child_md_links:
+            for md_file in index_child_md_links[md_path]:
+                if md_file not in referenced_md_files:
+                    complain(f"{md_path_rel}: {md_file.relative_to(OMZ_ROOT)} is not referenced")
 
         # check for HTML fragments that are unsupported by Doxygen
 

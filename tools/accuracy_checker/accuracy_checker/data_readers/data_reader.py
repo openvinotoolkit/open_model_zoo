@@ -15,46 +15,19 @@ limitations under the License.
 """
 
 import re
-import wave
 from collections import OrderedDict, namedtuple
 from functools import singledispatch
 from pathlib import Path
 
-import cv2
 import numpy as np
-from numpy.lib.npyio import NpzFile
-from PIL import Image
 
-from ..utils import get_path, read_json, read_pickle, contains_all, UnsupportedPackage, get_parameter_value_from_config
+from ..utils import (
+    get_path, get_parameter_value_from_config
+)
 from ..dependency import ClassProvider, UnregisteredProviderException
 from ..config import (
-    BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField, NumberField, PathField
+    BaseField, StringField, ConfigValidator, ConfigError, DictField, BoolField, PathField
 )
-
-try:
-    import lmdb
-except ImportError as import_error:
-    lmdb = UnsupportedPackage("lmdb", import_error.msg)
-
-try:
-    import nibabel as nib
-except ImportError as import_error:
-    nib = UnsupportedPackage("nibabel", import_error.msg)
-
-try:
-    import pydicom
-except ImportError as import_error:
-    pydicom = UnsupportedPackage("pydicom", import_error.msg)
-
-try:
-    import skimage.io as sk
-except ImportError as import_error:
-    sk = UnsupportedPackage('skimage.io', import_error.msg)
-
-try:
-    import rawpy
-except ImportError as import_error:
-    rawpy = UnsupportedPackage('rawpy', import_error.msg)
 
 REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
 DOES_NOT_REQUIRED_DATA_SOURCE = REQUIRES_ANNOTATIONS + ['ncf_reader']
@@ -81,56 +54,69 @@ MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id
 ImagePairIdentifier = namedtuple('ImagePairIdentifier', ['first', 'second'])
 ListIdentifier = namedtuple('ListIdentifier', ['values'])
 MultiInstanceIdentifier = namedtuple('MultiInstanceIdentifier', ['identifier', 'object_id'])
+KaldiMatrixIdentifier = namedtuple('KaldiMatrixIdentifier', ['file', 'key'])
+KaldiFrameIdentifier = namedtuple('KaldiFrameIdentifier', ['file', 'key', 'id'])
+ParametricImageIdentifier = namedtuple('ParametricImageIdentifier', ['identifier', 'parameters'])
+VideoFrameIdentifier = namedtuple('VideoFrameIdentifier', ['video_id', 'frame'])
+
+IdentifierSerializationOptions = namedtuple(
+    "identifierSerializationOptions", ['type', 'fields', 'class_id', 'recursive', 'to_tuple']
+)
+
+identifier_serialization = {
+    'ClipIdentifier': IdentifierSerializationOptions(
+        'clip_identifier', ['video', 'clip_id', 'frames'], ClipIdentifier, [False, False, False], [False, False, True]),
+    'MultiFramesInputIdentifier': IdentifierSerializationOptions(
+        'multi_frame_identifier', ['input_id', 'frames'], MultiFramesInputIdentifier, [False, False], [False, True]),
+    'ImagePairIdentifier': IdentifierSerializationOptions(
+        'image_pair_identifier', ['first', 'second'], ImagePairIdentifier, False, False),
+    'ListIdentifier': IdentifierSerializationOptions('list_identifier', ['values'], ListIdentifier, [True], [True]),
+    'MultiInstanceIdentifier': IdentifierSerializationOptions(
+        'multi_instance', ['identifier', 'instance_id'], MultiInstanceIdentifier, [False, False], [False, False]),
+    'KaldiMatrixIdentifier': IdentifierSerializationOptions(
+        'kaldi_matrix', ['file', 'key'], KaldiMatrixIdentifier, [False, False], [False, False]),
+    'KaldiFrameIdentifier': IdentifierSerializationOptions(
+        'kaldi_frame', ['file', 'key', 'id'], KaldiFrameIdentifier, [False, False, False], [False, False, False]),
+    'ParametricImageIdentifier': IdentifierSerializationOptions(
+        'parametric_image_identifier', ['identifier', 'parameters'], ParametricImageIdentifier, False, [False, True]
+    ),
+    'VideoFrameIdentifier':
+        IdentifierSerializationOptions('video_frame', ['video_id', 'frame'], VideoFrameIdentifier, False, False)
+}
+
+identifier_deserialization = {option.type: option for option in identifier_serialization.values()}
 
 
 def serialize_identifier(identifier):
-    if isinstance(identifier, ClipIdentifier):
-        return {
-            "type": "clip_identifier",
-            "video": identifier.video,
-            "clip_id": identifier.clip_id,
-            "frames": identifier.frames
-        }
-    if isinstance(identifier, MultiFramesInputIdentifier):
-        return {
-            "type": "multi_frame_identifier",
-            "input_id": identifier.input_id,
-            "frames": identifier.frames
-        }
-    if isinstance(identifier, ImagePairIdentifier):
-        return {
-            "type": "image_pair_identifier",
-            "first": identifier.first,
-            "second": identifier.second
-        }
-    if isinstance(identifier, ListIdentifier):
-        return {
-            "type": "list_identifier",
-            "values": identifier.values
-        }
-    if isinstance(identifier, MultiInstanceIdentifier):
-        return {
-            "type": 'multi_instance',
-            "identifier": identifier.identifier,
-            "object_id": identifier.object_id
-        }
+    if type(identifier).__name__ in identifier_serialization:
+        options = identifier_serialization[type(identifier).__name__]
+        serialized_id = {'type': options.type}
+        for idx, field in options.fields:
+            serialized_id[field] = (
+                identifier[idx] if not options.recursive[idx] else serialize_identifier(identifier[idx])
+            )
+        return serialized_id
+
     return identifier
 
 
 def deserialize_identifier(identifier):
     if isinstance(identifier, dict):
-        type_id = identifier.get('type')
-        if type_id == 'image_pair_identifier':
-            return ImagePairIdentifier(identifier['first'], identifier['second'])
-        if type_id == 'list_identifier':
-            return ListIdentifier(tuple(identifier['values']))
-        if type_id == 'multi_frame_identifier':
-            return MultiFramesInputIdentifier(identifier['input_id'], tuple(identifier['frames']))
-        if type_id == 'clip_identifier':
-            return ClipIdentifier(identifier['video'], identifier['clip_id'], tuple(identifier['frames']))
-        if type_id == 'multi_instance':
-            return MultiInstanceIdentifier(identifier['identifier'], identifier['object_id'])
-        raise ValueError('Unsupported identifier type: {}'.format(type_id))
+        options = identifier_deserialization.get(identifier.get('type'))
+        if options is None:
+            raise ValueError('Unsupported identifier type: {}'.format(identifier.get('type')))
+        fields = []
+        for field, recursive, to_tuple in zip(options.fields, options.recursive, options.to_tuple):
+            if field not in identifier:
+                raise ValueError('Field {} required for identifier deserialization'.format(field))
+            data = identifier[field]
+            if recursive:
+                data = deserialize_identifier(data)
+            if to_tuple:
+                data = tuple(data)
+            fields.append(data)
+        return options.class_id(*fields)
+
     return identifier
 
 
@@ -141,6 +127,8 @@ def create_identifier_key(identifier):
         return ClipIdentifier(identifier.video, identifier.clip_id, tuple(identifier.frames))
     if isinstance(identifier, MultiFramesInputIdentifier):
         return MultiFramesInputIdentifier(tuple(identifier.input_id), tuple(identifier.frames))
+    if isinstance(identifier, ParametricImageIdentifier):
+        return ParametricImageIdentifier(identifier.identifier, tuple(identifier.parameters))
     return identifier
 
 
@@ -195,6 +183,8 @@ class BaseReader(ClassProvider):
         self.read_dispatcher.register(ImagePairIdentifier, self._read_pair)
         self.read_dispatcher.register(ListIdentifier, self._read_list_ids)
         self.read_dispatcher.register(MultiInstanceIdentifier, self._read_multi_instance_single_object)
+        self.read_dispatcher.register(ParametricImageIdentifier, self._read_parametric_input)
+        self.read_dispatcher.register(VideoFrameIdentifier, self._read_video_frame)
         self.multi_infer = False
 
         self.validate_config(config, data_source)
@@ -293,6 +283,13 @@ class BaseReader(ClassProvider):
     def _read_multi_instance_single_object(self, data_id):
         return self.read_dispatcher(data_id.identifier)
 
+    def _read_parametric_input(self, data_id):
+        data = self.read_dispatcher(data_id.identifier)
+        return [data, *data_id.parameters]
+
+    def _read_video_frame(self, data_id):
+        return self.read_dispatcher(data_id.frame)
+
     def read_item(self, data_id):
         data_rep = DataRepresentation(
             self.read_dispatcher(data_id),
@@ -356,515 +353,3 @@ class ReaderCombiner(BaseReader):
                 return reader.read(data_id)
 
         raise ConfigError('suitable data reader for {} not found'.format(data_id))
-
-
-OPENCV_IMREAD_FLAGS = {
-    'color': cv2.IMREAD_COLOR,
-    'gray': cv2.IMREAD_GRAYSCALE,
-    'unchanged': cv2.IMREAD_UNCHANGED
-}
-
-
-class OpenCVImageReader(BaseReader):
-    __provider__ = 'opencv_imread'
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'reading_flag': StringField(optional=True, choices=OPENCV_IMREAD_FLAGS, default='color',
-                                        description='Flag which specifies the way image should be read.')
-        })
-        return parameters
-
-    def configure(self):
-        super().configure()
-        self.flag = OPENCV_IMREAD_FLAGS[self.get_value_from_config('reading_flag')]
-
-    def read(self, data_id):
-        return cv2.imread(str(get_path(self.data_source / data_id)), self.flag)
-
-
-class PillowImageReader(BaseReader):
-    __provider__ = 'pillow_imread'
-
-    def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config, **kwargs)
-        self.convert_to_rgb = True
-
-    def read(self, data_id):
-        data_path = get_path(self.data_source / data_id) if self.data_source is not None else data_id
-        with open(str(data_path), 'rb') as f:
-            img = Image.open(f)
-
-            return np.array(img.convert('RGB') if self.convert_to_rgb else img)
-
-
-class ScipyImageReader(BaseReader):
-    __provider__ = 'scipy_imread'
-
-    def read(self, data_id):
-        # reimplementation scipy.misc.imread
-        data_path = self.data_source / data_id if self.data_source is not None else data_id
-        image = Image.open(str(get_path(data_path)))
-        if image.mode == 'P':
-            image = image.convert('RGBA') if 'transparency' in image.info else image.convert('RGB')
-
-        return np.array(image)
-
-
-class OpenCVFrameReader(BaseReader):
-    __provider__ = 'opencv_capture'
-
-    def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config, **kwargs)
-        self.current = -1
-
-    def read(self, data_id):
-        if data_id < 0:
-            raise IndexError('frame with {} index can not be grabbed, non-negative index is expected')
-        if data_id < self.current:
-            self.videocap.set(cv2.CAP_PROP_POS_FRAMES, data_id)
-            self.current = data_id - 1
-
-        return self._read_sequence(data_id)
-
-    def _read_sequence(self, data_id):
-        frame = None
-        while self.current != data_id:
-            success, frame = self.videocap.read()
-            self.current += 1
-            if not success:
-                raise EOFError('frame with {} index does not exist in {}'.format(self.current, self.data_source))
-
-        return frame
-
-    def configure(self):
-        if not self.data_source:
-            raise ConfigError('data_source parameter is required to create "{}" '
-                              'data reader and read data'.format(self.__provider__))
-        self.data_source = get_path(self.data_source)
-        self.videocap = cv2.VideoCapture(str(self.data_source))
-        self.multi_infer = self.get_value_from_config('multi_infer')
-
-    def reset(self):
-        self.current = -1
-        self.videocap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-
-
-class JSONReader(BaseReader):
-    __provider__ = 'json_reader'
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'key': StringField(optional=True, case_sensitive=True,
-                               description='Key for reading from json dictionary.')
-        })
-        return parameters
-
-    def configure(self):
-        self.key = self.get_value_from_config('key')
-        self.multi_infer = self.get_value_from_config('multi_infer')
-        if not self.data_source:
-            if not self._postpone_data_source:
-                raise ConfigError('data_source parameter is required to create "{}" '
-                                  'data reader and read data'.format(self.__provider__))
-
-    def read(self, data_id):
-
-        data = read_json(str(self.data_source / data_id))
-        if self.key:
-            data = data.get(self.key)
-
-            if not data:
-                raise ConfigError('{} does not contain {}'.format(data_id, self.key))
-
-        return np.array(data).astype(np.float32)
-
-
-class NCFDataReader(BaseReader):
-    __provider__ = 'ncf_data_reader'
-
-    def configure(self):
-        pass
-
-    def read(self, data_id):
-        if not isinstance(data_id, str):
-            raise IndexError('Data identifier must be a string')
-
-        return float(data_id.split(":")[1])
-
-
-class NiftiImageReader(BaseReader):
-    __provider__ = 'nifti_reader'
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'channels_first': BoolField(optional=True, default=False,
-                                        description='Allows read files and transpose in order where channels first.'),
-            'frame_separator': StringField(optional=True, default='#',
-                                           description="Separator between filename and frame number"),
-            'multi_frame': BoolField(optional=True, default=False,
-                                     description="Add annotation for each frame in source file"),
-            'to_4D': BoolField(optional=True, default=True, description="Ensure that data are 4D"),
-            'frame_axis': NumberField(optional=True, default=-1, description="Frames dimension axis"),
-        })
-        return parameters
-
-    def configure(self):
-        if isinstance(nib, UnsupportedPackage):
-            nib.raise_error(self.__provider__)
-        self.channels_first = self.get_value_from_config('channels_first')
-        self.multi_infer = self.get_value_from_config('multi_infer')
-        self.frame_axis = int(self.get_value_from_config('frame_axis'))
-        self.frame_separator = self.get_value_from_config('frame_separator')
-        self.multi_frame = self.get_value_from_config('multi_frame')
-        self.to_4D = self.get_value_from_config('to_4D')
-
-        if not self.data_source:
-            if not self._postpone_data_source:
-                raise ConfigError('data_source parameter is required to create "{}" '
-                                  'data reader and read data'.format(self.__provider__))
-
-    def read(self, data_id):
-        if self.multi_frame:
-            parts = data_id.split(self.frame_separator)
-            frame_number = int(parts[1])
-            data_id = parts[0]
-        data_path = self.data_source / data_id if self.data_source is not None else data_id
-        nib_image = nib.load(str(get_path(data_path)))
-        image = np.array(nib_image.dataobj)
-        if self.multi_frame:
-            image = image[:, :, frame_number]
-            image = np.expand_dims(image, 0)
-        if self.to_4D:
-            if len(image.shape) != 4:  # Make sure 4D
-                image = np.expand_dims(image, -1)
-            image = np.transpose(image, (3, 0, 1, 2) if self.channels_first else (2, 1, 0, 3))
-
-        return image
-
-
-class NumPyReader(BaseReader):
-    __provider__ = 'numpy_reader'
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'keys': StringField(optional=True, default="", description='Comma-separated model input names.'),
-            'separator': StringField(optional=True,
-                                     description='Separator symbol between input identifier and file identifier.'),
-            'id_sep': StringField(
-                optional=True, default="_",
-                description='Separator symbol between input name and record number in input identifier.'
-            ),
-            'block': BoolField(optional=True, default=False, description='Allows block mode.'),
-            'batch': NumberField(optional=True, default=1, description='Batch size')
-        })
-        return parameters
-
-    def configure(self):
-        self.is_text = self.config.get('text_file', False)
-        self.multi_infer = self.get_value_from_config('multi_infer')
-        self.keys = self.get_value_from_config('keys')
-        self.keys = [t.strip() for t in self.keys.split(',')] if len(self.keys) > 0 else []
-        self.separator = self.get_value_from_config('separator')
-        self.id_sep = self.get_value_from_config('id_sep')
-        self.block = self.get_value_from_config('block')
-        self.batch = int(self.get_value_from_config('batch'))
-
-        if self.separator and self.is_text:
-            raise ConfigError('text file reading with numpy does')
-        if not self.data_source:
-            if not self._postpone_data_source:
-                raise ConfigError('data_source parameter is required to create "{}" '
-                                  'data reader and read data'.format(self.__provider__))
-        self.keyRegex = {k: re.compile(k + self.id_sep) for k in self.keys}
-        self.valRegex = re.compile(r"([^0-9]+)([0-9]+)")
-
-    def read(self, data_id):
-        field_id = None
-        if self.separator:
-            field_id, data_id = str(data_id).split(self.separator)
-        data_path = self.data_source / data_id if self.data_source is not None else data_id
-
-        data = np.load(str(data_path))
-
-        if not isinstance(data, NpzFile):
-            return data
-
-        if field_id is not None:
-            key = [k for k, v in self.keyRegex.items() if v.match(field_id)]
-            if len(key) > 0:
-                if self.block:
-                    res = data[key[0]]
-                else:
-                    recno = field_id.split('_')[-1]
-                    recno = int(recno)
-                    start = Path(data_id).name.split('.')[0]
-                    start = int(start)
-                    res = data[key[0]][recno - start, :]
-                return res
-
-        key = next(iter(data.keys()))
-        return data[key]
-
-
-class NumpyTXTReader(BaseReader):
-    __provider__ = 'numpy_txt_reader'
-
-    def read(self, data_id):
-        return np.loadtxt(str(self.data_source / data_id))
-
-
-class NumpyDictReader(BaseReader):
-    __provider__ = 'numpy_dict_reader'
-
-    def read(self, data_id):
-        data_path = self.data_source / data_id if self.data_source is not None else data_id
-        return np.load(str(data_path), allow_pickle=True)[()]
-
-    def read_item(self, data_id):
-        dict_data = self.read_dispatcher(data_id)
-        identifier = []
-        data = []
-        for key, value in dict_data.items():
-            identifier.append('{}.{}'.format(data_id, key))
-            data.append(value)
-        if len(data) == 1:
-            return DataRepresentation(data[0], identifier=data_id)
-        return DataRepresentation(data, identifier=identifier)
-
-
-class NumpyBinReader(BaseReader):
-    __provider__ = 'numpy_bin_reader'
-
-    @classmethod
-    def parameters(cls):
-        params = super().parameters()
-        params.update({
-            "dtype": StringField(optional=True, default='float32', description='data type for reading')
-        })
-        return params
-
-    def configure(self):
-        self.dtype = self.get_value_from_config('dtype')
-
-    def read(self, data_id):
-        data_path = self.data_source / data_id if self.data_source is not None else data_id
-        return np.fromfile(data_path, dtype=self.dtype)
-
-
-class TensorflowImageReader(BaseReader):
-    __provider__ = 'tf_imread'
-
-    def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config, **kwargs)
-        try:
-            import tensorflow as tf  # pylint: disable=C0415
-        except ImportError as import_error:
-            raise ImportError(
-                'tf backend for image reading requires TensorFlow. '
-                'Please install it before usage. {}'.format(import_error.msg)
-            )
-        if tf.__version__ < '2.0.0':
-            tf.enable_eager_execution()
-
-        def read_func(path):
-            img_raw = tf.read_file(str(path)) if tf.__version__ < '2.0.0' else tf.io.read_file(str(path))
-            img_tensor = tf.image.decode_image(img_raw, channels=3)
-            return img_tensor.numpy()
-
-        self.read_realisation = read_func
-
-    def read(self, data_id):
-        data_path = self.data_source / data_id if self.data_source is not None else data_id
-        return self.read_realisation(data_path)
-
-
-class AnnotationFeaturesReader(BaseReader):
-    __provider__ = 'annotation_features_extractor'
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'features': ListField(allow_empty=False, value_type=str, description='List of features.')
-        })
-        return parameters
-
-    def configure(self):
-        self.feature_list = self.get_value_from_config('features')
-        if not contains_all(self.data_source[0].__dict__, self.feature_list):
-            raise ConfigError(
-                'annotation_class prototype does not contain provided features {}'.format(', '.join(self.feature_list))
-            )
-        self.single = len(self.feature_list) == 1
-        self.counter = 0
-        self.subset = range(len(self.data_source))
-        self.multi_infer = self.get_value_from_config('multi_infer')
-
-    def read(self, data_id):
-        relevant_annotation = self.data_source[self.subset[self.counter]]
-        self.counter += 1
-        features = [getattr(relevant_annotation, feature) for feature in self.feature_list]
-        if self.single:
-            return features[0]
-        return features
-
-    def _read_list(self, data_id):
-        return self.read(data_id)
-
-    def reset(self):
-        self.subset = range(len(self.data_source))
-        self.counter = 0
-
-
-class WavReader(BaseReader):
-    __provider__ = 'wav_reader'
-
-    _samplewidth_types = {
-        1: np.uint8,
-        2: np.int16
-    }
-
-    @classmethod
-    def parameters(cls):
-        params = super().parameters()
-        params.update({
-            'mono': BoolField(optional=True, default=False,
-                              description='get mean along channels if multichannel audio loaded'),
-            'to_float': BoolField(optional=True, default=False, description='converts audio signal to float')
-        })
-        return params
-
-    def configure(self):
-        self.mono = self.get_value_from_config('mono')
-        self.to_float = self.get_value_from_config('to_float')
-
-    def read(self, data_id):
-        data_path = self.data_source / data_id if self.data_source is not None else data_id
-        with wave.open(str(data_path), "rb") as wav:
-            sample_rate = wav.getframerate()
-            sample_width = wav.getsampwidth()
-            nframes = wav.getnframes()
-            data = wav.readframes(nframes)
-            if self._samplewidth_types.get(sample_width):
-                data = np.frombuffer(data, dtype=self._samplewidth_types[sample_width])
-            else:
-                raise RuntimeError("Reader {} couldn't process file {}: unsupported sample width {}"
-                                   "(reader only supports {})"
-                                   .format(self.__provider__, self.data_source / data_id,
-                                           sample_width, [*self._samplewidth_types.keys()]))
-            channels = wav.getnchannels()
-
-            data = data.reshape(-1, channels).T
-            if channels > 1 and self.mono:
-                data = data.mean(1)
-            if self.to_float:
-                data = data.astype(np.float32) / np.iinfo(self._samplewidth_types[sample_width]).max
-
-        return data, {'sample_rate': sample_rate}
-
-    def read_item(self, data_id):
-        return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)
-
-
-class DicomReader(BaseReader):
-    __provider__ = 'dicom_reader'
-
-    def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config)
-        if isinstance(pydicom, UnsupportedPackage):
-            pydicom.raise_error(self.__provider__)
-
-    def read(self, data_id):
-        data_path = self.data_source / data_id if self.data_source is not None else data_id
-        dataset = pydicom.dcmread(str(data_path))
-        return dataset.pixel_array
-
-
-class PickleReader(BaseReader):
-    __provider__ = 'pickle_reader'
-
-    def read(self, data_id):
-        data_path = self.data_source / data_id if self.data_source is not None else data_id
-        data = read_pickle(data_path)
-        if isinstance(data, list) and len(data) == 2 and isinstance(data[1], dict):
-            return data
-
-        return data, {}
-
-    def read_item(self, data_id):
-        return DataRepresentation(*self.read_dispatcher(data_id), identifier=data_id)
-
-
-class SkimageReader(BaseReader):
-    __provider__ = 'skimage_imread'
-
-    def __init__(self, data_source, config=None, **kwargs):
-        super().__init__(data_source, config, **kwargs)
-        if isinstance(sk, UnsupportedPackage):
-            sk.raise_error(self.__provider__)
-
-    def read(self, data_id):
-        data_path = self.data_source / data_id if self.data_source is not None else data_id
-        return sk.imread(str(data_path))
-
-
-class RawpyReader(BaseReader):
-    __provider__ = 'rawpy'
-
-    @classmethod
-    def parameters(cls):
-        params = super().parameters()
-        params.update({
-            'postprocess': BoolField(optional=True, default=True)
-        })
-        return params
-
-    def configure(self):
-        if isinstance(rawpy, UnsupportedPackage):
-            rawpy.raise_error(self.__provider__)
-        self.postprocess = self.get_value_from_config('postprocess')
-
-    def read(self, data_id):
-        data_path = self.data_source / data_id if self.data_source is not None else data_id
-        raw = rawpy.imread(str(data_path))
-        if not self.postprocess:
-            return raw.raw_image_visible.astype(np.float32)
-        postprocessed = raw.postprocess(use_camera_wb=True, half_size=False, no_auto_bright=True, output_bps=16)
-        return np.float32(postprocessed / 65535.0)
-
-
-class ByteFileReader(BaseReader):
-    __provider__ = 'byte_reader'
-
-    def read(self, data_id):
-        data_path = self.data_source / data_id if self.data_source is not None else data_id
-        with open(data_path, 'rb') as f:
-            return np.array(f.read())
-
-
-class LMDBReader(BaseReader):
-    __provider__ = 'lmdb_reader'
-
-
-    def configure(self):
-        super().configure()
-        self.database = lmdb.open(bytes(self.data_source), readonly=True)
-
-    def read(self, data_id):
-        with self.database.begin(write=False) as txn:
-            img_key = f'image-{data_id:09d}'.encode()
-            image_bytes = txn.get(img_key)
-            img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_UNCHANGED)
-            if len(img.shape) < 3:
-                img = np.stack((img,) * 3, axis=-1)
-            assert img.shape[-1] == 3
-            return img

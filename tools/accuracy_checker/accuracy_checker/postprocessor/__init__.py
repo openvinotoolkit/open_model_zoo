@@ -61,6 +61,10 @@ from .normalize_salient_map import SalientMapNormalizer
 from .min_max_normalization import MinMaxRegressionNormalization
 from .crop_image import CropImage, CornerCropImage
 from .pad_signal import PadSignal
+from .time_series_denormalize import TimeSeriesDenormalize
+from .interp import Interpolation
+from .invert_mask import InvertMask
+from .rescale_mask import RescaleMask
 
 
 __all__ = [
@@ -136,5 +140,12 @@ __all__ = [
     'CropImage',
     'CornerCropImage',
 
-    'PadSignal'
+    'PadSignal',
+
+    'TimeSeriesDenormalize',
+
+    'Interpolation',
+
+    'InvertMask',
+    'RescaleMask',
 ]

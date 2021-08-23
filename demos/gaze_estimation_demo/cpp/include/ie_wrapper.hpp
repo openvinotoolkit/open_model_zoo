@@ -19,6 +19,7 @@ class IEWrapper {
 public:
     IEWrapper(InferenceEngine::Core& ie,
               const std::string& modelPath,
+              const std::string& modelType,
               const std::string& deviceName);
     // For setting input blobs containing images
     void setInputBlob(const std::string& blobName, const cv::Mat& image);
@@ -27,8 +28,6 @@ public:
 
     // Get output blob content as a vector given its name
     void getOutputBlob(const std::string& blobName, std::vector<float>& output);
-
-    void printPerlayerPerformance() const;
 
     const std::map<std::string, std::vector<unsigned long>>& getInputBlobDimsInfo() const;
     const std::map<std::string, std::vector<unsigned long>>& getOutputBlobDimsInfo() const;
@@ -44,6 +43,7 @@ public:
 
 private:
     std::string modelPath;
+    std::string modelType;
     std::string deviceName;
     InferenceEngine::Core& ie;
     InferenceEngine::CNNNetwork network;

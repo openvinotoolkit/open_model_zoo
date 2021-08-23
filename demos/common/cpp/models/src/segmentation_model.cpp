@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,46 +17,64 @@
 #include "models/segmentation_model.h"
 #include "utils/ocv_common.hpp"
 
-using namespace InferenceEngine;
-
 SegmentationModel::SegmentationModel(const std::string& modelFileName, bool useAutoResize) :
-    ImageModel(modelFileName, useAutoResize) {
+    ImageModel(modelFileName, useAutoResize) {}
+
+std::vector<std::string> SegmentationModel::loadLabels(const std::string & labelFilename)
+{
+    std::vector<std::string> labelsList;
+
+    /* Read labels (if any) */
+    if (!labelFilename.empty()) {
+        std::ifstream inputFile(labelFilename);
+        if (!inputFile.is_open())
+            throw std::runtime_error("Can't open the labels file: " + labelFilename);
+        std::string label;
+        while (std::getline(inputFile, label)) {
+            labelsList.push_back(label);
+        }
+        if (labelsList.empty())
+            throw std::logic_error("File is empty: " + labelFilename);
+    }
+
+    return labelsList;
 }
 
-void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
+void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork)
+{
     // --------------------------- Configure input & output ---------------------------------------------
     // --------------------------- Prepare input blobs -----------------------------------------------------
-    ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
-    if (inputShapes.size() != 1)
+    InferenceEngine::ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+    if (inputShapes.size() != 1) {
         throw std::runtime_error("Demo supports topologies only with 1 input");
+    }
+
     inputsNames.push_back(inputShapes.begin()->first);
-    SizeVector& inSizeVector = inputShapes.begin()->second;
+
+    InferenceEngine::SizeVector& inSizeVector = inputShapes.begin()->second;
     if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
         throw std::runtime_error("3-channel 4-dimensional model's input is expected");
 
-    InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
-    inputInfo.setPrecision(Precision::U8);
+    InferenceEngine::InputInfo& inputInfo = *cnnNetwork.getInputsInfo().begin()->second;
+    inputInfo.setPrecision(InferenceEngine::Precision::U8);
+
     if (useAutoResize) {
-        inputInfo.getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-        inputInfo.setLayout(Layout::NHWC);
-    }
-    else {
-        inputInfo.setLayout(Layout::NCHW);
+        inputInfo.getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
+        inputInfo.setLayout(InferenceEngine::Layout::NHWC);
+    } else {
+        inputInfo.setLayout(InferenceEngine::Layout::NCHW);
     }
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    const OutputsDataMap& outputsDataMap = cnnNetwork.getOutputsInfo();
+    const InferenceEngine::OutputsDataMap& outputsDataMap = cnnNetwork.getOutputsInfo();
     if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
 
     outputsNames.push_back(outputsDataMap.begin()->first);
-    Data& data = *outputsDataMap.begin()->second;
-    // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
-    // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
-    // postprocessing
-    data.setPrecision(Precision::FP32);
-    const SizeVector& outSizeVector = data.getTensorDesc().getDims();
+    InferenceEngine::Data& data = *outputsDataMap.begin()->second;
+
+    const InferenceEngine::SizeVector& outSizeVector = data.getTensorDesc().getDims();
     switch (outSizeVector.size()) {
     case 3:
-        outChannels = 0;
+        outChannels = 1;
         outHeight = (int)(outSizeVector[1]);
         outWidth = (int)(outSizeVector[2]);
         break;
@@ -66,58 +84,78 @@ void SegmentationModel::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNet
         outWidth = (int)(outSizeVector[3]);
         break;
     default:
-        throw std::runtime_error("Unexpected output blob shape. Only 4D and 3D output blobs are"
-            "supported.");
+        throw std::runtime_error("Unexpected output blob shape. Only 4D and 3D output blobs are supported.");
     }
 }
 
-std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
+std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request)
+{
     auto imgData = inputData.asRef<ImageInputData>();
     auto& img = imgData.inputImage;
 
-    if (useAutoResize) {
+    std::shared_ptr<InternalModelData> resPtr = nullptr;
+
+    if (useAutoResize)
+    {
         /* Just set input blob containing read image. Resize and layout conversionx will be done automatically */
         request->SetBlob(inputsNames[0], wrapMat2Blob(img));
         /* IE::Blob::Ptr from wrapMat2Blob() doesn't own data. Save the image to avoid deallocation before inference */
-        return std::make_shared<InternalImageMatModelData>(img);
+        resPtr = std::make_shared<InternalImageMatModelData>(img);
     }
-    /* Resize and copy data from the image to the input blob */
-    Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-    matU8ToBlob<uint8_t>(img, frameBlob);
-    return std::make_shared<InternalImageModelData>(img.cols, img.rows);
+    else
+    {
+        /* Resize and copy data from the image to the input blob */
+        InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
+        matU8ToBlob<uint8_t>(img, frameBlob);
+        resPtr = std::make_shared<InternalImageModelData>(img.cols, img.rows);
+    }
+
+    return resPtr;
 }
 
 std::unique_ptr<ResultBase> SegmentationModel::postprocess(InferenceResult& infResult) {
-    SegmentationResult* result = new SegmentationResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    ImageResult* result = new ImageResult(infResult.frameId, infResult.metaData);
 
     const auto& inputImgSize = infResult.internalModelData->asRef<InternalImageModelData>();
 
-    LockedMemory<const void> outMapped = infResult.getFirstOutputBlob()->rmap();
-    const float * const predictions = outMapped.as<float*>();
+    InferenceEngine::MemoryBlob::Ptr blobPtr = infResult.getFirstOutputBlob();
 
-    result->mask = cv::Mat(outHeight, outWidth, CV_8UC1);
-    for (int rowId = 0; rowId < outHeight; ++rowId) {
-        for (int colId = 0; colId < outWidth; ++colId) {
-            std::size_t classId = 0;
-            if (outChannels < 2) {  // assume the output is already ArgMax'ed
-                classId = static_cast<std::size_t>(predictions[rowId * outWidth + colId]);
-            }
-            else {
+    void* pData = blobPtr->rmap().as<void*>();
+
+    result->resultImage = cv::Mat(outHeight, outWidth, CV_8UC1);
+
+    if (outChannels == 1 && blobPtr->getTensorDesc().getPrecision() == InferenceEngine::Precision::I32)
+    {
+        cv::Mat predictions(outHeight, outWidth, CV_32SC1, pData);
+        predictions.convertTo(result->resultImage, CV_8UC1);
+    }
+    else if (blobPtr->getTensorDesc().getPrecision() == InferenceEngine::Precision::FP32)
+    {
+        float* ptr = reinterpret_cast<float*>(pData);
+        for (int rowId = 0; rowId < outHeight; ++rowId)
+        {
+            for (int colId = 0; colId < outWidth; ++colId)
+            {
+                int classId = 0;
                 float maxProb = -1.0f;
-                for (int chId = 0; chId < outChannels; ++chId) {
-                    float prob = predictions[chId * outHeight * outWidth + rowId * outWidth + colId];
-                    if (prob > maxProb) {
+                for (int chId = 0; chId < outChannels; ++chId)
+                {
+                    float prob = ptr[chId * outHeight * outWidth + rowId * outWidth + colId];
+                    if (prob > maxProb)
+                    {
                         classId = chId;
                         maxProb = prob;
                     }
-                }
-            }
+                } // nChannels
 
-            result->mask.at<uint8_t>(rowId, colId) = classId;
-        }
+                result->resultImage.at<uint8_t>(rowId, colId) = classId;
+            } // width
+        } // height
     }
-    cv::resize(result->mask, result->mask, cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight),0,0,cv::INTER_NEAREST);
+
+    cv::resize(result->resultImage, result->resultImage,
+        cv::Size(inputImgSize.inputImgWidth, inputImgSize.inputImgHeight),
+        0, 0, cv::INTER_NEAREST);
 
     return std::unique_ptr<ResultBase>(result);
 }

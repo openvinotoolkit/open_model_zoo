@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import subprocess
+import subprocess # nosec - disable B404:import-subprocess check
 
 import pytest
 
@@ -40,11 +40,7 @@ except ImportError:
 
 
 def no_available_myriad():
-    try:
-        from openvino.inference_engine import IECore
-        return 'MYRIAD' not in IECore().available_devices
-    except Exception:
-        return True
+    return True
 
 
 def has_layers():
@@ -424,7 +420,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_from_caffe(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -447,7 +443,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_with_mo_params(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -471,7 +467,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_with_mo_flags(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -520,7 +516,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_from_tf(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -541,7 +537,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_from_tf_checkpoint(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -822,7 +818,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_from_mxnet(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -843,7 +839,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_from_onnx(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 
@@ -864,7 +860,7 @@ class TestDLSDKLauncher:
 
     def test_model_converted_from_kaldi(self, mocker):
         mock = mocker.patch(
-            'accuracy_checker.launcher.dlsdk_launcher.convert_model',
+            'accuracy_checker.launcher.dlsdk_launcher_config.convert_model',
             return_value=('converted_model', 'converted_weights')
         )
 

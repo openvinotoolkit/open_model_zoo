@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import copy
 import warnings
 from collections import OrderedDict
 from functools import singledispatch
@@ -102,6 +103,9 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         return diff
 
     def _calculate_diff_regression_rep(self, annotation, prediction):
+        def to_float(value):
+            return value.astype(float) if not np.isscalar(value) and np.issubdtype(value.dtype,
+                                                                                   np.integer) else value
         if isinstance(annotation.value, dict):
             if not isinstance(prediction.value, dict):
                 if len(annotation.value) != 1:
@@ -109,7 +113,9 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
                 return self.value_differ(next(iter(annotation.value.values())), prediction.value)
             diff_dict = OrderedDict()
             for key in annotation.value:
-                diff = self.value_differ(annotation.value[key], prediction.value[key])
+                annotation_val = to_float(annotation.value[key])
+                prediction_val = to_float(prediction.value[key])
+                diff = self.value_differ(annotation_val, prediction_val)
                 if np.ndim(diff) > 1:
                     diff = np.mean(diff)
                 diff_dict[key] = diff
@@ -117,12 +123,16 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         if isinstance(prediction.value, dict):
             if len(prediction.value) != 1:
                 raise ConfigError('annotation for all predictions should be provided')
-            diff = self.value_differ(annotation.value, next(iter(prediction.value.values())))
-            if not np.isscalar(diff) and np.size(diff) > 1:
+            annotation_val = to_float(annotation.value)
+            prediction_val = to_float(next(iter(prediction.value.values())))
+            diff = self.value_differ(annotation_val, prediction_val)
+            if not np.isscalar(diff) and np.ndim(diff) > 1:
                 diff = np.mean(diff)
             return diff
-        diff = self.value_differ(annotation.value, prediction.value)
-        if not np.isscalar(diff) and np.size(diff) > 1:
+        annotation_val = to_float(annotation.value)
+        prediction_val = to_float(prediction.value)
+        diff = self.value_differ(annotation_val, prediction_val)
+        if not np.isscalar(diff) and np.ndim(diff) > 1:
             diff = np.mean(diff)
         return diff
 
@@ -229,7 +239,7 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
             self.magnitude = self.magnitude[1:-1]
 
         result = [[np.mean(values), np.std(values)] if values else [np.nan, np.nan] for values in self.magnitude]
-        result, self.meta['names'] = finalize_metric_result(np.reshape(result, -1), self.meta['names'])
+        result, self.meta['names'] = finalize_metric_result(np.reshape(result, -1), self.meta['orig_names'])
 
         if not result:
             warnings.warn("No values in given interval")
@@ -252,6 +262,7 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         if not self.ignore_out_of_range:
             self.meta['names'].append('mean: > ' + str(self.intervals[-1]))
             self.meta['names'].append('std: > ' + str(self.intervals[-1]))
+        self.meta['orig_names'] = copy.deepcopy(self.meta['names'])
 
     def reset(self):
         self.magnitude = [[] for _ in range(len(self.intervals) + 1)]
@@ -339,7 +350,7 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
             error = [np.sqrt(np.mean(values)), np.sqrt(np.std(values))] if values else [np.nan, np.nan]
             result.append(error)
 
-        result, self.meta['names'] = finalize_metric_result(np.reshape(result, -1), self.meta['names'])
+        result, self.meta['names'] = finalize_metric_result(np.reshape(result, -1), self.meta['orig_names'])
 
         if not result:
             warnings.warn("No values in given interval")
@@ -542,10 +553,8 @@ def calculate_distance(x_coords, y_coords, selected_points):
 def mae_differ(annotation_val, prediction_val):
     return np.abs(annotation_val - prediction_val)
 
-
 def mse_differ(annotation_val, prediction_val):
-    return (annotation_val - prediction_val)**2
-
+    return (annotation_val - prediction_val) ** 2
 
 def find_interval(value, intervals):
     for index, point in enumerate(intervals):

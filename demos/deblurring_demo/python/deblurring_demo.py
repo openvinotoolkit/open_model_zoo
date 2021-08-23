@@ -14,25 +14,25 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 from time import perf_counter
 
 import cv2
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from models import Deblurring
 import monitors
-from pipelines import get_user_config, AsyncPipeline
+from pipelines import get_user_config, parse_devices, AsyncPipeline
 from images_capture import open_images_capture
 from performance_metrics import PerformanceMetrics
+from helpers import log_blobs_info, log_runtime_settings, log_latency_per_stage
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -45,7 +45,7 @@ def build_argparser():
                       help='Required. An input to process. The input must be a single image, '
                            'a folder of images or anything that cv2.VideoCapture can process.')
     args.add_argument('-d', '--device', default='CPU', type=str,
-                      help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
+                      help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
                            'acceptable. The demo will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
 
@@ -64,7 +64,7 @@ def build_argparser():
     io_args.add_argument('--loop', default=False, action='store_true',
                          help='Optional. Enable reading the input in a loop.')
     io_args.add_argument('-o', '--output', required=False,
-                         help='Optional. Name of output to save.')
+                         help='Optional. Name of the output file(s) to save.')
     io_args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                          help='Optional. Number of frames to store in output. '
                               'If 0 is set, all frames are stored.')
@@ -77,34 +77,38 @@ def build_argparser():
 def main():
     args = build_argparser().parse_args()
 
-    log.info('Initializing Inference Engine...')
+    cap = open_images_capture(args.input, args.loop)
+    next_frame_id = 1
+    next_frame_id_to_show = 0
+
+    metrics = PerformanceMetrics()
+    render_metrics = PerformanceMetrics()
+    video_writer = cv2.VideoWriter()
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
-    cap = open_images_capture(args.input, args.loop)
 
     start_time = perf_counter()
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
 
-    log.info('Loading network...')
+    log.info('Reading model {}'.format(args.model))
     model = Deblurring(ie, args.model, frame.shape)
+    log_blobs_info(model)
 
     pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+    log_runtime_settings(pipeline.exec_net, set(parse_devices(args.device)))
 
     pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
 
-    next_frame_id = 1
-    next_frame_id_to_show = 0
-    metrics = PerformanceMetrics()
     presenter = monitors.Presenter(args.utilization_monitors, 55,
                                    (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
-    video_writer = cv2.VideoWriter()
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
                                              cap.fps(), (2 * frame.shape[1], frame.shape[0])):
         raise RuntimeError("Can't open video writer")
@@ -133,9 +137,11 @@ def main():
             input_frame = frame_meta['frame']
             start_time = frame_meta['start_time']
 
+            rendering_start_time = perf_counter()
             if input_frame.shape != result_frame.shape:
                 input_frame = cv2.resize(input_frame, (result_frame.shape[1], result_frame.shape[0]))
             final_image = cv2.hconcat([input_frame, result_frame])
+            render_metrics.update(rendering_start_time)
 
             presenter.drawGraphs(final_image)
             metrics.update(start_time, final_image)
@@ -158,9 +164,11 @@ def main():
             input_frame = frame_meta['frame']
             start_time = frame_meta['start_time']
 
+            rendering_start_time = perf_counter()
             if input_frame.shape != result_frame.shape:
                 input_frame = cv2.resize(input_frame, (result_frame.shape[1], result_frame.shape[0]))
             final_image = cv2.hconcat([input_frame, result_frame])
+            render_metrics.update(rendering_start_time)
 
             presenter.drawGraphs(final_image)
             metrics.update(start_time, final_image)
@@ -173,8 +181,14 @@ def main():
         else:
             break
 
-    metrics.print_total()
-    print(presenter.reportMeans())
+    metrics.log_total()
+    log_latency_per_stage(cap.reader_metrics.get_latency(),
+                          pipeline.preprocess_metrics.get_latency(),
+                          pipeline.inference_metrics.get_latency(),
+                          pipeline.postprocess_metrics.get_latency(),
+                          render_metrics.get_latency())
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

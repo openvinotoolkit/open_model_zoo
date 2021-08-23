@@ -18,7 +18,7 @@ from collections import defaultdict
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, ConfigError, NumberField, BoolField, DictField, ListField, StringField
+from ..config import ConfigValidator, ConfigError, NumberField, BoolField, DictField, ListField, StringField, PathField
 from ..representation import CharacterRecognitionPrediction
 from ..utils import softmax
 
@@ -58,6 +58,9 @@ class BeamSearchDecoder(Adapter):
         self.softmaxed_probabilities = self.get_value_from_config('softmaxed_probabilities')
         self.logits_output = self.get_value_from_config("logits_output")
         self.custom_label_map = self.get_value_from_config("custom_label_map")
+        if self.custom_label_map:
+            labels = {int(k): v for k, v in self.custom_label_map.items()}
+            self.custom_label_map = labels
 
     def process(self, raw, identifiers, frame_meta):
         if self.custom_label_map:
@@ -179,6 +182,9 @@ class CTCGreedySearchDecoder(Adapter):
         self.blank_label = self.get_value_from_config('blank_label')
         self.logits_output = self.get_value_from_config("logits_output")
         self.custom_label_map = self.get_value_from_config("custom_label_map")
+        if self.custom_label_map:
+            labels = {int(k): v for k, v in self.custom_label_map.items()}
+            self.custom_label_map = labels
 
     def process(self, raw, identifiers=None, frame_meta=None):
         if self.custom_label_map:
@@ -232,8 +238,11 @@ class SimpleDecoder(Adapter):
             'eos_label': StringField(
                 optional=True, default='[s]', description="End-of-sequence label."
             ),
-            'custom_label_map': DictField(optional=True, description='Label map')
-
+            'custom_label_map': DictField(optional=True, description='Label map'),
+            'start_index': NumberField(optional=True, default=0, min_value=0, value_type=int,
+                                       description="Start index in predicted data"),
+            'do_lower': BoolField(optional=True, default=False,
+                                  description="Allow converting predicted data to lower case")
         })
         return parameters
 
@@ -246,6 +255,11 @@ class SimpleDecoder(Adapter):
     def configure(self):
         self.eos_label = self.get_value_from_config('eos_label')
         self.custom_label_map = self.get_value_from_config("custom_label_map")
+        self.start_index = self.get_value_from_config("start_index")
+        self.do_lower = self.get_value_from_config("do_lower")
+        if self.custom_label_map:
+            labels = {int(k): v for k, v in self.custom_label_map.items()}
+            self.custom_label_map = labels
 
     def process(self, raw, identifiers=None, frame_meta=None):
         if self.custom_label_map:
@@ -260,8 +274,10 @@ class SimpleDecoder(Adapter):
 
         result = []
         for identifier, data in zip(identifiers, preds_index):
-            decoded = ''.join(str(self.label_map[char]) for char in data)
+            decoded = ''.join(str(self.label_map[char]) for char in data[self.start_index:])
             decoded = decoded[:decoded.find(self.eos_label)]
+            if self.do_lower:
+                decoded = decoded.lower()
             result.append(CharacterRecognitionPrediction(identifier, decoded))
 
         return result
@@ -335,3 +351,58 @@ class AttentionOCRAdapter(Adapter):
                 decoded_out = decoded_out.lower()
             result.append(CharacterRecognitionPrediction(identifier, decoded_out))
         return result
+
+
+class PDPDTextRecognition(Adapter):
+    __provider__ = 'ppocr'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'vocabulary_file': PathField(description='file with decoding labels'),
+            'remove_duplicates': BoolField(
+                optional=True, default=True, description='remove duplications from result string'
+            )
+        })
+        return params
+
+    def configure(self):
+        self.labels_file = self.get_value_from_config('vocabulary_file')
+        chr_str = ''
+        with self.labels_file.open("rb") as fin:
+            lines = fin.readlines()
+            for line in lines:
+                line = line.decode('utf-8').strip("\n").strip("\r\n")
+                chr_str += line
+            chr_str += " "
+        dict_character = list(chr_str)
+        self.label_map = dict(enumerate(['<blank>'] + dict_character))
+        self.ignored_tokens = [0]
+        self.remove_duplicates = self.get_value_from_config('remove_duplicates')
+
+    def process(self, raw, identifiers, frame_meta):
+        results = []
+        outputs = self._extract_predictions(raw, frame_meta)
+        for identifier, out in zip(identifiers, outputs[self.output_blob]):
+            preds_idx = np.argmax(out, axis=1)
+            text = self.decode(preds_idx)
+            results.append(CharacterRecognitionPrediction(identifier, text))
+
+        return results
+
+    def decode(self, text_index):
+        """ convert text-index into text-label. """
+        char_list = []
+        for pos_id, idx in enumerate(text_index):
+            if idx in self.ignored_tokens:
+                continue
+            if self.remove_duplicates:
+                if pos_id > 0 and text_index[pos_id - 1] == idx:
+                    continue
+
+            if idx == len(self.label_map):
+                continue
+            char_list.append(self.label_map[int(idx)])
+
+        return ''.join(char_list)

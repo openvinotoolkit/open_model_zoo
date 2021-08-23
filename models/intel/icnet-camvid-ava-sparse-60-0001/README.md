@@ -34,7 +34,7 @@ The quality metrics were calculated on the CamVid validation dataset. The `unlab
 
 | Metric                    | Value         |
 |---------------------------|---------------|
-| mIoU                      |        69.91% |
+| mIoU                      |        75.79% |
 
 - `IOU=TP/(TP+FN+FP)`, where:
   - `TP` - number of true positive pixels for given class

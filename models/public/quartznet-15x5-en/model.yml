@@ -80,6 +80,14 @@ postprocessing:
     file: models/nemo/collections/asr/__init__.py
     pattern: 'JasperEncoder\,'
     replacement: 'JasperEncoder)'
+  - $type: regex_replace  # numpy Windows build lacks np.float128
+    file: models/nemo/constants.py
+    pattern: 'np.float128,'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: models/nemo/collections/asr/jasper.py
+    pattern: 'transpose\(1, 2\)'
+    replacement: 'transpose(1, -1)'
 conversion_to_onnx_args:
   - --model-path=$config_dir
   - --model-path=$dl_dir/models

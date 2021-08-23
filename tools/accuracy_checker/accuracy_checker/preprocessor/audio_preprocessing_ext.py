@@ -19,8 +19,10 @@ import numpy as np
 from ..config import BoolField, NumberField
 from ..preprocessor import Preprocessor
 
+
 class SpliceFrame(Preprocessor):
     __provider__ = 'audio_splice'
+    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -35,7 +37,6 @@ class SpliceFrame(Preprocessor):
 
         self.frames = self.get_value_from_config('frames')
         self.axis = self.get_value_from_config('axis')
-
 
     def process(self, image, annotation_meta=None):
         if self.frames > 1:
@@ -74,6 +75,7 @@ class DitherFrame(Preprocessor):
 
 class PreemphFrame(Preprocessor):
     __provider__ = 'audio_preemph'
+    shape_modificator = True
 
     @classmethod
     def parameters(cls):
@@ -118,6 +120,8 @@ class DitherSpectrum(Preprocessor):
 
 class SignalPatching(Preprocessor):
     __provider__ = 'audio_patches'
+    shape_modificator = True
+    _dynamic_output = False
 
     @classmethod
     def parameters(cls):
@@ -140,4 +144,44 @@ class SignalPatching(Preprocessor):
         processed_data = np.split(data, patch_num)
         image.data = processed_data
         image.metadata['multi_infer'] = True
+        return image
+
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_output
+
+
+class ContextWindow(Preprocessor):
+    __provider__ = 'context_window'
+    shape_modificator = True
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'cw_l': NumberField(value_type=int, min_value=0, description='Context window left'),
+            'cw_r': NumberField(value_type=int, min_value=0, description='Context window right'),
+            'to_multi_infer': BoolField(optional=True, default=False)
+        })
+        return params
+
+    def configure(self):
+        self.cw_l = self.get_value_from_config('cw_l')
+        self.cw_r = self.get_value_from_config('cw_r')
+        self.to_multi_infer = self.get_value_from_config('to_multi_infer')
+
+    def process(self, image, annotation_meta=None):
+        def process_single(signal):
+            borders = (self.cw_l, self.cw_r) if signal.ndim == 1 else ((self.cw_l, self.cw_r), (0, 0))
+            return np.pad(signal, borders, mode='edge')
+        image.data = (
+            process_single(image.data) if not isinstance(image.data, list)
+            else [process_single(elem) for elem in image.data]
+        )
+        image.metadata['context_left'] = self.cw_l
+        image.metadata['context_right'] = self.cw_r
+        if self.to_multi_infer:
+            image.data = list(image.data)
+            image.metadata['multi_infer'] = True
+
         return image

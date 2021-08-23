@@ -15,7 +15,7 @@
  limitations under the License.
 """
 
-import logging
+import logging as log
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
@@ -23,17 +23,17 @@ from time import perf_counter
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 import models
 import monitors
 from images_capture import open_images_capture
-from pipelines import get_user_config, AsyncPipeline
+from pipelines import get_user_config, parse_devices, AsyncPipeline
 from performance_metrics import PerformanceMetrics
+from helpers import resolution, log_blobs_info, log_runtime_settings, log_latency_per_stage
 
-logging.basicConfig(format='[ %(levelname)s ] %(message)s', level=logging.INFO, stream=sys.stdout)
-log = logging.getLogger()
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -50,13 +50,13 @@ def build_argparser():
     args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
     args.add_argument('-o', '--output', required=False,
-                      help='Optional. Name of output to save.')
+                      help='Optional. Name of the output file(s) to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                        help='Optional. Number of frames to store in output. '
                             'If 0 is set, all frames are stored.')
     args.add_argument('-d', '--device', default='CPU', type=str,
-                      help='Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is '
-                           'acceptable. The sample will look for a suitable plugin for device specified. '
+                      help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
+                           'acceptable. The demo will look for a suitable plugin for device specified. '
                            'Default value is CPU.')
 
     common_model_args = parser.add_argument_group('Common model options')
@@ -85,6 +85,10 @@ def build_argparser():
 
     io_args = parser.add_argument_group('Input/output options')
     io_args.add_argument('-no_show', '--no_show', help="Optional. Don't show output.", action='store_true')
+    io_args.add_argument('--output_resolution', default=None, type=resolution,
+                         help='Optional. Specify the maximum output window resolution '
+                              'in (width x height) format. Example: 1280x720. '
+                              'Input frame size used by default.')
     io_args.add_argument('-u', '--utilization_monitors', default='', type=str,
                          help='Optional. List of monitors to show initially.')
 
@@ -120,14 +124,16 @@ colors = (
         (0, 170, 255))
 
 
-def draw_poses(img, poses, point_score_threshold, skeleton=default_skeleton, draw_ellipses=False):
+def draw_poses(img, poses, point_score_threshold, output_transform, skeleton=default_skeleton, draw_ellipses=False):
+    img = output_transform.resize(img)
     if poses.size == 0:
         return img
     stick_width = 4
 
     img_limbs = np.copy(img)
     for pose in poses:
-        points = pose[:, :2].astype(int).tolist()
+        points = pose[:, :2].astype(np.int32)
+        points = output_transform.scale(points)
         points_scores = pose[:, 2]
         # Draw joints.
         for i, (p, v) in enumerate(zip(points, points_scores)):
@@ -150,46 +156,57 @@ def draw_poses(img, poses, point_score_threshold, skeleton=default_skeleton, dra
     return img
 
 
-def print_raw_results(poses, scores):
-    log.info('Poses:')
+def print_raw_results(poses, scores, frame_id):
+    log.debug(' ------------------- Frame # {} ------------------ '.format(frame_id))
     for pose, pose_score in zip(poses, scores):
         pose_str = ' '.join('({:.2f}, {:.2f}, {:.2f})'.format(p[0], p[1], p[2]) for p in pose)
-        log.info('{} | {:.2f}'.format(pose_str, pose_score))
+        log.debug('{} | {:.2f}'.format(pose_str, pose_score))
 
 
 def main():
     args = build_argparser().parse_args()
-    metrics = PerformanceMetrics()
 
-    log.info('Initializing Inference Engine...')
+    cap = open_images_capture(args.input, args.loop)
+    next_frame_id = 1
+    next_frame_id_to_show = 0
+
+    metrics = PerformanceMetrics()
+    render_metrics = PerformanceMetrics()
+    video_writer = cv2.VideoWriter()
+
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
     plugin_config = get_user_config(args.device, args.num_streams, args.num_threads)
-
-    cap = open_images_capture(args.input, args.loop)
 
     start_time = perf_counter()
     frame = cap.read()
     if frame is None:
         raise RuntimeError("Can't read an image from the input")
 
-    log.info('Loading network...')
+    log.info('Reading model {}'.format(args.model))
     model = get_model(ie, args, frame.shape[1] / frame.shape[0])
+    log_blobs_info(model)
+
     hpe_pipeline = AsyncPipeline(ie, model, plugin_config, device=args.device, max_num_requests=args.num_infer_requests)
 
-    log.info('Starting inference...')
-    hpe_pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
-    next_frame_id = 1
-    next_frame_id_to_show = 0
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+    log_runtime_settings(hpe_pipeline.exec_net, set(parse_devices(args.device)))
 
+    hpe_pipeline.submit_data(frame, 0, {'frame': frame, 'start_time': start_time})
+
+    output_transform = models.OutputTransform(frame.shape[:2], args.output_resolution)
+    if args.output_resolution:
+        output_resolution = output_transform.new_resolution
+    else:
+        output_resolution = (frame.shape[1], frame.shape[0])
     presenter = monitors.Presenter(args.utilization_monitors, 55,
-                                   (round(frame.shape[1] / 4), round(frame.shape[0] / 8)))
-    video_writer = cv2.VideoWriter()
+                                   (round(output_resolution[0] / 4), round(output_resolution[1] / 8)))
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'), cap.fps(),
-            (frame.shape[1], frame.shape[0])):
+            output_resolution):
         raise RuntimeError("Can't open video writer")
 
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     while True:
         if hpe_pipeline.callback_exceptions:
             raise hpe_pipeline.callback_exceptions[0]
@@ -201,10 +218,12 @@ def main():
             start_time = frame_meta['start_time']
 
             if len(poses) and args.raw_output_message:
-                print_raw_results(poses, scores)
+                print_raw_results(poses, scores, next_frame_id_to_show)
 
             presenter.drawGraphs(frame)
-            frame = draw_poses(frame, poses, args.prob_threshold)
+            rendering_start_time = perf_counter()
+            frame = draw_poses(frame, poses, args.prob_threshold, output_transform)
+            render_metrics.update(rendering_start_time)
             metrics.update(start_time, frame)
             if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
                 video_writer.write(frame)
@@ -246,10 +265,12 @@ def main():
         start_time = frame_meta['start_time']
 
         if len(poses) and args.raw_output_message:
-            print_raw_results(poses, scores)
+            print_raw_results(poses, scores, next_frame_id_to_show)
 
         presenter.drawGraphs(frame)
-        frame = draw_poses(frame, poses, args.prob_threshold)
+        rendering_start_time = perf_counter()
+        frame = draw_poses(frame, poses, args.prob_threshold, output_transform)
+        render_metrics.update(rendering_start_time)
         metrics.update(start_time, frame)
         if video_writer.isOpened() and (args.output_limit <= 0 or next_frame_id_to_show <= args.output_limit-1):
             video_writer.write(frame)
@@ -263,8 +284,14 @@ def main():
                 break
             presenter.handleKey(key)
 
-    metrics.print_total()
-    print(presenter.reportMeans())
+    metrics.log_total()
+    log_latency_per_stage(cap.reader_metrics.get_latency(),
+                          hpe_pipeline.preprocess_metrics.get_latency(),
+                          hpe_pipeline.inference_metrics.get_latency(),
+                          hpe_pipeline.postprocess_metrics.get_latency(),
+                          render_metrics.get_latency())
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

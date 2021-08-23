@@ -66,7 +66,9 @@ class ModelEvaluator:
         launcher_config = model_config['launchers'][0]
         launcher = create_launcher(launcher_config, model_name, delayed_model_loading=True)
         config_adapter = launcher_config.get('adapter')
-        adapter = None if not config_adapter else create_adapter(config_adapter, None, None)
+        adapter = None if not config_adapter else create_adapter(
+            config_adapter, launcher, None, delayed_model_loading=True
+        )
 
         return cls(
             launcher, adapter, dataset_config
@@ -74,7 +76,7 @@ class ModelEvaluator:
 
     def _get_batch_input(self, batch_input, batch_annotation):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
-        _, batch_meta = extract_image_representations(batch_input)
+        batch_meta = extract_image_representations(batch_input, meta_only=True)
         filled_inputs = self.input_feeder.fill_inputs(batch_input)
 
         return filled_inputs, batch_meta
@@ -94,8 +96,8 @@ class ModelEvaluator:
             **kwargs
     ):
 
-        def _process_ready_predictions(batch_raw_predictions, batch_identifiers, batch_meta):
-            if self.adapter:
+        def _process_ready_predictions(batch_raw_predictions, batch_identifiers, batch_meta, calculate_metrics=True):
+            if self.adapter and calculate_metrics:
                 return self.adapter.process(batch_raw_predictions, batch_identifiers, batch_meta)
 
             return batch_raw_predictions
@@ -108,11 +110,7 @@ class ModelEvaluator:
 
         self._prepare_to_evaluation(dataset_tag, dump_prediction_to_annotation)
 
-        if (
-                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
-                self.preprocessor.has_multi_infer_transformations or
-                self.dataset.multi_infer
-        ):
+        if self._switch_to_sync():
             warning('Model can not to be processed in async mode. Switched to sync.')
             return self.process_dataset(
                 subset,
@@ -150,28 +148,31 @@ class ModelEvaluator:
                         batch_raw_predictions,
                     ) = ready_data
                     batch_predictions = _process_ready_predictions(
-                        batch_raw_predictions, batch_identifiers, batch_meta
+                        batch_raw_predictions, batch_identifiers, batch_meta,
+                        calculate_metrics or dump_prediction_to_annotation
                     )
                     free_irs.append(ready_ir_id)
-                    annotations, predictions = self.postprocessor.process_batch(
-                        batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
-                    )
-                    if dump_prediction_to_annotation:
-                        threshold = kwargs.get('annotation_conf_threshold', 0.0)
-                        annotations = []
-                        for prediction in predictions:
-                            generated_annotation = prediction.to_annotation(threshold=threshold)
-                            if generated_annotation:
-                                annotations.append(generated_annotation)
-                        self._dumped_annotations.extend(annotations)
+
                     metrics_result = None
-                    if self.metric_executor and calculate_metrics:
-                        metrics_result, _ = self.metric_executor.update_metrics_on_batch(
-                            batch_input_ids, annotations, predictions
+                    if calculate_metrics:
+                        annotations, predictions = self.postprocessor.process_batch(
+                            batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
                         )
-                        if self.metric_executor.need_store_predictions:
-                            self._annotations.extend(annotations)
-                            self._predictions.extend(predictions)
+                        if dump_prediction_to_annotation:
+                            threshold = kwargs.get('annotation_conf_threshold', 0.0)
+                            annotations = []
+                            for prediction in predictions:
+                                generated_annotation = prediction.to_annotation(threshold=threshold)
+                                if generated_annotation:
+                                    annotations.append(generated_annotation)
+                            self._dumped_annotations.extend(annotations)
+                        if self.metric_executor:
+                            metrics_result, _ = self.metric_executor.update_metrics_on_batch(
+                                batch_input_ids, annotations, predictions
+                            )
+                            if self.metric_executor.need_store_predictions:
+                                self._annotations.extend(annotations)
+                                self._predictions.extend(predictions)
 
                     if output_callback:
                         output_callback(
@@ -250,31 +251,33 @@ class ModelEvaluator:
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
             batch_raw_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
-            if self.adapter:
+            if self.adapter and (calculate_metrics or dump_prediction_to_annotation):
                 self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
                 batch_predictions = self.adapter.process(batch_raw_predictions, batch_identifiers, batch_meta)
             else:
                 batch_predictions = batch_raw_predictions
 
-            annotations, predictions = self.postprocessor.process_batch(
-                batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
-            )
-            if dump_prediction_to_annotation:
-                threshold = kwargs.get('annotation_conf_threshold', 0.0)
-                annotations = []
-                for prediction in predictions:
-                    generated_annotation = prediction.to_annotation(threshold=threshold)
-                    if generated_annotation:
-                        annotations.append(generated_annotation)
-                self._dumped_annotations.extend(annotations)
             metrics_result = None
-            if self.metric_executor and calculate_metrics:
-                metrics_result, _ = self.metric_executor.update_metrics_on_batch(
-                    batch_input_ids, annotations, predictions
+            if calculate_metrics:
+                annotations, predictions = self.postprocessor.process_batch(
+                    batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
                 )
-                if self.metric_executor.need_store_predictions:
-                    self._annotations.extend(annotations)
-                    self._predictions.extend(predictions)
+                if dump_prediction_to_annotation:
+                    threshold = kwargs.get('annotation_conf_threshold', 0.0)
+                    annotations = []
+                    for prediction in predictions:
+                        generated_annotation = prediction.to_annotation(threshold=threshold)
+                        if generated_annotation:
+                            annotations.append(generated_annotation)
+                    self._dumped_annotations.extend(annotations)
+
+                if self.metric_executor:
+                    metrics_result, _ = self.metric_executor.update_metrics_on_batch(
+                        batch_input_ids, annotations, predictions
+                    )
+                    if self.metric_executor.need_store_predictions:
+                        self._annotations.extend(annotations)
+                        self._predictions.extend(predictions)
 
             if output_callback:
                 if isinstance(batch_raw_predictions, list) and len(batch_raw_predictions) == 1:
@@ -341,7 +344,26 @@ class ModelEvaluator:
 
         return infer_requests_pool
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
+    def _switch_to_sync(self):
+        if (
+                self.launcher.allow_reshape_input or self.input_feeder.lstm_inputs or
+                self.preprocessor.has_multi_infer_transformations or self.dataset.multi_infer
+        ):
+            return True
+
+        if hasattr(self.launcher, 'dyn_input_layers') and self.launcher.dyn_input_layers:
+            if self.preprocessor.dynamic_shapes:
+                return True
+            self._initialize_input_shape()
+
+        return False
+
+    def _initialize_input_shape(self):
+        _, batch_annotation, batch_input, _ = self.dataset[0]
+        filled_inputs, _ = self._get_batch_input(batch_input, batch_annotation)
+        self.launcher.initialize_undefined_shapes(filled_inputs)
+
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         if not self.metric_executor:
             return []
         if self._metrics_results:
@@ -358,20 +380,22 @@ class ModelEvaluator:
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting=ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting=ignore_results_formatting,
+                                              ignore_metric_reference=ignore_metric_reference)
         return self._metrics_results
 
-    def print_metrics_results(self, ignore_results_formatting=False):
+    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting)
+            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting)
+            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
+                                ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting)
+            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
 
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
@@ -384,7 +408,7 @@ class ModelEvaluator:
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting)
+                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
         return extracted_results, extracted_meta
 
@@ -399,7 +423,7 @@ class ModelEvaluator:
         network = next(iter(network_list))['model'] if network_list is not None else None
         self.launcher.load_network(network)
         self.input_feeder = InputFeeder(
-            self.launcher.config.get('inputs', []), self.launcher.inputs,
+            self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
             self.launcher.fit_to_input, self.launcher.default_layout
         )
         if self.adapter:
@@ -410,7 +434,7 @@ class ModelEvaluator:
         xml_path, bin_path = model_paths['model'], model_paths['weights']
         self.launcher.load_ir(xml_path, bin_path)
         self.input_feeder = InputFeeder(
-            self.launcher.config.get('inputs', []), self.launcher.inputs,
+            self.launcher.config.get('inputs', []), self.launcher.inputs, self.launcher.input_shape,
             self.launcher.fit_to_input, self.launcher.default_layout
         )
         if self.adapter:
@@ -453,9 +477,14 @@ class ModelEvaluator:
         self._metrics_results = []
         if self.dataset:
             self.dataset.reset(self.postprocessor.has_processors)
+        if self.adapter:
+            self.adapter.reset()
 
     def release(self):
         self.launcher.release()
+        self.input_feeder.release()
+        if self.adapter:
+            self.adapter.release()
 
 
 def create_dataset_attributes(config, tag, dumped_annotations=None):
@@ -473,7 +502,6 @@ def create_dataset_attributes(config, tag, dumped_annotations=None):
     data_source = dataset_config.get('data_source')
     annotation_reader = None
     dataset_meta = {}
-    annotation = None
     if contains_any(dataset_config, ['annotation', 'annotation_conversion']) or dumped_annotations:
         annotation, meta = Dataset.load_annotation(dataset_config)
         annotation_reader = AnnotationProvider(
@@ -490,7 +518,7 @@ def create_dataset_attributes(config, tag, dumped_annotations=None):
     if data_reader_type in REQUIRES_ANNOTATIONS:
         if annotation_reader is None:
             raise ConfigError('data reader *{}* requires annotation'.format(data_reader_type))
-        data_source = annotation if not dumped_annotations else dumped_annotations
+        data_source = annotation_reader
     data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
 
     metric_dispatcher = None

@@ -33,6 +33,18 @@ class Detection:
     def top_right_point(self):
         return self.xmax, self.ymax
 
+    def get_coords(self):
+        return self.xmin, self.ymin, self.xmax, self.ymax
+
+
+def clip_detections(detections, size):
+    for detection in detections:
+        detection.xmin = max(int(detection.xmin), 0)
+        detection.ymin = max(int(detection.ymin), 0)
+        detection.xmax = min(int(detection.xmax), size[1])
+        detection.ymax = min(int(detection.ymax), size[0])
+    return detections
+
 
 class DetectionWithLandmarks(Detection):
     def __init__(self, xmin, ymin, xmax, ymax, score, id, landmarks_x, landmarks_y):
@@ -40,6 +52,35 @@ class DetectionWithLandmarks(Detection):
         self.landmarks = []
         for x, y in zip(landmarks_x, landmarks_y):
             self.landmarks.append((x, y))
+
+
+class OutputTransform:
+    def __init__(self, input_size, output_resolution):
+        self.output_resolution = output_resolution
+        if self.output_resolution:
+            self.new_resolution = self.compute_resolution(input_size)
+
+    def compute_resolution(self, input_size):
+        self.input_size = input_size
+        size = self.input_size[::-1]
+        self.scale_factor = min(self.output_resolution[0] / size[0],
+                                self.output_resolution[1] / size[1])
+        return self.scale(size)
+
+    def resize(self, image):
+        if not self.output_resolution:
+            return image
+        curr_size = image.shape[:2]
+        if curr_size != self.input_size:
+            self.new_resolution = self.compute_resolution(curr_size)
+        if self.scale_factor == 1:
+            return image
+        return cv2.resize(image, self.new_resolution)
+
+    def scale(self, inputs):
+        if not self.output_resolution or self.scale_factor == 1:
+            return inputs
+        return (np.array(inputs) * self.scale_factor).astype(np.int32)
 
 
 class InputTransform:

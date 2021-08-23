@@ -16,7 +16,6 @@
 
 #include "models/image_model.h"
 #include <utils/ocv_common.hpp>
-#include <utils/slog.hpp>
 
 ImageModel::ImageModel(const std::string& modelFileName, bool useAutoResize) :
     ModelBase(modelFileName),

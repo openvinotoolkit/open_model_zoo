@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/person-attributes-recognition-crossroad-0234.xml
-    size: 190320
-    sha256: c9afe24a7ba534a2d3176f3543eec0422a17656000d80e7e3780301ef64017e5
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-attributes-recognition-crossroad-0234/FP32/person-attributes-recognition-crossroad-0234.xml
+    size: 192956
+    sha256: 8542a8617816fc5109267ff1129b226be4b9c45ac0d2002f83805e06972269fc
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-attributes-recognition-crossroad-0234/FP32/person-attributes-recognition-crossroad-0234.xml
   - name: FP32/person-attributes-recognition-crossroad-0234.bin
-    size: 94040708
-    sha256: 4678ccb968ca5113b89c759d7a043badec3b69437a9ea5d11c029b91dfbdcc04
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-attributes-recognition-crossroad-0234/FP32/person-attributes-recognition-crossroad-0234.bin
+    size: 94040716
+    sha256: 54fcac9e5cfbf5f3b9eda31f342af3443c2461eaf49916c3ac8a0a57c3665ab7
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-attributes-recognition-crossroad-0234/FP32/person-attributes-recognition-crossroad-0234.bin
   - name: FP16/person-attributes-recognition-crossroad-0234.xml
-    size: 190260
-    sha256: dffc2275fbd6903b53b2a438a801831a036f3970e9e3b95d7deedeaa33692122
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-attributes-recognition-crossroad-0234/FP16/person-attributes-recognition-crossroad-0234.xml
+    size: 192896
+    sha256: 18f2bc8207a49e0d27a8958c4201899ccedb8b47cf106800a59dd2224072dfc8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-attributes-recognition-crossroad-0234/FP16/person-attributes-recognition-crossroad-0234.xml
   - name: FP16/person-attributes-recognition-crossroad-0234.bin
-    size: 47020380
-    sha256: 5de2ad3c3eef8d18ed246197a97ccaed5709306ff6662611d30cc97d52396b62
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-attributes-recognition-crossroad-0234/FP16/person-attributes-recognition-crossroad-0234.bin
+    size: 47020388
+    sha256: 8794458d3d461a0b773abf7a41e51dfdff6140421f7d72dbedcf7e0495a1157d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-attributes-recognition-crossroad-0234/FP16/person-attributes-recognition-crossroad-0234.bin
   - name: FP16-INT8/person-attributes-recognition-crossroad-0234.xml
-    size: 454149
-    sha256: 52063fe179e2f3bdbf3b649fa1dd223c0d29d0e1333e2925c31f4241b9a3a579
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-attributes-recognition-crossroad-0234/FP16-INT8/person-attributes-recognition-crossroad-0234.xml
+    size: 449259
+    sha256: fcaeb416fcde64bdbe458963632a67b10a4419a75ca308870d1031b8a6c520a9
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-attributes-recognition-crossroad-0234/FP16-INT8/person-attributes-recognition-crossroad-0234.xml
   - name: FP16-INT8/person-attributes-recognition-crossroad-0234.bin
     size: 23651452
-    sha256: 7e12f23475f3965f3e60804e63c3addb8964944476feedf047f89450a8fd130f
-    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.3/models_bin/2/person-attributes-recognition-crossroad-0234/FP16-INT8/person-attributes-recognition-crossroad-0234.bin
+    sha256: 057ba895b32c1d1bd665528c811c16fb27a71fd14cad5680506b6cdf6a494f7b
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/person-attributes-recognition-crossroad-0234/FP16-INT8/person-attributes-recognition-crossroad-0234.bin
 framework: dldt
 license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

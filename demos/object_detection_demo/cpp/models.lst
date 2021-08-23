@@ -4,10 +4,8 @@ ctdet_coco_dlav0_384
 ctdet_coco_dlav0_512
 # For -at faceboxes
 faceboxes-pytorch
-# For -at retinaface
-retinaface-anti-cov
-retinaface-resnet50
-ssh-mxnet
+# For -at retinaface-pytorch
+retinaface-resnet50-pytorch
 # For -at ssd
 efficientdet-d0-tf
 efficientdet-d1-tf
@@ -36,5 +34,15 @@ vehicle-detection-adas-????
 vehicle-license-plate-detection-barrier-????
 # For -at yolo
 person-vehicle-bike-detection-crossroad-yolov3-1020
+yolo-v1-tiny-tf
+yolo-v2-ava-0001
+yolo-v2-ava-sparse-??-0001
+yolo-v2-tiny-ava-0001
+yolo-v2-tiny-ava-sparse-??-0001
+yolo-v2-tiny-vehicle-detection-0001
+yolo-v2-tf
+yolo-v2-tiny-tf
 yolo-v3-tf
 yolo-v3-tiny-tf
+yolo-v4-tf
+yolo-v4-tiny-tf

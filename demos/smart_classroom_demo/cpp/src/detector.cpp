@@ -13,8 +13,6 @@
 
 #include <ngraph/ngraph.hpp>
 
-using namespace InferenceEngine;
-
 #define SSD_EMPTY_DETECTIONS_INDICATOR -1.0
 
 using namespace detection;
@@ -57,13 +55,13 @@ void FaceDetection::submitRequest() {
 
 void FaceDetection::enqueue(const cv::Mat &frame) {
     if (!request) {
-        request = net_.CreateInferRequestPtr();
+        request = std::make_shared<InferenceEngine::InferRequest>(net_.CreateInferRequest());
     }
 
     width_ = static_cast<float>(frame.cols);
     height_ = static_cast<float>(frame.rows);
 
-    Blob::Ptr inputBlob = request->GetBlob(input_name_);
+    InferenceEngine::Blob::Ptr inputBlob = request->GetBlob(input_name_);
 
     matU8ToBlob<uint8_t>(frame, inputBlob);
 
@@ -72,51 +70,53 @@ void FaceDetection::enqueue(const cv::Mat &frame) {
 
 FaceDetection::FaceDetection(const DetectorConfig& config) :
         BaseCnnDetection(config.is_async), config_(config) {
-    topoName = "face detector";
+    topoName = "Face Detection";
     auto cnnNetwork = config.ie.ReadNetwork(config.path_to_model);
 
-    InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
-        THROW_IE_EXCEPTION << "Face Detection network should have only one input";
+        throw std::runtime_error("Face Detection network should have only one input");
     }
-    InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
-    inputInfoFirst->setPrecision(Precision::U8);
-    inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
+    InferenceEngine::InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
+    inputInfoFirst->setPrecision(InferenceEngine::Precision::U8);
+    inputInfoFirst->getInputData()->setLayout(InferenceEngine::Layout::NCHW);
 
-    SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
+    InferenceEngine::SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
     input_dims[2] = config_.input_h;
     input_dims[3] = config_.input_w;
-    std::map<std::string, SizeVector> input_shapes;
+    std::map<std::string, InferenceEngine::SizeVector> input_shapes;
     input_shapes[inputInfo.begin()->first] = input_dims;
     cnnNetwork.reshape(input_shapes);
 
-    OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
+    InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     if (outputInfo.size() != 1) {
-        THROW_IE_EXCEPTION << "Face Detection network should have only one output";
+        throw std::runtime_error("Face Detection network should have only one output");
     }
-    DataPtr& _output = outputInfo.begin()->second;
+    InferenceEngine::DataPtr& _output = outputInfo.begin()->second;
     output_name_ = outputInfo.begin()->first;
 
-    const SizeVector outputDims = _output->getTensorDesc().getDims();
+    const InferenceEngine::SizeVector outputDims = _output->getTensorDesc().getDims();
     max_detections_count_ = outputDims[2];
     object_size_ = outputDims[3];
     if (object_size_ != 7) {
-        THROW_IE_EXCEPTION << "Face Detection network output layer should have 7 as a last dimension";
+        throw std::runtime_error("Face Detection network output layer should have 7 as a last dimension");
     }
     if (outputDims.size() != 4) {
-        THROW_IE_EXCEPTION << "Face Detection network output should have 4 dimensions, but had " +
-                              std::to_string(outputDims.size());
+        throw std::runtime_error("Face Detection network output should have 4 dimensions, but had " +
+                              std::to_string(outputDims.size()));
     }
-    _output->setPrecision(Precision::FP32);
-    _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
+    _output->setPrecision(InferenceEngine::Precision::FP32);
+    _output->setLayout(InferenceEngine::TensorDesc::getLayoutByDims(_output->getDims()));
 
     input_name_ = inputInfo.begin()->first;
     net_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
+    logExecNetworkInfo(net_, config_.path_to_model, config_.deviceName, topoName);
 }
 
 DetectedObjects FaceDetection::fetchResults() {
     DetectedObjects results;
-    LockedMemory<const void> outputMapped = as<MemoryBlob>(request->GetBlob(output_name_))->rmap();
+    InferenceEngine::LockedMemory<const void> outputMapped =
+        InferenceEngine::as<InferenceEngine::MemoryBlob>(request->GetBlob(output_name_))->rmap();
     const float *data = outputMapped.as<float *>();
 
     for (int det_id = 0; det_id < max_detections_count_; ++det_id) {

@@ -70,7 +70,9 @@ class ONNXLauncher(Launcher):
 
     @property
     def output_blob(self):
-        return next(iter(self.output_names))
+        if hasattr(self, 'output_names'):
+            return next(iter(self.output_names))
+        return None
 
     @property
     def batch(self):
@@ -133,7 +135,8 @@ class ONNXLauncher(Launcher):
         layer_shape = self.inputs[layer_name]
         input_precision = self._input_precisions.get(layer_name, np.float32) if not precision else precision
         if len(np.shape(data)) == 4:
-            data = np.transpose(data, layout).astype(input_precision)
+            if layout:
+                data = np.transpose(data, layout).astype(input_precision)
             if len(layer_shape) == 3:
                 if np.shape(data)[0] != 1:
                     raise ValueError('Only for batch size 1 first dimension can be omitted')

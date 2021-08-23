@@ -8,4 +8,4 @@ file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp)
 add_demo(NAME security_barrier_camera_demo
     SOURCES ${SOURCES}
     HEADERS ${HEADERS}
-    DEPENDENCIES monitors)
+    DEPENDENCIES monitors utils)

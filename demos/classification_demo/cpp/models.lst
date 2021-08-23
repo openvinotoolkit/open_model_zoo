@@ -28,6 +28,7 @@ hbonet-0.25
 hbonet-0.5
 hbonet-1.0
 inception-resnet-v2-tf
+mixnet-l
 mobilenet-v1-0.25-128
 mobilenet-v1-0.50-160
 mobilenet-v1-0.50-224
@@ -64,6 +65,7 @@ se-resnet-152
 se-resnet-50
 se-resnext-101
 se-resnext-50
+shufflenet-v2-x0.5
 shufflenet-v2-x1.0
 squeezenet1.0
 squeezenet1.1

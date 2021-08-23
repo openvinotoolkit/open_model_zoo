@@ -16,21 +16,22 @@ import argparse
 import cv2
 import logging as log
 import numpy as np
-import time
+from time import perf_counter
 import sys
 from os import path as osp
 
-from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
+from openvino.inference_engine import IECore, get_version
 
 from utils.network_wrappers import MaskRCNN, SemanticSegmentation
-from utils.misc import MouseClick, set_log_config, check_pressed_keys
+from utils.misc import MouseClick, check_pressed_keys
 
 sys.path.append(osp.join(osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__)))), 'common/python'))
 import monitors
 from images_capture import open_images_capture
+from performance_metrics import PerformanceMetrics
 
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
-set_log_config()
 WINNAME = 'Whiteboard_inpainting_demo'
 
 
@@ -71,7 +72,7 @@ def main():
     parser.add_argument('--loop', default=False, action='store_true',
                         help='Optional. Enable reading the input in a loop.')
     parser.add_argument('-o', '--output', required=False,
-                        help='Optional. Name of output to save.')
+                        help='Optional. Name of the output file(s) to save.')
     parser.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                         help='Optional. Number of frames to store in output. '
                              'If 0 is set, all frames are stored.')
@@ -83,7 +84,7 @@ def main():
                         help='Optional. Threshold for person instance segmentation model.')
     parser.add_argument('--no_show', help="Optional. Don't show output.", action='store_true')
     parser.add_argument('-d', '--device', type=str, default='CPU',
-                        help='Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is '
+                        help='Optional. Specify a target device to infer on. CPU, GPU, HDDL or MYRIAD is '
                              'acceptable. The demo will look for a suitable plugin for the device specified.')
     parser.add_argument('-l', '--cpu_extension', type=str, default=None,
                         help='MKLDNN (CPU)-targeted custom layers. Absolute \
@@ -95,17 +96,10 @@ def main():
     cap = open_images_capture(args.input, args.loop)
     if cap.get_type() not in ('VIDEO', 'CAMERA'):
         raise RuntimeError("The input should be a video file or a numeric camera ID")
-    frame = cap.read()
-    if frame is None:
-        raise RuntimeError("Can't read an image from the input")
 
     if bool(args.m_instance_segmentation) == bool(args.m_semantic_segmentation):
         raise ValueError('Set up exactly one of segmentation models: '
                          '--m_instance_segmentation or --m_semantic_segmentation')
-
-    out_frame_size = (frame.shape[1], frame.shape[0] * 2)
-    presenter = monitors.Presenter(args.utilization_monitors, 20,
-                                   (out_frame_size[0] // 4, out_frame_size[1] // 16))
 
     root_dir = osp.dirname(osp.abspath(__file__))
 
@@ -114,13 +108,12 @@ def main():
         cv2.namedWindow(WINNAME)
         cv2.setMouseCallback(WINNAME, mouse.get_points)
 
-    video_writer = cv2.VideoWriter()
-    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
-                                             cap.fps(), out_frame_size):
-        raise RuntimeError("Can't open video writer")
-
-    log.info("Initializing Inference Engine")
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
+
+    model_path = args.m_instance_segmentation if args.m_instance_segmentation else args.m_semantic_segmentation
+    log.info('Reading model {}'.format(model_path))
     if args.m_instance_segmentation:
         labels_file = osp.join(root_dir, 'coco_labels.txt')
         segmentation = MaskRCNN(ie, args.m_instance_segmentation, labels_file,
@@ -129,12 +122,26 @@ def main():
         labels_file = osp.join(root_dir, 'cityscapes_labels.txt')
         segmentation = SemanticSegmentation(ie, args.m_semantic_segmentation, labels_file,
                                             args.threshold, args.device, args.cpu_extension)
+    log.info('The model {} is loaded to {}'.format(model_path, args.device))
 
+    metrics = PerformanceMetrics()
+    video_writer = cv2.VideoWriter()
     black_board = False
-    output_frame = np.full((frame.shape[0], frame.shape[1], 3), 255, dtype='uint8')
     frame_number = 0
     key = -1
-    start = time.time()
+
+    start_time = perf_counter()
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
+
+    out_frame_size = (frame.shape[1], frame.shape[0] * 2)
+    output_frame = np.full((frame.shape[0], frame.shape[1], 3), 255, dtype='uint8')
+    presenter = monitors.Presenter(args.utilization_monitors, 20,
+                                   (out_frame_size[0] // 4, out_frame_size[1] // 16))
+    if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
+                                             cap.fps(), out_frame_size):
+        raise RuntimeError("Can't open video writer")
 
     while frame is not None:
         mask = None
@@ -155,6 +162,8 @@ def main():
         output_frame = np.where(mask, output_frame, clear_frame)
         merged_frame = np.vstack([frame, output_frame])
         merged_frame = cv2.resize(merged_frame, out_frame_size)
+
+        metrics.update(start_time, merged_frame)
 
         if video_writer.isOpened() and (args.output_limit <= 0 or frame_number <= args.output_limit-1):
             video_writer.write(merged_frame)
@@ -182,15 +191,13 @@ def main():
                 cv2.namedWindow('Board', cv2.WINDOW_KEEPRATIO)
                 cv2.imshow('Board', board)
 
-        end = time.time()
-        print('\rProcessing frame: {}, fps = {:.3}'
-            .format(frame_number, 1. / (end - start)), end="")
         frame_number += 1
-        start = time.time()
+        start_time = perf_counter()
         frame = cap.read()
-    print('')
 
-    log.info(presenter.reportMeans())
+    metrics.log_total()
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

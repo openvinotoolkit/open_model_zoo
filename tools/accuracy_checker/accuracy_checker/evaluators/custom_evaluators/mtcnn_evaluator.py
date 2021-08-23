@@ -17,7 +17,7 @@ limitations under the License.
 import copy
 from functools import partial
 from collections import OrderedDict
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 from pathlib import Path
 import numpy as np
 import cv2
@@ -250,6 +250,9 @@ class CaffeModelMixin:
             inputs_map[input_blob] = self.net.blobs[input_blob].data.shape
         return inputs_map
 
+    def input_shape(self, input_name):
+        return self.inputs[input_name]
+
     def release(self):
         del self.net
 
@@ -322,6 +325,9 @@ class DLSDKModelMixin:
         if not has_info:
             return self.exec_network.inputs
         return OrderedDict([(name, data.input_data) for name, data in self.exec_network.input_info.items()])
+
+    def input_shape(self, input_name):
+        return self.inputs[input_name]
 
     def release(self):
         self.input_feeder.release()
@@ -410,14 +416,16 @@ class DLSDKModelMixin:
         self.network = network
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
         self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
 
     def load_model(self, network_info, launcher, model_prefix=None, log=False):
         self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         if log:
             self.print_input_output_info()
 
@@ -476,7 +484,7 @@ class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):
     def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher, *args, **kwargs):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
-        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         pnet_outs = model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         pnet_adapter_config.update({'regions_format': 'hw'})
@@ -487,14 +495,14 @@ class CaffeRefineStage(CaffeModelMixin, RefineBaseStage):
     def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher, *args, **kwargs):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
-        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
 
 
 class CaffeOutputStage(CaffeModelMixin, OutputBaseStage):
     def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, launcher):
         super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
-        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
 
 
 class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
@@ -515,7 +523,8 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         self.network = network
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
         self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input)
         pnet_outs = self.model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         self.adapter = create_adapter(pnet_adapter_config)
@@ -525,7 +534,9 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.update_input_output_info(model_prefix)
-        self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
+        self.input_feeder = InputFeeder(
+            self.model_info.get('inputs', []), self.inputs, self.input_shape, self.fit_to_input
+        )
         pnet_outs = self.model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
         self.adapter = create_adapter(pnet_adapter_config)
@@ -606,9 +617,7 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
 
 
 class MTCNNEvaluator(BaseEvaluator):
-    def __init__(
-            self, dataset_config, launcher, stages
-    ):
+    def __init__(self, dataset_config, launcher, stages, orig_config):
         self.dataset_config = dataset_config
         self.stages = stages
         self.launcher = launcher
@@ -616,6 +625,7 @@ class MTCNNEvaluator(BaseEvaluator):
         self.postprocessor = None
         self.metric_executor = None
         self._annotations, self._predictions, self._metrics_results = [], [], []
+        self.config = orig_config
 
     def process_dataset(
             self, subset=None,
@@ -636,16 +646,15 @@ class MTCNNEvaluator(BaseEvaluator):
         if compute_intermediate_metric_res:
             metric_interval = kwargs.get('metrics_interval', 1000)
             ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
+            ignore_metric_reference = kwargs.get('ignore_metric_reference', False)
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_prediction = []
             batch_raw_prediction = []
             intermediate_callback = None
             if output_callback:
-                intermediate_callback = partial(output_callback,
-                                                metrics_result=None,
-                                                element_identifiers=batch_identifiers,
-                                                dataset_indices=batch_input_ids)
+                intermediate_callback = partial(output_callback, metrics_result=None,
+                                                element_identifiers=batch_identifiers, dataset_indices=batch_input_ids)
             batch_size = 1
             for stage in self.stages.values():
                 previous_stage_predictions = batch_prediction
@@ -671,34 +680,33 @@ class MTCNNEvaluator(BaseEvaluator):
             if output_callback:
                 output_callback(
                     list(self.stages.values())[-1].transform_for_callback(batch_size, batch_raw_prediction),
-                    metrics_result=metrics_result,
-                    element_identifiers=batch_identifiers,
+                    metrics_result=metrics_result, element_identifiers=batch_identifiers,
                     dataset_indices=batch_input_ids
                 )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
                 if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
-                    self.compute_metrics(
-                        print_results=True, ignore_results_formatting=ignore_results_formatting
-                    )
+                    self.compute_metrics(print_results=True, ignore_results_formatting=ignore_results_formatting,
+                                         ignore_metric_reference=ignore_metric_reference)
+                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
         if _progress_reporter:
             _progress_reporter.finish()
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
-
         for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
         return self._metrics_results
 
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
+                                ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting)
+            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
@@ -710,19 +718,19 @@ class MTCNNEvaluator(BaseEvaluator):
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting)
+                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
         return extracted_results, extracted_meta
 
-    def print_metrics_results(self, ignore_results_formatting=False):
+    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting)
+            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
             return
         result_presenters = self.metrics_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting)
+            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False):
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config = config['datasets']
         launcher_config = config['launchers'][0]
         if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
@@ -730,7 +738,7 @@ class MTCNNEvaluator(BaseEvaluator):
         models_info = config['network_info']
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
         stages = build_stages(models_info, [], launcher, config.get('_models'), delayed_model_loading)
-        return cls(dataset_config, launcher, stages)
+        return cls(dataset_config, launcher, stages, orig_config)
 
     @staticmethod
     def get_processing_info(config):
@@ -841,6 +849,24 @@ class MTCNNEvaluator(BaseEvaluator):
     def dataset_size(self):
         return self.dataset.size
 
+    def send_processing_info(self, sender):
+        if not sender:
+            return {}
+        model_type = None
+        details = {}
+        metrics = self.dataset_config[0].get('metrics', [])
+        metric_info = [metric['type'] for metric in metrics]
+        adapter_type = next(iter(self.stages.values())).adapter.__provider__
+        details.update({
+            'metrics': metric_info,
+            'model_file_type': model_type,
+            'adapter': adapter_type,
+        })
+        if self.dataset is None:
+            self.select_dataset('')
+        details.update(self.dataset.send_annotation_info(self.dataset_config[0]))
+        return details
+
 
 def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_mapping, iou_type=None):
     score = out[0][outputs_mapping['probability_out']][:, 1]
@@ -862,40 +888,29 @@ def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_ma
             previous_stage_predictions[0].scores
         ]
         mv = mv[np.sort(peek).astype(int)]
-    bboxes = bbreg(bboxes, mv.T)
-    x_mins, y_mins, x_maxs, y_maxs, _ = bboxes.T
+    x_mins, y_mins, x_maxs, y_maxs, _ = bbreg(bboxes, mv.T).T
     previous_stage_predictions[0].x_mins = x_mins
     previous_stage_predictions[0].y_mins = y_mins
     previous_stage_predictions[0].x_maxs = x_maxs
     previous_stage_predictions[0].y_maxs = y_maxs
     return previous_stage_predictions
 
-
 def nms(prediction, threshold, iou_type):
-    bboxes = np.c_[
-        prediction.x_mins, prediction.y_mins,
-        prediction.x_maxs, prediction.y_maxs,
-        prediction.scores
-    ]
+    bboxes = np.c_[prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs, prediction.scores]
     peek = MTCNNPAdapter.nms(bboxes, threshold, iou_type)
     prediction.remove([i for i in range(prediction.size) if i not in peek])
     return prediction, peek
 
-
 def bbreg(boundingbox, reg):
     reg = reg.T
-
     # calibrate bounding boxes
     w = boundingbox[:, 2] - boundingbox[:, 0] + 1
     h = boundingbox[:, 3] - boundingbox[:, 1] + 1
-
     bb0 = boundingbox[:, 0] + reg[:, 0] * w
     bb1 = boundingbox[:, 1] + reg[:, 1] * h
     bb2 = boundingbox[:, 2] + reg[:, 2] * w
     bb3 = boundingbox[:, 3] + reg[:, 3] * h
-
     boundingbox[:, 0:4] = np.array([bb0, bb1, bb2, bb3]).T
-
     return boundingbox
 
 def filter_valid(dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph):
@@ -935,7 +950,6 @@ def pad(boxesA, h, w):
     if tmp.shape[0] != 0:
         dx[tmp] = 2 - x[tmp]
         x[tmp] = np.ones_like(x[tmp])
-
     tmp = np.where(y < 1)[0]
     if tmp.shape[0] != 0:
         dy[tmp] = 2 - y[tmp]
@@ -951,7 +965,6 @@ def pad(boxesA, h, w):
     ex = np.maximum(0, ex - 1)
     return filter_valid(dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph)
 
-
 def rerec(bboxA):
     w = bboxA[:, 2] - bboxA[:, 0]
     h = bboxA[:, 3] - bboxA[:, 1]
@@ -961,13 +974,8 @@ def rerec(bboxA):
     bboxA[:, 2:4] = bboxA[:, 0:2] + np.repeat([max_side], 2, axis=0).T
     return bboxA
 
-
 def cut_roi(image, prediction, dst_size, include_bound=True):
-    bboxes = np.c_[
-        prediction.x_mins, prediction.y_mins,
-        prediction.x_maxs, prediction.y_maxs,
-        prediction.scores
-    ]
+    bboxes = np.c_[prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs, prediction.scores]
     img = image.data
     bboxes = rerec(bboxes)
     bboxes[:, 0:4] = np.fix(bboxes[:, 0:4])

@@ -16,12 +16,14 @@ import argparse
 import itertools
 import logging as log
 import sys
-import time
+from time import perf_counter
 from pathlib import Path
 
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 from tokenizers import SentencePieceBPETokenizer
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 class Translator:
@@ -33,11 +35,13 @@ class Translator:
         tokenizer_src (str): path to src tokenizer.
         tokenizer_tgt (str): path to tgt tokenizer.
     """
-    def __init__(self, model_xml, model_bin, tokenizer_src, tokenizer_tgt, output_name):
-        self.model = TranslationEngine(model_xml, model_bin, output_name)
+    def __init__(self, model_xml, model_bin, device, tokenizer_src, tokenizer_tgt, output_name):
+        self.model = TranslationEngine(model_xml, model_bin, device, output_name)
         self.max_tokens = self.model.get_max_tokens()
         self.tokenizer_src = Tokenizer(tokenizer_src, self.max_tokens)
+        log.debug('Loaded src tokenizer, max tokens: {}'.format(self.max_tokens))
         self.tokenizer_tgt = Tokenizer(tokenizer_tgt, self.max_tokens)
+        log.debug('Loaded tgt tokenizer, max tokens: {}'.format(self.max_tokens))
 
     def __call__(self, sentence, remove_repeats=True):
         """ Main translation method.
@@ -65,17 +69,18 @@ class TranslationEngine:
         model_bin (str): path to model's .bin file.
         output_name (str): name of output blob of model.
     """
-    def __init__(self, model_xml, model_bin, output_name):
-        self.logger = log.getLogger("TranslationEngine")
-        self.logger.info("loading network")
-        self.logger.info(f"model_xml: {model_xml}")
-        self.logger.info(f"model_bin: {model_bin}")
-        self.ie = IECore()
-        self.net = self.ie.read_network(
+    def __init__(self, model_xml, model_bin, device, output_name):
+        log.info('OpenVINO Inference Engine')
+        log.info('\tbuild: {}'.format(get_version()))
+        ie = IECore()
+
+        log.info('Reading model {}'.format(model_xml))
+        self.net = ie.read_network(
             model=model_xml,
             weights=model_bin
         )
-        self.net_exec = self.ie.load_network(self.net, "CPU")
+        self.net_exec = ie.load_network(self.net, device)
+        log.info('The model {} is loaded to {}'.format(model_xml, device))
         self.output_name = output_name
         assert self.output_name != "", "there is not output in model"
 
@@ -110,10 +115,6 @@ class Tokenizer:
         max_tokens (int): max tokens.
     """
     def __init__(self, path, max_tokens):
-        self.logger = log.getLogger("Tokenizer")
-        self.logger.info("loading tokenizer")
-        self.logger.info(f"path: {path}")
-        self.logger.info(f"max_tokens: {max_tokens}")
         self.tokenizer = SentencePieceBPETokenizer.from_file(
             str(path / "vocab.json"),
             str(path / "merges.txt"),
@@ -185,54 +186,80 @@ def build_argparser():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model", required=True, type=Path,
-                        help="Required. Path to an .xml file with a trained model")
+                        help="Required. Path to an .xml file with a trained model.")
     parser.add_argument('--tokenizer-src', type=Path, required=True,
                         help='Required. Path to the folder with src tokenizer that contains vocab.json and merges.txt.')
     parser.add_argument('--tokenizer-tgt', type=Path, required=True,
                         help='Required. Path to the folder with tgt tokenizer that contains vocab.json and merges.txt.')
     parser.add_argument('-i', '--input', type=str, required=False, nargs='*',
-                        help='Optional. Text for translation. Replaces console input.')
+                        help='Optional. Text for translation or path to the input .txt file. Replaces console input.')
+    parser.add_argument('-d', '--device', default='CPU', type=str,
+                        help='Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is '
+                             'acceptable. The demo will look for a suitable plugin for device specified. '
+                             'Default value is CPU.')
+    parser.add_argument('-o', '--output', required=False, type=str,
+                         help='Optional. Path to the output .txt file.')
     parser.add_argument('--output-name', type=str, default='pred',
                         help='Optional. Name of the models output node.')
     return parser
 
+def parse_input(input):
+    if not input:
+        return
+    sentences = []
+    for text in input:
+        if text.endswith('.txt'):
+            try:
+                with open(text, 'r', encoding='utf8') as f:
+                    sentences += f.readlines()
+                continue
+            except OSError:
+                pass
+        sentences.append(text)
+    return sentences
 
 def main(args):
-    log.basicConfig(format="[ %(levelname)s ] [ %(name)s ] %(message)s", level=log.INFO, stream=sys.stdout)
-    logger = log.getLogger("main")
-    logger.info("creating translator")
     model = Translator(
         model_xml=args.model,
         model_bin=args.model.with_suffix(".bin"),
+        device=args.device,
         tokenizer_src=args.tokenizer_src,
         tokenizer_tgt=args.tokenizer_tgt,
         output_name=args.output_name
     )
+    input_data = parse_input(args.input)
+    if args.output:
+        open(args.output, 'w').close()
 
-    if args.input:
-        def sentences():
-            for sentence in args.input:
-                print("> {}".format(sentence))
-                yield sentence
-    else:
-        def sentences():
+    def sentences():
+        if input_data:
+            for sentence in input_data:
+                sentence = sentence.strip()
+                if sentence:
+                    print("> {}".format(sentence))
+                    yield sentence
+        else:
             while True:
                 yield input("> ")
 
+    start_time = perf_counter()
     # loop on user's or prepared questions
     for sentence in sentences():
         if not sentence.strip():
             break
 
         try:
-            start = time.perf_counter()
             translation = model(sentence)
-            stop = time.perf_counter()
             print(translation)
-            logger.info(f"time: {stop - start} s.")
+            if args.output:
+                with open(args.output, 'a', encoding='utf8') as f:
+                    print(translation, file=f)
         except Exception:
             log.error("an error occurred", exc_info=True)
 
+    total_latency = (perf_counter() - start_time) * 1e3
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
 
 if __name__ == "__main__":
     args = build_argparser().parse_args()

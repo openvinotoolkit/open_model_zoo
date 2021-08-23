@@ -12,7 +12,7 @@
 
 #include <monitors/presenter.h>
 #include <utils/images_capture.h>
-
+#include <utils/slog.hpp>
 #include <opencv2/core.hpp>
 
 #include <iostream>
@@ -23,7 +23,6 @@
 #include <string>
 #include <gflags/gflags.h>
 
-using namespace InferenceEngine;
 using ImageWithFrameIndex = std::pair<cv::Mat, int>;
 
 std::unique_ptr<PedestrianTracker>
@@ -53,12 +52,11 @@ CreatePedestrianTracker(const std::string& reid_model,
     if (!reid_model.empty()) {
         CnnConfig reid_config(reid_model);
         reid_config.max_batch_size = 16;   // defaulting to 16
-
         std::shared_ptr<IImageDescriptor> descriptor_strong =
             std::make_shared<DescriptorIE>(reid_config, ie, deviceName);
 
         if (descriptor_strong == nullptr) {
-            THROW_IE_EXCEPTION << "[SAMPLES] internal error - invalid descriptor";
+            throw std::runtime_error("[SAMPLES] internal error - invalid descriptor");
         }
         std::shared_ptr<IDescriptorDistance> distance_strong =
             std::make_shared<CosDistance>(descriptor_strong->size());
@@ -66,9 +64,9 @@ CreatePedestrianTracker(const std::string& reid_model,
         tracker->set_descriptor_strong(descriptor_strong);
         tracker->set_distance_strong(distance_strong);
     } else {
-        std::cout << "WARNING: Reid model "
+        slog::warn << "Reid model "
             << "was not specified. "
-            << "Only fast reidentification approach will be used." << std::endl;
+            << "Only fast reidentification approach will be used." << slog::endl;
     }
 
     return tracker;
@@ -101,7 +99,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char **argv) {
     try {
-        std::cout << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << std::endl;
+        PerformanceMetrics metrics;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -118,7 +116,6 @@ int main(int argc, char **argv) {
 
         auto custom_cpu_library = FLAGS_l;
         auto path_to_custom_layers = FLAGS_c;
-        bool should_use_perf_counter = FLAGS_pc;
 
         bool should_print_out = FLAGS_r;
 
@@ -131,10 +128,9 @@ int main(int argc, char **argv) {
         bool should_save_det_log = !detlog_out.empty();
 
         std::vector<std::string> devices{detector_mode, reid_mode};
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
         InferenceEngine::Core ie =
-            LoadInferenceEngine(
-                devices, custom_cpu_library, path_to_custom_layers,
-                should_use_perf_counter);
+            LoadInferenceEngine(devices, custom_cpu_library, path_to_custom_layers);
 
         DetectorConfig detector_confid(det_model);
         ObjectDetector pedestrian_detector(detector_confid, ie, detector_mode);
@@ -151,6 +147,7 @@ int main(int argc, char **argv) {
             video_fps = 60.0;
         }
 
+        auto startTime = std::chrono::steady_clock::now();
         cv::Mat frame = cap->read();
         if (!frame.data) throw std::runtime_error("Can't read an image from the input");
         cv::Size firstFrameSize = frame.size();
@@ -164,12 +161,6 @@ int main(int argc, char **argv) {
         cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
         Presenter presenter(FLAGS_u, 10, graphSize);
 
-        std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press ESC key";
-        }
-        std::cout << std::endl;
-
         for (unsigned frameIdx = 0; ; ++frameIdx) {
             pedestrian_detector.submitFrame(frame, frameIdx);
             pedestrian_detector.waitAndFetchResults();
@@ -180,7 +171,6 @@ int main(int argc, char **argv) {
             uint64_t cur_timestamp = static_cast<uint64_t >(1000.0 / video_fps * frameIdx);
             tracker->Process(frame, detections, cur_timestamp);
 
-            presenter.drawGraphs(frame);
             // Drawing colored "worms" (tracks).
             frame = tracker->DrawActiveTracks(frame);
 
@@ -195,9 +185,11 @@ int main(int argc, char **argv) {
                 cv::rectangle(frame, detection.rect, cv::Scalar(0, 0, 255), 3);
                 std::string text = std::to_string(detection.object_id) +
                     " conf: " + std::to_string(detection.confidence);
-                cv::putText(frame, text, detection.rect.tl(), cv::FONT_HERSHEY_COMPLEX,
-                            1.0, cv::Scalar(0, 0, 255), 3);
+                putHighlightedText(frame, text, detection.rect.tl() - cv::Point{10, 10}, cv::FONT_HERSHEY_COMPLEX,
+                            0.65, cv::Scalar(0, 0, 255), 2);
             }
+            presenter.drawGraphs(frame);
+            metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
 
             framesProcessed++;
             if (videoWriter.isOpened() && (FLAGS_limit == 0 || framesProcessed <= FLAGS_limit)) {
@@ -215,6 +207,8 @@ int main(int argc, char **argv) {
                 DetectionLog log = tracker->GetDetectionLog(true);
                 SaveDetectionLogToTrajFile(detlog_out, log);
             }
+
+            startTime = std::chrono::steady_clock::now();
             frame = cap->read();
             if (!frame.data) break;
             if (frame.size() != firstFrameSize)
@@ -229,23 +223,19 @@ int main(int argc, char **argv) {
             if (should_print_out)
                 PrintDetectionLog(log);
         }
-        if (should_use_perf_counter) {
-            pedestrian_detector.PrintPerformanceCounts(getFullDeviceName(ie, FLAGS_d_det));
-            tracker->PrintReidPerformanceCounts(getFullDeviceName(ie, FLAGS_d_reid));
-        }
 
-        std::cout << presenter.reportMeans() << '\n';
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.logTotal();
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
-        std::cerr << "[ ERROR ] " << error.what() << std::endl;
+        slog::err << error.what() << slog::endl;
         return 1;
     }
     catch (...) {
-        std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
+        slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-
-    std::cout << "Execution successful" << std::endl;
 
     return 0;
 }

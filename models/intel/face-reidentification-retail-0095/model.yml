@@ -1,0 +1,44 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Single embedding-based face verification model
+task_type: face_recognition
+files:
+  - name: FP32/face-reidentification-retail-0095.xml
+    size: 239537
+    sha256: b16f72d8f6db556fd417c0c823c4a031f8c47e48e7797163b3de49baa7c59542
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
+  - name: FP32/face-reidentification-retail-0095.bin
+    size: 4427256
+    sha256: 5ac2b046dd8644be5bf26677fbe3db955a0777a777ed6767c772d665f21d89b8
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
+  - name: FP16/face-reidentification-retail-0095.xml
+    size: 239433
+    sha256: c9b6c7b8cdbd4fd0a5d9e031cefa1b7a2c899ba0d6305ca77b8838686f8949f0
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
+  - name: FP16/face-reidentification-retail-0095.bin
+    size: 2213724
+    sha256: c2f8a7b9268e5b5236574d6fda2216df43c03acaa39c078848a98fbb707ae0a3
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
+  - name: FP16-INT8/face-reidentification-retail-0095.xml
+    size: 658847
+    sha256: 36f8fc6155a830e477f15a2d8e3ac5be981222902368b0343eb847eb8d317700
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.xml
+  - name: FP16-INT8/face-reidentification-retail-0095.bin
+    size: 1180982
+    sha256: fa491a056a5ff7e286e47ef14727dcb31ac23219d826fdf82fa6fc1de9c5aa61
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/face-reidentification-retail-0095/FP16-INT8/face-reidentification-retail-0095.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

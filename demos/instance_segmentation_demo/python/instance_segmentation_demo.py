@@ -17,13 +17,13 @@
 
 import logging as log
 import sys
-import time
+from time import perf_counter
 from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
@@ -33,6 +33,9 @@ from instance_segmentation_demo.visualizer import Visualizer
 
 import monitors
 from images_capture import open_images_capture
+from performance_metrics import PerformanceMetrics
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -52,12 +55,12 @@ def build_argparser():
     args.add_argument('--loop', default=False, action='store_true',
                       help='Optional. Enable reading the input in a loop.')
     args.add_argument('-o', '--output', required=False,
-                      help='Optional. Name of output to save.')
+                      help='Optional. Name of the output file(s) to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
     args.add_argument('-d', '--device',
-                      help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
+                      help='Optional. Specify the target device to infer on: CPU, GPU, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
                            '(by default, it is CPU).',
                       default='CPU', type=str, metavar='"<device>"')
@@ -83,9 +86,6 @@ def build_argparser():
     args.add_argument('--show_boxes',
                       help='Optional. Show bounding boxes.',
                       action='store_true')
-    args.add_argument('-pc', '--perf_counts',
-                      help='Optional. Report performance counters.',
-                      action='store_true')
     args.add_argument('-r', '--raw_output_message',
                       help='Optional. Output inference results raw values.',
                       action='store_true')
@@ -98,35 +98,34 @@ def build_argparser():
 
 
 def main():
-    log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
+    cap = open_images_capture(args.input, args.loop)
+
+    with open(args.labels, 'rt') as labels_file:
+        class_labels = labels_file.read().splitlines()
+        assert len(class_labels), 'The file with class labels is empty'
+
     # Plugin initialization for specified device and load extensions library if specified.
-    log.info('Creating Inference Engine...')
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
         ie.add_extension(args.cpu_extension, 'CPU')
+
     # Read IR
-    log.info('Loading network')
+    log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, args.model.with_suffix('.bin'))
     image_input, image_info_input, (n, c, h, w), model_type, postprocessor = check_model(net)
     args.no_keep_aspect_ratio = model_type == 'yolact' or args.no_keep_aspect_ratio
 
-    log.info('Loading IR to the plugin...')
     exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)
-
-    cap = open_images_capture(args.input, args.loop)
-    frame = cap.read()
-    if frame is None:
-        raise RuntimeError("Can't read an image from the input")
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     if args.no_track:
         tracker = None
     else:
         tracker = StaticIOUTracker()
-
-    with open(args.labels, 'rt') as labels_file:
-        class_labels = labels_file.read().splitlines()
 
     if args.delay:
         delay = args.delay
@@ -134,19 +133,21 @@ def main():
         delay = int(cap.get_type() in ('VIDEO', 'CAMERA'))
 
     frames_processed = 0
+    metrics = PerformanceMetrics()
+    visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
+    video_writer = cv2.VideoWriter()
+
+    start_time = perf_counter()
+    frame = cap.read()
+    if frame is None:
+        raise RuntimeError("Can't read an image from the input")
+
     out_frame_size = (frame.shape[1], frame.shape[0])
     presenter = monitors.Presenter(args.utilization_monitors, 45,
                 (round(out_frame_size[0] / 4), round(out_frame_size[1] / 8)))
-    visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
-    video_writer = cv2.VideoWriter()
     if args.output and not video_writer.open(args.output, cv2.VideoWriter_fourcc(*'MJPG'),
                                              cap.fps(), out_frame_size):
         raise RuntimeError("Can't open video writer")
-
-    render_time = 0
-
-    log.info('Starting inference...')
-    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
 
     while frame is not None:
         if args.no_keep_aspect_ratio:
@@ -170,25 +171,20 @@ def main():
         input_image_info = np.asarray([[input_image_size[0], input_image_size[1], 1]], dtype=np.float32)
 
         # Run the net.
-        inf_start = time.time()
         feed_dict = {image_input: input_image}
         if image_info_input:
             feed_dict[image_info_input] = input_image_info
         outputs = exec_net.infer(feed_dict)
-        inf_end = time.time()
-        det_time = inf_end - inf_start
 
         # Parse detection results of the current request
         scores, classes, boxes, masks = postprocessor(
             outputs, scale_x, scale_y, *frame.shape[:2], h, w, args.prob_threshold)
 
-        render_start = time.time()
-
         if len(boxes) and args.raw_output_message:
-            log.info('Detected boxes:')
-            log.info('  Class ID | Confidence |     XMIN |     YMIN |     XMAX |     YMAX ')
+            log.debug('  -------------------------- Frame # {} --------------------------  '.format(frames_processed))
+            log.debug('  Class ID | Confidence |     XMIN |     YMIN |     XMAX |     YMAX ')
             for box, cls, score, mask in zip(boxes, classes, scores, masks):
-                log.info('{:>10} | {:>10f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} '.format(cls, score, *box))
+                log.debug('{:>10} | {:>10f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} '.format(cls, score, *box))
 
         # Get instance track IDs.
         masks_tracks_ids = None
@@ -198,21 +194,8 @@ def main():
         # Visualize masks.
         frame = visualizer(frame, boxes, classes, scores, presenter, masks, masks_tracks_ids)
 
-        # Draw performance stats.
-        inf_time_message = 'Inference time: {:.3f} ms'.format(det_time * 1000)
-        render_time_message = 'OpenCV rendering time: {:.3f} ms'.format(render_time * 1000)
-        cv2.putText(frame, inf_time_message, (15, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
-        cv2.putText(frame, render_time_message, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
+        metrics.update(start_time, frame)
 
-        # Print performance counters.
-        if args.perf_counts:
-            perf_counts = exec_net.requests[0].get_perf_counts()
-            log.info('Performance counters:')
-            print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format('name', 'layer_type', 'exet_type', 'status',
-                                                              'real_time, us'))
-            for layer, stats in perf_counts.items():
-                print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
-                                                                  stats['status'], stats['real_time']))
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(frame)
@@ -220,8 +203,6 @@ def main():
         if not args.no_show:
             # Show resulting image.
             cv2.imshow('Results', frame)
-        render_end = time.time()
-        render_time = render_end - render_start
 
         if not args.no_show:
             key = cv2.waitKey(delay)
@@ -229,9 +210,12 @@ def main():
             if key == esc_code:
                 break
             presenter.handleKey(key)
+        start_time = perf_counter()
         frame = cap.read()
 
-    print(presenter.reportMeans())
+    metrics.log_total()
+    for rep in presenter.reportMeans():
+        log.info(rep)
     cv2.destroyAllWindows()
 
 

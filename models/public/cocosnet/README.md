@@ -19,7 +19,7 @@ For details see [paper](https://arxiv.org/abs/2004.05571) and [repository](https
 Metrics were calculated between generated images by model and real validation images from ADE20k dataset.
 For some GAN metrics (IS and FID) you need to use classification model as verification network.
 In our case it is [Inception-V3](../googlenet-v3/README.md) model.
-For details, please check Accuracy Checker [config](accuracy-check-pipelined.yml).
+For details, please check Accuracy Checker config `<omz_dir>/models/public/cocosnet/accuracy-check-pipelined.yml`.
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |

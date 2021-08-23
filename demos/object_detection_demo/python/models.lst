@@ -4,8 +4,12 @@ ctdet_coco_dlav0_384
 ctdet_coco_dlav0_512
 # For --architecture_type=ctpn
 ctpn
+# For --architecture_type=detr
+detr-resnet50
 # For --architecture_type=faceboxes
 faceboxes-pytorch
+# For --architecture_type=retinaface-pytorch
+retinaface-resnet50-pytorch
 # For --architecture_type=ssd
 efficientdet-d0-tf
 efficientdet-d1-tf
@@ -33,10 +37,6 @@ ssdlite_mobilenet_v2
 vehicle-detection-????
 vehicle-detection-adas-????
 vehicle-license-plate-detection-barrier-????
-# For --architecture_type=retinaface
-retinaface-anti-cov
-retinaface-resnet50
-ssh-mxnet
 # For --architecture_type=ultra_lightweight_face_detection
 ultra-lightweight-face-detection-rfb-320
 ultra-lightweight-face-detection-slim-320

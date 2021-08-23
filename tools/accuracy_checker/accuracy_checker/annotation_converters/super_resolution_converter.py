@@ -31,7 +31,8 @@ LOADERS_MAPPING = {
     'opencv': GTLoader.OPENCV,
     'pillow': GTLoader.PILLOW,
     'dicom': GTLoader.DICOM,
-    'skimage': GTLoader.SKIMAGE
+    'skimage': GTLoader.SKIMAGE,
+    'pillow_rgb': GTLoader.PILLOW_RGB
 }
 
 
@@ -488,7 +489,14 @@ class SRDirectoryBased(BaseFormatConverter):
             found_files.extend(search_dir.glob('*{}*'.format(i)))
         if not found_files:
             return None
-        return found_files[0]
+        result = found_files[0]
+        if len(found_files) > 1:
+            for found_file in found_files:
+                found_idx = get_index(found_file.name)
+                if found_idx == idx:
+                    result = found_file
+                    break
+        return result
 
     @staticmethod
     def find_file_with_prefix(search_dir, file_name):

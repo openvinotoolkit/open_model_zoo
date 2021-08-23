@@ -19,7 +19,7 @@ This is a vehicle detection network based on an SSD framework with tuned MobileN
 | MParams                         | 1.079                                     |
 | Source framework                | Caffe\*                                   |
 
-For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](https://doi.org/10.1007/s11263-009-0275-4).
+For Average Precision metric description, see [The PASCAL Visual Object Classes (VOC) Challenge](https://link.springer.com/article/10.1007/s11263-009-0275-4).
 
 Tested on a challenging internal dataset with 3000 images and 12585 vehicles to detect.
 

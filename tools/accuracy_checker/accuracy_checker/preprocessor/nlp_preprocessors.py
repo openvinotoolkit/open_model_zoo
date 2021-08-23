@@ -23,6 +23,7 @@ try:
 except ImportError as import_error:
     SentencePieceBPETokenizer = UnsupportedPackage("tokenizers", import_error.msg)
 
+
 class DecodeBySentencePieceBPETokenizer(Preprocessor):
     __provider__ = 'decode_by_sentence_piece_bpe_tokenizer'
 
@@ -100,6 +101,8 @@ class DecodeByVocabulary(Preprocessor):
 
 class PadWithEOS(Preprocessor):
     __provider__ = 'pad_with_eos'
+    shape_modificator = True
+    _dynamic_shapes = False
 
     @classmethod
     def parameters(cls):
@@ -151,3 +154,7 @@ class PadWithEOS(Preprocessor):
         image.data = ' '.join(words)
 
         return image
+
+    @property
+    def dynamic_result_shape(self):
+        return self._dynamic_shapes

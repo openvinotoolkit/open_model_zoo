@@ -6,7 +6,6 @@ you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,11 +14,13 @@ limitations under the License.
 """
 
 import warnings
+import platform
+import sys
 
 import copy
 import json
 from pathlib import Path
-import pickle
+import pickle # nosec - disable B403:import-pickle check
 from argparse import ArgumentParser
 from collections import namedtuple
 from functools import partial
@@ -28,12 +29,15 @@ import numpy as np
 
 from .. import __version__
 from ..representation import (
-    ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation
+    ReIdentificationClassificationAnnotation, ReIdentificationAnnotation, PlaceRecognitionAnnotation,
 )
-from ..utils import get_path, OrderedSet
+from ..data_readers import KaldiFrameIdentifier, KaldiMatrixIdentifier
+from ..utils import (
+    get_path, OrderedSet, cast_to_bool, is_relative_to, start_telemetry, send_telemetry_event, end_telemetry
+)
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
-from ..utils import cast_to_bool, is_relative_to
+from ..logging import exception
 
 DatasetConversionInfo = namedtuple('DatasetConversionInfo',
                                    [
@@ -90,6 +94,8 @@ def make_subset(annotation, size, seed=666, shuffle=True):
         return make_subset_reid(annotation, size, shuffle)
     if isinstance(annotation[-1], PlaceRecognitionAnnotation):
         return make_subset_place_recognition(annotation, size, shuffle)
+    if isinstance(annotation[-1].identifier, (KaldiMatrixIdentifier, KaldiFrameIdentifier)):
+        return make_subset_kaldi(annotation, size, shuffle)
 
     result_annotation = list(np.random.choice(annotation, size=size, replace=False)) if shuffle else annotation[:size]
     return result_annotation
@@ -192,52 +198,94 @@ def make_subset_place_recognition(annotation, size, shuffle=True):
     return [annotation[ind] for ind in subsample_set]
 
 
+def make_subset_kaldi(annotation, size, shuffle=True):
+    file_to_num_utterances = {}
+    for ind, ann in enumerate(annotation):
+        if ann.identifier.file not in file_to_num_utterances:
+            file_to_num_utterances[ann.identifier.file] = []
+        file_to_num_utterances[ann.identifier.file].append(ind)
+
+    subset = []
+    for _, indices in file_to_num_utterances.items():
+        if len(subset) + len(indices) > size:
+            num_elem_to_add = size - len(subset)
+            if shuffle:
+                indices = np.random.choice(indices, num_elem_to_add)
+            else:
+                indices = indices[:num_elem_to_add]
+        else:
+            if shuffle:
+                indices = np.random.shuffle(indices)
+        subset.extend([annotation[idx] for idx in indices])
+        if len(subset) == size:
+            break
+    return subset
+
+
 def main():
     main_argparser = build_argparser()
+    tm = start_telemetry()
+    send_telemetry_event(tm, 'annotation_conversion_status', 'started')
+
     args, _ = main_argparser.parse_known_args()
     converter, converter_argparser, converter_args = get_converter_arguments(args)
-
-    main_argparser = ArgumentParser(parents=[main_argparser, converter_argparser])
-    args = main_argparser.parse_args()
-
-    converter, converter_config = configure_converter(converter_args, args, converter)
-    out_dir = args.output_dir or Path.cwd()
-
-    results = converter.convert()
-    converted_annotation = results.annotations
-    meta = results.meta
-    errors = results.content_check_errors
-    if errors:
-        warnings.warn('Following problems were found during conversion:'
-                      '\n{}'.format('\n'.join(errors)))
-
-    subsample = args.subsample
-    if subsample:
-        if subsample.endswith('%'):
-            subsample_ratio = float(subsample[:-1]) / 100
-            subsample_size = int(len(converted_annotation) * subsample_ratio)
-        else:
-            subsample_size = int(args.subsample)
-
-        converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed, args.shuffle)
-    if args.analyze_dataset:
-        analyze_dataset(converted_annotation, meta)
-
-    converter_name = converter.get_name()
-    annotation_name = args.annotation_name or "{}.pickle".format(converter_name)
-    meta_name = args.meta_name or "{}.json".format(converter_name)
-
-    annotation_file = out_dir / annotation_name
-    meta_file = out_dir / meta_name
-    dataset_config = {
-        'name': annotation_name,
-        'annotation_conversion': converter_config,
-        'subsample_size': subsample,
-        'subsample_seed': args.subsample_seed,
-        'shuffle': args.shuffle
+    details = {
+        'platform': platform.system(), 'conversion_errors': None, 'save_annotation': True,
+        'subsample': bool(args.subsample),
+        'shuffle': args.shuffle,
+        'converter': converter.get_name(),
+        'dataset_analysis': args.analyze_dataset
     }
 
-    save_annotation(converted_annotation, meta, annotation_file, meta_file, dataset_config)
+    try:
+        main_argparser = ArgumentParser(parents=[main_argparser, converter_argparser])
+        args = main_argparser.parse_args()
+
+        converter, converter_config = configure_converter(converter_args, args, converter)
+        out_dir = args.output_dir or Path.cwd()
+
+        results = converter.convert()
+        converted_annotation = results.annotations
+        meta = results.meta
+        errors = results.content_check_errors
+        if errors:
+            warnings.warn('Following problems were found during conversion:'
+                          '\n{}'.format('\n'.join(errors)))
+            details['conversion_errors'] = str(len(errors))
+
+        subsample = args.subsample
+        if subsample:
+            if subsample.endswith('%'):
+                subsample_ratio = float(subsample[:-1]) / 100
+                subsample_size = int(len(converted_annotation) * subsample_ratio)
+            else:
+                subsample_size = int(args.subsample)
+
+            converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed, args.shuffle)
+            details['dataset_size'] = len(converted_annotation)
+        send_telemetry_event(tm, 'annotation_conversion', json.dumps(details))
+        if args.analyze_dataset:
+            analyze_dataset(converted_annotation, meta)
+
+        converter_name = converter.get_name()
+        annotation_name = args.annotation_name or "{}.pickle".format(converter_name)
+        meta_name = args.meta_name or "{}.json".format(converter_name)
+
+        annotation_file = out_dir / annotation_name
+        meta_file = out_dir / meta_name
+        dataset_config = {
+            'name': annotation_name,
+            'annotation_conversion': converter_config,
+        }
+
+        save_annotation(converted_annotation, meta, annotation_file, meta_file, dataset_config)
+    except Exception as e: # pylint:disable=W0703
+        send_telemetry_event(tm, 'annotation_conversion_status', 'failure')
+        exception(e)
+        sys.exit(1)
+    send_telemetry_event(tm, 'annotation_conversion_status', 'success')
+    end_telemetry(tm)
+    sys.exit(0)
 
 
 def save_annotation(annotation, meta, annotation_file, meta_file, dataset_config=None):
@@ -271,10 +319,19 @@ def get_conversion_attributes(config, dataset_size):
                 continue
 
             if isinstance(m_path, list):
-                for m_path in config['_command_line_mapping'][key]:
+                path_list = []
+                for path in m_path:
+                    if isinstance(path, list):
+                        path_list.extend(path)
+                    else:
+                        path_list.append(path)
+
+                for m_path in path_list:
                     if is_relative_to(value, m_path):
                         break
             conversion_parameters[key] = str(value.relative_to(m_path))
+        if isinstance(value, Path):
+            conversion_parameters[key] = 'PATH/{}'.format(value.name)
 
     subset_size = config.get('subsample_size')
     subset_parameters = {}

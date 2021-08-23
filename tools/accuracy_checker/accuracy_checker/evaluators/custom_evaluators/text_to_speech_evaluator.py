@@ -30,7 +30,7 @@ from ...logging import print_info
 
 
 class TextToSpeechEvaluator(BaseEvaluator):
-    def __init__(self, dataset_config, launcher, model):
+    def __init__(self, dataset_config, launcher, model, orig_config):
         self.dataset_config = dataset_config
         self.preprocessor = None
         self.dataset = None
@@ -38,10 +38,11 @@ class TextToSpeechEvaluator(BaseEvaluator):
         self.metric_executor = None
         self.launcher = launcher
         self.model = model
+        self.config = orig_config
         self._metrics_results = []
 
     @classmethod
-    def from_configs(cls, config, delayed_model_loading=False):
+    def from_configs(cls, config, delayed_model_loading=False, orig_config=None):
         dataset_config = config['datasets']
         launcher_config = config['launchers'][0]
         if launcher_config['framework'] == 'dlsdk' and 'device' not in launcher_config:
@@ -52,7 +53,7 @@ class TextToSpeechEvaluator(BaseEvaluator):
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
         )
-        return cls(dataset_config, launcher, model)
+        return cls(dataset_config, launcher, model, orig_config)
 
     def process_dataset(
             self, subset=None,
@@ -78,6 +79,7 @@ class TextToSpeechEvaluator(BaseEvaluator):
         if compute_intermediate_metric_res:
             metric_interval = kwargs.get('metrics_interval', 1000)
             ignore_results_formatting = kwargs.get('ignore_results_formatting', False)
+            ignore_metric_reference = kwargs.get('ignore_metric_reference', False)
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             batch_data, batch_meta = extract_image_representations(batch_inputs)
@@ -115,13 +117,15 @@ class TextToSpeechEvaluator(BaseEvaluator):
                 _progress_reporter.update(batch_id, len(batch_prediction))
                 if compute_intermediate_metric_res and _progress_reporter.current % metric_interval == 0:
                     self.compute_metrics(
-                        print_results=True, ignore_results_formatting=ignore_results_formatting
+                        print_results=True, ignore_results_formatting=ignore_results_formatting,
+                        ignore_metric_reference=ignore_metric_reference
                     )
+                    self.write_results_to_csv(kwargs.get('csv_result'), ignore_results_formatting, metric_interval)
 
         if _progress_reporter:
             _progress_reporter.finish()
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False, ignore_metric_reference=False):
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
@@ -131,13 +135,14 @@ class TextToSpeechEvaluator(BaseEvaluator):
         ):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting, ignore_metric_reference)
 
         return self._metrics_results
 
-    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False,
+                                ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(False, ignore_results_formatting)
+            self.compute_metrics(False, ignore_results_formatting, ignore_metric_reference)
 
         result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
@@ -150,17 +155,17 @@ class TextToSpeechEvaluator(BaseEvaluator):
                 extracted_results.append(result)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_result(metric_result, ignore_results_formatting)
+                presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
         return extracted_results, extracted_meta
 
-    def print_metrics_results(self, ignore_results_formatting=False):
+    def print_metrics_results(self, ignore_results_formatting=False, ignore_metric_reference=False):
         if not self._metrics_results:
-            self.compute_metrics(True, ignore_results_formatting)
+            self.compute_metrics(True, ignore_results_formatting, ignore_metric_reference)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_result(metric_result, ignore_results_formatting)
+            presenter.write_result(metric_result, ignore_results_formatting, ignore_metric_reference)
 
     def set_profiling_dir(self, profiler_dir):
         self.metric_executor.set_profiling_dir(profiler_dir)
@@ -255,6 +260,25 @@ class TextToSpeechEvaluator(BaseEvaluator):
         elif num_images is not None:
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
 
+    def send_processing_info(self, sender):
+        if not sender:
+            return {}
+        model_type = None
+        details = {}
+        metrics = self.dataset_config[0].get('metrics', [])
+        metric_info = [metric['type'] for metric in metrics]
+        adapter_type = self.model.adapter.__provider__
+        details.update({
+            'metrics': metric_info,
+            'model_file_type': model_type,
+            'adapter': adapter_type,
+        })
+        if self.dataset is None:
+            self.select_dataset('')
+
+        details.update(self.dataset.send_annotation_info(self.dataset_config[0]))
+        return details
+
 
 def create_network(model_config, launcher, suffix, delayed_model_loading=False):
     launcher_model_mapping = {
@@ -310,6 +334,9 @@ class SequentialModel:
             self.forward_tacotron_duration_input = None
             self.melgan_input = None
         self.forward_tacotron_regression_input = network_info['forward_tacotron_regression_inputs']
+        self.duration_speaker_embeddings = (
+            'speaker_embedding' if 'speaker_embedding' in self.forward_tacotron_regression_input else None
+        )
         self.duration_output = 'duration'
         self.embeddings_output = 'embeddings'
         self.mel_output = 'mel'
@@ -349,7 +376,8 @@ class SequentialModel:
     def predict(self, identifiers, input_data, input_meta, input_names, callback=None):
         assert len(identifiers) == 1
 
-        duration_output = self.forward_tacotron_duration.predict(dict(zip(input_names, input_data[0])))
+        duration_input = dict(zip(input_names, input_data[0]))
+        duration_output = self.forward_tacotron_duration.predict(duration_input)
         if callback:
             callback(duration_output)
 
@@ -368,6 +396,9 @@ class SequentialModel:
                 self.forward_tacotron_regression_input['data']: processed_emb,
                 self.forward_tacotron_regression_input['data_mask']: input_mask,
                 self.forward_tacotron_regression_input['pos_mask']: pos_mask}
+            if self.duration_speaker_embeddings:
+                sp_emb_input = self.forward_tacotron_regression_input['speaker_embedding']
+                input_to_regression[sp_emb_input] = duration_input[self.duration_speaker_embeddings]
             mels = self.forward_tacotron_regression.predict(input_to_regression)
         else:
             mels = self.forward_tacotron_regression.predict({self.forward_tacotron_regression_input: processed_emb})
@@ -441,6 +472,10 @@ class SequentialModel:
             self.adapter.output_blob = self.audio_output
             self.forward_tacotron_duration_input = next(iter(self.forward_tacotron_duration.inputs))
             self.melgan_input = next(iter(self.melgan.inputs))
+            if self.duration_speaker_embeddings:
+                self.duration_speaker_embeddings = generate_name(
+                    'forward_tacotron_duration_', with_prefix, self.duration_speaker_embeddings
+                )
             for key, value in self.forward_tacotron_regression_input.items():
                 self.forward_tacotron_regression_input[key] = generate_name(
                     'forward_tacotron_regression_', with_prefix, value
@@ -455,6 +490,7 @@ class TTSDLSDKModel:
         self.default_model_suffix = suffix
         if not delayed_model_loading:
             self.load_model(network_info, launcher, log=True)
+        self.launcher = launcher
 
     def predict(self, input_data):
         return self.exec_network.infer(input_data)
@@ -462,6 +498,11 @@ class TTSDLSDKModel:
     def release(self):
         del self.network
         del self.exec_network
+
+    def reshape(self, input_shapes):
+        del self.exec_network
+        self.network.reshape(input_shapes)
+        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
 
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])

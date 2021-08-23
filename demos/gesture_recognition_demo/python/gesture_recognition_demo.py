@@ -17,7 +17,7 @@
 
 import logging as log
 import sys
-import time
+from time import perf_counter
 import json
 import os
 import multiprocessing
@@ -37,6 +37,9 @@ from gesture_recognition_demo.visualizer import Visualizer
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                              'common/python'))
 import monitors
+from performance_metrics import PerformanceMetrics
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 DETECTOR_OUTPUT_SHAPE = -1, 5
 TRACKER_SCORE_THRESHOLD = 0.4
@@ -65,7 +68,7 @@ def build_argparser():
     args.add_argument('-i', '--input', required=True,
                       help='Required. Path to a video file or a device node of a web-camera.')
     args.add_argument('-o', '--output', required=False,
-                      help='Optional. Name of output to save.')
+                      help='Optional. Name of the output file(s) to save.')
     args.add_argument('-limit', '--output_limit', required=False, default=1000, type=int,
                       help='Optional. Number of frames to store in output. '
                            'If 0 is set, all frames are stored.')
@@ -79,7 +82,7 @@ def build_argparser():
                       help='Optional. Threshold for the predicted score of an action.',
                       default=0.8, type=float)
     args.add_argument('-d', '--device',
-                      help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL '
+                      help='Optional. Specify the target device to infer on: CPU, GPU, HDDL '
                            'or MYRIAD. The demo will look for a suitable plugin for device '
                            'specified (by default, it is CPU).',
                       default='CPU', type=str)
@@ -109,24 +112,25 @@ def load_class_map(file_path):
 
 
 def main():
-    log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
     class_map = load_class_map(args.class_map)
     assert class_map is not None
 
-    ie_core = load_ie_core(args.device, args.cpu_extension)
+    ie = load_ie_core(args.device, args.cpu_extension)
 
-    person_detector = PersonDetector(args.detection_model, args.device, ie_core,
+    person_detector = PersonDetector(args.detection_model, args.device, ie,
                                      num_requests=2, output_shape=DETECTOR_OUTPUT_SHAPE)
-    action_recognizer = ActionRecognizer(args.action_model, args.device, ie_core,
+    action_recognizer = ActionRecognizer(args.action_model, args.device, ie,
                                          num_requests=2, img_scale=ACTION_IMAGE_SCALE,
                                          num_classes=len(class_map))
+
     person_tracker = Tracker(person_detector, TRACKER_SCORE_THRESHOLD, TRACKER_IOU_THRESHOLD)
 
     video_stream = VideoStream(args.input, ACTION_NET_INPUT_FPS, action_recognizer.input_length)
     video_stream.start()
 
+    metrics = PerformanceMetrics()
     visualizer = Visualizer(VISUALIZER_TRG_FPS)
     visualizer.register_window('Demo')
     presenter = monitors.Presenter(args.utilization_monitors)
@@ -150,8 +154,8 @@ def main():
 
     frames_processed = 0
 
-    start_time = time.perf_counter()
     while True:
+        start_time = perf_counter()
         frame = video_stream.get_live_frame()
         batch = video_stream.get_batch()
         if frame is None or batch is None:
@@ -188,14 +192,7 @@ def main():
                 if action_class_score > args.action_threshold:
                     last_caption = 'Last gesture: {} '.format(action_class_label)
 
-        end_time = time.perf_counter()
-        elapsed_time = end_time - start_time
-        start_time = end_time
         presenter.drawGraphs(frame)
-        if active_object_id >= 0:
-            current_fps = 1.0 / elapsed_time
-            cv2.putText(frame, 'FPS: {:.2f}'.format(current_fps), (10, 40),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
         if detections is not None:
             tracker_labels = {det.id for det in detections}
@@ -212,6 +209,9 @@ def main():
         if last_caption is not None:
             cv2.putText(frame, last_caption, (10, frame.shape[0] - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+        metrics.update(start_time, frame)
+
         frames_processed += 1
         if video_writer.isOpened() and (args.output_limit <= 0 or frames_processed <= args.output_limit):
             video_writer.write(frame)
@@ -246,7 +246,10 @@ def main():
         samples_library.release()
     visualizer.release()
     video_stream.release()
-    print(presenter.reportMeans())
+
+    metrics.log_total()
+    for rep in presenter.reportMeans():
+        log.info(rep)
 
 
 if __name__ == '__main__':

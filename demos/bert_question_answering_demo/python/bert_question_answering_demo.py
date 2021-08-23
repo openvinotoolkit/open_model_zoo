@@ -22,11 +22,13 @@ from argparse import ArgumentParser, SUPPRESS
 from pathlib import Path
 
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
 
 sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def build_argparser():
@@ -83,7 +85,6 @@ def find_sentence_range(context, s, e):
     return c_s, c_e
 
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
     if args.colors:
@@ -94,69 +95,57 @@ def main():
         COLOR_RESET = ""
 
     # load vocabulary file for model
-    log.info("Loading vocab file:\t{}".format(args.vocab))
     vocab = load_vocab_file(args.vocab)
-    log.info("{} tokens loaded".format(len(vocab)))
+    log.debug("Loaded vocab file from {}, get {} tokens".format(args.vocab, len(vocab)))
 
     # get context as a string (as we might need it's length for the sequence reshape)
     paragraphs = get_paragraphs(args.input)
     context = '\n'.join(paragraphs)
-    log.info("Size: {} chars".format(len(context)))
-    log.info("Context: " + COLOR_RED + context + COLOR_RESET)
     # encode context into token ids list
     c_tokens_id, c_tokens_se = text_to_tokens(context.lower(), vocab)
 
-    log.info("Initializing Inference Engine")
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
-    version = ie.get_versions(args.device)[args.device]
-    version_str = "{}.{}.{}".format(version.major, version.minor, version.build_number)
-    log.info("Plugin version is {}".format(version_str))
 
     # read IR
     model_xml = args.model
     model_bin = model_xml.with_suffix(".bin")
-    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+    log.info('Reading model {}'.format(args.model))
     ie_encoder = ie.read_network(model=model_xml, weights=model_bin)
 
     if args.reshape:
         # reshape the sequence length to the context + maximum question length (in tokens)
-        first_input_layer = next(iter(ie_encoder.inputs))
-        c = ie_encoder.inputs[first_input_layer].shape[1]
+        first_input_layer = next(iter(ie_encoder.input_info))
+        c = ie_encoder.input_info[first_input_layer].input_data.shape[1]
         # find the closest multiple of 64, if it is smaller than current network's sequence length, let' use that
         seq = min(c, int(np.ceil((len(c_tokens_id) + args.max_question_token_num) / 64) * 64))
         if seq < c:
-            input_info = list(ie_encoder.inputs)
             new_shapes = {}
-            for i in input_info:
-                n, c = ie_encoder.inputs[i].shape
-                new_shapes[i] = [n, seq]
-                log.info("Reshaped input {} from {} to the {}".format(i, ie_encoder.inputs[i].shape, new_shapes[i]))
-            log.info("Attempting to reshape the network to the modified inputs...")
+            for input_name, input_info in ie_encoder.input_info.items():
+                n, c = input_info.input_data.shape
+                new_shapes[input_name] = [n, seq]
             try:
                 ie_encoder.reshape(new_shapes)
-                log.info("Successful!")
+                log.debug("Reshape model {} from {} to the {}".format(
+                    input_name, input_info.input_data.shape, new_shapes[input_name]))
             except RuntimeError:
                 log.error("Failed to reshape the network, please retry the demo without '-r' option")
                 sys.exit(-1)
         else:
-            log.info("Skipping network reshaping,"
+            log.debug("Skipping network reshaping,"
                      " as (context length + max question length) exceeds the current (input) network sequence length")
 
     # check input and output names
     input_names = [i.strip() for i in args.input_names.split(',')]
     output_names = [o.strip() for o in args.output_names.split(',')]
-    if ie_encoder.inputs.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
-        log.error("Input or Output names do not match")
-        log.error("    The demo expects input->output names: {}->{}. "
-                  "Please use the --input_names and --output_names to specify the right names "
-                  "(see actual values below)".format(input_names, output_names))
-        log.error("    Actual network input->output names: {}->{}".format(list(ie_encoder.inputs.keys()),
-                                                                          list(ie_encoder.outputs.keys())))
-        raise Exception("Unexpected network input or output names")
+    if ie_encoder.input_info.keys() != set(input_names) or ie_encoder.outputs.keys() != set(output_names):
+        raise RuntimeError("The demo expects input->output names: {}->{}, actual network input->output names: {}->{}".format(
+            input_names, output_names, list(ie_encoder.input_info.keys()), list(ie_encoder.outputs.keys())))
 
     # load model to the device
-    log.info("Loading model to the {}".format(args.device))
     ie_encoder_exec = ie.load_network(network=ie_encoder, device_name=args.device)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
 
     if args.questions:
         def questions():
@@ -176,7 +165,7 @@ def main():
         q_tokens_id, _ = text_to_tokens(question.lower(), vocab)
 
         # maximum number of tokens that can be processed by network at once
-        max_length = ie_encoder.inputs[input_names[0]].shape[1]
+        max_length = ie_encoder.input_info[input_names[0]].input_data.shape[1]
 
         # calculate number of tokens for context in each inference request.
         # reserve 3 positions for special tokens
@@ -284,8 +273,6 @@ def main():
             c_e = min(c_s + c_wnd_len, len(c_tokens_id))
 
         t1 = time.perf_counter()
-        log.info("The performance below is reported only for reference purposes, "
-                 "please use the benchmark_app tool (part of the OpenVINO samples) for any actual measurements.")
         log.info("{} requests of {} length were processed in {:0.2f}sec ({:0.2}sec per request)".format(
             t_count,
             max_length,

@@ -1,12 +1,9 @@
 """
 Copyright (c) 2018-2021 Intel Corporation
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
       http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,6 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import json
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -27,8 +25,17 @@ from .config import ConfigReader
 from .logging import print_info, add_file_handler, exception
 from .evaluators import ModelEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
-from .utils import get_path, cast_to_bool, check_file_existence, validate_print_interval
+from .utils import (
+    get_path,
+    cast_to_bool,
+    check_file_existence,
+    validate_print_interval,
+    start_telemetry,
+    end_telemetry,
+    send_telemetry_event
+)
 from . import __version__
+
 
 EVALUATION_MODE = {
     'models': ModelEvaluator,
@@ -193,7 +200,7 @@ def add_tool_settings_args(parser):
     )
     tool_settings_args.add_argument(
         '--intermediate_metrics_results',
-        help='enables intermediate metrics results printing',
+        help='enables intermediate metrics results printing or saving',
         type=cast_to_bool,
         default=False,
         required=False
@@ -336,6 +343,14 @@ def add_openvino_specific_args(parser):
         help='the number of infer requests',
         required=False
     )
+    openvino_specific_args.add_argument(
+        '--kaldi_bin_dir', help='directory with Kaldi utility binaries. Required only for Kaldi models decoding.',
+        required=False, type=partial(get_path, is_directory=True)
+    )
+    openvino_specific_args.add_argument(
+        '--kaldi_log_file', help='path for saving logs from Kaldi tools', type=partial(get_path, check_exists=False),
+        required=False
+    )
 
 
 def build_arguments_parser():
@@ -360,51 +375,64 @@ def build_arguments_parser():
 def main():
     return_code = 0
     args = build_arguments_parser().parse_args()
+    tm = start_telemetry()
     progress_bar_provider = args.progress if ':' not in args.progress else args.progress.split(':')[0]
     progress_reporter = ProgressReporter.provide(progress_bar_provider, None, print_interval=args.progress_interval)
     if args.log_file:
         add_file_handler(args.log_file)
-    intermdeiate_metrics = args.intermediate_metrics_results
-    evaluator_kwargs = {}
-    if intermdeiate_metrics:
-        validate_print_interval(args.metrics_interval)
-        evaluator_kwargs['intermediate_metrics_results'] = intermdeiate_metrics
-        evaluator_kwargs['metrics_interval'] = args.metrics_interval
-        evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
-    evaluator_kwargs['store_only'] = args.store_only
+    evaluator_kwargs = configure_evaluator_kwargs(args)
+    details = {
+        'mode': "online" if not args.store_only else "offline",
+        'metric_profiling': args.profile or False,
+        'error': None
+    }
 
     config, mode = ConfigReader.merge(args)
     evaluator_class = EVALUATION_MODE.get(mode)
     if not evaluator_class:
+        send_telemetry_event(tm, 'error', 'Unknown evaluation mode')
+        end_telemetry(tm)
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
-        config_entry['_store_only'] = args.store_only
-        config_entry['_stored_data'] = args.stored_predictions
+        details.update({'status': 'started', "error": None})
+        send_telemetry_event(tm, 'status', 'started')
+        config_entry.update({
+            '_store_only': args.store_only,
+            '_stored_data': args.stored_predictions
+        })
         try:
             processing_info = evaluator_class.get_processing_info(config_entry)
             print_processing_info(*processing_info)
             evaluator = evaluator_class.from_configs(config_entry)
+            details.update(evaluator.send_processing_info(tm))
             if args.profile:
-                _timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-                profiler_dir = args.profiler_logs_dir / _timestamp
-                print_info('Metric profiling activated. Profiler output will be stored in {}'.format(profiler_dir))
-                evaluator.set_profiling_dir(profiler_dir)
+                setup_profiling(args.profiler_logs_dir, evaluator)
+            send_telemetry_event(tm, 'model_run', json.dumps(details))
             evaluator.process_dataset(
                 stored_predictions=args.stored_predictions, progress_reporter=progress_reporter, **evaluator_kwargs
             )
             if not args.store_only:
                 metrics_results, metrics_meta = evaluator.extract_metrics_results(
-                    print_results=True, ignore_results_formatting=args.ignore_result_formatting
+                    print_results=True, ignore_results_formatting=args.ignore_result_formatting,
                 )
                 if args.csv_result:
                     write_csv_result(
                         args.csv_result, processing_info, metrics_results, evaluator.dataset_size, metrics_meta
                     )
             evaluator.release()
+            details['status'] = 'finished'
+            send_telemetry_event(tm, 'status', 'success')
+            send_telemetry_event(tm, 'model_run', json.dumps(details))
+
         except Exception as e:  # pylint:disable=W0703
+            details['status'] = 'error'
+            details['error'] = str(type(e))
+            send_telemetry_event(tm, 'status', 'failure')
+            send_telemetry_event(tm, 'model_run', json.dumps(details))
             exception(e)
             return_code = 1
             continue
+        end_telemetry(tm)
     sys.exit(return_code)
 
 
@@ -424,7 +452,7 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
     field_names = [
         'model', 'launcher', 'device', 'dataset',
         'tags', 'metric_name', 'metric_type', 'metric_value', 'metric_target', 'metric_scale', 'metric_postfix',
-        'dataset_size']
+        'dataset_size', 'ref', 'abs_threshold', 'rel_threshold']
     model, launcher, device, tags, dataset = processing_info
     main_info = {
         'model': model,
@@ -447,8 +475,30 @@ def write_csv_result(csv_file, processing_info, metric_results, dataset_size, me
                 'metric_value': metric_result['value'],
                 'metric_target': metric_meta.get('target', 'higher-better'),
                 'metric_scale': metric_meta.get('scale', 100),
-                'metric_postfix': metric_meta.get('postfix', '%')
+                'metric_postfix': metric_meta.get('postfix', '%'),
+                'ref': metric_result.get('ref', ''),
+                'abs_threshold': metric_result.get('abs_threshold', 0),
+                'rel_threshold': metric_result.get('rel_threshold', 0)
             })
+
+
+def setup_profiling(logs_dir, evaluator):
+    _timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    profiler_dir = logs_dir / _timestamp
+    print_info('Metric profiling activated. Profiler output will be stored in {}'.format(profiler_dir))
+    evaluator.set_profiling_dir(profiler_dir)
+
+
+def configure_evaluator_kwargs(args):
+    evaluator_kwargs = {}
+    if args.intermediate_metrics_results:
+        validate_print_interval(args.metrics_interval)
+        evaluator_kwargs['intermediate_metrics_results'] = args.intermediate_metrics_results
+        evaluator_kwargs['metrics_interval'] = args.metrics_interval
+        evaluator_kwargs['ignore_result_formatting'] = args.ignore_result_formatting
+        evaluator_kwargs['csv_result'] = args.csv_result
+    evaluator_kwargs['store_only'] = args.store_only
+    return evaluator_kwargs
 
 
 if __name__ == '__main__':

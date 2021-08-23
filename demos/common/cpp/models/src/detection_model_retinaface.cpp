@@ -16,7 +16,6 @@
 
 #include <ngraph/ngraph.hpp>
 #include <utils/common.hpp>
-#include <utils/slog.hpp>
 #include "models/detection_model_retinaface.h"
 
 ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
@@ -31,7 +30,6 @@ ModelRetinaFace::ModelRetinaFace(const std::string& modelFileName, float confide
 void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
     // --------------------------- Configure input & output -------------------------------------------------
     // --------------------------- Prepare input blobs ------------------------------------------------------
-    slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
     InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("This demo accepts networks that have only one input");
@@ -55,7 +53,6 @@ void ModelRetinaFace::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwo
     netInputWidth = getTensorWidth(inputDesc);
 
     // --------------------------- Prepare output blobs -----------------------------------------------------
-    slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
 
     InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
 
@@ -214,7 +211,7 @@ void filterScores(std::vector<float>& scores, const std::vector<size_t>& indices
     auto start = sz[2] * sz[3] * anchorNum;
 
     for (auto i : indices) {
-        auto offset = (i % anchorNum) * sz[2] * sz[3] + i / anchorNum;;
+        auto offset = (i % anchorNum) * sz[2] * sz[3] + i / anchorNum;
         scores.push_back(memPtr[start + offset]);
     }
 }
@@ -315,12 +312,11 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         }
     }
     // --------------------------- Apply Non-maximum Suppression ----------------------------------------------------------
-    // !shouldDetectLandmarks determines nms behavior, if true - boundaries are included in areas calculation for ssh-mxnet model
+    // !shouldDetectLandmarks determines nms behavior, if true - boundaries are included in areas calculation
     auto keep = nms(bboxes, scores, boxIOUThreshold, !shouldDetectLandmarks);
 
     // --------------------------- Create detection result objects --------------------------------------------------------
-    RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult;
-    *static_cast<ResultBase*>(result) = static_cast<ResultBase&>(infResult);
+    RetinaFaceDetectionResult* result = new RetinaFaceDetectionResult(infResult.frameId, infResult.metaData);
 
     auto imgWidth = infResult.internalModelData->asRef<InternalImageModelData>().inputImgWidth;
     auto imgHeight = infResult.internalModelData->asRef<InternalImageModelData>().inputImgHeight;
@@ -355,5 +351,5 @@ std::unique_ptr<ResultBase> ModelRetinaFace::postprocess(InferenceResult& infRes
         }
     }
 
-    return std::unique_ptr<ResultBase>(result);;
+    return std::unique_ptr<ResultBase>(result);
 }

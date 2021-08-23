@@ -1,43 +1,76 @@
 # Crossroad Camera C++ Demo
 
-![](./crossroad_camera.gif)
+![example](./crossroad_camera.gif)
 
-This demo provides an inference pipeline for persons' detection, recognition and reidentification. The demo uses Person Detection network followed by the Person Attributes Recognition and Person Reidentification Retail networks applied on top of the detection results. You can use a set of the following pre-trained models with the demo:
+This demo provides an inference pipeline for person detection, recognition and reidentification. The demo uses Person Detection network followed by the Person Attributes Recognition and Person Reidentification Retail networks applied on top of the detection results. You can use a set of the following pre-trained models with the demo:
 
 * `person-vehicle-bike-detection-crossroad-0078`, which is a primary detection network for finding the persons (and other objects if needed)
 * `person-attributes-recognition-crossroad-0230`, which is executed on top of the results from the first network and
 reports person attributes like gender, has hat, has long-sleeved clothes
-* `person-reidentification-retail-0031`, which is executed on top of the results from the first network and prints
+* `person-reidentification-retail-0277`, which is executed on top of the results from the first network and prints
 a vector of features for each detected person. This vector is used to conclude if it is already detected person or not.
 
 For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 Other demo objectives are:
+
 * Images/Video/Camera as inputs, via OpenCV\*
 * Example of simple networks pipelining: Person Attributes and Person Reidentification networks are executed on top of
 the Person Detection results
 * Visualization of Person Attributes and Person Reidentification (REID) information for each detected person
 
-
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads the specified networks. The Person Detection
-network is required, the other two are optional.
+On startup, the application reads command line parameters and loads the specified networks. The Person Detection
+network is required, and the other two are optional.
 
 Upon getting a frame from the OpenCV VideoCapture, the application performs inference of Person Detection network, then performs another
 two inferences of Person Attributes Recognition and Person Reidentification Retail networks if they were specified in the
 command line, and displays the results.
 
-In case of a Person Reidentification Retail network specified, the resulting vector is generated for each detected person. This vector is
+If the Person Reidentification Retail network is specified, the resulting vector is generated for each detected person. This vector is
 compared one-by-one with all previously detected persons vectors using cosine similarity algorithm. If comparison result
 is greater than the specified (or default) threshold value, it is concluded that the person was already detected and a known
 REID value is assigned. Otherwise, the vector is added to a global list, and new REID value is assigned.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+
+## Preparing to Run
+
+For demo input image or video files, refer to the section **Media Files Available for Demos** in the [Open Model Zoo Demos Overview](../../README.md).
+The list of models supported by the demo is in `<omz_dir>/demos/crossroad_camera_demo/cpp/models.lst` file.
+This file can be used as a parameter for [Model Downloader](../../../tools/downloader/README.md) and Converter to download and, if necessary, convert models to OpenVINO Inference Engine format (\*.xml + \*.bin).
+
+An example of using the Model Downloader:
+
+```sh
+python3 <omz_dir>/tools/downloader/downloader.py --list models.lst
+```
+
+An example of using the Model Converter:
+
+```sh
+python3 <omz_dir>/tools/downloader/converter.py --list models.lst
+```
+
+### Supported Models
+
+* person-attributes-recognition-crossroad-0230
+* person-attributes-recognition-crossroad-0234
+* person-attributes-recognition-crossroad-0238
+* person-reidentification-retail-0277
+* person-reidentification-retail-0286
+* person-reidentification-retail-0287
+* person-reidentification-retail-0288
+* person-vehicle-bike-detection-crossroad-0078
+* person-vehicle-bike-detection-crossroad-1016
+
+> **NOTE**: Refer to the tables [Intel's Pre-Trained Models Device Support](../../../models/intel/device_support.md) and [Public Pre-Trained Models Device Support](../../../models/public/device_support.md) for the details on models inference support at different devices.
 
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
+
 ```
 crossroad_camera_demo [OPTION]
 Options:
@@ -45,7 +78,7 @@ Options:
     -h                           Print a usage message.
     -i                           Required. An input to process. The input must be a single image, a folder of images, video file or camera id.
     -loop                        Optional. Enable reading the input in a loop.
-    -o "<path>"                  Optional. Name of output to save.
+    -o "<path>"                  Optional. Name of the output file(s) to save.
     -limit "<num>"               Optional. Number of frames to store in output. If 0 is set, all frames are stored.
     -m "<path>"                  Required. Path to the Person/Vehicle/Bike Detection Crossroad model (.xml) file.
     -m_pa "<path>"               Optional. Path to the Person Attributes Recognition Crossroad model (.xml) file.
@@ -56,7 +89,6 @@ Options:
     -d "<device>"                Optional. Specify the target device for Person/Vehicle/Bike Detection. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_pa "<device>"             Optional. Specify the target device for Person Attributes Recognition. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_reid "<device>"           Optional. Specify the target device for Person Reidentification Retail. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
-    -pc                          Optional. Enables per-layer performance statistics.
     -r                           Optional. Output Inference results as raw values.
     -t                           Optional. Probability threshold for person/vehicle/bike crossroad detections.
     -t_reid                      Optional. Cosine similarity threshold between two vectors for person reidentification.
@@ -67,10 +99,6 @@ Options:
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.
-
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md). The list of models supported by the demo is in `<omz_dir>/demos/crossroad_camera_demo/cpp/models.lst`.
-
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
@@ -84,22 +112,35 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 > * the model `person-vehicle-bike-detection-crossroad-0078` returns for persons the category index 1, it is the default value for the demo
 > * the model `person-vehicle-bike-detection-crossroad-1016` returns for persons the category index 2, so for the demo to work correctly, the command line parameter `-person_label 2` should be added.
 
+>**NOTE**: If you provide a single image as an input, the demo processes and renders it quickly, then exits. To continuously visualize inference results on the screen, apply the `loop` option, which enforces processing a single image in a loop.
+
+You can save processed results to a Motion JPEG AVI file or separate JPEG or PNG files using the `-o` option:
+
+* To save processed results in an AVI file, specify the name of the output file with `avi` extension, for example: `-o output.avi`.
+* To save processed results as images, specify the template name of the output image file with `jpg` or `png` extension, for example: `-o output_%03d.jpg`. The actual file names are constructed from the template at runtime by replacing regular expression `%03d` with the frame number, resulting in the following: `output_000.jpg`, `output_001.jpg`, and so on.
+To avoid disk space overrun in case of continuous input stream, like camera, you can limit the amount of data stored in the output file(s) with the `limit` option. The default value is 1000. To change it, you can apply the `-limit N` option, where `N` is the number of frames to store.
+
+>**NOTE**: Windows\* systems may not have the Motion JPEG codec installed by default. If this is the case, you can download OpenCV FFMPEG back end using the PowerShell script provided with the OpenVINO &trade; install package and located at `<INSTALL_DIR>/opencv/ffmpeg-download.ps1`. The script should be run with administrative privileges if OpenVINO &trade; is installed in a system protected folder (this is a typical case). Alternatively, you can save results as images.
+
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
-In the default mode, the demo reports **Person Detection time** - inference time for the Person/Vehicle/Bike Detection network.
+In the default mode, during the demo's run it reports **Person Detection time** - inference time for the Person/Vehicle/Bike Detection network.
 
 If Person Attributes Recognition or Person Reidentification Retail are enabled, the additional info below is reported also:
-	* **Person Attributes Recognition time** - Inference time of Person Attributes Recognition averaged by the number of detected persons.
-	* **Person Reidentification time** - Inference time of Person Reidentification averaged by the number of detected persons.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
-> * `person-attributes-recognition-crossroad-0230`
-> * `person-reidentification-retail-0031`
-> * `person-vehicle-bike-detection-crossroad-0078`
-> Other models may produce unexpected results on these devices.
+* **Person Attributes Recognition time** - Inference time of Person Attributes Recognition averaged by the number of detected persons.
+* **Person Reidentification time** - Inference time of Person Reidentification averaged by the number of detected persons.
+
+On completion the demo reports:
+
+* **FPS**: average rate of video frame processing (frames per second).
+* **Latency**: average time required to process one frame (from reading the frame to displaying the results).
+
+You can use these metrics to measure application-level performance.
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+
+* [Open Model Zoo Demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)

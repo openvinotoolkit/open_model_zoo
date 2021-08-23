@@ -18,7 +18,7 @@ import cv2
 import numpy as np
 
 from .model import Model
-from .utils import Detection, nms
+from .utils import Detection, nms, clip_detections
 
 
 class CTPN(Model):
@@ -54,8 +54,9 @@ class CTPN(Model):
 
         self.h1, self.w1 = self.ctpn_keep_aspect_ratio(1200, 600, input_size[1], input_size[0])
         self.h2, self.w2 = self.ctpn_keep_aspect_ratio(600, 600, self.w1, self.h1)
-        input_shape = {self.image_blob_name: (1, 3, self.h2, self.w2)}
-        self.logger.info('Reshape net to {}'.format(input_shape))
+        default_input_shape = self.net.input_info[self.image_blob_name].input_data.shape
+        input_shape = {self.image_blob_name: (default_input_shape[:-2] + [self.h2, self.w2])}
+        self.logger.debug('\tReshape model from {} to {}'.format(default_input_shape, input_shape[self.image_blob_name]))
         self.net.reshape(input_shape)
 
     def prepare_inputs(self):
@@ -115,7 +116,8 @@ class CTPN(Model):
             second_scales = meta['scales'].pop()
             boxes[:, 0:8:2] /= second_scales[0]
             boxes[:, 1:8:2] /= second_scales[1]
-        return [Detection(box[0], box[1], box[2], box[5], box[8], 0) for box in boxes]
+        detections = [Detection(box[0], box[1], box[2], box[5], box[8], 0) for box in boxes]
+        return clip_detections(detections, meta['original_shape'])
 
     @staticmethod
     def ctpn_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):

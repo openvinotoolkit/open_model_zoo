@@ -29,8 +29,6 @@
 #include "logger.hpp"
 #include "smart_classroom_demo.hpp"
 
-using namespace InferenceEngine;
-
 namespace {
 
 class Visualizer {
@@ -161,15 +159,6 @@ public:
         if (!label_to_draw.empty()) {
             cv::putText(frame_, label_to_draw, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_PLAIN, 1,
                         text_color, 1, cv::LINE_AA);
-        }
-    }
-
-    void DrawFPS(const float fps, const cv::Scalar& color) {
-        if (enabled_ && !writer_.isOpened()) {
-            cv::putText(frame_,
-                        std::to_string(static_cast<int>(fps)) + " fps",
-                        cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 1,
-                        color, 2, cv::LINE_AA);
         }
     }
 
@@ -406,9 +395,9 @@ std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_track
     return face_track_id_to_label;
 }
 
-bool checkDynamicBatchSupport(const Core& ie, const std::string& device)  {
+bool checkDynamicBatchSupport(const InferenceEngine::Core& ie, const std::string& device)  {
     try  {
-        if (ie.GetConfig(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != PluginConfigParams::YES)
+        if (ie.GetConfig(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != InferenceEngine::PluginConfigParams::YES)
             return false;
     }
     catch(const std::exception&)  {
@@ -426,9 +415,6 @@ public:
     virtual std::vector<std::string> GetIDToLabelMap() const = 0;
 
     virtual std::vector<int> Recognize(const cv::Mat& frame, const detection::DetectedObjects& faces) = 0;
-
-    virtual void PrintPerformanceCounts(
-        const std::string &landmarks_device, const std::string &reid_device) = 0;
 };
 
 class FaceRecognizerNull : public FaceRecognizer {
@@ -444,9 +430,6 @@ public:
     std::vector<int> Recognize(const cv::Mat&, const detection::DetectedObjects& faces) override {
         return std::vector<int>(faces.size(), EmbeddingsGallery::unknown_id);
     }
-
-    void PrintPerformanceCounts(
-        const std::string &, const std::string &) override {}
 };
 
 class FaceRecognizerDefault : public FaceRecognizer {
@@ -501,12 +484,6 @@ public:
         return face_gallery.GetIDsByEmbeddings(embeddings);
     }
 
-    void PrintPerformanceCounts(
-            const std::string &landmarks_device, const std::string &reid_device) override {
-        landmarks_detector.PrintPerformanceCounts(landmarks_device);
-        face_reid.PrintPerformanceCounts(reid_device);
-    }
-
 private:
     VectorCNN landmarks_detector;
     VectorCNN face_reid;
@@ -523,8 +500,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         return false;
     }
 
-    slog::info << "Parsing input parameters" << slog::endl;
-
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
     }
@@ -539,9 +514,9 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char* argv[]) {
     try {
-        /** This demo covers 4 certain topologies and cannot be generalized **/
-        slog::info << "InferenceEngine: " << printable(*GetInferenceEngineVersion()) << slog::endl;
+        PerformanceMetrics metrics;
 
+        /** This demo covers 4 certain topologies and cannot be generalized **/
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
@@ -575,42 +550,37 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        slog::info << "Loading Inference Engine" << slog::endl;
-        Core ie;
+        slog::info << *InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        InferenceEngine::Core ie;
 
         std::vector<std::string> devices = {FLAGS_d_act, FLAGS_d_fd, FLAGS_d_lm,
                                             FLAGS_d_reid};
         std::set<std::string> loadedDevices;
 
-        slog::info << "Device info: " << slog::endl;
-
         for (const auto &device : devices) {
             if (loadedDevices.find(device) != loadedDevices.end())
                 continue;
-
-            slog::info << printable(ie.GetVersions(device)) << slog::endl;
 
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
+                    auto extension_ptr = std::make_shared<InferenceEngine::Extension>(FLAGS_l);
                     ie.AddExtension(extension_ptr, "CPU");
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
             } else if (!FLAGS_c.empty()) {
                 // Load Extensions for other plugins not CPU
-                ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
+                ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
             }
 
             if (device.find("CPU") != std::string::npos) {
-                ie.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}}, "CPU");
+                ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
+                    InferenceEngine::PluginConfigParams::YES}}, "CPU");
             } else if (device.find("GPU") != std::string::npos) {
-                ie.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}}, "GPU");
+                ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_DYN_BATCH_ENABLED,
+                    InferenceEngine::PluginConfigParams::YES}}, "GPU");
             }
-
-            if (FLAGS_pc)
-                ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
 
             loadedDevices.insert(device);
         }
@@ -618,7 +588,7 @@ int main(int argc, char* argv[]) {
         std::unique_ptr<AsyncDetection<DetectedAction>> action_detector;
         if (!ad_model_path.empty()) {
             // Load action detector
-            ActionDetectorConfig action_config(ad_model_path);
+            ActionDetectorConfig action_config(ad_model_path, "Person/Action Detection");
             action_config.deviceName = FLAGS_d_act;
             action_config.ie = ie;
             action_config.is_async = true;
@@ -628,6 +598,7 @@ int main(int argc, char* argv[]) {
             action_detector.reset(new ActionDetection(action_config));
         } else {
             action_detector.reset(new NullDetection<DetectedAction>);
+            slog::info << "Person/Action Detection DISABLED" << slog::endl;
         }
 
         std::unique_ptr<AsyncDetection<detection::DetectedObject>> face_detector;
@@ -660,7 +631,7 @@ int main(int argc, char* argv[]) {
             face_registration_det_config.increase_scale_x = static_cast<float>(FLAGS_exp_r_fd);
             face_registration_det_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
 
-            CnnConfig reid_config(fr_model_path);
+            CnnConfig reid_config(fr_model_path, "Face Re-Identification");
             reid_config.deviceName = FLAGS_d_reid;
             if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
                 reid_config.max_batch_size = 16;
@@ -668,7 +639,7 @@ int main(int argc, char* argv[]) {
                 reid_config.max_batch_size = 1;
             reid_config.ie = ie;
 
-            CnnConfig landmarks_config(lm_model_path);
+            CnnConfig landmarks_config(lm_model_path, "Facial Landmarks Regression");
             landmarks_config.deviceName = FLAGS_d_lm;
             if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
                 landmarks_config.max_batch_size = 16;
@@ -686,7 +657,7 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
         } else {
-            slog::warn << "Face recognition models are disabled!" << slog::endl;
+            slog::warn << "Face Recognition models are disabled!" << slog::endl;
             if (actions_type == TEACHER) {
                 slog::err << "Face recognition must be enabled to recognize teacher actions." << slog::endl;
                 return 1;
@@ -725,8 +696,6 @@ int main(int argc, char* argv[]) {
 
         Tracker tracker_action(tracker_action_params);
 
-        float work_time_ms = 0.f;
-        float wait_time_ms = 0.f;
         size_t work_num_frames = 0;
         size_t wait_num_frames = 0;
         size_t total_num_frames = 0;
@@ -755,13 +724,7 @@ int main(int argc, char* argv[]) {
             throw std::runtime_error("Can't open video writer");
         }
         Visualizer sc_visualizer(!FLAGS_no_show, videoWriter, FLAGS_limit, num_top_persons);
-        DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad, FLAGS_al);
-
-        std::cout << "To close the application, press 'CTRL+C' here";
-        if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press ESC key";
-        }
-        std::cout << std::endl;
+        DetectionsLogger logger(slog::debug, FLAGS_r, FLAGS_ad, FLAGS_al);
 
         if (actions_type != TOP_K) {
             action_detector->enqueue(frame);
@@ -774,7 +737,7 @@ int main(int argc, char* argv[]) {
 
         bool is_last_frame = false;
         while (!is_last_frame) {
-            auto started = std::chrono::high_resolution_clock::now();
+            auto startTime = std::chrono::steady_clock::now();
             cv::Mat prev_frame = std::move(frame);
             frame = cap->read();
             if (frame.data && frame.size() != prev_frame.size()) {
@@ -809,14 +772,8 @@ int main(int argc, char* argv[]) {
                         sc_visualizer.ClearTopWindow();
                     }
 
-                    auto elapsed = std::chrono::high_resolution_clock::now() - started;
-                    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
-
-                    wait_time_ms += elapsed_ms;
                     ++wait_num_frames;
-
-                    sc_visualizer.DrawFPS(1e3f / (wait_time_ms / static_cast<float>(wait_num_frames) + 1e-6f),
-                                          green_color);
+                    metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 } else {
                     if (key == SPACE_KEY) {
                         is_monitoring_enabled = true;
@@ -856,14 +813,6 @@ int main(int argc, char* argv[]) {
                         }
                     }
 
-                    auto elapsed = std::chrono::high_resolution_clock::now() - started;
-                    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
-
-                    work_time_ms += elapsed_ms;
-                    ++work_num_frames;
-
-                    sc_visualizer.DrawFPS(1e3f / (work_time_ms / static_cast<float>(work_num_frames) + 1e-6f),
-                                          red_color);
 
                     for (const auto& action : tracked_actions) {
                         auto box_color = white_color;
@@ -876,6 +825,8 @@ int main(int argc, char* argv[]) {
 
                         sc_visualizer.DrawObject(action.rect, box_caption, white_color, box_color, true);
                     }
+                    ++work_num_frames;
+                    metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 }
             } else {
                 face_detector->wait();
@@ -909,12 +860,6 @@ int main(int argc, char* argv[]) {
 
                 tracker_action.Process(prev_frame, tracked_action_objects, work_num_frames);
                 const auto tracked_actions = tracker_action.TrackedDetectionsWithLabels();
-
-                auto elapsed = std::chrono::high_resolution_clock::now() - started;
-                auto elapsed_ms =
-                        std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
-
-                work_time_ms += elapsed_ms;
 
                 std::map<int, int> frame_face_obj_id_to_action;
                 for (size_t j = 0; j < tracked_faces.size(); j++) {
@@ -969,10 +914,7 @@ int main(int argc, char* argv[]) {
                         logger.AddPersonToFrame(track_action.rect, action_label, teacher_id);
                     }
                 }
-
-                sc_visualizer.DrawFPS(1e3f / (work_time_ms / static_cast<float>(work_num_frames) + 1e-6f),
-                                      red_color);
-
+                metrics.update(startTime, frame, { 10, 22 }, cv::FONT_HERSHEY_COMPLEX, 0.65);
                 ++work_num_frames;
             }
 
@@ -983,23 +925,6 @@ int main(int argc, char* argv[]) {
             logger.FinalizeFrameRecord();
         }
         sc_visualizer.Finalize();
-
-        slog::info << slog::endl;
-        if (work_num_frames > 0) {
-            const float mean_time_ms = work_time_ms / static_cast<float>(work_num_frames);
-            slog::info << "Mean FPS: " << 1e3f / mean_time_ms << slog::endl;
-        }
-        slog::info << "Frames processed: " << total_num_frames << slog::endl;
-        if (FLAGS_pc) {
-            std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, devices);
-            face_detector->wait();
-            action_detector->wait();
-            action_detector->printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_act));
-            face_detector->printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_fd));
-            face_recognizer->PrintPerformanceCounts(
-                getFullDeviceName(mapDevices, FLAGS_d_lm),
-                getFullDeviceName(mapDevices, FLAGS_d_reid));
-        }
 
         if (actions_type == STUDENT) {
             auto face_tracks = tracker_reid.vector_tracks();
@@ -1024,7 +949,7 @@ int main(int argc, char* argv[]) {
                              smooth_window_size, smooth_min_length, default_action_index,
                              &face_obj_id_to_events);
 
-                slog::info << "Final ID->events mapping" << slog::endl;
+                slog::debug << "Final ID->events mapping" << slog::endl;
                 logger.DumpTracks(face_obj_id_to_events,
                                   actions_map, face_track_id_to_label,
                                   face_id_to_label_map);
@@ -1033,7 +958,7 @@ int main(int argc, char* argv[]) {
                 ConvertRangeEventsTracksToActionMaps(end_frame, face_obj_id_to_events,
                                                      &face_obj_id_to_smoothed_action_maps);
 
-                slog::info << "Final per-frame ID->action mapping" << slog::endl;
+                slog::debug << "Final per-frame ID->action mapping" << slog::endl;
                 logger.DumpDetections(FLAGS_i, frame.size(), work_num_frames,
                                       new_face_tracks,
                                       face_track_id_to_label,
@@ -1042,7 +967,9 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        std::cout << presenter.reportMeans() << '\n';
+        slog::info << "Metrics report:" << slog::endl;
+        metrics.logTotal();
+        slog::info << presenter.reportMeans() << slog::endl;
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -1052,8 +979,6 @@ int main(int argc, char* argv[]) {
         slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
-
-    slog::info << "Execution successful" << slog::endl;
 
     return 0;
 }

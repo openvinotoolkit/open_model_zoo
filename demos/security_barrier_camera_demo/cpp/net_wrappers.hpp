@@ -65,6 +65,8 @@ public:
         _output->setPrecision(InferenceEngine::Precision::FP32);
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
+        logExecNetworkInfo(net, xmlPath, deviceName, "Vehicle And License Plate Detection");
+
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -86,7 +88,7 @@ public:
         }
     }
 
-    std::list<Result> getResults(InferenceEngine::InferRequest& inferRequest, cv::Size upscale, std::ostream* rawResults = nullptr) {
+    std::list<Result> getResults(InferenceEngine::InferRequest& inferRequest, cv::Size upscale, std::vector<std::string>& rawResults) {
         // there is no big difference if InferReq of detector from another device is passed because the processing is the same for the same topology
         std::list<Result> results;
         InferenceEngine::LockedMemory<const void> detectorOutputBlobMapped = InferenceEngine::as<
@@ -110,11 +112,10 @@ public:
             rect.width = static_cast<int>(detections[i * objectSize + 5] * upscale.width) - rect.x;
             rect.height = static_cast<int>(detections[i * objectSize + 6] * upscale.height) - rect.y;
             results.push_back(Result{label, confidence, rect});
-
-            if (rawResults) {
-                *rawResults << "[" << i << "," << label << "] element, prob = " << confidence
-                            << "    (" << rect.x << "," << rect.y << ")-(" << rect.width << "," << rect.height << ")" << std::endl;
-            }
+            std::ostringstream rawResultsStream;
+            rawResultsStream << "[" << i << "," << label << "] element, prob = " << confidence
+                        << "    (" << rect.x << "," << rect.y << ")-(" << rect.width << "," << rect.height << ")";
+            rawResults.push_back(rawResultsStream.str());
         }
         return results;
     }
@@ -159,6 +160,7 @@ public:
         outputNameForType = (it)->second->getName();  // type is the second output.
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
+        logExecNetworkInfo(net, FLAGS_m_va, deviceName, "Vehicle Attributes Recognition");
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -262,6 +264,7 @@ public:
         }
 
         net = ie_.LoadNetwork(network, deviceName, pluginConfig);
+        logExecNetworkInfo(net, FLAGS_m_lpr, deviceName, "License Plate Recognition");
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -311,12 +314,39 @@ public:
         // up to 88 items per license plate, ended with "-1"
         InferenceEngine::LockedMemory<const void> lprOutputMapped = InferenceEngine::as<InferenceEngine::MemoryBlob>(
             inferRequest.GetBlob(LprOutputName))->rmap();
-        const auto data = lprOutputMapped.as<float*>();
-        for (int i = 0; i < maxSequenceSizePerPlate; i++) {
-            if (data[i] == -1) {
-                break;
+
+        InferenceEngine::Precision precision = inferRequest.GetBlob(LprOutputName)->getTensorDesc().getPrecision();
+
+        switch (precision) {
+            case InferenceEngine::Precision::I32:
+            {
+                const auto data = lprOutputMapped.as<int32_t*>();
+                for (int i = 0; i < maxSequenceSizePerPlate; i++) {
+                    int32_t val = data[i];
+                    if (val == -1) {
+                        break;
+                    }
+                    result += items[val];
+                }
             }
-            result += items[std::size_t(data[i])];
+            break;
+
+            case InferenceEngine::Precision::FP32:
+            {
+                const auto data = lprOutputMapped.as<float*>();
+                for (int i = 0; i < maxSequenceSizePerPlate; i++) {
+                    int32_t val = int32_t(data[i]);
+                    if (val == -1) {
+                        break;
+                    }
+                    result += items[val];
+                }
+            }
+            break;
+
+            default:
+                throw std::logic_error("Not expected output blob precision");
+                break;
         }
         return result;
     }

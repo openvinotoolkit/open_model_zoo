@@ -16,13 +16,15 @@
 """
 
 from argparse import ArgumentParser, SUPPRESS
-import logging
+import logging as log
 import sys
-import time
+from time import perf_counter
 import wave
 
 import numpy as np
-from openvino.inference_engine import IECore
+from openvino.inference_engine import IECore, get_version
+
+log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
 
 def type_overlap(arg):
@@ -46,8 +48,8 @@ def build_argparser():
                       help="Optional. Required for CPU custom layers. Absolute path to a shared library with "
                            "the kernels implementations.")
     args.add_argument("-d", "--device", type=str, default="CPU",
-                      help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is"
-                           " acceptable. The sample will look for a suitable plugin for device specified. "
+                      help="Optional. Specify the target device to infer on; CPU, GPU, HDDL or MYRIAD is"
+                           " acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU")
     args.add_argument('--labels', type=str, default=None,
                       help="Optional. Labels mapping file")
@@ -134,16 +136,13 @@ def read_wav(file, as_float=False):
 def main():
     args = build_argparser()
 
-    logging.basicConfig(format="[ %(levelname)s ] %(message)s", level=logging.INFO, stream=sys.stdout)
-    log = logging.getLogger()
-
-    log.info("Creating Inference Engine")
+    log.info('OpenVINO Inference Engine')
+    log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
-
     if args.device == "CPU" and args.cpu_extension:
         ie.add_extension(args.cpu_extension, 'CPU')
 
-    log.info("Loading model {}".format(args.model))
+    log.info('Reading model {}'.format(args.model))
     net = ie.read_network(args.model, args.model[:-4] + ".bin")
 
     if len(net.input_info) != 1:
@@ -156,36 +155,31 @@ def main():
         sys.exit(1)
     output_blob = next(iter(net.outputs))
 
-    log.info("Loading model to the plugin")
-    exec_net = ie.load_network(network=net, device_name=args.device)
-
-    log.info("Preparing input")
-
-    labels = []
-    if args.labels:
-        with open(args.labels, "r") as file:
-            labels = [line.rstrip() for line in file.readlines()]
-
     batch_size, channels, one, length = input_shape
     if one != 1:
         raise RuntimeError("Wrong third dimension size of model input shape - {} (expected 1)".format(one))
-
-    audio = AudioSource(args.input, channels=channels, samplerate=args.sample_rate)
 
     hop = length - args.overlap if isinstance(args.overlap, int) else int(length * (1.0 - args.overlap))
     if hop < 0:
         log.error("Wrong value for '-ol/--overlap' argument - overlapping more than clip length")
         sys.exit(1)
 
-    log.info("Starting inference")
+    exec_net = ie.load_network(network=net, device_name=args.device)
+    log.info('The model {} is loaded to {}'.format(args.model, args.device))
+
+    labels = []
+    if args.labels:
+        with open(args.labels, "r") as file:
+            labels = [line.rstrip() for line in file.readlines()]
+
+    start_time = perf_counter()
+    audio = AudioSource(args.input, channels=channels, samplerate=args.sample_rate)
+
     outputs = []
     clips = 0
-    infer_time = 0
     for idx, chunk in enumerate(audio.chunks(length, hop, num_chunks=batch_size)):
         chunk.shape = input_shape
-        infer_start_time = time.perf_counter()
         output = exec_net.infer(inputs={input_blob: chunk})
-        infer_time += time.perf_counter() - infer_start_time
         clips += batch_size
         output = output[output_blob]
         for batch, data in enumerate(output):
@@ -196,9 +190,9 @@ def main():
             if start_time < audio.duration():
                 log.info("[{:.2f}-{:.2f}] - {:6.2%} {:s}".format(start_time, end_time, data[label],
                                                                  labels[label] if labels else "Class {}".format(label)))
-
-    logging.info("Average infer time - {:.1f} ms per clip".format(infer_time / clips * 1000))
-
+    total_latency = (perf_counter() - start_time) * 1e3
+    log.info("Metrics report:")
+    log.info("\tLatency: {:.1f} ms".format(total_latency))
 
 if __name__ == '__main__':
     main()

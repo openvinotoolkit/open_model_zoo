@@ -76,7 +76,7 @@ Description of the model. Must match with the description from the model [docume
 
 **`task_type`**
 
-[Model task type](tools/downloader/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [tools/downloader/common.py](tools/downloader/common.py) file.
+[Model task type](tools/downloader/README.md#model-information-dumper-usage). If there is no task type of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [`open_model_zoo.model_tools._common`](tools/downloader/src/open_model_zoo/model_tools/_common.py) module.
 
 **`files`**
 
@@ -193,7 +193,7 @@ Demos are required to support the following keys:
 
  -  `-i "<input>"`: Required. An input to process. The input can usually be a single image, a folder of images or anything that OpenCV's `VideoCapture` can process.
  -  `-m "<path>"`: Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m_`.
- -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
+ -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
  -  `-no_show`: Optional. Do not visualize inference results.
 
 > **TIP**: For Python, it is preferable to use `--` instead of `-` for long keys.

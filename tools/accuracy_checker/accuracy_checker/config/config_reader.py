@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from argparse import Namespace
 import copy
 from pathlib import Path
 import os
@@ -50,12 +51,18 @@ PREPROCESSING_PATHS = {
 ADAPTERS_PATHS = {
     'lm_file': ['model_attributes', 'models', 'source'],
     'vocabulary_file': ['model_attributes', 'models', 'source'],
-    'merges_file': ['model_attributes', 'models', 'source']
+    'merges_file': ['model_attributes', 'models', 'source'],
+    'fst_file': ['model_attributes', 'models', 'source'],
+    'words_file': ['model_attributes', 'models', 'source'],
+    'transition_model_file': ['model_attributes', 'models', 'source'],
 }
 
 ANNOTATION_CONVERSION_PATHS = {
     'vocab_file': ['model_attributes', 'source', 'models'],
-    'merges_file': ['model_attributes', 'source', 'models']
+    'merges_file': ['model_attributes', 'source', 'models'],
+    'mask_file': ['model_attributes', 'source', 'models'],
+    'stats_file': ['model_attributes', 'source', 'models'],
+    'tokenizer_dir': ['model_attributes', 'models', 'source']
 }
 
 LIST_ENTRIES_PATHS = {
@@ -80,6 +87,7 @@ COMMAND_LINE_ARGS_AS_ENV_VARS = {
     'models': 'MODELS_DIR',
     'extensions': 'EXTENSIONS_DIR',
     'model_attributes': 'MODEL_ATTRIBUTES_DIR',
+    'kaldi_bin_dir': 'KALDI_BIN_DIR'
 }
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
 CONFIG_SHARED_PARAMETERS = ['bitstream']
@@ -357,7 +365,7 @@ class ConfigReader:
                     for model_path in model_paths:
                         copy_launcher = copy.deepcopy(launcher)
                         copy_launcher['model'] = model_path
-                        if launcher['framework'] == 'dlsdk' and 'model_is_blob' in arguments:
+                        if launcher['framework'] in ['dlsdk', 'g-api'] and 'model_is_blob' in arguments:
                             copy_launcher['_model_is_blob'] = arguments.model_is_blob
                         updated_launchers.append(copy_launcher)
                 return updated_launchers
@@ -418,9 +426,6 @@ class ConfigReader:
             value = arguments_dict.get(key)
             if value:
                 update_launcher_entry['_{}'.format(key)] = value
-
-        if arguments_dict.get('device_config'):
-            update_launcher_entry['device_config'] = read_yaml(arguments_dict['device_config'])
 
         return functors_by_mode[mode](config, arguments, update_launcher_entry)
 
@@ -542,12 +547,14 @@ class ConfigReader:
     def convert_paths(config):
         mode = 'evaluations' if 'evaluations' in config else 'models'
         definitions = os.environ.get(DEFINITION_ENV_VAR)
+        args = {}
         if definitions:
             definitions = read_yaml(Path(definitions))
             ConfigReader._prepare_global_configs(definitions)
             config = ConfigReader._merge_configs(definitions, config, {}, mode)
-        if COMMAND_LINE_ARGS_AS_ENV_VARS['source'] in os.environ:
-            ConfigReader._merge_paths_with_prefixes({}, config, mode)
+        ConfigReader._merge_paths_with_prefixes(args, config, mode)
+        if COMMAND_LINE_ARGS_AS_ENV_VARS['kaldi_bin_dir'] in os.environ:
+            ConfigReader._provide_cmd_arguments(Namespace(**args), config, mode)
 
         def convert_launcher_paths(launcher_config):
             for key, path in launcher_config.items():
@@ -849,6 +856,12 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
 
         return launcher_entry
 
+    kaldi_binaries = arguments.kaldi_bin_dir if 'kaldi_bin_dir' in arguments else None
+    kaldi_logs = arguments.kaldi_log_file if 'kaldi_log_file' in arguments else None
+    if kaldi_binaries:
+        launcher_entry['_kaldi_bin_dir'] = kaldi_binaries
+        launcher_entry['_kaldi_log_file'] = kaldi_logs
+
     if launcher_entry['framework'].lower() != 'dlsdk':
         return launcher_entry
 
@@ -856,6 +869,9 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
     _convert_models_args(launcher_entry)
     _async_evaluation_args(launcher_entry)
     _fpga_specific_args(launcher_entry)
+
+    if 'device_config' in arguments and arguments.device_config:
+        merge_device_configs(launcher_entry, arguments.device_config)
 
     if 'cpu_extensions' not in launcher_entry and 'extensions' in arguments and arguments.extensions:
         extensions = arguments.extensions
@@ -896,3 +912,22 @@ def prepare_commandline_conversion_mapping(commandline_conversion, args):
             mapping[key] = possible_paths
 
     return mapping
+
+
+def merge_device_configs(launcher_entry, device_config_file):
+    embedded_device_config = launcher_entry.get('device_config')
+    external_device_config = read_yaml(device_config_file)
+    if not embedded_device_config:
+        embedded_device_config = external_device_config
+    elif (
+            not isinstance(next(iter(external_device_config.values())), dict)
+            and not isinstance(next(iter(embedded_device_config.values())), dict)
+    ):
+        embedded_device_config.update(external_device_config)
+    else:
+        for key, value in external_device_config.items():
+            if key not in embedded_device_config:
+                embedded_device_config[key] = {}
+            embedded_device_config[key].update(value)
+    launcher_entry['device_config'] = embedded_device_config
+    return launcher_entry

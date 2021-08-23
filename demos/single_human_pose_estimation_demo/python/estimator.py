@@ -5,7 +5,7 @@ import cv2
 
 def preprocess_bbox(bbox, image):
     aspect_ratio = 0.75
-    bbox[0] = np.clip(bbox[0], 0, image.shape[0] - 1)
+    bbox[0] = np.clip(bbox[0], 0, image.shape[1] - 1)
     bbox[1] = np.clip(bbox[1], 0, image.shape[0] - 1)
     x2 = np.min((image.shape[1] - 1, bbox[0] + np.max((0, bbox[2] - 1))))
     y2 = np.min((image.shape[0] - 1, bbox[1] + np.max((0, bbox[3] - 1))))
@@ -111,15 +111,12 @@ class HumanPoseEstimator(object):
         _, _, self.input_h, self.input_w = self.model.input_info[self._input_layer_name].input_data.shape
         _, _, self.output_h, self.output_w = self.model.outputs[self._output_layer_name].shape
         self._transform = TransformedCrop(self.input_h, self.input_w, self.output_h, self.output_w)
-        self.infer_time = -1
 
     def _preprocess(self, img, bbox):
         return self._transform(img, bbox)
 
     def _infer(self, prep_img):
-        t0 = cv2.getTickCount()
         output = self._exec_model.infer(inputs={self._input_layer_name: prep_img})
-        self.infer_time = ((cv2.getTickCount() - t0) / cv2.getTickFrequency())
         return output[self._output_layer_name][0]
 
     @staticmethod
