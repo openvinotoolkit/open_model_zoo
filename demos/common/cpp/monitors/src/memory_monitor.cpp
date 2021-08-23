@@ -189,11 +189,11 @@ std::deque<std::pair<double, double>> MemoryMonitor::getLastHistory() const {
 }
 
 double MemoryMonitor::getMeanMem() const {
-    return memSum / samplesNumber;
+    return samplesNumber ? memSum / samplesNumber : 0;
 }
 
 double MemoryMonitor::getMeanSwap() const {
-    return swapSum / samplesNumber;
+    return samplesNumber ? swapSum / samplesNumber : 0;
 }
 
 double MemoryMonitor::getMaxMem() const {
