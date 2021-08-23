@@ -72,6 +72,7 @@ KNOWN_TASK_TYPES = {
     'sound_classification',
     'speech_recognition',
     'style_transfer',
+    'text_prediction',
     'text_to_speech',
     'time_series',
     'token_recognition',

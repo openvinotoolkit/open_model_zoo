@@ -63,6 +63,7 @@
 | googlenet-v3 | YES | YES | YES |
 | googlenet-v3-pytorch | YES | YES | YES |
 | googlenet-v4-tf | YES | YES | YES |
+| gpt-2 | YES | YES | |
 | hbonet-0.25 | YES | YES | YES |
 | hbonet-0.5 | YES | YES | YES |
 | hbonet-1.0 | YES | YES | YES |

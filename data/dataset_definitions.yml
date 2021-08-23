@@ -1371,3 +1371,12 @@ datasets:
       sampled_folder: accuracy_checker_preprocess/Single-channel/Sampled
       mask_file: sampling_mask_20perc.npy
       stats_file: stats_fs_unet_norm_20.npy
+
+  - name: WikiText_2_raw_gpt2
+    annotation: wikitext_2_raw.pickle
+    annotation_conversion:
+      converter: wikitext2raw
+      vocab_file: gpt2/vocab.json
+      merges_file: gpt2/merges.txt
+      testing_file: wikitext-2-raw/wiki.test.raw
+      max_seq_length: 1024

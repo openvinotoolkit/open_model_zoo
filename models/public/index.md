@@ -288,6 +288,14 @@ The task of image deblurring.
 | -------------- | -------------- | ------------------------- | -------- | ------- | -------- |
 | F3Net          | PyTorch\*      | [f3net](./f3net/README.md) | 84.21%   | 31.2883 | 25.2791  |
 
+## Text Prediction
+
+Text prediction is a task to predict the next word, given all of the previous words within some text.
+
+| Model Name     | Implementation | OMZ Model Name             | Accuracy | GFlops   | mParams  |
+| -------------- | -------------- | -------------------------- | -------- | -------- | -------- |
+| GPT-2          | PyTorch\*      | [gpt-2](./gpt-2/README.md) | 29.00%   | 293.0489 | 175.6203 |
+
 ## Text Recognition
 
 Scene text recognition is a task to recognize text on a given image.
