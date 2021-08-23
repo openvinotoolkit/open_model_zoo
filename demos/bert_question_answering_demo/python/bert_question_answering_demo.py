@@ -29,7 +29,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from tokens_bert import text_to_tokens, load_vocab_file, ContextData
 from html_reader import get_paragraphs
-from models import QuestionAnswering
+from models import BertQuestionAnswering
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -107,8 +107,8 @@ def main():
     ie = IECore()
 
     log.info('Reading model {}'.format(args.model))
-    model = QuestionAnswering(ie, args.model, vocab, args.input_names, args.output_names,
-                              args.max_answer_token_num, args.model_squad_ver)
+    model = BertQuestionAnswering(ie, args.model, vocab, args.input_names, args.output_names,
+                                  args.max_answer_token_num, args.model_squad_ver)
     if args.reshape:
         # find the closest multiple of 64, if it is smaller than current network's sequence length, do reshape
         new_length = min(model.max_length, int(np.ceil((len(c_tokens_id) + args.max_question_token_num) / 64) * 64))

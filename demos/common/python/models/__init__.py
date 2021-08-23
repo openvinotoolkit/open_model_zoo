@@ -15,7 +15,7 @@
 """
 
 
-from .bert import BertEmbedding, NamedEntityRecognition, QuestionAnswering
+from .bert import BertEmbedding, BertNamedEntityRecognition, BertQuestionAnswering
 from .centernet import CenterNet
 from .deblurring import Deblurring
 from .detr import DETR
@@ -32,6 +32,8 @@ from .yolo import YOLO, YoloV4
 
 __all__ = [
     'BertEmbedding',
+    'BertNamedEntityRecognition',
+    'BertQuestionAnswering',
     'CTPN',
     'CenterNet',
     'DETR',
@@ -40,10 +42,8 @@ __all__ = [
     'FaceBoxes',
     'HpeAssociativeEmbedding',
     'InputTransform',
-    'NamedEntityRecognition',
     'OpenPose',
     'OutputTransform',
-    'QuestionAnswering',
     'RetinaFace',
     'RetinaFacePyTorch',
     'SSD',

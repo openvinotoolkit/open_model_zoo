@@ -29,7 +29,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from tokens_bert import text_to_tokens, load_vocab_file, ContextData
 from html_reader import get_paragraphs
-from models import BertEmbedding, QuestionAnswering
+from models import BertEmbedding, BertQuestionAnswering
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -117,8 +117,8 @@ def main():
 
     if args.model_qa:
         log.info('Reading Question Answering model {}'.format(args.model_qa))
-        model_qa = QuestionAnswering(ie, args.model_qa, vocab, args.input_names_qa, args.output_names_qa,
-                                     args.max_answer_token_num, args.model_qa_squad_ver)
+        model_qa = BertQuestionAnswering(ie, args.model_qa, vocab, args.input_names_qa, args.output_names_qa,
+                                         args.max_answer_token_num, args.model_qa_squad_ver)
         model_qa_exec = ie.load_network(model_qa.net, args.device)
         log.info('The Question Answering model {} is loaded to {}'.format(args.model_qa, args.device))
 

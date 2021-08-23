@@ -17,24 +17,21 @@ from .model import Model
 
 
 class Bert(Model):
-
-    def __init__(self, ie, model_path, vocab):
+    def __init__(self, ie, model_path, vocab, input_names):
         super().__init__(ie, model_path)
         self.token_cls = [vocab['[CLS]']]
         self.token_sep = [vocab['[SEP]']]
         self.token_pad = [vocab['[PAD]']]
+        self.check_input_names(input_names)
 
-    def check_input_output_names(self, input_names, output_names=None):
+    def check_input_names(self, input_names):
         self.input_names = [i.strip() for i in input_names.split(',')]
         if self.net.input_info.keys() != set(self.input_names):
             raise RuntimeError('The demo expects input names: {}, actual network input names: {}'.format(
                 self.input_names, list(self.net.input_info.keys())))
-
         self.max_length = self.net.input_info[self.input_names[0]].input_data.shape[1]
 
-        if output_names is None:
-            return
-
+    def check_output_names(self, output_names):
         self.output_names = [o.strip() for o in output_names.split(',')]
         if self.net.outputs.keys() != set(self.output_names):
             raise RuntimeError('The demo expects output names: {}, actual network output names: {}'.format(
@@ -48,14 +45,17 @@ class Bert(Model):
 
         return self.create_input_array(input_ids, attention_mask, token_type_ids), meta
 
+    def form_request():
+        raise NotImplementedError
+
     def pad_input(self, input_ids, attention_mask, token_type_ids):
         pad_len = self.max_length - len(input_ids)
         if pad_len < 0:
             raise ValueError("The input request is longer than max number of tokens ({})"
                              " processed by model".format(self.max_length))
         input_ids += self.token_pad * pad_len
-        token_type_ids += self.token_pad * pad_len
-        attention_mask += self.token_pad * pad_len
+        token_type_ids += [0] * pad_len
+        attention_mask += [0] * pad_len
         return pad_len
 
     def create_input_array(self, input_ids, attention_mask, token_type_ids):
@@ -82,15 +82,13 @@ class Bert(Model):
             raise RuntimeError("Failed to reshape the model")
 
 
-class NamedEntityRecognition(Bert):
-
+class BertNamedEntityRecognition(Bert):
     def __init__(self, ie, model_path, vocab, input_names):
-        super().__init__(ie, model_path, vocab)
+        super().__init__(ie, model_path, vocab, input_names)
 
-        self.check_input_output_names(input_names)
         self.output_names = list(self.net.outputs)
         if len(self.output_names) != 1:
-            raise RuntimeError("The demo supports topologies only with 1 output")
+            raise RuntimeError("The BertNamedEntityRecognition model wrapper supports only with 1 output")
 
     def form_request(self, inputs):
         c_tokens_id = inputs
@@ -113,14 +111,12 @@ class NamedEntityRecognition(Bert):
 
 
 class BertEmbedding(Bert):
-
     def __init__(self, ie, model_path, vocab, input_names):
-        super().__init__(ie, model_path, vocab)
+        super().__init__(ie, model_path, vocab, input_names)
 
-        self.check_input_output_names(input_names)
         self.output_names = list(self.net.outputs)
         if len(self.output_names) != 1:
-            raise RuntimeError("The demo supports topologies only with 1 output")
+            raise RuntimeError("The BertEmbedding model wrapper supports only 1 output")
 
     def form_request(self, inputs):
         tokens_id, self.max_length = inputs
@@ -134,15 +130,14 @@ class BertEmbedding(Bert):
         return output.squeeze(0)
 
 
-class QuestionAnswering(Bert):
-
+class BertQuestionAnswering(Bert):
     def __init__(self, ie, model_path, vocab, input_names, output_names,
                  max_answer_token_num, squad_ver):
-        super().__init__(ie, model_path, vocab)
+        super().__init__(ie, model_path, vocab, input_names)
 
         self.max_answer_token_num = max_answer_token_num
         self.squad_ver = squad_ver
-        self.check_input_output_names(input_names, output_names)
+        self.check_output_names(output_names)
 
     def form_request(self, inputs):
         c_data, q_tokens_id = inputs
@@ -182,8 +177,8 @@ class QuestionAnswering(Bert):
 
         context_len = context_end_idx - context_start_idx
         score_mat = np.matmul(
-        start_score[context_start_idx:context_end_idx].reshape((context_len, 1)),
-        end_score[context_start_idx:context_end_idx].reshape((1, context_len)),
+            start_score[context_start_idx:context_end_idx].reshape((context_len, 1)),
+            end_score[context_start_idx:context_end_idx].reshape((1, context_len)),
         )
         # reset candidates with end before start
         score_mat = np.triu(score_mat)

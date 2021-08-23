@@ -29,7 +29,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2] / 'common/python'))
 
 from tokens_bert import text_to_tokens, load_vocab_file
 from html_reader import get_paragraphs
-from models import NamedEntityRecognition
+from models import BertNamedEntityRecognition
 
 log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.DEBUG, stream=sys.stdout)
 
@@ -79,7 +79,7 @@ def main():
     ie = IECore()
 
     log.info('Reading model {}'.format(args.model))
-    model = NamedEntityRecognition(ie, args.model, vocab, args.input_names)
+    model = BertNamedEntityRecognition(ie, args.model, vocab, args.input_names)
     if max_sentence_length > model.max_length:
         model.reshape(max_sentence_length)
 
