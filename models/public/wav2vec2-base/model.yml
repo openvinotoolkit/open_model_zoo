@@ -13,20 +13,17 @@
 # limitations under the License.
 
 description: >-
-  "bert-base-ner" is a fine-tuned BERT model that is ready to use for Named Entity
-  Recognition and achieves state-of-the-art performance for the NER task. It has been
-  trained to recognize four types of entities: location (LOC), organizations (ORG),
-  person (PER) and Miscellaneous (MISC).
-
-  Specifically, this model is a bert-base-cased model that was fine-tuned on the English
-  version of the standard CoNLL-2003 Named Entity Recognition <https://www.aclweb.org/anthology/W03-0419.pdf>
-  dataset. For details about the original model, check out BERT: Pre-training of Deep
-  Bidirectional Transformers for Language Understanding <https://arxiv.org/abs/1810.04805>,
-  HuggingFace's Transformers: State-of-the-art Natural Language Processing <https://arxiv.org/abs/1910.03771>
-  papers and repository <https://github.com/huggingface/transformers>
-
-  Tokenization occurs using the BERT tokenizer (see the demo code for implementation
-  details) and the enclosed "vocab.txt" dictionary file.
+  Wav2Vec2.0-base is a model, which pre-trained to learn speech representations on
+  unlabeled data as described in wav2vec 2.0: A Framework for Self-Supervised Learning
+  of Speech Representations <https://arxiv.org/abs/2006.11477> paper and fine-tuned
+  for speech recognition task with a Connectionist Temporal Classification (CTC) loss
+  on LibriSpeech dataset containing 960 hours of audio. The model is composed of a
+  multi-layer convolutional feature encoder which takes as input raw audio and outputs
+  latent speech representations, then fed to a Transformer to build representations
+  capturing information from the entire sequence. For base model Transformer consists
+  of 12 transformer layers and has 768 as feature dimension. For details please also
+  check repository <https://github.com/pytorch/fairseq/tree/master/examples/wav2vec#wav2vec-20>
+  and model card <https://huggingface.co/facebook/wav2vec2-base-960h>.
 task_type: named_entity_recognition
 files:
   - name: transformers-4.8.2-py3-none-any.whl
@@ -86,8 +83,10 @@ postprocessing:
     replacement: 'repo = None'
   - $type: regex_replace
     file: transformers/file_utils.py
-    pattern: 'def _push_to_hub\(cls, repo\: Repository, commit_message\: Optional\[str\] = None\) -> str\:'
-    replacement: 'def _push_to_hub(cls, repo, commit_message: Optional[str] = None) -> str:'
+    pattern: 'def _push_to_hub\(cls, repo\: Repository, commit_message\: Optional\[str\]
+      = None\) -> str\:'
+    replacement: 'def _push_to_hub(cls, repo, commit_message: Optional[str] = None)
+      -> str:'
   - $type: regex_replace
     file: transformers/file_utils.py
     pattern: '-> Repository\:'
@@ -102,7 +101,8 @@ conversion_to_onnx_args:
   - --output-names=logits
   - --input-shapes=[1,30480]
   - --output-file=$conv_dir/wav2vec2-base.onnx
-  - '--conversion-param=dynamic_axes={"inputs": {0: "batch_size", 1: "sequence_len"}, "logits": {0: "batch_size", 1: "sequence_len"}}'
+  - '--conversion-param=dynamic_axes={"inputs": {0: "batch_size", 1: "sequence_len"},
+    "logits": {0: "batch_size", 1: "sequence_len"}}'
 model_optimizer_args:
   - --input_shape=[1,30480]
   - --input=inputs
