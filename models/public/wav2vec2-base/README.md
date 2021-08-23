@@ -30,6 +30,8 @@ Normalized audio signal, name - `inputs`,  shape - `1, 30480`, format is `B, N`,
 - `B` - batch size
 - `N` - sequence length
 
+**NOTE**: Model expects 16-bit, 16 kHz, mono-channel WAVE audio as input data.
+
 #### Converted model
 
 The converted model has the same parameters as the original model.
