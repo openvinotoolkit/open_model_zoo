@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from argparse import Namespace
 import copy
 from pathlib import Path
 import os
@@ -312,7 +313,6 @@ class ConfigReader:
         for argument, env_var in COMMAND_LINE_ARGS_AS_ENV_VARS.items():
             if argument not in args or args[argument] is None:
                 env_var_value = os.environ.get(env_var)
-                warnings.warn(f'{env_var}: {env_var_value}')
                 if env_var_value is not None:
                     args[argument] = Path(env_var_value)
 
@@ -547,12 +547,14 @@ class ConfigReader:
     def convert_paths(config):
         mode = 'evaluations' if 'evaluations' in config else 'models'
         definitions = os.environ.get(DEFINITION_ENV_VAR)
+        args = {}
         if definitions:
             definitions = read_yaml(Path(definitions))
             ConfigReader._prepare_global_configs(definitions)
             config = ConfigReader._merge_configs(definitions, config, {}, mode)
-        if COMMAND_LINE_ARGS_AS_ENV_VARS['source'] in os.environ:
-            ConfigReader._merge_paths_with_prefixes({}, config, mode)
+        ConfigReader._merge_paths_with_prefixes(args, config, mode)
+        if COMMAND_LINE_ARGS_AS_ENV_VARS['kaldi_bin_dir'] in os.environ:
+            ConfigReader._provide_cmd_arguments(Namespace(**args), config, mode)
 
         def convert_launcher_paths(launcher_config):
             for key, path in launcher_config.items():
