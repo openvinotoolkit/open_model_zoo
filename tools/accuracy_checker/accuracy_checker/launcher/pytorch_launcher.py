@@ -117,6 +117,8 @@ class PyTorchLauncher(Launcher):
                     checkpoint, map_location=None if self.cuda else self._torch.device('cpu')
                 )
                 state = checkpoint if not state_key else checkpoint[state_key]
+                if all([key.startswith('module.') for key in state]):
+                    module = self._torch.nn.DataParallel(module)
                 module.load_state_dict(state, strict=False)
             module.to(self.device)
             module.eval()
