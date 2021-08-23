@@ -101,7 +101,7 @@ void FaceDetection::enqueue(const cv::Mat &frame) {
 
     InferenceEngine::Blob::Ptr  inputBlob = request->GetBlob(input);
 
-    matU8ToBlob<uint8_t>(frame, inputBlob);
+    matToBlob<uint8_t>(frame, inputBlob);
 
     enquedFrames = 1;
 }
@@ -301,7 +301,7 @@ void AntispoofingClassifier::enqueue(const cv::Mat& face) {
 
     InferenceEngine::Blob::Ptr  inputBlob = request->GetBlob(input);
 
-    matU8ToBlob<uint8_t>(face, inputBlob, enquedFaces);
+    matToBlob<uint8_t>(face, inputBlob, enquedFaces);
 
     enquedFaces++;
 }
@@ -381,8 +381,7 @@ void AgeGenderDetection::enqueue(const cv::Mat &face) {
     }
 
     InferenceEngine::Blob::Ptr  inputBlob = request->GetBlob(input);
-
-    matU8ToBlob<uint8_t>(face, inputBlob, enquedFaces);
+    matToBlob<uint8_t>(face, inputBlob, enquedFaces);
 
     enquedFaces++;
 }
@@ -469,7 +468,7 @@ void HeadPoseDetection::enqueue(const cv::Mat &face) {
 
     InferenceEngine::Blob::Ptr inputBlob = request->GetBlob(input);
 
-    matU8ToBlob<uint8_t>(face, inputBlob, enquedFaces);
+    matToBlob<uint8_t>(face, inputBlob, enquedFaces);
 
     enquedFaces++;
 }
@@ -559,7 +558,7 @@ void EmotionsDetection::enqueue(const cv::Mat &face) {
 
     InferenceEngine::Blob::Ptr inputBlob = request->GetBlob(input);
 
-    matU8ToBlob<uint8_t>(face, inputBlob, enquedFaces);
+    matToBlob<uint8_t>(face, inputBlob, enquedFaces);
 
     enquedFaces++;
 }
@@ -669,7 +668,7 @@ void FacialLandmarksDetection::enqueue(const cv::Mat &face) {
 
     InferenceEngine::Blob::Ptr inputBlob = request->GetBlob(input);
 
-    matU8ToBlob<uint8_t>(face, inputBlob, enquedFaces);
+    matToBlob<uint8_t>(face, inputBlob, enquedFaces);
 
     enquedFaces++;
 }

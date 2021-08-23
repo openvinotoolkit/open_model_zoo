@@ -56,7 +56,7 @@ static inline float linear(float x) {
 ModelYolo::ModelYolo(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,
     bool useAdvancedPostprocessing, float boxIOUThreshold, const std::vector<std::string>& labels,
     const std::vector<float>& anchors, const std::vector<int64_t>& masks) :
-    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels),
+    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, InputTransform(), labels),
     boxIOUThreshold(boxIOUThreshold),
     useAdvancedPostprocessing(useAdvancedPostprocessing),
     yoloVersion(YOLO_V3),

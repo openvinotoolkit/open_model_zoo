@@ -20,7 +20,7 @@
 #include "models/detection_model_retinaface_pt.h"
 
 ModelRetinaFacePT::ModelRetinaFacePT(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
-    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),  // Default label is "Face"
+    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, InputTransform(), {"Face"}),  // Default label is "Face"
     landmarksNum(0), boxIOUThreshold(boxIOUThreshold) {
 }
 

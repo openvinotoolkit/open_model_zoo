@@ -174,7 +174,10 @@ Options:
     -u                        Optional. List of monitors to show initially.
     -yolo_af                  Optional. Use advanced postprocessing/filtering algorithm for YOLO.
     -anchors                  Optional. A comma separated list of anchors. By default used default anchors for model. Only for YOLOV4 architecture type.
-    -masks                    Optional. A comma separated list of mask for anchors. By default used default masks for model. Only for YOLOV4 architecture type.                                   [
+    -masks                    Optional. A comma separated list of mask for anchors. By default used default masks for model. Only for YOLOV4 architecture type.
+    -reverse_input_channels   Optional. Switch the input channels order from BGR to RGB.
+    -mean_values              Optional. Normalize input by subtracting the mean values per channel. Example: "255.0 255.0 255.0"
+    -scale_values             Optional. Divide input by scale values per channel. Division is applied after mean values subtraction. Example: "255.0 255.0 255.0"
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

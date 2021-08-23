@@ -73,7 +73,7 @@ void ObjectDetector::enqueue(const cv::Mat &frame) {
 
     InferenceEngine::Blob::Ptr inputBlob = request->GetBlob(input_name_);
 
-    matU8ToBlob<uint8_t>(frame, inputBlob);
+    matToBlob<uint8_t>(frame, inputBlob);
 
     if (!im_info_name_.empty()) {
         InferenceEngine::LockedMemory<void> imInfoMapped =

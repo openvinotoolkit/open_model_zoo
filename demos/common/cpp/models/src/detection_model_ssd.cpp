@@ -20,8 +20,9 @@
 
 ModelSSD::ModelSSD(const std::string& modelFileName,
     float confidenceThreshold, bool useAutoResize,
+    InputTransform& inputTransform,
     const std::vector<std::string>& labels) :
-    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, labels) {
+    DetectionModel(modelFileName, confidenceThreshold, useAutoResize, inputTransform, labels) {
 }
 
 std::shared_ptr<InternalModelData> ModelSSD::preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) {
@@ -134,8 +135,7 @@ void ModelSSD::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwork) {
             else {
                 inputsNames[0] = inputInfoItem.first;
             }
-
-            inputInfoItem.second->setPrecision(InferenceEngine::Precision::U8);
+            inputTransform.setPrecision(inputInfoItem.second);
             if (useAutoResize) {
                 inputInfoItem.second->getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
                 inputInfoItem.second->getInputData()->setLayout(InferenceEngine::Layout::NHWC);

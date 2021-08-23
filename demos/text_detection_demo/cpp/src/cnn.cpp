@@ -82,7 +82,7 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     }
 
     auto blob = infer_request_.GetBlob(input_name_);
-    matU8ToBlob<uint8_t>(image, blob);
+    matToBlob<uint8_t>(image, blob);
     infer_request_.Infer();
 
     // --------------------------- Processing output -----------------------------------------------------
@@ -167,7 +167,7 @@ InferenceEngine::BlobMap EncoderDecoderCNN::Infer(const cv::Mat &frame) {
     } else {
         image = frame;
     }
-    matU8ToBlob<uint8_t>(image, infer_request_.GetBlob(input_name_));
+    matToBlob<uint8_t>(image, infer_request_.GetBlob(input_name_));
 
     infer_request_.Infer();
     // --------------------------- Processing encoder output -----------------------------------------------------

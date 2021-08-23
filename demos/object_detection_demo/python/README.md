@@ -226,11 +226,11 @@ Input transform options:
                         BGR to RGB.
   --mean_values MEAN_VALUES
                         Optional. Normalize input by subtracting the mean
-                        values per channel. Example: 255 255 255
+                        values per channel. Example: 255.0 255.0 255.0
   --scale_values SCALE_VALUES
                         Optional. Divide input by scale values per channel.
                         Division is applied after mean values subtraction.
-                        Example: 255 255 255
+                        Example: 255.0 255.0 255.0
 
 Debug options:
   -r, --raw_output_message

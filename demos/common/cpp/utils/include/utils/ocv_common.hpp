@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2020 Intel Corporation
+// Copyright (C) 2018-2021 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -20,7 +20,7 @@
 * @param batchIndex - batch index of an image inside of the blob.
 */
 template <typename T>
-void matU8ToBlob(const cv::Mat& orig_image, const InferenceEngine::Blob::Ptr& blob, int batchIndex = 0) {
+void matToBlob(const cv::Mat& orig_image, const InferenceEngine::Blob::Ptr& blob, int batchIndex = 0) {
     InferenceEngine::SizeVector blobSize = blob->getTensorDesc().getDims();
     const size_t width = blobSize[3];
     const size_t height = blobSize[2];
@@ -49,8 +49,14 @@ void matU8ToBlob(const cv::Mat& orig_image, const InferenceEngine::Blob::Ptr& bl
         for (size_t c = 0; c < channels; c++) {
             for (size_t  h = 0; h < height; h++) {
                 for (size_t w = 0; w < width; w++) {
-                    blob_data[batchOffset + c * width * height + h * width + w] =
-                            resized_image.at<cv::Vec3b>(h, w)[c];
+                    if (std::is_same<T, float_t>::value) {
+                        blob_data[batchOffset + c * width * height + h * width + w] =
+                            (T)resized_image.at<cv::Vec3f>(h, w)[c];
+                    }
+                    else {
+                        blob_data[batchOffset + c * width * height + h * width + w] =
+                            (T)resized_image.at<cv::Vec3b>(h, w)[c];
+                    }
                 }
             }
         }
@@ -66,25 +72,30 @@ void matU8ToBlob(const cv::Mat& orig_image, const InferenceEngine::Blob::Ptr& bl
  * @param mat - given cv::Mat object with an image data.
  * @return resulting Blob pointer.
  */
-static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
+static UNUSED InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat, bool isMatFloat = false) {
     size_t channels = mat.channels();
     size_t height = mat.size().height;
     size_t width = mat.size().width;
 
-    size_t strideH = mat.step.buf[0];
-    size_t strideW = mat.step.buf[1];
+    if (!isMatFloat) {
+        size_t strideH = mat.step.buf[0];
+        size_t strideW = mat.step.buf[1];
 
-    bool is_dense =
-            strideW == channels &&
-            strideH == channels * width;
+        bool is_dense =
+                strideW == channels &&
+                strideH == channels * width;
 
-    if (!is_dense)
-        throw std::runtime_error("Doesn't support conversion from not dense cv::Mat");
-
-    InferenceEngine::TensorDesc tDesc(InferenceEngine::Precision::U8,
+        if (!is_dense)
+            throw std::runtime_error("Doesn't support conversion from not dense cv::Mat");
+    }
+    InferenceEngine::Precision precision = isMatFloat ?
+        InferenceEngine::Precision::FP32 : InferenceEngine::Precision::U8;
+    InferenceEngine::TensorDesc tDesc(precision,
                                       {1, channels, height, width},
                                       InferenceEngine::Layout::NHWC);
-
+    if (isMatFloat) {
+        return InferenceEngine::make_shared_blob<float>(tDesc, (float*)mat.data);
+    }
     return InferenceEngine::make_shared_blob<uint8_t>(tDesc, mat.data);
 }
 
@@ -159,4 +170,62 @@ class OutputTransform {
         cv::Size inputSize;
         cv::Size outputResolution;
         cv::Size newResolution;
+};
+
+
+class InputTransform {
+    public:
+        InputTransform() : isTrivial(true), reverseInputChannels(false) {}
+
+        InputTransform(bool reverseInputChannels, const std::string &meanValues, const std::string &scaleValues) {
+            reverseInputChannels = reverseInputChannels;
+            isTrivial = !reverseInputChannels && meanValues.empty() && scaleValues.empty();
+            if (!isTrivial) {
+                means = meanValues.empty() ? std::vector<float>({0, 0, 0}) : string2Vec(meanValues);
+                stdScales = scaleValues.empty() ? std::vector<float>({1, 1, 1}) : string2Vec(scaleValues);
+            }
+        }
+
+        std::vector<float> string2Vec(const std::string &string) {
+            const auto& strValues = split(string, ' ');
+            std::vector<float> values;
+            try {
+                for (auto& str : strValues)
+                    values.push_back(std::stof(str));
+            } catch(...) {
+                throw std::runtime_error("Invalid parameter --mean_values or --scale_values is provided.");
+            }
+            if (values.size() != 3) {
+                throw std::runtime_error("InputTransform expects 3 values per channel, but get \"" + string + "\".");
+            }
+            return values;
+        }
+
+        void setPrecision(const InferenceEngine::InputInfo::Ptr& input) {
+            const auto precision = isTrivial ? InferenceEngine::Precision::U8 : InferenceEngine::Precision::FP32;
+            input->setPrecision(precision);
+        }
+
+        cv::Mat call(const cv::Mat& inputs) {
+            if (isTrivial) { return inputs; }
+            cv::Mat result;
+            inputs.convertTo(result, CV_32F);
+            if (reverseInputChannels) {
+                cv::cvtColor(result, result, cv::COLOR_BGR2RGB);
+            }
+            std::vector<cv::Mat> channels;
+            cv::split(result, channels);
+            for (int i = 0; i < channels.size(); i++) {
+                channels[i] = (channels[i] - means[i]) / stdScales[i];
+            }
+            cv::merge(channels, result);
+            return result;
+        }
+
+        bool isTrivial;
+
+    private:
+        bool reverseInputChannels;
+        std::vector<float> means;
+        std::vector<float> stdScales;
 };

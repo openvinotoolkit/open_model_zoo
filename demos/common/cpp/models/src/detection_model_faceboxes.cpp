@@ -20,8 +20,8 @@
 #include "models/detection_model_faceboxes.h"
 
 ModelFaceBoxes::ModelFaceBoxes(const std::string& modelFileName,
-    float confidenceThreshold, bool useAutoResize, float boxIOUThreshold)
-    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, {"Face"}),
+    float confidenceThreshold, bool useAutoResize, float boxIOUThreshold, InputTransform& inputTransform)
+    : DetectionModel(modelFileName, confidenceThreshold, useAutoResize, inputTransform, {"Face"}),
       maxProposalsCount(0), boxIOUThreshold(boxIOUThreshold), variance({0.1f, 0.2f}),
       steps({32, 64, 128}), minSizes({ {32, 64, 128}, {256}, {512} }) {
 }
@@ -37,7 +37,7 @@ void ModelFaceBoxes::prepareInputsOutputs(InferenceEngine::CNNNetwork& cnnNetwor
 
     InferenceEngine::InputInfo::Ptr& input = inputInfo.begin()->second;
     const InferenceEngine::TensorDesc& inputDesc = input->getTensorDesc();
-    input->setPrecision(InferenceEngine::Precision::U8);
+    inputTransform.setPrecision(input);
 
     if (inputDesc.getDims()[1] != 3) {
          throw std::logic_error("Expected 3-channel input");

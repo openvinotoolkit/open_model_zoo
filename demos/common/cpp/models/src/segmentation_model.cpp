@@ -106,7 +106,7 @@ std::shared_ptr<InternalModelData> SegmentationModel::preprocess(const InputData
     {
         /* Resize and copy data from the image to the input blob */
         InferenceEngine::Blob::Ptr frameBlob = request->GetBlob(inputsNames[0]);
-        matU8ToBlob<uint8_t>(img, frameBlob);
+        matToBlob<uint8_t>(img, frameBlob);
         resPtr = std::make_shared<InternalImageModelData>(img.cols, img.rows);
     }
 

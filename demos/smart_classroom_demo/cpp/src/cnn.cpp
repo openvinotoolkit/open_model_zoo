@@ -58,7 +58,7 @@ void CnnDLSDKBase::InferBatch(
     for (size_t batch_i = 0; batch_i < num_imgs; batch_i += batch_size) {
         const size_t current_batch_size = std::min(batch_size, num_imgs - batch_i);
         for (size_t b = 0; b < current_batch_size; b++) {
-            matU8ToBlob<uint8_t>(frames[batch_i + b], input, b);
+            matToBlob<uint8_t>(frames[batch_i + b], input, b);
         }
 
         if (config_.max_batch_size != 1)
