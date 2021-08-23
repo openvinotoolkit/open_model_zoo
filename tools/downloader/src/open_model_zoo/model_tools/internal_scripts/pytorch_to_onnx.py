@@ -127,7 +127,7 @@ def convert_to_onnx(model, input_shapes, output_file, input_names, output_names,
         for input_shape in input_shapes)
     model(*dummy_inputs)
     torch.onnx.export(model, dummy_inputs, str(output_file), verbose=False, opset_version=11,
-                      input_names=input_names.split(','), output_names=output_names.split(','), *conversion_params)
+                      input_names=input_names.split(','), output_names=output_names.split(','), **conversion_params)
 
     model = onnx.load(str(output_file))
 
