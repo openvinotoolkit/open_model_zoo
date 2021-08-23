@@ -110,4 +110,4 @@ model_optimizer_args:
   - --output=logits
 framework: pytorch
 quantizable: yes
-license: https://raw.githubusercontent.com/huggingface/transformers/master/LICENSE
+license: https://raw.githubusercontent.com/pytorch/fairseq/master/LICENSE
