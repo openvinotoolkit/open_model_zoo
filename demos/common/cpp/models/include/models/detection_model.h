@@ -24,7 +24,7 @@ public:
     /// Any detected object with confidence lower than this threshold will be ignored.
     /// @param useAutoResize - if true, image will be resized by IE.
     /// Otherwise, image will be preprocessed and resized using OpenCV routines.
-    /// @param inputTransform - class, which applies input normalization (means subtraction and division by scales per channel).
+    /// @param inputTransform - if not trivial, it applies input normalization (means subtraction and/or division by scales per channel).
     /// @param labels - array of labels for every class. If this array is empty or contains less elements
     /// than actual classes number, default "Label #N" will be shown for missing items.
     DetectionModel(const std::string& modelFileName, float confidenceThreshold, bool useAutoResize,

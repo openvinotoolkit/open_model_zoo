@@ -22,7 +22,7 @@ public:
     /// Constructor
     /// @param modelFileName name of model to load
     /// @param useAutoResize - if true, image is resized by IE.
-    /// @param inputTransform - class, which applies input normalization (means subtraction and division by scales per channel).
+    //// @param inputTransform - if not trivial, it applies input normalization (means subtraction and/or division by scales per channel).
     ImageModel(const std::string& modelFileName, bool useAutoResize, InputTransform& inputTransform = InputTransform());
 
     virtual std::shared_ptr<InternalModelData> preprocess(const InputData& inputData, InferenceEngine::InferRequest::Ptr& request) override;
