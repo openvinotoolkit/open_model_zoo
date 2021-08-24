@@ -611,55 +611,42 @@ class YolorAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'classes': NumberField(
-                value_type=int, optional=True, min_value=1, default=80, description="Number of detection classes."
-            ),
-            'coords': NumberField(
-                value_type=int, optional=True, min_value=1, default=4, description="Number of bbox coordinates."
-            ),
-            'num': NumberField(
-                value_type=int, optional=True, min_value=1, default=3,
-                description="Num parameter from configuration file."
-            ),
-            'anchors': StringField(
-                optional=False, choices=YoloV3Adapter.PRECOMPUTED_ANCHORS.keys(), allow_own_choice=True,
-                description="Anchor values provided as comma-separated list"
-            ),
             'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
                                      description="Minimal objectiveness score value for valid detections."),
-            'anchor_masks': ListField(optional=False, description='per layer used anchors mask')
+            'num': NumberField(value_type=int, optional=True, min_value=1, default=5,
+                               description="Num parameter from DarkNet configuration file."),
+            'output_name': StringField(optional=True, default=None, description="Name of output.")
         })
         return parameters
 
     def configure(self):
-        self.classes = self.get_value_from_config('classes')
-        self.coords = self.get_value_from_config('coords')
-        self.num = self.get_value_from_config('num')
-        self.anchors = self.get_value_from_config('anchors')
         self.threshold = self.get_value_from_config('threshold')
-        self.anchor_masks = self.get_value_from_config('anchor_masks')
+        self.num = self.get_value_from_config('num')
+        self.output_name = self.get_value_from_config('output_name')
+        if self.output_name is None:
+            self.output_name = self.output_blob
 
     def xywh2xyxy(self, x):
         y = np.copy(x)
-        y[:, 0] = x[:, 0] - x[:, 2] / 2  # top left x
-        y[:, 1] = x[:, 1] - x[:, 3] / 2  # top left y
-        y[:, 2] = x[:, 0] + x[:, 2] / 2  # bottom right x
-        y[:, 3] = x[:, 1] + x[:, 3] / 2  # bottom right y
+        y[:, 0] = x[:, 0] - x[:, 2] / 2
+        y[:, 1] = x[:, 1] - x[:, 3] / 2
+        y[:, 2] = x[:, 0] + x[:, 2] / 2
+        y[:, 3] = x[:, 1] + x[:, 3] / 2
         return y
 
     def process(self, raw, identifiers, frame_meta):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
 
-        for identifier, output, meta in zip(identifiers, raw_outputs, frame_meta):
-            min_wh, max_wh = 2, 4096
+        for identifier, output, meta in zip(identifiers, raw_outputs[self.output_name], frame_meta):
             valid_predictions = output[output[..., 4] > self.threshold]
             valid_predictions[:, 5:] *= valid_predictions[:, 4:5]
 
             boxes = self.xywh2xyxy(valid_predictions[:, :4])
 
-            i, j = (valid_predictions[:, 5:] > self.threshold).nonzero(as_tuple=False).T
-            valid_predictions = np.concatenate((boxes[i], valid_predictions[i, j + 5, None], j[:, None]), 1)
+            i, j = (valid_predictions[:, 5:] > self.threshold).nonzero()
+            valid_predictions = np.concatenate((boxes[i], valid_predictions[i, j + self.num, None], j[:, None]), 1)
+            x_mins, y_mins, x_maxs, y_maxs, scores, labels = valid_predictions.T
 
-            c = valid_predictions[:, 5:6] * max_wh  # classes
-            boxes, scores = valid_predictions[:, :4] + c, valid_predictions[:, 4]
+            result.append(DetectionPrediction(identifier, labels.astype(np.int64), scores, x_mins, y_mins, x_maxs, y_maxs, meta))
+        return result
