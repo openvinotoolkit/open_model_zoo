@@ -364,6 +364,16 @@ def main():
         'intel', "Intel's Pre-trained Models")
     add_model_pages(output_root, trained_models_group_element,
         'public', "Public Pre-trained Models")
+    
+    datasets_element = add_page(output_root, navindex_element,
+        id='omz_data_datasets', path='data/datasets.md', title='Dataset Preparation Guide')
+
+    # The xml:id here is omz_data rather than omz_data_datasets, because
+    # later we might want to have other pages in the "data" directory. If
+    # that happens, we'll create a parent page with ID "omz_data" and move
+    # the xml:id to that page, thus integrating the new pages without having
+    # to change the upstream OpenVINO documentation building process.
+    datasets_element.attrib[XML_ID_ATTRIBUTE] = 'omz_data'
 
     add_demos_pages(output_root, navindex_element)
 
