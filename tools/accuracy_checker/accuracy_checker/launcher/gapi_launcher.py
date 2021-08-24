@@ -213,6 +213,8 @@ class GAPILauncher(Launcher):
         data = np.array(data)
         if data.dtype in [float, np.float64]:
             data = data.astype(np.float32)
+        if precision:
+            data = data.astype(precision)
 
         return data
 
