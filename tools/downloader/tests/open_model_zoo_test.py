@@ -1,12 +1,7 @@
 import unittest
-import sys
 import os
 
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent / '../../tools/downloader/src'))
-
-import open_model_zoo as omz
+import open_model_zoo.open_model_zoo as omz
 
 from openvino.inference_engine import IECore
 

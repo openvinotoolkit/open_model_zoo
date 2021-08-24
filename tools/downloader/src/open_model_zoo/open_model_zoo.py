@@ -1,14 +1,11 @@
-import sys
 import os
 import argparse
 
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent / '../../tools/downloader/src'))
-
-#import open_model_zoo.model_tools.common as common
-#import open_model_zoo.model_tools.downloader as downloader
-#import open_model_zoo.model_tools.converter as converter
+from  open_model_zoo.model_tools import (
+    _configuration, _common, downloader, converter
+)
 
 class Model:
     def __init__(self, model_name, precision, *, download_dir='models', cache_dir=None):
@@ -39,7 +36,7 @@ class Model:
 
         parser = argparse.ArgumentParser()
         args = argparse.Namespace(all=False, list=None, name=model_name, print_all=False)
-        topology = common.load_models_from_args(parser, args)[0]
+        topology = _configuration.load_models_from_args(parser, args, _common.MODEL_ROOT)[0]
 
         model_dir = download_dir / topology.subdirectory
 
