@@ -1045,9 +1045,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='speech_recognition_wav2vec_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': TestDataArg('how_are_you_doing.wav')}),
-        single_option_cases('-m',
-            ModelArg('wav2vec2-base'),
-            ModelFileArg('wav2vec2-base', 'wav2vec2-base.onnx'))
+        single_option_cases('-m', ModelArg('wav2vec2-base'))
     )),
 
     PythonDemo(name='text_spotting_demo', device_keys=['-d'], test_cases=combine_cases(
