@@ -626,7 +626,8 @@ class YolorAdapter(Adapter):
         if self.output_name is None:
             self.output_name = self.output_blob
 
-    def xywh2xyxy(self, x):
+    @staticmethod
+    def xywh2xyxy(x):
         y = np.copy(x)
         y[:, 0] = x[:, 0] - x[:, 2] / 2
         y[:, 1] = x[:, 1] - x[:, 3] / 2
@@ -645,8 +646,10 @@ class YolorAdapter(Adapter):
             boxes = self.xywh2xyxy(valid_predictions[:, :4])
 
             i, j = (valid_predictions[:, 5:] > self.threshold).nonzero()
-            valid_predictions = np.concatenate((boxes[i], valid_predictions[i, j + self.num, None], j[:, None]), 1)
-            x_mins, y_mins, x_maxs, y_maxs, scores, labels = valid_predictions.T
+            x_mins, y_mins, x_maxs, y_maxs = boxes[i].T
+            scores = valid_predictions[i, j + self.num]
 
-            result.append(DetectionPrediction(identifier, labels.astype(np.int64), scores, x_mins, y_mins, x_maxs, y_maxs, meta))
+            result.append(DetectionPrediction(
+                identifier, j, scores, x_mins, y_mins, x_maxs, y_maxs, meta
+            ))
         return result
