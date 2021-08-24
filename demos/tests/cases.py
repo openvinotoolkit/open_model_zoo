@@ -706,6 +706,15 @@ PYTHON_DEMOS = [
         ],
     )),
 
+    PythonDemo(name='gpt2_text_prediction_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={
+            '-i': ['The poem was written by'],
+            '-m': ModelArg('gpt-2'),
+            '-v': ModelFileArg('gpt-2', 'gpt2/vocab.json'),
+            '--merges': ModelFileArg('gpt-2', 'gpt2/merges.txt'),
+        }),
+    )),
+
     PythonDemo(name='handwritten_text_recognition_demo', device_keys=['-d'], test_cases=combine_cases(
         [
             TestCase(options={
