@@ -81,7 +81,7 @@ def parse_args():
     parser.add_argument('--inputs-dtype', type=str, required=False, choices=INPUT_DTYPE_TO_TORCH, default='float',
                         help='Data type for inputs')
     parser.add_argument('--conversion-param', type=model_parameter, default=[], action='append',
-                        help='additonal parameter for export')
+                        help='Additional parameter for export')
     return parser.parse_args()
 
 
