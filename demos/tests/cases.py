@@ -366,10 +366,6 @@ NATIVE_DEMOS = [
             **MONITORS,
             '-i': DataPatternArg('person-detection-retail')}),
         *combine_cases(
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> ab78d96a8 (add key person_label and tests)
             TestCase(options={'-at': 'ssd'}),
             single_option_cases('-m_det',
                 ModelArg('person-detection-retail-0002'),
@@ -380,19 +376,7 @@ NATIVE_DEMOS = [
                 ModelArg('person-reidentification-retail-0287'),
                 ModelArg('person-reidentification-retail-0288')),
         *combine_cases(
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
             TestCase(options={'-at': 'yolo', '-person_label': '0'}),
-=======
-            TestCase(options={'-at': 'yolo','-person_label':0}),
->>>>>>> ab78d96a8 (add key person_label and tests)
-=======
-            TestCase(options={'-at': 'yolo', '-person_label': 0}),
->>>>>>> 58eee205d (missing whitespace)
-=======
-            TestCase(options={'-at': 'yolo', '-person_label': '0'}),
->>>>>>> 9de7445ba (cases.py)
             single_option_cases('-m_det',
                 ModelArg('yolo-v3-tf'))),
             single_option_cases('-m_reid',
@@ -401,19 +385,7 @@ NATIVE_DEMOS = [
                 ModelArg('person-reidentification-retail-0287'),
                 ModelArg('person-reidentification-retail-0288')),
         *combine_cases(
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
             TestCase(options={'-at': 'ssd', '-person_label': '1'}),
-=======
-            TestCase(options={'-at': 'ssd','-person_label':1}),
->>>>>>> ab78d96a8 (add key person_label and tests)
-=======
-            TestCase(options={'-at': 'ssd', '-person_label': 1}),
->>>>>>> 58eee205d (missing whitespace)
-=======
-            TestCase(options={'-at': 'ssd', '-person_label': '1'}),
->>>>>>> 9de7445ba (cases.py)
             single_option_cases('-m_det',
                 ModelArg('retinanet-tf'))),
             single_option_cases('-m_reid',
@@ -422,19 +394,7 @@ NATIVE_DEMOS = [
                 ModelArg('person-reidentification-retail-0287'),
                 ModelArg('person-reidentification-retail-0288')),
         *combine_cases(
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
             TestCase(options={'-at': 'centernet', '-person_label': '0'}),
-=======
-            TestCase(options={'-at': 'centernet','-person_label':0}),
->>>>>>> ab78d96a8 (add key person_label and tests)
-=======
-            TestCase(options={'-at': 'centernet', '-person_label': 0}),
->>>>>>> 58eee205d (missing whitespace)
-=======
-            TestCase(options={'-at': 'centernet', '-person_label': '0'}),
->>>>>>> 9de7445ba (cases.py)
             single_option_cases('-m_det',
                 ModelArg('ctdet_coco_dlav0_512'))),
             single_option_cases('-m_reid',
@@ -442,20 +402,6 @@ NATIVE_DEMOS = [
                 ModelArg('person-reidentification-retail-0286'),
                 ModelArg('person-reidentification-retail-0287'),
                 ModelArg('person-reidentification-retail-0288')),
-<<<<<<< HEAD
-=======
-                TestCase(options={'-at': 'ssd'}),
-        single_option_cases('-m_det',
-            ModelArg('person-detection-retail-0002'),
-            ModelArg('person-detection-retail-0013'))),
-        single_option_cases('-m_reid',
-            ModelArg('person-reidentification-retail-0277'),
-            ModelArg('person-reidentification-retail-0286'),
-            ModelArg('person-reidentification-retail-0287'),
-            ModelArg('person-reidentification-retail-0288')),
->>>>>>> c9d021884 (solve mistakes)
-=======
->>>>>>> ab78d96a8 (add key person_label and tests)
     )),
 
     CppDemo(name='security_barrier_camera_demo',
