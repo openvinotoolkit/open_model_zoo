@@ -104,6 +104,7 @@ python3 <omz_dir>/tools/downloader/converter.py --list models.lst
 * squeezenet1.0
 * squeezenet1.1
 * squeezenet1.1-caffe2
+* swin-tiny-patch4-window7-224
 * vgg16
 * vgg19
 * vgg19-caffe2
