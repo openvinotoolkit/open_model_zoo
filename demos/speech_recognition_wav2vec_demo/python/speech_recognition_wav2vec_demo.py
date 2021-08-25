@@ -17,7 +17,9 @@
 
 from argparse import ArgumentParser, SUPPRESS
 from itertools import groupby
+import json
 import logging as log
+from pathlib import Path
 from time import perf_counter
 import sys
 
@@ -32,23 +34,24 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     parser.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     parser.add_argument('-m', '--model', help='Required. Path to an .xml file with a trained model.', required=True)
-    parser.add_argument('-i', '--input', help="Required. Path to an audio file in WAV PCM 16 kHz mono format", required=True)
+    parser.add_argument('-i', '--input', help="Required. Path to an audio file in WAV PCM 16 kHz mono format.", required=True)
     parser.add_argument('-d', '--device', default='CPU',
                         help="Optional. Specify the target device to infer on, for example: "
                              "CPU, GPU, HDDL, MYRIAD or HETERO. "
                              "The demo will look for a suitable IE plugin for this device. Default value is CPU.")
+    parser.add_argument('--vocab', help='Optional. Path to an .json file with encoding vocabulary.')
     return parser
 
 
 class Wav2Vec:
     alphabet = [
-        "[pad]", "[s]", "[s]", "[unk]", "|",
+        "<pad>", "<s>", "</s>", "<unk>", "|",
         "e", "t", "a", "o", "n", "i", "h", "s", "r", "d", "l", "u",
         "m", "w", "c", "f", "g", "y", "p", "b", "v", "k", "'", "x", "j", "q", "z"]
     words_delimiter = '|'
-    pad_token = '[pad]'
+    pad_token = '<pad>'
 
-    def __init__(self, ie, model_path, input_shape, device):
+    def __init__(self, ie, model_path, input_shape, device, vocab_file):
         self.ie = ie
         log.info('Reading model {}'.format(model_path))
         network = self.ie.read_network(model_path)
@@ -67,6 +70,21 @@ class Wav2Vec:
         network.reshape({next(iter(network.input_info)): input_shape})
         self.exec_net = self.ie.load_network(network, device)
         log.info('The model {} is loaded to {}'.format(model_path, device))
+        self._init_vocab(vocab_file)
+
+    def _init_vocab(self, vocab_file):
+        if vocab_file is not None:
+            vocab_file = Path(vocab_file)
+            if not vocab_file.exists():
+                raise RuntimeError(f'vocab file: {vocab_file} does not exist')
+            if vocab_file.suffix != '.json':
+                raise RuntimeError('Wav2Vec demo support only vocabulary stored in json')
+            with vocab_file.open('r') as vf:
+                encoding_vocab = json.load(vf)
+                self.decoding_vocab = {int(v): k for k, v in encoding_vocab.items()}
+                return
+        self.decoding_vocab = dict(enumerate(self.alphabet))
+
 
     @staticmethod
     def preprocess(sound):
@@ -77,7 +95,7 @@ class Wav2Vec:
 
     def decode(self, logits):
         token_ids = np.squeeze(np.argmax(logits, -1))
-        tokens = [self.alphabet[idx] for idx in token_ids]
+        tokens = [self.decoding_vocab[idx] for idx in token_ids]
         tokens = [token_group[0] for token_group in groupby(tokens)]
         tokens = [t for t in tokens if t != self.pad_token]
         res_string = ''.join([t if t != self.words_delimiter else ' ' for t in tokens]).strip()
@@ -103,7 +121,7 @@ def main():
     log.info('\tbuild: {}'.format(get_version()))
     ie = IECore()
 
-    net = Wav2Vec(ie, args.model, audio.shape, args.device)
+    net = Wav2Vec(ie, args.model, audio.shape, args.device, args.vocab)
     normalized_audio = net.preprocess(audio)
     character_probs = net.infer(normalized_audio)
     transcription = net.decode(character_probs)

@@ -41,12 +41,13 @@ optional arguments:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
-                        Required. Path to an audio file in WAV PCM 16 kHz mono format
+                        Required. Path to an audio file in WAV PCM 16 kHz mono format.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on, for
                         example: CPU, GPU, HDDL, MYRIAD or HETERO. The
                         demo will look for a suitable IE plugin for this
                         device. Default value is CPU.
+  --vocab VOCAB         Optional. Path to an .json file with model encoding vocabulary.
 ```
 
 The typical command line is:
