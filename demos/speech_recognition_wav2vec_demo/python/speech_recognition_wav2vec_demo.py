@@ -46,7 +46,7 @@ class Wav2Vec:
         "e", "t", "a", "o", "n", "i", "h", "s", "r", "d", "l", "u",
         "m", "w", "c", "f", "g", "y", "p", "b", "v", "k", "'", "x", "j", "q", "z"]
     words_delimiter = '|'
-    pad_token = '<pad>'
+    pad_token = '[pad]'
 
     def __init__(self, ie, model_path, input_shape, device):
         self.ie = ie
