@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import glob
+from pathlib import PosixPath
 import re
 import shutil
 
@@ -37,27 +39,25 @@ class PostprocRegexReplace(Postproc):
         )
 
     def apply(self, reporter, output_dir):
-        postproc_file = output_dir / self.file
+        postproc_files = glob.glob(str(output_dir / self.file), recursive=True)
+        for postproc_file in postproc_files:
+            postproc_file = PosixPath(postproc_file)
+            reporter.print_section_heading('Replacing text in {}', postproc_file)
 
-        reporter.print_section_heading('Replacing text in {}', postproc_file)
+            postproc_file_text = postproc_file.read_text(encoding='utf-8')
 
-        postproc_file_text = postproc_file.read_text(encoding='utf-8')
+            orig_file = postproc_file.with_name(postproc_file.name + '.orig')
+            if not orig_file.exists():
+                postproc_file.replace(orig_file)
 
-        orig_file = postproc_file.with_name(postproc_file.name + '.orig')
-        if not orig_file.exists():
-            postproc_file.replace(orig_file)
+            postproc_file_text, num_replacements = self.pattern.subn(
+                self.replacement, postproc_file_text, count=self.count)
 
-        postproc_file_text, num_replacements = self.pattern.subn(
-            self.replacement, postproc_file_text, count=self.count)
+            if self.count != 0 and num_replacements != self.count:
+                raise RuntimeError('Invalid pattern: expected at least {} occurrences, but only {} found'.format(
+                    self.count, num_replacements))
 
-        if num_replacements == 0:
-            raise RuntimeError('Invalid pattern: no occurrences found')
-
-        if self.count != 0 and num_replacements != self.count:
-            raise RuntimeError('Invalid pattern: expected at least {} occurrences, but only {} found'.format(
-                self.count, num_replacements))
-
-        postproc_file.write_text(postproc_file_text, encoding='utf-8')
+            postproc_file.write_text(postproc_file_text, encoding='utf-8')
 
 Postproc.types['regex_replace'] = PostprocRegexReplace
 
